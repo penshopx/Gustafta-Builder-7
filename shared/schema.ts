@@ -20,7 +20,7 @@ export type UserProfile = InsertUserProfile & {
 // Big Idea schema - Top level of hierarchy
 export const insertBigIdeaSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  type: z.enum(["problem", "idea", "inspiration"]),
+  type: z.enum(["problem", "idea", "inspiration", "mentoring"]),
   description: z.string().min(1, "Description is required"),
   goals: z.array(z.string()).optional().default([]),
   targetAudience: z.string().optional().default(""),

@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCreateBigIdea } from "@/hooks/use-big-ideas";
 import { useToast } from "@/hooks/use-toast";
-import { Lightbulb, AlertTriangle, Sparkles, Plus, X } from "lucide-react";
+import { Lightbulb, AlertTriangle, Sparkles, Plus, X, GraduationCap } from "lucide-react";
 
 interface CreateBigIdeaDialogProps {
   open: boolean;
@@ -21,7 +21,7 @@ interface CreateBigIdeaDialogProps {
 
 export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogProps) {
   const [name, setName] = useState("");
-  const [type, setType] = useState<"problem" | "idea" | "inspiration">("problem");
+  const [type, setType] = useState<"problem" | "idea" | "inspiration" | "mentoring">("problem");
   const [description, setDescription] = useState("");
   const [goals, setGoals] = useState<string[]>([""]);
   const [targetAudience, setTargetAudience] = useState("");
@@ -95,12 +95,14 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
     problem: <AlertTriangle className="h-5 w-5" />,
     idea: <Lightbulb className="h-5 w-5" />,
     inspiration: <Sparkles className="h-5 w-5" />,
+    mentoring: <GraduationCap className="h-5 w-5" />,
   };
 
   const typeLabels = {
     problem: "Problem - Masalah yang akan diatasi",
     idea: "Idea - Ide untuk mencapai sesuatu",
     inspiration: "Inspiration - Inspirasi untuk inovasi",
+    mentoring: "Mentoring - Edukasi dan pendampingan",
   };
 
   return (
@@ -118,10 +120,10 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
             <Label>Tipe Big Idea</Label>
             <RadioGroup
               value={type}
-              onValueChange={(value) => setType(value as "problem" | "idea" | "inspiration")}
+              onValueChange={(value) => setType(value as "problem" | "idea" | "inspiration" | "mentoring")}
               className="grid grid-cols-1 gap-3"
             >
-              {(["problem", "idea", "inspiration"] as const).map((t) => (
+              {(["problem", "idea", "inspiration", "mentoring"] as const).map((t) => (
                 <Label
                   key={t}
                   className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover-elevate ${
