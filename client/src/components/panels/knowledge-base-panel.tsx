@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useRef } from "react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase } from "@/hooks/use-knowledge-base";
+import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile } from "@/hooks/use-knowledge-base";
 import type { Agent } from "@shared/schema";
 
 interface KnowledgeBasePanelProps {
@@ -28,11 +28,26 @@ const typeLabels = {
   url: "Web URL",
 };
 
+const fileTypeLabels: Record<string, string> = {
+  pdf: "PDF",
+  ppt: "PowerPoint",
+  pptx: "PowerPoint",
+  xls: "Excel",
+  xlsx: "Excel",
+  doc: "Word",
+  docx: "Word",
+  txt: "Text",
+  other: "File",
+};
+
 export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const { toast } = useToast();
   const { data: knowledgeBases = [], isLoading } = useKnowledgeBases(agent.id);
   const createKnowledgeBase = useCreateKnowledgeBase();
   const deleteKnowledgeBase = useDeleteKnowledgeBase();
+  const uploadFile = useUploadKnowledgeFile();
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,6 +56,10 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     type: "text" as "text" | "file" | "url",
     content: "",
     description: "",
+    fileName: "",
+    fileSize: 0,
+    fileType: undefined as string | undefined,
+    fileUrl: "",
   });
 
   const filteredItems = knowledgeBases.filter(
@@ -49,31 +68,109 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Error",
+        description: "Format file tidak didukung. Gunakan PDF, PPT, Excel, Word, atau TXT.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Ukuran file maksimal 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await uploadFile.mutateAsync(file);
+      setNewItem({
+        ...newItem,
+        name: newItem.name || file.name.replace(/\.[^/.]+$/, ""),
+        fileName: result.fileName,
+        fileSize: result.fileSize,
+        fileType: result.fileType,
+        fileUrl: result.fileUrl,
+        content: result.fileUrl,
+      });
+      toast({
+        title: "Berhasil",
+        description: "File berhasil diupload",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal mengupload file",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleCreate = () => {
     if (!newItem.name || !newItem.content) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields.",
+        description: "Mohon lengkapi semua field yang diperlukan.",
         variant: "destructive",
       });
       return;
     }
 
     createKnowledgeBase.mutate(
-      { ...newItem, agentId: agent.id },
+      {
+        agentId: agent.id,
+        name: newItem.name,
+        type: newItem.type,
+        content: newItem.content,
+        description: newItem.description,
+        fileName: newItem.fileName,
+        fileSize: newItem.fileSize,
+        fileType: newItem.fileType as any,
+        fileUrl: newItem.fileUrl,
+        processingStatus: "completed" as const,
+        extractedText: "",
+      },
       {
         onSuccess: () => {
           toast({
             title: "Knowledge Added",
-            description: "New knowledge base item has been added successfully.",
+            description: "Item knowledge base berhasil ditambahkan.",
           });
           setDialogOpen(false);
-          setNewItem({ name: "", type: "text", content: "", description: "" });
+          setNewItem({
+            name: "",
+            type: "text",
+            content: "",
+            description: "",
+            fileName: "",
+            fileSize: 0,
+            fileType: undefined,
+            fileUrl: "",
+          });
         },
         onError: () => {
           toast({
             title: "Error",
-            description: "Failed to add knowledge base item.",
+            description: "Gagal menambahkan item knowledge base.",
             variant: "destructive",
           });
         },
@@ -88,11 +185,19 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         onSuccess: () => {
           toast({
             title: "Deleted",
-            description: "Knowledge base item has been removed.",
+            description: "Item knowledge base berhasil dihapus.",
           });
         },
       }
     );
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
@@ -104,40 +209,40 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             Knowledge Base
           </h2>
           <p className="text-muted-foreground mt-1">
-            Manage the information your chatbot can access and reference
+            Kelola informasi yang dapat diakses chatbot Anda
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button data-testid="button-add-knowledge">
               <Plus className="w-4 h-4 mr-2" />
-              Add Knowledge
+              Tambah Knowledge
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Add Knowledge Base Item</DialogTitle>
+              <DialogTitle>Tambah Knowledge Base</DialogTitle>
               <DialogDescription>
-                Add new information for your chatbot to reference
+                Tambahkan informasi baru untuk referensi chatbot
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="kb-name">Name</Label>
+                <Label htmlFor="kb-name">Nama</Label>
                 <Input
                   id="kb-name"
                   value={newItem.name}
                   onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                  placeholder="Product FAQ, Company Info, etc."
+                  placeholder="FAQ Produk, Info Perusahaan, dll."
                   data-testid="input-kb-name"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="kb-type">Type</Label>
+                <Label htmlFor="kb-type">Tipe</Label>
                 <Select
                   value={newItem.type}
                   onValueChange={(value: "text" | "file" | "url") =>
-                    setNewItem({ ...newItem, type: value })
+                    setNewItem({ ...newItem, type: value, content: "", fileName: "", fileSize: 0, fileType: undefined, fileUrl: "" })
                   }
                 >
                   <SelectTrigger id="kb-type" data-testid="select-kb-type">
@@ -145,66 +250,116 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="text">Text Content</SelectItem>
+                    <SelectItem value="file">Upload File (PDF, PPT, Excel, Word)</SelectItem>
                     <SelectItem value="url">Web URL</SelectItem>
-                    <SelectItem value="file">File Reference</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="kb-content">
-                  {newItem.type === "url" ? "URL" : newItem.type === "file" ? "File Path" : "Content"}
-                </Label>
-                {newItem.type === "text" ? (
-                  <Textarea
-                    id="kb-content"
-                    value={newItem.content}
-                    onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
-                    placeholder="Enter the knowledge content..."
-                    rows={6}
-                    data-testid="input-kb-content"
-                  />
-                ) : (
+              
+              {newItem.type === "file" ? (
+                <div className="space-y-2">
+                  <Label>Upload File</Label>
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                    {newItem.fileName ? (
+                      <div className="space-y-2">
+                        <File className="w-10 h-10 mx-auto text-primary" />
+                        <p className="font-medium">{newItem.fileName}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatFileSize(newItem.fileSize)} - {fileTypeLabels[newItem.fileType || "other"]}
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Ganti File
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                          Drag & drop atau klik untuk upload
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PDF, PPT, Excel, Word (Max 10MB)
+                        </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadFile.isPending}
+                          data-testid="button-upload-file"
+                        >
+                          {uploadFile.isPending ? "Uploading..." : "Pilih File"}
+                        </Button>
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.ppt,.pptx,.xls,.xlsx,.doc,.docx,.txt"
+                      onChange={handleFileChange}
+                      data-testid="input-kb-file"
+                    />
+                  </div>
+                </div>
+              ) : newItem.type === "url" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="kb-content">URL</Label>
                   <Input
                     id="kb-content"
                     value={newItem.content}
                     onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
-                    placeholder={newItem.type === "url" ? "https://..." : "path/to/file.pdf"}
+                    placeholder="https://..."
                     data-testid="input-kb-content"
                   />
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="kb-content">Content</Label>
+                  <Textarea
+                    id="kb-content"
+                    value={newItem.content}
+                    onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
+                    placeholder="Masukkan konten knowledge..."
+                    rows={6}
+                    data-testid="input-kb-content"
+                  />
+                </div>
+              )}
+              
               <div className="space-y-2">
-                <Label htmlFor="kb-description">Description (Optional)</Label>
+                <Label htmlFor="kb-description">Deskripsi (Opsional)</Label>
                 <Input
                   id="kb-description"
                   value={newItem.description}
                   onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                  placeholder="Brief description of this knowledge"
+                  placeholder="Deskripsi singkat tentang knowledge ini"
                   data-testid="input-kb-description"
                 />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                Batal
               </Button>
               <Button
                 onClick={handleCreate}
-                disabled={createKnowledgeBase.isPending}
+                disabled={createKnowledgeBase.isPending || (newItem.type === "file" && !newItem.fileUrl)}
                 data-testid="button-confirm-add-knowledge"
               >
-                {createKnowledgeBase.isPending ? "Adding..." : "Add Knowledge"}
+                {createKnowledgeBase.isPending ? "Menambahkan..." : "Tambah Knowledge"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Search knowledge base..."
+          placeholder="Cari knowledge base..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
@@ -212,7 +367,6 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         />
       </div>
 
-      {/* Knowledge Items */}
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -228,16 +382,16 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         <Card>
           <CardContent className="py-12 text-center">
             <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-1">No Knowledge Base Items</h3>
+            <h3 className="font-semibold text-lg mb-1">Belum Ada Knowledge Base</h3>
             <p className="text-muted-foreground mb-4">
               {searchQuery
-                ? "No items match your search"
-                : "Add information for your chatbot to reference"}
+                ? "Tidak ada item yang cocok dengan pencarian"
+                : "Tambahkan informasi untuk referensi chatbot Anda"}
             </p>
             {!searchQuery && (
               <Button onClick={() => setDialogOpen(true)} variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Your First Item
+                Tambah Item Pertama
               </Button>
             )}
           </CardContent>
@@ -255,19 +409,29 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <h4 className="font-medium truncate">{item.name}</h4>
                           <Badge variant="secondary" className="shrink-0">
                             {typeLabels[item.type]}
                           </Badge>
+                          {item.fileType && (
+                            <Badge variant="outline" className="shrink-0">
+                              {fileTypeLabels[item.fileType] || item.fileType.toUpperCase()}
+                            </Badge>
+                          )}
                         </div>
                         {item.description && (
                           <p className="text-sm text-muted-foreground truncate">
                             {item.description}
                           </p>
                         )}
+                        {item.fileName && (
+                          <p className="text-xs text-muted-foreground">
+                            {item.fileName} ({formatFileSize(item.fileSize)})
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-1">
-                          Added {new Date(item.createdAt).toLocaleDateString()}
+                          Ditambahkan {new Date(item.createdAt).toLocaleDateString("id-ID")}
                         </p>
                       </div>
                     </div>
@@ -288,29 +452,34 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         </div>
       )}
 
-      {/* Stats */}
       {knowledgeBases.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Knowledge Base Statistics</CardTitle>
+            <CardTitle className="text-sm">Statistik Knowledge Base</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-primary">{knowledgeBases.length}</div>
-                <div className="text-xs text-muted-foreground">Total Items</div>
+                <div className="text-xs text-muted-foreground">Total Item</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-primary">
                   {knowledgeBases.filter((i) => i.type === "text").length}
                 </div>
-                <div className="text-xs text-muted-foreground">Text Documents</div>
+                <div className="text-xs text-muted-foreground">Text</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-primary">
+                  {knowledgeBases.filter((i) => i.type === "file").length}
+                </div>
+                <div className="text-xs text-muted-foreground">File</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-primary">
                   {knowledgeBases.filter((i) => i.type === "url").length}
                 </div>
-                <div className="text-xs text-muted-foreground">Web Sources</div>
+                <div className="text-xs text-muted-foreground">URL</div>
               </div>
             </div>
           </CardContent>

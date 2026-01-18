@@ -12,6 +12,12 @@ import type {
   InsertUser,
   Analytics,
   InsertAnalytics,
+  BigIdea,
+  InsertBigIdea,
+  Toolbox,
+  InsertToolbox,
+  UserProfile,
+  InsertUserProfile,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -20,8 +26,31 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
+  // User Profile methods
+  getUserProfile(userId: string): Promise<UserProfile | undefined>;
+  createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
+  updateUserProfile(userId: string, data: Partial<InsertUserProfile>): Promise<UserProfile | undefined>;
+
+  // Big Idea methods
+  getBigIdeas(): Promise<BigIdea[]>;
+  getBigIdea(id: string): Promise<BigIdea | undefined>;
+  getActiveBigIdea(): Promise<BigIdea | null>;
+  createBigIdea(bigIdea: InsertBigIdea): Promise<BigIdea>;
+  updateBigIdea(id: string, data: Partial<InsertBigIdea>): Promise<BigIdea | undefined>;
+  setActiveBigIdea(id: string): Promise<BigIdea | undefined>;
+  deleteBigIdea(id: string): Promise<boolean>;
+
+  // Toolbox methods
+  getToolboxes(bigIdeaId?: string): Promise<Toolbox[]>;
+  getToolbox(id: string): Promise<Toolbox | undefined>;
+  getActiveToolbox(): Promise<Toolbox | null>;
+  createToolbox(toolbox: InsertToolbox): Promise<Toolbox>;
+  updateToolbox(id: string, data: Partial<InsertToolbox>): Promise<Toolbox | undefined>;
+  setActiveToolbox(id: string): Promise<Toolbox | undefined>;
+  deleteToolbox(id: string): Promise<boolean>;
+
   // Agent methods
-  getAgents(): Promise<Agent[]>;
+  getAgents(toolboxId?: string): Promise<Agent[]>;
   getAgent(id: string): Promise<Agent | undefined>;
   getActiveAgent(): Promise<Agent | null>;
   createAgent(agent: InsertAgent): Promise<Agent>;
@@ -32,6 +61,7 @@ export interface IStorage {
   // Knowledge Base methods
   getKnowledgeBases(agentId: string): Promise<KnowledgeBase[]>;
   createKnowledgeBase(kb: InsertKnowledgeBase): Promise<KnowledgeBase>;
+  updateKnowledgeBase(id: string, data: Partial<InsertKnowledgeBase>): Promise<KnowledgeBase | undefined>;
   deleteKnowledgeBase(id: string): Promise<boolean>;
 
   // Integration methods
@@ -59,6 +89,9 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private userProfiles: Map<string, UserProfile>;
+  private bigIdeas: Map<string, BigIdea>;
+  private toolboxes: Map<string, Toolbox>;
   private agents: Map<string, Agent>;
   private knowledgeBases: Map<string, KnowledgeBase>;
   private integrations: Map<string, Integration>;
@@ -67,6 +100,9 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
+    this.userProfiles = new Map();
+    this.bigIdeas = new Map();
+    this.toolboxes = new Map();
     this.agents = new Map();
     this.knowledgeBases = new Map();
     this.integrations = new Map();
@@ -92,9 +128,239 @@ export class MemStorage implements IStorage {
     return user;
   }
 
+  // User Profile methods
+  async getUserProfile(userId: string): Promise<UserProfile | undefined> {
+    return Array.from(this.userProfiles.values()).find(p => p.userId === userId);
+  }
+
+  async createUserProfile(insertProfile: InsertUserProfile): Promise<UserProfile> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    const profile: UserProfile = {
+      ...insertProfile,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.userProfiles.set(id, profile);
+    return profile;
+  }
+
+  async updateUserProfile(userId: string, data: Partial<InsertUserProfile>): Promise<UserProfile | undefined> {
+    const profile = await this.getUserProfile(userId);
+    if (!profile) return undefined;
+    
+    const updated: UserProfile = {
+      ...profile,
+      displayName: data.displayName !== undefined ? data.displayName : profile.displayName,
+      avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : profile.avatarUrl,
+      bio: data.bio !== undefined ? data.bio : profile.bio,
+      company: data.company !== undefined ? data.company : profile.company,
+      position: data.position !== undefined ? data.position : profile.position,
+      updatedAt: new Date().toISOString(),
+    };
+    this.userProfiles.set(profile.id, updated);
+    return updated;
+  }
+
+  // Big Idea methods
+  async getBigIdeas(): Promise<BigIdea[]> {
+    return Array.from(this.bigIdeas.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getBigIdea(id: string): Promise<BigIdea | undefined> {
+    return this.bigIdeas.get(id);
+  }
+
+  async getActiveBigIdea(): Promise<BigIdea | null> {
+    const bigIdea = Array.from(this.bigIdeas.values()).find((b) => b.isActive);
+    return bigIdea || null;
+  }
+
+  async createBigIdea(insertBigIdea: InsertBigIdea): Promise<BigIdea> {
+    const id = randomUUID();
+    
+    Array.from(this.bigIdeas.entries()).forEach(([bigIdeaId, b]) => {
+      this.bigIdeas.set(bigIdeaId, { ...b, isActive: false });
+    });
+    
+    const bigIdea: BigIdea = {
+      id,
+      name: insertBigIdea.name,
+      type: insertBigIdea.type,
+      description: insertBigIdea.description,
+      goals: insertBigIdea.goals || [],
+      targetAudience: insertBigIdea.targetAudience || "",
+      expectedOutcome: insertBigIdea.expectedOutcome || "",
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    
+    this.bigIdeas.set(id, bigIdea);
+    return bigIdea;
+  }
+
+  async updateBigIdea(id: string, data: Partial<InsertBigIdea>): Promise<BigIdea | undefined> {
+    const bigIdea = this.bigIdeas.get(id);
+    if (!bigIdea) return undefined;
+
+    const updated: BigIdea = {
+      ...bigIdea,
+      name: data.name !== undefined ? data.name : bigIdea.name,
+      type: data.type !== undefined ? data.type : bigIdea.type,
+      description: data.description !== undefined ? data.description : bigIdea.description,
+      goals: data.goals !== undefined ? data.goals : bigIdea.goals,
+      targetAudience: data.targetAudience !== undefined ? data.targetAudience : bigIdea.targetAudience,
+      expectedOutcome: data.expectedOutcome !== undefined ? data.expectedOutcome : bigIdea.expectedOutcome,
+    };
+    
+    this.bigIdeas.set(id, updated);
+    return updated;
+  }
+
+  async setActiveBigIdea(id: string): Promise<BigIdea | undefined> {
+    const bigIdea = this.bigIdeas.get(id);
+    if (!bigIdea) return undefined;
+
+    Array.from(this.bigIdeas.entries()).forEach(([bigIdeaId, b]) => {
+      this.bigIdeas.set(bigIdeaId, { ...b, isActive: false });
+    });
+
+    const updated: BigIdea = { ...bigIdea, isActive: true };
+    this.bigIdeas.set(id, updated);
+    return updated;
+  }
+
+  async deleteBigIdea(id: string): Promise<boolean> {
+    const bigIdea = this.bigIdeas.get(id);
+    if (!bigIdea) return false;
+    
+    const wasActive = bigIdea.isActive;
+    const deleted = this.bigIdeas.delete(id);
+    
+    if (deleted && wasActive) {
+      const remaining = Array.from(this.bigIdeas.values());
+      if (remaining.length > 0) {
+        this.bigIdeas.set(remaining[0].id, { ...remaining[0], isActive: true });
+      }
+    }
+    
+    // Delete related toolboxes
+    Array.from(this.toolboxes.entries()).forEach(([toolboxId, t]) => {
+      if (t.bigIdeaId === id) {
+        this.deleteToolbox(toolboxId);
+      }
+    });
+    
+    return deleted;
+  }
+
+  // Toolbox methods
+  async getToolboxes(bigIdeaId?: string): Promise<Toolbox[]> {
+    let toolboxes = Array.from(this.toolboxes.values());
+    if (bigIdeaId) {
+      toolboxes = toolboxes.filter(t => t.bigIdeaId === bigIdeaId);
+    }
+    return toolboxes.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getToolbox(id: string): Promise<Toolbox | undefined> {
+    return this.toolboxes.get(id);
+  }
+
+  async getActiveToolbox(): Promise<Toolbox | null> {
+    const toolbox = Array.from(this.toolboxes.values()).find((t) => t.isActive);
+    return toolbox || null;
+  }
+
+  async createToolbox(insertToolbox: InsertToolbox): Promise<Toolbox> {
+    const id = randomUUID();
+    
+    Array.from(this.toolboxes.entries()).forEach(([toolboxId, t]) => {
+      this.toolboxes.set(toolboxId, { ...t, isActive: false });
+    });
+    
+    const toolbox: Toolbox = {
+      id,
+      bigIdeaId: insertToolbox.bigIdeaId,
+      name: insertToolbox.name,
+      description: insertToolbox.description || "",
+      purpose: insertToolbox.purpose || "",
+      capabilities: insertToolbox.capabilities || [],
+      limitations: insertToolbox.limitations || [],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    
+    this.toolboxes.set(id, toolbox);
+    return toolbox;
+  }
+
+  async updateToolbox(id: string, data: Partial<InsertToolbox>): Promise<Toolbox | undefined> {
+    const toolbox = this.toolboxes.get(id);
+    if (!toolbox) return undefined;
+
+    const updated: Toolbox = {
+      ...toolbox,
+      name: data.name !== undefined ? data.name : toolbox.name,
+      description: data.description !== undefined ? data.description : toolbox.description,
+      purpose: data.purpose !== undefined ? data.purpose : toolbox.purpose,
+      capabilities: data.capabilities !== undefined ? data.capabilities : toolbox.capabilities,
+      limitations: data.limitations !== undefined ? data.limitations : toolbox.limitations,
+    };
+    
+    this.toolboxes.set(id, updated);
+    return updated;
+  }
+
+  async setActiveToolbox(id: string): Promise<Toolbox | undefined> {
+    const toolbox = this.toolboxes.get(id);
+    if (!toolbox) return undefined;
+
+    Array.from(this.toolboxes.entries()).forEach(([toolboxId, t]) => {
+      this.toolboxes.set(toolboxId, { ...t, isActive: false });
+    });
+
+    const updated: Toolbox = { ...toolbox, isActive: true };
+    this.toolboxes.set(id, updated);
+    return updated;
+  }
+
+  async deleteToolbox(id: string): Promise<boolean> {
+    const toolbox = this.toolboxes.get(id);
+    if (!toolbox) return false;
+    
+    const wasActive = toolbox.isActive;
+    const deleted = this.toolboxes.delete(id);
+    
+    if (deleted && wasActive) {
+      const remaining = Array.from(this.toolboxes.values());
+      if (remaining.length > 0) {
+        this.toolboxes.set(remaining[0].id, { ...remaining[0], isActive: true });
+      }
+    }
+    
+    // Delete related agents
+    Array.from(this.agents.entries()).forEach(([agentId, a]) => {
+      if (a.toolboxId === id) {
+        this.deleteAgent(agentId);
+      }
+    });
+    
+    return deleted;
+  }
+
   // Agent methods
-  async getAgents(): Promise<Agent[]> {
-    return Array.from(this.agents.values()).sort(
+  async getAgents(toolboxId?: string): Promise<Agent[]> {
+    let agents = Array.from(this.agents.values());
+    if (toolboxId) {
+      agents = agents.filter(a => a.toolboxId === toolboxId);
+    }
+    return agents.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
@@ -111,12 +377,10 @@ export class MemStorage implements IStorage {
   async createAgent(insertAgent: InsertAgent): Promise<Agent> {
     const id = randomUUID();
     
-    // Deactivate all existing agents and set new one as active
     Array.from(this.agents.entries()).forEach(([agentId, a]) => {
       this.agents.set(agentId, { ...a, isActive: false });
     });
     
-    // Generate access token for secure external access
     const accessToken = `gus_${randomUUID().replace(/-/g, "")}`;
     
     const agent: Agent = {
@@ -138,6 +402,17 @@ export class MemStorage implements IStorage {
       accessToken,
       isPublic: insertAgent.isPublic ?? false,
       allowedDomains: insertAgent.allowedDomains || [],
+      toolboxId: insertAgent.toolboxId || "",
+      orchestratorRole: insertAgent.orchestratorRole || "standalone",
+      parentAgentId: insertAgent.parentAgentId || "",
+      agenticMode: insertAgent.agenticMode ?? false,
+      attentiveListening: insertAgent.attentiveListening ?? true,
+      contextRetention: insertAgent.contextRetention ?? 10,
+      proactiveAssistance: insertAgent.proactiveAssistance ?? false,
+      learningEnabled: insertAgent.learningEnabled ?? false,
+      emotionalIntelligence: insertAgent.emotionalIntelligence ?? true,
+      multiStepReasoning: insertAgent.multiStepReasoning ?? true,
+      selfCorrection: insertAgent.selfCorrection ?? true,
       isActive: true,
       createdAt: new Date().toISOString(),
     };
@@ -150,7 +425,6 @@ export class MemStorage implements IStorage {
     const agent = this.agents.get(id);
     if (!agent) return undefined;
 
-    // Only update fields that are provided and valid
     const updated: Agent = {
       ...agent,
       name: data.name !== undefined ? data.name : agent.name,
@@ -169,6 +443,17 @@ export class MemStorage implements IStorage {
       subcategory: data.subcategory !== undefined ? data.subcategory : agent.subcategory,
       isPublic: data.isPublic !== undefined ? data.isPublic : agent.isPublic,
       allowedDomains: data.allowedDomains !== undefined ? data.allowedDomains : agent.allowedDomains,
+      toolboxId: data.toolboxId !== undefined ? data.toolboxId : agent.toolboxId,
+      orchestratorRole: data.orchestratorRole !== undefined ? data.orchestratorRole : agent.orchestratorRole,
+      parentAgentId: data.parentAgentId !== undefined ? data.parentAgentId : agent.parentAgentId,
+      agenticMode: data.agenticMode !== undefined ? data.agenticMode : agent.agenticMode,
+      attentiveListening: data.attentiveListening !== undefined ? data.attentiveListening : agent.attentiveListening,
+      contextRetention: data.contextRetention !== undefined ? data.contextRetention : agent.contextRetention,
+      proactiveAssistance: data.proactiveAssistance !== undefined ? data.proactiveAssistance : agent.proactiveAssistance,
+      learningEnabled: data.learningEnabled !== undefined ? data.learningEnabled : agent.learningEnabled,
+      emotionalIntelligence: data.emotionalIntelligence !== undefined ? data.emotionalIntelligence : agent.emotionalIntelligence,
+      multiStepReasoning: data.multiStepReasoning !== undefined ? data.multiStepReasoning : agent.multiStepReasoning,
+      selfCorrection: data.selfCorrection !== undefined ? data.selfCorrection : agent.selfCorrection,
     };
     
     this.agents.set(id, updated);
@@ -179,12 +464,10 @@ export class MemStorage implements IStorage {
     const agent = this.agents.get(id);
     if (!agent) return undefined;
 
-    // Deactivate all agents
     Array.from(this.agents.entries()).forEach(([agentId, a]) => {
       this.agents.set(agentId, { ...a, isActive: false });
     });
 
-    // Activate the selected agent
     const updated: Agent = { ...agent, isActive: true };
     this.agents.set(id, updated);
     return updated;
@@ -197,7 +480,6 @@ export class MemStorage implements IStorage {
     const wasActive = agent.isActive;
     const deleted = this.agents.delete(id);
     
-    // If deleted agent was active, activate another agent if available
     if (deleted && wasActive) {
       const remainingAgents = Array.from(this.agents.values());
       if (remainingAgents.length > 0) {
@@ -206,7 +488,7 @@ export class MemStorage implements IStorage {
       }
     }
     
-    // Also delete related data
+    // Delete related data
     Array.from(this.knowledgeBases.entries()).forEach(([kbId, kb]) => {
       if (kb.agentId === id) this.knowledgeBases.delete(kbId);
     });
@@ -236,10 +518,32 @@ export class MemStorage implements IStorage {
       type: insertKb.type,
       content: insertKb.content,
       description: insertKb.description || "",
+      fileType: insertKb.fileType,
+      fileName: insertKb.fileName || "",
+      fileSize: insertKb.fileSize || 0,
+      fileUrl: insertKb.fileUrl || "",
+      processingStatus: insertKb.processingStatus || "completed",
+      extractedText: insertKb.extractedText || "",
       createdAt: new Date().toISOString(),
     };
     this.knowledgeBases.set(id, kb);
     return kb;
+  }
+
+  async updateKnowledgeBase(id: string, data: Partial<InsertKnowledgeBase>): Promise<KnowledgeBase | undefined> {
+    const kb = this.knowledgeBases.get(id);
+    if (!kb) return undefined;
+
+    const updated: KnowledgeBase = {
+      ...kb,
+      name: data.name !== undefined ? data.name : kb.name,
+      content: data.content !== undefined ? data.content : kb.content,
+      description: data.description !== undefined ? data.description : kb.description,
+      processingStatus: data.processingStatus !== undefined ? data.processingStatus : kb.processingStatus,
+      extractedText: data.extractedText !== undefined ? data.extractedText : kb.extractedText,
+    };
+    this.knowledgeBases.set(id, updated);
+    return updated;
   }
 
   async deleteKnowledgeBase(id: string): Promise<boolean> {
@@ -300,6 +604,9 @@ export class MemStorage implements IStorage {
       agentId: insertMsg.agentId,
       role: insertMsg.role,
       content: insertMsg.content,
+      reasoning: insertMsg.reasoning || "",
+      sources: insertMsg.sources || [],
+      confidence: insertMsg.confidence,
       createdAt: new Date().toISOString(),
     };
     this.messages.set(id, message);
@@ -313,6 +620,8 @@ export class MemStorage implements IStorage {
         agentId: insertMsg.agentId,
         role: "assistant",
         content: this.generateBotResponse(insertMsg.content, agent),
+        reasoning: agent?.agenticMode ? "Analyzed user query and formulated response based on context and knowledge." : "",
+        sources: [],
         createdAt: new Date().toISOString(),
       };
       this.messages.set(botId, botMessage);
@@ -322,18 +631,18 @@ export class MemStorage implements IStorage {
   }
 
   private generateBotResponse(userMessage: string, agent?: Agent): string {
-    const greetings = ["hello", "hi", "hey", "greetings"];
+    const greetings = ["hello", "hi", "hey", "greetings", "halo", "hai"];
     const lowerMessage = userMessage.toLowerCase();
 
     if (greetings.some((g) => lowerMessage.includes(g))) {
       return `Hello! I'm ${agent?.name || "your assistant"}. ${agent?.tagline || "How can I help you today?"}`;
     }
 
-    if (lowerMessage.includes("help")) {
+    if (lowerMessage.includes("help") || lowerMessage.includes("bantu")) {
       return `I'd be happy to help! ${agent?.description || "I'm here to assist you with any questions you may have."}`;
     }
 
-    if (lowerMessage.includes("who are you") || lowerMessage.includes("what are you")) {
+    if (lowerMessage.includes("who are you") || lowerMessage.includes("what are you") || lowerMessage.includes("siapa kamu")) {
       return `I'm ${agent?.name || "an AI assistant"}. ${agent?.philosophy || "I'm designed to be helpful, harmless, and honest."}`;
     }
 
@@ -391,14 +700,11 @@ export class MemStorage implements IStorage {
       (m) => m.agentId === agentId
     );
 
-    // Count actual messages (always use the messages directly)
     const totalMessages = agentMessages.length;
-    // Sessions based on analytics events or default to 1 if any messages exist
     const sessionEvents = agentAnalytics.filter((a) => a.eventType === "session").length;
     const totalSessions = sessionEvents > 0 ? sessionEvents : (agentMessages.length > 0 ? 1 : 0);
     const totalIntegrationCalls = agentAnalytics.filter((a) => a.eventType === "integration_call").length;
 
-    // Calculate messages per day for last 7 days
     const now = new Date();
     const messagesLast7Days: number[] = [];
     for (let i = 6; i >= 0; i--) {
@@ -415,7 +721,6 @@ export class MemStorage implements IStorage {
       messagesLast7Days.push(count);
     }
 
-    // Calculate top hours
     const hourCounts: Record<number, number> = {};
     agentMessages.forEach((m) => {
       const hour = new Date(m.createdAt).getHours();

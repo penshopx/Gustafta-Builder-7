@@ -21,6 +21,23 @@ export function useCreateKnowledgeBase() {
   });
 }
 
+export function useUploadKnowledgeFile() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const res = await fetch("/api/knowledge-base/upload", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!res.ok) throw new Error("Failed to upload file");
+      return res.json();
+    },
+  });
+}
+
 export function useDeleteKnowledgeBase() {
   return useMutation({
     mutationFn: async ({ id, agentId }: { id: string; agentId: string }) => {
