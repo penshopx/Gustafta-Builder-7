@@ -17,6 +17,7 @@ export function useSendMessage() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages", variables.agentId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/analytics", variables.agentId, "summary"] });
     },
   });
 }

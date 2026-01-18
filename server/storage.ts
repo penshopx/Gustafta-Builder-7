@@ -10,6 +10,8 @@ import type {
   InsertMessage,
   User,
   InsertUser,
+  Analytics,
+  InsertAnalytics,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -42,6 +44,17 @@ export interface IStorage {
   getMessages(agentId: string): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   clearMessages(agentId: string): Promise<boolean>;
+
+  // Analytics methods
+  getAnalytics(agentId: string): Promise<Analytics[]>;
+  createAnalytics(analytics: InsertAnalytics): Promise<Analytics>;
+  getAnalyticsSummary(agentId: string): Promise<{
+    totalMessages: number;
+    totalSessions: number;
+    totalIntegrationCalls: number;
+    messagesLast7Days: number[];
+    topHours: { hour: number; count: number }[];
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -50,6 +63,7 @@ export class MemStorage implements IStorage {
   private knowledgeBases: Map<string, KnowledgeBase>;
   private integrations: Map<string, Integration>;
   private messages: Map<string, Message>;
+  private analytics: Map<string, Analytics>;
 
   constructor() {
     this.users = new Map();
@@ -57,6 +71,7 @@ export class MemStorage implements IStorage {
     this.knowledgeBases = new Map();
     this.integrations = new Map();
     this.messages = new Map();
+    this.analytics = new Map();
   }
 
   // User methods
@@ -336,6 +351,85 @@ export class MemStorage implements IStorage {
       }
     });
     return true;
+  }
+
+  // Analytics methods
+  async getAnalytics(agentId: string): Promise<Analytics[]> {
+    return Array.from(this.analytics.values())
+      .filter((a) => a.agentId === agentId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createAnalytics(insertAnalytics: InsertAnalytics): Promise<Analytics> {
+    const id = randomUUID();
+    const analytics: Analytics = {
+      id,
+      agentId: insertAnalytics.agentId,
+      eventType: insertAnalytics.eventType,
+      metadata: insertAnalytics.metadata || {},
+      createdAt: new Date().toISOString(),
+    };
+    this.analytics.set(id, analytics);
+    return analytics;
+  }
+
+  async getAnalyticsSummary(agentId: string): Promise<{
+    totalMessages: number;
+    totalSessions: number;
+    totalIntegrationCalls: number;
+    messagesLast7Days: number[];
+    topHours: { hour: number; count: number }[];
+  }> {
+    const agentAnalytics = Array.from(this.analytics.values()).filter(
+      (a) => a.agentId === agentId
+    );
+    const agentMessages = Array.from(this.messages.values()).filter(
+      (m) => m.agentId === agentId
+    );
+
+    // Count actual messages (always use the messages directly)
+    const totalMessages = agentMessages.length;
+    // Sessions based on analytics events or default to 1 if any messages exist
+    const sessionEvents = agentAnalytics.filter((a) => a.eventType === "session").length;
+    const totalSessions = sessionEvents > 0 ? sessionEvents : (agentMessages.length > 0 ? 1 : 0);
+    const totalIntegrationCalls = agentAnalytics.filter((a) => a.eventType === "integration_call").length;
+
+    // Calculate messages per day for last 7 days
+    const now = new Date();
+    const messagesLast7Days: number[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(now);
+      dayStart.setDate(now.getDate() - i);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      const count = agentMessages.filter((m) => {
+        const msgDate = new Date(m.createdAt);
+        return msgDate >= dayStart && msgDate <= dayEnd;
+      }).length;
+      messagesLast7Days.push(count);
+    }
+
+    // Calculate top hours
+    const hourCounts: Record<number, number> = {};
+    agentMessages.forEach((m) => {
+      const hour = new Date(m.createdAt).getHours();
+      hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+    });
+    
+    const topHours = Object.entries(hourCounts)
+      .map(([hour, count]) => ({ hour: parseInt(hour), count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return {
+      totalMessages,
+      totalSessions,
+      totalIntegrationCalls,
+      messagesLast7Days,
+      topHours,
+    };
   }
 }
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings } from "lucide-react";
+import { Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -13,6 +13,7 @@ import { PersonaPanel } from "@/components/panels/persona-panel";
 import { KnowledgeBasePanel } from "@/components/panels/knowledge-base-panel";
 import { IntegrationsPanel } from "@/components/panels/integrations-panel";
 import { ChatConsolePanel } from "@/components/panels/chat-console-panel";
+import { AnalyticsPanel } from "@/components/panels/analytics-panel";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
 import { ChatPopup } from "@/components/chat-popup";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -20,13 +21,14 @@ import { useAgents, useActiveAgent, useSetActiveAgent } from "@/hooks/use-agents
 import { cn } from "@/lib/utils";
 import type { Agent } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "chat";
+type NavItem = "persona" | "knowledge" | "integrations" | "chat" | "analytics";
 
 const navItems: { id: NavItem; label: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", icon: Bot },
   { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
   { id: "integrations", label: "Integrations", icon: Plug },
   { id: "chat", label: "Chat Console", icon: MessageSquare },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 export default function Dashboard() {
@@ -70,6 +72,8 @@ export default function Dashboard() {
         return <IntegrationsPanel agent={activeAgent} />;
       case "chat":
         return <ChatConsolePanel agent={activeAgent} />;
+      case "analytics":
+        return <AnalyticsPanel agent={activeAgent} />;
       default:
         return null;
     }

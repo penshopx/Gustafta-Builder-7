@@ -227,5 +227,27 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Analytics Routes ====================
+
+  // Get analytics summary for an agent
+  app.get("/api/analytics/:agentId/summary", async (req, res) => {
+    try {
+      const summary = await storage.getAnalyticsSummary(req.params.agentId);
+      res.json(summary);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Get all analytics for an agent
+  app.get("/api/analytics/:agentId", async (req, res) => {
+    try {
+      const analytics = await storage.getAnalytics(req.params.agentId);
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
   return httpServer;
 }
