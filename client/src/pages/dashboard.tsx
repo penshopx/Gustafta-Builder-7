@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
-  Lightbulb, Wrench, Sparkles, User
+  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -50,6 +50,7 @@ export default function Dashboard() {
   const [bigIdeaDialogOpen, setBigIdeaDialogOpen] = useState(false);
   const [toolboxDialogOpen, setToolboxDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   const { data: agents = [], isLoading: agentsLoading } = useAgents();
   const { data: activeAgent } = useActiveAgent();
@@ -137,33 +138,43 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-background">
       {/* Left Sidebar Navigation */}
-      <aside className="w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
+      <aside className={cn(
+        "bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300",
+        sidebarCollapsed ? "w-16" : "w-64"
+      )}>
         {/* Logo */}
-        <div className="p-4 border-b border-sidebar-border">
+        <div className="p-3 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
               <Bot className="w-5 h-5 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="font-semibold text-sidebar-foreground">Gustafta</h1>
-              <p className="text-xs text-muted-foreground">AI Chatbot Builder</p>
-            </div>
+            {!sidebarCollapsed && (
+              <div className="min-w-0">
+                <h1 className="font-semibold text-sidebar-foreground truncate">Gustafta</h1>
+                <p className="text-xs text-muted-foreground">AI Chatbot Builder</p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Hierarchy Section */}
-        <div className="p-3 border-b border-sidebar-border space-y-2">
+        <div className={cn("border-b border-sidebar-border space-y-2", sidebarCollapsed ? "p-2" : "p-3")}>
           {/* Big Idea Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between px-3 py-2 h-auto" data-testid="button-bigidea-selector">
+              <Button variant="ghost" className={cn(
+                "w-full h-auto",
+                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+              )} data-testid="button-bigidea-selector">
                 <div className="flex items-center gap-2 min-w-0">
                   <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
-                  <span className="truncate text-sm">
-                    {activeBigIdea?.name || "Pilih Big Idea"}
-                  </span>
+                  {!sidebarCollapsed && (
+                    <span className="truncate text-sm">
+                      {activeBigIdea?.name || "Pilih Big Idea"}
+                    </span>
+                  )}
                 </div>
-                <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
@@ -197,14 +208,19 @@ export default function Dashboard() {
           {/* Toolbox Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between px-3 py-2 h-auto" disabled={!activeBigIdea} data-testid="button-toolbox-selector">
+              <Button variant="ghost" className={cn(
+                "w-full h-auto",
+                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+              )} disabled={!activeBigIdea} data-testid="button-toolbox-selector">
                 <div className="flex items-center gap-2 min-w-0">
                   <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                  <span className="truncate text-sm">
-                    {activeToolbox?.name || "Pilih Toolbox"}
-                  </span>
+                  {!sidebarCollapsed && (
+                    <span className="truncate text-sm">
+                      {activeToolbox?.name || "Pilih Toolbox"}
+                    </span>
+                  )}
                 </div>
-                <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
@@ -242,24 +258,26 @@ export default function Dashboard() {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className={cn("flex-1 space-y-1", sidebarCollapsed ? "p-2" : "p-3")}>
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveNav(item.id)}
               disabled={!activeAgent}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                "w-full flex items-center rounded-md text-sm font-medium transition-colors",
+                sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
                 activeNav === item.id && activeAgent
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
                 !activeAgent && "opacity-50 cursor-not-allowed"
               )}
               data-testid={`nav-${item.id}`}
+              title={sidebarCollapsed ? item.label : undefined}
             >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-              {item.id === "agentic" && (
+              <item.icon className="w-4 h-4 shrink-0" />
+              {!sidebarCollapsed && item.label}
+              {!sidebarCollapsed && item.id === "agentic" && (
                 <Badge variant="secondary" className="ml-auto text-xs">New</Badge>
               )}
             </button>
@@ -267,26 +285,54 @@ export default function Dashboard() {
         </nav>
 
         {/* User Profile at bottom */}
-        <div className="p-3 border-t border-sidebar-border space-y-1">
+        <div className={cn("border-t border-sidebar-border space-y-1", sidebarCollapsed ? "p-2" : "p-3")}>
           <button
             onClick={() => setProfileDialogOpen(true)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+            className={cn(
+              "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
+              sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+            )}
             data-testid="button-user-profile"
+            title={sidebarCollapsed ? "Profil" : undefined}
           >
-            <Avatar className="w-6 h-6">
+            <Avatar className="w-6 h-6 shrink-0">
               <AvatarImage src={profile?.avatarUrl} />
               <AvatarFallback className="text-xs">
                 {profile?.displayName ? getInitials(profile.displayName) : <User className="w-3 h-3" />}
               </AvatarFallback>
             </Avatar>
-            <span className="truncate">{profile?.displayName || "Profil"}</span>
+            {!sidebarCollapsed && <span className="truncate">{profile?.displayName || "Profil"}</span>}
           </button>
           <button
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+            className={cn(
+              "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
+              sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+            )}
             data-testid="nav-settings"
+            title={sidebarCollapsed ? "Pengaturan" : undefined}
           >
-            <Settings className="w-4 h-4" />
-            Pengaturan
+            <Settings className="w-4 h-4 shrink-0" />
+            {!sidebarCollapsed && "Pengaturan"}
+          </button>
+          
+          {/* Sidebar Toggle */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className={cn(
+              "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
+              sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+            )}
+            data-testid="button-toggle-sidebar"
+            title={sidebarCollapsed ? "Perluas Sidebar" : "Ciutkan Sidebar"}
+          >
+            {sidebarCollapsed ? (
+              <PanelLeft className="w-4 h-4 shrink-0" />
+            ) : (
+              <>
+                <PanelLeftClose className="w-4 h-4 shrink-0" />
+                Ciutkan
+              </>
+            )}
           </button>
         </div>
       </aside>
