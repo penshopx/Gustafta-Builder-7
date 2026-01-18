@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { 
   Bot, Check, X, Zap, Crown, Building2, Sparkles, ArrowRight,
-  MessageSquare, Users, Globe, BookOpen, BarChart3, Shield, Headphones
+  MessageSquare, Users, Globe, BookOpen, BarChart3, Shield, Headphones,
+  CreditCard, Wallet, Building, Smartphone, QrCode
 } from "lucide-react";
 
 interface PricingTier {
@@ -13,6 +14,8 @@ interface PricingTier {
   description: string;
   price: string;
   priceNote: string;
+  duration?: string;
+  savings?: string;
   icon: typeof Bot;
   popular?: boolean;
   features: { text: string; included: boolean }[];
@@ -20,91 +23,173 @@ interface PricingTier {
   ctaVariant: "default" | "outline" | "secondary";
 }
 
-const pricingTiers: PricingTier[] = [
+const subscriptionTiers: PricingTier[] = [
   {
-    name: "Starter",
-    description: "Untuk individu dan usaha kecil yang baru memulai",
+    name: "Free Trial",
+    description: "Coba gratis selama 14 hari dengan materi awareness",
     price: "Gratis",
-    priceNote: "Selamanya",
+    priceNote: "14 hari",
+    duration: "14 Hari",
     icon: Zap,
     features: [
       { text: "1 Chatbot", included: true },
-      { text: "1.000 pesan/bulan", included: true },
-      { text: "Knowledge Base: 5 dokumen", included: true },
+      { text: "500 pesan", included: true },
+      { text: "Materi Awareness", included: true },
+      { text: "Knowledge Base: 3 dokumen", included: true },
       { text: "Web Widget", included: true },
-      { text: "Branding Gustafta", included: true },
-      { text: "Multi-channel (WhatsApp, Telegram)", included: false },
+      { text: "Multi-channel Integration", included: false },
       { text: "Agentic AI Features", included: false },
       { text: "Analytics Dashboard", included: false },
-      { text: "Custom Domain", included: false },
-      { text: "Priority Support", included: false },
     ],
-    cta: "Mulai Gratis",
+    cta: "Mulai Trial Gratis",
     ctaVariant: "outline",
   },
   {
-    name: "Professional",
-    description: "Untuk bisnis yang ingin meningkatkan customer engagement",
-    price: "Rp 499.000",
+    name: "1 Bulan",
+    description: "Berlangganan bulanan untuk 1 chatbot",
+    price: "Rp 199.000",
     priceNote: "/bulan",
+    duration: "1 Bulan",
     icon: Sparkles,
-    popular: true,
     features: [
-      { text: "5 Chatbot", included: true },
-      { text: "10.000 pesan/bulan", included: true },
-      { text: "Knowledge Base: 50 dokumen", included: true },
+      { text: "1 Chatbot", included: true },
+      { text: "5.000 pesan/bulan", included: true },
+      { text: "Knowledge Base: 20 dokumen", included: true },
       { text: "Web Widget (No Branding)", included: true },
-      { text: "Multi-channel (WhatsApp, Telegram, Discord)", included: true },
+      { text: "WhatsApp & Telegram", included: true },
       { text: "Agentic AI Features", included: true },
       { text: "Analytics Dashboard", included: true },
-      { text: "Custom Domain", included: false },
-      { text: "API Access", included: false },
-      { text: "Priority Support", included: false },
+      { text: "Email Support", included: true },
     ],
     cta: "Berlangganan",
     ctaVariant: "default",
   },
   {
-    name: "Business",
-    description: "Untuk perusahaan dengan kebutuhan enterprise",
-    price: "Rp 1.499.000",
-    priceNote: "/bulan",
+    name: "3 Bulan",
+    description: "Hemat 17% dengan berlangganan 3 bulan",
+    price: "Rp 499.000",
+    priceNote: "/3 bulan",
+    duration: "3 Bulan",
+    savings: "Hemat Rp 98.000",
+    icon: Sparkles,
+    popular: true,
+    features: [
+      { text: "1 Chatbot", included: true },
+      { text: "5.000 pesan/bulan", included: true },
+      { text: "Knowledge Base: 20 dokumen", included: true },
+      { text: "Web Widget (No Branding)", included: true },
+      { text: "WhatsApp & Telegram", included: true },
+      { text: "Agentic AI Features", included: true },
+      { text: "Analytics Dashboard", included: true },
+      { text: "Priority Email Support", included: true },
+    ],
+    cta: "Berlangganan",
+    ctaVariant: "default",
+  },
+  {
+    name: "6 Bulan",
+    description: "Hemat 17% dengan berlangganan 6 bulan",
+    price: "Rp 999.000",
+    priceNote: "/6 bulan",
+    duration: "6 Bulan",
+    savings: "Hemat Rp 195.000",
     icon: Crown,
     features: [
-      { text: "20 Chatbot", included: true },
-      { text: "50.000 pesan/bulan", included: true },
-      { text: "Knowledge Base: Unlimited", included: true },
-      { text: "Web Widget (Custom Branding)", included: true },
-      { text: "Multi-channel (Semua Platform)", included: true },
+      { text: "1 Chatbot", included: true },
+      { text: "5.000 pesan/bulan", included: true },
+      { text: "Knowledge Base: 30 dokumen", included: true },
+      { text: "Web Widget (No Branding)", included: true },
+      { text: "WhatsApp, Telegram, Discord", included: true },
       { text: "Agentic AI Features", included: true },
       { text: "Advanced Analytics", included: true },
-      { text: "Custom Domain", included: true },
-      { text: "API Access", included: true },
       { text: "Priority Support", included: true },
     ],
     cta: "Berlangganan",
     ctaVariant: "default",
   },
   {
-    name: "Enterprise",
-    description: "Solusi khusus untuk korporasi dan organisasi besar",
-    price: "Custom",
-    priceNote: "Hubungi kami",
-    icon: Building2,
+    name: "12 Bulan",
+    description: "Hemat 17% dengan berlangganan tahunan",
+    price: "Rp 1.999.000",
+    priceNote: "/tahun",
+    duration: "12 Bulan",
+    savings: "Hemat Rp 389.000",
+    icon: Crown,
     features: [
-      { text: "Unlimited Chatbot", included: true },
-      { text: "Unlimited pesan", included: true },
-      { text: "Knowledge Base: Unlimited", included: true },
-      { text: "White-label Solution", included: true },
-      { text: "On-premise Option", included: true },
-      { text: "Custom AI Training", included: true },
-      { text: "Dedicated Account Manager", included: true },
-      { text: "SLA 99.9%", included: true },
-      { text: "SSO & Advanced Security", included: true },
-      { text: "24/7 Support", included: true },
+      { text: "1 Chatbot", included: true },
+      { text: "5.000 pesan/bulan", included: true },
+      { text: "Knowledge Base: 50 dokumen", included: true },
+      { text: "Web Widget (Custom Branding)", included: true },
+      { text: "Semua Multi-channel", included: true },
+      { text: "Agentic AI Features", included: true },
+      { text: "Advanced Analytics", included: true },
+      { text: "Priority Support + WhatsApp", included: true },
     ],
-    cta: "Hubungi Sales",
-    ctaVariant: "secondary",
+    cta: "Berlangganan",
+    ctaVariant: "default",
+  },
+];
+
+const chatbotPackages = [
+  {
+    name: "5 Chatbot",
+    description: "Untuk tim kecil",
+    price1m: "Rp 899.000",
+    price3m: "Rp 2.399.000",
+    price6m: "Rp 4.499.000",
+    price12m: "Rp 8.999.000",
+  },
+  {
+    name: "10 Chatbot",
+    description: "Untuk bisnis menengah",
+    price1m: "Rp 1.699.000",
+    price3m: "Rp 4.499.000",
+    price6m: "Rp 8.499.000",
+    price12m: "Rp 16.999.000",
+  },
+  {
+    name: "20 Chatbot",
+    description: "Untuk enterprise",
+    price1m: "Rp 2.999.000",
+    price3m: "Rp 7.999.000",
+    price6m: "Rp 14.999.000",
+    price12m: "Rp 29.999.000",
+  },
+  {
+    name: "Unlimited",
+    description: "Custom solution",
+    price1m: "Custom",
+    price3m: "Custom",
+    price6m: "Custom",
+    price12m: "Custom",
+  },
+];
+
+const paymentMethods = [
+  {
+    category: "Transfer Bank",
+    icon: Building,
+    methods: ["BCA", "BNI", "BRI", "Mandiri", "CIMB Niaga", "Permata", "Bank Lainnya (via Virtual Account)"],
+  },
+  {
+    category: "E-Wallet",
+    icon: Wallet,
+    methods: ["GoPay", "OVO", "DANA", "ShopeePay", "LinkAja"],
+  },
+  {
+    category: "Kartu Kredit/Debit",
+    icon: CreditCard,
+    methods: ["Visa", "Mastercard", "JCB", "American Express"],
+  },
+  {
+    category: "Minimarket",
+    icon: Building2,
+    methods: ["Indomaret", "Alfamart", "Alfamidi"],
+  },
+  {
+    category: "QRIS",
+    icon: QrCode,
+    methods: ["Scan QR dari semua aplikasi e-wallet dan mobile banking"],
   },
 ];
 
@@ -117,7 +202,7 @@ const addOns = [
   {
     name: "Chatbot Tambahan",
     description: "Per chatbot/bulan",
-    price: "Rp 49.000",
+    price: "Rp 149.000",
   },
   {
     name: "Knowledge Base Extra",
@@ -134,23 +219,27 @@ const addOns = [
 const faqs = [
   {
     question: "Bagaimana cara kerja pembayaran?",
-    answer: "Pembayaran dilakukan secara bulanan melalui kartu kredit/debit atau transfer bank. Anda bisa membatalkan kapan saja.",
+    answer: "Pembayaran dilakukan melalui payment gateway lokal Indonesia. Anda bisa bayar via transfer bank, e-wallet, kartu kredit/debit, minimarket, atau QRIS.",
   },
   {
     question: "Apakah ada periode trial?",
-    answer: "Paket Starter gratis selamanya. Untuk paket berbayar, kami menyediakan trial 14 hari dengan akses penuh.",
+    answer: "Ya! Kami menyediakan free trial 14 hari dengan akses ke materi awareness dan fitur dasar chatbot. Tidak perlu kartu kredit untuk memulai.",
   },
   {
     question: "Bagaimana jika pesan melebihi kuota?",
-    answer: "Anda akan mendapat notifikasi saat mendekati limit. Anda bisa membeli paket pesan tambahan atau upgrade paket.",
+    answer: "Anda akan mendapat notifikasi saat mendekati limit. Anda bisa membeli paket pesan tambahan atau upgrade ke paket chatbot yang lebih besar.",
   },
   {
-    question: "Apakah bisa downgrade paket?",
-    answer: "Ya, Anda bisa downgrade kapan saja. Perubahan akan berlaku di periode billing berikutnya.",
+    question: "Apakah bisa upgrade atau downgrade paket?",
+    answer: "Ya, Anda bisa upgrade kapan saja. Untuk downgrade, perubahan akan berlaku di periode billing berikutnya.",
   },
   {
     question: "Bagaimana dengan keamanan data?",
     answer: "Data Anda dilindungi dengan enkripsi end-to-end dan disimpan di server yang aman. Kami mematuhi standar keamanan industri.",
+  },
+  {
+    question: "Metode pembayaran apa yang tersedia?",
+    answer: "Kami menerima transfer bank (BCA, BNI, BRI, Mandiri, dll), e-wallet (GoPay, OVO, DANA, ShopeePay), kartu kredit/debit, pembayaran di minimarket, dan QRIS.",
   },
 ];
 
@@ -161,6 +250,13 @@ function PricingCard({ tier }: { tier: PricingTier }) {
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <Badge className="bg-primary text-primary-foreground">
             Paling Populer
+          </Badge>
+        </div>
+      )}
+      {tier.savings && (
+        <div className="absolute -top-3 right-2">
+          <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400">
+            {tier.savings}
           </Badge>
         </div>
       )}
@@ -195,7 +291,7 @@ function PricingCard({ tier }: { tier: PricingTier }) {
         <Button 
           className="w-full" 
           variant={tier.ctaVariant}
-          data-testid={`button-plan-${tier.name.toLowerCase()}`}
+          data-testid={`button-plan-${tier.name.toLowerCase().replace(/\s/g, '-')}`}
         >
           {tier.cta}
         </Button>
@@ -234,17 +330,90 @@ export default function Pricing() {
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <Badge className="mb-4">Pricing</Badge>
-          <h1 className="text-4xl font-bold mb-4">Pilih Paket yang Tepat untuk Bisnis Anda</h1>
+          <h1 className="text-4xl font-bold mb-4">Pilih Paket Berlangganan</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Mulai gratis, tingkatkan sesuai kebutuhan. Semua paket termasuk fitur dasar chatbot AI.
+            Mulai dengan free trial 14 hari, lalu pilih durasi berlangganan yang sesuai kebutuhan Anda.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {pricingTiers.map((tier) => (
-            <PricingCard key={tier.name} tier={tier} />
-          ))}
-        </div>
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Paket 1 Chatbot</h2>
+            <p className="text-muted-foreground">Pilih durasi berlangganan untuk 1 chatbot</p>
+          </div>
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {subscriptionTiers.map((tier) => (
+              <PricingCard key={tier.name} tier={tier} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Paket Multiple Chatbot</h2>
+            <p className="text-muted-foreground">Untuk kebutuhan bisnis dengan banyak chatbot</p>
+          </div>
+          <Card>
+            <CardContent className="p-0 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-4 font-medium">Paket</th>
+                    <th className="text-center p-4 font-medium">1 Bulan</th>
+                    <th className="text-center p-4 font-medium bg-primary/5">3 Bulan</th>
+                    <th className="text-center p-4 font-medium">6 Bulan</th>
+                    <th className="text-center p-4 font-medium">12 Bulan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chatbotPackages.map((pkg, index) => (
+                    <tr key={index} className="border-b last:border-0">
+                      <td className="p-4">
+                        <div className="font-medium">{pkg.name}</div>
+                        <div className="text-xs text-muted-foreground">{pkg.description}</div>
+                      </td>
+                      <td className="text-center p-4 font-medium">{pkg.price1m}</td>
+                      <td className="text-center p-4 font-medium bg-primary/5">{pkg.price3m}</td>
+                      <td className="text-center p-4 font-medium">{pkg.price6m}</td>
+                      <td className="text-center p-4 font-medium">{pkg.price12m}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold mb-2">Metode Pembayaran</h2>
+            <p className="text-muted-foreground">Bayar dengan mudah menggunakan payment gateway lokal Indonesia</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paymentMethods.map((payment) => (
+              <Card key={payment.category}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <payment.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-semibold">{payment.category}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {payment.methods.map((method, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {method}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Pembayaran diproses melalui payment gateway terpercaya dan tersertifikasi PCI-DSS
+          </p>
+        </section>
 
         <section className="mb-16">
           <div className="text-center mb-8">
@@ -267,7 +436,7 @@ export default function Pricing() {
         <section className="mb-16">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold mb-2">Perbandingan Fitur</h2>
-            <p className="text-muted-foreground">Detail fitur untuk setiap paket</p>
+            <p className="text-muted-foreground">Detail fitur untuk setiap durasi berlangganan</p>
           </div>
           <Card>
             <CardContent className="p-0 overflow-x-auto">
@@ -275,35 +444,37 @@ export default function Pricing() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-4 font-medium">Fitur</th>
-                    <th className="text-center p-4 font-medium">Starter</th>
-                    <th className="text-center p-4 font-medium bg-primary/5">Professional</th>
-                    <th className="text-center p-4 font-medium">Business</th>
-                    <th className="text-center p-4 font-medium">Enterprise</th>
+                    <th className="text-center p-4 font-medium">Free Trial</th>
+                    <th className="text-center p-4 font-medium">1 Bulan</th>
+                    <th className="text-center p-4 font-medium bg-primary/5">3 Bulan</th>
+                    <th className="text-center p-4 font-medium">6 Bulan</th>
+                    <th className="text-center p-4 font-medium">12 Bulan</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    { feature: "Jumlah Chatbot", starter: "1", professional: "5", business: "20", enterprise: "Unlimited" },
-                    { feature: "Pesan/bulan", starter: "1.000", professional: "10.000", business: "50.000", enterprise: "Unlimited" },
-                    { feature: "Knowledge Base", starter: "5 dok", professional: "50 dok", business: "Unlimited", enterprise: "Unlimited" },
-                    { feature: "Web Widget", starter: "Ya", professional: "Ya", business: "Ya", enterprise: "Ya" },
-                    { feature: "Remove Branding", starter: "-", professional: "Ya", business: "Ya", enterprise: "Ya" },
-                    { feature: "WhatsApp", starter: "-", professional: "Ya", business: "Ya", enterprise: "Ya" },
-                    { feature: "Telegram", starter: "-", professional: "Ya", business: "Ya", enterprise: "Ya" },
-                    { feature: "Discord", starter: "-", professional: "Ya", business: "Ya", enterprise: "Ya" },
-                    { feature: "Slack", starter: "-", professional: "-", business: "Ya", enterprise: "Ya" },
-                    { feature: "API Access", starter: "-", professional: "-", business: "Ya", enterprise: "Ya" },
-                    { feature: "Agentic AI", starter: "-", professional: "Ya", business: "Ya", enterprise: "Ya" },
-                    { feature: "Analytics", starter: "Basic", professional: "Standard", business: "Advanced", enterprise: "Custom" },
-                    { feature: "Custom Domain", starter: "-", professional: "-", business: "Ya", enterprise: "Ya" },
-                    { feature: "Support", starter: "Email", professional: "Email + Chat", business: "Priority", enterprise: "24/7" },
+                    { feature: "Durasi", trial: "14 hari", m1: "30 hari", m3: "90 hari", m6: "180 hari", m12: "365 hari" },
+                    { feature: "Jumlah Chatbot", trial: "1", m1: "1", m3: "1", m6: "1", m12: "1" },
+                    { feature: "Pesan", trial: "500", m1: "5.000/bln", m3: "5.000/bln", m6: "5.000/bln", m12: "5.000/bln" },
+                    { feature: "Knowledge Base", trial: "3 dok", m1: "20 dok", m3: "20 dok", m6: "30 dok", m12: "50 dok" },
+                    { feature: "Materi Awareness", trial: "Ya", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Web Widget", trial: "Ya", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Remove Branding", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Custom" },
+                    { feature: "WhatsApp", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Telegram", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Discord", trial: "-", m1: "-", m3: "-", m6: "Ya", m12: "Ya" },
+                    { feature: "Slack", trial: "-", m1: "-", m3: "-", m6: "-", m12: "Ya" },
+                    { feature: "Agentic AI", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Analytics", trial: "Basic", m1: "Standard", m3: "Standard", m6: "Advanced", m12: "Advanced" },
+                    { feature: "Support", trial: "Email", m1: "Email", m3: "Priority Email", m6: "Priority", m12: "Priority + WA" },
                   ].map((row, index) => (
                     <tr key={index} className="border-b last:border-0">
                       <td className="p-4 font-medium">{row.feature}</td>
-                      <td className="text-center p-4">{row.starter === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.starter}</td>
-                      <td className="text-center p-4 bg-primary/5">{row.professional === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.professional}</td>
-                      <td className="text-center p-4">{row.business === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.business}</td>
-                      <td className="text-center p-4">{row.enterprise}</td>
+                      <td className="text-center p-4">{row.trial === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.trial}</td>
+                      <td className="text-center p-4">{row.m1 === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.m1}</td>
+                      <td className="text-center p-4 bg-primary/5">{row.m3 === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.m3}</td>
+                      <td className="text-center p-4">{row.m6 === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.m6}</td>
+                      <td className="text-center p-4">{row.m12 === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.m12}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -330,21 +501,21 @@ export default function Pricing() {
         </section>
 
         <section className="text-center py-12 bg-muted/30 rounded-lg">
-          <h2 className="text-2xl font-bold mb-2">Butuh Solusi Khusus?</h2>
+          <h2 className="text-2xl font-bold mb-2">Siap Memulai?</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Tim kami siap membantu Anda menemukan solusi yang tepat untuk kebutuhan bisnis Anda.
+            Coba gratis selama 14 hari tanpa perlu kartu kredit. Upgrade kapan saja sesuai kebutuhan bisnis Anda.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2" data-testid="button-contact-sales">
+            <Link href="/dashboard">
+              <Button size="lg" className="gap-2" data-testid="button-start-trial">
+                <Zap className="h-4 w-4" />
+                Mulai Free Trial
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="gap-2" data-testid="button-contact-sales">
               <Headphones className="h-4 w-4" />
               Hubungi Sales
             </Button>
-            <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="gap-2" data-testid="button-start-free">
-                Mulai Gratis
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
           </div>
         </section>
       </main>
