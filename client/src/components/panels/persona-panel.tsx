@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateAgent } from "@/hooks/use-agents";
+import { getCategoryById, getSubcategoryLabel } from "@/lib/categories";
 import type { Agent } from "@shared/schema";
 
 interface PersonaPanelProps {
@@ -217,6 +218,32 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               </SelectContent>
             </Select>
           </div>
+
+          {agent.category && (
+            <div className="space-y-2">
+              <Label>Business Category</Label>
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+                {(() => {
+                  const category = getCategoryById(agent.category);
+                  if (!category) return null;
+                  const IconComponent = category.icon;
+                  return (
+                    <>
+                      <IconComponent className="w-5 h-5 text-primary" />
+                      <span className="text-sm font-medium">
+                        {category.label}
+                        {agent.subcategory && (
+                          <span className="text-muted-foreground">
+                            {" "}&gt; {getSubcategoryLabel(agent.category, agent.subcategory)}
+                          </span>
+                        )}
+                      </span>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

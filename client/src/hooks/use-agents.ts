@@ -23,7 +23,7 @@ export function useAgent(id: string) {
 
 export function useCreateAgent() {
   return useMutation({
-    mutationFn: async (data: InsertAgent) => {
+    mutationFn: async (data: Partial<InsertAgent> & { name: string }) => {
       const response = await apiRequest("POST", "/api/agents", data);
       return await response.json();
     },
