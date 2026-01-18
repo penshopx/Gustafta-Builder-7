@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+// Export auth models (required for Replit Auth)
+export * from "./models/auth";
+
 // User Profile schema with avatar support
 export const insertUserProfileSchema = z.object({
   userId: z.string(),

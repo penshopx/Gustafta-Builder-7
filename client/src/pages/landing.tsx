@@ -2,12 +2,15 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
 import { 
   Bot, Sparkles, MessageSquare, Zap, Globe, Shield, 
-  BookOpen, BarChart3, Lightbulb, ArrowRight, Check
+  BookOpen, BarChart3, Lightbulb, ArrowRight, Check, LogIn, LogOut
 } from "lucide-react";
 
 export default function Landing() {
+  const { user, isLoading, isAuthenticated } = useAuth();
   const features = [
     {
       icon: Lightbulb,
@@ -84,11 +87,33 @@ export default function Landing() {
               </Button>
             </Link>
             <ThemeToggle />
-            <Link href="/dashboard">
-              <Button data-testid="button-go-dashboard">
-                Masuk Dashboard
-              </Button>
-            </Link>
+            {isLoading ? (
+              <Button disabled>Loading...</Button>
+            ) : isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link href="/dashboard">
+                  <Button data-testid="button-go-dashboard">
+                    Dashboard
+                  </Button>
+                </Link>
+                <a href="/api/logout">
+                  <Button variant="ghost" size="icon" data-testid="button-logout">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </a>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
+                  <AvatarFallback>{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
+                </Avatar>
+              </div>
+            ) : (
+              <a href="/api/login">
+                <Button className="gap-2" data-testid="button-login">
+                  <LogIn className="h-4 w-4" />
+                  Masuk
+                </Button>
+              </a>
+            )}
           </div>
         </div>
       </header>
@@ -109,15 +134,26 @@ export default function Landing() {
               dengan persona kustom, knowledge base, dan integrasi multi-channel
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/dashboard">
-                <Button size="lg" className="gap-2" data-testid="button-start-now">
-                  Mulai Sekarang
-                  <ArrowRight className="h-4 w-4" />
+              {isAuthenticated ? (
+                <Link href="/dashboard">
+                  <Button size="lg" className="gap-2" data-testid="button-start-now">
+                    Buka Dashboard
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <a href="/api/login">
+                  <Button size="lg" className="gap-2" data-testid="button-start-now">
+                    Mulai Sekarang
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </a>
+              )}
+              <Link href="/documentation">
+                <Button size="lg" variant="outline" className="gap-2" data-testid="button-learn-more">
+                  Pelajari Lebih Lanjut
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="gap-2" data-testid="button-learn-more">
-                Pelajari Lebih Lanjut
-              </Button>
             </div>
           </div>
         </div>
