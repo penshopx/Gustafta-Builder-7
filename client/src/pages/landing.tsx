@@ -78,6 +78,11 @@ export default function Landing() {
                 Dokumentasi
               </Button>
             </Link>
+            <Link href="/pricing">
+              <Button variant="ghost" data-testid="button-pricing">
+                Harga
+              </Button>
+            </Link>
             <ThemeToggle />
             <Link href="/dashboard">
               <Button data-testid="button-go-dashboard">
