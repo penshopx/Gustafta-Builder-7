@@ -107,12 +107,28 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Info Box - Explain what Toolbox is */}
+          <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
+            <h4 className="font-medium text-blue-900 dark:text-blue-100">Apa itu Toolbox?</h4>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Toolbox adalah kumpulan kemampuan dan tools yang akan digunakan oleh chatbot Anda. 
+              Toolbox berasal dari Big Idea dan menentukan apa yang bisa dilakukan chatbot.
+            </p>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Contoh: Dari Big Idea "Layanan Customer Service", Anda bisa membuat Toolbox untuk 
+              "FAQ Handler", "Complaint Resolution", atau "Product Recommendation".
+            </p>
+          </div>
+
           <div className="p-4 bg-muted rounded-lg">
             <Label className="text-xs text-muted-foreground">Dari Big Idea:</Label>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="secondary">{bigIdea.type}</Badge>
               <span className="font-medium">{bigIdea.name}</span>
             </div>
+            {bigIdea.description && (
+              <p className="text-sm text-muted-foreground mt-2">{bigIdea.description}</p>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -13,6 +13,13 @@ import {
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import OpenAI from "openai";
+
+// Initialize OpenAI client with Replit AI Integrations
+const openai = new OpenAI({
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+});
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -551,16 +558,90 @@ export async function registerRoutes(
     }
   });
 
-  // Send message
+  // Send message and get AI response
   app.post("/api/messages", async (req, res) => {
     try {
       const parsed = insertMessageSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
-      const message = await storage.createMessage(parsed.data);
-      res.status(201).json(message);
+      
+      // Save user message
+      const userMessage = await storage.createMessage(parsed.data);
+      
+      // Get agent configuration for persona
+      const agent = await storage.getAgent(parsed.data.agentId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      
+      // Get knowledge base for context
+      const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
+      const knowledgeContext = knowledgeBases
+        .map(kb => `[${kb.name}]: ${kb.content}`)
+        .join("\n\n");
+      
+      // Get recent conversation history
+      const allMessages = await storage.getMessages(parsed.data.agentId);
+      const recentMessages = allMessages.slice(-10); // Last 10 messages for context
+      
+      // Build system prompt from agent persona
+      let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;
+      if (agent.tagline) {
+        systemPrompt += ` ${agent.tagline}`;
+      }
+      if (agent.philosophy) {
+        systemPrompt += `\n\nFilosofi: ${agent.philosophy}`;
+      }
+      if (knowledgeContext) {
+        systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
+      }
+      systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
+      
+      // Build messages for OpenAI
+      const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+        { role: "system", content: systemPrompt }
+      ];
+      
+      // Add conversation history
+      for (const msg of recentMessages) {
+        if (msg.id !== userMessage.id) {
+          chatMessages.push({
+            role: msg.role as "user" | "assistant",
+            content: msg.content
+          });
+        }
+      }
+      
+      // Add current user message
+      chatMessages.push({ role: "user", content: parsed.data.content });
+      
+      // Call OpenAI
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: chatMessages,
+        max_tokens: 1024,
+        temperature: 0.7,
+      });
+      
+      const aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      
+      // Save AI response
+      const aiMessage = await storage.createMessage({
+        agentId: parsed.data.agentId,
+        role: "assistant",
+        content: aiResponseContent,
+        reasoning: "",
+        sources: [],
+      });
+      
+      // Return both messages
+      res.status(201).json({
+        userMessage,
+        aiMessage,
+      });
     } catch (error) {
+      console.error("Failed to process message:", error);
       res.status(500).json({ error: "Failed to send message" });
     }
   });
