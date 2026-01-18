@@ -72,7 +72,7 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: User = { ...insertUser, id, createdAt: new Date().toISOString() };
     this.users.set(id, user);
     return user;
   }
@@ -97,9 +97,12 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     
     // Deactivate all existing agents and set new one as active
-    for (const [agentId, a] of this.agents) {
+    Array.from(this.agents.entries()).forEach(([agentId, a]) => {
       this.agents.set(agentId, { ...a, isActive: false });
-    }
+    });
+    
+    // Generate access token for secure external access
+    const accessToken = `gus_${randomUUID().replace(/-/g, "")}`;
     
     const agent: Agent = {
       id,
@@ -112,6 +115,12 @@ export class MemStorage implements IStorage {
       systemPrompt: insertAgent.systemPrompt || "You are a helpful assistant.",
       temperature: insertAgent.temperature ?? 0.7,
       maxTokens: insertAgent.maxTokens ?? 1024,
+      greetingMessage: insertAgent.greetingMessage || "",
+      conversationStarters: insertAgent.conversationStarters || [],
+      language: insertAgent.language || "id",
+      accessToken,
+      isPublic: insertAgent.isPublic ?? false,
+      allowedDomains: insertAgent.allowedDomains || [],
       isActive: true,
       createdAt: new Date().toISOString(),
     };
@@ -136,6 +145,11 @@ export class MemStorage implements IStorage {
       systemPrompt: data.systemPrompt !== undefined ? data.systemPrompt : agent.systemPrompt,
       temperature: data.temperature !== undefined ? Math.max(0, Math.min(2, data.temperature)) : agent.temperature,
       maxTokens: data.maxTokens !== undefined ? Math.max(100, Math.min(4096, data.maxTokens)) : agent.maxTokens,
+      greetingMessage: data.greetingMessage !== undefined ? data.greetingMessage : agent.greetingMessage,
+      conversationStarters: data.conversationStarters !== undefined ? data.conversationStarters : agent.conversationStarters,
+      language: data.language !== undefined ? data.language : agent.language,
+      isPublic: data.isPublic !== undefined ? data.isPublic : agent.isPublic,
+      allowedDomains: data.allowedDomains !== undefined ? data.allowedDomains : agent.allowedDomains,
     };
     
     this.agents.set(id, updated);
@@ -147,9 +161,9 @@ export class MemStorage implements IStorage {
     if (!agent) return undefined;
 
     // Deactivate all agents
-    for (const [agentId, a] of this.agents) {
+    Array.from(this.agents.entries()).forEach(([agentId, a]) => {
       this.agents.set(agentId, { ...a, isActive: false });
-    }
+    });
 
     // Activate the selected agent
     const updated: Agent = { ...agent, isActive: true };
@@ -174,15 +188,15 @@ export class MemStorage implements IStorage {
     }
     
     // Also delete related data
-    for (const [kbId, kb] of this.knowledgeBases) {
+    Array.from(this.knowledgeBases.entries()).forEach(([kbId, kb]) => {
       if (kb.agentId === id) this.knowledgeBases.delete(kbId);
-    }
-    for (const [intId, integration] of this.integrations) {
+    });
+    Array.from(this.integrations.entries()).forEach(([intId, integration]) => {
       if (integration.agentId === id) this.integrations.delete(intId);
-    }
-    for (const [msgId, msg] of this.messages) {
+    });
+    Array.from(this.messages.entries()).forEach(([msgId, msg]) => {
       if (msg.agentId === id) this.messages.delete(msgId);
-    }
+    });
 
     return deleted;
   }
@@ -316,11 +330,11 @@ export class MemStorage implements IStorage {
   }
 
   async clearMessages(agentId: string): Promise<boolean> {
-    for (const [msgId, msg] of this.messages) {
+    Array.from(this.messages.entries()).forEach(([msgId, msg]) => {
       if (msg.agentId === agentId) {
         this.messages.delete(msgId);
       }
-    }
+    });
     return true;
   }
 }

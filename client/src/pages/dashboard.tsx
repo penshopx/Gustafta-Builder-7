@@ -14,7 +14,7 @@ import { KnowledgeBasePanel } from "@/components/panels/knowledge-base-panel";
 import { IntegrationsPanel } from "@/components/panels/integrations-panel";
 import { ChatConsolePanel } from "@/components/panels/chat-console-panel";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
-import { TrialChat } from "@/components/trial-chat";
+import { ChatPopup } from "@/components/chat-popup";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAgents, useActiveAgent, useSetActiveAgent } from "@/hooks/use-agents";
 import { cn } from "@/lib/utils";
@@ -205,21 +205,14 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Main Content with Trial Chat */}
-        <div className="flex-1 flex min-h-0">
-          {/* Configuration Panel */}
-          <div className="flex-1 overflow-auto">
-            {renderPanel()}
-          </div>
-
-          {/* Trial Chat (Right side) */}
-          {activeAgent && (
-            <div className="w-80 border-l border-border bg-card flex flex-col">
-              <TrialChat agent={activeAgent} />
-            </div>
-          )}
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto">
+          {renderPanel()}
         </div>
       </div>
+
+      {/* Floating Chat Popup */}
+      {activeAgent && <ChatPopup agent={activeAgent} />}
 
       {/* Create Agent Dialog */}
       <CreateAgentDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />

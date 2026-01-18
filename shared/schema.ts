@@ -1,21 +1,6 @@
 import { z } from "zod";
 
-// Agent/Chatbot schema
-export const agents = {
-  id: "string",
-  name: "string",
-  description: "string",
-  avatar: "string",
-  tagline: "string",
-  philosophy: "string",
-  offTopicHandling: "string",
-  systemPrompt: "string",
-  temperature: "number",
-  maxTokens: "number",
-  isActive: "boolean",
-  createdAt: "string",
-};
-
+// Agent/Chatbot schema with enhanced features
 export const insertAgentSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().default(""),
@@ -26,6 +11,14 @@ export const insertAgentSchema = z.object({
   systemPrompt: z.string().optional().default("You are a helpful assistant."),
   temperature: z.number().min(0).max(2).optional().default(0.7),
   maxTokens: z.number().min(100).max(4096).optional().default(1024),
+  // Enhanced features inspired by GPTs, Botika, KorinAI
+  greetingMessage: z.string().optional().default(""),
+  conversationStarters: z.array(z.string()).optional().default([]),
+  language: z.string().optional().default("id"),
+  // Access control for monetization
+  accessToken: z.string().optional().default(""),
+  isPublic: z.boolean().optional().default(false),
+  allowedDomains: z.array(z.string()).optional().default([]),
 });
 
 export type InsertAgent = z.infer<typeof insertAgentSchema>;
@@ -78,13 +71,29 @@ export type Message = InsertMessage & {
   createdAt: string;
 };
 
-// User schema (keeping existing)
+// User schema with admin role for access control
 export const insertUserSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
+  email: z.string().email().optional(),
+  role: z.enum(["admin", "user"]).optional().default("admin"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = InsertUser & {
   id: string;
+  createdAt: string;
+};
+
+// Analytics schema for tracking usage
+export const insertAnalyticsSchema = z.object({
+  agentId: z.string(),
+  eventType: z.enum(["message", "session", "integration_call"]),
+  metadata: z.record(z.any()).optional().default({}),
+});
+
+export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;
+export type Analytics = InsertAnalytics & {
+  id: string;
+  createdAt: string;
 };

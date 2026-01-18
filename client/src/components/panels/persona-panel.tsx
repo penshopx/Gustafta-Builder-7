@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateAgent } from "@/hooks/use-agents";
@@ -14,6 +16,17 @@ import type { Agent } from "@shared/schema";
 interface PersonaPanelProps {
   agent: Agent;
 }
+
+const languages = [
+  { code: "id", name: "Bahasa Indonesia" },
+  { code: "en", name: "English" },
+  { code: "ms", name: "Bahasa Melayu" },
+  { code: "th", name: "Thai" },
+  { code: "vi", name: "Vietnamese" },
+  { code: "zh", name: "Chinese" },
+  { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" },
+];
 
 export function PersonaPanel({ agent }: PersonaPanelProps) {
   const { toast } = useToast();
@@ -28,7 +41,15 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     systemPrompt: agent.systemPrompt,
     temperature: agent.temperature,
     maxTokens: agent.maxTokens,
+    greetingMessage: agent.greetingMessage || "",
+    conversationStarters: agent.conversationStarters || [],
+    language: agent.language || "id",
+    isPublic: agent.isPublic || false,
+    allowedDomains: agent.allowedDomains || [],
   });
+
+  const [newStarter, setNewStarter] = useState("");
+  const [newDomain, setNewDomain] = useState("");
 
   useEffect(() => {
     setFormData({
@@ -40,6 +61,11 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       systemPrompt: agent.systemPrompt,
       temperature: agent.temperature,
       maxTokens: agent.maxTokens,
+      greetingMessage: agent.greetingMessage || "",
+      conversationStarters: agent.conversationStarters || [],
+      language: agent.language || "id",
+      isPublic: agent.isPublic || false,
+      allowedDomains: agent.allowedDomains || [],
     });
   }, [agent]);
 
@@ -62,6 +88,50 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         },
       }
     );
+  };
+
+  const addConversationStarter = () => {
+    if (newStarter.trim() && formData.conversationStarters.length < 5) {
+      setFormData({
+        ...formData,
+        conversationStarters: [...formData.conversationStarters, newStarter.trim()],
+      });
+      setNewStarter("");
+    }
+  };
+
+  const removeConversationStarter = (index: number) => {
+    setFormData({
+      ...formData,
+      conversationStarters: formData.conversationStarters.filter((_, i) => i !== index),
+    });
+  };
+
+  const addAllowedDomain = () => {
+    if (newDomain.trim() && formData.allowedDomains.length < 10) {
+      setFormData({
+        ...formData,
+        allowedDomains: [...formData.allowedDomains, newDomain.trim()],
+      });
+      setNewDomain("");
+    }
+  };
+
+  const removeAllowedDomain = (index: number) => {
+    setFormData({
+      ...formData,
+      allowedDomains: formData.allowedDomains.filter((_, i) => i !== index),
+    });
+  };
+
+  const copyAccessToken = () => {
+    if (agent.accessToken) {
+      navigator.clipboard.writeText(agent.accessToken);
+      toast({
+        title: "Copied",
+        description: "Access token copied to clipboard.",
+      });
+    }
   };
 
   return (
@@ -129,6 +199,92 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               data-testid="input-agent-description"
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="language">Primary Language</Label>
+            <Select
+              value={formData.language}
+              onValueChange={(value) => setFormData({ ...formData, language: value })}
+            >
+              <SelectTrigger id="language" data-testid="select-language">
+                <SelectValue placeholder="Select language" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Greeting & Conversation Starters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-primary" />
+            Welcome Experience
+          </CardTitle>
+          <CardDescription>First impression when users start a conversation</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="greetingMessage">Greeting Message</Label>
+            <Textarea
+              id="greetingMessage"
+              value={formData.greetingMessage}
+              onChange={(e) => setFormData({ ...formData, greetingMessage: e.target.value })}
+              placeholder="Hello! Welcome to our service. How can I help you today?"
+              rows={2}
+              data-testid="input-greeting-message"
+            />
+            <p className="text-xs text-muted-foreground">
+              This message is shown when users first open the chat
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label>Conversation Starters</Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Quick prompts users can click to start a conversation (max 5)
+            </p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {formData.conversationStarters.map((starter, index) => (
+                <Badge key={index} variant="secondary" className="gap-1 pl-3">
+                  {starter}
+                  <button
+                    onClick={() => removeConversationStarter(index)}
+                    className="ml-1 hover:text-destructive"
+                    data-testid={`button-remove-starter-${index}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            {formData.conversationStarters.length < 5 && (
+              <div className="flex gap-2">
+                <Input
+                  value={newStarter}
+                  onChange={(e) => setNewStarter(e.target.value)}
+                  placeholder="e.g., How do I get started?"
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addConversationStarter())}
+                  data-testid="input-new-starter"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={addConversationStarter}
+                  disabled={!newStarter.trim()}
+                  data-testid="button-add-starter"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -136,7 +292,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-primary" />
+            <Globe className="w-5 h-5 text-primary" />
             Personality & Behavior
           </CardTitle>
           <CardDescription>How your chatbot interacts with users</CardDescription>
@@ -244,6 +400,96 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               onValueChange={([value]) => setFormData({ ...formData, maxTokens: value })}
               data-testid="slider-max-tokens"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Access Control & Security */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" />
+            Access Control & Security
+          </CardTitle>
+          <CardDescription>Control who can access your chatbot</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="isPublic">Public Access</Label>
+              <p className="text-xs text-muted-foreground">
+                Allow anyone to access this chatbot without authentication
+              </p>
+            </div>
+            <Switch
+              id="isPublic"
+              checked={formData.isPublic}
+              onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })}
+              data-testid="switch-is-public"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Key className="w-4 h-4" />
+              Access Token
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                value={agent.accessToken || ""}
+                readOnly
+                className="font-mono text-sm"
+                data-testid="input-access-token"
+              />
+              <Button variant="outline" onClick={copyAccessToken} data-testid="button-copy-token">
+                Copy
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Use this token to authenticate API requests to your chatbot
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Allowed Domains</Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Restrict web widget access to specific domains (leave empty for all domains)
+            </p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {formData.allowedDomains.map((domain, index) => (
+                <Badge key={index} variant="secondary" className="gap-1 pl-3">
+                  {domain}
+                  <button
+                    onClick={() => removeAllowedDomain(index)}
+                    className="ml-1 hover:text-destructive"
+                    data-testid={`button-remove-domain-${index}`}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            {formData.allowedDomains.length < 10 && (
+              <div className="flex gap-2">
+                <Input
+                  value={newDomain}
+                  onChange={(e) => setNewDomain(e.target.value)}
+                  placeholder="e.g., example.com"
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addAllowedDomain())}
+                  data-testid="input-new-domain"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={addAllowedDomain}
+                  disabled={!newDomain.trim()}
+                  data-testid="button-add-domain"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
