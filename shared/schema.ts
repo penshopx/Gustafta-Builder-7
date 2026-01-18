@@ -15,6 +15,9 @@ export const insertAgentSchema = z.object({
   greetingMessage: z.string().optional().default(""),
   conversationStarters: z.array(z.string()).optional().default([]),
   language: z.string().optional().default("id"),
+  // Business/Profession category
+  category: z.string().optional().default(""),
+  subcategory: z.string().optional().default(""),
   // Access control for monetization
   accessToken: z.string().optional().default(""),
   isPublic: z.boolean().optional().default(false),
