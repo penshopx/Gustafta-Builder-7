@@ -73,6 +73,11 @@ export default function Landing() {
             <span className="text-xl font-bold">Gustafta</span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/documentation">
+              <Button variant="ghost" data-testid="button-documentation">
+                Dokumentasi
+              </Button>
+            </Link>
             <ThemeToggle />
             <Link href="/dashboard">
               <Button data-testid="button-go-dashboard">
