@@ -33,7 +33,7 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
     if (!input.trim()) return;
 
     sendMessage.mutate(
-      { agentId: agent.id, role: "user", content: input.trim() },
+      { agentId: agent.id, role: "user", content: input.trim(), reasoning: "", sources: [] },
       {
         onSuccess: () => {
           setInput("");
@@ -77,25 +77,27 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
   };
 
   return (
-    <div className="p-6 h-full flex flex-col max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-primary" />
-            Chat Console
+    <div className="p-3 md:p-6 h-full flex flex-col max-w-4xl">
+      <div className="flex items-center justify-between mb-4 md:mb-6 gap-2">
+        <div className="min-w-0">
+          <h2 className="text-lg md:text-2xl font-semibold flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-primary shrink-0" />
+            <span className="truncate">Chat Console</span>
           </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-xs md:text-sm text-muted-foreground mt-1 hidden sm:block">
             Full conversation history and testing interface
           </p>
         </div>
         <Button
           variant="outline"
+          size="sm"
           onClick={handleClear}
           disabled={messages.length === 0}
           data-testid="button-clear-chat"
+          className="shrink-0"
         >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Clear History
+          <Trash2 className="w-4 h-4 md:mr-2" />
+          <span className="hidden md:inline">Clear History</span>
         </Button>
       </div>
 

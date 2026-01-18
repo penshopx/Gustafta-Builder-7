@@ -136,24 +136,26 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold flex items-center gap-2">
-            <Bot className="w-6 h-6 text-primary" />
-            Persona Configuration
+    <div className="p-3 md:p-6 space-y-4 md:space-y-6 max-w-4xl">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="text-lg md:text-2xl font-semibold flex items-center gap-2">
+            <Bot className="w-5 h-5 md:w-6 md:h-6 text-primary shrink-0" />
+            <span className="truncate">Persona</span>
           </h2>
-          <p className="text-muted-foreground mt-1">
-            Define your chatbot's personality, behavior, and response style
+          <p className="text-xs md:text-sm text-muted-foreground mt-1 hidden sm:block">
+            Define your chatbot's personality and behavior
           </p>
         </div>
         <Button
           onClick={handleSave}
           disabled={updateAgent.isPending}
+          size="sm"
           data-testid="button-save-persona"
+          className="shrink-0"
         >
-          <Save className="w-4 h-4 mr-2" />
-          {updateAgent.isPending ? "Saving..." : "Save Changes"}
+          <Save className="w-4 h-4 md:mr-2" />
+          <span className="hidden md:inline">{updateAgent.isPending ? "Saving..." : "Save Changes"}</span>
         </Button>
       </div>
 
@@ -167,9 +169,9 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           <CardDescription>Basic information about your chatbot</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Chatbot Name</Label>
+              <Label htmlFor="name" className="text-sm">Chatbot Name</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -179,7 +181,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tagline">Tagline</Label>
+              <Label htmlFor="tagline" className="text-sm">Tagline</Label>
               <Input
                 id="tagline"
                 value={formData.tagline}
