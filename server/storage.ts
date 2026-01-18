@@ -133,6 +133,8 @@ export class MemStorage implements IStorage {
       greetingMessage: insertAgent.greetingMessage || "",
       conversationStarters: insertAgent.conversationStarters || [],
       language: insertAgent.language || "id",
+      category: insertAgent.category || "",
+      subcategory: insertAgent.subcategory || "",
       accessToken,
       isPublic: insertAgent.isPublic ?? false,
       allowedDomains: insertAgent.allowedDomains || [],
@@ -163,6 +165,8 @@ export class MemStorage implements IStorage {
       greetingMessage: data.greetingMessage !== undefined ? data.greetingMessage : agent.greetingMessage,
       conversationStarters: data.conversationStarters !== undefined ? data.conversationStarters : agent.conversationStarters,
       language: data.language !== undefined ? data.language : agent.language,
+      category: data.category !== undefined ? data.category : agent.category,
+      subcategory: data.subcategory !== undefined ? data.subcategory : agent.subcategory,
       isPublic: data.isPublic !== undefined ? data.isPublic : agent.isPublic,
       allowedDomains: data.allowedDomains !== undefined ? data.allowedDomains : agent.allowedDomains,
     };
