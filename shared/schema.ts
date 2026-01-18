@@ -180,3 +180,42 @@ export type Analytics = InsertAnalytics & {
   id: string;
   createdAt: string;
 };
+
+// Subscription schema for payment/monetization
+export const subscriptionPlanSchema = z.enum([
+  "free_trial",
+  "monthly_1",
+  "monthly_3", 
+  "monthly_6",
+  "monthly_12"
+]);
+
+export type SubscriptionPlan = z.infer<typeof subscriptionPlanSchema>;
+
+export const subscriptionPricing: Record<SubscriptionPlan, { price: number; duration: number; label: string }> = {
+  free_trial: { price: 0, duration: 14, label: "Free Trial 14 Hari" },
+  monthly_1: { price: 199000, duration: 30, label: "1 Bulan" },
+  monthly_3: { price: 499000, duration: 90, label: "3 Bulan" },
+  monthly_6: { price: 999000, duration: 180, label: "6 Bulan" },
+  monthly_12: { price: 1999000, duration: 365, label: "12 Bulan" },
+};
+
+export const insertSubscriptionSchema = z.object({
+  userId: z.string(),
+  plan: subscriptionPlanSchema,
+  status: z.enum(["pending", "active", "expired", "cancelled"]).default("pending"),
+  scalevOrderId: z.string().optional(),
+  scalevInvoiceNumber: z.string().optional(),
+  paymentUrl: z.string().optional(),
+  amount: z.number(),
+  chatbotLimit: z.number().default(1),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = InsertSubscription & {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+};

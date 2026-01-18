@@ -9,11 +9,15 @@ import {
   insertBigIdeaSchema,
   insertToolboxSchema,
   insertUserProfileSchema,
+  subscriptionPlanSchema,
+  subscriptionPricing,
+  type SubscriptionPlan,
 } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
+import { createScalevOrder, isScalevConfigured, parseScalevWebhook } from "./lib/scalev";
 
 // Initialize OpenAI client with Replit AI Integrations
 const openai = new OpenAI({
@@ -675,6 +679,160 @@ export async function registerRoutes(
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // ==================== Payment/Subscription Routes (Scalev.id) ====================
+
+  // Get subscription plans
+  app.get("/api/subscriptions/plans", (_req, res) => {
+    const plans = Object.entries(subscriptionPricing).map(([key, value]) => ({
+      id: key,
+      ...value,
+    }));
+    res.json(plans);
+  });
+
+  // Check Scalev configuration status
+  app.get("/api/subscriptions/status", (_req, res) => {
+    res.json({
+      scalevConfigured: isScalevConfigured(),
+    });
+  });
+
+  // Create subscription/payment order
+  app.post("/api/subscriptions/create", async (req, res) => {
+    try {
+      const { plan, customerName, customerEmail, customerPhone } = req.body;
+      
+      // Validate plan
+      const planValidation = subscriptionPlanSchema.safeParse(plan);
+      if (!planValidation.success) {
+        return res.status(400).json({ error: "Invalid subscription plan" });
+      }
+      
+      const selectedPlan = planValidation.data as SubscriptionPlan;
+      const pricing = subscriptionPricing[selectedPlan];
+      
+      // For free trial, create subscription directly
+      if (selectedPlan === "free_trial") {
+        const now = new Date();
+        const endDate = new Date(now.getTime() + pricing.duration * 24 * 60 * 60 * 1000);
+        
+        const subscription = await storage.createSubscription({
+          userId: customerEmail, // Use email as user identifier for now
+          plan: selectedPlan,
+          status: "active",
+          amount: 0,
+          chatbotLimit: 1,
+          startDate: now.toISOString(),
+          endDate: endDate.toISOString(),
+        });
+        
+        return res.status(201).json({
+          subscription,
+          message: "Free trial activated successfully",
+        });
+      }
+      
+      // Check if Scalev is configured
+      if (!isScalevConfigured()) {
+        return res.status(503).json({ 
+          error: "Payment gateway not configured",
+          message: "Scalev.id API token is not configured. Please contact administrator."
+        });
+      }
+      
+      // Create Scalev order
+      const scalevProductId = parseInt(process.env.SCALEV_PRODUCT_ID || "1");
+      
+      const scalevOrder = await createScalevOrder({
+        product_id: scalevProductId,
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        payment_method: "epayment",
+        amount: pricing.price,
+        notes: `Subscription: ${pricing.label}`,
+      });
+      
+      // Create pending subscription
+      const subscription = await storage.createSubscription({
+        userId: customerEmail,
+        plan: selectedPlan,
+        status: "pending",
+        scalevOrderId: String(scalevOrder.id),
+        scalevInvoiceNumber: scalevOrder.invoice_number,
+        paymentUrl: scalevOrder.payment_url,
+        amount: pricing.price,
+        chatbotLimit: 1,
+      });
+      
+      res.status(201).json({
+        subscription,
+        paymentUrl: scalevOrder.payment_url,
+        invoiceNumber: scalevOrder.invoice_number,
+      });
+    } catch (error) {
+      console.error("Failed to create subscription:", error);
+      res.status(500).json({ error: "Failed to create subscription" });
+    }
+  });
+
+  // Scalev webhook handler
+  app.post("/api/webhooks/scalev", async (req, res) => {
+    try {
+      const payload = parseScalevWebhook(req.body);
+      
+      if (!payload) {
+        return res.status(400).json({ error: "Invalid webhook payload" });
+      }
+      
+      if (payload.event === "order.payment_status_changed") {
+        const { order } = payload;
+        
+        if (order.payment_status === "paid") {
+          // Find and update subscription
+          const subscription = await storage.getSubscriptionByScalevOrderId(String(order.id));
+          
+          if (subscription) {
+            const pricing = subscriptionPricing[subscription.plan];
+            const now = new Date();
+            const endDate = new Date(now.getTime() + pricing.duration * 24 * 60 * 60 * 1000);
+            
+            await storage.updateSubscription(subscription.id, {
+              status: "active",
+              startDate: now.toISOString(),
+              endDate: endDate.toISOString(),
+            });
+            
+            console.log(`Subscription ${subscription.id} activated for order ${order.id}`);
+          }
+        } else if (order.payment_status === "expired" || order.payment_status === "cancelled") {
+          const subscription = await storage.getSubscriptionByScalevOrderId(String(order.id));
+          
+          if (subscription) {
+            await storage.updateSubscription(subscription.id, {
+              status: "cancelled",
+            });
+          }
+        }
+      }
+      
+      res.json({ status: "success" });
+    } catch (error) {
+      console.error("Webhook processing error:", error);
+      res.status(500).json({ error: "Webhook processing failed" });
+    }
+  });
+
+  // Get user's active subscription
+  app.get("/api/subscriptions/user/:userId", async (req, res) => {
+    try {
+      const subscription = await storage.getActiveSubscription(req.params.userId);
+      res.json(subscription);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch subscription" });
     }
   });
 

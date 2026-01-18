@@ -18,6 +18,8 @@ import type {
   InsertToolbox,
   UserProfile,
   InsertUserProfile,
+  Subscription,
+  InsertSubscription,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -85,6 +87,13 @@ export interface IStorage {
     messagesLast7Days: number[];
     topHours: { hour: number; count: number }[];
   }>;
+
+  // Subscription methods
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  getSubscription(id: string): Promise<Subscription | undefined>;
+  getSubscriptionByScalevOrderId(scalevOrderId: string): Promise<Subscription | undefined>;
+  getActiveSubscription(userId: string): Promise<Subscription | undefined>;
+  updateSubscription(id: string, data: Partial<InsertSubscription>): Promise<Subscription | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -97,6 +106,7 @@ export class MemStorage implements IStorage {
   private integrations: Map<string, Integration>;
   private messages: Map<string, Message>;
   private analytics: Map<string, Analytics>;
+  private subscriptions: Map<string, Subscription>;
 
   constructor() {
     this.users = new Map();
@@ -108,6 +118,7 @@ export class MemStorage implements IStorage {
     this.integrations = new Map();
     this.messages = new Map();
     this.analytics = new Map();
+    this.subscriptions = new Map();
   }
 
   // User methods
@@ -739,6 +750,63 @@ export class MemStorage implements IStorage {
       messagesLast7Days,
       topHours,
     };
+  }
+
+  // Subscription methods
+  async createSubscription(insertSubscription: InsertSubscription): Promise<Subscription> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    const subscription: Subscription = {
+      id,
+      userId: insertSubscription.userId,
+      plan: insertSubscription.plan,
+      status: insertSubscription.status || "pending",
+      scalevOrderId: insertSubscription.scalevOrderId,
+      scalevInvoiceNumber: insertSubscription.scalevInvoiceNumber,
+      paymentUrl: insertSubscription.paymentUrl,
+      amount: insertSubscription.amount,
+      chatbotLimit: insertSubscription.chatbotLimit || 1,
+      startDate: insertSubscription.startDate,
+      endDate: insertSubscription.endDate,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.subscriptions.set(id, subscription);
+    return subscription;
+  }
+
+  async getSubscription(id: string): Promise<Subscription | undefined> {
+    return this.subscriptions.get(id);
+  }
+
+  async getSubscriptionByScalevOrderId(scalevOrderId: string): Promise<Subscription | undefined> {
+    return Array.from(this.subscriptions.values()).find(
+      (sub) => sub.scalevOrderId === scalevOrderId
+    );
+  }
+
+  async getActiveSubscription(userId: string): Promise<Subscription | undefined> {
+    const now = new Date();
+    return Array.from(this.subscriptions.values()).find((sub) => {
+      if (sub.userId !== userId || sub.status !== "active") return false;
+      if (sub.endDate) {
+        return new Date(sub.endDate) > now;
+      }
+      return true;
+    });
+  }
+
+  async updateSubscription(id: string, data: Partial<InsertSubscription>): Promise<Subscription | undefined> {
+    const subscription = this.subscriptions.get(id);
+    if (!subscription) return undefined;
+    
+    const updated: Subscription = {
+      ...subscription,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    this.subscriptions.set(id, updated);
+    return updated;
   }
 }
 
