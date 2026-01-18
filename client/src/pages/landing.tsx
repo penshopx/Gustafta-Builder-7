@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
+import { trackLead, trackViewContent, trackContact } from "@/hooks/use-meta-pixel";
 import { 
   Bot, Sparkles, MessageSquare, Zap, Globe, Shield, 
   BookOpen, BarChart3, Lightbulb, ArrowRight, Check, LogIn, LogOut
@@ -11,6 +13,22 @@ import {
 
 export default function Landing() {
   const { user, isLoading, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    trackViewContent({ content_name: 'Landing Page', content_category: 'Homepage' });
+  }, []);
+
+  const handleLoginClick = () => {
+    trackLead({ content_name: 'Login Button Click' });
+  };
+
+  const handleStartNowClick = () => {
+    trackLead({ content_name: 'Start Now CTA' });
+  };
+
+  const handlePricingClick = () => {
+    trackViewContent({ content_name: 'Pricing Page', content_category: 'Pricing' });
+  };
   const features = [
     {
       icon: Lightbulb,
@@ -81,7 +99,7 @@ export default function Landing() {
                 Dokumentasi
               </Button>
             </Link>
-            <Link href="/pricing">
+            <Link href="/pricing" onClick={handlePricingClick}>
               <Button variant="ghost" data-testid="button-pricing">
                 Harga
               </Button>
@@ -107,7 +125,7 @@ export default function Landing() {
                 </Avatar>
               </div>
             ) : (
-              <a href="/api/login">
+              <a href="/api/login" onClick={handleLoginClick}>
                 <Button className="gap-2" data-testid="button-login">
                   <LogIn className="h-4 w-4" />
                   Masuk
@@ -142,7 +160,7 @@ export default function Landing() {
                   </Button>
                 </Link>
               ) : (
-                <a href="/api/login">
+                <a href="/api/login" onClick={handleStartNowClick}>
                   <Button size="lg" className="gap-2" data-testid="button-start-now">
                     Mulai Sekarang
                     <ArrowRight className="h-4 w-4" />

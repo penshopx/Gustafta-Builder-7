@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -23,6 +24,8 @@ function Router() {
 }
 
 function App() {
+  useMetaPixel();
+  
   return (
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
