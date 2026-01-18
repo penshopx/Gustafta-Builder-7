@@ -7,9 +7,13 @@ Gustafta is an AI chatbot builder platform that allows users to create, configur
 The platform enables users to:
 - Create and manage multiple AI chatbot agents
 - Configure detailed persona settings (name, tagline, philosophy, system prompts)
+- Set up greeting messages and conversation starters (up to 5)
+- Choose from 8 languages including Bahasa Indonesia
 - Build knowledge bases from text, files, or URLs
-- Set up integrations with WhatsApp, Telegram, Discord, Slack, and web embeds
-- Test chatbots through an integrated chat console
+- Set up integrations with WhatsApp, Telegram, Discord, Slack, Web Widget, and API
+- Test chatbots through a floating popup chat widget (mobile-first design)
+- Control access with auto-generated tokens, public/private toggle, and allowed domains
+- View analytics dashboard with message counts, sessions, and engagement metrics
 
 ## User Preferences
 
@@ -27,10 +31,11 @@ Preferred communication style: Simple, everyday language.
 
 The frontend follows a feature-based organization:
 - `pages/` - Route-level components (dashboard, not-found)
-- `components/panels/` - Main content panels (persona, knowledge base, integrations, chat)
+- `components/panels/` - Main content panels (persona, knowledge base, integrations, chat, analytics)
 - `components/dialogs/` - Modal dialogs (create agent)
+- `components/chat-popup.tsx` - Floating popup chat widget (mobile-first)
 - `components/ui/` - Reusable UI primitives from shadcn/ui
-- `hooks/` - Custom React hooks for data fetching (agents, chat, integrations, knowledge base)
+- `hooks/` - Custom React hooks for data fetching (agents, chat, integrations, knowledge base, analytics)
 - `lib/` - Utilities, query client, theme provider
 
 ### Backend Architecture
@@ -52,11 +57,12 @@ The server provides:
 - **Session Store**: connect-pg-simple for PostgreSQL sessions
 
 Schema includes:
-- `agents` - Chatbot configurations with persona settings
+- `agents` - Chatbot configurations with persona settings, access control, language preferences
 - `knowledgeBases` - Text/file/URL content linked to agents
 - `integrations` - Channel configurations (WhatsApp, Telegram, etc.)
 - `messages` - Chat history per agent
 - `users` - User authentication data
+- `analytics` - Event tracking for usage metrics
 
 ### Design Patterns
 - **Two-Panel Layout**: Left navigation sidebar with right content panel
