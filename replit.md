@@ -7,6 +7,9 @@ Gustafta is an AI chatbot builder platform that allows users to create, configur
 The platform enables users to:
 - Create and manage multiple AI chatbot agents
 - Configure detailed persona settings (name, tagline, philosophy, system prompts)
+- Select from multiple AI models (OpenAI GPT-4o, GPT-3.5, DeepSeek, Claude, or custom models)
+- Configure custom API endpoints with user-provided credentials
+- Enhanced persona fields: personality, expertise, communication style, tone of voice
 - Set up greeting messages and conversation starters (up to 5)
 - Choose from 8 languages including Bahasa Indonesia
 - Build knowledge bases from text, files, or URLs
@@ -14,6 +17,7 @@ The platform enables users to:
 - Test chatbots through a floating popup chat widget (mobile-first design)
 - Control access with auto-generated tokens, public/private toggle, and allowed domains
 - View analytics dashboard with message counts, sessions, and engagement metrics
+- Mayar.id payment gateway integration for subscription management
 
 ## User Preferences
 
@@ -57,12 +61,21 @@ The server provides:
 - **Session Store**: connect-pg-simple for PostgreSQL sessions
 
 Schema includes:
-- `agents` - Chatbot configurations with persona settings, access control, language preferences
+- `agents` - Chatbot configurations with:
+  - Basic settings: name, description, avatar, tagline, philosophy
+  - AI model config: aiModel (gpt-4o-mini/gpt-4o/deepseek/claude/custom), customApiKey, customBaseUrl, customModelName
+  - Enhanced persona: personality, expertise, communicationStyle, toneOfVoice, responseFormat, avoidTopics, keyPhrases
+  - Agentic features: agenticMode, attentiveListening, contextRetention, proactiveAssistance
+  - Access control: accessToken, isPublic, allowedDomains
 - `knowledgeBases` - Text/file/URL content linked to agents
 - `integrations` - Channel configurations (WhatsApp, Telegram, etc.)
-- `messages` - Chat history per agent
-- `users` - User authentication data
+- `agentMessages` - Chat history per agent
+- `users` - User authentication data (Replit Auth)
+- `userProfiles` - Extended user profile data
 - `analytics` - Event tracking for usage metrics
+- `bigIdeas` - Top-level business concepts
+- `toolboxes` - Collections of agents under a Big Idea
+- `subscriptionsNew` - Mayar.id payment subscriptions
 
 ### Design Patterns
 - **Two-Panel Layout**: Left navigation sidebar with right content panel

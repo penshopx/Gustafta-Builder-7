@@ -594,12 +594,21 @@ export async function registerRoutes(
       if (agent.philosophy) {
         systemPrompt += `\n\nFilosofi: ${agent.philosophy}`;
       }
+      if (agent.personality) {
+        systemPrompt += `\n\nKepribadian: ${agent.personality}`;
+      }
+      if (agent.communicationStyle) {
+        systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
+      }
+      if (agent.toneOfVoice) {
+        systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
+      }
       if (knowledgeContext) {
         systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
       }
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
-      // Build messages for OpenAI
+      // Build messages array
       const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
         { role: "system", content: systemPrompt }
       ];
@@ -617,15 +626,102 @@ export async function registerRoutes(
       // Add current user message
       chatMessages.push({ role: "user", content: parsed.data.content });
       
-      // Call OpenAI
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: chatMessages,
-        max_tokens: 1024,
-        temperature: 0.7,
-      });
+      // Determine which AI model and client to use
+      const agentModel = agent.aiModel || "gpt-4o-mini";
+      const temperature = Math.max(0, Math.min(2, agent.temperature ?? 0.7));
+      const maxTokens = Math.max(100, Math.min(4096, agent.maxTokens ?? 1024));
       
-      const aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      let aiResponseContent = "";
+      
+      // Handle different model providers
+      if (agentModel === "custom") {
+        // Custom model with user-provided credentials
+        if (!agent.customApiKey) {
+          return res.status(400).json({ error: "Custom model requires API key. Please configure in Persona settings." });
+        }
+        if (!agent.customBaseUrl) {
+          return res.status(400).json({ error: "Custom model requires Base URL. Please configure in Persona settings." });
+        }
+        
+        const customClient = new OpenAI({
+          apiKey: agent.customApiKey,
+          baseURL: agent.customBaseUrl,
+        });
+        const modelName = agent.customModelName || "gpt-4";
+        
+        const completion = await customClient.chat.completions.create({
+          model: modelName,
+          messages: chatMessages,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+        
+      } else if (agentModel.startsWith("deepseek-")) {
+        // DeepSeek models - require API key
+        const deepseekApiKey = process.env.DEEPSEEK_API_KEY || agent.customApiKey;
+        if (!deepseekApiKey) {
+          return res.status(400).json({ 
+            error: "DeepSeek API key not configured. Please set DEEPSEEK_API_KEY environment variable or provide custom API key in Persona settings." 
+          });
+        }
+        
+        const deepseekClient = new OpenAI({
+          apiKey: deepseekApiKey,
+          baseURL: "https://api.deepseek.com",
+        });
+        
+        const completion = await deepseekClient.chat.completions.create({
+          model: agentModel,
+          messages: chatMessages,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+        
+      } else if (agentModel.startsWith("claude-")) {
+        // Claude models - require custom configuration with OpenAI-compatible proxy
+        // Anthropic's native API is not OpenAI-compatible, so users must use a proxy service
+        // or configure a custom endpoint that wraps Anthropic's API
+        
+        if (agent.customApiKey && agent.customBaseUrl) {
+          // User has configured custom proxy for Claude
+          const claudeClient = new OpenAI({
+            apiKey: agent.customApiKey,
+            baseURL: agent.customBaseUrl,
+          });
+          
+          try {
+            const completion = await claudeClient.chat.completions.create({
+              model: agent.customModelName || agentModel,
+              messages: chatMessages,
+              max_tokens: maxTokens,
+              temperature: temperature,
+            });
+            aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+          } catch (claudeError) {
+            console.error("Claude proxy error:", claudeError);
+            return res.status(503).json({ 
+              error: "Failed to connect to Claude model. Please verify your custom API configuration." 
+            });
+          }
+        } else {
+          // Claude without custom configuration - inform user about setup requirements
+          return res.status(400).json({ 
+            error: "Claude models require custom API configuration. Please select 'Custom Model' and configure an OpenAI-compatible proxy endpoint (such as OpenRouter, LiteLLM, or similar) that supports Claude models, or use OpenAI/DeepSeek models instead." 
+          });
+        }
+        
+      } else {
+        // OpenAI models (default) - use the built-in integration
+        const completion = await openai.chat.completions.create({
+          model: agentModel,
+          messages: chatMessages,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      }
       
       // Save AI response
       const aiMessage = await storage.createMessage({
@@ -722,6 +818,7 @@ export async function registerRoutes(
           plan: selectedPlan,
           status: "active",
           amount: 0,
+          currency: "IDR",
           chatbotLimit: pricing.chatbotLimit,
           startDate: now.toISOString(),
           endDate: endDate.toISOString(),
@@ -762,9 +859,10 @@ export async function registerRoutes(
         userId: customerEmail,
         plan: selectedPlan,
         status: "pending",
-        scalevOrderId: mayarPayment.data.id,
-        paymentUrl: mayarPayment.data.link,
+        mayarOrderId: mayarPayment.data.id,
+        mayarPaymentUrl: mayarPayment.data.link,
         amount: pricing.price,
+        currency: "IDR",
         chatbotLimit: pricing.chatbotLimit,
       });
       

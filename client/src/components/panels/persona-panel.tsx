@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,18 @@ const languages = [
   { code: "ko", name: "Korean" },
 ];
 
+const aiModels = [
+  { value: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", description: "Fast and affordable" },
+  { value: "gpt-4o", name: "GPT-4o", provider: "OpenAI", description: "Most capable" },
+  { value: "gpt-4-turbo", name: "GPT-4 Turbo", provider: "OpenAI", description: "High performance" },
+  { value: "gpt-3.5-turbo", name: "GPT-3.5 Turbo", provider: "OpenAI", description: "Legacy model" },
+  { value: "deepseek-chat", name: "DeepSeek Chat", provider: "DeepSeek", description: "Cost-effective" },
+  { value: "deepseek-reasoner", name: "DeepSeek Reasoner", provider: "DeepSeek", description: "Advanced reasoning" },
+  { value: "claude-3-haiku", name: "Claude 3 Haiku", provider: "Anthropic", description: "Fast responses" },
+  { value: "claude-3-sonnet", name: "Claude 3 Sonnet", provider: "Anthropic", description: "Balanced performance" },
+  { value: "custom", name: "Custom Model", provider: "Custom", description: "Use your own API" },
+];
+
 export function PersonaPanel({ agent }: PersonaPanelProps) {
   const { toast } = useToast();
   const updateAgent = useUpdateAgent();
@@ -42,6 +54,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     systemPrompt: agent.systemPrompt,
     temperature: agent.temperature,
     maxTokens: agent.maxTokens,
+    aiModel: agent.aiModel || "gpt-4o-mini",
+    customApiKey: agent.customApiKey || "",
+    customBaseUrl: agent.customBaseUrl || "",
+    customModelName: agent.customModelName || "",
     greetingMessage: agent.greetingMessage || "",
     conversationStarters: agent.conversationStarters || [],
     language: agent.language || "id",
@@ -51,6 +67,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
 
   const [newStarter, setNewStarter] = useState("");
   const [newDomain, setNewDomain] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false);
 
   useEffect(() => {
     setFormData({
@@ -62,6 +79,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       systemPrompt: agent.systemPrompt,
       temperature: agent.temperature,
       maxTokens: agent.maxTokens,
+      aiModel: agent.aiModel || "gpt-4o-mini",
+      customApiKey: agent.customApiKey || "",
+      customBaseUrl: agent.customBaseUrl || "",
+      customModelName: agent.customModelName || "",
       greetingMessage: agent.greetingMessage || "",
       conversationStarters: agent.conversationStarters || [],
       language: agent.language || "id",
@@ -389,11 +410,111 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         </CardContent>
       </Card>
 
+      {/* AI Model Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Cpu className="w-5 h-5 text-primary" />
+            AI Model Configuration
+          </CardTitle>
+          <CardDescription>Select which AI model powers your chatbot</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="aiModel">AI Model</Label>
+            <Select
+              value={formData.aiModel}
+              onValueChange={(value) => setFormData({ ...formData, aiModel: value })}
+            >
+              <SelectTrigger id="aiModel" data-testid="select-ai-model">
+                <SelectValue placeholder="Select AI model" />
+              </SelectTrigger>
+              <SelectContent>
+                {aiModels.map((model) => (
+                  <SelectItem key={model.value} value={model.value}>
+                    <div className="flex items-center gap-2">
+                      <span>{model.name}</span>
+                      <span className="text-xs text-muted-foreground">({model.provider})</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {aiModels.find(m => m.value === formData.aiModel)?.description || "Choose an AI model"}
+            </p>
+          </div>
+
+          {(formData.aiModel === "custom" || formData.aiModel.startsWith("claude-")) && (
+            <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                <Settings2 className="w-4 h-4" />
+                {formData.aiModel.startsWith("claude-") ? "Claude Proxy Settings" : "Custom Model Settings"}
+              </div>
+              {formData.aiModel.startsWith("claude-") && (
+                <p className="text-xs text-muted-foreground">
+                  Claude models require an OpenAI-compatible proxy (like OpenRouter or LiteLLM). Configure your proxy endpoint below.
+                </p>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="customApiKey">API Key</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="customApiKey"
+                    type={showApiKey ? "text" : "password"}
+                    value={formData.customApiKey}
+                    onChange={(e) => setFormData({ ...formData, customApiKey: e.target.value })}
+                    placeholder="sk-..."
+                    className="font-mono text-sm"
+                    data-testid="input-custom-api-key"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    data-testid="button-toggle-api-key-visibility"
+                  >
+                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="customBaseUrl">Base URL</Label>
+                <Input
+                  id="customBaseUrl"
+                  value={formData.customBaseUrl}
+                  onChange={(e) => setFormData({ ...formData, customBaseUrl: e.target.value })}
+                  placeholder="https://api.example.com/v1"
+                  data-testid="input-custom-base-url"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The API endpoint URL (e.g., https://api.openai.com/v1)
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="customModelName">Model Name</Label>
+                <Input
+                  id="customModelName"
+                  value={formData.customModelName}
+                  onChange={(e) => setFormData({ ...formData, customModelName: e.target.value })}
+                  placeholder="gpt-4"
+                  data-testid="input-custom-model-name"
+                />
+                <p className="text-xs text-muted-foreground">
+                  The specific model identifier to use
+                </p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Model Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Model Settings</CardTitle>
-          <CardDescription>Fine-tune the AI model parameters</CardDescription>
+          <CardTitle className="text-lg">Model Parameters</CardTitle>
+          <CardDescription>Fine-tune the AI model behavior</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">

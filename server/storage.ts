@@ -405,6 +405,10 @@ export class MemStorage implements IStorage {
       systemPrompt: insertAgent.systemPrompt || "You are a helpful assistant.",
       temperature: insertAgent.temperature ?? 0.7,
       maxTokens: insertAgent.maxTokens ?? 1024,
+      aiModel: insertAgent.aiModel || "gpt-4o-mini",
+      customApiKey: insertAgent.customApiKey || "",
+      customBaseUrl: insertAgent.customBaseUrl || "",
+      customModelName: insertAgent.customModelName || "",
       greetingMessage: insertAgent.greetingMessage || "",
       conversationStarters: insertAgent.conversationStarters || [],
       language: insertAgent.language || "id",
@@ -424,6 +428,13 @@ export class MemStorage implements IStorage {
       emotionalIntelligence: insertAgent.emotionalIntelligence ?? true,
       multiStepReasoning: insertAgent.multiStepReasoning ?? true,
       selfCorrection: insertAgent.selfCorrection ?? true,
+      personality: insertAgent.personality || "",
+      expertise: insertAgent.expertise || [],
+      communicationStyle: insertAgent.communicationStyle || "friendly",
+      toneOfVoice: insertAgent.toneOfVoice || "professional",
+      responseFormat: insertAgent.responseFormat || "conversational",
+      avoidTopics: insertAgent.avoidTopics || [],
+      keyPhrases: insertAgent.keyPhrases || [],
       isActive: true,
       createdAt: new Date().toISOString(),
     };
@@ -447,6 +458,10 @@ export class MemStorage implements IStorage {
       systemPrompt: data.systemPrompt !== undefined ? data.systemPrompt : agent.systemPrompt,
       temperature: data.temperature !== undefined ? Math.max(0, Math.min(2, data.temperature)) : agent.temperature,
       maxTokens: data.maxTokens !== undefined ? Math.max(100, Math.min(4096, data.maxTokens)) : agent.maxTokens,
+      aiModel: data.aiModel !== undefined ? data.aiModel : agent.aiModel,
+      customApiKey: data.customApiKey !== undefined ? data.customApiKey : agent.customApiKey,
+      customBaseUrl: data.customBaseUrl !== undefined ? data.customBaseUrl : agent.customBaseUrl,
+      customModelName: data.customModelName !== undefined ? data.customModelName : agent.customModelName,
       greetingMessage: data.greetingMessage !== undefined ? data.greetingMessage : agent.greetingMessage,
       conversationStarters: data.conversationStarters !== undefined ? data.conversationStarters : agent.conversationStarters,
       language: data.language !== undefined ? data.language : agent.language,
@@ -465,6 +480,13 @@ export class MemStorage implements IStorage {
       emotionalIntelligence: data.emotionalIntelligence !== undefined ? data.emotionalIntelligence : agent.emotionalIntelligence,
       multiStepReasoning: data.multiStepReasoning !== undefined ? data.multiStepReasoning : agent.multiStepReasoning,
       selfCorrection: data.selfCorrection !== undefined ? data.selfCorrection : agent.selfCorrection,
+      personality: data.personality !== undefined ? data.personality : agent.personality,
+      expertise: data.expertise !== undefined ? data.expertise : agent.expertise,
+      communicationStyle: data.communicationStyle !== undefined ? data.communicationStyle : agent.communicationStyle,
+      toneOfVoice: data.toneOfVoice !== undefined ? data.toneOfVoice : agent.toneOfVoice,
+      responseFormat: data.responseFormat !== undefined ? data.responseFormat : agent.responseFormat,
+      avoidTopics: data.avoidTopics !== undefined ? data.avoidTopics : agent.avoidTopics,
+      keyPhrases: data.keyPhrases !== undefined ? data.keyPhrases : agent.keyPhrases,
     };
     
     this.agents.set(id, updated);
@@ -761,10 +783,10 @@ export class MemStorage implements IStorage {
       userId: insertSubscription.userId,
       plan: insertSubscription.plan,
       status: insertSubscription.status || "pending",
-      scalevOrderId: insertSubscription.scalevOrderId,
-      scalevInvoiceNumber: insertSubscription.scalevInvoiceNumber,
-      paymentUrl: insertSubscription.paymentUrl,
+      mayarOrderId: insertSubscription.mayarOrderId,
+      mayarPaymentUrl: insertSubscription.mayarPaymentUrl,
       amount: insertSubscription.amount,
+      currency: insertSubscription.currency || "IDR",
       chatbotLimit: insertSubscription.chatbotLimit || 1,
       startDate: insertSubscription.startDate,
       endDate: insertSubscription.endDate,
@@ -779,9 +801,9 @@ export class MemStorage implements IStorage {
     return this.subscriptions.get(id);
   }
 
-  async getSubscriptionByScalevOrderId(scalevOrderId: string): Promise<Subscription | undefined> {
+  async getSubscriptionByScalevOrderId(mayarOrderId: string): Promise<Subscription | undefined> {
     return Array.from(this.subscriptions.values()).find(
-      (sub) => sub.scalevOrderId === scalevOrderId
+      (sub) => sub.mayarOrderId === mayarOrderId
     );
   }
 
@@ -810,4 +832,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { dbStorage } from "./db-storage";
+
+// Use DatabaseStorage for persistence
+export const storage: IStorage = dbStorage;
