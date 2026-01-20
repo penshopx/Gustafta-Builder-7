@@ -51,6 +51,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     tagline: agent.tagline,
     philosophy: agent.philosophy,
     offTopicHandling: agent.offTopicHandling,
+    offTopicResponse: agent.offTopicResponse || "",
     systemPrompt: agent.systemPrompt,
     temperature: agent.temperature,
     maxTokens: agent.maxTokens,
@@ -76,6 +77,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       tagline: agent.tagline,
       philosophy: agent.philosophy,
       offTopicHandling: agent.offTopicHandling,
+      offTopicResponse: agent.offTopicResponse || "",
       systemPrompt: agent.systemPrompt,
       temperature: agent.temperature,
       maxTokens: agent.maxTokens,
@@ -384,27 +386,42 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             <AlertCircle className="w-5 h-5 text-primary" />
             Off-Topic Handling
           </CardTitle>
-          <CardDescription>How your chatbot responds to irrelevant questions</CardDescription>
+          <CardDescription>Bagaimana chatbot merespons pertanyaan di luar topik</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="offTopicHandling">Response Strategy</Label>
+            <Label htmlFor="offTopicHandling">Strategi Respons</Label>
             <Select
               value={formData.offTopicHandling}
               onValueChange={(value) => setFormData({ ...formData, offTopicHandling: value })}
             >
               <SelectTrigger id="offTopicHandling" data-testid="select-off-topic-handling">
-                <SelectValue placeholder="Select a strategy" />
+                <SelectValue placeholder="Pilih strategi" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="politely_redirect">Politely Redirect</SelectItem>
-                <SelectItem value="acknowledge_and_decline">Acknowledge and Decline</SelectItem>
-                <SelectItem value="attempt_to_help">Attempt to Help Anyway</SelectItem>
-                <SelectItem value="strict_boundaries">Strict Boundaries</SelectItem>
+                <SelectItem value="politely_redirect">Arahkan dengan Sopan</SelectItem>
+                <SelectItem value="acknowledge_and_decline">Akui dan Tolak</SelectItem>
+                <SelectItem value="attempt_to_help">Tetap Coba Bantu</SelectItem>
+                <SelectItem value="strict_boundaries">Batasan Ketat</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Determines how the chatbot handles questions outside its intended scope
+              Menentukan bagaimana chatbot menangani pertanyaan di luar cakupan yang ditentukan
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="offTopicResponse">Respons Kustom (Opsional)</Label>
+            <Textarea
+              id="offTopicResponse"
+              value={formData.offTopicResponse}
+              onChange={(e) => setFormData({ ...formData, offTopicResponse: e.target.value })}
+              placeholder="Contoh: Maaf, saya hanya bisa membantu dengan pertanyaan seputar produk kami. Silakan hubungi customer service untuk pertanyaan lainnya."
+              rows={3}
+              data-testid="input-off-topic-response"
+            />
+            <p className="text-xs text-muted-foreground">
+              Tulis respons kustom yang akan diberikan chatbot ketika menerima pertanyaan di luar topik. 
+              Kosongkan untuk menggunakan respons otomatis berdasarkan strategi di atas.
             </p>
           </div>
         </CardContent>

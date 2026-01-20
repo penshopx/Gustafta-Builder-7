@@ -235,6 +235,7 @@ export const insertAgentSchema = z.object({
   tagline: z.string().optional().default(""),
   philosophy: z.string().optional().default(""),
   offTopicHandling: z.string().optional().default("politely_redirect"),
+  offTopicResponse: z.string().optional().default(""),
   systemPrompt: z.string().optional().default("You are a helpful assistant."),
   temperature: z.number().min(0).max(2).optional().default(0.7),
   maxTokens: z.number().min(100).max(4096).optional().default(1024),

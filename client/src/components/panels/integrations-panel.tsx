@@ -294,35 +294,63 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
           <div className="space-y-4 py-4">
             {selectedIntegration?.type === "whatsapp" && (
               <>
-                <div className="space-y-2">
-                  <Label>Phone Number ID</Label>
-                  <Input
-                    value={configData.phoneNumberId || ""}
-                    onChange={(e) => setConfigData({ ...configData, phoneNumberId: e.target.value })}
-                    placeholder="Enter your WhatsApp Phone Number ID"
-                  />
+                <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground mb-2">
+                  <p className="font-medium text-foreground mb-1">Cara Menghubungkan WhatsApp:</p>
+                  <p>Masukkan token API dari layanan WhatsApp Anda (Multichat, WATI, Twilio, dll). 
+                  Token ini biasanya ditemukan di halaman "API Access" atau "Generate Token" di dashboard layanan Anda.</p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Access Token</Label>
+                  <Label>Webhook URL (untuk layanan eksternal)</Label>
+                  <div className="bg-muted rounded-lg p-3 font-mono text-sm break-all">
+                    {`https://api.gustafta.com/webhook/whatsapp/${agent.id}`}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Salin URL ini dan masukkan sebagai Webhook di dashboard Multichat/layanan WhatsApp Anda
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>API Token dari Layanan WhatsApp</Label>
                   <Input
                     type="password"
                     value={configData.accessToken || ""}
                     onChange={(e) => setConfigData({ ...configData, accessToken: e.target.value })}
-                    placeholder="Enter your WhatsApp Access Token"
+                    placeholder="Contoh: eyJhbGciOiJIUzI1NiIs... (dari Multichat/layanan lain)"
+                    data-testid="input-whatsapp-token"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Token ini dari layanan WhatsApp eksternal Anda (bukan Access Token Gustafta)
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Phone Number ID (Opsional)</Label>
+                  <Input
+                    value={configData.phoneNumberId || ""}
+                    onChange={(e) => setConfigData({ ...configData, phoneNumberId: e.target.value })}
+                    placeholder="Masukkan Phone Number ID jika diperlukan"
                   />
                 </div>
               </>
             )}
             {selectedIntegration?.type === "telegram" && (
-              <div className="space-y-2">
-                <Label>Bot Token</Label>
-                <Input
-                  type="password"
-                  value={configData.botToken || ""}
-                  onChange={(e) => setConfigData({ ...configData, botToken: e.target.value })}
-                  placeholder="Enter your Telegram Bot Token"
-                />
-              </div>
+              <>
+                <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground mb-2">
+                  <p className="font-medium text-foreground mb-1">Cara Mendapatkan Bot Token:</p>
+                  <p>Buka @BotFather di Telegram, buat bot baru dengan /newbot, lalu salin token yang diberikan.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Bot Token dari Telegram</Label>
+                  <Input
+                    type="password"
+                    value={configData.botToken || ""}
+                    onChange={(e) => setConfigData({ ...configData, botToken: e.target.value })}
+                    placeholder="Contoh: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+                    data-testid="input-telegram-token"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Token ini diberikan oleh @BotFather saat Anda membuat bot Telegram
+                  </p>
+                </div>
+              </>
             )}
             {selectedIntegration?.type === "discord" && (
               <div className="space-y-2">
