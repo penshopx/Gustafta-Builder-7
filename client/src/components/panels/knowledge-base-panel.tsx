@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File } from "lucide-react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,16 @@ const fileTypeLabels: Record<string, string> = {
   doc: "Word",
   docx: "Word",
   txt: "Text",
+  jpg: "Image",
+  jpeg: "Image",
+  png: "Image",
+  gif: "Image",
+  webp: "Image",
   other: "File",
+};
+
+const isImageType = (fileType?: string) => {
+  return fileType && ["jpg", "jpeg", "png", "gif", "webp"].includes(fileType);
 };
 
 export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
@@ -81,12 +90,16 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
     ];
 
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Error",
-        description: "Format file tidak didukung. Gunakan PDF, PPT, Excel, Word, atau TXT.",
+        description: "Format file tidak didukung. Gunakan PDF, PPT, Excel, Word, TXT, atau gambar (JPG, PNG, GIF, WebP).",
         variant: "destructive",
       });
       return;
@@ -405,9 +418,28 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
+                      {/* Show image thumbnail or icon */}
+                      {isImageType(item.fileType) && item.fileUrl ? (
+                        <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border">
+                          <img 
+                            src={item.fileUrl} 
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full bg-primary/10 flex items-center justify-center"><svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          {isImageType(item.fileType) ? (
+                            <ImageIcon className="w-5 h-5 text-primary" />
+                          ) : (
+                            <Icon className="w-5 h-5 text-primary" />
+                          )}
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <h4 className="font-medium truncate">{item.name}</h4>
@@ -429,6 +461,17 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                           <p className="text-xs text-muted-foreground">
                             {item.fileName} ({formatFileSize(item.fileSize)})
                           </p>
+                        )}
+                        {/* Show clickable link for images */}
+                        {isImageType(item.fileType) && item.fileUrl && (
+                          <a 
+                            href={item.fileUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Lihat gambar ukuran penuh
+                          </a>
                         )}
                         <p className="text-xs text-muted-foreground mt-1">
                           Ditambahkan {new Date(item.createdAt).toLocaleDateString("id-ID")}

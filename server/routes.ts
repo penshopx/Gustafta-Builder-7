@@ -452,6 +452,19 @@ export async function registerRoutes(
         case ".txt":
           fileType = "txt";
           break;
+        case ".jpg":
+        case ".jpeg":
+          fileType = "jpeg";
+          break;
+        case ".png":
+          fileType = "png";
+          break;
+        case ".gif":
+          fileType = "gif";
+          break;
+        case ".webp":
+          fileType = "webp";
+          break;
         default:
           fileType = "other";
       }
