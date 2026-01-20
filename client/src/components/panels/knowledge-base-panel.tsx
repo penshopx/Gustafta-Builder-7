@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon } from "lucide-react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile } from "@/hooks/use-knowledge-base";
+import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile, useUpdateKnowledgeBase } from "@/hooks/use-knowledge-base";
+import type { KnowledgeBase } from "@shared/schema";
 import type { Agent } from "@shared/schema";
 
 interface KnowledgeBasePanelProps {
@@ -54,15 +55,28 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const { data: knowledgeBases = [], isLoading } = useKnowledgeBases(agent.id);
   const createKnowledgeBase = useCreateKnowledgeBase();
   const deleteKnowledgeBase = useDeleteKnowledgeBase();
+  const updateKnowledgeBase = useUpdateKnowledgeBase();
   const uploadFile = useUploadKnowledgeFile();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<KnowledgeBase | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newItem, setNewItem] = useState({
     name: "",
     type: "text" as "text" | "file" | "url",
+    content: "",
+    description: "",
+    fileName: "",
+    fileSize: 0,
+    fileType: undefined as string | undefined,
+    fileUrl: "",
+  });
+  const [editItem, setEditItem] = useState({
+    name: "",
     content: "",
     description: "",
     fileName: "",
@@ -199,6 +213,124 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           toast({
             title: "Deleted",
             description: "Item knowledge base berhasil dihapus.",
+          });
+        },
+      }
+    );
+  };
+
+  const handleEdit = (item: KnowledgeBase) => {
+    setEditingItem(item);
+    setEditItem({
+      name: item.name,
+      content: item.content,
+      description: item.description,
+      fileName: item.fileName || "",
+      fileSize: item.fileSize || 0,
+      fileType: item.fileType,
+      fileUrl: item.fileUrl || "",
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Error",
+        description: "Format file tidak didukung.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Ukuran file maksimal 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await uploadFile.mutateAsync(file);
+      setEditItem({
+        ...editItem,
+        fileName: result.fileName,
+        fileSize: result.fileSize,
+        fileType: result.fileType,
+        fileUrl: result.fileUrl,
+        content: result.fileUrl,
+      });
+      toast({
+        title: "Berhasil",
+        description: "File berhasil diupload",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal mengupload file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingItem || !editItem.name) {
+      toast({
+        title: "Error",
+        description: "Nama tidak boleh kosong.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateKnowledgeBase.mutate(
+      {
+        id: editingItem.id,
+        agentId: agent.id,
+        data: {
+          name: editItem.name,
+          content: editItem.content,
+          description: editItem.description,
+          fileName: editItem.fileName,
+          fileSize: editItem.fileSize,
+          fileType: editItem.fileType as any,
+          fileUrl: editItem.fileUrl,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Berhasil",
+            description: "Item knowledge base berhasil diperbarui.",
+          });
+          setEditDialogOpen(false);
+          setEditingItem(null);
+        },
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Gagal memperbarui item.",
+            variant: "destructive",
           });
         },
       }
@@ -478,15 +610,24 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                         </p>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(item.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                      data-testid={`button-delete-kb-${item.id}`}
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(item)}
+                        data-testid={`button-edit-kb-${item.id}`}
+                      >
+                        <Pencil className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(item.id)}
+                        data-testid={`button-delete-kb-${item.id}`}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -528,6 +669,116 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Knowledge Base</DialogTitle>
+            <DialogDescription>
+              Perbarui informasi knowledge base
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-kb-name">Nama</Label>
+              <Input
+                id="edit-kb-name"
+                value={editItem.name}
+                onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
+                placeholder="Nama item"
+                data-testid="input-edit-kb-name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-kb-description">Deskripsi</Label>
+              <Input
+                id="edit-kb-description"
+                value={editItem.description}
+                onChange={(e) => setEditItem({ ...editItem, description: e.target.value })}
+                placeholder="Deskripsi singkat"
+                data-testid="input-edit-kb-description"
+              />
+            </div>
+            {editingItem?.type === "text" && (
+              <div className="space-y-2">
+                <Label htmlFor="edit-kb-content">Konten</Label>
+                <Textarea
+                  id="edit-kb-content"
+                  value={editItem.content}
+                  onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
+                  rows={6}
+                  placeholder="Konten teks"
+                  data-testid="input-edit-kb-content"
+                />
+              </div>
+            )}
+            {editingItem?.type === "url" && (
+              <div className="space-y-2">
+                <Label htmlFor="edit-kb-url">URL</Label>
+                <Input
+                  id="edit-kb-url"
+                  value={editItem.content}
+                  onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
+                  placeholder="https://example.com"
+                  data-testid="input-edit-kb-url"
+                />
+              </div>
+            )}
+            {editingItem?.type === "file" && (
+              <div className="space-y-2">
+                <Label>File Saat Ini</Label>
+                {editItem.fileName ? (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
+                    {isImageType(editItem.fileType) && editItem.fileUrl ? (
+                      <img src={editItem.fileUrl} alt={editItem.fileName} className="w-12 h-12 rounded object-cover" />
+                    ) : (
+                      <File className="w-8 h-8 text-primary" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{editItem.fileName}</p>
+                      <p className="text-xs text-muted-foreground">{formatFileSize(editItem.fileSize)}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Tidak ada file</p>
+                )}
+                <div className="pt-2">
+                  <input
+                    ref={editFileInputRef}
+                    type="file"
+                    onChange={handleEditFileChange}
+                    className="hidden"
+                    accept=".pdf,.ppt,.pptx,.xls,.xlsx,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => editFileInputRef.current?.click()}
+                    disabled={uploadFile.isPending}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadFile.isPending ? "Mengupload..." : "Ganti File"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Batal
+            </Button>
+            <Button 
+              onClick={handleSaveEdit} 
+              disabled={updateKnowledgeBase.isPending}
+              data-testid="button-save-edit-kb"
+            >
+              {updateKnowledgeBase.isPending ? "Menyimpan..." : "Simpan Perubahan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

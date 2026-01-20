@@ -49,3 +49,15 @@ export function useDeleteKnowledgeBase() {
     },
   });
 }
+
+export function useUpdateKnowledgeBase() {
+  return useMutation({
+    mutationFn: async ({ id, agentId, data }: { id: string; agentId: string; data: Partial<InsertKnowledgeBase> }) => {
+      const response = await apiRequest("PATCH", `/api/knowledge-base/${id}`, data);
+      return { result: await response.json(), agentId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId] });
+    },
+  });
+}
