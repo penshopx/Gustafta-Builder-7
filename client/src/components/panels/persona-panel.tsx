@@ -424,7 +424,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             <Label htmlFor="aiModel">AI Model</Label>
             <Select
               value={formData.aiModel}
-              onValueChange={(value) => setFormData({ ...formData, aiModel: value })}
+              onValueChange={(value) => setFormData({ ...formData, aiModel: value as typeof formData.aiModel })}
             >
               <SelectTrigger id="aiModel" data-testid="select-ai-model">
                 <SelectValue placeholder="Select AI model" />
@@ -445,15 +445,24 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             </p>
           </div>
 
-          {(formData.aiModel === "custom" || formData.aiModel.startsWith("claude-")) && (
+          {(formData.aiModel === "custom" || formData.aiModel.startsWith("claude-") || formData.aiModel.startsWith("deepseek-")) && (
             <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
               <div className="flex items-center gap-2 text-sm font-medium text-primary">
                 <Settings2 className="w-4 h-4" />
-                {formData.aiModel.startsWith("claude-") ? "Claude Proxy Settings" : "Custom Model Settings"}
+                {formData.aiModel.startsWith("claude-") 
+                  ? "Claude Proxy Settings" 
+                  : formData.aiModel.startsWith("deepseek-")
+                    ? "DeepSeek API Settings"
+                    : "Custom Model Settings"}
               </div>
               {formData.aiModel.startsWith("claude-") && (
                 <p className="text-xs text-muted-foreground">
                   Claude models require an OpenAI-compatible proxy (like OpenRouter or LiteLLM). Configure your proxy endpoint below.
+                </p>
+              )}
+              {formData.aiModel.startsWith("deepseek-") && (
+                <p className="text-xs text-muted-foreground">
+                  Masukkan API key DeepSeek Anda. Dapatkan di <a href="https://platform.deepseek.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">platform.deepseek.com</a>
                 </p>
               )}
               <div className="space-y-2">
@@ -582,7 +591,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Key className="w-4 h-4" />
-              Access Token
+              Access Token (untuk Integrasi)
             </Label>
             <div className="flex gap-2">
               <Input
@@ -596,7 +605,8 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Use this token to authenticate API requests to your chatbot
+              Token ini digunakan untuk mengautentikasi permintaan API ke chatbot Anda. 
+              Gunakan saat menyematkan chatbot di website Anda atau mengintegrasikan dengan aplikasi eksternal (WhatsApp, Telegram, dll).
             </p>
           </div>
 
