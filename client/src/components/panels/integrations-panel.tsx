@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plug, MessageCircle, Send, Hash, Slack, Globe, Code, Check, X, Settings } from "lucide-react";
+import { Plug, MessageCircle, Send, Hash, Slack, Globe, Code, Check, X, Settings, Loader2, Link2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIntegrations, useCreateIntegration, useUpdateIntegration } from "@/hooks/use-integrations";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import type { Agent, Integration } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 
 interface IntegrationsPanelProps {
   agent: Agent;
@@ -76,6 +77,41 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [selectedIntegration, setSelectedIntegration] = useState<typeof integrationTypes[0] | null>(null);
   const [configData, setConfigData] = useState<Record<string, string>>({});
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const getBaseUrl = () => {
+    return window.location.origin;
+  };
+
+  const setupTelegramWebhook = async () => {
+    setIsConnecting(true);
+    try {
+      const response = await apiRequest("POST", `/api/telegram/setup-webhook/${agent.id}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Berhasil!",
+          description: "Telegram bot sudah terhubung. Coba kirim pesan ke bot Anda.",
+        });
+        setConfigDialogOpen(false);
+      } else {
+        toast({
+          title: "Gagal",
+          description: result.error || "Gagal menghubungkan Telegram bot",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal menghubungkan Telegram bot. Pastikan Bot Token sudah benar.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   const getIntegration = (type: string): Integration | undefined => {
     return integrations.find((i) => i.type === type);
@@ -114,23 +150,39 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
     setConfigDialogOpen(true);
   };
 
-  const saveConfig = () => {
-    if (!selectedIntegration) return;
+  const saveConfig = async (): Promise<boolean> => {
+    if (!selectedIntegration) return false;
 
     const existing = getIntegration(selectedIntegration.type);
     if (existing) {
-      updateIntegration.mutate({
-        id: existing.id,
-        agentId: agent.id,
-        data: { config: configData },
-      });
+      try {
+        await updateIntegration.mutateAsync({
+          id: existing.id,
+          agentId: agent.id,
+          data: { config: configData },
+        });
+        toast({
+          title: "Configuration Saved",
+          description: `${selectedIntegration.name} settings have been updated.`,
+        });
+        return true;
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to save configuration",
+          variant: "destructive",
+        });
+        return false;
+      }
     }
-
-    toast({
-      title: "Configuration Saved",
-      description: `${selectedIntegration.name} settings have been updated.`,
-    });
-    setConfigDialogOpen(false);
+    return false;
+  };
+  
+  const saveConfigAndClose = async () => {
+    const success = await saveConfig();
+    if (success) {
+      setConfigDialogOpen(false);
+    }
   };
 
   return (
@@ -294,15 +346,19 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
           <div className="space-y-4 py-4">
             {selectedIntegration?.type === "whatsapp" && (
               <>
-                <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground mb-2">
-                  <p className="font-medium text-foreground mb-1">Cara Menghubungkan WhatsApp:</p>
-                  <p>Masukkan token API dari layanan WhatsApp Anda (Multichat, WATI, Twilio, dll). 
-                  Token ini biasanya ditemukan di halaman "API Access" atau "Generate Token" di dashboard layanan Anda.</p>
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-sm mb-2">
+                  <p className="font-medium text-foreground mb-2">Langkah Menghubungkan WhatsApp:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                    <li>Daftar di layanan WhatsApp API (Multichat, WATI, dll)</li>
+                    <li>Dapatkan API Token dari dashboard layanan</li>
+                    <li>Salin Webhook URL di bawah ke dashboard layanan</li>
+                    <li>Masukkan API Token dan simpan konfigurasi</li>
+                  </ol>
                 </div>
                 <div className="space-y-2">
-                  <Label>Webhook URL (untuk layanan eksternal)</Label>
-                  <div className="bg-muted rounded-lg p-3 font-mono text-sm break-all">
-                    {`https://api.gustafta.com/webhook/whatsapp/${agent.id}`}
+                  <Label>Webhook URL (salin ke layanan WhatsApp)</Label>
+                  <div className="bg-muted rounded-lg p-3 font-mono text-xs break-all">
+                    {`${getBaseUrl()}/api/webhook/whatsapp/${agent.id}`}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Salin URL ini dan masukkan sebagai Webhook di dashboard Multichat/layanan WhatsApp Anda
@@ -312,33 +368,38 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                   <Label>API Token dari Layanan WhatsApp</Label>
                   <Input
                     type="password"
-                    value={configData.accessToken || ""}
-                    onChange={(e) => setConfigData({ ...configData, accessToken: e.target.value })}
-                    placeholder="Contoh: eyJhbGciOiJIUzI1NiIs... (dari Multichat/layanan lain)"
+                    value={configData.apiToken || ""}
+                    onChange={(e) => setConfigData({ ...configData, apiToken: e.target.value })}
+                    placeholder="Token dari dashboard Multichat/WATI/layanan lain"
                     data-testid="input-whatsapp-token"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Token ini dari layanan WhatsApp eksternal Anda (bukan Access Token Gustafta)
-                  </p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Phone Number ID (Opsional)</Label>
+                  <Label>Send URL (URL untuk mengirim pesan balik)</Label>
                   <Input
-                    value={configData.phoneNumberId || ""}
-                    onChange={(e) => setConfigData({ ...configData, phoneNumberId: e.target.value })}
-                    placeholder="Masukkan Phone Number ID jika diperlukan"
+                    value={configData.sendUrl || ""}
+                    onChange={(e) => setConfigData({ ...configData, sendUrl: e.target.value })}
+                    placeholder="https://api.multichat.co/v1/send atau URL dari layanan Anda"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    URL endpoint untuk mengirim pesan balasan (dari dokumentasi layanan Anda)
+                  </p>
                 </div>
               </>
             )}
             {selectedIntegration?.type === "telegram" && (
               <>
-                <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground mb-2">
-                  <p className="font-medium text-foreground mb-1">Cara Mendapatkan Bot Token:</p>
-                  <p>Buka @BotFather di Telegram, buat bot baru dengan /newbot, lalu salin token yang diberikan.</p>
+                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-sm mb-2">
+                  <p className="font-medium text-foreground mb-2">Langkah Menghubungkan Telegram:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                    <li>Buka @BotFather di Telegram</li>
+                    <li>Kirim /newbot dan ikuti petunjuk untuk membuat bot</li>
+                    <li>Salin Bot Token yang diberikan</li>
+                    <li>Tempel token di bawah dan klik "Hubungkan ke Telegram"</li>
+                  </ol>
                 </div>
                 <div className="space-y-2">
-                  <Label>Bot Token dari Telegram</Label>
+                  <Label>Bot Token dari @BotFather</Label>
                   <Input
                     type="password"
                     value={configData.botToken || ""}
@@ -346,10 +407,38 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                     placeholder="Contoh: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
                     data-testid="input-telegram-token"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Webhook URL (otomatis)</Label>
+                  <div className="bg-muted rounded-lg p-3 font-mono text-xs break-all">
+                    {`${getBaseUrl()}/api/webhook/telegram/${agent.id}`}
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Token ini diberikan oleh @BotFather saat Anda membuat bot Telegram
+                    URL ini akan didaftarkan otomatis ke Telegram saat Anda klik tombol "Hubungkan"
                   </p>
                 </div>
+                <Button 
+                  onClick={async () => {
+                    const saved = await saveConfig();
+                    if (saved) {
+                      await setupTelegramWebhook();
+                    }
+                  }}
+                  disabled={!configData.botToken || isConnecting}
+                  className="w-full"
+                >
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Menghubungkan...
+                    </>
+                  ) : (
+                    <>
+                      <Link2 className="w-4 h-4 mr-2" />
+                      Hubungkan ke Telegram
+                    </>
+                  )}
+                </Button>
               </>
             )}
             {selectedIntegration?.type === "discord" && (
@@ -395,7 +484,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
             <Button variant="outline" onClick={() => setConfigDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={saveConfig}>Save Configuration</Button>
+            <Button onClick={saveConfigAndClose}>Save Configuration</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

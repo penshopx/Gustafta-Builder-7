@@ -944,5 +944,358 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Telegram Webhook ====================
+  
+  // Helper function to generate AI response for external integrations
+  async function generateAIResponse(agentId: string, userMessage: string): Promise<string> {
+    const agent = await storage.getAgent(agentId);
+    if (!agent) {
+      return "Agent tidak ditemukan.";
+    }
+    
+    // Get knowledge base for context
+    const knowledgeBases = await storage.getKnowledgeBases(agentId);
+    const knowledgeContext = knowledgeBases
+      .map(kb => `[${kb.name}]: ${kb.content}`)
+      .join("\n\n");
+    
+    // Build system prompt from agent persona
+    let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;
+    if (agent.tagline) {
+      systemPrompt += ` ${agent.tagline}`;
+    }
+    if (agent.philosophy) {
+      systemPrompt += `\n\nFilosofi: ${agent.philosophy}`;
+    }
+    if (agent.personality) {
+      systemPrompt += `\n\nKepribadian: ${agent.personality}`;
+    }
+    if (agent.communicationStyle) {
+      systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
+    }
+    if (agent.toneOfVoice) {
+      systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
+    }
+    if (knowledgeContext) {
+      systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
+    }
+    systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
+    
+    const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userMessage }
+    ];
+    
+    const agentModel = agent.aiModel || "gpt-4o-mini";
+    const temperature = Math.max(0, Math.min(2, agent.temperature ?? 0.7));
+    const maxTokens = Math.max(100, Math.min(4096, agent.maxTokens ?? 1024));
+    
+    try {
+      if (agentModel === "custom" && agent.customApiKey && agent.customBaseUrl) {
+        const customClient = new OpenAI({
+          apiKey: agent.customApiKey,
+          baseURL: agent.customBaseUrl,
+        });
+        const modelName = agent.customModelName || "gpt-4";
+        const completion = await customClient.chat.completions.create({
+          model: modelName,
+          messages: chatMessages,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        return completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      } else if (agentModel.startsWith("deepseek-")) {
+        const deepseekApiKey = process.env.DEEPSEEK_API_KEY || agent.customApiKey;
+        if (!deepseekApiKey) {
+          return "DeepSeek API key belum dikonfigurasi.";
+        }
+        const deepseekClient = new OpenAI({
+          apiKey: deepseekApiKey,
+          baseURL: "https://api.deepseek.com",
+        });
+        const completion = await deepseekClient.chat.completions.create({
+          model: agentModel,
+          messages: chatMessages,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        return completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      } else {
+        // OpenAI models (default)
+        const completion = await openai.chat.completions.create({
+          model: agentModel,
+          messages: chatMessages,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        return completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      }
+    } catch (error) {
+      console.error("AI response error:", error);
+      return "Maaf, terjadi kesalahan dalam memproses pesan Anda.";
+    }
+  }
+
+  // Telegram webhook endpoint
+  app.post("/api/webhook/telegram/:agentId", async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      const update = req.body;
+      
+      console.log("Telegram webhook received:", JSON.stringify(update, null, 2));
+      
+      // Get agent and its Telegram integration
+      const agent = await storage.getAgent(agentId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      
+      const integrations = await storage.getIntegrations(agentId);
+      const telegramIntegration = integrations.find(i => i.type === "telegram" && i.isEnabled);
+      const config = (telegramIntegration?.config || {}) as Record<string, string>;
+      const botToken = config.botToken || config.apiToken;
+      
+      if (!telegramIntegration || !botToken) {
+        console.log("Telegram integration not configured for agent:", agentId);
+        return res.status(200).json({ ok: true }); // Return 200 to prevent Telegram from retrying
+      }
+      
+      // Handle incoming message
+      const message = update.message;
+      if (!message || !message.text) {
+        return res.status(200).json({ ok: true });
+      }
+      
+      const chatId = message.chat.id;
+      const userText = message.text;
+      
+      // Handle /start command
+      if (userText === "/start") {
+        const greeting = agent.greetingMessage || `Halo! Saya ${agent.name}. ${agent.tagline || "Ada yang bisa saya bantu?"}`;
+        await sendTelegramMessage(botToken, chatId, greeting);
+        return res.status(200).json({ ok: true });
+      }
+      
+      // Generate AI response
+      const aiResponse = await generateAIResponse(agentId, userText);
+      
+      // Send response to Telegram
+      await sendTelegramMessage(botToken, chatId, aiResponse);
+      
+      // Log the interaction
+      await storage.createMessage({
+        agentId,
+        role: "user",
+        content: userText,
+        reasoning: "",
+        sources: [],
+      });
+      await storage.createMessage({
+        agentId,
+        role: "assistant", 
+        content: aiResponse,
+        reasoning: "",
+        sources: [],
+      });
+      
+      res.status(200).json({ ok: true });
+    } catch (error) {
+      console.error("Telegram webhook error:", error);
+      res.status(200).json({ ok: true }); // Return 200 to prevent retries
+    }
+  });
+  
+  // Helper function to send Telegram message
+  async function sendTelegramMessage(botToken: string, chatId: number, text: string): Promise<void> {
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: text,
+        parse_mode: "Markdown",
+      }),
+    });
+  }
+  
+  // Setup Telegram webhook (call this to register webhook URL with Telegram)
+  app.post("/api/telegram/setup-webhook/:agentId", async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      
+      const integrations = await storage.getIntegrations(agentId);
+      const telegramIntegration = integrations.find(i => i.type === "telegram");
+      const telegramConfig = (telegramIntegration?.config || {}) as Record<string, string>;
+      const botToken = telegramConfig.botToken || telegramConfig.apiToken;
+      
+      if (!telegramIntegration || !botToken) {
+        return res.status(400).json({ error: "Telegram Bot Token belum dikonfigurasi" });
+      }
+      
+      // Get the webhook URL
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : req.protocol + "://" + req.get("host");
+      const webhookUrl = `${baseUrl}/api/webhook/telegram/${agentId}`;
+      
+      // Set webhook with Telegram
+      const telegramUrl = `https://api.telegram.org/bot${botToken}/setWebhook`;
+      const response = await fetch(telegramUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: webhookUrl }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.ok) {
+        // Update integration config with webhook URL
+        await storage.updateIntegration(telegramIntegration.id, {
+          config: { ...telegramConfig, webhookUrl },
+        });
+        
+        res.json({ 
+          success: true, 
+          webhookUrl,
+          message: "Telegram webhook berhasil diatur!" 
+        });
+      } else {
+        res.status(400).json({ 
+          error: "Gagal mengatur webhook Telegram",
+          details: result 
+        });
+      }
+    } catch (error) {
+      console.error("Telegram webhook setup error:", error);
+      res.status(500).json({ error: "Gagal mengatur webhook Telegram" });
+    }
+  });
+
+  // ==================== WhatsApp Webhook (via Multichat/generic provider) ====================
+  
+  // WhatsApp webhook endpoint
+  app.post("/api/webhook/whatsapp/:agentId", async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      const payload = req.body;
+      
+      console.log("WhatsApp webhook received:", JSON.stringify(payload, null, 2));
+      
+      // Get agent and its WhatsApp integration
+      const agent = await storage.getAgent(agentId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      
+      const integrations = await storage.getIntegrations(agentId);
+      const whatsappIntegration = integrations.find(i => i.type === "whatsapp" && i.isEnabled);
+      const waConfig = (whatsappIntegration?.config || {}) as Record<string, string>;
+      const waApiToken = waConfig.apiToken || waConfig.token;
+      
+      if (!whatsappIntegration || !waApiToken) {
+        console.log("WhatsApp integration not configured for agent:", agentId);
+        return res.status(200).json({ status: "ok" });
+      }
+      
+      // Handle different webhook formats (Multichat, WhatsApp Cloud API, etc.)
+      let phoneNumber: string | undefined;
+      let messageText: string | undefined;
+      let messageId: string | undefined;
+      
+      // Multichat format
+      if (payload.from && payload.text) {
+        phoneNumber = payload.from;
+        messageText = payload.text;
+        messageId = payload.id;
+      }
+      // WhatsApp Cloud API format
+      else if (payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0]) {
+        const msg = payload.entry[0].changes[0].value.messages[0];
+        phoneNumber = msg.from;
+        messageText = msg.text?.body;
+        messageId = msg.id;
+      }
+      // Generic format
+      else if (payload.message && payload.sender) {
+        phoneNumber = payload.sender;
+        messageText = payload.message;
+        messageId = payload.messageId;
+      }
+      
+      if (!phoneNumber || !messageText) {
+        console.log("No message found in webhook payload");
+        return res.status(200).json({ status: "ok" });
+      }
+      
+      // Generate AI response
+      const aiResponse = await generateAIResponse(agentId, messageText);
+      
+      // Send response via Multichat API or configured send URL
+      const sendUrl = waConfig.sendUrl || waConfig.webhookUrl;
+      if (sendUrl) {
+        try {
+          await fetch(sendUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${waApiToken}`,
+            },
+            body: JSON.stringify({
+              to: phoneNumber,
+              text: aiResponse,
+              replyTo: messageId,
+            }),
+          });
+        } catch (sendError) {
+          console.error("Failed to send WhatsApp reply:", sendError);
+        }
+      }
+      
+      // Log the interaction
+      await storage.createMessage({
+        agentId,
+        role: "user",
+        content: messageText,
+        reasoning: "",
+        sources: [],
+      });
+      await storage.createMessage({
+        agentId,
+        role: "assistant",
+        content: aiResponse,
+        reasoning: "",
+        sources: [],
+      });
+      
+      res.status(200).json({ status: "ok" });
+    } catch (error) {
+      console.error("WhatsApp webhook error:", error);
+      res.status(200).json({ status: "ok" });
+    }
+  });
+  
+  // Webhook verification for WhatsApp Cloud API
+  app.get("/api/webhook/whatsapp/:agentId", async (req, res) => {
+    const mode = req.query["hub.mode"];
+    const token = req.query["hub.verify_token"];
+    const challenge = req.query["hub.challenge"];
+    
+    // Get agent's WhatsApp integration to verify token
+    const { agentId } = req.params;
+    const integrations = await storage.getIntegrations(agentId);
+    const whatsappIntegration = integrations.find(i => i.type === "whatsapp");
+    const waVerifyConfig = (whatsappIntegration?.config || {}) as Record<string, string>;
+    const verifyToken = waVerifyConfig.verifyToken || waVerifyConfig.accessToken;
+    
+    // Use configured verify token for webhook verification
+    if (mode === "subscribe" && token === verifyToken) {
+      console.log("WhatsApp webhook verified for agent:", agentId);
+      res.status(200).send(challenge);
+    } else {
+      res.sendStatus(403);
+    }
+  });
+
   return httpServer;
 }
