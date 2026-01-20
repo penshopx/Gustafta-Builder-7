@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff, Camera, Upload } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateAgent } from "@/hooks/use-agents";
 import { getCategoryById, getSubcategoryLabel } from "@/lib/categories";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { Agent } from "@shared/schema";
 
 interface PersonaPanelProps {
@@ -48,6 +49,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
   const [formData, setFormData] = useState({
     name: agent.name,
     description: agent.description,
+    avatar: agent.avatar || "",
     tagline: agent.tagline,
     philosophy: agent.philosophy,
     offTopicHandling: agent.offTopicHandling,
@@ -69,11 +71,14 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
   const [newStarter, setNewStarter] = useState("");
   const [newDomain, setNewDomain] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setFormData({
       name: agent.name,
       description: agent.description,
+      avatar: agent.avatar || "",
       tagline: agent.tagline,
       philosophy: agent.philosophy,
       offTopicHandling: agent.offTopicHandling,
@@ -92,6 +97,57 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       allowedDomains: agent.allowedDomains || [],
     });
   }, [agent]);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Error",
+        description: "Hanya file gambar yang diperbolehkan",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Ukuran file maksimal 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
+      
+      const res = await fetch("/api/knowledge-base/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+      
+      if (!res.ok) throw new Error("Failed to upload avatar");
+      const result = await res.json();
+      
+      setFormData({ ...formData, avatar: result.fileUrl });
+      toast({
+        title: "Berhasil",
+        description: "Avatar berhasil diupload. Klik Save Changes untuk menyimpan.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal mengupload avatar",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleSave = () => {
     updateAgent.mutate(
@@ -192,6 +248,58 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           <CardDescription>Basic information about your chatbot</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Avatar Upload */}
+          <div className="flex items-start gap-4">
+            <div className="relative">
+              <Avatar className="h-20 w-20 border-2 border-primary/20">
+                <AvatarImage src={formData.avatar} alt={formData.name} />
+                <AvatarFallback className="text-xl bg-primary/10">
+                  {formData.name ? formData.name.substring(0, 2).toUpperCase() : <Bot className="h-8 w-8 text-primary" />}
+                </AvatarFallback>
+              </Avatar>
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                className="absolute bottom-0 right-0 h-7 w-7 rounded-full"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+                data-testid="button-upload-avatar"
+              >
+                {isUploadingAvatar ? (
+                  <Upload className="h-3.5 w-3.5 animate-pulse" />
+                ) : (
+                  <Camera className="h-3.5 w-3.5" />
+                )}
+              </Button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+                data-testid="input-avatar-file"
+              />
+            </div>
+            <div className="flex-1 space-y-1">
+              <Label className="text-sm">Avatar Chatbot</Label>
+              <p className="text-xs text-muted-foreground">
+                Klik ikon kamera untuk upload gambar avatar. Format: JPG, PNG, GIF, WebP. Maksimal 5MB.
+              </p>
+              {formData.avatar && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive h-7 px-2"
+                  onClick={() => setFormData({ ...formData, avatar: "" })}
+                >
+                  <X className="w-3 h-3 mr-1" />
+                  Hapus Avatar
+                </Button>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm">Chatbot Name</Label>
