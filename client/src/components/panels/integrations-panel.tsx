@@ -535,42 +535,53 @@ Response:
             {selectedIntegration?.type === "whatsapp" && (
               <>
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-sm mb-2">
-                  <p className="font-medium text-foreground mb-2">Langkah Menghubungkan WhatsApp:</p>
+                  <p className="font-medium text-foreground mb-2">Hubungkan WhatsApp Official:</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                    <li>Daftar di layanan WhatsApp API (Multichat, WATI, dll)</li>
-                    <li>Dapatkan API Token dari dashboard layanan</li>
-                    <li>Salin Webhook URL di bawah ke dashboard layanan</li>
-                    <li>Masukkan API Token dan simpan konfigurasi</li>
+                    <li>Daftar di layanan WhatsApp API (Botika, Multichat, WATI, dll)</li>
+                    <li>Masukkan nomor telepon WhatsApp Business Anda</li>
+                    <li>Dapatkan Token dari dashboard layanan</li>
+                    <li>Salin Webhook URL ke dashboard layanan</li>
                   </ol>
                 </div>
                 <div className="space-y-2">
-                  <Label>Webhook URL (salin ke layanan WhatsApp)</Label>
-                  <div className="bg-muted rounded-lg p-3 font-mono text-xs break-all">
-                    {`${getBaseUrl()}/api/webhook/whatsapp/${agent.id}`}
-                  </div>
+                  <Label>Nomor Telepon WhatsApp</Label>
+                  <Input
+                    value={configData.phone || ""}
+                    onChange={(e) => setConfigData({ ...configData, phone: e.target.value })}
+                    placeholder="628123456789"
+                    data-testid="input-whatsapp-phone"
+                  />
                   <p className="text-xs text-muted-foreground">
-                    Salin URL ini dan masukkan sebagai Webhook di dashboard Multichat/layanan WhatsApp Anda
+                    Nomor WhatsApp Business Anda (dengan kode negara, tanpa +)
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label>API Token dari Layanan WhatsApp</Label>
+                  <Label>Token</Label>
                   <Input
                     type="password"
                     value={configData.apiToken || ""}
                     onChange={(e) => setConfigData({ ...configData, apiToken: e.target.value })}
-                    placeholder="Token dari dashboard Multichat/WATI/layanan lain"
+                    placeholder="Masukkan token Anda"
                     data-testid="input-whatsapp-token"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Send URL (URL untuk mengirim pesan balik)</Label>
-                  <Input
-                    value={configData.sendUrl || ""}
-                    onChange={(e) => setConfigData({ ...configData, sendUrl: e.target.value })}
-                    placeholder="https://api.multichat.co/v1/send atau URL dari layanan Anda"
-                  />
+                  <Label>Webhook URL</Label>
+                  <div className="bg-muted rounded-lg p-3 font-mono text-xs break-all flex items-center justify-between gap-2">
+                    <span>{`${getBaseUrl()}/api/webhook/whatsapp/${agent.id}`}</span>
+                    <Button 
+                      size="icon" 
+                      variant="ghost"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${getBaseUrl()}/api/webhook/whatsapp/${agent.id}`);
+                        toast({ title: "Tersalin!", description: "Webhook URL sudah disalin." });
+                      }}
+                    >
+                      <Code className="w-4 h-4" />
+                    </Button>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    URL endpoint untuk mengirim pesan balasan (dari dokumentasi layanan Anda)
+                    Salin URL ini ke dashboard layanan WhatsApp Anda
                   </p>
                 </div>
               </>
