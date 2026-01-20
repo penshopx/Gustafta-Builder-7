@@ -1108,15 +1108,25 @@ export async function registerRoutes(
   // Helper function to send Telegram message
   async function sendTelegramMessage(botToken: string, chatId: number, text: string): Promise<void> {
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-        parse_mode: "Markdown",
-      }),
-    });
+    console.log("Sending Telegram message to chat:", chatId);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: text,
+          parse_mode: "Markdown",
+        }),
+      });
+      const result = await response.json();
+      console.log("Telegram sendMessage result:", JSON.stringify(result));
+      if (!result.ok) {
+        console.error("Failed to send Telegram message:", result);
+      }
+    } catch (error) {
+      console.error("Error sending Telegram message:", error);
+    }
   }
   
   // Setup Telegram webhook (call this to register webhook URL with Telegram)
