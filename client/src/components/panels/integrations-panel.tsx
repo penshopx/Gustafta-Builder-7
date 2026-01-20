@@ -608,13 +608,20 @@ Response:
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Webhook URL (otomatis)</Label>
-                  <div className="bg-muted rounded-lg p-3 font-mono text-xs break-all">
-                    {`${getBaseUrl()}/api/webhook/telegram/${agent.id}`}
+                  <Label>Webhook URL</Label>
+                  <div className="bg-muted rounded-lg p-3 font-mono text-xs break-all flex items-center justify-between gap-2">
+                    <span>{`${getBaseUrl()}/api/webhook/telegram/${agent.id}`}</span>
+                    <Button 
+                      size="icon" 
+                      variant="ghost"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${getBaseUrl()}/api/webhook/telegram/${agent.id}`);
+                        toast({ title: "Tersalin!", description: "Webhook URL sudah disalin." });
+                      }}
+                    >
+                      <Code className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    URL ini akan didaftarkan otomatis ke Telegram saat Anda klik tombol "Hubungkan"
-                  </p>
                 </div>
                 <Button 
                   onClick={async () => {
@@ -638,6 +645,9 @@ Response:
                     </>
                   )}
                 </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Klik tombol di atas untuk mendaftarkan atau memperbarui webhook
+                </p>
               </>
             )}
             {selectedIntegration?.type === "discord" && (

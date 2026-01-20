@@ -1133,11 +1133,12 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Telegram Bot Token belum dikonfigurasi" });
       }
       
-      // Get the webhook URL
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-        : req.protocol + "://" + req.get("host");
+      // Get the webhook URL - prefer production URL from request host
+      const host = req.get("host");
+      const baseUrl = host ? `https://${host}` : `https://${process.env.REPLIT_DEV_DOMAIN}`;
       const webhookUrl = `${baseUrl}/api/webhook/telegram/${agentId}`;
+      
+      console.log("Setting Telegram webhook to:", webhookUrl);
       
       // Set webhook with Telegram
       const telegramUrl = `https://api.telegram.org/bot${botToken}/setWebhook`;
@@ -1169,6 +1170,32 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Telegram webhook setup error:", error);
       res.status(500).json({ error: "Gagal mengatur webhook Telegram" });
+    }
+  });
+
+  // Check Telegram webhook status
+  app.get("/api/telegram/webhook-info/:agentId", async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      
+      const integrations = await storage.getIntegrations(agentId);
+      const telegramIntegration = integrations.find(i => i.type === "telegram");
+      const telegramConfig = (telegramIntegration?.config || {}) as Record<string, string>;
+      const botToken = telegramConfig.botToken || telegramConfig.apiToken;
+      
+      if (!telegramIntegration || !botToken) {
+        return res.status(400).json({ error: "Telegram Bot Token belum dikonfigurasi" });
+      }
+      
+      // Get webhook info from Telegram
+      const telegramUrl = `https://api.telegram.org/bot${botToken}/getWebhookInfo`;
+      const response = await fetch(telegramUrl);
+      const result = await response.json();
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Telegram webhook info error:", error);
+      res.status(500).json({ error: "Gagal mendapatkan info webhook" });
     }
   });
 
