@@ -3,7 +3,7 @@ import { Send, Bot, User, MessageCircle, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMessages, useSendMessage } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
 import type { Agent, Message } from "@shared/schema";
@@ -36,7 +36,7 @@ export function ChatPopup({ agent }: ChatPopupProps) {
     if (!input.trim()) return;
 
     sendMessage.mutate(
-      { agentId: agent.id, role: "user", content: input.trim() },
+      { agentId: agent.id, role: "user", content: input.trim(), reasoning: "", sources: [] },
       {
         onSuccess: () => {
           setInput("");
@@ -72,9 +72,14 @@ export function ChatPopup({ agent }: ChatPopupProps) {
         {/* Header */}
         <div className="bg-primary p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <Avatar className="w-10 h-10 border-2 border-primary-foreground/30">
+              {agent.avatar ? (
+                <AvatarImage src={agent.avatar} alt={agent.name} />
+              ) : null}
+              <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
+                {agent.name ? agent.name.substring(0, 2).toUpperCase() : <Bot className="w-5 h-5" />}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <h3 className="text-sm font-semibold text-primary-foreground">
                 {agent.name}
@@ -126,7 +131,7 @@ export function ChatPopup({ agent }: ChatPopupProps) {
               </div>
             ) : (
               recentMessages.map((message) => (
-                <ChatBubble key={message.id} message={message} agentName={agent.name} />
+                <ChatBubble key={message.id} message={message} agentName={agent.name} agentAvatar={agent.avatar} />
               ))
             )}
 
@@ -210,19 +215,22 @@ export function ChatPopup({ agent }: ChatPopupProps) {
   );
 }
 
-function ChatBubble({ message, agentName }: { message: Message; agentName: string }) {
+function ChatBubble({ message, agentName, agentAvatar }: { message: Message; agentName: string; agentAvatar?: string }) {
   const isUser = message.role === "user";
 
   return (
     <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
       <Avatar className="w-8 h-8 shrink-0">
+        {!isUser && agentAvatar ? (
+          <AvatarImage src={agentAvatar} alt={agentName} />
+        ) : null}
         <AvatarFallback
           className={cn(
             "text-xs",
             isUser ? "bg-secondary" : "bg-primary/10 text-primary"
           )}
         >
-          {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+          {isUser ? <User className="w-4 h-4" /> : (agentName ? agentName.substring(0, 2).toUpperCase() : <Bot className="w-4 h-4" />)}
         </AvatarFallback>
       </Avatar>
       <div className="flex flex-col gap-1 max-w-[75%]">
