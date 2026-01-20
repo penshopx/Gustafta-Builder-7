@@ -284,7 +284,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             <div className="flex-1 space-y-1">
               <Label className="text-sm">Avatar Chatbot</Label>
               <p className="text-xs text-muted-foreground">
-                Klik ikon kamera untuk upload gambar avatar. Format: JPG, PNG, GIF, WebP. Maksimal 5MB.
+                Klik ikon kamera untuk upload gambar avatar. Format: JPG, PNG, GIF, WebP. Maksimal 5MB. Rekomendasi ukuran: 200x200 hingga 500x500 pixel (rasio 1:1).
               </p>
               {formData.avatar && (
                 <Button

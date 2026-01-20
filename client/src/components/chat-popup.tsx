@@ -73,8 +73,8 @@ export function ChatPopup({ agent }: ChatPopupProps) {
         <div className="bg-primary p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10 border-2 border-primary-foreground/30">
-              {agent.avatar ? (
-                <AvatarImage src={agent.avatar} alt={agent.name} />
+              {agent.avatar && agent.avatar.trim() !== "" ? (
+                <AvatarImage src={agent.avatar} alt={agent.name} className="object-cover" />
               ) : null}
               <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
                 {agent.name ? agent.name.substring(0, 2).toUpperCase() : <Bot className="w-5 h-5" />}
@@ -221,8 +221,8 @@ function ChatBubble({ message, agentName, agentAvatar }: { message: Message; age
   return (
     <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
       <Avatar className="w-8 h-8 shrink-0">
-        {!isUser && agentAvatar ? (
-          <AvatarImage src={agentAvatar} alt={agentName} />
+        {!isUser && agentAvatar && agentAvatar.trim() !== "" ? (
+          <AvatarImage src={agentAvatar} alt={agentName} className="object-cover" />
         ) : null}
         <AvatarFallback
           className={cn(
