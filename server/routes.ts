@@ -1297,5 +1297,108 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Generic Webhook/Chat API (Botika-style format) ====================
+  
+  // Generic chat webhook - accepts multiple formats including Botika style
+  app.post("/api/webhook/chat/:agentId", async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      const payload = req.body;
+      const authHeader = req.headers.authorization;
+      
+      console.log("Chat webhook received:", JSON.stringify(payload, null, 2));
+      
+      // Get agent
+      const agent = await storage.getAgent(agentId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      
+      // Verify access token - require it if agent has one set
+      if (agent.accessToken) {
+        if (!authHeader) {
+          return res.status(401).json({ error: "Authorization header required" });
+        }
+        const token = authHeader.replace("Bearer ", "");
+        if (token !== agent.accessToken) {
+          return res.status(401).json({ error: "Invalid access token" });
+        }
+      }
+      
+      let senderId: string | undefined;
+      let messageText: string | undefined;
+      let messageId: string | undefined;
+      
+      // Botika format: { app: { id }, data: { sender: { id }, message: [{ type, value }] } }
+      if (payload.app?.id && payload.data?.message?.[0]) {
+        senderId = payload.data.sender?.id;
+        const firstMessage = payload.data.message[0];
+        messageText = firstMessage.value || firstMessage.text;
+        messageId = firstMessage.id;
+      }
+      // Simple format: { sender_id, message }
+      else if (payload.sender_id && payload.message) {
+        senderId = payload.sender_id;
+        messageText = payload.message;
+        messageId = payload.message_id;
+      }
+      // Ultra simple: { message }
+      else if (payload.message) {
+        senderId = payload.sender || payload.user_id || "anonymous";
+        messageText = payload.message;
+      }
+      
+      if (!messageText) {
+        return res.status(400).json({ error: "No message provided" });
+      }
+      
+      // Generate AI response
+      const aiResponse = await generateAIResponse(agentId, messageText);
+      
+      // Log the interaction
+      await storage.createMessage({
+        agentId,
+        role: "user",
+        content: messageText,
+        reasoning: "",
+        sources: [],
+      });
+      await storage.createMessage({
+        agentId,
+        role: "assistant",
+        content: aiResponse,
+        reasoning: "",
+        sources: [],
+      });
+      
+      // Return Botika-style response
+      const timestamp = Date.now();
+      res.json({
+        app: {
+          id: agentId,
+        },
+        time: timestamp,
+        data: {
+          recipient: {
+            id: senderId || "user",
+          },
+          message: [
+            {
+              time: String(timestamp),
+              type: "text",
+              value: aiResponse,
+            },
+          ],
+        },
+        // Also include simple format for easy parsing
+        response: aiResponse,
+        agent_id: agentId,
+      });
+    } catch (error) {
+      console.error("Chat webhook error:", error);
+      res.status(500).json({ error: "Failed to process message" });
+    }
+  });
+
   return httpServer;
 }

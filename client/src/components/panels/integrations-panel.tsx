@@ -276,53 +276,241 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
       {getIntegration("web")?.isEnabled && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Web Widget Embed Code</CardTitle>
-            <CardDescription>Copy this code to embed the chatbot on your website</CardDescription>
+            <CardTitle className="text-lg">Web Widget / WordPress Embed</CardTitle>
+            <CardDescription>Tambahkan chatbot ke website atau WordPress Anda</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="bg-muted rounded-lg p-4 font-mono text-sm overflow-x-auto">
-              <code className="text-muted-foreground">
-                {`<script src="https://gustafta.com/widget.js" data-agent-id="${agent.id}"></script>`}
-              </code>
+          <CardContent className="space-y-4">
+            <div className="p-3 rounded-lg bg-primary/10 text-sm">
+              <p className="font-medium text-foreground mb-2">Cara Memasang di WordPress:</p>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                <li>Masuk ke Dashboard WordPress Anda</li>
+                <li>Pergi ke Appearance → Theme Editor atau gunakan plugin "Insert Headers and Footers"</li>
+                <li>Tempel kode di bawah sebelum tag &lt;/body&gt;</li>
+                <li>Simpan perubahan</li>
+              </ol>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  `<script src="https://gustafta.com/widget.js" data-agent-id="${agent.id}"></script>`
-                );
-                toast({ title: "Copied!", description: "Embed code copied to clipboard." });
-              }}
-              data-testid="button-copy-embed"
-            >
-              Copy to Clipboard
-            </Button>
+            <div className="space-y-2">
+              <Label>Embed Code (tempel di website Anda)</Label>
+              <div className="bg-muted rounded-lg p-4 font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all">
+{`<!-- Gustafta Chat Widget -->
+<script>
+  (function() {
+    var w = document.createElement('script');
+    w.type = 'text/javascript';
+    w.async = true;
+    w.src = '${getBaseUrl()}/widget.js';
+    w.setAttribute('data-agent-id', '${agent.id}');
+    document.body.appendChild(w);
+  })();
+</script>`}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Widget ini akan bekerja jika agent di-set sebagai "Public" di panel Persona
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Atau gunakan iframe sederhana:</Label>
+              <div className="bg-muted rounded-lg p-4 font-mono text-xs overflow-x-auto break-all">
+{`<iframe 
+  src="${getBaseUrl()}/embed/${agent.id}" 
+  width="400" 
+  height="600" 
+  frameborder="0">
+</iframe>`}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const code = `<!-- Gustafta Chat Widget -->
+<script>
+  (function() {
+    var w = document.createElement('script');
+    w.type = 'text/javascript';
+    w.async = true;
+    w.src = '${getBaseUrl()}/widget.js';
+    w.setAttribute('data-agent-id', '${agent.id}');
+    document.body.appendChild(w);
+  })();
+</script>`;
+                  navigator.clipboard.writeText(code);
+                  toast({ title: "Tersalin!", description: "Kode embed sudah disalin." });
+                }}
+                data-testid="button-copy-embed"
+              >
+                Salin Kode Widget
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const code = `<iframe src="${getBaseUrl()}/embed/${agent.id}" width="400" height="600" frameborder="0"></iframe>`;
+                  navigator.clipboard.writeText(code);
+                  toast({ title: "Tersalin!", description: "Kode iframe sudah disalin." });
+                }}
+                data-testid="button-copy-iframe"
+              >
+                Salin Kode iFrame
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* API Credentials */}
+      {/* Webhook/API Integration - Like Botika */}
       {getIntegration("api")?.isEnabled && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">API Credentials</CardTitle>
-            <CardDescription>Use these credentials to access the REST API</CardDescription>
+            <CardTitle className="text-lg">Webhook/API Integration</CardTitle>
+            <CardDescription>Gunakan webhook untuk menghubungkan aplikasi Anda ke Gustafta chatbot</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-sm">
+              <p className="text-muted-foreground">
+                Webhook integration memungkinkan Anda menghubungkan aplikasi ke Gustafta chatbot secara otomatis dan real-time.
+              </p>
+            </div>
+            
             <div className="space-y-2">
-              <Label>API Endpoint</Label>
-              <div className="bg-muted rounded-lg p-3 font-mono text-sm">
-                https://api.gustafta.com/v1/agents/{agent.id}/chat
+              <Label>Unique ID</Label>
+              <div className="bg-muted rounded-lg p-3 font-mono text-sm flex justify-between items-center">
+                <span className="break-all">{agent.id}</span>
+                <Button size="icon" variant="ghost" onClick={() => {
+                  navigator.clipboard.writeText(agent.id);
+                  toast({ title: "Tersalin!", description: "Unique ID sudah disalin." });
+                }}>
+                  <Code className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">ID unik untuk webhook Anda</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Access Token</Label>
+              <div className="bg-muted rounded-lg p-3 font-mono text-sm flex justify-between items-center">
+                <span className="break-all">{agent.accessToken || "Belum digenerate"}</span>
+                <Button size="icon" variant="ghost" onClick={() => {
+                  if (agent.accessToken) {
+                    navigator.clipboard.writeText(agent.accessToken);
+                    toast({ title: "Tersalin!", description: "Access Token sudah disalin." });
+                  }
+                }}>
+                  <Code className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Token untuk autentikasi API</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Endpoint</Label>
+              <div className="bg-muted rounded-lg p-3 font-mono text-xs flex justify-between items-center">
+                <span className="break-all">{`${getBaseUrl()}/api/webhook/chat/${agent.id}`}</span>
+                <Button size="icon" variant="ghost" onClick={() => {
+                  navigator.clipboard.writeText(`${getBaseUrl()}/api/webhook/chat/${agent.id}`);
+                  toast({ title: "Tersalin!", description: "Endpoint sudah disalin." });
+                }}>
+                  <Code className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">URL endpoint Gustafta untuk menerima pesan</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Header (untuk autentikasi)</Label>
+              <div className="bg-muted rounded-lg p-4 font-mono text-xs overflow-x-auto">
+{`{
+  "Authorization": "Bearer ${agent.accessToken || "YOUR_ACCESS_TOKEN"}",
+  "Content-Type": "application/json"
+}`}
               </div>
             </div>
+
             <div className="space-y-2">
-              <Label>Agent ID</Label>
-              <div className="bg-muted rounded-lg p-3 font-mono text-sm">
-                {agent.id}
+              <Label>Contoh JSON Request</Label>
+              <div className="bg-muted rounded-lg p-4 font-mono text-xs overflow-x-auto whitespace-pre">
+{`{
+  "app": {
+    "id": "${agent.id}"
+  },
+  "time": 1768945705571,
+  "data": {
+    "sender": {
+      "id": "628123456789"
+    },
+    "message": [
+      {
+        "id": "msg_unique_id",
+        "time": 1768945705571,
+        "type": "text",
+        "value": "Hello World!"
+      }
+    ]
+  }
+}`}
               </div>
             </div>
+
+            <div className="space-y-2">
+              <Label>Contoh JSON Response</Label>
+              <div className="bg-muted rounded-lg p-4 font-mono text-xs overflow-x-auto whitespace-pre">
+{`{
+  "app": {
+    "id": "${agent.id}"
+  },
+  "time": 1768945705571,
+  "data": {
+    "recipient": {
+      "id": "628123456789"
+    },
+    "message": [
+      {
+        "time": "1768945705571",
+        "type": "text",
+        "value": "Hello! Saya adalah AI assistant."
+      }
+    ]
+  }
+}`}
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const docs = `Gustafta Webhook/API Integration
+
+Unique ID: ${agent.id}
+Access Token: ${agent.accessToken || "YOUR_ACCESS_TOKEN"}
+Endpoint: ${getBaseUrl()}/api/webhook/chat/${agent.id}
+
+Header:
+{
+  "Authorization": "Bearer ${agent.accessToken || "YOUR_ACCESS_TOKEN"}",
+  "Content-Type": "application/json"
+}
+
+Example Request:
+POST ${getBaseUrl()}/api/webhook/chat/${agent.id}
+{
+  "sender_id": "user123",
+  "message": "Hello!"
+}
+
+Response:
+{
+  "response": "AI response here",
+  "agent_id": "${agent.id}"
+}`;
+                navigator.clipboard.writeText(docs);
+                toast({ title: "Tersalin!", description: "Dokumentasi API sudah disalin." });
+              }}
+              data-testid="button-copy-api-docs"
+            >
+              Salin Dokumentasi API
+            </Button>
           </CardContent>
         </Card>
       )}
