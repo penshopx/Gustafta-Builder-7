@@ -1235,13 +1235,20 @@ export async function registerRoutes(
         return res.status(200).json({ status: "ok" });
       }
       
-      // Handle different webhook formats (Multichat, WhatsApp Cloud API, etc.)
+      // Handle different webhook formats (Multichat, WhatsApp Cloud API, Kirimi.id, etc.)
       let phoneNumber: string | undefined;
       let messageText: string | undefined;
       let messageId: string | undefined;
       
-      // Multichat format
-      if (payload.from && payload.text) {
+      // Kirimi.id format: { event: "message.received", from: "628...", message: "text" }
+      if (payload.event === "message.received" && payload.from && payload.message) {
+        phoneNumber = payload.from;
+        messageText = payload.message;
+        messageId = payload.msgId || payload.messageId;
+        console.log("Kirimi.id format detected");
+      }
+      // Multichat format: { from: "628...", text: "message" }
+      else if (payload.from && payload.text) {
         phoneNumber = payload.from;
         messageText = payload.text;
         messageId = payload.id;
@@ -1253,11 +1260,17 @@ export async function registerRoutes(
         messageText = msg.text?.body;
         messageId = msg.id;
       }
-      // Generic format
+      // Generic format: { sender: "628...", message: "text" }
       else if (payload.message && payload.sender) {
         phoneNumber = payload.sender;
         messageText = payload.message;
         messageId = payload.messageId;
+      }
+      // Simple format: { from: "628...", message: "text" }
+      else if (payload.from && payload.message) {
+        phoneNumber = payload.from;
+        messageText = payload.message;
+        messageId = payload.msgId || payload.id;
       }
       
       if (!phoneNumber || !messageText) {

@@ -537,11 +537,14 @@ Response:
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-sm mb-2">
                   <p className="font-medium text-foreground mb-2">Hubungkan WhatsApp Official:</p>
                   <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                    <li>Daftar di layanan WhatsApp API (Botika, Multichat, WATI, dll)</li>
+                    <li>Daftar di layanan WhatsApp API (Kirimi.id, Botika, Multichat, WATI, dll)</li>
                     <li>Masukkan nomor telepon WhatsApp Business Anda</li>
                     <li>Dapatkan Token dari dashboard layanan</li>
                     <li>Salin Webhook URL ke dashboard layanan</li>
                   </ol>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Mendukung: Kirimi.id, Botika, Multichat, WhatsApp Cloud API, dan layanan lainnya
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label>Nomor Telepon WhatsApp</Label>
