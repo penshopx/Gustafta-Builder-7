@@ -824,7 +824,7 @@ export class DatabaseStorage implements IStorage {
     return this.mapSubscriptionRow(result[0]);
   }
 
-  async getSubscriptionByScalevOrderId(mayarOrderId: string): Promise<Subscription | undefined> {
+  async getSubscriptionByMayarOrderId(mayarOrderId: string): Promise<Subscription | undefined> {
     const result = await db.select().from(subscriptionsTable)
       .where(eq(subscriptionsTable.mayarOrderId, mayarOrderId))
       .limit(1);

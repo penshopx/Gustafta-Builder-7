@@ -902,7 +902,7 @@ export async function registerRoutes(
       // Handle transaction completed event
       if (payload.event === "transaction.completed" || payload.status === "paid") {
         // Find subscription by payment ID
-        const subscription = await storage.getSubscriptionByScalevOrderId(payload.id);
+        const subscription = await storage.getSubscriptionByMayarOrderId(payload.id);
         
         if (subscription) {
           const planDetails = subscriptionPlans[subscription.plan as SubscriptionPlanKey];
@@ -914,11 +914,9 @@ export async function registerRoutes(
             startDate: now.toISOString(),
             endDate: endDate.toISOString(),
           });
-          
-          console.log(`Subscription ${subscription.id} activated via Mayar payment ${payload.id}`);
         }
       } else if (payload.status === "expired" || payload.status === "cancelled" || payload.status === "failed") {
-        const subscription = await storage.getSubscriptionByScalevOrderId(payload.id);
+        const subscription = await storage.getSubscriptionByMayarOrderId(payload.id);
         
         if (subscription) {
           await storage.updateSubscription(subscription.id, {

@@ -91,7 +91,7 @@ export interface IStorage {
   // Subscription methods
   createSubscription(subscription: InsertSubscription): Promise<Subscription>;
   getSubscription(id: string): Promise<Subscription | undefined>;
-  getSubscriptionByScalevOrderId(scalevOrderId: string): Promise<Subscription | undefined>;
+  getSubscriptionByMayarOrderId(mayarOrderId: string): Promise<Subscription | undefined>;
   getActiveSubscription(userId: string): Promise<Subscription | undefined>;
   updateSubscription(id: string, data: Partial<InsertSubscription>): Promise<Subscription | undefined>;
 }
@@ -801,7 +801,7 @@ export class MemStorage implements IStorage {
     return this.subscriptions.get(id);
   }
 
-  async getSubscriptionByScalevOrderId(mayarOrderId: string): Promise<Subscription | undefined> {
+  async getSubscriptionByMayarOrderId(mayarOrderId: string): Promise<Subscription | undefined> {
     return Array.from(this.subscriptions.values()).find(
       (sub) => sub.mayarOrderId === mayarOrderId
     );
