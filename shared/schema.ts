@@ -89,6 +89,14 @@ export const agents = pgTable("agents", {
   responseFormat: text("response_format").default("conversational"),
   avoidTopics: jsonb("avoid_topics").default([]),
   keyPhrases: jsonb("key_phrases").default([]),
+  // Widget Customization
+  widgetColor: text("widget_color").default("#6366f1"),
+  widgetPosition: text("widget_position").default("bottom-right"),
+  widgetSize: text("widget_size").default("medium"),
+  widgetBorderRadius: text("widget_border_radius").default("rounded"),
+  widgetShowBranding: boolean("widget_show_branding").default(true),
+  widgetWelcomeMessage: text("widget_welcome_message").default(""),
+  widgetButtonIcon: text("widget_button_icon").default("chat"),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -277,6 +285,14 @@ export const insertAgentSchema = z.object({
   responseFormat: z.string().optional().default("conversational"),
   avoidTopics: z.array(z.string()).optional().default([]),
   keyPhrases: z.array(z.string()).optional().default([]),
+  // Widget Customization
+  widgetColor: z.string().optional().default("#6366f1"),
+  widgetPosition: z.enum(["bottom-right", "bottom-left", "top-right", "top-left"]).optional().default("bottom-right"),
+  widgetSize: z.enum(["small", "medium", "large"]).optional().default("medium"),
+  widgetBorderRadius: z.enum(["rounded", "square", "pill"]).optional().default("rounded"),
+  widgetShowBranding: z.boolean().optional().default(true),
+  widgetWelcomeMessage: z.string().optional().default(""),
+  widgetButtonIcon: z.enum(["chat", "message", "bot", "help"]).optional().default("chat"),
 });
 
 export type InsertAgent = z.infer<typeof insertAgentSchema>;

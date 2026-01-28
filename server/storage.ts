@@ -435,6 +435,13 @@ export class MemStorage implements IStorage {
       responseFormat: insertAgent.responseFormat || "conversational",
       avoidTopics: insertAgent.avoidTopics || [],
       keyPhrases: insertAgent.keyPhrases || [],
+      widgetColor: insertAgent.widgetColor || "#6366f1",
+      widgetPosition: insertAgent.widgetPosition || "bottom-right",
+      widgetSize: insertAgent.widgetSize || "medium",
+      widgetBorderRadius: insertAgent.widgetBorderRadius || "rounded",
+      widgetShowBranding: insertAgent.widgetShowBranding ?? true,
+      widgetWelcomeMessage: insertAgent.widgetWelcomeMessage || "",
+      widgetButtonIcon: insertAgent.widgetButtonIcon || "chat",
       isActive: true,
       createdAt: new Date().toISOString(),
     };
@@ -487,6 +494,13 @@ export class MemStorage implements IStorage {
       responseFormat: data.responseFormat !== undefined ? data.responseFormat : agent.responseFormat,
       avoidTopics: data.avoidTopics !== undefined ? data.avoidTopics : agent.avoidTopics,
       keyPhrases: data.keyPhrases !== undefined ? data.keyPhrases : agent.keyPhrases,
+      widgetColor: data.widgetColor !== undefined ? data.widgetColor : agent.widgetColor,
+      widgetPosition: data.widgetPosition !== undefined ? data.widgetPosition : agent.widgetPosition,
+      widgetSize: data.widgetSize !== undefined ? data.widgetSize : agent.widgetSize,
+      widgetBorderRadius: data.widgetBorderRadius !== undefined ? data.widgetBorderRadius : agent.widgetBorderRadius,
+      widgetShowBranding: data.widgetShowBranding !== undefined ? data.widgetShowBranding : agent.widgetShowBranding,
+      widgetWelcomeMessage: data.widgetWelcomeMessage !== undefined ? data.widgetWelcomeMessage : agent.widgetWelcomeMessage,
+      widgetButtonIcon: data.widgetButtonIcon !== undefined ? data.widgetButtonIcon : agent.widgetButtonIcon,
     };
     
     this.agents.set(id, updated);

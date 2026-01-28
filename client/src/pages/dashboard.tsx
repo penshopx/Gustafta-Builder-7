@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
-  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X
+  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +21,7 @@ import { KnowledgeBasePanel } from "@/components/panels/knowledge-base-panel";
 import { IntegrationsPanel } from "@/components/panels/integrations-panel";
 import { ChatConsolePanel } from "@/components/panels/chat-console-panel";
 import { AnalyticsPanel } from "@/components/panels/analytics-panel";
+import { WidgetPanel } from "@/components/panels/widget-panel";
 import { AgenticAIPanel } from "@/components/panels/agentic-ai-panel";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
 import { CreateBigIdeaDialog } from "@/components/dialogs/create-big-idea-dialog";
@@ -35,13 +36,14 @@ import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "chat" | "analytics" | "agentic";
+type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
   { id: "agentic", label: "Agentic AI", shortLabel: "AI", icon: Sparkles },
   { id: "knowledge", label: "Knowledge Base", shortLabel: "KB", icon: BookOpen },
   { id: "integrations", label: "Integrations", shortLabel: "Integ", icon: Plug },
+  { id: "widget", label: "Widget", shortLabel: "Widget", icon: Palette },
   { id: "chat", label: "Chat Console", shortLabel: "Chat", icon: MessageSquare },
   { id: "analytics", label: "Analytics", shortLabel: "Stats", icon: BarChart3 },
 ];
@@ -128,6 +130,8 @@ export default function Dashboard() {
         return <KnowledgeBasePanel agent={activeAgent} />;
       case "integrations":
         return <IntegrationsPanel agent={activeAgent} />;
+      case "widget":
+        return <WidgetPanel agent={activeAgent} />;
       case "chat":
         return <ChatConsolePanel agent={activeAgent} />;
       case "analytics":

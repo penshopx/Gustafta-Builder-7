@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAnalyticsSummary } from "@/hooks/use-analytics";
-import { MessageSquare, Users, Zap, BarChart3, Clock, TrendingUp } from "lucide-react";
+import { MessageSquare, Users, Zap, BarChart3, Clock, TrendingUp, Lightbulb, Target, Sparkles, CheckCircle2 } from "lucide-react";
 import type { Agent } from "@shared/schema";
 
 interface AnalyticsPanelProps {
@@ -29,6 +29,59 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
   };
 
   const maxMessages = Math.max(...(analytics?.messagesLast7Days || [1]));
+  
+  const totalMessagesThisWeek = (analytics?.messagesLast7Days || []).reduce((a, b) => a + b, 0);
+  const avgMessagesPerDay = totalMessagesThisWeek > 0 ? Math.round(totalMessagesThisWeek / 7) : 0;
+  const avgMessagesPerSession = analytics?.totalSessions && analytics.totalSessions > 0 
+    ? Math.round((analytics?.totalMessages || 0) / analytics.totalSessions) 
+    : 0;
+  
+  const getInsights = () => {
+    const insights: { icon: typeof Lightbulb; text: string; type: "success" | "warning" | "info" }[] = [];
+    
+    if ((analytics?.totalMessages || 0) > 100) {
+      insights.push({ 
+        icon: Sparkles, 
+        text: "Chatbot Anda sangat aktif! Pertimbangkan untuk menambah fitur agentic AI.", 
+        type: "success" 
+      });
+    }
+    
+    if (avgMessagesPerSession > 5) {
+      insights.push({ 
+        icon: CheckCircle2, 
+        text: `Rata-rata ${avgMessagesPerSession} pesan per sesi - engagement yang bagus!`, 
+        type: "success" 
+      });
+    } else if (avgMessagesPerSession > 0 && avgMessagesPerSession < 3) {
+      insights.push({ 
+        icon: Target, 
+        text: "Tingkatkan engagement dengan conversation starters yang menarik.", 
+        type: "warning" 
+      });
+    }
+    
+    if (!agent.greetingMessage) {
+      insights.push({ 
+        icon: Lightbulb, 
+        text: "Tambahkan greeting message untuk menyambut pengunjung baru.", 
+        type: "info" 
+      });
+    }
+    
+    if (analytics?.topHours && analytics.topHours.length > 0) {
+      const peakHour = formatHour(analytics.topHours[0].hour);
+      insights.push({ 
+        icon: Clock, 
+        text: `Jam tersibuk chatbot Anda adalah ${peakHour}.`, 
+        type: "info" 
+      });
+    }
+    
+    return insights;
+  };
+
+  const insights = getInsights();
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
@@ -127,14 +180,77 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
               </CardContent>
             </Card>
 
+            {insights.length > 0 && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb className="w-5 h-5 text-primary" />
+                    <CardTitle>Quick Insights</CardTitle>
+                  </div>
+                  <CardDescription>Rekomendasi berdasarkan data Anda</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3" data-testid="list-insights">
+                    {insights.map((insight, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <div className={`p-1.5 rounded-full ${
+                          insight.type === "success" ? "bg-green-500/10" :
+                          insight.type === "warning" ? "bg-amber-500/10" : "bg-primary/10"
+                        }`}>
+                          <insight.icon className={`w-4 h-4 ${
+                            insight.type === "success" ? "text-green-500" :
+                            insight.type === "warning" ? "text-amber-500" : "text-primary"
+                          }`} />
+                        </div>
+                        <span className="text-sm text-foreground">{insight.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-primary" data-testid="text-avg-messages">
+                      {avgMessagesPerDay}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">Rata-rata pesan/hari</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-green-500" data-testid="text-avg-session">
+                      {avgMessagesPerSession}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">Pesan per sesi</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-amber-500" data-testid="text-total-week">
+                      {totalMessagesThisWeek}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">Total minggu ini</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
               <Card>
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-muted-foreground" />
-                    <CardTitle>Peak Hours</CardTitle>
+                    <CardTitle>Jam Tersibuk</CardTitle>
                   </div>
-                  <CardDescription>When your chatbot is most active</CardDescription>
+                  <CardDescription>Kapan chatbot Anda paling aktif</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {analytics?.topHours && analytics.topHours.length > 0 ? (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, ChevronLeft, ChevronRight } from "lucide-react";
+import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,24 +13,34 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateAgent } from "@/hooks/use-agents";
 import { categories, getCategoryById } from "@/lib/categories";
 import { cn } from "@/lib/utils";
+import { TemplateDialog } from "./template-dialog";
+import type { InsertAgent } from "@shared/schema";
 
 interface CreateAgentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type Step = "category" | "subcategory" | "details";
+type Step = "start" | "category" | "subcategory" | "details";
 
 export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps) {
   const { toast } = useToast();
   const createAgent = useCreateAgent();
 
-  const [step, setStep] = useState<Step>("category");
-  const [formData, setFormData] = useState({
+  const [step, setStep] = useState<Step>("start");
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    tagline: string;
+    category: string;
+    subcategory: string;
+  } & Partial<InsertAgent>>({
     name: "",
     description: "",
     tagline: "",
@@ -51,11 +61,24 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
   };
 
   const handleBack = () => {
-    if (step === "subcategory") {
+    if (step === "category") {
+      setStep("start");
+    } else if (step === "subcategory") {
       setStep("category");
     } else if (step === "details") {
       setStep("subcategory");
     }
+  };
+
+  const handleTemplateSelect = (template: Partial<InsertAgent>) => {
+    setFormData({
+      ...formData,
+      ...template,
+      name: template.name || "",
+      description: template.description || "",
+      tagline: template.tagline || "",
+    });
+    setStep("details");
   };
 
   const handleCreate = () => {
@@ -68,14 +91,15 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
       return;
     }
 
+    const agentData: Partial<InsertAgent> = {
+      ...formData,
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      tagline: formData.tagline.trim(),
+    };
+
     createAgent.mutate(
-      {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        tagline: formData.tagline.trim(),
-        category: formData.category,
-        subcategory: formData.subcategory,
-      },
+      agentData as InsertAgent,
       {
         onSuccess: () => {
           toast({
@@ -84,7 +108,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
           });
           onOpenChange(false);
           setFormData({ name: "", description: "", tagline: "", category: "", subcategory: "" });
-          setStep("category");
+          setStep("start");
         },
         onError: () => {
           toast({
@@ -99,7 +123,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
 
   const handleClose = (isOpen: boolean) => {
     if (!isOpen) {
-      setStep("category");
+      setStep("start");
       setFormData({ name: "", description: "", tagline: "", category: "", subcategory: "" });
     }
     onOpenChange(isOpen);
@@ -113,16 +137,64 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
               <Bot className="w-4 h-4 text-primary" />
             </div>
-            {step === "category" && "Select Your Department"}
+            {step === "start" && "Buat Chatbot Baru"}
+            {step === "category" && "Pilih Kategori"}
             {step === "subcategory" && selectedCategory?.label}
-            {step === "details" && "Create New Chatbot"}
+            {step === "details" && "Detail Chatbot"}
           </DialogTitle>
           <DialogDescription>
-            {step === "category" && "Choose a business category for your AI chatbot"}
-            {step === "subcategory" && "Select a specific role or profession"}
-            {step === "details" && "Configure your chatbot's basic information"}
+            {step === "start" && "Pilih cara untuk memulai pembuatan chatbot"}
+            {step === "category" && "Pilih kategori bisnis untuk chatbot Anda"}
+            {step === "subcategory" && "Pilih peran atau profesi spesifik"}
+            {step === "details" && "Konfigurasi informasi dasar chatbot Anda"}
           </DialogDescription>
         </DialogHeader>
+
+        {step === "start" && (
+          <div className="grid gap-4 sm:grid-cols-2 py-4">
+            <Card
+              className="cursor-pointer transition-all hover-elevate"
+              onClick={() => setTemplateDialogOpen(true)}
+              data-testid="card-use-template"
+            >
+              <CardHeader className="pb-2">
+                <div className="p-2 rounded-lg bg-primary/10 w-fit">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <CardTitle className="text-base mt-2">Gunakan Template</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Mulai dengan template siap pakai untuk berbagai industri seperti e-commerce, pendidikan, kesehatan, dan lainnya.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="cursor-pointer transition-all hover-elevate"
+              onClick={() => setStep("category")}
+              data-testid="card-start-scratch"
+            >
+              <CardHeader className="pb-2">
+                <div className="p-2 rounded-lg bg-muted w-fit">
+                  <PenLine className="w-5 h-5 text-foreground" />
+                </div>
+                <CardTitle className="text-base mt-2">Mulai dari Awal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Buat chatbot custom dengan memilih kategori bisnis dan mengkonfigurasi sendiri semua pengaturan.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <TemplateDialog
+          open={templateDialogOpen}
+          onOpenChange={setTemplateDialogOpen}
+          onSelectTemplate={handleTemplateSelect}
+        />
 
         {step === "category" && (
           <ScrollArea className="h-[400px] pr-4">
@@ -220,15 +292,15 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
         )}
 
         <DialogFooter className="gap-2">
-          {step !== "category" && (
+          {step !== "start" && (
             <Button variant="outline" onClick={handleBack} data-testid="button-back">
               <ChevronLeft className="w-4 h-4 mr-1" />
-              Back
+              Kembali
             </Button>
           )}
           <div className="flex-1" />
           <Button variant="ghost" onClick={() => handleClose(false)}>
-            Cancel
+            Batal
           </Button>
           {step === "details" && (
             <Button
@@ -236,7 +308,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
               disabled={createAgent.isPending}
               data-testid="button-confirm-create-agent"
             >
-              {createAgent.isPending ? "Creating..." : "Create Chatbot"}
+              {createAgent.isPending ? "Membuat..." : "Buat Chatbot"}
             </Button>
           )}
         </DialogFooter>

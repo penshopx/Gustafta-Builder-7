@@ -419,6 +419,13 @@ export class DatabaseStorage implements IStorage {
       responseFormat: insertAgent.responseFormat || "conversational",
       avoidTopics: insertAgent.avoidTopics || [],
       keyPhrases: insertAgent.keyPhrases || [],
+      widgetColor: insertAgent.widgetColor || "#6366f1",
+      widgetPosition: insertAgent.widgetPosition || "bottom-right",
+      widgetSize: insertAgent.widgetSize || "medium",
+      widgetBorderRadius: insertAgent.widgetBorderRadius || "rounded",
+      widgetShowBranding: insertAgent.widgetShowBranding ?? true,
+      widgetWelcomeMessage: insertAgent.widgetWelcomeMessage || "",
+      widgetButtonIcon: insertAgent.widgetButtonIcon || "chat",
       isActive: true,
     }).returning();
     return this.mapAgentRow(result[0]);
