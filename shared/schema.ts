@@ -343,6 +343,7 @@ export type Integration = InsertIntegration & {
 // Chat Message schema
 export const insertMessageSchema = z.object({
   agentId: z.string(),
+  sessionId: z.string().optional(),
   role: z.enum(["user", "assistant"]),
   content: z.string(),
   // Agentic AI metadata
