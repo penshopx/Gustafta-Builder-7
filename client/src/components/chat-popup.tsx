@@ -187,17 +187,17 @@ export function ChatPopup({ agent }: ChatPopupProps) {
         </div>
       </div>
 
-      {/* Floating Button with Pulse Animation */}
+      {/* Floating Button with Slow Pulse Animation */}
       <div className="relative">
         {!isOpen && (
-          <span className="absolute inset-0 w-14 h-14 rounded-full bg-primary animate-ping opacity-40" />
+          <span className="absolute inset-0 w-14 h-14 rounded-full bg-primary animate-slow-ping" />
         )}
         <Button
           onClick={() => setIsOpen(!isOpen)}
           size="icon"
           className={cn(
             "relative w-14 h-14 rounded-full shadow-lg transition-all duration-200",
-            !isOpen && "animate-pulse"
+            !isOpen && "animate-slow-pulse"
           )}
           data-testid="button-open-popup"
         >
