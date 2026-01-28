@@ -18,6 +18,18 @@ The platform enables users to:
 - Control access with auto-generated tokens, public/private toggle, and allowed domains
 - View analytics dashboard with message counts, sessions, and engagement metrics
 - Mayar.id payment gateway integration for subscription management
+- Widget customization (color, position, size, border radius, icon, branding)
+- Chatbot templates for various industries (E-commerce, Education, Healthcare, Real Estate, Restaurant, HR, General Support)
+
+### Built-in Gustafta Assistant Chatbot
+The platform includes a pre-built "Gustafta Assistant" knowledge base chatbot that:
+- Explains what Gustafta is and its features
+- Provides step-by-step guides on using the platform
+- Offers inspiration for chatbot creation across 10+ business categories
+- Lists available templates and their use cases
+- Gives tips for creating effective chatbots
+
+To seed this chatbot: POST /api/agents/seed-knowledge-base
 
 ## User Preferences
 

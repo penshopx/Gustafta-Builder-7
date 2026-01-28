@@ -15,6 +15,7 @@ import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
 import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type SubscriptionPlanKey } from "./lib/mayar";
+import { gustaftaKnowledgeBaseAgent } from "./seed-knowledge-base";
 
 // Initialize OpenAI client with Replit AI Integrations
 const openai = new OpenAI({
@@ -389,6 +390,27 @@ export async function registerRoutes(
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete agent" });
+    }
+  });
+
+  // Seed Gustafta Knowledge Base chatbot
+  app.post("/api/agents/seed-knowledge-base", async (req, res) => {
+    try {
+      const existingAgents = await storage.getAgents();
+      const alreadyExists = existingAgents.some(
+        agent => agent.name === "Gustafta Assistant"
+      );
+      
+      if (alreadyExists) {
+        const existing = existingAgents.find(a => a.name === "Gustafta Assistant");
+        return res.json({ message: "Gustafta Assistant already exists", agent: existing });
+      }
+      
+      const agent = await storage.createAgent(gustaftaKnowledgeBaseAgent);
+      res.status(201).json({ message: "Gustafta Assistant created successfully", agent });
+    } catch (error: any) {
+      console.error("Seed knowledge base error:", error);
+      res.status(500).json({ error: "Failed to seed knowledge base chatbot", details: error?.message });
     }
   });
 
