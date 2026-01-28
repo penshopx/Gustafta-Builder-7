@@ -16,6 +16,7 @@ import fs from "fs";
 import OpenAI from "openai";
 import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type SubscriptionPlanKey } from "./lib/mayar";
 import { gustaftaKnowledgeBaseAgent } from "./seed-knowledge-base";
+import { isAuthenticated } from "./replit_integrations/auth";
 
 // Initialize OpenAI client with Replit AI Integrations
 const openai = new OpenAI({
@@ -79,10 +80,10 @@ export async function registerRoutes(
     }
   });
 
-  // ==================== User Profile Routes ====================
+  // ==================== User Profile Routes (Protected) ====================
 
   // Get user profile
-  app.get("/api/profile/:userId", async (req, res) => {
+  app.get("/api/profile/:userId", isAuthenticated, async (req, res) => {
     try {
       const profile = await storage.getUserProfile(req.params.userId);
       res.json(profile || null);
@@ -92,7 +93,7 @@ export async function registerRoutes(
   });
 
   // Create or update user profile
-  app.post("/api/profile", async (req, res) => {
+  app.post("/api/profile", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertUserProfileSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -115,7 +116,7 @@ export async function registerRoutes(
   });
 
   // Upload avatar
-  app.post("/api/profile/avatar", upload.single("avatar"), async (req, res) => {
+  app.post("/api/profile/avatar", isAuthenticated, upload.single("avatar"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -127,10 +128,10 @@ export async function registerRoutes(
     }
   });
 
-  // ==================== Big Idea Routes ====================
+  // ==================== Big Idea Routes (Protected) ====================
 
   // Get all big ideas
-  app.get("/api/big-ideas", async (_req, res) => {
+  app.get("/api/big-ideas", isAuthenticated, async (_req, res) => {
     try {
       const bigIdeas = await storage.getBigIdeas();
       res.json(bigIdeas);
@@ -140,7 +141,7 @@ export async function registerRoutes(
   });
 
   // Get active big idea
-  app.get("/api/big-ideas/active", async (_req, res) => {
+  app.get("/api/big-ideas/active", isAuthenticated, async (_req, res) => {
     try {
       const bigIdea = await storage.getActiveBigIdea();
       res.json(bigIdea);
@@ -150,7 +151,7 @@ export async function registerRoutes(
   });
 
   // Get single big idea
-  app.get("/api/big-ideas/:id", async (req, res) => {
+  app.get("/api/big-ideas/:id", isAuthenticated, async (req, res) => {
     try {
       const bigIdea = await storage.getBigIdea(req.params.id);
       if (!bigIdea) {
@@ -163,7 +164,7 @@ export async function registerRoutes(
   });
 
   // Create big idea
-  app.post("/api/big-ideas", async (req, res) => {
+  app.post("/api/big-ideas", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertBigIdeaSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -177,7 +178,7 @@ export async function registerRoutes(
   });
 
   // Update big idea
-  app.patch("/api/big-ideas/:id", async (req, res) => {
+  app.patch("/api/big-ideas/:id", isAuthenticated, async (req, res) => {
     try {
       const bigIdea = await storage.updateBigIdea(req.params.id, req.body);
       if (!bigIdea) {
@@ -190,7 +191,7 @@ export async function registerRoutes(
   });
 
   // Activate big idea
-  app.post("/api/big-ideas/:id/activate", async (req, res) => {
+  app.post("/api/big-ideas/:id/activate", isAuthenticated, async (req, res) => {
     try {
       const bigIdea = await storage.setActiveBigIdea(req.params.id);
       if (!bigIdea) {
@@ -203,7 +204,7 @@ export async function registerRoutes(
   });
 
   // Delete big idea
-  app.delete("/api/big-ideas/:id", async (req, res) => {
+  app.delete("/api/big-ideas/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteBigIdea(req.params.id);
       if (!deleted) {
@@ -215,10 +216,10 @@ export async function registerRoutes(
     }
   });
 
-  // ==================== Toolbox Routes ====================
+  // ==================== Toolbox Routes (Protected) ====================
 
   // Get all toolboxes (optionally filter by big idea)
-  app.get("/api/toolboxes", async (req, res) => {
+  app.get("/api/toolboxes", isAuthenticated, async (req, res) => {
     try {
       const bigIdeaId = req.query.bigIdeaId as string | undefined;
       const toolboxes = await storage.getToolboxes(bigIdeaId);
@@ -229,7 +230,7 @@ export async function registerRoutes(
   });
 
   // Get active toolbox
-  app.get("/api/toolboxes/active", async (_req, res) => {
+  app.get("/api/toolboxes/active", isAuthenticated, async (_req, res) => {
     try {
       const toolbox = await storage.getActiveToolbox();
       res.json(toolbox);
@@ -239,7 +240,7 @@ export async function registerRoutes(
   });
 
   // Get single toolbox
-  app.get("/api/toolboxes/:id", async (req, res) => {
+  app.get("/api/toolboxes/:id", isAuthenticated, async (req, res) => {
     try {
       const toolbox = await storage.getToolbox(req.params.id);
       if (!toolbox) {
@@ -252,7 +253,7 @@ export async function registerRoutes(
   });
 
   // Create toolbox
-  app.post("/api/toolboxes", async (req, res) => {
+  app.post("/api/toolboxes", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertToolboxSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -266,7 +267,7 @@ export async function registerRoutes(
   });
 
   // Update toolbox
-  app.patch("/api/toolboxes/:id", async (req, res) => {
+  app.patch("/api/toolboxes/:id", isAuthenticated, async (req, res) => {
     try {
       const toolbox = await storage.updateToolbox(req.params.id, req.body);
       if (!toolbox) {
@@ -279,7 +280,7 @@ export async function registerRoutes(
   });
 
   // Activate toolbox
-  app.post("/api/toolboxes/:id/activate", async (req, res) => {
+  app.post("/api/toolboxes/:id/activate", isAuthenticated, async (req, res) => {
     try {
       const toolbox = await storage.setActiveToolbox(req.params.id);
       if (!toolbox) {
@@ -292,7 +293,7 @@ export async function registerRoutes(
   });
 
   // Delete toolbox
-  app.delete("/api/toolboxes/:id", async (req, res) => {
+  app.delete("/api/toolboxes/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteToolbox(req.params.id);
       if (!deleted) {
@@ -304,10 +305,10 @@ export async function registerRoutes(
     }
   });
 
-  // ==================== Agent Routes ====================
+  // ==================== Agent Routes (Protected) ====================
   
   // Get all agents (optionally filter by toolbox)
-  app.get("/api/agents", async (req, res) => {
+  app.get("/api/agents", isAuthenticated, async (req, res) => {
     try {
       const toolboxId = req.query.toolboxId as string | undefined;
       const agents = await storage.getAgents(toolboxId);
@@ -318,7 +319,7 @@ export async function registerRoutes(
   });
 
   // Get active agent
-  app.get("/api/agents/active", async (_req, res) => {
+  app.get("/api/agents/active", isAuthenticated, async (_req, res) => {
     try {
       const agent = await storage.getActiveAgent();
       res.json(agent);
@@ -328,7 +329,7 @@ export async function registerRoutes(
   });
 
   // Get single agent
-  app.get("/api/agents/:id", async (req, res) => {
+  app.get("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id);
       if (!agent) {
@@ -341,7 +342,7 @@ export async function registerRoutes(
   });
 
   // Create agent
-  app.post("/api/agents", async (req, res) => {
+  app.post("/api/agents", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertAgentSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -355,7 +356,7 @@ export async function registerRoutes(
   });
 
   // Update agent
-  app.patch("/api/agents/:id", async (req, res) => {
+  app.patch("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
       const agent = await storage.updateAgent(req.params.id, req.body);
       if (!agent) {
@@ -368,7 +369,7 @@ export async function registerRoutes(
   });
 
   // Activate agent
-  app.post("/api/agents/:id/activate", async (req, res) => {
+  app.post("/api/agents/:id/activate", isAuthenticated, async (req, res) => {
     try {
       const agent = await storage.setActiveAgent(req.params.id);
       if (!agent) {
@@ -381,7 +382,7 @@ export async function registerRoutes(
   });
 
   // Delete agent
-  app.delete("/api/agents/:id", async (req, res) => {
+  app.delete("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteAgent(req.params.id);
       if (!deleted) {
@@ -414,10 +415,10 @@ export async function registerRoutes(
     }
   });
 
-  // ==================== Knowledge Base Routes ====================
+  // ==================== Knowledge Base Routes (Protected) ====================
 
   // Get knowledge bases for an agent
-  app.get("/api/knowledge-base/:agentId", async (req, res) => {
+  app.get("/api/knowledge-base/:agentId", isAuthenticated, async (req, res) => {
     try {
       const kbs = await storage.getKnowledgeBases(req.params.agentId);
       res.json(kbs);
@@ -427,7 +428,7 @@ export async function registerRoutes(
   });
 
   // Create knowledge base
-  app.post("/api/knowledge-base", async (req, res) => {
+  app.post("/api/knowledge-base", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertKnowledgeBaseSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -441,7 +442,7 @@ export async function registerRoutes(
   });
 
   // Upload file for knowledge base
-  app.post("/api/knowledge-base/upload", upload.single("file"), async (req, res) => {
+  app.post("/api/knowledge-base/upload", isAuthenticated, upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -505,7 +506,7 @@ export async function registerRoutes(
   });
 
   // Update knowledge base
-  app.patch("/api/knowledge-base/:id", async (req, res) => {
+  app.patch("/api/knowledge-base/:id", isAuthenticated, async (req, res) => {
     try {
       const kb = await storage.updateKnowledgeBase(req.params.id, req.body);
       if (!kb) {
@@ -518,7 +519,7 @@ export async function registerRoutes(
   });
 
   // Delete knowledge base
-  app.delete("/api/knowledge-base/:id", async (req, res) => {
+  app.delete("/api/knowledge-base/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteKnowledgeBase(req.params.id);
       if (!deleted) {
@@ -530,10 +531,10 @@ export async function registerRoutes(
     }
   });
 
-  // ==================== Integration Routes ====================
+  // ==================== Integration Routes (Protected) ====================
 
   // Get integrations for an agent
-  app.get("/api/integrations/:agentId", async (req, res) => {
+  app.get("/api/integrations/:agentId", isAuthenticated, async (req, res) => {
     try {
       const integrations = await storage.getIntegrations(req.params.agentId);
       res.json(integrations);
@@ -543,7 +544,7 @@ export async function registerRoutes(
   });
 
   // Create integration
-  app.post("/api/integrations", async (req, res) => {
+  app.post("/api/integrations", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertIntegrationSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -557,7 +558,7 @@ export async function registerRoutes(
   });
 
   // Update integration
-  app.patch("/api/integrations/:id", async (req, res) => {
+  app.patch("/api/integrations/:id", isAuthenticated, async (req, res) => {
     try {
       const integration = await storage.updateIntegration(req.params.id, req.body);
       if (!integration) {
@@ -570,7 +571,7 @@ export async function registerRoutes(
   });
 
   // Delete integration
-  app.delete("/api/integrations/:id", async (req, res) => {
+  app.delete("/api/integrations/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteIntegration(req.params.id);
       if (!deleted) {

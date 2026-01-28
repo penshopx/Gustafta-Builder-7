@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette
@@ -33,6 +33,8 @@ import { useAgents, useActiveAgent, useSetActiveAgent } from "@/hooks/use-agents
 import { useBigIdeas, useActiveBigIdea, useActivateBigIdea } from "@/hooks/use-big-ideas";
 import { useToolboxes, useActiveToolbox, useActivateToolbox } from "@/hooks/use-toolboxes";
 import { useProfile } from "@/hooks/use-profile";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
@@ -57,6 +59,23 @@ export default function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast({
+        title: "Akses Ditolak",
+        description: "Silakan login terlebih dahulu...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+    }
+  }, [authLoading, isAuthenticated, toast]);
+  
   const { data: agents = [], isLoading: agentsLoading } = useAgents();
   const { data: activeAgent } = useActiveAgent();
   const setActiveAgent = useSetActiveAgent();
@@ -70,6 +89,23 @@ export default function Dashboard() {
   const activateToolbox = useActivateToolbox();
   
   const { data: profile } = useProfile();
+  
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+            <Bot className="w-8 h-8 text-primary" />
+          </div>
+          <p className="text-muted-foreground">Memuat...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleAgentSelect = (agent: Agent) => {
     setActiveAgent.mutate(agent.id);
