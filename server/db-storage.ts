@@ -691,12 +691,12 @@ export class DatabaseStorage implements IStorage {
     const agentIdNum = parseInt(message.agentId);
     const reasoningVal = message.reasoning || "";
     const confidenceVal = message.confidence || 0;
-    const sourcesVal = `{${sourcesArray.join(",")}}`;
+    const sourcesJson = JSON.stringify(sourcesArray);
     const sessionId = message.sessionId || `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     
     const result = await db.execute(sql`
       INSERT INTO agent_messages (agent_id, session_id, role, content, reasoning, confidence, sources)
-      VALUES (${agentIdNum}, ${sessionId}, ${message.role}, ${message.content}, ${reasoningVal}, ${confidenceVal}, ${sourcesVal}::text[])
+      VALUES (${agentIdNum}, ${sessionId}, ${message.role}, ${message.content}, ${reasoningVal}, ${confidenceVal}, ${sourcesJson}::jsonb)
       RETURNING *
     `);
     const rows = result.rows as any[];
