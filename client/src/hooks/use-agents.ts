@@ -72,3 +72,11 @@ export function useDeleteAgent() {
     },
   });
 }
+
+export function useGustaftaAssistant() {
+  return useQuery<Agent | null>({
+    queryKey: ["/api/agents/gustafta-assistant"],
+    retry: false,
+    staleTime: 1000 * 60 * 5,
+  });
+}

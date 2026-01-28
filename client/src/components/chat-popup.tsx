@@ -187,26 +187,31 @@ export function ChatPopup({ agent }: ChatPopupProps) {
         </div>
       </div>
 
-      {/* Floating Button */}
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        size="icon"
-        className={cn(
-          "w-14 h-14 rounded-full shadow-lg transition-all duration-200",
-          isOpen && "rotate-0"
+      {/* Floating Button with Pulse Animation */}
+      <div className="relative">
+        {!isOpen && (
+          <span className="absolute inset-0 w-14 h-14 rounded-full bg-primary animate-ping opacity-40" />
         )}
-        data-testid="button-open-popup"
-      >
-        {isOpen ? (
-          <X className="w-6 h-6" />
-        ) : (
-          <MessageCircle className="w-6 h-6" />
-        )}
-      </Button>
+        <Button
+          onClick={() => setIsOpen(!isOpen)}
+          size="icon"
+          className={cn(
+            "relative w-14 h-14 rounded-full shadow-lg transition-all duration-200",
+            !isOpen && "animate-pulse"
+          )}
+          data-testid="button-open-popup"
+        >
+          {isOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <MessageCircle className="w-6 h-6" />
+          )}
+        </Button>
+      </div>
 
       {/* Unread indicator badge */}
       {!isOpen && recentMessages.length > 0 && (
-        <span className="absolute top-0 right-0 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+        <span className="absolute top-0 right-0 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center animate-bounce">
           {Math.min(recentMessages.length, 9)}
           {recentMessages.length > 9 && "+"}
         </span>

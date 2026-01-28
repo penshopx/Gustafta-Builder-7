@@ -6,7 +6,9 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
+import { useGustaftaAssistant } from "@/hooks/use-agents";
 import { trackLead, trackViewContent } from "@/hooks/use-meta-pixel";
+import { ChatPopup } from "@/components/chat-popup";
 import { 
   Bot, Sparkles, MessageSquare, Globe, Shield, 
   BookOpen, BarChart3, Lightbulb, ArrowRight, Check, LogIn, LogOut, Menu, X
@@ -14,6 +16,7 @@ import {
 
 export default function Landing() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  const { data: gustaftaAssistant } = useGustaftaAssistant();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -392,6 +395,10 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {gustaftaAssistant && (
+        <ChatPopup agent={gustaftaAssistant} />
+      )}
     </div>
   );
 }

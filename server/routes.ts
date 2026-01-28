@@ -305,6 +305,22 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Public Agent Routes ====================
+  
+  // Get Gustafta Assistant (public - for landing page chatbot)
+  app.get("/api/agents/gustafta-assistant", async (_req, res) => {
+    try {
+      const agents = await storage.getAgents();
+      const gustaftaAssistant = agents.find(agent => agent.name === "Gustafta Assistant");
+      if (!gustaftaAssistant) {
+        return res.status(404).json({ error: "Gustafta Assistant not found" });
+      }
+      res.json(gustaftaAssistant);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch Gustafta Assistant" });
+    }
+  });
+
   // ==================== Agent Routes (Protected) ====================
   
   // Get all agents (optionally filter by toolbox)
