@@ -687,24 +687,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const result = await db.insert(agentMessages).values({
-      agentId: parseInt(message.agentId),
-      role: message.role,
-      content: message.content,
-      reasoning: message.reasoning || "",
-      confidence: message.confidence,
-      sources: message.sources || [],
-    }).returning();
-    const row = result[0];
+    const sourcesArray = Array.isArray(message.sources) ? message.sources : [];
+    const result = await db.execute(
+      `INSERT INTO agent_messages (agent_id, role, content, reasoning, confidence, sources)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [
+        parseInt(message.agentId),
+        message.role,
+        message.content,
+        message.reasoning || "",
+        message.confidence || 0,
+        `{${sourcesArray.join(",")}}`
+      ]
+    );
+    const rows = result.rows as any[];
+    const row = rows[0];
     return {
       id: String(row.id),
-      agentId: String(row.agentId),
+      agentId: String(row.agent_id),
       role: row.role as "user" | "assistant",
       content: row.content,
       reasoning: row.reasoning || "",
       confidence: row.confidence || undefined,
       sources: (row.sources as string[]) || [],
-      createdAt: row.createdAt.toISOString(),
+      createdAt: new Date(row.created_at).toISOString(),
     };
   }
 

@@ -103,18 +103,23 @@ export function ChatPopup({ agent }: ChatPopupProps) {
         {/* Messages Area */}
         <ScrollArea className="h-[400px] max-h-[60vh]" ref={scrollRef}>
           <div className="p-4 space-y-4">
-            {/* Welcome Message */}
+            {/* Greeting Message from Agent */}
             {recentMessages.length === 0 && !isLoading && (
-              <div className="text-center py-6">
-                <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                  <Sparkles className="w-8 h-8 text-primary" />
+              <div className="flex gap-3">
+                <Avatar className="w-8 h-8 shrink-0">
+                  {agent.avatar && agent.avatar.trim() !== "" ? (
+                    <AvatarImage src={agent.avatar} alt={agent.name} className="object-cover" />
+                  ) : null}
+                  <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                    {agent.name ? agent.name.substring(0, 2).toUpperCase() : <Bot className="w-4 h-4" />}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-1 max-w-[75%]">
+                  <span className="text-[10px] text-muted-foreground">{agent.name}</span>
+                  <div className="rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm bg-muted">
+                    {agent.greetingMessage || `Halo! Selamat datang di ${agent.name}. Ada yang bisa saya bantu?`}
+                  </div>
                 </div>
-                <h4 className="font-medium text-foreground mb-1">
-                  Welcome to {agent.name}!
-                </h4>
-                <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">
-                  {agent.tagline || "Start a conversation to test your chatbot."}
-                </p>
               </div>
             )}
 
