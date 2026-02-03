@@ -2,21 +2,27 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
+import { useTemplates } from "@/hooks/use-templates";
 import { trackLead, trackViewContent } from "@/hooks/use-meta-pixel";
 import { ChatPopup } from "@/components/chat-popup";
+import { TemplateShowcase } from "@/components/template-showcase";
 import { 
   Bot, Sparkles, MessageSquare, Globe, Shield, 
-  BookOpen, BarChart3, Lightbulb, ArrowRight, Check, LogIn, LogOut, Menu, X
+  BookOpen, BarChart3, Lightbulb, ArrowRight, Check, LogIn, LogOut, Menu, 
+  Zap, Palette, Download, Upload, Code, Cpu, FileJson, Settings2, Layers
 } from "lucide-react";
 
 export default function Landing() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
+  const { data: templatesData } = useTemplates();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -65,6 +71,39 @@ export default function Landing() {
       icon: Shield,
       title: "Access Control",
       description: "Token akses, mode publik/privat, dan kontrol domain untuk monetisasi"
+    },
+  ];
+
+  const advancedFeatures = [
+    {
+      icon: Layers,
+      title: "Template Library",
+      description: "10+ template siap pakai untuk berbagai industri - Customer Support, Sales, HR, Education, dan lainnya"
+    },
+    {
+      icon: FileJson,
+      title: "Export & Import",
+      description: "Ekspor konfigurasi chatbot dalam format JSON dan import ke proyek lain dengan mudah"
+    },
+    {
+      icon: Palette,
+      title: "Widget Customization",
+      description: "Kustomisasi tampilan widget chat - warna, posisi, ukuran, dan branding sesuai brand Anda"
+    },
+    {
+      icon: Cpu,
+      title: "Multi-Model AI",
+      description: "Pilih dari GPT-4, GPT-3.5, DeepSeek, Claude, atau gunakan model custom Anda sendiri"
+    },
+    {
+      icon: Code,
+      title: "API Access",
+      description: "REST API lengkap untuk integrasi dengan sistem Anda - webhook, embed, dan custom integration"
+    },
+    {
+      icon: Settings2,
+      title: "Advanced Settings",
+      description: "Kontrol penuh: temperature, max tokens, context retention, dan behavior tuning"
     },
   ];
 
@@ -367,18 +406,122 @@ export default function Landing() {
         </div>
       </section>
 
+      <section className="py-12 md:py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 md:mb-12">
+            <Badge className="mb-4">Template Library</Badge>
+            <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Mulai dengan Template Siap Pakai</h2>
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
+              Pilih dari {templatesData?.templates.length || 10}+ template chatbot profesional untuk berbagai industri. 
+              Kustomisasi sesuai kebutuhan bisnis Anda.
+            </p>
+          </div>
+          
+          {templatesData && (
+            <TemplateShowcase 
+              showCreateButton={false} 
+              maxItems={6} 
+              compact={true}
+            />
+          )}
+
+          <div className="text-center mt-8">
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button size="lg" className="gap-2" data-testid="button-explore-templates">
+                  <Layers className="h-4 w-4" />
+                  Jelajahi Semua Template
+                </Button>
+              </Link>
+            ) : (
+              <a href="/api/login">
+                <Button size="lg" className="gap-2" data-testid="button-explore-templates-login">
+                  <Layers className="h-4 w-4" />
+                  Jelajahi Template
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 md:mb-16">
+            <Badge variant="secondary" className="mb-4">Advanced Features</Badge>
+            <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Platform yang Mudah Dikustomisasi</h2>
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
+              Fleksibilitas penuh untuk membangun chatbot sesuai kebutuhan unik bisnis Anda
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {advancedFeatures.map((feature) => (
+              <Card key={feature.title} className="hover-elevate">
+                <CardContent className="p-4 md:p-6">
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+                    <feature.icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                  </div>
+                  <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground text-xs md:text-sm">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12 md:py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-xl md:text-3xl font-bold mb-4">Mengapa Memilih Gustafta?</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="text-center p-6">
+              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">10+</div>
+              <div className="text-sm md:text-base text-muted-foreground">Template Profesional</div>
+            </div>
+            <div className="text-center p-6">
+              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">6+</div>
+              <div className="text-sm md:text-base text-muted-foreground">Channel Integrasi</div>
+            </div>
+            <div className="text-center p-6">
+              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">5+</div>
+              <div className="text-sm md:text-base text-muted-foreground">Model AI Tersedia</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-12 md:py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-xl md:text-3xl font-bold mb-3 md:mb-4">Siap Membangun Chatbot AI Anda?</h2>
           <p className="text-primary-foreground/80 mb-6 md:mb-8 max-w-xl mx-auto text-sm md:text-base">
-            Mulai gratis dan tingkatkan sesuai kebutuhan bisnis Anda
+            Mulai gratis dengan template siap pakai dan tingkatkan sesuai kebutuhan bisnis Anda
           </p>
-          <Link href="/dashboard">
-            <Button size="lg" variant="secondary" className="gap-2" data-testid="button-cta-dashboard">
-              Mulai Sekarang - Gratis
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button size="lg" variant="secondary" className="gap-2" data-testid="button-cta-dashboard">
+                  Buka Dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <a href="/api/login">
+                <Button size="lg" variant="secondary" className="gap-2" data-testid="button-cta-dashboard">
+                  Mulai Sekarang - Gratis
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </a>
+            )}
+            <Link href="/documentation">
+              <Button size="lg" variant="outline" className="gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" data-testid="button-cta-docs">
+                <BookOpen className="h-4 w-4" />
+                Baca Dokumentasi
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 

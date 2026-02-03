@@ -805,6 +805,172 @@ export async function registerRoutes(
     }
   });
 
+  // Streaming message endpoint for real-time AI responses
+  app.post("/api/messages/stream", async (req, res) => {
+    try {
+      const parsed = insertMessageSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      
+      // Save user message
+      const userMessage = await storage.createMessage(parsed.data);
+      
+      // Get agent configuration for persona
+      const agent = await storage.getAgent(parsed.data.agentId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      
+      // Get knowledge base for context
+      const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
+      const knowledgeContext = knowledgeBases
+        .map(kb => `[${kb.name}]: ${kb.content}`)
+        .join("\n\n");
+      
+      // Get recent conversation history
+      const allMessages = await storage.getMessages(parsed.data.agentId);
+      const recentMessages = allMessages.slice(-10);
+      
+      // Build system prompt from agent persona
+      let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;
+      if (agent.tagline) systemPrompt += ` ${agent.tagline}`;
+      if (agent.philosophy) systemPrompt += `\n\nFilosofi: ${agent.philosophy}`;
+      if (agent.personality) systemPrompt += `\n\nKepribadian: ${agent.personality}`;
+      if (agent.communicationStyle) systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
+      if (agent.toneOfVoice) systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
+      if (knowledgeContext) systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
+      systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
+      
+      // Build messages array
+      const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+        { role: "system", content: systemPrompt }
+      ];
+      
+      for (const msg of recentMessages) {
+        if (msg.id !== userMessage.id) {
+          chatMessages.push({
+            role: msg.role as "user" | "assistant",
+            content: msg.content
+          });
+        }
+      }
+      chatMessages.push({ role: "user", content: parsed.data.content });
+      
+      // Set up SSE headers
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.setHeader("X-Accel-Buffering", "no");
+      res.flushHeaders();
+      
+      // Track if client disconnected
+      let isClientConnected = true;
+      req.on("close", () => {
+        isClientConnected = false;
+      });
+      
+      // Send keepalive ping periodically
+      const pingInterval = setInterval(() => {
+        if (isClientConnected && !res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ type: "ping" })}\n\n`);
+        }
+      }, 15000);
+      
+      // Cleanup function
+      const cleanup = () => {
+        clearInterval(pingInterval);
+      };
+      
+      // Send user message first
+      res.write(`data: ${JSON.stringify({ type: "user_message", message: userMessage })}\n\n`);
+      
+      const agentModel = agent.aiModel || "gpt-4o-mini";
+      const temperature = Math.max(0, Math.min(2, agent.temperature ?? 0.7));
+      const maxTokens = Math.max(100, Math.min(4096, agent.maxTokens ?? 1024));
+      
+      let fullContent = "";
+      let streamClient: OpenAI;
+      let modelName = agentModel;
+      
+      // Select appropriate client
+      if (agentModel === "custom" && agent.customApiKey && agent.customBaseUrl) {
+        streamClient = new OpenAI({
+          apiKey: agent.customApiKey,
+          baseURL: agent.customBaseUrl,
+        });
+        modelName = agent.customModelName || "gpt-4";
+      } else if (agentModel.startsWith("deepseek-")) {
+        const deepseekApiKey = process.env.DEEPSEEK_API_KEY || agent.customApiKey;
+        if (!deepseekApiKey) {
+          res.write(`data: ${JSON.stringify({ type: "error", error: "DeepSeek API key not configured" })}\n\n`);
+          res.end();
+          return;
+        }
+        streamClient = new OpenAI({
+          apiKey: deepseekApiKey,
+          baseURL: "https://api.deepseek.com",
+        });
+      } else if (agentModel.startsWith("claude-") && agent.customApiKey && agent.customBaseUrl) {
+        streamClient = new OpenAI({
+          apiKey: agent.customApiKey,
+          baseURL: agent.customBaseUrl,
+        });
+        modelName = agent.customModelName || agentModel;
+      } else {
+        streamClient = openai;
+      }
+      
+      try {
+        const stream = await streamClient.chat.completions.create({
+          model: modelName,
+          messages: chatMessages,
+          max_tokens: maxTokens,
+          temperature: temperature,
+          stream: true,
+        });
+        
+        for await (const chunk of stream) {
+          if (!isClientConnected) {
+            cleanup();
+            return;
+          }
+          const content = chunk.choices[0]?.delta?.content || "";
+          if (content) {
+            fullContent += content;
+            res.write(`data: ${JSON.stringify({ type: "chunk", content })}\n\n`);
+          }
+        }
+        
+        // Save the complete AI response
+        const aiMessage = await storage.createMessage({
+          agentId: parsed.data.agentId,
+          role: "assistant",
+          content: fullContent || "Maaf, saya tidak dapat merespons saat ini.",
+          reasoning: "",
+          sources: [],
+        });
+        
+        // Send completion event
+        cleanup();
+        res.write(`data: ${JSON.stringify({ type: "complete", message: aiMessage })}\n\n`);
+        res.end();
+        
+      } catch (streamError) {
+        console.error("Streaming error:", streamError);
+        cleanup();
+        if (isClientConnected && !res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ type: "error", error: "Failed to generate response" })}\n\n`);
+          res.end();
+        }
+      }
+      
+    } catch (error) {
+      console.error("Failed to process streaming message:", error);
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
   // ==================== Analytics Routes ====================
 
   // Get analytics summary for an agent
@@ -1484,6 +1650,279 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Chat webhook error:", error);
       res.status(500).json({ error: "Failed to process message" });
+    }
+  });
+
+  // ==================== Unified Context API ====================
+
+  // Get unified active context (Big Idea -> Toolbox -> Agent chain)
+  app.get("/api/context/active", isAuthenticated, async (_req, res) => {
+    try {
+      const [activeBigIdea, activeToolbox, activeAgent] = await Promise.all([
+        storage.getActiveBigIdea(),
+        storage.getActiveToolbox(),
+        storage.getActiveAgent(),
+      ]);
+
+      // Validate chain consistency
+      let validatedToolbox = activeToolbox;
+      let validatedAgent = activeAgent;
+
+      // If toolbox doesn't belong to active big idea, invalidate
+      if (activeBigIdea && activeToolbox && activeToolbox.bigIdeaId !== activeBigIdea.id) {
+        validatedToolbox = null;
+      }
+
+      // If agent doesn't belong to active toolbox, invalidate
+      if (validatedToolbox && activeAgent && activeAgent.toolboxId !== validatedToolbox.id) {
+        validatedAgent = null;
+      }
+
+      res.json({
+        bigIdea: activeBigIdea,
+        toolbox: validatedToolbox,
+        agent: validatedAgent,
+        chain: {
+          isValid: !!(activeBigIdea || activeAgent),
+          hasOrphanedToolbox: activeToolbox && !validatedToolbox,
+          hasOrphanedAgent: activeAgent && !validatedAgent,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch active context" });
+    }
+  });
+
+  // Activate context with cascade (Big Idea -> auto-select first Toolbox -> first Agent)
+  app.post("/api/context/activate", isAuthenticated, async (req, res) => {
+    try {
+      const { bigIdeaId, toolboxId, agentId } = req.body;
+
+      let result: any = {};
+
+      // If activating a Big Idea, cascade to toolbox and agent
+      if (bigIdeaId) {
+        const bigIdea = await storage.setActiveBigIdea(bigIdeaId);
+        result.bigIdea = bigIdea;
+
+        // Get first toolbox in this big idea
+        const toolboxes = await storage.getToolboxes(bigIdeaId);
+        if (toolboxes.length > 0) {
+          const toolbox = await storage.setActiveToolbox(toolboxes[0].id);
+          result.toolbox = toolbox;
+
+          // Get first agent in this toolbox
+          const agents = await storage.getAgents(toolboxes[0].id);
+          if (agents.length > 0) {
+            const agent = await storage.setActiveAgent(agents[0].id);
+            result.agent = agent;
+          }
+        }
+      }
+
+      // If activating a Toolbox specifically
+      if (toolboxId && !bigIdeaId) {
+        const toolbox = await storage.setActiveToolbox(toolboxId);
+        result.toolbox = toolbox;
+
+        // Cascade to first agent in toolbox
+        if (toolbox) {
+          const agents = await storage.getAgents(toolboxId);
+          if (agents.length > 0) {
+            const agent = await storage.setActiveAgent(agents[0].id);
+            result.agent = agent;
+          }
+        }
+      }
+
+      // If activating an Agent specifically
+      if (agentId && !toolboxId && !bigIdeaId) {
+        const agent = await storage.setActiveAgent(agentId);
+        result.agent = agent;
+      }
+
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to activate context" });
+    }
+  });
+
+  // ==================== Agent Templates API ====================
+
+  // Get all templates
+  app.get("/api/templates", async (_req, res) => {
+    try {
+      const { agentTemplates, templateCategories } = await import("@shared/agent-templates");
+      res.json({ templates: agentTemplates, categories: templateCategories });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch templates" });
+    }
+  });
+
+  // Get template by ID
+  app.get("/api/templates/:id", async (req, res) => {
+    try {
+      const { getTemplateById } = await import("@shared/agent-templates");
+      const template = getTemplateById(req.params.id);
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch template" });
+    }
+  });
+
+  // Create agent from template
+  app.post("/api/templates/:id/create-agent", isAuthenticated, async (req, res) => {
+    try {
+      const { getTemplateById } = await import("@shared/agent-templates");
+      const template = getTemplateById(req.params.id);
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+
+      const { customName, toolboxId } = req.body;
+
+      // Merge template with custom values
+      const agentData = {
+        ...template.agent,
+        name: customName || template.agent.name,
+        toolboxId: toolboxId || "",
+      };
+
+      const agent = await storage.createAgent(agentData as any);
+      res.status(201).json(agent);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create agent from template" });
+    }
+  });
+
+  // ==================== Export/Import Agent Configuration ====================
+
+  // Export agent configuration
+  app.get("/api/agents/:id/export", isAuthenticated, async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+
+      // Get knowledge bases for this agent
+      const knowledgeBases = await storage.getKnowledgeBases(req.params.id);
+      const integrations = await storage.getIntegrations(req.params.id);
+
+      // Create export object (exclude sensitive data)
+      const exportData = {
+        version: "1.0",
+        exportedAt: new Date().toISOString(),
+        agent: {
+          name: agent.name,
+          description: agent.description,
+          tagline: agent.tagline,
+          philosophy: agent.philosophy,
+          systemPrompt: agent.systemPrompt,
+          personality: agent.personality,
+          communicationStyle: agent.communicationStyle,
+          toneOfVoice: agent.toneOfVoice,
+          responseFormat: agent.responseFormat,
+          greetingMessage: agent.greetingMessage,
+          conversationStarters: agent.conversationStarters,
+          language: agent.language,
+          category: agent.category,
+          subcategory: agent.subcategory,
+          temperature: agent.temperature,
+          maxTokens: agent.maxTokens,
+          aiModel: agent.aiModel,
+          agenticMode: agent.agenticMode,
+          attentiveListening: agent.attentiveListening,
+          contextRetention: agent.contextRetention,
+          emotionalIntelligence: agent.emotionalIntelligence,
+          multiStepReasoning: agent.multiStepReasoning,
+          selfCorrection: agent.selfCorrection,
+          expertise: agent.expertise,
+          avoidTopics: agent.avoidTopics,
+          keyPhrases: agent.keyPhrases,
+          widgetColor: agent.widgetColor,
+          widgetPosition: agent.widgetPosition,
+          widgetSize: agent.widgetSize,
+          widgetBorderRadius: agent.widgetBorderRadius,
+          widgetShowBranding: agent.widgetShowBranding,
+          widgetWelcomeMessage: agent.widgetWelcomeMessage,
+          widgetButtonIcon: agent.widgetButtonIcon,
+        },
+        knowledgeBases: knowledgeBases.map(kb => ({
+          name: kb.name,
+          type: kb.type,
+          content: kb.content,
+          description: kb.description,
+        })),
+        integrations: integrations.map(int => ({
+          type: int.type,
+          name: int.name,
+          isEnabled: int.isEnabled,
+        })),
+      };
+
+      res.json(exportData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to export agent" });
+    }
+  });
+
+  // Import agent configuration
+  app.post("/api/agents/import", isAuthenticated, async (req, res) => {
+    try {
+      const { config, customName, toolboxId } = req.body;
+
+      if (!config || !config.agent) {
+        return res.status(400).json({ error: "Invalid configuration format" });
+      }
+
+      // Create agent from imported config
+      const agentData = {
+        ...config.agent,
+        name: customName || config.agent.name || "Imported Agent",
+        toolboxId: toolboxId || "",
+      };
+
+      const agent = await storage.createAgent(agentData);
+
+      // Import knowledge bases if present
+      if (config.knowledgeBases && Array.isArray(config.knowledgeBases)) {
+        for (const kb of config.knowledgeBases) {
+          await storage.createKnowledgeBase({
+            agentId: agent.id,
+            name: kb.name,
+            type: kb.type,
+            content: kb.content,
+            description: kb.description || "",
+          });
+        }
+      }
+
+      res.status(201).json(agent);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to import agent" });
+    }
+  });
+
+  // ==================== Enhanced Analytics ====================
+
+  // Get aggregated platform stats (for landing page)
+  app.get("/api/stats/platform", async (_req, res) => {
+    try {
+      const agents = await storage.getAgents();
+      const activeAgentCount = agents.filter(a => a.isActive).length;
+      
+      res.json({
+        totalAgents: agents.length,
+        activeAgents: activeAgentCount,
+        categories: [...new Set(agents.map(a => a.category).filter(Boolean))].length,
+        templates: 10, // From our template library
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch platform stats" });
     }
   });
 

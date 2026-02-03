@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine } from "lucide-react";
+import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateAgent } from "@/hooks/use-agents";
+import { useActiveToolbox } from "@/hooks/use-toolboxes";
+import { useActiveBigIdea } from "@/hooks/use-big-ideas";
 import { categories, getCategoryById } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { TemplateDialog } from "./template-dialog";
@@ -31,6 +34,8 @@ type Step = "start" | "category" | "subcategory" | "details";
 export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps) {
   const { toast } = useToast();
   const createAgent = useCreateAgent();
+  const { data: activeToolbox } = useActiveToolbox();
+  const { data: activeBigIdea } = useActiveBigIdea();
 
   const [step, setStep] = useState<Step>("start");
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
@@ -96,6 +101,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
       name: formData.name.trim(),
       description: formData.description.trim(),
       tagline: formData.tagline.trim(),
+      toolboxId: activeToolbox?.id || null,
     };
 
     createAgent.mutate(
@@ -151,42 +157,64 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
         </DialogHeader>
 
         {step === "start" && (
-          <div className="grid gap-4 sm:grid-cols-2 py-4">
-            <Card
-              className="cursor-pointer transition-all hover-elevate"
-              onClick={() => setTemplateDialogOpen(true)}
-              data-testid="card-use-template"
-            >
-              <CardHeader className="pb-2">
-                <div className="p-2 rounded-lg bg-primary/10 w-fit">
-                  <Sparkles className="w-5 h-5 text-primary" />
+          <div className="space-y-4 py-4">
+            {(activeToolbox || activeBigIdea) && (
+              <div className="p-3 rounded-lg bg-muted/50 border space-y-2">
+                <p className="text-xs text-muted-foreground">Chatbot akan dibuat dalam konteks:</p>
+                <div className="flex flex-wrap gap-2">
+                  {activeBigIdea && (
+                    <Badge variant="outline" className="gap-1">
+                      <Lightbulb className="h-3 w-3" />
+                      {activeBigIdea.name}
+                    </Badge>
+                  )}
+                  {activeToolbox && (
+                    <Badge variant="secondary" className="gap-1">
+                      <Wrench className="h-3 w-3" />
+                      {activeToolbox.name}
+                    </Badge>
+                  )}
                 </div>
-                <CardTitle className="text-base mt-2">Gunakan Template</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Mulai dengan template siap pakai untuk berbagai industri seperti e-commerce, pendidikan, kesehatan, dan lainnya.
-                </CardDescription>
-              </CardContent>
-            </Card>
+              </div>
+            )}
+            
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Card
+                className="cursor-pointer transition-all hover-elevate"
+                onClick={() => setTemplateDialogOpen(true)}
+                data-testid="card-use-template"
+              >
+                <CardHeader className="pb-2">
+                  <div className="p-2 rounded-lg bg-primary/10 w-fit">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                  </div>
+                  <CardTitle className="text-base mt-2">Gunakan Template</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Mulai dengan template siap pakai untuk berbagai industri seperti e-commerce, pendidikan, kesehatan, dan lainnya.
+                  </CardDescription>
+                </CardContent>
+              </Card>
 
-            <Card
-              className="cursor-pointer transition-all hover-elevate"
-              onClick={() => setStep("category")}
-              data-testid="card-start-scratch"
-            >
-              <CardHeader className="pb-2">
-                <div className="p-2 rounded-lg bg-muted w-fit">
-                  <PenLine className="w-5 h-5 text-foreground" />
-                </div>
-                <CardTitle className="text-base mt-2">Mulai dari Awal</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Buat chatbot custom dengan memilih kategori bisnis dan mengkonfigurasi sendiri semua pengaturan.
-                </CardDescription>
-              </CardContent>
-            </Card>
+              <Card
+                className="cursor-pointer transition-all hover-elevate"
+                onClick={() => setStep("category")}
+                data-testid="card-start-scratch"
+              >
+                <CardHeader className="pb-2">
+                  <div className="p-2 rounded-lg bg-muted w-fit">
+                    <PenLine className="w-5 h-5 text-foreground" />
+                  </div>
+                  <CardTitle className="text-base mt-2">Mulai dari Awal</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Buat chatbot custom dengan memilih kategori bisnis dan mengkonfigurasi sendiri semua pengaturan.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
 

@@ -121,3 +121,32 @@ Schema includes:
 - Replit-specific plugins (runtime error overlay, cartographer, dev banner)
 - TypeScript with strict mode
 - PostCSS with Tailwind and Autoprefixer
+
+## Recent Changes (February 2026)
+
+### Agent Template Library
+- Added 10+ professional templates (shared/agent-templates.ts)
+- Categories: Business, Education, Healthcare, Technology, Creative, Legal, Travel, Finance
+- Each template includes pre-configured persona, system prompts, and settings
+
+### Unified Context API
+- Big Idea → Toolbox → Agent hierarchy with cascade logic
+- /api/context/active endpoint for active context management
+- Context-aware creation dialogs showing active toolbox/big idea
+
+### Streaming Chat
+- Real-time AI responses via Server-Sent Events (SSE)
+- POST /api/messages/stream endpoint with keepalive pings
+- Client-side buffer-aware SSE parsing (use-streaming-chat.ts)
+- Multi-line SSE event support with error handling
+
+### Export/Import Functionality
+- Export agent configurations as JSON
+- Import configurations to recreate agents
+- /api/agents/:id/export and /api/agents/import endpoints
+
+### Enhanced Landing Page
+- Template showcase with category filtering
+- Advanced features section
+- Statistics display
+- Improved CTAs for authentication flow
