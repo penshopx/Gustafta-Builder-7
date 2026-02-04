@@ -1,6 +1,7 @@
 import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
+import { randomUUID } from "crypto";
 import {
   agents,
   bigIdeas,
@@ -379,6 +380,10 @@ export class DatabaseStorage implements IStorage {
 
   async createAgent(insertAgent: InsertAgent): Promise<Agent> {
     await db.update(agents).set({ isActive: false });
+    
+    // Auto-generate access token if not provided
+    const accessToken = insertAgent.accessToken || `gus_${randomUUID().replace(/-/g, "")}`;
+    
     const result = await db.insert(agents).values({
       name: insertAgent.name,
       description: insertAgent.description || "",
@@ -398,7 +403,7 @@ export class DatabaseStorage implements IStorage {
       language: insertAgent.language || "id",
       category: insertAgent.category || "",
       subcategory: insertAgent.subcategory || "",
-      accessToken: insertAgent.accessToken || "",
+      accessToken: accessToken,
       isPublic: insertAgent.isPublic || false,
       allowedDomains: insertAgent.allowedDomains || [],
       toolboxId: insertAgent.toolboxId ? parseInt(insertAgent.toolboxId) : null,
