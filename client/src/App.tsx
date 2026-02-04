@@ -9,6 +9,8 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
 import Pricing from "@/pages/pricing";
+import Subscription from "@/pages/subscription";
+import PaymentSuccess from "@/pages/payment-success";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/documentation" component={Documentation} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/subscription" component={Subscription} />
+      <Route path="/payment-success" component={PaymentSuccess} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,8 +1,16 @@
-import { Link } from "wouter";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { useCreateSubscription, usePaymentStatus } from "@/hooks/use-subscription";
+import { Loader2 } from "lucide-react";
 import { 
   Bot, Check, X, Zap, Crown, Building2, Sparkles, ArrowRight,
   MessageSquare, Users, Globe, BookOpen, BarChart3, Shield, Headphones,
@@ -11,6 +19,7 @@ import {
 
 interface PricingTier {
   name: string;
+  planKey: string;
   description: string;
   price: string;
   priceNote: string;
@@ -26,6 +35,7 @@ interface PricingTier {
 const subscriptionTiers: PricingTier[] = [
   {
     name: "Free Trial",
+    planKey: "free_trial",
     description: "Coba gratis selama 14 hari dengan materi awareness",
     price: "Gratis",
     priceNote: "14 hari",
@@ -46,6 +56,7 @@ const subscriptionTiers: PricingTier[] = [
   },
   {
     name: "1 Bulan",
+    planKey: "monthly_1",
     description: "Berlangganan bulanan untuk 1 chatbot",
     price: "Rp 199.000",
     priceNote: "/bulan",
@@ -66,6 +77,7 @@ const subscriptionTiers: PricingTier[] = [
   },
   {
     name: "3 Bulan",
+    planKey: "monthly_3",
     description: "Hemat 17% dengan berlangganan 3 bulan",
     price: "Rp 499.000",
     priceNote: "/3 bulan",
@@ -88,6 +100,7 @@ const subscriptionTiers: PricingTier[] = [
   },
   {
     name: "6 Bulan",
+    planKey: "monthly_6",
     description: "Hemat 17% dengan berlangganan 6 bulan",
     price: "Rp 999.000",
     priceNote: "/6 bulan",
@@ -109,6 +122,7 @@ const subscriptionTiers: PricingTier[] = [
   },
   {
     name: "12 Bulan",
+    planKey: "monthly_12",
     description: "Hemat 17% dengan berlangganan tahunan",
     price: "Rp 1.999.000",
     priceNote: "/tahun",
@@ -243,7 +257,16 @@ const faqs = [
   },
 ];
 
-function PricingCard({ tier }: { tier: PricingTier }) {
+interface PricingCardProps {
+  tier: PricingTier;
+  onSelect: (planKey: string) => void;
+  isLoading?: boolean;
+  selectedPlan?: string;
+}
+
+function PricingCard({ tier, onSelect, isLoading, selectedPlan }: PricingCardProps) {
+  const isCurrentlyLoading = isLoading && selectedPlan === tier.planKey;
+  
   return (
     <Card className={`relative flex flex-col ${tier.popular ? "border-primary shadow-lg scale-105" : ""}`}>
       {tier.popular && (
@@ -291,9 +314,18 @@ function PricingCard({ tier }: { tier: PricingTier }) {
         <Button 
           className="w-full" 
           variant={tier.ctaVariant}
+          onClick={() => onSelect(tier.planKey)}
+          disabled={isLoading}
           data-testid={`button-plan-${tier.name.toLowerCase().replace(/\s/g, '-')}`}
         >
-          {tier.cta}
+          {isCurrentlyLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Memproses...
+            </>
+          ) : (
+            tier.cta
+          )}
         </Button>
       </CardFooter>
     </Card>
@@ -301,8 +333,134 @@ function PricingCard({ tier }: { tier: PricingTier }) {
 }
 
 export default function Pricing() {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const createSubscription = useCreateSubscription();
+  const { data: paymentStatus } = usePaymentStatus();
+  
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerName, setCustomerName] = useState("");
+
+  const handleSelectPlan = (planKey: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Diperlukan",
+        description: "Silakan login terlebih dahulu untuk berlangganan.",
+        variant: "destructive",
+      });
+      window.location.href = "/api/login";
+      return;
+    }
+    
+    setSelectedPlan(planKey);
+    setCustomerEmail(user?.email || "");
+    setCustomerName(user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "");
+    setShowPaymentDialog(true);
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!customerEmail || !customerName) {
+      toast({
+        title: "Data Tidak Lengkap",
+        description: "Silakan lengkapi nama dan email Anda.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await createSubscription.mutateAsync({
+        plan: selectedPlan,
+        email: customerEmail,
+        name: customerName,
+      });
+
+      if (result.paymentUrl) {
+        window.location.href = result.paymentUrl;
+      } else if (selectedPlan === "free_trial") {
+        toast({
+          title: "Free Trial Aktif!",
+          description: "Selamat! Free trial 14 hari Anda sudah aktif.",
+        });
+        setShowPaymentDialog(false);
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast({
+        title: "Gagal Memproses",
+        description: "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Pembayaran</DialogTitle>
+            <DialogDescription>
+              {selectedPlan === "free_trial" 
+                ? "Masukkan data Anda untuk memulai free trial 14 hari."
+                : "Masukkan data Anda untuk melanjutkan ke pembayaran."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="customer-name">Nama Lengkap</Label>
+              <Input
+                id="customer-name"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Masukkan nama lengkap"
+                data-testid="input-customer-name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer-email">Email</Label>
+              <Input
+                id="customer-email"
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                placeholder="email@example.com"
+                data-testid="input-customer-email"
+              />
+            </div>
+            {!paymentStatus?.paymentConfigured && selectedPlan !== "free_trial" && (
+              <div className="p-3 bg-yellow-500/10 rounded-lg text-sm text-yellow-600 dark:text-yellow-400">
+                Payment gateway belum dikonfigurasi. Hubungi admin untuk informasi pembayaran.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+              Batal
+            </Button>
+            <Button 
+              onClick={handleConfirmPayment}
+              disabled={createSubscription.isPending}
+              data-testid="button-confirm-payment"
+            >
+              {createSubscription.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Memproses...
+                </>
+              ) : selectedPlan === "free_trial" ? (
+                "Mulai Free Trial"
+              ) : (
+                "Lanjut ke Pembayaran"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/">
@@ -317,6 +475,13 @@ export default function Pricing() {
                 Dokumentasi
               </Button>
             </Link>
+            {isAuthenticated && (
+              <Link href="/subscription">
+                <Button variant="ghost" data-testid="button-my-subscription">
+                  Langganan Saya
+                </Button>
+              </Link>
+            )}
             <ThemeToggle />
             <Link href="/dashboard">
               <Button data-testid="button-go-dashboard">
@@ -343,7 +508,13 @@ export default function Pricing() {
           </div>
           <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
             {subscriptionTiers.map((tier) => (
-              <PricingCard key={tier.name} tier={tier} />
+              <PricingCard 
+                key={tier.name} 
+                tier={tier} 
+                onSelect={handleSelectPlan}
+                isLoading={createSubscription.isPending}
+                selectedPlan={selectedPlan}
+              />
             ))}
           </div>
         </section>
