@@ -102,67 +102,15 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
 
   const getBaseUrl = () => window.location.origin;
 
-  const generateEmbedCode = () => {
-    const sizeMap = { small: "350", medium: "400", large: "450" };
-    const borderMap = { rounded: "16", square: "0", pill: "24" };
-    const positionMap = {
-      "bottom-right": "bottom: 20px; right: 20px;",
-      "bottom-left": "bottom: 20px; left: 20px;",
-      "top-right": "top: 20px; right: 20px;",
-      "top-left": "top: 20px; left: 20px;",
-    };
-    const iconMap = {
-      chat: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>`,
-      message: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-      bot: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>`,
-      help: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>`,
-    };
-
-    return `<!-- Gustafta Chat Widget -->
-<script>
-(function() {
-  var config = {
-    agentId: "${agent.id}",
-    apiUrl: "${getBaseUrl()}/api/embed-chat",
-    color: "${settings.widgetColor}",
-    position: "${settings.widgetPosition}",
-    size: "${sizeMap[settings.widgetSize as keyof typeof sizeMap]}",
-    borderRadius: "${borderMap[settings.widgetBorderRadius as keyof typeof borderMap]}",
-    showBranding: ${settings.widgetShowBranding},
-    welcomeMessage: "${settings.widgetWelcomeMessage || agent.greetingMessage || "Halo! Ada yang bisa saya bantu?"}",
-    agentName: "${agent.name}",
-    agentAvatar: "${agent.avatar || ""}"
-  };
-  
-  var style = document.createElement('style');
-  style.textContent = \`
-    #gustafta-widget-container { position: fixed; ${positionMap[settings.widgetPosition as keyof typeof positionMap]} z-index: 9999; font-family: system-ui, -apple-system, sans-serif; }
-    #gustafta-widget-btn { width: 56px; height: 56px; border-radius: 50%; background: \${config.color}; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; }
-    #gustafta-widget-btn:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
-    #gustafta-chat-frame { display: none; position: absolute; ${settings.widgetPosition.includes("bottom") ? "bottom: 70px;" : "top: 70px;"} ${settings.widgetPosition.includes("right") ? "right: 0;" : "left: 0;"} width: \${config.size}px; height: 500px; border: none; border-radius: \${config.borderRadius}px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); background: white; overflow: hidden; }
-    #gustafta-chat-frame.open { display: block; animation: gustafta-slide-in 0.3s ease; }
-    @keyframes gustafta-slide-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  \`;
-  document.head.appendChild(style);
-  
-  var container = document.createElement('div');
-  container.id = 'gustafta-widget-container';
-  container.innerHTML = \`
-    <iframe id="gustafta-chat-frame" src="\${config.apiUrl}/\${config.agentId}?color=\${encodeURIComponent(config.color)}&name=\${encodeURIComponent(config.agentName)}&avatar=\${encodeURIComponent(config.agentAvatar)}&welcome=\${encodeURIComponent(config.welcomeMessage)}&branding=\${config.showBranding}"></iframe>
-    <button id="gustafta-widget-btn" aria-label="Chat">${iconMap[settings.widgetButtonIcon as keyof typeof iconMap]}</button>
-  \`;
-  document.body.appendChild(container);
-  
-  var btn = document.getElementById('gustafta-widget-btn');
-  var frame = document.getElementById('gustafta-chat-frame');
-  btn.onclick = function() { frame.classList.toggle('open'); };
-})();
-</script>
+  // Dynamic embed code - just a loader script that fetches config from backend
+  const generateDynamicEmbedCode = () => {
+    return `<!-- Gustafta Chat Widget (Dynamic) -->
+<script src="${getBaseUrl()}/widget/loader.js" data-agent-id="${agent.id}"></script>
 <!-- End Gustafta Chat Widget -->`;
   };
 
   const copyEmbedCode = () => {
-    navigator.clipboard.writeText(generateEmbedCode());
+    navigator.clipboard.writeText(generateDynamicEmbedCode());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast({
@@ -396,13 +344,15 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Kode Embed</CardTitle>
-              <CardDescription>Salin dan tempel kode ini di website Anda sebelum tag &lt;/body&gt;</CardDescription>
+              <CardTitle className="text-lg">Kode Embed (Dinamis)</CardTitle>
+              <CardDescription>
+                Salin kode ini ke website Anda. Widget akan otomatis mengambil konfigurasi terbaru dari server.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="relative">
-                <pre className="p-4 rounded-lg bg-muted text-xs overflow-x-auto max-h-64">
-                  <code>{generateEmbedCode()}</code>
+                <pre className="p-4 rounded-lg bg-muted text-sm overflow-x-auto">
+                  <code>{generateDynamicEmbedCode()}</code>
                 </pre>
                 <Button
                   size="sm"
@@ -413,6 +363,12 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-sm text-muted-foreground">
+                  Kode embed ini bersifat dinamis. Semua perubahan warna, posisi, ukuran, dan pesan akan 
+                  otomatis diterapkan tanpa perlu mengganti kode embed di website Anda.
+                </p>
               </div>
             </CardContent>
           </Card>

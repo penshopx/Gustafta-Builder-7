@@ -2010,5 +2010,176 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== DYNAMIC WIDGET API ====================
+  
+  // Public endpoint to get widget configuration (no auth required)
+  app.get("/api/widget/config/:agentId", async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      const agent = await storage.getAgent(agentId);
+      
+      if (!agent) {
+        return res.status(404).json({ error: "Widget not found" });
+      }
+      
+      // Check if agent is active and public (for public embed access)
+      if (!agent.isActive) {
+        return res.status(404).json({ error: "Widget is disabled", disabled: true });
+      }
+      
+      if (!agent.isPublic) {
+        return res.status(403).json({ error: "Widget is not public", private: true });
+      }
+      
+      // Return only public widget configuration
+      const widgetConfig = {
+        agentId: agent.id,
+        name: agent.name,
+        avatar: agent.avatar || "",
+        tagline: agent.tagline || "",
+        greetingMessage: agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
+        welcomeMessage: agent.widgetWelcomeMessage || agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
+        conversationStarters: agent.conversationStarters || [],
+        // Widget styling
+        color: agent.widgetColor || "#6366f1",
+        position: agent.widgetPosition || "bottom-right",
+        size: agent.widgetSize || "medium",
+        borderRadius: agent.widgetBorderRadius || "rounded",
+        showBranding: agent.widgetShowBranding ?? true,
+        buttonIcon: agent.widgetButtonIcon || "chat",
+        // Status
+        isActive: agent.isActive,
+        isPublic: agent.isPublic,
+      };
+      
+      res.json(widgetConfig);
+    } catch (error) {
+      console.error("Widget config error:", error);
+      res.status(500).json({ error: "Failed to load widget configuration" });
+    }
+  });
+
+  // Serve dynamic widget loader script
+  app.get("/widget/loader.js", (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    
+    const loaderScript = `
+(function() {
+  'use strict';
+  
+  // Get script element using document.currentScript (with fallback)
+  var currentScript = document.currentScript;
+  if (!currentScript) {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      if (scripts[i].src && scripts[i].src.indexOf('widget/loader.js') !== -1) {
+        currentScript = scripts[i];
+        break;
+      }
+    }
+  }
+  
+  if (!currentScript) {
+    console.error('Gustafta Widget: Could not find loader script');
+    return;
+  }
+  
+  var agentId = currentScript.getAttribute('data-agent-id');
+  var apiBase = currentScript.getAttribute('data-api-base') || '${baseUrl}';
+  
+  if (!agentId) {
+    console.error('Gustafta Widget: data-agent-id attribute is required');
+    return;
+  }
+  
+  // Prevent duplicate injection per agentId (allows multiple widgets for different agents)
+  window.__gustaftaWidgets = window.__gustaftaWidgets || {};
+  if (window.__gustaftaWidgets[agentId]) return;
+  window.__gustaftaWidgets[agentId] = true;
+  
+  // Size and border radius mappings
+  var sizeMap = { small: 350, medium: 400, large: 450 };
+  var borderMap = { rounded: 16, square: 0, pill: 24 };
+  
+  // Icon SVGs
+  var icons = {
+    chat: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>',
+    message: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    bot: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>',
+    help: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>'
+  };
+  
+  // Fetch configuration from backend
+  fetch(apiBase + '/api/widget/config/' + agentId)
+    .then(function(response) {
+      if (!response.ok) throw new Error('Failed to load widget config');
+      return response.json();
+    })
+    .then(function(config) {
+      initWidget(config);
+    })
+    .catch(function(error) {
+      console.error('Gustafta Widget Error:', error);
+    });
+  
+  function initWidget(config) {
+    var width = sizeMap[config.size] || 400;
+    var radius = borderMap[config.borderRadius] || 16;
+    var icon = icons[config.buttonIcon] || icons.chat;
+    
+    // Position styles
+    var posStyles = {
+      'bottom-right': 'bottom: 20px; right: 20px;',
+      'bottom-left': 'bottom: 20px; left: 20px;',
+      'top-right': 'top: 20px; right: 20px;',
+      'top-left': 'top: 20px; left: 20px;'
+    };
+    var framePos = {
+      'bottom-right': 'bottom: 70px; right: 0;',
+      'bottom-left': 'bottom: 70px; left: 0;',
+      'top-right': 'top: 70px; right: 0;',
+      'top-left': 'top: 70px; left: 0;'
+    };
+    
+    // Inject styles
+    var style = document.createElement('style');
+    style.textContent = 
+      '#gustafta-widget-container { position: fixed; ' + posStyles[config.position] + ' z-index: 9999; font-family: system-ui, -apple-system, sans-serif; }' +
+      '#gustafta-widget-btn { width: 56px; height: 56px; border-radius: 50%; background: ' + config.color + '; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; }' +
+      '#gustafta-widget-btn:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }' +
+      '#gustafta-chat-frame { display: none; position: absolute; ' + framePos[config.position] + ' width: ' + width + 'px; height: 500px; border: none; border-radius: ' + radius + 'px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); background: white; overflow: hidden; }' +
+      '#gustafta-chat-frame.open { display: block; animation: gustafta-slide-in 0.3s ease; }' +
+      '@keyframes gustafta-slide-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }';
+    document.head.appendChild(style);
+    
+    // Create widget elements
+    var container = document.createElement('div');
+    container.id = 'gustafta-widget-container';
+    
+    var embedUrl = apiBase + '/api/embed-chat/' + config.agentId + 
+      '?color=' + encodeURIComponent(config.color) + 
+      '&name=' + encodeURIComponent(config.name) + 
+      '&avatar=' + encodeURIComponent(config.avatar) + 
+      '&welcome=' + encodeURIComponent(config.welcomeMessage) + 
+      '&branding=' + config.showBranding;
+    
+    container.innerHTML = 
+      '<iframe id="gustafta-chat-frame" src="' + embedUrl + '"></iframe>' +
+      '<button id="gustafta-widget-btn" aria-label="Chat">' + icon + '</button>';
+    
+    document.body.appendChild(container);
+    
+    // Toggle chat
+    var btn = document.getElementById('gustafta-widget-btn');
+    var frame = document.getElementById('gustafta-chat-frame');
+    btn.onclick = function() { frame.classList.toggle('open'); };
+  }
+})();
+`;
+    
+    res.type('application/javascript');
+    res.send(loaderScript);
+  });
+
   return httpServer;
 }
