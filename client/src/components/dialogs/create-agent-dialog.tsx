@@ -116,10 +116,31 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
           setFormData({ name: "", description: "", tagline: "", category: "", subcategory: "" });
           setStep("start");
         },
-        onError: () => {
+        onError: (error: any) => {
+          let title = "Error";
+          let description = "Failed to create chatbot. Please try again.";
+          
+          try {
+            const errorData = error?.response?.data || error?.data || error;
+            if (errorData?.code === "NO_SUBSCRIPTION") {
+              title = "Langganan Diperlukan";
+              description = "Silakan berlangganan terlebih dahulu untuk membuat chatbot.";
+            } else if (errorData?.code === "SUBSCRIPTION_EXPIRED") {
+              title = "Langganan Habis";
+              description = "Langganan Anda sudah habis. Silakan perpanjang untuk membuat chatbot baru.";
+            } else if (errorData?.code === "LIMIT_REACHED") {
+              title = "Batas Chatbot Tercapai";
+              description = errorData?.message || "Upgrade paket untuk menambah chatbot.";
+            } else if (errorData?.message) {
+              description = errorData.message;
+            }
+          } catch (e) {
+            // Use default error message
+          }
+          
           toast({
-            title: "Error",
-            description: "Failed to create chatbot. Please try again.",
+            title,
+            description,
             variant: "destructive",
           });
         },

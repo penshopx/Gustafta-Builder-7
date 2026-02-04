@@ -357,14 +357,60 @@ export async function registerRoutes(
     }
   });
 
-  // Create agent
+  // Create agent (with subscription check)
   app.post("/api/agents", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertAgentSchema.safeParse(req.body);
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User ID not found" });
+      }
+
+      // Check subscription status
+      const subscription = await storage.getActiveSubscription(userId);
+      
+      if (!subscription) {
+        return res.status(403).json({ 
+          error: "Subscription required",
+          message: "Silakan berlangganan terlebih dahulu untuk membuat chatbot.",
+          code: "NO_SUBSCRIPTION"
+        });
+      }
+
+      if (subscription.status !== "active") {
+        return res.status(403).json({ 
+          error: "Subscription expired",
+          message: "Langganan Anda sudah habis. Silakan perpanjang untuk membuat chatbot baru.",
+          code: "SUBSCRIPTION_EXPIRED"
+        });
+      }
+
+      // Check chatbot limit
+      const currentAgentCount = await storage.countUserAgents(userId);
+      const chatbotLimit = subscription.chatbotLimit || 1;
+
+      if (currentAgentCount >= chatbotLimit) {
+        return res.status(403).json({ 
+          error: "Chatbot limit reached",
+          message: `Anda sudah mencapai batas ${chatbotLimit} chatbot. Upgrade paket untuk menambah chatbot.`,
+          code: "LIMIT_REACHED",
+          currentCount: currentAgentCount,
+          limit: chatbotLimit
+        });
+      }
+
+      // Parse and validate agent data
+      const parsed = insertAgentSchema.safeParse({
+        ...req.body,
+        userId: userId, // Add user ID to agent
+      });
+      
       if (!parsed.success) {
         console.error("Agent validation error:", parsed.error.format());
         return res.status(400).json({ error: parsed.error.message, details: parsed.error.format() });
       }
+      
       const agent = await storage.createAgent(parsed.data);
       res.status(201).json(agent);
     } catch (error) {
@@ -1148,6 +1194,30 @@ export async function registerRoutes(
       res.status(500).json({ error: "Failed to fetch subscription" });
     }
   });
+
+  // Auto-expire subscriptions (protected - requires auth)
+  app.post("/api/subscriptions/expire-check", isAuthenticated, async (_req, res) => {
+    try {
+      const expiredCount = await storage.expireSubscriptions();
+      console.log(`Auto-expired ${expiredCount} subscriptions`);
+      res.json({ success: true, expiredCount });
+    } catch (error) {
+      console.error("Failed to expire subscriptions:", error);
+      res.status(500).json({ error: "Failed to expire subscriptions" });
+    }
+  });
+
+  // Run expire check on startup
+  (async () => {
+    try {
+      const expiredCount = await storage.expireSubscriptions();
+      if (expiredCount > 0) {
+        console.log(`[Startup] Auto-expired ${expiredCount} subscriptions`);
+      }
+    } catch (error) {
+      console.error("[Startup] Failed to run expire check:", error);
+    }
+  })();
 
   // ==================== Telegram Webhook ====================
   

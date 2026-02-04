@@ -94,6 +94,10 @@ export interface IStorage {
   getSubscriptionByMayarOrderId(mayarOrderId: string): Promise<Subscription | undefined>;
   getActiveSubscription(userId: string): Promise<Subscription | undefined>;
   updateSubscription(id: string, data: Partial<InsertSubscription>): Promise<Subscription | undefined>;
+  expireSubscriptions(): Promise<number>;
+  
+  // Agent count for subscription limits
+  countUserAgents(userId: string): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -843,6 +847,37 @@ export class MemStorage implements IStorage {
     };
     this.subscriptions.set(id, updated);
     return updated;
+  }
+
+  async expireSubscriptions(): Promise<number> {
+    const now = new Date();
+    let expiredCount = 0;
+    
+    this.subscriptions.forEach((subscription, id) => {
+      if (subscription.status === "active" && subscription.endDate) {
+        const endDate = new Date(subscription.endDate);
+        if (endDate < now) {
+          this.subscriptions.set(id, {
+            ...subscription,
+            status: "expired",
+            updatedAt: new Date().toISOString(),
+          });
+          expiredCount++;
+        }
+      }
+    });
+    
+    return expiredCount;
+  }
+
+  async countUserAgents(userId: string): Promise<number> {
+    let count = 0;
+    this.agents.forEach((agent) => {
+      if (agent.userId === userId) {
+        count++;
+      }
+    });
+    return count;
   }
 }
 

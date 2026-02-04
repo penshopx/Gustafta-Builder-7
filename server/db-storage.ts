@@ -875,6 +875,27 @@ export class DatabaseStorage implements IStorage {
     if (result.length === 0) return undefined;
     return this.mapSubscriptionRow(result[0]);
   }
+
+  async expireSubscriptions(): Promise<number> {
+    const now = new Date();
+    const result = await db.update(subscriptionsTable)
+      .set({ status: "expired", updatedAt: now })
+      .where(
+        and(
+          eq(subscriptionsTable.status, "active"),
+          sql`${subscriptionsTable.endDate} < ${now}`
+        )
+      )
+      .returning();
+    return result.length;
+  }
+
+  async countUserAgents(userId: string): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(agents)
+      .where(eq(agents.userId, userId));
+    return Number(result[0]?.count || 0);
+  }
 }
 
 export const dbStorage = new DatabaseStorage();

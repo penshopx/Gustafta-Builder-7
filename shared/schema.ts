@@ -50,6 +50,7 @@ export const toolboxes = pgTable("toolboxes", {
 // Agents/Chatbots Table
 export const agents = pgTable("agents", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().default(""),
   name: text("name").notNull(),
   description: text("description").default(""),
   avatar: text("avatar").default(""),
@@ -236,6 +237,7 @@ export const aiModelSchema = z.enum([
 export type AIModel = z.infer<typeof aiModelSchema>;
 
 // Agent/Chatbot schema with enhanced features including Toolbox reference
+// Note: userId is NOT included here - it must be set server-side from authenticated user
 export const insertAgentSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().default(""),
