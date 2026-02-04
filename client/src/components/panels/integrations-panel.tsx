@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plug, MessageCircle, Send, Hash, Slack, Globe, Code, Check, X, Settings, Loader2, Link2 } from "lucide-react";
+import { Plug, MessageCircle, Send, Hash, Slack, Globe, Code, Check, X, Settings, Loader2, Link2, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +11,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useIntegrations, useCreateIntegration, useUpdateIntegration } from "@/hooks/use-integrations";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import type { Agent, Integration } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
+
+// Generate a secure random token
+function generateSecureToken(length: number = 32): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => chars[byte % chars.length]).join('');
+}
 
 interface IntegrationsPanelProps {
   agent: Agent;
@@ -78,6 +87,31 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
   const [selectedIntegration, setSelectedIntegration] = useState<typeof integrationTypes[0] | null>(null);
   const [configData, setConfigData] = useState<Record<string, string>>({});
   const [isConnecting, setIsConnecting] = useState(false);
+
+  // Mutation for generating access token
+  const generateTokenMutation = useMutation({
+    mutationFn: async () => {
+      const newToken = generateSecureToken(32);
+      const response = await apiRequest("PATCH", `/api/agents/${agent.id}`, {
+        accessToken: newToken
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      toast({
+        title: "Token Digenerate!",
+        description: "Access token baru sudah dibuat dan disimpan.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Gagal",
+        description: "Gagal membuat token baru. Coba lagi.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const getBaseUrl = () => {
     return window.location.origin;
@@ -389,18 +423,30 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
 
             <div className="space-y-2">
               <Label>Access Token</Label>
-              <div className="bg-muted rounded-lg p-3 font-mono text-sm flex justify-between items-center">
-                <span className="break-all">{agent.accessToken || "Belum digenerate"}</span>
-                <Button size="icon" variant="ghost" onClick={() => {
-                  if (agent.accessToken) {
-                    navigator.clipboard.writeText(agent.accessToken);
-                    toast({ title: "Tersalin!", description: "Access Token sudah disalin." });
-                  }
-                }}>
-                  <Code className="w-4 h-4" />
-                </Button>
+              <div className="bg-muted rounded-lg p-3 font-mono text-sm flex justify-between items-center gap-2">
+                <span className="break-all flex-1">{agent.accessToken || "Belum digenerate"}</span>
+                <div className="flex gap-1">
+                  <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    onClick={() => generateTokenMutation.mutate()}
+                    disabled={generateTokenMutation.isPending}
+                    title="Generate Token Baru"
+                    data-testid="button-generate-token"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${generateTokenMutation.isPending ? 'animate-spin' : ''}`} />
+                  </Button>
+                  <Button size="icon" variant="ghost" onClick={() => {
+                    if (agent.accessToken) {
+                      navigator.clipboard.writeText(agent.accessToken);
+                      toast({ title: "Tersalin!", description: "Access Token sudah disalin." });
+                    }
+                  }} title="Salin Token" data-testid="button-copy-token">
+                    <Code className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">Token untuk autentikasi API</p>
+              <p className="text-xs text-muted-foreground">Klik ikon refresh untuk generate token baru</p>
             </div>
 
             <div className="space-y-2">
