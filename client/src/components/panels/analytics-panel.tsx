@@ -1,6 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useAnalyticsSummary } from "@/hooks/use-analytics";
-import { MessageSquare, Users, Zap, BarChart3, Clock, TrendingUp, Lightbulb, Target, Sparkles, CheckCircle2 } from "lucide-react";
+import { MessageSquare, Users, Zap, BarChart3, Clock, TrendingUp, Lightbulb, Target, Sparkles, CheckCircle2, Download, FileJson, FileSpreadsheet } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 import type { Agent } from "@shared/schema";
 
 interface AnalyticsPanelProps {
@@ -9,6 +12,38 @@ interface AnalyticsPanelProps {
 
 export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
   const { data: analytics, isLoading } = useAnalyticsSummary(agent.id);
+  const { toast } = useToast();
+
+  const exportConversations = async (format: "json" | "csv") => {
+    try {
+      const response = await fetch(`/api/messages/${agent.id}/export/${format}`, {
+        credentials: "include",
+      });
+      
+      if (!response.ok) throw new Error("Export failed");
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${agent.name}_conversations_${Date.now()}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Export Berhasil",
+        description: `Percakapan berhasil diekspor sebagai ${format.toUpperCase()}`,
+      });
+    } catch {
+      toast({
+        title: "Export Gagal",
+        description: "Gagal mengekspor percakapan",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getDayLabels = () => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -86,9 +121,29 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
   return (
     <div className="flex-1 overflow-y-auto p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground" data-testid="text-analytics-title">Analytics</h2>
-          <p className="text-muted-foreground mt-1">Track your chatbot performance and engagement</p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground" data-testid="text-analytics-title">Analytics</h2>
+            <p className="text-muted-foreground mt-1">Track your chatbot performance and engagement</p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" data-testid="button-export-conversations">
+                <Download className="w-4 h-4 mr-2" />
+                Export Percakapan
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportConversations("json")} data-testid="menu-export-json">
+                <FileJson className="w-4 h-4 mr-2" />
+                Export sebagai JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportConversations("csv")} data-testid="menu-export-csv">
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Export sebagai CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {isLoading ? (

@@ -671,6 +671,52 @@ export async function registerRoutes(
     }
   });
 
+  // Export messages as JSON
+  app.get("/api/messages/:agentId/export/json", isAuthenticated, async (req, res) => {
+    try {
+      const messages = await storage.getMessages(req.params.agentId);
+      const agent = await storage.getAgent(req.params.agentId);
+      
+      const exportData = {
+        agentName: agent?.name || "Unknown Agent",
+        exportDate: new Date().toISOString(),
+        totalMessages: messages.length,
+        messages: messages.map(m => ({
+          role: m.role,
+          content: m.content,
+          timestamp: m.createdAt,
+        })),
+      };
+      
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", `attachment; filename="${agent?.name || "chat"}_export_${Date.now()}.json"`);
+      res.json(exportData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to export messages" });
+    }
+  });
+
+  // Export messages as CSV
+  app.get("/api/messages/:agentId/export/csv", isAuthenticated, async (req, res) => {
+    try {
+      const messages = await storage.getMessages(req.params.agentId);
+      const agent = await storage.getAgent(req.params.agentId);
+      
+      // Build CSV
+      const csvRows = ["Timestamp,Role,Content"];
+      messages.forEach(m => {
+        const content = m.content.replace(/"/g, '""').replace(/\n/g, ' ');
+        csvRows.push(`"${m.createdAt}","${m.role}","${content}"`);
+      });
+      
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="${agent?.name || "chat"}_export_${Date.now()}.csv"`);
+      res.send(csvRows.join("\n"));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to export messages" });
+    }
+  });
+
   // Send message and get AI response
   app.post("/api/messages", async (req, res) => {
     try {
@@ -1032,6 +1078,20 @@ export async function registerRoutes(
   });
 
   // ==================== Analytics Routes ====================
+
+  // Track analytics event (public endpoint for widget)
+  app.post("/api/analytics", async (req, res) => {
+    try {
+      const { agentId, eventType, metadata } = req.body;
+      if (!agentId || !eventType) {
+        return res.status(400).json({ error: "Missing agentId or eventType" });
+      }
+      await storage.trackAnalytics(agentId, eventType, metadata || {});
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to track analytics" });
+    }
+  });
 
   // Get analytics summary for an agent
   app.get("/api/analytics/:agentId/summary", async (req, res) => {
@@ -2156,7 +2216,7 @@ export async function registerRoutes(
     var container = document.createElement('div');
     container.id = 'gustafta-widget-container';
     
-    var embedUrl = apiBase + '/api/embed-chat/' + config.agentId + 
+    var embedUrl = apiBase + '/embed/' + config.agentId + 
       '?color=' + encodeURIComponent(config.color) + 
       '&name=' + encodeURIComponent(config.name) + 
       '&avatar=' + encodeURIComponent(config.avatar) + 
