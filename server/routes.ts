@@ -15,7 +15,7 @@ import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
 import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type SubscriptionPlanKey } from "./lib/mayar";
-import { gustaftaKnowledgeBaseAgent } from "./seed-knowledge-base";
+import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 import { isAuthenticated } from "./replit_integrations/auth";
 
 // Initialize OpenAI client with Replit AI Integrations
@@ -307,17 +307,33 @@ export async function registerRoutes(
 
   // ==================== Public Agent Routes ====================
   
-  // Get Gustafta Assistant (public - for landing page chatbot)
+  // Get Gustafta Helpdesk (public - for landing page chatbot)
   app.get("/api/agents/gustafta-assistant", async (_req, res) => {
     try {
       const agents = await storage.getAgents();
-      const gustaftaAssistant = agents.find(agent => agent.name === "Gustafta Assistant");
-      if (!gustaftaAssistant) {
-        return res.status(404).json({ error: "Gustafta Assistant not found" });
+      const gustaftaHelpdesk = agents.find(agent => 
+        agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
+      );
+      if (!gustaftaHelpdesk) {
+        return res.status(404).json({ error: "Gustafta Helpdesk not found" });
       }
-      res.json(gustaftaAssistant);
+      res.json(gustaftaHelpdesk);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch Gustafta Assistant" });
+      res.status(500).json({ error: "Failed to fetch Gustafta Helpdesk" });
+    }
+  });
+
+  // Get Dokumentender Assistant (public)
+  app.get("/api/agents/dokumentender", async (_req, res) => {
+    try {
+      const agents = await storage.getAgents();
+      const dokumentender = agents.find(agent => agent.name === "Dokumentender Assistant");
+      if (!dokumentender) {
+        return res.status(404).json({ error: "Dokumentender Assistant not found" });
+      }
+      res.json(dokumentender);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch Dokumentender Assistant" });
     }
   });
 
@@ -470,24 +486,41 @@ export async function registerRoutes(
     }
   });
 
-  // Seed Gustafta Knowledge Base chatbot
-  app.post("/api/agents/seed-knowledge-base", async (req, res) => {
+  // Seed Gustafta Helpdesk and Dokumentender chatbots
+  app.post("/api/agents/seed-knowledge-base", async (_req, res) => {
     try {
       const existingAgents = await storage.getAgents();
-      const alreadyExists = existingAgents.some(
-        agent => agent.name === "Gustafta Assistant"
-      );
+      const createdAgents: any[] = [];
       
-      if (alreadyExists) {
-        const existing = existingAgents.find(a => a.name === "Gustafta Assistant");
-        return res.json({ message: "Gustafta Assistant already exists", agent: existing });
+      // Create Gustafta Helpdesk
+      const helpdeskExists = existingAgents.some(
+        agent => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
+      );
+      if (!helpdeskExists) {
+        const helpdesk = await storage.createAgent(gustaftaKnowledgeBaseAgent);
+        createdAgents.push(helpdesk);
       }
       
-      const agent = await storage.createAgent(gustaftaKnowledgeBaseAgent);
-      res.status(201).json({ message: "Gustafta Assistant created successfully", agent });
+      // Create Dokumentender Assistant
+      const dokumentenderExists = existingAgents.some(
+        agent => agent.name === "Dokumentender Assistant"
+      );
+      if (!dokumentenderExists) {
+        const dokumentender = await storage.createAgent(dokumentenderAgent);
+        createdAgents.push(dokumentender);
+      }
+      
+      if (createdAgents.length === 0) {
+        return res.json({ message: "All chatbots already exist" });
+      }
+      
+      res.status(201).json({ 
+        message: `Created ${createdAgents.length} chatbot(s) successfully`, 
+        agents: createdAgents 
+      });
     } catch (error: any) {
       console.error("Seed knowledge base error:", error);
-      res.status(500).json({ error: "Failed to seed knowledge base chatbot", details: error?.message });
+      res.status(500).json({ error: "Failed to seed knowledge base chatbots", details: error?.message });
     }
   });
 
