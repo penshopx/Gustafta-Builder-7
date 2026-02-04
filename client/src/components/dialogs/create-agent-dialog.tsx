@@ -101,7 +101,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
       name: formData.name.trim(),
       description: formData.description.trim(),
       tagline: formData.tagline.trim(),
-      toolboxId: activeToolbox?.id || null,
+      toolboxId: activeToolbox?.id || "",
     };
 
     createAgent.mutate(

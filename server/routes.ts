@@ -362,12 +362,14 @@ export async function registerRoutes(
     try {
       const parsed = insertAgentSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ error: parsed.error.message });
+        console.error("Agent validation error:", parsed.error.format());
+        return res.status(400).json({ error: parsed.error.message, details: parsed.error.format() });
       }
       const agent = await storage.createAgent(parsed.data);
       res.status(201).json(agent);
     } catch (error) {
-      res.status(500).json({ error: "Failed to create agent" });
+      console.error("Agent creation error:", error);
+      res.status(500).json({ error: "Failed to create agent", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
