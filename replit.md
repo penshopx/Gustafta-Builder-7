@@ -150,3 +150,12 @@ Schema includes:
 - Advanced features section
 - Statistics display
 - Improved CTAs for authentication flow
+
+### Dynamic Widget Embed System
+- Widget configuration fetched dynamically from backend (no hard-coded values in embed)
+- `/api/widget/config/:agentId` - Public API endpoint for widget config
+- `/widget/loader.js` - Dynamic loader script with data-agent-id attribute
+- Supports: agentId, welcomeMessage, color, position, size, branding, enable/disable
+- Widget adapts to changes automatically without needing to replace embed code
+- Access control: Only active + public agents can be embedded
+- Multi-widget support: Multiple widgets per page (different agents)
