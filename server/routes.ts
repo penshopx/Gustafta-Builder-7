@@ -367,15 +367,27 @@ export async function registerRoutes(
         return res.status(401).json({ error: "User ID not found" });
       }
 
-      // Check subscription status
-      const subscription = await storage.getActiveSubscription(userId);
+      // Check subscription status - auto-create free trial if no subscription exists
+      let subscription = await storage.getActiveSubscription(userId);
       
       if (!subscription) {
-        return res.status(403).json({ 
-          error: "Subscription required",
-          message: "Silakan berlangganan terlebih dahulu untuk membuat chatbot.",
-          code: "NO_SUBSCRIPTION"
+        // Auto-create free trial subscription for new users
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 14); // 14-day free trial
+        
+        subscription = await storage.createSubscription({
+          userId,
+          plan: "free_trial",
+          status: "active",
+          amount: 0,
+          currency: "IDR",
+          chatbotLimit: 1,
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
         });
+        
+        console.log(`Created free trial subscription for user ${userId}`);
       }
 
       if (subscription.status !== "active") {
