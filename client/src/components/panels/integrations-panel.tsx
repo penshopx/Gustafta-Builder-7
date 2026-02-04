@@ -580,17 +580,41 @@ Response:
           <div className="space-y-4 py-4">
             {selectedIntegration?.type === "whatsapp" && (
               <>
-                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-sm mb-2">
-                  <p className="font-medium text-foreground mb-2">Hubungkan WhatsApp Official:</p>
-                  <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                    <li>Daftar di layanan WhatsApp API (Kirimi.id, Botika, Multichat, WATI, dll)</li>
-                    <li>Masukkan nomor telepon WhatsApp Business Anda</li>
-                    <li>Dapatkan Token dari dashboard layanan</li>
-                    <li>Salin Webhook URL ke dashboard layanan</li>
-                  </ol>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Mendukung: Kirimi.id, Botika, Multichat, WhatsApp Cloud API, dan layanan lainnya
-                  </p>
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-sm mb-2 space-y-3">
+                  <p className="font-medium text-foreground">Pilih Layanan WhatsApp API:</p>
+                  
+                  <div className="space-y-2">
+                    <p className="font-medium text-xs text-foreground">Opsi 1: Fonnte (Paling Mudah & Murah)</p>
+                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-xs">
+                      <li>Kunjungi <a href="https://fonnte.com" target="_blank" rel="noopener" className="text-primary underline">fonnte.com</a> dan daftar akun</li>
+                      <li>Hubungkan nomor WhatsApp Anda dengan scan QR</li>
+                      <li>Salin Token dari menu Device</li>
+                      <li>Paste Webhook URL di bawah ke menu Webhook di Fonnte</li>
+                    </ol>
+                    <p className="text-xs text-green-600 dark:text-green-400">Mulai dari Rp 25.000/bulan</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="font-medium text-xs text-foreground">Opsi 2: Kirimi.id (Indonesia)</p>
+                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-xs">
+                      <li>Daftar di <a href="https://kirimi.id" target="_blank" rel="noopener" className="text-primary underline">kirimi.id</a></li>
+                      <li>Tambahkan device dan scan QR dengan WhatsApp</li>
+                      <li>Salin API Token dari dashboard</li>
+                      <li>Set Webhook URL di pengaturan device</li>
+                    </ol>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="font-medium text-xs text-foreground">Opsi 3: WhatsApp Cloud API (Gratis dari Meta)</p>
+                    <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-xs">
+                      <li>Buka <a href="https://developers.facebook.com" target="_blank" rel="noopener" className="text-primary underline">developers.facebook.com</a></li>
+                      <li>Buat App baru → pilih Business → WhatsApp</li>
+                      <li>Verifikasi bisnis Anda (butuh dokumen)</li>
+                      <li>Dapatkan Access Token dan Phone Number ID</li>
+                      <li>Set Webhook URL dengan verify token</li>
+                    </ol>
+                    <p className="text-xs text-muted-foreground">Gratis 1000 percakapan/bulan, tapi proses verifikasi lebih lama</p>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Nomor Telepon WhatsApp</Label>

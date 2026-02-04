@@ -1582,16 +1582,26 @@ export async function registerRoutes(
         return res.status(200).json({ status: "ok" });
       }
       
-      // Handle different webhook formats (Multichat, WhatsApp Cloud API, Kirimi.id, etc.)
+      // Handle different webhook formats (Fonnte, Multichat, WhatsApp Cloud API, Kirimi.id, etc.)
       let phoneNumber: string | undefined;
       let messageText: string | undefined;
       let messageId: string | undefined;
+      let provider: string = "generic";
       
+      // Fonnte format: { pengirim: "628...", pesan: "text", device: "..." }
+      if (payload.pengirim && payload.pesan) {
+        phoneNumber = payload.pengirim;
+        messageText = payload.pesan;
+        messageId = payload.id;
+        provider = "fonnte";
+        console.log("Fonnte format detected");
+      }
       // Kirimi.id format: { event: "message.received", from: "628...", message: "text" }
-      if (payload.event === "message.received" && payload.from && payload.message) {
+      else if (payload.event === "message.received" && payload.from && payload.message) {
         phoneNumber = payload.from;
         messageText = payload.message;
         messageId = payload.msgId || payload.messageId;
+        provider = "kirimi";
         console.log("Kirimi.id format detected");
       }
       // Multichat format: { from: "628...", text: "message" }
@@ -1599,6 +1609,7 @@ export async function registerRoutes(
         phoneNumber = payload.from;
         messageText = payload.text;
         messageId = payload.id;
+        provider = "multichat";
       }
       // WhatsApp Cloud API format
       else if (payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0]) {
@@ -1606,6 +1617,7 @@ export async function registerRoutes(
         phoneNumber = msg.from;
         messageText = msg.text?.body;
         messageId = msg.id;
+        provider = "meta";
       }
       // Generic format: { sender: "628...", message: "text" }
       else if (payload.message && payload.sender) {
@@ -1628,25 +1640,59 @@ export async function registerRoutes(
       // Generate AI response
       const aiResponse = await generateAIResponse(agentId, messageText);
       
-      // Send response via Multichat API or configured send URL
-      const sendUrl = waConfig.sendUrl || waConfig.webhookUrl;
-      if (sendUrl) {
-        try {
-          await fetch(sendUrl, {
+      // Send response based on provider
+      try {
+        if (provider === "fonnte") {
+          // Fonnte API format
+          await fetch("https://api.fonnte.com/send", {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${waApiToken}`,
+              "Authorization": waApiToken,
             },
-            body: JSON.stringify({
-              to: phoneNumber,
-              text: aiResponse,
-              replyTo: messageId,
+            body: new URLSearchParams({
+              target: phoneNumber,
+              message: aiResponse,
             }),
           });
-        } catch (sendError) {
-          console.error("Failed to send WhatsApp reply:", sendError);
+          console.log("Sent reply via Fonnte");
+        } else if (provider === "meta") {
+          // WhatsApp Cloud API format
+          const phoneNumberId = waConfig.phoneNumberId;
+          if (phoneNumberId) {
+            await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}/messages`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${waApiToken}`,
+              },
+              body: JSON.stringify({
+                messaging_product: "whatsapp",
+                to: phoneNumber,
+                type: "text",
+                text: { body: aiResponse },
+              }),
+            });
+          }
+        } else {
+          // Generic/Multichat/Kirimi format - use configured send URL
+          const sendUrl = waConfig.sendUrl || waConfig.webhookUrl;
+          if (sendUrl) {
+            await fetch(sendUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${waApiToken}`,
+              },
+              body: JSON.stringify({
+                to: phoneNumber,
+                text: aiResponse,
+                replyTo: messageId,
+              }),
+            });
+          }
         }
+      } catch (sendError) {
+        console.error("Failed to send WhatsApp reply:", sendError);
       }
       
       // Log the interaction
