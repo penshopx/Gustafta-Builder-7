@@ -124,6 +124,14 @@ Schema includes:
 
 ## Recent Changes (February 2026)
 
+### Fonnte WhatsApp Integration (Feb 5, 2026)
+- Implemented complete Fonnte WhatsApp integration with webhook handler
+- Webhook endpoint: POST /api/webhook/whatsapp/:agentId (supports Fonnte format: {pengirim, pesan})
+- Test connection endpoint: POST /api/whatsapp/test-connection/:agentId (authenticated)
+- Send test message endpoint: POST /api/whatsapp/send-test/:agentId (authenticated)
+- Frontend UI with clear Fonnte setup instructions and test connection button
+- Security: All management endpoints require authentication
+
 ### Pre-Deployment Synchronization (Feb 5, 2026)
 - Enhanced Gustafta Helpdesk knowledge base with comprehensive feature documentation
 - Added complete explanation of all 10 chatbot templates with use cases

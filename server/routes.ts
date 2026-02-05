@@ -1613,7 +1613,120 @@ export async function registerRoutes(
     }
   });
 
-  // ==================== WhatsApp Webhook (via Multichat/generic provider) ====================
+  // ==================== WhatsApp/Fonnte Integration ====================
+  
+  // Test WhatsApp/Fonnte connection (requires authentication)
+  app.post("/api/whatsapp/test-connection/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      
+      const integrations = await storage.getIntegrations(agentId);
+      const whatsappIntegration = integrations.find(i => i.type === "whatsapp");
+      const waConfig = (whatsappIntegration?.config || {}) as Record<string, string>;
+      const token = waConfig.apiToken || waConfig.token;
+      const phone = waConfig.phone;
+      
+      if (!whatsappIntegration || !token) {
+        return res.status(400).json({ error: "Token WhatsApp/Fonnte belum dikonfigurasi" });
+      }
+      
+      // Test Fonnte API connection by checking device status
+      const response = await fetch("https://api.fonnte.com/device", {
+        method: "POST",
+        headers: {
+          "Authorization": token,
+        },
+      });
+      
+      const result = await response.json() as { status?: boolean; reason?: string; device?: string };
+      
+      if (result.status) {
+        // Update webhook URL in integration config
+        const host = req.get("host");
+        const baseUrl = host ? `https://${host}` : `https://${process.env.REPLIT_DEV_DOMAIN}`;
+        const webhookUrl = `${baseUrl}/api/webhook/whatsapp/${agentId}`;
+        
+        await storage.updateIntegration(whatsappIntegration.id, {
+          config: { ...waConfig, webhookUrl },
+          isEnabled: true,
+        });
+        
+        res.json({ 
+          success: true,
+          device: result.device,
+          webhookUrl,
+          message: "Koneksi Fonnte berhasil! Jangan lupa set Webhook URL di dashboard Fonnte."
+        });
+      } else {
+        res.status(400).json({ 
+          success: false,
+          error: result.reason || "Token tidak valid atau device tidak terhubung",
+          details: result
+        });
+      }
+    } catch (error) {
+      console.error("WhatsApp connection test error:", error);
+      res.status(500).json({ error: "Gagal menguji koneksi WhatsApp" });
+    }
+  });
+
+  // Send test message via Fonnte (requires authentication)
+  app.post("/api/whatsapp/send-test/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const { agentId } = req.params;
+      const { targetPhone } = req.body;
+      
+      if (!targetPhone || typeof targetPhone !== "string") {
+        return res.status(400).json({ error: "Nomor telepon tujuan harus diisi" });
+      }
+      
+      const normalizedPhone = targetPhone.replace(/[^0-9]/g, "");
+      if (normalizedPhone.length < 10 || normalizedPhone.length > 15) {
+        return res.status(400).json({ error: "Format nomor telepon tidak valid (10-15 digit)" });
+      }
+      
+      const integrations = await storage.getIntegrations(agentId);
+      const whatsappIntegration = integrations.find(i => i.type === "whatsapp");
+      const waConfig = (whatsappIntegration?.config || {}) as Record<string, string>;
+      const token = waConfig.apiToken || waConfig.token;
+      
+      if (!token) {
+        return res.status(400).json({ error: "Token Fonnte belum dikonfigurasi" });
+      }
+      
+      const agent = await storage.getAgent(agentId);
+      const testMessage = `Halo! Ini pesan test dari chatbot "${agent?.name || 'Gustafta'}". Integrasi WhatsApp berhasil!`;
+      
+      const response = await fetch("https://api.fonnte.com/send", {
+        method: "POST",
+        headers: {
+          "Authorization": token,
+        },
+        body: new URLSearchParams({
+          target: normalizedPhone,
+          message: testMessage,
+          countryCode: "62",
+        }),
+      });
+      
+      const result = await response.json() as { status?: boolean; reason?: string };
+      
+      if (result.status) {
+        res.json({ 
+          success: true,
+          message: "Pesan test berhasil dikirim!"
+        });
+      } else {
+        res.status(400).json({ 
+          success: false,
+          error: result.reason || "Gagal mengirim pesan"
+        });
+      }
+    } catch (error) {
+      console.error("WhatsApp send test error:", error);
+      res.status(500).json({ error: "Gagal mengirim pesan test" });
+    }
+  });
   
   // WhatsApp webhook endpoint
   app.post("/api/webhook/whatsapp/:agentId", async (req, res) => {

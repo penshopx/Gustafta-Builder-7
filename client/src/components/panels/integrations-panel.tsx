@@ -147,6 +147,41 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
     }
   };
 
+  const testFonnteConnection = async () => {
+    setIsConnecting(true);
+    try {
+      const saved = await saveConfig();
+      if (!saved) {
+        setIsConnecting(false);
+        return;
+      }
+      
+      const response = await apiRequest("POST", `/api/whatsapp/test-connection/${agent.id}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Koneksi Berhasil!",
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: "Gagal",
+          description: result.error || "Gagal menguji koneksi Fonnte",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal menguji koneksi. Pastikan Token sudah benar.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
   const getIntegration = (type: string): Integration | undefined => {
     return integrations.find((i) => i.type === type);
   };
@@ -584,14 +619,16 @@ Response:
                   <p className="font-medium text-foreground">Pilih Layanan WhatsApp API:</p>
                   
                   <div className="space-y-2">
-                    <p className="font-medium text-xs text-foreground">Opsi 1: Fonnte (Paling Mudah & Murah)</p>
+                    <p className="font-medium text-xs text-foreground">Opsi 1: Fonnte (Rekomendasi - Mudah & Murah)</p>
                     <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-xs">
-                      <li>Kunjungi <a href="https://fonnte.com" target="_blank" rel="noopener" className="text-primary underline">fonnte.com</a> dan daftar akun</li>
-                      <li>Hubungkan nomor WhatsApp Anda dengan scan QR</li>
-                      <li>Salin Token dari menu Device</li>
-                      <li>Paste Webhook URL di bawah ke menu Webhook di Fonnte</li>
+                      <li>Daftar akun di <a href="https://md.fonnte.com/new/register.php" target="_blank" rel="noopener" className="text-primary underline">md.fonnte.com/new/register.php</a></li>
+                      <li>Buat Device baru dan connect via scan QR code WhatsApp</li>
+                      <li>Salin Token API dari dashboard Device</li>
+                      <li>Paste token di field "Token" di bawah</li>
+                      <li>Copy Webhook URL di bawah ke menu Webhook di dashboard Fonnte</li>
                     </ol>
-                    <p className="text-xs text-green-600 dark:text-green-400">Mulai dari Rp 25.000/bulan</p>
+                    <p className="text-xs text-green-600 dark:text-green-400">Mulai dari Rp 25.000/bulan - Tanpa verifikasi bisnis</p>
+                    <p className="text-xs text-muted-foreground">Dokumentasi: <a href="https://docs.fonnte.com/make-whatsapp-bot-using-php-webhook/" target="_blank" rel="noopener" className="text-primary underline">docs.fonnte.com</a></p>
                   </div>
 
                   <div className="space-y-2">
@@ -654,9 +691,30 @@ Response:
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Salin URL ini ke dashboard layanan WhatsApp Anda
+                    Salin URL ini ke menu Webhook di dashboard Fonnte
                   </p>
                 </div>
+                <Button 
+                  onClick={testFonnteConnection}
+                  disabled={!configData.apiToken || isConnecting}
+                  className="w-full"
+                  data-testid="button-test-fonnte"
+                >
+                  {isConnecting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Menguji Koneksi...
+                    </>
+                  ) : (
+                    <>
+                      <Link2 className="w-4 h-4 mr-2" />
+                      Test Koneksi Fonnte
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Klik tombol di atas untuk memverifikasi token dan menyimpan konfigurasi
+                </p>
               </>
             )}
             {selectedIntegration?.type === "telegram" && (
