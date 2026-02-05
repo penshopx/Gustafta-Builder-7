@@ -134,6 +134,7 @@ export const integrations = pgTable("integrations", {
 export const agentMessages = pgTable("agent_messages", {
   id: serial("id").primaryKey(),
   agentId: integer("agent_id").notNull(),
+  sessionId: text("session_id").default(""),
   role: text("role").notNull(),
   content: text("content").notNull(),
   reasoning: text("reasoning").default(""),
