@@ -218,7 +218,7 @@ export class DatabaseStorage implements IStorage {
 
   async setActiveBigIdea(id: string): Promise<BigIdea | undefined> {
     await db.update(bigIdeas).set({ isActive: false });
-    return this.updateBigIdea(id, {});
+    return this.updateBigIdea(id, { isActive: true });
   }
 
   async deleteBigIdea(id: string): Promise<boolean> {
