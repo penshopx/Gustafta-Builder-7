@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
-  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette
+  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -449,11 +449,21 @@ export default function Dashboard() {
                       data-testid={`agent-option-${agent.id}`}
                     >
                       <Avatar className="w-6 h-6">
-                        <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                          {agent.name.substring(0, 2).toUpperCase()}
+                        <AvatarFallback className={cn(
+                          "text-xs",
+                          agent.isOrchestrator ? "bg-purple-500/10 text-purple-600" : "bg-primary/10 text-primary"
+                        )}>
+                          {agent.isOrchestrator ? (
+                            <Network className="w-3 h-3" />
+                          ) : (
+                            agent.name.substring(0, 2).toUpperCase()
+                          )}
                         </AvatarFallback>
                       </Avatar>
                       <span className="truncate">{agent.name}</span>
+                      {agent.isOrchestrator && (
+                        <Badge className="text-xs bg-purple-500/20 text-purple-600 border-purple-500/30">Orchestrator</Badge>
+                      )}
                       {agent.isActive && (
                         <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>
                       )}

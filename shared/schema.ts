@@ -73,6 +73,8 @@ export const agents = pgTable("agents", {
   isPublic: boolean("is_public").default(false),
   allowedDomains: jsonb("allowed_domains").default([]),
   toolboxId: integer("toolbox_id"),
+  bigIdeaId: integer("big_idea_id"),
+  isOrchestrator: boolean("is_orchestrator").default(false),
   orchestratorRole: text("orchestrator_role").default("standalone"),
   parentAgentId: integer("parent_agent_id"),
   agenticMode: boolean("agentic_mode").default(false),
@@ -266,8 +268,12 @@ export const insertAgentSchema = z.object({
   accessToken: z.string().optional().default(""),
   isPublic: z.boolean().optional().default(false),
   allowedDomains: z.array(z.string()).optional().default([]),
-  // Hierarchy: Toolbox reference
-  toolboxId: z.string().optional().default(""),
+  // Hierarchy: Toolbox reference (required for module chatbots)
+  toolboxId: z.string().optional(),
+  // Hierarchy: Big Idea reference (required for orchestrators)
+  bigIdeaId: z.string().optional(),
+  // Is this an orchestrator chatbot?
+  isOrchestrator: z.boolean().optional().default(false),
   // Role in orchestration
   orchestratorRole: z.enum(["orchestrator", "specialist", "standalone"]).optional().default("standalone"),
   parentAgentId: z.string().optional().default(""),
@@ -296,7 +302,19 @@ export const insertAgentSchema = z.object({
   widgetShowBranding: z.boolean().optional().default(true),
   widgetWelcomeMessage: z.string().optional().default(""),
   widgetButtonIcon: z.enum(["chat", "message", "bot", "help"]).optional().default("chat"),
-});
+}).refine(
+  (data) => {
+    // Orchestrator must have bigIdeaId, Module must have toolboxId
+    if (data.isOrchestrator) {
+      return !!data.bigIdeaId;
+    }
+    return true; // Module validation is optional - existing agents may not have toolboxId
+  },
+  {
+    message: "Orchestrator membutuhkan Big Idea yang aktif",
+    path: ["bigIdeaId"],
+  }
+);
 
 export type InsertAgent = z.infer<typeof insertAgentSchema>;
 export type Agent = InsertAgent & {

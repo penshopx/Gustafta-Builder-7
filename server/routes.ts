@@ -438,6 +438,25 @@ export async function registerRoutes(
         console.error("Agent validation error:", parsed.error.format());
         return res.status(400).json({ error: parsed.error.message, details: parsed.error.format() });
       }
+
+      // Enforce hierarchy: Orchestrator requires bigIdeaId, Module requires toolboxId
+      const { isOrchestrator, bigIdeaId, toolboxId } = parsed.data;
+      
+      if (isOrchestrator && !bigIdeaId) {
+        return res.status(400).json({ 
+          error: "Orchestrator requires Big Idea",
+          message: "Chatbot orchestrator membutuhkan Big Idea yang aktif.",
+          code: "ORCHESTRATOR_NO_BIGIDEA"
+        });
+      }
+      
+      if (!isOrchestrator && !toolboxId) {
+        return res.status(400).json({ 
+          error: "Module requires Toolbox",
+          message: "Chatbot modul membutuhkan Toolbox yang aktif.",
+          code: "MODULE_NO_TOOLBOX"
+        });
+      }
       
       const agent = await storage.createAgent(parsed.data);
       res.status(201).json(agent);

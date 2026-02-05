@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb } from "lucide-react";
+import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +39,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
 
   const [step, setStep] = useState<Step>("start");
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [isOrchestrator, setIsOrchestrator] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -96,12 +97,34 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
       return;
     }
 
+    // Validation for orchestrator: requires Big Idea
+    if (isOrchestrator && !activeBigIdea) {
+      toast({
+        title: "Validation Error",
+        description: "Orchestrator membutuhkan Big Idea yang aktif.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validation for module: requires Toolbox
+    if (!isOrchestrator && !activeToolbox) {
+      toast({
+        title: "Validation Error",
+        description: "Chatbot modul membutuhkan Toolbox yang aktif. Silakan pilih Toolbox terlebih dahulu.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const agentData: Partial<InsertAgent> = {
       ...formData,
       name: formData.name.trim(),
       description: formData.description.trim(),
       tagline: formData.tagline.trim(),
-      toolboxId: activeToolbox?.id || "",
+      toolboxId: isOrchestrator ? undefined : activeToolbox?.id,
+      bigIdeaId: isOrchestrator ? activeBigIdea?.id : undefined,
+      isOrchestrator: isOrchestrator,
     };
 
     createAgent.mutate(
@@ -151,6 +174,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
   const handleClose = (isOpen: boolean) => {
     if (!isOpen) {
       setStep("start");
+      setIsOrchestrator(false);
       setFormData({ name: "", description: "", tagline: "", category: "", subcategory: "" });
     }
     onOpenChange(isOpen);
@@ -161,19 +185,26 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
       <DialogContent className="sm:max-w-2xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-primary" />
+            <div className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center",
+              isOrchestrator ? "bg-purple-500/10" : "bg-primary/10"
+            )}>
+              {isOrchestrator ? (
+                <Network className="w-4 h-4 text-purple-500" />
+              ) : (
+                <Bot className="w-4 h-4 text-primary" />
+              )}
             </div>
             {step === "start" && "Buat Chatbot Baru"}
-            {step === "category" && "Pilih Kategori"}
+            {step === "category" && (isOrchestrator ? "Kategori Orchestrator" : "Pilih Kategori")}
             {step === "subcategory" && selectedCategory?.label}
-            {step === "details" && "Detail Chatbot"}
+            {step === "details" && (isOrchestrator ? "Detail Orchestrator" : "Detail Chatbot")}
           </DialogTitle>
           <DialogDescription>
             {step === "start" && "Pilih cara untuk memulai pembuatan chatbot"}
-            {step === "category" && "Pilih kategori bisnis untuk chatbot Anda"}
+            {step === "category" && (isOrchestrator ? "Pilih kategori untuk chatbot orchestrator Anda" : "Pilih kategori bisnis untuk chatbot Anda")}
             {step === "subcategory" && "Pilih peran atau profesi spesifik"}
-            {step === "details" && "Konfigurasi informasi dasar chatbot Anda"}
+            {step === "details" && (isOrchestrator ? "Konfigurasi chatbot orchestrator Anda" : "Konfigurasi informasi dasar chatbot Anda")}
           </DialogDescription>
         </DialogHeader>
 
@@ -189,20 +220,56 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                       {activeBigIdea.name}
                     </Badge>
                   )}
-                  {activeToolbox && (
+                  {activeToolbox && !isOrchestrator && (
                     <Badge variant="secondary" className="gap-1">
                       <Wrench className="h-3 w-3" />
                       {activeToolbox.name}
+                    </Badge>
+                  )}
+                  {isOrchestrator && (
+                    <Badge className="gap-1 bg-purple-500/20 text-purple-600 border-purple-500/30">
+                      <Network className="h-3 w-3" />
+                      Orchestrator
                     </Badge>
                   )}
                 </div>
               </div>
             )}
             
+            {/* Orchestrator Option - Only show when Big Idea is active */}
+            {activeBigIdea && (
+              <Card
+                className={cn(
+                  "cursor-pointer transition-all hover-elevate border-2",
+                  isOrchestrator ? "border-purple-500 bg-purple-500/5" : "border-transparent"
+                )}
+                onClick={() => {
+                  setIsOrchestrator(true);
+                  setStep("category");
+                }}
+                data-testid="card-create-orchestrator"
+              >
+                <CardHeader className="pb-2">
+                  <div className="p-2 rounded-lg bg-purple-500/10 w-fit">
+                    <Network className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <CardTitle className="text-base mt-2">Buat Chatbot Orchestrator</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Chatbot utama untuk Big Idea "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke modul-modul chatbot lainnya.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            )}
+            
             <div className="grid gap-4 sm:grid-cols-2">
               <Card
                 className="cursor-pointer transition-all hover-elevate"
-                onClick={() => setTemplateDialogOpen(true)}
+                onClick={() => {
+                  setIsOrchestrator(false);
+                  setTemplateDialogOpen(true);
+                }}
                 data-testid="card-use-template"
               >
                 <CardHeader className="pb-2">
@@ -213,14 +280,19 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Mulai dengan template siap pakai untuk berbagai industri seperti e-commerce, pendidikan, kesehatan, dan lainnya.
+                    {activeToolbox 
+                      ? `Buat chatbot modul untuk Toolbox "${activeToolbox.name}" dengan template siap pakai.`
+                      : "Mulai dengan template siap pakai untuk berbagai industri."}
                   </CardDescription>
                 </CardContent>
               </Card>
 
               <Card
                 className="cursor-pointer transition-all hover-elevate"
-                onClick={() => setStep("category")}
+                onClick={() => {
+                  setIsOrchestrator(false);
+                  setStep("category");
+                }}
                 data-testid="card-start-scratch"
               >
                 <CardHeader className="pb-2">
@@ -231,7 +303,9 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Buat chatbot custom dengan memilih kategori bisnis dan mengkonfigurasi sendiri semua pengaturan.
+                    {activeToolbox 
+                      ? `Buat chatbot modul untuk Toolbox "${activeToolbox.name}" dari awal.`
+                      : "Buat chatbot custom dengan konfigurasi sendiri."}
                   </CardDescription>
                 </CardContent>
               </Card>
