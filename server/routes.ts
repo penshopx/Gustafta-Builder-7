@@ -1248,9 +1248,33 @@ export async function registerRoutes(
     }
   });
 
-  // Mayar webhook handler
+  // Mayar webhook handler with signature verification
   app.post("/api/webhooks/mayar", async (req, res) => {
     try {
+      // Verify webhook signature if webhook secret is configured
+      const webhookSecret = process.env.MAYAR_WEBHOOK_SECRET;
+      if (webhookSecret) {
+        const signature = req.headers["x-mayar-signature"] || req.headers["x-webhook-signature"];
+        if (!signature) {
+          console.warn("Mayar webhook received without signature");
+          return res.status(401).json({ error: "Missing webhook signature" });
+        }
+        
+        // Verify HMAC signature
+        const crypto = await import("crypto");
+        const expectedSignature = crypto
+          .createHmac("sha256", webhookSecret)
+          .update(JSON.stringify(req.body))
+          .digest("hex");
+        
+        if (signature !== expectedSignature && signature !== `sha256=${expectedSignature}`) {
+          console.warn("Mayar webhook signature verification failed");
+          return res.status(401).json({ error: "Invalid webhook signature" });
+        }
+      } else {
+        console.warn("MAYAR_WEBHOOK_SECRET not configured - webhook signature verification skipped");
+      }
+      
       const payload = parseWebhookPayload(req.body);
       
       if (!payload || !payload.event) {
