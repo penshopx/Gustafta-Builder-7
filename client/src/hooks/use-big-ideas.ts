@@ -53,6 +53,8 @@ export function useActivateBigIdea() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
     },
   });
 }
