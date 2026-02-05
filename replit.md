@@ -124,6 +124,17 @@ Schema includes:
 
 ## Recent Changes (February 2026)
 
+### Orchestrator vs Module Architecture (Feb 5, 2026)
+- Chatbot hierarchy: Big Idea (brand) → Toolbox (category) → Agent (chatbot)
+- **Orchestrator**: Main entry-point chatbot for a Big Idea (1 per Big Idea, no Toolbox required)
+  - Created via "Buat Chatbot Orchestrator" when Big Idea is active (no Toolbox selected)
+  - Has purple "Orchestrator" badge and Network icon in dashboard
+  - Requires `isOrchestrator: true` and `bigIdeaId` in schema
+- **Module**: Standard chatbots under a Toolbox (many per Toolbox)
+  - Created via "Buat Chatbot" when a Toolbox is active
+  - Requires `toolboxId` in schema
+- Validation enforced at 3 layers: Frontend (create-agent-dialog.tsx), Backend (routes.ts), Schema (Zod refine)
+
 ### Fonnte WhatsApp Integration (Feb 5, 2026)
 - Implemented complete Fonnte WhatsApp integration with webhook handler
 - Webhook endpoint: POST /api/webhook/whatsapp/:agentId (supports Fonnte format: {pengirim, pesan})
