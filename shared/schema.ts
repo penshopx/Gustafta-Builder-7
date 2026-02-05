@@ -57,6 +57,7 @@ export const agents = pgTable("agents", {
   tagline: text("tagline").default(""),
   philosophy: text("philosophy").default(""),
   offTopicHandling: text("off_topic_handling").default("politely_redirect"),
+  offTopicResponse: text("off_topic_response").default(""),
   systemPrompt: text("system_prompt").default("You are a helpful assistant."),
   temperature: real("temperature").default(0.7),
   maxTokens: integer("max_tokens").default(1024),
