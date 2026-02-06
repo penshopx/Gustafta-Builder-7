@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Palette, Move, Maximize, Square, Eye, MessageCircle, Bot, HelpCircle, MessageSquare, Copy, Check } from "lucide-react";
+import { Palette, Move, Maximize, Square, Eye, MessageCircle, Bot, HelpCircle, MessageSquare, Copy, Check, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -109,6 +109,10 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
 <!-- End Gustafta Chat Widget -->`;
   };
 
+  const [chatLinkCopied, setChatLinkCopied] = useState(false);
+
+  const getPublicChatUrl = () => `${getBaseUrl()}/chat/${agent.id}`;
+
   const copyEmbedCode = () => {
     navigator.clipboard.writeText(generateDynamicEmbedCode());
     setCopied(true);
@@ -116,6 +120,16 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
     toast({
       title: "Disalin!",
       description: "Kode embed berhasil disalin ke clipboard",
+    });
+  };
+
+  const copyChatLink = () => {
+    navigator.clipboard.writeText(getPublicChatUrl());
+    setChatLinkCopied(true);
+    setTimeout(() => setChatLinkCopied(false), 2000);
+    toast({
+      title: "Disalin!",
+      description: "Link chat publik berhasil disalin ke clipboard",
     });
   };
 
@@ -338,6 +352,44 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                 >
                   <IconComponent className="w-6 h-6 text-white" />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Link Chat Publik</CardTitle>
+              <CardDescription>
+                Halaman chat khusus untuk chatbot ini. Bagikan link ini agar user bisa langsung chat.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={getPublicChatUrl()}
+                  readOnly
+                  className="text-sm font-mono"
+                  data-testid="input-public-chat-url"
+                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={copyChatLink}
+                  data-testid="button-copy-chat-link"
+                >
+                  {chatLinkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+                <a href={`/chat/${agent.id}`} target="_blank" rel="noopener noreferrer">
+                  <Button size="icon" variant="outline" data-testid="button-open-chat-link">
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </a>
+              </div>
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-sm text-muted-foreground">
+                  Halaman ini adalah "rumah" chatbot Anda. User dapat membuka link ini langsung di browser 
+                  untuk berkomunikasi dengan chatbot tanpa perlu masuk ke dashboard.
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -12,6 +12,7 @@ import Pricing from "@/pages/pricing";
 import Subscription from "@/pages/subscription";
 import PaymentSuccess from "@/pages/payment-success";
 import EmbedChat from "@/pages/embed-chat";
+import AgentChat from "@/pages/agent-chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/subscription" component={Subscription} />
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/embed/:agentId" component={EmbedChat} />
+      <Route path="/chat/:agentId" component={AgentChat} />
       <Route component={NotFound} />
     </Switch>
   );

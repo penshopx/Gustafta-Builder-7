@@ -2463,14 +2463,16 @@ export async function registerRoutes(
         greetingMessage: agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
         welcomeMessage: agent.widgetWelcomeMessage || agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
         conversationStarters: agent.conversationStarters || [],
-        // Widget styling
+        personality: agent.personality || "",
+        philosophy: agent.philosophy || "",
+        category: agent.category || "",
+        subcategory: agent.subcategory || "",
         color: agent.widgetColor || "#6366f1",
         position: agent.widgetPosition || "bottom-right",
         size: agent.widgetSize || "medium",
         borderRadius: agent.widgetBorderRadius || "rounded",
         showBranding: agent.widgetShowBranding ?? true,
         buttonIcon: agent.widgetButtonIcon || "chat",
-        // Status
         isActive: agent.isActive,
         isPublic: agent.isPublic,
       };
