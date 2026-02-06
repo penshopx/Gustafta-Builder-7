@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useMessages, useSendMessage, useClearMessages } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
@@ -140,12 +140,15 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
               </div>
             ) : (
               messages.map((message) => (
-                <MessageBubble key={message.id} message={message} agentName={agent.name} />
+                <MessageBubble key={message.id} message={message} agentName={agent.name} agentAvatar={agent.avatar} />
               ))
             )}
             {sendMessage.isPending && (
               <div className="flex gap-3">
                 <Avatar className="w-8 h-8">
+                  {agent.avatar && agent.avatar.trim() !== "" ? (
+                    <AvatarImage src={agent.avatar} alt={agent.name} className="object-cover" />
+                  ) : null}
                   <AvatarFallback className="bg-primary/10 text-primary">
                     <Bot className="w-4 h-4" />
                   </AvatarFallback>
@@ -189,12 +192,15 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
   );
 }
 
-function MessageBubble({ message, agentName }: { message: Message; agentName: string }) {
+function MessageBubble({ message, agentName, agentAvatar }: { message: Message; agentName: string; agentAvatar?: string }) {
   const isUser = message.role === "user";
 
   return (
     <div className={cn("flex gap-3", isUser && "flex-row-reverse")} data-testid={`message-${message.id}`}>
       <Avatar className="w-8 h-8 shrink-0">
+        {!isUser && agentAvatar && agentAvatar.trim() !== "" ? (
+          <AvatarImage src={agentAvatar} alt={agentName} className="object-cover" />
+        ) : null}
         <AvatarFallback className={isUser ? "bg-secondary" : "bg-primary/10 text-primary"}>
           {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
         </AvatarFallback>
