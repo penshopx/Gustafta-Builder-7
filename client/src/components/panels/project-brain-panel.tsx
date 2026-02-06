@@ -55,21 +55,36 @@ const statusIcons: Record<string, typeof FileText> = {
 };
 
 const defaultTemplateFields: ProjectBrainField[] = [
+  // === Project Profile ===
   { key: "project_name", label: "Nama Proyek", type: "text", required: true, placeholder: "Contoh: Pembangunan Jembatan Kali Brantas", helpText: "Nama resmi proyek", defaultValue: "", options: [], order: 0 },
   { key: "project_type", label: "Tipe Proyek", type: "select", required: true, placeholder: "Pilih tipe proyek", helpText: "Kategori utama proyek", defaultValue: "", options: ["Gedung", "Jembatan", "Jalan", "Infrastruktur", "Perumahan", "Industri", "Lainnya"], order: 1 },
   { key: "project_stage", label: "Tahap Proyek", type: "select", required: true, placeholder: "Pilih tahap proyek", helpText: "Fase proyek saat ini", defaultValue: "", options: ["Perencanaan", "Desain", "Procurement", "Konstruksi", "Finishing", "Serah Terima", "Pemeliharaan"], order: 2 },
   { key: "location", label: "Lokasi", type: "text", required: false, placeholder: "Contoh: Surabaya, Jawa Timur", helpText: "Lokasi proyek", defaultValue: "", options: [], order: 3 },
+  // === Key Technical Parameters ===
   { key: "structural_system", label: "Sistem Struktur", type: "text", required: false, placeholder: "Contoh: Beton bertulang, Baja, Komposit", helpText: "Sistem struktur utama yang digunakan", defaultValue: "", options: [], order: 4 },
   { key: "concrete_grade", label: "Mutu Beton (fc')", type: "text", required: false, placeholder: "Contoh: fc' 30 MPa", helpText: "Grade beton yang digunakan", defaultValue: "", options: [], order: 5 },
   { key: "construction_method", label: "Metode Konstruksi Utama", type: "text", required: false, placeholder: "Contoh: Konvensional, Precast, Prestress", helpText: "Metode kerja konstruksi utama", defaultValue: "", options: [], order: 6 },
+  // === Project Constraints ===
   { key: "time_constraint", label: "Batasan Waktu", type: "text", required: false, placeholder: "Contoh: 12 bulan, deadline Desember 2026", helpText: "Batas waktu penyelesaian proyek", defaultValue: "", options: [], order: 7 },
   { key: "cost_constraint", label: "Batasan Biaya", type: "text", required: false, placeholder: "Contoh: Rp 50 Miliar", helpText: "Estimasi atau batasan anggaran proyek", defaultValue: "", options: [], order: 8 },
   { key: "site_access", label: "Akses Lokasi", type: "text", required: false, placeholder: "Contoh: Jalan akses terbatas, area padat", helpText: "Kondisi akses menuju lokasi proyek", defaultValue: "", options: [], order: 9 },
-  { key: "active_issues", label: "Isu Aktif", type: "textarea", required: false, placeholder: "Contoh: Retak pada kolom lt.3, Slump tidak memenuhi spec", helpText: "Masalah teknis yang sedang terjadi (tipe, lokasi, status)", defaultValue: "", options: [], order: 10 },
-  { key: "key_decisions", label: "Keputusan Penting", type: "textarea", required: false, placeholder: "Contoh: Ganti metode pondasi dari bored pile ke driven pile", helpText: "Keputusan teknis penting beserta alasan dan level risiko", defaultValue: "", options: [], order: 11 },
-  { key: "test_data", label: "Data Pengujian", type: "textarea", required: false, placeholder: "Contoh: Slump 12cm, Kuat tekan 28 hari = 32 MPa", helpText: "Hasil pengujian material atau lapangan terkini", defaultValue: "", options: [], order: 12 },
-  { key: "completeness_level", label: "Tingkat Kelengkapan Data", type: "select", required: false, placeholder: "Pilih level", helpText: "Seberapa lengkap data proyek yang tersedia", defaultValue: "", options: ["Awal (< 30%)", "Parsial (30-60%)", "Substansial (60-90%)", "Lengkap (> 90%)"], order: 13 },
-  { key: "last_updated", label: "Terakhir Diperbarui", type: "date", required: false, placeholder: "", helpText: "Tanggal terakhir data proyek diperbarui", defaultValue: "", options: [], order: 14 },
+  // === Active Issues (sub-fields) ===
+  { key: "issue_type", label: "Tipe Isu", type: "text", required: false, placeholder: "Contoh: Structural, Quality, Safety", helpText: "Jenis masalah yang terjadi", defaultValue: "", options: [], order: 10 },
+  { key: "issue_location", label: "Lokasi/Elemen Isu", type: "text", required: false, placeholder: "Contoh: Kolom Lt.3, Pondasi zona B", helpText: "Lokasi atau elemen yang terdampak", defaultValue: "", options: [], order: 11 },
+  { key: "issue_status", label: "Status Isu", type: "select", required: false, placeholder: "Pilih status", helpText: "Status penanganan isu saat ini", defaultValue: "", options: ["Open", "Monitoring", "In Progress", "Closed"], order: 12 },
+  { key: "issue_since", label: "Isu Sejak", type: "date", required: false, placeholder: "", helpText: "Sejak kapan isu ini muncul", defaultValue: "", options: [], order: 13 },
+  // === Key Decisions Log ===
+  { key: "decision_summary", label: "Ringkasan Keputusan", type: "textarea", required: false, placeholder: "Contoh: Ganti metode pondasi dari bored pile ke driven pile", helpText: "Ringkasan keputusan teknis yang diambil", defaultValue: "", options: [], order: 14 },
+  { key: "decision_reason", label: "Alasan Keputusan", type: "textarea", required: false, placeholder: "Contoh: Kondisi tanah tidak sesuai hasil soil test", helpText: "Alasan di balik keputusan yang diambil", defaultValue: "", options: [], order: 15 },
+  { key: "decision_risk_level", label: "Level Risiko Keputusan", type: "select", required: false, placeholder: "Pilih level risiko", helpText: "Tingkat risiko dari keputusan ini", defaultValue: "", options: ["Low", "Medium", "High"], order: 16 },
+  { key: "decision_date", label: "Tanggal Keputusan", type: "date", required: false, placeholder: "", helpText: "Kapan keputusan ini diambil", defaultValue: "", options: [], order: 17 },
+  // === Test Data Snapshot ===
+  { key: "slump", label: "Slump", type: "text", required: false, placeholder: "Contoh: 12 ± 2 cm", helpText: "Hasil uji slump beton", defaultValue: "", options: [], order: 18 },
+  { key: "concrete_strength", label: "Kuat Tekan Beton", type: "text", required: false, placeholder: "Contoh: 28 hari = 32 MPa", helpText: "Hasil uji kuat tekan beton", defaultValue: "", options: [], order: 19 },
+  { key: "inspection_notes", label: "Catatan Inspeksi", type: "textarea", required: false, placeholder: "Contoh: Visual check OK, rebar spacing sesuai gambar", helpText: "Catatan dari hasil inspeksi lapangan", defaultValue: "", options: [], order: 20 },
+  // === Project Brain Status ===
+  { key: "completeness_level", label: "Tingkat Kelengkapan Data", type: "select", required: false, placeholder: "Pilih level", helpText: "Seberapa lengkap data proyek yang tersedia", defaultValue: "", options: ["Awal (< 30%)", "Parsial (30-60%)", "Substansial (60-90%)", "Lengkap (> 90%)"], order: 21 },
+  { key: "last_updated", label: "Terakhir Diperbarui", type: "date", required: false, placeholder: "", helpText: "Tanggal terakhir data proyek diperbarui", defaultValue: "", options: [], order: 22 },
 ];
 
 export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {

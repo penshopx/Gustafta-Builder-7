@@ -22,6 +22,17 @@ import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type Subscri
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 import { isAuthenticated } from "./replit_integrations/auth";
 
+const KNOWN_PROJECT_BRAIN_KEYS = [
+  "project_name", "project_type", "project_stage", "location",
+  "structural_system", "concrete_grade", "construction_method",
+  "time_constraint", "cost_constraint", "site_access",
+  "issue_type", "issue_location", "issue_status", "issue_since",
+  "decision_summary", "decision_reason", "decision_risk_level", "decision_date",
+  "slump", "concrete_strength", "inspection_notes",
+  "completeness_level", "last_updated",
+  "active_issues", "key_decisions", "test_data"
+];
+
 function formatProjectBrainBlock(projectName: string, values: Record<string, any>): string {
   const v = (key: string) => {
     const val = values[key];
@@ -47,25 +58,37 @@ function formatProjectBrainBlock(projectName: string, values: Record<string, any
   sections.push(`- Site Access             : ${v("site_access")}`);
 
   sections.push(`\nActive Issues:`);
-  sections.push(`- ${v("active_issues")}`);
+  sections.push(`- Issue List:`);
+  sections.push(`  - Type                  : ${v("issue_type")}`);
+  sections.push(`  - Location/Element      : ${v("issue_location")}`);
+  sections.push(`  - Status                : ${v("issue_status")}`);
+  sections.push(`  - Since                 : ${v("issue_since")}`);
+  if (values["active_issues"]) {
+    sections.push(`  - Notes                 : ${values["active_issues"]}`);
+  }
 
   sections.push(`\nKey Decisions Log:`);
-  sections.push(`- ${v("key_decisions")}`);
+  sections.push(`- Decision Summary        : ${v("decision_summary")}`);
+  sections.push(`- Reason                  : ${v("decision_reason")}`);
+  sections.push(`- Risk Level              : ${v("decision_risk_level")}`);
+  sections.push(`- Decision Date           : ${v("decision_date")}`);
+  if (values["key_decisions"]) {
+    sections.push(`- Additional Notes        : ${values["key_decisions"]}`);
+  }
 
   sections.push(`\nTest Data Snapshot:`);
-  sections.push(`- ${v("test_data")}`);
+  sections.push(`- Slump                   : ${v("slump")}`);
+  sections.push(`- Concrete Strength       : ${v("concrete_strength")}`);
+  sections.push(`- Inspection Notes        : ${v("inspection_notes")}`);
+  if (values["test_data"]) {
+    sections.push(`- Additional Test Data    : ${values["test_data"]}`);
+  }
 
   sections.push(`\nProject Brain Status:`);
   sections.push(`- Completeness Level      : ${v("completeness_level")}`);
   sections.push(`- Last Updated            : ${v("last_updated")}`);
 
-  const extraKeys = Object.keys(values).filter(k => ![
-    "project_name", "project_type", "project_stage", "location",
-    "structural_system", "concrete_grade", "construction_method",
-    "time_constraint", "cost_constraint", "site_access",
-    "active_issues", "key_decisions", "test_data",
-    "completeness_level", "last_updated"
-  ].includes(k));
+  const extraKeys = Object.keys(values).filter(k => !KNOWN_PROJECT_BRAIN_KEYS.includes(k));
 
   if (extraKeys.length > 0) {
     sections.push(`\nAdditional Data:`);
@@ -79,6 +102,25 @@ function formatProjectBrainBlock(projectName: string, values: Record<string, any
 
   return sections.join("\n");
 }
+
+const MODE_SNAPSHOT = `If the user requests a management snapshot, produce a concise management-style snapshot using:
+- overall status (Healthy / Attention / Critical)
+- active issues summary (Open/Monitoring/Closed)
+- technical/schedule/cost risk level (Low/Medium/High)
+- last key decision
+Keep it concise and non-technical.`;
+
+const MODE_DECISION_SUMMARY = `Generate a concise executive decision summary for management based on Project Brain:
+- brief period label if provided
+- list key decisions (summary, reason, risk level, date)
+- key risks
+- short recommendation for next steps
+Keep it professional and concise.`;
+
+const MODE_RISK_RADAR = `Assess and report current project risks based on Project Brain:
+- Technical Risk, Schedule Risk, Cost Risk (Low/Medium/High)
+- Provide 2-5 short reasons for each risk rating
+Keep it non-technical and actionable.`;
 
 // Initialize OpenAI client with Replit AI Integrations
 const openai = new OpenAI({
@@ -886,6 +928,8 @@ export async function registerRoutes(
         systemPrompt += `\nGunakan data proyek di atas sebagai konteks utama untuk analisis dan rekomendasi.`;
       }
 
+      systemPrompt += `\n\nMODE INSTRUCTION (OPTIONAL)\n${MODE_SNAPSHOT}\n\n${MODE_DECISION_SUMMARY}\n\n${MODE_RISK_RADAR}`;
+
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
       // Build messages array
@@ -1075,6 +1119,8 @@ export async function registerRoutes(
         systemPrompt += `\n\n${formatProjectBrainBlock(activeProjectBrainStream.name, activeProjectBrainStream.values as Record<string, any>)}`;
         systemPrompt += `\nGunakan data proyek di atas sebagai konteks utama untuk analisis dan rekomendasi.`;
       }
+
+      systemPrompt += `\n\nMODE INSTRUCTION (OPTIONAL)\n${MODE_SNAPSHOT}\n\n${MODE_DECISION_SUMMARY}\n\n${MODE_RISK_RADAR}`;
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
