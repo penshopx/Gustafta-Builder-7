@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -34,22 +32,130 @@ interface AgentConfig {
   isPublic: boolean;
 }
 
-function cleanMarkdown(text: string): string {
-  return text
-    .replace(/#{1,6}\s*/g, "")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/__([^_]+)__/g, "$1")
-    .replace(/_([^_]+)_/g, "$1")
-    .replace(/~~([^~]+)~~/g, "$1")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/^[-*+]\s+/gm, "")
-    .replace(/^\d+\.\s+/gm, "")
-    .replace(/^>\s*/gm, "")
-    .replace(/---+/g, "")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
-    .trim();
+function processInlineText(text: string): (string | JSX.Element)[] {
+  const parts: (string | JSX.Element)[] = [];
+  const regex = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    const m = match[0];
+    if (m.startsWith("**") && m.endsWith("**")) {
+      parts.push(<strong key={match.index}>{m.slice(2, -2)}</strong>);
+    } else if (m.startsWith("__") && m.endsWith("__")) {
+      parts.push(<strong key={match.index}>{m.slice(2, -2)}</strong>);
+    } else if (m.startsWith("`") && m.endsWith("`")) {
+      parts.push(<code key={match.index} className="bg-muted px-1 rounded text-xs">{m.slice(1, -1)}</code>);
+    }
+    lastIndex = match.index + m.length;
+  }
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+  return parts.length > 0 ? parts : [text];
+}
+
+function formatMessageContent(text: string) {
+  const lines = text.split("\n");
+  const elements: JSX.Element[] = [];
+  let listItems: string[] = [];
+  let listType: "ul" | "ol" = "ul";
+  let inList = false;
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      const Tag = listType;
+      elements.push(
+        <Tag key={`list-${elements.length}`} className={cn("space-y-1 text-sm", listType === "ol" ? "list-decimal pl-5" : "list-disc pl-5")}>
+          {listItems.map((item, i) => (
+            <li key={i}>{processInlineText(item)}</li>
+          ))}
+        </Tag>
+      );
+      listItems = [];
+      inList = false;
+    }
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      flushList();
+      continue;
+    }
+
+    const headingMatch = trimmed.match(/^#{1,3}\s+(.+)/);
+    if (headingMatch) {
+      flushList();
+      elements.push(
+        <p key={`h-${elements.length}`} className="font-semibold text-sm mt-1">
+          {headingMatch[1]}
+        </p>
+      );
+      continue;
+    }
+
+    const ulMatch = trimmed.match(/^[-*+]\s+(.+)/);
+    if (ulMatch) {
+      if (!inList || listType !== "ul") {
+        flushList();
+        inList = true;
+        listType = "ul";
+      }
+      listItems.push(ulMatch[1]);
+      continue;
+    }
+
+    const olMatch = trimmed.match(/^\d+\.\s+(.+)/);
+    if (olMatch) {
+      if (!inList || listType !== "ol") {
+        flushList();
+        inList = true;
+        listType = "ol";
+      }
+      listItems.push(olMatch[1]);
+      continue;
+    }
+
+    flushList();
+    elements.push(
+      <p key={`p-${elements.length}`} className="text-sm">{processInlineText(trimmed)}</p>
+    );
+  }
+
+  flushList();
+  return <div className="space-y-1.5">{elements}</div>;
+}
+
+function AgentAvatar({ config, size = "md", color }: { config: AgentConfig; size?: "sm" | "md" | "lg"; color: string }) {
+  const sizeClasses = {
+    sm: "w-8 h-8",
+    md: "w-10 h-10",
+    lg: "w-20 h-20",
+  };
+  const textClasses = {
+    sm: "text-xs",
+    md: "text-sm font-semibold",
+    lg: "text-2xl font-bold",
+  };
+
+  return (
+    <Avatar className={cn(sizeClasses[size], "shrink-0 border-2")} style={{ borderColor: `${color}40` }}>
+      {config.avatar ? (
+        <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
+      ) : null}
+      <AvatarFallback
+        className={textClasses[size]}
+        style={{ backgroundColor: `${color}15`, color }}
+      >
+        {config.name.substring(0, 2).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
+  );
 }
 
 export default function AgentChat() {
@@ -74,6 +180,7 @@ export default function AgentChat() {
         .then((data) => {
           setConfig(data);
           setLoading(false);
+          document.title = `${data.name} - Chat`;
         })
         .catch((err) => {
           setError(err.message);
@@ -165,8 +272,8 @@ export default function AgentChat() {
           }
         }
       }
-    } catch (error) {
-      console.error("Chat error:", error);
+    } catch (err) {
+      console.error("Chat error:", err);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -186,14 +293,28 @@ export default function AgentChat() {
     }
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: config?.name || "Chat",
+          text: config?.tagline || "Chat with AI assistant",
+          url: window.location.href,
+        });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center" data-testid="chat-loading">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center" data-testid="chat-loading">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
             <Bot className="w-8 h-8 text-primary" />
           </div>
-          <p className="text-muted-foreground">Memuat chatbot...</p>
+          <p className="text-muted-foreground text-sm">Memuat chatbot...</p>
         </div>
       </div>
     );
@@ -201,7 +322,7 @@ export default function AgentChat() {
 
   if (error || !config) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4" data-testid="chat-error">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center p-4" data-testid="chat-error">
         <Card className="max-w-md w-full p-8 text-center space-y-4">
           <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
             <Bot className="w-8 h-8 text-destructive" />
@@ -225,85 +346,77 @@ export default function AgentChat() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col" data-testid="agent-chat-page">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden" data-testid="agent-chat-page">
       <header
-        className="border-b px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-50"
+        className="border-b px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 sticky top-0 z-50"
         style={{ backgroundColor: color }}
         data-testid="chat-header"
       >
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <a href="/">
             <Button size="icon" variant="ghost" className="text-white shrink-0" data-testid="button-back">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </a>
-          <Avatar className="w-10 h-10 border-2 border-white/30 shrink-0">
+          <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-white/30 shrink-0">
             {config.avatar ? (
               <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
             ) : null}
-            <AvatarFallback className="bg-white/20 text-white font-semibold">
+            <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
               {config.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <h1 className="text-white font-semibold truncate" data-testid="text-agent-name">
+            <h1 className="text-white font-semibold text-sm sm:text-base truncate" data-testid="text-agent-name">
               {config.name}
             </h1>
             {config.tagline && (
-              <p className="text-white/70 text-xs truncate">{config.tagline}</p>
+              <p className="text-white/70 text-[10px] sm:text-xs truncate max-w-[180px] sm:max-w-none">{config.tagline}</p>
             )}
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <Badge variant="outline" className="text-white border-white/30 text-[10px]">
+          <Badge variant="outline" className="text-white border-white/30 text-[10px] hidden sm:inline-flex">
             Online
           </Badge>
-          <ThemeToggle />
+          <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={handleShare} data-testid="button-share">
+            <Share2 className="w-4 h-4" />
+          </Button>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col max-w-3xl w-full mx-auto">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {!hasMessages && (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-6" data-testid="chat-welcome">
-            <Avatar className="w-20 h-20 border-4" style={{ borderColor: `${color}40` }}>
-              {config.avatar ? (
-                <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
-              ) : null}
-              <AvatarFallback
-                className="text-2xl font-bold"
-                style={{ backgroundColor: `${color}15`, color }}
-              >
-                {config.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto" data-testid="chat-welcome">
+            <AgentAvatar config={config} size="lg" color={color} />
 
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold" data-testid="text-welcome-name">{config.name}</h2>
+            <div className="text-center space-y-1.5 sm:space-y-2">
+              <h2 className="text-xl sm:text-2xl font-bold" data-testid="text-welcome-name">{config.name}</h2>
               {config.tagline && (
-                <p className="text-muted-foreground">{config.tagline}</p>
+                <p className="text-muted-foreground text-sm sm:text-base">{config.tagline}</p>
               )}
               {config.philosophy && (
-                <p className="text-sm text-muted-foreground/80 italic max-w-md">
+                <p className="text-xs sm:text-sm text-muted-foreground/80 italic max-w-md px-4">
                   "{config.philosophy}"
                 </p>
               )}
             </div>
 
             <div
-              className="rounded-xl px-5 py-3 text-sm max-w-md text-center"
+              className="rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm max-w-md text-center"
               style={{ backgroundColor: `${color}10`, color }}
             >
               {config.greetingMessage}
             </div>
 
             {config.conversationStarters.length > 0 && (
-              <div className="flex flex-wrap gap-2 justify-center max-w-lg" data-testid="conversation-starters">
+              <div className="flex flex-wrap gap-2 justify-center max-w-lg px-2" data-testid="conversation-starters">
                 {config.conversationStarters.slice(0, 5).map((starter, idx) => (
                   <Button
                     key={idx}
                     variant="outline"
                     size="sm"
-                    className="text-xs"
+                    className="text-[11px] sm:text-xs"
                     onClick={() => sendMessage(starter)}
                     data-testid={`button-starter-${idx}`}
                   >
@@ -316,45 +429,35 @@ export default function AgentChat() {
         )}
 
         {hasMessages && (
-          <ScrollArea className="flex-1 px-4" ref={scrollRef}>
-            <div className="py-4 space-y-4 max-w-2xl mx-auto">
+          <div className="flex-1 overflow-y-auto px-3 sm:px-4" ref={scrollRef}>
+            <div className="py-3 sm:py-4 space-y-3 sm:space-y-4 max-w-2xl mx-auto">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={cn("flex gap-3", message.role === "user" && "flex-row-reverse")}
+                  className={cn("flex gap-2 sm:gap-3", message.role === "user" && "flex-row-reverse")}
                   data-testid={`message-${message.id}`}
                 >
-                  <Avatar className="w-8 h-8 shrink-0">
-                    {message.role === "assistant" && config.avatar ? (
-                      <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
-                    ) : null}
-                    <AvatarFallback
-                      className="text-xs"
-                      style={
-                        message.role === "assistant"
-                          ? { backgroundColor: `${color}20`, color }
-                          : {}
-                      }
-                    >
-                      {message.role === "user" ? (
+                  {message.role === "assistant" ? (
+                    <AgentAvatar config={config} size="sm" color={color} />
+                  ) : (
+                    <Avatar className="w-8 h-8 shrink-0">
+                      <AvatarFallback className="text-xs bg-muted">
                         <User className="w-4 h-4" />
-                      ) : (
-                        config.name.substring(0, 2).toUpperCase()
-                      )}
-                    </AvatarFallback>
-                  </Avatar>
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                   <div
                     className={cn(
-                      "flex flex-col gap-1 max-w-[80%]",
+                      "flex flex-col gap-0.5 sm:gap-1 max-w-[85%] sm:max-w-[75%]",
                       message.role === "user" && "items-end"
                     )}
                   >
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[10px] text-muted-foreground px-1">
                       {message.role === "user" ? "Anda" : config.name}
                     </span>
                     <div
                       className={cn(
-                        "rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words",
+                        "rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 whitespace-pre-wrap break-words",
                         message.role === "user"
                           ? "rounded-tr-sm text-white"
                           : "bg-muted rounded-tl-sm"
@@ -364,10 +467,10 @@ export default function AgentChat() {
                       }
                     >
                       {message.role === "user"
-                        ? message.content
-                        : cleanMarkdown(message.content)}
+                        ? <span className="text-sm">{message.content}</span>
+                        : formatMessageContent(message.content)}
                     </div>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[10px] text-muted-foreground px-1">
                       {message.timestamp.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -378,21 +481,11 @@ export default function AgentChat() {
               ))}
 
               {isTyping && (
-                <div className="flex gap-3">
-                  <Avatar className="w-8 h-8 shrink-0">
-                    {config.avatar ? (
-                      <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
-                    ) : null}
-                    <AvatarFallback
-                      className="text-xs"
-                      style={{ backgroundColor: `${color}20`, color }}
-                    >
-                      {config.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="flex gap-2 sm:gap-3">
+                  <AgentAvatar config={config} size="sm" color={color} />
+                  <div className="bg-muted rounded-2xl rounded-tl-sm px-3 sm:px-4 py-2.5 sm:py-3">
                     <div className="flex gap-1.5 items-center">
-                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                      <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
                         Mengetik...
                       </span>
@@ -401,10 +494,10 @@ export default function AgentChat() {
                 </div>
               )}
             </div>
-          </ScrollArea>
+          </div>
         )}
 
-        <div className="p-4 border-t bg-background/80 backdrop-blur-sm">
+        <div className="p-2.5 sm:p-4 border-t bg-background safe-area-bottom">
           <div className="flex gap-2 items-end max-w-2xl mx-auto">
             <Textarea
               ref={textareaRef}
@@ -416,7 +509,7 @@ export default function AgentChat() {
               }}
               onKeyDown={handleKeyDown}
               placeholder={`Ketik pesan ke ${config.name}...`}
-              className="min-h-[44px] max-h-[120px] resize-none text-sm rounded-xl"
+              className="resize-none text-sm rounded-xl"
               rows={1}
               disabled={isTyping}
               data-testid="input-chat-message"
@@ -432,7 +525,7 @@ export default function AgentChat() {
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground text-center mt-2">
+          <p className="text-[10px] text-muted-foreground text-center mt-1.5 sm:mt-2">
             Powered by <a href="/" className="font-medium hover:underline">Gustafta</a>
           </p>
         </div>
