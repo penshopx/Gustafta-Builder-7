@@ -23,9 +23,9 @@ import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge
 import { isAuthenticated } from "./replit_integrations/auth";
 
 const KNOWN_PROJECT_BRAIN_KEYS = [
-  "project_name", "project_type", "project_stage", "location",
+  "project_name", "project_type", "project_stage", "location", "owner_client",
   "structural_system", "concrete_grade", "construction_method",
-  "time_constraint", "cost_constraint", "site_access",
+  "time_constraint", "cost_constraint", "site_access", "environmental_factors",
   "issue_type", "issue_location", "issue_status", "issue_since",
   "decision_summary", "decision_reason", "decision_risk_level", "decision_date",
   "slump", "concrete_strength", "inspection_notes",
@@ -46,6 +46,7 @@ function formatProjectBrainBlock(projectName: string, values: Record<string, any
   sections.push(`- Project Type            : ${v("project_type")}`);
   sections.push(`- Project Stage           : ${v("project_stage")}`);
   sections.push(`- Location                : ${v("location")}`);
+  sections.push(`- Owner / Client          : ${v("owner_client")}`);
 
   sections.push(`\nKey Technical Parameters:`);
   sections.push(`- Structural System       : ${v("structural_system")}`);
@@ -56,6 +57,7 @@ function formatProjectBrainBlock(projectName: string, values: Record<string, any
   sections.push(`- Time Constraint         : ${v("time_constraint")}`);
   sections.push(`- Cost Constraint         : ${v("cost_constraint")}`);
   sections.push(`- Site Access             : ${v("site_access")}`);
+  sections.push(`- Environmental Factors   : ${v("environmental_factors")}`);
 
   sections.push(`\nActive Issues:`);
   sections.push(`- Issue List:`);

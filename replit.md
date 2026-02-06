@@ -195,13 +195,13 @@ Schema includes:
   - Field types: text, textarea, number, select, multiselect, boolean, date, url, email
   - Each field: key, label, type, required, placeholder, helpText, defaultValue, options, order
 - **Default template fields aligned with CiviloPro architecture:**
-  - Project Profile: project_name, project_type, project_stage, location
+  - Project Profile: project_name, project_type, project_stage, location, owner_client
   - Key Technical Parameters: structural_system, concrete_grade, construction_method
-  - Project Constraints: time_constraint, cost_constraint, site_access
+  - Project Constraints: time_constraint, cost_constraint, site_access, environmental_factors
   - Active Issues: issue_type, issue_location, issue_status, issue_since
   - Key Decisions Log: decision_summary, decision_reason, decision_risk_level, decision_date
   - Test Data Snapshot: slump, concrete_strength, inspection_notes
-  - Metadata: completeness_level, last_updated
+  - Metadata: completeness_level (Empty/Partial/Active), last_updated
   - Legacy keys (active_issues, key_decisions, test_data) still supported as "Notes" sections
 - Instances: data proyek aktual yang diisi oleh pengguna
   - Status: draft, active, completed, archived
