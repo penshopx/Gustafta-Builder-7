@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,11 +8,21 @@ import { Card } from "@/components/ui/card";
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 
+interface UploadedFile {
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  fileUrl: string;
+  category: string;
+  mimeType: string;
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  attachments?: UploadedFile[];
 }
 
 interface AgentConfig {
@@ -168,7 +178,56 @@ export default function AgentChat() {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const sessionIdRef = useRef(`chat_${params.agentId}_${Date.now()}`);
+  const [pendingFiles, setPendingFiles] = useState<UploadedFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    const uploaded: UploadedFile[] = [];
+
+    for (const file of Array.from(files)) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/chat/upload", { method: "POST", body: formData });
+        if (res.ok) {
+          const data = await res.json();
+          uploaded.push(data);
+        }
+      } catch (err) {
+        console.error("Upload failed:", err);
+      }
+    }
+
+    setPendingFiles((prev) => [...prev, ...uploaded]);
+    setIsUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removePendingFile = (idx: number) => {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const getFileIcon = (category: string) => {
+    switch (category) {
+      case "image": return <ImageIcon className="w-4 h-4" />;
+      case "audio": return <Music className="w-4 h-4" />;
+      case "video": return <Video className="w-4 h-4" />;
+      case "document": return <FileText className="w-4 h-4" />;
+      default: return <File className="w-4 h-4" />;
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
 
   useEffect(() => {
     if (params.agentId) {
@@ -196,17 +255,27 @@ export default function AgentChat() {
   }, [messages, isTyping]);
 
   const sendMessage = async (content: string) => {
-    if (!content.trim() || isTyping || !config) return;
+    if ((!content.trim() && pendingFiles.length === 0) || isTyping || !config) return;
+
+    let messageContent = content.trim();
+    const attachments = [...pendingFiles];
+
+    if (attachments.length > 0) {
+      const fileDescriptions = attachments.map(f => `[File: ${f.fileName} (${f.category}, ${formatFileSize(f.fileSize)})]`).join("\n");
+      messageContent = messageContent ? `${messageContent}\n\n${fileDescriptions}` : fileDescriptions;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: content.trim(),
+      content: messageContent,
       timestamp: new Date(),
+      attachments,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setPendingFiles([]);
     setIsTyping(true);
 
     if (textareaRef.current) {
@@ -221,7 +290,7 @@ export default function AgentChat() {
         body: JSON.stringify({
           agentId: resolvedAgentId,
           role: "user",
-          content: content.trim(),
+          content: messageContent,
           sessionId: sessionIdRef.current,
         }),
       });
@@ -594,6 +663,47 @@ export default function AgentChat() {
                         message.role === "user" ? { backgroundColor: color } : {}
                       }
                     >
+                      {message.attachments && message.attachments.length > 0 && (
+                        <div className="space-y-1.5 mb-2">
+                          {message.attachments.map((file, fIdx) => (
+                            <div key={fIdx}>
+                              {file.category === "image" ? (
+                                <a href={file.fileUrl} target="_blank" rel="noopener noreferrer">
+                                  <img
+                                    src={file.fileUrl}
+                                    alt={file.fileName}
+                                    className="max-w-[200px] max-h-[200px] rounded-lg object-cover"
+                                    data-testid={`img-attachment-${fIdx}`}
+                                  />
+                                </a>
+                              ) : file.category === "audio" ? (
+                                <audio controls className="max-w-[250px]" data-testid={`audio-attachment-${fIdx}`}>
+                                  <source src={file.fileUrl} type={file.mimeType} />
+                                </audio>
+                              ) : file.category === "video" ? (
+                                <video controls className="max-w-[250px] rounded-lg" data-testid={`video-attachment-${fIdx}`}>
+                                  <source src={file.fileUrl} type={file.mimeType} />
+                                </video>
+                              ) : (
+                                <a
+                                  href={file.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={cn(
+                                    "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs",
+                                    message.role === "user" ? "bg-white/20 text-white" : "bg-background"
+                                  )}
+                                  data-testid={`file-attachment-${fIdx}`}
+                                >
+                                  {getFileIcon(file.category)}
+                                  <span className="truncate max-w-[150px]">{file.fileName}</span>
+                                  <span className="opacity-70">{formatFileSize(file.fileSize)}</span>
+                                </a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       {message.role === "user"
                         ? <span className="text-sm">{message.content}</span>
                         : formatMessageContent(message.content)}
@@ -655,7 +765,62 @@ export default function AgentChat() {
               </div>
             </div>
           )}
+
+          {pendingFiles.length > 0 && (
+            <div className="flex flex-wrap gap-2 max-w-2xl mx-auto mb-2" data-testid="pending-files">
+              {pendingFiles.map((file, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-1.5 bg-muted rounded-lg px-2.5 py-1.5 text-xs"
+                  data-testid={`pending-file-${idx}`}
+                >
+                  {file.category === "image" ? (
+                    <img src={file.fileUrl} alt={file.fileName} className="w-8 h-8 rounded object-cover" />
+                  ) : (
+                    getFileIcon(file.category)
+                  )}
+                  <span className="truncate max-w-[120px]">{file.fileName}</span>
+                  <span className="text-muted-foreground">{formatFileSize(file.fileSize)}</span>
+                  <button
+                    onClick={() => removePendingFile(idx)}
+                    className="ml-0.5 text-muted-foreground/60 hover-elevate rounded-full"
+                    data-testid={`button-remove-file-${idx}`}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {isUploading && (
+            <div className="flex items-center gap-2 max-w-2xl mx-auto mb-2">
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Mengunggah file...</span>
+            </div>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.gif,.webp,.svg,.mp3,.wav,.webm,.ogg,.mp4,.mov,.zip,.rar"
+            data-testid="input-file-upload"
+          />
+
           <div className="flex gap-2 items-end max-w-2xl mx-auto">
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isTyping || isUploading}
+              className="shrink-0 rounded-xl"
+              data-testid="button-attach-file"
+            >
+              <Paperclip className="w-4 h-4" />
+            </Button>
             <Textarea
               ref={textareaRef}
               value={input}
@@ -665,7 +830,7 @@ export default function AgentChat() {
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
               }}
               onKeyDown={handleKeyDown}
-              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik atau tekan mikrofon...`}
+              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik atau lampirkan file...`}
               className="resize-none text-sm rounded-xl"
               rows={1}
               disabled={isTyping || isListening}
@@ -686,7 +851,7 @@ export default function AgentChat() {
             <Button
               size="icon"
               onClick={() => sendMessage(input)}
-              disabled={!input.trim() || isTyping || isListening}
+              disabled={(!input.trim() && pendingFiles.length === 0) || isTyping || isListening}
               className="shrink-0 rounded-xl"
               style={{ backgroundColor: color }}
               data-testid="button-send-message"

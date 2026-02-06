@@ -149,7 +149,7 @@ const upload = multer({
     },
   }),
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit
   },
   fileFilter: (_req, file, cb) => {
     const allowedTypes = [
@@ -161,15 +161,28 @@ const upload = multer({
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
+      "text/csv",
       "image/jpeg",
       "image/png",
       "image/gif",
       "image/webp",
+      "image/svg+xml",
+      "audio/mpeg",
+      "audio/mp3",
+      "audio/wav",
+      "audio/webm",
+      "audio/ogg",
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",
+      "application/zip",
+      "application/x-rar-compressed",
+      "application/octet-stream",
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Invalid file type"));
+      cb(null, true);
     }
   },
 });
@@ -1068,6 +1081,41 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Failed to process message:", error);
       res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  // Upload file in chat (no auth required for public chat)
+  app.post("/api/chat/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const ext = path.extname(req.file.originalname).toLowerCase();
+      const imageExts = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+      const audioExts = [".mp3", ".wav", ".webm", ".ogg"];
+      const videoExts = [".mp4", ".webm", ".mov"];
+      const docExts = [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv"];
+      
+      let category = "other";
+      if (imageExts.includes(ext)) category = "image";
+      else if (audioExts.includes(ext)) category = "audio";
+      else if (videoExts.includes(ext)) category = "video";
+      else if (docExts.includes(ext)) category = "document";
+
+      const fileUrl = `/uploads/${req.file.filename}`;
+      
+      res.json({
+        fileName: req.file.originalname,
+        fileSize: req.file.size,
+        fileType: ext.replace(".", ""),
+        fileUrl,
+        category,
+        mimeType: req.file.mimetype,
+      });
+    } catch (error) {
+      console.error("Chat file upload error:", error);
+      res.status(500).json({ error: "Failed to upload file" });
     }
   });
 

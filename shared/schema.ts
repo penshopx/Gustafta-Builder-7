@@ -590,3 +590,19 @@ export type MiniAppResult = InsertMiniAppResult & {
   id: string;
   createdAt: string;
 };
+
+// ==================== VOICE CHAT CONVERSATIONS ====================
+
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull().default("New Chat"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const messages = pgTable("voice_messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
