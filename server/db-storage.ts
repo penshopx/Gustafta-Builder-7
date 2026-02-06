@@ -236,7 +236,7 @@ export class DatabaseStorage implements IStorage {
 
   async setActiveBigIdea(id: string): Promise<BigIdea | undefined> {
     await db.update(bigIdeas).set({ isActive: false });
-    return this.updateBigIdea(id, { isActive: true });
+    return this.updateBigIdea(id, { isActive: true } as any);
   }
 
   async deleteBigIdea(id: string): Promise<boolean> {
@@ -535,12 +535,12 @@ export class DatabaseStorage implements IStorage {
       avoidTopics: (row.avoidTopics as string[]) || [],
       keyPhrases: (row.keyPhrases as string[]) || [],
       widgetColor: row.widgetColor || "#6366f1",
-      widgetPosition: row.widgetPosition || "bottom-right",
-      widgetSize: row.widgetSize || "medium",
-      widgetBorderRadius: row.widgetBorderRadius || "rounded",
+      widgetPosition: (row.widgetPosition || "bottom-right") as Agent["widgetPosition"],
+      widgetSize: (row.widgetSize || "medium") as Agent["widgetSize"],
+      widgetBorderRadius: (row.widgetBorderRadius || "rounded") as Agent["widgetBorderRadius"],
       widgetShowBranding: row.widgetShowBranding ?? true,
       widgetWelcomeMessage: row.widgetWelcomeMessage || "",
-      widgetButtonIcon: row.widgetButtonIcon || "chat",
+      widgetButtonIcon: (row.widgetButtonIcon || "chat") as Agent["widgetButtonIcon"],
       isListed: row.isListed ?? false,
       productSlug: row.productSlug || undefined,
       productSummary: row.productSummary || "",
