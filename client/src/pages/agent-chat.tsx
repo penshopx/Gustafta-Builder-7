@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +23,7 @@ interface Message {
   content: string;
   timestamp: Date;
   attachments?: UploadedFile[];
+  feedback?: "up" | "down" | null;
 }
 
 interface AgentConfig {
@@ -182,6 +183,93 @@ export default function AgentChat() {
   const sessionIdRef = useRef(`chat_${params.agentId}_${Date.now()}`);
   const [pendingFiles, setPendingFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+
+  const getStorageKey = useCallback(() => `gustafta_chat_${params.agentId}`, [params.agentId]);
+
+  useEffect(() => {
+    try {
+      const key = getStorageKey();
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+        }
+      }
+    } catch {}
+  }, [getStorageKey]);
+
+  useEffect(() => {
+    try {
+      const key = getStorageKey();
+      if (messages.length > 0) {
+        localStorage.setItem(key, JSON.stringify(messages.slice(-100)));
+      } else {
+        localStorage.removeItem(key);
+      }
+    } catch {}
+  }, [messages, getStorageKey]);
+
+  const copyToClipboard = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(messageId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {}
+  };
+
+  const setFeedback = (messageId: string, feedback: "up" | "down") => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId
+          ? { ...m, feedback: m.feedback === feedback ? null : feedback }
+          : m
+      )
+    );
+  };
+
+  const exportChat = () => {
+    if (messages.length === 0) return;
+    const lines = messages.map((m) => {
+      const time = m.timestamp.toLocaleString();
+      const sender = m.role === "user" ? "Anda" : (config?.name || "Assistant");
+      return `[${time}] ${sender}:\n${m.content}\n`;
+    });
+    const text = `Chat dengan ${config?.name || "AI"}\n${"=".repeat(40)}\n\n${lines.join("\n")}`;
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-${config?.name || "ai"}-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    setFollowUpSuggestions([]);
+    localStorage.removeItem(getStorageKey());
+  };
+
+  const extractFollowUps = useCallback((content: string) => {
+    const suggestions: string[] = [];
+    const lines = content.split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.length > 10 && trimmed.length < 80 && trimmed.endsWith("?")) {
+        suggestions.push(trimmed.replace(/^[-*•\d.)\s]+/, "").trim());
+      }
+    }
+    if (suggestions.length === 0 && content.length > 50) {
+      const topics = content.match(/\b(tentang|mengenai|soal|terkait)\s+([^,.!?]+)/gi);
+      if (topics && topics.length > 0) {
+        suggestions.push(`Bisa jelaskan lebih detail ${topics[0]}?`);
+      }
+    }
+    return suggestions.slice(0, 3);
+  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -276,6 +364,7 @@ export default function AgentChat() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setPendingFiles([]);
+    setFollowUpSuggestions([]);
     setIsTyping(true);
 
     if (textareaRef.current) {
@@ -345,6 +434,8 @@ export default function AgentChat() {
       if (voiceMode && assistantContent.trim()) {
         speakText(assistantContent, assistantMessage.id);
       }
+      const followUps = extractFollowUps(assistantContent);
+      setFollowUpSuggestions(followUps);
     } catch (err) {
       console.error("Chat error:", err);
       const errorMessage: Message = {
@@ -576,6 +667,16 @@ export default function AgentChat() {
           >
             {voiceMode ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </Button>
+          {hasMessages && (
+            <>
+              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={exportChat} data-testid="button-export-chat">
+                <Download className="w-4 h-4" />
+              </Button>
+              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={clearChat} data-testid="button-clear-chat">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </>
+          )}
           <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={handleShare} data-testid="button-share">
             <Share2 className="w-4 h-4" />
           </Button>
@@ -716,23 +817,56 @@ export default function AgentChat() {
                         })}
                       </span>
                       {message.role === "assistant" && message.content && (
-                        <button
-                          onClick={() => {
-                            if (isSpeaking && speakingMessageIdRef.current === message.id) {
-                              stopSpeaking();
-                            } else {
-                              speakText(message.content, message.id);
-                            }
-                          }}
-                          className="text-muted-foreground/60 hover-elevate rounded-full p-0.5"
-                          data-testid={`button-speak-${message.id}`}
-                        >
-                          {isSpeaking && speakingMessageIdRef.current === message.id ? (
-                            <VolumeX className="w-3 h-3" />
-                          ) : (
-                            <Volume2 className="w-3 h-3" />
-                          )}
-                        </button>
+                        <>
+                          <button
+                            onClick={() => copyToClipboard(message.content, message.id)}
+                            className="text-muted-foreground/60 hover-elevate rounded-full p-0.5"
+                            data-testid={`button-copy-${message.id}`}
+                          >
+                            {copiedId === message.id ? (
+                              <Check className="w-3 h-3 text-green-500" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (isSpeaking && speakingMessageIdRef.current === message.id) {
+                                stopSpeaking();
+                              } else {
+                                speakText(message.content, message.id);
+                              }
+                            }}
+                            className="text-muted-foreground/60 hover-elevate rounded-full p-0.5"
+                            data-testid={`button-speak-${message.id}`}
+                          >
+                            {isSpeaking && speakingMessageIdRef.current === message.id ? (
+                              <VolumeX className="w-3 h-3" />
+                            ) : (
+                              <Volume2 className="w-3 h-3" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => setFeedback(message.id, "up")}
+                            className={cn(
+                              "hover-elevate rounded-full p-0.5",
+                              message.feedback === "up" ? "text-green-500" : "text-muted-foreground/60"
+                            )}
+                            data-testid={`button-thumbsup-${message.id}`}
+                          >
+                            <ThumbsUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => setFeedback(message.id, "down")}
+                            className={cn(
+                              "hover-elevate rounded-full p-0.5",
+                              message.feedback === "down" ? "text-destructive" : "text-muted-foreground/60"
+                            )}
+                            data-testid={`button-thumbsdown-${message.id}`}
+                          >
+                            <ThumbsDown className="w-3 h-3" />
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -750,6 +884,26 @@ export default function AgentChat() {
                       </span>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {!isTyping && followUpSuggestions.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1" data-testid="follow-up-suggestions">
+                  {followUpSuggestions.map((suggestion, idx) => (
+                    <Button
+                      key={idx}
+                      variant="outline"
+                      size="sm"
+                      className="text-[11px] sm:text-xs"
+                      onClick={() => {
+                        setFollowUpSuggestions([]);
+                        sendMessage(suggestion);
+                      }}
+                      data-testid={`button-followup-${idx}`}
+                    >
+                      {suggestion}
+                    </Button>
+                  ))}
                 </div>
               )}
             </div>
