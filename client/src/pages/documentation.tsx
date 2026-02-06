@@ -1,10 +1,12 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
+import { SharedHeader } from "@/components/shared-header";
+import { useGustaftaAssistant } from "@/hooks/use-agents";
+import { ChatPopup } from "@/components/chat-popup";
 import { 
-  Bot, ArrowLeft, Lightbulb, Wrench, MessageSquare, BookOpen, 
+  Bot, Lightbulb, Wrench, MessageSquare, BookOpen, 
   Sparkles, Globe, Settings, Shield, BarChart3, Zap, Code, 
   FileText, Users, Play, Puzzle, Layers, Brain, Key, Webhook
 } from "lucide-react";
@@ -187,31 +189,11 @@ function DocSection({ title, description, docs }: { title: string; description?:
 }
 
 export default function Documentation() {
+  const { data: gustaftaAssistant } = useGustaftaAssistant();
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon" data-testid="button-back-home">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Bot className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">Gustafta</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Link href="/dashboard">
-              <Button data-testid="button-go-dashboard">
-                Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SharedHeader />
 
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-5xl mx-auto">
@@ -515,6 +497,10 @@ export default function Documentation() {
           </div>
         </div>
       </footer>
+
+      {gustaftaAssistant && (
+        <ChatPopup agent={gustaftaAssistant} />
+      )}
     </div>
   );
 }

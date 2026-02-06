@@ -3,13 +3,15 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreateSubscription, usePaymentStatus } from "@/hooks/use-subscription";
+import { useGustaftaAssistant } from "@/hooks/use-agents";
+import { ChatPopup } from "@/components/chat-popup";
+import { SharedHeader } from "@/components/shared-header";
 import { Loader2 } from "lucide-react";
 import { 
   Bot, Check, X, Zap, Crown, Building2, Sparkles, ArrowRight,
@@ -338,6 +340,7 @@ export default function Pricing() {
   const [, navigate] = useLocation();
   const createSubscription = useCreateSubscription();
   const { data: paymentStatus } = usePaymentStatus();
+  const { data: gustaftaAssistant } = useGustaftaAssistant();
   
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
@@ -461,36 +464,7 @@ export default function Pricing() {
         </DialogContent>
       </Dialog>
 
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Bot className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">Gustafta</span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/documentation">
-              <Button variant="ghost" data-testid="button-documentation">
-                Dokumentasi
-              </Button>
-            </Link>
-            {isAuthenticated && (
-              <Link href="/subscription">
-                <Button variant="ghost" data-testid="button-my-subscription">
-                  Langganan Saya
-                </Button>
-              </Link>
-            )}
-            <ThemeToggle />
-            <Link href="/dashboard">
-              <Button data-testid="button-go-dashboard">
-                Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SharedHeader />
 
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
@@ -699,11 +673,15 @@ export default function Pricing() {
               <span className="font-bold">Gustafta</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              2024 Gustafta. AI Chatbot Builder Platform.
+              © 2026 Gustafta. AI Project Intelligence Platform.
             </p>
           </div>
         </div>
       </footer>
+
+      {gustaftaAssistant && (
+        <ChatPopup agent={gustaftaAssistant} />
+      )}
     </div>
   );
 }

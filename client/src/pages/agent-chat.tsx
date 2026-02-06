@@ -214,11 +214,12 @@ export default function AgentChat() {
     }
 
     try {
+      const resolvedAgentId = config.agentId || params.agentId;
       const response = await fetch("/api/messages/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          agentId: params.agentId,
+          agentId: resolvedAgentId,
           role: "user",
           content: content.trim(),
           sessionId: sessionIdRef.current,

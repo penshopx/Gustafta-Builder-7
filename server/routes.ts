@@ -2438,7 +2438,18 @@ export async function registerRoutes(
   // Public endpoint to get widget configuration (no auth required)
   app.get("/api/widget/config/:agentId", async (req, res) => {
     try {
-      const { agentId } = req.params;
+      let { agentId } = req.params;
+      
+      if (agentId === "dokumentender") {
+        const agents = await storage.getAgents();
+        const dok = agents.find(a => a.name === "Dokumentender Assistant");
+        if (dok) agentId = dok.id.toString();
+      } else if (agentId === "gustafta-helpdesk") {
+        const agents = await storage.getAgents();
+        const helpdesk = agents.find(a => a.name === "Gustafta Helpdesk" || a.name === "Gustafta Assistant");
+        if (helpdesk) agentId = helpdesk.id.toString();
+      }
+      
       const agent = await storage.getAgent(agentId);
       
       if (!agent) {

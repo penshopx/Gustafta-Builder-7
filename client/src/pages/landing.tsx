@@ -1,33 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
 import { useTemplates } from "@/hooks/use-templates";
 import { trackLead, trackViewContent } from "@/hooks/use-meta-pixel";
 import { ChatPopup } from "@/components/chat-popup";
+import { SharedHeader } from "@/components/shared-header";
 import { TemplateShowcase } from "@/components/template-showcase";
 import { 
   Bot, Sparkles, MessageSquare, Globe, Shield, 
-  BookOpen, BarChart3, Lightbulb, ArrowRight, Check, LogIn, LogOut, Menu, 
-  Zap, Palette, Download, Upload, Code, Cpu, FileJson, Settings2, Layers,
+  BookOpen, BarChart3, Lightbulb, ArrowRight, Check,
+  Zap, Palette, Code, Cpu, Layers,
   Clock, TrendingUp, Users, Star, CheckCircle2, XCircle, AlertTriangle,
   HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
-  Brain, Blocks, ClipboardList, Calculator, Activity, FileText, Wrench,
-  AlertCircle, ListTodo, GitCompareArrows, Camera, LayoutDashboard, Plug
+  Brain, Blocks, Camera, Plug, ExternalLink, Wrench
 } from "lucide-react";
 
 export default function Landing() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
   const { data: templatesData } = useTemplates();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     trackViewContent({ content_name: 'Landing Page', content_category: 'Homepage' });
@@ -237,117 +234,9 @@ export default function Landing() {
     { value: "98%", label: "Kepuasan Pengguna" },
   ];
 
-  const MobileMenu = () => (
-    <div className="flex flex-col gap-4 p-4">
-      <Link href="/documentation" onClick={() => setMobileMenuOpen(false)}>
-        <Button variant="ghost" className="w-full justify-start" data-testid="mobile-button-documentation">
-          <BookOpen className="h-4 w-4 mr-2" />
-          Dokumentasi
-        </Button>
-      </Link>
-      <Link href="/pricing" onClick={() => { handlePricingClick(); setMobileMenuOpen(false); }}>
-        <Button variant="ghost" className="w-full justify-start" data-testid="mobile-button-pricing">
-          <BarChart3 className="h-4 w-4 mr-2" />
-          Harga
-        </Button>
-      </Link>
-      <div className="border-t pt-4">
-        {isAuthenticated ? (
-          <div className="space-y-2">
-            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full" data-testid="mobile-button-dashboard">
-                Dashboard
-              </Button>
-            </Link>
-            <a href="/api/logout">
-              <Button variant="outline" className="w-full gap-2" data-testid="mobile-button-logout">
-                <LogOut className="h-4 w-4" />
-                Keluar
-              </Button>
-            </a>
-          </div>
-        ) : (
-          <a href="/api/login" onClick={handleLoginClick}>
-            <Button className="w-full gap-2" data-testid="mobile-button-login">
-              <LogIn className="h-4 w-4" />
-              Masuk
-            </Button>
-          </a>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-background">
-      {/* HEADER - Sticky Navigation */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bot className="h-7 w-7 md:h-8 md:w-8 text-primary" />
-            <span className="text-lg md:text-xl font-bold">Gustafta</span>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-4">
-            <Link href="/documentation">
-              <Button variant="ghost" data-testid="button-documentation">
-                Dokumentasi
-              </Button>
-            </Link>
-            <Link href="/pricing" onClick={handlePricingClick}>
-              <Button variant="ghost" data-testid="button-pricing">
-                Harga
-              </Button>
-            </Link>
-            <ThemeToggle />
-            {isLoading ? (
-              <Button disabled>Loading...</Button>
-            ) : isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <Link href="/dashboard">
-                  <Button data-testid="button-go-dashboard">
-                    Dashboard
-                  </Button>
-                </Link>
-                <a href="/api/logout">
-                  <Button variant="ghost" size="icon" data-testid="button-logout">
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </a>
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
-                  <AvatarFallback>{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
-                </Avatar>
-              </div>
-            ) : (
-              <a href="/api/login" onClick={handleLoginClick}>
-                <Button className="gap-2" data-testid="button-login">
-                  <LogIn className="h-4 w-4" />
-                  Masuk
-                </Button>
-              </a>
-            )}
-          </div>
-
-          <div className="flex md:hidden items-center gap-2">
-            <ThemeToggle />
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="button-mobile-menu">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-72">
-                <div className="flex items-center gap-2 mb-6">
-                  <Bot className="h-6 w-6 text-primary" />
-                  <span className="font-bold">Gustafta</span>
-                </div>
-                <MobileMenu />
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </header>
+      <SharedHeader />
 
       {/* ATTENTION: Hero Section with Strong Value Proposition */}
       <section className="relative overflow-hidden py-16 md:py-28 lg:py-36">
@@ -783,6 +672,67 @@ export default function Landing() {
                 </AccordionItem>
               ))}
             </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* Dokumentender Integration Section */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-10">
+              <Badge variant="secondary" className="mb-4">
+                <Globe className="h-3 w-3 mr-1" />
+                Knowledge Partner
+              </Badge>
+              <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                Terhubung dengan Dokumentender
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Akses pengetahuan lengkap tentang keteknikan, konstruksi, pengadaan, dan berbagai bidang lainnya
+                melalui platform AI knowledge base Dokumentender.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <Card className="hover-elevate" data-testid="card-dokumentender-engineering">
+                <CardContent className="p-6">
+                  <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
+                    <Wrench className="h-6 w-6 text-emerald-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Keteknikan</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Teknik Sipil, Mesin, Elektro, Lingkungan - standar SNI, ISO, perhitungan teknis, dan referensi lengkap.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="hover-elevate" data-testid="card-dokumentender-construction">
+                <CardContent className="p-6">
+                  <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
+                    <Blocks className="h-6 w-6 text-emerald-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Konstruksi & Pengadaan</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Metode pelaksanaan, spesifikasi material, RAB, K3, dokumen tender, kontrak, dan peraturan LKPP.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="w-full sm:w-auto gap-2" data-testid="button-dokumentender-external">
+                  <ExternalLink className="h-5 w-5" />
+                  Buka chat.dokumentender.com
+                </Button>
+              </a>
+              <Link href="/chat/dokumentender">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2" data-testid="button-dokumentender-chat">
+                  <MessageSquare className="h-5 w-5" />
+                  Chat di Gustafta
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserSubscription, formatCurrency, formatDate, getDaysRemaining } from "@/hooks/use-subscription";
+import { useGustaftaAssistant } from "@/hooks/use-agents";
+import { ChatPopup } from "@/components/chat-popup";
+import { SharedHeader } from "@/components/shared-header";
 import { 
   Bot, Crown, Zap, Calendar, CreditCard, Clock, 
   MessageSquare, FileText, ArrowRight, AlertCircle,
@@ -58,6 +60,7 @@ function StatusBadge({ status }: { status: string }) {
 export default function Subscription() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: subscription, isLoading: subLoading } = useUserSubscription(user?.id);
+  const { data: gustaftaAssistant } = useGustaftaAssistant();
 
   const isLoading = authLoading || subLoading;
   const planInfo = subscription ? planDetails[subscription.plan] || planDetails.free_trial : null;
@@ -92,29 +95,7 @@ export default function Subscription() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Bot className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">Gustafta</span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/pricing">
-              <Button variant="ghost" data-testid="button-pricing">
-                Pricing
-              </Button>
-            </Link>
-            <ThemeToggle />
-            <Link href="/dashboard">
-              <Button data-testid="button-go-dashboard">
-                Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SharedHeader />
 
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="mb-8">
@@ -339,11 +320,15 @@ export default function Subscription() {
               <span className="font-bold">Gustafta</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              2024 Gustafta. AI Chatbot Builder Platform.
+              © 2026 Gustafta. AI Project Intelligence Platform.
             </p>
           </div>
         </div>
       </footer>
+
+      {gustaftaAssistant && (
+        <ChatPopup agent={gustaftaAssistant} />
+      )}
     </div>
   );
 }
