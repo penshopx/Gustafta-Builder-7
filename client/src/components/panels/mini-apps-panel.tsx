@@ -443,86 +443,29 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
     </div>
   );
 
+  const renderJsonEditor = (config: Record<string, any>, setConfig: (c: Record<string, any>) => void, testIdPrefix: string, collapsed = false) => {
+    const jsonStr = typeof config === "object" ? JSON.stringify(config, null, 2) : "{}";
+    const lineCount = jsonStr.split("\n").length;
+    return (
+      <div className="space-y-2">
+        <Label>Konfigurasi (JSON)</Label>
+        <Textarea
+          value={jsonStr}
+          onChange={(e) => {
+            try {
+              setConfig(JSON.parse(e.target.value));
+            } catch {}
+          }}
+          rows={Math.min(Math.max(lineCount + 1, 4), 16)}
+          className="font-mono text-xs"
+          data-testid={`${testIdPrefix}-json`}
+        />
+      </div>
+    );
+  };
+
   const renderConfigByType = (type: MiniAppType, config: Record<string, any>, setConfig: (c: Record<string, any>) => void, testIdPrefix: string) => {
-    switch (type) {
-      case "checklist":
-        return null;
-      case "calculator":
-        return (
-          <div className="space-y-2">
-            <Label>Formula (opsional)</Label>
-            <Textarea
-              value={config.formula || ""}
-              onChange={(e) => setConfig({ ...config, formula: e.target.value })}
-              placeholder="Contoh: harga * luas * 1.1"
-              rows={2}
-              data-testid={`${testIdPrefix}-formula`}
-            />
-            <Label>Variabel (pisahkan dengan koma)</Label>
-            <Input
-              value={config.variables || ""}
-              onChange={(e) => setConfig({ ...config, variables: e.target.value })}
-              placeholder="harga, luas, pajak"
-              data-testid={`${testIdPrefix}-variables`}
-            />
-          </div>
-        );
-      case "progress_tracker":
-        return (
-          <div className="space-y-2">
-            <Label>Milestone (pisahkan dengan koma)</Label>
-            <Textarea
-              value={config.milestones || ""}
-              onChange={(e) => setConfig({ ...config, milestones: e.target.value })}
-              placeholder="Perencanaan, Desain, Pembangunan, Finishing"
-              rows={2}
-              data-testid={`${testIdPrefix}-milestones`}
-            />
-          </div>
-        );
-      case "risk_assessment":
-        return (
-          <div className="space-y-2">
-            <Label>Kriteria Risiko (pisahkan dengan koma)</Label>
-            <Textarea
-              value={config.criteria || ""}
-              onChange={(e) => setConfig({ ...config, criteria: e.target.value })}
-              placeholder="Risiko Pasar, Risiko Teknis, Risiko Finansial"
-              rows={2}
-              data-testid={`${testIdPrefix}-criteria`}
-            />
-          </div>
-        );
-      case "document_generator":
-        return (
-          <div className="space-y-2">
-            <Label>Template Dokumen</Label>
-            <Textarea
-              value={config.template || ""}
-              onChange={(e) => setConfig({ ...config, template: e.target.value })}
-              placeholder="Gunakan {{variable}} untuk placeholder..."
-              rows={4}
-              data-testid={`${testIdPrefix}-template`}
-            />
-          </div>
-        );
-      default:
-        return (
-          <div className="space-y-2">
-            <Label>Konfigurasi (JSON)</Label>
-            <Textarea
-              value={typeof config === "object" ? JSON.stringify(config, null, 2) : "{}"}
-              onChange={(e) => {
-                try {
-                  setConfig(JSON.parse(e.target.value));
-                } catch {}
-              }}
-              rows={4}
-              data-testid={`${testIdPrefix}-json`}
-            />
-          </div>
-        );
-    }
+    return renderJsonEditor(config, setConfig, testIdPrefix);
   };
 
   return (
