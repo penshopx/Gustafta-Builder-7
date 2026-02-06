@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
-  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network
+  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,6 +23,8 @@ import { ChatConsolePanel } from "@/components/panels/chat-console-panel";
 import { AnalyticsPanel } from "@/components/panels/analytics-panel";
 import { WidgetPanel } from "@/components/panels/widget-panel";
 import { AgenticAIPanel } from "@/components/panels/agentic-ai-panel";
+import { ProjectBrainPanel } from "@/components/panels/project-brain-panel";
+import { MiniAppsPanel } from "@/components/panels/mini-apps-panel";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
 import { CreateBigIdeaDialog } from "@/components/dialogs/create-big-idea-dialog";
 import { CreateToolboxDialog } from "@/components/dialogs/create-toolbox-dialog";
@@ -38,12 +40,14 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic";
+type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
   { id: "agentic", label: "Agentic AI", shortLabel: "AI", icon: Sparkles },
   { id: "knowledge", label: "Knowledge Base", shortLabel: "KB", icon: BookOpen },
+  { id: "project-brain", label: "Otak Proyek", shortLabel: "Brain", icon: Brain },
+  { id: "mini-apps", label: "Mini Apps", shortLabel: "Apps", icon: Blocks },
   { id: "integrations", label: "Integrations", shortLabel: "Integ", icon: Plug },
   { id: "widget", label: "Widget", shortLabel: "Widget", icon: Palette },
   { id: "chat", label: "Chat Console", shortLabel: "Chat", icon: MessageSquare },
@@ -170,6 +174,10 @@ export default function Dashboard() {
         return <WidgetPanel agent={activeAgent} />;
       case "chat":
         return <ChatConsolePanel agent={activeAgent} />;
+      case "project-brain":
+        return <ProjectBrainPanel agent={activeAgent} />;
+      case "mini-apps":
+        return <MiniAppsPanel agent={activeAgent} />;
       case "analytics":
         return <AnalyticsPanel agent={activeAgent} />;
       default:
@@ -298,7 +306,7 @@ export default function Dashboard() {
           >
             <item.icon className="w-4 h-4 shrink-0" />
             {!sidebarCollapsed && item.label}
-            {!sidebarCollapsed && item.id === "agentic" && (
+            {!sidebarCollapsed && (item.id === "project-brain" || item.id === "mini-apps") && (
               <Badge variant="secondary" className="ml-auto text-xs">New</Badge>
             )}
           </button>
@@ -534,24 +542,31 @@ export default function Dashboard() {
                 <button
                   className={cn(
                     "flex flex-col items-center justify-center gap-0.5 px-2 py-1 min-w-0 flex-1",
-                    activeNav === "analytics" ? "text-primary" : "text-muted-foreground"
+                    navItems.slice(5).some((item) => activeNav === item.id) ? "text-primary" : "text-muted-foreground"
                   )}
                   data-testid="mobile-nav-more"
                 >
-                  <BarChart3 className="w-5 h-5" />
+                  <Settings className="w-5 h-5" />
                   <span className="text-[10px] font-medium">More</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="mb-2">
-                <DropdownMenuItem onClick={() => setActiveNav("analytics")} className="gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Analytics
-                </DropdownMenuItem>
+                {navItems.slice(5).map((item) => (
+                  <DropdownMenuItem
+                    key={item.id}
+                    onClick={() => setActiveNav(item.id)}
+                    className="gap-2"
+                    data-testid={`mobile-nav-more-${item.id}`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setProfileDialogOpen(true)} className="gap-2">
                   <User className="w-4 h-4" />
                   Profil
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <Link href="/">
                   <DropdownMenuItem className="gap-2">
                     <Home className="w-4 h-4" />
