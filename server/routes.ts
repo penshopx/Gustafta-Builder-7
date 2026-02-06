@@ -2697,9 +2697,9 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/project-brain/templates", isAuthenticated, async (req, res) => {
+  app.post("/api/project-brain/templates/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertProjectBrainTemplateSchema.safeParse(req.body);
+      const parsed = insertProjectBrainTemplateSchema.safeParse({ ...req.body, agentId: req.params.agentId });
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
@@ -2766,9 +2766,9 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/project-brain/instances", isAuthenticated, async (req, res) => {
+  app.post("/api/project-brain/instances/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertProjectBrainInstanceSchema.safeParse(req.body);
+      const parsed = insertProjectBrainInstanceSchema.safeParse({ ...req.body, agentId: req.params.agentId });
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
