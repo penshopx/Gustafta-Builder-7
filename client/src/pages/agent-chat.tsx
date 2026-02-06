@@ -112,7 +112,8 @@ export default function AgentChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           agentId: params.agentId,
-          message: content.trim(),
+          role: "user",
+          content: content.trim(),
           sessionId: sessionIdRef.current,
         }),
       });
