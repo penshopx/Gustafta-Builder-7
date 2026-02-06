@@ -188,3 +188,32 @@ Schema includes:
 - Widget adapts to changes automatically without needing to replace embed code
 - Access control: Only active + public agents can be embedded
 - Multi-widget support: Multiple widgets per page (different agents)
+
+### Project Brain (Feb 6, 2026)
+- "Otak Proyek" - form data proyek yang menjadi konteks chatbot
+- Templates: definisi field yang bisa dikonfigurasi per agent (JSONB)
+  - Field types: text, textarea, number, select, multiselect, boolean, date, url, email
+  - Each field: key, label, type, required, placeholder, helpText, defaultValue, options, order
+- Instances: data proyek aktual yang diisi oleh pengguna
+  - Status: draft, active, completed, archived
+  - Active instance auto-injected into system prompt
+- Tables: `project_brain_templates`, `project_brain_instances`
+- API Routes:
+  - GET/POST /api/project-brain/templates/:agentId
+  - GET/PATCH/DELETE /api/project-brain/template/:id
+  - GET/POST /api/project-brain/instances/:agentId
+  - GET /api/project-brain/instances/:agentId/active
+  - GET/PATCH/DELETE /api/project-brain/instance/:id
+  - POST /api/project-brain/instance/:id/activate
+- Chat integration: Active project brain instance values injected into both regular and streaming chat system prompts
+
+### Mini Apps (Feb 6, 2026)
+- Aplikasi kecil turunan dari Project Brain data
+- Types: checklist, calculator, risk_assessment, progress_tracker, document_generator, custom
+- Each mini app: name, description, type, config (JSONB), icon
+- Mini App Results: stores input/output of mini app executions
+- Tables: `mini_apps`, `mini_app_results`
+- API Routes:
+  - GET/POST /api/mini-apps/:agentId
+  - GET/PATCH/DELETE /api/mini-app/:id
+  - GET/POST /api/mini-app-results/:miniAppId

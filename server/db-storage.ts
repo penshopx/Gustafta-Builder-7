@@ -12,6 +12,10 @@ import {
   analyticsTable,
   subscriptionsTable,
   userProfiles,
+  projectBrainTemplates,
+  projectBrainInstances,
+  miniApps,
+  miniAppResults,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 import type {
@@ -35,6 +39,14 @@ import type {
   InsertUserProfile,
   Subscription,
   InsertSubscription,
+  ProjectBrainTemplate,
+  InsertProjectBrainTemplate,
+  ProjectBrainInstance,
+  InsertProjectBrainInstance,
+  MiniApp,
+  InsertMiniApp,
+  MiniAppResult,
+  InsertMiniAppResult,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -910,6 +922,358 @@ export class DatabaseStorage implements IStorage {
       .from(agents)
       .where(eq(agents.userId, userId));
     return Number(result[0]?.count || 0);
+  }
+
+  // Project Brain Template methods
+  async getProjectBrainTemplates(agentId: string): Promise<ProjectBrainTemplate[]> {
+    const result = await db.select().from(projectBrainTemplates)
+      .where(eq(projectBrainTemplates.agentId, parseInt(agentId)))
+      .orderBy(desc(projectBrainTemplates.createdAt));
+    return result.map(row => ({
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      fields: (row.fields as any[]) || [],
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async getProjectBrainTemplate(id: string): Promise<ProjectBrainTemplate | undefined> {
+    const result = await db.select().from(projectBrainTemplates)
+      .where(eq(projectBrainTemplates.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      fields: (row.fields as any[]) || [],
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async createProjectBrainTemplate(template: InsertProjectBrainTemplate): Promise<ProjectBrainTemplate> {
+    const result = await db.insert(projectBrainTemplates).values({
+      agentId: parseInt(template.agentId),
+      name: template.name,
+      description: template.description || "",
+      fields: template.fields || [],
+      isActive: true,
+    }).returning();
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      fields: (row.fields as any[]) || [],
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async updateProjectBrainTemplate(id: string, data: Partial<InsertProjectBrainTemplate>): Promise<ProjectBrainTemplate | undefined> {
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.fields !== undefined) updateData.fields = data.fields;
+
+    const result = await db.update(projectBrainTemplates)
+      .set(updateData)
+      .where(eq(projectBrainTemplates.id, parseInt(id)))
+      .returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      fields: (row.fields as any[]) || [],
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async deleteProjectBrainTemplate(id: string): Promise<boolean> {
+    const result = await db.delete(projectBrainTemplates)
+      .where(eq(projectBrainTemplates.id, parseInt(id))).returning();
+    return result.length > 0;
+  }
+
+  // Project Brain Instance methods
+  async getProjectBrainInstances(agentId: string): Promise<ProjectBrainInstance[]> {
+    const result = await db.select().from(projectBrainInstances)
+      .where(eq(projectBrainInstances.agentId, parseInt(agentId)))
+      .orderBy(desc(projectBrainInstances.createdAt));
+    return result.map(row => ({
+      id: String(row.id),
+      agentId: String(row.agentId),
+      templateId: String(row.templateId),
+      name: row.name,
+      values: (row.values as Record<string, any>) || {},
+      status: (row.status || "active") as "draft" | "active" | "completed" | "archived",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    }));
+  }
+
+  async getProjectBrainInstance(id: string): Promise<ProjectBrainInstance | undefined> {
+    const result = await db.select().from(projectBrainInstances)
+      .where(eq(projectBrainInstances.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      templateId: String(row.templateId),
+      name: row.name,
+      values: (row.values as Record<string, any>) || {},
+      status: (row.status || "active") as "draft" | "active" | "completed" | "archived",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async getActiveProjectBrainInstance(agentId: string): Promise<ProjectBrainInstance | null> {
+    const result = await db.select().from(projectBrainInstances)
+      .where(and(
+        eq(projectBrainInstances.agentId, parseInt(agentId)),
+        eq(projectBrainInstances.isActive, true)
+      ))
+      .limit(1);
+    if (result.length === 0) return null;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      templateId: String(row.templateId),
+      name: row.name,
+      values: (row.values as Record<string, any>) || {},
+      status: (row.status || "active") as "draft" | "active" | "completed" | "archived",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async createProjectBrainInstance(instance: InsertProjectBrainInstance): Promise<ProjectBrainInstance> {
+    const result = await db.insert(projectBrainInstances).values({
+      agentId: parseInt(instance.agentId),
+      templateId: parseInt(instance.templateId),
+      name: instance.name,
+      values: instance.values || {},
+      status: instance.status || "active",
+      isActive: true,
+    }).returning();
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      templateId: String(row.templateId),
+      name: row.name,
+      values: (row.values as Record<string, any>) || {},
+      status: (row.status || "active") as "draft" | "active" | "completed" | "archived",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async updateProjectBrainInstance(id: string, data: Partial<InsertProjectBrainInstance>): Promise<ProjectBrainInstance | undefined> {
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.values !== undefined) updateData.values = data.values;
+    if (data.status !== undefined) updateData.status = data.status;
+
+    const result = await db.update(projectBrainInstances)
+      .set(updateData)
+      .where(eq(projectBrainInstances.id, parseInt(id)))
+      .returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      templateId: String(row.templateId),
+      name: row.name,
+      values: (row.values as Record<string, any>) || {},
+      status: (row.status || "active") as "draft" | "active" | "completed" | "archived",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async setActiveProjectBrainInstance(id: string): Promise<ProjectBrainInstance | undefined> {
+    const instance = await this.getProjectBrainInstance(id);
+    if (!instance) return undefined;
+
+    await db.update(projectBrainInstances)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(projectBrainInstances.agentId, parseInt(instance.agentId)));
+
+    const result = await db.update(projectBrainInstances)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(projectBrainInstances.id, parseInt(id)))
+      .returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      templateId: String(row.templateId),
+      name: row.name,
+      values: (row.values as Record<string, any>) || {},
+      status: (row.status || "active") as "draft" | "active" | "completed" | "archived",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async deleteProjectBrainInstance(id: string): Promise<boolean> {
+    const result = await db.delete(projectBrainInstances)
+      .where(eq(projectBrainInstances.id, parseInt(id))).returning();
+    return result.length > 0;
+  }
+
+  // Mini App methods
+  async getMiniApps(agentId: string): Promise<MiniApp[]> {
+    const result = await db.select().from(miniApps)
+      .where(eq(miniApps.agentId, parseInt(agentId)))
+      .orderBy(desc(miniApps.createdAt));
+    return result.map(row => ({
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      type: row.type as MiniApp["type"],
+      config: (row.config as Record<string, any>) || {},
+      icon: row.icon || "app",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async getMiniApp(id: string): Promise<MiniApp | undefined> {
+    const result = await db.select().from(miniApps)
+      .where(eq(miniApps.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      type: row.type as MiniApp["type"],
+      config: (row.config as Record<string, any>) || {},
+      icon: row.icon || "app",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async createMiniApp(miniApp: InsertMiniApp): Promise<MiniApp> {
+    const result = await db.insert(miniApps).values({
+      agentId: parseInt(miniApp.agentId),
+      name: miniApp.name,
+      description: miniApp.description || "",
+      type: miniApp.type,
+      config: miniApp.config || {},
+      icon: miniApp.icon || "app",
+      isActive: true,
+    }).returning();
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      type: row.type as MiniApp["type"],
+      config: (row.config as Record<string, any>) || {},
+      icon: row.icon || "app",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async updateMiniApp(id: string, data: Partial<InsertMiniApp>): Promise<MiniApp | undefined> {
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.type !== undefined) updateData.type = data.type;
+    if (data.config !== undefined) updateData.config = data.config;
+    if (data.icon !== undefined) updateData.icon = data.icon;
+
+    const result = await db.update(miniApps)
+      .set(updateData)
+      .where(eq(miniApps.id, parseInt(id)))
+      .returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      name: row.name,
+      description: row.description || "",
+      type: row.type as MiniApp["type"],
+      config: (row.config as Record<string, any>) || {},
+      icon: row.icon || "app",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async deleteMiniApp(id: string): Promise<boolean> {
+    const result = await db.delete(miniApps)
+      .where(eq(miniApps.id, parseInt(id))).returning();
+    return result.length > 0;
+  }
+
+  // Mini App Result methods
+  async getMiniAppResults(miniAppId: string): Promise<MiniAppResult[]> {
+    const result = await db.select().from(miniAppResults)
+      .where(eq(miniAppResults.miniAppId, parseInt(miniAppId)))
+      .orderBy(desc(miniAppResults.createdAt));
+    return result.map(row => ({
+      id: String(row.id),
+      miniAppId: String(row.miniAppId),
+      agentId: String(row.agentId),
+      projectInstanceId: row.projectInstanceId ? String(row.projectInstanceId) : undefined,
+      input: (row.input as Record<string, any>) || {},
+      output: (row.output as Record<string, any>) || {},
+      status: (row.status || "completed") as "pending" | "completed" | "error",
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async createMiniAppResult(resultData: InsertMiniAppResult): Promise<MiniAppResult> {
+    const result = await db.insert(miniAppResults).values({
+      miniAppId: parseInt(resultData.miniAppId),
+      agentId: parseInt(resultData.agentId),
+      projectInstanceId: resultData.projectInstanceId ? parseInt(resultData.projectInstanceId) : null,
+      input: resultData.input || {},
+      output: resultData.output || {},
+      status: resultData.status || "completed",
+    }).returning();
+    const row = result[0];
+    return {
+      id: String(row.id),
+      miniAppId: String(row.miniAppId),
+      agentId: String(row.agentId),
+      projectInstanceId: row.projectInstanceId ? String(row.projectInstanceId) : undefined,
+      input: (row.input as Record<string, any>) || {},
+      output: (row.output as Record<string, any>) || {},
+      status: (row.status || "completed") as "pending" | "completed" | "error",
+      createdAt: row.createdAt.toISOString(),
+    };
   }
 }
 

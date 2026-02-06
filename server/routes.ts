@@ -9,6 +9,10 @@ import {
   insertBigIdeaSchema,
   insertToolboxSchema,
   insertUserProfileSchema,
+  insertProjectBrainTemplateSchema,
+  insertProjectBrainInstanceSchema,
+  insertMiniAppSchema,
+  insertMiniAppResultSchema,
 } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -816,6 +820,16 @@ export async function registerRoutes(
       if (knowledgeContext) {
         systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
       }
+
+      const activeProjectBrain = await storage.getActiveProjectBrainInstance(parsed.data.agentId);
+      if (activeProjectBrain && activeProjectBrain.values && Object.keys(activeProjectBrain.values).length > 0) {
+        const projectDataStr = Object.entries(activeProjectBrain.values)
+          .map(([key, value]) => `- ${key}: ${value}`)
+          .join("\n");
+        systemPrompt += `\n\nProject Brain (Konteks Proyek Aktif: ${activeProjectBrain.name}):\n${projectDataStr}`;
+        systemPrompt += `\nGunakan data proyek di atas sebagai konteks utama untuk semua jawaban dan rekomendasi.`;
+      }
+
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
       // Build messages array
@@ -998,6 +1012,16 @@ export async function registerRoutes(
       if (agent.communicationStyle) systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
       if (agent.toneOfVoice) systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
       if (knowledgeContext) systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
+
+      const activeProjectBrainStream = await storage.getActiveProjectBrainInstance(parsed.data.agentId);
+      if (activeProjectBrainStream && activeProjectBrainStream.values && Object.keys(activeProjectBrainStream.values).length > 0) {
+        const projectDataStr = Object.entries(activeProjectBrainStream.values)
+          .map(([key, value]) => `- ${key}: ${value}`)
+          .join("\n");
+        systemPrompt += `\n\nProject Brain (Konteks Proyek Aktif: ${activeProjectBrainStream.name}):\n${projectDataStr}`;
+        systemPrompt += `\nGunakan data proyek di atas sebagai konteks utama untuk semua jawaban dan rekomendasi.`;
+      }
+
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
       // Build messages array
@@ -2474,6 +2498,231 @@ export async function registerRoutes(
     
     res.type('application/javascript');
     res.send(loaderScript);
+  });
+
+  // ==================== Project Brain Template Routes (Protected) ====================
+
+  app.get("/api/project-brain/templates/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const templates = await storage.getProjectBrainTemplates(req.params.agentId);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch project brain templates" });
+    }
+  });
+
+  app.get("/api/project-brain/template/:id", isAuthenticated, async (req, res) => {
+    try {
+      const template = await storage.getProjectBrainTemplate(req.params.id);
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch template" });
+    }
+  });
+
+  app.post("/api/project-brain/templates", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertProjectBrainTemplateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      const template = await storage.createProjectBrainTemplate(parsed.data);
+      res.status(201).json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create template" });
+    }
+  });
+
+  app.patch("/api/project-brain/template/:id", isAuthenticated, async (req, res) => {
+    try {
+      const template = await storage.updateProjectBrainTemplate(req.params.id, req.body);
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update template" });
+    }
+  });
+
+  app.delete("/api/project-brain/template/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteProjectBrainTemplate(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete template" });
+    }
+  });
+
+  // ==================== Project Brain Instance Routes (Protected) ====================
+
+  app.get("/api/project-brain/instances/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const instances = await storage.getProjectBrainInstances(req.params.agentId);
+      res.json(instances);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch project brain instances" });
+    }
+  });
+
+  app.get("/api/project-brain/instance/:id", isAuthenticated, async (req, res) => {
+    try {
+      const instance = await storage.getProjectBrainInstance(req.params.id);
+      if (!instance) {
+        return res.status(404).json({ error: "Instance not found" });
+      }
+      res.json(instance);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch instance" });
+    }
+  });
+
+  app.get("/api/project-brain/instances/:agentId/active", isAuthenticated, async (req, res) => {
+    try {
+      const instance = await storage.getActiveProjectBrainInstance(req.params.agentId);
+      res.json(instance);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch active instance" });
+    }
+  });
+
+  app.post("/api/project-brain/instances", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertProjectBrainInstanceSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      const instance = await storage.createProjectBrainInstance(parsed.data);
+      res.status(201).json(instance);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create instance" });
+    }
+  });
+
+  app.patch("/api/project-brain/instance/:id", isAuthenticated, async (req, res) => {
+    try {
+      const instance = await storage.updateProjectBrainInstance(req.params.id, req.body);
+      if (!instance) {
+        return res.status(404).json({ error: "Instance not found" });
+      }
+      res.json(instance);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update instance" });
+    }
+  });
+
+  app.post("/api/project-brain/instance/:id/activate", isAuthenticated, async (req, res) => {
+    try {
+      const instance = await storage.setActiveProjectBrainInstance(req.params.id);
+      if (!instance) {
+        return res.status(404).json({ error: "Instance not found" });
+      }
+      res.json(instance);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to activate instance" });
+    }
+  });
+
+  app.delete("/api/project-brain/instance/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteProjectBrainInstance(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Instance not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete instance" });
+    }
+  });
+
+  // ==================== Mini Apps Routes (Protected) ====================
+
+  app.get("/api/mini-apps/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const apps = await storage.getMiniApps(req.params.agentId);
+      res.json(apps);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini apps" });
+    }
+  });
+
+  app.get("/api/mini-app/:id", isAuthenticated, async (req, res) => {
+    try {
+      const app = await storage.getMiniApp(req.params.id);
+      if (!app) {
+        return res.status(404).json({ error: "Mini app not found" });
+      }
+      res.json(app);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini app" });
+    }
+  });
+
+  app.post("/api/mini-apps", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertMiniAppSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      const miniApp = await storage.createMiniApp(parsed.data);
+      res.status(201).json(miniApp);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create mini app" });
+    }
+  });
+
+  app.patch("/api/mini-app/:id", isAuthenticated, async (req, res) => {
+    try {
+      const miniApp = await storage.updateMiniApp(req.params.id, req.body);
+      if (!miniApp) {
+        return res.status(404).json({ error: "Mini app not found" });
+      }
+      res.json(miniApp);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update mini app" });
+    }
+  });
+
+  app.delete("/api/mini-app/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteMiniApp(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Mini app not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete mini app" });
+    }
+  });
+
+  // ==================== Mini App Results Routes (Protected) ====================
+
+  app.get("/api/mini-app-results/:miniAppId", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getMiniAppResults(req.params.miniAppId);
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini app results" });
+    }
+  });
+
+  app.post("/api/mini-app-results", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertMiniAppResultSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      const result = await storage.createMiniAppResult(parsed.data);
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create mini app result" });
+    }
   });
 
   return httpServer;

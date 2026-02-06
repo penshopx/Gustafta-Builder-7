@@ -20,6 +20,14 @@ import type {
   InsertUserProfile,
   Subscription,
   InsertSubscription,
+  ProjectBrainTemplate,
+  InsertProjectBrainTemplate,
+  ProjectBrainInstance,
+  InsertProjectBrainInstance,
+  MiniApp,
+  InsertMiniApp,
+  MiniAppResult,
+  InsertMiniAppResult,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -98,6 +106,33 @@ export interface IStorage {
   
   // Agent count for subscription limits
   countUserAgents(userId: string): Promise<number>;
+
+  // Project Brain Template methods
+  getProjectBrainTemplates(agentId: string): Promise<ProjectBrainTemplate[]>;
+  getProjectBrainTemplate(id: string): Promise<ProjectBrainTemplate | undefined>;
+  createProjectBrainTemplate(template: InsertProjectBrainTemplate): Promise<ProjectBrainTemplate>;
+  updateProjectBrainTemplate(id: string, data: Partial<InsertProjectBrainTemplate>): Promise<ProjectBrainTemplate | undefined>;
+  deleteProjectBrainTemplate(id: string): Promise<boolean>;
+
+  // Project Brain Instance methods
+  getProjectBrainInstances(agentId: string): Promise<ProjectBrainInstance[]>;
+  getProjectBrainInstance(id: string): Promise<ProjectBrainInstance | undefined>;
+  getActiveProjectBrainInstance(agentId: string): Promise<ProjectBrainInstance | null>;
+  createProjectBrainInstance(instance: InsertProjectBrainInstance): Promise<ProjectBrainInstance>;
+  updateProjectBrainInstance(id: string, data: Partial<InsertProjectBrainInstance>): Promise<ProjectBrainInstance | undefined>;
+  setActiveProjectBrainInstance(id: string): Promise<ProjectBrainInstance | undefined>;
+  deleteProjectBrainInstance(id: string): Promise<boolean>;
+
+  // Mini App methods
+  getMiniApps(agentId: string): Promise<MiniApp[]>;
+  getMiniApp(id: string): Promise<MiniApp | undefined>;
+  createMiniApp(miniApp: InsertMiniApp): Promise<MiniApp>;
+  updateMiniApp(id: string, data: Partial<InsertMiniApp>): Promise<MiniApp | undefined>;
+  deleteMiniApp(id: string): Promise<boolean>;
+
+  // Mini App Result methods
+  getMiniAppResults(miniAppId: string): Promise<MiniAppResult[]>;
+  createMiniAppResult(result: InsertMiniAppResult): Promise<MiniAppResult>;
 }
 
 export class MemStorage implements IStorage {
@@ -111,6 +146,10 @@ export class MemStorage implements IStorage {
   private messages: Map<string, Message>;
   private analytics: Map<string, Analytics>;
   private subscriptions: Map<string, Subscription>;
+  private projectBrainTemplates: Map<string, ProjectBrainTemplate>;
+  private projectBrainInstances: Map<string, ProjectBrainInstance>;
+  private miniApps: Map<string, MiniApp>;
+  private miniAppResults: Map<string, MiniAppResult>;
 
   constructor() {
     this.users = new Map();
@@ -123,6 +162,10 @@ export class MemStorage implements IStorage {
     this.messages = new Map();
     this.analytics = new Map();
     this.subscriptions = new Map();
+    this.projectBrainTemplates = new Map();
+    this.projectBrainInstances = new Map();
+    this.miniApps = new Map();
+    this.miniAppResults = new Map();
   }
 
   // User methods
@@ -878,6 +921,191 @@ export class MemStorage implements IStorage {
       }
     });
     return count;
+  }
+
+  // Project Brain Template methods
+  async getProjectBrainTemplates(agentId: string): Promise<ProjectBrainTemplate[]> {
+    return Array.from(this.projectBrainTemplates.values())
+      .filter((t) => t.agentId === agentId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getProjectBrainTemplate(id: string): Promise<ProjectBrainTemplate | undefined> {
+    return this.projectBrainTemplates.get(id);
+  }
+
+  async createProjectBrainTemplate(insertTemplate: InsertProjectBrainTemplate): Promise<ProjectBrainTemplate> {
+    const id = randomUUID();
+    const template: ProjectBrainTemplate = {
+      id,
+      agentId: insertTemplate.agentId,
+      name: insertTemplate.name,
+      description: insertTemplate.description || "",
+      fields: insertTemplate.fields || [],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    this.projectBrainTemplates.set(id, template);
+    return template;
+  }
+
+  async updateProjectBrainTemplate(id: string, data: Partial<InsertProjectBrainTemplate>): Promise<ProjectBrainTemplate | undefined> {
+    const template = this.projectBrainTemplates.get(id);
+    if (!template) return undefined;
+
+    const updated: ProjectBrainTemplate = {
+      ...template,
+      name: data.name !== undefined ? data.name : template.name,
+      description: data.description !== undefined ? data.description : template.description,
+      fields: data.fields !== undefined ? data.fields : template.fields,
+    };
+    this.projectBrainTemplates.set(id, updated);
+    return updated;
+  }
+
+  async deleteProjectBrainTemplate(id: string): Promise<boolean> {
+    return this.projectBrainTemplates.delete(id);
+  }
+
+  // Project Brain Instance methods
+  async getProjectBrainInstances(agentId: string): Promise<ProjectBrainInstance[]> {
+    return Array.from(this.projectBrainInstances.values())
+      .filter((i) => i.agentId === agentId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getProjectBrainInstance(id: string): Promise<ProjectBrainInstance | undefined> {
+    return this.projectBrainInstances.get(id);
+  }
+
+  async getActiveProjectBrainInstance(agentId: string): Promise<ProjectBrainInstance | null> {
+    const instance = Array.from(this.projectBrainInstances.values()).find(
+      (i) => i.agentId === agentId && i.isActive
+    );
+    return instance || null;
+  }
+
+  async createProjectBrainInstance(insertInstance: InsertProjectBrainInstance): Promise<ProjectBrainInstance> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    const instance: ProjectBrainInstance = {
+      id,
+      agentId: insertInstance.agentId,
+      templateId: insertInstance.templateId,
+      name: insertInstance.name,
+      values: insertInstance.values || {},
+      status: insertInstance.status || "active",
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.projectBrainInstances.set(id, instance);
+    return instance;
+  }
+
+  async updateProjectBrainInstance(id: string, data: Partial<InsertProjectBrainInstance>): Promise<ProjectBrainInstance | undefined> {
+    const instance = this.projectBrainInstances.get(id);
+    if (!instance) return undefined;
+
+    const updated: ProjectBrainInstance = {
+      ...instance,
+      name: data.name !== undefined ? data.name : instance.name,
+      values: data.values !== undefined ? data.values : instance.values,
+      status: data.status !== undefined ? data.status : instance.status,
+      updatedAt: new Date().toISOString(),
+    };
+    this.projectBrainInstances.set(id, updated);
+    return updated;
+  }
+
+  async setActiveProjectBrainInstance(id: string): Promise<ProjectBrainInstance | undefined> {
+    const instance = this.projectBrainInstances.get(id);
+    if (!instance) return undefined;
+
+    Array.from(this.projectBrainInstances.entries()).forEach(([instId, inst]) => {
+      if (inst.agentId === instance.agentId) {
+        this.projectBrainInstances.set(instId, { ...inst, isActive: false });
+      }
+    });
+
+    const updated: ProjectBrainInstance = { ...instance, isActive: true, updatedAt: new Date().toISOString() };
+    this.projectBrainInstances.set(id, updated);
+    return updated;
+  }
+
+  async deleteProjectBrainInstance(id: string): Promise<boolean> {
+    return this.projectBrainInstances.delete(id);
+  }
+
+  // Mini App methods
+  async getMiniApps(agentId: string): Promise<MiniApp[]> {
+    return Array.from(this.miniApps.values())
+      .filter((app) => app.agentId === agentId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getMiniApp(id: string): Promise<MiniApp | undefined> {
+    return this.miniApps.get(id);
+  }
+
+  async createMiniApp(insertMiniApp: InsertMiniApp): Promise<MiniApp> {
+    const id = randomUUID();
+    const miniApp: MiniApp = {
+      id,
+      agentId: insertMiniApp.agentId,
+      name: insertMiniApp.name,
+      description: insertMiniApp.description || "",
+      type: insertMiniApp.type,
+      config: insertMiniApp.config || {},
+      icon: insertMiniApp.icon || "app",
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    this.miniApps.set(id, miniApp);
+    return miniApp;
+  }
+
+  async updateMiniApp(id: string, data: Partial<InsertMiniApp>): Promise<MiniApp | undefined> {
+    const miniApp = this.miniApps.get(id);
+    if (!miniApp) return undefined;
+
+    const updated: MiniApp = {
+      ...miniApp,
+      name: data.name !== undefined ? data.name : miniApp.name,
+      description: data.description !== undefined ? data.description : miniApp.description,
+      type: data.type !== undefined ? data.type : miniApp.type,
+      config: data.config !== undefined ? data.config : miniApp.config,
+      icon: data.icon !== undefined ? data.icon : miniApp.icon,
+    };
+    this.miniApps.set(id, updated);
+    return updated;
+  }
+
+  async deleteMiniApp(id: string): Promise<boolean> {
+    return this.miniApps.delete(id);
+  }
+
+  // Mini App Result methods
+  async getMiniAppResults(miniAppId: string): Promise<MiniAppResult[]> {
+    return Array.from(this.miniAppResults.values())
+      .filter((r) => r.miniAppId === miniAppId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createMiniAppResult(insertResult: InsertMiniAppResult): Promise<MiniAppResult> {
+    const id = randomUUID();
+    const result: MiniAppResult = {
+      id,
+      miniAppId: insertResult.miniAppId,
+      agentId: insertResult.agentId,
+      projectInstanceId: insertResult.projectInstanceId,
+      input: insertResult.input || {},
+      output: insertResult.output || {},
+      status: insertResult.status || "completed",
+      createdAt: new Date().toISOString(),
+    };
+    this.miniAppResults.set(id, result);
+    return result;
   }
 }
 

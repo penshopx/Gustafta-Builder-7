@@ -445,3 +445,146 @@ export type Subscription = InsertSubscription & {
   createdAt: string;
   updatedAt: string;
 };
+
+// ==================== PROJECT BRAIN ====================
+
+// Project Brain field type enum
+export const projectBrainFieldTypeSchema = z.enum([
+  "text", "textarea", "number", "select", "multiselect", "boolean", "date", "url", "email"
+]);
+export type ProjectBrainFieldType = z.infer<typeof projectBrainFieldTypeSchema>;
+
+// Project Brain field definition
+export const projectBrainFieldSchema = z.object({
+  key: z.string().min(1),
+  label: z.string().min(1),
+  type: projectBrainFieldTypeSchema,
+  required: z.boolean().default(false),
+  placeholder: z.string().optional().default(""),
+  helpText: z.string().optional().default(""),
+  defaultValue: z.string().optional().default(""),
+  options: z.array(z.string()).optional().default([]),
+  order: z.number().optional().default(0),
+});
+export type ProjectBrainField = z.infer<typeof projectBrainFieldSchema>;
+
+// Project Brain Templates Table
+export const projectBrainTemplates = pgTable("project_brain_templates", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description").default(""),
+  fields: jsonb("fields").default([]),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Project Brain Instances Table (filled project data)
+export const projectBrainInstances = pgTable("project_brain_instances", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  templateId: integer("template_id").notNull(),
+  name: text("name").notNull(),
+  values: jsonb("values").default({}),
+  status: text("status").default("active"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Project Brain Template Zod schema
+export const insertProjectBrainTemplateSchema = z.object({
+  agentId: z.string(),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional().default(""),
+  fields: z.array(projectBrainFieldSchema).optional().default([]),
+});
+
+export type InsertProjectBrainTemplate = z.infer<typeof insertProjectBrainTemplateSchema>;
+export type ProjectBrainTemplate = InsertProjectBrainTemplate & {
+  id: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
+// Project Brain Instance Zod schema
+export const insertProjectBrainInstanceSchema = z.object({
+  agentId: z.string(),
+  templateId: z.string(),
+  name: z.string().min(1, "Project name is required"),
+  values: z.record(z.any()).optional().default({}),
+  status: z.enum(["draft", "active", "completed", "archived"]).optional().default("active"),
+});
+
+export type InsertProjectBrainInstance = z.infer<typeof insertProjectBrainInstanceSchema>;
+export type ProjectBrainInstance = InsertProjectBrainInstance & {
+  id: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// ==================== MINI APPS ====================
+
+export const miniAppTypeSchema = z.enum([
+  "checklist", "calculator", "risk_assessment", "progress_tracker", "document_generator", "custom"
+]);
+export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
+
+// Mini Apps Table
+export const miniApps = pgTable("mini_apps", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description").default(""),
+  type: text("type").notNull(),
+  config: jsonb("config").default({}),
+  icon: text("icon").default("app"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Mini App Results Table
+export const miniAppResults = pgTable("mini_app_results", {
+  id: serial("id").primaryKey(),
+  miniAppId: integer("mini_app_id").notNull(),
+  agentId: integer("agent_id").notNull(),
+  projectInstanceId: integer("project_instance_id"),
+  input: jsonb("input").default({}),
+  output: jsonb("output").default({}),
+  status: text("status").default("completed"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Mini App Zod schema
+export const insertMiniAppSchema = z.object({
+  agentId: z.string(),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional().default(""),
+  type: miniAppTypeSchema,
+  config: z.record(z.any()).optional().default({}),
+  icon: z.string().optional().default("app"),
+});
+
+export type InsertMiniApp = z.infer<typeof insertMiniAppSchema>;
+export type MiniApp = InsertMiniApp & {
+  id: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
+// Mini App Result Zod schema
+export const insertMiniAppResultSchema = z.object({
+  miniAppId: z.string(),
+  agentId: z.string(),
+  projectInstanceId: z.string().optional(),
+  input: z.record(z.any()).optional().default({}),
+  output: z.record(z.any()).optional().default({}),
+  status: z.enum(["pending", "completed", "error"]).optional().default("completed"),
+});
+
+export type InsertMiniAppResult = z.infer<typeof insertMiniAppResultSchema>;
+export type MiniAppResult = InsertMiniAppResult & {
+  id: string;
+  createdAt: string;
+};
