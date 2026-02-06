@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -272,6 +272,9 @@ export default function AgentChat() {
           }
         }
       }
+      if (voiceMode && assistantContent.trim()) {
+        speakText(assistantContent, assistantMessage.id);
+      }
     } catch (err) {
       console.error("Chat error:", err);
       const errorMessage: Message = {
@@ -357,11 +360,63 @@ export default function AgentChat() {
     }
   }, []);
 
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const speakingMessageIdRef = useRef<string | null>(null);
+
+  const speakText = (text: string, messageId?: string) => {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+
+    const cleanText = text
+      .replace(/#{1,6}\s*/g, "")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1")
+      .replace(/_([^_]+)_/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/^[-*+]\s+/gm, "")
+      .replace(/^\d+\.\s+/gm, "")
+      .replace(/^>\s*/gm, "")
+      .replace(/---+/g, "")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = "id-ID";
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+      speakingMessageIdRef.current = messageId || null;
+    };
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      speakingMessageIdRef.current = null;
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      speakingMessageIdRef.current = null;
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    speakingMessageIdRef.current = null;
+  };
+
   const toggleSpeech = () => {
     if (!recognitionRef.current) return;
     if (isListening) {
       recognitionRef.current.stop();
     } else {
+      setVoiceMode(true);
       setInput("");
       recognitionRef.current.start();
     }
@@ -439,6 +494,18 @@ export default function AgentChat() {
           <Badge variant="outline" className="text-white border-white/30 text-[10px] hidden sm:inline-flex">
             Online
           </Badge>
+          <Button
+            size="icon"
+            variant="ghost"
+            className={cn("text-white shrink-0 toggle-elevate", voiceMode && "toggle-elevated")}
+            onClick={() => {
+              setVoiceMode(!voiceMode);
+              if (voiceMode) stopSpeaking();
+            }}
+            data-testid="button-voice-mode"
+          >
+            {voiceMode ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </Button>
           <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={handleShare} data-testid="button-share">
             <Share2 className="w-4 h-4" />
           </Button>
@@ -530,12 +597,33 @@ export default function AgentChat() {
                         ? <span className="text-sm">{message.content}</span>
                         : formatMessageContent(message.content)}
                     </div>
-                    <span className="text-[10px] text-muted-foreground px-1">
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    <div className="flex items-center gap-1.5 px-1">
+                      <span className="text-[10px] text-muted-foreground">
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      {message.role === "assistant" && message.content && (
+                        <button
+                          onClick={() => {
+                            if (isSpeaking && speakingMessageIdRef.current === message.id) {
+                              stopSpeaking();
+                            } else {
+                              speakText(message.content, message.id);
+                            }
+                          }}
+                          className="text-muted-foreground/60 hover-elevate rounded-full p-0.5"
+                          data-testid={`button-speak-${message.id}`}
+                        >
+                          {isSpeaking && speakingMessageIdRef.current === message.id ? (
+                            <VolumeX className="w-3 h-3" />
+                          ) : (
+                            <Volume2 className="w-3 h-3" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
