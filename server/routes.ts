@@ -27,7 +27,7 @@ const KNOWN_PROJECT_BRAIN_KEYS = [
   "structural_system", "concrete_grade", "construction_method",
   "time_constraint", "cost_constraint", "site_access", "environmental_factors",
   "issue_type", "issue_location", "issue_status", "issue_since",
-  "decision_summary", "decision_reason", "decision_risk_level", "decision_date",
+  "decision_summary", "decision_reason", "decision_risk_level", "decision_date", "decision_impact", "assumption_used",
   "slump", "concrete_strength", "inspection_notes",
   "completeness_level", "last_updated",
   "active_issues", "key_decisions", "test_data"
@@ -73,7 +73,9 @@ function formatProjectBrainBlock(projectName: string, values: Record<string, any
   sections.push(`- Decision Summary        : ${v("decision_summary")}`);
   sections.push(`- Reason                  : ${v("decision_reason")}`);
   sections.push(`- Risk Level              : ${v("decision_risk_level")}`);
+  sections.push(`- Impact Area             : ${v("decision_impact")}`);
   sections.push(`- Decision Date           : ${v("decision_date")}`);
+  sections.push(`- Assumption Used         : ${v("assumption_used")}`);
   if (values["key_decisions"]) {
     sections.push(`- Additional Notes        : ${values["key_decisions"]}`);
   }

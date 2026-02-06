@@ -71,22 +71,24 @@ const defaultTemplateFields: ProjectBrainField[] = [
   { key: "site_access", label: "Akses Lokasi", type: "select", required: false, placeholder: "Pilih kondisi akses", helpText: "Kondisi akses menuju lokasi proyek", defaultValue: "", options: ["Easy", "Limited"], order: 10 },
   { key: "environmental_factors", label: "Faktor Lingkungan", type: "text", required: false, placeholder: "Contoh: Dekat sungai, area rawan banjir", helpText: "Faktor lingkungan yang mempengaruhi proyek", defaultValue: "", options: [], order: 11 },
   // === Active Issues (sub-fields) ===
-  { key: "issue_type", label: "Tipe Isu", type: "text", required: false, placeholder: "Contoh: Structural, Quality, Safety", helpText: "Jenis masalah yang terjadi", defaultValue: "", options: [], order: 12 },
+  { key: "issue_type", label: "Tipe Isu", type: "select", required: false, placeholder: "Pilih tipe isu", helpText: "Jenis masalah yang terjadi", defaultValue: "", options: ["Structural", "Quality", "Safety", "Method", "Cost", "Schedule", "Environment"], order: 12 },
   { key: "issue_location", label: "Lokasi/Elemen Isu", type: "text", required: false, placeholder: "Contoh: Kolom Lt.3, Pondasi zona B", helpText: "Lokasi atau elemen yang terdampak", defaultValue: "", options: [], order: 13 },
   { key: "issue_status", label: "Status Isu", type: "select", required: false, placeholder: "Pilih status", helpText: "Status penanganan isu saat ini", defaultValue: "", options: ["Open", "Monitoring", "Closed"], order: 14 },
   { key: "issue_since", label: "Isu Sejak", type: "date", required: false, placeholder: "", helpText: "Sejak kapan isu ini muncul", defaultValue: "", options: [], order: 15 },
   // === Key Decisions Log ===
   { key: "decision_summary", label: "Ringkasan Keputusan", type: "textarea", required: false, placeholder: "Contoh: Ganti metode pondasi dari bored pile ke driven pile", helpText: "Ringkasan keputusan teknis yang diambil", defaultValue: "", options: [], order: 16 },
   { key: "decision_reason", label: "Alasan Keputusan", type: "textarea", required: false, placeholder: "Contoh: Kondisi tanah tidak sesuai hasil soil test", helpText: "Alasan di balik keputusan yang diambil", defaultValue: "", options: [], order: 17 },
-  { key: "decision_risk_level", label: "Level Risiko Keputusan", type: "select", required: false, placeholder: "Pilih level risiko", helpText: "Tingkat risiko dari keputusan ini", defaultValue: "", options: ["Low", "Medium", "High"], order: 18 },
+  { key: "decision_risk_level", label: "Level Risiko Keputusan", type: "select", required: false, placeholder: "Pilih level risiko", helpText: "Tingkat risiko dari keputusan ini", defaultValue: "Medium", options: ["Low", "Medium", "High"], order: 18 },
   { key: "decision_date", label: "Tanggal Keputusan", type: "date", required: false, placeholder: "", helpText: "Kapan keputusan ini diambil", defaultValue: "", options: [], order: 19 },
+  { key: "decision_impact", label: "Dampak Keputusan", type: "select", required: false, placeholder: "Pilih dampak", helpText: "Area yang paling terdampak oleh keputusan ini", defaultValue: "", options: ["Cost", "Time", "Quality", "Safety", "Multi"], order: 20 },
+  { key: "assumption_used", label: "Asumsi Utama", type: "textarea", required: false, placeholder: "Contoh: Data soil test dianggap valid hingga kedalaman 30 m", helpText: "Asumsi utama yang mendasari keputusan (penting untuk audit trail)", defaultValue: "", options: [], order: 21 },
   // === Test Data Snapshot ===
-  { key: "slump", label: "Slump", type: "text", required: false, placeholder: "Contoh: 12 ± 2 cm", helpText: "Hasil uji slump beton", defaultValue: "", options: [], order: 20 },
-  { key: "concrete_strength", label: "Kuat Tekan Beton", type: "text", required: false, placeholder: "Contoh: 28 hari = 32 MPa (Umur / Nilai)", helpText: "Hasil uji kuat tekan beton", defaultValue: "", options: [], order: 21 },
-  { key: "inspection_notes", label: "Catatan Inspeksi", type: "textarea", required: false, placeholder: "Contoh: Visual check OK, rebar spacing sesuai gambar", helpText: "Catatan dari hasil inspeksi lapangan", defaultValue: "", options: [], order: 22 },
+  { key: "slump", label: "Slump", type: "text", required: false, placeholder: "Contoh: 12 ± 2 cm", helpText: "Hasil uji slump beton", defaultValue: "", options: [], order: 22 },
+  { key: "concrete_strength", label: "Kuat Tekan Beton", type: "text", required: false, placeholder: "Contoh: 28 hari = 32 MPa (Umur / Nilai)", helpText: "Hasil uji kuat tekan beton", defaultValue: "", options: [], order: 23 },
+  { key: "inspection_notes", label: "Catatan Inspeksi", type: "textarea", required: false, placeholder: "Contoh: Visual check OK, rebar spacing sesuai gambar", helpText: "Catatan dari hasil inspeksi lapangan", defaultValue: "", options: [], order: 24 },
   // === Project Brain Status ===
-  { key: "completeness_level", label: "Tingkat Kelengkapan Data", type: "select", required: false, placeholder: "Pilih level", helpText: "Seberapa lengkap data proyek yang tersedia", defaultValue: "", options: ["Empty", "Partial", "Active"], order: 23 },
-  { key: "last_updated", label: "Terakhir Diperbarui", type: "date", required: false, placeholder: "", helpText: "Tanggal terakhir data proyek diperbarui", defaultValue: "", options: [], order: 24 },
+  { key: "completeness_level", label: "Tingkat Kelengkapan Data", type: "select", required: false, placeholder: "Pilih level", helpText: "Seberapa lengkap data proyek yang tersedia", defaultValue: "", options: ["Draft", "Partial", "Complete"], order: 25 },
+  { key: "last_updated", label: "Terakhir Diperbarui", type: "date", required: false, placeholder: "", helpText: "Tanggal terakhir data proyek diperbarui", defaultValue: "", options: [], order: 26 },
 ];
 
 export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
