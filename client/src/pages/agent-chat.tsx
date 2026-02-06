@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2 } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -307,6 +307,66 @@ export default function AgentChat() {
     }
   };
 
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const sendMessageRef = useRef(sendMessage);
+  sendMessageRef.current = sendMessage;
+
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.lang = "id-ID";
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      let finalTranscript = "";
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        finalTranscript = "";
+      };
+
+      recognition.onresult = (event: any) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interim += transcript;
+          }
+        }
+        setInput(finalTranscript + interim);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        if (finalTranscript.trim()) {
+          sendMessageRef.current(finalTranscript.trim());
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleSpeech = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      setInput("");
+      recognitionRef.current.start();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center" data-testid="chat-loading">
@@ -498,6 +558,14 @@ export default function AgentChat() {
         )}
 
         <div className="p-2.5 sm:p-4 border-t bg-background safe-area-bottom">
+          {isListening && (
+            <div className="flex items-center justify-center gap-2 pb-2 max-w-2xl mx-auto">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-destructive/10">
+                <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+                <span className="text-xs text-destructive font-medium">Mendengarkan... bicara sekarang</span>
+              </div>
+            </div>
+          )}
           <div className="flex gap-2 items-end max-w-2xl mx-auto">
             <Textarea
               ref={textareaRef}
@@ -508,16 +576,28 @@ export default function AgentChat() {
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
               }}
               onKeyDown={handleKeyDown}
-              placeholder={`Ketik pesan ke ${config.name}...`}
+              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik atau tekan mikrofon...`}
               className="resize-none text-sm rounded-xl"
               rows={1}
-              disabled={isTyping}
+              disabled={isTyping || isListening}
               data-testid="input-chat-message"
             />
+            {speechSupported && (
+              <Button
+                size="icon"
+                variant={isListening ? "destructive" : "outline"}
+                onClick={toggleSpeech}
+                disabled={isTyping}
+                className="shrink-0 rounded-xl"
+                data-testid="button-voice-input"
+              >
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </Button>
+            )}
             <Button
               size="icon"
               onClick={() => sendMessage(input)}
-              disabled={!input.trim() || isTyping}
+              disabled={!input.trim() || isTyping || isListening}
               className="shrink-0 rounded-xl"
               style={{ backgroundColor: color }}
               data-testid="button-send-message"
