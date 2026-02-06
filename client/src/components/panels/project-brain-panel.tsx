@@ -54,6 +54,19 @@ const statusIcons: Record<string, typeof FileText> = {
   archived: Archive,
 };
 
+const defaultTemplateFields: ProjectBrainField[] = [
+  { key: "nama_proyek", label: "Nama Proyek", type: "text", required: true, placeholder: "Masukkan nama proyek", helpText: "Nama proyek atau produk yang sedang dikerjakan", defaultValue: "", options: [], order: 0 },
+  { key: "deskripsi_proyek", label: "Deskripsi Proyek", type: "textarea", required: true, placeholder: "Jelaskan proyek Anda secara singkat", helpText: "Gambaran umum tentang proyek ini", defaultValue: "", options: [], order: 1 },
+  { key: "target_audiens", label: "Target Audiens", type: "textarea", required: false, placeholder: "Siapa target pengguna/pelanggan?", helpText: "Segmen pasar atau pengguna yang ditargetkan", defaultValue: "", options: [], order: 2 },
+  { key: "industri", label: "Industri/Bidang", type: "select", required: false, placeholder: "Pilih industri", helpText: "", defaultValue: "", options: ["Teknologi", "Pendidikan", "Kesehatan", "E-commerce", "Keuangan", "Real Estate", "F&B", "Lainnya"], order: 3 },
+  { key: "tujuan_utama", label: "Tujuan Utama", type: "textarea", required: false, placeholder: "Apa tujuan utama proyek ini?", helpText: "Goal atau objektif yang ingin dicapai", defaultValue: "", options: [], order: 4 },
+  { key: "tanggal_mulai", label: "Tanggal Mulai", type: "date", required: false, placeholder: "", helpText: "Kapan proyek ini dimulai", defaultValue: "", options: [], order: 5 },
+  { key: "website", label: "Website", type: "url", required: false, placeholder: "https://contoh.com", helpText: "URL website proyek (jika ada)", defaultValue: "", options: [], order: 6 },
+  { key: "email_kontak", label: "Email Kontak", type: "email", required: false, placeholder: "email@contoh.com", helpText: "Email kontak utama proyek", defaultValue: "", options: [], order: 7 },
+  { key: "anggaran", label: "Anggaran", type: "number", required: false, placeholder: "Masukkan nominal", helpText: "Estimasi anggaran dalam Rupiah", defaultValue: "", options: [], order: 8 },
+  { key: "sudah_berjalan", label: "Proyek Sudah Berjalan?", type: "boolean", required: false, placeholder: "", helpText: "Apakah proyek ini sudah berjalan atau masih perencanaan", defaultValue: "", options: [], order: 9 },
+];
+
 export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
   const { toast } = useToast();
   const agentId = String(agent.id);
@@ -81,7 +94,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
   const [newTemplate, setNewTemplate] = useState({
     name: "",
     description: "",
-    fields: [] as ProjectBrainField[],
+    fields: [...defaultTemplateFields] as ProjectBrainField[],
   });
 
   const [newInstance, setNewInstance] = useState({
@@ -143,7 +156,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
         onSuccess: () => {
           toast({ title: "Berhasil", description: "Template berhasil dibuat." });
           setTemplateDialogOpen(false);
-          setNewTemplate({ name: "", description: "", fields: [] });
+          setNewTemplate({ name: "", description: "", fields: [...defaultTemplateFields] });
         },
         onError: () => {
           toast({ title: "Error", description: "Gagal membuat template.", variant: "destructive" });
