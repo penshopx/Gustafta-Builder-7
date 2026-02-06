@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +49,12 @@ interface AgentConfig {
   isActive: boolean;
   isPublic: boolean;
   channels: ChannelInfo[];
+  requireRegistration: boolean;
+  monthlyPrice: number;
+  trialEnabled: boolean;
+  trialDays: number;
+  messageQuotaDaily: number;
+  messageQuotaMonthly: number;
 }
 
 function processInlineText(text: string): (string | JSX.Element)[] {
@@ -202,6 +208,15 @@ export default function AgentChat() {
   const [isUploading, setIsUploading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+  const [clientToken, setClientToken] = useState<string | null>(null);
+  const [clientInfo, setClientInfo] = useState<{ name: string; email: string; plan: string } | null>(null);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [regName, setRegName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [registering, setRegistering] = useState(false);
+  const [quotaInfo, setQuotaInfo] = useState<{ dailyUsed: number; dailyLimit: number; monthlyUsed: number; monthlyLimit: number } | null>(null);
+  const [quotaError, setQuotaError] = useState<string | null>(null);
 
   const getStorageKey = useCallback(() => `gustafta_chat_${params.agentId}`, [params.agentId]);
 
@@ -268,6 +283,41 @@ export default function AgentChat() {
     setMessages([]);
     setFollowUpSuggestions([]);
     localStorage.removeItem(getStorageKey());
+  };
+
+  const handleClientRegister = async () => {
+    if (!regName || !regEmail) return;
+    setRegistering(true);
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const referralCode = urlParams.get("ref") || undefined;
+      const selectedPlan = config.trialEnabled ? "trial" : (config.monthlyPrice > 0 ? "monthly" : "trial");
+      const res = await fetch(`/api/products/${params.agentId}/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: regName,
+          customerEmail: regEmail,
+          customerPhone: regPhone,
+          plan: selectedPlan,
+          referralCode,
+        }),
+      });
+      const data = await res.json();
+      if (data.subscription) {
+        const token = data.accessToken || data.subscription.accessToken;
+        setClientToken(token);
+        setClientInfo({ name: regName, email: regEmail, plan: data.subscription.plan });
+        localStorage.setItem(`gustafta_client_${params.agentId}`, token);
+        setShowRegistration(false);
+        if (data.paymentUrl) {
+          window.open(data.paymentUrl, "_blank");
+        }
+      }
+    } catch (err) {
+      console.error("Registration failed:", err);
+    }
+    setRegistering(false);
   };
 
   const extractFollowUps = useCallback((content: string) => {
@@ -354,6 +404,36 @@ export default function AgentChat() {
   }, [params.agentId]);
 
   useEffect(() => {
+    const savedToken = localStorage.getItem(`gustafta_client_${params.agentId}`);
+    if (savedToken) {
+      setClientToken(savedToken);
+      fetch("/api/client/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken: savedToken, agentId: params.agentId }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.valid) {
+            setClientInfo({ name: data.subscription.customerName, email: data.subscription.customerEmail, plan: data.subscription.plan });
+          } else {
+            localStorage.removeItem(`gustafta_client_${params.agentId}`);
+            setClientToken(null);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [params.agentId]);
+
+  useEffect(() => {
+    if (config && (config as any).requireRegistration && !clientToken) {
+      setShowRegistration(true);
+    } else {
+      setShowRegistration(false);
+    }
+  }, [config, clientToken]);
+
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
@@ -361,6 +441,31 @@ export default function AgentChat() {
 
   const sendMessage = async (content: string) => {
     if ((!content.trim() && pendingFiles.length === 0) || isTyping || !config) return;
+
+    if (config && (config as any).requireRegistration && clientToken) {
+      try {
+        const quotaRes = await fetch("/api/client/check-quota", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken: clientToken, agentId: params.agentId }),
+        });
+        const quotaData = await quotaRes.json();
+        if (!quotaData.allowed) {
+          if (quotaData.reason === "daily_limit_reached") {
+            setQuotaError(`Kuota harian tercapai (${quotaData.limit} pesan). Coba lagi besok.`);
+          } else if (quotaData.reason === "monthly_limit_reached") {
+            setQuotaError(`Kuota bulanan tercapai (${quotaData.limit} pesan). Upgrade langganan Anda.`);
+          } else {
+            setQuotaError("Akses ditolak. Silakan registrasi ulang.");
+          }
+          return;
+        }
+        setQuotaInfo({ dailyUsed: quotaData.dailyUsed, dailyLimit: quotaData.dailyLimit, monthlyUsed: quotaData.monthlyUsed, monthlyLimit: quotaData.monthlyLimit });
+        setQuotaError(null);
+      } catch (err) {
+        console.error("Quota check failed:", err);
+      }
+    }
 
     let messageContent = content.trim();
     const attachments = [...pendingFiles];
@@ -390,14 +495,19 @@ export default function AgentChat() {
 
     try {
       const resolvedAgentId = config.agentId || params.agentId;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (clientToken) {
+        headers["x-client-token"] = clientToken;
+      }
       const response = await fetch("/api/messages/stream", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           agentId: resolvedAgentId,
           role: "user",
           content: messageContent,
           sessionId: sessionIdRef.current,
+          clientToken: clientToken || undefined,
         }),
       });
 
@@ -640,6 +750,72 @@ export default function AgentChat() {
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden" data-testid="agent-chat-page">
+      {showRegistration && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6 space-y-4">
+              <div className="text-center space-y-2">
+                <div className="flex justify-center">
+                  <AgentAvatar config={config} size="lg" color={color} />
+                </div>
+                <h2 className="text-xl font-semibold">{config?.name}</h2>
+                <p className="text-sm text-muted-foreground">Daftar untuk mulai chat</p>
+                {config && (config as any).monthlyPrice > 0 && (
+                  <Badge variant="secondary">
+                    {(config as any).trialEnabled
+                      ? `Trial ${(config as any).trialDays} hari gratis`
+                      : new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format((config as any).monthlyPrice) + "/bulan"}
+                  </Badge>
+                )}
+              </div>
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Nama</label>
+                  <input
+                    type="text"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    placeholder="Nama lengkap"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    data-testid="input-reg-name"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Email</label>
+                  <input
+                    type="email"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    placeholder="email@contoh.com"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    data-testid="input-reg-email"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Telepon (opsional)</label>
+                  <input
+                    type="tel"
+                    value={regPhone}
+                    onChange={(e) => setRegPhone(e.target.value)}
+                    placeholder="08xxxxxxxxxx"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    data-testid="input-reg-phone"
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={handleClientRegister}
+                disabled={!regName || !regEmail || registering}
+                className="w-full"
+                data-testid="button-register-client"
+              >
+                {registering ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                {registering ? "Mendaftar..." : "Mulai Chat"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       <header
         className="border-b px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 sticky top-0 z-50"
         style={{ backgroundColor: color }}
@@ -984,6 +1160,16 @@ export default function AgentChat() {
           </div>
         )}
 
+        {quotaError && (
+          <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm text-center" data-testid="quota-error">
+            {quotaError}
+          </div>
+        )}
+        {quotaInfo && !quotaError && (
+          <div className="px-4 py-1 bg-muted text-muted-foreground text-xs text-center" data-testid="quota-info">
+            Kuota: {quotaInfo.dailyUsed}/{quotaInfo.dailyLimit} hari ini | {quotaInfo.monthlyUsed}/{quotaInfo.monthlyLimit} bulan ini
+          </div>
+        )}
         <div className="p-2.5 sm:p-4 border-t bg-background safe-area-bottom">
           {isListening && (
             <div className="flex items-center justify-center gap-2 pb-2 max-w-2xl mx-auto">

@@ -101,6 +101,20 @@ export const agents = pgTable("agents", {
   widgetShowBranding: boolean("widget_show_branding").default(true),
   widgetWelcomeMessage: text("widget_welcome_message").default(""),
   widgetButtonIcon: text("widget_button_icon").default("chat"),
+  // Product/Monetization Settings
+  isListed: boolean("is_listed").default(false),
+  productSlug: text("product_slug"),
+  productSummary: text("product_summary").default(""),
+  productFeatures: jsonb("product_features").default([]),
+  productPricing: jsonb("product_pricing").default({}),
+  trialEnabled: boolean("trial_enabled").default(true),
+  trialDays: integer("trial_days").default(7),
+  monthlyPrice: integer("monthly_price").default(0),
+  messageQuotaDaily: integer("message_quota_daily").default(50),
+  messageQuotaMonthly: integer("message_quota_monthly").default(1000),
+  requireRegistration: boolean("require_registration").default(false),
+  brandingName: text("branding_name").default(""),
+  brandingLogo: text("branding_logo").default(""),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -155,7 +169,47 @@ export const analyticsTable = pgTable("analytics", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Subscriptions Table
+// Client Subscriptions Table (end-users subscribing to chatbot products)
+export const clientSubscriptions = pgTable("client_subscriptions", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").default(""),
+  plan: text("plan").notNull().default("trial"),
+  status: text("status").default("active"),
+  accessToken: text("access_token").notNull(),
+  mayarOrderId: text("mayar_order_id"),
+  mayarPaymentUrl: text("mayar_payment_url"),
+  amount: integer("amount").default(0),
+  currency: text("currency").default("IDR"),
+  messageUsedToday: integer("message_used_today").default(0),
+  messageUsedMonth: integer("message_used_month").default(0),
+  lastMessageDate: text("last_message_date"),
+  lastMonthReset: text("last_month_reset"),
+  referralCode: text("referral_code"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Affiliates/Partners Table
+export const affiliates = pgTable("affiliates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").default(""),
+  code: text("code").notNull(),
+  commissionRate: real("commission_rate").default(10),
+  totalEarnings: integer("total_earnings").default(0),
+  totalReferrals: integer("total_referrals").default(0),
+  payoutInfo: text("payout_info").default(""),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Subscriptions Table (builder-side platform subscriptions)
 export const subscriptionsTable = pgTable("subscriptions_new", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 255 }).notNull(),
@@ -303,6 +357,20 @@ export const insertAgentSchema = z.object({
   widgetShowBranding: z.boolean().optional().default(true),
   widgetWelcomeMessage: z.string().optional().default(""),
   widgetButtonIcon: z.enum(["chat", "message", "bot", "help"]).optional().default("chat"),
+  // Product/Monetization Settings
+  isListed: z.boolean().optional().default(false),
+  productSlug: z.string().optional(),
+  productSummary: z.string().optional().default(""),
+  productFeatures: z.array(z.string()).optional().default([]),
+  productPricing: z.record(z.any()).optional().default({}),
+  trialEnabled: z.boolean().optional().default(true),
+  trialDays: z.number().min(1).max(30).optional().default(7),
+  monthlyPrice: z.number().min(0).optional().default(0),
+  messageQuotaDaily: z.number().min(0).optional().default(50),
+  messageQuotaMonthly: z.number().min(0).optional().default(1000),
+  requireRegistration: z.boolean().optional().default(false),
+  brandingName: z.string().optional().default(""),
+  brandingLogo: z.string().optional().default(""),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId
@@ -444,6 +512,61 @@ export type Subscription = InsertSubscription & {
   id: string;
   createdAt: string;
   updatedAt: string;
+};
+
+// ==================== CLIENT SUBSCRIPTIONS ====================
+
+export const clientSubscriptionPlanSchema = z.enum([
+  "trial", "monthly", "yearly", "lifetime"
+]);
+export type ClientSubscriptionPlan = z.infer<typeof clientSubscriptionPlanSchema>;
+
+export const insertClientSubscriptionSchema = z.object({
+  agentId: z.string(),
+  customerName: z.string().min(1, "Name is required"),
+  customerEmail: z.string().email("Valid email is required"),
+  customerPhone: z.string().optional().default(""),
+  plan: clientSubscriptionPlanSchema.default("trial"),
+  status: z.enum(["active", "expired", "cancelled", "pending"]).default("active"),
+  accessToken: z.string(),
+  mayarOrderId: z.string().optional(),
+  mayarPaymentUrl: z.string().optional(),
+  amount: z.number().default(0),
+  currency: z.string().default("IDR"),
+  referralCode: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+export type InsertClientSubscription = z.infer<typeof insertClientSubscriptionSchema>;
+export type ClientSubscription = InsertClientSubscription & {
+  id: string;
+  messageUsedToday: number;
+  messageUsedMonth: number;
+  lastMessageDate: string | null;
+  lastMonthReset: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// ==================== AFFILIATES ====================
+
+export const insertAffiliateSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().optional().default(""),
+  code: z.string().min(3, "Code must be at least 3 characters"),
+  commissionRate: z.number().min(0).max(100).default(10),
+  payoutInfo: z.string().optional().default(""),
+});
+
+export type InsertAffiliate = z.infer<typeof insertAffiliateSchema>;
+export type Affiliate = InsertAffiliate & {
+  id: string;
+  totalEarnings: number;
+  totalReferrals: number;
+  isActive: boolean;
+  createdAt: string;
 };
 
 // ==================== PROJECT BRAIN ====================

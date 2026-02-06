@@ -16,6 +16,8 @@ import {
   projectBrainInstances,
   miniApps,
   miniAppResults,
+  clientSubscriptions,
+  affiliates,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 import type {
@@ -47,6 +49,10 @@ import type {
   InsertMiniApp,
   MiniAppResult,
   InsertMiniAppResult,
+  ClientSubscription,
+  InsertClientSubscription,
+  Affiliate,
+  InsertAffiliate,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -535,6 +541,19 @@ export class DatabaseStorage implements IStorage {
       widgetShowBranding: row.widgetShowBranding ?? true,
       widgetWelcomeMessage: row.widgetWelcomeMessage || "",
       widgetButtonIcon: row.widgetButtonIcon || "chat",
+      isListed: row.isListed ?? false,
+      productSlug: row.productSlug || undefined,
+      productSummary: row.productSummary || "",
+      productFeatures: (row.productFeatures as string[]) || [],
+      productPricing: (row.productPricing as Record<string, any>) || {},
+      trialEnabled: row.trialEnabled ?? true,
+      trialDays: row.trialDays ?? 7,
+      monthlyPrice: row.monthlyPrice ?? 0,
+      messageQuotaDaily: row.messageQuotaDaily ?? 50,
+      messageQuotaMonthly: row.messageQuotaMonthly ?? 1000,
+      requireRegistration: row.requireRegistration ?? false,
+      brandingName: row.brandingName || "",
+      brandingLogo: row.brandingLogo || "",
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };
@@ -1274,6 +1293,418 @@ export class DatabaseStorage implements IStorage {
       status: (row.status || "completed") as "pending" | "completed" | "error",
       createdAt: row.createdAt.toISOString(),
     };
+  }
+
+  // Client Subscription methods
+  async getClientSubscriptions(agentId: string): Promise<ClientSubscription[]> {
+    const result = await db.select().from(clientSubscriptions)
+      .where(eq(clientSubscriptions.agentId, parseInt(agentId)))
+      .orderBy(desc(clientSubscriptions.createdAt));
+    return result.map((row) => ({
+      id: String(row.id),
+      agentId: String(row.agentId),
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone || "",
+      plan: row.plan as "trial" | "monthly" | "yearly" | "lifetime",
+      status: (row.status || "active") as "active" | "expired" | "cancelled" | "pending",
+      accessToken: row.accessToken,
+      mayarOrderId: row.mayarOrderId || undefined,
+      mayarPaymentUrl: row.mayarPaymentUrl || undefined,
+      amount: row.amount || 0,
+      currency: row.currency || "IDR",
+      referralCode: row.referralCode || undefined,
+      startDate: row.startDate ? row.startDate.toISOString() : undefined,
+      endDate: row.endDate ? row.endDate.toISOString() : undefined,
+      messageUsedToday: row.messageUsedToday || 0,
+      messageUsedMonth: row.messageUsedMonth || 0,
+      lastMessageDate: row.lastMessageDate || null,
+      lastMonthReset: row.lastMonthReset || null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    }));
+  }
+
+  async getClientSubscription(id: string): Promise<ClientSubscription | undefined> {
+    const result = await db.select().from(clientSubscriptions)
+      .where(eq(clientSubscriptions.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone || "",
+      plan: row.plan as "trial" | "monthly" | "yearly" | "lifetime",
+      status: (row.status || "active") as "active" | "expired" | "cancelled" | "pending",
+      accessToken: row.accessToken,
+      mayarOrderId: row.mayarOrderId || undefined,
+      mayarPaymentUrl: row.mayarPaymentUrl || undefined,
+      amount: row.amount || 0,
+      currency: row.currency || "IDR",
+      referralCode: row.referralCode || undefined,
+      startDate: row.startDate ? row.startDate.toISOString() : undefined,
+      endDate: row.endDate ? row.endDate.toISOString() : undefined,
+      messageUsedToday: row.messageUsedToday || 0,
+      messageUsedMonth: row.messageUsedMonth || 0,
+      lastMessageDate: row.lastMessageDate || null,
+      lastMonthReset: row.lastMonthReset || null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async getClientSubscriptionByToken(token: string): Promise<ClientSubscription | undefined> {
+    const result = await db.select().from(clientSubscriptions)
+      .where(eq(clientSubscriptions.accessToken, token)).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone || "",
+      plan: row.plan as "trial" | "monthly" | "yearly" | "lifetime",
+      status: (row.status || "active") as "active" | "expired" | "cancelled" | "pending",
+      accessToken: row.accessToken,
+      mayarOrderId: row.mayarOrderId || undefined,
+      mayarPaymentUrl: row.mayarPaymentUrl || undefined,
+      amount: row.amount || 0,
+      currency: row.currency || "IDR",
+      referralCode: row.referralCode || undefined,
+      startDate: row.startDate ? row.startDate.toISOString() : undefined,
+      endDate: row.endDate ? row.endDate.toISOString() : undefined,
+      messageUsedToday: row.messageUsedToday || 0,
+      messageUsedMonth: row.messageUsedMonth || 0,
+      lastMessageDate: row.lastMessageDate || null,
+      lastMonthReset: row.lastMonthReset || null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async getClientSubscriptionByEmail(agentId: string, email: string): Promise<ClientSubscription | undefined> {
+    const result = await db.select().from(clientSubscriptions)
+      .where(and(
+        eq(clientSubscriptions.agentId, parseInt(agentId)),
+        eq(clientSubscriptions.customerEmail, email)
+      )).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone || "",
+      plan: row.plan as "trial" | "monthly" | "yearly" | "lifetime",
+      status: (row.status || "active") as "active" | "expired" | "cancelled" | "pending",
+      accessToken: row.accessToken,
+      mayarOrderId: row.mayarOrderId || undefined,
+      mayarPaymentUrl: row.mayarPaymentUrl || undefined,
+      amount: row.amount || 0,
+      currency: row.currency || "IDR",
+      referralCode: row.referralCode || undefined,
+      startDate: row.startDate ? row.startDate.toISOString() : undefined,
+      endDate: row.endDate ? row.endDate.toISOString() : undefined,
+      messageUsedToday: row.messageUsedToday || 0,
+      messageUsedMonth: row.messageUsedMonth || 0,
+      lastMessageDate: row.lastMessageDate || null,
+      lastMonthReset: row.lastMonthReset || null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async createClientSubscription(insertSub: InsertClientSubscription): Promise<ClientSubscription> {
+    const result = await db.insert(clientSubscriptions).values({
+      agentId: parseInt(insertSub.agentId),
+      customerName: insertSub.customerName,
+      customerEmail: insertSub.customerEmail,
+      customerPhone: insertSub.customerPhone || "",
+      plan: insertSub.plan || "trial",
+      status: insertSub.status || "active",
+      accessToken: insertSub.accessToken,
+      mayarOrderId: insertSub.mayarOrderId || null,
+      mayarPaymentUrl: insertSub.mayarPaymentUrl || null,
+      amount: insertSub.amount || 0,
+      currency: insertSub.currency || "IDR",
+      referralCode: insertSub.referralCode || null,
+      startDate: insertSub.startDate ? new Date(insertSub.startDate) : null,
+      endDate: insertSub.endDate ? new Date(insertSub.endDate) : null,
+    }).returning();
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone || "",
+      plan: row.plan as "trial" | "monthly" | "yearly" | "lifetime",
+      status: (row.status || "active") as "active" | "expired" | "cancelled" | "pending",
+      accessToken: row.accessToken,
+      mayarOrderId: row.mayarOrderId || undefined,
+      mayarPaymentUrl: row.mayarPaymentUrl || undefined,
+      amount: row.amount || 0,
+      currency: row.currency || "IDR",
+      referralCode: row.referralCode || undefined,
+      startDate: row.startDate ? row.startDate.toISOString() : undefined,
+      endDate: row.endDate ? row.endDate.toISOString() : undefined,
+      messageUsedToday: row.messageUsedToday || 0,
+      messageUsedMonth: row.messageUsedMonth || 0,
+      lastMessageDate: row.lastMessageDate || null,
+      lastMonthReset: row.lastMonthReset || null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async updateClientSubscription(id: string, data: Partial<InsertClientSubscription & { messageUsedToday: number; messageUsedMonth: number; lastMessageDate: string; lastMonthReset: string }>): Promise<ClientSubscription | undefined> {
+    const updateData: Record<string, any> = { updatedAt: new Date() };
+    if (data.customerName !== undefined) updateData.customerName = data.customerName;
+    if (data.customerEmail !== undefined) updateData.customerEmail = data.customerEmail;
+    if (data.customerPhone !== undefined) updateData.customerPhone = data.customerPhone;
+    if (data.plan !== undefined) updateData.plan = data.plan;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.accessToken !== undefined) updateData.accessToken = data.accessToken;
+    if (data.mayarOrderId !== undefined) updateData.mayarOrderId = data.mayarOrderId;
+    if (data.mayarPaymentUrl !== undefined) updateData.mayarPaymentUrl = data.mayarPaymentUrl;
+    if (data.amount !== undefined) updateData.amount = data.amount;
+    if (data.currency !== undefined) updateData.currency = data.currency;
+    if (data.referralCode !== undefined) updateData.referralCode = data.referralCode;
+    if (data.messageUsedToday !== undefined) updateData.messageUsedToday = data.messageUsedToday;
+    if (data.messageUsedMonth !== undefined) updateData.messageUsedMonth = data.messageUsedMonth;
+    if (data.lastMessageDate !== undefined) updateData.lastMessageDate = data.lastMessageDate;
+    if (data.lastMonthReset !== undefined) updateData.lastMonthReset = data.lastMonthReset;
+
+    const result = await db.update(clientSubscriptions).set(updateData)
+      .where(eq(clientSubscriptions.id, parseInt(id))).returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone || "",
+      plan: row.plan as "trial" | "monthly" | "yearly" | "lifetime",
+      status: (row.status || "active") as "active" | "expired" | "cancelled" | "pending",
+      accessToken: row.accessToken,
+      mayarOrderId: row.mayarOrderId || undefined,
+      mayarPaymentUrl: row.mayarPaymentUrl || undefined,
+      amount: row.amount || 0,
+      currency: row.currency || "IDR",
+      referralCode: row.referralCode || undefined,
+      startDate: row.startDate ? row.startDate.toISOString() : undefined,
+      endDate: row.endDate ? row.endDate.toISOString() : undefined,
+      messageUsedToday: row.messageUsedToday || 0,
+      messageUsedMonth: row.messageUsedMonth || 0,
+      lastMessageDate: row.lastMessageDate || null,
+      lastMonthReset: row.lastMonthReset || null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async deleteClientSubscription(id: string): Promise<boolean> {
+    const result = await db.delete(clientSubscriptions)
+      .where(eq(clientSubscriptions.id, parseInt(id))).returning();
+    return result.length > 0;
+  }
+
+  async incrementClientMessageUsage(id: string): Promise<ClientSubscription | undefined> {
+    const sub = await this.getClientSubscription(id);
+    if (!sub) return undefined;
+
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    const currentMonth = today.substring(0, 7);
+
+    let messageUsedToday = sub.messageUsedToday;
+    let messageUsedMonth = sub.messageUsedMonth;
+
+    if (sub.lastMessageDate !== today) {
+      messageUsedToday = 0;
+    }
+    if (!sub.lastMonthReset || sub.lastMonthReset.substring(0, 7) !== currentMonth) {
+      messageUsedMonth = 0;
+    }
+
+    messageUsedToday += 1;
+    messageUsedMonth += 1;
+
+    return this.updateClientSubscription(id, {
+      messageUsedToday,
+      messageUsedMonth,
+      lastMessageDate: today,
+      lastMonthReset: today,
+    });
+  }
+
+  async getClientSubscriptionStats(agentId: string): Promise<{ totalClients: number; activeClients: number; totalRevenue: number }> {
+    const subs = await this.getClientSubscriptions(agentId);
+    const totalClients = subs.length;
+    const activeClients = subs.filter((sub) => sub.status === "active").length;
+    const totalRevenue = subs.reduce((sum, sub) => sum + (sub.amount || 0), 0);
+    return { totalClients, activeClients, totalRevenue };
+  }
+
+  // Affiliate methods
+  async getAffiliates(): Promise<Affiliate[]> {
+    const result = await db.select().from(affiliates).orderBy(desc(affiliates.createdAt));
+    return result.map((row) => ({
+      id: String(row.id),
+      name: row.name,
+      email: row.email,
+      phone: row.phone || "",
+      code: row.code,
+      commissionRate: row.commissionRate || 10,
+      payoutInfo: row.payoutInfo || "",
+      totalEarnings: row.totalEarnings || 0,
+      totalReferrals: row.totalReferrals || 0,
+      isActive: row.isActive ?? true,
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async getAffiliate(id: string): Promise<Affiliate | undefined> {
+    const result = await db.select().from(affiliates)
+      .where(eq(affiliates.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      name: row.name,
+      email: row.email,
+      phone: row.phone || "",
+      code: row.code,
+      commissionRate: row.commissionRate || 10,
+      payoutInfo: row.payoutInfo || "",
+      totalEarnings: row.totalEarnings || 0,
+      totalReferrals: row.totalReferrals || 0,
+      isActive: row.isActive ?? true,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getAffiliateByCode(code: string): Promise<Affiliate | undefined> {
+    const result = await db.select().from(affiliates)
+      .where(eq(affiliates.code, code)).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      name: row.name,
+      email: row.email,
+      phone: row.phone || "",
+      code: row.code,
+      commissionRate: row.commissionRate || 10,
+      payoutInfo: row.payoutInfo || "",
+      totalEarnings: row.totalEarnings || 0,
+      totalReferrals: row.totalReferrals || 0,
+      isActive: row.isActive ?? true,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async createAffiliate(insertAffiliate: InsertAffiliate): Promise<Affiliate> {
+    const result = await db.insert(affiliates).values({
+      name: insertAffiliate.name,
+      email: insertAffiliate.email,
+      phone: insertAffiliate.phone || "",
+      code: insertAffiliate.code,
+      commissionRate: insertAffiliate.commissionRate ?? 10,
+      payoutInfo: insertAffiliate.payoutInfo || "",
+    }).returning();
+    const row = result[0];
+    return {
+      id: String(row.id),
+      name: row.name,
+      email: row.email,
+      phone: row.phone || "",
+      code: row.code,
+      commissionRate: row.commissionRate || 10,
+      payoutInfo: row.payoutInfo || "",
+      totalEarnings: row.totalEarnings || 0,
+      totalReferrals: row.totalReferrals || 0,
+      isActive: row.isActive ?? true,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async updateAffiliate(id: string, data: Partial<InsertAffiliate>): Promise<Affiliate | undefined> {
+    const updateData: Record<string, any> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.email !== undefined) updateData.email = data.email;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.code !== undefined) updateData.code = data.code;
+    if (data.commissionRate !== undefined) updateData.commissionRate = data.commissionRate;
+    if (data.payoutInfo !== undefined) updateData.payoutInfo = data.payoutInfo;
+
+    const result = await db.update(affiliates).set(updateData)
+      .where(eq(affiliates.id, parseInt(id))).returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      name: row.name,
+      email: row.email,
+      phone: row.phone || "",
+      code: row.code,
+      commissionRate: row.commissionRate || 10,
+      payoutInfo: row.payoutInfo || "",
+      totalEarnings: row.totalEarnings || 0,
+      totalReferrals: row.totalReferrals || 0,
+      isActive: row.isActive ?? true,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async deleteAffiliate(id: string): Promise<boolean> {
+    const result = await db.delete(affiliates)
+      .where(eq(affiliates.id, parseInt(id))).returning();
+    return result.length > 0;
+  }
+
+  async incrementAffiliateReferral(code: string, amount: number): Promise<Affiliate | undefined> {
+    const affiliate = await this.getAffiliateByCode(code);
+    if (!affiliate) return undefined;
+
+    const commission = amount * (affiliate.commissionRate / 100);
+    const result = await db.update(affiliates).set({
+      totalReferrals: (affiliate.totalReferrals || 0) + 1,
+      totalEarnings: (affiliate.totalEarnings || 0) + commission,
+    }).where(eq(affiliates.code, code)).returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      name: row.name,
+      email: row.email,
+      phone: row.phone || "",
+      code: row.code,
+      commissionRate: row.commissionRate || 10,
+      payoutInfo: row.payoutInfo || "",
+      totalEarnings: row.totalEarnings || 0,
+      totalReferrals: row.totalReferrals || 0,
+      isActive: row.isActive ?? true,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  // Product listing methods
+  async getListedAgents(): Promise<Agent[]> {
+    const result = await db.select().from(agents).where(eq(agents.isListed, true));
+    return result.map((row) => this.mapAgentRow(row));
+  }
+
+  async getAgentBySlug(slug: string): Promise<Agent | undefined> {
+    const result = await db.select().from(agents)
+      .where(eq(agents.productSlug, slug)).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapAgentRow(result[0]);
   }
 }
 

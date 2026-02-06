@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
-  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks
+  Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
+  ShoppingBag, Users, Handshake, TrendingUp, Users2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,6 +26,9 @@ import { WidgetPanel } from "@/components/panels/widget-panel";
 import { AgenticAIPanel } from "@/components/panels/agentic-ai-panel";
 import { ProjectBrainPanel } from "@/components/panels/project-brain-panel";
 import { MiniAppsPanel } from "@/components/panels/mini-apps-panel";
+import { ProductSettingsPanel } from "@/components/panels/product-settings-panel";
+import { RevenuPanel } from "@/components/panels/revenue-panel";
+import { AffiliatePanel } from "@/components/panels/affiliate-panel";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
 import { CreateBigIdeaDialog } from "@/components/dialogs/create-big-idea-dialog";
 import { CreateToolboxDialog } from "@/components/dialogs/create-toolbox-dialog";
@@ -40,7 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps";
+type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
@@ -50,6 +54,9 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "mini-apps", label: "Mini Apps", shortLabel: "Apps", icon: Blocks },
   { id: "integrations", label: "Integrations", shortLabel: "Integ", icon: Plug },
   { id: "widget", label: "Widget", shortLabel: "Widget", icon: Palette },
+  { id: "product-settings", label: "Monetisasi", shortLabel: "Produk", icon: ShoppingBag },
+  { id: "revenue", label: "Revenue & Klien", shortLabel: "Revenue", icon: TrendingUp },
+  { id: "affiliates", label: "Afiliasi", shortLabel: "Afiliasi", icon: Users2 },
   { id: "chat", label: "Chat Console", shortLabel: "Chat", icon: MessageSquare },
   { id: "analytics", label: "Analytics", shortLabel: "Stats", icon: BarChart3 },
 ];
@@ -178,6 +185,12 @@ export default function Dashboard() {
         return <ProjectBrainPanel agent={activeAgent} />;
       case "mini-apps":
         return <MiniAppsPanel agent={activeAgent} />;
+      case "product-settings":
+        return <ProductSettingsPanel agent={activeAgent} />;
+      case "revenue":
+        return <RevenuPanel agent={activeAgent} />;
+      case "affiliates":
+        return <AffiliatePanel agent={activeAgent} />;
       case "analytics":
         return <AnalyticsPanel agent={activeAgent} />;
       default:

@@ -33,7 +33,7 @@ The server manages CRUD operations for agents, knowledge bases, integrations, me
 - **Database**: PostgreSQL (with in-memory fallback for development)
 - **Session Store**: connect-pg-simple
 
-The schema includes tables for `agents` (with extensive configuration options, AI model settings, enhanced persona fields, and access control), `knowledgeBases`, `integrations`, `agentMessages`, `users`, `userProfiles`, `analytics`, `bigIdeas`, `toolboxes`, `subscriptionsNew`, `project_brain_templates`, `project_brain_instances`, `mini_apps`, and `mini_app_results`. A hierarchical structure (`bigIdeas` -> `toolboxes` -> `agents`) is enforced.
+The schema includes tables for `agents` (with extensive configuration options, AI model settings, enhanced persona fields, access control, and product monetization fields), `knowledgeBases`, `integrations`, `agentMessages`, `users`, `userProfiles`, `analytics`, `bigIdeas`, `toolboxes`, `subscriptionsNew`, `project_brain_templates`, `project_brain_instances`, `mini_apps`, `mini_app_results`, `clientSubscriptions` (end-user subscriptions to chatbot products), and `affiliates` (referral partnership tracking). A hierarchical structure (`bigIdeas` -> `toolboxes` -> `agents`) is enforced.
 
 ### Design Patterns
 - **Two-Panel Layout**: Left navigation, right content.

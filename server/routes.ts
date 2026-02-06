@@ -13,6 +13,7 @@ import {
   insertProjectBrainInstanceSchema,
   insertMiniAppSchema,
   insertMiniAppResultSchema,
+  insertAffiliateSchema,
 } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -1137,14 +1138,49 @@ export async function registerRoutes(
         return res.status(400).json({ error: parsed.error.message });
       }
       
-      // Save user message
-      const userMessage = await storage.createMessage(parsed.data);
-      
       // Get agent configuration for persona
       const agent = await storage.getAgent(parsed.data.agentId);
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
+
+      // Server-side access control for monetized chatbots
+      if (agent.requireRegistration) {
+        const clientAccessToken = req.headers["x-client-token"] as string || req.body.clientToken;
+        if (!clientAccessToken) {
+          return res.status(403).json({ error: "Registration required", reason: "registration_required" });
+        }
+        const subscription = await storage.getClientSubscriptionByToken(clientAccessToken);
+        if (!subscription || subscription.status !== "active") {
+          return res.status(403).json({ error: "No active subscription", reason: "no_active_subscription" });
+        }
+        if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
+          await storage.updateClientSubscription(subscription.id, { status: "expired" });
+          return res.status(403).json({ error: "Subscription expired", reason: "subscription_expired" });
+        }
+        const today = new Date().toISOString().split("T")[0];
+        let dailyUsed = subscription.messageUsedToday || 0;
+        if (subscription.lastMessageDate !== today) {
+          dailyUsed = 0;
+        }
+        const dailyLimit = agent.messageQuotaDaily ?? 50;
+        const monthlyLimit = agent.messageQuotaMonthly ?? 1000;
+        if (dailyUsed >= dailyLimit) {
+          return res.status(429).json({ error: "Daily quota exceeded", reason: "daily_limit_reached" });
+        }
+        if ((subscription.messageUsedTotal || 0) >= monthlyLimit) {
+          return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
+        }
+        // Increment usage counters atomically
+        await storage.updateClientSubscription(subscription.id, {
+          messageUsedToday: dailyUsed + 1,
+          messageUsedTotal: (subscription.messageUsedTotal || 0) + 1,
+          lastMessageDate: today,
+        });
+      }
+      
+      // Save user message
+      const userMessage = await storage.createMessage(parsed.data);
       
       // Get knowledge base for context
       const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
@@ -2543,6 +2579,12 @@ export async function registerRoutes(
         isActive: agent.isActive,
         isPublic: agent.isPublic,
         channels: enabledChannels,
+        requireRegistration: agent.requireRegistration ?? false,
+        monthlyPrice: agent.monthlyPrice ?? 0,
+        trialEnabled: agent.trialEnabled ?? true,
+        trialDays: agent.trialDays ?? 7,
+        messageQuotaDaily: agent.messageQuotaDaily ?? 50,
+        messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
       };
       
       res.json(widgetConfig);
@@ -3120,6 +3162,361 @@ Be professional and suitable for management review.`;
       res.status(201).json(result);
     } catch (error) {
       res.status(500).json({ error: "Failed to create mini app result" });
+    }
+  });
+
+  // ==================== Product Catalog Routes (Public) ====================
+
+  app.get("/api/products", async (req, res) => {
+    try {
+      const products = await storage.getListedAgents();
+      const publicProducts = products.map(p => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        avatar: p.avatar,
+        tagline: p.tagline,
+        category: p.category,
+        productSlug: p.productSlug,
+        productSummary: p.productSummary,
+        productFeatures: p.productFeatures,
+        monthlyPrice: p.monthlyPrice,
+        trialEnabled: p.trialEnabled,
+        trialDays: p.trialDays,
+        greetingMessage: p.greetingMessage,
+        brandingName: p.brandingName,
+        brandingLogo: p.brandingLogo,
+      }));
+      res.json(publicProducts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
+  app.get("/api/products/:slug", async (req, res) => {
+    try {
+      const product = await storage.getAgentBySlug(req.params.slug as string);
+      if (!product || !product.isListed) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        avatar: product.avatar,
+        tagline: product.tagline,
+        philosophy: product.philosophy,
+        category: product.category,
+        productSlug: product.productSlug,
+        productSummary: product.productSummary,
+        productFeatures: product.productFeatures,
+        productPricing: product.productPricing,
+        monthlyPrice: product.monthlyPrice,
+        trialEnabled: product.trialEnabled,
+        trialDays: product.trialDays,
+        greetingMessage: product.greetingMessage,
+        conversationStarters: product.conversationStarters,
+        brandingName: product.brandingName,
+        brandingLogo: product.brandingLogo,
+        messageQuotaDaily: product.messageQuotaDaily,
+        messageQuotaMonthly: product.messageQuotaMonthly,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch product" });
+    }
+  });
+
+  // ==================== Client Subscription Routes (Public) ====================
+
+  app.post("/api/products/:agentId/subscribe", async (req, res) => {
+    try {
+      const { customerName, customerEmail, customerPhone, plan, referralCode } = req.body;
+      if (!customerName || !customerEmail) {
+        return res.status(400).json({ error: "Name and email are required" });
+      }
+
+      const agent = await storage.getAgent(req.params.agentId as string);
+      if (!agent) {
+        return res.status(404).json({ error: "Chatbot product not found" });
+      }
+
+      const existing = await storage.getClientSubscriptionByEmail(req.params.agentId as string, customerEmail);
+      if (existing && existing.status === "active") {
+        return res.json({ subscription: existing, message: "Already subscribed" });
+      }
+
+      const crypto = await import("crypto");
+      const accessToken = crypto.randomBytes(32).toString("hex");
+
+      const startDate = new Date();
+      let endDate = new Date();
+      let amount = 0;
+
+      if (plan === "trial" || !plan) {
+        if (!agent.trialEnabled && agent.monthlyPrice && agent.monthlyPrice > 0) {
+          return res.status(400).json({ error: "Trial not available for this product. Please choose a paid plan." });
+        }
+        endDate.setDate(endDate.getDate() + (agent.trialDays || 7));
+      } else if (plan === "monthly") {
+        endDate.setDate(endDate.getDate() + 30);
+        amount = agent.monthlyPrice || 0;
+      } else if (plan === "yearly") {
+        endDate.setDate(endDate.getDate() + 365);
+        amount = (agent.monthlyPrice || 0) * 10;
+      }
+
+      if (amount > 0) {
+        const mayarApiKey = process.env.MAYAR_API_KEY;
+        if (mayarApiKey) {
+          try {
+            const { createPaymentLink } = await import("./lib/mayar");
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+            const payment = await createPaymentLink(mayarApiKey, {
+              name: customerName,
+              email: customerEmail,
+              amount,
+              description: `Langganan ${agent.name} - ${plan}`,
+              redirectUrl: `${baseUrl}/chat/${agent.id}?subscribed=true`,
+            });
+
+            const subscription = await storage.createClientSubscription({
+              agentId: req.params.agentId as string,
+              customerName,
+              customerEmail,
+              customerPhone: customerPhone || "",
+              plan: plan || "trial",
+              status: "pending",
+              accessToken,
+              mayarOrderId: payment.data.id,
+              mayarPaymentUrl: payment.data.link,
+              amount,
+              referralCode: referralCode || undefined,
+              startDate: startDate.toISOString(),
+              endDate: endDate.toISOString(),
+            });
+
+            return res.json({ subscription, paymentUrl: payment.data.link });
+          } catch (payErr) {
+            console.error("Payment creation failed:", payErr);
+          }
+        }
+      }
+
+      const subscription = await storage.createClientSubscription({
+        agentId: req.params.agentId as string,
+        customerName,
+        customerEmail,
+        customerPhone: customerPhone || "",
+        plan: plan || "trial",
+        status: "active",
+        accessToken,
+        amount: 0,
+        referralCode: referralCode || undefined,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
+
+      if (referralCode) {
+        try {
+          await storage.incrementAffiliateReferral(referralCode, amount);
+        } catch (e) { /* ignore */ }
+      }
+
+      res.status(201).json({ subscription, accessToken });
+    } catch (error) {
+      console.error("Subscribe error:", error);
+      res.status(500).json({ error: "Failed to create subscription" });
+    }
+  });
+
+  app.post("/api/client/validate", async (req, res) => {
+    try {
+      const { accessToken, agentId } = req.body;
+      if (!accessToken) {
+        return res.status(400).json({ error: "Access token required" });
+      }
+
+      const subscription = await storage.getClientSubscriptionByToken(accessToken);
+      if (!subscription) {
+        return res.status(404).json({ valid: false, error: "Invalid token" });
+      }
+
+      if (subscription.status !== "active") {
+        return res.json({ valid: false, error: "Subscription not active", status: subscription.status });
+      }
+
+      if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
+        await storage.updateClientSubscription(subscription.id, { status: "expired" });
+        return res.json({ valid: false, error: "Subscription expired" });
+      }
+
+      res.json({
+        valid: true,
+        subscription: {
+          id: subscription.id,
+          plan: subscription.plan,
+          customerName: subscription.customerName,
+          customerEmail: subscription.customerEmail,
+          messageUsedToday: subscription.messageUsedToday,
+          messageUsedMonth: subscription.messageUsedMonth,
+          endDate: subscription.endDate,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Validation failed" });
+    }
+  });
+
+  app.post("/api/client/check-quota", async (req, res) => {
+    try {
+      const { accessToken, agentId } = req.body;
+
+      const agent = await storage.getAgent(agentId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+
+      if (!agent.requireRegistration) {
+        return res.json({ allowed: true, unlimited: true });
+      }
+
+      if (!accessToken) {
+        return res.json({ allowed: false, reason: "registration_required" });
+      }
+
+      const subscription = await storage.getClientSubscriptionByToken(accessToken);
+      if (!subscription || subscription.status !== "active") {
+        return res.json({ allowed: false, reason: "no_active_subscription" });
+      }
+
+      if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
+        await storage.updateClientSubscription(subscription.id, { status: "expired" });
+        return res.json({ allowed: false, reason: "subscription_expired" });
+      }
+
+      const today = new Date().toISOString().split("T")[0];
+      let dailyUsed = subscription.messageUsedToday || 0;
+      if (subscription.lastMessageDate !== today) {
+        dailyUsed = 0;
+      }
+
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      let monthlyUsed = subscription.messageUsedMonth || 0;
+      if (subscription.lastMonthReset !== currentMonth) {
+        monthlyUsed = 0;
+      }
+
+      const dailyLimit = agent.messageQuotaDaily || 50;
+      const monthlyLimit = agent.messageQuotaMonthly || 1000;
+
+      if (dailyUsed >= dailyLimit) {
+        return res.json({ allowed: false, reason: "daily_limit_reached", limit: dailyLimit, used: dailyUsed });
+      }
+      if (monthlyUsed >= monthlyLimit) {
+        return res.json({ allowed: false, reason: "monthly_limit_reached", limit: monthlyLimit, used: monthlyUsed });
+      }
+
+      await storage.incrementClientMessageUsage(subscription.id);
+
+      res.json({
+        allowed: true,
+        dailyUsed: dailyUsed + 1,
+        dailyLimit,
+        monthlyUsed: monthlyUsed + 1,
+        monthlyLimit,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Quota check failed" });
+    }
+  });
+
+  // ==================== Client Management Routes (Protected) ====================
+
+  app.get("/api/clients/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const clients = await storage.getClientSubscriptions(req.params.agentId as string);
+      res.json(clients);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch clients" });
+    }
+  });
+
+  app.get("/api/clients/:agentId/stats", isAuthenticated, async (req, res) => {
+    try {
+      const stats = await storage.getClientSubscriptionStats(req.params.agentId as string);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch client stats" });
+    }
+  });
+
+  app.delete("/api/clients/subscription/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteClientSubscription(req.params.id as string);
+      if (!deleted) return res.status(404).json({ error: "Subscription not found" });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete subscription" });
+    }
+  });
+
+  // ==================== Affiliate Routes (Protected) ====================
+
+  app.get("/api/affiliates", isAuthenticated, async (req, res) => {
+    try {
+      const allAffiliates = await storage.getAffiliates();
+      res.json(allAffiliates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch affiliates" });
+    }
+  });
+
+  app.post("/api/affiliates", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertAffiliateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      const existing = await storage.getAffiliateByCode(parsed.data.code);
+      if (existing) {
+        return res.status(400).json({ error: "Affiliate code already exists" });
+      }
+      const affiliate = await storage.createAffiliate(parsed.data);
+      res.status(201).json(affiliate);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create affiliate" });
+    }
+  });
+
+  app.patch("/api/affiliates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const affiliate = await storage.updateAffiliate(req.params.id as string, req.body);
+      if (!affiliate) return res.status(404).json({ error: "Affiliate not found" });
+      res.json(affiliate);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update affiliate" });
+    }
+  });
+
+  app.delete("/api/affiliates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteAffiliate(req.params.id as string);
+      if (!deleted) return res.status(404).json({ error: "Affiliate not found" });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete affiliate" });
+    }
+  });
+
+  app.get("/api/affiliate/validate/:code", async (req, res) => {
+    try {
+      const affiliate = await storage.getAffiliateByCode(req.params.code as string);
+      if (!affiliate || !affiliate.isActive) {
+        return res.status(404).json({ valid: false });
+      }
+      res.json({ valid: true, name: affiliate.name });
+    } catch (error) {
+      res.status(500).json({ error: "Validation failed" });
     }
   });
 

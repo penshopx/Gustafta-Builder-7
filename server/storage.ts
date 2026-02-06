@@ -28,6 +28,10 @@ import type {
   InsertMiniApp,
   MiniAppResult,
   InsertMiniAppResult,
+  ClientSubscription,
+  InsertClientSubscription,
+  Affiliate,
+  InsertAffiliate,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -133,6 +137,30 @@ export interface IStorage {
   // Mini App Result methods
   getMiniAppResults(miniAppId: string): Promise<MiniAppResult[]>;
   createMiniAppResult(result: InsertMiniAppResult): Promise<MiniAppResult>;
+
+  // Client Subscription methods
+  getClientSubscriptions(agentId: string): Promise<ClientSubscription[]>;
+  getClientSubscription(id: string): Promise<ClientSubscription | undefined>;
+  getClientSubscriptionByToken(token: string): Promise<ClientSubscription | undefined>;
+  getClientSubscriptionByEmail(agentId: string, email: string): Promise<ClientSubscription | undefined>;
+  createClientSubscription(sub: InsertClientSubscription): Promise<ClientSubscription>;
+  updateClientSubscription(id: string, data: Partial<InsertClientSubscription & { messageUsedToday: number; messageUsedMonth: number; lastMessageDate: string; lastMonthReset: string }>): Promise<ClientSubscription | undefined>;
+  deleteClientSubscription(id: string): Promise<boolean>;
+  incrementClientMessageUsage(id: string): Promise<ClientSubscription | undefined>;
+  getClientSubscriptionStats(agentId: string): Promise<{ totalClients: number; activeClients: number; totalRevenue: number }>;
+
+  // Affiliate methods
+  getAffiliates(): Promise<Affiliate[]>;
+  getAffiliate(id: string): Promise<Affiliate | undefined>;
+  getAffiliateByCode(code: string): Promise<Affiliate | undefined>;
+  createAffiliate(affiliate: InsertAffiliate): Promise<Affiliate>;
+  updateAffiliate(id: string, data: Partial<InsertAffiliate>): Promise<Affiliate | undefined>;
+  deleteAffiliate(id: string): Promise<boolean>;
+  incrementAffiliateReferral(code: string, amount: number): Promise<Affiliate | undefined>;
+
+  // Product listing methods
+  getListedAgents(): Promise<Agent[]>;
+  getAgentBySlug(slug: string): Promise<Agent | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -150,6 +178,8 @@ export class MemStorage implements IStorage {
   private projectBrainInstances: Map<string, ProjectBrainInstance>;
   private miniApps: Map<string, MiniApp>;
   private miniAppResults: Map<string, MiniAppResult>;
+  private clientSubscriptions: Map<string, ClientSubscription>;
+  private affiliatesMap: Map<string, Affiliate>;
 
   constructor() {
     this.users = new Map();
@@ -166,6 +196,8 @@ export class MemStorage implements IStorage {
     this.projectBrainInstances = new Map();
     this.miniApps = new Map();
     this.miniAppResults = new Map();
+    this.clientSubscriptions = new Map();
+    this.affiliatesMap = new Map();
   }
 
   // User methods
@@ -1106,6 +1138,185 @@ export class MemStorage implements IStorage {
     };
     this.miniAppResults.set(id, result);
     return result;
+  }
+
+  // Client Subscription methods
+  async getClientSubscriptions(agentId: string): Promise<ClientSubscription[]> {
+    return Array.from(this.clientSubscriptions.values())
+      .filter((sub) => sub.agentId === agentId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getClientSubscription(id: string): Promise<ClientSubscription | undefined> {
+    return this.clientSubscriptions.get(id);
+  }
+
+  async getClientSubscriptionByToken(token: string): Promise<ClientSubscription | undefined> {
+    return Array.from(this.clientSubscriptions.values()).find(
+      (sub) => sub.accessToken === token
+    );
+  }
+
+  async getClientSubscriptionByEmail(agentId: string, email: string): Promise<ClientSubscription | undefined> {
+    return Array.from(this.clientSubscriptions.values()).find(
+      (sub) => sub.agentId === agentId && sub.customerEmail === email
+    );
+  }
+
+  async createClientSubscription(insertSub: InsertClientSubscription): Promise<ClientSubscription> {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    const sub: ClientSubscription = {
+      ...insertSub,
+      id,
+      messageUsedToday: 0,
+      messageUsedMonth: 0,
+      lastMessageDate: null,
+      lastMonthReset: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.clientSubscriptions.set(id, sub);
+    return sub;
+  }
+
+  async updateClientSubscription(id: string, data: Partial<InsertClientSubscription & { messageUsedToday: number; messageUsedMonth: number; lastMessageDate: string; lastMonthReset: string }>): Promise<ClientSubscription | undefined> {
+    const sub = this.clientSubscriptions.get(id);
+    if (!sub) return undefined;
+
+    const updated: ClientSubscription = {
+      ...sub,
+      ...data,
+      id: sub.id,
+      createdAt: sub.createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+    this.clientSubscriptions.set(id, updated);
+    return updated;
+  }
+
+  async deleteClientSubscription(id: string): Promise<boolean> {
+    return this.clientSubscriptions.delete(id);
+  }
+
+  async incrementClientMessageUsage(id: string): Promise<ClientSubscription | undefined> {
+    const sub = this.clientSubscriptions.get(id);
+    if (!sub) return undefined;
+
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    const currentMonth = today.substring(0, 7);
+
+    let messageUsedToday = sub.messageUsedToday;
+    let messageUsedMonth = sub.messageUsedMonth;
+
+    if (sub.lastMessageDate !== today) {
+      messageUsedToday = 0;
+    }
+    if (!sub.lastMonthReset || sub.lastMonthReset.substring(0, 7) !== currentMonth) {
+      messageUsedMonth = 0;
+    }
+
+    messageUsedToday += 1;
+    messageUsedMonth += 1;
+
+    const updated: ClientSubscription = {
+      ...sub,
+      messageUsedToday,
+      messageUsedMonth,
+      lastMessageDate: today,
+      lastMonthReset: today,
+      updatedAt: new Date().toISOString(),
+    };
+    this.clientSubscriptions.set(id, updated);
+    return updated;
+  }
+
+  async getClientSubscriptionStats(agentId: string): Promise<{ totalClients: number; activeClients: number; totalRevenue: number }> {
+    const subs = Array.from(this.clientSubscriptions.values()).filter(
+      (sub) => sub.agentId === agentId
+    );
+    const totalClients = subs.length;
+    const activeClients = subs.filter((sub) => sub.status === "active").length;
+    const totalRevenue = subs.reduce((sum, sub) => sum + (sub.amount || 0), 0);
+    return { totalClients, activeClients, totalRevenue };
+  }
+
+  // Affiliate methods
+  async getAffiliates(): Promise<Affiliate[]> {
+    return Array.from(this.affiliatesMap.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getAffiliate(id: string): Promise<Affiliate | undefined> {
+    return this.affiliatesMap.get(id);
+  }
+
+  async getAffiliateByCode(code: string): Promise<Affiliate | undefined> {
+    return Array.from(this.affiliatesMap.values()).find(
+      (aff) => aff.code === code
+    );
+  }
+
+  async createAffiliate(insertAffiliate: InsertAffiliate): Promise<Affiliate> {
+    const id = randomUUID();
+    const affiliate: Affiliate = {
+      ...insertAffiliate,
+      id,
+      totalEarnings: 0,
+      totalReferrals: 0,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    this.affiliatesMap.set(id, affiliate);
+    return affiliate;
+  }
+
+  async updateAffiliate(id: string, data: Partial<InsertAffiliate>): Promise<Affiliate | undefined> {
+    const affiliate = this.affiliatesMap.get(id);
+    if (!affiliate) return undefined;
+
+    const updated: Affiliate = {
+      ...affiliate,
+      ...data,
+      id: affiliate.id,
+      totalEarnings: affiliate.totalEarnings,
+      totalReferrals: affiliate.totalReferrals,
+      isActive: affiliate.isActive,
+      createdAt: affiliate.createdAt,
+    };
+    this.affiliatesMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteAffiliate(id: string): Promise<boolean> {
+    return this.affiliatesMap.delete(id);
+  }
+
+  async incrementAffiliateReferral(code: string, amount: number): Promise<Affiliate | undefined> {
+    const affiliate = await this.getAffiliateByCode(code);
+    if (!affiliate) return undefined;
+
+    const commission = amount * (affiliate.commissionRate / 100);
+    const updated: Affiliate = {
+      ...affiliate,
+      totalReferrals: affiliate.totalReferrals + 1,
+      totalEarnings: affiliate.totalEarnings + commission,
+    };
+    this.affiliatesMap.set(affiliate.id, updated);
+    return updated;
+  }
+
+  // Product listing methods
+  async getListedAgents(): Promise<Agent[]> {
+    return Array.from(this.agents.values()).filter((agent) => agent.isListed === true);
+  }
+
+  async getAgentBySlug(slug: string): Promise<Agent | undefined> {
+    return Array.from(this.agents.values()).find(
+      (agent) => agent.productSlug === slug
+    );
   }
 }
 
