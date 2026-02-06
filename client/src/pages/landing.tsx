@@ -18,7 +18,9 @@ import {
   BookOpen, BarChart3, Lightbulb, ArrowRight, Check, LogIn, LogOut, Menu, 
   Zap, Palette, Download, Upload, Code, Cpu, FileJson, Settings2, Layers,
   Clock, TrendingUp, Users, Star, CheckCircle2, XCircle, AlertTriangle,
-  HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play
+  HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
+  Brain, Blocks, ClipboardList, Calculator, Activity, FileText, Wrench,
+  AlertCircle, ListTodo, GitCompareArrows, Camera, LayoutDashboard, Plug
 } from "lucide-react";
 
 export default function Landing() {
@@ -46,171 +48,171 @@ export default function Landing() {
   const painPoints = [
     {
       icon: Clock,
-      problem: "Butuh waktu berminggu-minggu untuk setup chatbot",
-      solution: "Deploy chatbot dalam hitungan menit dengan template siap pakai"
+      problem: "Laporan proyek manual memakan waktu berjam-jam",
+      solution: "Generate laporan otomatis dengan AI dari data Project Brain dalam hitungan menit"
     },
     {
       icon: AlertTriangle,
-      problem: "Customer service kewalahan dengan pertanyaan repetitif",
-      solution: "Otomatisasi 80% pertanyaan rutin dengan AI cerdas"
+      problem: "Isu proyek sering terlewat dan terlambat di-follow up",
+      solution: "Issue Log & Action Tracker otomatis mendeteksi, prioritaskan, dan eskalasi isu"
     },
     {
       icon: TrendingUp,
-      problem: "Kehilangan leads karena respons lambat",
-      solution: "Respons instan 24/7 meningkatkan konversi hingga 40%"
+      problem: "Risiko proyek tidak teridentifikasi sejak dini",
+      solution: "Risk Radar AI menganalisis risiko teknis, jadwal, dan biaya secara real-time"
     },
     {
       icon: Users,
-      problem: "Biaya tim support terus meningkat",
-      solution: "Kurangi beban tim hingga 60% dengan asisten AI"
+      problem: "Informasi proyek tersebar dan sulit diakses tim",
+      solution: "Project Brain memusatkan semua data proyek untuk akses tim kapan saja"
     },
   ];
 
   const features = [
     {
+      icon: Brain,
+      title: "Project Brain (Otak Proyek)",
+      description: "Pusatkan data proyek dengan template CiviloPro - tahap proyek, isu, keputusan, risiko, dan batasan dalam satu tempat"
+    },
+    {
+      icon: Blocks,
+      title: "Mini Apps (12 Tools)",
+      description: "6 tools dasar (Checklist, Kalkulator, Risk Assessment, Progress Tracker, Doc Generator, Custom) + 6 AI-powered (Issue Log, Action Tracker, Change Log, Snapshot, Decision Summary, Risk Radar)"
+    },
+    {
       icon: Lightbulb,
-      title: "Big Idea Framework",
-      description: "Mulai dari masalah, ide, inspirasi, atau mentoring - sistem hierarki membantu Anda membangun chatbot yang tepat sasaran"
+      title: "Big Idea \u2192 Toolbox \u2192 Agent",
+      description: "Arsitektur hierarkis untuk mengorganisir proyek: dari visi besar ke kategori kerja hingga agen AI spesifik"
     },
     {
       icon: Sparkles,
-      title: "Attentive Agentic AI",
-      description: "Chatbot cerdas dengan kemampuan mendengar aktif, konteks percakapan, dan kecerdasan emosional"
+      title: "Agentic AI",
+      description: "AI cerdas dengan kemampuan mendengar aktif, retensi konteks, koreksi diri, dan pemahaman data proyek"
     },
     {
       icon: BookOpen,
       title: "Knowledge Base",
-      description: "Upload PDF, PPT, Excel, Word atau tambahkan teks dan URL untuk melatih chatbot Anda"
+      description: "Upload PDF, PPT, Excel, gambar teknis, atau URL untuk memperkaya pengetahuan agen AI proyek Anda"
     },
     {
-      icon: Globe,
-      title: "Multi-Channel",
-      description: "Integrasikan dengan WhatsApp, Telegram, Discord, Slack, Web Widget, dan API"
-    },
-    {
-      icon: BarChart3,
-      title: "Analytics Dashboard",
-      description: "Pantau performa chatbot dengan metrik pesan, sesi, dan engagement"
-    },
-    {
-      icon: Shield,
-      title: "Access Control",
-      description: "Token akses, mode publik/privat, dan kontrol domain untuk monetisasi"
+      icon: Plug,
+      title: "Multi-Channel & Integrasi",
+      description: "WhatsApp, Telegram, Discord, Slack, Web Widget, dan REST API untuk komunikasi tim proyek"
     },
   ];
 
   const advancedFeatures = [
     {
-      icon: Layers,
-      title: "Template Library",
-      description: "10+ template siap pakai untuk berbagai industri - Customer Support, Sales, HR, Education, dan lainnya"
+      icon: Camera,
+      title: "Project Snapshot AI",
+      description: "Ringkasan kondisi proyek otomatis untuk laporan manajemen - status, isu, risiko, dan keputusan terakhir"
     },
     {
-      icon: FileJson,
-      title: "Export & Import",
-      description: "Ekspor konfigurasi chatbot dalam format JSON dan import ke proyek lain dengan mudah"
-    },
-    {
-      icon: Palette,
-      title: "Widget Customization",
-      description: "Kustomisasi tampilan widget chat - warna, posisi, ukuran, dan branding sesuai brand Anda"
+      icon: BarChart3,
+      title: "Analytics Dashboard",
+      description: "Pantau performa agen AI dengan metrik pesan, sesi, engagement, dan peak hours"
     },
     {
       icon: Cpu,
       title: "Multi-Model AI",
-      description: "Pilih dari GPT-4, GPT-3.5, DeepSeek, Claude, atau gunakan model custom Anda sendiri"
+      description: "GPT-4o, GPT-3.5, DeepSeek, Claude, atau model custom dengan API endpoint sendiri"
+    },
+    {
+      icon: Palette,
+      title: "Widget Customization",
+      description: "Kustomisasi tampilan widget chat sesuai branding proyek - warna, posisi, ukuran, dan logo"
+    },
+    {
+      icon: Shield,
+      title: "Access Control & Keamanan",
+      description: "Token akses per agen, mode publik/privat, kontrol domain, dan enkripsi data proyek"
     },
     {
       icon: Code,
-      title: "API Access",
-      description: "REST API lengkap untuk integrasi dengan sistem Anda - webhook, embed, dan custom integration"
-    },
-    {
-      icon: Settings2,
-      title: "Advanced Settings",
-      description: "Kontrol penuh: temperature, max tokens, context retention, dan behavior tuning"
+      title: "API & Webhook",
+      description: "REST API lengkap dan webhook untuk integrasi dengan sistem manajemen proyek Anda"
     },
   ];
 
   const testimonials = [
     {
-      name: "Budi Santoso",
-      role: "CEO, TokoBagus.id",
+      name: "Ir. Budi Santoso",
+      role: "Project Manager, PT Pembangunan Jaya",
       avatar: "BS",
-      content: "Gustafta menghemat 40 jam kerja tim CS kami per minggu. ROI tercapai dalam 2 minggu pertama.",
+      content: "Project Brain mengubah cara kami mengelola data proyek. Laporan mingguan yang biasa butuh 4 jam sekarang selesai dalam 10 menit.",
       rating: 5
     },
     {
-      name: "Sarah Wijaya",
-      role: "Founder, EduTech Academy",
+      name: "Sarah Wijaya, ST",
+      role: "QA/QC Manager, Konstruksi Mandiri",
       avatar: "SW",
-      content: "Chatbot kami sekarang menangani 85% pertanyaan siswa secara otomatis. Sangat membantu!",
+      content: "Issue Log dan Risk Radar sangat membantu tim QC kami. Isu kritis tidak pernah terlewat lagi sejak pakai Gustafta.",
       rating: 5
     },
     {
-      name: "Andi Pratama",
-      role: "Marketing Director, PropertyHub",
+      name: "Andi Pratama, MT",
+      role: "Site Engineer, Infrastruktur Nusantara",
       avatar: "AP",
-      content: "Lead conversion naik 35% sejak menggunakan Gustafta. Setup-nya mudah banget.",
+      content: "Mini Apps untuk checklist dan action tracker mempercepat koordinasi tim di lapangan. Sangat praktis!",
       rating: 5
     },
   ];
 
   const comparisonData = [
-    { feature: "Setup Time", gustafta: "5 menit", others: "2-4 minggu" },
-    { feature: "Template Siap Pakai", gustafta: true, others: false },
-    { feature: "Multi-Model AI", gustafta: true, others: false },
-    { feature: "Knowledge Base", gustafta: true, others: "Limited" },
-    { feature: "Multi-Channel", gustafta: "6+ channels", others: "1-2 channels" },
-    { feature: "Export/Import", gustafta: true, others: false },
-    { feature: "Analytics", gustafta: true, others: "Basic" },
-    { feature: "Custom Branding", gustafta: true, others: "Premium only" },
+    { feature: "Project Brain (Data Proyek Terpusat)", gustafta: true, others: false },
+    { feature: "Mini Apps AI (12 Tools)", gustafta: true, others: false },
+    { feature: "Risk Radar & Issue Log Otomatis", gustafta: true, others: false },
+    { feature: "Template Konstruksi (CiviloPro)", gustafta: true, others: false },
+    { feature: "Hierarki Big Idea \u2192 Toolbox \u2192 Agent", gustafta: true, others: false },
+    { feature: "Multi-Channel (WhatsApp, Telegram, dll)", gustafta: "6+ channels", others: "1-2 channels" },
+    { feature: "Multi-Model AI (GPT-4, Claude, DeepSeek)", gustafta: true, others: "Limited" },
+    { feature: "Analytics & Laporan Otomatis", gustafta: true, others: "Basic" },
   ];
 
   const faqItems = [
     {
-      question: "Berapa lama waktu yang dibutuhkan untuk membuat chatbot?",
-      answer: "Dengan template siap pakai, Anda bisa deploy chatbot dalam 5 menit. Untuk kustomisasi lebih lanjut, biasanya membutuhkan 15-30 menit untuk setup persona, knowledge base, dan integrasi."
+      question: "Apa itu Project Brain dan bagaimana cara kerjanya?",
+      answer: "Project Brain (Otak Proyek) adalah fitur untuk memusatkan semua data proyek Anda - mulai dari tahap proyek, isu, keputusan, risiko, hingga batasan. Data ini otomatis digunakan oleh Mini Apps AI untuk menghasilkan laporan, analisis risiko, dan rekomendasi yang kontekstual."
+    },
+    {
+      question: "Apa saja Mini Apps yang tersedia?",
+      answer: "Ada 12 Mini Apps: 6 tools dasar (Checklist, Kalkulator, Risk Assessment, Progress Tracker, Document Generator, Custom) dan 6 AI-powered (Issue Log, Action Tracker, Change Log, Project Snapshot, Decision Summary, Risk Radar). Setiap Mini App memiliki konfigurasi JSON yang bisa disesuaikan."
+    },
+    {
+      question: "Apakah cocok untuk proyek konstruksi?",
+      answer: "Sangat cocok! Gustafta dilengkapi template CiviloPro khusus untuk civil engineering dan konstruksi - termasuk field untuk tahap proyek, jenis isu teknis, level risiko, dan batasan biaya/waktu."
+    },
+    {
+      question: "Bagaimana struktur Big Idea, Toolbox, dan Agent?",
+      answer: "Big Idea adalah level tertinggi (visi/brand proyek), Toolbox adalah kategori kerja di bawahnya, dan Agent adalah agen AI spesifik yang menjalankan tugas. Struktur ini membantu mengorganisir proyek besar dengan banyak aspek."
     },
     {
       question: "Apakah saya perlu keahlian coding?",
-      answer: "Tidak sama sekali! Gustafta dirancang untuk pengguna non-teknis. Semua konfigurasi dilakukan melalui antarmuka visual yang mudah dipahami."
+      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual. Project Brain, Mini Apps, dan Persona AI semuanya bisa di-setup tanpa menulis kode apapun."
     },
     {
-      question: "Model AI apa yang didukung?",
-      answer: "Kami mendukung GPT-4o, GPT-4o-mini, GPT-3.5, DeepSeek, Claude, dan Anda juga bisa menggunakan model custom dengan API endpoint sendiri."
-    },
-    {
-      question: "Bagaimana dengan keamanan data?",
-      answer: "Data Anda aman. Kami menggunakan enkripsi end-to-end, token akses untuk setiap chatbot, dan Anda memiliki kontrol penuh atas siapa yang bisa mengakses chatbot Anda."
-    },
-    {
-      question: "Bisakah chatbot terintegrasi dengan WhatsApp?",
-      answer: "Ya! Gustafta mendukung integrasi dengan WhatsApp, Telegram, Discord, Slack, Web Widget, dan REST API untuk integrasi custom."
-    },
-    {
-      question: "Apakah ada free trial?",
-      answer: "Ya, Anda bisa mulai gratis dengan fitur dasar. Upgrade kapan saja untuk akses fitur premium seperti multi-model AI dan unlimited knowledge base."
+      question: "Bagaimana dengan keamanan data proyek?",
+      answer: "Data proyek Anda aman dengan enkripsi, token akses per agen, mode publik/privat, dan kontrol domain. Anda memiliki kontrol penuh atas siapa yang bisa mengakses data proyek."
     },
   ];
 
   const steps = [
     {
       number: "1",
-      title: "Definisikan Big Idea",
-      description: "Tentukan masalah atau ide yang ingin Anda selesaikan",
-      time: "1 menit"
-    },
-    {
-      number: "2", 
-      title: "Pilih Template",
-      description: "Gunakan template siap pakai atau buat dari awal",
+      title: "Buat Big Idea & Project Brain",
+      description: "Definisikan proyek dan isi data di Otak Proyek dengan template CiviloPro",
       time: "2 menit"
     },
     {
+      number: "2", 
+      title: "Setup Agent & Mini Apps",
+      description: "Konfigurasi agen AI, pilih Mini Apps yang dibutuhkan, dan tambahkan Knowledge Base",
+      time: "3 menit"
+    },
+    {
       number: "3",
-      title: "Deploy & Integrasikan",
-      description: "Publish dan hubungkan ke channel favorit Anda",
+      title: "Deploy & Kolaborasi",
+      description: "Integrasikan ke WhatsApp/Web dan mulai gunakan bersama tim proyek",
       time: "2 menit"
     },
   ];
@@ -223,14 +225,15 @@ export default function Landing() {
   ];
 
   const categories = [
-    "E-Commerce", "Kesehatan", "Pendidikan", "Keuangan", "Properti",
-    "Travel", "F&B", "Otomotif", "Legal", "HR", "IT", "Marketing"
+    "Gedung & Highrise", "Jalan & Jembatan", "Infrastruktur", "Geoteknik",
+    "Struktur Baja", "MEP", "EPC", "QS & Estimasi", "HSE", "QA/QC",
+    "Manajemen Proyek", "Pengawasan"
   ];
 
   const stats = [
-    { value: "10K+", label: "Chatbot Dibuat" },
-    { value: "5M+", label: "Pesan Diproses" },
-    { value: "500+", label: "Bisnis Terbantu" },
+    { value: "12", label: "Mini Apps Tersedia" },
+    { value: "6", label: "AI-Powered Tools" },
+    { value: "500+", label: "Proyek Terbantu" },
     { value: "98%", label: "Kepuasan Pengguna" },
   ];
 
@@ -356,24 +359,25 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             {/* Urgency Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-pulse">
-              <Zap className="h-4 w-4" />
-              <span>500+ bisnis sudah menggunakan Gustafta</span>
+              <Brain className="h-4 w-4" />
+              <span>Project Brain + 12 Mini Apps AI</span>
               <Sparkles className="h-4 w-4" />
             </div>
             
             {/* Main Headline - AIDA Attention */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Bangun Chatbot AI dalam
-              <span className="text-primary"> 5 Menit</span>,
+              AI Project Intelligence
               <br className="hidden md:block" />
-              Tingkatkan Penjualan hingga
-              <span className="text-primary"> 40%</span>
+              untuk
+              <span className="text-primary"> Manajemen Proyek</span>
+              <br className="hidden md:block" />
+              <span className="text-primary">Konstruksi</span>
             </h1>
             
             {/* Subheadline - Value Proposition */}
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Platform AI chatbot termudah di Indonesia. Tanpa coding, tanpa ribet.
-              Respons pelanggan 24/7 dengan kecerdasan GPT-4.
+              Pusatkan data proyek di Project Brain, jalankan 12 Mini Apps AI untuk analisis otomatis,
+              dan deploy agen cerdas untuk tim Anda. Tanpa coding.
             </p>
             
             {/* Trust Indicators */}
@@ -414,7 +418,7 @@ export default function Landing() {
             {/* Risk Reversal */}
             <p className="text-sm text-muted-foreground">
               <CheckCircle2 className="h-4 w-4 inline mr-1 text-green-500" />
-              Gratis selamanya untuk fitur dasar. Tidak perlu kartu kredit.
+              Gratis untuk memulai. Tidak perlu kartu kredit. Setup dalam 7 menit.
             </p>
           </div>
         </div>
@@ -442,10 +446,10 @@ export default function Landing() {
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Masalah & Solusi</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Apakah Anda Mengalami Masalah Ini?
+              Tantangan Proyek yang Kami Selesaikan
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Ribuan bisnis menghadapi tantangan yang sama. Gustafta hadir sebagai solusi.
+              Tim proyek konstruksi menghadapi tantangan yang sama. Gustafta hadir sebagai solusi cerdas.
             </p>
           </div>
           
@@ -483,10 +487,10 @@ export default function Landing() {
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Cara Kerja</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              3 Langkah Mudah, 5 Menit Saja
+              3 Langkah Mudah, 7 Menit Saja
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Tidak perlu developer, tidak perlu koding. Siapapun bisa membuat chatbot profesional.
+              Tidak perlu developer, tidak perlu koding. Setup Project Brain dan agen AI untuk tim proyek Anda.
             </p>
           </div>
           
@@ -525,12 +529,12 @@ export default function Landing() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Fitur Lengkap</Badge>
+            <Badge variant="secondary" className="mb-4">Fitur Utama</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Semua yang Anda Butuhkan dalam Satu Platform
+              Platform Project Intelligence Terlengkap
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Fitur profesional untuk membangun chatbot AI yang powerful
+              Dari Project Brain hingga Mini Apps AI - semua yang dibutuhkan tim proyek dalam satu platform
             </p>
           </div>
           
@@ -556,11 +560,11 @@ export default function Landing() {
           <div className="text-center mb-12">
             <Badge className="mb-4">Template Library</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Mulai dengan Template Siap Pakai
+              Template Proyek Siap Pakai
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Pilih dari {templatesData?.templates.length || 10}+ template chatbot profesional. 
-              Kustomisasi sesuai kebutuhan bisnis Anda dalam hitungan menit.
+              Pilih dari {templatesData?.templates.length || 10}+ template CiviloPro untuk berbagai jenis proyek konstruksi.
+              Kustomisasi sesuai kebutuhan proyek Anda dalam hitungan menit.
             </p>
           </div>
           
@@ -599,10 +603,10 @@ export default function Landing() {
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Testimoni</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Dipercaya oleh Ratusan Bisnis
+              Dipercaya oleh Profesional Konstruksi
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Lihat bagaimana Gustafta membantu bisnis lain mencapai tujuan mereka
+              Lihat bagaimana Gustafta membantu tim proyek mengelola pekerjaan lebih efisien
             </p>
           </div>
           
@@ -643,7 +647,7 @@ export default function Landing() {
               Mengapa Gustafta Lebih Unggul?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Bandingkan fitur Gustafta dengan solusi chatbot lainnya
+              Bandingkan fitur Gustafta dengan tools manajemen proyek lainnya
             </p>
           </div>
           
@@ -705,12 +709,12 @@ export default function Landing() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Advanced Features</Badge>
+            <Badge variant="secondary" className="mb-4">Fitur Lanjutan</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Fleksibilitas Penuh untuk Developer
+              Kemampuan Lebih untuk Tim Proyek
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Fitur lanjutan untuk kebutuhan kustomisasi yang lebih kompleks
+              Fitur tambahan untuk monitoring, pelaporan, dan kolaborasi tim yang lebih efektif
             </p>
           </div>
           
@@ -734,8 +738,8 @@ export default function Landing() {
       <section className="py-16 md:py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h2 className="text-xl md:text-3xl font-bold mb-4">Didukung 37+ Kategori Bisnis</h2>
-            <p className="text-muted-foreground">Solusi chatbot untuk berbagai industri</p>
+            <h2 className="text-xl md:text-3xl font-bold mb-4">Untuk Berbagai Bidang Konstruksi</h2>
+            <p className="text-muted-foreground">Solusi project intelligence untuk semua jenis proyek</p>
           </div>
           <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
             {categories.map((category) => (
@@ -791,31 +795,31 @@ export default function Landing() {
         
         <div className="container mx-auto px-4 text-center relative">
           <Badge variant="secondary" className="mb-6 bg-white/20 text-white border-white/30">
-            <Zap className="h-3 w-3 mr-1" />
-            Limited Time Offer
+            <Brain className="h-3 w-3 mr-1" />
+            Project Brain + Mini Apps AI
           </Badge>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Siap Meningkatkan Bisnis Anda?
+            Siap Mengelola Proyek Lebih Cerdas?
           </h2>
           <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto text-lg">
-            Bergabung dengan 500+ bisnis yang sudah menggunakan Gustafta.
-            Mulai gratis hari ini dan lihat perbedaannya.
+            Bergabung dengan 500+ profesional konstruksi yang sudah menggunakan Gustafta.
+            Setup Project Brain dan mulai gunakan Mini Apps AI hari ini.
           </p>
           
           {/* Value Stack */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
-              <span>Setup 5 menit</span>
+              <span>Setup 7 menit</span>
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
-              <span>Tanpa kartu kredit</span>
+              <span>12 Mini Apps tersedia</span>
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
-              <span>Gratis selamanya</span>
+              <span>Tanpa coding</span>
             </div>
           </div>
           
@@ -856,7 +860,7 @@ export default function Landing() {
                 <span className="font-bold text-lg">Gustafta</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Platform AI chatbot builder terlengkap untuk bisnis Indonesia.
+                AI Project Intelligence platform untuk manajemen proyek konstruksi Indonesia.
               </p>
               <div className="flex gap-2">
                 {trustBadges.slice(0, 2).map((badge) => (
