@@ -222,12 +222,18 @@ Schema includes:
 
 ### Mini Apps (Feb 6, 2026)
 - Aplikasi kecil turunan dari Project Brain data
-- Types: checklist, calculator, risk_assessment, progress_tracker, document_generator, custom, project_snapshot, decision_summary, risk_radar
-- **AI-Powered Mini Apps** (project_snapshot, decision_summary, risk_radar):
+- Types: checklist, calculator, risk_assessment, progress_tracker, document_generator, custom, project_snapshot, decision_summary, risk_radar, issue_log, action_tracker, change_log
+- **AI-Powered Mini Apps** (6 types: project_snapshot, decision_summary, risk_radar, issue_log, action_tracker, change_log):
   - Execute via POST /api/mini-app/:id/run (uses OpenAI to analyze active Project Brain data)
   - Project Snapshot: Overall status, issue summary, risk indicators, last decision
   - Decision Summary: Executive decision summary with recommendations
   - Risk Radar: Technical/schedule/cost risk assessment with reasons
+  - Issue Log: Structured issue tracking with ISU-001 IDs, priority ranking, escalation flags (>14 days)
+  - Action Tracker: Action items from issues/decisions with PIC, due dates, overdue risk assessment
+  - Change Log: Design/method/scope change analysis with impact assessment and approval status
+- **DEFAULT_MINI_APP_CONFIGS**: Auto-populate name, description, and checklist items when creating mini apps
+  - Checklist default: 10-step "Checklist Penanganan Isu" for construction issue workflow
+  - All 11 types have default name and description
 - Each mini app: name, description, type, config (JSONB), icon
 - Mini App Results: stores input/output of mini app executions
 - Tables: `mini_apps`, `mini_app_results`
