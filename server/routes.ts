@@ -1971,13 +1971,20 @@ export async function registerRoutes(
     }
   });
   
-  // Track processed webhook message IDs to prevent duplicate processing
   const processedWebhookMessages = new Set<string>();
-  const WEBHOOK_DEDUP_TTL = 60000; // 60 seconds
+  const WEBHOOK_DEDUP_TTL = 120000; // 2 minutes
+  const recentBotReplies = new Map<string, number>(); // phoneNumber -> timestamp
+  const BOT_REPLY_COOLDOWN = 10000; // 10 second cooldown after sending a reply
 
-  // WhatsApp webhook endpoint
+  function normalizePhoneNumber(phone: string): string {
+    let digits = String(phone).replace(/\D/g, "");
+    if (digits.startsWith("0")) {
+      digits = "62" + digits.substring(1);
+    }
+    return digits;
+  }
+
   app.post("/api/webhook/whatsapp/:agentId", async (req, res) => {
-    // Always respond immediately to prevent Fonnte timeouts/retries
     res.status(200).json({ status: "ok" });
 
     try {
@@ -1985,17 +1992,21 @@ export async function registerRoutes(
       const payload = req.body;
       
       console.log("WhatsApp webhook received:", JSON.stringify(payload, null, 2));
+
+      if (payload.stateid || payload.status || payload.state) {
+        if (!payload.sender && !payload.pengirim && !payload.message && !payload.pesan) {
+          console.log("Skipping Fonnte status update webhook");
+          return;
+        }
+      }
       
-      // Handle different webhook formats (Fonnte, Multichat, WhatsApp Cloud API, Kirimi.id, etc.)
       let phoneNumber: string | undefined;
       let messageText: string | undefined;
       let messageId: string | undefined;
       let deviceNumber: string | undefined;
       let provider: string = "generic";
       
-      // Fonnte format: { sender: "628...", message: "text", device: "..." }
-      // Also support legacy: { pengirim: "628...", pesan: "text", device: "..." }
-      if ((payload.sender || payload.pengirim) && (payload.message || payload.pesan) && payload.device !== undefined) {
+      if ((payload.sender || payload.pengirim) && (payload.message !== undefined || payload.pesan !== undefined) && payload.device !== undefined) {
         phoneNumber = payload.sender || payload.pengirim;
         messageText = payload.message || payload.pesan;
         messageId = payload.id || payload.inboxid;
@@ -2003,7 +2014,6 @@ export async function registerRoutes(
         provider = "fonnte";
         console.log("Fonnte format detected, sender:", phoneNumber, "device:", deviceNumber);
       }
-      // Kirimi.id format: { event: "message.received", from: "628...", message: "text" }
       else if (payload.event === "message.received" && payload.from && payload.message) {
         phoneNumber = payload.from;
         messageText = payload.message;
@@ -2011,14 +2021,12 @@ export async function registerRoutes(
         provider = "kirimi";
         console.log("Kirimi.id format detected");
       }
-      // Multichat format: { from: "628...", text: "message" }
       else if (payload.from && payload.text) {
         phoneNumber = payload.from;
         messageText = payload.text;
         messageId = payload.id;
         provider = "multichat";
       }
-      // WhatsApp Cloud API format
       else if (payload.entry?.[0]?.changes?.[0]?.value?.messages?.[0]) {
         const msg = payload.entry[0].changes[0].value.messages[0];
         phoneNumber = msg.from;
@@ -2026,13 +2034,11 @@ export async function registerRoutes(
         messageId = msg.id;
         provider = "meta";
       }
-      // Generic format: { sender: "628...", message: "text" }
       else if (payload.message && payload.sender) {
         phoneNumber = payload.sender;
         messageText = payload.message;
         messageId = payload.messageId;
       }
-      // Simple format: { from: "628...", message: "text" }
       else if (payload.from && payload.message) {
         phoneNumber = payload.from;
         messageText = payload.message;
@@ -2040,22 +2046,37 @@ export async function registerRoutes(
       }
       
       if (!phoneNumber || !messageText) {
-        console.log("No message found in webhook payload");
+        console.log("No valid message found in webhook payload");
         return;
       }
 
-      // Fonnte: skip messages from the device itself (outgoing/bot's own messages)
+      messageText = String(messageText).trim();
+      if (!messageText) {
+        console.log("Empty message text, skipping");
+        return;
+      }
+
       if (provider === "fonnte" && deviceNumber) {
-        const senderClean = phoneNumber.replace(/\D/g, "");
-        const deviceClean = String(deviceNumber).replace(/\D/g, "");
-        if (senderClean === deviceClean) {
-          console.log("Skipping outgoing message from device:", deviceNumber);
+        const senderNorm = normalizePhoneNumber(phoneNumber);
+        const deviceNorm = normalizePhoneNumber(deviceNumber);
+        if (senderNorm === deviceNorm) {
+          console.log("Skipping outgoing message (sender===device):", phoneNumber);
+          return;
+        }
+        if (senderNorm.endsWith(deviceNorm) || deviceNorm.endsWith(senderNorm)) {
+          console.log("Skipping outgoing message (partial match):", phoneNumber, "~", deviceNumber);
           return;
         }
       }
 
-      // Deduplicate: skip if we already processed this message recently
-      const dedupeKey = `${provider}-${phoneNumber}-${messageId || messageText}`;
+      const senderKey = normalizePhoneNumber(phoneNumber);
+      const lastReplyTime = recentBotReplies.get(senderKey);
+      if (lastReplyTime && Date.now() - lastReplyTime < BOT_REPLY_COOLDOWN) {
+        console.log("Skipping message during cooldown period for:", phoneNumber);
+        return;
+      }
+
+      const dedupeKey = `${agentId}-${provider}-${senderKey}-${messageId || messageText}`;
       if (processedWebhookMessages.has(dedupeKey)) {
         console.log("Skipping duplicate webhook message:", dedupeKey);
         return;
@@ -2089,10 +2110,11 @@ export async function registerRoutes(
         return;
       }
 
-      // Send response based on provider
+      recentBotReplies.set(senderKey, Date.now());
+      setTimeout(() => recentBotReplies.delete(senderKey), BOT_REPLY_COOLDOWN);
+
       try {
         if (provider === "fonnte") {
-          // Fonnte API format
           const sendResult = await fetch("https://api.fonnte.com/send", {
             method: "POST",
             headers: {
