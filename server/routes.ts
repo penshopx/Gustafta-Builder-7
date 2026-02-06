@@ -207,7 +207,7 @@ export async function registerRoutes(
   // Get user profile
   app.get("/api/profile/:userId", isAuthenticated, async (req, res) => {
     try {
-      const profile = await storage.getUserProfile(req.params.userId);
+      const profile = await storage.getUserProfile(req.params.userId as string);
       res.json(profile || null);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch profile" });
@@ -275,7 +275,7 @@ export async function registerRoutes(
   // Get single big idea
   app.get("/api/big-ideas/:id", isAuthenticated, async (req, res) => {
     try {
-      const bigIdea = await storage.getBigIdea(req.params.id);
+      const bigIdea = await storage.getBigIdea(req.params.id as string);
       if (!bigIdea) {
         return res.status(404).json({ error: "Big idea not found" });
       }
@@ -302,7 +302,7 @@ export async function registerRoutes(
   // Update big idea
   app.patch("/api/big-ideas/:id", isAuthenticated, async (req, res) => {
     try {
-      const bigIdea = await storage.updateBigIdea(req.params.id, req.body);
+      const bigIdea = await storage.updateBigIdea(req.params.id as string, req.body);
       if (!bigIdea) {
         return res.status(404).json({ error: "Big idea not found" });
       }
@@ -315,7 +315,7 @@ export async function registerRoutes(
   // Activate big idea
   app.post("/api/big-ideas/:id/activate", isAuthenticated, async (req, res) => {
     try {
-      const bigIdea = await storage.setActiveBigIdea(req.params.id);
+      const bigIdea = await storage.setActiveBigIdea(req.params.id as string);
       if (!bigIdea) {
         return res.status(404).json({ error: "Big idea not found" });
       }
@@ -328,7 +328,7 @@ export async function registerRoutes(
   // Delete big idea
   app.delete("/api/big-ideas/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteBigIdea(req.params.id);
+      const deleted = await storage.deleteBigIdea(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Big idea not found" });
       }
@@ -364,7 +364,7 @@ export async function registerRoutes(
   // Get single toolbox
   app.get("/api/toolboxes/:id", isAuthenticated, async (req, res) => {
     try {
-      const toolbox = await storage.getToolbox(req.params.id);
+      const toolbox = await storage.getToolbox(req.params.id as string);
       if (!toolbox) {
         return res.status(404).json({ error: "Toolbox not found" });
       }
@@ -391,7 +391,7 @@ export async function registerRoutes(
   // Update toolbox
   app.patch("/api/toolboxes/:id", isAuthenticated, async (req, res) => {
     try {
-      const toolbox = await storage.updateToolbox(req.params.id, req.body);
+      const toolbox = await storage.updateToolbox(req.params.id as string, req.body);
       if (!toolbox) {
         return res.status(404).json({ error: "Toolbox not found" });
       }
@@ -404,7 +404,7 @@ export async function registerRoutes(
   // Activate toolbox
   app.post("/api/toolboxes/:id/activate", isAuthenticated, async (req, res) => {
     try {
-      const toolbox = await storage.setActiveToolbox(req.params.id);
+      const toolbox = await storage.setActiveToolbox(req.params.id as string);
       if (!toolbox) {
         return res.status(404).json({ error: "Toolbox not found" });
       }
@@ -417,7 +417,7 @@ export async function registerRoutes(
   // Delete toolbox
   app.delete("/api/toolboxes/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteToolbox(req.params.id);
+      const deleted = await storage.deleteToolbox(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Toolbox not found" });
       }
@@ -485,7 +485,7 @@ export async function registerRoutes(
   // Get single agent
   app.get("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
+      const agent = await storage.getAgent(req.params.id as string);
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
@@ -603,7 +603,7 @@ export async function registerRoutes(
   // Update agent
   app.patch("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
-      const agent = await storage.updateAgent(req.params.id, req.body);
+      const agent = await storage.updateAgent(req.params.id as string, req.body);
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
@@ -616,7 +616,7 @@ export async function registerRoutes(
   // Activate agent
   app.post("/api/agents/:id/activate", isAuthenticated, async (req, res) => {
     try {
-      const agent = await storage.setActiveAgent(req.params.id);
+      const agent = await storage.setActiveAgent(req.params.id as string);
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
@@ -629,7 +629,7 @@ export async function registerRoutes(
   // Delete agent
   app.delete("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteAgent(req.params.id);
+      const deleted = await storage.deleteAgent(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Agent not found" });
       }
@@ -650,7 +650,7 @@ export async function registerRoutes(
         agent => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
       );
       if (!helpdeskExists) {
-        const helpdesk = await storage.createAgent(gustaftaKnowledgeBaseAgent);
+        const helpdesk = await storage.createAgent(gustaftaKnowledgeBaseAgent as any);
         createdAgents.push(helpdesk);
       }
       
@@ -659,7 +659,7 @@ export async function registerRoutes(
         agent => agent.name === "Dokumentender Assistant"
       );
       if (!dokumentenderExists) {
-        const dokumentender = await storage.createAgent(dokumentenderAgent);
+        const dokumentender = await storage.createAgent(dokumentenderAgent as any);
         createdAgents.push(dokumentender);
       }
       
@@ -682,7 +682,7 @@ export async function registerRoutes(
   // Get knowledge bases for an agent
   app.get("/api/knowledge-base/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const kbs = await storage.getKnowledgeBases(req.params.agentId);
+      const kbs = await storage.getKnowledgeBases(req.params.agentId as string);
       res.json(kbs);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch knowledge bases" });
@@ -770,7 +770,7 @@ export async function registerRoutes(
   // Update knowledge base
   app.patch("/api/knowledge-base/:id", isAuthenticated, async (req, res) => {
     try {
-      const kb = await storage.updateKnowledgeBase(req.params.id, req.body);
+      const kb = await storage.updateKnowledgeBase(req.params.id as string, req.body);
       if (!kb) {
         return res.status(404).json({ error: "Knowledge base not found" });
       }
@@ -783,7 +783,7 @@ export async function registerRoutes(
   // Delete knowledge base
   app.delete("/api/knowledge-base/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteKnowledgeBase(req.params.id);
+      const deleted = await storage.deleteKnowledgeBase(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Knowledge base not found" });
       }
@@ -798,7 +798,7 @@ export async function registerRoutes(
   // Get integrations for an agent
   app.get("/api/integrations/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const integrations = await storage.getIntegrations(req.params.agentId);
+      const integrations = await storage.getIntegrations(req.params.agentId as string);
       res.json(integrations);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch integrations" });
@@ -822,7 +822,7 @@ export async function registerRoutes(
   // Update integration
   app.patch("/api/integrations/:id", isAuthenticated, async (req, res) => {
     try {
-      const integration = await storage.updateIntegration(req.params.id, req.body);
+      const integration = await storage.updateIntegration(req.params.id as string, req.body);
       if (!integration) {
         return res.status(404).json({ error: "Integration not found" });
       }
@@ -835,7 +835,7 @@ export async function registerRoutes(
   // Delete integration
   app.delete("/api/integrations/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteIntegration(req.params.id);
+      const deleted = await storage.deleteIntegration(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Integration not found" });
       }
@@ -850,7 +850,7 @@ export async function registerRoutes(
   // Get messages for an agent
   app.get("/api/messages/:agentId", async (req, res) => {
     try {
-      const messages = await storage.getMessages(req.params.agentId);
+      const messages = await storage.getMessages(req.params.agentId as string);
       res.json(messages);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch messages" });
@@ -860,8 +860,8 @@ export async function registerRoutes(
   // Export messages as JSON
   app.get("/api/messages/:agentId/export/json", isAuthenticated, async (req, res) => {
     try {
-      const messages = await storage.getMessages(req.params.agentId);
-      const agent = await storage.getAgent(req.params.agentId);
+      const messages = await storage.getMessages(req.params.agentId as string);
+      const agent = await storage.getAgent(req.params.agentId as string);
       
       const exportData = {
         agentName: agent?.name || "Unknown Agent",
@@ -885,8 +885,8 @@ export async function registerRoutes(
   // Export messages as CSV
   app.get("/api/messages/:agentId/export/csv", isAuthenticated, async (req, res) => {
     try {
-      const messages = await storage.getMessages(req.params.agentId);
-      const agent = await storage.getAgent(req.params.agentId);
+      const messages = await storage.getMessages(req.params.agentId as string);
+      const agent = await storage.getAgent(req.params.agentId as string);
       
       // Build CSV
       const csvRows = ["Timestamp,Role,Content"];
@@ -1135,7 +1135,7 @@ export async function registerRoutes(
   // Clear messages for an agent
   app.delete("/api/messages/:agentId", async (req, res) => {
     try {
-      await storage.clearMessages(req.params.agentId);
+      await storage.clearMessages(req.params.agentId as string);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to clear messages" });
@@ -1180,13 +1180,13 @@ export async function registerRoutes(
         if (dailyUsed >= dailyLimit) {
           return res.status(429).json({ error: "Daily quota exceeded", reason: "daily_limit_reached" });
         }
-        if ((subscription.messageUsedTotal || 0) >= monthlyLimit) {
+        if ((subscription.messageUsedMonth || 0) >= monthlyLimit) {
           return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
         }
         // Increment usage counters atomically
         await storage.updateClientSubscription(subscription.id, {
           messageUsedToday: dailyUsed + 1,
-          messageUsedTotal: (subscription.messageUsedTotal || 0) + 1,
+          messageUsedMonth: (subscription.messageUsedMonth || 0) + 1,
           lastMessageDate: today,
         });
       }
@@ -1273,7 +1273,7 @@ export async function registerRoutes(
       
       let fullContent = "";
       let streamClient: OpenAI;
-      let modelName = agentModel;
+      let modelName: string = agentModel;
       
       // Select appropriate client
       if (agentModel === "custom" && agent.customApiKey && agent.customBaseUrl) {
@@ -1362,7 +1362,7 @@ export async function registerRoutes(
       if (!agentId || !eventType) {
         return res.status(400).json({ error: "Missing agentId or eventType" });
       }
-      await storage.trackAnalytics(agentId, eventType, metadata || {});
+      await storage.createAnalytics({ agentId, eventType, metadata: metadata || {} });
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to track analytics" });
@@ -1372,7 +1372,7 @@ export async function registerRoutes(
   // Get analytics summary for an agent
   app.get("/api/analytics/:agentId/summary", async (req, res) => {
     try {
-      const summary = await storage.getAnalyticsSummary(req.params.agentId);
+      const summary = await storage.getAnalyticsSummary(req.params.agentId as string);
       res.json(summary);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch analytics" });
@@ -1382,7 +1382,7 @@ export async function registerRoutes(
   // Get all analytics for an agent
   app.get("/api/analytics/:agentId", async (req, res) => {
     try {
-      const analytics = await storage.getAnalytics(req.params.agentId);
+      const analytics = await storage.getAnalytics(req.params.agentId as string);
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch analytics" });
@@ -1560,7 +1560,7 @@ export async function registerRoutes(
   // Get user's active subscription
   app.get("/api/subscriptions/user/:userId", async (req, res) => {
     try {
-      const subscription = await storage.getActiveSubscription(req.params.userId);
+      const subscription = await storage.getActiveSubscription(req.params.userId as string);
       res.json(subscription);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch subscription" });
@@ -1861,7 +1861,7 @@ export async function registerRoutes(
   // Test WhatsApp/Fonnte connection (requires authentication)
   app.post("/api/whatsapp/test-connection/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const { agentId } = req.params;
+      const agentId = req.params.agentId as string;
       
       const integrations = await storage.getIntegrations(agentId);
       const whatsappIntegration = integrations.find(i => i.type === "whatsapp");
@@ -1916,7 +1916,7 @@ export async function registerRoutes(
   // Send test message via Fonnte (requires authentication)
   app.post("/api/whatsapp/send-test/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const { agentId } = req.params;
+      const agentId = req.params.agentId as string;
       const { targetPhone } = req.body;
       
       if (!targetPhone || typeof targetPhone !== "string") {
@@ -2366,7 +2366,7 @@ export async function registerRoutes(
   app.get("/api/templates/:id", async (req, res) => {
     try {
       const { getTemplateById } = await import("@shared/agent-templates");
-      const template = getTemplateById(req.params.id);
+      const template = getTemplateById(req.params.id as string);
       if (!template) {
         return res.status(404).json({ error: "Template not found" });
       }
@@ -2380,7 +2380,7 @@ export async function registerRoutes(
   app.post("/api/templates/:id/create-agent", isAuthenticated, async (req, res) => {
     try {
       const { getTemplateById } = await import("@shared/agent-templates");
-      const template = getTemplateById(req.params.id);
+      const template = getTemplateById(req.params.id as string);
       if (!template) {
         return res.status(404).json({ error: "Template not found" });
       }
@@ -2406,14 +2406,14 @@ export async function registerRoutes(
   // Export agent configuration
   app.get("/api/agents/:id/export", isAuthenticated, async (req, res) => {
     try {
-      const agent = await storage.getAgent(req.params.id);
+      const agent = await storage.getAgent(req.params.id as string);
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
 
       // Get knowledge bases for this agent
-      const knowledgeBases = await storage.getKnowledgeBases(req.params.id);
-      const integrations = await storage.getIntegrations(req.params.id);
+      const knowledgeBases = await storage.getKnowledgeBases(req.params.id as string);
+      const integrations = await storage.getIntegrations(req.params.id as string);
 
       // Create export object (exclude sensitive data)
       const exportData = {
@@ -2500,6 +2500,11 @@ export async function registerRoutes(
             type: kb.type,
             content: kb.content,
             description: kb.description || "",
+            fileName: "",
+            fileSize: 0,
+            fileUrl: "",
+            processingStatus: "completed" as const,
+            extractedText: "",
           });
         }
       }
@@ -2521,7 +2526,7 @@ export async function registerRoutes(
       res.json({
         totalAgents: agents.length,
         activeAgents: activeAgentCount,
-        categories: [...new Set(agents.map(a => a.category).filter(Boolean))].length,
+        categories: Array.from(new Set(agents.map(a => a.category).filter(Boolean))).length,
         templates: 10, // From our template library
       });
     } catch (error) {
@@ -2740,7 +2745,7 @@ export async function registerRoutes(
 
   app.get("/api/project-brain/templates/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const templates = await storage.getProjectBrainTemplates(req.params.agentId);
+      const templates = await storage.getProjectBrainTemplates(req.params.agentId as string);
       res.json(templates);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch project brain templates" });
@@ -2749,7 +2754,7 @@ export async function registerRoutes(
 
   app.get("/api/project-brain/template/:id", isAuthenticated, async (req, res) => {
     try {
-      const template = await storage.getProjectBrainTemplate(req.params.id);
+      const template = await storage.getProjectBrainTemplate(req.params.id as string);
       if (!template) {
         return res.status(404).json({ error: "Template not found" });
       }
@@ -2761,7 +2766,7 @@ export async function registerRoutes(
 
   app.post("/api/project-brain/templates/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertProjectBrainTemplateSchema.safeParse({ ...req.body, agentId: req.params.agentId });
+      const parsed = insertProjectBrainTemplateSchema.safeParse({ ...req.body, agentId: req.params.agentId as string });
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
@@ -2774,7 +2779,7 @@ export async function registerRoutes(
 
   app.patch("/api/project-brain/template/:id", isAuthenticated, async (req, res) => {
     try {
-      const template = await storage.updateProjectBrainTemplate(req.params.id, req.body);
+      const template = await storage.updateProjectBrainTemplate(req.params.id as string, req.body);
       if (!template) {
         return res.status(404).json({ error: "Template not found" });
       }
@@ -2786,7 +2791,7 @@ export async function registerRoutes(
 
   app.delete("/api/project-brain/template/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteProjectBrainTemplate(req.params.id);
+      const deleted = await storage.deleteProjectBrainTemplate(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Template not found" });
       }
@@ -2800,7 +2805,7 @@ export async function registerRoutes(
 
   app.get("/api/project-brain/instances/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const instances = await storage.getProjectBrainInstances(req.params.agentId);
+      const instances = await storage.getProjectBrainInstances(req.params.agentId as string);
       res.json(instances);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch project brain instances" });
@@ -2809,7 +2814,7 @@ export async function registerRoutes(
 
   app.get("/api/project-brain/instance/:id", isAuthenticated, async (req, res) => {
     try {
-      const instance = await storage.getProjectBrainInstance(req.params.id);
+      const instance = await storage.getProjectBrainInstance(req.params.id as string);
       if (!instance) {
         return res.status(404).json({ error: "Instance not found" });
       }
@@ -2821,7 +2826,7 @@ export async function registerRoutes(
 
   app.get("/api/project-brain/instances/:agentId/active", isAuthenticated, async (req, res) => {
     try {
-      const instance = await storage.getActiveProjectBrainInstance(req.params.agentId);
+      const instance = await storage.getActiveProjectBrainInstance(req.params.agentId as string);
       res.json(instance);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch active instance" });
@@ -2830,7 +2835,7 @@ export async function registerRoutes(
 
   app.post("/api/project-brain/instances/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertProjectBrainInstanceSchema.safeParse({ ...req.body, agentId: req.params.agentId });
+      const parsed = insertProjectBrainInstanceSchema.safeParse({ ...req.body, agentId: req.params.agentId as string });
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
@@ -2843,7 +2848,7 @@ export async function registerRoutes(
 
   app.patch("/api/project-brain/instance/:id", isAuthenticated, async (req, res) => {
     try {
-      const instance = await storage.updateProjectBrainInstance(req.params.id, req.body);
+      const instance = await storage.updateProjectBrainInstance(req.params.id as string, req.body);
       if (!instance) {
         return res.status(404).json({ error: "Instance not found" });
       }
@@ -2855,7 +2860,7 @@ export async function registerRoutes(
 
   app.post("/api/project-brain/instance/:id/activate", isAuthenticated, async (req, res) => {
     try {
-      const instance = await storage.setActiveProjectBrainInstance(req.params.id);
+      const instance = await storage.setActiveProjectBrainInstance(req.params.id as string);
       if (!instance) {
         return res.status(404).json({ error: "Instance not found" });
       }
@@ -2867,7 +2872,7 @@ export async function registerRoutes(
 
   app.delete("/api/project-brain/instance/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteProjectBrainInstance(req.params.id);
+      const deleted = await storage.deleteProjectBrainInstance(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Instance not found" });
       }
@@ -2881,7 +2886,7 @@ export async function registerRoutes(
 
   app.get("/api/mini-apps/:agentId", isAuthenticated, async (req, res) => {
     try {
-      const apps = await storage.getMiniApps(req.params.agentId);
+      const apps = await storage.getMiniApps(req.params.agentId as string);
       res.json(apps);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch mini apps" });
@@ -2890,7 +2895,7 @@ export async function registerRoutes(
 
   app.get("/api/mini-app/:id", isAuthenticated, async (req, res) => {
     try {
-      const app = await storage.getMiniApp(req.params.id);
+      const app = await storage.getMiniApp(req.params.id as string);
       if (!app) {
         return res.status(404).json({ error: "Mini app not found" });
       }
@@ -2915,7 +2920,7 @@ export async function registerRoutes(
 
   app.patch("/api/mini-app/:id", isAuthenticated, async (req, res) => {
     try {
-      const miniApp = await storage.updateMiniApp(req.params.id, req.body);
+      const miniApp = await storage.updateMiniApp(req.params.id as string, req.body);
       if (!miniApp) {
         return res.status(404).json({ error: "Mini app not found" });
       }
@@ -2927,7 +2932,7 @@ export async function registerRoutes(
 
   app.delete("/api/mini-app/:id", isAuthenticated, async (req, res) => {
     try {
-      const deleted = await storage.deleteMiniApp(req.params.id);
+      const deleted = await storage.deleteMiniApp(req.params.id as string);
       if (!deleted) {
         return res.status(404).json({ error: "Mini app not found" });
       }
@@ -2941,7 +2946,7 @@ export async function registerRoutes(
 
   app.post("/api/mini-app/:id/run", isAuthenticated, async (req, res) => {
     try {
-      const miniApp = await storage.getMiniApp(req.params.id);
+      const miniApp = await storage.getMiniApp(req.params.id as string);
       if (!miniApp) {
         return res.status(404).json({ error: "Mini app not found" });
       }
@@ -3165,7 +3170,7 @@ Be professional and suitable for management review.`;
 
   app.get("/api/mini-app-results/:miniAppId", isAuthenticated, async (req, res) => {
     try {
-      const results = await storage.getMiniAppResults(req.params.miniAppId);
+      const results = await storage.getMiniAppResults(req.params.miniAppId as string);
       res.json(results);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch mini app results" });
@@ -3310,6 +3315,7 @@ Be professional and suitable for management review.`;
               mayarOrderId: payment.data.id,
               mayarPaymentUrl: payment.data.link,
               amount,
+              currency: "IDR",
               referralCode: referralCode || undefined,
               startDate: startDate.toISOString(),
               endDate: endDate.toISOString(),
@@ -3331,6 +3337,7 @@ Be professional and suitable for management review.`;
         status: "active",
         accessToken,
         amount: 0,
+        currency: "IDR",
         referralCode: referralCode || undefined,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
