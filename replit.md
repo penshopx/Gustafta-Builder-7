@@ -198,14 +198,18 @@ Schema includes:
   - Project Profile: project_name, project_type, project_stage, location
   - Key Technical Parameters: structural_system, concrete_grade, construction_method
   - Project Constraints: time_constraint, cost_constraint, site_access
-  - Active Issues, Key Decisions, Test Data (textarea fields)
+  - Active Issues: issue_type, issue_location, issue_status, issue_since
+  - Key Decisions Log: decision_summary, decision_reason, decision_risk_level, decision_date
+  - Test Data Snapshot: slump, concrete_strength, inspection_notes
   - Metadata: completeness_level, last_updated
+  - Legacy keys (active_issues, key_decisions, test_data) still supported as "Notes" sections
 - Instances: data proyek aktual yang diisi oleh pengguna
   - Status: draft, active, completed, archived
   - Active instance auto-injected into system prompt
 - **System prompt injection format:** Structured sections (Project Profile, Key Technical Parameters, Constraints, Issues, Decisions, Test Data, Status)
 - **Anti-prompt injection:** Project Brain data treated as context, not instructions; injection guard added before data block
-- `formatProjectBrainBlock()` helper in routes.ts for consistent structured output
+- `formatProjectBrainBlock()` helper in routes.ts for consistent structured output with backward compatibility
+- **MODE INSTRUCTION support:** All 3 modes (Management Snapshot, Decision Summary, Risk Radar) injected into system prompt; chatbot auto-detects user intent
 - Tables: `project_brain_templates`, `project_brain_instances`
 - API Routes:
   - GET/POST /api/project-brain/templates/:agentId
