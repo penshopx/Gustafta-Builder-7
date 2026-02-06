@@ -2828,9 +2828,17 @@ export async function registerRoutes(
 
       const projectBrainBlock = formatProjectBrainBlock(activeInstance.name, activeInstance.values as Record<string, any>);
 
+      const appConfig = typeof miniApp.config === "object" && miniApp.config ? miniApp.config as Record<string, any> : {};
+      const configBlock = Object.keys(appConfig).length > 0
+        ? `\n\nMini App Configuration:\n${JSON.stringify(appConfig, null, 2)}`
+        : "";
+
       let modePrompt = "";
       if (appType === "project_snapshot") {
-        modePrompt = `You are a project management AI assistant. Based on the Project Brain data below, produce a PROJECT SNAPSHOT with the following structure:
+        modePrompt = `You are a project management AI assistant. Based on the Project Brain data below, produce a PROJECT SNAPSHOT.
+If a Mini App Configuration is provided, focus on the fields listed in "focus" and limit to "max_bullets" bullet points. Use "executive_summary" format.
+
+Output structure:
 
 Overall Project Status: (Healthy / Attention / Critical)
 
@@ -2852,10 +2860,11 @@ Last Key Decision:
 Be concise and professional. Target audience: Management.`;
       } else if (appType === "decision_summary") {
         modePrompt = `You are a project management AI assistant. Generate a concise executive DECISION SUMMARY based on the Project Brain data below.
+If a Mini App Configuration is provided, sort by "sort" order, limit to "limit" decisions, and use the "format" structure (what_why_risk_impact_next). Focus on the "fields" listed.
 
 Use this structure:
 1. Project Overview (1-2 sentences)
-2. Key Decisions Made (list each with summary, reason, risk level, date)
+2. Key Decisions Made (list each with summary, reason, risk level, date, impact)
 3. Active Issues Impact (how issues relate to decisions)
 4. Project Constraints Effect (how constraints influenced decisions)
 5. Recommendations (2-3 actionable next steps)
@@ -2863,6 +2872,7 @@ Use this structure:
 Target audience: Management. Tone: Professional, concise, non-technical.`;
       } else if (appType === "risk_radar") {
         modePrompt = `You are a project risk assessment AI assistant. Assess current project risk levels based on the Project Brain data below.
+If a Mini App Configuration is provided, group by "group_by" category, analyze trends if "trend_analysis" is true, and apply "alert_rules" to highlight concerning patterns. Use "sources" fields as primary data inputs.
 
 Output format:
 
@@ -2885,10 +2895,12 @@ Cost Risk: (Low / Medium / High)
 
 Overall Risk Level: (Low / Medium / High)
 Summary: (1-2 sentence overall assessment)
+Alert: (highlight any high_and_increasing or multiple_high_risk patterns)
 
 Be actionable and non-technical.`;
       } else if (appType === "issue_log") {
         modePrompt = `You are a project management AI assistant. Generate a structured ISSUE LOG based on the Project Brain data below.
+If a Mini App Configuration is provided, use the "fields" listed as data sources, apply "prioritization.sort" order, and "highlight_if" rules. Flag issues open > "rules.flag_if_open_days_over" days for escalation. Include "recommended_next_step" if enabled.
 
 Output format:
 
@@ -2900,15 +2912,16 @@ For each issue found:
 - Type: (from data)
 - Location/Element: (from data)
 - Status: (from data)
-- Risk Level: (assess based on data)
+- Risk Level: (assess based on decision_risk_level data)
 - Since: (from data)
 - Next Step: (1 line recommendation)
 
 Priority Ranking:
-1. (highest priority issue with reason)
+1. (highest priority issue with reason - sort by risk desc, then by oldest first)
 2. (next priority)
 
-Issues that have been Open > 14 days should be flagged for escalation.
+Issues that have been Open > 14 days should be flagged with [ESCALATION NEEDED].
+Highlight issues with status Open/Monitoring and risk High.
 
 Recommendations:
 - 2-3 actionable next steps
@@ -2916,6 +2929,7 @@ Recommendations:
 Be concise and actionable. Target audience: Site management.`;
       } else if (appType === "action_tracker") {
         modePrompt = `You are a project management AI assistant. Generate an ACTION TRACKER based on the Project Brain data below.
+If a Mini App Configuration is provided, use "fields" for output columns, "status_values" for status options, apply "rules.overdue_logic" and "rules.show_overdue_first" ordering, and "views.due_soon_days" for upcoming deadline window.
 
 Output format:
 
@@ -2930,10 +2944,12 @@ For each action:
 - Suggested PIC: (role, e.g., QA/QC, Engineer, Site Manager)
 - Suggested Due: (relative timeline, e.g., "within 3 days")
 - Status: Not Started
+- Note: (brief context)
 
 Overdue Risk Assessment:
-- Items at risk of delay
+- Items at risk of delay (show overdue first)
 - Suggested reprioritization
+- Items due within 7 days
 
 Summary:
 - Total actions: X
@@ -2943,6 +2959,7 @@ Summary:
 Be specific and actionable.`;
       } else if (appType === "change_log") {
         modePrompt = `You are a project management AI assistant. Generate a CHANGE LOG analysis based on the Project Brain data below.
+If a Mini App Configuration is provided, use "change_types" and "impact_areas" for classification, "fields" for output columns, "approval_status_values" for status options, and apply "rules" (require_reason, require_impact_area). If impact is "Multi", recommend running risk_assessment.
 
 Output format:
 
@@ -2953,17 +2970,20 @@ For each change found:
 - Change Type: (Design / Method / Scope)
 - Description: (what changed)
 - Reason: (from decision data)
-- Impact: (Cost / Time / Quality / Multi)
+- Impact Area: (Cost / Time / Quality / Safety / Multi)
 - Risk Assessment: (Low / Medium / High)
-- Approval Status: (Needs Review / Approved / Pending)
+- Approval Status: (Draft / Proposed / Approved / Rejected)
+- Date: (from data)
 
 Impact Summary:
 - Cost impact changes: X
 - Time impact changes: X
 - Quality impact changes: X
+- Safety impact changes: X
 
 Recommendations:
 - Changes requiring immediate attention
+- Multi-impact changes: recommend risk assessment
 - Risk mitigation suggestions
 - Audit trail completeness check
 
@@ -2980,7 +3000,7 @@ Be professional and suitable for management review.`;
         },
         {
           role: "user",
-          content: `Here is the project data:\n\n${projectBrainBlock}\n\nPlease generate the analysis now.`
+          content: `Here is the project data:\n\n${projectBrainBlock}${configBlock}\n\nPlease generate the analysis now. Follow the configuration rules and focus areas if provided.`
         }
       ];
 

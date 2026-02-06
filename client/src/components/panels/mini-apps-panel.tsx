@@ -25,12 +25,12 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   progress_tracker: "Pelacak Progres",
   document_generator: "Generator Dokumen",
   custom: "Custom",
-  project_snapshot: "Project Snapshot",
-  decision_summary: "Decision Summary",
-  risk_radar: "Risk Radar",
   issue_log: "Issue Log",
   action_tracker: "Action Tracker",
   change_log: "Change Log",
+  project_snapshot: "Project Snapshot",
+  decision_summary: "Decision Summary",
+  risk_radar: "Risk Radar",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -40,12 +40,12 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   progress_tracker: TrendingUp,
   document_generator: FileOutput,
   custom: Wrench,
-  project_snapshot: BarChart3,
-  decision_summary: ClipboardList,
-  risk_radar: Radar,
   issue_log: ListChecks,
   action_tracker: Users,
   change_log: FileWarning,
+  project_snapshot: BarChart3,
+  decision_summary: ClipboardList,
+  risk_radar: Radar,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -55,72 +55,175 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   progress_tracker: "Pelacak kemajuan dengan milestone dan persentase",
   document_generator: "Generator dokumen dari template dan data proyek",
   custom: "Aplikasi kustom dengan konfigurasi bebas",
-  project_snapshot: "Snapshot status proyek dari data Otak Proyek (AI-powered)",
-  decision_summary: "Ringkasan keputusan eksekutif dari data Otak Proyek (AI-powered)",
-  risk_radar: "Penilaian risiko proyek dari data Otak Proyek (AI-powered)",
   issue_log: "Daftar isu aktif & histori untuk monitoring proyek (AI-powered)",
   action_tracker: "Pelacakan tindak lanjut: siapa melakukan apa, kapan (AI-powered)",
   change_log: "Catatan perubahan desain/metode/scope dan dampaknya (AI-powered)",
+  project_snapshot: "Snapshot status proyek dari data Otak Proyek (AI-powered)",
+  decision_summary: "Ringkasan keputusan eksekutif dari data Otak Proyek (AI-powered)",
+  risk_radar: "Penilaian risiko proyek dari data Otak Proyek (AI-powered)",
 };
 
 const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log"];
 
-const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; description: string; items?: string[] }>> = {
+const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; description: string; items?: string[]; config?: Record<string, any> }>> = {
   checklist: {
     name: "Checklist Penanganan Isu",
     description: "Daftar langkah standar untuk memastikan isu dianalisa, diputuskan, ditindaklanjuti, dan ditutup.",
     items: [
       "Isu teridentifikasi & deskripsi jelas",
       "Lokasi/elemen isu terkonfirmasi",
-      "Data pendukung terkumpul (foto, laporan, hasil uji)",
+      "Data pendukung terkumpul (foto/laporan/uji)",
       "Analisa teknis dilakukan",
-      "Alternatif solusi dibuat",
+      "Alternatif solusi dibandingkan",
       "Risiko dinilai",
       "Keputusan diambil & dicatat",
       "PIC & due date ditetapkan",
       "Tindak lanjut dieksekusi",
       "Verifikasi selesai & isu ditutup",
     ],
-  },
-  risk_assessment: {
-    name: "Penilaian Risiko",
-    description: "Menilai risiko isu/keputusan dengan skor likelihood x impact dan prioritas mitigasi.",
-  },
-  progress_tracker: {
-    name: "Pelacak Progres",
-    description: "Monitoring progres rencana vs aktual untuk paket pekerjaan utama.",
+    config: {
+      mode: "task_list",
+      link_to: { project: "project_name", issue: ["issue_type", "issue_location", "issue_status"] },
+      rules: { block_close_if_unfinished: true, show_completion_rate: true },
+    },
   },
   calculator: {
     name: "Kalkulator",
     description: "Hitung cepat volume/berat/kebutuhan material.",
+    config: {
+      mode: "calculator",
+      presets: [
+        { name: "Volume Beton", inputs: ["panjang_m", "lebar_m", "tinggi_m"], formula: "panjang_m * lebar_m * tinggi_m", unit: "m3" },
+        { name: "Luas Bekisting", inputs: ["panjang_m", "tinggi_m"], formula: "panjang_m * tinggi_m", unit: "m2" },
+      ],
+      rules: { round_result: 3, reject_negative: true },
+    },
+  },
+  risk_assessment: {
+    name: "Penilaian Risiko",
+    description: "Menilai risiko isu/keputusan dengan skor likelihood x impact dan prioritas mitigasi.",
+    config: {
+      mode: "risk_scoring",
+      risk_categories: ["Safety", "Quality", "Structural", "Cost", "Schedule", "Environment"],
+      scoring: {
+        likelihood_scale: [1, 2, 3, 4, 5],
+        impact_scale: [1, 2, 3, 4, 5],
+        method: "likelihood_x_impact",
+        thresholds: { low_max: 6, medium_max: 14, high_min: 15 },
+      },
+      sources: ["time_constraint", "cost_constraint", "site_access", "environmental_factors", "issue_type", "issue_location", "issue_status"],
+      outputs: ["risk_category", "likelihood", "impact", "risk_level", "mitigation"],
+    },
+  },
+  progress_tracker: {
+    name: "Pelacak Progres",
+    description: "Monitoring progres rencana vs aktual untuk paket pekerjaan utama.",
+    config: {
+      mode: "progress_tracking",
+      metrics: { planned_field: "planned_progress", actual_field: "actual_progress", unit: "percent" },
+      rules: {
+        status_logic: [
+          { if: "actual >= planned + 5", status: "Ahead" },
+          { if: "actual >= planned - 5", status: "On Track" },
+          { if: "actual < planned - 5", status: "Delay" },
+        ],
+        require_note_if_delay: true,
+      },
+      summary: { show_top_delays: true, limit: 5 },
+    },
   },
   document_generator: {
     name: "Generator Dokumen",
     description: "Menghasilkan dokumen standar dari data Project Brain.",
+    config: {
+      mode: "document_generator",
+      document_types: ["Weekly Report", "Laporan Inspeksi", "Notulen Keputusan", "Ringkasan Risiko", "Progress Update"],
+      sources: [
+        "project_name", "project_type", "project_stage", "location", "owner_client",
+        "issue_type", "issue_location", "issue_status", "issue_since",
+        "decision_summary", "decision_reason", "decision_risk_level", "decision_date",
+        "inspection_notes", "last_updated",
+      ],
+      format: {
+        sections: ["Executive Summary", "Project Context", "Issues & Status", "Decisions", "Risks", "Quality/Inspection Notes", "Next Actions"],
+        style: "bullet_first",
+      },
+      rules: { no_hallucination: true, mark_missing_as: "Data belum tersedia" },
+    },
   },
-  project_snapshot: {
-    name: "Project Snapshot",
-    description: "Ringkasan kondisi proyek dalam satu tampilan untuk owner/manajemen.",
-  },
-  decision_summary: {
-    name: "Decision Summary",
-    description: "Ringkasan keputusan penting proyek untuk audit trail dan pembelajaran.",
-  },
-  risk_radar: {
-    name: "Risk Radar",
-    description: "Peta risiko per kategori dan tren.",
+  custom: {
+    name: "Custom",
+    description: "Aplikasi kustom untuk kebutuhan spesifik proyek.",
+    config: {
+      mode: "custom",
+      note: "Gunakan mini app ini untuk kebutuhan spesifik. Batasi scope dan jangan duplikasi fungsi Issue/Action/Decision/Risk.",
+      rules: { max_fields_recommended: 7, single_purpose_only: true },
+    },
   },
   issue_log: {
     name: "Issue Log",
     description: "Daftar isu aktif & histori isu untuk monitoring proyek.",
+    config: {
+      mode: "issue_log",
+      fields: ["issue_type", "issue_location", "issue_status", "issue_since", "decision_risk_level", "last_updated"],
+      prioritization: {
+        sort: ["decision_risk_level_desc", "issue_since_asc"],
+        highlight_if: { status: ["Open", "Monitoring"], risk: ["High"] },
+      },
+      rules: { flag_if_open_days_over: 14, recommended_next_step: true },
+    },
   },
   action_tracker: {
     name: "Action Tracker",
     description: "Pelacakan tugas tindak lanjut (who does what by when).",
+    config: {
+      mode: "action_tracker",
+      fields: ["action_item", "related_issue", "assigned_to", "due_date", "status", "note"],
+      status_values: ["Not Started", "In Progress", "Done", "Blocked"],
+      rules: { overdue_logic: "today > due_date AND status != Done", block_issue_close_if_overdue: true, show_overdue_first: true },
+      views: { default: "overdue_then_due_soon", due_soon_days: 7 },
+    },
   },
   change_log: {
     name: "Change Log",
     description: "Catatan perubahan desain/metode/scope dan dampaknya.",
+    config: {
+      mode: "change_log",
+      change_types: ["Design", "Method", "Scope"],
+      impact_areas: ["Cost", "Time", "Quality", "Safety", "Multi"],
+      fields: ["change_type", "description", "reason", "impact_area", "approval_status", "date"],
+      approval_status_values: ["Draft", "Proposed", "Approved", "Rejected"],
+      rules: { require_reason: true, require_impact_area: true, if_impact_multi_then_recommend: "run_risk_assessment" },
+    },
+  },
+  project_snapshot: {
+    name: "Project Snapshot",
+    description: "Ringkasan kondisi proyek dalam satu tampilan untuk owner/manajemen.",
+    config: {
+      output_format: "executive_summary",
+      max_bullets: 7,
+      focus: ["project_stage", "project_type", "location", "open_issues", "high_risks", "latest_decision", "last_updated"],
+    },
+  },
+  decision_summary: {
+    name: "Decision Summary",
+    description: "Ringkasan keputusan penting proyek untuk audit trail dan pembelajaran.",
+    config: {
+      sort: "decision_date_desc",
+      limit: 5,
+      format: "what_why_risk_impact_next",
+      fields: ["decision_summary", "decision_reason", "decision_date", "decision_risk_level", "project_stage"],
+    },
+  },
+  risk_radar: {
+    name: "Risk Radar",
+    description: "Peta risiko per kategori dan tren.",
+    config: {
+      group_by: "risk_category",
+      trend_analysis: true,
+      alert_rules: { high_and_increasing: "highlight", multiple_high_risk: "highlight" },
+      sources: ["decision_risk_level", "issue_status", "time_constraint", "cost_constraint", "environmental_factors"],
+    },
   },
 };
 
@@ -536,7 +639,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                   const updatedApp = {
                     ...newApp,
                     type: val,
-                    config: {},
+                    config: defaults?.config || {},
                     name: !newApp.name || DEFAULT_MINI_APP_CONFIGS[newApp.type]?.name === newApp.name ? (defaults?.name || "") : newApp.name,
                     description: !newApp.description || DEFAULT_MINI_APP_CONFIGS[newApp.type]?.description === newApp.description ? (defaults?.description || "") : newApp.description,
                   };
