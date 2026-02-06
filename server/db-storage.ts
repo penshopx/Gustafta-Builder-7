@@ -236,7 +236,23 @@ export class DatabaseStorage implements IStorage {
 
   async setActiveBigIdea(id: string): Promise<BigIdea | undefined> {
     await db.update(bigIdeas).set({ isActive: false });
-    return this.updateBigIdea(id, { isActive: true } as any);
+    const result = await db.update(bigIdeas)
+      .set({ isActive: true })
+      .where(eq(bigIdeas.id, parseInt(id)))
+      .returning();
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      name: row.name,
+      type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
+      description: row.description,
+      goals: (row.goals as string[]) || [],
+      targetAudience: row.targetAudience || "",
+      expectedOutcome: row.expectedOutcome || "",
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
   }
 
   async deleteBigIdea(id: string): Promise<boolean> {
