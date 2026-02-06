@@ -825,7 +825,7 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Produk</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/documentation" className="hover:text-foreground">Fitur</Link></li>
+                <li><Link href="/marketplace" className="hover:text-foreground">Marketplace</Link></li>
                 <li><Link href="/pricing" className="hover:text-foreground">Harga</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Template</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Integrasi</Link></li>

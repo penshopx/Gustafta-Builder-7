@@ -291,7 +291,7 @@ export default function AgentChat() {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const referralCode = urlParams.get("ref") || undefined;
-      const selectedPlan = config.trialEnabled ? "trial" : (config.monthlyPrice > 0 ? "monthly" : "trial");
+      const selectedPlan = config?.trialEnabled ? "trial" : (config?.monthlyPrice && config.monthlyPrice > 0 ? "monthly" : "trial");
       const res = await fetch(`/api/products/${params.agentId}/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

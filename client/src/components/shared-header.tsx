@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard } from "lucide-react";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag } from "lucide-react";
 
 interface SharedHeaderProps {
   transparent?: boolean;
@@ -17,6 +17,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   const [location] = useLocation();
 
   const navItems = [
+    { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
     { href: "/documentation", label: "Dokumentasi", icon: BookOpen },
     { href: "/pricing", label: "Harga", icon: BarChart3 },
   ];
