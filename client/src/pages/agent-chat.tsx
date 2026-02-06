@@ -651,11 +651,9 @@ export default function AgentChat() {
   const [voiceMode, setVoiceMode] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speakingMessageIdRef = useRef<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const speakText = (text: string, messageId?: string) => {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-
+  const speakText = async (text: string, messageId?: string) => {
     const cleanText = text
       .replace(/#{1,6}\s*/g, "")
       .replace(/\*\*([^*]+)\*\*/g, "$1")
@@ -669,32 +667,51 @@ export default function AgentChat() {
       .replace(/---+/g, "")
       .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
       .trim();
-
     if (!cleanText) return;
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = "id-ID";
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-
-    utterance.onstart = () => {
+    try {
       setIsSpeaking(true);
       speakingMessageIdRef.current = messageId || null;
-    };
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      speakingMessageIdRef.current = null;
-    };
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      speakingMessageIdRef.current = null;
-    };
 
-    window.speechSynthesis.speak(utterance);
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: cleanText }),
+      });
+
+      if (!response.ok) throw new Error("TTS failed");
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setIsSpeaking(false);
+        speakingMessageIdRef.current = null;
+        audioRef.current = null;
+        URL.revokeObjectURL(audioUrl);
+      };
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        speakingMessageIdRef.current = null;
+        audioRef.current = null;
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      await audio.play();
+    } catch (err) {
+      console.error("TTS error:", err);
+      setIsSpeaking(false);
+      speakingMessageIdRef.current = null;
+    }
   };
 
   const stopSpeaking = () => {
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     setIsSpeaking(false);
     speakingMessageIdRef.current = null;
   };

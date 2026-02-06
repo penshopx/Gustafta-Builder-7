@@ -22,6 +22,7 @@ import OpenAI from "openai";
 import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type SubscriptionPlanKey } from "./lib/mayar";
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 import { isAuthenticated } from "./replit_integrations/auth";
+import { textToSpeech } from "./replit_integrations/audio/client";
 
 const KNOWN_PROJECT_BRAIN_KEYS = [
   "project_name", "project_type", "project_stage", "location", "owner_client",
@@ -192,10 +193,40 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Serve uploaded files
+  // MIME type lookup for proper Content-Type headers
+  const mimeTypes: Record<string, string> = {
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".mov": "video/quicktime",
+    ".mp3": "audio/mpeg",
+    ".wav": "audio/wav",
+    ".ogg": "audio/ogg",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+    ".pdf": "application/pdf",
+    ".doc": "application/msword",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".xls": "application/vnd.ms-excel",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".ppt": "application/vnd.ms-powerpoint",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ".txt": "text/plain",
+    ".csv": "text/csv",
+    ".zip": "application/zip",
+    ".rar": "application/x-rar-compressed",
+  };
+
+  // Serve uploaded files with proper MIME types
   app.use("/uploads", (req, res, next) => {
     const filePath = path.join(uploadDir, req.path);
     if (fs.existsSync(filePath)) {
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = mimeTypes[ext] || "application/octet-stream";
+      res.setHeader("Content-Type", contentType);
       res.sendFile(filePath);
     } else {
       next();
@@ -1129,6 +1160,28 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Chat file upload error:", error);
       res.status(500).json({ error: "Failed to upload file" });
+    }
+  });
+
+  // Text-to-Speech endpoint using OpenAI via AI Integrations
+  app.post("/api/tts", async (req, res) => {
+    try {
+      const { text, voice } = req.body;
+      if (!text || typeof text !== "string") {
+        return res.status(400).json({ error: "Text is required" });
+      }
+
+      const validVoices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"] as const;
+      const selectedVoice = validVoices.includes(voice) ? voice : "alloy";
+
+      const audioBuffer = await textToSpeech(text, selectedVoice, "mp3");
+
+      res.setHeader("Content-Type", "audio/mpeg");
+      res.setHeader("Content-Length", audioBuffer.length.toString());
+      res.send(audioBuffer);
+    } catch (error) {
+      console.error("TTS error:", error);
+      res.status(500).json({ error: "Text-to-speech failed" });
     }
   });
 
