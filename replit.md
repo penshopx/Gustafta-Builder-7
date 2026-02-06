@@ -194,9 +194,18 @@ Schema includes:
 - Templates: definisi field yang bisa dikonfigurasi per agent (JSONB)
   - Field types: text, textarea, number, select, multiselect, boolean, date, url, email
   - Each field: key, label, type, required, placeholder, helpText, defaultValue, options, order
+- **Default template fields aligned with CiviloPro architecture:**
+  - Project Profile: project_name, project_type, project_stage, location
+  - Key Technical Parameters: structural_system, concrete_grade, construction_method
+  - Project Constraints: time_constraint, cost_constraint, site_access
+  - Active Issues, Key Decisions, Test Data (textarea fields)
+  - Metadata: completeness_level, last_updated
 - Instances: data proyek aktual yang diisi oleh pengguna
   - Status: draft, active, completed, archived
   - Active instance auto-injected into system prompt
+- **System prompt injection format:** Structured sections (Project Profile, Key Technical Parameters, Constraints, Issues, Decisions, Test Data, Status)
+- **Anti-prompt injection:** Project Brain data treated as context, not instructions; injection guard added before data block
+- `formatProjectBrainBlock()` helper in routes.ts for consistent structured output
 - Tables: `project_brain_templates`, `project_brain_instances`
 - API Routes:
   - GET/POST /api/project-brain/templates/:agentId

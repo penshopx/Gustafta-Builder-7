@@ -55,16 +55,21 @@ const statusIcons: Record<string, typeof FileText> = {
 };
 
 const defaultTemplateFields: ProjectBrainField[] = [
-  { key: "nama_proyek", label: "Nama Proyek", type: "text", required: true, placeholder: "Masukkan nama proyek", helpText: "Nama proyek atau produk yang sedang dikerjakan", defaultValue: "", options: [], order: 0 },
-  { key: "deskripsi_proyek", label: "Deskripsi Proyek", type: "textarea", required: true, placeholder: "Jelaskan proyek Anda secara singkat", helpText: "Gambaran umum tentang proyek ini", defaultValue: "", options: [], order: 1 },
-  { key: "target_audiens", label: "Target Audiens", type: "textarea", required: false, placeholder: "Siapa target pengguna/pelanggan?", helpText: "Segmen pasar atau pengguna yang ditargetkan", defaultValue: "", options: [], order: 2 },
-  { key: "industri", label: "Industri/Bidang", type: "select", required: false, placeholder: "Pilih industri", helpText: "", defaultValue: "", options: ["Teknologi", "Pendidikan", "Kesehatan", "E-commerce", "Keuangan", "Real Estate", "F&B", "Lainnya"], order: 3 },
-  { key: "tujuan_utama", label: "Tujuan Utama", type: "textarea", required: false, placeholder: "Apa tujuan utama proyek ini?", helpText: "Goal atau objektif yang ingin dicapai", defaultValue: "", options: [], order: 4 },
-  { key: "tanggal_mulai", label: "Tanggal Mulai", type: "date", required: false, placeholder: "", helpText: "Kapan proyek ini dimulai", defaultValue: "", options: [], order: 5 },
-  { key: "website", label: "Website", type: "url", required: false, placeholder: "https://contoh.com", helpText: "URL website proyek (jika ada)", defaultValue: "", options: [], order: 6 },
-  { key: "email_kontak", label: "Email Kontak", type: "email", required: false, placeholder: "email@contoh.com", helpText: "Email kontak utama proyek", defaultValue: "", options: [], order: 7 },
-  { key: "anggaran", label: "Anggaran", type: "number", required: false, placeholder: "Masukkan nominal", helpText: "Estimasi anggaran dalam Rupiah", defaultValue: "", options: [], order: 8 },
-  { key: "sudah_berjalan", label: "Proyek Sudah Berjalan?", type: "boolean", required: false, placeholder: "", helpText: "Apakah proyek ini sudah berjalan atau masih perencanaan", defaultValue: "", options: [], order: 9 },
+  { key: "project_name", label: "Nama Proyek", type: "text", required: true, placeholder: "Contoh: Pembangunan Jembatan Kali Brantas", helpText: "Nama resmi proyek", defaultValue: "", options: [], order: 0 },
+  { key: "project_type", label: "Tipe Proyek", type: "select", required: true, placeholder: "Pilih tipe proyek", helpText: "Kategori utama proyek", defaultValue: "", options: ["Gedung", "Jembatan", "Jalan", "Infrastruktur", "Perumahan", "Industri", "Lainnya"], order: 1 },
+  { key: "project_stage", label: "Tahap Proyek", type: "select", required: true, placeholder: "Pilih tahap proyek", helpText: "Fase proyek saat ini", defaultValue: "", options: ["Perencanaan", "Desain", "Procurement", "Konstruksi", "Finishing", "Serah Terima", "Pemeliharaan"], order: 2 },
+  { key: "location", label: "Lokasi", type: "text", required: false, placeholder: "Contoh: Surabaya, Jawa Timur", helpText: "Lokasi proyek", defaultValue: "", options: [], order: 3 },
+  { key: "structural_system", label: "Sistem Struktur", type: "text", required: false, placeholder: "Contoh: Beton bertulang, Baja, Komposit", helpText: "Sistem struktur utama yang digunakan", defaultValue: "", options: [], order: 4 },
+  { key: "concrete_grade", label: "Mutu Beton (fc')", type: "text", required: false, placeholder: "Contoh: fc' 30 MPa", helpText: "Grade beton yang digunakan", defaultValue: "", options: [], order: 5 },
+  { key: "construction_method", label: "Metode Konstruksi Utama", type: "text", required: false, placeholder: "Contoh: Konvensional, Precast, Prestress", helpText: "Metode kerja konstruksi utama", defaultValue: "", options: [], order: 6 },
+  { key: "time_constraint", label: "Batasan Waktu", type: "text", required: false, placeholder: "Contoh: 12 bulan, deadline Desember 2026", helpText: "Batas waktu penyelesaian proyek", defaultValue: "", options: [], order: 7 },
+  { key: "cost_constraint", label: "Batasan Biaya", type: "text", required: false, placeholder: "Contoh: Rp 50 Miliar", helpText: "Estimasi atau batasan anggaran proyek", defaultValue: "", options: [], order: 8 },
+  { key: "site_access", label: "Akses Lokasi", type: "text", required: false, placeholder: "Contoh: Jalan akses terbatas, area padat", helpText: "Kondisi akses menuju lokasi proyek", defaultValue: "", options: [], order: 9 },
+  { key: "active_issues", label: "Isu Aktif", type: "textarea", required: false, placeholder: "Contoh: Retak pada kolom lt.3, Slump tidak memenuhi spec", helpText: "Masalah teknis yang sedang terjadi (tipe, lokasi, status)", defaultValue: "", options: [], order: 10 },
+  { key: "key_decisions", label: "Keputusan Penting", type: "textarea", required: false, placeholder: "Contoh: Ganti metode pondasi dari bored pile ke driven pile", helpText: "Keputusan teknis penting beserta alasan dan level risiko", defaultValue: "", options: [], order: 11 },
+  { key: "test_data", label: "Data Pengujian", type: "textarea", required: false, placeholder: "Contoh: Slump 12cm, Kuat tekan 28 hari = 32 MPa", helpText: "Hasil pengujian material atau lapangan terkini", defaultValue: "", options: [], order: 12 },
+  { key: "completeness_level", label: "Tingkat Kelengkapan Data", type: "select", required: false, placeholder: "Pilih level", helpText: "Seberapa lengkap data proyek yang tersedia", defaultValue: "", options: ["Awal (< 30%)", "Parsial (30-60%)", "Substansial (60-90%)", "Lengkap (> 90%)"], order: 13 },
+  { key: "last_updated", label: "Terakhir Diperbarui", type: "date", required: false, placeholder: "", helpText: "Tanggal terakhir data proyek diperbarui", defaultValue: "", options: [], order: 14 },
 ];
 
 export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
