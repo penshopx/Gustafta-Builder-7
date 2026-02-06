@@ -2513,11 +2513,19 @@ export async function registerRoutes(
         return res.status(403).json({ error: "Widget is not public", private: true });
       }
       
-      // Return only public widget configuration
+      const integrations = await storage.getIntegrations(agentId);
+      const enabledChannels = integrations
+        .filter((i: any) => i.isEnabled)
+        .map((i: any) => ({
+          type: i.type,
+          name: i.name,
+        }));
+
       const widgetConfig = {
         agentId: agent.id,
         name: agent.name,
         avatar: agent.avatar || "",
+        description: agent.description || "",
         tagline: agent.tagline || "",
         greetingMessage: agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
         welcomeMessage: agent.widgetWelcomeMessage || agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
@@ -2534,6 +2542,7 @@ export async function registerRoutes(
         buttonIcon: agent.widgetButtonIcon || "chat",
         isActive: agent.isActive,
         isPublic: agent.isPublic,
+        channels: enabledChannels,
       };
       
       res.json(widgetConfig);

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2 } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle } from "lucide-react";
+import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,10 +27,16 @@ interface Message {
   feedback?: "up" | "down" | null;
 }
 
+interface ChannelInfo {
+  type: string;
+  name: string;
+}
+
 interface AgentConfig {
   agentId: string;
   name: string;
   avatar: string;
+  description: string;
   tagline: string;
   greetingMessage: string;
   welcomeMessage: string;
@@ -41,6 +48,7 @@ interface AgentConfig {
   color: string;
   isActive: boolean;
   isPublic: boolean;
+  channels: ChannelInfo[];
 }
 
 function processInlineText(text: string): (string | JSX.Element)[] {
@@ -168,6 +176,15 @@ function AgentAvatar({ config, size = "md", color }: { config: AgentConfig; size
     </Avatar>
   );
 }
+
+const channelMeta: Record<string, { icon: any; label: string; color: string; bgColor: string }> = {
+  whatsapp: { icon: SiWhatsapp, label: "WhatsApp", color: "text-green-600 dark:text-green-400", bgColor: "bg-green-500/10" },
+  telegram: { icon: SiTelegram, label: "Telegram", color: "text-blue-500 dark:text-blue-400", bgColor: "bg-blue-500/10" },
+  discord: { icon: SiDiscord, label: "Discord", color: "text-indigo-500 dark:text-indigo-400", bgColor: "bg-indigo-500/10" },
+  slack: { icon: SiSlack, label: "Slack", color: "text-purple-600 dark:text-purple-400", bgColor: "bg-purple-500/10" },
+  web: { icon: Globe, label: "Web Widget", color: "text-cyan-600 dark:text-cyan-400", bgColor: "bg-cyan-500/10" },
+  api: { icon: Code, label: "REST API", color: "text-orange-600 dark:text-orange-400", bgColor: "bg-orange-500/10" },
+};
 
 export default function AgentChat() {
   const params = useParams<{ agentId: string }>();
@@ -685,25 +702,45 @@ export default function AgentChat() {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {!hasMessages && (
-          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto" data-testid="chat-welcome">
-            <AgentAvatar config={config} size="lg" color={color} />
+          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto" data-testid="chat-welcome">
+            <div className="relative">
+              <AgentAvatar config={config} size="lg" color={color} />
+              <div
+                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background"
+                style={{ backgroundColor: "#22c55e" }}
+                data-testid="status-online-indicator"
+              />
+            </div>
 
             <div className="text-center space-y-1.5 sm:space-y-2">
               <h2 className="text-xl sm:text-2xl font-bold" data-testid="text-welcome-name">{config.name}</h2>
               {config.tagline && (
                 <p className="text-muted-foreground text-sm sm:text-base">{config.tagline}</p>
               )}
-              {config.philosophy && (
-                <p className="text-xs sm:text-sm text-muted-foreground/80 italic max-w-md px-4">
-                  "{config.philosophy}"
-                </p>
+              {config.category && (
+                <Badge variant="secondary" className="text-[10px]" data-testid="badge-category">
+                  {config.category}{config.subcategory ? ` / ${config.subcategory}` : ""}
+                </Badge>
               )}
             </div>
+
+            {config.description && (
+              <p className="text-xs sm:text-sm text-muted-foreground text-center max-w-sm px-4" data-testid="text-description">
+                {config.description}
+              </p>
+            )}
+
+            {config.philosophy && (
+              <p className="text-xs sm:text-sm text-muted-foreground/80 italic max-w-md px-4">
+                "{config.philosophy}"
+              </p>
+            )}
 
             <div
               className="rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm max-w-md text-center"
               style={{ backgroundColor: `${color}10`, color }}
             >
+              <MessageCircle className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
               {config.greetingMessage}
             </div>
 
@@ -723,6 +760,43 @@ export default function AgentChat() {
                 ))}
               </div>
             )}
+
+            {config.channels && config.channels.length > 0 && (
+              <div className="space-y-2 pt-2 max-w-sm w-full" data-testid="channels-section">
+                <p className="text-[10px] sm:text-xs text-muted-foreground text-center uppercase tracking-wider font-medium">
+                  Tersedia juga di
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {config.channels.map((channel) => {
+                    const meta = channelMeta[channel.type] || {
+                      icon: MessageCircle,
+                      label: channel.name || channel.type,
+                      color: "text-muted-foreground",
+                      bgColor: "bg-muted",
+                    };
+                    const Icon = meta.icon;
+                    return (
+                      <div
+                        key={channel.type}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
+                          meta.bgColor, meta.color
+                        )}
+                        data-testid={`channel-badge-${channel.type}`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span>{meta.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-1.5 pt-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <span className="text-[10px] text-muted-foreground">Online &middot; Siap membantu Anda</span>
+            </div>
           </div>
         )}
 
