@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useMiniApps, useCreateMiniApp, useUpdateMiniApp, useDeleteMiniApp, useMiniAppResults, useCreateMiniAppResult } from "@/hooks/use-mini-apps";
+import { useMiniApps, useCreateMiniApp, useUpdateMiniApp, useDeleteMiniApp, useMiniAppResults, useCreateMiniAppResult, useRunAIMiniApp } from "@/hooks/use-mini-apps";
 import type { Agent, MiniApp, MiniAppType, MiniAppResult } from "@shared/schema";
 
 interface MiniAppsPanelProps {
@@ -25,6 +25,9 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   progress_tracker: "Pelacak Progres",
   document_generator: "Generator Dokumen",
   custom: "Custom",
+  project_snapshot: "Project Snapshot",
+  decision_summary: "Decision Summary",
+  risk_radar: "Risk Radar",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -34,6 +37,9 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   progress_tracker: TrendingUp,
   document_generator: FileOutput,
   custom: Wrench,
+  project_snapshot: BarChart3,
+  decision_summary: ClipboardList,
+  risk_radar: Radar,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -43,7 +49,12 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   progress_tracker: "Pelacak kemajuan dengan milestone dan persentase",
   document_generator: "Generator dokumen dari template dan data proyek",
   custom: "Aplikasi kustom dengan konfigurasi bebas",
+  project_snapshot: "Snapshot status proyek dari data Otak Proyek (AI-powered)",
+  decision_summary: "Ringkasan keputusan eksekutif dari data Otak Proyek (AI-powered)",
+  risk_radar: "Penilaian risiko proyek dari data Otak Proyek (AI-powered)",
 };
+
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar"];
 
 export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const { toast } = useToast();
@@ -55,7 +66,9 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const deleteMiniApp = useDeleteMiniApp();
 
   const createMiniAppResult = useCreateMiniAppResult();
+  const runAIMiniApp = useRunAIMiniApp();
 
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -156,7 +169,39 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const handleViewDetail = (app: MiniApp) => {
     setViewingApp(app);
     setRunInput({});
+    setAiAnalysisResult(null);
     setDetailDialogOpen(true);
+  };
+
+  const handleRunAIMiniApp = () => {
+    if (!viewingApp) return;
+    setAiAnalysisResult(null);
+    runAIMiniApp.mutate(
+      { id: String(viewingApp.id), agentId },
+      {
+        onSuccess: (result) => {
+          setAiAnalysisResult(result.data.analysis);
+          toast({ title: "Berhasil", description: "Analisis AI berhasil dibuat." });
+        },
+        onError: (error: any) => {
+          let msg = "Gagal menjalankan analisis AI.";
+          if (error?.message) {
+            const match = error.message.match(/\d+:\s*(.+)/);
+            if (match) {
+              try {
+                const parsed = JSON.parse(match[1]);
+                msg = parsed.error || msg;
+              } catch {
+                msg = match[1] || msg;
+              }
+            } else {
+              msg = error.message;
+            }
+          }
+          toast({ title: "Error", description: msg, variant: "destructive" });
+        },
+      }
+    );
   };
 
   const handleRunMiniApp = () => {
@@ -533,6 +578,45 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
               </TabsList>
 
               <TabsContent value="run" className="space-y-4 mt-3">
+                {AI_MINI_APP_TYPES.includes(viewingApp.type as MiniAppType) && (
+                  <div className="space-y-4">
+                    <div className="bg-muted/50 rounded-md p-4 space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {viewingApp.type === "project_snapshot" && "Menghasilkan snapshot status proyek berdasarkan data Otak Proyek yang aktif. Mencakup status keseluruhan, ringkasan isu, indikator risiko, dan keputusan terakhir."}
+                        {viewingApp.type === "decision_summary" && "Menghasilkan ringkasan keputusan eksekutif berdasarkan data Otak Proyek. Mencakup overview proyek, keputusan kunci, dampak isu, dan rekomendasi."}
+                        {viewingApp.type === "risk_radar" && "Menilai level risiko proyek berdasarkan data Otak Proyek. Mencakup risiko teknis, jadwal, dan biaya dengan alasan detail."}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Pastikan ada Otak Proyek yang aktif sebelum menjalankan.</p>
+                    </div>
+                    <Button
+                      onClick={handleRunAIMiniApp}
+                      disabled={runAIMiniApp.isPending}
+                      className="w-full"
+                      data-testid="button-run-ai-miniapp"
+                    >
+                      {runAIMiniApp.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Menganalisis...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Jalankan Analisis AI
+                        </>
+                      )}
+                    </Button>
+                    {aiAnalysisResult && (
+                      <div className="bg-muted/30 border rounded-md p-4 space-y-2">
+                        <h4 className="text-sm font-medium">Hasil Analisis</h4>
+                        <div className="text-sm whitespace-pre-wrap leading-relaxed" data-testid="ai-analysis-result">
+                          {aiAnalysisResult}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {viewingApp.type === "checklist" && (() => {
                   const config = typeof viewingApp.config === "object" && viewingApp.config ? (viewingApp.config as Record<string, any>) : {};
                   const items = Array.isArray(config.items) ? config.items : [];
@@ -655,15 +739,17 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                   </div>
                 )}
 
-                <Button
-                  onClick={handleRunMiniApp}
-                  disabled={createMiniAppResult.isPending}
-                  className="w-full"
-                  data-testid="button-run-miniapp"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  {createMiniAppResult.isPending ? "Menjalankan..." : "Jalankan & Simpan"}
-                </Button>
+                {!AI_MINI_APP_TYPES.includes(viewingApp.type as MiniAppType) && (
+                  <Button
+                    onClick={handleRunMiniApp}
+                    disabled={createMiniAppResult.isPending}
+                    className="w-full"
+                    data-testid="button-run-miniapp"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    {createMiniAppResult.isPending ? "Menjalankan..." : "Jalankan & Simpan"}
+                  </Button>
+                )}
               </TabsContent>
 
               <TabsContent value="results" className="mt-3">
@@ -729,7 +815,12 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
                   </div>
                 </div>
               )}
-              {appType !== "checklist" && (
+              {(["project_snapshot", "decision_summary", "risk_radar"] as string[]).includes(appType) && output.analysis && (
+                <div className="text-xs whitespace-pre-wrap leading-relaxed max-h-40 overflow-auto">
+                  {output.analysis}
+                </div>
+              )}
+              {appType !== "checklist" && !(["project_snapshot", "decision_summary", "risk_radar"] as string[]).includes(appType) && (
                 <pre className="text-xs bg-muted p-2 rounded-md overflow-auto max-h-24">
                   {JSON.stringify(output, null, 2)}
                 </pre>

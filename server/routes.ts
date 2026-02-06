@@ -2766,7 +2766,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/mini-apps", isAuthenticated, async (req, res) => {
+  app.post("/api/mini-apps/:agentId", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertMiniAppSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -2803,6 +2803,129 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== AI Mini App Execution (Protected) ====================
+
+  app.post("/api/mini-app/:id/run", isAuthenticated, async (req, res) => {
+    try {
+      const miniApp = await storage.getMiniApp(req.params.id);
+      if (!miniApp) {
+        return res.status(404).json({ error: "Mini app not found" });
+      }
+
+      const appType = miniApp.type;
+      if (!["project_snapshot", "decision_summary", "risk_radar"].includes(appType)) {
+        return res.status(400).json({ error: "This mini app type does not support AI execution" });
+      }
+
+      const agentId = String(miniApp.agentId);
+      const activeInstance = await storage.getActiveProjectBrainInstance(agentId);
+
+      if (!activeInstance || !activeInstance.values || Object.keys(activeInstance.values).length === 0) {
+        return res.status(400).json({ error: "No active Project Brain instance found. Please activate a project brain instance first." });
+      }
+
+      const projectBrainBlock = formatProjectBrainBlock(activeInstance.name, activeInstance.values as Record<string, any>);
+
+      let modePrompt = "";
+      if (appType === "project_snapshot") {
+        modePrompt = `You are a project management AI assistant. Based on the Project Brain data below, produce a PROJECT SNAPSHOT with the following structure:
+
+Overall Project Status: (Healthy / Attention / Critical)
+
+Active Issues Summary:
+- Open: (count or description)
+- Monitoring: (count or description)
+- Closed: (count or description)
+
+Key Risk Indicator:
+- Technical Risk: (Low / Medium / High) - brief reason
+- Schedule Risk: (Low / Medium / High) - brief reason
+- Cost Risk: (Low / Medium / High) - brief reason
+
+Last Key Decision:
+- Summary: (from data)
+- Risk Level: (from data)
+- Date: (from data)
+
+Be concise and professional. Target audience: Management.`;
+      } else if (appType === "decision_summary") {
+        modePrompt = `You are a project management AI assistant. Generate a concise executive DECISION SUMMARY based on the Project Brain data below.
+
+Use this structure:
+1. Project Overview (1-2 sentences)
+2. Key Decisions Made (list each with summary, reason, risk level, date)
+3. Active Issues Impact (how issues relate to decisions)
+4. Project Constraints Effect (how constraints influenced decisions)
+5. Recommendations (2-3 actionable next steps)
+
+Target audience: Management. Tone: Professional, concise, non-technical.`;
+      } else if (appType === "risk_radar") {
+        modePrompt = `You are a project risk assessment AI assistant. Assess current project risk levels based on the Project Brain data below.
+
+Output format:
+
+RISK RADAR ASSESSMENT
+
+Technical Risk: (Low / Medium / High)
+- Reason 1
+- Reason 2
+(2-5 reasons based on active issues, test data, structural system)
+
+Schedule Risk: (Low / Medium / High)
+- Reason 1
+- Reason 2
+(2-5 reasons based on time constraints, project stage, active issues)
+
+Cost Risk: (Low / Medium / High)
+- Reason 1
+- Reason 2
+(2-5 reasons based on cost constraints, decisions, issues)
+
+Overall Risk Level: (Low / Medium / High)
+Summary: (1-2 sentence overall assessment)
+
+Be actionable and non-technical.`;
+      }
+
+      const agent = await storage.getAgent(agentId);
+      const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
+
+      const chatMessages: Array<{ role: "system" | "user"; content: string }> = [
+        {
+          role: "system",
+          content: `${modePrompt}\n\nRespons dalam bahasa ${language}.`
+        },
+        {
+          role: "user",
+          content: `Here is the project data:\n\n${projectBrainBlock}\n\nPlease generate the analysis now.`
+        }
+      ];
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: chatMessages,
+        temperature: 0.3,
+        max_tokens: 2000,
+      });
+
+      const aiOutput = response.choices[0]?.message?.content || "No response generated";
+
+      const result = await storage.createMiniAppResult({
+        miniAppId: String(miniApp.id),
+        agentId,
+        projectInstanceId: String(activeInstance.id),
+        input: { projectBrain: activeInstance.name, mode: appType },
+        output: { analysis: aiOutput, generatedAt: new Date().toISOString() },
+        status: "completed",
+      });
+
+      res.json({ result, analysis: aiOutput });
+    } catch (error: any) {
+      console.error("Mini app AI execution error:", error);
+      res.status(500).json({ error: "Failed to execute mini app: " + (error.message || "Unknown error") });
+    }
+  });
+
   // ==================== Mini App Results Routes (Protected) ====================
 
   app.get("/api/mini-app-results/:miniAppId", isAuthenticated, async (req, res) => {
@@ -2814,7 +2937,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/mini-app-results", isAuthenticated, async (req, res) => {
+  app.post("/api/mini-app-results/:miniAppId", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertMiniAppResultSchema.safeParse(req.body);
       if (!parsed.success) {

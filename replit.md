@@ -222,7 +222,12 @@ Schema includes:
 
 ### Mini Apps (Feb 6, 2026)
 - Aplikasi kecil turunan dari Project Brain data
-- Types: checklist, calculator, risk_assessment, progress_tracker, document_generator, custom
+- Types: checklist, calculator, risk_assessment, progress_tracker, document_generator, custom, project_snapshot, decision_summary, risk_radar
+- **AI-Powered Mini Apps** (project_snapshot, decision_summary, risk_radar):
+  - Execute via POST /api/mini-app/:id/run (uses OpenAI to analyze active Project Brain data)
+  - Project Snapshot: Overall status, issue summary, risk indicators, last decision
+  - Decision Summary: Executive decision summary with recommendations
+  - Risk Radar: Technical/schedule/cost risk assessment with reasons
 - Each mini app: name, description, type, config (JSONB), icon
 - Mini App Results: stores input/output of mini app executions
 - Tables: `mini_apps`, `mini_app_results`
