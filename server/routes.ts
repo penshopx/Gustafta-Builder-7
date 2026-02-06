@@ -1971,43 +1971,37 @@ export async function registerRoutes(
     }
   });
   
+  // Track processed webhook message IDs to prevent duplicate processing
+  const processedWebhookMessages = new Set<string>();
+  const WEBHOOK_DEDUP_TTL = 60000; // 60 seconds
+
   // WhatsApp webhook endpoint
   app.post("/api/webhook/whatsapp/:agentId", async (req, res) => {
+    // Always respond immediately to prevent Fonnte timeouts/retries
+    res.status(200).json({ status: "ok" });
+
     try {
       const { agentId } = req.params;
       const payload = req.body;
       
       console.log("WhatsApp webhook received:", JSON.stringify(payload, null, 2));
       
-      // Get agent and its WhatsApp integration
-      const agent = await storage.getAgent(agentId);
-      if (!agent) {
-        return res.status(404).json({ error: "Agent not found" });
-      }
-      
-      const integrations = await storage.getIntegrations(agentId);
-      const whatsappIntegration = integrations.find(i => i.type === "whatsapp" && i.isEnabled);
-      const waConfig = (whatsappIntegration?.config || {}) as Record<string, string>;
-      const waApiToken = waConfig.apiToken || waConfig.token;
-      
-      if (!whatsappIntegration || !waApiToken) {
-        console.log("WhatsApp integration not configured for agent:", agentId);
-        return res.status(200).json({ status: "ok" });
-      }
-      
       // Handle different webhook formats (Fonnte, Multichat, WhatsApp Cloud API, Kirimi.id, etc.)
       let phoneNumber: string | undefined;
       let messageText: string | undefined;
       let messageId: string | undefined;
+      let deviceNumber: string | undefined;
       let provider: string = "generic";
       
-      // Fonnte format: { pengirim: "628...", pesan: "text", device: "..." }
-      if (payload.pengirim && payload.pesan) {
-        phoneNumber = payload.pengirim;
-        messageText = payload.pesan;
-        messageId = payload.id;
+      // Fonnte format: { sender: "628...", message: "text", device: "..." }
+      // Also support legacy: { pengirim: "628...", pesan: "text", device: "..." }
+      if ((payload.sender || payload.pengirim) && (payload.message || payload.pesan) && payload.device !== undefined) {
+        phoneNumber = payload.sender || payload.pengirim;
+        messageText = payload.message || payload.pesan;
+        messageId = payload.id || payload.inboxid;
+        deviceNumber = payload.device;
         provider = "fonnte";
-        console.log("Fonnte format detected");
+        console.log("Fonnte format detected, sender:", phoneNumber, "device:", deviceNumber);
       }
       // Kirimi.id format: { event: "message.received", from: "628...", message: "text" }
       else if (payload.event === "message.received" && payload.from && payload.message) {
@@ -2047,17 +2041,59 @@ export async function registerRoutes(
       
       if (!phoneNumber || !messageText) {
         console.log("No message found in webhook payload");
-        return res.status(200).json({ status: "ok" });
+        return;
+      }
+
+      // Fonnte: skip messages from the device itself (outgoing/bot's own messages)
+      if (provider === "fonnte" && deviceNumber) {
+        const senderClean = phoneNumber.replace(/\D/g, "");
+        const deviceClean = String(deviceNumber).replace(/\D/g, "");
+        if (senderClean === deviceClean) {
+          console.log("Skipping outgoing message from device:", deviceNumber);
+          return;
+        }
+      }
+
+      // Deduplicate: skip if we already processed this message recently
+      const dedupeKey = `${provider}-${phoneNumber}-${messageId || messageText}`;
+      if (processedWebhookMessages.has(dedupeKey)) {
+        console.log("Skipping duplicate webhook message:", dedupeKey);
+        return;
+      }
+      processedWebhookMessages.add(dedupeKey);
+      setTimeout(() => processedWebhookMessages.delete(dedupeKey), WEBHOOK_DEDUP_TTL);
+
+      // Get agent and its WhatsApp integration
+      const agent = await storage.getAgent(agentId);
+      if (!agent) {
+        console.log("Agent not found for webhook:", agentId);
+        return;
+      }
+      
+      const integrations = await storage.getIntegrations(agentId);
+      const whatsappIntegration = integrations.find(i => i.type === "whatsapp" && i.isEnabled);
+      const waConfig = (whatsappIntegration?.config || {}) as Record<string, string>;
+      const waApiToken = waConfig.apiToken || waConfig.token;
+      
+      if (!whatsappIntegration || !waApiToken) {
+        console.log("WhatsApp integration not configured for agent:", agentId);
+        return;
       }
       
       // Generate AI response
       const aiResponse = await generateAIResponse(agentId, messageText);
       
+      // If AI response is an error message, log it but don't send error to user
+      if (aiResponse.startsWith("Maaf, terjadi kesalahan") || aiResponse === "Agent tidak ditemukan.") {
+        console.error("AI response failed for webhook, not sending error to user. Error:", aiResponse);
+        return;
+      }
+
       // Send response based on provider
       try {
         if (provider === "fonnte") {
           // Fonnte API format
-          await fetch("https://api.fonnte.com/send", {
+          const sendResult = await fetch("https://api.fonnte.com/send", {
             method: "POST",
             headers: {
               "Authorization": waApiToken,
@@ -2067,7 +2103,8 @@ export async function registerRoutes(
               message: aiResponse,
             }),
           });
-          console.log("Sent reply via Fonnte");
+          const sendResponse = await sendResult.json();
+          console.log("Fonnte send result:", JSON.stringify(sendResponse));
         } else if (provider === "meta") {
           // WhatsApp Cloud API format
           const phoneNumberId = waConfig.phoneNumberId;
@@ -2087,7 +2124,7 @@ export async function registerRoutes(
             });
           }
         } else {
-          // Generic/Multichat/Kirimi format - use configured send URL
+          // Generic/Multichat/Kirimi format - use configured send URL or Fonnte as fallback
           const sendUrl = waConfig.sendUrl || waConfig.webhookUrl;
           if (sendUrl) {
             await fetch(sendUrl, {
@@ -2109,25 +2146,26 @@ export async function registerRoutes(
       }
       
       // Log the interaction
-      await storage.createMessage({
-        agentId,
-        role: "user",
-        content: messageText,
-        reasoning: "",
-        sources: [],
-      });
-      await storage.createMessage({
-        agentId,
-        role: "assistant",
-        content: aiResponse,
-        reasoning: "",
-        sources: [],
-      });
-      
-      res.status(200).json({ status: "ok" });
+      try {
+        await storage.createMessage({
+          agentId,
+          role: "user",
+          content: messageText,
+          reasoning: "",
+          sources: [],
+        });
+        await storage.createMessage({
+          agentId,
+          role: "assistant",
+          content: aiResponse,
+          reasoning: "",
+          sources: [],
+        });
+      } catch (logError) {
+        console.error("Failed to log webhook messages:", logError);
+      }
     } catch (error) {
       console.error("WhatsApp webhook error:", error);
-      res.status(200).json({ status: "ok" });
     }
   });
   
