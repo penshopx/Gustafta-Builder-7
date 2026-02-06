@@ -2815,7 +2815,7 @@ export async function registerRoutes(
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
 
@@ -2887,6 +2887,87 @@ Overall Risk Level: (Low / Medium / High)
 Summary: (1-2 sentence overall assessment)
 
 Be actionable and non-technical.`;
+      } else if (appType === "issue_log") {
+        modePrompt = `You are a project management AI assistant. Generate a structured ISSUE LOG based on the Project Brain data below.
+
+Output format:
+
+ISSUE LOG
+
+Active Issues:
+For each issue found:
+- Issue ID: (auto-generate ISU-001, ISU-002, etc.)
+- Type: (from data)
+- Location/Element: (from data)
+- Status: (from data)
+- Risk Level: (assess based on data)
+- Since: (from data)
+- Next Step: (1 line recommendation)
+
+Priority Ranking:
+1. (highest priority issue with reason)
+2. (next priority)
+
+Issues that have been Open > 14 days should be flagged for escalation.
+
+Recommendations:
+- 2-3 actionable next steps
+
+Be concise and actionable. Target audience: Site management.`;
+      } else if (appType === "action_tracker") {
+        modePrompt = `You are a project management AI assistant. Generate an ACTION TRACKER based on the Project Brain data below.
+
+Output format:
+
+ACTION TRACKER
+
+Based on active issues and decisions, generate recommended action items:
+
+For each action:
+- Action Item: (specific task)
+- Related Issue: (which issue/decision)
+- Priority: (High / Medium / Low)
+- Suggested PIC: (role, e.g., QA/QC, Engineer, Site Manager)
+- Suggested Due: (relative timeline, e.g., "within 3 days")
+- Status: Not Started
+
+Overdue Risk Assessment:
+- Items at risk of delay
+- Suggested reprioritization
+
+Summary:
+- Total actions: X
+- High priority: X
+- Recommended immediate actions: (top 3)
+
+Be specific and actionable.`;
+      } else if (appType === "change_log") {
+        modePrompt = `You are a project management AI assistant. Generate a CHANGE LOG analysis based on the Project Brain data below.
+
+Output format:
+
+CHANGE LOG ANALYSIS
+
+Detected Changes (from decisions and issues):
+For each change found:
+- Change Type: (Design / Method / Scope)
+- Description: (what changed)
+- Reason: (from decision data)
+- Impact: (Cost / Time / Quality / Multi)
+- Risk Assessment: (Low / Medium / High)
+- Approval Status: (Needs Review / Approved / Pending)
+
+Impact Summary:
+- Cost impact changes: X
+- Time impact changes: X
+- Quality impact changes: X
+
+Recommendations:
+- Changes requiring immediate attention
+- Risk mitigation suggestions
+- Audit trail completeness check
+
+Be professional and suitable for management review.`;
       }
 
       const agent = await storage.getAgent(agentId);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2 } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,9 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   project_snapshot: "Project Snapshot",
   decision_summary: "Decision Summary",
   risk_radar: "Risk Radar",
+  issue_log: "Issue Log",
+  action_tracker: "Action Tracker",
+  change_log: "Change Log",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -40,6 +43,9 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   project_snapshot: BarChart3,
   decision_summary: ClipboardList,
   risk_radar: Radar,
+  issue_log: ListChecks,
+  action_tracker: Users,
+  change_log: FileWarning,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -52,9 +58,71 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   project_snapshot: "Snapshot status proyek dari data Otak Proyek (AI-powered)",
   decision_summary: "Ringkasan keputusan eksekutif dari data Otak Proyek (AI-powered)",
   risk_radar: "Penilaian risiko proyek dari data Otak Proyek (AI-powered)",
+  issue_log: "Daftar isu aktif & histori untuk monitoring proyek (AI-powered)",
+  action_tracker: "Pelacakan tindak lanjut: siapa melakukan apa, kapan (AI-powered)",
+  change_log: "Catatan perubahan desain/metode/scope dan dampaknya (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log"];
+
+const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; description: string; items?: string[] }>> = {
+  checklist: {
+    name: "Checklist Penanganan Isu",
+    description: "Daftar langkah standar untuk memastikan isu dianalisa, diputuskan, ditindaklanjuti, dan ditutup.",
+    items: [
+      "Isu teridentifikasi & deskripsi jelas",
+      "Lokasi/elemen isu terkonfirmasi",
+      "Data pendukung terkumpul (foto, laporan, hasil uji)",
+      "Analisa teknis dilakukan",
+      "Alternatif solusi dibuat",
+      "Risiko dinilai",
+      "Keputusan diambil & dicatat",
+      "PIC & due date ditetapkan",
+      "Tindak lanjut dieksekusi",
+      "Verifikasi selesai & isu ditutup",
+    ],
+  },
+  risk_assessment: {
+    name: "Penilaian Risiko",
+    description: "Menilai risiko isu/keputusan dengan skor likelihood x impact dan prioritas mitigasi.",
+  },
+  progress_tracker: {
+    name: "Pelacak Progres",
+    description: "Monitoring progres rencana vs aktual untuk paket pekerjaan utama.",
+  },
+  calculator: {
+    name: "Kalkulator",
+    description: "Hitung cepat volume/berat/kebutuhan material.",
+  },
+  document_generator: {
+    name: "Generator Dokumen",
+    description: "Menghasilkan dokumen standar dari data Project Brain.",
+  },
+  project_snapshot: {
+    name: "Project Snapshot",
+    description: "Ringkasan kondisi proyek dalam satu tampilan untuk owner/manajemen.",
+  },
+  decision_summary: {
+    name: "Decision Summary",
+    description: "Ringkasan keputusan penting proyek untuk audit trail dan pembelajaran.",
+  },
+  risk_radar: {
+    name: "Risk Radar",
+    description: "Peta risiko per kategori dan tren.",
+  },
+  issue_log: {
+    name: "Issue Log",
+    description: "Daftar isu aktif & histori isu untuk monitoring proyek.",
+  },
+  action_tracker: {
+    name: "Action Tracker",
+    description: "Pelacakan tugas tindak lanjut (who does what by when).",
+  },
+  change_log: {
+    name: "Change Log",
+    description: "Catatan perubahan desain/metode/scope dan dampaknya.",
+  },
+};
 
 export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const { toast } = useToast();
@@ -464,8 +532,20 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
               <Select
                 value={newApp.type}
                 onValueChange={(val: MiniAppType) => {
-                  setNewApp({ ...newApp, type: val, config: {} });
-                  if (val === "checklist") setChecklistItems([""]);
+                  const defaults = DEFAULT_MINI_APP_CONFIGS[val];
+                  const updatedApp = {
+                    ...newApp,
+                    type: val,
+                    config: {},
+                    name: !newApp.name || DEFAULT_MINI_APP_CONFIGS[newApp.type]?.name === newApp.name ? (defaults?.name || "") : newApp.name,
+                    description: !newApp.description || DEFAULT_MINI_APP_CONFIGS[newApp.type]?.description === newApp.description ? (defaults?.description || "") : newApp.description,
+                  };
+                  setNewApp(updatedApp);
+                  if (val === "checklist" && defaults?.items) {
+                    setChecklistItems(defaults.items);
+                  } else if (val === "checklist") {
+                    setChecklistItems([""]);
+                  }
                 }}
               >
                 <SelectTrigger data-testid="select-miniapp-type">
@@ -585,6 +665,9 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                         {viewingApp.type === "project_snapshot" && "Menghasilkan snapshot status proyek berdasarkan data Otak Proyek yang aktif. Mencakup status keseluruhan, ringkasan isu, indikator risiko, dan keputusan terakhir."}
                         {viewingApp.type === "decision_summary" && "Menghasilkan ringkasan keputusan eksekutif berdasarkan data Otak Proyek. Mencakup overview proyek, keputusan kunci, dampak isu, dan rekomendasi."}
                         {viewingApp.type === "risk_radar" && "Menilai level risiko proyek berdasarkan data Otak Proyek. Mencakup risiko teknis, jadwal, dan biaya dengan alasan detail."}
+                        {viewingApp.type === "issue_log" && "Menghasilkan daftar isu aktif & histori berdasarkan data Otak Proyek. Mencakup prioritas isu, status, dan rekomendasi langkah selanjutnya."}
+                        {viewingApp.type === "action_tracker" && "Menghasilkan daftar tindak lanjut berdasarkan isu dan keputusan di Otak Proyek. Mencakup aksi, PIC, due date, dan status."}
+                        {viewingApp.type === "change_log" && "Menganalisis perubahan desain/metode/scope dari data Otak Proyek. Mencakup dampak dan kebutuhan approval."}
                       </p>
                       <p className="text-xs text-muted-foreground">Pastikan ada Otak Proyek yang aktif sebelum menjalankan.</p>
                     </div>
@@ -815,12 +898,12 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
                   </div>
                 </div>
               )}
-              {(["project_snapshot", "decision_summary", "risk_radar"] as string[]).includes(appType) && output.analysis && (
+              {AI_MINI_APP_TYPES.includes(appType) && output.analysis && (
                 <div className="text-xs whitespace-pre-wrap leading-relaxed max-h-40 overflow-auto">
                   {output.analysis}
                 </div>
               )}
-              {appType !== "checklist" && !(["project_snapshot", "decision_summary", "risk_radar"] as string[]).includes(appType) && (
+              {appType !== "checklist" && !AI_MINI_APP_TYPES.includes(appType) && (
                 <pre className="text-xs bg-muted p-2 rounded-md overflow-auto max-h-24">
                   {JSON.stringify(output, null, 2)}
                 </pre>

@@ -528,7 +528,8 @@ export type ProjectBrainInstance = InsertProjectBrainInstance & {
 
 export const miniAppTypeSchema = z.enum([
   "checklist", "calculator", "risk_assessment", "progress_tracker", "document_generator", "custom",
-  "project_snapshot", "decision_summary", "risk_radar"
+  "project_snapshot", "decision_summary", "risk_radar",
+  "issue_log", "action_tracker", "change_log"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 
