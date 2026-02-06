@@ -99,7 +99,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
   const getBaseUrl = () => window.location.origin;
 
   const getMarketplaceUrl = () => `${getBaseUrl()}/marketplace/${settings.productSlug || "slug"}`;
-  const getChatUrl = () => `${getBaseUrl()}/chat/${agent.id}`;
+  const getChatUrl = () => `${getBaseUrl()}/chat/${settings.productSlug || agent.productSlug || agent.id}`;
 
   const copyMarketplaceUrl = () => {
     navigator.clipboard.writeText(getMarketplaceUrl());

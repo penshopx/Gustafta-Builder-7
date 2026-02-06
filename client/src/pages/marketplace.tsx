@@ -266,7 +266,7 @@ export default function Marketplace() {
                       </div>
                     </div>
 
-                    <Link href={`/chat/${product.id}`}>
+                    <Link href={`/chat/${product.productSlug || product.id}`}>
                       <Button
                         className="w-full mt-4"
                         data-testid={`button-try-product-${product.id}`}

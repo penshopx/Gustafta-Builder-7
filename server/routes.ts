@@ -580,6 +580,18 @@ export async function registerRoutes(
         });
       }
       
+      // Auto-generate slug from name if not provided
+      if (!parsed.data.productSlug && parsed.data.name) {
+        const baseSlug = parsed.data.name
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .slice(0, 60);
+        const existing = await storage.getAgentBySlug(baseSlug);
+        parsed.data.productSlug = existing ? `${baseSlug}-${Date.now().toString(36)}` : baseSlug;
+      }
+
       const agent = await storage.createAgent(parsed.data);
       res.status(201).json(agent);
     } catch (error) {
@@ -2534,11 +2546,18 @@ export async function registerRoutes(
         if (helpdesk) agentId = helpdesk.id.toString();
       }
       
-      const agent = await storage.getAgent(agentId);
+      // Try by ID first, then by slug
+      let agent = await storage.getAgent(agentId);
+      if (!agent) {
+        agent = await storage.getAgentBySlug(agentId as string);
+      }
       
       if (!agent) {
         return res.status(404).json({ error: "Widget not found" });
       }
+      
+      // Override agentId with actual agent ID for downstream use
+      agentId = agent.id.toString();
       
       // Check if agent is active and public (for public embed access)
       if (!agent.isActive) {
@@ -2576,6 +2595,7 @@ export async function registerRoutes(
         borderRadius: agent.widgetBorderRadius || "rounded",
         showBranding: agent.widgetShowBranding ?? true,
         buttonIcon: agent.widgetButtonIcon || "chat",
+        slug: agent.productSlug || "",
         isActive: agent.isActive,
         isPublic: agent.isPublic,
         channels: enabledChannels,
