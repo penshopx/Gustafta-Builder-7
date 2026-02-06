@@ -386,7 +386,7 @@ export default function AgentChat() {
 
   useEffect(() => {
     if (params.agentId) {
-      fetch(`/api/widget/config/${params.agentId}`)
+      fetch(`/api/chat/config/${params.agentId}`)
         .then((res) => {
           if (!res.ok) throw new Error("Agent not found");
           return res.json();

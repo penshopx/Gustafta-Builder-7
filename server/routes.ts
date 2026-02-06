@@ -2595,36 +2595,89 @@ export async function registerRoutes(
   });
 
   // ==================== DYNAMIC WIDGET API ====================
+
+  async function resolveAgent(agentId: string) {
+    if (agentId === "dokumentender") {
+      const allAgents = await storage.getAgents();
+      const dok = allAgents.find(a => a.name === "Dokumentender Assistant");
+      if (dok) agentId = dok.id.toString();
+    } else if (agentId === "gustafta-helpdesk") {
+      const allAgents = await storage.getAgents();
+      const helpdesk = allAgents.find(a => a.name === "Gustafta Helpdesk" || a.name === "Gustafta Assistant");
+      if (helpdesk) agentId = helpdesk.id.toString();
+    }
+    let agent = await storage.getAgent(agentId);
+    if (!agent) {
+      agent = await storage.getAgentBySlug(agentId);
+    }
+    return agent;
+  }
+
+  app.get("/api/chat/config/:agentId", async (req, res) => {
+    try {
+      const agent = await resolveAgent(req.params.agentId);
+      
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      
+      if (!agent.isActive) {
+        return res.status(404).json({ error: "Agent is disabled", disabled: true });
+      }
+
+      const agentId = agent.id.toString();
+      const integrations = await storage.getIntegrations(agentId);
+      const enabledChannels = integrations
+        .filter((i: any) => i.isEnabled)
+        .map((i: any) => ({ type: i.type, name: i.name }));
+
+      res.json({
+        agentId: agent.id,
+        name: agent.name,
+        avatar: agent.avatar || "",
+        description: agent.description || "",
+        tagline: agent.tagline || "",
+        greetingMessage: agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
+        welcomeMessage: agent.widgetWelcomeMessage || agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
+        conversationStarters: agent.conversationStarters || [],
+        personality: agent.personality || "",
+        philosophy: agent.philosophy || "",
+        category: agent.category || "",
+        subcategory: agent.subcategory || "",
+        color: agent.widgetColor || "#6366f1",
+        position: agent.widgetPosition || "bottom-right",
+        size: agent.widgetSize || "medium",
+        borderRadius: agent.widgetBorderRadius || "rounded",
+        showBranding: agent.widgetShowBranding ?? true,
+        buttonIcon: agent.widgetButtonIcon || "chat",
+        slug: agent.productSlug || "",
+        isActive: agent.isActive,
+        isPublic: agent.isPublic,
+        channels: enabledChannels,
+        requireRegistration: agent.requireRegistration ?? false,
+        monthlyPrice: agent.monthlyPrice ?? 0,
+        trialEnabled: agent.trialEnabled ?? true,
+        trialDays: agent.trialDays ?? 7,
+        messageQuotaDaily: agent.messageQuotaDaily ?? 50,
+        messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
+      });
+    } catch (error) {
+      console.error("Chat config error:", error);
+      res.status(500).json({ error: "Failed to load chat configuration" });
+    }
+  });
   
-  // Public endpoint to get widget configuration (no auth required)
+  // Widget embed endpoint - requires isPublic
   app.get("/api/widget/config/:agentId", async (req, res) => {
     try {
-      let { agentId } = req.params;
-      
-      if (agentId === "dokumentender") {
-        const agents = await storage.getAgents();
-        const dok = agents.find(a => a.name === "Dokumentender Assistant");
-        if (dok) agentId = dok.id.toString();
-      } else if (agentId === "gustafta-helpdesk") {
-        const agents = await storage.getAgents();
-        const helpdesk = agents.find(a => a.name === "Gustafta Helpdesk" || a.name === "Gustafta Assistant");
-        if (helpdesk) agentId = helpdesk.id.toString();
-      }
-      
-      // Try by ID first, then by slug
-      let agent = await storage.getAgent(agentId);
-      if (!agent) {
-        agent = await storage.getAgentBySlug(agentId as string);
-      }
+      const agent = await resolveAgent(req.params.agentId);
       
       if (!agent) {
         return res.status(404).json({ error: "Widget not found" });
       }
       
-      // Override agentId with actual agent ID for downstream use
-      agentId = agent.id.toString();
+      const agentId = agent.id.toString();
       
-      // Check if agent is active and public (for public embed access)
       if (!agent.isActive) {
         return res.status(404).json({ error: "Widget is disabled", disabled: true });
       }
