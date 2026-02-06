@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -508,6 +508,13 @@ export default function AgentChat() {
           content: messageContent,
           sessionId: sessionIdRef.current,
           clientToken: clientToken || undefined,
+          attachments: attachments.length > 0 ? attachments.map(f => ({
+            fileName: f.fileName,
+            fileUrl: f.fileUrl,
+            category: f.category,
+            mimeType: f.mimeType,
+            fileSize: f.fileSize,
+          })) : undefined,
         }),
       });
 
@@ -1147,7 +1154,7 @@ export default function AgentChat() {
                     <div className="flex gap-1.5 items-center">
                       <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        Mengetik...
+                        {messages[messages.length - 1]?.attachments?.length ? "Memproses file & mengetik..." : "Mengetik..."}
                       </span>
                     </div>
                   </div>
@@ -1231,6 +1238,26 @@ export default function AgentChat() {
             </div>
           )}
 
+          {!isUploading && input && (input.match(/youtube\.com|youtu\.be/) || input.match(/drive\.google\.com|docs\.google\.com|1drv\.ms|onedrive\.live\.com|sharepoint\.com/)) && (
+            <div className="flex flex-wrap gap-1.5 max-w-2xl mx-auto mb-2" data-testid="detected-links">
+              {input.match(/youtube\.com|youtu\.be/) && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400 rounded-full text-[10px] font-medium">
+                  <PlayCircle className="w-3 h-3" /> YouTube terdeteksi - akan dirangkum
+                </span>
+              )}
+              {input.match(/drive\.google\.com|docs\.google\.com/) && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-medium">
+                  <FileText className="w-3 h-3" /> Google Drive terdeteksi
+                </span>
+              )}
+              {input.match(/1drv\.ms|onedrive\.live\.com|sharepoint\.com/) && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-medium">
+                  <FileText className="w-3 h-3" /> OneDrive terdeteksi
+                </span>
+              )}
+            </div>
+          )}
+
           <input
             ref={fileInputRef}
             type="file"
@@ -1261,7 +1288,7 @@ export default function AgentChat() {
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
               }}
               onKeyDown={handleKeyDown}
-              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik atau lampirkan file...`}
+              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik pesan, tempel link YouTube/Drive...`}
               className="resize-none text-sm rounded-xl"
               rows={1}
               disabled={isTyping || isListening}

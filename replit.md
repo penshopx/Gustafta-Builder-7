@@ -26,7 +26,7 @@ The frontend employs a feature-based organization, including components for pane
 - **API Style**: RESTful JSON API
 - **Build**: esbuild
 
-The server manages CRUD operations for agents, knowledge bases, integrations, message storage, and user authentication. It handles webhook integrations for external services like WhatsApp.
+The server manages CRUD operations for agents, knowledge bases, integrations, message storage, and user authentication. It handles webhook integrations for external services like WhatsApp. The chat system supports intelligent file processing: image analysis via GPT-4o vision, document text extraction (PDF, Word, Excel), video audio transcription, YouTube transcript fetching, and Google Drive/OneDrive file reading.
 
 ### Data Storage
 - **ORM**: Drizzle ORM with Zod validation

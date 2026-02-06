@@ -23,6 +23,7 @@ import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type Subscri
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
+import { processAttachmentsAndUrls, type FileAttachment } from "./lib/file-processing";
 
 const KNOWN_PROJECT_BRAIN_KEYS = [
   "project_name", "project_type", "project_stage", "location", "owner_client",
@@ -1277,8 +1278,25 @@ export async function registerRoutes(
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
+      // Process file attachments and detect URLs (YouTube, Google Drive, OneDrive)
+      const attachments: FileAttachment[] = req.body.attachments || [];
+      let userContent = parsed.data.content;
+      let hasVisionContent = false;
+      let imageDataUrls: Array<{ url: string }> = [];
+
+      if (attachments.length > 0 || userContent.match(/youtube\.com|youtu\.be|drive\.google\.com|docs\.google\.com|1drv\.ms|onedrive\.live\.com|sharepoint\.com/)) {
+        try {
+          const processed = await processAttachmentsAndUrls(userContent, attachments);
+          userContent = processed.processedContent;
+          hasVisionContent = processed.hasVisionContent;
+          imageDataUrls = processed.imageDataUrls;
+        } catch (err) {
+          console.error("File processing error:", err);
+        }
+      }
+
       // Build messages array
-      const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: any }> = [
         { role: "system", content: systemPrompt }
       ];
       
@@ -1290,7 +1308,16 @@ export async function registerRoutes(
           });
         }
       }
-      chatMessages.push({ role: "user", content: parsed.data.content });
+
+      if (hasVisionContent && imageDataUrls.length > 0) {
+        const visionContent: any[] = [{ type: "text", text: userContent }];
+        for (const img of imageDataUrls) {
+          visionContent.push({ type: "image_url", image_url: { url: img.url, detail: "high" } });
+        }
+        chatMessages.push({ role: "user", content: visionContent });
+      } else {
+        chatMessages.push({ role: "user", content: userContent });
+      }
       
       // Set up SSE headers
       res.setHeader("Content-Type", "text/event-stream");
@@ -1320,7 +1347,10 @@ export async function registerRoutes(
       // Send user message first
       res.write(`data: ${JSON.stringify({ type: "user_message", message: userMessage })}\n\n`);
       
-      const agentModel = agent.aiModel || "gpt-4o-mini";
+      let agentModel = agent.aiModel || "gpt-4o-mini";
+      if (hasVisionContent && !agentModel.startsWith("gpt-4o")) {
+        agentModel = "gpt-4o-mini";
+      }
       const temperature = Math.max(0, Math.min(2, agent.temperature ?? 0.7));
       const maxTokens = Math.max(100, Math.min(4096, agent.maxTokens ?? 1024));
       
