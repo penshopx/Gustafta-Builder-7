@@ -21,15 +21,37 @@ export const userProfiles = pgTable("user_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Series Table - Groups Big Ideas into cohesive topics/products
+export const series = pgTable("series", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().default(""),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description").default(""),
+  tagline: text("tagline").default(""),
+  coverImage: text("cover_image").default(""),
+  color: text("color").default("#6366f1"),
+  category: text("category").default(""),
+  tags: jsonb("tags").default([]),
+  language: text("language").default("id"),
+  isPublic: boolean("is_public").default(false),
+  isActive: boolean("is_active").default(false),
+  isFeatured: boolean("is_featured").default(false),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Big Ideas Table
 export const bigIdeas = pgTable("big_ideas", {
   id: serial("id").primaryKey(),
+  seriesId: integer("series_id"),
   name: text("name").notNull(),
   type: text("type").notNull(),
   description: text("description").notNull(),
   goals: jsonb("goals").default([]),
   targetAudience: text("target_audience").default(""),
   expectedOutcome: text("expected_outcome").default(""),
+  sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -43,6 +65,7 @@ export const toolboxes = pgTable("toolboxes", {
   purpose: text("purpose").default(""),
   capabilities: jsonb("capabilities").default([]),
   limitations: jsonb("limitations").default([]),
+  sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -245,6 +268,56 @@ export type UserProfile = InsertUserProfile & {
   updatedAt: string;
 };
 
+// Series schema - Groups Big Ideas into topics
+export const insertSeriesSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  slug: z.string().min(1, "Slug is required"),
+  description: z.string().optional().default(""),
+  tagline: z.string().optional().default(""),
+  coverImage: z.string().optional().default(""),
+  color: z.string().optional().default("#6366f1"),
+  category: z.string().optional().default(""),
+  tags: z.array(z.string()).optional().default([]),
+  language: z.string().optional().default("id"),
+  isPublic: z.boolean().optional().default(false),
+  isFeatured: z.boolean().optional().default(false),
+  sortOrder: z.number().optional().default(0),
+});
+
+export type InsertSeries = z.infer<typeof insertSeriesSchema>;
+export type Series = InsertSeries & {
+  id: string;
+  userId: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
+export type SeriesWithStats = Series & {
+  totalBigIdeas: number;
+  totalToolboxes: number;
+  totalAgents: number;
+};
+
+export type SeriesWithHierarchy = SeriesWithStats & {
+  bigIdeas: (BigIdea & {
+    toolboxes: (Toolbox & {
+      agents: {
+        id: string;
+        name: string;
+        description: string;
+        avatar: string;
+        tagline: string;
+        category: string;
+        subcategory: string;
+        isPublic: boolean;
+        isActive: boolean;
+        productSlug: string;
+        widgetColor: string;
+      }[];
+    })[];
+  })[];
+};
+
 // Big Idea schema - Top level of hierarchy
 export const insertBigIdeaSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -253,6 +326,8 @@ export const insertBigIdeaSchema = z.object({
   goals: z.array(z.string()).optional().default([]),
   targetAudience: z.string().optional().default(""),
   expectedOutcome: z.string().optional().default(""),
+  seriesId: z.string().optional(),
+  sortOrder: z.number().optional().default(0),
 });
 
 export type InsertBigIdea = z.infer<typeof insertBigIdeaSchema>;

@@ -32,6 +32,10 @@ import type {
   InsertClientSubscription,
   Affiliate,
   InsertAffiliate,
+  Series,
+  InsertSeries,
+  SeriesWithStats,
+  SeriesWithHierarchy,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -45,8 +49,18 @@ export interface IStorage {
   createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
   updateUserProfile(userId: string, data: Partial<InsertUserProfile>): Promise<UserProfile | undefined>;
 
+  // Series methods
+  getSeries(): Promise<Series[]>;
+  getSeriesById(id: string): Promise<Series | undefined>;
+  getSeriesBySlug(slug: string): Promise<Series | undefined>;
+  getPublicSeries(): Promise<SeriesWithStats[]>;
+  getSeriesWithHierarchy(id: string): Promise<SeriesWithHierarchy | undefined>;
+  createSeries(data: InsertSeries, userId: string): Promise<Series>;
+  updateSeries(id: string, data: Partial<InsertSeries>): Promise<Series | undefined>;
+  deleteSeries(id: string): Promise<boolean>;
+
   // Big Idea methods
-  getBigIdeas(): Promise<BigIdea[]>;
+  getBigIdeas(seriesId?: string): Promise<BigIdea[]>;
   getBigIdea(id: string): Promise<BigIdea | undefined>;
   getActiveBigIdea(): Promise<BigIdea | null>;
   createBigIdea(bigIdea: InsertBigIdea): Promise<BigIdea>;
@@ -166,6 +180,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private userProfiles: Map<string, UserProfile>;
+  private seriesMap: Map<string, Series>;
   private bigIdeas: Map<string, BigIdea>;
   private toolboxes: Map<string, Toolbox>;
   private agents: Map<string, Agent>;
@@ -184,6 +199,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.userProfiles = new Map();
+    this.seriesMap = new Map();
     this.bigIdeas = new Map();
     this.toolboxes = new Map();
     this.agents = new Map();
@@ -253,6 +269,50 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  // Series methods
+  async getSeries(): Promise<Series[]> {
+    return Array.from(this.seriesMap.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async getSeriesById(id: string): Promise<Series | undefined> {
+    return this.seriesMap.get(id);
+  }
+
+  async getSeriesBySlug(slug: string): Promise<Series | undefined> {
+    return Array.from(this.seriesMap.values()).find(s => s.slug === slug);
+  }
+
+  async getPublicSeries(): Promise<SeriesWithStats[]> {
+    return Array.from(this.seriesMap.values())
+      .filter(s => s.isPublic && s.isActive)
+      .map(s => ({ ...s, totalBigIdeas: 0, totalToolboxes: 0, totalAgents: 0 }));
+  }
+
+  async getSeriesWithHierarchy(id: string): Promise<SeriesWithHierarchy | undefined> {
+    const s = this.seriesMap.get(id);
+    if (!s) return undefined;
+    return { ...s, totalBigIdeas: 0, totalToolboxes: 0, totalAgents: 0, bigIdeas: [] };
+  }
+
+  async createSeries(data: InsertSeries, userId: string): Promise<Series> {
+    const id = randomUUID();
+    const s: Series = { ...data, id, userId, isActive: true, createdAt: new Date().toISOString() };
+    this.seriesMap.set(id, s);
+    return s;
+  }
+
+  async updateSeries(id: string, data: Partial<InsertSeries>): Promise<Series | undefined> {
+    const s = this.seriesMap.get(id);
+    if (!s) return undefined;
+    const updated: Series = { ...s, ...data };
+    this.seriesMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteSeries(id: string): Promise<boolean> {
+    return this.seriesMap.delete(id);
+  }
+
   // Big Idea methods
   async getBigIdeas(): Promise<BigIdea[]> {
     return Array.from(this.bigIdeas.values()).sort(
@@ -284,6 +344,8 @@ export class MemStorage implements IStorage {
       goals: insertBigIdea.goals || [],
       targetAudience: insertBigIdea.targetAudience || "",
       expectedOutcome: insertBigIdea.expectedOutcome || "",
+      seriesId: insertBigIdea.seriesId || undefined,
+      sortOrder: insertBigIdea.sortOrder || 0,
       isActive: true,
       createdAt: new Date().toISOString(),
     };
@@ -304,6 +366,8 @@ export class MemStorage implements IStorage {
       goals: data.goals !== undefined ? data.goals : bigIdea.goals,
       targetAudience: data.targetAudience !== undefined ? data.targetAudience : bigIdea.targetAudience,
       expectedOutcome: data.expectedOutcome !== undefined ? data.expectedOutcome : bigIdea.expectedOutcome,
+      seriesId: data.seriesId !== undefined ? data.seriesId : bigIdea.seriesId,
+      sortOrder: data.sortOrder !== undefined ? data.sortOrder : bigIdea.sortOrder,
     };
     
     this.bigIdeas.set(id, updated);

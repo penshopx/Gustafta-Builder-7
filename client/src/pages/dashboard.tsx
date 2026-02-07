@@ -34,6 +34,7 @@ import { CreateBigIdeaDialog } from "@/components/dialogs/create-big-idea-dialog
 import { CreateToolboxDialog } from "@/components/dialogs/create-toolbox-dialog";
 import { UserProfileDialog } from "@/components/dialogs/user-profile-dialog";
 import { ChatPopup } from "@/components/chat-popup";
+import { SeriesManagementDialog } from "@/components/series-management-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAgents, useActiveAgent, useSetActiveAgent } from "@/hooks/use-agents";
 import { useBigIdeas, useActiveBigIdea, useActivateBigIdea } from "@/hooks/use-big-ideas";
@@ -67,6 +68,7 @@ export default function Dashboard() {
   const [bigIdeaDialogOpen, setBigIdeaDialogOpen] = useState(false);
   const [toolboxDialogOpen, setToolboxDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -327,6 +329,18 @@ export default function Dashboard() {
       </nav>
 
       <div className={cn("border-t border-sidebar-border space-y-1", sidebarCollapsed ? "p-2" : "p-3")}>
+        <button
+          onClick={() => setSeriesDialogOpen(true)}
+          className={cn(
+            "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
+            sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+          )}
+          data-testid="button-series-management"
+          title={sidebarCollapsed ? "Chatbot Series" : undefined}
+        >
+          <BookOpen className="w-4 h-4 shrink-0" />
+          {!sidebarCollapsed && "Series"}
+        </button>
         <button
           onClick={() => setProfileDialogOpen(true)}
           className={cn(
@@ -604,6 +618,7 @@ export default function Dashboard() {
         />
       )}
       <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
+      <SeriesManagementDialog open={seriesDialogOpen} onOpenChange={setSeriesDialogOpen} />
     </div>
   );
 }

@@ -282,6 +282,106 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Series Routes ====================
+
+  // Public: Get all public series with stats
+  app.get("/api/series/public", async (_req, res) => {
+    try {
+      const allSeries = await storage.getPublicSeries();
+      res.json(allSeries);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch series" });
+    }
+  });
+
+  // Public: Get series detail with full hierarchy
+  app.get("/api/series/public/:idOrSlug", async (req, res) => {
+    try {
+      const param = req.params.idOrSlug as string;
+      let s = await storage.getSeriesBySlug(param);
+      if (!s) {
+        s = await storage.getSeriesById(param);
+      }
+      if (!s) {
+        return res.status(404).json({ error: "Series not found" });
+      }
+      if (!s.isPublic || !s.isActive) {
+        return res.status(404).json({ error: "Series not found" });
+      }
+      const hierarchy = await storage.getSeriesWithHierarchy(s.id);
+      res.json(hierarchy);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch series" });
+    }
+  });
+
+  // Admin: Get all series
+  app.get("/api/series", isAuthenticated, async (_req, res) => {
+    try {
+      const allSeries = await storage.getSeries();
+      res.json(allSeries);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch series" });
+    }
+  });
+
+  // Admin: Get single series with hierarchy
+  app.get("/api/series/:id", isAuthenticated, async (req, res) => {
+    try {
+      const hierarchy = await storage.getSeriesWithHierarchy(req.params.id as string);
+      if (!hierarchy) {
+        return res.status(404).json({ error: "Series not found" });
+      }
+      res.json(hierarchy);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch series" });
+    }
+  });
+
+  // Admin: Create series
+  app.post("/api/series", isAuthenticated, async (req: any, res) => {
+    try {
+      const { insertSeriesSchema } = await import("@shared/schema");
+      const parsed = insertSeriesSchema.parse(req.body);
+      const userId = req.user?.claims?.sub || "";
+      const created = await storage.createSeries(parsed, userId);
+      res.status(201).json(created);
+    } catch (error) {
+      console.error("Create series error:", error);
+      res.status(400).json({ error: "Failed to create series" });
+    }
+  });
+
+  // Admin: Update series
+  app.patch("/api/series/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { insertSeriesSchema } = await import("@shared/schema");
+      const partialSchema = insertSeriesSchema.partial();
+      const parsed = partialSchema.parse(req.body);
+      const updated = await storage.updateSeries(req.params.id as string, parsed);
+      if (!updated) {
+        return res.status(404).json({ error: "Series not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Update series error:", error);
+      res.status(400).json({ error: "Failed to update series" });
+    }
+  });
+
+  // Admin: Delete series
+  app.delete("/api/series/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteSeries(req.params.id as string);
+      if (!deleted) {
+        return res.status(404).json({ error: "Series not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete series" });
+    }
+  });
+
   // ==================== Big Idea Routes (Protected) ====================
 
   // Get all big ideas

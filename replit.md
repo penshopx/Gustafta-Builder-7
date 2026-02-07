@@ -2,7 +2,7 @@
 
 ## Overview
 
-Gustafta is an AI chatbot builder platform designed to help users create, configure, and deploy intelligent conversational assistants. It features a two-panel dashboard for managing multiple chatbot agents, each with custom personas, knowledge bases, and multi-channel integrations. The platform supports various AI models and allows for extensive customization, including persona details, greeting messages, and language options. Users can integrate chatbots with popular messaging platforms, embed them as web widgets, and access analytics. Gustafta also includes a built-in assistant chatbot for guidance and offers templates for various industries. The platform supports a hierarchical structure for organizing chatbots: Big Idea (brand) → Toolbox (category) → Agent (chatbot), including "Orchestrator" chatbots for high-level management and "Module" chatbots for specific functions. A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots, decision summaries, and risk assessments. The platform integrates with Mayar.id for subscription management. Each chatbot has a dedicated public chat page (`/chat/:agentId`) serving as its "home" where end-users can interact directly without needing dashboard access.
+Gustafta is an AI chatbot builder platform designed to help users create, configure, and deploy intelligent conversational assistants. It features a two-panel dashboard for managing multiple chatbot agents, each with custom personas, knowledge bases, and multi-channel integrations. The platform supports various AI models and allows for extensive customization, including persona details, greeting messages, and language options. Users can integrate chatbots with popular messaging platforms, embed them as web widgets, and access analytics. Gustafta also includes a built-in assistant chatbot for guidance and offers templates for various industries. The platform supports a hierarchical structure for organizing chatbots: Series (topic package) → Big Idea (brand) → Toolbox (category) → Agent (chatbot), including "Orchestrator" chatbots for high-level management and "Module" chatbots for specific functions. The "Chatbot Series" feature allows organizing multiple Big Ideas into structured topic packages with public catalog and detail pages. A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots, decision summaries, and risk assessments. The platform integrates with Mayar.id for subscription management. Each chatbot has a dedicated public chat page (`/chat/:agentId`) serving as its "home" where end-users can interact directly without needing dashboard access.
 
 ## User Preferences
 
@@ -33,7 +33,7 @@ The server manages CRUD operations for agents, knowledge bases, integrations, me
 - **Database**: PostgreSQL (with in-memory fallback for development)
 - **Session Store**: connect-pg-simple
 
-The schema includes tables for `agents` (with extensive configuration options, AI model settings, enhanced persona fields, access control, and product monetization fields), `knowledgeBases`, `integrations`, `agentMessages`, `users`, `userProfiles`, `analytics`, `bigIdeas`, `toolboxes`, `subscriptionsNew`, `project_brain_templates`, `project_brain_instances`, `mini_apps`, `mini_app_results`, `clientSubscriptions` (end-user subscriptions to chatbot products), and `affiliates` (referral partnership tracking). A hierarchical structure (`bigIdeas` -> `toolboxes` -> `agents`) is enforced.
+The schema includes tables for `agents` (with extensive configuration options, AI model settings, enhanced persona fields, access control, and product monetization fields), `knowledgeBases`, `integrations`, `agentMessages`, `users`, `userProfiles`, `analytics`, `bigIdeas` (with `seriesId` and `sortOrder` fields), `toolboxes`, `series` (top-level grouping entity), `subscriptionsNew`, `project_brain_templates`, `project_brain_instances`, `mini_apps`, `mini_app_results`, `clientSubscriptions` (end-user subscriptions to chatbot products), and `affiliates` (referral partnership tracking). A hierarchical structure (`series` -> `bigIdeas` -> `toolboxes` -> `agents`) is enforced, where Series is the optional top-level grouping.
 
 ### Design Patterns
 - **Two-Panel Layout**: Left navigation, right content.
@@ -44,6 +44,7 @@ The schema includes tables for `agents` (with extensive configuration options, A
 - **Streaming Chat**: Real-time AI responses via Server-Sent Events (SSE).
 - **Project Brain**: Structured template and instance data for contextual chatbot interactions, with anti-prompt injection mechanisms.
 - **Mini Apps**: Configuration-driven, AI-powered applications that leverage Project Brain data for specialized outputs (e.g., project snapshots, risk radars).
+- **Chatbot Series**: Grouping multiple Big Ideas into structured topic packages with public catalog (`/series`), detail pages (`/series/:slug`), and admin management dialog in dashboard.
 
 ### UI/UX Decisions
 - Inspired by Botika Online's two-panel dashboard.
