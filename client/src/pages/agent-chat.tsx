@@ -261,18 +261,18 @@ function InstallBanner({ color, agentName }: { color: string; agentName: string 
   if (!deferredPrompt && !isIOS) return null;
 
   return (
-    <div className="w-full max-w-sm" data-testid="install-banner">
+    <div className="w-full max-w-sm">
       <button
         onClick={handleInstall}
         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all"
         style={{ backgroundColor: color }}
-        data-testid="button-install-app"
+       
       >
         <Smartphone className="w-4 h-4" />
         Install {agentName} di HP Anda
       </button>
       {showIOSGuide && isIOS && (
-        <div className="mt-2 p-3 bg-muted rounded-xl text-xs text-muted-foreground space-y-1" data-testid="ios-install-guide">
+        <div className="mt-2 p-3 bg-muted rounded-xl text-xs text-muted-foreground space-y-1">
           <p className="font-medium text-foreground">Cara install di iPhone/iPad:</p>
           <p>1. Tap tombol Share di Safari (kotak dengan panah ke atas)</p>
           <p>2. Scroll ke bawah, pilih "Add to Home Screen"</p>
@@ -836,7 +836,7 @@ export default function AgentChat() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-background flex items-center justify-center" data-testid="chat-loading">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
             <Bot className="w-8 h-8 text-primary" />
@@ -849,7 +849,7 @@ export default function AgentChat() {
 
   if (error || !config) {
     return (
-      <div className="min-h-[100dvh] bg-background flex items-center justify-center p-4" data-testid="chat-error">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-8 text-center space-y-4">
           <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
             <Bot className="w-8 h-8 text-destructive" />
@@ -859,7 +859,7 @@ export default function AgentChat() {
             Chatbot ini mungkin tidak aktif, tidak publik, atau link-nya tidak valid.
           </p>
           <a href="/">
-            <Button variant="outline" data-testid="button-back-home">
+            <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Kembali ke Beranda
             </Button>
@@ -881,7 +881,7 @@ export default function AgentChat() {
   ];
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden" data-testid="agent-chat-page">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {showRegistration && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
           <Card className="w-full max-w-md">
@@ -909,7 +909,7 @@ export default function AgentChat() {
                     onChange={(e) => setRegName(e.target.value)}
                     placeholder="Nama lengkap"
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    data-testid="input-reg-name"
+                   
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -920,7 +920,7 @@ export default function AgentChat() {
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="email@contoh.com"
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    data-testid="input-reg-email"
+                   
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -931,7 +931,7 @@ export default function AgentChat() {
                     onChange={(e) => setRegPhone(e.target.value)}
                     placeholder="08xxxxxxxxxx"
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    data-testid="input-reg-phone"
+                   
                   />
                 </div>
               </div>
@@ -939,7 +939,7 @@ export default function AgentChat() {
                 onClick={handleClientRegister}
                 disabled={!regName || !regEmail || registering}
                 className="w-full"
-                data-testid="button-register-client"
+               
               >
                 {registering ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 {registering ? "Mendaftar..." : "Mulai Chat"}
@@ -953,11 +953,11 @@ export default function AgentChat() {
       <header
         className="border-b px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 sticky top-0 z-50"
         style={{ backgroundColor: color }}
-        data-testid="chat-header"
+       
       >
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <a href="/">
-            <Button size="icon" variant="ghost" className="text-white shrink-0" data-testid="button-back">
+            <Button size="icon" variant="ghost" className="text-white shrink-0">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </a>
@@ -973,7 +973,7 @@ export default function AgentChat() {
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2" style={{ borderColor: color }} />
           </div>
           <div className="min-w-0">
-            <h1 className="text-white font-semibold text-sm sm:text-base truncate" data-testid="text-agent-name">
+            <h1 className="text-white font-semibold text-sm sm:text-base truncate">
               {config.name}
             </h1>
             <p className="text-white/60 text-[10px] sm:text-xs truncate max-w-[180px] sm:max-w-none">
@@ -990,21 +990,21 @@ export default function AgentChat() {
               setVoiceMode(!voiceMode);
               if (voiceMode) stopSpeaking();
             }}
-            data-testid="button-voice-mode"
+           
           >
             {voiceMode ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </Button>
           {hasMessages && (
             <>
-              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={exportChat} data-testid="button-export-chat">
+              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={exportChat}>
                 <Download className="w-4 h-4" />
               </Button>
-              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={clearChat} data-testid="button-clear-chat">
+              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={clearChat}>
                 <Trash2 className="w-4 h-4" />
               </Button>
             </>
           )}
-          <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={handleShare} data-testid="button-share">
+          <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={handleShare}>
             <Share2 className="w-4 h-4" />
           </Button>
         </div>
@@ -1013,7 +1013,7 @@ export default function AgentChat() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Welcome Screen - Rich Profile */}
         {!hasMessages && (
-          <div className="flex-1 overflow-y-auto" data-testid="chat-welcome">
+          <div className="flex-1 overflow-y-auto">
             <div className="flex flex-col items-center">
               {/* Hero Section with Gradient */}
               <div
@@ -1044,7 +1044,7 @@ export default function AgentChat() {
                     </div>
                   </div>
 
-                  <h2 className="text-white text-2xl sm:text-3xl font-bold mb-1" data-testid="text-welcome-name">
+                  <h2 className="text-white text-2xl sm:text-3xl font-bold mb-1">
                     {config.name}
                   </h2>
 
@@ -1056,17 +1056,17 @@ export default function AgentChat() {
 
                   <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
                     {config.category && (
-                      <Badge variant="secondary" className="bg-white/20 text-white border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate" data-testid="badge-category">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate">
                         {config.category}{config.subcategory ? ` / ${config.subcategory}` : ""}
                       </Badge>
                     )}
                     {config.communicationStyle && (
-                      <Badge variant="secondary" className="bg-white/15 text-white/90 border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate" data-testid="badge-style">
+                      <Badge variant="secondary" className="bg-white/15 text-white/90 border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate">
                         {styleLabels[config.communicationStyle] || config.communicationStyle}
                       </Badge>
                     )}
                     {config.toneOfVoice && config.toneOfVoice !== config.communicationStyle && (
-                      <Badge variant="secondary" className="bg-white/15 text-white/90 border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate" data-testid="badge-tone">
+                      <Badge variant="secondary" className="bg-white/15 text-white/90 border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate">
                         {styleLabels[config.toneOfVoice] || config.toneOfVoice}
                       </Badge>
                     )}
@@ -1092,7 +1092,7 @@ export default function AgentChat() {
 
                     {/* Description */}
                     {config.description && (
-                      <p className="text-sm text-muted-foreground leading-relaxed" data-testid="text-description">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
                         {config.description}
                       </p>
                     )}
@@ -1112,7 +1112,7 @@ export default function AgentChat() {
                     )}
 
                     {/* Feature Badges */}
-                    <div className="flex flex-wrap gap-1.5" data-testid="feature-badges">
+                    <div className="flex flex-wrap gap-1.5">
                       {featureBadges.filter(f => f.show).map((feature) => {
                         const Icon = feature.icon;
                         return (
@@ -1129,7 +1129,7 @@ export default function AgentChat() {
 
                     {/* Conversation Starters */}
                     {config.conversationStarters.length > 0 && (
-                      <div className="space-y-2" data-testid="conversation-starters">
+                      <div className="space-y-2">
                         <p className="text-xs text-muted-foreground font-medium">Mulai percakapan:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {config.conversationStarters.slice(0, 5).map((starter, idx) => (
@@ -1139,7 +1139,7 @@ export default function AgentChat() {
                               size="sm"
                               className="text-[11px] sm:text-xs"
                               onClick={() => sendMessage(starter)}
-                              data-testid={`button-starter-${idx}`}
+                             
                             >
                               {starter}
                             </Button>
@@ -1150,7 +1150,7 @@ export default function AgentChat() {
 
                     {/* Channels */}
                     {config.channels && config.channels.length > 0 && (
-                      <div className="space-y-2 pt-1" data-testid="channels-section">
+                      <div className="space-y-2 pt-1">
                         <p className="text-xs text-muted-foreground font-medium">
                           Tersedia juga di:
                         </p>
@@ -1170,7 +1170,7 @@ export default function AgentChat() {
                                   "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium",
                                   meta.bgColor, meta.color
                                 )}
-                                data-testid={`channel-badge-${channel.type}`}
+                               
                               >
                                 <Icon className="w-3.5 h-3.5" />
                                 {meta.label}
@@ -1208,7 +1208,7 @@ export default function AgentChat() {
                 <div
                   key={message.id}
                   className={cn("flex gap-2 sm:gap-3", message.role === "user" && "flex-row-reverse")}
-                  data-testid={`message-${message.id}`}
+                 
                 >
                   {message.role === "assistant" ? (
                     <AgentAvatar config={config} size="sm" color={color} />
@@ -1255,15 +1255,15 @@ export default function AgentChat() {
                                     src={file.fileUrl}
                                     alt={file.fileName}
                                     className="max-w-[200px] max-h-[200px] rounded-lg object-cover"
-                                    data-testid={`img-attachment-${fIdx}`}
+                                   
                                   />
                                 </a>
                               ) : file.category === "audio" ? (
-                                <audio controls className="max-w-[250px]" data-testid={`audio-attachment-${fIdx}`}>
+                                <audio controls className="max-w-[250px]">
                                   <source src={file.fileUrl} type={file.mimeType} />
                                 </audio>
                               ) : file.category === "video" ? (
-                                <video controls className="max-w-[250px] rounded-lg" data-testid={`video-attachment-${fIdx}`}>
+                                <video controls className="max-w-[250px] rounded-lg">
                                   <source src={file.fileUrl} type={file.mimeType} />
                                 </video>
                               ) : (
@@ -1275,7 +1275,7 @@ export default function AgentChat() {
                                     "flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs",
                                     message.role === "user" ? "bg-white/20 text-white" : "bg-background"
                                   )}
-                                  data-testid={`file-attachment-${fIdx}`}
+                                 
                                 >
                                   {getFileIcon(file.category)}
                                   <span className="truncate max-w-[150px]">{file.fileName}</span>
@@ -1302,7 +1302,7 @@ export default function AgentChat() {
                           <button
                             onClick={() => copyToClipboard(message.content, message.id)}
                             className="text-muted-foreground/60 hover-elevate rounded-full p-0.5"
-                            data-testid={`button-copy-${message.id}`}
+                           
                           >
                             {copiedId === message.id ? (
                               <Check className="w-3 h-3 text-green-500" />
@@ -1319,7 +1319,7 @@ export default function AgentChat() {
                               }
                             }}
                             className="text-muted-foreground/60 hover-elevate rounded-full p-0.5"
-                            data-testid={`button-speak-${message.id}`}
+                           
                           >
                             {isSpeaking && speakingMessageIdRef.current === message.id ? (
                               <VolumeX className="w-3 h-3" />
@@ -1333,7 +1333,7 @@ export default function AgentChat() {
                               "hover-elevate rounded-full p-0.5",
                               message.feedback === "up" ? "text-green-500" : "text-muted-foreground/60"
                             )}
-                            data-testid={`button-thumbsup-${message.id}`}
+                           
                           >
                             <ThumbsUp className="w-3 h-3" />
                           </button>
@@ -1343,7 +1343,7 @@ export default function AgentChat() {
                               "hover-elevate rounded-full p-0.5",
                               message.feedback === "down" ? "text-destructive" : "text-muted-foreground/60"
                             )}
-                            data-testid={`button-thumbsdown-${message.id}`}
+                           
                           >
                             <ThumbsDown className="w-3 h-3" />
                           </button>
@@ -1369,7 +1369,7 @@ export default function AgentChat() {
               )}
 
               {!isTyping && followUpSuggestions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1" data-testid="follow-up-suggestions">
+                <div className="flex flex-wrap gap-1.5 pt-1">
                   {followUpSuggestions.map((suggestion, idx) => (
                     <Button
                       key={idx}
@@ -1380,7 +1380,7 @@ export default function AgentChat() {
                         setFollowUpSuggestions([]);
                         sendMessage(suggestion);
                       }}
-                      data-testid={`button-followup-${idx}`}
+                     
                     >
                       {suggestion}
                     </Button>
@@ -1392,12 +1392,12 @@ export default function AgentChat() {
         )}
 
         {quotaError && (
-          <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm text-center" data-testid="quota-error">
+          <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm text-center">
             {quotaError}
           </div>
         )}
         {quotaInfo && !quotaError && (
-          <div className="px-4 py-1 bg-muted text-muted-foreground text-xs text-center" data-testid="quota-info">
+          <div className="px-4 py-1 bg-muted text-muted-foreground text-xs text-center">
             Kuota: {quotaInfo.dailyUsed}/{quotaInfo.dailyLimit} hari ini | {quotaInfo.monthlyUsed}/{quotaInfo.monthlyLimit} bulan ini
           </div>
         )}
@@ -1414,12 +1414,12 @@ export default function AgentChat() {
           )}
 
           {pendingFiles.length > 0 && (
-            <div className="flex flex-wrap gap-2 max-w-2xl mx-auto mb-2" data-testid="pending-files">
+            <div className="flex flex-wrap gap-2 max-w-2xl mx-auto mb-2">
               {pendingFiles.map((file, idx) => (
                 <div
                   key={idx}
                   className="flex items-center gap-1.5 bg-muted rounded-lg px-2.5 py-1.5 text-xs"
-                  data-testid={`pending-file-${idx}`}
+                 
                 >
                   {file.category === "image" ? (
                     <img src={file.fileUrl} alt={file.fileName} className="w-8 h-8 rounded object-cover" />
@@ -1431,7 +1431,7 @@ export default function AgentChat() {
                   <button
                     onClick={() => removePendingFile(idx)}
                     className="ml-0.5 text-muted-foreground/60 hover-elevate rounded-full"
-                    data-testid={`button-remove-file-${idx}`}
+                   
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1448,7 +1448,7 @@ export default function AgentChat() {
           )}
 
           {!isUploading && input && (input.match(/youtube\.com|youtu\.be/) || input.match(/drive\.google\.com|docs\.google\.com|1drv\.ms|onedrive\.live\.com|sharepoint\.com/)) && (
-            <div className="flex flex-wrap gap-1.5 max-w-2xl mx-auto mb-2" data-testid="detected-links">
+            <div className="flex flex-wrap gap-1.5 max-w-2xl mx-auto mb-2">
               {input.match(/youtube\.com|youtu\.be/) && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400 rounded-full text-[10px] font-medium">
                   <PlayCircle className="w-3 h-3" /> YouTube terdeteksi - akan dirangkum
@@ -1474,7 +1474,7 @@ export default function AgentChat() {
             className="hidden"
             onChange={handleFileSelect}
             accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.gif,.webp,.svg,.mp3,.wav,.webm,.ogg,.mp4,.mov,.zip,.rar"
-            data-testid="input-file-upload"
+           
           />
 
           <div className="flex gap-2 items-end max-w-2xl mx-auto">
@@ -1484,7 +1484,7 @@ export default function AgentChat() {
               onClick={() => fileInputRef.current?.click()}
               disabled={isTyping || isUploading}
               className="shrink-0 rounded-xl"
-              data-testid="button-attach-file"
+             
             >
               <Paperclip className="w-4 h-4" />
             </Button>
@@ -1501,7 +1501,7 @@ export default function AgentChat() {
               className="resize-none text-sm rounded-xl"
               rows={1}
               disabled={isTyping || isListening}
-              data-testid="input-chat-message"
+             
             />
             {speechSupported && (
               <Button
@@ -1510,7 +1510,7 @@ export default function AgentChat() {
                 onClick={toggleSpeech}
                 disabled={isTyping}
                 className="shrink-0 rounded-xl"
-                data-testid="button-voice-input"
+               
               >
                 {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </Button>
@@ -1521,7 +1521,7 @@ export default function AgentChat() {
               disabled={(!input.trim() && pendingFiles.length === 0) || isTyping || isListening}
               className="shrink-0 rounded-xl"
               style={{ backgroundColor: color }}
-              data-testid="button-send-message"
+             
             >
               <Send className="w-4 h-4" />
             </Button>

@@ -318,7 +318,7 @@ function PricingCard({ tier, onSelect, isLoading, selectedPlan }: PricingCardPro
           variant={tier.ctaVariant}
           onClick={() => onSelect(tier.planKey)}
           disabled={isLoading}
-          data-testid={`button-plan-${tier.name.toLowerCase().replace(/\s/g, '-')}`}
+         
         >
           {isCurrentlyLoading ? (
             <>
@@ -420,7 +420,7 @@ export default function Pricing() {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Masukkan nama lengkap"
-                data-testid="input-customer-name"
+               
               />
             </div>
             <div className="space-y-2">
@@ -431,7 +431,7 @@ export default function Pricing() {
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 placeholder="email@example.com"
-                data-testid="input-customer-email"
+               
               />
             </div>
             {!paymentStatus?.paymentConfigured && selectedPlan !== "free_trial" && (
@@ -447,7 +447,7 @@ export default function Pricing() {
             <Button 
               onClick={handleConfirmPayment}
               disabled={createSubscription.isPending}
-              data-testid="button-confirm-payment"
+             
             >
               {createSubscription.isPending ? (
                 <>
@@ -652,12 +652,12 @@ export default function Pricing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/dashboard">
-              <Button size="lg" className="gap-2" data-testid="button-start-trial">
+              <Button size="lg" className="gap-2">
                 <Zap className="h-4 w-4" />
                 Mulai Free Trial
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="gap-2" data-testid="button-contact-sales">
+            <Button size="lg" variant="outline" className="gap-2">
               <Headphones className="h-4 w-4" />
               Hubungi Sales
             </Button>

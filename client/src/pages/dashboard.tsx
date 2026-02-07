@@ -156,11 +156,11 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Button onClick={() => setBigIdeaDialogOpen(true)} variant="outline" className="w-full sm:w-auto" data-testid="button-create-first-bigidea">
+              <Button onClick={() => setBigIdeaDialogOpen(true)} variant="outline" className="w-full sm:w-auto">
                 <Lightbulb className="w-4 h-4 mr-2" />
                 Buat Big Idea
               </Button>
-              <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto" data-testid="button-create-first-agent">
+              <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 Buat Chatbot
               </Button>
@@ -208,7 +208,7 @@ export default function Dashboard() {
             <Button variant="ghost" className={cn(
               "w-full h-auto",
               sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
-            )} data-testid="button-bigidea-selector">
+            )}>
               <div className="flex items-center gap-2 min-w-0">
                 <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
                 {!sidebarCollapsed && (
@@ -232,7 +232,7 @@ export default function Dashboard() {
                   key={bi.id}
                   onClick={() => handleBigIdeaSelect(bi)}
                   className="gap-2"
-                  data-testid={`bigidea-option-${bi.id}`}
+                 
                 >
                   <Lightbulb className="w-4 h-4 text-yellow-500" />
                   <span className="truncate">{bi.name}</span>
@@ -241,7 +241,7 @@ export default function Dashboard() {
               ))
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setBigIdeaDialogOpen(true)} className="gap-2" data-testid="dropdown-create-bigidea">
+            <DropdownMenuItem onClick={() => setBigIdeaDialogOpen(true)} className="gap-2">
               <Plus className="w-4 h-4" />
               Buat Big Idea Baru
             </DropdownMenuItem>
@@ -253,7 +253,7 @@ export default function Dashboard() {
             <Button variant="ghost" className={cn(
               "w-full h-auto",
               sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
-            )} disabled={!activeBigIdea} data-testid="button-toolbox-selector">
+            )} disabled={!activeBigIdea}>
               <div className="flex items-center gap-2 min-w-0">
                 <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
                 {!sidebarCollapsed && (
@@ -277,7 +277,7 @@ export default function Dashboard() {
                   key={tb.id}
                   onClick={() => handleToolboxSelect(tb)}
                   className="gap-2"
-                  data-testid={`toolbox-option-${tb.id}`}
+                 
                 >
                   <Wrench className="w-4 h-4 text-blue-500" />
                   <span className="truncate">{tb.name}</span>
@@ -290,7 +290,7 @@ export default function Dashboard() {
               onClick={() => setToolboxDialogOpen(true)}
               className="gap-2"
               disabled={!activeBigIdea}
-              data-testid="dropdown-create-toolbox"
+             
             >
               <Plus className="w-4 h-4" />
               Buat Toolbox Baru
@@ -316,7 +316,7 @@ export default function Dashboard() {
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
               !activeAgent && "opacity-50 cursor-not-allowed"
             )}
-            data-testid={`nav-${item.id}`}
+           
             title={sidebarCollapsed ? item.label : undefined}
           >
             <item.icon className="w-4 h-4 shrink-0" />
@@ -335,7 +335,7 @@ export default function Dashboard() {
             "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
             sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
           )}
-          data-testid="button-series-management"
+         
           title={sidebarCollapsed ? "Chatbot Series" : undefined}
         >
           <BookOpen className="w-4 h-4 shrink-0" />
@@ -347,7 +347,7 @@ export default function Dashboard() {
             "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
             sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
           )}
-          data-testid="button-user-profile"
+         
           title={sidebarCollapsed ? "Profil" : undefined}
         >
           <Avatar className="w-6 h-6 shrink-0">
@@ -364,7 +364,7 @@ export default function Dashboard() {
               "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
               sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
             )}
-            data-testid="nav-home"
+           
             title={sidebarCollapsed ? "Beranda" : undefined}
           >
             <Home className="w-4 h-4 shrink-0" />
@@ -378,7 +378,7 @@ export default function Dashboard() {
             "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
             sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
           )}
-          data-testid="button-toggle-sidebar"
+         
           title={sidebarCollapsed ? "Perluas Sidebar" : "Ciutkan Sidebar"}
         >
           {sidebarCollapsed ? (
@@ -421,7 +421,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 md:gap-3">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-mobile-sidebar">
+                <Button variant="ghost" size="icon" className="md:hidden">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -449,7 +449,7 @@ export default function Dashboard() {
                   variant="ghost"
                   className="gap-1 md:gap-2 px-2 md:px-3 max-w-[180px] md:max-w-none"
                   disabled={agentsLoading}
-                  data-testid="button-agent-switcher"
+                 
                 >
                   {activeAgent ? (
                     <>
@@ -481,7 +481,7 @@ export default function Dashboard() {
                       key={agent.id}
                       onClick={() => handleAgentSelect(agent)}
                       className="gap-2"
-                      data-testid={`agent-option-${agent.id}`}
+                     
                     >
                       <Avatar className="w-6 h-6">
                         <AvatarFallback className={cn(
@@ -509,7 +509,7 @@ export default function Dashboard() {
                 <DropdownMenuItem
                   onClick={() => setCreateDialogOpen(true)}
                   className="gap-2"
-                  data-testid="dropdown-create-agent"
+                 
                 >
                   <Plus className="w-4 h-4" />
                   Buat Chatbot Baru
@@ -524,7 +524,7 @@ export default function Dashboard() {
               onClick={() => setCreateDialogOpen(true)}
               size="sm"
               className="hidden sm:flex"
-              data-testid="button-create-agent-header"
+             
             >
               <Plus className="w-4 h-4 mr-2" />
               New Chatbot
@@ -533,7 +533,7 @@ export default function Dashboard() {
               onClick={() => setCreateDialogOpen(true)}
               size="icon"
               className="sm:hidden"
-              data-testid="button-create-agent-header-mobile"
+             
             >
               <Plus className="w-4 h-4" />
             </Button>
@@ -558,7 +558,7 @@ export default function Dashboard() {
                     : "text-muted-foreground",
                   !activeAgent && "opacity-50"
                 )}
-                data-testid={`mobile-nav-${item.id}`}
+               
               >
                 <item.icon className="w-5 h-5" />
                 <span className="text-[10px] font-medium truncate">{item.shortLabel}</span>
@@ -571,7 +571,7 @@ export default function Dashboard() {
                     "flex flex-col items-center justify-center gap-0.5 px-2 py-1 min-w-0 flex-1",
                     navItems.slice(5).some((item) => activeNav === item.id) ? "text-primary" : "text-muted-foreground"
                   )}
-                  data-testid="mobile-nav-more"
+                 
                 >
                   <Settings className="w-5 h-5" />
                   <span className="text-[10px] font-medium">More</span>
@@ -583,7 +583,7 @@ export default function Dashboard() {
                     key={item.id}
                     onClick={() => setActiveNav(item.id)}
                     className="gap-2"
-                    data-testid={`mobile-nav-more-${item.id}`}
+                   
                   >
                     <item.icon className="w-4 h-4" />
                     {item.label}

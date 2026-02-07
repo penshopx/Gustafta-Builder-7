@@ -123,22 +123,22 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-2xl font-bold text-foreground" data-testid="text-analytics-title">Analytics</h2>
+            <h2 className="text-2xl font-bold text-foreground">Analytics</h2>
             <p className="text-muted-foreground mt-1">Track your chatbot performance and engagement</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" data-testid="button-export-conversations">
+              <Button variant="outline" size="sm">
                 <Download className="w-4 h-4 mr-2" />
                 Export Percakapan
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => exportConversations("json")} data-testid="menu-export-json">
+              <DropdownMenuItem onClick={() => exportConversations("json")}>
                 <FileJson className="w-4 h-4 mr-2" />
                 Export sebagai JSON
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => exportConversations("csv")} data-testid="menu-export-csv">
+              <DropdownMenuItem onClick={() => exportConversations("csv")}>
                 <FileSpreadsheet className="w-4 h-4 mr-2" />
                 Export sebagai CSV
               </DropdownMenuItem>
@@ -166,7 +166,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
                       <MessageSquare className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold" data-testid="text-total-messages">
+                      <p className="text-2xl font-bold">
                         {analytics?.totalMessages || 0}
                       </p>
                       <p className="text-sm text-muted-foreground">Total Messages</p>
@@ -182,7 +182,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
                       <Users className="w-6 h-6 text-green-500" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold" data-testid="text-total-sessions">
+                      <p className="text-2xl font-bold">
                         {analytics?.totalSessions || 0}
                       </p>
                       <p className="text-sm text-muted-foreground">Sessions</p>
@@ -198,7 +198,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
                       <Zap className="w-6 h-6 text-orange-500" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold" data-testid="text-integration-calls">
+                      <p className="text-2xl font-bold">
                         {analytics?.totalIntegrationCalls || 0}
                       </p>
                       <p className="text-sm text-muted-foreground">Integration Calls</p>
@@ -217,7 +217,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
                 <CardDescription>Daily message activity for your chatbot</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-48 flex items-end justify-between gap-2" data-testid="chart-messages-7days">
+                <div className="h-48 flex items-end justify-between gap-2">
                   {(analytics?.messagesLast7Days || [0, 0, 0, 0, 0, 0, 0]).map((count, index) => {
                     const height = maxMessages > 0 ? (count / maxMessages) * 100 : 0;
                     return (
@@ -245,7 +245,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
                   <CardDescription>Rekomendasi berdasarkan data Anda</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3" data-testid="list-insights">
+                  <div className="space-y-3">
                     {insights.map((insight, index) => (
                       <div key={index} className="flex items-start gap-3">
                         <div className={`p-1.5 rounded-full ${
@@ -269,7 +269,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
               <Card>
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-primary" data-testid="text-avg-messages">
+                    <p className="text-3xl font-bold text-primary">
                       {avgMessagesPerDay}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">Rata-rata pesan/hari</p>
@@ -279,7 +279,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
               <Card>
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-green-500" data-testid="text-avg-session">
+                    <p className="text-3xl font-bold text-green-500">
                       {avgMessagesPerSession}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">Pesan per sesi</p>
@@ -289,7 +289,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
               <Card>
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-amber-500" data-testid="text-total-week">
+                    <p className="text-3xl font-bold text-amber-500">
                       {totalMessagesThisWeek}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">Total minggu ini</p>
@@ -309,7 +309,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
                 </CardHeader>
                 <CardContent>
                   {analytics?.topHours && analytics.topHours.length > 0 ? (
-                    <div className="space-y-3" data-testid="list-peak-hours">
+                    <div className="space-y-3">
                       {analytics.topHours.map((item, index) => (
                         <div key={item.hour} className="flex items-center gap-3">
                           <span className="text-sm font-medium w-16">{formatHour(item.hour)}</span>
@@ -344,7 +344,7 @@ export function AnalyticsPanel({ agent }: AnalyticsPanelProps) {
                   <CardDescription>Suggestions to improve engagement</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3" data-testid="list-performance-tips">
+                  <ul className="space-y-3">
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
                       <span className="text-sm text-muted-foreground">

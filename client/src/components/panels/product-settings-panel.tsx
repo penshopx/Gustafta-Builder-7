@@ -123,7 +123,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
             <ShoppingBag className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-foreground" data-testid="text-product-settings-title">
+            <h2 className="text-2xl font-bold text-foreground">
               Pengaturan Produk
             </h2>
             <p className="text-muted-foreground">Konfigurasi monetisasi chatbot Anda</p>
@@ -132,7 +132,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
         <Button
           onClick={handleSave}
           disabled={updateMutation.isPending}
-          data-testid="button-save-product-settings"
+         
         >
           {updateMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
@@ -157,7 +157,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                 <Switch
                   checked={settings.isListed}
                   onCheckedChange={(checked) => setSettings({ ...settings, isListed: checked })}
-                  data-testid="switch-is-listed"
+                 
                 />
               </div>
 
@@ -167,7 +167,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   value={settings.productSlug}
                   onChange={(e) => setSettings({ ...settings, productSlug: e.target.value })}
                   placeholder="nama-produk-unik"
-                  data-testid="input-product-slug"
+                 
                 />
                 <p className="text-xs text-muted-foreground">Identifier URL-friendly untuk produk Anda</p>
               </div>
@@ -179,7 +179,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   onChange={(e) => setSettings({ ...settings, productSummary: e.target.value })}
                   placeholder="Deskripsi singkat tentang chatbot Anda untuk calon pelanggan..."
                   rows={3}
-                  data-testid="textarea-product-summary"
+                 
                 />
               </div>
 
@@ -196,14 +196,14 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                         addFeature();
                       }
                     }}
-                    data-testid="input-new-feature"
+                   
                   />
                   <Button
                     size="icon"
                     variant="outline"
                     onClick={addFeature}
                     disabled={!newFeature.trim()}
-                    data-testid="button-add-feature"
+                   
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
@@ -211,12 +211,12 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                 {settings.productFeatures.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {settings.productFeatures.map((feature, index) => (
-                      <Badge key={index} variant="secondary" className="gap-1" data-testid={`badge-feature-${index}`}>
+                      <Badge key={index} variant="secondary" className="gap-1">
                         {feature}
                         <button
                           onClick={() => removeFeature(index)}
                           className="ml-1 hover:text-destructive"
-                          data-testid={`button-remove-feature-${index}`}
+                         
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -245,7 +245,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   onChange={(e) => setSettings({ ...settings, monthlyPrice: parseInt(e.target.value) || 0 })}
                   placeholder="0"
                   min={0}
-                  data-testid="input-monthly-price"
+                 
                 />
                 <p className="text-xs text-muted-foreground">
                   Harga saat ini: {formatCurrency(settings.monthlyPrice)}
@@ -260,7 +260,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                 <Switch
                   checked={settings.trialEnabled}
                   onCheckedChange={(checked) => setSettings({ ...settings, trialEnabled: checked })}
-                  data-testid="switch-trial-enabled"
+                 
                 />
               </div>
 
@@ -273,7 +273,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                     onChange={(e) => setSettings({ ...settings, trialDays: parseInt(e.target.value) || 0 })}
                     placeholder="7"
                     min={1}
-                    data-testid="input-trial-days"
+                   
                   />
                 </div>
               )}
@@ -299,7 +299,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   onChange={(e) => setSettings({ ...settings, messageQuotaDaily: parseInt(e.target.value) || 0 })}
                   placeholder="50"
                   min={0}
-                  data-testid="input-message-quota-daily"
+                 
                 />
               </div>
 
@@ -311,7 +311,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   onChange={(e) => setSettings({ ...settings, messageQuotaMonthly: parseInt(e.target.value) || 0 })}
                   placeholder="1000"
                   min={0}
-                  data-testid="input-message-quota-monthly"
+                 
                 />
               </div>
 
@@ -323,7 +323,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                 <Switch
                   checked={settings.requireRegistration}
                   onCheckedChange={(checked) => setSettings({ ...settings, requireRegistration: checked })}
-                  data-testid="switch-require-registration"
+                 
                 />
               </div>
             </CardContent>
@@ -344,7 +344,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   value={settings.brandingName}
                   onChange={(e) => setSettings({ ...settings, brandingName: e.target.value })}
                   placeholder="Nama brand chatbot Anda"
-                  data-testid="input-branding-name"
+                 
                 />
               </div>
 
@@ -354,7 +354,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   value={settings.brandingLogo}
                   onChange={(e) => setSettings({ ...settings, brandingLogo: e.target.value })}
                   placeholder="https://example.com/logo.png"
-                  data-testid="input-branding-logo"
+                 
                 />
                 {settings.brandingLogo && (
                   <div className="mt-2 p-2 border rounded-md inline-block">
@@ -363,7 +363,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                       alt="Logo preview"
                       className="h-10 w-auto object-contain"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      data-testid="img-branding-logo-preview"
+                     
                     />
                   </div>
                 )}
@@ -387,13 +387,13 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                     value={getMarketplaceUrl()}
                     readOnly
                     className="text-sm"
-                    data-testid="input-marketplace-url"
+                   
                   />
                   <Button
                     size="icon"
                     variant="outline"
                     onClick={copyMarketplaceUrl}
-                    data-testid="button-copy-marketplace-url"
+                   
                   >
                     {copiedMarketplace ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
@@ -407,13 +407,13 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                     value={getChatUrl()}
                     readOnly
                     className="text-sm"
-                    data-testid="input-chat-url"
+                   
                   />
                   <Button
                     size="icon"
                     variant="outline"
                     onClick={copyChatUrl}
-                    data-testid="button-copy-chat-url"
+                   
                   >
                     {copiedChat ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>

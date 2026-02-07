@@ -78,17 +78,17 @@ export function RevenuPanel({ agent }: { agent: any }) {
           <TrendingUp className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground" data-testid="text-revenue-title">
+          <h2 className="text-2xl font-bold text-foreground">
             Revenue & Klien
           </h2>
           <p className="text-muted-foreground">Kelola pelanggan dan pantau pendapatan chatbot</p>
         </div>
       </div>
 
-      <Tabs defaultValue="ringkasan" data-testid="tabs-revenue">
-        <TabsList data-testid="tabs-list-revenue">
-          <TabsTrigger value="ringkasan" data-testid="tab-ringkasan">Ringkasan</TabsTrigger>
-          <TabsTrigger value="klien" data-testid="tab-klien">Klien</TabsTrigger>
+      <Tabs defaultValue="ringkasan">
+        <TabsList>
+          <TabsTrigger value="ringkasan">Ringkasan</TabsTrigger>
+          <TabsTrigger value="klien">Klien</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ringkasan">
@@ -100,7 +100,7 @@ export function RevenuPanel({ agent }: { agent: any }) {
                     <Users className="w-6 h-6 text-blue-500" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold" data-testid="text-total-clients">{totalClients}</p>
+                    <p className="text-2xl font-bold">{totalClients}</p>
                     <p className="text-sm text-muted-foreground">Total Klien</p>
                   </div>
                 </div>
@@ -114,7 +114,7 @@ export function RevenuPanel({ agent }: { agent: any }) {
                     <UserCheck className="w-6 h-6 text-green-500" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold" data-testid="text-active-clients">{activeClients}</p>
+                    <p className="text-2xl font-bold">{activeClients}</p>
                     <p className="text-sm text-muted-foreground">Klien Aktif</p>
                   </div>
                 </div>
@@ -128,7 +128,7 @@ export function RevenuPanel({ agent }: { agent: any }) {
                     <DollarSign className="w-6 h-6 text-emerald-500" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold" data-testid="text-revenue-month">{formatCurrency(revenueThisMonth)}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(revenueThisMonth)}</p>
                     <p className="text-sm text-muted-foreground">Revenue Bulan Ini</p>
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export function RevenuPanel({ agent }: { agent: any }) {
                     <Calendar className="w-6 h-6 text-orange-500" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold" data-testid="text-trial-clients">{trialClients}</p>
+                    <p className="text-2xl font-bold">{trialClients}</p>
                     <p className="text-sm text-muted-foreground">Trial Aktif</p>
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export function RevenuPanel({ agent }: { agent: any }) {
           {totalClients === 0 && (
             <div className="text-center py-12">
               <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground" data-testid="text-no-clients">Tidak ada data klien</p>
+              <p className="text-muted-foreground">Tidak ada data klien</p>
             </div>
           )}
         </TabsContent>
@@ -173,26 +173,26 @@ export function RevenuPanel({ agent }: { agent: any }) {
             ) : clients.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground" data-testid="text-no-clients-list">Tidak ada data klien</p>
+                <p className="text-muted-foreground">Tidak ada data klien</p>
               </div>
             ) : (
               clients.map((client: any) => (
-                <Card key={client.id} data-testid={`card-client-${client.id}`}>
+                <Card key={client.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-foreground" data-testid={`text-client-name-${client.id}`}>
+                          <p className="font-medium text-foreground">
                             {client.customerName}
                           </p>
-                          <Badge variant={getPlanBadgeVariant(client.plan)} data-testid={`badge-plan-${client.id}`}>
+                          <Badge variant={getPlanBadgeVariant(client.plan)}>
                             {client.plan}
                           </Badge>
-                          <Badge variant={getStatusBadgeVariant(client.status)} data-testid={`badge-status-${client.id}`}>
+                          <Badge variant={getStatusBadgeVariant(client.status)}>
                             {client.status}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1" data-testid={`text-client-email-${client.id}`}>
+                        <p className="text-sm text-muted-foreground mt-1">
                           {client.customerEmail}
                         </p>
                         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
@@ -211,7 +211,7 @@ export function RevenuPanel({ agent }: { agent: any }) {
                         variant="ghost"
                         onClick={() => deleteMutation.mutate(client.id)}
                         disabled={deleteMutation.isPending}
-                        data-testid={`button-delete-client-${client.id}`}
+                       
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>

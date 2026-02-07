@@ -167,7 +167,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {view !== "list" && (
-              <Button variant="ghost" size="icon" onClick={resetForm} data-testid="button-back-list">
+              <Button variant="ghost" size="icon" onClick={resetForm}>
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             )}
@@ -181,7 +181,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
         {view === "list" && (
           <div className="space-y-4">
-            <Button onClick={() => setView("create")} className="w-full" data-testid="button-create-series">
+            <Button onClick={() => setView("create")} className="w-full">
               <Plus className="w-4 h-4 mr-2" />
               Buat Series Baru
             </Button>
@@ -200,7 +200,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
             {allSeries.map((s: any) => {
               const assigned = getAssignedBigIdeas(String(s.id));
               return (
-                <Card key={s.id} data-testid={`admin-series-${s.id}`}>
+                <Card key={s.id}>
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start gap-3">
                       <div
@@ -239,7 +239,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(s)} data-testid={`button-edit-series-${s.id}`}>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(s)}>
                         <Edit className="w-3.5 h-3.5 mr-1" />
                         Edit
                       </Button>
@@ -247,7 +247,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                         variant="outline"
                         size="sm"
                         onClick={() => setAssignOpen(assignOpen === String(s.id) ? null : String(s.id))}
-                        data-testid={`button-assign-bi-${s.id}`}
+                       
                       >
                         <Layers className="w-3.5 h-3.5 mr-1" />
                         Big Ideas ({assigned.length})
@@ -257,7 +257,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                           variant="outline"
                           size="sm"
                           onClick={() => window.open(`/series/${s.slug}`, "_blank")}
-                          data-testid={`button-view-series-${s.id}`}
+                         
                         >
                           <Eye className="w-3.5 h-3.5 mr-1" />
                           Lihat
@@ -270,12 +270,12 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                           navigator.clipboard.writeText(`${window.location.origin}/series/${s.slug}`);
                           toast({ title: "Link disalin!" });
                         }}
-                        data-testid={`button-copy-link-${s.id}`}
+                       
                       >
                         <Copy className="w-3.5 h-3.5 mr-1" />
                         Link
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(String(s.id))} data-testid={`button-delete-series-${s.id}`}>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(String(s.id))}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
@@ -294,7 +294,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                               size="sm"
                               onClick={() => assignBigIdeaMutation.mutate({ bigIdeaId: bi.id, seriesId: null })}
                               className="text-xs shrink-0"
-                              data-testid={`button-remove-bi-${bi.id}`}
+                             
                             >
                               Hapus
                             </Button>
@@ -311,7 +311,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                                   size="sm"
                                   onClick={() => assignBigIdeaMutation.mutate({ bigIdeaId: bi.id, seriesId: String(s.id) })}
                                   className="text-xs shrink-0"
-                                  data-testid={`button-add-bi-${bi.id}`}
+                                 
                                 >
                                   <Plus className="w-3 h-3 mr-1" />
                                   Tambah
@@ -341,7 +341,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 }}
                 className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
                 placeholder="Contoh: Chatbot Bisnis Online"
-                data-testid="input-series-name"
+               
               />
             </div>
 
@@ -353,7 +353,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 onChange={(e) => setForm({ ...form, slug: generateSlug(e.target.value) })}
                 className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
                 placeholder="chatbot-bisnis-online"
-                data-testid="input-series-slug"
+               
               />
             </div>
 
@@ -365,7 +365,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 onChange={(e) => setForm({ ...form, tagline: e.target.value })}
                 className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
                 placeholder="Deskripsi singkat"
-                data-testid="input-series-tagline"
+               
               />
             </div>
 
@@ -376,7 +376,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm min-h-[80px]"
                 placeholder="Deskripsi lengkap series..."
-                data-testid="input-series-description"
+               
               />
             </div>
 
@@ -389,7 +389,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
                   placeholder="Bisnis, Edukasi, dll"
-                  data-testid="input-series-category"
+                 
                 />
               </div>
               <div>
@@ -398,7 +398,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                   value={form.language}
                   onChange={(e) => setForm({ ...form, language: e.target.value })}
                   className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
-                  data-testid="select-series-language"
+                 
                 >
                   <option value="id">Indonesia</option>
                   <option value="en">English</option>
@@ -416,7 +416,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                     value={form.color}
                     onChange={(e) => setForm({ ...form, color: e.target.value })}
                     className="w-10 h-9 rounded border cursor-pointer"
-                    data-testid="input-series-color"
+                   
                   />
                   <input
                     type="text"
@@ -434,7 +434,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                   onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
                   className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
                   placeholder="https://..."
-                  data-testid="input-series-cover"
+                 
                 />
               </div>
             </div>
@@ -450,7 +450,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 }}
                 className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
                 placeholder="bisnis, online, chatbot"
-                data-testid="input-series-tags"
+               
               />
             </div>
 
@@ -460,7 +460,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 <Switch
                   checked={form.isPublic}
                   onCheckedChange={(checked) => setForm({ ...form, isPublic: checked })}
-                  data-testid="switch-series-public"
+                 
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -468,7 +468,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 <Switch
                   checked={form.isActive}
                   onCheckedChange={(checked) => setForm({ ...form, isActive: checked })}
-                  data-testid="switch-series-active"
+                 
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -476,20 +476,20 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 <Switch
                   checked={form.isFeatured}
                   onCheckedChange={(checked) => setForm({ ...form, isFeatured: checked })}
-                  data-testid="switch-series-featured"
+                 
                 />
               </div>
             </div>
 
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" onClick={resetForm} className="flex-1" data-testid="button-cancel-series">
+              <Button variant="outline" onClick={resetForm} className="flex-1">
                 Batal
               </Button>
               <Button
                 onClick={handleSubmit}
                 className="flex-1"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                data-testid="button-save-series"
+               
               >
                 {createMutation.isPending || updateMutation.isPending ? "Menyimpan..." : view === "edit" ? "Perbarui" : "Buat Series"}
               </Button>

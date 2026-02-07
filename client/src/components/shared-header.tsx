@@ -28,7 +28,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     <header className={`sticky top-0 z-50 border-b ${transparent ? "bg-background/80" : "bg-background/95"} backdrop-blur`}>
       <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between gap-4">
         <Link href="/">
-          <div className="flex items-center gap-2 cursor-pointer" data-testid="link-home">
+          <div className="flex items-center gap-2 cursor-pointer">
             <Bot className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             <span className="text-lg md:text-xl font-bold">Gustafta</span>
           </div>
@@ -39,7 +39,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive(item.href) ? "secondary" : "ghost"}
-                data-testid={`button-nav-${item.label.toLowerCase()}`}
+               
               >
                 {item.label}
               </Button>
@@ -49,7 +49,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             <Link href="/subscription">
               <Button
                 variant={isActive("/subscription") ? "secondary" : "ghost"}
-                data-testid="button-nav-subscription"
+               
               >
                 <CreditCard className="h-4 w-4 mr-2" />
                 Langganan
@@ -62,13 +62,13 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
           ) : isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link href="/dashboard">
-                <Button data-testid="button-go-dashboard">
+                <Button>
                   <LayoutDashboard className="h-4 w-4 mr-2" />
                   Dashboard
                 </Button>
               </Link>
               <a href="/api/logout">
-                <Button variant="ghost" size="icon" data-testid="button-logout">
+                <Button variant="ghost" size="icon">
                   <LogOut className="h-4 w-4" />
                 </Button>
               </a>
@@ -79,7 +79,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             </div>
           ) : (
             <a href="/api/login">
-              <Button className="gap-2" data-testid="button-login">
+              <Button className="gap-2">
                 <LogIn className="h-4 w-4" />
                 Masuk
               </Button>
@@ -91,7 +91,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
           <ThemeToggle />
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="button-mobile-menu">
+              <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -127,13 +127,13 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                   {isAuthenticated ? (
                     <div className="space-y-2">
                       <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <Button className="w-full" data-testid="mobile-button-dashboard">
+                        <Button className="w-full">
                           <LayoutDashboard className="h-4 w-4 mr-2" />
                           Dashboard
                         </Button>
                       </Link>
                       <a href="/api/logout">
-                        <Button variant="outline" className="w-full gap-2" data-testid="mobile-button-logout">
+                        <Button variant="outline" className="w-full gap-2">
                           <LogOut className="h-4 w-4" />
                           Keluar
                         </Button>
@@ -141,7 +141,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                     </div>
                   ) : (
                     <a href="/api/login">
-                      <Button className="w-full gap-2" data-testid="mobile-button-login">
+                      <Button className="w-full gap-2">
                         <LogIn className="h-4 w-4" />
                         Masuk
                       </Button>

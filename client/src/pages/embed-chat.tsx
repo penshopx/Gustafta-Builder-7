@@ -227,7 +227,7 @@ export default function EmbedChat() {
                   size="sm"
                   className="text-xs h-auto py-1.5 px-3"
                   onClick={() => sendMessage(starter)}
-                  data-testid={`quick-reply-${idx}`}
+                 
                 >
                   {starter}
                 </Button>
@@ -291,7 +291,7 @@ export default function EmbedChat() {
                 size="sm"
                 className="h-7 px-2"
                 onClick={() => handleRating("up")}
-                data-testid="button-rating-up"
+               
               >
                 <ThumbsUp className="w-4 h-4" />
               </Button>
@@ -300,7 +300,7 @@ export default function EmbedChat() {
                 size="sm"
                 className="h-7 px-2"
                 onClick={() => handleRating("down")}
-                data-testid="button-rating-down"
+               
               >
                 <ThumbsDown className="w-4 h-4" />
               </Button>
@@ -332,7 +332,7 @@ export default function EmbedChat() {
             className="min-h-[40px] max-h-[80px] resize-none text-sm rounded-xl"
             rows={1}
             disabled={isLoading}
-            data-testid="input-embed-message"
+           
           />
           <Button
             size="icon"
@@ -340,7 +340,7 @@ export default function EmbedChat() {
             disabled={!input.trim() || isLoading}
             className="shrink-0 h-10 w-10 rounded-xl"
             style={{ backgroundColor: color }}
-            data-testid="button-send-embed"
+           
           >
             <Send className="w-4 h-4" />
           </Button>

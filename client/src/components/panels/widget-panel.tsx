@@ -142,7 +142,7 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
           <Palette className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground" data-testid="text-widget-title">Widget Customization</h2>
+          <h2 className="text-2xl font-bold text-foreground">Widget Customization</h2>
           <p className="text-muted-foreground">Sesuaikan tampilan chat widget</p>
         </div>
       </div>
@@ -165,14 +165,14 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                     value={settings.widgetColor}
                     onChange={(e) => setSettings({ ...settings, widgetColor: e.target.value })}
                     className="w-12 h-9 p-1 cursor-pointer"
-                    data-testid="input-widget-color"
+                   
                   />
                   <Input
                     value={settings.widgetColor}
                     onChange={(e) => setSettings({ ...settings, widgetColor: e.target.value })}
                     className="flex-1"
                     placeholder="#6366f1"
-                    data-testid="input-widget-color-hex"
+                   
                   />
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -182,7 +182,7 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                       className="w-6 h-6 rounded-full border-2 border-transparent hover:border-foreground/30 transition-colors"
                       style={{ backgroundColor: color }}
                       onClick={() => setSettings({ ...settings, widgetColor: color })}
-                      data-testid={`button-color-${color.replace("#", "")}`}
+                     
                     />
                   ))}
                 </div>
@@ -194,12 +194,12 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                   value={settings.widgetButtonIcon}
                   onValueChange={(v) => setSettings({ ...settings, widgetButtonIcon: v })}
                 >
-                  <SelectTrigger data-testid="select-widget-icon">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {iconOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} data-testid={`icon-option-${opt.value}`}>
+                      <SelectItem key={opt.value} value={opt.value}>
                         <div className="flex items-center gap-2">
                           <opt.icon className="w-4 h-4" />
                           {opt.label}
@@ -216,12 +216,12 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                   value={settings.widgetBorderRadius}
                   onValueChange={(v) => setSettings({ ...settings, widgetBorderRadius: v })}
                 >
-                  <SelectTrigger data-testid="select-widget-radius">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {borderRadiusOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} data-testid={`radius-option-${opt.value}`}>
+                      <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>
                     ))}
@@ -245,12 +245,12 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                   value={settings.widgetPosition}
                   onValueChange={(v) => setSettings({ ...settings, widgetPosition: v })}
                 >
-                  <SelectTrigger data-testid="select-widget-position">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {positionOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} data-testid={`position-option-${opt.value}`}>
+                      <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>
                     ))}
@@ -264,12 +264,12 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                   value={settings.widgetSize}
                   onValueChange={(v) => setSettings({ ...settings, widgetSize: v })}
                 >
-                  <SelectTrigger data-testid="select-widget-size">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {sizeOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} data-testid={`size-option-${opt.value}`}>
+                      <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>
                     ))}
@@ -294,7 +294,7 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                   onChange={(e) => setSettings({ ...settings, widgetWelcomeMessage: e.target.value })}
                   placeholder="Halo! Ada yang bisa saya bantu hari ini?"
                   rows={2}
-                  data-testid="input-widget-welcome"
+                 
                 />
                 <p className="text-xs text-muted-foreground">
                   Kosongkan untuk menggunakan greeting message dari persona
@@ -309,13 +309,13 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                 <Switch
                   checked={settings.widgetShowBranding}
                   onCheckedChange={(v) => setSettings({ ...settings, widgetShowBranding: v })}
-                  data-testid="switch-widget-branding"
+                 
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Button onClick={handleSave} className="w-full" disabled={updateMutation.isPending} data-testid="button-save-widget">
+          <Button onClick={handleSave} className="w-full" disabled={updateMutation.isPending}>
             {updateMutation.isPending ? "Menyimpan..." : "Simpan Pengaturan"}
           </Button>
         </div>
@@ -348,7 +348,7 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                     ...(settings.widgetPosition === "top-right" ? { top: 16, right: 16 } : {}),
                     ...(settings.widgetPosition === "top-left" ? { top: 16, left: 16 } : {}),
                   }}
-                  data-testid="preview-widget-button"
+                 
                 >
                   <IconComponent className="w-6 h-6 text-white" />
                 </div>
@@ -369,18 +369,18 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                   value={getPublicChatUrl()}
                   readOnly
                   className="text-sm font-mono"
-                  data-testid="input-public-chat-url"
+                 
                 />
                 <Button
                   size="icon"
                   variant="outline"
                   onClick={copyChatLink}
-                  data-testid="button-copy-chat-link"
+                 
                 >
                   {chatLinkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>
                 <a href={`/chat/${agent.id}`} target="_blank" rel="noopener noreferrer">
-                  <Button size="icon" variant="outline" data-testid="button-open-chat-link">
+                  <Button size="icon" variant="outline">
                     <ExternalLink className="w-4 h-4" />
                   </Button>
                 </a>
@@ -411,7 +411,7 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                   variant="outline"
                   className="absolute top-2 right-2"
                   onClick={copyEmbedCode}
-                  data-testid="button-copy-embed"
+                 
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>

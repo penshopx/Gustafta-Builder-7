@@ -283,7 +283,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               {isAuthenticated ? (
                 <Link href="/dashboard">
-                  <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6" data-testid="button-start-now">
+                  <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6">
                     <Rocket className="h-5 w-5" />
                     Buka Dashboard
                     <ArrowRight className="h-5 w-5" />
@@ -291,14 +291,14 @@ export default function Landing() {
                 </Link>
               ) : (
                 <a href="/api/login" onClick={handleStartNowClick} className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full gap-2 text-lg px-8 py-6" data-testid="button-start-now">
+                  <Button size="lg" className="w-full gap-2 text-lg px-8 py-6">
                     <Rocket className="h-5 w-5" />
                     Mulai Gratis Sekarang
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </a>
               )}
-              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6" data-testid="button-watch-demo">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6">
                 <Play className="h-5 w-5" />
                 Lihat Demo
               </Button>
@@ -319,7 +319,7 @@ export default function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-1" data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
                   {stat.value}
                 </div>
                 <div className="text-sm text-muted-foreground">{stat.label}</div>
@@ -344,7 +344,7 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {painPoints.map((item, index) => (
-              <Card key={index} className="hover-elevate overflow-visible" data-testid={`card-pain-point-${index}`}>
+              <Card key={index} className="hover-elevate overflow-visible">
                 <CardContent className="p-6">
                   <div className="flex gap-4">
                     <div className="flex-shrink-0">
@@ -385,7 +385,7 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {steps.map((step, index) => (
-              <div key={step.number} className="relative" data-testid={`step-${step.number}`}>
+              <div key={step.number} className="relative">
                 {index < steps.length - 1 && (
                   <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-border" />
                 )}
@@ -404,7 +404,7 @@ export default function Landing() {
           <div className="text-center mt-10">
             {!isAuthenticated && (
               <a href="/api/login" onClick={handleStartNowClick}>
-                <Button size="lg" className="gap-2" data-testid="button-try-now">
+                <Button size="lg" className="gap-2">
                   <Target className="h-5 w-5" />
                   Coba Sekarang - Gratis
                 </Button>
@@ -429,7 +429,7 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature) => (
-              <Card key={feature.title} className="hover-elevate" data-testid={`card-feature-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
+              <Card key={feature.title} className="hover-elevate">
                 <CardContent className="p-6">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <feature.icon className="h-6 w-6 text-primary" />
@@ -468,14 +468,14 @@ export default function Landing() {
           <div className="text-center mt-10">
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button size="lg" className="gap-2" data-testid="button-explore-templates">
+                <Button size="lg" className="gap-2">
                   <Layers className="h-5 w-5" />
                   Jelajahi Semua Template
                 </Button>
               </Link>
             ) : (
               <a href="/api/login">
-                <Button size="lg" className="gap-2" data-testid="button-explore-templates-login">
+                <Button size="lg" className="gap-2">
                   <Layers className="h-5 w-5" />
                   Jelajahi Template
                   <ArrowRight className="h-5 w-5" />
@@ -501,7 +501,7 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover-elevate" data-testid={`card-testimonial-${index}`}>
+              <Card key={index} className="hover-elevate">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -544,7 +544,7 @@ export default function Landing() {
             <Card>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
-                  <table className="w-full" data-testid="table-comparison">
+                  <table className="w-full">
                     <thead>
                       <tr className="border-b">
                         <th className="text-left p-4 font-semibold">Fitur</th>
@@ -609,7 +609,7 @@ export default function Landing() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {advancedFeatures.map((feature) => (
-              <Card key={feature.title} className="hover-elevate" data-testid={`card-advanced-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
+              <Card key={feature.title} className="hover-elevate">
                 <CardContent className="p-6">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <feature.icon className="h-6 w-6 text-primary" />
@@ -660,13 +660,13 @@ export default function Landing() {
           </div>
           
           <div className="max-w-3xl mx-auto">
-            <Accordion type="single" collapsible className="w-full" data-testid="accordion-faq">
+            <Accordion type="single" collapsible className="w-full">
               {faqItems.map((item, index) => (
                 <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left" data-testid={`faq-trigger-${index}`}>
+                  <AccordionTrigger className="text-left">
                     {item.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground" data-testid={`faq-content-${index}`}>
+                  <AccordionContent className="text-muted-foreground">
                     {item.answer}
                   </AccordionContent>
                 </AccordionItem>
@@ -695,7 +695,7 @@ export default function Landing() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <Card className="hover-elevate" data-testid="card-dokumentender-engineering">
+              <Card className="hover-elevate">
                 <CardContent className="p-6">
                   <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
                     <Wrench className="h-6 w-6 text-emerald-500" />
@@ -706,7 +706,7 @@ export default function Landing() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="hover-elevate" data-testid="card-dokumentender-construction">
+              <Card className="hover-elevate">
                 <CardContent className="p-6">
                   <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
                     <Blocks className="h-6 w-6 text-emerald-500" />
@@ -721,13 +721,13 @@ export default function Landing() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" className="w-full sm:w-auto gap-2" data-testid="button-dokumentender-external">
+                <Button size="lg" className="w-full sm:w-auto gap-2">
                   <ExternalLink className="h-5 w-5" />
                   Buka chat.dokumentender.com
                 </Button>
               </a>
               <Link href="/chat/dokumentender">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2" data-testid="button-dokumentender-chat">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2">
                   <MessageSquare className="h-5 w-5" />
                   Chat di Gustafta
                 </Button>
@@ -776,7 +776,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6" data-testid="button-cta-dashboard">
+                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6">
                   <Rocket className="h-5 w-5" />
                   Buka Dashboard
                   <ArrowRight className="h-5 w-5" />
@@ -784,7 +784,7 @@ export default function Landing() {
               </Link>
             ) : (
               <a href="/api/login" onClick={handleStartNowClick}>
-                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6" data-testid="button-cta-signup">
+                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6">
                   <Rocket className="h-5 w-5" />
                   Mulai Gratis Sekarang
                   <ArrowRight className="h-5 w-5" />
@@ -792,7 +792,7 @@ export default function Landing() {
               </a>
             )}
             <Link href="/pricing" onClick={handlePricingClick}>
-              <Button size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" data-testid="button-cta-pricing">
+              <Button size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
                 Lihat Harga
               </Button>
             </Link>

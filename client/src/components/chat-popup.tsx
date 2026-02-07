@@ -76,7 +76,7 @@ export function ChatPopup({ agent }: ChatPopupProps) {
   const recentMessages = messages.slice(-50);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50" data-testid="chat-popup-container">
+    <div className="fixed bottom-4 right-4 z-50">
       {/* Chat Window */}
       <div
         className={cn(
@@ -85,7 +85,7 @@ export function ChatPopup({ agent }: ChatPopupProps) {
             ? "scale-100 opacity-100 pointer-events-auto"
             : "scale-95 opacity-0 pointer-events-none"
         )}
-        data-testid="chat-popup-window"
+       
       >
         {/* Header */}
         <div className="bg-primary p-4 flex items-center justify-between">
@@ -112,7 +112,7 @@ export function ChatPopup({ agent }: ChatPopupProps) {
             size="icon"
             onClick={() => setIsOpen(false)}
             className="text-primary-foreground hover:bg-primary-foreground/20"
-            data-testid="button-close-popup"
+           
           >
             <X className="w-5 h-5" />
           </Button>
@@ -192,14 +192,14 @@ export function ChatPopup({ agent }: ChatPopupProps) {
               placeholder="Type your message..."
               className="min-h-[44px] max-h-[100px] resize-none text-sm rounded-xl"
               rows={1}
-              data-testid="input-popup-message"
+             
             />
             <Button
               size="icon"
               onClick={handleSend}
               disabled={!input.trim() || sendMessage.isPending}
               className="shrink-0 h-11 w-11 rounded-xl"
-              data-testid="button-send-popup"
+             
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -222,7 +222,7 @@ export function ChatPopup({ agent }: ChatPopupProps) {
             "relative w-14 h-14 rounded-full shadow-lg transition-all duration-200",
             !isOpen && "animate-slow-pulse"
           )}
-          data-testid="button-open-popup"
+         
         >
           {isOpen ? (
             <X className="w-6 h-6" />

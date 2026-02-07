@@ -359,7 +359,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button data-testid="button-add-knowledge">
+            <Button>
               <Plus className="w-4 h-4 mr-2" />
               Tambah Knowledge
             </Button>
@@ -379,7 +379,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   value={newItem.name}
                   onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                   placeholder="FAQ Produk, Info Perusahaan, dll."
-                  data-testid="input-kb-name"
+                 
                 />
               </div>
               <div className="space-y-2">
@@ -390,7 +390,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     setNewItem({ ...newItem, type: value, content: "", fileName: "", fileSize: 0, fileType: undefined, fileUrl: "" })
                   }
                 >
-                  <SelectTrigger id="kb-type" data-testid="select-kb-type">
+                  <SelectTrigger id="kb-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -433,7 +433,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                           variant="outline"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={uploadFile.isPending}
-                          data-testid="button-upload-file"
+                         
                         >
                           {uploadFile.isPending ? "Uploading..." : "Pilih File"}
                         </Button>
@@ -445,7 +445,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                       className="hidden"
                       accept=".pdf,.ppt,.pptx,.xls,.xlsx,.doc,.docx,.txt"
                       onChange={handleFileChange}
-                      data-testid="input-kb-file"
+                     
                     />
                   </div>
                 </div>
@@ -457,7 +457,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     value={newItem.content}
                     onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
                     placeholder="https://..."
-                    data-testid="input-kb-content"
+                   
                   />
                 </div>
               ) : (
@@ -469,7 +469,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
                     placeholder="Masukkan konten knowledge..."
                     rows={6}
-                    data-testid="input-kb-content"
+                   
                   />
                 </div>
               )}
@@ -481,7 +481,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   value={newItem.description}
                   onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
                   placeholder="Deskripsi singkat tentang knowledge ini"
-                  data-testid="input-kb-description"
+                 
                 />
               </div>
             </div>
@@ -492,7 +492,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
               <Button
                 onClick={handleCreate}
                 disabled={createKnowledgeBase.isPending || (newItem.type === "file" && !newItem.fileUrl)}
-                data-testid="button-confirm-add-knowledge"
+               
               >
                 {createKnowledgeBase.isPending ? "Menambahkan..." : "Tambah Knowledge"}
               </Button>
@@ -508,7 +508,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
-          data-testid="input-search-knowledge"
+         
         />
       </div>
 
@@ -546,7 +546,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           {filteredItems.map((item) => {
             const Icon = typeIcons[item.type];
             return (
-              <Card key={item.id} className="group" data-testid={`kb-item-${item.id}`}>
+              <Card key={item.id} className="group">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -615,7 +615,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(item)}
-                        data-testid={`button-edit-kb-${item.id}`}
+                       
                       >
                         <Pencil className="w-4 h-4 text-muted-foreground" />
                       </Button>
@@ -623,7 +623,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(item.id)}
-                        data-testid={`button-delete-kb-${item.id}`}
+                       
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
@@ -687,7 +687,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 value={editItem.name}
                 onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
                 placeholder="Nama item"
-                data-testid="input-edit-kb-name"
+               
               />
             </div>
             <div className="space-y-2">
@@ -697,7 +697,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 value={editItem.description}
                 onChange={(e) => setEditItem({ ...editItem, description: e.target.value })}
                 placeholder="Deskripsi singkat"
-                data-testid="input-edit-kb-description"
+               
               />
             </div>
             {editingItem?.type === "text" && (
@@ -709,7 +709,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
                   rows={6}
                   placeholder="Konten teks"
-                  data-testid="input-edit-kb-content"
+                 
                 />
               </div>
             )}
@@ -721,7 +721,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   value={editItem.content}
                   onChange={(e) => setEditItem({ ...editItem, content: e.target.value })}
                   placeholder="https://example.com"
-                  data-testid="input-edit-kb-url"
+                 
                 />
               </div>
             )}
@@ -772,7 +772,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             <Button 
               onClick={handleSaveEdit} 
               disabled={updateKnowledgeBase.isPending}
-              data-testid="button-save-edit-kb"
+             
             >
               {updateKnowledgeBase.isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>

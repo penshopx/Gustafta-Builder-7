@@ -68,7 +68,7 @@ export function TrialChat({ agent }: TrialChatProps) {
           variant="ghost"
           size="icon"
           onClick={() => setIsMinimized(!isMinimized)}
-          data-testid="button-toggle-trial-chat"
+         
         >
           {isMinimized ? (
             <Maximize2 className="w-4 h-4" />
@@ -138,13 +138,13 @@ export function TrialChat({ agent }: TrialChatProps) {
                 placeholder="Type a message..."
                 className="min-h-[36px] max-h-[80px] resize-none text-sm"
                 rows={1}
-                data-testid="input-trial-message"
+               
               />
               <Button
                 size="icon"
                 onClick={handleSend}
                 disabled={!input.trim() || sendMessage.isPending}
-                data-testid="button-send-trial"
+               
               >
                 <Send className="w-4 h-4" />
               </Button>

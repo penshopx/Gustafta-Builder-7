@@ -769,7 +769,7 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
                     : ""
                 }`}
                 onClick={() => handleSelect(template)}
-                data-testid={`template-card-${template.id}`}
+               
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
@@ -798,13 +798,13 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
         </ScrollArea>
 
         <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)} data-testid="button-cancel-template">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Batal
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!selectedTemplate}
-            data-testid="button-use-template"
+           
           >
             <Sparkles className="w-4 h-4 mr-2" />
             Gunakan Template

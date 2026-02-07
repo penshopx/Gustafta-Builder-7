@@ -33,23 +33,23 @@ export default function SeriesCatalog() {
   const regular = filtered.filter(s => !s.isFeatured);
 
   return (
-    <div className="min-h-screen bg-background" data-testid="series-catalog-page">
+    <div className="min-h-screen bg-background">
       <header className="border-b bg-background sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
           <Link href="/">
-            <span className="text-lg font-bold text-foreground cursor-pointer" data-testid="link-home">
+            <span className="text-lg font-bold text-foreground cursor-pointer">
               Gustafta
             </span>
           </Link>
           <nav className="flex items-center gap-2">
             <Link href="/marketplace">
-              <Button variant="ghost" size="sm" data-testid="link-marketplace">Marketplace</Button>
+              <Button variant="ghost" size="sm">Marketplace</Button>
             </Link>
             <Link href="/pricing">
-              <Button variant="ghost" size="sm" data-testid="link-pricing">Harga</Button>
+              <Button variant="ghost" size="sm">Harga</Button>
             </Link>
             <Link href="/dashboard">
-              <Button size="sm" data-testid="link-dashboard">Dashboard</Button>
+              <Button size="sm">Dashboard</Button>
             </Link>
           </nav>
         </div>
@@ -61,7 +61,7 @@ export default function SeriesCatalog() {
             <Sparkles className="w-4 h-4" />
             Chatbot Series
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-3" data-testid="text-page-title">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">
             Koleksi Chatbot Series
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
@@ -78,7 +78,7 @@ export default function SeriesCatalog() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm"
-              data-testid="input-search-series"
+             
             />
           </div>
           {categories.length > 0 && (
@@ -87,7 +87,7 @@ export default function SeriesCatalog() {
                 variant={selectedCategory === null ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(null)}
-                data-testid="button-filter-all"
+               
               >
                 Semua
               </Button>
@@ -97,7 +97,7 @@ export default function SeriesCatalog() {
                   variant={selectedCategory === cat ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedCategory(cat === selectedCategory ? null : cat)}
-                  data-testid={`button-filter-${cat}`}
+                 
                 >
                   {cat}
                 </Button>
@@ -139,7 +139,7 @@ export default function SeriesCatalog() {
           <div className="mb-8 sm:mb-10">
             <div className="flex items-center gap-2 mb-4">
               <Star className="w-5 h-5 text-amber-500" />
-              <h2 className="text-lg font-semibold" data-testid="text-featured-heading">Series Unggulan</h2>
+              <h2 className="text-lg font-semibold">Series Unggulan</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {featured.map(s => (
@@ -152,7 +152,7 @@ export default function SeriesCatalog() {
         {regular.length > 0 && (
           <div>
             {featured.length > 0 && (
-              <h2 className="text-lg font-semibold mb-4" data-testid="text-all-heading">Semua Series</h2>
+              <h2 className="text-lg font-semibold mb-4">Semua Series</h2>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {regular.map(s => (
@@ -175,7 +175,7 @@ function SeriesCard({ series: s, featured = false }: { series: SeriesWithStats; 
 
   return (
     <Link href={`/series/${s.slug}`}>
-      <Card className="overflow-hidden hover-elevate cursor-pointer group" data-testid={`card-series-${s.id}`}>
+      <Card className="overflow-hidden hover-elevate cursor-pointer group">
         <CardContent className="p-0">
           <div
             className="relative overflow-hidden"
@@ -203,7 +203,7 @@ function SeriesCard({ series: s, featured = false }: { series: SeriesWithStats; 
                   </Badge>
                 )}
               </div>
-              <h3 className="text-white font-bold text-lg sm:text-xl leading-tight" data-testid={`text-series-name-${s.id}`}>
+              <h3 className="text-white font-bold text-lg sm:text-xl leading-tight">
                 {s.name}
               </h3>
               {s.tagline && (

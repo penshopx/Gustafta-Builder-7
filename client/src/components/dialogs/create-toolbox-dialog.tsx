@@ -138,7 +138,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
               placeholder="Contoh: Customer Service Toolbox"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              data-testid="input-toolbox-name"
+             
             />
           </div>
 
@@ -150,7 +150,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              data-testid="input-toolbox-description"
+             
             />
           </div>
 
@@ -162,7 +162,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               rows={2}
-              data-testid="input-toolbox-purpose"
+             
             />
           </div>
 
@@ -174,7 +174,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
                   placeholder={`Kapabilitas ${index + 1}`}
                   value={cap}
                   onChange={(e) => updateList(capabilities, setCapabilities, index, e.target.value)}
-                  data-testid={`input-toolbox-capability-${index}`}
+                 
                 />
                 {capabilities.length > 1 && (
                   <Button
@@ -208,7 +208,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
                   placeholder={`Batasan ${index + 1}`}
                   value={lim}
                   onChange={(e) => updateList(limitations, setLimitations, index, e.target.value)}
-                  data-testid={`input-toolbox-limitation-${index}`}
+                 
                 />
                 {limitations.length > 1 && (
                   <Button
@@ -241,7 +241,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
             <Button
               onClick={handleSubmit}
               disabled={createToolbox.isPending}
-              data-testid="button-create-toolbox"
+             
             >
               {createToolbox.isPending ? "Membuat..." : "Buat Toolbox"}
             </Button>

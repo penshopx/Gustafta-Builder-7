@@ -303,7 +303,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
             rows={3}
-            data-testid={`input-pb-field-${field.key}`}
+           
           />
         );
       case "number":
@@ -313,13 +313,13 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
-            data-testid={`input-pb-field-${field.key}`}
+           
           />
         );
       case "select":
         return (
           <Select value={value || ""} onValueChange={onChange}>
-            <SelectTrigger data-testid={`select-pb-field-${field.key}`}>
+            <SelectTrigger>
               <SelectValue placeholder={field.placeholder || "Pilih..."} />
             </SelectTrigger>
             <SelectContent>
@@ -335,7 +335,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             <Switch
               checked={value === true || value === "true"}
               onCheckedChange={(checked) => onChange(checked)}
-              data-testid={`switch-pb-field-${field.key}`}
+             
             />
             <span className="text-sm text-muted-foreground">{value ? "Ya" : "Tidak"}</span>
           </div>
@@ -346,7 +346,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             type="date"
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
-            data-testid={`input-pb-field-${field.key}`}
+           
           />
         );
       case "url":
@@ -356,7 +356,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder || "https://..."}
-            data-testid={`input-pb-field-${field.key}`}
+           
           />
         );
       case "email":
@@ -366,7 +366,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder || "email@example.com"}
-            data-testid={`input-pb-field-${field.key}`}
+           
           />
         );
       default:
@@ -375,7 +375,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={field.placeholder}
-            data-testid={`input-pb-field-${field.key}`}
+           
           />
         );
     }
@@ -398,7 +398,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => removeField(index, fields, setFields)}
-                data-testid={`button-remove-field-${index}`}
+               
               >
                 <Trash2 className="w-4 h-4 text-muted-foreground" />
               </Button>
@@ -410,7 +410,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                   value={field.key}
                   onChange={(e) => updateField(index, { key: e.target.value.replace(/\s/g, "_").toLowerCase() }, fields, setFields)}
                   placeholder="nama_field"
-                  data-testid={`input-field-key-${index}`}
+                 
                 />
               </div>
               <div className="space-y-1.5">
@@ -419,7 +419,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                   value={field.label}
                   onChange={(e) => updateField(index, { label: e.target.value }, fields, setFields)}
                   placeholder="Nama Field"
-                  data-testid={`input-field-label-${index}`}
+                 
                 />
               </div>
               <div className="space-y-1.5">
@@ -428,7 +428,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                   value={field.type}
                   onValueChange={(val: ProjectBrainFieldType) => updateField(index, { type: val }, fields, setFields)}
                 >
-                  <SelectTrigger data-testid={`select-field-type-${index}`}>
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -444,7 +444,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                   value={field.placeholder || ""}
                   onChange={(e) => updateField(index, { placeholder: e.target.value }, fields, setFields)}
                   placeholder="Placeholder teks..."
-                  data-testid={`input-field-placeholder-${index}`}
+                 
                 />
               </div>
             </div>
@@ -457,7 +457,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                     updateField(index, { options: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) }, fields, setFields)
                   }
                   placeholder="Opsi 1, Opsi 2, Opsi 3"
-                  data-testid={`input-field-options-${index}`}
+                 
                 />
               </div>
             )}
@@ -465,7 +465,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
               <Switch
                 checked={field.required}
                 onCheckedChange={(checked) => updateField(index, { required: checked }, fields, setFields)}
-                data-testid={`switch-field-required-${index}`}
+               
               />
               <Label className="text-xs">Wajib diisi</Label>
             </div>
@@ -476,7 +476,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
         variant="outline"
         onClick={() => addField(fields, setFields)}
         className="w-full"
-        data-testid="button-add-field"
+       
       >
         <Plus className="w-4 h-4 mr-2" />
         Tambah Field
@@ -498,10 +498,10 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
 
       <Tabs defaultValue="templates">
         <TabsList className="w-full grid grid-cols-2">
-          <TabsTrigger value="templates" data-testid="tab-templates">
+          <TabsTrigger value="templates">
             Template ({templates.length})
           </TabsTrigger>
-          <TabsTrigger value="instances" data-testid="tab-instances">
+          <TabsTrigger value="instances">
             Proyek ({instances.length})
           </TabsTrigger>
         </TabsList>
@@ -511,7 +511,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             <p className="text-sm text-muted-foreground">
               Template mendefinisikan field data yang bisa diisi per proyek.
             </p>
-            <Button onClick={() => setTemplateDialogOpen(true)} data-testid="button-create-template">
+            <Button onClick={() => setTemplateDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Buat Template
             </Button>
@@ -533,7 +533,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 <p className="text-muted-foreground mb-4 text-sm">
                   Buat template untuk mendefinisikan data proyek chatbot Anda
                 </p>
-                <Button onClick={() => setTemplateDialogOpen(true)} variant="outline" data-testid="button-create-first-template">
+                <Button onClick={() => setTemplateDialogOpen(true)} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   Buat Template Pertama
                 </Button>
@@ -545,7 +545,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 const fields = Array.isArray(template.fields) ? (template.fields as ProjectBrainField[]) : [];
                 const isExpanded = expandedTemplate === String(template.id);
                 return (
-                  <Card key={template.id} data-testid={`template-item-${template.id}`}>
+                  <Card key={template.id}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -562,7 +562,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                             variant="ghost"
                             size="icon"
                             onClick={() => setExpandedTemplate(isExpanded ? null : String(template.id))}
-                            data-testid={`button-expand-template-${template.id}`}
+                           
                           >
                             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                           </Button>
@@ -570,7 +570,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEditTemplate(template)}
-                            data-testid={`button-edit-template-${template.id}`}
+                           
                           >
                             <Pencil className="w-4 h-4 text-muted-foreground" />
                           </Button>
@@ -578,7 +578,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDeleteTemplate(String(template.id))}
-                            data-testid={`button-delete-template-${template.id}`}
+                           
                           >
                             <Trash2 className="w-4 h-4 text-muted-foreground" />
                           </Button>
@@ -611,7 +611,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             <Button
               onClick={() => setInstanceDialogOpen(true)}
               disabled={templates.length === 0}
-              data-testid="button-create-instance"
+             
             >
               <Plus className="w-4 h-4 mr-2" />
               Buat Proyek
@@ -642,7 +642,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 <p className="text-muted-foreground mb-4 text-sm">
                   Buat proyek untuk mengisi data dan mengaktifkan konteks chatbot
                 </p>
-                <Button onClick={() => setInstanceDialogOpen(true)} variant="outline" data-testid="button-create-first-instance">
+                <Button onClick={() => setInstanceDialogOpen(true)} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   Buat Proyek Pertama
                 </Button>
@@ -662,7 +662,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                   <Card
                     key={instance.id}
                     className={instance.isActive ? "border-primary/50" : ""}
-                    data-testid={`instance-item-${instance.id}`}
+                   
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-3">
@@ -687,7 +687,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                               variant="outline"
                               size="sm"
                               onClick={() => handleActivateInstance(String(instance.id))}
-                              data-testid={`button-activate-instance-${instance.id}`}
+                             
                             >
                               <Zap className="w-3 h-3 mr-1" />
                               Aktifkan
@@ -697,7 +697,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleFillInstance(instance)}
-                            data-testid={`button-fill-instance-${instance.id}`}
+                           
                           >
                             <Pencil className="w-4 h-4 text-muted-foreground" />
                           </Button>
@@ -705,7 +705,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDeleteInstance(String(instance.id))}
-                            data-testid={`button-delete-instance-${instance.id}`}
+                           
                           >
                             <Trash2 className="w-4 h-4 text-muted-foreground" />
                           </Button>
@@ -733,7 +733,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 value={newTemplate.name}
                 onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
                 placeholder="Contoh: Data Properti, Info Produk"
-                data-testid="input-template-name"
+               
               />
             </div>
             <div className="space-y-2">
@@ -743,7 +743,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
                 placeholder="Deskripsi singkat template ini..."
                 rows={2}
-                data-testid="input-template-description"
+               
               />
             </div>
             <div className="space-y-2">
@@ -756,7 +756,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             <Button
               onClick={handleCreateTemplate}
               disabled={createTemplate.isPending}
-              data-testid="button-confirm-create-template"
+             
             >
               {createTemplate.isPending ? "Membuat..." : "Buat Template"}
             </Button>
@@ -776,7 +776,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
               <Input
                 value={editTemplateName}
                 onChange={(e) => setEditTemplateName(e.target.value)}
-                data-testid="input-edit-template-name"
+               
               />
             </div>
             <div className="space-y-2">
@@ -785,7 +785,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 value={editTemplateDesc}
                 onChange={(e) => setEditTemplateDesc(e.target.value)}
                 rows={2}
-                data-testid="input-edit-template-description"
+               
               />
             </div>
             <div className="space-y-2">
@@ -798,7 +798,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             <Button
               onClick={handleSaveTemplate}
               disabled={updateTemplate.isPending}
-              data-testid="button-confirm-edit-template"
+             
             >
               {updateTemplate.isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
@@ -819,7 +819,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 value={newInstance.templateId}
                 onValueChange={(val) => setNewInstance({ ...newInstance, templateId: val })}
               >
-                <SelectTrigger data-testid="select-instance-template">
+                <SelectTrigger>
                   <SelectValue placeholder="Pilih template..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -835,7 +835,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
                 value={newInstance.name}
                 onChange={(e) => setNewInstance({ ...newInstance, name: e.target.value })}
                 placeholder="Contoh: Rumah Tipe 36 Serpong"
-                data-testid="input-instance-name"
+               
               />
             </div>
           </div>
@@ -844,7 +844,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             <Button
               onClick={handleCreateInstance}
               disabled={createInstance.isPending}
-              data-testid="button-confirm-create-instance"
+             
             >
               {createInstance.isPending ? "Membuat..." : "Buat Proyek"}
             </Button>
@@ -886,7 +886,7 @@ export function ProjectBrainPanel({ agent }: ProjectBrainPanelProps) {
             <Button
               onClick={handleSaveInstanceValues}
               disabled={updateInstance.isPending}
-              data-testid="button-confirm-fill-instance"
+             
             >
               {updateInstance.isPending ? "Menyimpan..." : "Simpan Data"}
             </Button>

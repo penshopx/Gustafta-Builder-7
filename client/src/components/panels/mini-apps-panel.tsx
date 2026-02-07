@@ -417,14 +417,14 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
               setItems(updated);
             }}
             placeholder={`Item ${index + 1}`}
-            data-testid={`${testIdPrefix}-item-${index}`}
+           
           />
           {items.length > 1 && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setItems(items.filter((_, i) => i !== index))}
-              data-testid={`${testIdPrefix}-remove-${index}`}
+             
             >
               <Trash2 className="w-4 h-4 text-muted-foreground" />
             </Button>
@@ -435,7 +435,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
         variant="outline"
         size="sm"
         onClick={() => setItems([...items, ""])}
-        data-testid={`${testIdPrefix}-add`}
+       
       >
         <Plus className="w-3 h-3 mr-1" />
         Tambah Item
@@ -458,7 +458,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
           }}
           rows={Math.min(Math.max(lineCount + 1, 4), 16)}
           className="font-mono text-xs"
-          data-testid={`${testIdPrefix}-json`}
+         
         />
       </div>
     );
@@ -480,7 +480,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
             Aplikasi kecil yang memproses data dari Otak Proyek
           </p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)} data-testid="button-create-miniapp">
+        <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Buat Mini App
         </Button>
@@ -502,7 +502,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
             <p className="text-muted-foreground mb-4 text-sm">
               Buat mini app untuk memproses data proyek Anda
             </p>
-            <Button onClick={() => setCreateDialogOpen(true)} variant="outline" data-testid="button-create-first-miniapp">
+            <Button onClick={() => setCreateDialogOpen(true)} variant="outline">
               <Plus className="w-4 h-4 mr-2" />
               Buat Mini App Pertama
             </Button>
@@ -513,7 +513,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
           {miniApps.map((app) => {
             const TypeIcon = miniAppTypeIcons[app.type as MiniAppType] || Wrench;
             return (
-              <Card key={app.id} data-testid={`miniapp-item-${app.id}`}>
+              <Card key={app.id}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
@@ -532,7 +532,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(app)}
-                        data-testid={`button-edit-miniapp-${app.id}`}
+                       
                       >
                         <Pencil className="w-4 h-4 text-muted-foreground" />
                       </Button>
@@ -540,7 +540,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(String(app.id))}
-                        data-testid={`button-delete-miniapp-${app.id}`}
+                       
                       >
                         <Trash2 className="w-4 h-4 text-muted-foreground" />
                       </Button>
@@ -554,7 +554,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                     size="sm"
                     className="w-full"
                     onClick={() => handleViewDetail(app)}
-                    data-testid={`button-view-miniapp-${app.id}`}
+                   
                   >
                     <Play className="w-3 h-3 mr-1" />
                     Lihat Detail
@@ -594,7 +594,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                   }
                 }}
               >
-                <SelectTrigger data-testid="select-miniapp-type">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -619,7 +619,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                 value={newApp.name}
                 onChange={(e) => setNewApp({ ...newApp, name: e.target.value })}
                 placeholder="Contoh: Checklist Dokumen KPR"
-                data-testid="input-miniapp-name"
+               
               />
             </div>
             <div className="space-y-2">
@@ -629,7 +629,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                 onChange={(e) => setNewApp({ ...newApp, description: e.target.value })}
                 placeholder="Deskripsi singkat..."
                 rows={2}
-                data-testid="input-miniapp-description"
+               
               />
             </div>
             {newApp.type === "checklist" && renderChecklistEditor(checklistItems, setChecklistItems, "create-checklist")}
@@ -640,7 +640,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
             <Button
               onClick={handleCreate}
               disabled={createMiniApp.isPending}
-              data-testid="button-confirm-create-miniapp"
+             
             >
               {createMiniApp.isPending ? "Membuat..." : "Buat Mini App"}
             </Button>
@@ -660,7 +660,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
               <Input
                 value={editApp.name}
                 onChange={(e) => setEditApp({ ...editApp, name: e.target.value })}
-                data-testid="input-edit-miniapp-name"
+               
               />
             </div>
             <div className="space-y-2">
@@ -669,7 +669,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                 value={editApp.description}
                 onChange={(e) => setEditApp({ ...editApp, description: e.target.value })}
                 rows={2}
-                data-testid="input-edit-miniapp-description"
+               
               />
             </div>
             {editApp.type === "checklist" && renderChecklistEditor(editChecklistItems, setEditChecklistItems, "edit-checklist")}
@@ -680,7 +680,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
             <Button
               onClick={handleSaveEdit}
               disabled={updateMiniApp.isPending}
-              data-testid="button-confirm-edit-miniapp"
+             
             >
               {updateMiniApp.isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
@@ -699,8 +699,8 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
           {viewingApp && (
             <Tabs defaultValue="run">
               <TabsList className="w-full grid grid-cols-2">
-                <TabsTrigger value="run" data-testid="tab-miniapp-run">Jalankan</TabsTrigger>
-                <TabsTrigger value="results" data-testid="tab-miniapp-results">Riwayat</TabsTrigger>
+                <TabsTrigger value="run">Jalankan</TabsTrigger>
+                <TabsTrigger value="results">Riwayat</TabsTrigger>
               </TabsList>
 
               <TabsContent value="run" className="space-y-4 mt-3">
@@ -721,7 +721,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       onClick={handleRunAIMiniApp}
                       disabled={runAIMiniApp.isPending}
                       className="w-full"
-                      data-testid="button-run-ai-miniapp"
+                     
                     >
                       {runAIMiniApp.isPending ? (
                         <>
@@ -738,7 +738,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                     {aiAnalysisResult && (
                       <div className="bg-muted/30 border rounded-md p-4 space-y-2">
                         <h4 className="text-sm font-medium">Hasil Analisis</h4>
-                        <div className="text-sm whitespace-pre-wrap leading-relaxed" data-testid="ai-analysis-result">
+                        <div className="text-sm whitespace-pre-wrap leading-relaxed">
                           {aiAnalysisResult}
                         </div>
                       </div>
@@ -761,7 +761,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                               setRunInput({ ...runInput, checked: { ...checked, [i]: e.target.checked } })
                             }
                             className="rounded"
-                            data-testid={`run-checklist-item-${i}`}
+                           
                           />
                           <span className={checked[i] ? "line-through text-muted-foreground" : ""}>{item}</span>
                         </label>
@@ -785,7 +785,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                             value={runInput[v] || ""}
                             onChange={(e) => setRunInput({ ...runInput, [v]: e.target.value })}
                             placeholder={`Masukkan ${v}`}
-                            data-testid={`run-calc-${v}`}
+                           
                           />
                         </div>
                       ));
@@ -811,7 +811,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                             value={runInput[`milestone_${i}`] || "pending"}
                             onValueChange={(val) => setRunInput({ ...runInput, [`milestone_${i}`]: val })}
                           >
-                            <SelectTrigger className="w-32" data-testid={`run-milestone-${i}`}>
+                            <SelectTrigger className="w-32">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -838,7 +838,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                             value={runInput[`risk_${i}`] || "low"}
                             onValueChange={(val) => setRunInput({ ...runInput, [`risk_${i}`]: val })}
                           >
-                            <SelectTrigger className="w-28" data-testid={`run-risk-${i}`}>
+                            <SelectTrigger className="w-28">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -863,7 +863,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       }}
                       rows={4}
                       placeholder='{"key": "value"}'
-                      data-testid="run-custom-input"
+                     
                     />
                   </div>
                 )}
@@ -873,7 +873,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                     onClick={handleRunMiniApp}
                     disabled={createMiniAppResult.isPending}
                     className="w-full"
-                    data-testid="button-run-miniapp"
+                   
                   >
                     <Play className="w-4 h-4 mr-2" />
                     {createMiniAppResult.isPending ? "Menjalankan..." : "Jalankan & Simpan"}
@@ -920,7 +920,7 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
       {results.map((result) => {
         const output = typeof result.output === "object" && result.output ? (result.output as Record<string, any>) : {};
         return (
-          <Card key={result.id} data-testid={`miniapp-result-${result.id}`}>
+          <Card key={result.id}>
             <CardContent className="p-3 space-y-2">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <Badge variant="secondary" className="text-xs">

@@ -114,11 +114,11 @@ export default function Marketplace() {
           <div className="text-center mb-8 md:mb-12">
             <div className="flex items-center justify-center gap-3 mb-3">
               <ShoppingBag className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl md:text-4xl font-bold" data-testid="text-marketplace-title">
+              <h1 className="text-3xl md:text-4xl font-bold">
                 Marketplace Chatbot
               </h1>
             </div>
-            <p className="text-muted-foreground text-lg" data-testid="text-marketplace-subtitle">
+            <p className="text-muted-foreground text-lg">
               Temukan chatbot AI yang tepat untuk kebutuhan Anda
             </p>
           </div>
@@ -131,7 +131,7 @@ export default function Marketplace() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
-                data-testid="input-search-products"
+               
               />
             </div>
 
@@ -141,7 +141,7 @@ export default function Marketplace() {
                   variant={selectedCategory === "all" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedCategory("all")}
-                  data-testid="button-category-all"
+                 
                 >
                   Semua
                 </Button>
@@ -151,7 +151,7 @@ export default function Marketplace() {
                     variant={selectedCategory === cat ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedCategory(cat)}
-                    data-testid={`button-category-${cat.toLowerCase().replace(/\s+/g, "-")}`}
+                   
                   >
                     {cat}
                   </Button>
@@ -167,7 +167,7 @@ export default function Marketplace() {
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-16" data-testid="text-empty-state">
+            <div className="text-center py-16">
               <Bot className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">
                 Belum ada produk chatbot yang tersedia
@@ -178,7 +178,7 @@ export default function Marketplace() {
                   : "Produk chatbot akan segera hadir"}
               </p>
               <Link href="/">
-                <Button variant="outline" data-testid="button-back-home">
+                <Button variant="outline">
                   <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
                   Kembali ke Beranda
                 </Button>
@@ -190,7 +190,7 @@ export default function Marketplace() {
                 <Card
                   key={product.id}
                   className="flex flex-col hover-elevate"
-                  data-testid={`card-product-${product.id}`}
+                 
                 >
                   <CardContent className="p-6 flex flex-col flex-1">
                     <div className="flex items-center gap-3 mb-3">
@@ -206,7 +206,7 @@ export default function Marketplace() {
                       <div className="min-w-0 flex-1">
                         <h3
                           className="font-semibold truncate"
-                          data-testid={`text-product-name-${product.id}`}
+                         
                         >
                           {product.brandingName || product.name}
                         </h3>
@@ -220,7 +220,7 @@ export default function Marketplace() {
 
                     <p
                       className="text-sm text-muted-foreground mb-4 line-clamp-2"
-                      data-testid={`text-product-tagline-${product.id}`}
+                     
                     >
                       {product.tagline || product.productSummary || product.description}
                     </p>
@@ -244,7 +244,7 @@ export default function Marketplace() {
                       <div className="flex items-center gap-2">
                         <span
                           className="font-bold text-lg"
-                          data-testid={`text-product-price-${product.id}`}
+                         
                         >
                           {formatPrice(product.monthlyPrice || 0)}
                         </span>
@@ -257,7 +257,7 @@ export default function Marketplace() {
                           <Badge
                             variant="outline"
                             className="text-xs"
-                            data-testid={`badge-trial-${product.id}`}
+                           
                           >
                             <Zap className="h-3 w-3 mr-1" />
                             Trial {product.trialDays} hari
@@ -269,7 +269,7 @@ export default function Marketplace() {
                     <Link href={`/chat/${product.productSlug || product.id}`}>
                       <Button
                         className="w-full mt-4"
-                        data-testid={`button-try-product-${product.id}`}
+                       
                       >
                         <MessageSquare className="h-4 w-4 mr-2" />
                         {product.monthlyPrice === 0 ? "Mulai" : "Coba Sekarang"}

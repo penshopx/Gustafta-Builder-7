@@ -93,7 +93,7 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
           size="sm"
           onClick={handleClear}
           disabled={messages.length === 0}
-          data-testid="button-clear-chat"
+         
           className="shrink-0"
         >
           <Trash2 className="w-4 h-4 md:mr-2" />
@@ -176,12 +176,12 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
               placeholder="Type your message..."
               className="min-h-[44px] max-h-[120px] resize-none"
               rows={1}
-              data-testid="input-console-message"
+             
             />
             <Button
               onClick={handleSend}
               disabled={!input.trim() || sendMessage.isPending}
-              data-testid="button-send-console"
+             
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -196,7 +196,7 @@ function MessageBubble({ message, agentName, agentAvatar }: { message: Message; 
   const isUser = message.role === "user";
 
   return (
-    <div className={cn("flex gap-3", isUser && "flex-row-reverse")} data-testid={`message-${message.id}`}>
+    <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
       <Avatar className="w-8 h-8 shrink-0">
         {!isUser && agentAvatar && agentAvatar.trim() !== "" ? (
           <AvatarImage src={agentAvatar} alt={agentName} className="object-cover" />

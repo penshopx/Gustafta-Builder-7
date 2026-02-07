@@ -129,7 +129,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
                   className={`flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover-elevate ${
                     type === t ? "border-primary bg-primary/5" : ""
                   }`}
-                  data-testid={`radio-bigidea-type-${t}`}
+                 
                 >
                   <RadioGroupItem value={t} />
                   <span className="text-primary">{typeIcons[t]}</span>
@@ -146,7 +146,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
               placeholder="Contoh: Otomasi Customer Service"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              data-testid="input-bigidea-name"
+             
             />
           </div>
 
@@ -158,7 +158,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              data-testid="input-bigidea-description"
+             
             />
           </div>
 
@@ -170,7 +170,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
                   placeholder={`Tujuan ${index + 1}`}
                   value={goal}
                   onChange={(e) => updateGoal(index, e.target.value)}
-                  data-testid={`input-bigidea-goal-${index}`}
+                 
                 />
                 {goals.length > 1 && (
                   <Button
@@ -203,7 +203,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
               placeholder="Contoh: UMKM di Indonesia"
               value={targetAudience}
               onChange={(e) => setTargetAudience(e.target.value)}
-              data-testid="input-bigidea-audience"
+             
             />
           </div>
 
@@ -215,7 +215,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
               value={expectedOutcome}
               onChange={(e) => setExpectedOutcome(e.target.value)}
               rows={3}
-              data-testid="input-bigidea-outcome"
+             
             />
           </div>
 
@@ -226,7 +226,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
             <Button
               onClick={handleSubmit}
               disabled={createBigIdea.isPending}
-              data-testid="button-create-bigidea"
+             
             >
               {createBigIdea.isPending ? "Membuat..." : "Buat Big Idea"}
             </Button>

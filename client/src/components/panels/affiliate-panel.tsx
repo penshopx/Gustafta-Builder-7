@@ -98,7 +98,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
           <Users className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground" data-testid="text-affiliate-title">
+          <h2 className="text-2xl font-bold text-foreground">
             Program Afiliasi
           </h2>
           <p className="text-muted-foreground">Kelola mitra afiliasi dan referral untuk chatbot Anda</p>
@@ -121,7 +121,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Nama mitra afiliasi"
-                data-testid="input-affiliate-name"
+               
               />
             </div>
             <div className="space-y-2">
@@ -132,7 +132,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="email@example.com"
-                data-testid="input-affiliate-email"
+               
               />
             </div>
             <div className="space-y-2">
@@ -143,14 +143,14 @@ export function AffiliatePanel({ agent }: { agent: any }) {
                   value={formData.referralCode}
                   onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
                   placeholder="KODE123"
-                  data-testid="input-affiliate-code"
+                 
                 />
                 <Button
                   type="button"
                   size="icon"
                   variant="outline"
                   onClick={() => setFormData({ ...formData, referralCode: generateReferralCode() })}
-                  data-testid="button-generate-code"
+                 
                 >
                   <LinkIcon className="w-4 h-4" />
                 </Button>
@@ -167,7 +167,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
                   value={formData.commissionRate}
                   onChange={(e) => setFormData({ ...formData, commissionRate: Number(e.target.value) })}
                   placeholder="10"
-                  data-testid="input-affiliate-commission"
+                 
                 />
                 <Percent className="w-4 h-4 text-muted-foreground" />
               </div>
@@ -176,7 +176,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
               <Button
                 type="submit"
                 disabled={createMutation.isPending || !formData.name.trim() || !formData.email.trim()}
-                data-testid="button-create-affiliate"
+               
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {createMutation.isPending ? "Menambahkan..." : "Tambah Afiliasi"}
@@ -187,7 +187,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
       </Card>
 
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-foreground" data-testid="text-affiliate-list-title">
+        <h3 className="text-lg font-semibold text-foreground">
           Daftar Afiliasi
         </h3>
 
@@ -204,26 +204,26 @@ export function AffiliatePanel({ agent }: { agent: any }) {
         ) : affiliates.length === 0 ? (
           <div className="text-center py-12">
             <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground" data-testid="text-no-affiliates">Belum ada afiliasi</p>
+            <p className="text-muted-foreground">Belum ada afiliasi</p>
           </div>
         ) : (
           affiliates.map((affiliate: any) => (
-            <Card key={affiliate.id} data-testid={`card-affiliate-${affiliate.id}`}>
+            <Card key={affiliate.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-foreground" data-testid={`text-affiliate-name-${affiliate.id}`}>
+                      <p className="font-medium text-foreground">
                         {affiliate.name}
                       </p>
                       <Badge
                         variant={affiliate.isActive ? "default" : "secondary"}
-                        data-testid={`badge-affiliate-status-${affiliate.id}`}
+                       
                       >
                         {affiliate.isActive ? "Aktif" : "Tidak Aktif"}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1" data-testid={`text-affiliate-email-${affiliate.id}`}>
+                    <p className="text-sm text-muted-foreground mt-1">
                       {affiliate.email}
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
@@ -242,7 +242,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
                       size="icon"
                       variant="ghost"
                       onClick={() => copyReferralLink(affiliate)}
-                      data-testid={`button-copy-referral-${affiliate.id}`}
+                     
                     >
                       {copiedId === affiliate.id ? (
                         <Check className="w-4 h-4 text-green-500" />
@@ -255,7 +255,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
                       variant="outline"
                       onClick={() => toggleMutation.mutate({ id: affiliate.id, isActive: affiliate.isActive })}
                       disabled={toggleMutation.isPending}
-                      data-testid={`button-toggle-affiliate-${affiliate.id}`}
+                     
                     >
                       {affiliate.isActive ? "Nonaktifkan" : "Aktifkan"}
                     </Button>
@@ -264,7 +264,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
                       variant="ghost"
                       onClick={() => deleteMutation.mutate(affiliate.id)}
                       disabled={deleteMutation.isPending}
-                      data-testid={`button-delete-affiliate-${affiliate.id}`}
+                     
                     >
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>

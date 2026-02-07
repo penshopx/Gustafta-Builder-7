@@ -302,7 +302,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
             <Card
               key={integration.type}
               className={isEnabled ? "ring-1 ring-primary/20" : ""}
-              data-testid={`integration-${integration.type}`}
+             
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
@@ -315,7 +315,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                       <Switch
                         checked={isEnabled}
                         onCheckedChange={(checked) => handleToggle(integration.type, checked)}
-                        data-testid={`switch-${integration.type}`}
+                       
                       />
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -327,7 +327,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                         size="sm"
                         className="mt-2 -ml-2"
                         onClick={() => openConfig(integration)}
-                        data-testid={`button-config-${integration.type}`}
+                       
                       >
                         <Settings className="w-3.5 h-3.5 mr-1.5" />
                         Configure
@@ -407,7 +407,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                   navigator.clipboard.writeText(code);
                   toast({ title: "Tersalin!", description: "Kode embed sudah disalin." });
                 }}
-                data-testid="button-copy-embed"
+               
               >
                 Salin Kode Widget
               </Button>
@@ -419,7 +419,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                   navigator.clipboard.writeText(code);
                   toast({ title: "Tersalin!", description: "Kode iframe sudah disalin." });
                 }}
-                data-testid="button-copy-iframe"
+               
               >
                 Salin Kode iFrame
               </Button>
@@ -467,7 +467,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                     onClick={() => generateTokenMutation.mutate()}
                     disabled={generateTokenMutation.isPending}
                     title="Generate Token Baru"
-                    data-testid="button-generate-token"
+                   
                   >
                     <RefreshCw className={`w-4 h-4 ${generateTokenMutation.isPending ? 'animate-spin' : ''}`} />
                   </Button>
@@ -476,7 +476,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
                       navigator.clipboard.writeText(agent.accessToken);
                       toast({ title: "Tersalin!", description: "Access Token sudah disalin." });
                     }
-                  }} title="Salin Token" data-testid="button-copy-token">
+                  }} title="Salin Token">
                     <Code className="w-4 h-4" />
                   </Button>
                 </div>
@@ -588,7 +588,7 @@ Response:
                 navigator.clipboard.writeText(docs);
                 toast({ title: "Tersalin!", description: "Dokumentasi API sudah disalin." });
               }}
-              data-testid="button-copy-api-docs"
+             
             >
               Salin Dokumentasi API
             </Button>
@@ -659,7 +659,7 @@ Response:
                     value={configData.phone || ""}
                     onChange={(e) => setConfigData({ ...configData, phone: e.target.value })}
                     placeholder="628123456789"
-                    data-testid="input-whatsapp-phone"
+                   
                   />
                   <p className="text-xs text-muted-foreground">
                     Nomor WhatsApp Business Anda (dengan kode negara, tanpa +)
@@ -672,7 +672,7 @@ Response:
                     value={configData.apiToken || ""}
                     onChange={(e) => setConfigData({ ...configData, apiToken: e.target.value })}
                     placeholder="Masukkan token Anda"
-                    data-testid="input-whatsapp-token"
+                   
                   />
                 </div>
                 <div className="space-y-2">
@@ -698,7 +698,7 @@ Response:
                   onClick={testFonnteConnection}
                   disabled={!configData.apiToken || isConnecting}
                   className="w-full"
-                  data-testid="button-test-fonnte"
+                 
                 >
                   {isConnecting ? (
                     <>
@@ -735,7 +735,7 @@ Response:
                     value={configData.botToken || ""}
                     onChange={(e) => setConfigData({ ...configData, botToken: e.target.value })}
                     placeholder="Contoh: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
-                    data-testid="input-telegram-token"
+                   
                   />
                 </div>
                 <div className="space-y-2">

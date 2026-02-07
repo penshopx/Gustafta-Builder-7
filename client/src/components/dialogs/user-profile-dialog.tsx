@@ -155,7 +155,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
                   className="absolute bottom-0 right-0 h-8 w-8 rounded-full"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadAvatar.isPending}
-                  data-testid="button-upload-avatar"
+                 
                 >
                   {uploadAvatar.isPending ? (
                     <Upload className="h-4 w-4 animate-pulse" />
@@ -170,7 +170,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
                 accept="image/*"
                 className="hidden"
                 onChange={handleFileChange}
-                data-testid="input-avatar-file"
+               
               />
               <p className="text-xs text-muted-foreground">
                 Klik ikon kamera untuk mengupload foto
@@ -184,7 +184,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
                 placeholder="Nama lengkap Anda"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                data-testid="input-profile-name"
+               
               />
             </div>
 
@@ -195,7 +195,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
                 placeholder="Contoh: CEO, Marketing Manager"
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
-                data-testid="input-profile-position"
+               
               />
             </div>
 
@@ -206,7 +206,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
                 placeholder="Nama perusahaan Anda"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                data-testid="input-profile-company"
+               
               />
             </div>
 
@@ -218,7 +218,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={3}
-                data-testid="input-profile-bio"
+               
               />
             </div>
 
@@ -229,7 +229,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
               <Button
                 onClick={handleSubmit}
                 disabled={saveProfile.isPending}
-                data-testid="button-save-profile"
+               
               >
                 {saveProfile.isPending ? "Menyimpan..." : "Simpan Profil"}
               </Button>

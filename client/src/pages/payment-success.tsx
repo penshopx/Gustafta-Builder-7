@@ -55,14 +55,14 @@ export default function PaymentSuccess() {
 
           <div className="flex flex-col gap-3">
             <Link href="/dashboard">
-              <Button className="w-full" size="lg" data-testid="button-go-dashboard">
+              <Button className="w-full" size="lg">
                 <Bot className="mr-2 h-4 w-4" />
                 Mulai Buat Chatbot
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
             <Link href="/subscription">
-              <Button variant="outline" className="w-full" data-testid="button-view-subscription">
+              <Button variant="outline" className="w-full">
                 Lihat Status Langganan
               </Button>
             </Link>

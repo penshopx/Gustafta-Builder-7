@@ -102,7 +102,7 @@ export default function SeriesDetail() {
             Series ini mungkin tidak tersedia atau link-nya tidak valid.
           </p>
           <Link href="/series">
-            <Button variant="outline" data-testid="button-back-catalog">
+            <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Kembali ke Katalog
             </Button>
@@ -116,7 +116,7 @@ export default function SeriesDetail() {
   const s = seriesData;
 
   return (
-    <div className="min-h-screen bg-background" data-testid="series-detail-page">
+    <div className="min-h-screen bg-background">
       {/* Hero */}
       <div
         className="relative overflow-hidden"
@@ -140,12 +140,12 @@ export default function SeriesDetail() {
         <div className="relative max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
             <Link href="/series">
-              <Button variant="ghost" size="sm" className="text-white" data-testid="button-back">
+              <Button variant="ghost" size="sm" className="text-white">
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 Katalog
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" className="text-white" onClick={handleShare} data-testid="button-share">
+            <Button variant="ghost" size="icon" className="text-white" onClick={handleShare}>
               <Share2 className="w-4 h-4" />
             </Button>
           </div>
@@ -165,7 +165,7 @@ export default function SeriesDetail() {
               )}
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" data-testid="text-series-name">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
               {s.name}
             </h1>
             {s.tagline && (
@@ -216,10 +216,10 @@ export default function SeriesDetail() {
             Struktur Series
           </h2>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={expandAll} data-testid="button-expand-all">
+            <Button variant="outline" size="sm" onClick={expandAll}>
               Buka Semua
             </Button>
-            <Button variant="outline" size="sm" onClick={collapseAll} data-testid="button-collapse-all">
+            <Button variant="outline" size="sm" onClick={collapseAll}>
               Tutup Semua
             </Button>
           </div>
@@ -240,12 +240,12 @@ export default function SeriesDetail() {
             const TypeIcon = typeIcons[bi.type] || Lightbulb;
 
             return (
-              <Card key={bi.id} data-testid={`card-big-idea-${bi.id}`}>
+              <Card key={bi.id}>
                 <CardContent className="p-0">
                   <button
                     onClick={() => toggleBigIdea(bi.id)}
                     className="w-full flex items-center gap-3 sm:gap-4 p-4 text-left hover-elevate rounded-lg"
-                    data-testid={`button-toggle-bi-${bi.id}`}
+                   
                   >
                     <div
                       className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-sm sm:text-base"
@@ -294,11 +294,11 @@ export default function SeriesDetail() {
                         const tbExpanded = expandedToolboxes.has(tb.id);
 
                         return (
-                          <div key={tb.id} className="pl-6 sm:pl-8" data-testid={`card-toolbox-${tb.id}`}>
+                          <div key={tb.id} className="pl-6 sm:pl-8">
                             <button
                               onClick={() => toggleToolbox(tb.id)}
                               className="w-full flex items-center gap-3 p-3 rounded-lg border text-left hover-elevate"
-                              data-testid={`button-toggle-tb-${tb.id}`}
+                             
                             >
                               <div
                                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
@@ -335,7 +335,7 @@ export default function SeriesDetail() {
                                     <div
                                       key={agent.id}
                                       className="flex items-center gap-3 p-3 rounded-lg border"
-                                      data-testid={`card-agent-${agent.id}`}
+                                     
                                     >
                                       <Avatar className="w-9 h-9 shrink-0" style={{ borderColor: `${agent.widgetColor || color}30` }}>
                                         {agent.avatar ? (
@@ -365,7 +365,7 @@ export default function SeriesDetail() {
                                       <div className="flex items-center gap-1.5 shrink-0">
                                         {agent.isPublic && agent.isActive ? (
                                           <Link href={chatUrl}>
-                                            <Button size="sm" className="text-xs gap-1" data-testid={`button-chat-${agent.id}`}>
+                                            <Button size="sm" className="text-xs gap-1">
                                               <MessageCircle className="w-3.5 h-3.5" />
                                               Chat
                                             </Button>

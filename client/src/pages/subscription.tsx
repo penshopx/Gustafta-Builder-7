@@ -84,7 +84,7 @@ export default function Subscription() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button onClick={() => window.location.href = "/api/login"} data-testid="button-login">
+            <Button onClick={() => window.location.href = "/api/login"}>
               Login dengan Replit
             </Button>
           </CardContent>
@@ -208,7 +208,7 @@ export default function Subscription() {
                           className="mt-3" 
                           size="sm"
                           onClick={() => window.location.href = subscription.mayarPaymentUrl!}
-                          data-testid="button-continue-payment"
+                         
                         >
                           Lanjutkan Pembayaran
                           <ArrowRight className="ml-2 h-4 w-4" />
@@ -234,7 +234,7 @@ export default function Subscription() {
                             : `Langganan Anda akan berakhir dalam ${daysRemaining} hari. Perpanjang sekarang untuk tetap aktif.`}
                         </p>
                         <Link href="/pricing">
-                          <Button className="mt-3" size="sm" data-testid="button-renew">
+                          <Button className="mt-3" size="sm">
                             Perpanjang Langganan
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Button>
@@ -278,13 +278,13 @@ export default function Subscription() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/pricing">
-                <Button variant="outline" className="w-full sm:w-auto" data-testid="button-upgrade">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Crown className="mr-2 h-4 w-4" />
                   Upgrade Paket
                 </Button>
               </Link>
               <Link href="/dashboard">
-                <Button className="w-full sm:w-auto" data-testid="button-to-dashboard">
+                <Button className="w-full sm:w-auto">
                   <Bot className="mr-2 h-4 w-4" />
                   Ke Dashboard
                 </Button>
@@ -302,7 +302,7 @@ export default function Subscription() {
                 Anda belum memiliki langganan aktif. Mulai dengan free trial 14 hari atau pilih paket yang sesuai kebutuhan Anda.
               </p>
               <Link href="/pricing">
-                <Button size="lg" data-testid="button-start-subscription">
+                <Button size="lg">
                   <Zap className="mr-2 h-4 w-4" />
                   Lihat Paket Langganan
                 </Button>

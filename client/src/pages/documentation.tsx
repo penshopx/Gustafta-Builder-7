@@ -462,7 +462,7 @@ export default function Documentation() {
 
                 <div className="not-prose mt-6">
                   <Link href="/dashboard">
-                    <Button className="gap-2" data-testid="button-start-building">
+                    <Button className="gap-2">
                       Mulai Membangun
                       <Zap className="h-4 w-4" />
                     </Button>
@@ -477,7 +477,7 @@ export default function Documentation() {
             <p className="text-muted-foreground mb-4">
               Hubungi tim dukungan kami untuk pertanyaan lebih lanjut.
             </p>
-            <Button variant="outline" data-testid="button-contact-support">
+            <Button variant="outline">
               Hubungi Dukungan
             </Button>
           </div>

@@ -174,7 +174,7 @@ export function AgenticAIPanel() {
             <Switch
               checked={settings.agenticMode}
               onCheckedChange={(checked) => handleSettingChange("agenticMode", checked)}
-              data-testid="switch-agentic-mode"
+             
             />
           </div>
         </CardHeader>
@@ -199,7 +199,7 @@ export function AgenticAIPanel() {
                   onCheckedChange={(checked) =>
                     handleSettingChange(feature.key as keyof typeof settings, checked)
                   }
-                  data-testid={`switch-${feature.key}`}
+                 
                 />
               </div>
             </CardContent>
@@ -236,7 +236,7 @@ export function AgenticAIPanel() {
               min={1}
               max={50}
               step={1}
-              data-testid="slider-context-retention"
+             
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>1 pesan</span>

@@ -247,7 +247,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                   setIsOrchestrator(true);
                   setStep("category");
                 }}
-                data-testid="card-create-orchestrator"
+               
               >
                 <CardHeader className="pb-2">
                   <div className="p-2 rounded-lg bg-purple-500/10 w-fit">
@@ -270,7 +270,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                   setIsOrchestrator(false);
                   setTemplateDialogOpen(true);
                 }}
-                data-testid="card-use-template"
+               
               >
                 <CardHeader className="pb-2">
                   <div className="p-2 rounded-lg bg-primary/10 w-fit">
@@ -293,7 +293,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                   setIsOrchestrator(false);
                   setStep("category");
                 }}
-                data-testid="card-start-scratch"
+               
               >
                 <CardHeader className="pb-2">
                   <div className="p-2 rounded-lg bg-muted w-fit">
@@ -332,7 +332,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                       "flex flex-col items-center gap-2 p-4 rounded-lg border transition-colors hover-elevate",
                       "text-center"
                     )}
-                    data-testid={`category-${category.id}`}
+                   
                   >
                     <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                       <IconComponent className="w-6 h-6 text-primary" />
@@ -355,7 +355,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                   className={cn(
                     "flex items-center gap-3 p-4 rounded-lg border transition-colors hover-elevate text-left"
                   )}
-                  data-testid={`subcategory-${sub.id}`}
+                 
                 >
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">{sub.label}</span>
@@ -385,7 +385,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="My Assistant"
-                data-testid="input-create-agent-name"
+               
               />
             </div>
 
@@ -396,7 +396,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                 value={formData.tagline}
                 onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
                 placeholder="Your helpful AI companion"
-                data-testid="input-create-agent-tagline"
+               
               />
             </div>
 
@@ -408,7 +408,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe what your chatbot does..."
                 rows={3}
-                data-testid="input-create-agent-description"
+               
               />
             </div>
           </div>
@@ -416,7 +416,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
 
         <DialogFooter className="gap-2">
           {step !== "start" && (
-            <Button variant="outline" onClick={handleBack} data-testid="button-back">
+            <Button variant="outline" onClick={handleBack}>
               <ChevronLeft className="w-4 h-4 mr-1" />
               Kembali
             </Button>
@@ -429,7 +429,7 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
             <Button
               onClick={handleCreate}
               disabled={createAgent.isPending}
-              data-testid="button-confirm-create-agent"
+             
             >
               {createAgent.isPending ? "Membuat..." : "Buat Chatbot"}
             </Button>

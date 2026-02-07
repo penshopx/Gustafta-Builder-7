@@ -140,7 +140,7 @@ export function TemplateShowcase({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
-                data-testid="input-search-templates"
+               
               />
             </div>
           </div>
@@ -152,10 +152,10 @@ export function TemplateShowcase({
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category.id)}
-                data-testid={`button-category-${category.id}`}
+               
               >
                 {category.name}
-                <Badge variant="secondary" className="ml-2" data-testid={`badge-category-count-${category.id}`}>
+                <Badge variant="secondary" className="ml-2">
                   {category.count}
                 </Badge>
               </Button>
@@ -173,7 +173,7 @@ export function TemplateShowcase({
               key={template.id} 
               className="hover-elevate group cursor-pointer transition-all"
               onClick={() => showCreateButton && openCreateDialog(template)}
-              data-testid={`card-template-${template.id}`}
+             
             >
               <CardContent className={compact ? "p-4" : "p-6"}>
                 <div 
@@ -187,26 +187,26 @@ export function TemplateShowcase({
                 </div>
                 <h3 
                   className={`${compact ? 'text-base' : 'text-lg'} font-semibold mb-1 group-hover:text-primary transition-colors`}
-                  data-testid={`text-template-name-${template.id}`}
+                 
                 >
                   {template.name}
                 </h3>
                 <p 
                   className={`text-muted-foreground ${compact ? 'text-xs line-clamp-2' : 'text-sm line-clamp-3'} mb-3`}
-                  data-testid={`text-template-desc-${template.id}`}
+                 
                 >
                   {template.description}
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {template.tags.slice(0, compact ? 2 : 3).map((tag, index) => (
-                    <Badge key={tag} variant="secondary" className="text-xs" data-testid={`badge-template-tag-${template.id}-${index}`}>
+                    <Badge key={tag} variant="secondary" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
                 </div>
                 {showCreateButton && (
                   <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" className="w-full gap-2" data-testid={`button-use-template-${template.id}`}>
+                    <Button size="sm" className="w-full gap-2">
                       <Sparkles className="h-4 w-4" />
                       Gunakan Template
                     </Button>
@@ -220,7 +220,7 @@ export function TemplateShowcase({
 
       {maxItems && filteredTemplates.length > maxItems && (
         <div className="text-center">
-          <Button variant="outline" className="gap-2" data-testid="button-view-all-templates">
+          <Button variant="outline" className="gap-2">
             Lihat Semua {filteredTemplates.length} Template
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -261,30 +261,30 @@ export function TemplateShowcase({
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="Masukkan nama chatbot"
-                data-testid="input-agent-name"
+               
               />
             </div>
 
             {selectedTemplate && (
               <div className="space-y-2">
-                <Label data-testid="label-template-features">Fitur Template</Label>
+                <Label>Fitur Template</Label>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p data-testid="text-template-persona">Persona: {selectedTemplate.agent.personality}</p>
-                  <p data-testid="text-template-style">Gaya Komunikasi: {selectedTemplate.agent.communicationStyle}</p>
-                  <p data-testid="text-template-model">Model AI: {selectedTemplate.agent.aiModel || "gpt-4o-mini"}</p>
+                  <p>Persona: {selectedTemplate.agent.personality}</p>
+                  <p>Gaya Komunikasi: {selectedTemplate.agent.communicationStyle}</p>
+                  <p>Model AI: {selectedTemplate.agent.aiModel || "gpt-4o-mini"}</p>
                 </div>
               </div>
             )}
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateDialogOpen(false)} data-testid="button-cancel-template">
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Batal
             </Button>
             <Button 
               onClick={handleCreateAgent} 
               disabled={createFromTemplate.isPending}
-              data-testid="button-confirm-create-from-template"
+             
             >
               {createFromTemplate.isPending ? "Membuat..." : "Buat Chatbot"}
             </Button>
