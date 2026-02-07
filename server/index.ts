@@ -4,6 +4,8 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
+import { storage } from "./storage";
+import { gustaftaKnowledgeBaseAgent } from "./seed-knowledge-base";
 
 const app = express();
 const httpServer = createServer(app);
@@ -104,8 +106,36 @@ app.use((req, res, next) => {
       host: "0.0.0.0",
       reusePort: true,
     },
-    () => {
+    async () => {
       log(`serving on port ${port}`);
+      
+      try {
+        const existingAgents = await storage.getAgents();
+        const helpdeskExists = existingAgents.some(
+          (agent: any) => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
+        );
+        if (!helpdeskExists) {
+          await storage.createAgent(gustaftaKnowledgeBaseAgent as any);
+          log("Gustafta Helpdesk chatbot auto-seeded successfully");
+        } else {
+          const helpdesk = existingAgents.find(
+            (agent: any) => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
+          );
+          if (helpdesk) {
+            await storage.updateAgent(helpdesk.id, {
+              systemPrompt: gustaftaKnowledgeBaseAgent.systemPrompt,
+              greetingMessage: gustaftaKnowledgeBaseAgent.greetingMessage,
+              conversationStarters: gustaftaKnowledgeBaseAgent.conversationStarters,
+              personality: gustaftaKnowledgeBaseAgent.personality,
+              tagline: gustaftaKnowledgeBaseAgent.tagline,
+              description: gustaftaKnowledgeBaseAgent.description,
+            } as any);
+            log("Gustafta Helpdesk chatbot updated with latest configuration");
+          }
+        }
+      } catch (err) {
+        log("Failed to auto-seed Gustafta Helpdesk: " + (err as Error).message);
+      }
     },
   );
 })();
