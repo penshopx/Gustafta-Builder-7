@@ -2743,6 +2743,9 @@ export async function registerRoutes(
         trialDays: agent.trialDays ?? 7,
         messageQuotaDaily: agent.messageQuotaDaily ?? 50,
         messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
+        communicationStyle: agent.communicationStyle || "friendly",
+        toneOfVoice: agent.toneOfVoice || "professional",
+        language: agent.language || "id",
       });
     } catch (error) {
       console.error("Chat config error:", error);
@@ -2750,6 +2753,91 @@ export async function registerRoutes(
     }
   });
   
+  app.get("/api/manifest/:agentId", async (req, res) => {
+    try {
+      const agent = await resolveAgent(req.params.agentId);
+      if (!agent) {
+        return res.json({
+          name: "Gustafta",
+          short_name: "Gustafta",
+          start_url: "/",
+          display: "standalone",
+          background_color: "#ffffff",
+          theme_color: "#6366f1",
+          icons: [
+            { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+            { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+          ],
+        });
+      }
+
+      const agentName = (agent.name || "Gustafta").replace(/[<>"'&]/g, "");
+      const color = agent.widgetColor || "#6366f1";
+      const slug = agent.productSlug || agent.id.toString();
+      const description = (agent.description || agent.tagline || `Chat with ${agentName}`).replace(/[<>"'&]/g, "").substring(0, 200);
+
+      const icons: any[] = [
+        { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+        { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+      ];
+      if (agent.avatar && agent.avatar.startsWith("/uploads/")) {
+        icons.unshift({ src: agent.avatar, sizes: "256x256", type: "image/png", purpose: "any" });
+      }
+
+      res.json({
+        name: agentName,
+        short_name: agentName.substring(0, 12),
+        description,
+        start_url: `/chat/${slug}`,
+        display: "standalone",
+        background_color: "#ffffff",
+        theme_color: color,
+        orientation: "portrait-primary",
+        icons,
+        categories: ["business", "productivity", "utilities"],
+      });
+    } catch (error) {
+      console.error("Manifest error:", error);
+      res.json({
+        name: "Gustafta",
+        short_name: "Gustafta",
+        start_url: "/",
+        display: "standalone",
+        background_color: "#ffffff",
+        theme_color: "#6366f1",
+        icons: [
+          { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+        ],
+      });
+    }
+  });
+
+  app.get("/api/chat/meta/:agentId", async (req, res) => {
+    try {
+      const agent = await resolveAgent(req.params.agentId);
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      const name = (agent.name || "Gustafta").replace(/[<>"'&]/g, "");
+      const description = (agent.description || agent.tagline || `Chat with ${name}`).replace(/[<>"'&]/g, "").substring(0, 200);
+      const color = agent.widgetColor || "#6366f1";
+      const avatar = agent.avatar || "/icon-512.png";
+      const slug = agent.productSlug || agent.id.toString();
+
+      res.json({
+        title: `${name} - Gustafta AI`,
+        description,
+        color,
+        avatar,
+        url: `/chat/${slug}`,
+        name,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to load meta" });
+    }
+  });
+
   // Widget embed endpoint - requires isPublic
   app.get("/api/widget/config/:agentId", async (req, res) => {
     try {
@@ -3740,6 +3828,49 @@ Be professional and suitable for management review.`;
       res.json({ valid: true, name: affiliate.name });
     } catch (error) {
       res.status(500).json({ error: "Validation failed" });
+    }
+  });
+
+  const socialBotPattern = /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|Discordbot|Pinterest|vkShare|OGP|crawler|spider|bot/i;
+
+  app.get("/chat/:agentId", async (req, res, next) => {
+    const ua = req.headers["user-agent"] || "";
+    if (!socialBotPattern.test(ua)) {
+      return next();
+    }
+    try {
+      const agent = await resolveAgent(req.params.agentId);
+      if (!agent) return next();
+
+      const name = (agent.name || "Gustafta").replace(/[<>"'&]/g, "");
+      const description = (agent.description || agent.tagline || `Chat with ${name}`).replace(/[<>"'&]/g, "").substring(0, 200);
+      const color = agent.widgetColor || "#6366f1";
+      const avatar = agent.avatar || "/icon-512.png";
+      const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
+      const avatarUrl = avatar.startsWith("http") ? avatar : `${req.protocol}://${req.get("host")}${avatar}`;
+
+      res.status(200).set({ "Content-Type": "text/html" }).end(`<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>${name} - Gustafta AI</title>
+<meta name="description" content="${description}">
+<meta name="theme-color" content="${color}">
+<meta property="og:title" content="${name} - Gustafta AI">
+<meta property="og:description" content="${description}">
+<meta property="og:image" content="${avatarUrl}">
+<meta property="og:url" content="${fullUrl}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gustafta">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="${name} - Gustafta AI">
+<meta name="twitter:description" content="${description}">
+<meta name="twitter:image" content="${avatarUrl}">
+</head>
+<body><p>${description}</p></body>
+</html>`);
+    } catch {
+      next();
     }
   });
 

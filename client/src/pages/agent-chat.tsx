@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +55,9 @@ interface AgentConfig {
   trialDays: number;
   messageQuotaDaily: number;
   messageQuotaMonthly: number;
+  communicationStyle: string;
+  toneOfVoice: string;
+  language: string;
 }
 
 function processInlineText(text: string): (string | JSX.Element)[] {
@@ -156,16 +159,18 @@ function formatMessageContent(text: string) {
   return <div className="space-y-1.5">{elements}</div>;
 }
 
-function AgentAvatar({ config, size = "md", color }: { config: AgentConfig; size?: "sm" | "md" | "lg"; color: string }) {
+function AgentAvatar({ config, size = "md", color }: { config: AgentConfig; size?: "sm" | "md" | "lg" | "xl"; color: string }) {
   const sizeClasses = {
     sm: "w-8 h-8",
     md: "w-10 h-10",
     lg: "w-20 h-20",
+    xl: "w-28 h-28",
   };
   const textClasses = {
     sm: "text-xs",
     md: "text-sm font-semibold",
     lg: "text-2xl font-bold",
+    xl: "text-4xl font-bold",
   };
 
   return (
@@ -191,6 +196,92 @@ const channelMeta: Record<string, { icon: any; label: string; color: string; bgC
   web: { icon: Globe, label: "Web Widget", color: "text-cyan-600 dark:text-cyan-400", bgColor: "bg-cyan-500/10" },
   api: { icon: Code, label: "REST API", color: "text-orange-600 dark:text-orange-400", bgColor: "bg-orange-500/10" },
 };
+
+const styleLabels: Record<string, string> = {
+  friendly: "Ramah",
+  professional: "Profesional",
+  casual: "Santai",
+  formal: "Formal",
+  technical: "Teknikal",
+  creative: "Kreatif",
+  educational: "Edukatif",
+  enthusiastic: "Antusias",
+  caring: "Peduli",
+  inspiring: "Inspiratif",
+};
+
+const langLabels: Record<string, string> = {
+  id: "Indonesia",
+  en: "English",
+  ms: "Melayu",
+  jv: "Jawa",
+  su: "Sunda",
+  ar: "Arabic",
+  zh: "Chinese",
+  ja: "Japanese",
+  ko: "Korean",
+};
+
+function InstallBanner({ color, agentName }: { color: string; agentName: string }) {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const [installed, setInstalled] = useState(false);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+
+    const installedHandler = () => setInstalled(true);
+    window.addEventListener("appinstalled", installedHandler);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
+  }, []);
+
+  if (installed) return null;
+  if (window.matchMedia("(display-mode: standalone)").matches) return null;
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === "accepted") setInstalled(true);
+      setDeferredPrompt(null);
+    } else if (isIOS) {
+      setShowIOSGuide(!showIOSGuide);
+    }
+  };
+
+  if (!deferredPrompt && !isIOS) return null;
+
+  return (
+    <div className="w-full max-w-sm" data-testid="install-banner">
+      <button
+        onClick={handleInstall}
+        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-all"
+        style={{ backgroundColor: color }}
+        data-testid="button-install-app"
+      >
+        <Smartphone className="w-4 h-4" />
+        Install {agentName} di HP Anda
+      </button>
+      {showIOSGuide && isIOS && (
+        <div className="mt-2 p-3 bg-muted rounded-xl text-xs text-muted-foreground space-y-1" data-testid="ios-install-guide">
+          <p className="font-medium text-foreground">Cara install di iPhone/iPad:</p>
+          <p>1. Tap tombol Share di Safari (kotak dengan panah ke atas)</p>
+          <p>2. Scroll ke bawah, pilih "Add to Home Screen"</p>
+          <p>3. Tap "Add" di pojok kanan atas</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AgentChat() {
   const params = useParams<{ agentId: string }>();
@@ -326,7 +417,7 @@ export default function AgentChat() {
     for (const line of lines) {
       const trimmed = line.trim();
       if (trimmed.length > 10 && trimmed.length < 80 && trimmed.endsWith("?")) {
-        suggestions.push(trimmed.replace(/^[-*•\d.)\s]+/, "").trim());
+        suggestions.push(trimmed.replace(/^[-*\d.)\s]+/, "").trim());
       }
     }
     if (suggestions.length === 0 && content.length > 50) {
@@ -394,7 +485,16 @@ export default function AgentChat() {
         .then((data) => {
           setConfig(data);
           setLoading(false);
-          document.title = `${data.name} - Chat`;
+          document.title = `${data.name} - Gustafta AI`;
+
+          const metaTheme = document.querySelector('meta[name="theme-color"]');
+          if (metaTheme) metaTheme.setAttribute("content", data.color || "#6366f1");
+
+          const metaDesc = document.querySelector('meta[name="description"]');
+          if (metaDesc) metaDesc.setAttribute("content", data.description || data.tagline || `Chat with ${data.name}`);
+
+          const manifestLink = document.querySelector('link[rel="manifest"]');
+          if (manifestLink) manifestLink.setAttribute("href", `/api/manifest/${params.agentId}`);
         })
         .catch((err) => {
           setError(err.message);
@@ -772,6 +872,14 @@ export default function AgentChat() {
   const color = config.color || "#6366f1";
   const hasMessages = messages.length > 0;
 
+  const featureBadges = [
+    { icon: Sparkles, label: "AI Cerdas", show: true },
+    { icon: Mic, label: "Suara", show: speechSupported },
+    { icon: Paperclip, label: "File & Dokumen", show: true },
+    { icon: Languages, label: langLabels[config.language] || "Multi-bahasa", show: true },
+    { icon: Shield, label: "Aman", show: true },
+  ];
+
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden" data-testid="agent-chat-page">
       {showRegistration && (
@@ -840,6 +948,8 @@ export default function AgentChat() {
           </Card>
         </div>
       )}
+
+      {/* Header */}
       <header
         className="border-b px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 sticky top-0 z-50"
         style={{ backgroundColor: color }}
@@ -851,27 +961,27 @@ export default function AgentChat() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </a>
-          <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-white/30 shrink-0">
-            {config.avatar ? (
-              <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
-            ) : null}
-            <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
-              {config.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative shrink-0">
+            <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border-2 border-white/30">
+              {config.avatar ? (
+                <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
+              ) : null}
+              <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
+                {config.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2" style={{ borderColor: color }} />
+          </div>
           <div className="min-w-0">
             <h1 className="text-white font-semibold text-sm sm:text-base truncate" data-testid="text-agent-name">
               {config.name}
             </h1>
-            {config.tagline && (
-              <p className="text-white/70 text-[10px] sm:text-xs truncate max-w-[180px] sm:max-w-none">{config.tagline}</p>
-            )}
+            <p className="text-white/60 text-[10px] sm:text-xs truncate max-w-[180px] sm:max-w-none">
+              {config.tagline || "Online"}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <Badge variant="outline" className="text-white border-white/30 text-[10px] hidden sm:inline-flex">
-            Online
-          </Badge>
           <Button
             size="icon"
             variant="ghost"
@@ -901,105 +1011,196 @@ export default function AgentChat() {
       </header>
 
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Welcome Screen - Rich Profile */}
         {!hasMessages && (
-          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto" data-testid="chat-welcome">
-            <div className="relative">
-              <AgentAvatar config={config} size="lg" color={color} />
+          <div className="flex-1 overflow-y-auto" data-testid="chat-welcome">
+            <div className="flex flex-col items-center">
+              {/* Hero Section with Gradient */}
               <div
-                className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background"
-                style={{ backgroundColor: "#22c55e" }}
-                data-testid="status-online-indicator"
-              />
-            </div>
+                className="w-full relative overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${color} 0%, ${color}dd 40%, ${color}99 100%)`,
+                }}
+              >
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-4 left-8 w-32 h-32 rounded-full bg-white/20 blur-3xl" />
+                  <div className="absolute bottom-4 right-12 w-40 h-40 rounded-full bg-white/10 blur-3xl" />
+                </div>
 
-            <div className="text-center space-y-1.5 sm:space-y-2">
-              <h2 className="text-xl sm:text-2xl font-bold" data-testid="text-welcome-name">{config.name}</h2>
-              {config.tagline && (
-                <p className="text-muted-foreground text-sm sm:text-base">{config.tagline}</p>
-              )}
-              {config.category && (
-                <Badge variant="secondary" className="text-[10px]" data-testid="badge-category">
-                  {config.category}{config.subcategory ? ` / ${config.subcategory}` : ""}
-                </Badge>
-              )}
-            </div>
+                <div className="relative px-4 sm:px-6 pt-8 sm:pt-10 pb-16 sm:pb-20 flex flex-col items-center text-center">
+                  <div className="relative mb-4">
+                    <Avatar className="w-24 h-24 sm:w-28 sm:h-28 border-4 border-white/30 shadow-lg">
+                      {config.avatar ? (
+                        <AvatarImage src={config.avatar} alt={config.name} className="object-cover" />
+                      ) : null}
+                      <AvatarFallback className="text-3xl sm:text-4xl font-bold bg-white/20 text-white">
+                        {config.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div
+                      className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-green-400 border-3 border-white flex items-center justify-center"
+                    >
+                      <Zap className="w-3 h-3 text-white" />
+                    </div>
+                  </div>
 
-            {config.description && (
-              <p className="text-xs sm:text-sm text-muted-foreground text-center max-w-sm px-4" data-testid="text-description">
-                {config.description}
-              </p>
-            )}
+                  <h2 className="text-white text-2xl sm:text-3xl font-bold mb-1" data-testid="text-welcome-name">
+                    {config.name}
+                  </h2>
 
-            {config.philosophy && (
-              <p className="text-xs sm:text-sm text-muted-foreground/80 italic max-w-md px-4">
-                "{config.philosophy}"
-              </p>
-            )}
+                  {config.tagline && (
+                    <p className="text-white/80 text-sm sm:text-base mb-3 max-w-md">
+                      {config.tagline}
+                    </p>
+                  )}
 
-            <div
-              className="rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm max-w-md text-center"
-              style={{ backgroundColor: `${color}10`, color }}
-            >
-              <MessageCircle className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
-              {config.greetingMessage}
-            </div>
-
-            {config.conversationStarters.length > 0 && (
-              <div className="flex flex-wrap gap-2 justify-center max-w-lg px-2" data-testid="conversation-starters">
-                {config.conversationStarters.slice(0, 5).map((starter, idx) => (
-                  <Button
-                    key={idx}
-                    variant="outline"
-                    size="sm"
-                    className="text-[11px] sm:text-xs"
-                    onClick={() => sendMessage(starter)}
-                    data-testid={`button-starter-${idx}`}
-                  >
-                    {starter}
-                  </Button>
-                ))}
-              </div>
-            )}
-
-            {config.channels && config.channels.length > 0 && (
-              <div className="space-y-2 pt-2 max-w-sm w-full" data-testid="channels-section">
-                <p className="text-[10px] sm:text-xs text-muted-foreground text-center uppercase tracking-wider font-medium">
-                  Tersedia juga di
-                </p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {config.channels.map((channel) => {
-                    const meta = channelMeta[channel.type] || {
-                      icon: MessageCircle,
-                      label: channel.name || channel.type,
-                      color: "text-muted-foreground",
-                      bgColor: "bg-muted",
-                    };
-                    const Icon = meta.icon;
-                    return (
-                      <div
-                        key={channel.type}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
-                          meta.bgColor, meta.color
-                        )}
-                        data-testid={`channel-badge-${channel.type}`}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                        <span>{meta.label}</span>
-                      </div>
-                    );
-                  })}
+                  <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
+                    {config.category && (
+                      <Badge variant="secondary" className="bg-white/20 text-white border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate" data-testid="badge-category">
+                        {config.category}{config.subcategory ? ` / ${config.subcategory}` : ""}
+                      </Badge>
+                    )}
+                    {config.communicationStyle && (
+                      <Badge variant="secondary" className="bg-white/15 text-white/90 border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate" data-testid="badge-style">
+                        {styleLabels[config.communicationStyle] || config.communicationStyle}
+                      </Badge>
+                    )}
+                    {config.toneOfVoice && config.toneOfVoice !== config.communicationStyle && (
+                      <Badge variant="secondary" className="bg-white/15 text-white/90 border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate" data-testid="badge-tone">
+                        {styleLabels[config.toneOfVoice] || config.toneOfVoice}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
-            )}
 
-            <div className="flex items-center gap-1.5 pt-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              <span className="text-[10px] text-muted-foreground">Online &middot; Siap membantu Anda</span>
+              {/* Profile Card - overlapping hero */}
+              <div className="w-full max-w-lg px-4 -mt-10 sm:-mt-12 relative z-10">
+                <Card className="shadow-lg">
+                  <CardContent className="p-4 sm:p-5 space-y-4">
+                    {/* Greeting */}
+                    <div className="flex items-start gap-3">
+                      <AgentAvatar config={config} size="sm" color={color} />
+                      <div
+                        className="rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-sm flex-1"
+                        style={{ backgroundColor: `${color}08` }}
+                      >
+                        <MessageCircle className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5 opacity-60" style={{ color }} />
+                        {config.greetingMessage}
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    {config.description && (
+                      <p className="text-sm text-muted-foreground leading-relaxed" data-testid="text-description">
+                        {config.description}
+                      </p>
+                    )}
+
+                    {/* Philosophy Quote */}
+                    {config.philosophy && (
+                      <div className="border-l-2 pl-3 py-1" style={{ borderColor: `${color}60` }}>
+                        <p className="text-xs text-muted-foreground/80 italic leading-relaxed">
+                          "{config.philosophy}"
+                        </p>
+                        {config.personality && (
+                          <p className="text-[10px] text-muted-foreground/60 mt-1">
+                            Kepribadian: {config.personality}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Feature Badges */}
+                    <div className="flex flex-wrap gap-1.5" data-testid="feature-badges">
+                      {featureBadges.filter(f => f.show).map((feature) => {
+                        const Icon = feature.icon;
+                        return (
+                          <span
+                            key={feature.label}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted text-muted-foreground text-[10px] sm:text-xs"
+                          >
+                            <Icon className="w-3 h-3" />
+                            {feature.label}
+                          </span>
+                        );
+                      })}
+                    </div>
+
+                    {/* Conversation Starters */}
+                    {config.conversationStarters.length > 0 && (
+                      <div className="space-y-2" data-testid="conversation-starters">
+                        <p className="text-xs text-muted-foreground font-medium">Mulai percakapan:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {config.conversationStarters.slice(0, 5).map((starter, idx) => (
+                            <Button
+                              key={idx}
+                              variant="outline"
+                              size="sm"
+                              className="text-[11px] sm:text-xs"
+                              onClick={() => sendMessage(starter)}
+                              data-testid={`button-starter-${idx}`}
+                            >
+                              {starter}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Channels */}
+                    {config.channels && config.channels.length > 0 && (
+                      <div className="space-y-2 pt-1" data-testid="channels-section">
+                        <p className="text-xs text-muted-foreground font-medium">
+                          Tersedia juga di:
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {config.channels.map((channel) => {
+                            const meta = channelMeta[channel.type] || {
+                              icon: MessageCircle,
+                              label: channel.name || channel.type,
+                              color: "text-muted-foreground",
+                              bgColor: "bg-muted",
+                            };
+                            const Icon = meta.icon;
+                            return (
+                              <span
+                                key={channel.type}
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium",
+                                  meta.bgColor, meta.color
+                                )}
+                                data-testid={`channel-badge-${channel.type}`}
+                              >
+                                <Icon className="w-3.5 h-3.5" />
+                                {meta.label}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Install Banner */}
+                <div className="flex justify-center mt-4 mb-4">
+                  <InstallBanner color={color} agentName={config.name} />
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center justify-center gap-1.5 pb-6">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[10px] text-muted-foreground">
+                    Online &middot; Siap membantu Anda
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
+        {/* Chat Messages */}
         {hasMessages && (
           <div className="flex-1 overflow-y-auto px-3 sm:px-4" ref={scrollRef}>
             <div className="py-3 sm:py-4 space-y-3 sm:space-y-4 max-w-2xl mx-auto">
@@ -1013,9 +1214,15 @@ export default function AgentChat() {
                     <AgentAvatar config={config} size="sm" color={color} />
                   ) : (
                     <Avatar className="w-8 h-8 shrink-0">
-                      <AvatarFallback className="text-xs bg-muted">
-                        <User className="w-4 h-4" />
-                      </AvatarFallback>
+                      {clientInfo?.name ? (
+                        <AvatarFallback className="text-xs font-medium" style={{ backgroundColor: `${color}20`, color }}>
+                          {clientInfo.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      ) : (
+                        <AvatarFallback className="text-xs bg-muted">
+                          <User className="w-4 h-4" />
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                   )}
                   <div
@@ -1025,7 +1232,7 @@ export default function AgentChat() {
                     )}
                   >
                     <span className="text-[10px] text-muted-foreground px-1">
-                      {message.role === "user" ? "Anda" : config.name}
+                      {message.role === "user" ? (clientInfo?.name || "Anda") : config.name}
                     </span>
                     <div
                       className={cn(
@@ -1194,6 +1401,8 @@ export default function AgentChat() {
             Kuota: {quotaInfo.dailyUsed}/{quotaInfo.dailyLimit} hari ini | {quotaInfo.monthlyUsed}/{quotaInfo.monthlyLimit} bulan ini
           </div>
         )}
+
+        {/* Input Area */}
         <div className="p-2.5 sm:p-4 border-t bg-background safe-area-bottom">
           {isListening && (
             <div className="flex items-center justify-center gap-2 pb-2 max-w-2xl mx-auto">
@@ -1288,7 +1497,7 @@ export default function AgentChat() {
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
               }}
               onKeyDown={handleKeyDown}
-              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik pesan, tempel link YouTube/Drive...`}
+              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik pesan ke ${config.name}...`}
               className="resize-none text-sm rounded-xl"
               rows={1}
               disabled={isTyping || isListening}
