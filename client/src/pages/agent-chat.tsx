@@ -495,6 +495,19 @@ export default function AgentChat() {
 
           const manifestLink = document.querySelector('link[rel="manifest"]');
           if (manifestLink) manifestLink.setAttribute("href", `/api/manifest/${params.agentId}`);
+
+          const appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]');
+          if (appleTouchIcon && data.avatar) {
+            appleTouchIcon.setAttribute("href", data.avatar);
+          }
+
+          const favicon = document.querySelector('link[rel="icon"]');
+          if (favicon && data.avatar) {
+            favicon.setAttribute("href", data.avatar);
+          }
+
+          const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+          if (appleTitle) appleTitle.setAttribute("content", data.name);
         })
         .catch((err) => {
           setError(err.message);

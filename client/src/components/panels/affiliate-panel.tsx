@@ -78,7 +78,7 @@ export function AffiliatePanel({ agent }: { agent: any }) {
   });
 
   const copyReferralLink = (affiliate: any) => {
-    const link = `${window.location.origin}/chat/${agent.id}?ref=${affiliate.referralCode}`;
+    const link = `${window.location.origin}/bot/${agent.id}?ref=${affiliate.referralCode}`;
     navigator.clipboard.writeText(link);
     setCopiedId(affiliate.id);
     setTimeout(() => setCopiedId(null), 2000);

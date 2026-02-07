@@ -2880,7 +2880,7 @@ export async function registerRoutes(
         { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
         { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
       ];
-      if (agent.avatar && agent.avatar.startsWith("/uploads/")) {
+      if (agent.avatar) {
         icons.unshift({ src: agent.avatar, sizes: "256x256", type: "image/png", purpose: "any" });
       }
 
@@ -2888,7 +2888,7 @@ export async function registerRoutes(
         name: agentName,
         short_name: agentName.substring(0, 12),
         description,
-        start_url: `/chat/${slug}`,
+        start_url: `/bot/${slug}`,
         display: "standalone",
         background_color: "#ffffff",
         theme_color: color,
@@ -2930,7 +2930,7 @@ export async function registerRoutes(
         description,
         color,
         avatar,
-        url: `/chat/${slug}`,
+        url: `/bot/${slug}`,
         name,
       });
     } catch (error) {
@@ -3685,7 +3685,7 @@ Be professional and suitable for management review.`;
               email: customerEmail,
               amount,
               description: `Langganan ${agent.name} - ${plan}`,
-              redirectUrl: `${baseUrl}/chat/${agent.id}?subscribed=true`,
+              redirectUrl: `${baseUrl}/bot/${agent.id}?subscribed=true`,
             });
 
             const subscription = await storage.createClientSubscription({
@@ -3933,13 +3933,14 @@ Be professional and suitable for management review.`;
 
   const socialBotPattern = /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|Discordbot|Pinterest|vkShare|OGP|crawler|spider|bot/i;
 
-  app.get("/chat/:agentId", async (req, res, next) => {
+  app.get(["/bot/:agentId", "/chat/:agentId"], async (req, res, next) => {
     const ua = req.headers["user-agent"] || "";
     if (!socialBotPattern.test(ua)) {
       return next();
     }
     try {
-      const agent = await resolveAgent(req.params.agentId);
+      const agentIdParam = Array.isArray(req.params.agentId) ? req.params.agentId[0] : req.params.agentId;
+      const agent = await resolveAgent(agentIdParam);
       if (!agent) return next();
 
       const name = (agent.name || "Gustafta").replace(/[<>"'&]/g, "");

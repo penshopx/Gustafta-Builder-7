@@ -29,6 +29,7 @@ function Router() {
       <Route path="/subscription" component={Subscription} />
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/embed/:agentId" component={EmbedChat} />
+      <Route path="/bot/:agentId" component={AgentChat} />
       <Route path="/chat/:agentId" component={AgentChat} />
       <Route path="/series" component={SeriesCatalog} />
       <Route path="/series/:slug" component={SeriesDetail} />

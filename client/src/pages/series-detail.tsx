@@ -328,8 +328,8 @@ export default function SeriesDetail() {
                               <div className="mt-2 pl-4 sm:pl-6 space-y-2">
                                 {tb.agents.map((agent) => {
                                   const chatUrl = agent.productSlug
-                                    ? `/chat/${agent.productSlug}`
-                                    : `/chat/${agent.id}`;
+                                    ? `/bot/${agent.productSlug}`
+                                    : `/bot/${agent.id}`;
 
                                   return (
                                     <div

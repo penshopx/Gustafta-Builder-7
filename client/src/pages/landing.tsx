@@ -726,7 +726,7 @@ export default function Landing() {
                   Buka chat.dokumentender.com
                 </Button>
               </a>
-              <Link href="/chat/dokumentender">
+              <Link href="/bot/dokumentender">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2">
                   <MessageSquare className="h-5 w-5" />
                   Chat di Gustafta

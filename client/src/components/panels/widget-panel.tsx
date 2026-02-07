@@ -111,7 +111,7 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
 
   const [chatLinkCopied, setChatLinkCopied] = useState(false);
 
-  const getPublicChatUrl = () => `${getBaseUrl()}/chat/${agent.id}`;
+  const getPublicChatUrl = () => `${getBaseUrl()}/bot/${agent.id}`;
 
   const copyEmbedCode = () => {
     navigator.clipboard.writeText(generateDynamicEmbedCode());
@@ -379,7 +379,7 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
                 >
                   {chatLinkCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>
-                <a href={`/chat/${agent.id}`} target="_blank" rel="noopener noreferrer">
+                <a href={`/bot/${agent.id}`} target="_blank" rel="noopener noreferrer">
                   <Button size="icon" variant="outline">
                     <ExternalLink className="w-4 h-4" />
                   </Button>
