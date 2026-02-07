@@ -170,38 +170,61 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     );
   };
 
+  const autoSaveField = (field: string, value: unknown) => {
+    updateAgent.mutate(
+      { id: agent.id, data: { [field]: value } },
+      {
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Gagal menyimpan perubahan otomatis.",
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
+
   const addConversationStarter = () => {
     if (newStarter.trim() && formData.conversationStarters.length < 5) {
+      const updated = [...formData.conversationStarters, newStarter.trim()];
       setFormData({
         ...formData,
-        conversationStarters: [...formData.conversationStarters, newStarter.trim()],
+        conversationStarters: updated,
       });
       setNewStarter("");
+      autoSaveField("conversationStarters", updated);
     }
   };
 
   const removeConversationStarter = (index: number) => {
+    const updated = formData.conversationStarters.filter((_, i) => i !== index);
     setFormData({
       ...formData,
-      conversationStarters: formData.conversationStarters.filter((_, i) => i !== index),
+      conversationStarters: updated,
     });
+    autoSaveField("conversationStarters", updated);
   };
 
   const addAllowedDomain = () => {
     if (newDomain.trim() && formData.allowedDomains.length < 10) {
+      const updated = [...formData.allowedDomains, newDomain.trim()];
       setFormData({
         ...formData,
-        allowedDomains: [...formData.allowedDomains, newDomain.trim()],
+        allowedDomains: updated,
       });
       setNewDomain("");
+      autoSaveField("allowedDomains", updated);
     }
   };
 
   const removeAllowedDomain = (index: number) => {
+    const updated = formData.allowedDomains.filter((_, i) => i !== index);
     setFormData({
       ...formData,
-      allowedDomains: formData.allowedDomains.filter((_, i) => i !== index),
+      allowedDomains: updated,
     });
+    autoSaveField("allowedDomains", updated);
   };
 
   const copyAccessToken = () => {
