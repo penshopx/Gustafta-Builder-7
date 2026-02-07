@@ -25,6 +25,49 @@ import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import { processAttachmentsAndUrls, type FileAttachment } from "./lib/file-processing";
 
+const guestMessageTracker = new Map<string, { count: number; lastReset: string }>();
+
+function getGuestFingerprint(req: any, agentId: string): string {
+  const ip = req.headers["x-forwarded-for"] || req.ip || "unknown";
+  const ua = req.headers["user-agent"] || "unknown";
+  const key = `${agentId}_${ip}_${ua.substring(0, 50)}`;
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    const char = key.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return `guest_${Math.abs(hash).toString(36)}`;
+}
+
+function getGuestUsage(fingerprint: string): number {
+  const today = new Date().toISOString().split("T")[0];
+  const entry = guestMessageTracker.get(fingerprint);
+  if (!entry || entry.lastReset !== today) {
+    return 0;
+  }
+  return entry.count;
+}
+
+function incrementGuestUsage(fingerprint: string): number {
+  const today = new Date().toISOString().split("T")[0];
+  const entry = guestMessageTracker.get(fingerprint);
+  if (!entry || entry.lastReset !== today) {
+    guestMessageTracker.set(fingerprint, { count: 1, lastReset: today });
+    return 1;
+  }
+  entry.count += 1;
+  return entry.count;
+}
+
+setInterval(() => {
+  const today = new Date().toISOString().split("T")[0];
+  const entries = Array.from(guestMessageTracker.entries());
+  for (const [key, val] of entries) {
+    if (val.lastReset !== today) guestMessageTracker.delete(key);
+  }
+}, 60 * 60 * 1000);
+
 const KNOWN_PROJECT_BRAIN_KEYS = [
   "project_name", "project_type", "project_stage", "location", "owner_client",
   "structural_system", "concrete_grade", "construction_method",
@@ -1311,8 +1354,9 @@ export async function registerRoutes(
       }
 
       // Server-side access control for monetized chatbots
+      const clientAccessToken = req.headers["x-client-token"] as string || req.body.clientToken;
+      
       if (agent.requireRegistration) {
-        const clientAccessToken = req.headers["x-client-token"] as string || req.body.clientToken;
         if (!clientAccessToken) {
           return res.status(403).json({ error: "Registration required", reason: "registration_required" });
         }
@@ -1337,12 +1381,55 @@ export async function registerRoutes(
         if ((subscription.messageUsedMonth || 0) >= monthlyLimit) {
           return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
         }
-        // Increment usage counters atomically
         await storage.updateClientSubscription(subscription.id, {
           messageUsedToday: dailyUsed + 1,
           messageUsedMonth: (subscription.messageUsedMonth || 0) + 1,
           lastMessageDate: today,
         });
+      } else {
+        // Guest mode: enforce guest message limit per session
+        const guestLimit = agent.guestMessageLimit ?? 10;
+        if (guestLimit > 0) {
+          if (clientAccessToken) {
+            // Registered user in non-required mode: check subscription quotas
+            const subscription = await storage.getClientSubscriptionByToken(clientAccessToken);
+            if (subscription && subscription.status === "active") {
+              if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
+                await storage.updateClientSubscription(subscription.id, { status: "expired" });
+              } else {
+                const today = new Date().toISOString().split("T")[0];
+                let dailyUsed = subscription.messageUsedToday || 0;
+                if (subscription.lastMessageDate !== today) dailyUsed = 0;
+                const dailyLimit = agent.messageQuotaDaily ?? 50;
+                const monthlyLimit = agent.messageQuotaMonthly ?? 1000;
+                if (dailyUsed >= dailyLimit) {
+                  return res.status(429).json({ error: "Daily quota exceeded", reason: "daily_limit_reached" });
+                }
+                if ((subscription.messageUsedMonth || 0) >= monthlyLimit) {
+                  return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
+                }
+                await storage.updateClientSubscription(subscription.id, {
+                  messageUsedToday: dailyUsed + 1,
+                  messageUsedMonth: (subscription.messageUsedMonth || 0) + 1,
+                  lastMessageDate: today,
+                });
+              }
+            }
+          } else {
+            // Pure guest: track by IP+UA fingerprint (server-side, not client-supplied)
+            const fingerprint = getGuestFingerprint(req, parsed.data.agentId);
+            const currentUsage = getGuestUsage(fingerprint);
+            if (currentUsage >= guestLimit) {
+              return res.status(429).json({
+                error: "Guest message limit reached",
+                reason: "guest_limit_reached",
+                limit: guestLimit,
+                used: currentUsage,
+              });
+            }
+            incrementGuestUsage(fingerprint);
+          }
+        }
       }
       
       // Save user message
@@ -2843,6 +2930,7 @@ export async function registerRoutes(
         trialDays: agent.trialDays ?? 7,
         messageQuotaDaily: agent.messageQuotaDaily ?? 50,
         messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
+        guestMessageLimit: agent.guestMessageLimit ?? 10,
         communicationStyle: agent.communicationStyle || "friendly",
         toneOfVoice: agent.toneOfVoice || "professional",
         language: agent.language || "id",
@@ -3788,7 +3876,26 @@ Be professional and suitable for management review.`;
       }
 
       if (!agent.requireRegistration) {
-        return res.json({ allowed: true, unlimited: true });
+        if (accessToken) {
+          const subscription = await storage.getClientSubscriptionByToken(accessToken);
+          if (subscription && subscription.status === "active") {
+            if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
+              await storage.updateClientSubscription(subscription.id, { status: "expired" });
+              return res.json({ allowed: false, reason: "subscription_expired" });
+            }
+            return res.json({ allowed: true, unlimited: false, plan: subscription.plan });
+          }
+        }
+        const guestLimit = agent.guestMessageLimit ?? 10;
+        if (guestLimit <= 0) {
+          return res.json({ allowed: true, unlimited: true });
+        }
+        const fingerprint = getGuestFingerprint(req, agentId);
+        const guestUsed = getGuestUsage(fingerprint);
+        if (guestUsed >= guestLimit) {
+          return res.json({ allowed: false, reason: "guest_limit_reached", limit: guestLimit, used: guestUsed });
+        }
+        return res.json({ allowed: true, unlimited: false, guestUsed, guestLimit, isGuest: true });
       }
 
       if (!accessToken) {

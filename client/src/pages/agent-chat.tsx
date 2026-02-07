@@ -55,6 +55,7 @@ interface AgentConfig {
   trialDays: number;
   messageQuotaDaily: number;
   messageQuotaMonthly: number;
+  guestMessageLimit: number;
   communicationStyle: string;
   toneOfVoice: string;
   language: string;
@@ -308,6 +309,9 @@ export default function AgentChat() {
   const [registering, setRegistering] = useState(false);
   const [quotaInfo, setQuotaInfo] = useState<{ dailyUsed: number; dailyLimit: number; monthlyUsed: number; monthlyLimit: number } | null>(null);
   const [quotaError, setQuotaError] = useState<string | null>(null);
+  const [guestMessageCount, setGuestMessageCount] = useState(0);
+  const [showUpgradeWall, setShowUpgradeWall] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
 
   const getStorageKey = useCallback(() => `gustafta_chat_${params.agentId}`, [params.agentId]);
 
@@ -529,7 +533,17 @@ export default function AgentChat() {
         .then(data => {
           if (data.valid) {
             setClientInfo({ name: data.subscription.customerName, email: data.subscription.customerEmail, plan: data.subscription.plan });
+            if (data.subscription.endDate) {
+              const daysLeft = Math.ceil((new Date(data.subscription.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+              if (daysLeft <= 2 && daysLeft > 0 && data.subscription.plan === "trial") {
+                setQuotaError(`Trial berakhir dalam ${daysLeft} hari. Upgrade untuk akses penuh.`);
+              }
+            }
           } else {
+            if (data.error === "Subscription expired") {
+              setUpgradeReason("expired");
+              setShowUpgradeWall(true);
+            }
             localStorage.removeItem(`gustafta_client_${params.agentId}`);
             setClientToken(null);
           }
@@ -555,25 +569,41 @@ export default function AgentChat() {
   const sendMessage = async (content: string) => {
     if ((!content.trim() && pendingFiles.length === 0) || isTyping || !config) return;
 
-    if (config && (config as any).requireRegistration && clientToken) {
+    // Check guest limit for non-registered mode
+    if (config && !config.requireRegistration && !clientToken) {
+      const guestLimit = config.guestMessageLimit ?? 10;
+      if (guestLimit > 0 && guestMessageCount >= guestLimit) {
+        setUpgradeReason("guest_limit");
+        setShowUpgradeWall(true);
+        return;
+      }
+    }
+
+    if (config && clientToken) {
       try {
         const quotaRes = await fetch("/api/client/check-quota", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ accessToken: clientToken, agentId: params.agentId }),
+          body: JSON.stringify({ accessToken: clientToken, agentId: params.agentId, sessionId: sessionIdRef.current }),
         });
         const quotaData = await quotaRes.json();
         if (!quotaData.allowed) {
           if (quotaData.reason === "daily_limit_reached") {
             setQuotaError(`Kuota harian tercapai (${quotaData.limit} pesan). Coba lagi besok.`);
           } else if (quotaData.reason === "monthly_limit_reached") {
-            setQuotaError(`Kuota bulanan tercapai (${quotaData.limit} pesan). Upgrade langganan Anda.`);
+            setUpgradeReason("monthly_limit");
+            setShowUpgradeWall(true);
+          } else if (quotaData.reason === "subscription_expired") {
+            setUpgradeReason("expired");
+            setShowUpgradeWall(true);
           } else {
             setQuotaError("Akses ditolak. Silakan registrasi ulang.");
           }
           return;
         }
-        setQuotaInfo({ dailyUsed: quotaData.dailyUsed, dailyLimit: quotaData.dailyLimit, monthlyUsed: quotaData.monthlyUsed, monthlyLimit: quotaData.monthlyLimit });
+        if (quotaData.dailyUsed !== undefined) {
+          setQuotaInfo({ dailyUsed: quotaData.dailyUsed, dailyLimit: quotaData.dailyLimit, monthlyUsed: quotaData.monthlyUsed, monthlyLimit: quotaData.monthlyLimit });
+        }
         setQuotaError(null);
       } catch (err) {
         console.error("Quota check failed:", err);
@@ -631,7 +661,50 @@ export default function AgentChat() {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to send message");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        if (errData.reason === "guest_limit_reached") {
+          setUpgradeReason("guest_limit");
+          setShowUpgradeWall(true);
+          setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+          setIsTyping(false);
+          return;
+        }
+        if (errData.reason === "subscription_expired") {
+          setUpgradeReason("expired");
+          setShowUpgradeWall(true);
+          setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+          setIsTyping(false);
+          return;
+        }
+        if (errData.reason === "daily_limit_reached" || errData.reason === "monthly_limit_reached") {
+          setUpgradeReason(errData.reason === "daily_limit_reached" ? "daily_limit" : "monthly_limit");
+          setShowUpgradeWall(true);
+          setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+          setIsTyping(false);
+          return;
+        }
+        throw new Error(errData.error || "Failed to send message");
+      }
+      
+      // Sync guest counter from server-side tracking
+      if (!clientToken && !config.requireRegistration) {
+        try {
+          const statusRes = await fetch("/api/client/check-quota", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ agentId: params.agentId }),
+          });
+          const statusData = await statusRes.json();
+          if (statusData.guestUsed !== undefined) {
+            setGuestMessageCount(statusData.guestUsed);
+          } else {
+            setGuestMessageCount((prev) => prev + 1);
+          }
+        } catch {
+          setGuestMessageCount((prev) => prev + 1);
+        }
+      }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -956,6 +1029,161 @@ export default function AgentChat() {
               >
                 {registering ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 {registering ? "Mendaftar..." : "Mulai Chat"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {showUpgradeWall && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6 space-y-4">
+              <div className="text-center space-y-2">
+                <div className="flex justify-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${color}20` }}>
+                    <Shield className="w-6 h-6" style={{ color }} />
+                  </div>
+                </div>
+                <h2 className="text-xl font-semibold" data-testid="text-upgrade-title">
+                  {upgradeReason === "guest_limit" ? "Batas Pesan Gratis Tercapai" :
+                   upgradeReason === "expired" ? "Langganan Berakhir" :
+                   upgradeReason === "daily_limit" ? "Kuota Harian Habis" :
+                   upgradeReason === "monthly_limit" ? "Kuota Bulanan Habis" :
+                   "Upgrade Diperlukan"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {upgradeReason === "guest_limit"
+                    ? `Anda telah menggunakan ${config?.guestMessageLimit ?? 10} pesan gratis. Daftar untuk melanjutkan percakapan.`
+                    : upgradeReason === "expired"
+                    ? "Masa langganan Anda telah berakhir. Perpanjang untuk terus menggunakan layanan ini."
+                    : upgradeReason === "daily_limit"
+                    ? "Kuota pesan harian Anda sudah habis. Coba lagi besok atau upgrade paket."
+                    : "Kuota pesan bulanan Anda sudah habis. Upgrade paket untuk mendapatkan lebih banyak pesan."}
+                </p>
+              </div>
+
+              {config && config.monthlyPrice > 0 && (
+                <div className="rounded-md border p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm">Paket Bulanan</span>
+                    <span className="font-semibold" style={{ color }}>
+                      {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(config.monthlyPrice)}/bulan
+                    </span>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li className="flex items-center gap-1.5">
+                      <Zap className="w-3 h-3" style={{ color }} />
+                      {config.messageQuotaDaily} pesan/hari
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3" style={{ color }} />
+                      {config.messageQuotaMonthly} pesan/bulan
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              {!clientToken ? (
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Nama</label>
+                    <input
+                      type="text"
+                      value={regName}
+                      onChange={(e) => setRegName(e.target.value)}
+                      placeholder="Nama lengkap"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      data-testid="input-upgrade-name"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Email</label>
+                    <input
+                      type="email"
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      placeholder="email@contoh.com"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      data-testid="input-upgrade-email"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Telepon (opsional)</label>
+                    <input
+                      type="tel"
+                      value={regPhone}
+                      onChange={(e) => setRegPhone(e.target.value)}
+                      placeholder="08xxxxxxxxxx"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      data-testid="input-upgrade-phone"
+                    />
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      await handleClientRegister();
+                      setShowUpgradeWall(false);
+                    }}
+                    disabled={!regName || !regEmail || registering}
+                    className="w-full"
+                    data-testid="button-upgrade-register"
+                  >
+                    {registering ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                    {config?.trialEnabled ? `Mulai Trial ${config.trialDays} Hari` : "Daftar & Lanjutkan"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-center text-muted-foreground">
+                    Terdaftar sebagai <span className="font-medium text-foreground">{clientInfo?.name}</span>
+                  </p>
+                  {config && config.monthlyPrice > 0 ? (
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/api/products/${params.agentId}/subscribe`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              customerName: clientInfo?.name || "",
+                              customerEmail: clientInfo?.email || "",
+                              plan: "monthly",
+                            }),
+                          });
+                          const data = await res.json();
+                          if (data.paymentUrl) {
+                            window.open(data.paymentUrl, "_blank");
+                          }
+                          setShowUpgradeWall(false);
+                        } catch (err) {
+                          console.error("Upgrade failed:", err);
+                        }
+                      }}
+                      className="w-full"
+                      data-testid="button-upgrade-pay"
+                    >
+                      Upgrade Sekarang
+                    </Button>
+                  ) : upgradeReason === "daily_limit" ? (
+                    <p className="text-sm text-center text-muted-foreground">
+                      Kuota harian akan direset besok. Terima kasih sudah menggunakan layanan ini.
+                    </p>
+                  ) : (
+                    <p className="text-sm text-center text-muted-foreground">
+                      Hubungi penyedia layanan untuk informasi upgrade.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full"
+                onClick={() => setShowUpgradeWall(false)}
+                data-testid="button-upgrade-dismiss"
+              >
+                Tutup
               </Button>
             </CardContent>
           </Card>
@@ -1405,13 +1633,28 @@ export default function AgentChat() {
         )}
 
         {quotaError && (
-          <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm text-center">
+          <div className="px-4 py-2 bg-destructive/10 text-destructive text-sm text-center" data-testid="text-quota-error">
             {quotaError}
           </div>
         )}
         {quotaInfo && !quotaError && (
-          <div className="px-4 py-1 bg-muted text-muted-foreground text-xs text-center">
+          <div className="px-4 py-1 bg-muted text-muted-foreground text-xs text-center" data-testid="text-quota-info">
             Kuota: {quotaInfo.dailyUsed}/{quotaInfo.dailyLimit} hari ini | {quotaInfo.monthlyUsed}/{quotaInfo.monthlyLimit} bulan ini
+          </div>
+        )}
+        {!clientToken && config && !config.requireRegistration && (config.guestMessageLimit ?? 10) > 0 && !quotaError && (
+          <div className="px-4 py-1 text-xs text-center" data-testid="text-guest-quota">
+            <span className={cn(
+              guestMessageCount >= (config.guestMessageLimit ?? 10) * 0.7 ? "text-orange-500" : "text-muted-foreground",
+              guestMessageCount >= (config.guestMessageLimit ?? 10) ? "text-destructive font-medium" : ""
+            )}>
+              Pesan gratis: {guestMessageCount}/{config.guestMessageLimit ?? 10}
+            </span>
+            {guestMessageCount >= Math.floor((config.guestMessageLimit ?? 10) * 0.7) && guestMessageCount < (config.guestMessageLimit ?? 10) && (
+              <span className="text-muted-foreground ml-2">
+                — Daftar untuk akses penuh
+              </span>
+            )}
           </div>
         )}
 

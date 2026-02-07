@@ -28,6 +28,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
     trialDays: agent.trialDays ?? 7,
     messageQuotaDaily: agent.messageQuotaDaily ?? 50,
     messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
+    guestMessageLimit: agent.guestMessageLimit ?? 10,
     requireRegistration: agent.requireRegistration ?? false,
     brandingName: agent.brandingName || "",
     brandingLogo: agent.brandingLogo || "",
@@ -48,6 +49,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
       trialDays: agent.trialDays ?? 7,
       messageQuotaDaily: agent.messageQuotaDaily ?? 50,
       messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
+      guestMessageLimit: agent.guestMessageLimit ?? 10,
       requireRegistration: agent.requireRegistration ?? false,
       brandingName: agent.brandingName || "",
       brandingLogo: agent.brandingLogo || "",
@@ -313,6 +315,19 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   min={0}
                  
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Batas Pesan Gratis (Guest)</Label>
+                <Input
+                  type="number"
+                  value={settings.guestMessageLimit}
+                  onChange={(e) => setSettings({ ...settings, guestMessageLimit: parseInt(e.target.value) || 0 })}
+                  placeholder="10"
+                  min={0}
+                  data-testid="input-guest-message-limit"
+                />
+                <p className="text-xs text-muted-foreground">Jumlah pesan gratis sebelum pengguna diminta mendaftar. Set 0 untuk tanpa batas.</p>
               </div>
 
               <div className="flex items-center justify-between gap-2">
