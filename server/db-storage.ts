@@ -19,6 +19,8 @@ import {
   clientSubscriptions,
   affiliates,
   series,
+  vouchers,
+  voucherRedemptions,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 import type {
@@ -58,6 +60,9 @@ import type {
   InsertSeries,
   SeriesWithStats,
   SeriesWithHierarchy,
+  Voucher,
+  InsertVoucher,
+  VoucherRedemption,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -1942,6 +1947,141 @@ export class DatabaseStorage implements IStorage {
       .where(eq(agents.productSlug, slug)).limit(1);
     if (result.length === 0) return undefined;
     return this.mapAgentRow(result[0]);
+  }
+
+  private mapVoucherRow(row: any): Voucher {
+    return {
+      id: row.id,
+      agentId: row.agentId,
+      code: row.code,
+      name: row.name,
+      type: row.type || "unlimited",
+      extraMessages: row.extraMessages || 0,
+      durationDays: row.durationDays || 30,
+      maxRedemptions: row.maxRedemptions || 0,
+      totalRedeemed: row.totalRedeemed || 0,
+      isActive: row.isActive ?? true,
+      expiresAt: row.expiresAt ? row.expiresAt.toISOString() : null,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getVouchers(agentId?: string): Promise<Voucher[]> {
+    let result;
+    if (agentId) {
+      result = await db.select().from(vouchers)
+        .where(eq(vouchers.agentId, parseInt(agentId)))
+        .orderBy(desc(vouchers.createdAt));
+    } else {
+      result = await db.select().from(vouchers)
+        .orderBy(desc(vouchers.createdAt));
+    }
+    return result.map((row) => this.mapVoucherRow(row));
+  }
+
+  async getVoucher(id: string): Promise<Voucher | undefined> {
+    const result = await db.select().from(vouchers)
+      .where(eq(vouchers.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapVoucherRow(result[0]);
+  }
+
+  async getVoucherByCode(code: string): Promise<Voucher | undefined> {
+    const result = await db.select().from(vouchers)
+      .where(eq(vouchers.code, code.toUpperCase())).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapVoucherRow(result[0]);
+  }
+
+  async createVoucher(voucher: InsertVoucher): Promise<Voucher> {
+    const result = await db.insert(vouchers).values({
+      agentId: voucher.agentId || null,
+      code: voucher.code.toUpperCase(),
+      name: voucher.name,
+      type: voucher.type || "unlimited",
+      extraMessages: voucher.extraMessages || 0,
+      durationDays: voucher.durationDays || 30,
+      maxRedemptions: voucher.maxRedemptions || 0,
+      isActive: voucher.isActive ?? true,
+      expiresAt: voucher.expiresAt ? new Date(voucher.expiresAt) : null,
+    }).returning();
+    return this.mapVoucherRow(result[0]);
+  }
+
+  async updateVoucher(id: string, data: Partial<InsertVoucher>): Promise<Voucher | undefined> {
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.code !== undefined) updateData.code = data.code.toUpperCase();
+    if (data.type !== undefined) updateData.type = data.type;
+    if (data.extraMessages !== undefined) updateData.extraMessages = data.extraMessages;
+    if (data.durationDays !== undefined) updateData.durationDays = data.durationDays;
+    if (data.maxRedemptions !== undefined) updateData.maxRedemptions = data.maxRedemptions;
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if (data.agentId !== undefined) updateData.agentId = data.agentId;
+    if (data.expiresAt !== undefined) updateData.expiresAt = data.expiresAt ? new Date(data.expiresAt) : null;
+
+    const result = await db.update(vouchers)
+      .set(updateData)
+      .where(eq(vouchers.id, parseInt(id)))
+      .returning();
+    if (result.length === 0) return undefined;
+    return this.mapVoucherRow(result[0]);
+  }
+
+  async deleteVoucher(id: string): Promise<boolean> {
+    await db.delete(voucherRedemptions).where(eq(voucherRedemptions.voucherId, parseInt(id)));
+    const result = await db.delete(vouchers).where(eq(vouchers.id, parseInt(id))).returning();
+    return result.length > 0;
+  }
+
+  async redeemVoucher(voucherId: number, clientSubscriptionId: number): Promise<VoucherRedemption> {
+    await db.update(vouchers)
+      .set({ totalRedeemed: sql`${vouchers.totalRedeemed} + 1` })
+      .where(eq(vouchers.id, voucherId));
+
+    const result = await db.insert(voucherRedemptions).values({
+      voucherId,
+      clientSubscriptionId,
+    }).returning();
+
+    return {
+      id: result[0].id,
+      voucherId: result[0].voucherId,
+      clientSubscriptionId: result[0].clientSubscriptionId,
+      redeemedAt: result[0].redeemedAt.toISOString(),
+    };
+  }
+
+  async getVoucherRedemptions(voucherId: string): Promise<VoucherRedemption[]> {
+    const result = await db.select().from(voucherRedemptions)
+      .where(eq(voucherRedemptions.voucherId, parseInt(voucherId)))
+      .orderBy(desc(voucherRedemptions.redeemedAt));
+    return result.map((row) => ({
+      id: row.id,
+      voucherId: row.voucherId,
+      clientSubscriptionId: row.clientSubscriptionId,
+      redeemedAt: row.redeemedAt.toISOString(),
+    }));
+  }
+
+  async getClientVoucherRedemptions(clientSubscriptionId: number): Promise<(VoucherRedemption & { voucher?: Voucher })[]> {
+    const result = await db.select().from(voucherRedemptions)
+      .where(eq(voucherRedemptions.clientSubscriptionId, clientSubscriptionId))
+      .orderBy(desc(voucherRedemptions.redeemedAt));
+
+    const redemptions: (VoucherRedemption & { voucher?: Voucher })[] = [];
+    for (const row of result) {
+      const voucherResult = await db.select().from(vouchers)
+        .where(eq(vouchers.id, row.voucherId)).limit(1);
+      redemptions.push({
+        id: row.id,
+        voucherId: row.voucherId,
+        clientSubscriptionId: row.clientSubscriptionId,
+        redeemedAt: row.redeemedAt.toISOString(),
+        voucher: voucherResult.length > 0 ? this.mapVoucherRow(voucherResult[0]) : undefined,
+      });
+    }
+    return redemptions;
   }
 }
 

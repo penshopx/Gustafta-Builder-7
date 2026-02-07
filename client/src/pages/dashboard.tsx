@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,6 +29,7 @@ import { MiniAppsPanel } from "@/components/panels/mini-apps-panel";
 import { ProductSettingsPanel } from "@/components/panels/product-settings-panel";
 import { RevenuPanel } from "@/components/panels/revenue-panel";
 import { AffiliatePanel } from "@/components/panels/affiliate-panel";
+import { VoucherPanel } from "@/components/panels/voucher-panel";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
 import { CreateBigIdeaDialog } from "@/components/dialogs/create-big-idea-dialog";
 import { CreateToolboxDialog } from "@/components/dialogs/create-toolbox-dialog";
@@ -45,7 +46,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates";
+type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates" | "vouchers";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
@@ -58,6 +59,7 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "product-settings", label: "Monetisasi", shortLabel: "Produk", icon: ShoppingBag },
   { id: "revenue", label: "Revenue & Klien", shortLabel: "Revenue", icon: TrendingUp },
   { id: "affiliates", label: "Afiliasi", shortLabel: "Afiliasi", icon: Users2 },
+  { id: "vouchers", label: "Voucher", shortLabel: "Voucher", icon: Ticket },
   { id: "chat", label: "Chat Console", shortLabel: "Chat", icon: MessageSquare },
   { id: "analytics", label: "Analytics", shortLabel: "Stats", icon: BarChart3 },
 ];
@@ -193,6 +195,8 @@ export default function Dashboard() {
         return <RevenuPanel agent={activeAgent} />;
       case "affiliates":
         return <AffiliatePanel agent={activeAgent} />;
+      case "vouchers":
+        return <VoucherPanel agent={activeAgent} />;
       case "analytics":
         return <AnalyticsPanel agent={activeAgent} />;
       default:

@@ -36,6 +36,9 @@ import type {
   InsertSeries,
   SeriesWithStats,
   SeriesWithHierarchy,
+  Voucher,
+  InsertVoucher,
+  VoucherRedemption,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -172,6 +175,17 @@ export interface IStorage {
   deleteAffiliate(id: string): Promise<boolean>;
   incrementAffiliateReferral(code: string, amount: number): Promise<Affiliate | undefined>;
 
+  // Voucher methods
+  getVouchers(agentId?: string): Promise<Voucher[]>;
+  getVoucher(id: string): Promise<Voucher | undefined>;
+  getVoucherByCode(code: string): Promise<Voucher | undefined>;
+  createVoucher(voucher: InsertVoucher): Promise<Voucher>;
+  updateVoucher(id: string, data: Partial<InsertVoucher>): Promise<Voucher | undefined>;
+  deleteVoucher(id: string): Promise<boolean>;
+  redeemVoucher(voucherId: number, clientSubscriptionId: number): Promise<VoucherRedemption>;
+  getVoucherRedemptions(voucherId: string): Promise<VoucherRedemption[]>;
+  getClientVoucherRedemptions(clientSubscriptionId: number): Promise<(VoucherRedemption & { voucher?: Voucher })[]>;
+
   // Product listing methods
   getListedAgents(): Promise<Agent[]>;
   getAgentBySlug(slug: string): Promise<Agent | undefined>;
@@ -195,6 +209,8 @@ export class MemStorage implements IStorage {
   private miniAppResults: Map<string, MiniAppResult>;
   private clientSubscriptions: Map<string, ClientSubscription>;
   private affiliatesMap: Map<string, Affiliate>;
+  private vouchersMap: Map<string, Voucher>;
+  private voucherRedemptionsMap: Map<string, VoucherRedemption>;
 
   constructor() {
     this.users = new Map();
@@ -214,6 +230,8 @@ export class MemStorage implements IStorage {
     this.miniAppResults = new Map();
     this.clientSubscriptions = new Map();
     this.affiliatesMap = new Map();
+    this.vouchersMap = new Map();
+    this.voucherRedemptionsMap = new Map();
   }
 
   // User methods
@@ -1387,6 +1405,85 @@ export class MemStorage implements IStorage {
     };
     this.affiliatesMap.set(affiliate.id, updated);
     return updated;
+  }
+
+  // Voucher methods
+  async getVouchers(agentId?: string): Promise<Voucher[]> {
+    let result = Array.from(this.vouchersMap.values());
+    if (agentId) result = result.filter((v) => v.agentId === parseInt(agentId));
+    return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getVoucher(id: string): Promise<Voucher | undefined> {
+    return this.vouchersMap.get(id);
+  }
+
+  async getVoucherByCode(code: string): Promise<Voucher | undefined> {
+    return Array.from(this.vouchersMap.values()).find((v) => v.code === code.toUpperCase());
+  }
+
+  async createVoucher(voucher: InsertVoucher): Promise<Voucher> {
+    const id = String(this.vouchersMap.size + 1);
+    const v: Voucher = {
+      id: parseInt(id),
+      agentId: voucher.agentId || null,
+      code: voucher.code.toUpperCase(),
+      name: voucher.name,
+      type: voucher.type || "unlimited",
+      extraMessages: voucher.extraMessages || 0,
+      durationDays: voucher.durationDays || 30,
+      maxRedemptions: voucher.maxRedemptions || 0,
+      totalRedeemed: 0,
+      isActive: voucher.isActive ?? true,
+      expiresAt: voucher.expiresAt || null,
+      createdAt: new Date().toISOString(),
+    };
+    this.vouchersMap.set(id, v);
+    return v;
+  }
+
+  async updateVoucher(id: string, data: Partial<InsertVoucher>): Promise<Voucher | undefined> {
+    const existing = this.vouchersMap.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...data } as Voucher;
+    if (data.code) updated.code = data.code.toUpperCase();
+    this.vouchersMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteVoucher(id: string): Promise<boolean> {
+    return this.vouchersMap.delete(id);
+  }
+
+  async redeemVoucher(voucherId: number, clientSubscriptionId: number): Promise<VoucherRedemption> {
+    const voucher = this.vouchersMap.get(String(voucherId));
+    if (voucher) {
+      voucher.totalRedeemed += 1;
+      this.vouchersMap.set(String(voucherId), voucher);
+    }
+    const id = String(this.voucherRedemptionsMap.size + 1);
+    const redemption: VoucherRedemption = {
+      id: parseInt(id),
+      voucherId,
+      clientSubscriptionId,
+      redeemedAt: new Date().toISOString(),
+    };
+    this.voucherRedemptionsMap.set(id, redemption);
+    return redemption;
+  }
+
+  async getVoucherRedemptions(voucherId: string): Promise<VoucherRedemption[]> {
+    return Array.from(this.voucherRedemptionsMap.values())
+      .filter((r) => r.voucherId === parseInt(voucherId));
+  }
+
+  async getClientVoucherRedemptions(clientSubscriptionId: number): Promise<(VoucherRedemption & { voucher?: Voucher })[]> {
+    const redemptions = Array.from(this.voucherRedemptionsMap.values())
+      .filter((r) => r.clientSubscriptionId === clientSubscriptionId);
+    return redemptions.map((r) => ({
+      ...r,
+      voucher: this.vouchersMap.get(String(r.voucherId)),
+    }));
   }
 
   // Product listing methods

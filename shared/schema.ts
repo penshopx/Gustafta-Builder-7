@@ -594,7 +594,7 @@ export type Subscription = InsertSubscription & {
 // ==================== CLIENT SUBSCRIPTIONS ====================
 
 export const clientSubscriptionPlanSchema = z.enum([
-  "trial", "monthly", "yearly", "lifetime"
+  "trial", "monthly", "yearly", "lifetime", "voucher"
 ]);
 export type ClientSubscriptionPlan = z.infer<typeof clientSubscriptionPlanSchema>;
 
@@ -789,6 +789,65 @@ export type InsertMiniAppResult = z.infer<typeof insertMiniAppResultSchema>;
 export type MiniAppResult = InsertMiniAppResult & {
   id: string;
   createdAt: string;
+};
+
+// ==================== VOUCHERS ====================
+
+export const vouchers = pgTable("vouchers", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id"),
+  code: text("code").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull().default("unlimited"),
+  extraMessages: integer("extra_messages").default(0),
+  durationDays: integer("duration_days").default(30),
+  maxRedemptions: integer("max_redemptions").default(0),
+  totalRedeemed: integer("total_redeemed").default(0),
+  isActive: boolean("is_active").default(true),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const voucherRedemptions = pgTable("voucher_redemptions", {
+  id: serial("id").primaryKey(),
+  voucherId: integer("voucher_id").notNull(),
+  clientSubscriptionId: integer("client_subscription_id").notNull(),
+  redeemedAt: timestamp("redeemed_at").defaultNow().notNull(),
+});
+
+export const insertVoucherSchema = z.object({
+  agentId: z.number().nullable().optional(),
+  code: z.string().min(1, "Kode voucher wajib diisi"),
+  name: z.string().min(1, "Nama voucher wajib diisi"),
+  type: z.enum(["unlimited", "extra_quota"]).optional().default("unlimited"),
+  extraMessages: z.number().optional().default(0),
+  durationDays: z.number().optional().default(30),
+  maxRedemptions: z.number().optional().default(0),
+  isActive: z.boolean().optional().default(true),
+  expiresAt: z.string().nullable().optional(),
+});
+
+export type InsertVoucher = z.infer<typeof insertVoucherSchema>;
+export type Voucher = {
+  id: number;
+  agentId: number | null;
+  code: string;
+  name: string;
+  type: string;
+  extraMessages: number;
+  durationDays: number;
+  maxRedemptions: number;
+  totalRedeemed: number;
+  isActive: boolean;
+  expiresAt: string | null;
+  createdAt: string;
+};
+
+export type VoucherRedemption = {
+  id: number;
+  voucherId: number;
+  clientSubscriptionId: number;
+  redeemedAt: string;
 };
 
 // ==================== VOICE CHAT CONVERSATIONS ====================

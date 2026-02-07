@@ -312,6 +312,9 @@ export default function AgentChat() {
   const [guestMessageCount, setGuestMessageCount] = useState(0);
   const [showUpgradeWall, setShowUpgradeWall] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
+  const [voucherCode, setVoucherCode] = useState("");
+  const [voucherLoading, setVoucherLoading] = useState(false);
+  const [voucherMessage, setVoucherMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const getStorageKey = useCallback(() => `gustafta_chat_${params.agentId}`, [params.agentId]);
 
@@ -413,6 +416,41 @@ export default function AgentChat() {
       console.error("Registration failed:", err);
     }
     setRegistering(false);
+  };
+
+  const handleVoucherRedeem = async () => {
+    if (!voucherCode.trim()) return;
+    if (!clientToken) {
+      setVoucherMessage({ type: "error", text: "Silakan daftar terlebih dahulu sebelum menggunakan voucher." });
+      return;
+    }
+    setVoucherLoading(true);
+    setVoucherMessage(null);
+    try {
+      const res = await fetch("/api/vouchers/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: voucherCode.trim().toUpperCase(),
+          accessToken: clientToken,
+          agentId: params.agentId,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setVoucherMessage({ type: "success", text: data.message });
+        setVoucherCode("");
+        setTimeout(() => {
+          setShowUpgradeWall(false);
+          setVoucherMessage(null);
+        }, 2000);
+      } else {
+        setVoucherMessage({ type: "error", text: data.error || "Gagal menggunakan voucher" });
+      }
+    } catch {
+      setVoucherMessage({ type: "error", text: "Gagal menggunakan voucher" });
+    }
+    setVoucherLoading(false);
   };
 
   const extractFollowUps = useCallback((content: string) => {
@@ -1171,6 +1209,34 @@ export default function AgentChat() {
                   ) : (
                     <p className="text-sm text-center text-muted-foreground">
                       Hubungi penyedia layanan untuk informasi upgrade.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {clientToken && (
+                <div className="border-t pt-3 space-y-2">
+                  <p className="text-xs text-muted-foreground text-center">Punya kode voucher?</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                      placeholder="Masukkan kode voucher"
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm uppercase"
+                      data-testid="input-voucher-code"
+                    />
+                    <Button
+                      onClick={handleVoucherRedeem}
+                      disabled={!voucherCode.trim() || voucherLoading}
+                      data-testid="button-voucher-redeem"
+                    >
+                      {voucherLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Pakai"}
+                    </Button>
+                  </div>
+                  {voucherMessage && (
+                    <p className={`text-xs text-center ${voucherMessage.type === "success" ? "text-green-600" : "text-destructive"}`}>
+                      {voucherMessage.text}
                     </p>
                   )}
                 </div>

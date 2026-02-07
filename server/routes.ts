@@ -1368,51 +1368,55 @@ export async function registerRoutes(
           await storage.updateClientSubscription(subscription.id, { status: "expired" });
           return res.status(403).json({ error: "Subscription expired", reason: "subscription_expired" });
         }
-        const today = new Date().toISOString().split("T")[0];
-        let dailyUsed = subscription.messageUsedToday || 0;
-        if (subscription.lastMessageDate !== today) {
-          dailyUsed = 0;
+        // Check if user has active voucher - skip quota for "voucher" plan with valid endDate
+        const hasActiveVoucher = subscription.plan === "voucher" && subscription.endDate && new Date(subscription.endDate) > new Date();
+        if (!hasActiveVoucher) {
+          const today = new Date().toISOString().split("T")[0];
+          let dailyUsed = subscription.messageUsedToday || 0;
+          if (subscription.lastMessageDate !== today) dailyUsed = 0;
+          const dailyLimit = agent.messageQuotaDaily ?? 50;
+          const monthlyLimit = agent.messageQuotaMonthly ?? 1000;
+          if (dailyUsed >= dailyLimit) {
+            return res.status(429).json({ error: "Daily quota exceeded", reason: "daily_limit_reached" });
+          }
+          if ((subscription.messageUsedMonth || 0) >= monthlyLimit) {
+            return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
+          }
+          await storage.updateClientSubscription(subscription.id, {
+            messageUsedToday: dailyUsed + 1,
+            messageUsedMonth: (subscription.messageUsedMonth || 0) + 1,
+            lastMessageDate: today,
+          });
         }
-        const dailyLimit = agent.messageQuotaDaily ?? 50;
-        const monthlyLimit = agent.messageQuotaMonthly ?? 1000;
-        if (dailyUsed >= dailyLimit) {
-          return res.status(429).json({ error: "Daily quota exceeded", reason: "daily_limit_reached" });
-        }
-        if ((subscription.messageUsedMonth || 0) >= monthlyLimit) {
-          return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
-        }
-        await storage.updateClientSubscription(subscription.id, {
-          messageUsedToday: dailyUsed + 1,
-          messageUsedMonth: (subscription.messageUsedMonth || 0) + 1,
-          lastMessageDate: today,
-        });
       } else {
         // Guest mode: enforce guest message limit per session
         const guestLimit = agent.guestMessageLimit ?? 10;
         if (guestLimit > 0) {
           if (clientAccessToken) {
-            // Registered user in non-required mode: check subscription quotas
             const subscription = await storage.getClientSubscriptionByToken(clientAccessToken);
             if (subscription && subscription.status === "active") {
               if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
                 await storage.updateClientSubscription(subscription.id, { status: "expired" });
               } else {
-                const today = new Date().toISOString().split("T")[0];
-                let dailyUsed = subscription.messageUsedToday || 0;
-                if (subscription.lastMessageDate !== today) dailyUsed = 0;
-                const dailyLimit = agent.messageQuotaDaily ?? 50;
-                const monthlyLimit = agent.messageQuotaMonthly ?? 1000;
-                if (dailyUsed >= dailyLimit) {
-                  return res.status(429).json({ error: "Daily quota exceeded", reason: "daily_limit_reached" });
+                const hasActiveVoucher = subscription.plan === "voucher" && subscription.endDate && new Date(subscription.endDate) > new Date();
+                if (!hasActiveVoucher) {
+                  const today = new Date().toISOString().split("T")[0];
+                  let dailyUsed = subscription.messageUsedToday || 0;
+                  if (subscription.lastMessageDate !== today) dailyUsed = 0;
+                  const dailyLimit = agent.messageQuotaDaily ?? 50;
+                  const monthlyLimit = agent.messageQuotaMonthly ?? 1000;
+                  if (dailyUsed >= dailyLimit) {
+                    return res.status(429).json({ error: "Daily quota exceeded", reason: "daily_limit_reached" });
+                  }
+                  if ((subscription.messageUsedMonth || 0) >= monthlyLimit) {
+                    return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
+                  }
+                  await storage.updateClientSubscription(subscription.id, {
+                    messageUsedToday: dailyUsed + 1,
+                    messageUsedMonth: (subscription.messageUsedMonth || 0) + 1,
+                    lastMessageDate: today,
+                  });
                 }
-                if ((subscription.messageUsedMonth || 0) >= monthlyLimit) {
-                  return res.status(429).json({ error: "Monthly quota exceeded", reason: "monthly_limit_reached" });
-                }
-                await storage.updateClientSubscription(subscription.id, {
-                  messageUsedToday: dailyUsed + 1,
-                  messageUsedMonth: (subscription.messageUsedMonth || 0) + 1,
-                  lastMessageDate: today,
-                });
               }
             }
           } else {
@@ -3883,7 +3887,8 @@ Be professional and suitable for management review.`;
               await storage.updateClientSubscription(subscription.id, { status: "expired" });
               return res.json({ allowed: false, reason: "subscription_expired" });
             }
-            return res.json({ allowed: true, unlimited: false, plan: subscription.plan });
+            const hasActiveVoucher = subscription.plan === "voucher" && subscription.endDate && new Date(subscription.endDate) > new Date();
+            return res.json({ allowed: true, unlimited: hasActiveVoucher, plan: subscription.plan, hasVoucher: hasActiveVoucher });
           }
         }
         const guestLimit = agent.guestMessageLimit ?? 10;
@@ -4035,6 +4040,134 @@ Be professional and suitable for management review.`;
       res.json({ valid: true, name: affiliate.name });
     } catch (error) {
       res.status(500).json({ error: "Validation failed" });
+    }
+  });
+
+  // ==================== Voucher Routes (Protected) ====================
+
+  app.get("/api/vouchers", isAuthenticated, async (req, res) => {
+    try {
+      const agentId = req.query.agentId as string | undefined;
+      const vouchersList = await storage.getVouchers(agentId);
+      res.json(vouchersList);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch vouchers" });
+    }
+  });
+
+  app.get("/api/vouchers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const voucher = await storage.getVoucher(req.params.id as string);
+      if (!voucher) return res.status(404).json({ error: "Voucher not found" });
+      const redemptions = await storage.getVoucherRedemptions(req.params.id as string);
+      res.json({ ...voucher, redemptions });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch voucher" });
+    }
+  });
+
+  app.post("/api/vouchers", isAuthenticated, async (req, res) => {
+    try {
+      const existing = await storage.getVoucherByCode(req.body.code);
+      if (existing) {
+        return res.status(400).json({ error: "Kode voucher sudah digunakan" });
+      }
+      const voucher = await storage.createVoucher(req.body);
+      res.json(voucher);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create voucher" });
+    }
+  });
+
+  app.patch("/api/vouchers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const updated = await storage.updateVoucher(req.params.id as string, req.body);
+      if (!updated) return res.status(404).json({ error: "Voucher not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update voucher" });
+    }
+  });
+
+  app.delete("/api/vouchers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteVoucher(req.params.id as string);
+      if (!deleted) return res.status(404).json({ error: "Voucher not found" });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete voucher" });
+    }
+  });
+
+  // Public voucher redeem endpoint (for chat users)
+  app.post("/api/vouchers/redeem", async (req, res) => {
+    try {
+      const { code, accessToken, agentId } = req.body;
+      if (!code || !accessToken) {
+        return res.status(400).json({ error: "Kode voucher dan token akses diperlukan" });
+      }
+
+      const voucher = await storage.getVoucherByCode(code);
+      if (!voucher) {
+        return res.status(404).json({ error: "Kode voucher tidak valid" });
+      }
+
+      if (!voucher.isActive) {
+        return res.status(400).json({ error: "Voucher sudah tidak aktif" });
+      }
+
+      if (voucher.expiresAt && new Date(voucher.expiresAt) < new Date()) {
+        return res.status(400).json({ error: "Voucher sudah kedaluwarsa" });
+      }
+
+      if (voucher.maxRedemptions > 0 && voucher.totalRedeemed >= voucher.maxRedemptions) {
+        return res.status(400).json({ error: "Voucher sudah mencapai batas penggunaan" });
+      }
+
+      if (voucher.agentId && agentId && voucher.agentId !== parseInt(agentId)) {
+        return res.status(400).json({ error: "Voucher tidak berlaku untuk chatbot ini" });
+      }
+
+      const subscription = await storage.getClientSubscriptionByToken(accessToken);
+      if (!subscription) {
+        return res.status(404).json({ error: "Akun tidak ditemukan. Silakan daftar terlebih dahulu." });
+      }
+
+      const existingRedemptions = await storage.getClientVoucherRedemptions(parseInt(subscription.id));
+      const alreadyRedeemed = existingRedemptions.some((r) => r.voucherId === voucher.id);
+      if (alreadyRedeemed) {
+        return res.status(400).json({ error: "Anda sudah menggunakan voucher ini" });
+      }
+
+      const redemption = await storage.redeemVoucher(voucher.id, parseInt(subscription.id));
+
+      if (voucher.type === "unlimited") {
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + (voucher.durationDays || 30));
+        await storage.updateClientSubscription(subscription.id, {
+          plan: "voucher",
+          status: "active",
+          endDate: endDate.toISOString(),
+        } as any);
+      } else if (voucher.type === "extra_quota") {
+        await storage.updateClientSubscription(subscription.id, {
+          status: "active",
+          messageUsedToday: Math.max(0, (subscription.messageUsedToday || 0) - (voucher.extraMessages || 0)),
+          messageUsedMonth: Math.max(0, (subscription.messageUsedMonth || 0) - (voucher.extraMessages || 0)),
+        });
+      }
+
+      res.json({
+        success: true,
+        message: voucher.type === "unlimited"
+          ? `Voucher berhasil! Akses gratis selama ${voucher.durationDays} hari.`
+          : `Voucher berhasil! Anda mendapat tambahan ${voucher.extraMessages} pesan.`,
+        voucherType: voucher.type,
+        durationDays: voucher.durationDays,
+        extraMessages: voucher.extraMessages,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Gagal menggunakan voucher" });
     }
   });
 

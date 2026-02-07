@@ -10,6 +10,7 @@ Gustafta is an AI chatbot builder platform designed to help users create, config
 - **Registered User Quotas**: Daily and monthly message limits enforced server-side. Counters reset automatically.
 - **Upgrade Wall**: Professional overlay shown when any limit is reached. Supports guest registration, trial-to-paid upgrade, and renewal flows via Mayar.id payment gateway.
 - **Server-side Enforcement**: All quota checks happen server-side on `/api/messages/stream` endpoint - cannot be bypassed from client.
+- **Voucher System**: Admin can create voucher codes (unlimited access or extra quota type) via dashboard Voucher panel. Users redeem vouchers in the upgrade wall. Voucher holders with plan="voucher" bypass quota limits. Server validates: isActive, expiresAt, maxRedemptions, per-user dedup, agent scope. Schema tables: `vouchers`, `voucher_redemptions`.
 
 ## User Preferences
 
