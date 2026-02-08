@@ -92,7 +92,6 @@ export default function Dashboard() {
     }
   }, [authLoading, isAuthenticated, toast]);
   
-  const { data: agents = [], isLoading: agentsLoading } = useAgents();
   const { data: activeAgent } = useActiveAgent();
   const setActiveAgent = useSetActiveAgent();
   
@@ -110,13 +109,15 @@ export default function Dashboard() {
 
   const handleSeriesSelect = (seriesId: number | null) => {
     setActiveSeriesId(seriesId);
-    if (seriesId !== null && activeBigIdea) {
-      const belongsToSeries = Number(activeBigIdea.seriesId) === seriesId;
-      if (!belongsToSeries) {
-        const firstInSeries = bigIdeas.find((bi: any) => Number(bi.seriesId) === seriesId);
-        if (firstInSeries) {
-          activateBigIdea.mutate(firstInSeries.id);
+    if (seriesId !== null) {
+      const filtered = bigIdeas.filter((bi: any) => Number(bi.seriesId) === seriesId);
+      if (activeBigIdea) {
+        const belongsToSeries = Number(activeBigIdea.seriesId) === seriesId;
+        if (!belongsToSeries && filtered.length > 0) {
+          activateBigIdea.mutate(String(filtered[0].id));
         }
+      } else if (filtered.length > 0) {
+        activateBigIdea.mutate(String(filtered[0].id));
       }
     }
   };
@@ -124,8 +125,36 @@ export default function Dashboard() {
   const { data: toolboxes = [] } = useToolboxes(activeBigIdea?.id);
   const { data: activeToolbox } = useActiveToolbox();
   const activateToolbox = useActivateToolbox();
-  
+
+  const shouldFetchAgents = !!activeToolbox?.id;
+  const { data: agents = [], isLoading: agentsLoading } = useAgents(shouldFetchAgents ? activeToolbox.id : undefined);
+  const filteredAgents = shouldFetchAgents ? agents : [];
+
   const { data: profile } = useProfile();
+
+  useEffect(() => {
+    if (!activeBigIdea || toolboxes.length === 0) return;
+    if (!activeToolbox) {
+      activateToolbox.mutate(String(toolboxes[0].id));
+    } else {
+      const toolboxBelongs = toolboxes.some((tb) => tb.id === activeToolbox.id);
+      if (!toolboxBelongs) {
+        activateToolbox.mutate(String(toolboxes[0].id));
+      }
+    }
+  }, [activeBigIdea?.id, toolboxes, activeToolbox?.id]);
+
+  useEffect(() => {
+    if (!activeToolbox || filteredAgents.length === 0) return;
+    if (!activeAgent) {
+      setActiveAgent.mutate(String(filteredAgents[0].id));
+    } else {
+      const agentBelongs = filteredAgents.some((a) => String(a.id) === String(activeAgent.id));
+      if (!agentBelongs) {
+        setActiveAgent.mutate(String(filteredAgents[0].id));
+      }
+    }
+  }, [activeToolbox?.id, filteredAgents, activeAgent?.id]);
   
   if (authLoading) {
     return (
@@ -145,15 +174,15 @@ export default function Dashboard() {
   }
 
   const handleAgentSelect = (agent: Agent) => {
-    setActiveAgent.mutate(agent.id);
+    setActiveAgent.mutate(String(agent.id));
   };
 
   const handleBigIdeaSelect = (bigIdea: BigIdea) => {
-    activateBigIdea.mutate(bigIdea.id);
+    activateBigIdea.mutate(String(bigIdea.id));
   };
 
   const handleToolboxSelect = (toolbox: Toolbox) => {
-    activateToolbox.mutate(toolbox.id);
+    activateToolbox.mutate(String(toolbox.id));
   };
 
   const getInitials = (name: string) => {
@@ -547,13 +576,17 @@ export default function Dashboard() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel>Chatbots</DropdownMenuLabel>
-                {agents.length === 0 ? (
+                <DropdownMenuLabel>Chatbots{activeToolbox ? ` - ${activeToolbox.name}` : ""}</DropdownMenuLabel>
+                {!activeToolbox ? (
                   <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                    Belum ada chatbot
+                    Pilih Toolbox terlebih dahulu
+                  </div>
+                ) : filteredAgents.length === 0 ? (
+                  <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                    Belum ada chatbot di toolbox ini
                   </div>
                 ) : (
-                  agents.map((agent) => (
+                  filteredAgents.map((agent) => (
                     <DropdownMenuItem
                       key={agent.id}
                       onClick={() => handleAgentSelect(agent)}

@@ -2,9 +2,21 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Agent, InsertAgent } from "@shared/schema";
 
-export function useAgents() {
+export function useAgents(toolboxId?: number | string) {
+  const queryKey = toolboxId
+    ? ["/api/agents", { toolboxId: String(toolboxId) }]
+    : ["/api/agents"];
+
   return useQuery<Agent[]>({
-    queryKey: ["/api/agents"],
+    queryKey,
+    queryFn: async () => {
+      const url = toolboxId
+        ? `/api/agents?toolboxId=${toolboxId}`
+        : "/api/agents";
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch agents");
+      return res.json();
+    },
   });
 }
 

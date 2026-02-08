@@ -2,9 +2,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Toolbox, InsertToolbox } from "@shared/schema";
 
-export function useToolboxes(bigIdeaId?: string) {
+export function useToolboxes(bigIdeaId?: number | string) {
   const queryKey = bigIdeaId 
-    ? ["/api/toolboxes", { bigIdeaId }]
+    ? ["/api/toolboxes", { bigIdeaId: String(bigIdeaId) }]
     : ["/api/toolboxes"];
   
   return useQuery<Toolbox[]>({
@@ -13,7 +13,7 @@ export function useToolboxes(bigIdeaId?: string) {
       const url = bigIdeaId 
         ? `/api/toolboxes?bigIdeaId=${bigIdeaId}` 
         : "/api/toolboxes";
-      const res = await fetch(url);
+      const res = await fetch(url, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch toolboxes");
       return res.json();
     },
@@ -65,6 +65,9 @@ export function useActivateToolbox() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
     },
   });
 }
