@@ -228,24 +228,26 @@ export default function Dashboard() {
 
   const SidebarContent = () => (
     <>
-      <div className={cn("border-b border-sidebar-border space-y-2", sidebarCollapsed ? "p-2" : "p-3")}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={cn(
-              "w-full h-auto",
-              sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
-            )}>
-              <div className="flex items-center gap-2 min-w-0">
-                <BookOpen className="w-4 h-4 text-purple-500 shrink-0" />
-                {!sidebarCollapsed && (
-                  <span className="truncate text-sm">
-                    {activeSeries?.name || "Semua Series"}
-                  </span>
-                )}
-              </div>
-              {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-            </Button>
-          </DropdownMenuTrigger>
+      <div className={cn("border-b border-sidebar-border space-y-3", sidebarCollapsed ? "p-2" : "p-3")}>
+        <div>
+          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-3 mb-1">Series / Topik</p>}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className={cn(
+                "w-full h-auto",
+                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+              )}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <BookOpen className="w-4 h-4 text-purple-500 shrink-0" />
+                  {!sidebarCollapsed && (
+                    <span className="truncate text-sm">
+                      {activeSeries?.name || "Semua Series"}
+                    </span>
+                  )}
+                </div>
+                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+              </Button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
             <DropdownMenuLabel>Series / Topik</DropdownMenuLabel>
             <DropdownMenuItem
@@ -282,25 +284,28 @@ export default function Dashboard() {
               Kelola Series
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={cn(
-              "w-full h-auto",
-              sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
-            )}>
-              <div className="flex items-center gap-2 min-w-0">
-                <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
-                {!sidebarCollapsed && (
-                  <span className="truncate text-sm">
-                    {activeBigIdea?.name || "Pilih Big Idea"}
-                  </span>
-                )}
-              </div>
-              {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-            </Button>
-          </DropdownMenuTrigger>
+        <div>
+          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-3 mb-1">Big Idea</p>}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className={cn(
+                "w-full h-auto",
+                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+              )}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
+                  {!sidebarCollapsed && (
+                    <span className="truncate text-sm">
+                      {activeBigIdea?.name || "Pilih Big Idea"}
+                    </span>
+                  )}
+                </div>
+                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+              </Button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
             <DropdownMenuLabel>Big Ideas{activeSeries ? ` - ${activeSeries.name}` : ""}</DropdownMenuLabel>
             {filteredBigIdeas.length === 0 ? (
@@ -326,27 +331,30 @@ export default function Dashboard() {
               Buat Big Idea Baru
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className={cn(
-              "w-full h-auto",
-              sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
-            )} disabled={!activeBigIdea}>
-              <div className="flex items-center gap-2 min-w-0">
-                <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                {!sidebarCollapsed && (
-                  <span className="truncate text-sm">
-                    {activeToolbox?.name || "Pilih Toolbox"}
-                  </span>
-                )}
-              </div>
-              {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel>Toolboxes</DropdownMenuLabel>
+        <div>
+          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-3 mb-1">Toolbox</p>}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className={cn(
+                "w-full h-auto",
+                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+              )} disabled={!activeBigIdea}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
+                  {!sidebarCollapsed && (
+                    <span className="truncate text-sm">
+                      {activeToolbox?.name || "Pilih Toolbox"}
+                    </span>
+                  )}
+                </div>
+                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>Toolboxes</DropdownMenuLabel>
             {toolboxes.length === 0 ? (
               <div className="px-2 py-3 text-sm text-muted-foreground text-center">
                 Belum ada Toolbox
@@ -375,8 +383,9 @@ export default function Dashboard() {
               <Plus className="w-4 h-4" />
               Buat Toolbox Baru
             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <nav className={cn("flex-1 space-y-1", sidebarCollapsed ? "p-2" : "p-3")}>
