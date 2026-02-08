@@ -44,6 +44,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
 type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates" | "vouchers";
@@ -95,9 +96,30 @@ export default function Dashboard() {
   const { data: activeAgent } = useActiveAgent();
   const setActiveAgent = useSetActiveAgent();
   
+  const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
+  const [activeSeriesId, setActiveSeriesId] = useState<number | null>(null);
+  const activeSeries = allSeries.find((s: any) => s.id === activeSeriesId) || null;
+  
   const { data: bigIdeas = [] } = useBigIdeas();
   const { data: activeBigIdea } = useActiveBigIdea();
   const activateBigIdea = useActivateBigIdea();
+  
+  const filteredBigIdeas = activeSeriesId
+    ? bigIdeas.filter((bi: any) => Number(bi.seriesId) === activeSeriesId)
+    : bigIdeas;
+
+  const handleSeriesSelect = (seriesId: number | null) => {
+    setActiveSeriesId(seriesId);
+    if (seriesId !== null && activeBigIdea) {
+      const belongsToSeries = Number(activeBigIdea.seriesId) === seriesId;
+      if (!belongsToSeries) {
+        const firstInSeries = bigIdeas.find((bi: any) => Number(bi.seriesId) === seriesId);
+        if (firstInSeries) {
+          activateBigIdea.mutate(firstInSeries.id);
+        }
+      }
+    }
+  };
   
   const { data: toolboxes = [] } = useToolboxes(activeBigIdea?.id);
   const { data: activeToolbox } = useActiveToolbox();
@@ -214,6 +236,61 @@ export default function Dashboard() {
               sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
             )}>
               <div className="flex items-center gap-2 min-w-0">
+                <BookOpen className="w-4 h-4 text-purple-500 shrink-0" />
+                {!sidebarCollapsed && (
+                  <span className="truncate text-sm">
+                    {activeSeries?.name || "Semua Series"}
+                  </span>
+                )}
+              </div>
+              {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel>Series / Topik</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => handleSeriesSelect(null)}
+              className="gap-2"
+              data-testid="menu-series-all"
+            >
+              <BookOpen className="w-4 h-4 text-purple-500" />
+              <span>Semua Series</span>
+              {!activeSeriesId && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {allSeries.length === 0 ? (
+              <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                Belum ada Series
+              </div>
+            ) : (
+              allSeries.map((s: any) => (
+                <DropdownMenuItem
+                  key={s.id}
+                  onClick={() => handleSeriesSelect(s.id)}
+                  className="gap-2"
+                  data-testid={`menu-series-${s.id}`}
+                >
+                  <BookOpen className="w-4 h-4 text-purple-500" />
+                  <span className="truncate">{s.name}</span>
+                  {activeSeriesId === s.id && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
+                </DropdownMenuItem>
+              ))
+            )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setSeriesDialogOpen(true)} className="gap-2" data-testid="menu-series-manage">
+              <Settings className="w-4 h-4" />
+              Kelola Series
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className={cn(
+              "w-full h-auto",
+              sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+            )}>
+              <div className="flex items-center gap-2 min-w-0">
                 <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
                 {!sidebarCollapsed && (
                   <span className="truncate text-sm">
@@ -225,18 +302,17 @@ export default function Dashboard() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel>Big Ideas</DropdownMenuLabel>
-            {bigIdeas.length === 0 ? (
+            <DropdownMenuLabel>Big Ideas{activeSeries ? ` - ${activeSeries.name}` : ""}</DropdownMenuLabel>
+            {filteredBigIdeas.length === 0 ? (
               <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                Belum ada Big Idea
+                {activeSeriesId ? "Belum ada Big Idea di series ini" : "Belum ada Big Idea"}
               </div>
             ) : (
-              bigIdeas.map((bi) => (
+              filteredBigIdeas.map((bi) => (
                 <DropdownMenuItem
                   key={bi.id}
                   onClick={() => handleBigIdeaSelect(bi)}
                   className="gap-2"
-                 
                 >
                   <Lightbulb className="w-4 h-4 text-yellow-500" />
                   <span className="truncate">{bi.name}</span>
@@ -333,18 +409,6 @@ export default function Dashboard() {
       </nav>
 
       <div className={cn("border-t border-sidebar-border space-y-1", sidebarCollapsed ? "p-2" : "p-3")}>
-        <button
-          onClick={() => setSeriesDialogOpen(true)}
-          className={cn(
-            "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
-            sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
-          )}
-         
-          title={sidebarCollapsed ? "Chatbot Series" : undefined}
-        >
-          <BookOpen className="w-4 h-4 shrink-0" />
-          {!sidebarCollapsed && "Series"}
-        </button>
         <button
           onClick={() => setProfileDialogOpen(true)}
           className={cn(
