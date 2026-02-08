@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +32,14 @@ interface ChannelInfo {
   name: string;
 }
 
+interface ContextQuestion {
+  id: string;
+  label: string;
+  type: "text" | "select";
+  options?: string[];
+  required?: boolean;
+}
+
 interface AgentConfig {
   agentId: string;
   name: string;
@@ -59,6 +67,7 @@ interface AgentConfig {
   communicationStyle: string;
   toneOfVoice: string;
   language: string;
+  contextQuestions?: ContextQuestion[];
 }
 
 function processInlineText(text: string): (string | JSX.Element)[] {
@@ -315,6 +324,9 @@ export default function AgentChat() {
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [voucherMessage, setVoucherMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [projectContext, setProjectContext] = useState<Record<string, string>>({});
+  const [showContextForm, setShowContextForm] = useState(false);
+  const [contextCompleted, setContextCompleted] = useState(false);
 
   const getStorageKey = useCallback(() => `gustafta_chat_${params.agentId}`, [params.agentId]);
 
@@ -381,6 +393,12 @@ export default function AgentChat() {
     setMessages([]);
     setFollowUpSuggestions([]);
     localStorage.removeItem(getStorageKey());
+    localStorage.removeItem(`gustafta_context_${params.agentId}`);
+    setProjectContext({});
+    setContextCompleted(false);
+    if (config?.contextQuestions && config.contextQuestions.length > 0) {
+      setShowContextForm(true);
+    }
   };
 
   const handleClientRegister = async () => {
@@ -599,13 +617,31 @@ export default function AgentChat() {
   }, [config, clientToken]);
 
   useEffect(() => {
+    if (config && config.contextQuestions && config.contextQuestions.length > 0 && !contextCompleted && messages.length === 0) {
+      const savedContext = localStorage.getItem(`gustafta_context_${params.agentId}`);
+      if (savedContext) {
+        try {
+          const parsed = JSON.parse(savedContext);
+          setProjectContext(parsed);
+          setContextCompleted(true);
+        } catch {}
+      } else {
+        setShowContextForm(true);
+      }
+    }
+  }, [config, contextCompleted, messages.length, params.agentId]);
+
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isTyping]);
 
+  const needsContext = config && config.contextQuestions && config.contextQuestions.length > 0 && !contextCompleted && messages.length === 0;
+
   const sendMessage = async (content: string) => {
     if ((!content.trim() && pendingFiles.length === 0) || isTyping || !config) return;
+    if (needsContext) return;
 
     // Check guest limit for non-registered mode
     if (config && !config.requireRegistration && !clientToken) {
@@ -689,6 +725,7 @@ export default function AgentChat() {
           content: messageContent,
           sessionId: sessionIdRef.current,
           clientToken: clientToken || undefined,
+          projectContext: Object.keys(projectContext).length > 0 ? projectContext : undefined,
           attachments: attachments.length > 0 ? attachments.map(f => ({
             fileName: f.fileName,
             fileUrl: f.fileUrl,
@@ -1434,8 +1471,60 @@ export default function AgentChat() {
                       })}
                     </div>
 
+                    {/* Context Form */}
+                    {showContextForm && config.contextQuestions && config.contextQuestions.length > 0 && (
+                      <div className="space-y-3 p-3 rounded-lg border" style={{ borderColor: `${color}30` }}>
+                        <div className="flex items-center gap-2">
+                          <ClipboardList className="w-4 h-4" style={{ color }} />
+                          <p className="text-sm font-medium">Sebelum mulai, bantu saya memahami kebutuhan Anda:</p>
+                        </div>
+                        {config.contextQuestions.map((q) => (
+                          <div key={q.id} className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">
+                              {q.label} {q.required && <span className="text-destructive">*</span>}
+                            </label>
+                            {q.type === "select" && q.options && q.options.length > 0 ? (
+                              <select
+                                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                value={projectContext[q.id] || ""}
+                                onChange={(e) => setProjectContext(prev => ({ ...prev, [q.id]: e.target.value }))}
+                                data-testid={`select-context-${q.id}`}
+                              >
+                                <option value="">Pilih...</option>
+                                {q.options.map((opt) => (
+                                  <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                placeholder="Ketik jawaban..."
+                                value={projectContext[q.id] || ""}
+                                onChange={(e) => setProjectContext(prev => ({ ...prev, [q.id]: e.target.value }))}
+                                data-testid={`input-context-${q.id}`}
+                              />
+                            )}
+                          </div>
+                        ))}
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          style={{ backgroundColor: color }}
+                          disabled={config.contextQuestions.some(q => q.required && !projectContext[q.id])}
+                          onClick={() => {
+                            localStorage.setItem(`gustafta_context_${params.agentId}`, JSON.stringify(projectContext));
+                            setContextCompleted(true);
+                            setShowContextForm(false);
+                          }}
+                          data-testid="button-submit-context"
+                        >
+                          Mulai Percakapan
+                        </Button>
+                      </div>
+                    )}
+
                     {/* Conversation Starters */}
-                    {config.conversationStarters.length > 0 && (
+                    {config.conversationStarters.length > 0 && (!showContextForm || contextCompleted) && (
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground font-medium">Mulai percakapan:</p>
                         <div className="flex flex-wrap gap-1.5">
@@ -1822,7 +1911,7 @@ export default function AgentChat() {
               placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik pesan ke ${config.name}...`}
               className="resize-none text-sm rounded-xl"
               rows={1}
-              disabled={isTyping || isListening}
+              disabled={isTyping || isListening || !!needsContext}
              
             />
             {speechSupported && (
@@ -1840,7 +1929,7 @@ export default function AgentChat() {
             <Button
               size="icon"
               onClick={() => sendMessage(input)}
-              disabled={(!input.trim() && pendingFiles.length === 0) || isTyping || isListening}
+              disabled={(!input.trim() && pendingFiles.length === 0) || isTyping || isListening || !!needsContext}
               className="shrink-0 rounded-xl"
               style={{ backgroundColor: color }}
              

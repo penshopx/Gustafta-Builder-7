@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff, Camera, Upload } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, GripVertical, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -66,11 +66,16 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     language: agent.language || "id",
     isPublic: agent.isPublic || false,
     allowedDomains: agent.allowedDomains || [],
+    contextQuestions: (agent as any).contextQuestions || [],
   });
 
   const [newStarter, setNewStarter] = useState("");
   const [newDomain, setNewDomain] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [newContextLabel, setNewContextLabel] = useState("");
+  const [newContextType, setNewContextType] = useState<"text" | "select">("select");
+  const [newContextOptions, setNewContextOptions] = useState("");
+  const [newContextRequired, setNewContextRequired] = useState(true);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -95,6 +100,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       language: agent.language || "id",
       isPublic: agent.isPublic || false,
       allowedDomains: agent.allowedDomains || [],
+      contextQuestions: (agent as any).contextQuestions || [],
     });
   }, [agent]);
 
@@ -468,6 +474,141 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Context Questions / Konteks Proyek */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-primary" />
+            Konteks Proyek
+          </CardTitle>
+          <CardDescription>
+            Pertanyaan yang ditanyakan chatbot di awal percakapan untuk memahami konteks pengguna. Jawaban akan digunakan chatbot untuk menyesuaikan responnya.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {formData.contextQuestions.length > 0 && (
+            <div className="space-y-2">
+              {formData.contextQuestions.map((q: any, index: number) => (
+                <div key={q.id} className="flex items-start gap-2 p-3 rounded-lg border bg-muted/30">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium">{q.label}</span>
+                      <Badge variant="secondary">{q.type === "select" ? "Pilihan" : "Teks Bebas"}</Badge>
+                      {q.required && <Badge variant="outline" className="text-xs">Wajib</Badge>}
+                    </div>
+                    {q.type === "select" && q.options?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {q.options.map((opt: string, i: number) => (
+                          <span key={i} className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">{opt}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const updated = formData.contextQuestions.filter((_: any, i: number) => i !== index);
+                      setFormData({ ...formData, contextQuestions: updated });
+                    }}
+                    data-testid={`button-remove-context-${index}`}
+                  >
+                    <Trash2 className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {formData.contextQuestions.length < 10 && (
+            <div className="space-y-3 p-4 rounded-lg border border-dashed">
+              <p className="text-sm font-medium text-muted-foreground">Tambah Pertanyaan Konteks</p>
+              <div className="space-y-2">
+                <Input
+                  value={newContextLabel}
+                  onChange={(e) => setNewContextLabel(e.target.value)}
+                  placeholder="Contoh: Jenis proyek apa yang Anda kelola?"
+                  data-testid="input-context-label"
+                />
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm">Tipe:</Label>
+                  <Select
+                    value={newContextType}
+                    onValueChange={(v) => setNewContextType(v as "text" | "select")}
+                  >
+                    <SelectTrigger className="w-[140px]" data-testid="select-context-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="select">Pilihan</SelectItem>
+                      <SelectItem value="text">Teks Bebas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={newContextRequired}
+                    onCheckedChange={setNewContextRequired}
+                    data-testid="switch-context-required"
+                  />
+                  <Label className="text-sm">Wajib</Label>
+                </div>
+              </div>
+              {newContextType === "select" && (
+                <div className="space-y-1">
+                  <Input
+                    value={newContextOptions}
+                    onChange={(e) => setNewContextOptions(e.target.value)}
+                    placeholder="Pilihan dipisah koma: Gedung, Jalan, Irigasi, Jembatan"
+                    data-testid="input-context-options"
+                  />
+                  <p className="text-xs text-muted-foreground">Pisahkan setiap pilihan dengan tanda koma</p>
+                </div>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (!newContextLabel.trim()) return;
+                  const options = newContextType === "select"
+                    ? newContextOptions.split(",").map(o => o.trim()).filter(Boolean)
+                    : [];
+                  if (newContextType === "select" && options.length === 0) return;
+                  const newQuestion = {
+                    id: `ctx_${Date.now()}`,
+                    label: newContextLabel.trim(),
+                    type: newContextType,
+                    options,
+                    required: newContextRequired,
+                  };
+                  setFormData({
+                    ...formData,
+                    contextQuestions: [...formData.contextQuestions, newQuestion],
+                  });
+                  setNewContextLabel("");
+                  setNewContextOptions("");
+                  setNewContextRequired(true);
+                }}
+                disabled={!newContextLabel.trim() || (newContextType === "select" && !newContextOptions.trim())}
+                data-testid="button-add-context-question"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah Pertanyaan
+              </Button>
+            </div>
+          )}
+
+          {formData.contextQuestions.length === 0 && (
+            <p className="text-sm text-muted-foreground italic">
+              Belum ada pertanyaan konteks. Tambahkan pertanyaan agar chatbot memahami kebutuhan pengguna di awal percakapan.
+            </p>
+          )}
         </CardContent>
       </Card>
 

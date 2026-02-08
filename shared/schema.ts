@@ -139,6 +139,7 @@ export const agents = pgTable("agents", {
   requireRegistration: boolean("require_registration").default(false),
   brandingName: text("branding_name").default(""),
   brandingLogo: text("branding_logo").default(""),
+  contextQuestions: jsonb("context_questions").default([]),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -448,6 +449,13 @@ export const insertAgentSchema = z.object({
   requireRegistration: z.boolean().optional().default(false),
   brandingName: z.string().optional().default(""),
   brandingLogo: z.string().optional().default(""),
+  contextQuestions: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    type: z.enum(["text", "select"]),
+    options: z.array(z.string()).optional().default([]),
+    required: z.boolean().optional().default(true),
+  })).optional().default([]),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId

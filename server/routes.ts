@@ -1122,6 +1122,24 @@ export async function registerRoutes(
       if (agent.toneOfVoice) {
         systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
       }
+
+      const projectContext = req.body.projectContext;
+      const configuredQuestions = (agent.contextQuestions as any[]) || [];
+      if (projectContext && typeof projectContext === "object" && configuredQuestions.length > 0) {
+        const validEntries: string[] = [];
+        for (const q of configuredQuestions) {
+          const value = projectContext[q.id];
+          if (value && typeof value === "string") {
+            const sanitized = value.slice(0, 200).replace(/[\n\r]/g, " ");
+            validEntries.push(`- ${q.label}: ${sanitized}`);
+          }
+        }
+        if (validEntries.length > 0) {
+          systemPrompt += `\n\nKONTEKS PROYEK (dari pengguna):\n${validEntries.join("\n")}`;
+          systemPrompt += `\nSesuaikan semua respon berdasarkan konteks proyek di atas.`;
+        }
+      }
+
       if (knowledgeContext) {
         systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
       }
@@ -1456,6 +1474,24 @@ export async function registerRoutes(
       if (agent.personality) systemPrompt += `\n\nKepribadian: ${agent.personality}`;
       if (agent.communicationStyle) systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
       if (agent.toneOfVoice) systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
+
+      const projectContextStream = req.body.projectContext;
+      const configuredQuestionsStream = (agent.contextQuestions as any[]) || [];
+      if (projectContextStream && typeof projectContextStream === "object" && configuredQuestionsStream.length > 0) {
+        const validEntriesStream: string[] = [];
+        for (const q of configuredQuestionsStream) {
+          const value = projectContextStream[q.id];
+          if (value && typeof value === "string") {
+            const sanitized = value.slice(0, 200).replace(/[\n\r]/g, " ");
+            validEntriesStream.push(`- ${q.label}: ${sanitized}`);
+          }
+        }
+        if (validEntriesStream.length > 0) {
+          systemPrompt += `\n\nKONTEKS PROYEK (dari pengguna):\n${validEntriesStream.join("\n")}`;
+          systemPrompt += `\nSesuaikan semua respon berdasarkan konteks proyek di atas.`;
+        }
+      }
+
       if (knowledgeContext) systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
 
       const activeProjectBrainStream = await storage.getActiveProjectBrainInstance(parsed.data.agentId);
@@ -2938,6 +2974,7 @@ export async function registerRoutes(
         communicationStyle: agent.communicationStyle || "friendly",
         toneOfVoice: agent.toneOfVoice || "professional",
         language: agent.language || "id",
+        contextQuestions: agent.contextQuestions || [],
       });
     } catch (error) {
       console.error("Chat config error:", error);
