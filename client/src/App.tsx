@@ -16,6 +16,7 @@ import EmbedChat from "@/pages/embed-chat";
 import AgentChat from "@/pages/agent-chat";
 import SeriesCatalog from "@/pages/series-catalog";
 import SeriesDetail from "@/pages/series-detail";
+import SectorLanding from "@/pages/sector-landing";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/chat/:agentId" component={AgentChat} />
       <Route path="/series" component={SeriesCatalog} />
       <Route path="/series/:slug" component={SeriesDetail} />
+      <Route path="/sector/:sectorId" component={SectorLanding} />
       <Route component={NotFound} />
     </Switch>
   );
