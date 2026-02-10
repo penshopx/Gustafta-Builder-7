@@ -463,13 +463,18 @@ export async function registerRoutes(
   // Create big idea
   app.post("/api/big-ideas", isAuthenticated, async (req, res) => {
     try {
+      console.log("[BigIdea] Create request body:", JSON.stringify(req.body));
       const parsed = insertBigIdeaSchema.safeParse(req.body);
       if (!parsed.success) {
+        console.log("[BigIdea] Validation error:", parsed.error.message);
         return res.status(400).json({ error: parsed.error.message });
       }
+      console.log("[BigIdea] Parsed data:", JSON.stringify(parsed.data));
       const bigIdea = await storage.createBigIdea(parsed.data);
+      console.log("[BigIdea] Created:", JSON.stringify(bigIdea));
       res.status(201).json(bigIdea);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("[BigIdea] Create error:", error?.message || error);
       res.status(500).json({ error: "Failed to create big idea" });
     }
   });
