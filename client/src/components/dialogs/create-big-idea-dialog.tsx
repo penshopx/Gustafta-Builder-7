@@ -52,7 +52,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId }: CreateBigI
 
     try {
       const finalSeriesId = selectedSeriesId !== "none" ? selectedSeriesId : undefined;
-      await createBigIdea.mutateAsync({
+      const payload = {
         name: name.trim(),
         type,
         description: description.trim(),
@@ -61,7 +61,10 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId }: CreateBigI
         expectedOutcome: expectedOutcome.trim(),
         sortOrder: 0,
         ...(finalSeriesId ? { seriesId: finalSeriesId } : {}),
-      });
+      };
+      console.log("[CreateBigIdea] Sending payload:", JSON.stringify(payload));
+      const result = await createBigIdea.mutateAsync(payload);
+      console.log("[CreateBigIdea] Success:", JSON.stringify(result));
       
       toast({
         title: "Berhasil",
@@ -70,10 +73,12 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId }: CreateBigI
       
       resetForm();
       onOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("[CreateBigIdea] Error:", error?.message || error);
+      const errorMsg = error?.message || "Gagal membuat Big Idea";
       toast({
         title: "Error",
-        description: "Gagal membuat Big Idea",
+        description: errorMsg.includes("401") ? "Sesi login habis, silakan login ulang" : `Gagal membuat Big Idea: ${errorMsg}`,
         variant: "destructive",
       });
     }
