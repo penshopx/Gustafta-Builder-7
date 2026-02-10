@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
 import { useCreateBigIdea } from "@/hooks/use-big-ideas";
 import { useToast } from "@/hooks/use-toast";
 import { Lightbulb, AlertTriangle, Sparkles, Plus, X, GraduationCap } from "lucide-react";
@@ -17,15 +19,23 @@ import { Lightbulb, AlertTriangle, Sparkles, Plus, X, GraduationCap } from "luci
 interface CreateBigIdeaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  seriesId?: number | null;
 }
 
-export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogProps) {
+export function CreateBigIdeaDialog({ open, onOpenChange, seriesId }: CreateBigIdeaDialogProps) {
   const [name, setName] = useState("");
   const [type, setType] = useState<"problem" | "idea" | "inspiration" | "mentoring">("problem");
   const [description, setDescription] = useState("");
   const [goals, setGoals] = useState<string[]>([""]);
   const [targetAudience, setTargetAudience] = useState("");
   const [expectedOutcome, setExpectedOutcome] = useState("");
+  const [selectedSeriesId, setSelectedSeriesId] = useState<string>(seriesId ? String(seriesId) : "none");
+
+  const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
+  
+  useEffect(() => {
+    setSelectedSeriesId(seriesId ? String(seriesId) : "none");
+  }, [seriesId]);
   
   const createBigIdea = useCreateBigIdea();
   const { toast } = useToast();
@@ -41,6 +51,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
     }
 
     try {
+      const finalSeriesId = selectedSeriesId !== "none" ? selectedSeriesId : undefined;
       await createBigIdea.mutateAsync({
         name: name.trim(),
         type,
@@ -48,6 +59,8 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
         goals: goals.filter(g => g.trim()),
         targetAudience: targetAudience.trim(),
         expectedOutcome: expectedOutcome.trim(),
+        sortOrder: 0,
+        ...(finalSeriesId ? { seriesId: finalSeriesId } : {}),
       });
       
       toast({
@@ -73,6 +86,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
     setGoals([""]);
     setTargetAudience("");
     setExpectedOutcome("");
+    setSelectedSeriesId(seriesId ? String(seriesId) : "none");
   };
 
   const addGoal = () => {
@@ -116,6 +130,23 @@ export function CreateBigIdeaDialog({ open, onOpenChange }: CreateBigIdeaDialogP
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {allSeries.length > 0 && (
+            <div className="space-y-2">
+              <Label>Series / Topik</Label>
+              <Select value={selectedSeriesId} onValueChange={setSelectedSeriesId}>
+                <SelectTrigger data-testid="select-series">
+                  <SelectValue placeholder="Pilih Series" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Tanpa Series</SelectItem>
+                  {allSeries.map((s: any) => (
+                    <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label>Tipe Big Idea</Label>
             <RadioGroup

@@ -29,6 +29,7 @@ export function useCreateBigIdea() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });
     },
   });
 }
@@ -41,6 +42,7 @@ export function useUpdateBigIdea() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });
     },
   });
 }

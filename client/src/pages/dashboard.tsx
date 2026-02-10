@@ -719,7 +719,7 @@ export default function Dashboard() {
       {activeAgent && <ChatPopup agent={activeAgent} />}
 
       <CreateAgentDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
-      <CreateBigIdeaDialog open={bigIdeaDialogOpen} onOpenChange={setBigIdeaDialogOpen} />
+      <CreateBigIdeaDialog open={bigIdeaDialogOpen} onOpenChange={setBigIdeaDialogOpen} seriesId={activeSeriesId} />
       {activeBigIdea && (
         <CreateToolboxDialog 
           open={toolboxDialogOpen} 
