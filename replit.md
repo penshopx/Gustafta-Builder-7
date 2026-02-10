@@ -66,6 +66,7 @@ The schema includes tables for `agents` (with extensive configuration options, A
 - Mobile-first design for the floating chat widget.
 - Professional templates for various industries and use cases.
 - Dynamic widget embed system for flexible deployment.
+- **Multi-sector landing pages**: Generic platform landing at `/` with sector grid linking to `/sector/:sectorId` pages. 12 featured sectors with tailored content (engineering, medical, education, finance, retail, legal, hospitality, marketing, customer_success, real_estate, creative, logistics). Sector content stored in `client/src/lib/sector-content.ts`.
 
 ## External Dependencies
 
