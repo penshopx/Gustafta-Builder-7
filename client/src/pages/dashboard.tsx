@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,16 +30,28 @@ import { ProductSettingsPanel } from "@/components/panels/product-settings-panel
 import { RevenuPanel } from "@/components/panels/revenue-panel";
 import { AffiliatePanel } from "@/components/panels/affiliate-panel";
 import { VoucherPanel } from "@/components/panels/voucher-panel";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
 import { CreateBigIdeaDialog } from "@/components/dialogs/create-big-idea-dialog";
 import { CreateToolboxDialog } from "@/components/dialogs/create-toolbox-dialog";
+import { EditBigIdeaDialog } from "@/components/dialogs/edit-big-idea-dialog";
+import { EditToolboxDialog } from "@/components/dialogs/edit-toolbox-dialog";
 import { UserProfileDialog } from "@/components/dialogs/user-profile-dialog";
 import { ChatPopup } from "@/components/chat-popup";
 import { SeriesManagementDialog } from "@/components/series-management-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAgents, useActiveAgent, useSetActiveAgent } from "@/hooks/use-agents";
-import { useBigIdeas, useActiveBigIdea, useActivateBigIdea } from "@/hooks/use-big-ideas";
-import { useToolboxes, useActiveToolbox, useActivateToolbox } from "@/hooks/use-toolboxes";
+import { useBigIdeas, useActiveBigIdea, useActivateBigIdea, useDeleteBigIdea } from "@/hooks/use-big-ideas";
+import { useToolboxes, useActiveToolbox, useActivateToolbox, useDeleteToolbox } from "@/hooks/use-toolboxes";
 import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -74,6 +86,12 @@ export default function Dashboard() {
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [editBigIdeaDialogOpen, setEditBigIdeaDialogOpen] = useState(false);
+  const [editingBigIdea, setEditingBigIdea] = useState<BigIdea | null>(null);
+  const [editToolboxDialogOpen, setEditToolboxDialogOpen] = useState(false);
+  const [editingToolbox, setEditingToolbox] = useState<Toolbox | null>(null);
+  const [deleteBigIdeaConfirm, setDeleteBigIdeaConfirm] = useState<BigIdea | null>(null);
+  const [deleteToolboxConfirm, setDeleteToolboxConfirm] = useState<Toolbox | null>(null);
   
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -133,9 +151,12 @@ export default function Dashboard() {
     }
   };
   
+  const deleteBigIdea = useDeleteBigIdea();
+  
   const { data: toolboxes = [] } = useToolboxes(activeBigIdea?.id);
   const { data: activeToolbox } = useActiveToolbox();
   const activateToolbox = useActivateToolbox();
+  const deleteToolbox = useDeleteToolbox();
 
   const shouldFetchAgents = !!activeToolbox?.id;
   const { data: agents = [], isLoading: agentsLoading } = useAgents(shouldFetchAgents ? activeToolbox.id : undefined);
@@ -194,6 +215,36 @@ export default function Dashboard() {
 
   const handleToolboxSelect = (toolbox: Toolbox) => {
     activateToolbox.mutate(String(toolbox.id));
+  };
+
+  const handleEditBigIdea = (bi: BigIdea) => {
+    setEditingBigIdea(bi);
+    setEditBigIdeaDialogOpen(true);
+  };
+
+  const handleDeleteBigIdea = async (bi: BigIdea) => {
+    try {
+      await deleteBigIdea.mutateAsync(String(bi.id));
+      toast({ title: "Berhasil", description: `Big Idea "${bi.name}" berhasil dihapus` });
+      setDeleteBigIdeaConfirm(null);
+    } catch (error) {
+      toast({ title: "Error", description: "Gagal menghapus Big Idea", variant: "destructive" });
+    }
+  };
+
+  const handleEditToolbox = (tb: Toolbox) => {
+    setEditingToolbox(tb);
+    setEditToolboxDialogOpen(true);
+  };
+
+  const handleDeleteToolbox = async (tb: Toolbox) => {
+    try {
+      await deleteToolbox.mutateAsync(String(tb.id));
+      toast({ title: "Berhasil", description: `Toolbox "${tb.name}" berhasil dihapus` });
+      setDeleteToolboxConfirm(null);
+    } catch (error) {
+      toast({ title: "Error", description: "Gagal menghapus Toolbox", variant: "destructive" });
+    }
   };
 
   const getInitials = (name: string) => {
@@ -346,7 +397,7 @@ export default function Dashboard() {
                 {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
               </Button>
             </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuContent align="start" className="w-64">
             <DropdownMenuLabel>Big Ideas{activeSeries ? ` - ${activeSeries.name}` : ""}</DropdownMenuLabel>
             {filteredBigIdeas.length === 0 ? (
               <div className="px-2 py-3 text-sm text-muted-foreground text-center">
@@ -354,15 +405,37 @@ export default function Dashboard() {
               </div>
             ) : (
               filteredBigIdeas.map((bi) => (
-                <DropdownMenuItem
-                  key={bi.id}
-                  onClick={() => handleBigIdeaSelect(bi)}
-                  className="gap-2"
-                >
-                  <Lightbulb className="w-4 h-4 text-yellow-500" />
-                  <span className="truncate">{bi.name}</span>
-                  {bi.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-                </DropdownMenuItem>
+                <div key={bi.id} className="group relative flex items-center">
+                  <DropdownMenuItem
+                    onClick={() => handleBigIdeaSelect(bi)}
+                    className="flex-1 gap-2 pr-16"
+                    data-testid={`menu-bigidea-${bi.id}`}
+                  >
+                    <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
+                    <span className="truncate">{bi.name}</span>
+                    {bi.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
+                  </DropdownMenuItem>
+                  <div className="absolute right-1 flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={(e) => { e.stopPropagation(); handleEditBigIdea(bi); }}
+                      data-testid={`button-edit-bigidea-${bi.id}`}
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive"
+                      onClick={(e) => { e.stopPropagation(); setDeleteBigIdeaConfirm(bi); }}
+                      data-testid={`button-delete-bigidea-${bi.id}`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
               ))
             )}
             <DropdownMenuSeparator />
@@ -393,7 +466,7 @@ export default function Dashboard() {
                 {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="start" className="w-64">
               <DropdownMenuLabel>Toolboxes</DropdownMenuLabel>
             {toolboxes.length === 0 ? (
               <div className="px-2 py-3 text-sm text-muted-foreground text-center">
@@ -401,16 +474,37 @@ export default function Dashboard() {
               </div>
             ) : (
               toolboxes.map((tb) => (
-                <DropdownMenuItem
-                  key={tb.id}
-                  onClick={() => handleToolboxSelect(tb)}
-                  className="gap-2"
-                 
-                >
-                  <Wrench className="w-4 h-4 text-blue-500" />
-                  <span className="truncate">{tb.name}</span>
-                  {tb.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-                </DropdownMenuItem>
+                <div key={tb.id} className="group relative flex items-center">
+                  <DropdownMenuItem
+                    onClick={() => handleToolboxSelect(tb)}
+                    className="flex-1 gap-2 pr-16"
+                    data-testid={`menu-toolbox-${tb.id}`}
+                  >
+                    <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
+                    <span className="truncate">{tb.name}</span>
+                    {tb.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
+                  </DropdownMenuItem>
+                  <div className="absolute right-1 flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={(e) => { e.stopPropagation(); handleEditToolbox(tb); }}
+                      data-testid={`button-edit-toolbox-${tb.id}`}
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive"
+                      onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(tb); }}
+                      data-testid={`button-delete-toolbox-${tb.id}`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
               ))
             )}
             <DropdownMenuSeparator />
@@ -418,7 +512,6 @@ export default function Dashboard() {
               onClick={() => setToolboxDialogOpen(true)}
               className="gap-2"
               disabled={!activeBigIdea}
-             
             >
               <Plus className="w-4 h-4" />
               Buat Toolbox Baru
@@ -740,6 +833,72 @@ export default function Dashboard() {
       )}
       <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
       <SeriesManagementDialog open={seriesDialogOpen} onOpenChange={setSeriesDialogOpen} />
+
+      {editingBigIdea && (
+        <EditBigIdeaDialog
+          open={editBigIdeaDialogOpen}
+          onOpenChange={(open) => {
+            setEditBigIdeaDialogOpen(open);
+            if (!open) setEditingBigIdea(null);
+          }}
+          bigIdea={editingBigIdea}
+        />
+      )}
+
+      {editingToolbox && (
+        <EditToolboxDialog
+          open={editToolboxDialogOpen}
+          onOpenChange={(open) => {
+            setEditToolboxDialogOpen(open);
+            if (!open) setEditingToolbox(null);
+          }}
+          toolbox={editingToolbox}
+        />
+      )}
+
+      <AlertDialog open={!!deleteBigIdeaConfirm} onOpenChange={(open) => { if (!open) setDeleteBigIdeaConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Big Idea?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus Big Idea "{deleteBigIdeaConfirm?.name}"? 
+              Semua Toolbox dan Agent di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-bigidea">Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteBigIdeaConfirm && handleDeleteBigIdea(deleteBigIdeaConfirm)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete-bigidea"
+            >
+              {deleteBigIdea.isPending ? "Menghapus..." : "Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteToolboxConfirm} onOpenChange={(open) => { if (!open) setDeleteToolboxConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Toolbox?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus Toolbox "{deleteToolboxConfirm?.name}"? 
+              Semua Agent di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-toolbox">Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteToolboxConfirm && handleDeleteToolbox(deleteToolboxConfirm)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete-toolbox"
+            >
+              {deleteToolbox.isPending ? "Menghapus..." : "Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
