@@ -39,6 +39,7 @@ export function useActivateContext() {
       return await response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
       queryClient.invalidateQueries({ queryKey: ["/api/context/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
       queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });

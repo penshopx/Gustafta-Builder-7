@@ -2,6 +2,17 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Agent, InsertAgent } from "@shared/schema";
 
+function invalidateHierarchy() {
+  queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/toolboxes/active"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/context/active"] });
+}
+
 export function useAgents(toolboxId?: number | string) {
   const queryKey = toolboxId
     ? ["/api/agents", { toolboxId: String(toolboxId) }]
@@ -40,8 +51,7 @@ export function useCreateAgent() {
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+      invalidateHierarchy();
     },
   });
 }
@@ -53,9 +63,8 @@ export function useUpdateAgent() {
       return await response.json();
     },
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
       queryClient.invalidateQueries({ queryKey: ["/api/agents", id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+      invalidateHierarchy();
     },
   });
 }
@@ -67,8 +76,7 @@ export function useSetActiveAgent() {
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+      invalidateHierarchy();
     },
   });
 }
@@ -79,8 +87,7 @@ export function useDeleteAgent() {
       await apiRequest("DELETE", `/api/agents/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+      invalidateHierarchy();
     },
   });
 }

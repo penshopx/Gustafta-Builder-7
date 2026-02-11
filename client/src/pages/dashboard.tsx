@@ -102,6 +102,17 @@ export default function Dashboard() {
   const { data: bigIdeas = [] } = useBigIdeas();
   const { data: activeBigIdea } = useActiveBigIdea();
   const activateBigIdea = useActivateBigIdea();
+
+  useEffect(() => {
+    if (activeBigIdea?.seriesId && allSeries.length > 0) {
+      const seriesIdNum = Number(activeBigIdea.seriesId);
+      if (activeSeriesId !== seriesIdNum) {
+        setActiveSeriesId(seriesIdNum);
+      }
+    } else if (activeBigIdea && !activeBigIdea.seriesId) {
+      setActiveSeriesId(null);
+    }
+  }, [activeBigIdea?.id, activeBigIdea?.seriesId, allSeries.length]);
   
   const filteredBigIdeas = activeSeriesId
     ? bigIdeas.filter((bi: any) => Number(bi.seriesId) === activeSeriesId)

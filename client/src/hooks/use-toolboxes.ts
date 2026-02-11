@@ -2,6 +2,17 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Toolbox, InsertToolbox } from "@shared/schema";
 
+function invalidateHierarchy() {
+  queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/toolboxes/active"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+  queryClient.invalidateQueries({ queryKey: ["/api/context/active"] });
+}
+
 export function useToolboxes(bigIdeaId?: number | string) {
   const queryKey = bigIdeaId 
     ? ["/api/toolboxes", { bigIdeaId: String(bigIdeaId) }]
@@ -40,7 +51,7 @@ export function useCreateToolbox() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      invalidateHierarchy();
     },
   });
 }
@@ -52,7 +63,7 @@ export function useUpdateToolbox() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      invalidateHierarchy();
     },
   });
 }
@@ -64,10 +75,7 @@ export function useActivateToolbox() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+      invalidateHierarchy();
     },
   });
 }
@@ -78,7 +86,7 @@ export function useDeleteToolbox() {
       await apiRequest("DELETE", `/api/toolboxes/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      invalidateHierarchy();
     },
   });
 }

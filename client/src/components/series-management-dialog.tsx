@@ -64,10 +64,21 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
     enabled: open,
   });
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/toolboxes/active"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/context/active"] });
+  };
+
   const createMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/series", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+      invalidateAll();
       toast({ title: "Series berhasil dibuat" });
       resetForm();
     },
@@ -77,7 +88,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => apiRequest("PATCH", `/api/series/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+      invalidateAll();
       toast({ title: "Series berhasil diperbarui" });
       resetForm();
     },
@@ -87,7 +98,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/series/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+      invalidateAll();
       toast({ title: "Series berhasil dihapus" });
     },
     onError: () => toast({ title: "Gagal menghapus series", variant: "destructive" }),
@@ -97,8 +108,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
     mutationFn: ({ bigIdeaId, seriesId }: { bigIdeaId: string; seriesId: string | null }) =>
       apiRequest("PATCH", `/api/big-ideas/${bigIdeaId}`, { seriesId: seriesId ?? null }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+      invalidateAll();
     },
   });
 

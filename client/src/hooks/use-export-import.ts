@@ -34,8 +34,14 @@ export function useImportAgent() {
       return await response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/big-ideas/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes/active"] });
       queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
       queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/context/active"] });
     },
   });
 }
