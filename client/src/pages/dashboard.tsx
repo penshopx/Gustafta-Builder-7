@@ -325,9 +325,11 @@ export default function Dashboard() {
     }
   };
 
+  const [toolboxListExpanded, setToolboxListExpanded] = useState(false);
+
   const SidebarContent = () => (
     <>
-      <div className={cn("border-b border-sidebar-border overflow-y-auto shrink-0 max-h-[40vh]", sidebarCollapsed ? "p-2" : "")}>
+      <div className={cn("border-b border-sidebar-border shrink-0 max-h-[35vh] overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
         {/* Series / Topik Dropdown */}
         <div className={cn(sidebarCollapsed ? "" : "px-3 pt-3 pb-1")}>
           {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Series / Topik</p>}
@@ -335,7 +337,7 @@ export default function Dashboard() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className={cn(
                 "w-full h-auto",
-                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-1.5"
               )}>
                 <div className="flex items-center gap-2 min-w-0">
                   <BookOpen className="w-4 h-4 text-purple-500 shrink-0" />
@@ -388,13 +390,13 @@ export default function Dashboard() {
         </div>
 
         {/* Big Idea Dropdown */}
-        <div className={cn(sidebarCollapsed ? "" : "px-3 pt-2 pb-1")}>
+        <div className={cn(sidebarCollapsed ? "" : "px-3 pt-1 pb-1")}>
           {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Big Idea</p>}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className={cn(
                 "w-full h-auto",
-                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-1.5"
               )}>
                 <div className="flex items-center gap-2 min-w-0">
                   <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
@@ -434,14 +436,27 @@ export default function Dashboard() {
         {/* Toolbox Section - only when Big Idea is selected */}
         {activeBigIdea && (
           <>
-            {/* Toolbox Dropdown */}
-            <div className={cn(sidebarCollapsed ? "" : "px-3 pt-2 pb-1")}>
-              {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Toolbox</p>}
+            {/* Toolbox Dropdown with expand toggle */}
+            <div className={cn(sidebarCollapsed ? "" : "px-3 pt-1 pb-1")}>
+              {!sidebarCollapsed && (
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0">Toolbox</p>
+                  {toolboxes.length > 0 && (
+                    <button
+                      onClick={() => setToolboxListExpanded(!toolboxListExpanded)}
+                      className="text-[10px] text-muted-foreground hover:text-sidebar-foreground transition-colors"
+                      data-testid="button-toggle-toolbox-list"
+                    >
+                      {toolboxListExpanded ? "Tutup" : `${toolboxes.length} items`}
+                    </button>
+                  )}
+                </div>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className={cn(
                     "w-full h-auto",
-                    sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+                    sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-1.5"
                   )}>
                     <div className="flex items-center gap-2 min-w-0">
                       <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
@@ -474,20 +489,24 @@ export default function Dashboard() {
                       </DropdownMenuItem>
                     ))
                   )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setToolboxDialogOpen(true)} className="gap-2" data-testid="button-add-toolbox-dropdown">
+                    <Plus className="w-4 h-4" />
+                    Buat Toolbox Baru
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
 
-            {/* Toolboxes Flat List */}
-            {!sidebarCollapsed && (
-              <div className="px-3 pt-1 pb-2">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Toolboxes</p>
+            {/* Collapsible Toolboxes List - only shown when expanded */}
+            {!sidebarCollapsed && toolboxListExpanded && (
+              <div className="px-3 pt-1 pb-2 max-h-32 overflow-y-auto">
                 <div className="space-y-0.5">
                   {toolboxes.map((tb) => (
                     <div
                       key={tb.id}
                       className={cn(
-                        "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                        "group flex items-center gap-2 rounded-md px-2 py-1 text-xs cursor-pointer transition-colors",
                         tb.isActive
                           ? "bg-sidebar-accent text-sidebar-accent-foreground"
                           : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
@@ -495,9 +514,9 @@ export default function Dashboard() {
                       onClick={() => handleToolboxSelect(tb)}
                       data-testid={`list-toolbox-${tb.id}`}
                     >
-                      <Wrench className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                      <span className="truncate flex-1 text-sm">{tb.name}</span>
-                      {tb.isActive && <Badge variant="secondary" className="text-[10px] shrink-0">Aktif</Badge>}
+                      <Wrench className="w-3 h-3 text-blue-500 shrink-0" />
+                      <span className="truncate flex-1">{tb.name}</span>
+                      {tb.isActive && <Badge variant="secondary" className="text-[9px] shrink-0">Aktif</Badge>}
                       <div className="flex items-center gap-0.5 shrink-0 invisible group-hover:visible">
                         <Button
                           variant="ghost"
@@ -522,10 +541,10 @@ export default function Dashboard() {
                   ))}
                   <button
                     onClick={() => setToolboxDialogOpen(true)}
-                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1 text-xs text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
                     data-testid="button-add-toolbox"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-3 h-3" />
                     <span>Buat Toolbox Baru</span>
                   </button>
                 </div>
@@ -536,7 +555,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <nav className={cn("flex-1 min-h-0 space-y-1 overflow-y-auto", sidebarCollapsed ? "p-2" : "p-3")}>
+      <nav className={cn("flex-1 min-h-0 space-y-0.5 overflow-y-auto", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -547,7 +566,7 @@ export default function Dashboard() {
             disabled={!activeAgent}
             className={cn(
               "w-full flex items-center rounded-md text-sm font-medium transition-colors",
-              sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5",
+              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
               activeNav === item.id && activeAgent
                 ? "bg-sidebar-accent text-sidebar-accent-foreground"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
@@ -565,12 +584,12 @@ export default function Dashboard() {
         ))}
       </nav>
 
-      <div className={cn("border-t border-sidebar-border space-y-1 shrink-0", sidebarCollapsed ? "p-2" : "p-3")}>
+      <div className={cn("border-t border-sidebar-border space-y-0.5 shrink-0", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
         <button
           onClick={() => setProfileDialogOpen(true)}
           className={cn(
             "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
-            sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+            sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
           )}
          
           title={sidebarCollapsed ? "Profil" : undefined}
@@ -587,7 +606,7 @@ export default function Dashboard() {
           <button
             className={cn(
               "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
-              sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
             )}
            
             title={sidebarCollapsed ? "Beranda" : undefined}
@@ -601,7 +620,7 @@ export default function Dashboard() {
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className={cn(
             "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
-            sidebarCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+            sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
           )}
          
           title={sidebarCollapsed ? "Perluas Sidebar" : "Ciutkan Sidebar"}
