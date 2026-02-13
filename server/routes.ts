@@ -3296,8 +3296,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         return res.status(404).json({ error: "Agent not found" });
       }
       
-      if (!agent.isActive) {
-        return res.status(404).json({ error: "Agent is disabled", disabled: true });
+      if (!agent.isPublic) {
+        return res.status(404).json({ error: "Agent is not public", disabled: true });
       }
 
       const agentId = agent.id.toString();
@@ -3442,10 +3442,6 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
       
       const agentId = agent.id.toString();
-      
-      if (!agent.isActive) {
-        return res.status(404).json({ error: "Widget is disabled", disabled: true });
-      }
       
       if (!agent.isPublic) {
         return res.status(403).json({ error: "Widget is not public", private: true });
