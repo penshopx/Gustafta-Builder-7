@@ -285,9 +285,15 @@ export default function Landing() {
                   </Button>
                 </a>
               )}
-              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-lg px-8 py-6" data-testid="button-demo">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="w-full sm:w-auto gap-2 text-lg px-8 py-6" 
+                data-testid="button-demo"
+                onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
+              >
                 <Play className="h-5 w-5" />
-                Lihat Demo
+                Lihat Fitur
               </Button>
             </div>
             
@@ -397,7 +403,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section id="features" className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Fitur Utama</Badge>

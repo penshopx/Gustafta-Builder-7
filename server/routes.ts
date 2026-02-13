@@ -28,6 +28,22 @@ import { processKnowledgeBaseForRAG, searchKnowledgeBase } from "./lib/rag-servi
 
 const guestMessageTracker = new Map<string, { count: number; lastReset: string }>();
 
+async function isPublicAgent(agentId: string | number): Promise<boolean> {
+  try {
+    const agent = await storage.getAgent(String(agentId));
+    return agent?.isPublic === true;
+  } catch {
+    return false;
+  }
+}
+
+function optionalAuth(req: any, res: any, next: any) {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  next();
+}
+
 function getGuestFingerprint(req: any, agentId: string): string {
   const ip = req.headers["x-forwarded-for"] || req.ip || "unknown";
   const ua = req.headers["user-agent"] || "unknown";
@@ -1095,7 +1111,7 @@ export async function registerRoutes(
 
   // ==================== User Memory Routes ====================
 
-  app.get("/api/memories/:agentId", async (req, res) => {
+  app.get("/api/memories/:agentId", isAuthenticated, async (req, res) => {
     try {
       const agentId = req.params.agentId as string;
       const sessionId = req.query.sessionId as string | undefined;
@@ -1106,7 +1122,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/memories", async (req, res) => {
+  app.post("/api/memories", isAuthenticated, async (req, res) => {
     try {
       const { agentId, sessionId, category, content } = req.body;
       if (!agentId || !content) {
@@ -1124,7 +1140,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/memories/:id", async (req, res) => {
+  app.delete("/api/memories/:id", isAuthenticated, async (req, res) => {
     try {
       const success = await storage.deleteUserMemory(req.params.id as string);
       res.json({ success });
@@ -1133,7 +1149,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/memories/agent/:agentId", async (req, res) => {
+  app.delete("/api/memories/agent/:agentId", isAuthenticated, async (req, res) => {
     try {
       const agentId = req.params.agentId as string;
       const sessionId = req.query.sessionId as string | undefined;
@@ -1198,10 +1214,20 @@ export async function registerRoutes(
 
   // ==================== Message Routes ====================
 
-  // Get messages for an agent
-  app.get("/api/messages/:agentId", async (req, res) => {
+  app.get("/api/messages/:agentId", optionalAuth, async (req: any, res) => {
     try {
-      const messages = await storage.getMessages(req.params.agentId as string);
+      const agentId = req.params.agentId as string;
+      const agent = await storage.getAgent(agentId);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      
+      const isAuthed = req.isAuthenticated && req.isAuthenticated();
+      if (!agent.isPublic && !isAuthed) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      if (agent.isPublic && !isAuthed) {
+        return res.json([]);
+      }
+      const messages = await storage.getMessages(agentId);
       res.json(messages);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch messages" });
@@ -1581,8 +1607,7 @@ Kamu memiliki kemampuan menyimpan informasi yang diminta pengguna.
     }
   });
 
-  // Clear messages for an agent
-  app.delete("/api/messages/:agentId", async (req, res) => {
+  app.delete("/api/messages/:agentId", isAuthenticated, async (req, res) => {
     try {
       await storage.clearMessages(req.params.agentId as string);
       res.status(204).send();

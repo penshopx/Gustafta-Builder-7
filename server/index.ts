@@ -53,8 +53,9 @@ app.use((req, res, next) => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      if (capturedJsonResponse && process.env.NODE_ENV !== "production") {
+        const jsonStr = JSON.stringify(capturedJsonResponse);
+        logLine += ` :: ${jsonStr.length > 200 ? jsonStr.substring(0, 200) + "..." : jsonStr}`;
       }
 
       log(logLine);
@@ -64,8 +65,15 @@ app.use((req, res, next) => {
   next();
 });
 
+const requiredEnvVars = ["DATABASE_URL", "SESSION_SECRET"];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`Missing required environment variable: ${envVar}`);
+    process.exit(1);
+  }
+}
+
 (async () => {
-  // Setup authentication (before registering other routes)
   await setupAuth(app);
   registerAuthRoutes(app);
   registerAudioRoutes(app);
