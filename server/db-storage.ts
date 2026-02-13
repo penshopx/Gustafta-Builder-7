@@ -7,6 +7,7 @@ import {
   bigIdeas,
   toolboxes,
   knowledgeBases,
+  knowledgeChunks,
   integrations,
   agentMessages,
   analyticsTable,
@@ -63,6 +64,8 @@ import type {
   Voucher,
   InsertVoucher,
   VoucherRedemption,
+  KnowledgeChunk,
+  InsertKnowledgeChunk,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -887,8 +890,84 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteKnowledgeBase(id: string): Promise<boolean> {
+    await db.delete(knowledgeChunks).where(eq(knowledgeChunks.knowledgeBaseId, parseInt(id)));
     const result = await db.delete(knowledgeBases).where(eq(knowledgeBases.id, parseInt(id))).returning();
     return result.length > 0;
+  }
+
+  // Knowledge Chunks methods (RAG)
+  async getChunksByKnowledgeBase(knowledgeBaseId: string): Promise<KnowledgeChunk[]> {
+    const result = await db.select().from(knowledgeChunks)
+      .where(eq(knowledgeChunks.knowledgeBaseId, parseInt(knowledgeBaseId)))
+      .orderBy(knowledgeChunks.chunkIndex);
+    return result.map(row => ({
+      id: row.id as unknown as number,
+      knowledgeBaseId: row.knowledgeBaseId as unknown as number,
+      agentId: row.agentId as unknown as number,
+      chunkIndex: row.chunkIndex,
+      content: row.content,
+      tokenCount: row.tokenCount || 0,
+      embedding: (row.embedding as number[]) || [],
+      metadata: (row.metadata as Record<string, any>) || {},
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async getChunksByAgent(agentId: string): Promise<KnowledgeChunk[]> {
+    const result = await db.select().from(knowledgeChunks)
+      .where(eq(knowledgeChunks.agentId, parseInt(agentId)))
+      .orderBy(knowledgeChunks.chunkIndex);
+    return result.map(row => ({
+      id: row.id as unknown as number,
+      knowledgeBaseId: row.knowledgeBaseId as unknown as number,
+      agentId: row.agentId as unknown as number,
+      chunkIndex: row.chunkIndex,
+      content: row.content,
+      tokenCount: row.tokenCount || 0,
+      embedding: (row.embedding as number[]) || [],
+      metadata: (row.metadata as Record<string, any>) || {},
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async createChunks(chunks: InsertKnowledgeChunk[]): Promise<KnowledgeChunk[]> {
+    if (chunks.length === 0) return [];
+    const created: KnowledgeChunk[] = [];
+    for (const chunk of chunks) {
+      const result = await db.insert(knowledgeChunks).values({
+        knowledgeBaseId: chunk.knowledgeBaseId as any,
+        agentId: chunk.agentId as any,
+        chunkIndex: chunk.chunkIndex,
+        content: chunk.content,
+        tokenCount: chunk.tokenCount || 0,
+        embedding: chunk.embedding || [],
+        metadata: chunk.metadata || {},
+      }).returning();
+      if (result[0]) {
+        created.push({
+          id: result[0].id as unknown as number,
+          knowledgeBaseId: result[0].knowledgeBaseId as unknown as number,
+          agentId: result[0].agentId as unknown as number,
+          chunkIndex: result[0].chunkIndex,
+          content: result[0].content,
+          tokenCount: result[0].tokenCount || 0,
+          embedding: (result[0].embedding as number[]) || [],
+          metadata: (result[0].metadata as Record<string, any>) || {},
+          createdAt: result[0].createdAt.toISOString(),
+        });
+      }
+    }
+    return created;
+  }
+
+  async deleteChunksByKnowledgeBase(knowledgeBaseId: string): Promise<boolean> {
+    await db.delete(knowledgeChunks).where(eq(knowledgeChunks.knowledgeBaseId, parseInt(knowledgeBaseId)));
+    return true;
+  }
+
+  async deleteChunksByAgent(agentId: string): Promise<boolean> {
+    await db.delete(knowledgeChunks).where(eq(knowledgeChunks.agentId, parseInt(agentId)));
+    return true;
   }
 
   // Integration methods

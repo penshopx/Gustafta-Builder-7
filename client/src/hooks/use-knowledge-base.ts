@@ -2,6 +2,18 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { KnowledgeBase, InsertKnowledgeBase } from "@shared/schema";
 
+interface RagStats {
+  totalChunks: number;
+  totalKnowledgeBases: number;
+  ragEnabled: boolean;
+  chunksByKb: Array<{
+    kbId: string;
+    kbName: string;
+    chunkCount: number;
+    processingStatus: string;
+  }>;
+}
+
 export function useKnowledgeBases(agentId: string) {
   return useQuery<KnowledgeBase[]>({
     queryKey: ["/api/knowledge-base", agentId],
@@ -17,6 +29,7 @@ export function useCreateKnowledgeBase() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", variables.agentId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", variables.agentId, "rag-stats"] });
     },
   });
 }
@@ -46,6 +59,7 @@ export function useDeleteKnowledgeBase() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId, "rag-stats"] });
     },
   });
 }
@@ -58,6 +72,27 @@ export function useUpdateKnowledgeBase() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId, "rag-stats"] });
+    },
+  });
+}
+
+export function useRagStats(agentId: string) {
+  return useQuery<RagStats>({
+    queryKey: ["/api/knowledge-base", agentId, "rag-stats"],
+    enabled: !!agentId,
+  });
+}
+
+export function useReprocessRag() {
+  return useMutation({
+    mutationFn: async ({ id, agentId }: { id: string; agentId: string }) => {
+      const response = await apiRequest("POST", `/api/knowledge-base/${id}/reprocess`, { agentId });
+      return { result: await response.json(), agentId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId, "rag-stats"] });
     },
   });
 }

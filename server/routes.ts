@@ -24,6 +24,7 @@ import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge
 import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import { processAttachmentsAndUrls, type FileAttachment } from "./lib/file-processing";
+import { processKnowledgeBaseForRAG, searchKnowledgeBase } from "./lib/rag-service";
 
 const guestMessageTracker = new Map<string, { count: number; lastReset: string }>();
 
@@ -876,8 +877,33 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
-      const kb = await storage.createKnowledgeBase(parsed.data);
+      const kb = await storage.createKnowledgeBase({
+        ...parsed.data,
+        processingStatus: "processing",
+      });
       res.status(201).json(kb);
+
+      const textContent = parsed.data.extractedText || parsed.data.content || "";
+      if (textContent.trim().length > 0) {
+        try {
+          const chunks = await processKnowledgeBaseForRAG(
+            parseInt(kb.id),
+            parseInt(kb.agentId),
+            textContent,
+            kb.name
+          );
+          if (chunks.length > 0) {
+            await storage.createChunks(chunks);
+          }
+          await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+          console.log(`[RAG] KB "${kb.name}" processed: ${chunks.length} chunks`);
+        } catch (ragError) {
+          console.error(`[RAG] Processing failed for KB "${kb.name}":`, ragError);
+          await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+        }
+      } else {
+        await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to create knowledge base" });
     }
@@ -950,11 +976,38 @@ export async function registerRoutes(
   // Update knowledge base
   app.patch("/api/knowledge-base/:id", isAuthenticated, async (req, res) => {
     try {
-      const kb = await storage.updateKnowledgeBase(req.params.id as string, req.body);
+      const kb = await storage.updateKnowledgeBase(req.params.id as string, {
+        ...req.body,
+        processingStatus: "processing",
+      });
       if (!kb) {
         return res.status(404).json({ error: "Knowledge base not found" });
       }
       res.json(kb);
+
+      const textContent = kb.extractedText || kb.content || "";
+      if (textContent.trim().length > 0) {
+        try {
+          await storage.deleteChunksByKnowledgeBase(kb.id);
+          const chunks = await processKnowledgeBaseForRAG(
+            parseInt(kb.id),
+            parseInt(kb.agentId),
+            textContent,
+            kb.name
+          );
+          if (chunks.length > 0) {
+            await storage.createChunks(chunks);
+          }
+          await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+          console.log(`[RAG] KB "${kb.name}" re-processed: ${chunks.length} chunks`);
+        } catch (ragError) {
+          console.error(`[RAG] Re-processing failed for KB "${kb.name}":`, ragError);
+          await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+        }
+      } else {
+        await storage.deleteChunksByKnowledgeBase(kb.id);
+        await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to update knowledge base" });
     }
@@ -970,6 +1023,64 @@ export async function registerRoutes(
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete knowledge base" });
+    }
+  });
+
+  // Reprocess knowledge base for RAG (manual trigger)
+  app.post("/api/knowledge-base/:id/reprocess", isAuthenticated, async (req, res) => {
+    try {
+      const kbs = await storage.getKnowledgeBases("0");
+      const allKbs = await storage.getKnowledgeBases(req.body.agentId || "0");
+      let kb: any = null;
+      for (const k of allKbs) {
+        if (k.id === req.params.id) { kb = k; break; }
+      }
+      if (!kb) {
+        return res.status(404).json({ error: "Knowledge base not found" });
+      }
+
+      await storage.updateKnowledgeBase(kb.id, { processingStatus: "processing" });
+      res.json({ status: "processing", message: "RAG reprocessing started" });
+
+      try {
+        await storage.deleteChunksByKnowledgeBase(kb.id);
+        const textContent = kb.extractedText || kb.content || "";
+        const chunks = await processKnowledgeBaseForRAG(
+          parseInt(kb.id), parseInt(kb.agentId), textContent, kb.name
+        );
+        if (chunks.length > 0) {
+          await storage.createChunks(chunks);
+        }
+        await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+        console.log(`[RAG] Manual reprocess KB "${kb.name}": ${chunks.length} chunks`);
+      } catch (ragError) {
+        console.error(`[RAG] Reprocess failed for KB "${kb.name}":`, ragError);
+        await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reprocess knowledge base" });
+    }
+  });
+
+  // Get RAG chunk stats for an agent
+  app.get("/api/knowledge-base/:agentId/rag-stats", isAuthenticated, async (req, res) => {
+    try {
+      const chunks = await storage.getChunksByAgent(req.params.agentId);
+      const kbs = await storage.getKnowledgeBases(req.params.agentId);
+      const stats = {
+        totalChunks: chunks.length,
+        totalKnowledgeBases: kbs.length,
+        ragEnabled: chunks.length > 0,
+        chunksByKb: kbs.map(kb => ({
+          kbId: kb.id,
+          kbName: kb.name,
+          chunkCount: chunks.filter(c => c.knowledgeBaseId === parseInt(kb.id)).length,
+          processingStatus: kb.processingStatus,
+        })),
+      };
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get RAG stats" });
     }
   });
 
@@ -1100,11 +1211,15 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Agent not found" });
       }
       
-      // Get knowledge base for context
-      const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
-      const knowledgeContext = knowledgeBases
-        .map(kb => `[${kb.name}]: ${kb.content}`)
-        .join("\n\n");
+      // Get knowledge base for context (RAG-enhanced)
+      const ragChunks = await storage.getChunksByAgent(parsed.data.agentId);
+      let knowledgeContext = "";
+      if (ragChunks.length > 0) {
+        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunks);
+      } else {
+        const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
+        knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+      }
       
       // Get recent conversation history
       const allMessages = await storage.getMessages(parsed.data.agentId);
@@ -1462,11 +1577,15 @@ export async function registerRoutes(
       // Save user message
       const userMessage = await storage.createMessage(parsed.data);
       
-      // Get knowledge base for context
-      const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
-      const knowledgeContext = knowledgeBases
-        .map(kb => `[${kb.name}]: ${kb.content}`)
-        .join("\n\n");
+      // Get knowledge base for context (RAG-enhanced)
+      const ragChunksStream = await storage.getChunksByAgent(parsed.data.agentId);
+      let knowledgeContext = "";
+      if (ragChunksStream.length > 0) {
+        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunksStream);
+      } else {
+        const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
+        knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+      }
       
       // Get recent conversation history
       const allMessages = await storage.getMessages(parsed.data.agentId);
@@ -1915,11 +2034,15 @@ export async function registerRoutes(
       return "Agent tidak ditemukan.";
     }
     
-    // Get knowledge base for context
-    const knowledgeBases = await storage.getKnowledgeBases(agentId);
-    const knowledgeContext = knowledgeBases
-      .map(kb => `[${kb.name}]: ${kb.content}`)
-      .join("\n\n");
+    // Get knowledge base for context (RAG-enhanced)
+    const ragChunksExt = await storage.getChunksByAgent(agentId);
+    let knowledgeContext = "";
+    if (ragChunksExt.length > 0) {
+      knowledgeContext = await searchKnowledgeBase(userMessage, ragChunksExt);
+    } else {
+      const knowledgeBases = await storage.getKnowledgeBases(agentId);
+      knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+    }
     
     // Build system prompt from agent persona
     let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;

@@ -39,6 +39,8 @@ import type {
   Voucher,
   InsertVoucher,
   VoucherRedemption,
+  KnowledgeChunk,
+  InsertKnowledgeChunk,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -94,6 +96,13 @@ export interface IStorage {
   createKnowledgeBase(kb: InsertKnowledgeBase): Promise<KnowledgeBase>;
   updateKnowledgeBase(id: string, data: Partial<InsertKnowledgeBase>): Promise<KnowledgeBase | undefined>;
   deleteKnowledgeBase(id: string): Promise<boolean>;
+
+  // Knowledge Chunks methods (RAG)
+  getChunksByKnowledgeBase(knowledgeBaseId: string): Promise<KnowledgeChunk[]>;
+  getChunksByAgent(agentId: string): Promise<KnowledgeChunk[]>;
+  createChunks(chunks: InsertKnowledgeChunk[]): Promise<KnowledgeChunk[]>;
+  deleteChunksByKnowledgeBase(knowledgeBaseId: string): Promise<boolean>;
+  deleteChunksByAgent(agentId: string): Promise<boolean>;
 
   // Integration methods
   getIntegrations(agentId: string): Promise<Integration[]>;
@@ -773,6 +782,53 @@ export class MemStorage implements IStorage {
 
   async deleteKnowledgeBase(id: string): Promise<boolean> {
     return this.knowledgeBases.delete(id);
+  }
+
+  // Knowledge Chunks methods (RAG)
+  private knowledgeChunksStore: Map<number, KnowledgeChunk> = new Map();
+  private chunkIdCounter = 1;
+
+  async getChunksByKnowledgeBase(knowledgeBaseId: string): Promise<KnowledgeChunk[]> {
+    return Array.from(this.knowledgeChunksStore.values())
+      .filter(c => c.knowledgeBaseId === parseInt(knowledgeBaseId))
+      .sort((a, b) => a.chunkIndex - b.chunkIndex);
+  }
+
+  async getChunksByAgent(agentId: string): Promise<KnowledgeChunk[]> {
+    return Array.from(this.knowledgeChunksStore.values())
+      .filter(c => c.agentId === parseInt(agentId))
+      .sort((a, b) => a.chunkIndex - b.chunkIndex);
+  }
+
+  async createChunks(chunks: InsertKnowledgeChunk[]): Promise<KnowledgeChunk[]> {
+    const created: KnowledgeChunk[] = [];
+    for (const chunk of chunks) {
+      const id = this.chunkIdCounter++;
+      const kc: KnowledgeChunk = {
+        ...chunk,
+        id,
+        createdAt: new Date().toISOString(),
+      };
+      this.knowledgeChunksStore.set(id, kc);
+      created.push(kc);
+    }
+    return created;
+  }
+
+  async deleteChunksByKnowledgeBase(knowledgeBaseId: string): Promise<boolean> {
+    const kbId = parseInt(knowledgeBaseId);
+    for (const [id, chunk] of this.knowledgeChunksStore) {
+      if (chunk.knowledgeBaseId === kbId) this.knowledgeChunksStore.delete(id);
+    }
+    return true;
+  }
+
+  async deleteChunksByAgent(agentId: string): Promise<boolean> {
+    const aId = parseInt(agentId);
+    for (const [id, chunk] of this.knowledgeChunksStore) {
+      if (chunk.agentId === aId) this.knowledgeChunksStore.delete(id);
+    }
+    return true;
   }
 
   // Integration methods

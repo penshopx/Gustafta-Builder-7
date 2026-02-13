@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil } from "lucide-react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile, useUpdateKnowledgeBase } from "@/hooks/use-knowledge-base";
+import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile, useUpdateKnowledgeBase, useRagStats, useReprocessRag } from "@/hooks/use-knowledge-base";
 import type { KnowledgeBase } from "@shared/schema";
 import type { Agent } from "@shared/schema";
 
@@ -57,6 +57,8 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const deleteKnowledgeBase = useDeleteKnowledgeBase();
   const updateKnowledgeBase = useUpdateKnowledgeBase();
   const uploadFile = useUploadKnowledgeFile();
+  const { data: ragStats } = useRagStats(agent.id);
+  const reprocessRag = useReprocessRag();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
@@ -508,9 +510,32 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
-         
+          data-testid="input-search-kb"
         />
       </div>
+
+      {ragStats && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="font-medium text-sm">RAG (Retrieval Augmented Generation)</p>
+                  <p className="text-xs text-muted-foreground">
+                    {ragStats.ragEnabled
+                      ? `${ragStats.totalChunks} potongan dokumen dari ${ragStats.totalKnowledgeBases} knowledge base`
+                      : "Belum ada dokumen yang diproses"}
+                  </p>
+                </div>
+              </div>
+              <Badge variant={ragStats.ragEnabled ? "default" : "secondary"} data-testid="badge-rag-status">
+                {ragStats.ragEnabled ? "Aktif" : "Belum Aktif"}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {isLoading ? (
         <div className="space-y-4">
@@ -583,6 +608,27 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                               {fileTypeLabels[item.fileType] || item.fileType.toUpperCase()}
                             </Badge>
                           )}
+                          {(() => {
+                            const kbStat = ragStats?.chunksByKb?.find(s => s.kbId === item.id);
+                            if (!kbStat) return null;
+                            if (item.processingStatus === "processing" || kbStat.processingStatus === "processing") {
+                              return (
+                                <Badge variant="outline" className="shrink-0 text-yellow-600" data-testid={`badge-processing-${item.id}`}>
+                                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                  Processing
+                                </Badge>
+                              );
+                            }
+                            if (kbStat.chunkCount > 0) {
+                              return (
+                                <Badge variant="outline" className="shrink-0" data-testid={`badge-chunks-${item.id}`}>
+                                  <Brain className="w-3 h-3 mr-1" />
+                                  {kbStat.chunkCount} chunks
+                                </Badge>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                         {item.description && (
                           <p className="text-sm text-muted-foreground truncate">
@@ -594,7 +640,6 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                             {item.fileName} ({formatFileSize(item.fileSize)})
                           </p>
                         )}
-                        {/* Show clickable link for images */}
                         {isImageType(item.fileType) && item.fileUrl && (
                           <a 
                             href={item.fileUrl} 
@@ -614,8 +659,25 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => {
+                          reprocessRag.mutate(
+                            { id: item.id, agentId: agent.id },
+                            {
+                              onSuccess: () => toast({ title: "RAG diproses ulang", description: `"${item.name}" sedang diproses untuk pencarian cerdas.` }),
+                              onError: () => toast({ title: "Error", description: "Gagal memproses ulang.", variant: "destructive" }),
+                            }
+                          );
+                        }}
+                        disabled={reprocessRag.isPending}
+                        data-testid={`button-reprocess-${item.id}`}
+                      >
+                        <RefreshCw className={`w-4 h-4 text-muted-foreground ${reprocessRag.isPending ? "animate-spin" : ""}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleEdit(item)}
-                       
+                        data-testid={`button-edit-kb-${item.id}`}
                       >
                         <Pencil className="w-4 h-4 text-muted-foreground" />
                       </Button>
@@ -623,7 +685,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(item.id)}
-                       
+                        data-testid={`button-delete-kb-${item.id}`}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>

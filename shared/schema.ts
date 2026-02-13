@@ -161,6 +161,19 @@ export const knowledgeBases = pgTable("knowledge_bases", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Knowledge Chunks Table - RAG system for large document retrieval
+export const knowledgeChunks = pgTable("knowledge_chunks", {
+  id: serial("id").primaryKey(),
+  knowledgeBaseId: integer("knowledge_base_id").notNull(),
+  agentId: integer("agent_id").notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+  content: text("content").notNull(),
+  tokenCount: integer("token_count").default(0),
+  embedding: jsonb("embedding").default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Integrations Table
 export const integrations = pgTable("integrations", {
   id: serial("id").primaryKey(),
@@ -497,6 +510,23 @@ export const insertKnowledgeBaseSchema = z.object({
 export type InsertKnowledgeBase = z.infer<typeof insertKnowledgeBaseSchema>;
 export type KnowledgeBase = InsertKnowledgeBase & {
   id: string;
+  createdAt: string;
+};
+
+// Knowledge Chunk schema - RAG
+export const insertKnowledgeChunkSchema = z.object({
+  knowledgeBaseId: z.number(),
+  agentId: z.number(),
+  chunkIndex: z.number(),
+  content: z.string(),
+  tokenCount: z.number().optional().default(0),
+  embedding: z.array(z.number()).optional().default([]),
+  metadata: z.record(z.any()).optional().default({}),
+});
+
+export type InsertKnowledgeChunk = z.infer<typeof insertKnowledgeChunkSchema>;
+export type KnowledgeChunk = InsertKnowledgeChunk & {
+  id: number;
   createdAt: string;
 };
 

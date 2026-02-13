@@ -108,6 +108,18 @@ export const knowledgeBases = pgTable("knowledge_bases", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const knowledgeChunks = pgTable("knowledge_chunks", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  knowledgeBaseId: varchar("knowledge_base_id", { length: 36 }).notNull(),
+  agentId: varchar("agent_id", { length: 36 }).notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+  content: text("content").notNull(),
+  tokenCount: integer("token_count").default(0),
+  embedding: jsonb("embedding").default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const integrations = pgTable("integrations", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   agentId: varchar("agent_id", { length: 36 }).notNull(),
