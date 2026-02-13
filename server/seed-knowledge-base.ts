@@ -689,6 +689,245 @@ Edukator keuangan untuk membantu memahami konsep keuangan dan investasi dasar.
 - Gaya: Educational & Professional
 
 ## ═══════════════════════════════════════════════════════════════
+## BAGIAN 5B: FITUR-FITUR LANJUTAN (TERBARU)
+## ═══════════════════════════════════════════════════════════════
+
+### 5B.1 ORGANISASI HIERARKIS (Series → Big Idea → Toolbox → Agent)
+
+**Apa itu?**
+Gustafta menggunakan sistem hierarki untuk mengorganisasi chatbot:
+- **Series**: Paket topik terbesar (contoh: "CIVILPRO" untuk konstruksi)
+- **Big Idea**: Brand atau ide besar di dalam series (contoh: "CIVILPRO SKK" untuk sertifikasi)
+- **Toolbox**: Kategori atau kelompok chatbot di dalam Big Idea
+- **Agent**: Chatbot individual yang melakukan tugas spesifik
+
+**Manfaat:**
+- Organisasi rapi untuk banyak chatbot
+- Mudah dikelola per topik/brand
+- Series bisa ditampilkan di halaman katalog publik (/series)
+
+**Cara Menggunakan:**
+1. Buat Series terlebih dahulu di dashboard (ikon Series)
+2. Buat Big Idea di dalam Series
+3. (Opsional) Buat Toolbox di dalam Big Idea
+4. Buat Agent/Chatbot di dalam struktur tersebut
+
+---
+
+### 5B.2 KONTEKS PROYEK (Project Context)
+
+**Apa itu?**
+Fitur yang memungkinkan chatbot menanyakan pertanyaan konteks di awal percakapan untuk memberikan jawaban yang lebih personal dan relevan.
+
+**Contoh Penggunaan:**
+- Chatbot konstruksi bertanya: "Jenis proyek apa yang Anda kerjakan?" (Gedung/Jalan/Jembatan)
+- Chatbot pendidikan bertanya: "Kelas berapa Anda?" (SD/SMP/SMA)
+
+**Cara Mengatur:**
+1. Buka Persona Panel chatbot
+2. Cari bagian "Konteks Proyek"
+3. Tambahkan pertanyaan konteks (tipe teks atau pilihan)
+4. Tandai apakah wajib diisi atau tidak
+5. Saat user mulai chat, mereka akan diminta mengisi form konteks terlebih dahulu
+
+---
+
+### 5B.3 SISTEM INGATAN PENGGUNA (User Memory)
+
+**Apa itu?**
+Chatbot bisa mengingat informasi yang diberikan pengguna lintas percakapan, seperti nama, preferensi, atau catatan.
+
+**Cara Kerja:**
+- AI secara otomatis mendeteksi informasi penting yang perlu diingat
+- Informasi tersimpan per sesi dan per chatbot
+- Chatbot akan menggunakan ingatan ini untuk personalisasi jawaban
+- Pengguna bisa meminta chatbot menyimpan atau menghapus ingatan
+
+**Kategori Ingatan:**
+- **Memory**: Fakta dan preferensi (nama, pekerjaan, kesukaan)
+- **Note**: Catatan dan to-do list
+
+---
+
+### 5B.4 PROJECT BRAIN & MINI APPS
+
+**Project Brain:**
+Fitur untuk memberikan data kontekstual terstruktur kepada chatbot. Admin membuat template (seperti "Project Snapshot") dengan field yang terstruktur, lalu mengisi data instance berdasarkan template tersebut. Chatbot akan menggunakan data ini sebagai konteks saat menjawab.
+
+**Mini Apps:**
+Aplikasi mini yang didukung AI, memanfaatkan data Project Brain untuk menghasilkan output spesialis:
+- Project Snapshot: Ringkasan status proyek
+- Decision Summary: Rangkuman keputusan penting
+- Risk Radar: Penilaian risiko proyek
+
+**Cara Menggunakan:**
+1. Buka tab "Otak Proyek" di dashboard
+2. Buat template dengan field yang dibutuhkan
+3. Isi data instance
+4. Buka tab "Mini Apps" untuk menjalankan aplikasi mini berbasis AI
+
+---
+
+### 5B.5 CHATBOT SERIES & KATALOG PUBLIK
+
+**Apa itu?**
+Fitur untuk mengelompokkan beberapa Big Idea ke dalam paket topik terstruktur yang bisa ditampilkan di halaman publik.
+
+**Fitur:**
+- Halaman katalog publik di /series
+- Halaman detail series di /series/:slug
+- Pengelolaan series via dialog di dashboard
+- Setiap series punya nama, slug, deskripsi, tagline, dan cover image
+
+---
+
+### 5B.6 HALAMAN CHAT PUBLIK & PWA
+
+**Halaman Chat Publik:**
+Setiap chatbot punya halaman publik di /bot/:agentId dimana end-user bisa langsung chat tanpa perlu akses dashboard.
+
+**PWA (Progressive Web App):**
+- Setiap chatbot bisa diinstall di HP seperti aplikasi mobile
+- Manifest PWA dinamis: setiap bot menampilkan avatar dan namanya sendiri saat diinstall
+- Bisa diakses offline (untuk cache yang sudah dimuat)
+
+---
+
+### 5B.7 SISTEM PROTEKSI MONETISASI
+
+**Batas Pesan Tamu:**
+- Pengunjung tanpa akun dibatasi jumlah pesannya (default: 10)
+- Setelah batas tercapai, muncul "upgrade wall" untuk mendaftar
+
+**Masa Percobaan (Trial):**
+- Durasi trial bisa dikonfigurasi per chatbot
+- Peringatan otomatis saat trial hampir habis
+
+**Kuota Pengguna Terdaftar:**
+- Batas pesan harian dan bulanan yang bisa diatur
+- Counter reset otomatis
+
+**Sistem Voucher:**
+- Admin bisa membuat kode voucher (akses unlimited atau kuota tambahan)
+- Pengguna redeem voucher di upgrade wall
+- Voucher punya batas waktu, jumlah pemakaian maksimal, dan scope per agent
+
+---
+
+### 5B.8 REVENUE, AFILIASI & KLIEN
+
+**Revenue & Klien:**
+- Pantau pendapatan dari chatbot berbayar
+- Kelola langganan klien end-user
+- Integrasi dengan Mayar.id untuk pembayaran
+
+**Program Afiliasi:**
+- Buat link referral untuk mengajak pengguna baru
+- Tracking komisi dan performa affiliate
+
+---
+
+### 5B.9 BROADCAST WA (WhatsApp Broadcast)
+
+**Apa itu?**
+Fitur untuk mengirim pesan WhatsApp broadcast terjadwal ke banyak kontak sekaligus.
+
+**Tab Kontak WA:**
+- Daftar kontak WA yang terhubung dengan chatbot
+- Kontak otomatis tersimpan dari pesan masuk via webhook
+- Bisa menambahkan kontak manual (nama + nomor)
+- Kelola status opt-out (kontak yang tidak ingin menerima broadcast)
+
+**Tab Broadcast:**
+- Buat broadcast baru dengan template pesan
+- Placeholder dinamis: {{name}}, {{date}}, {{tender_list}}, {{count}}
+- Jadwal pengiriman: sekali kirim atau harian pada jam tertentu
+- Sumber data: kosong (pesan kustom) atau "tender_daily" (otomatis isi data tender terbaru)
+- Tombol "Kirim Sekarang" untuk pengiriman langsung
+- Aktifkan/nonaktifkan broadcast
+
+**Cara Menggunakan:**
+1. Buka panel "Broadcast WA" di dashboard
+2. Tab "Kontak WA": tambahkan kontak penerima
+3. Tab "Broadcast": buat broadcast baru
+4. Isi template pesan dengan placeholder
+5. Atur jadwal (sekali atau harian)
+6. Aktifkan broadcast atau klik "Kirim Sekarang"
+
+---
+
+### 5B.10 INFO TENDER (INAPROC Tender Management)
+
+**Apa itu?**
+Fitur untuk mengambil dan mengelola data tender pengadaan dari situs-situs LPSE/INAPROC pemerintah Indonesia.
+
+**Tab Sumber Tender:**
+- Tambahkan URL situs LPSE (nasional, daerah, BUMN)
+- Contoh: lpse.jakarta.go.id, lpse.pu.go.id, spse.inaproc.id
+- Klik "Scrape Sekarang" untuk mengambil data tender
+- Aktifkan/nonaktifkan sumber
+
+**Tab Data Tender:**
+- Daftar tender yang berhasil diambil
+- Informasi: nama tender, instansi, anggaran, jenis, status, lokasi, tanggal, link
+- Pencarian/filter berdasarkan nama
+- **Input Manual**: Tambahkan data tender satu per satu via form
+- **Upload CSV**: Import banyak data tender sekaligus dari file CSV
+
+**Format CSV yang Didukung:**
+Kolom yang dikenali (Bahasa Indonesia & Inggris):
+- Nama Tender: name, nama, nama_tender, Nama Tender, Nama Paket
+- Instansi: agency, instansi, Instansi, Satuan Kerja
+- Anggaran: budget, anggaran, pagu, Pagu, HPS
+- Jenis: type, jenis, Jenis, Metode
+- Status: status, Status
+- Lokasi: location, lokasi, Lokasi
+- Tanggal: publishDate, tanggal, Tanggal
+- Batas Waktu: deadlineDate, deadline, batas_waktu, Batas Waktu
+- Link: url, link, URL, Link
+
+**Integrasi dengan Broadcast:**
+Data tender bisa dikirim otomatis ke kontak WA melalui broadcast dengan dataSource "tender_daily". Sistem mengambil 10 tender terbaru dan memformat ke dalam template pesan.
+
+**Catatan Penting:**
+- Hanya bisa mengambil data dari situs pengadaan publik (LPSE pemerintah)
+- Situs dengan proteksi Cloudflare mungkin memerlukan input manual
+- Situs tender berbayar (pengadaan.com, bcicentral.com) tidak bisa di-scrape
+- Data BUMN dari situs eproc mungkin punya format berbeda
+
+**Cara Menggunakan:**
+1. Buka panel "Info Tender" di dashboard
+2. Tab "Sumber Tender": tambahkan URL LPSE
+3. Klik "Scrape Sekarang" untuk mengambil data
+4. Jika gagal, gunakan "Input Manual" atau "Upload CSV" di tab "Data Tender"
+5. Hubungkan dengan Broadcast WA untuk pengiriman otomatis
+
+---
+
+### 5B.11 PEMROSESAN FILE CERDAS
+
+**File yang Didukung:**
+- **Gambar**: Analisis gambar via GPT-4o vision
+- **Dokumen**: Ekstraksi teks dari PDF, Word (.docx), Excel (.xlsx)
+- **Video**: Transkripsi audio dari file video
+- **YouTube**: Ambil transkrip dari video YouTube
+- **Google Drive/OneDrive**: Baca file dari cloud storage
+
+**Cara Kerja:**
+Pengguna cukup upload file atau kirim link, chatbot otomatis memproses dan menganalisis konten.
+
+---
+
+### 5B.12 LANDING PAGE MULTI-SEKTOR
+
+**Apa itu?**
+Gustafta memiliki landing page generik di / serta halaman per sektor di /sector/:sectorId untuk 12 sektor industri:
+- Engineering, Medical, Education, Finance, Retail, Legal
+- Hospitality, Marketing, Customer Success, Real Estate, Creative, Logistics
+
+Setiap halaman sektor menampilkan konten yang disesuaikan dengan industri tersebut.
+
+## ═══════════════════════════════════════════════════════════════
 ## BAGIAN 6: PANDUAN LANGKAH DEMI LANGKAH
 ## ═══════════════════════════════════════════════════════════════
 
