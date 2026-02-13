@@ -193,13 +193,25 @@ export default function Dashboard() {
   }, [activeToolbox?.id, filteredAgents, activeAgent?.id]);
 
   type HierarchyLevel = 'series' | 'bigIdeas' | 'toolboxes' | 'agents';
-  const getInitialNavLevel = (): HierarchyLevel => {
-    if (activeSeries && activeBigIdea && activeToolbox) return 'agents';
-    if (activeSeries && activeBigIdea) return 'toolboxes';
-    if (activeSeries) return 'bigIdeas';
-    return 'series';
-  };
-  const [navLevel, setNavLevel] = useState<HierarchyLevel>(getInitialNavLevel);
+  const [navLevel, setNavLevel] = useState<HierarchyLevel>('series');
+  const [navInitialized, setNavInitialized] = useState(false);
+
+  useEffect(() => {
+    if (navInitialized) return;
+    if (allSeries.length === 0) return;
+    if (activeSeriesId && activeBigIdea && activeToolbox) {
+      setNavLevel('agents');
+      setNavInitialized(true);
+    } else if (activeSeriesId && activeBigIdea) {
+      setNavLevel('toolboxes');
+      setNavInitialized(true);
+    } else if (activeSeriesId) {
+      setNavLevel('bigIdeas');
+      setNavInitialized(true);
+    } else {
+      setNavInitialized(true);
+    }
+  }, [navInitialized, allSeries.length, activeSeriesId, activeBigIdea?.id, activeToolbox?.id]);
 
   if (authLoading) {
     return (
