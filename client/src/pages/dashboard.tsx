@@ -327,7 +327,7 @@ export default function Dashboard() {
 
   const SidebarContent = () => (
     <>
-      <div className={cn("border-b border-sidebar-border overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
+      <div className={cn("border-b border-sidebar-border overflow-y-auto shrink-0 max-h-[40vh]", sidebarCollapsed ? "p-2" : "")}>
         {/* Series / Topik Dropdown */}
         <div className={cn(sidebarCollapsed ? "" : "px-3 pt-3 pb-1")}>
           {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Series / Topik</p>}
@@ -536,7 +536,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <nav className={cn("flex-1 space-y-1 overflow-y-auto", sidebarCollapsed ? "p-2" : "p-3")}>
+      <nav className={cn("flex-1 min-h-0 space-y-1 overflow-y-auto", sidebarCollapsed ? "p-2" : "p-3")}>
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -565,7 +565,7 @@ export default function Dashboard() {
         ))}
       </nav>
 
-      <div className={cn("border-t border-sidebar-border space-y-1", sidebarCollapsed ? "p-2" : "p-3")}>
+      <div className={cn("border-t border-sidebar-border space-y-1 shrink-0", sidebarCollapsed ? "p-2" : "p-3")}>
         <button
           onClick={() => setProfileDialogOpen(true)}
           className={cn(
