@@ -193,21 +193,13 @@ export default function Dashboard() {
   }, [activeToolbox?.id, filteredAgents, activeAgent?.id]);
 
   type HierarchyLevel = 'series' | 'bigIdeas' | 'toolboxes' | 'agents';
-  const [navLevel, setNavLevel] = useState<HierarchyLevel>(activeSeries ? (activeBigIdea ? (activeToolbox ? 'agents' : 'toolboxes') : 'bigIdeas') : 'series');
-  const [manualNavOverride, setManualNavOverride] = useState(false);
-
-  useEffect(() => {
-    if (manualNavOverride) return;
-    if (activeSeriesId && activeBigIdea && activeToolbox && filteredAgents.length > 0) {
-      setNavLevel('agents');
-    } else if (activeSeriesId && activeBigIdea && toolboxes.length > 0) {
-      setNavLevel('toolboxes');
-    } else if (activeSeriesId && filteredBigIdeas.length > 0) {
-      setNavLevel('bigIdeas');
-    } else if (!activeSeriesId) {
-      setNavLevel('series');
-    }
-  }, [activeSeriesId, activeBigIdea?.id, activeToolbox?.id, filteredAgents.length, toolboxes.length, filteredBigIdeas.length, manualNavOverride]);
+  const getInitialNavLevel = (): HierarchyLevel => {
+    if (activeSeries && activeBigIdea && activeToolbox) return 'agents';
+    if (activeSeries && activeBigIdea) return 'toolboxes';
+    if (activeSeries) return 'bigIdeas';
+    return 'series';
+  };
+  const [navLevel, setNavLevel] = useState<HierarchyLevel>(getInitialNavLevel);
 
   if (authLoading) {
     return (
@@ -343,9 +335,7 @@ export default function Dashboard() {
   };
 
   const navigateToLevel = (level: HierarchyLevel) => {
-    setManualNavOverride(true);
     setNavLevel(level);
-    setTimeout(() => setManualNavOverride(false), 500);
   };
 
   const handleSeriesDrillDown = (seriesId: number) => {
