@@ -4849,6 +4849,24 @@ Be professional and suitable for management review.`;
     }
   });
 
+  app.post("/api/tenders", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.upsertTender(req.body);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create tender" });
+    }
+  });
+
+  app.delete("/api/tenders/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteTender(req.params.id as string);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete tender" });
+    }
+  });
+
   app.post("/api/tender-sources/:id/scrape", isAuthenticated, async (req, res) => {
     try {
       const source = await storage.getTenderSource(req.params.id as string);
