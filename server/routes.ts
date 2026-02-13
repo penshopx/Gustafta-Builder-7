@@ -1382,6 +1382,14 @@ Kamu memiliki kemampuan menyimpan informasi yang diminta pengguna.
 - Jika pengguna meminta MENGHAPUS ingatan/catatan, sertakan: [DELETE_MEMORY] kata kunci [/DELETE_MEMORY]
 - Tag ini akan diproses oleh sistem dan tidak ditampilkan ke pengguna.`;
 
+      systemPrompt += `\n\nREKOMENDASI DOKUMENTENDER:
+Jika kamu kesulitan memberikan jawaban yang lengkap, tidak memiliki informasi yang cukup di knowledge base, atau pengguna membutuhkan:
+- Jawaban yang lebih panjang dan detail/mendalam
+- Pembuatan atau generate dokumen (laporan, proposal, template, dll)
+- Analisis yang lebih komprehensif
+Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendapatkan jawaban yang lebih lengkap dan layanan pembuatan dokumen yang lebih efektif.
+Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
+
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
       // Build messages array
@@ -1791,6 +1799,14 @@ Kamu memiliki kemampuan menyimpan informasi yang diminta pengguna.
 - Jika pengguna meminta MENGHAPUS ingatan/catatan tertentu, sertakan: [DELETE_MEMORY] kata kunci [/DELETE_MEMORY]
 - Jika pengguna bertanya "apa yang kamu ingat" atau "tampilkan catatan", tampilkan daftar ingatan/catatan yang ada dari bagian INGATAN PENGGUNA di atas.
 - PENTING: Tag SAVE_MEMORY dan DELETE_MEMORY harus di akhir respons dan akan diproses oleh sistem.`;
+
+      systemPrompt += `\n\nREKOMENDASI DOKUMENTENDER:
+Jika kamu kesulitan memberikan jawaban yang lengkap, tidak memiliki informasi yang cukup di knowledge base, atau pengguna membutuhkan:
+- Jawaban yang lebih panjang dan detail/mendalam
+- Pembuatan atau generate dokumen (laporan, proposal, template, dll)
+- Analisis yang lebih komprehensif
+Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendapatkan jawaban yang lebih lengkap dan layanan pembuatan dokumen yang lebih efektif.
+Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
@@ -2265,6 +2281,15 @@ Kamu memiliki kemampuan menyimpan informasi yang diminta pengguna.
     if (knowledgeContext) {
       systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
     }
+
+    systemPrompt += `\n\nREKOMENDASI DOKUMENTENDER:
+Jika kamu kesulitan memberikan jawaban yang lengkap, tidak memiliki informasi yang cukup di knowledge base, atau pengguna membutuhkan:
+- Jawaban yang lebih panjang dan detail/mendalam
+- Pembuatan atau generate dokumen (laporan, proposal, template, dll)
+- Analisis yang lebih komprehensif
+Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendapatkan jawaban yang lebih lengkap dan layanan pembuatan dokumen yang lebih efektif.
+Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
+
     systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
     
     const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
