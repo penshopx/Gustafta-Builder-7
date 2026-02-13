@@ -144,6 +144,106 @@ for (const envVar of requiredEnvVars) {
       } catch (err) {
         log("Failed to auto-seed Gustafta Helpdesk: " + (err as Error).message);
       }
+
+      startScheduler();
     },
   );
 })();
+
+function startScheduler() {
+  const BROADCAST_CHECK_INTERVAL = 2 * 60 * 1000;
+  const TENDER_SCRAPE_INTERVAL = 12 * 60 * 60 * 1000;
+
+  setInterval(async () => {
+    try {
+      const dueBroadcasts = await storage.getDueBroadcasts();
+      for (const broadcast of dueBroadcasts) {
+        log(`[Scheduler] Running broadcast: ${broadcast.name} (ID: ${broadcast.id})`);
+        try {
+          const contacts = await storage.getWaContacts(String(broadcast.agentId));
+          const activeContacts = contacts.filter(c => !c.isOptedOut);
+          if (activeContacts.length === 0) continue;
+
+          const integrations = await storage.getIntegrations(String(broadcast.agentId));
+          const waIntegration = integrations.find((i: any) => i.type === "whatsapp" && i.isEnabled);
+          const waConfig = (waIntegration?.config || {}) as Record<string, string>;
+          const waApiToken = waConfig.apiToken || waConfig.token;
+          if (!waApiToken) continue;
+
+          const run = await storage.createBroadcastRun({
+            broadcastId: broadcast.id,
+            status: "running",
+            totalRecipients: activeContacts.length,
+          });
+
+          let message = broadcast.messageTemplate;
+          if (broadcast.dataSource === "tender_daily") {
+            const latestTenders = await storage.getLatestTenders(10);
+            if (latestTenders.length > 0) {
+              const tenderList = latestTenders.map((t: any, i: number) =>
+                `${i + 1}. ${t.name}\n   ${t.agency} | ${t.budget}\n   ${t.url}`
+              ).join("\n\n");
+              message = message.replace("{{tender_list}}", tenderList);
+              message = message.replace("{{date}}", new Date().toLocaleDateString("id-ID"));
+              message = message.replace("{{count}}", String(latestTenders.length));
+            }
+          }
+
+          let sent = 0, failed = 0;
+          for (const contact of activeContacts) {
+            try {
+              await fetch("https://api.fonnte.com/send", {
+                method: "POST",
+                headers: { "Authorization": waApiToken },
+                body: new URLSearchParams({
+                  target: contact.phone,
+                  message: message.replace("{{name}}", contact.name || ""),
+                }),
+              });
+              sent++;
+              if (activeContacts.length > 5) await new Promise(r => setTimeout(r, 1000));
+            } catch {
+              failed++;
+            }
+          }
+
+          await storage.updateBroadcastRun(String(run.id), {
+            status: "completed",
+            totalSent: sent,
+            totalFailed: failed,
+            completedAt: new Date(),
+          });
+
+          await storage.updateWaBroadcast(String(broadcast.id), { lastRunAt: new Date() } as any);
+
+          if (broadcast.scheduleType === "daily") {
+            const [hours, minutes] = (broadcast.scheduleTime || "08:00").split(":").map(Number);
+            const next = new Date();
+            next.setDate(next.getDate() + 1);
+            next.setHours(hours, minutes, 0, 0);
+            await storage.updateWaBroadcast(String(broadcast.id), { nextRunAt: next } as any);
+          } else if (broadcast.scheduleType === "once") {
+            await storage.updateWaBroadcast(String(broadcast.id), { isEnabled: false } as any);
+          }
+
+          log(`[Scheduler] Broadcast "${broadcast.name}" completed: ${sent} sent, ${failed} failed`);
+        } catch (err) {
+          log(`[Scheduler] Broadcast "${broadcast.name}" failed: ${(err as Error).message}`);
+        }
+      }
+    } catch (err) {
+      log(`[Scheduler] Broadcast check error: ${(err as Error).message}`);
+    }
+  }, BROADCAST_CHECK_INTERVAL);
+
+  setInterval(async () => {
+    try {
+      const { runDailyTenderScrape } = await import("./lib/inaproc-scraper");
+      await runDailyTenderScrape(storage);
+    } catch (err) {
+      log(`[Scheduler] Tender scrape error: ${(err as Error).message}`);
+    }
+  }, TENDER_SCRAPE_INTERVAL);
+
+  log("[Scheduler] Started - broadcasts checked every 2min, tenders scraped every 12h");
+}

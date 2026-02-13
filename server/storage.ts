@@ -43,6 +43,15 @@ import type {
   InsertKnowledgeChunk,
   UserMemory,
   InsertUserMemory,
+  WaContact,
+  InsertWaContact,
+  WaBroadcast,
+  InsertWaBroadcast,
+  WaBroadcastRun,
+  TenderSource,
+  InsertTenderSource,
+  Tender,
+  InsertTender,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -206,6 +215,40 @@ export interface IStorage {
   // Product listing methods
   getListedAgents(): Promise<Agent[]>;
   getAgentBySlug(slug: string): Promise<Agent | undefined>;
+
+  // WA Contact methods
+  getWaContacts(agentId: string): Promise<WaContact[]>;
+  getWaContact(id: string): Promise<WaContact | undefined>;
+  upsertWaContact(contact: InsertWaContact): Promise<WaContact>;
+  updateWaContact(id: string, data: Partial<InsertWaContact>): Promise<WaContact | undefined>;
+  deleteWaContact(id: string): Promise<boolean>;
+
+  // WA Broadcast methods
+  getWaBroadcasts(agentId?: string): Promise<WaBroadcast[]>;
+  getWaBroadcast(id: string): Promise<WaBroadcast | undefined>;
+  getDueBroadcasts(): Promise<WaBroadcast[]>;
+  createWaBroadcast(broadcast: InsertWaBroadcast): Promise<WaBroadcast>;
+  updateWaBroadcast(id: string, data: Partial<InsertWaBroadcast>): Promise<WaBroadcast | undefined>;
+  deleteWaBroadcast(id: string): Promise<boolean>;
+
+  // WA Broadcast Run methods
+  createBroadcastRun(run: Partial<WaBroadcastRun>): Promise<WaBroadcastRun>;
+  updateBroadcastRun(id: string, data: Partial<WaBroadcastRun>): Promise<WaBroadcastRun | undefined>;
+  getBroadcastRuns(broadcastId: string): Promise<WaBroadcastRun[]>;
+
+  // Tender Source methods
+  getTenderSources(): Promise<TenderSource[]>;
+  getTenderSource(id: string): Promise<TenderSource | undefined>;
+  createTenderSource(source: InsertTenderSource): Promise<TenderSource>;
+  updateTenderSource(id: string, data: Partial<InsertTenderSource>): Promise<TenderSource | undefined>;
+  deleteTenderSource(id: string): Promise<boolean>;
+
+  // Tender methods
+  getTenders(sourceId?: string, limit?: number): Promise<Tender[]>;
+  getTender(id: string): Promise<Tender | undefined>;
+  upsertTender(tender: InsertTender): Promise<Tender>;
+  getLatestTenders(limit?: number): Promise<Tender[]>;
+  deleteTender(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1590,6 +1633,35 @@ export class MemStorage implements IStorage {
       (agent) => agent.productSlug === slug
     );
   }
+
+  async getWaContacts(_agentId: string): Promise<WaContact[]> { return []; }
+  async getWaContact(_id: string): Promise<WaContact | undefined> { return undefined; }
+  async upsertWaContact(contact: InsertWaContact): Promise<WaContact> { return { id: 1, ...contact, createdAt: new Date() } as any; }
+  async updateWaContact(_id: string, _data: Partial<InsertWaContact>): Promise<WaContact | undefined> { return undefined; }
+  async deleteWaContact(_id: string): Promise<boolean> { return false; }
+
+  async getWaBroadcasts(_agentId?: string): Promise<WaBroadcast[]> { return []; }
+  async getWaBroadcast(_id: string): Promise<WaBroadcast | undefined> { return undefined; }
+  async getDueBroadcasts(): Promise<WaBroadcast[]> { return []; }
+  async createWaBroadcast(broadcast: InsertWaBroadcast): Promise<WaBroadcast> { return { id: 1, ...broadcast, createdAt: new Date() } as any; }
+  async updateWaBroadcast(_id: string, _data: Partial<InsertWaBroadcast>): Promise<WaBroadcast | undefined> { return undefined; }
+  async deleteWaBroadcast(_id: string): Promise<boolean> { return false; }
+
+  async createBroadcastRun(run: Partial<WaBroadcastRun>): Promise<WaBroadcastRun> { return { id: 1, ...run } as any; }
+  async updateBroadcastRun(_id: string, _data: Partial<WaBroadcastRun>): Promise<WaBroadcastRun | undefined> { return undefined; }
+  async getBroadcastRuns(_broadcastId: string): Promise<WaBroadcastRun[]> { return []; }
+
+  async getTenderSources(): Promise<TenderSource[]> { return []; }
+  async getTenderSource(_id: string): Promise<TenderSource | undefined> { return undefined; }
+  async createTenderSource(source: InsertTenderSource): Promise<TenderSource> { return { id: 1, ...source, createdAt: new Date() } as any; }
+  async updateTenderSource(_id: string, _data: Partial<InsertTenderSource>): Promise<TenderSource | undefined> { return undefined; }
+  async deleteTenderSource(_id: string): Promise<boolean> { return false; }
+
+  async getTenders(_sourceId?: string, _limit?: number): Promise<Tender[]> { return []; }
+  async getTender(_id: string): Promise<Tender | undefined> { return undefined; }
+  async upsertTender(tender: InsertTender): Promise<Tender> { return { id: 1, ...tender, createdAt: new Date(), updatedAt: new Date() } as any; }
+  async getLatestTenders(_limit?: number): Promise<Tender[]> { return []; }
+  async deleteTender(_id: string): Promise<boolean> { return false; }
 }
 
 import { dbStorage } from "./db-storage";

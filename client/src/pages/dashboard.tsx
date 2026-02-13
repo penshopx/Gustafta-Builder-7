@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,6 +30,8 @@ import { ProductSettingsPanel } from "@/components/panels/product-settings-panel
 import { RevenuPanel } from "@/components/panels/revenue-panel";
 import { AffiliatePanel } from "@/components/panels/affiliate-panel";
 import { VoucherPanel } from "@/components/panels/voucher-panel";
+import { BroadcastPanel } from "@/components/panels/broadcast-panel";
+import { TenderPanel } from "@/components/panels/tender-panel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +61,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates" | "vouchers";
+type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
@@ -69,6 +71,8 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "mini-apps", label: "Mini Apps", shortLabel: "Apps", icon: Blocks },
   { id: "integrations", label: "Integrations", shortLabel: "Integ", icon: Plug },
   { id: "widget", label: "Widget", shortLabel: "Widget", icon: Palette },
+  { id: "broadcast", label: "Broadcast WA", shortLabel: "Broadcast", icon: Radio },
+  { id: "tenders", label: "Info Tender", shortLabel: "Tender", icon: FileText },
   { id: "product-settings", label: "Monetisasi", shortLabel: "Produk", icon: ShoppingBag },
   { id: "revenue", label: "Revenue & Klien", shortLabel: "Revenue", icon: TrendingUp },
   { id: "affiliates", label: "Afiliasi", shortLabel: "Afiliasi", icon: Users2 },
@@ -310,6 +314,10 @@ export default function Dashboard() {
         return <AffiliatePanel agent={activeAgent} />;
       case "vouchers":
         return <VoucherPanel agent={activeAgent} />;
+      case "broadcast":
+        return <BroadcastPanel agent={activeAgent} />;
+      case "tenders":
+        return <TenderPanel agent={activeAgent} />;
       case "analytics":
         return <AnalyticsPanel agent={activeAgent} />;
       default:

@@ -23,6 +23,11 @@ import {
   vouchers,
   voucherRedemptions,
   userMemories,
+  waContacts,
+  waBroadcasts,
+  waBroadcastRuns,
+  tenderSources,
+  tenders,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 import type {
@@ -69,6 +74,15 @@ import type {
   InsertKnowledgeChunk,
   UserMemory,
   InsertUserMemory,
+  WaContact,
+  InsertWaContact,
+  WaBroadcast,
+  InsertWaBroadcast,
+  WaBroadcastRun,
+  TenderSource,
+  InsertTenderSource,
+  Tender,
+  InsertTender,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -2195,6 +2209,171 @@ export class DatabaseStorage implements IStorage {
     if (sessionId) conditions.push(eq(userMemories.sessionId, sessionId));
     await db.delete(userMemories).where(and(...conditions));
     return true;
+  }
+
+  async getWaContacts(agentId: string): Promise<WaContact[]> {
+    return db.select().from(waContacts)
+      .where(eq(waContacts.agentId, Number(agentId)))
+      .orderBy(desc(waContacts.lastSeenAt));
+  }
+
+  async getWaContact(id: string): Promise<WaContact | undefined> {
+    const [result] = await db.select().from(waContacts).where(eq(waContacts.id, Number(id)));
+    return result;
+  }
+
+  async upsertWaContact(contact: InsertWaContact): Promise<WaContact> {
+    const existing = await db.select().from(waContacts)
+      .where(and(
+        eq(waContacts.agentId, contact.agentId),
+        eq(waContacts.phone, contact.phone)
+      ));
+    if (existing.length > 0) {
+      const [updated] = await db.update(waContacts)
+        .set({ lastSeenAt: new Date(), name: contact.name || existing[0].name })
+        .where(eq(waContacts.id, existing[0].id))
+        .returning();
+      return updated;
+    }
+    const [result] = await db.insert(waContacts).values({
+      agentId: contact.agentId,
+      phone: contact.phone,
+      name: contact.name || "",
+      source: contact.source || "webhook",
+    }).returning();
+    return result;
+  }
+
+  async updateWaContact(id: string, data: Partial<InsertWaContact>): Promise<WaContact | undefined> {
+    const [result] = await db.update(waContacts).set(data).where(eq(waContacts.id, Number(id))).returning();
+    return result;
+  }
+
+  async deleteWaContact(id: string): Promise<boolean> {
+    const result = await db.delete(waContacts).where(eq(waContacts.id, Number(id)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getWaBroadcasts(agentId?: string): Promise<WaBroadcast[]> {
+    if (agentId) {
+      return db.select().from(waBroadcasts)
+        .where(eq(waBroadcasts.agentId, Number(agentId)))
+        .orderBy(desc(waBroadcasts.createdAt));
+    }
+    return db.select().from(waBroadcasts).orderBy(desc(waBroadcasts.createdAt));
+  }
+
+  async getWaBroadcast(id: string): Promise<WaBroadcast | undefined> {
+    const [result] = await db.select().from(waBroadcasts).where(eq(waBroadcasts.id, Number(id)));
+    return result;
+  }
+
+  async getDueBroadcasts(): Promise<WaBroadcast[]> {
+    return db.select().from(waBroadcasts)
+      .where(and(
+        eq(waBroadcasts.isEnabled, true),
+        sql`${waBroadcasts.nextRunAt} <= NOW()`
+      ));
+  }
+
+  async createWaBroadcast(broadcast: InsertWaBroadcast): Promise<WaBroadcast> {
+    const [result] = await db.insert(waBroadcasts).values(broadcast as any).returning();
+    return result;
+  }
+
+  async updateWaBroadcast(id: string, data: Partial<InsertWaBroadcast>): Promise<WaBroadcast | undefined> {
+    const [result] = await db.update(waBroadcasts).set(data as any).where(eq(waBroadcasts.id, Number(id))).returning();
+    return result;
+  }
+
+  async deleteWaBroadcast(id: string): Promise<boolean> {
+    const result = await db.delete(waBroadcasts).where(eq(waBroadcasts.id, Number(id)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async createBroadcastRun(run: Partial<WaBroadcastRun>): Promise<WaBroadcastRun> {
+    const [result] = await db.insert(waBroadcastRuns).values(run as any).returning();
+    return result;
+  }
+
+  async updateBroadcastRun(id: string, data: Partial<WaBroadcastRun>): Promise<WaBroadcastRun | undefined> {
+    const [result] = await db.update(waBroadcastRuns).set(data as any).where(eq(waBroadcastRuns.id, Number(id))).returning();
+    return result;
+  }
+
+  async getBroadcastRuns(broadcastId: string): Promise<WaBroadcastRun[]> {
+    return db.select().from(waBroadcastRuns)
+      .where(eq(waBroadcastRuns.broadcastId, Number(broadcastId)))
+      .orderBy(desc(waBroadcastRuns.runAt));
+  }
+
+  async getTenderSources(): Promise<TenderSource[]> {
+    return db.select().from(tenderSources).orderBy(desc(tenderSources.createdAt));
+  }
+
+  async getTenderSource(id: string): Promise<TenderSource | undefined> {
+    const [result] = await db.select().from(tenderSources).where(eq(tenderSources.id, Number(id)));
+    return result;
+  }
+
+  async createTenderSource(source: InsertTenderSource): Promise<TenderSource> {
+    const [result] = await db.insert(tenderSources).values(source as any).returning();
+    return result;
+  }
+
+  async updateTenderSource(id: string, data: Partial<InsertTenderSource>): Promise<TenderSource | undefined> {
+    const [result] = await db.update(tenderSources).set(data as any).where(eq(tenderSources.id, Number(id))).returning();
+    return result;
+  }
+
+  async deleteTenderSource(id: string): Promise<boolean> {
+    const result = await db.delete(tenderSources).where(eq(tenderSources.id, Number(id)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getTenders(sourceId?: string, limit?: number): Promise<Tender[]> {
+    let query = db.select().from(tenders);
+    if (sourceId) {
+      query = query.where(eq(tenders.sourceId, Number(sourceId))) as any;
+    }
+    query = query.orderBy(desc(tenders.createdAt)) as any;
+    if (limit) {
+      query = query.limit(limit) as any;
+    }
+    return query;
+  }
+
+  async getTender(id: string): Promise<Tender | undefined> {
+    const [result] = await db.select().from(tenders).where(eq(tenders.id, Number(id)));
+    return result;
+  }
+
+  async upsertTender(tender: InsertTender): Promise<Tender> {
+    const existing = await db.select().from(tenders)
+      .where(and(
+        eq(tenders.sourceId, tender.sourceId),
+        eq(tenders.tenderId, tender.tenderId)
+      ));
+    if (existing.length > 0) {
+      const [updated] = await db.update(tenders)
+        .set({ ...tender, updatedAt: new Date() } as any)
+        .where(eq(tenders.id, existing[0].id))
+        .returning();
+      return updated;
+    }
+    const [result] = await db.insert(tenders).values(tender as any).returning();
+    return result;
+  }
+
+  async getLatestTenders(limit: number = 20): Promise<Tender[]> {
+    return db.select().from(tenders)
+      .orderBy(desc(tenders.createdAt))
+      .limit(limit);
+  }
+
+  async deleteTender(id: string): Promise<boolean> {
+    const result = await db.delete(tenders).where(eq(tenders.id, Number(id)));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 

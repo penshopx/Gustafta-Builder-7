@@ -2764,6 +2764,17 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         console.log("WhatsApp integration not configured for agent:", agentId);
         return;
       }
+
+      try {
+        await storage.upsertWaContact({
+          agentId: Number(agentId),
+          phone: phoneNumber,
+          name: payload.name || payload.pushName || "",
+          source: provider,
+        });
+      } catch (err) {
+        console.error("Failed to save WA contact:", err);
+      }
       
       // Generate AI response
       const aiResponse = await generateAIResponse(agentId, messageText);
@@ -4603,6 +4614,251 @@ Be professional and suitable for management review.`;
 </html>`);
     } catch {
       next();
+    }
+  });
+
+  // ==================== WA Contact Routes (Protected) ====================
+
+  app.get("/api/wa-contacts/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const contacts = await storage.getWaContacts(req.params.agentId as string);
+      res.json(contacts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch contacts" });
+    }
+  });
+
+  app.post("/api/wa-contacts", isAuthenticated, async (req, res) => {
+    try {
+      const contact = await storage.upsertWaContact(req.body);
+      res.json(contact);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create contact" });
+    }
+  });
+
+  app.patch("/api/wa-contacts/:id", isAuthenticated, async (req, res) => {
+    try {
+      const updated = await storage.updateWaContact(req.params.id as string, req.body);
+      if (!updated) return res.status(404).json({ error: "Contact not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update contact" });
+    }
+  });
+
+  app.delete("/api/wa-contacts/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteWaContact(req.params.id as string);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete contact" });
+    }
+  });
+
+  // ==================== WA Broadcast Routes (Protected) ====================
+
+  app.get("/api/wa-broadcasts", isAuthenticated, async (req, res) => {
+    try {
+      const agentId = req.query.agentId as string | undefined;
+      const broadcasts = await storage.getWaBroadcasts(agentId);
+      res.json(broadcasts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch broadcasts" });
+    }
+  });
+
+  app.get("/api/wa-broadcasts/:id", isAuthenticated, async (req, res) => {
+    try {
+      const broadcast = await storage.getWaBroadcast(req.params.id as string);
+      if (!broadcast) return res.status(404).json({ error: "Broadcast not found" });
+      res.json(broadcast);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch broadcast" });
+    }
+  });
+
+  app.post("/api/wa-broadcasts", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || "";
+      const data = { ...req.body, userId };
+      if (data.scheduleType === "once" && data.nextRunAt) {
+        data.nextRunAt = new Date(data.nextRunAt);
+      } else if (data.scheduleType === "daily") {
+        const [hours, minutes] = (data.scheduleTime || "08:00").split(":").map(Number);
+        const next = new Date();
+        next.setHours(hours, minutes, 0, 0);
+        if (next <= new Date()) next.setDate(next.getDate() + 1);
+        data.nextRunAt = next;
+      }
+      const broadcast = await storage.createWaBroadcast(data);
+      res.json(broadcast);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create broadcast" });
+    }
+  });
+
+  app.patch("/api/wa-broadcasts/:id", isAuthenticated, async (req, res) => {
+    try {
+      const updated = await storage.updateWaBroadcast(req.params.id as string, req.body);
+      if (!updated) return res.status(404).json({ error: "Broadcast not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update broadcast" });
+    }
+  });
+
+  app.delete("/api/wa-broadcasts/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteWaBroadcast(req.params.id as string);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete broadcast" });
+    }
+  });
+
+  app.get("/api/wa-broadcasts/:id/runs", isAuthenticated, async (req, res) => {
+    try {
+      const runs = await storage.getBroadcastRuns(req.params.id as string);
+      res.json(runs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch runs" });
+    }
+  });
+
+  app.post("/api/wa-broadcasts/:id/send-now", isAuthenticated, async (req, res) => {
+    try {
+      const broadcast = await storage.getWaBroadcast(req.params.id as string);
+      if (!broadcast) return res.status(404).json({ error: "Broadcast not found" });
+
+      const contacts = await storage.getWaContacts(String(broadcast.agentId));
+      const activeContacts = contacts.filter(c => !c.isOptedOut);
+      if (activeContacts.length === 0) return res.status(400).json({ error: "No active contacts" });
+
+      const agentIntegrations = await storage.getIntegrations(String(broadcast.agentId));
+      const waIntegration = agentIntegrations.find(i => i.type === "whatsapp" && i.isEnabled);
+      const waConfig = (waIntegration?.config || {}) as Record<string, string>;
+      const waApiToken = waConfig.apiToken || waConfig.token;
+      if (!waApiToken) return res.status(400).json({ error: "WhatsApp integration not configured" });
+
+      const run = await storage.createBroadcastRun({
+        broadcastId: broadcast.id,
+        status: "running",
+        totalRecipients: activeContacts.length,
+      });
+
+      let message = broadcast.messageTemplate;
+      if (broadcast.dataSource === "tender_daily") {
+        const latestTenders = await storage.getLatestTenders(10);
+        if (latestTenders.length > 0) {
+          const tenderList = latestTenders.map((t, i) => 
+            `${i + 1}. ${t.name}\n   ${t.agency} | ${t.budget}\n   ${t.url}`
+          ).join("\n\n");
+          message = message.replace("{{tender_list}}", tenderList);
+          message = message.replace("{{date}}", new Date().toLocaleDateString("id-ID"));
+          message = message.replace("{{count}}", String(latestTenders.length));
+        }
+      }
+
+      let sent = 0, failed = 0;
+      const errors: string[] = [];
+      for (const contact of activeContacts) {
+        try {
+          await fetch("https://api.fonnte.com/send", {
+            method: "POST",
+            headers: { "Authorization": waApiToken },
+            body: new URLSearchParams({
+              target: contact.phone,
+              message: message.replace("{{name}}", contact.name || ""),
+            }),
+          });
+          sent++;
+          if (activeContacts.length > 5) await new Promise(r => setTimeout(r, 1000));
+        } catch (err: any) {
+          failed++;
+          errors.push(`${contact.phone}: ${err.message}`);
+        }
+      }
+
+      await storage.updateBroadcastRun(String(run.id), {
+        status: "completed",
+        totalSent: sent,
+        totalFailed: failed,
+        completedAt: new Date(),
+        errorLog: errors.join("\n"),
+      });
+
+      await storage.updateWaBroadcast(String(broadcast.id), { lastRunAt: new Date() } as any);
+
+      res.json({ success: true, sent, failed, total: activeContacts.length });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to send broadcast" });
+    }
+  });
+
+  // ==================== Tender Source Routes (Protected) ====================
+
+  app.get("/api/tender-sources", isAuthenticated, async (_req, res) => {
+    try {
+      const sources = await storage.getTenderSources();
+      res.json(sources);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tender sources" });
+    }
+  });
+
+  app.post("/api/tender-sources", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || "";
+      const source = await storage.createTenderSource({ ...req.body, userId });
+      res.json(source);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create tender source" });
+    }
+  });
+
+  app.patch("/api/tender-sources/:id", isAuthenticated, async (req, res) => {
+    try {
+      const updated = await storage.updateTenderSource(req.params.id as string, req.body);
+      if (!updated) return res.status(404).json({ error: "Source not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update tender source" });
+    }
+  });
+
+  app.delete("/api/tender-sources/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteTenderSource(req.params.id as string);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete tender source" });
+    }
+  });
+
+  // ==================== Tender Routes (Protected) ====================
+
+  app.get("/api/tenders", isAuthenticated, async (req, res) => {
+    try {
+      const sourceId = req.query.sourceId as string | undefined;
+      const limit = req.query.limit ? Number(req.query.limit) : 50;
+      const result = await storage.getTenders(sourceId, limit);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tenders" });
+    }
+  });
+
+  app.post("/api/tender-sources/:id/scrape", isAuthenticated, async (req, res) => {
+    try {
+      const source = await storage.getTenderSource(req.params.id as string);
+      if (!source) return res.status(404).json({ error: "Source not found" });
+      
+      const { scrapeInaproc } = await import("./lib/inaproc-scraper");
+      const result = await scrapeInaproc(source, storage);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to scrape tenders" });
     }
   });
 

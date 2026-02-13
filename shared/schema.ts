@@ -911,6 +911,105 @@ export type UserMemory = typeof userMemories.$inferSelect;
 
 // ==================== VOICE CHAT CONVERSATIONS ====================
 
+// ==================== WA CONTACTS ====================
+
+export const waContacts = pgTable("wa_contacts", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  phone: text("phone").notNull(),
+  name: text("name").default(""),
+  source: text("source").default("webhook"),
+  isOptedOut: boolean("is_opted_out").default(false),
+  lastSeenAt: timestamp("last_seen_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertWaContactSchema = createInsertSchema(waContacts).omit({ id: true, createdAt: true });
+export type InsertWaContact = z.infer<typeof insertWaContactSchema>;
+export type WaContact = typeof waContacts.$inferSelect;
+
+// ==================== WA BROADCASTS ====================
+
+export const waBroadcasts = pgTable("wa_broadcasts", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  userId: varchar("user_id", { length: 255 }).notNull().default(""),
+  name: text("name").notNull(),
+  messageTemplate: text("message_template").notNull(),
+  scheduleType: text("schedule_type").notNull().default("once"),
+  scheduleTime: text("schedule_time").default("08:00"),
+  scheduleDays: jsonb("schedule_days").default([]),
+  timezone: text("timezone").default("Asia/Jakarta"),
+  nextRunAt: timestamp("next_run_at"),
+  lastRunAt: timestamp("last_run_at"),
+  dataSource: text("data_source").default(""),
+  dataSourceConfig: jsonb("data_source_config").default({}),
+  isEnabled: boolean("is_enabled").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertWaBroadcastSchema = createInsertSchema(waBroadcasts).omit({ id: true, createdAt: true, lastRunAt: true });
+export type InsertWaBroadcast = z.infer<typeof insertWaBroadcastSchema>;
+export type WaBroadcast = typeof waBroadcasts.$inferSelect;
+
+// ==================== WA BROADCAST RUNS ====================
+
+export const waBroadcastRuns = pgTable("wa_broadcast_runs", {
+  id: serial("id").primaryKey(),
+  broadcastId: integer("broadcast_id").notNull(),
+  status: text("status").notNull().default("pending"),
+  totalRecipients: integer("total_recipients").default(0),
+  totalSent: integer("total_sent").default(0),
+  totalFailed: integer("total_failed").default(0),
+  runAt: timestamp("run_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+  errorLog: text("error_log").default(""),
+});
+
+export type WaBroadcastRun = typeof waBroadcastRuns.$inferSelect;
+
+// ==================== TENDER SOURCES ====================
+
+export const tenderSources = pgTable("tender_sources", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().default(""),
+  name: text("name").notNull(),
+  baseUrl: text("base_url").notNull(),
+  isEnabled: boolean("is_enabled").default(true),
+  lastScrapedAt: timestamp("last_scraped_at"),
+  totalTenders: integer("total_tenders").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTenderSourceSchema = createInsertSchema(tenderSources).omit({ id: true, createdAt: true, lastScrapedAt: true, totalTenders: true });
+export type InsertTenderSource = z.infer<typeof insertTenderSourceSchema>;
+export type TenderSource = typeof tenderSources.$inferSelect;
+
+// ==================== TENDERS ====================
+
+export const tenders = pgTable("tenders", {
+  id: serial("id").primaryKey(),
+  sourceId: integer("source_id").notNull(),
+  tenderId: text("tender_id").notNull(),
+  name: text("name").notNull(),
+  agency: text("agency").default(""),
+  budget: text("budget").default(""),
+  type: text("type").default(""),
+  status: text("status").default(""),
+  stage: text("stage").default(""),
+  location: text("location").default(""),
+  publishDate: text("publish_date").default(""),
+  deadlineDate: text("deadline_date").default(""),
+  url: text("url").default(""),
+  rawData: jsonb("raw_data").default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertTenderSchema = createInsertSchema(tenders).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTender = z.infer<typeof insertTenderSchema>;
+export type Tender = typeof tenders.$inferSelect;
+
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
   title: text("title").notNull().default("New Chat"),
