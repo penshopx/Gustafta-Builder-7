@@ -810,13 +810,19 @@ export default function AgentChat() {
               const parsed = JSON.parse(data);
               if (parsed.content) {
                 assistantContent += parsed.content;
+                const displayContent = assistantContent
+                  .replace(/\[SAVE_MEMORY:(memory|note)\][\s\S]*?\[\/SAVE_MEMORY\]/g, "")
+                  .replace(/\[DELETE_MEMORY\][\s\S]*?\[\/DELETE_MEMORY\]/g, "")
+                  .replace(/\[SAVE_MEMORY:(memory|note)\][\s\S]*$/g, "")
+                  .replace(/\[DELETE_MEMORY\][\s\S]*$/g, "")
+                  .trim();
                 setMessages((prev) => {
                   const updated = [...prev];
                   const lastIdx = updated.length - 1;
                   if (updated[lastIdx]?.role === "assistant") {
                     updated[lastIdx] = {
                       ...updated[lastIdx],
-                      content: assistantContent,
+                      content: displayContent,
                     };
                   }
                   return updated;

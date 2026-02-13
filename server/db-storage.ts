@@ -22,6 +22,7 @@ import {
   series,
   vouchers,
   voucherRedemptions,
+  userMemories,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 import type {
@@ -66,6 +67,8 @@ import type {
   VoucherRedemption,
   KnowledgeChunk,
   InsertKnowledgeChunk,
+  UserMemory,
+  InsertUserMemory,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -2161,6 +2164,37 @@ export class DatabaseStorage implements IStorage {
       });
     }
     return redemptions;
+  }
+  // User Memory methods
+  async getUserMemories(agentId: string, sessionId?: string): Promise<UserMemory[]> {
+    const conditions = [eq(userMemories.agentId, Number(agentId))];
+    if (sessionId) conditions.push(eq(userMemories.sessionId, sessionId));
+    const result = await db.select().from(userMemories)
+      .where(and(...conditions))
+      .orderBy(desc(userMemories.createdAt));
+    return result;
+  }
+
+  async createUserMemory(memory: InsertUserMemory): Promise<UserMemory> {
+    const [result] = await db.insert(userMemories).values({
+      agentId: memory.agentId,
+      sessionId: memory.sessionId || "",
+      category: memory.category || "memory",
+      content: memory.content,
+    }).returning();
+    return result;
+  }
+
+  async deleteUserMemory(id: string): Promise<boolean> {
+    const result = await db.delete(userMemories).where(eq(userMemories.id, Number(id)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async deleteUserMemoriesByAgent(agentId: string, sessionId?: string): Promise<boolean> {
+    const conditions = [eq(userMemories.agentId, Number(agentId))];
+    if (sessionId) conditions.push(eq(userMemories.sessionId, sessionId));
+    await db.delete(userMemories).where(and(...conditions));
+    return true;
   }
 }
 

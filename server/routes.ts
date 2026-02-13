@@ -1093,6 +1093,57 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== User Memory Routes ====================
+
+  app.get("/api/memories/:agentId", async (req, res) => {
+    try {
+      const agentId = req.params.agentId as string;
+      const sessionId = req.query.sessionId as string | undefined;
+      const memories = await storage.getUserMemories(agentId, sessionId);
+      res.json(memories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch memories" });
+    }
+  });
+
+  app.post("/api/memories", async (req, res) => {
+    try {
+      const { agentId, sessionId, category, content } = req.body;
+      if (!agentId || !content) {
+        return res.status(400).json({ error: "agentId and content are required" });
+      }
+      const memory = await storage.createUserMemory({
+        agentId: Number(agentId),
+        sessionId: sessionId || "",
+        category: category || "memory",
+        content,
+      });
+      res.json(memory);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create memory" });
+    }
+  });
+
+  app.delete("/api/memories/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteUserMemory(req.params.id as string);
+      res.json({ success });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete memory" });
+    }
+  });
+
+  app.delete("/api/memories/agent/:agentId", async (req, res) => {
+    try {
+      const agentId = req.params.agentId as string;
+      const sessionId = req.query.sessionId as string | undefined;
+      const success = await storage.deleteUserMemoriesByAgent(agentId, sessionId);
+      res.json({ success });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to clear memories" });
+    }
+  });
+
   // ==================== Integration Routes (Protected) ====================
 
   // Get integrations for an agent
@@ -1229,10 +1280,14 @@ export async function registerRoutes(
         const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
         knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
       }
+
+      // Load user memories
+      const nonStreamSessionId = req.body.sessionId || `anon_${parsed.data.agentId}_${Date.now()}`;
+      const nonStreamMemories = await storage.getUserMemories(String(parsed.data.agentId), nonStreamSessionId);
       
       // Get recent conversation history
       const allMessages = await storage.getMessages(parsed.data.agentId);
-      const recentMessages = allMessages.slice(-10); // Last 10 messages for context
+      const recentMessages = allMessages.slice(-10);
       
       // Build system prompt from agent persona
       let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;
@@ -1281,6 +1336,25 @@ export async function registerRoutes(
       }
 
       systemPrompt += `\n\nMODE INSTRUCTION (OPTIONAL)\n${MODE_SNAPSHOT}\n\n${MODE_DECISION_SUMMARY}\n\n${MODE_RISK_RADAR}`;
+
+      // Inject user memories
+      if (nonStreamMemories.length > 0) {
+        const memLines = nonStreamMemories.map(m => {
+          const tag = m.category === "note" ? "[Catatan]" : "[Ingatan]";
+          return `${tag} ${m.content}`;
+        });
+        systemPrompt += `\n\nINGATAN PENGGUNA (data yang diminta pengguna untuk diingat/dicatat):\n${memLines.join("\n")}`;
+        systemPrompt += `\nGunakan informasi di atas untuk mempersonalisasi respons.`;
+      }
+
+      systemPrompt += `\n\nFITUR MEMORI:
+Kamu memiliki kemampuan menyimpan informasi yang diminta pengguna.
+- Jika pengguna meminta kamu MENYIMPAN/MENGINGAT/MENCATAT sesuatu, sertakan tag berikut di AKHIR responmu:
+  [SAVE_MEMORY:memory] informasi yang harus diingat [/SAVE_MEMORY]
+  [SAVE_MEMORY:note] catatan yang harus disimpan [/SAVE_MEMORY]
+- Gunakan kategori "memory" untuk fakta/preferensi, "note" untuk catatan/to-do.
+- Jika pengguna meminta MENGHAPUS ingatan/catatan, sertakan: [DELETE_MEMORY] kata kunci [/DELETE_MEMORY]
+- Tag ini akan diproses oleh sistem dan tidak ditampilkan ke pengguna.`;
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
@@ -1399,11 +1473,42 @@ export async function registerRoutes(
         aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
       }
       
-      // Save AI response
+      // Process memory tags from AI response
+      const saveMemRegex = new RegExp("\\[SAVE_MEMORY:(memory|note)\\]\\s*([\\s\\S]*?)\\s*\\[\\/SAVE_MEMORY\\]", "g");
+      const delMemRegex = new RegExp("\\[DELETE_MEMORY\\]\\s*([\\s\\S]*?)\\s*\\[\\/DELETE_MEMORY\\]", "g");
+      
+      let smMatch;
+      while ((smMatch = saveMemRegex.exec(aiResponseContent)) !== null) {
+        try {
+          await storage.createUserMemory({
+            agentId: Number(parsed.data.agentId),
+            sessionId: nonStreamSessionId,
+            category: smMatch[1],
+            content: smMatch[2].trim(),
+          });
+        } catch (e) { console.error("Failed to save memory:", e); }
+      }
+      
+      let dmMatch;
+      while ((dmMatch = delMemRegex.exec(aiResponseContent)) !== null) {
+        try {
+          const kw = dmMatch[1].trim().toLowerCase();
+          const mems = await storage.getUserMemories(String(parsed.data.agentId), nonStreamSessionId);
+          for (const mem of mems) {
+            if (mem.content.toLowerCase().includes(kw)) {
+              await storage.deleteUserMemory(String(mem.id));
+            }
+          }
+        } catch (e) { console.error("Failed to delete memory:", e); }
+      }
+      
+      const cleanAiResponse = aiResponseContent.replace(saveMemRegex, "").replace(delMemRegex, "").trim();
+
+      // Save AI response (without memory tags)
       const aiMessage = await storage.createMessage({
         agentId: parsed.data.agentId,
         role: "assistant",
-        content: aiResponseContent,
+        content: cleanAiResponse,
         reasoning: "",
         sources: [],
       });
@@ -1595,6 +1700,10 @@ export async function registerRoutes(
         const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
         knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
       }
+
+      // Load user memories for this agent+session
+      const streamSessionId = req.body.sessionId || `anon_${parsed.data.agentId}_${Date.now()}`;
+      const existingMemories = await storage.getUserMemories(String(parsed.data.agentId), streamSessionId);
       
       // Get recent conversation history
       const allMessages = await storage.getMessages(parsed.data.agentId);
@@ -1635,6 +1744,28 @@ export async function registerRoutes(
       }
 
       systemPrompt += `\n\nMODE INSTRUCTION (OPTIONAL)\n${MODE_SNAPSHOT}\n\n${MODE_DECISION_SUMMARY}\n\n${MODE_RISK_RADAR}`;
+
+      // Inject user memories into system prompt
+      if (existingMemories.length > 0) {
+        const memoryLines = existingMemories.map(m => {
+          const tag = m.category === "note" ? "[Catatan]" : "[Ingatan]";
+          return `${tag} ${m.content}`;
+        });
+        systemPrompt += `\n\nINGATAN PENGGUNA (data yang diminta pengguna untuk diingat/dicatat):\n${memoryLines.join("\n")}`;
+        systemPrompt += `\nGunakan informasi di atas untuk mempersonalisasi respons. Jika pengguna bertanya tentang apa yang kamu ingat, tampilkan informasi ini.`;
+      }
+
+      // Memory detection instructions
+      systemPrompt += `\n\nFITUR MEMORI:
+Kamu memiliki kemampuan menyimpan informasi yang diminta pengguna.
+- Jika pengguna meminta kamu MENYIMPAN/MENGINGAT/MENCATAT sesuatu, sertakan tag berikut di AKHIR responmu (tag ini tidak akan ditampilkan ke pengguna):
+  [SAVE_MEMORY:memory] informasi yang harus diingat [/SAVE_MEMORY]
+  [SAVE_MEMORY:note] catatan yang harus disimpan [/SAVE_MEMORY]
+- Gunakan kategori "memory" untuk fakta/preferensi (contoh: "nama perusahaan saya...", "saya lebih suka...")
+- Gunakan kategori "note" untuk catatan/to-do (contoh: "catat bahwa...", "tandai bahwa...")
+- Jika pengguna meminta MENGHAPUS ingatan/catatan tertentu, sertakan: [DELETE_MEMORY] kata kunci [/DELETE_MEMORY]
+- Jika pengguna bertanya "apa yang kamu ingat" atau "tampilkan catatan", tampilkan daftar ingatan/catatan yang ada dari bagian INGATAN PENGGUNA di atas.
+- PENTING: Tag SAVE_MEMORY dan DELETE_MEMORY harus di akhir respons dan akan diproses oleh sistem.`;
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
       
@@ -1767,11 +1898,47 @@ export async function registerRoutes(
           }
         }
         
-        // Save the complete AI response
+        // Process memory tags from AI response
+        let cleanContent = fullContent || "Maaf, saya tidak dapat merespons saat ini.";
+        const saveMemoryRegex = new RegExp("\\[SAVE_MEMORY:(memory|note)\\]\\s*([\\s\\S]*?)\\s*\\[\\/SAVE_MEMORY\\]", "g");
+        const deleteMemoryRegex = new RegExp("\\[DELETE_MEMORY\\]\\s*([\\s\\S]*?)\\s*\\[\\/DELETE_MEMORY\\]", "g");
+        
+        let memMatch;
+        while ((memMatch = saveMemoryRegex.exec(fullContent)) !== null) {
+          try {
+            await storage.createUserMemory({
+              agentId: Number(parsed.data.agentId),
+              sessionId: streamSessionId,
+              category: memMatch[1],
+              content: memMatch[2].trim(),
+            });
+          } catch (memErr) {
+            console.error("Failed to save memory:", memErr);
+          }
+        }
+        
+        let delMatch;
+        while ((delMatch = deleteMemoryRegex.exec(fullContent)) !== null) {
+          try {
+            const keyword = delMatch[1].trim().toLowerCase();
+            const mems = await storage.getUserMemories(String(parsed.data.agentId), streamSessionId);
+            for (const mem of mems) {
+              if (mem.content.toLowerCase().includes(keyword)) {
+                await storage.deleteUserMemory(String(mem.id));
+              }
+            }
+          } catch (delErr) {
+            console.error("Failed to delete memory:", delErr);
+          }
+        }
+        
+        cleanContent = cleanContent.replace(saveMemoryRegex, "").replace(deleteMemoryRegex, "").trim();
+
+        // Save the complete AI response (without memory tags)
         const aiMessage = await storage.createMessage({
           agentId: parsed.data.agentId,
           role: "assistant",
-          content: fullContent || "Maaf, saya tidak dapat merespons saat ini.",
+          content: cleanContent,
           reasoning: "",
           sources: [],
         });

@@ -41,6 +41,8 @@ import type {
   VoucherRedemption,
   KnowledgeChunk,
   InsertKnowledgeChunk,
+  UserMemory,
+  InsertUserMemory,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -195,6 +197,12 @@ export interface IStorage {
   getVoucherRedemptions(voucherId: string): Promise<VoucherRedemption[]>;
   getClientVoucherRedemptions(clientSubscriptionId: number): Promise<(VoucherRedemption & { voucher?: Voucher })[]>;
 
+  // User Memory methods
+  getUserMemories(agentId: string, sessionId?: string): Promise<UserMemory[]>;
+  createUserMemory(memory: InsertUserMemory): Promise<UserMemory>;
+  deleteUserMemory(id: string): Promise<boolean>;
+  deleteUserMemoriesByAgent(agentId: string, sessionId?: string): Promise<boolean>;
+
   // Product listing methods
   getListedAgents(): Promise<Agent[]>;
   getAgentBySlug(slug: string): Promise<Agent | undefined>;
@@ -220,6 +228,7 @@ export class MemStorage implements IStorage {
   private affiliatesMap: Map<string, Affiliate>;
   private vouchersMap: Map<string, Voucher>;
   private voucherRedemptionsMap: Map<string, VoucherRedemption>;
+  private userMemoriesMap: Map<string, UserMemory>;
 
   constructor() {
     this.users = new Map();
@@ -241,6 +250,7 @@ export class MemStorage implements IStorage {
     this.affiliatesMap = new Map();
     this.vouchersMap = new Map();
     this.voucherRedemptionsMap = new Map();
+    this.userMemoriesMap = new Map();
   }
 
   // User methods
@@ -1540,6 +1550,34 @@ export class MemStorage implements IStorage {
       ...r,
       voucher: this.vouchersMap.get(String(r.voucherId)),
     }));
+  }
+
+  // User Memory methods
+  async getUserMemories(agentId: string, sessionId?: string): Promise<UserMemory[]> {
+    const all = Array.from(this.userMemoriesMap.values()).filter(m => m.agentId === Number(agentId));
+    if (sessionId) return all.filter(m => m.sessionId === sessionId);
+    return all;
+  }
+
+  async createUserMemory(memory: InsertUserMemory): Promise<UserMemory> {
+    const id = this.userMemoriesMap.size + 1;
+    const item: UserMemory = { ...memory, id, category: memory.category || "memory", sessionId: memory.sessionId || "", createdAt: new Date() };
+    this.userMemoriesMap.set(String(id), item);
+    return item;
+  }
+
+  async deleteUserMemory(id: string): Promise<boolean> {
+    return this.userMemoriesMap.delete(id);
+  }
+
+  async deleteUserMemoriesByAgent(agentId: string, sessionId?: string): Promise<boolean> {
+    const toDelete = Array.from(this.userMemoriesMap.entries()).filter(([, m]) => {
+      if (m.agentId !== Number(agentId)) return false;
+      if (sessionId && m.sessionId !== sessionId) return false;
+      return true;
+    });
+    for (const [key] of toDelete) this.userMemoriesMap.delete(key);
+    return true;
   }
 
   // Product listing methods

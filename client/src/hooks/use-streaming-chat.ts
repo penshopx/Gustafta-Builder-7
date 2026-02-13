@@ -149,9 +149,15 @@ export function useStreamingChat() {
             queryClient.invalidateQueries({ queryKey: ["/api/messages", agentId] });
           } else if (data.type === "chunk") {
             fullContent += data.content;
+            const displayContent = fullContent
+              .replace(/\[SAVE_MEMORY:(memory|note)\][\s\S]*?\[\/SAVE_MEMORY\]/g, "")
+              .replace(/\[DELETE_MEMORY\][\s\S]*?\[\/DELETE_MEMORY\]/g, "")
+              .replace(/\[SAVE_MEMORY:(memory|note)\][\s\S]*$/g, "")
+              .replace(/\[DELETE_MEMORY\][\s\S]*$/g, "")
+              .trim();
             setState(prev => ({
               ...prev,
-              streamingContent: fullContent,
+              streamingContent: displayContent,
             }));
             onChunk?.(data.content);
           } else if (data.type === "complete") {

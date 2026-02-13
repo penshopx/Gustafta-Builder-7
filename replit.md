@@ -11,6 +11,16 @@ Gustafta is an AI chatbot builder platform designed to help users create, config
 - **Server-side**: Context answers are injected into the system prompt as "KONTEKS PROYEK" block, enabling the AI to tailor responses based on user's specific context (e.g., project type, scale, phase).
 - **Schema**: `contextQuestions` field on `agents` table (jsonb array of `{id, label, type, options, required}`).
 
+### User Memory System
+- **Purpose**: Chatbots can remember user-provided information across conversations (facts, preferences, notes).
+- **AI Detection**: The AI detects save/recall commands via special tags (`[SAVE_MEMORY]`, `[DELETE_MEMORY]`) in its response, processed server-side.
+- **Categories**: "memory" for facts/preferences, "note" for to-do/catatan.
+- **Per-Session**: Memories are scoped to agent+session, so different users have separate memories.
+- **Chat Integration**: Existing memories are injected into system prompt as "INGATAN PENGGUNA" block. AI uses them to personalize responses.
+- **Frontend Handling**: Memory tags are stripped from streamed responses in real-time to avoid displaying raw tags.
+- **Schema**: `user_memories` table with `agentId`, `sessionId`, `category`, `content`, `createdAt`.
+- **API**: `GET/POST/DELETE /api/memories/:agentId`, `DELETE /api/memories/agent/:agentId`.
+
 ### Monetization Protection System
 - **Guest Message Limit**: Configurable per chatbot (default: 10). Server-side tracking via IP+UA fingerprint. When guests exceed limit, upgrade wall is shown prompting registration.
 - **Trial Period**: Configurable trial days (default: 7). Auto-expires subscriptions. Frontend warns users when trial has ≤2 days left.

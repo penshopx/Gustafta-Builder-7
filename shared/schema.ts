@@ -894,6 +894,21 @@ export type VoucherRedemption = {
   redeemedAt: string;
 };
 
+// ==================== USER MEMORIES ====================
+
+export const userMemories = pgTable("user_memories", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  sessionId: text("session_id").default(""),
+  category: text("category").notNull().default("memory"),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUserMemorySchema = createInsertSchema(userMemories).omit({ id: true, createdAt: true });
+export type InsertUserMemory = z.infer<typeof insertUserMemorySchema>;
+export type UserMemory = typeof userMemories.$inferSelect;
+
 // ==================== VOICE CHAT CONVERSATIONS ====================
 
 export const conversations = pgTable("conversations", {
