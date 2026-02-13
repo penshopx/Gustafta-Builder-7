@@ -5,7 +5,7 @@ import { createServer } from "http";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
-import { gustaftaKnowledgeBaseAgent } from "./seed-knowledge-base";
+import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 
 const app = express();
 const httpServer = createServer(app);
@@ -143,6 +143,34 @@ for (const envVar of requiredEnvVars) {
         }
       } catch (err) {
         log("Failed to auto-seed Gustafta Helpdesk: " + (err as Error).message);
+      }
+
+      try {
+        const allAgents = await storage.getAgents();
+        const dokExists = allAgents.some(
+          (agent: any) => agent.name === "Dokumentender Assistant"
+        );
+        if (!dokExists) {
+          await storage.createAgent(dokumentenderAgent as any);
+          log("Dokumentender Assistant chatbot auto-seeded successfully");
+        } else {
+          const dok = allAgents.find(
+            (agent: any) => agent.name === "Dokumentender Assistant"
+          );
+          if (dok) {
+            await storage.updateAgent(dok.id, {
+              systemPrompt: dokumentenderAgent.systemPrompt,
+              greetingMessage: dokumentenderAgent.greetingMessage,
+              conversationStarters: dokumentenderAgent.conversationStarters,
+              personality: dokumentenderAgent.personality,
+              tagline: dokumentenderAgent.tagline,
+              description: dokumentenderAgent.description,
+            } as any);
+            log("Dokumentender Assistant chatbot updated with latest configuration");
+          }
+        }
+      } catch (err) {
+        log("Failed to auto-seed Dokumentender: " + (err as Error).message);
       }
 
       startScheduler();

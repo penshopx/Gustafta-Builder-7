@@ -42,7 +42,7 @@ export function BroadcastPanel({ agent }: { agent: any }) {
   });
 
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
-    queryKey: ["/api/wa-contacts", agent.id],
+    queryKey: [`/api/wa-contacts/${agent.id}`],
   });
 
   const { data: broadcasts = [], isLoading: broadcastsLoading } = useQuery<any[]>({
@@ -60,7 +60,7 @@ export function BroadcastPanel({ agent }: { agent: any }) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wa-contacts", agent.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/wa-contacts/${agent.id}`] });
       setContactForm({ phone: "", name: "" });
       toast({ title: "Berhasil", description: "Kontak berhasil ditambahkan" });
     },
@@ -74,7 +74,7 @@ export function BroadcastPanel({ agent }: { agent: any }) {
       await apiRequest("PATCH", `/api/wa-contacts/${id}`, { isOptedOut: !isOptedOut });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wa-contacts", agent.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/wa-contacts/${agent.id}`] });
     },
   });
 
@@ -83,7 +83,7 @@ export function BroadcastPanel({ agent }: { agent: any }) {
       await apiRequest("DELETE", `/api/wa-contacts/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wa-contacts", agent.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/wa-contacts/${agent.id}`] });
       toast({ title: "Berhasil", description: "Kontak berhasil dihapus" });
     },
     onError: () => {
