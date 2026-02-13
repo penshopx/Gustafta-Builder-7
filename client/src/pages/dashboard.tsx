@@ -327,9 +327,10 @@ export default function Dashboard() {
 
   const SidebarContent = () => (
     <>
-      <div className={cn("border-b border-sidebar-border space-y-3", sidebarCollapsed ? "p-2" : "p-3")}>
-        <div>
-          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-3 mb-1">Series / Topik</p>}
+      <div className={cn("border-b border-sidebar-border overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
+        {/* Series / Topik Dropdown */}
+        <div className={cn(sidebarCollapsed ? "" : "px-3 pt-3 pb-1")}>
+          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Series / Topik</p>}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className={cn(
@@ -347,47 +348,48 @@ export default function Dashboard() {
                 {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
               </Button>
             </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel>Series / Topik</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => handleSeriesSelect(null)}
-              className="gap-2"
-              data-testid="menu-series-all"
-            >
-              <BookOpen className="w-4 h-4 text-purple-500" />
-              <span>Semua Series</span>
-              {!activeSeriesId && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {allSeries.length === 0 ? (
-              <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                Belum ada Series
-              </div>
-            ) : (
-              allSeries.map((s: any) => (
-                <DropdownMenuItem
-                  key={s.id}
-                  onClick={() => handleSeriesSelect(s.id)}
-                  className="gap-2"
-                  data-testid={`menu-series-${s.id}`}
-                >
-                  <BookOpen className="w-4 h-4 text-purple-500" />
-                  <span className="truncate">{s.name}</span>
-                  {activeSeriesId === s.id && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-                </DropdownMenuItem>
-              ))
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setSeriesDialogOpen(true)} className="gap-2" data-testid="menu-series-manage">
-              <Settings className="w-4 h-4" />
-              Kelola Series
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>Series / Topik</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => handleSeriesSelect(null)}
+                className="gap-2"
+                data-testid="menu-series-all"
+              >
+                <BookOpen className="w-4 h-4 text-purple-500" />
+                <span>Semua Series</span>
+                {!activeSeriesId && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {allSeries.length === 0 ? (
+                <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                  Belum ada Series
+                </div>
+              ) : (
+                allSeries.map((s: any) => (
+                  <DropdownMenuItem
+                    key={s.id}
+                    onClick={() => handleSeriesSelect(s.id)}
+                    className="gap-2"
+                    data-testid={`menu-series-${s.id}`}
+                  >
+                    <BookOpen className="w-4 h-4 text-purple-500" />
+                    <span className="truncate">{s.name}</span>
+                    {activeSeriesId === s.id && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
+                  </DropdownMenuItem>
+                ))
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSeriesDialogOpen(true)} className="gap-2" data-testid="menu-series-manage">
+                <Settings className="w-4 h-4" />
+                Kelola Series
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        <div>
-          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-3 mb-1">Big Idea</p>}
+        {/* Big Idea Dropdown */}
+        <div className={cn(sidebarCollapsed ? "" : "px-3 pt-2 pb-1")}>
+          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Big Idea</p>}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className={cn(
@@ -405,29 +407,55 @@ export default function Dashboard() {
                 {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
               </Button>
             </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
-            <DropdownMenuLabel>Big Ideas{activeSeries ? ` - ${activeSeries.name}` : ""}</DropdownMenuLabel>
-            {filteredBigIdeas.length === 0 ? (
-              <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                {activeSeriesId ? "Belum ada Big Idea di series ini" : "Belum ada Big Idea"}
-              </div>
-            ) : (
-              filteredBigIdeas.map((bi) => (
-                <div key={bi.id} className="group relative flex items-center">
+            <DropdownMenuContent align="start" className="w-64">
+              <DropdownMenuLabel>Pilih Big Idea{activeSeries ? ` - ${activeSeries.name}` : ""}</DropdownMenuLabel>
+              {filteredBigIdeas.length === 0 ? (
+                <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                  {activeSeriesId ? "Belum ada Big Idea di series ini" : "Belum ada Big Idea"}
+                </div>
+              ) : (
+                filteredBigIdeas.map((bi) => (
                   <DropdownMenuItem
+                    key={bi.id}
                     onClick={() => handleBigIdeaSelect(bi)}
-                    className="flex-1 gap-2 pr-16"
-                    data-testid={`menu-bigidea-${bi.id}`}
+                    className="gap-2"
+                    data-testid={`menu-bigidea-select-${bi.id}`}
                   >
                     <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
                     <span className="truncate">{bi.name}</span>
                     {bi.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
                   </DropdownMenuItem>
-                  <div className="absolute right-1 flex items-center gap-0.5">
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Big Ideas Flat List */}
+        {!sidebarCollapsed && filteredBigIdeas.length > 0 && (
+          <div className="px-3 pt-1 pb-2">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Big Ideas</p>
+            <div className="space-y-0.5">
+              {filteredBigIdeas.map((bi) => (
+                <div
+                  key={bi.id}
+                  className={cn(
+                    "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                    bi.isActive
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                  )}
+                  onClick={() => handleBigIdeaSelect(bi)}
+                  data-testid={`list-bigidea-${bi.id}`}
+                >
+                  <Lightbulb className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
+                  <span className="truncate flex-1 text-sm">{bi.name}</span>
+                  {bi.isActive && <Badge variant="secondary" className="text-[10px] shrink-0">Aktif</Badge>}
+                  <div className="flex items-center gap-0.5 shrink-0 invisible group-hover:visible">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6"
+                      className="h-5 w-5"
                       onClick={(e) => { e.stopPropagation(); handleEditBigIdea(bi); }}
                       data-testid={`button-edit-bigidea-${bi.id}`}
                     >
@@ -436,7 +464,7 @@ export default function Dashboard() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 text-destructive"
+                      className="h-5 w-5 text-destructive"
                       onClick={(e) => { e.stopPropagation(); setDeleteBigIdeaConfirm(bi); }}
                       data-testid={`button-delete-bigidea-${bi.id}`}
                     >
@@ -444,92 +472,162 @@ export default function Dashboard() {
                     </Button>
                   </div>
                 </div>
-              ))
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setBigIdeaDialogOpen(true)} className="gap-2">
-              <Plus className="w-4 h-4" />
-              Buat Big Idea Baru
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              ))}
+              <button
+                onClick={() => setBigIdeaDialogOpen(true)}
+                className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                data-testid="button-add-bigidea"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat Big Idea Baru</span>
+              </button>
+            </div>
+          </div>
+        )}
 
-        <div>
-          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-3 mb-1">Toolbox</p>}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className={cn(
-                "w-full h-auto",
-                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
-              )} disabled={!activeBigIdea}>
-                <div className="flex items-center gap-2 min-w-0">
-                  <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                  {!sidebarCollapsed && (
-                    <span className="truncate text-sm">
-                      {activeToolbox?.name || "Pilih Toolbox"}
-                    </span>
+        {/* Toolbox Section - only when Big Idea is selected */}
+        {activeBigIdea && (
+          <>
+            {/* Toolbox Dropdown */}
+            <div className={cn(sidebarCollapsed ? "" : "px-3 pt-2 pb-1")}>
+              {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Toolbox</p>}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className={cn(
+                    "w-full h-auto",
+                    sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-2"
+                  )}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
+                      {!sidebarCollapsed && (
+                        <span className="truncate text-sm">
+                          {activeToolbox?.name || "Pilih Toolbox"}
+                        </span>
+                      )}
+                    </div>
+                    {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64">
+                  <DropdownMenuLabel>Pilih Toolbox</DropdownMenuLabel>
+                  {toolboxes.length === 0 ? (
+                    <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                      Belum ada Toolbox
+                    </div>
+                  ) : (
+                    toolboxes.map((tb) => (
+                      <DropdownMenuItem
+                        key={tb.id}
+                        onClick={() => handleToolboxSelect(tb)}
+                        className="gap-2"
+                        data-testid={`menu-toolbox-select-${tb.id}`}
+                      >
+                        <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
+                        <span className="truncate">{tb.name}</span>
+                        {tb.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
+                      </DropdownMenuItem>
+                    ))
                   )}
-                </div>
-                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-64">
-              <DropdownMenuLabel>Toolboxes</DropdownMenuLabel>
-            {toolboxes.length === 0 ? (
-              <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                Belum ada Toolbox
-              </div>
-            ) : (
-              toolboxes.map((tb) => (
-                <div key={tb.id} className="group relative flex items-center">
-                  <DropdownMenuItem
-                    onClick={() => handleToolboxSelect(tb)}
-                    className="flex-1 gap-2 pr-16"
-                    data-testid={`menu-toolbox-${tb.id}`}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Toolboxes Flat List */}
+            {!sidebarCollapsed && toolboxes.length > 0 && (
+              <div className="px-3 pt-1 pb-2">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Toolboxes</p>
+                <div className="space-y-0.5">
+                  {toolboxes.map((tb) => (
+                    <div
+                      key={tb.id}
+                      className={cn(
+                        "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                        tb.isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                      )}
+                      onClick={() => handleToolboxSelect(tb)}
+                      data-testid={`list-toolbox-${tb.id}`}
+                    >
+                      <Wrench className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                      <span className="truncate flex-1 text-sm">{tb.name}</span>
+                      {tb.isActive && <Badge variant="secondary" className="text-[10px] shrink-0">Aktif</Badge>}
+                      <div className="flex items-center gap-0.5 shrink-0 invisible group-hover:visible">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5"
+                          onClick={(e) => { e.stopPropagation(); handleEditToolbox(tb); }}
+                          data-testid={`button-edit-toolbox-${tb.id}`}
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 text-destructive"
+                          onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(tb); }}
+                          data-testid={`button-delete-toolbox-${tb.id}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setToolboxDialogOpen(true)}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    data-testid="button-add-toolbox"
                   >
-                    <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                    <span className="truncate">{tb.name}</span>
-                    {tb.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-                  </DropdownMenuItem>
-                  <div className="absolute right-1 flex items-center gap-0.5">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={(e) => { e.stopPropagation(); handleEditToolbox(tb); }}
-                      data-testid={`button-edit-toolbox-${tb.id}`}
-                    >
-                      <Pencil className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-destructive"
-                      onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(tb); }}
-                      data-testid={`button-delete-toolbox-${tb.id}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Buat Toolbox Baru</span>
+                  </button>
                 </div>
-              ))
+              </div>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => setToolboxDialogOpen(true)}
-              className="gap-2"
-              disabled={!activeBigIdea}
-            >
-              <Plus className="w-4 h-4" />
-              Buat Toolbox Baru
-            </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+
+            {/* Agents Flat List under active Toolbox */}
+            {!sidebarCollapsed && activeToolbox && (
+              <div className="px-3 pt-1 pb-2">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Chatbots</p>
+                <div className="space-y-0.5">
+                  {filteredAgents.length === 0 ? (
+                    <p className="text-xs text-muted-foreground px-2 py-1.5">Belum ada chatbot di toolbox ini</p>
+                  ) : (
+                    filteredAgents.map((agent) => (
+                      <div
+                        key={agent.id}
+                        className={cn(
+                          "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                          activeAgent && String(activeAgent.id) === String(agent.id)
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                        onClick={() => handleAgentSelect(agent)}
+                        data-testid={`list-agent-${agent.id}`}
+                      >
+                        <Bot className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span className="truncate flex-1 text-sm">{agent.name}</span>
+                        {agent.isActive && <Badge variant="secondary" className="text-[10px] shrink-0">Aktif</Badge>}
+                      </div>
+                    ))
+                  )}
+                  <button
+                    onClick={() => setCreateDialogOpen(true)}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    data-testid="button-add-agent-sidebar"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Buat Chatbot Baru</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      <nav className={cn("flex-1 space-y-1", sidebarCollapsed ? "p-2" : "p-3")}>
+      <nav className={cn("flex-1 space-y-1 overflow-y-auto", sidebarCollapsed ? "p-2" : "p-3")}>
         {navItems.map((item) => (
           <button
             key={item.id}
