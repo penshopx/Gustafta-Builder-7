@@ -431,60 +431,6 @@ export default function Dashboard() {
           </DropdownMenu>
         </div>
 
-        {/* Big Ideas Flat List */}
-        {!sidebarCollapsed && filteredBigIdeas.length > 0 && (
-          <div className="px-3 pt-1 pb-2">
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Big Ideas</p>
-            <div className="space-y-0.5">
-              {filteredBigIdeas.map((bi) => (
-                <div
-                  key={bi.id}
-                  className={cn(
-                    "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
-                    bi.isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                  )}
-                  onClick={() => handleBigIdeaSelect(bi)}
-                  data-testid={`list-bigidea-${bi.id}`}
-                >
-                  <Lightbulb className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-                  <span className="truncate flex-1 text-sm">{bi.name}</span>
-                  {bi.isActive && <Badge variant="secondary" className="text-[10px] shrink-0">Aktif</Badge>}
-                  <div className="flex items-center gap-0.5 shrink-0 invisible group-hover:visible">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={(e) => { e.stopPropagation(); handleEditBigIdea(bi); }}
-                      data-testid={`button-edit-bigidea-${bi.id}`}
-                    >
-                      <Pencil className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5 text-destructive"
-                      onClick={(e) => { e.stopPropagation(); setDeleteBigIdeaConfirm(bi); }}
-                      data-testid={`button-delete-bigidea-${bi.id}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              <button
-                onClick={() => setBigIdeaDialogOpen(true)}
-                className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-                data-testid="button-add-bigidea"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Buat Big Idea Baru</span>
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Toolbox Section - only when Big Idea is selected */}
         {activeBigIdea && (
           <>
@@ -533,7 +479,7 @@ export default function Dashboard() {
             </div>
 
             {/* Toolboxes Flat List */}
-            {!sidebarCollapsed && toolboxes.length > 0 && (
+            {!sidebarCollapsed && (
               <div className="px-3 pt-1 pb-2">
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Toolboxes</p>
                 <div className="space-y-0.5">
@@ -586,43 +532,6 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Agents Flat List under active Toolbox */}
-            {!sidebarCollapsed && activeToolbox && (
-              <div className="px-3 pt-1 pb-2">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Chatbots</p>
-                <div className="space-y-0.5">
-                  {filteredAgents.length === 0 ? (
-                    <p className="text-xs text-muted-foreground px-2 py-1.5">Belum ada chatbot di toolbox ini</p>
-                  ) : (
-                    filteredAgents.map((agent) => (
-                      <div
-                        key={agent.id}
-                        className={cn(
-                          "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
-                          activeAgent && String(activeAgent.id) === String(agent.id)
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        )}
-                        onClick={() => handleAgentSelect(agent)}
-                        data-testid={`list-agent-${agent.id}`}
-                      >
-                        <Bot className="w-3.5 h-3.5 text-primary shrink-0" />
-                        <span className="truncate flex-1 text-sm">{agent.name}</span>
-                        {agent.isActive && <Badge variant="secondary" className="text-[10px] shrink-0">Aktif</Badge>}
-                      </div>
-                    ))
-                  )}
-                  <button
-                    onClick={() => setCreateDialogOpen(true)}
-                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-                    data-testid="button-add-agent-sidebar"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Buat Chatbot Baru</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
