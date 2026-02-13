@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle } from "lucide-react";
+import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
+import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,12 +11,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import Papa from "papaparse";
 
 export function TenderPanel({ agent }: { agent: any }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [csvUploading, setCsvUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [sourceForm, setSourceForm] = useState({
     name: "",
@@ -141,6 +144,51 @@ export function TenderPanel({ agent }: { agent: any }) {
     e.preventDefault();
     if (!tenderForm.name.trim()) return;
     createTenderMutation.mutate(tenderForm);
+  };
+
+  const handleCsvUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvUploading(true);
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const mapped = results.data.map((row: any) => ({
+            name: row.name || row.nama || row.nama_tender || row["Nama Tender"] || row["Nama Paket"] || "",
+            agency: row.agency || row.instansi || row["Instansi"] || row["Satuan Kerja"] || "",
+            budget: row.budget || row.anggaran || row.pagu || row["Pagu"] || row["HPS"] || "",
+            type: row.type || row.jenis || row["Jenis"] || row["Metode"] || "",
+            status: row.status || row["Status"] || "",
+            location: row.location || row.lokasi || row["Lokasi"] || "",
+            publishDate: row.publishDate || row.tanggal || row["Tanggal"] || "",
+            deadlineDate: row.deadlineDate || row.deadline || row.batas_waktu || row["Batas Waktu"] || "",
+            url: row.url || row.link || row["URL"] || row["Link"] || "",
+          })).filter((t: any) => t.name);
+
+          if (mapped.length === 0) {
+            toast({ title: "Gagal", description: "Tidak ada data valid ditemukan di file CSV", variant: "destructive" });
+            setCsvUploading(false);
+            return;
+          }
+
+          const res = await apiRequest("POST", "/api/tenders/bulk", { tenders: mapped });
+          const result = await res.json();
+          queryClient.invalidateQueries({ queryKey: ["/api/tenders?limit=50"] });
+          toast({ title: "Berhasil", description: `${result.imported} data tender berhasil diimpor` });
+        } catch {
+          toast({ title: "Gagal", description: "Gagal mengimpor data tender", variant: "destructive" });
+        }
+        setCsvUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      },
+      error: () => {
+        toast({ title: "Gagal", description: "File CSV tidak bisa dibaca", variant: "destructive" });
+        setCsvUploading(false);
+      },
+    });
   };
 
   const filteredTenders = tenders.filter((tender: any) =>
@@ -361,8 +409,33 @@ export function TenderPanel({ agent }: { agent: any }) {
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Input Manual
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={csvUploading}
+                data-testid="button-upload-csv"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {csvUploading ? "Mengimpor..." : "Upload CSV"}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleCsvUpload}
+                className="hidden"
+                data-testid="input-file-csv"
+              />
             </div>
           </div>
+
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">
+                Format CSV: kolom <strong>name/nama</strong> (wajib), agency/instansi, budget/anggaran/pagu, type/jenis, status, location/lokasi, publishDate/tanggal, deadlineDate/deadline, url/link. Baris pertama harus berisi nama kolom.
+              </p>
+            </CardContent>
+          </Card>
 
           {showAddForm && (
             <Card>

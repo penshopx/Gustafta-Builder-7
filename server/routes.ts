@@ -4858,6 +4858,35 @@ Be professional and suitable for management review.`;
     }
   });
 
+  app.post("/api/tenders/bulk", isAuthenticated, async (req, res) => {
+    try {
+      const { tenders: tenderList } = req.body;
+      if (!Array.isArray(tenderList)) return res.status(400).json({ error: "tenders must be an array" });
+      let imported = 0;
+      for (const t of tenderList) {
+        if (!t.name) continue;
+        await storage.upsertTender({
+          sourceId: t.sourceId || 0,
+          tenderId: t.tenderId || `csv-${Date.now()}-${imported}`,
+          name: t.name,
+          agency: t.agency || "",
+          budget: t.budget || "",
+          type: t.type || "",
+          status: t.status || "",
+          stage: t.stage || "",
+          location: t.location || "",
+          publishDate: t.publishDate || "",
+          deadlineDate: t.deadlineDate || "",
+          url: t.url || "",
+        });
+        imported++;
+      }
+      res.json({ success: true, imported });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to import tenders" });
+    }
+  });
+
   app.delete("/api/tenders/:id", isAuthenticated, async (req, res) => {
     try {
       await storage.deleteTender(req.params.id as string);
