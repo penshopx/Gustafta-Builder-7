@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { 
-  Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, Settings, BarChart3,
+  Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -325,233 +325,368 @@ export default function Dashboard() {
     }
   };
 
-  const [toolboxListExpanded, setToolboxListExpanded] = useState(false);
+  type HierarchyLevel = 'series' | 'bigIdeas' | 'toolboxes' | 'agents';
+  const [navLevel, setNavLevel] = useState<HierarchyLevel>(activeSeries ? (activeBigIdea ? (activeToolbox ? 'agents' : 'toolboxes') : 'bigIdeas') : 'series');
+
+  const [manualNavOverride, setManualNavOverride] = useState(false);
+  const navigateToLevel = (level: HierarchyLevel) => {
+    setManualNavOverride(true);
+    setNavLevel(level);
+    setTimeout(() => setManualNavOverride(false), 500);
+  };
+
+  const handleSeriesDrillDown = (seriesId: number) => {
+    setActiveSeriesId(seriesId);
+    setNavLevel('bigIdeas');
+  };
+
+  const handleBigIdeaDrillDown = (bi: BigIdea) => {
+    handleBigIdeaSelect(bi);
+    setNavLevel('toolboxes');
+  };
+
+  const handleToolboxDrillDown = (tb: Toolbox) => {
+    handleToolboxSelect(tb);
+    setNavLevel('agents');
+  };
+
+  useEffect(() => {
+    if (manualNavOverride) return;
+    if (activeSeriesId && activeBigIdea && activeToolbox && filteredAgents.length > 0) {
+      setNavLevel('agents');
+    } else if (activeSeriesId && activeBigIdea && toolboxes.length > 0) {
+      setNavLevel('toolboxes');
+    } else if (activeSeriesId && filteredBigIdeas.length > 0) {
+      setNavLevel('bigIdeas');
+    } else if (!activeSeriesId) {
+      setNavLevel('series');
+    }
+  }, [activeSeriesId, activeBigIdea?.id, activeToolbox?.id, filteredAgents.length, toolboxes.length, filteredBigIdeas.length, manualNavOverride]);
 
   const SidebarContent = () => (
     <>
-      <div className={cn("border-b border-sidebar-border shrink-0 max-h-[35vh] overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
-        {/* Series / Topik Dropdown */}
-        <div className={cn(sidebarCollapsed ? "" : "px-3 pt-3 pb-1")}>
-          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Series / Topik</p>}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className={cn(
-                "w-full h-auto",
-                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-1.5"
-              )}>
-                <div className="flex items-center gap-2 min-w-0">
-                  <BookOpen className="w-4 h-4 text-purple-500 shrink-0" />
-                  {!sidebarCollapsed && (
-                    <span className="truncate text-sm">
-                      {activeSeries?.name || "Semua Series"}
-                    </span>
-                  )}
-                </div>
-                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuLabel>Series / Topik</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => handleSeriesSelect(null)}
-                className="gap-2"
-                data-testid="menu-series-all"
+      <div className={cn("border-b border-sidebar-border shrink-0 max-h-[45vh] overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
+        {sidebarCollapsed ? (
+          <div className="flex flex-col items-center gap-1 py-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" title="Navigasi Hierarki">
+                  <FolderOpen className="w-4 h-4 text-purple-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start" className="w-56">
+                <DropdownMenuLabel>Navigasi</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => { navigateToLevel('series'); setSidebarCollapsed(false); }} className="gap-2">
+                  <FolderOpen className="w-4 h-4 text-purple-500" />
+                  <span>Series</span>
+                </DropdownMenuItem>
+                {activeSeries && (
+                  <DropdownMenuItem onClick={() => { navigateToLevel('bigIdeas'); setSidebarCollapsed(false); }} className="gap-2 pl-6">
+                    <Lightbulb className="w-4 h-4 text-yellow-500" />
+                    <span className="truncate">Big Ideas - {activeSeries.name}</span>
+                  </DropdownMenuItem>
+                )}
+                {activeBigIdea && (
+                  <DropdownMenuItem onClick={() => { navigateToLevel('toolboxes'); setSidebarCollapsed(false); }} className="gap-2 pl-8">
+                    <Wrench className="w-4 h-4 text-blue-500" />
+                    <span className="truncate">Toolboxes - {activeBigIdea.name}</span>
+                  </DropdownMenuItem>
+                )}
+                {activeToolbox && (
+                  <DropdownMenuItem onClick={() => { navigateToLevel('agents'); setSidebarCollapsed(false); }} className="gap-2 pl-10">
+                    <Bot className="w-4 h-4 text-primary" />
+                    <span className="truncate">Agents - {activeToolbox.name}</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <div className="px-3 pt-3 pb-2">
+            {/* Breadcrumb trail */}
+            <div className="flex items-center gap-1 mb-2 flex-wrap">
+              <button
+                onClick={() => navigateToLevel('series')}
+                className={cn(
+                  "text-[11px] font-medium uppercase tracking-wider transition-colors",
+                  navLevel === 'series' ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground cursor-pointer"
+                )}
+                data-testid="breadcrumb-series"
               >
-                <BookOpen className="w-4 h-4 text-purple-500" />
-                <span>Semua Series</span>
-                {!activeSeriesId && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {allSeries.length === 0 ? (
-                <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                  Belum ada Series
-                </div>
-              ) : (
-                allSeries.map((s: any) => (
-                  <DropdownMenuItem
-                    key={s.id}
-                    onClick={() => handleSeriesSelect(s.id)}
-                    className="gap-2"
-                    data-testid={`menu-series-${s.id}`}
+                Series
+              </button>
+              {activeSeriesId && activeSeries && (
+                <>
+                  <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                  <button
+                    onClick={() => navigateToLevel('bigIdeas')}
+                    className={cn(
+                      "text-[11px] font-medium truncate max-w-[80px] transition-colors",
+                      navLevel === 'bigIdeas' ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground cursor-pointer"
+                    )}
+                    title={activeSeries.name}
+                    data-testid="breadcrumb-bigideas"
                   >
-                    <BookOpen className="w-4 h-4 text-purple-500" />
-                    <span className="truncate">{s.name}</span>
-                    {activeSeriesId === s.id && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-                  </DropdownMenuItem>
-                ))
+                    {activeSeries.name}
+                  </button>
+                </>
               )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setSeriesDialogOpen(true)} className="gap-2" data-testid="menu-series-manage">
-                <Settings className="w-4 h-4" />
-                Kelola Series
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Big Idea Dropdown */}
-        <div className={cn(sidebarCollapsed ? "" : "px-3 pt-1 pb-1")}>
-          {!sidebarCollapsed && <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0 mb-1">Big Idea</p>}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className={cn(
-                "w-full h-auto",
-                sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-1.5"
-              )}>
-                <div className="flex items-center gap-2 min-w-0">
-                  <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
-                  {!sidebarCollapsed && (
-                    <span className="truncate text-sm">
-                      {activeBigIdea?.name || "Pilih Big Idea"}
-                    </span>
-                  )}
-                </div>
-                {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-64">
-              <DropdownMenuLabel>Pilih Big Idea{activeSeries ? ` - ${activeSeries.name}` : ""}</DropdownMenuLabel>
-              {filteredBigIdeas.length === 0 ? (
-                <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                  {activeSeriesId ? "Belum ada Big Idea di series ini" : "Belum ada Big Idea"}
-                </div>
-              ) : (
-                filteredBigIdeas.map((bi) => (
-                  <DropdownMenuItem
-                    key={bi.id}
-                    onClick={() => handleBigIdeaSelect(bi)}
-                    className="gap-2"
-                    data-testid={`menu-bigidea-select-${bi.id}`}
+              {activeBigIdea && navLevel !== 'series' && navLevel !== 'bigIdeas' && (
+                <>
+                  <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                  <button
+                    onClick={() => navigateToLevel('toolboxes')}
+                    className={cn(
+                      "text-[11px] font-medium truncate max-w-[70px] transition-colors",
+                      navLevel === 'toolboxes' ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground cursor-pointer"
+                    )}
+                    title={activeBigIdea.name}
+                    data-testid="breadcrumb-toolboxes"
                   >
-                    <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
-                    <span className="truncate">{bi.name}</span>
-                    {bi.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-                  </DropdownMenuItem>
-                ))
+                    {activeBigIdea.name}
+                  </button>
+                </>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              {activeToolbox && navLevel === 'agents' && (
+                <>
+                  <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
+                  <span
+                    className="text-[11px] font-medium text-sidebar-foreground truncate max-w-[70px]"
+                    title={activeToolbox.name}
+                    data-testid="breadcrumb-agents"
+                  >
+                    {activeToolbox.name}
+                  </span>
+                </>
+              )}
+            </div>
 
-        {/* Toolbox Section - only when Big Idea is selected */}
-        {activeBigIdea && (
-          <>
-            {/* Toolbox Dropdown with expand toggle */}
-            <div className={cn(sidebarCollapsed ? "" : "px-3 pt-1 pb-1")}>
-              {!sidebarCollapsed && (
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider px-0">Toolbox</p>
-                  {toolboxes.length > 0 && (
-                    <button
-                      onClick={() => setToolboxListExpanded(!toolboxListExpanded)}
-                      className="text-[10px] text-muted-foreground hover:text-sidebar-foreground transition-colors"
-                      data-testid="button-toggle-toolbox-list"
-                    >
-                      {toolboxListExpanded ? "Tutup" : `${toolboxes.length} items`}
-                    </button>
-                  )}
-                </div>
-              )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className={cn(
-                    "w-full h-auto",
-                    sidebarCollapsed ? "justify-center p-2" : "justify-between px-3 py-1.5"
-                  )}>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                      {!sidebarCollapsed && (
-                        <span className="truncate text-sm">
-                          {activeToolbox?.name || "Pilih Toolbox"}
-                        </span>
-                      )}
+            {/* Level content */}
+            <div className="space-y-0.5">
+              {navLevel === 'series' && (
+                <>
+                  {allSeries.length === 0 ? (
+                    <div className="py-3 text-sm text-muted-foreground text-center">
+                      Belum ada Series
                     </div>
-                    {!sidebarCollapsed && <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64">
-                  <DropdownMenuLabel>Pilih Toolbox</DropdownMenuLabel>
+                  ) : (
+                    allSeries.map((s: any) => (
+                      <div
+                        key={s.id}
+                        className={cn(
+                          "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                          activeSeriesId === s.id
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                        onClick={() => handleSeriesDrillDown(s.id)}
+                        data-testid={`nav-series-${s.id}`}
+                      >
+                        <FolderOpen className="w-4 h-4 text-purple-500 shrink-0" />
+                        <span className="truncate flex-1">{s.name}</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      </div>
+                    ))
+                  )}
+                  <button
+                    onClick={() => setSeriesDialogOpen(true)}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    data-testid="button-manage-series"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Kelola Series</span>
+                  </button>
+                </>
+              )}
+
+              {navLevel === 'bigIdeas' && (
+                <>
+                  <button
+                    onClick={() => navigateToLevel('series')}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors mb-1"
+                    data-testid="button-back-to-series"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                    <span>Kembali ke Series</span>
+                  </button>
+                  {filteredBigIdeas.length === 0 ? (
+                    <div className="py-3 text-sm text-muted-foreground text-center">
+                      Belum ada Big Idea
+                    </div>
+                  ) : (
+                    filteredBigIdeas.map((bi) => (
+                      <div
+                        key={bi.id}
+                        className={cn(
+                          "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                          bi.isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                        onClick={() => handleBigIdeaDrillDown(bi)}
+                        data-testid={`nav-bigidea-${bi.id}`}
+                      >
+                        <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
+                        <span className="truncate flex-1">{bi.name}</span>
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          <div className="invisible group-hover:visible flex items-center gap-0.5">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5"
+                              onClick={(e) => { e.stopPropagation(); handleEditBigIdea(bi); }}
+                              data-testid={`button-edit-bigidea-${bi.id}`}
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 text-destructive"
+                              onClick={(e) => { e.stopPropagation(); setDeleteBigIdeaConfirm(bi); }}
+                              data-testid={`button-delete-bigidea-${bi.id}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  <button
+                    onClick={() => setBigIdeaDialogOpen(true)}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    data-testid="button-add-bigidea"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Buat Big Idea Baru</span>
+                  </button>
+                </>
+              )}
+
+              {navLevel === 'toolboxes' && (
+                <>
+                  <button
+                    onClick={() => navigateToLevel('bigIdeas')}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors mb-1"
+                    data-testid="button-back-to-bigideas"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                    <span>Kembali ke Big Ideas</span>
+                  </button>
                   {toolboxes.length === 0 ? (
-                    <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                    <div className="py-3 text-sm text-muted-foreground text-center">
                       Belum ada Toolbox
                     </div>
                   ) : (
                     toolboxes.map((tb) => (
-                      <DropdownMenuItem
+                      <div
                         key={tb.id}
-                        onClick={() => handleToolboxSelect(tb)}
-                        className="gap-2"
-                        data-testid={`menu-toolbox-select-${tb.id}`}
+                        className={cn(
+                          "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                          tb.isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                        onClick={() => handleToolboxDrillDown(tb)}
+                        data-testid={`nav-toolbox-${tb.id}`}
                       >
                         <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                        <span className="truncate">{tb.name}</span>
-                        {tb.isActive && <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>}
-                      </DropdownMenuItem>
+                        <span className="truncate flex-1">{tb.name}</span>
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          <div className="invisible group-hover:visible flex items-center gap-0.5">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5"
+                              onClick={(e) => { e.stopPropagation(); handleEditToolbox(tb); }}
+                              data-testid={`button-edit-toolbox-${tb.id}`}
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-5 w-5 text-destructive"
+                              onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(tb); }}
+                              data-testid={`button-delete-toolbox-${tb.id}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                      </div>
                     ))
                   )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setToolboxDialogOpen(true)} className="gap-2" data-testid="button-add-toolbox-dropdown">
-                    <Plus className="w-4 h-4" />
-                    Buat Toolbox Baru
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Collapsible Toolboxes List - only shown when expanded */}
-            {!sidebarCollapsed && toolboxListExpanded && (
-              <div className="px-3 pt-1 pb-2 max-h-32 overflow-y-auto">
-                <div className="space-y-0.5">
-                  {toolboxes.map((tb) => (
-                    <div
-                      key={tb.id}
-                      className={cn(
-                        "group flex items-center gap-2 rounded-md px-2 py-1 text-xs cursor-pointer transition-colors",
-                        tb.isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                      )}
-                      onClick={() => handleToolboxSelect(tb)}
-                      data-testid={`list-toolbox-${tb.id}`}
-                    >
-                      <Wrench className="w-3 h-3 text-blue-500 shrink-0" />
-                      <span className="truncate flex-1">{tb.name}</span>
-                      {tb.isActive && <Badge variant="secondary" className="text-[9px] shrink-0">Aktif</Badge>}
-                      <div className="flex items-center gap-0.5 shrink-0 invisible group-hover:visible">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-5 w-5"
-                          onClick={(e) => { e.stopPropagation(); handleEditToolbox(tb); }}
-                          data-testid={`button-edit-toolbox-${tb.id}`}
-                        >
-                          <Pencil className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-5 w-5 text-destructive"
-                          onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(tb); }}
-                          data-testid={`button-delete-toolbox-${tb.id}`}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
                   <button
                     onClick={() => setToolboxDialogOpen(true)}
-                    className="w-full flex items-center gap-2 rounded-md px-2 py-1 text-xs text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
                     data-testid="button-add-toolbox"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-4 h-4" />
                     <span>Buat Toolbox Baru</span>
                   </button>
-                </div>
-              </div>
-            )}
+                </>
+              )}
 
-          </>
+              {navLevel === 'agents' && (
+                <>
+                  <button
+                    onClick={() => navigateToLevel('toolboxes')}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors mb-1"
+                    data-testid="button-back-to-toolboxes"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                    <span>Kembali ke Toolboxes</span>
+                  </button>
+                  {agentsLoading ? (
+                    <div className="py-3 text-sm text-muted-foreground text-center">Memuat...</div>
+                  ) : filteredAgents.length === 0 ? (
+                    <div className="py-3 text-sm text-muted-foreground text-center">
+                      Belum ada Chatbot
+                    </div>
+                  ) : (
+                    filteredAgents.map((agent) => (
+                      <div
+                        key={agent.id}
+                        className={cn(
+                          "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                          String(agent.id) === String(activeAgent?.id)
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                        onClick={() => handleAgentSelect(agent)}
+                        data-testid={`nav-agent-${agent.id}`}
+                      >
+                        <Avatar className="w-5 h-5 shrink-0">
+                          <AvatarFallback className={cn(
+                            "text-[9px]",
+                            agent.isOrchestrator ? "bg-purple-500/10 text-purple-600" : "bg-primary/10 text-primary"
+                          )}>
+                            {agent.isOrchestrator ? <Network className="w-3 h-3" /> : agent.name.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate flex-1">{agent.name}</span>
+                        {agent.isOrchestrator && (
+                          <Badge className="text-[9px] bg-purple-500/20 text-purple-600 border-purple-500/30 shrink-0">Orch</Badge>
+                        )}
+                      </div>
+                    ))
+                  )}
+                  <button
+                    onClick={() => setCreateDialogOpen(true)}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    data-testid="button-add-agent-sidebar"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Buat Chatbot Baru</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
