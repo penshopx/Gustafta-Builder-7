@@ -6,6 +6,7 @@ import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
+import { seedCivilproEcosystem } from "./seed-civilpro";
 
 const app = express();
 const httpServer = createServer(app);
@@ -171,6 +172,12 @@ for (const envVar of requiredEnvVars) {
         }
       } catch (err) {
         log("Failed to auto-seed Dokumentender: " + (err as Error).message);
+      }
+
+      try {
+        await seedCivilproEcosystem("49465846");
+      } catch (err) {
+        log("Failed to seed CIVILPRO ecosystem: " + (err as Error).message);
       }
 
       startScheduler();
