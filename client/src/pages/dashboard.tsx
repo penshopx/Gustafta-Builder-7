@@ -118,8 +118,8 @@ export default function Dashboard() {
   const setActiveAgent = useSetActiveAgent();
   
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
-  const [activeSeriesId, setActiveSeriesId] = useState<number | null>(null);
-  const activeSeries = allSeries.find((s: any) => s.id === activeSeriesId) || null;
+  const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
+  const activeSeries = allSeries.find((s: any) => String(s.id) === activeSeriesId) || null;
   
   const { data: bigIdeas = [] } = useBigIdeas();
   const { data: activeBigIdea } = useActiveBigIdea();
@@ -127,9 +127,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (activeBigIdea?.seriesId && allSeries.length > 0) {
-      const seriesIdNum = Number(activeBigIdea.seriesId);
-      if (activeSeriesId !== seriesIdNum) {
-        setActiveSeriesId(seriesIdNum);
+      const seriesIdStr = String(activeBigIdea.seriesId);
+      if (activeSeriesId !== seriesIdStr) {
+        setActiveSeriesId(seriesIdStr);
       }
     } else if (activeBigIdea && !activeBigIdea.seriesId) {
       setActiveSeriesId(null);
@@ -137,15 +137,15 @@ export default function Dashboard() {
   }, [activeBigIdea?.id, activeBigIdea?.seriesId, allSeries.length]);
   
   const filteredBigIdeas = activeSeriesId
-    ? bigIdeas.filter((bi: any) => Number(bi.seriesId) === activeSeriesId)
+    ? bigIdeas.filter((bi: any) => String(bi.seriesId) === activeSeriesId)
     : bigIdeas;
 
-  const handleSeriesSelect = (seriesId: number | null) => {
+  const handleSeriesSelect = (seriesId: string | null) => {
     setActiveSeriesId(seriesId);
     if (seriesId !== null) {
-      const filtered = bigIdeas.filter((bi: any) => Number(bi.seriesId) === seriesId);
+      const filtered = bigIdeas.filter((bi: any) => String(bi.seriesId) === seriesId);
       if (activeBigIdea) {
-        const belongsToSeries = Number(activeBigIdea.seriesId) === seriesId;
+        const belongsToSeries = String(activeBigIdea.seriesId) === seriesId;
         if (!belongsToSeries && filtered.length > 0) {
           activateBigIdea.mutate(String(filtered[0].id));
         }
@@ -199,19 +199,21 @@ export default function Dashboard() {
   useEffect(() => {
     if (navInitialized) return;
     if (allSeries.length === 0) return;
-    if (activeSeriesId && activeBigIdea && activeToolbox) {
+    if (!activeSeriesId) return;
+    if (activeBigIdea && activeToolbox && filteredAgents.length > 0) {
       setNavLevel('agents');
       setNavInitialized(true);
-    } else if (activeSeriesId && activeBigIdea) {
+    } else if (activeBigIdea && toolboxes.length > 0) {
       setNavLevel('toolboxes');
       setNavInitialized(true);
-    } else if (activeSeriesId) {
+    } else if (activeBigIdea) {
       setNavLevel('bigIdeas');
       setNavInitialized(true);
     } else {
+      setNavLevel('bigIdeas');
       setNavInitialized(true);
     }
-  }, [navInitialized, allSeries.length, activeSeriesId, activeBigIdea?.id, activeToolbox?.id]);
+  }, [navInitialized, allSeries.length, activeSeriesId, activeBigIdea?.id, activeToolbox?.id, toolboxes.length, filteredAgents.length]);
 
   if (authLoading) {
     return (
@@ -350,8 +352,8 @@ export default function Dashboard() {
     setNavLevel(level);
   };
 
-  const handleSeriesDrillDown = (seriesId: number) => {
-    setActiveSeriesId(seriesId);
+  const handleSeriesDrillDown = (seriesId: string | number) => {
+    setActiveSeriesId(String(seriesId));
     setNavLevel('bigIdeas');
   };
 
@@ -477,7 +479,7 @@ export default function Dashboard() {
                         key={s.id}
                         className={cn(
                           "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
-                          activeSeriesId === s.id
+                          activeSeriesId === String(s.id)
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
                             : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                         )}
@@ -994,7 +996,7 @@ export default function Dashboard() {
       {activeAgent && <ChatPopup agent={activeAgent} />}
 
       <CreateAgentDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
-      <CreateBigIdeaDialog open={bigIdeaDialogOpen} onOpenChange={setBigIdeaDialogOpen} seriesId={activeSeriesId} />
+      <CreateBigIdeaDialog open={bigIdeaDialogOpen} onOpenChange={setBigIdeaDialogOpen} seriesId={activeSeriesId ? Number(activeSeriesId) : null} />
       {activeBigIdea && (
         <CreateToolboxDialog 
           open={toolboxDialogOpen} 
