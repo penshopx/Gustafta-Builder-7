@@ -9,17 +9,19 @@ function getOpenAI(): OpenAI {
   return _openai;
 }
 
-const CHUNK_SIZE = 800;
-const CHUNK_OVERLAP = 200;
+export const RAG_DEFAULTS = {
+  chunkSize: 800,
+  chunkOverlap: 200,
+  topK: 5,
+};
 const EMBEDDING_MODEL = "text-embedding-3-small";
-const TOP_K_RESULTS = 5;
 const SIMILARITY_THRESHOLD = 0.3;
 
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
-export function chunkText(text: string, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP): string[] {
+export function chunkText(text: string, chunkSize = RAG_DEFAULTS.chunkSize, overlap = RAG_DEFAULTS.chunkOverlap): string[] {
   if (!text || text.trim().length === 0) return [];
 
   const cleanText = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
@@ -111,7 +113,7 @@ function cosineSimilarity(a: number[], b: number[]): number {
 export function retrieveRelevantChunks(
   queryEmbedding: number[],
   chunks: KnowledgeChunk[],
-  topK = TOP_K_RESULTS,
+  topK = RAG_DEFAULTS.topK,
   threshold = SIMILARITY_THRESHOLD
 ): { chunk: KnowledgeChunk; score: number }[] {
   if (queryEmbedding.length === 0 || chunks.length === 0) return [];
@@ -132,12 +134,14 @@ export async function processKnowledgeBaseForRAG(
   knowledgeBaseId: number,
   agentId: number,
   content: string,
-  name: string
+  name: string,
+  chunkSize = RAG_DEFAULTS.chunkSize,
+  chunkOverlap = RAG_DEFAULTS.chunkOverlap
 ): Promise<InsertKnowledgeChunk[]> {
   const textContent = content.trim();
   if (!textContent) return [];
 
-  const chunks = chunkText(textContent);
+  const chunks = chunkText(textContent, chunkSize, chunkOverlap);
   if (chunks.length === 0) return [];
 
   console.log(`[RAG] Processing "${name}": ${chunks.length} chunks created`);
@@ -162,7 +166,7 @@ export async function processKnowledgeBaseForRAG(
 export async function searchKnowledgeBase(
   query: string,
   allChunks: KnowledgeChunk[],
-  topK = TOP_K_RESULTS
+  topK = RAG_DEFAULTS.topK
 ): Promise<string> {
   if (allChunks.length === 0) return "";
 

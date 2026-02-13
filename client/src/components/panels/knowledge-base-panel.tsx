@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2, Settings2, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Slider } from "@/components/ui/slider";
 import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile, useUpdateKnowledgeBase, useRagStats, useReprocessRag } from "@/hooks/use-knowledge-base";
+import { useUpdateAgent } from "@/hooks/use-agents";
 import type { KnowledgeBase } from "@shared/schema";
 import type { Agent } from "@shared/schema";
 
@@ -59,11 +61,22 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const uploadFile = useUploadKnowledgeFile();
   const { data: ragStats } = useRagStats(agent.id);
   const reprocessRag = useReprocessRag();
+  const updateAgent = useUpdateAgent();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [ragSettingsOpen, setRagSettingsOpen] = useState(false);
+  const [ragChunkSize, setRagChunkSize] = useState(agent.ragChunkSize ?? 800);
+  const [ragChunkOverlap, setRagChunkOverlap] = useState(agent.ragChunkOverlap ?? 200);
+  const [ragTopK, setRagTopK] = useState(agent.ragTopK ?? 5);
+
+  useEffect(() => {
+    setRagChunkSize(agent.ragChunkSize ?? 800);
+    setRagChunkOverlap(agent.ragChunkOverlap ?? 200);
+    setRagTopK(agent.ragTopK ?? 5);
+  }, [agent.id, agent.ragChunkSize, agent.ragChunkOverlap, agent.ragTopK]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<KnowledgeBase | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -529,10 +542,111 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   </p>
                 </div>
               </div>
-              <Badge variant={ragStats.ragEnabled ? "default" : "secondary"} data-testid="badge-rag-status">
-                {ragStats.ragEnabled ? "Aktif" : "Belum Aktif"}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant={ragStats.ragEnabled ? "default" : "secondary"} data-testid="badge-rag-status">
+                  {ragStats.ragEnabled ? "Aktif" : "Belum Aktif"}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setRagSettingsOpen(!ragSettingsOpen)}
+                  data-testid="button-toggle-rag-settings"
+                >
+                  <Settings2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
+            {ragSettingsOpen && (
+              <div className="mt-4 space-y-4 border-t pt-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm">Ukuran Chunk (token)</Label>
+                    <span className="text-sm font-medium text-muted-foreground">{ragChunkSize}</span>
+                  </div>
+                  <Slider
+                    value={[ragChunkSize]}
+                    min={200}
+                    max={2000}
+                    step={100}
+                    onValueChange={([v]) => setRagChunkSize(v)}
+                    data-testid="slider-chunk-size"
+                  />
+                  <p className="text-xs text-muted-foreground">Ukuran setiap potongan dokumen. Lebih besar = konteks lebih lengkap, lebih kecil = pencarian lebih presisi. Default: 800</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm">Overlap (token)</Label>
+                    <span className="text-sm font-medium text-muted-foreground">{ragChunkOverlap}</span>
+                  </div>
+                  <Slider
+                    value={[ragChunkOverlap]}
+                    min={0}
+                    max={500}
+                    step={50}
+                    onValueChange={([v]) => setRagChunkOverlap(v)}
+                    data-testid="slider-chunk-overlap"
+                  />
+                  <p className="text-xs text-muted-foreground">Tumpang tindih antar potongan. Lebih besar = transisi lebih halus. Default: 200</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm">Hasil Pencarian (Top-K)</Label>
+                    <span className="text-sm font-medium text-muted-foreground">{ragTopK}</span>
+                  </div>
+                  <Slider
+                    value={[ragTopK]}
+                    min={1}
+                    max={20}
+                    step={1}
+                    onValueChange={([v]) => setRagTopK(v)}
+                    data-testid="slider-top-k"
+                  />
+                  <p className="text-xs text-muted-foreground">Jumlah potongan paling relevan yang diambil saat menjawab. Lebih banyak = konteks lebih luas. Default: 5</p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      updateAgent.mutate(
+                        { id: agent.id, data: { ragChunkSize, ragChunkOverlap, ragTopK } },
+                        {
+                          onSuccess: () => {
+                            const chunkSettingsChanged = ragChunkSize !== (agent.ragChunkSize ?? 800) || ragChunkOverlap !== (agent.ragChunkOverlap ?? 200);
+                            if (chunkSettingsChanged && knowledgeBases.length > 0) {
+                              toast({
+                                title: "Pengaturan RAG disimpan",
+                                description: "Ukuran chunk berubah. Klik tombol refresh pada setiap knowledge base untuk menerapkan pengaturan baru.",
+                                duration: 8000,
+                              });
+                            } else {
+                              toast({ title: "Pengaturan RAG disimpan", description: "Pengaturan berhasil diperbarui." });
+                            }
+                          },
+                          onError: () => toast({ title: "Error", description: "Gagal menyimpan pengaturan.", variant: "destructive" }),
+                        }
+                      );
+                    }}
+                    disabled={updateAgent.isPending}
+                    data-testid="button-save-rag-settings"
+                  >
+                    {updateAgent.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                    Simpan Pengaturan
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setRagChunkSize(800);
+                      setRagChunkOverlap(200);
+                      setRagTopK(5);
+                    }}
+                    data-testid="button-reset-rag-defaults"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reset Default
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

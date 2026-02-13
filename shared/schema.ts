@@ -140,6 +140,9 @@ export const agents = pgTable("agents", {
   brandingName: text("branding_name").default(""),
   brandingLogo: text("branding_logo").default(""),
   contextQuestions: jsonb("context_questions").default([]),
+  ragChunkSize: integer("rag_chunk_size").default(800),
+  ragChunkOverlap: integer("rag_chunk_overlap").default(200),
+  ragTopK: integer("rag_top_k").default(5),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -469,6 +472,9 @@ export const insertAgentSchema = z.object({
     options: z.array(z.string()).optional().default([]),
     required: z.boolean().optional().default(true),
   })).optional().default([]),
+  ragChunkSize: z.number().min(200).max(2000).optional().default(800),
+  ragChunkOverlap: z.number().min(0).max(500).optional().default(200),
+  ragTopK: z.number().min(1).max(20).optional().default(5),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId

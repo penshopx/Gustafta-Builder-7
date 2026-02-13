@@ -886,11 +886,14 @@ export async function registerRoutes(
       const textContent = parsed.data.extractedText || parsed.data.content || "";
       if (textContent.trim().length > 0) {
         try {
+          const agentForRag = await storage.getAgent(kb.agentId);
           const chunks = await processKnowledgeBaseForRAG(
             parseInt(kb.id),
             parseInt(kb.agentId),
             textContent,
-            kb.name
+            kb.name,
+            agentForRag?.ragChunkSize ?? 800,
+            agentForRag?.ragChunkOverlap ?? 200
           );
           if (chunks.length > 0) {
             await storage.createChunks(chunks);
@@ -989,11 +992,14 @@ export async function registerRoutes(
       if (textContent.trim().length > 0) {
         try {
           await storage.deleteChunksByKnowledgeBase(kb.id);
+          const agentForRag = await storage.getAgent(kb.agentId);
           const chunks = await processKnowledgeBaseForRAG(
             parseInt(kb.id),
             parseInt(kb.agentId),
             textContent,
-            kb.name
+            kb.name,
+            agentForRag?.ragChunkSize ?? 800,
+            agentForRag?.ragChunkOverlap ?? 200
           );
           if (chunks.length > 0) {
             await storage.createChunks(chunks);
@@ -1045,8 +1051,10 @@ export async function registerRoutes(
       try {
         await storage.deleteChunksByKnowledgeBase(kb.id);
         const textContent = kb.extractedText || kb.content || "";
+        const agentForRag = await storage.getAgent(kb.agentId);
         const chunks = await processKnowledgeBaseForRAG(
-          parseInt(kb.id), parseInt(kb.agentId), textContent, kb.name
+          parseInt(kb.id), parseInt(kb.agentId), textContent, kb.name,
+          agentForRag?.ragChunkSize ?? 800, agentForRag?.ragChunkOverlap ?? 200
         );
         if (chunks.length > 0) {
           await storage.createChunks(chunks);
@@ -1065,8 +1073,9 @@ export async function registerRoutes(
   // Get RAG chunk stats for an agent
   app.get("/api/knowledge-base/:agentId/rag-stats", isAuthenticated, async (req, res) => {
     try {
-      const chunks = await storage.getChunksByAgent(req.params.agentId);
-      const kbs = await storage.getKnowledgeBases(req.params.agentId);
+      const agentId = req.params.agentId as string;
+      const chunks = await storage.getChunksByAgent(agentId);
+      const kbs = await storage.getKnowledgeBases(agentId);
       const stats = {
         totalChunks: chunks.length,
         totalKnowledgeBases: kbs.length,
@@ -1215,7 +1224,7 @@ export async function registerRoutes(
       const ragChunks = await storage.getChunksByAgent(parsed.data.agentId);
       let knowledgeContext = "";
       if (ragChunks.length > 0) {
-        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunks);
+        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunks, agent.ragTopK ?? 5);
       } else {
         const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
         knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
@@ -1581,7 +1590,7 @@ export async function registerRoutes(
       const ragChunksStream = await storage.getChunksByAgent(parsed.data.agentId);
       let knowledgeContext = "";
       if (ragChunksStream.length > 0) {
-        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunksStream);
+        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunksStream, agent.ragTopK ?? 5);
       } else {
         const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
         knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
@@ -2038,7 +2047,7 @@ export async function registerRoutes(
     const ragChunksExt = await storage.getChunksByAgent(agentId);
     let knowledgeContext = "";
     if (ragChunksExt.length > 0) {
-      knowledgeContext = await searchKnowledgeBase(userMessage, ragChunksExt);
+      knowledgeContext = await searchKnowledgeBase(userMessage, ragChunksExt, agent.ragTopK ?? 5);
     } else {
       const knowledgeBases = await storage.getKnowledgeBases(agentId);
       knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
