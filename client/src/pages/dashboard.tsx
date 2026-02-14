@@ -183,6 +183,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!activeToolbox || filteredAgents.length === 0) return;
+    if (activeAgent?.isOrchestrator) return;
     if (!activeAgent) {
       setActiveAgent.mutate(String(filteredAgents[0].id));
     } else {
