@@ -209,10 +209,11 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             fileUrl: "",
           });
         },
-        onError: () => {
+        onError: (error: any) => {
+          console.error("KB creation error:", error);
           toast({
             title: "Error",
-            description: "Gagal menambahkan item knowledge base.",
+            description: error?.message || "Gagal menambahkan item knowledge base.",
             variant: "destructive",
           });
         },

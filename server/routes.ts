@@ -924,7 +924,8 @@ export async function registerRoutes(
         await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
       }
     } catch (error) {
-      res.status(500).json({ error: "Failed to create knowledge base" });
+      console.error("KB creation error:", error);
+      res.status(500).json({ error: "Failed to create knowledge base", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
