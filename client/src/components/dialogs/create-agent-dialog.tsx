@@ -16,7 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateAgent, useSetActiveAgent } from "@/hooks/use-agents";
+import { useCreateAgent } from "@/hooks/use-agents";
 import { useActiveToolbox } from "@/hooks/use-toolboxes";
 import { useActiveBigIdea } from "@/hooks/use-big-ideas";
 import { categories, getCategoryById } from "@/lib/categories";
@@ -35,7 +35,6 @@ type Step = "start" | "category" | "subcategory" | "details";
 export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator }: CreateAgentDialogProps) {
   const { toast } = useToast();
   const createAgent = useCreateAgent();
-  const setActiveAgent = useSetActiveAgent();
   const { data: activeToolbox } = useActiveToolbox();
   const { data: activeBigIdea } = useActiveBigIdea();
 
@@ -143,10 +142,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator }: Cre
     createAgent.mutate(
       agentData as InsertAgent,
       {
-        onSuccess: (newAgent: any) => {
-          if (newAgent?.id) {
-            setActiveAgent.mutate(String(newAgent.id));
-          }
+        onSuccess: () => {
           toast({
             title: "Chatbot Created",
             description: `${formData.name} has been created successfully.`,

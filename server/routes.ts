@@ -834,6 +834,7 @@ export async function registerRoutes(
       }
 
       const agent = await storage.createAgent(parsed.data);
+      await storage.setActiveAgent(String(agent.id));
       res.status(201).json(agent);
     } catch (error) {
       console.error("Agent creation error:", error);
