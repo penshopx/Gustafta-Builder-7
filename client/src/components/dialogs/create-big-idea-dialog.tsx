@@ -20,9 +20,10 @@ interface CreateBigIdeaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   seriesId?: number | null;
+  onCreated?: () => void;
 }
 
-export function CreateBigIdeaDialog({ open, onOpenChange, seriesId }: CreateBigIdeaDialogProps) {
+export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }: CreateBigIdeaDialogProps) {
   const [name, setName] = useState("");
   const [type, setType] = useState<"problem" | "idea" | "inspiration" | "mentoring">("problem");
   const [description, setDescription] = useState("");
@@ -65,6 +66,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId }: CreateBigI
       console.log("[CreateBigIdea] Sending payload:", JSON.stringify(payload));
       const result = await createBigIdea.mutateAsync(payload);
       console.log("[CreateBigIdea] Success:", JSON.stringify(result));
+      onCreated?.();
       
       toast({
         title: "Berhasil",

@@ -118,6 +118,8 @@ export default function Dashboard() {
   const { data: activeAgent } = useActiveAgent();
   const setActiveAgent = useSetActiveAgent();
   const agentCreationCooldown = useRef(false);
+  const bigIdeaCreationCooldown = useRef(false);
+  const toolboxCreationCooldown = useRef(false);
   
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
   const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
@@ -126,6 +128,17 @@ export default function Dashboard() {
   const { data: bigIdeas = [] } = useBigIdeas();
   const { data: activeBigIdea } = useActiveBigIdea();
   const activateBigIdea = useActivateBigIdea();
+
+  const [localBigIdeaId, setLocalBigIdeaId] = useState<string | undefined>();
+  const [localToolboxId, setLocalToolboxId] = useState<string | undefined>();
+
+  const effectiveBigIdeaId = localBigIdeaId || activeBigIdea?.id;
+
+  useEffect(() => {
+    if (activeBigIdea?.id && localBigIdeaId && String(activeBigIdea.id) === localBigIdeaId) {
+      setLocalBigIdeaId(undefined);
+    }
+  }, [activeBigIdea?.id, localBigIdeaId]);
 
   useEffect(() => {
     if (activeBigIdea?.seriesId && allSeries.length > 0) {
@@ -143,7 +156,10 @@ export default function Dashboard() {
     : bigIdeas;
 
   const handleSeriesSelect = (seriesId: string | null) => {
+    if (bigIdeaCreationCooldown.current) return;
     setActiveSeriesId(seriesId);
+    setLocalBigIdeaId(undefined);
+    setLocalToolboxId(undefined);
     if (seriesId !== null) {
       const filtered = bigIdeas.filter((bi: any) => String(bi.seriesId) === seriesId);
       if (activeBigIdea) {
@@ -159,18 +175,28 @@ export default function Dashboard() {
   
   const deleteBigIdea = useDeleteBigIdea();
   
-  const { data: toolboxes = [] } = useToolboxes(activeBigIdea?.id);
+  const { data: toolboxes = [] } = useToolboxes(effectiveBigIdeaId);
   const { data: activeToolbox } = useActiveToolbox();
   const activateToolbox = useActivateToolbox();
   const deleteToolbox = useDeleteToolbox();
 
-  const shouldFetchAgents = !!activeToolbox?.id;
-  const { data: agents = [], isLoading: agentsLoading } = useAgents(shouldFetchAgents ? activeToolbox.id : undefined);
+  const effectiveToolboxId = localToolboxId || activeToolbox?.id;
+  const shouldFetchAgents = !!effectiveToolboxId;
+  const { data: agents = [], isLoading: agentsLoading } = useAgents(shouldFetchAgents ? effectiveToolboxId : undefined);
   const filteredAgents = shouldFetchAgents ? agents : [];
 
   const { data: profile } = useProfile();
 
   useEffect(() => {
+    if (activeToolbox?.id && localToolboxId && String(activeToolbox.id) === localToolboxId) {
+      setLocalToolboxId(undefined);
+    }
+  }, [activeToolbox?.id, localToolboxId]);
+
+  useEffect(() => {
+    if (bigIdeaCreationCooldown.current) return;
+    if (toolboxCreationCooldown.current) return;
+    if (localToolboxId) return;
     if (!activeBigIdea || toolboxes.length === 0) return;
     if (!activeToolbox) {
       activateToolbox.mutate(String(toolboxes[0].id));
@@ -183,8 +209,10 @@ export default function Dashboard() {
   }, [activeBigIdea?.id, toolboxes, activeToolbox?.id]);
 
   useEffect(() => {
-    if (!activeToolbox || filteredAgents.length === 0) return;
+    if (!effectiveToolboxId || filteredAgents.length === 0) return;
     if (agentCreationCooldown.current) return;
+    if (toolboxCreationCooldown.current) return;
+    if (bigIdeaCreationCooldown.current) return;
     if (activeAgent?.isOrchestrator) return;
     if (!activeAgent) {
       setActiveAgent.mutate(String(filteredAgents[0].id));
@@ -194,7 +222,7 @@ export default function Dashboard() {
         setActiveAgent.mutate(String(filteredAgents[0].id));
       }
     }
-  }, [activeToolbox?.id, filteredAgents, activeAgent?.id]);
+  }, [effectiveToolboxId, filteredAgents, activeAgent?.id]);
 
   type HierarchyLevel = 'series' | 'bigIdeas' | 'toolboxes' | 'agents';
   const [navLevel, setNavLevel] = useState<HierarchyLevel>('series');
@@ -353,6 +381,13 @@ export default function Dashboard() {
   };
 
   const navigateToLevel = (level: HierarchyLevel) => {
+    if (level === 'series' || level === 'bigIdeas') {
+      setLocalBigIdeaId(undefined);
+      setLocalToolboxId(undefined);
+    }
+    if (level === 'toolboxes') {
+      setLocalToolboxId(undefined);
+    }
     setNavLevel(level);
   };
 
@@ -362,11 +397,14 @@ export default function Dashboard() {
   };
 
   const handleBigIdeaDrillDown = (bi: BigIdea) => {
+    setLocalBigIdeaId(String(bi.id));
+    setLocalToolboxId(undefined);
     handleBigIdeaSelect(bi);
     setNavLevel('toolboxes');
   };
 
   const handleToolboxDrillDown = (tb: Toolbox) => {
+    setLocalToolboxId(String(tb.id));
     handleToolboxSelect(tb);
     setNavLevel('agents');
   };
@@ -1022,12 +1060,24 @@ export default function Dashboard() {
           setTimeout(() => { agentCreationCooldown.current = false; }, 3000);
         }}
       />
-      <CreateBigIdeaDialog open={bigIdeaDialogOpen} onOpenChange={setBigIdeaDialogOpen} seriesId={activeSeriesId ? Number(activeSeriesId) : null} />
+      <CreateBigIdeaDialog 
+        open={bigIdeaDialogOpen} 
+        onOpenChange={setBigIdeaDialogOpen} 
+        seriesId={activeSeriesId ? Number(activeSeriesId) : null}
+        onCreated={() => {
+          bigIdeaCreationCooldown.current = true;
+          setTimeout(() => { bigIdeaCreationCooldown.current = false; }, 3000);
+        }}
+      />
       {activeBigIdea && (
         <CreateToolboxDialog 
           open={toolboxDialogOpen} 
           onOpenChange={setToolboxDialogOpen} 
           bigIdea={activeBigIdea}
+          onCreated={() => {
+            toolboxCreationCooldown.current = true;
+            setTimeout(() => { toolboxCreationCooldown.current = false; }, 3000);
+          }}
         />
       )}
       <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />

@@ -19,9 +19,10 @@ interface CreateToolboxDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   bigIdea: BigIdea;
+  onCreated?: () => void;
 }
 
-export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolboxDialogProps) {
+export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: CreateToolboxDialogProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [purpose, setPurpose] = useState("");
@@ -50,6 +51,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea }: CreateToolb
         capabilities: capabilities.filter(c => c.trim()),
         limitations: limitations.filter(l => l.trim()),
       });
+      onCreated?.();
       
       toast({
         title: "Berhasil",
