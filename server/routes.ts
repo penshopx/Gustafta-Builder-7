@@ -728,49 +728,51 @@ export async function registerRoutes(
         return res.status(401).json({ error: "User ID not found" });
       }
 
-      // Check subscription status - auto-create free trial if no subscription exists
-      let subscription = await storage.getActiveSubscription(userId);
-      
-      if (!subscription) {
-        // Auto-create free trial subscription for new users
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 14); // 14-day free trial
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map(id => id.trim());
+      const isAdmin = adminIds.includes(userId);
+
+      if (!isAdmin) {
+        let subscription = await storage.getActiveSubscription(userId);
         
-        subscription = await storage.createSubscription({
-          userId,
-          plan: "free_trial",
-          status: "active",
-          amount: 0,
-          currency: "IDR",
-          chatbotLimit: 1,
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-        });
-        
-        console.log(`Created free trial subscription for user ${userId}`);
-      }
+        if (!subscription) {
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 14);
+          
+          subscription = await storage.createSubscription({
+            userId,
+            plan: "free_trial",
+            status: "active",
+            amount: 0,
+            currency: "IDR",
+            chatbotLimit: 3,
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+          });
+          
+          console.log(`Created free trial subscription for user ${userId}`);
+        }
 
-      if (subscription.status !== "active") {
-        return res.status(403).json({ 
-          error: "Subscription expired",
-          message: "Langganan Anda sudah habis. Silakan perpanjang untuk membuat chatbot baru.",
-          code: "SUBSCRIPTION_EXPIRED"
-        });
-      }
+        if (subscription.status !== "active") {
+          return res.status(403).json({ 
+            error: "Subscription expired",
+            message: "Langganan Anda sudah habis. Silakan perpanjang untuk membuat chatbot baru.",
+            code: "SUBSCRIPTION_EXPIRED"
+          });
+        }
 
-      // Check chatbot limit
-      const currentAgentCount = await storage.countUserAgents(userId);
-      const chatbotLimit = subscription.chatbotLimit || 1;
+        const currentAgentCount = await storage.countUserAgents(userId);
+        const chatbotLimit = subscription.chatbotLimit || 3;
 
-      if (currentAgentCount >= chatbotLimit) {
-        return res.status(403).json({ 
-          error: "Chatbot limit reached",
-          message: `Anda sudah mencapai batas ${chatbotLimit} chatbot. Upgrade paket untuk menambah chatbot.`,
-          code: "LIMIT_REACHED",
-          currentCount: currentAgentCount,
-          limit: chatbotLimit
-        });
+        if (currentAgentCount >= chatbotLimit) {
+          return res.status(403).json({ 
+            error: "Chatbot limit reached",
+            message: `Anda sudah mencapai batas ${chatbotLimit} chatbot. Upgrade paket untuk menambah chatbot.`,
+            code: "LIMIT_REACHED",
+            currentCount: currentAgentCount,
+            limit: chatbotLimit
+          });
+        }
       }
 
       // Parse and validate agent data
