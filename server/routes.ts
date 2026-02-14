@@ -368,6 +368,22 @@ export async function registerRoutes(
     }
   });
 
+  // Upload chatbot avatar as base64 data URL (persisted in database)
+  app.post("/api/agents/avatar-upload", isAuthenticated, avatarUpload.single("file"), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      const mimeType = req.file.mimetype;
+      const base64Data = req.file.buffer.toString("base64");
+      const dataUrl = `data:${mimeType};base64,${base64Data}`;
+      res.json({ fileUrl: dataUrl });
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      res.status(500).json({ error: "Failed to upload avatar" });
+    }
+  });
+
   // ==================== Series Routes ====================
 
   // Public: Get all public series with stats

@@ -131,7 +131,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       const formDataUpload = new FormData();
       formDataUpload.append("file", file);
       
-      const res = await fetch("/api/knowledge-base/upload", {
+      const res = await fetch("/api/agents/avatar-upload", {
         method: "POST",
         body: formDataUpload,
       });

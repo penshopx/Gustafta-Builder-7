@@ -48,12 +48,14 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: true,
       staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 60,
       retry: (failureCount, error) => {
         if (error instanceof Error && error.message.startsWith("401")) {
-          return false;
+          return failureCount < 1;
         }
         return failureCount < 2;
       },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     },
     mutations: {
       retry: false,
