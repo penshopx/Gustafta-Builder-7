@@ -3484,6 +3484,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         trialDays: agent.trialDays ?? 7,
         messageQuotaDaily: agent.messageQuotaDaily ?? 50,
         messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
+        guestMessageLimit: agent.guestMessageLimit ?? 10,
+        contextQuestions: agent.contextQuestions || [],
       };
       
       res.json(widgetConfig);

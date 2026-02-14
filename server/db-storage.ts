@@ -816,6 +816,11 @@ export class DatabaseStorage implements IStorage {
       requireRegistration: row.requireRegistration ?? false,
       brandingName: row.brandingName || "",
       brandingLogo: row.brandingLogo || "",
+      contextQuestions: (row.contextQuestions as any[]) || [],
+      guestMessageLimit: row.guestMessageLimit ?? 10,
+      ragChunkSize: row.ragChunkSize ?? 800,
+      ragChunkOverlap: row.ragChunkOverlap ?? 200,
+      ragTopK: row.ragTopK ?? 5,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };
