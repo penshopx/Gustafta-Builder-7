@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
@@ -117,6 +117,7 @@ export default function Dashboard() {
   
   const { data: activeAgent } = useActiveAgent();
   const setActiveAgent = useSetActiveAgent();
+  const agentCreationCooldown = useRef(false);
   
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
   const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
@@ -183,6 +184,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!activeToolbox || filteredAgents.length === 0) return;
+    if (agentCreationCooldown.current) return;
     if (activeAgent?.isOrchestrator) return;
     if (!activeAgent) {
       setActiveAgent.mutate(String(filteredAgents[0].id));
@@ -1015,6 +1017,10 @@ export default function Dashboard() {
           if (!open) setCreateAsOrchestrator(false);
         }}
         forceOrchestrator={createAsOrchestrator}
+        onCreated={() => {
+          agentCreationCooldown.current = true;
+          setTimeout(() => { agentCreationCooldown.current = false; }, 3000);
+        }}
       />
       <CreateBigIdeaDialog open={bigIdeaDialogOpen} onOpenChange={setBigIdeaDialogOpen} seriesId={activeSeriesId ? Number(activeSeriesId) : null} />
       {activeBigIdea && (

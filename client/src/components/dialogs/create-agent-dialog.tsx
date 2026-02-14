@@ -28,11 +28,12 @@ interface CreateAgentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   forceOrchestrator?: boolean;
+  onCreated?: () => void;
 }
 
 type Step = "start" | "category" | "subcategory" | "details";
 
-export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator }: CreateAgentDialogProps) {
+export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCreated }: CreateAgentDialogProps) {
   const { toast } = useToast();
   const createAgent = useCreateAgent();
   const { data: activeToolbox } = useActiveToolbox();
@@ -143,6 +144,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator }: Cre
       agentData as InsertAgent,
       {
         onSuccess: () => {
+          onCreated?.();
           toast({
             title: "Chatbot Created",
             description: `${formData.name} has been created successfully.`,
