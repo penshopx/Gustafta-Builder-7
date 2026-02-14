@@ -131,6 +131,42 @@ export async function setupAuth(app: Express) {
   });
 }
 
+const refreshLocks = new Map<string, Promise<boolean>>();
+
+async function performTokenRefresh(user: any, req: any): Promise<boolean> {
+  const sessionId = req.sessionID || "default";
+
+  const existing = refreshLocks.get(sessionId);
+  if (existing) {
+    return existing;
+  }
+
+  const refreshPromise = (async () => {
+    try {
+      const refreshToken = user.refresh_token;
+      if (!refreshToken) return false;
+      const config = await getOidcConfig();
+      const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+      updateUserSession(user, tokenResponse);
+      await new Promise<void>((resolve, reject) => {
+        req.session?.save((err: any) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+      return true;
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+      return false;
+    } finally {
+      setTimeout(() => refreshLocks.delete(sessionId), 1000);
+    }
+  })();
+
+  refreshLocks.set(sessionId, refreshPromise);
+  return refreshPromise;
+}
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
@@ -143,33 +179,14 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  const gracePeriod = 5 * 60;
-  if (now <= user.expires_at + gracePeriod) {
-    if (now > user.expires_at && user.refresh_token) {
-      try {
-        const config = await getOidcConfig();
-        const tokenResponse = await client.refreshTokenGrant(config, user.refresh_token);
-        updateUserSession(user, tokenResponse);
-        req.session?.save(() => {});
-      } catch (_e) {
-      }
-    }
+  if (now <= user.expires_at) {
     return next();
   }
 
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    return res.status(401).json({ message: "Unauthorized" });
+  const refreshed = await performTokenRefresh(user, req);
+  if (refreshed) {
+    return next();
   }
 
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    req.session?.save(() => {});
-    return next();
-  } catch (error) {
-    console.error("Token refresh failed:", error);
-    return res.status(401).json({ message: "Unauthorized" });
-  }
+  return res.status(401).json({ message: "Unauthorized" });
 };
