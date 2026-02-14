@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network } from "lucide-react";
 import {
   Dialog,
@@ -27,19 +27,27 @@ import type { InsertAgent } from "@shared/schema";
 interface CreateAgentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  forceOrchestrator?: boolean;
 }
 
 type Step = "start" | "category" | "subcategory" | "details";
 
-export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps) {
+export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator }: CreateAgentDialogProps) {
   const { toast } = useToast();
   const createAgent = useCreateAgent();
   const { data: activeToolbox } = useActiveToolbox();
   const { data: activeBigIdea } = useActiveBigIdea();
 
-  const [step, setStep] = useState<Step>("start");
+  const [step, setStep] = useState<Step>(forceOrchestrator ? "category" : "start");
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
-  const [isOrchestrator, setIsOrchestrator] = useState(false);
+  const [isOrchestrator, setIsOrchestrator] = useState(forceOrchestrator || false);
+
+  useEffect(() => {
+    if (open && forceOrchestrator) {
+      setIsOrchestrator(true);
+      setStep("category");
+    }
+  }, [open, forceOrchestrator]);
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -68,7 +76,11 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
 
   const handleBack = () => {
     if (step === "category") {
-      setStep("start");
+      if (forceOrchestrator) {
+        handleClose(false);
+      } else {
+        setStep("start");
+      }
     } else if (step === "subcategory") {
       setStep("category");
     } else if (step === "details") {
@@ -321,6 +333,21 @@ export function CreateAgentDialog({ open, onOpenChange }: CreateAgentDialogProps
 
         {step === "category" && (
           <ScrollArea className="h-[400px] pr-4">
+            {forceOrchestrator && activeBigIdea && (
+              <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20 space-y-1 mb-3">
+                <p className="text-xs text-muted-foreground">Orchestrator untuk Big Idea:</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="gap-1">
+                    <Lightbulb className="h-3 w-3" />
+                    {activeBigIdea.name}
+                  </Badge>
+                  <Badge className="gap-1 bg-purple-500/20 text-purple-600 border-purple-500/30">
+                    <Network className="h-3 w-3" />
+                    Orchestrator (di atas semua Toolbox)
+                  </Badge>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 py-2">
               {categories.map((category) => {
                 const IconComponent = category.icon;

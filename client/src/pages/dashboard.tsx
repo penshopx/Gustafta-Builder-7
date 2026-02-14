@@ -84,6 +84,7 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
 export default function Dashboard() {
   const [activeNav, setActiveNav] = useState<NavItem>("persona");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createAsOrchestrator, setCreateAsOrchestrator] = useState(false);
   const [bigIdeaDialogOpen, setBigIdeaDialogOpen] = useState(false);
   const [toolboxDialogOpen, setToolboxDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -632,6 +633,17 @@ export default function Dashboard() {
                     <Plus className="w-4 h-4" />
                     <span>Buat Toolbox Baru</span>
                   </button>
+                  <button
+                    onClick={() => {
+                      setCreateDialogOpen(true);
+                      setCreateAsOrchestrator(true);
+                    }}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors"
+                    data-testid="button-add-orchestrator"
+                  >
+                    <Network className="w-4 h-4" />
+                    <span>Buat Orchestrator</span>
+                  </button>
                 </>
               )}
 
@@ -995,7 +1007,14 @@ export default function Dashboard() {
 
       {activeAgent && <ChatPopup agent={activeAgent} />}
 
-      <CreateAgentDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+      <CreateAgentDialog 
+        open={createDialogOpen} 
+        onOpenChange={(open) => {
+          setCreateDialogOpen(open);
+          if (!open) setCreateAsOrchestrator(false);
+        }}
+        forceOrchestrator={createAsOrchestrator}
+      />
       <CreateBigIdeaDialog open={bigIdeaDialogOpen} onOpenChange={setBigIdeaDialogOpen} seriesId={activeSeriesId ? Number(activeSeriesId) : null} />
       {activeBigIdea && (
         <CreateToolboxDialog 
