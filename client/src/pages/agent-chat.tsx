@@ -304,7 +304,16 @@ export default function AgentChat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const sessionIdRef = useRef(`chat_${params.agentId}_${Date.now()}`);
+  const [stableSessionId] = useState(() => {
+    const storageKey = `gustafta_session_${params.agentId}`;
+    let sid = localStorage.getItem(storageKey);
+    if (!sid) {
+      sid = `chat_${params.agentId}_${Date.now()}`;
+      localStorage.setItem(storageKey, sid);
+    }
+    return sid;
+  });
+  const sessionIdRef = useRef<string>(stableSessionId);
   const [pendingFiles, setPendingFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -331,17 +340,35 @@ export default function AgentChat() {
   const getStorageKey = useCallback(() => `gustafta_chat_${params.agentId}`, [params.agentId]);
 
   useEffect(() => {
-    try {
-      const key = getStorageKey();
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+    const loadMessages = async () => {
+      try {
+        const res = await fetch(`/api/messages/${params.agentId}/session/${sessionIdRef.current}`);
+        if (res.ok) {
+          const dbMessages = await res.json();
+          if (Array.isArray(dbMessages) && dbMessages.length > 0) {
+            setMessages(dbMessages.map((m: any) => ({
+              id: String(m.id),
+              role: m.role,
+              content: m.content,
+              timestamp: new Date(m.createdAt || m.timestamp),
+            })));
+            return;
+          }
         }
-      }
-    } catch {}
-  }, [getStorageKey]);
+      } catch {}
+      try {
+        const key = getStorageKey();
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+          }
+        }
+      } catch {}
+    };
+    loadMessages();
+  }, [params.agentId, getStorageKey]);
 
   useEffect(() => {
     try {
@@ -394,6 +421,9 @@ export default function AgentChat() {
     setFollowUpSuggestions([]);
     localStorage.removeItem(getStorageKey());
     localStorage.removeItem(`gustafta_context_${params.agentId}`);
+    const newSessionId = `chat_${params.agentId}_${Date.now()}`;
+    sessionIdRef.current = newSessionId;
+    localStorage.setItem(`gustafta_session_${params.agentId}`, newSessionId);
     setProjectContext({});
     setContextCompleted(false);
     if (config?.contextQuestions && config.contextQuestions.length > 0) {

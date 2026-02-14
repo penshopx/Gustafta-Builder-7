@@ -1066,6 +1066,27 @@ export class DatabaseStorage implements IStorage {
     return result.map(row => ({
       id: String(row.id),
       agentId: String(row.agentId),
+      sessionId: row.sessionId || "",
+      role: row.role as "user" | "assistant",
+      content: row.content,
+      reasoning: row.reasoning || "",
+      confidence: row.confidence || undefined,
+      sources: (row.sources as string[]) || [],
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async getMessagesBySession(agentId: string, sessionId: string): Promise<Message[]> {
+    const result = await db.select().from(agentMessages)
+      .where(and(
+        eq(agentMessages.agentId, parseInt(agentId)),
+        eq(agentMessages.sessionId, sessionId)
+      ))
+      .orderBy(agentMessages.createdAt);
+    return result.map(row => ({
+      id: String(row.id),
+      agentId: String(row.agentId),
+      sessionId: row.sessionId || "",
       role: row.role as "user" | "assistant",
       content: row.content,
       reasoning: row.reasoning || "",

@@ -123,6 +123,7 @@ export interface IStorage {
 
   // Message methods
   getMessages(agentId: string): Promise<Message[]>;
+  getMessagesBySession(agentId: string, sessionId: string): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   clearMessages(agentId: string): Promise<boolean>;
 
@@ -928,6 +929,12 @@ export class MemStorage implements IStorage {
   async getMessages(agentId: string): Promise<Message[]> {
     return Array.from(this.messages.values())
       .filter((msg) => msg.agentId === agentId)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }
+
+  async getMessagesBySession(agentId: string, sessionId: string): Promise<Message[]> {
+    return Array.from(this.messages.values())
+      .filter((msg) => msg.agentId === agentId && msg.sessionId === sessionId)
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }
 

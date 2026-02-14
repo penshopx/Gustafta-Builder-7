@@ -201,6 +201,18 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"));
+    }
+  },
+});
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => {
@@ -329,15 +341,29 @@ export async function registerRoutes(
     }
   });
 
-  // Upload avatar
-  app.post("/api/profile/avatar", isAuthenticated, upload.single("avatar"), async (req, res) => {
+  // Upload avatar - stores as base64 data URL in database
+  app.post("/api/profile/avatar", isAuthenticated, avatarUpload.single("avatar"), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
-      const avatarUrl = `/uploads/${req.file.filename}`;
+      const base64Data = req.file.buffer.toString("base64");
+      const mimeType = req.file.mimetype || "image/png";
+      const avatarUrl = `data:${mimeType};base64,${base64Data}`;
+      const userId = req.user?.claims?.sub || "default-user";
+      try {
+        const existingProfile = await storage.getUserProfile(userId);
+        if (existingProfile) {
+          await storage.updateUserProfile(userId, { avatarUrl });
+        } else {
+          await storage.createUserProfile({ userId, displayName: userId, avatarUrl, bio: "", company: "", position: "" });
+        }
+      } catch (e) {
+        console.error("Failed to persist avatar to profile:", e);
+      }
       res.json({ avatarUrl });
     } catch (error) {
+      console.error("Avatar upload error:", error);
       res.status(500).json({ error: "Failed to upload avatar" });
     }
   });
@@ -1232,6 +1258,16 @@ export async function registerRoutes(
       res.json(messages);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  // Get messages by session ID (for public chat persistence)
+  app.get("/api/messages/:agentId/session/:sessionId", async (req, res) => {
+    try {
+      const messages = await storage.getMessagesBySession(req.params.agentId, req.params.sessionId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch session messages" });
     }
   });
 
