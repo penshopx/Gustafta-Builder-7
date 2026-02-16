@@ -5187,5 +5187,37 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
     }
   });
 
+  app.get("/api/landing/:agentId", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.agentId as string);
+      if (!agent || !agent.landingPageEnabled) {
+        return res.status(404).json({ error: "Landing page not found" });
+      }
+      res.json({
+        id: agent.id,
+        name: agent.name,
+        description: agent.description,
+        avatar: agent.avatar,
+        landingPageEnabled: agent.landingPageEnabled,
+        landingHeroHeadline: agent.landingHeroHeadline,
+        landingHeroSubheadline: agent.landingHeroSubheadline,
+        landingHeroCtaText: agent.landingHeroCtaText,
+        landingPainPoints: agent.landingPainPoints,
+        landingSolutionText: agent.landingSolutionText,
+        landingBenefits: agent.landingBenefits,
+        landingDemoItems: agent.landingDemoItems,
+        landingTestimonials: agent.landingTestimonials,
+        landingFaq: agent.landingFaq,
+        landingAuthority: agent.landingAuthority,
+        landingGuarantees: agent.landingGuarantees,
+        productFeatures: agent.productFeatures,
+        conversionOffers: agent.conversionOffers,
+        monthlyPrice: agent.monthlyPrice,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch landing page" });
+    }
+  });
+
   return httpServer;
 }
