@@ -31,8 +31,11 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
   const [targetAudience, setTargetAudience] = useState("");
   const [expectedOutcome, setExpectedOutcome] = useState("");
   const [selectedSeriesId, setSelectedSeriesId] = useState<string>("none");
+  const [selectedCoreId, setSelectedCoreId] = useState<string>("none");
 
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
+  const { data: allCores = [] } = useQuery<any[]>({ queryKey: ["/api/cores"] });
+  const availableCores = allCores.filter((c: any) => selectedSeriesId !== "none" && c.seriesId === selectedSeriesId);
   const updateBigIdea = useUpdateBigIdea();
   const { toast } = useToast();
 
@@ -45,6 +48,7 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
       setTargetAudience(bigIdea.targetAudience || "");
       setExpectedOutcome(bigIdea.expectedOutcome || "");
       setSelectedSeriesId(bigIdea.seriesId ? String(bigIdea.seriesId) : "none");
+      setSelectedCoreId(bigIdea.coreId ? String(bigIdea.coreId) : "none");
     }
   }, [open, bigIdea]);
 
@@ -69,6 +73,7 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           targetAudience: targetAudience.trim(),
           expectedOutcome: expectedOutcome.trim(),
           seriesId: selectedSeriesId !== "none" ? String(selectedSeriesId) : "",
+          coreId: selectedCoreId !== "none" ? String(selectedCoreId) : null,
         },
       });
 
@@ -136,6 +141,23 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
               </SelectContent>
             </Select>
           </div>
+
+          {availableCores.length > 0 && (
+            <div className="space-y-2">
+              <Label>Core (opsional - payung strategis)</Label>
+              <Select value={selectedCoreId} onValueChange={setSelectedCoreId}>
+                <SelectTrigger data-testid="select-core-edit">
+                  <SelectValue placeholder="Pilih Core" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Tanpa Core</SelectItem>
+                  {availableCores.map((c: any) => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Tipe Big Idea</Label>

@@ -20,6 +20,7 @@ import {
   clientSubscriptions,
   affiliates,
   series,
+  cores,
   vouchers,
   voucherRedemptions,
   userMemories,
@@ -69,6 +70,8 @@ import type {
   InsertSeries,
   SeriesWithStats,
   SeriesWithHierarchy,
+  Core,
+  InsertCore,
   Voucher,
   InsertVoucher,
   VoucherRedemption,
@@ -234,7 +237,8 @@ export class DatabaseStorage implements IStorage {
           totalAgents += agentRows.length;
         }
       }
-      result.push({ ...mapped, totalBigIdeas: biIds.length, totalToolboxes, totalAgents });
+      const coreCount = await db.select({ id: cores.id }).from(cores).where(eq(cores.seriesId, s.id));
+      result.push({ ...mapped, totalBigIdeas: biIds.length, totalToolboxes, totalAgents, totalCores: coreCount.length });
     }
     return result;
   }
@@ -251,6 +255,10 @@ export class DatabaseStorage implements IStorage {
     if (sRows.length === 0) return undefined;
     const mapped = this.mapSeriesRow(sRows[0]);
 
+    const coreRows = await db.select().from(cores)
+      .where(eq(cores.seriesId, sid))
+      .orderBy(cores.sortOrder);
+
     const biRows = await db.select().from(bigIdeas)
       .where(eq(bigIdeas.seriesId, sid))
       .orderBy(bigIdeas.sortOrder);
@@ -258,8 +266,7 @@ export class DatabaseStorage implements IStorage {
     let totalToolboxes = 0;
     let totalAgents = 0;
 
-    const bigIdeasWithToolboxes = [];
-    for (const bi of biRows) {
+    const buildBigIdeaWithToolboxes = async (bi: any) => {
       const tbRows = await db.select().from(toolboxes)
         .where(eq(toolboxes.bigIdeaId, bi.id))
         .orderBy(toolboxes.sortOrder);
@@ -296,20 +303,29 @@ export class DatabaseStorage implements IStorage {
         });
       }
 
-      bigIdeasWithToolboxes.push({
-        id: String(bi.id),
-        name: bi.name,
-        type: bi.type as "problem" | "idea" | "inspiration" | "mentoring",
-        description: bi.description,
-        goals: (bi.goals as string[]) || [],
-        targetAudience: bi.targetAudience || "",
-        expectedOutcome: bi.expectedOutcome || "",
-        seriesId: bi.seriesId ? String(bi.seriesId) : undefined,
-        sortOrder: bi.sortOrder || 0,
-        isActive: bi.isActive || false,
-        createdAt: bi.createdAt.toISOString(),
+      return {
+        ...this.mapBigIdeaRow(bi),
         toolboxes: toolboxesWithAgents,
+      };
+    };
+
+    const coresWithBigIdeas = [];
+    for (const c of coreRows) {
+      const coreBigIdeas = biRows.filter(bi => bi.coreId === c.id);
+      const coreBigIdeasMapped = [];
+      for (const bi of coreBigIdeas) {
+        coreBigIdeasMapped.push(await buildBigIdeaWithToolboxes(bi));
+      }
+      coresWithBigIdeas.push({
+        ...this.mapCoreRow(c),
+        bigIdeas: coreBigIdeasMapped,
       });
+    }
+
+    const ungroupedBigIdeas = biRows.filter(bi => !bi.coreId);
+    const ungroupedMapped = [];
+    for (const bi of ungroupedBigIdeas) {
+      ungroupedMapped.push(await buildBigIdeaWithToolboxes(bi));
     }
 
     return {
@@ -317,7 +333,9 @@ export class DatabaseStorage implements IStorage {
       totalBigIdeas: biRows.length,
       totalToolboxes,
       totalAgents,
-      bigIdeas: bigIdeasWithToolboxes,
+      totalCores: coreRows.length,
+      cores: coresWithBigIdeas,
+      bigIdeas: ungroupedMapped,
     };
   }
 
@@ -369,10 +387,63 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
+  // Core methods
+  private mapCoreRow(row: any): Core {
+    return {
+      id: String(row.id),
+      seriesId: String(row.seriesId),
+      name: row.name,
+      description: row.description || "",
+      sortOrder: row.sortOrder || 0,
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getCores(seriesId?: string): Promise<Core[]> {
+    const query = seriesId
+      ? db.select().from(cores).where(eq(cores.seriesId, parseInt(seriesId))).orderBy(cores.sortOrder)
+      : db.select().from(cores).orderBy(cores.sortOrder);
+    const result = await query;
+    return result.map(r => this.mapCoreRow(r));
+  }
+
+  async getCore(id: string): Promise<Core | undefined> {
+    const result = await db.select().from(cores).where(eq(cores.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapCoreRow(result[0]);
+  }
+
+  async createCore(data: InsertCore): Promise<Core> {
+    const result = await db.insert(cores).values({
+      seriesId: parseInt(data.seriesId),
+      name: data.name,
+      description: data.description || "",
+      sortOrder: data.sortOrder || 0,
+      isActive: true,
+    }).returning();
+    return this.mapCoreRow(result[0]);
+  }
+
+  async updateCore(id: string, data: Partial<InsertCore>): Promise<Core | undefined> {
+    const updateData: any = { ...data };
+    if ('seriesId' in updateData && updateData.seriesId) {
+      updateData.seriesId = parseInt(updateData.seriesId);
+    }
+    const result = await db.update(cores).set(updateData).where(eq(cores.id, parseInt(id))).returning();
+    if (result.length === 0) return undefined;
+    return this.mapCoreRow(result[0]);
+  }
+
+  async deleteCore(id: string): Promise<boolean> {
+    await db.update(bigIdeas).set({ coreId: null }).where(eq(bigIdeas.coreId, parseInt(id)));
+    const result = await db.delete(cores).where(eq(cores.id, parseInt(id))).returning();
+    return result.length > 0;
+  }
+
   // Big Idea methods
-  async getBigIdeas(): Promise<BigIdea[]> {
-    const result = await db.select().from(bigIdeas).orderBy(desc(bigIdeas.createdAt));
-    return result.map(row => ({
+  private mapBigIdeaRow(row: any): BigIdea {
+    return {
       id: String(row.id),
       name: row.name,
       type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
@@ -381,48 +452,28 @@ export class DatabaseStorage implements IStorage {
       targetAudience: row.targetAudience || "",
       expectedOutcome: row.expectedOutcome || "",
       seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      coreId: row.coreId ? String(row.coreId) : undefined,
       sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
-    }));
+    };
+  }
+
+  async getBigIdeas(): Promise<BigIdea[]> {
+    const result = await db.select().from(bigIdeas).orderBy(desc(bigIdeas.createdAt));
+    return result.map(row => this.mapBigIdeaRow(row));
   }
 
   async getBigIdea(id: string): Promise<BigIdea | undefined> {
     const result = await db.select().from(bigIdeas).where(eq(bigIdeas.id, parseInt(id))).limit(1);
     if (result.length === 0) return undefined;
-    const row = result[0];
-    return {
-      id: String(row.id),
-      name: row.name,
-      type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
-      description: row.description,
-      goals: (row.goals as string[]) || [],
-      targetAudience: row.targetAudience || "",
-      expectedOutcome: row.expectedOutcome || "",
-      seriesId: row.seriesId ? String(row.seriesId) : undefined,
-      sortOrder: row.sortOrder || 0,
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.mapBigIdeaRow(result[0]);
   }
 
   async getActiveBigIdea(): Promise<BigIdea | null> {
     const result = await db.select().from(bigIdeas).where(eq(bigIdeas.isActive, true)).limit(1);
     if (result.length === 0) return null;
-    const row = result[0];
-    return {
-      id: String(row.id),
-      name: row.name,
-      type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
-      description: row.description,
-      goals: (row.goals as string[]) || [],
-      targetAudience: row.targetAudience || "",
-      expectedOutcome: row.expectedOutcome || "",
-      seriesId: row.seriesId ? String(row.seriesId) : undefined,
-      sortOrder: row.sortOrder || 0,
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.mapBigIdeaRow(result[0]);
   }
 
   async createBigIdea(insertBigIdea: InsertBigIdea): Promise<BigIdea> {
@@ -435,23 +486,11 @@ export class DatabaseStorage implements IStorage {
       targetAudience: insertBigIdea.targetAudience || "",
       expectedOutcome: insertBigIdea.expectedOutcome || "",
       seriesId: insertBigIdea.seriesId ? parseInt(insertBigIdea.seriesId) : null,
+      coreId: insertBigIdea.coreId ? parseInt(insertBigIdea.coreId) : null,
       sortOrder: insertBigIdea.sortOrder || 0,
       isActive: true,
     }).returning();
-    const row = result[0];
-    return {
-      id: String(row.id),
-      name: row.name,
-      type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
-      description: row.description,
-      goals: (row.goals as string[]) || [],
-      targetAudience: row.targetAudience || "",
-      expectedOutcome: row.expectedOutcome || "",
-      seriesId: row.seriesId ? String(row.seriesId) : undefined,
-      sortOrder: row.sortOrder || 0,
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.mapBigIdeaRow(result[0]);
   }
 
   async updateBigIdea(id: string, data: Partial<InsertBigIdea>): Promise<BigIdea | undefined> {
@@ -463,25 +502,19 @@ export class DatabaseStorage implements IStorage {
         updateData.seriesId = null;
       }
     }
+    if ('coreId' in updateData) {
+      if (updateData.coreId && typeof updateData.coreId === 'string' && updateData.coreId.trim() !== '') {
+        updateData.coreId = parseInt(updateData.coreId);
+      } else {
+        updateData.coreId = null;
+      }
+    }
     const result = await db.update(bigIdeas)
       .set(updateData)
       .where(eq(bigIdeas.id, parseInt(id)))
       .returning();
     if (result.length === 0) return undefined;
-    const row = result[0];
-    return {
-      id: String(row.id),
-      name: row.name,
-      type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
-      description: row.description,
-      goals: (row.goals as string[]) || [],
-      targetAudience: row.targetAudience || "",
-      expectedOutcome: row.expectedOutcome || "",
-      seriesId: row.seriesId ? String(row.seriesId) : undefined,
-      sortOrder: row.sortOrder || 0,
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.mapBigIdeaRow(result[0]);
   }
 
   async setActiveBigIdea(id: string): Promise<BigIdea | undefined> {
@@ -491,20 +524,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bigIdeas.id, parseInt(id)))
       .returning();
     if (result.length === 0) return undefined;
-    const row = result[0];
-    return {
-      id: String(row.id),
-      name: row.name,
-      type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
-      description: row.description,
-      goals: (row.goals as string[]) || [],
-      targetAudience: row.targetAudience || "",
-      expectedOutcome: row.expectedOutcome || "",
-      seriesId: row.seriesId ? String(row.seriesId) : undefined,
-      sortOrder: row.sortOrder || 0,
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.mapBigIdeaRow(result[0]);
   }
 
   async deleteBigIdea(id: string): Promise<boolean> {

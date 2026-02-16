@@ -7,6 +7,7 @@ import {
   insertIntegrationSchema,
   insertMessageSchema,
   insertBigIdeaSchema,
+  insertCoreSchema,
   insertToolboxSchema,
   insertUserProfileSchema,
   insertProjectBrainTemplateSchema,
@@ -481,6 +482,62 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete series" });
+    }
+  });
+
+  // ==================== Core Routes (Protected) ====================
+
+  app.get("/api/cores", isAuthenticated, async (req, res) => {
+    try {
+      const seriesId = req.query.seriesId as string | undefined;
+      const coresList = await storage.getCores(seriesId);
+      res.json(coresList);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch cores" });
+    }
+  });
+
+  app.get("/api/cores/:id", isAuthenticated, async (req, res) => {
+    try {
+      const core = await storage.getCore(req.params.id as string);
+      if (!core) return res.status(404).json({ error: "Core not found" });
+      res.json(core);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch core" });
+    }
+  });
+
+  app.post("/api/cores", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertCoreSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+      const core = await storage.createCore(parsed.data);
+      res.status(201).json(core);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create core" });
+    }
+  });
+
+  app.patch("/api/cores/:id", isAuthenticated, async (req, res) => {
+    try {
+      const partialSchema = insertCoreSchema.partial();
+      const parsed = partialSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+      const core = await storage.updateCore(req.params.id as string, parsed.data);
+      if (!core) return res.status(404).json({ error: "Core not found" });
+      res.json(core);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update core" });
+    }
+  });
+
+  app.delete("/api/cores/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteCore(req.params.id as string);
+      if (!deleted) return res.status(404).json({ error: "Core not found" });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete core" });
     }
   });
 

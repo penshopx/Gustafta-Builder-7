@@ -31,12 +31,20 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
   const [targetAudience, setTargetAudience] = useState("");
   const [expectedOutcome, setExpectedOutcome] = useState("");
   const [selectedSeriesId, setSelectedSeriesId] = useState<string>(seriesId ? String(seriesId) : "none");
+  const [selectedCoreId, setSelectedCoreId] = useState<string>("none");
 
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
+  const { data: allCores = [] } = useQuery<any[]>({ queryKey: ["/api/cores"] });
+
+  const availableCores = allCores.filter((c: any) => selectedSeriesId !== "none" && c.seriesId === selectedSeriesId);
   
   useEffect(() => {
     setSelectedSeriesId(seriesId ? String(seriesId) : "none");
   }, [seriesId]);
+
+  useEffect(() => {
+    setSelectedCoreId("none");
+  }, [selectedSeriesId]);
   
   const createBigIdea = useCreateBigIdea();
   const { toast } = useToast();
@@ -53,6 +61,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
 
     try {
       const finalSeriesId = selectedSeriesId !== "none" ? selectedSeriesId : undefined;
+      const finalCoreId = selectedCoreId !== "none" ? selectedCoreId : undefined;
       const payload = {
         name: name.trim(),
         type,
@@ -62,6 +71,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
         expectedOutcome: expectedOutcome.trim(),
         sortOrder: 0,
         ...(finalSeriesId ? { seriesId: finalSeriesId } : {}),
+        ...(finalCoreId ? { coreId: finalCoreId } : {}),
       };
       console.log("[CreateBigIdea] Sending payload:", JSON.stringify(payload));
       const result = await createBigIdea.mutateAsync(payload);
@@ -94,6 +104,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
     setTargetAudience("");
     setExpectedOutcome("");
     setSelectedSeriesId(seriesId ? String(seriesId) : "none");
+    setSelectedCoreId("none");
   };
 
   const addGoal = () => {
@@ -148,6 +159,23 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
                   <SelectItem value="none">Tanpa Series</SelectItem>
                   {allSeries.map((s: any) => (
                     <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {availableCores.length > 0 && (
+            <div className="space-y-2">
+              <Label>Core (opsional - payung strategis)</Label>
+              <Select value={selectedCoreId} onValueChange={setSelectedCoreId}>
+                <SelectTrigger data-testid="select-core">
+                  <SelectValue placeholder="Pilih Core" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Tanpa Core</SelectItem>
+                  {availableCores.map((c: any) => (
+                    <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

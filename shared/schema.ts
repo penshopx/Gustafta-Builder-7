@@ -41,10 +41,22 @@ export const series = pgTable("series", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Cores Table - Optional strategic umbrella between Series and Big Ideas
+export const cores = pgTable("cores", {
+  id: serial("id").primaryKey(),
+  seriesId: integer("series_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description").default(""),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Big Ideas Table
 export const bigIdeas = pgTable("big_ideas", {
   id: serial("id").primaryKey(),
   seriesId: integer("series_id"),
+  coreId: integer("core_id"),
   name: text("name").notNull(),
   type: text("type").notNull(),
   description: text("description").notNull(),
@@ -345,26 +357,44 @@ export type SeriesWithStats = Series & {
   totalBigIdeas: number;
   totalToolboxes: number;
   totalAgents: number;
+  totalCores: number;
 };
 
+type AgentSummary = {
+  id: string;
+  name: string;
+  description: string;
+  avatar: string;
+  tagline: string;
+  category: string;
+  subcategory: string;
+  isPublic: boolean;
+  isActive: boolean;
+  productSlug: string;
+  widgetColor: string;
+};
+
+type ToolboxWithAgents = Toolbox & { agents: AgentSummary[] };
+type BigIdeaWithToolboxes = BigIdea & { toolboxes: ToolboxWithAgents[] };
+
 export type SeriesWithHierarchy = SeriesWithStats & {
-  bigIdeas: (BigIdea & {
-    toolboxes: (Toolbox & {
-      agents: {
-        id: string;
-        name: string;
-        description: string;
-        avatar: string;
-        tagline: string;
-        category: string;
-        subcategory: string;
-        isPublic: boolean;
-        isActive: boolean;
-        productSlug: string;
-        widgetColor: string;
-      }[];
-    })[];
-  })[];
+  cores: (Core & { bigIdeas: BigIdeaWithToolboxes[] })[];
+  bigIdeas: BigIdeaWithToolboxes[];
+};
+
+// Core schema - Optional strategic umbrella under Series
+export const insertCoreSchema = z.object({
+  seriesId: z.string().min(1, "Series is required"),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional().default(""),
+  sortOrder: z.number().optional().default(0),
+});
+
+export type InsertCore = z.infer<typeof insertCoreSchema>;
+export type Core = InsertCore & {
+  id: string;
+  isActive: boolean;
+  createdAt: string;
 };
 
 // Big Idea schema - Top level of hierarchy
@@ -376,6 +406,7 @@ export const insertBigIdeaSchema = z.object({
   targetAudience: z.string().optional().default(""),
   expectedOutcome: z.string().optional().default(""),
   seriesId: z.string().optional(),
+  coreId: z.string().optional(),
   sortOrder: z.number().optional().default(0),
 });
 

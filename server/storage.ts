@@ -36,6 +36,8 @@ import type {
   InsertSeries,
   SeriesWithStats,
   SeriesWithHierarchy,
+  Core,
+  InsertCore,
   Voucher,
   InsertVoucher,
   VoucherRedemption,
@@ -78,6 +80,13 @@ export interface IStorage {
   createSeries(data: InsertSeries, userId: string): Promise<Series>;
   updateSeries(id: string, data: Partial<InsertSeries>): Promise<Series | undefined>;
   deleteSeries(id: string): Promise<boolean>;
+
+  // Core methods
+  getCores(seriesId?: string): Promise<Core[]>;
+  getCore(id: string): Promise<Core | undefined>;
+  createCore(data: InsertCore): Promise<Core>;
+  updateCore(id: string, data: Partial<InsertCore>): Promise<Core | undefined>;
+  deleteCore(id: string): Promise<boolean>;
 
   // Big Idea methods
   getBigIdeas(seriesId?: string): Promise<BigIdea[]>;
@@ -291,6 +300,7 @@ export class MemStorage implements IStorage {
   private vouchersMap: Map<string, Voucher>;
   private voucherRedemptionsMap: Map<string, VoucherRedemption>;
   private userMemoriesMap: Map<string, UserMemory>;
+  private coresMap: Map<string, Core>;
   private leadsMap: Map<string, Lead>;
   private scoringResultsMap: Map<string, ScoringResult>;
 
@@ -298,6 +308,7 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.userProfiles = new Map();
     this.seriesMap = new Map();
+    this.coresMap = new Map();
     this.bigIdeas = new Map();
     this.toolboxes = new Map();
     this.agents = new Map();
@@ -388,13 +399,13 @@ export class MemStorage implements IStorage {
   async getPublicSeries(): Promise<SeriesWithStats[]> {
     return Array.from(this.seriesMap.values())
       .filter(s => s.isPublic && s.isActive)
-      .map(s => ({ ...s, totalBigIdeas: 0, totalToolboxes: 0, totalAgents: 0 }));
+      .map(s => ({ ...s, totalBigIdeas: 0, totalToolboxes: 0, totalAgents: 0, totalCores: 0 }));
   }
 
   async getSeriesWithHierarchy(id: string): Promise<SeriesWithHierarchy | undefined> {
     const s = this.seriesMap.get(id);
     if (!s) return undefined;
-    return { ...s, totalBigIdeas: 0, totalToolboxes: 0, totalAgents: 0, bigIdeas: [] };
+    return { ...s, totalBigIdeas: 0, totalToolboxes: 0, totalAgents: 0, totalCores: 0, cores: [], bigIdeas: [] };
   }
 
   async createSeries(data: InsertSeries, userId: string): Promise<Series> {
@@ -414,6 +425,44 @@ export class MemStorage implements IStorage {
 
   async deleteSeries(id: string): Promise<boolean> {
     return this.seriesMap.delete(id);
+  }
+
+  // Core methods
+  async getCores(seriesId?: string): Promise<Core[]> {
+    const all = Array.from(this.coresMap.values());
+    if (seriesId) return all.filter(c => c.seriesId === seriesId);
+    return all.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async getCore(id: string): Promise<Core | undefined> {
+    return this.coresMap.get(id);
+  }
+
+  async createCore(data: InsertCore): Promise<Core> {
+    const id = randomUUID();
+    const core: Core = {
+      id,
+      seriesId: data.seriesId,
+      name: data.name,
+      description: data.description || "",
+      sortOrder: data.sortOrder || 0,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    this.coresMap.set(id, core);
+    return core;
+  }
+
+  async updateCore(id: string, data: Partial<InsertCore>): Promise<Core | undefined> {
+    const core = this.coresMap.get(id);
+    if (!core) return undefined;
+    const updated = { ...core, ...data };
+    this.coresMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteCore(id: string): Promise<boolean> {
+    return this.coresMap.delete(id);
   }
 
   // Big Idea methods
@@ -448,6 +497,7 @@ export class MemStorage implements IStorage {
       targetAudience: insertBigIdea.targetAudience || "",
       expectedOutcome: insertBigIdea.expectedOutcome || "",
       seriesId: insertBigIdea.seriesId || undefined,
+      coreId: insertBigIdea.coreId || undefined,
       sortOrder: insertBigIdea.sortOrder || 0,
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -470,6 +520,7 @@ export class MemStorage implements IStorage {
       targetAudience: data.targetAudience !== undefined ? data.targetAudience : bigIdea.targetAudience,
       expectedOutcome: data.expectedOutcome !== undefined ? data.expectedOutcome : bigIdea.expectedOutcome,
       seriesId: data.seriesId !== undefined ? data.seriesId : bigIdea.seriesId,
+      coreId: data.coreId !== undefined ? data.coreId : bigIdea.coreId,
       sortOrder: data.sortOrder !== undefined ? data.sortOrder : bigIdea.sortOrder,
     };
     

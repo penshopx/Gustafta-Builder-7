@@ -8,9 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, BookOpen, Bot, Layers, Globe, Eye, ArrowLeft, ExternalLink, Copy, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Edit, Trash2, BookOpen, Bot, Layers, Globe, Eye, ArrowLeft, ExternalLink, Copy, ChevronDown, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Series, BigIdea } from "@shared/schema";
+import type { Series, BigIdea, Core } from "@shared/schema";
 
 type SeriesForm = {
   name: string;
@@ -53,6 +55,9 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
   const [form, setForm] = useState<SeriesForm>(defaultForm);
   const [tagsInput, setTagsInput] = useState("");
   const [assignOpen, setAssignOpen] = useState<string | null>(null);
+  const [coresOpen, setCoresOpen] = useState<string | null>(null);
+  const [coreForm, setCoreForm] = useState({ name: "", description: "" });
+  const [editingCoreId, setEditingCoreId] = useState<string | null>(null);
 
   const { data: allSeries = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/series"],
@@ -61,6 +66,11 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
   const { data: bigIdeas = [] } = useQuery<BigIdea[]>({
     queryKey: ["/api/big-ideas"],
+    enabled: open,
+  });
+
+  const { data: allCores = [] } = useQuery<Core[]>({
+    queryKey: ["/api/cores"],
     enabled: open,
   });
 
@@ -73,6 +83,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
     queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
     queryClient.invalidateQueries({ queryKey: ["/api/agents/active"] });
     queryClient.invalidateQueries({ queryKey: ["/api/context/active"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/cores"] });
   };
 
   const createMutation = useMutation({
@@ -111,6 +122,50 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
       invalidateAll();
     },
   });
+
+  const createCoreMutation = useMutation({
+    mutationFn: (data: { seriesId: string; name: string; description: string }) =>
+      apiRequest("POST", "/api/cores", data),
+    onSuccess: () => {
+      invalidateAll();
+      setCoreForm({ name: "", description: "" });
+      toast({ title: "Core berhasil dibuat" });
+    },
+    onError: () => toast({ title: "Gagal membuat core", variant: "destructive" }),
+  });
+
+  const updateCoreMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      apiRequest("PATCH", `/api/cores/${id}`, data),
+    onSuccess: () => {
+      invalidateAll();
+      setCoreForm({ name: "", description: "" });
+      setEditingCoreId(null);
+      toast({ title: "Core berhasil diperbarui" });
+    },
+    onError: () => toast({ title: "Gagal memperbarui core", variant: "destructive" }),
+  });
+
+  const deleteCoreMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/cores/${id}`),
+    onSuccess: () => {
+      invalidateAll();
+      toast({ title: "Core berhasil dihapus" });
+    },
+    onError: () => toast({ title: "Gagal menghapus core", variant: "destructive" }),
+  });
+
+  const assignBigIdeaToCoreMutation = useMutation({
+    mutationFn: ({ bigIdeaId, coreId }: { bigIdeaId: string; coreId: string | null }) =>
+      apiRequest("PATCH", `/api/big-ideas/${bigIdeaId}`, { coreId: coreId ?? null }),
+    onSuccess: () => {
+      invalidateAll();
+    },
+  });
+
+  const getCoresForSeries = (seriesId: string) => {
+    return allCores.filter(c => c.seriesId === seriesId);
+  };
 
   const resetForm = () => {
     setForm(defaultForm);
@@ -256,7 +311,24 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setAssignOpen(assignOpen === String(s.id) ? null : String(s.id))}
+                        onClick={() => {
+                          setCoresOpen(coresOpen === String(s.id) ? null : String(s.id));
+                          setAssignOpen(null);
+                          setCoreForm({ name: "", description: "" });
+                          setEditingCoreId(null);
+                        }}
+                        data-testid={`button-cores-${s.id}`}
+                      >
+                        <Shield className="w-3.5 h-3.5 mr-1" />
+                        Cores ({getCoresForSeries(String(s.id)).length})
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setAssignOpen(assignOpen === String(s.id) ? null : String(s.id));
+                          setCoresOpen(null);
+                        }}
                        
                       >
                         <Layers className="w-3.5 h-3.5 mr-1" />
@@ -289,6 +361,159 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
+
+                    {coresOpen === String(s.id) && (
+                      <div className="border rounded-lg p-3 space-y-3">
+                        <p className="text-xs font-medium text-muted-foreground">Cores dalam series ini (payung strategis):</p>
+                        {getCoresForSeries(String(s.id)).length === 0 && (
+                          <p className="text-xs text-muted-foreground">Belum ada Core. Core bersifat opsional - gunakan untuk series besar yang butuh pengelompokan.</p>
+                        )}
+                        {getCoresForSeries(String(s.id)).map((core: Core) => {
+                          const coreBigIdeas = bigIdeas.filter(bi => bi.coreId === core.id);
+                          return (
+                            <div key={core.id} className="border rounded-md p-2 space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
+                                  <span className="text-sm font-medium truncate">{core.name}</span>
+                                  <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate shrink-0">
+                                    {coreBigIdeas.length} Big Ideas
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      setEditingCoreId(core.id);
+                                      setCoreForm({ name: core.name, description: core.description || "" });
+                                    }}
+                                    data-testid={`button-edit-core-${core.id}`}
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                      if (confirm("Hapus Core ini? Big Ideas terkait akan jadi tanpa Core.")) {
+                                        deleteCoreMutation.mutate(core.id);
+                                      }
+                                    }}
+                                    data-testid={`button-delete-core-${core.id}`}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              {core.description && (
+                                <p className="text-xs text-muted-foreground">{core.description}</p>
+                              )}
+                              {coreBigIdeas.length > 0 && (
+                                <div className="pl-4 space-y-1">
+                                  {coreBigIdeas.map(bi => (
+                                    <div key={bi.id} className="flex items-center justify-between gap-2 text-xs">
+                                      <span className="truncate">{bi.name}</span>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => assignBigIdeaToCoreMutation.mutate({ bigIdeaId: bi.id, coreId: null })}
+                                        className="text-[10px] h-6 shrink-0"
+                                      >
+                                        Lepas
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {bigIdeas.filter(bi => bi.seriesId === String(s.id) && !bi.coreId).length > 0 && (
+                                <div className="pl-4 pt-1 border-t space-y-1">
+                                  <p className="text-[10px] text-muted-foreground">Tambahkan Big Idea:</p>
+                                  {bigIdeas.filter(bi => bi.seriesId === String(s.id) && !bi.coreId).map(bi => (
+                                    <div key={bi.id} className="flex items-center justify-between gap-2 text-xs">
+                                      <span className="truncate">{bi.name}</span>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => assignBigIdeaToCoreMutation.mutate({ bigIdeaId: bi.id, coreId: core.id })}
+                                        className="text-[10px] h-6 shrink-0"
+                                      >
+                                        <Plus className="w-3 h-3 mr-0.5" />
+                                        Tambah
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                        {editingCoreId && (
+                          <div className="border rounded-md p-2 space-y-2 bg-muted/30">
+                            <p className="text-xs font-medium">Edit Core</p>
+                            <Input
+                              value={coreForm.name}
+                              onChange={(e) => setCoreForm({ ...coreForm, name: e.target.value })}
+                              placeholder="Nama Core"
+                              className="text-sm"
+                              data-testid="input-edit-core-name"
+                            />
+                            <Input
+                              value={coreForm.description}
+                              onChange={(e) => setCoreForm({ ...coreForm, description: e.target.value })}
+                              placeholder="Deskripsi (opsional)"
+                              className="text-sm"
+                              data-testid="input-edit-core-desc"
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => { setEditingCoreId(null); setCoreForm({ name: "", description: "" }); }}
+                              >
+                                Batal
+                              </Button>
+                              <Button
+                                size="sm"
+                                disabled={!coreForm.name.trim() || updateCoreMutation.isPending}
+                                onClick={() => updateCoreMutation.mutate({ id: editingCoreId, data: coreForm })}
+                                data-testid="button-save-edit-core"
+                              >
+                                Simpan
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        {!editingCoreId && (
+                          <div className="border rounded-md p-2 space-y-2 bg-muted/30">
+                            <p className="text-xs font-medium">Tambah Core Baru</p>
+                            <Input
+                              value={coreForm.name}
+                              onChange={(e) => setCoreForm({ ...coreForm, name: e.target.value })}
+                              placeholder="Nama Core (contoh: Compliance System)"
+                              className="text-sm"
+                              data-testid="input-new-core-name"
+                            />
+                            <Input
+                              value={coreForm.description}
+                              onChange={(e) => setCoreForm({ ...coreForm, description: e.target.value })}
+                              placeholder="Deskripsi (opsional)"
+                              className="text-sm"
+                              data-testid="input-new-core-desc"
+                            />
+                            <Button
+                              size="sm"
+                              disabled={!coreForm.name.trim() || createCoreMutation.isPending}
+                              onClick={() => createCoreMutation.mutate({ seriesId: String(s.id), name: coreForm.name.trim(), description: coreForm.description.trim() })}
+                              data-testid="button-create-core"
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Buat Core
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {assignOpen === String(s.id) && (
                       <div className="border rounded-lg p-3 space-y-2">
