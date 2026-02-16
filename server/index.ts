@@ -7,6 +7,7 @@ import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 import { seedCivilproEcosystem } from "./seed-civilpro";
+import { seedPerijinanSertifikasi } from "./seed-perijinan";
 
 const app = express();
 const httpServer = createServer(app);
@@ -178,6 +179,12 @@ for (const envVar of requiredEnvVars) {
         await seedCivilproEcosystem("49465846");
       } catch (err) {
         log("Failed to seed CIVILPRO ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedPerijinanSertifikasi("49465846");
+      } catch (err) {
+        log("Failed to seed Perijinan & Sertifikasi ecosystem: " + (err as Error).message);
       }
 
       startScheduler();
