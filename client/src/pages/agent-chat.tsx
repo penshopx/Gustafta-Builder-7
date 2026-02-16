@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -336,6 +336,11 @@ export default function AgentChat() {
   const [projectContext, setProjectContext] = useState<Record<string, string>>({});
   const [showContextForm, setShowContextForm] = useState(false);
   const [contextCompleted, setContextCompleted] = useState(false);
+  const [conversionConfig, setConversionConfig] = useState<any>(null);
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [showCtaCard, setShowCtaCard] = useState(false);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+  const [leadFormData, setLeadFormData] = useState<Record<string, string>>({});
 
   const getStorageKey = useCallback(() => `gustafta_chat_${params.agentId}`, [params.agentId]);
 
@@ -598,6 +603,10 @@ export default function AgentChat() {
 
           const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
           if (appleTitle) appleTitle.setAttribute("content", data.name);
+
+          fetch(`/api/conversion-config/${params.agentId}`).then(r => r.json()).then(convData => {
+            setConversionConfig(convData);
+          }).catch(() => {});
         })
         .catch((err) => {
           setError(err.message);
@@ -660,6 +669,27 @@ export default function AgentChat() {
       }
     }
   }, [config, contextCompleted, messages.length, params.agentId]);
+
+  useEffect(() => {
+    if (!conversionConfig?.conversionEnabled || showCtaCard || leadSubmitted) return;
+    const userMsgCount = messages.filter(m => m.role === "user").length;
+    if (userMsgCount >= (conversionConfig.ctaTriggerAfterMessages || 5)) {
+      setShowCtaCard(true);
+      return;
+    }
+    if (conversionConfig.scoringEnabled && conversionConfig.ctaTriggerOnScore > 0) {
+      const lastAssistantMsg = [...messages].reverse().find(m => m.role === "assistant");
+      if (lastAssistantMsg) {
+        const scoreMatch = lastAssistantMsg.content.match(/(?:skor|score|nilai)[:\s]*(\d+)/i);
+        if (scoreMatch) {
+          const detectedScore = parseInt(scoreMatch[1]);
+          if (detectedScore <= conversionConfig.ctaTriggerOnScore) {
+            setShowCtaCard(true);
+          }
+        }
+      }
+    }
+  }, [messages, conversionConfig]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -1031,6 +1061,268 @@ export default function AgentChat() {
     }
   };
 
+  const handleLeadSubmit = async () => {
+    try {
+      const res = await fetch("/api/leads/capture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: parseInt(params.agentId!),
+          sessionId: sessionIdRef.current,
+          name: leadFormData.name || "",
+          email: leadFormData.email || "",
+          phone: leadFormData.phone || "",
+          company: leadFormData.company || "",
+          source: "chat",
+          metadata: { conversationLength: messages.length, contextAnswers: projectContext },
+        }),
+      });
+      if (res.ok) {
+        setLeadSubmitted(true);
+        setTimeout(() => {
+          setShowLeadForm(false);
+        }, 2000);
+      }
+    } catch (err) {
+      console.error("Lead capture failed:", err);
+    }
+  };
+
+  const SmartCtaCard = () => {
+    if (!conversionConfig?.conversionEnabled || !showCtaCard) return null;
+    const cta = conversionConfig.conversionCta || {};
+    const offers = conversionConfig.conversionOffers || [];
+    const whatsappCta = conversionConfig.whatsappCta;
+    const calendlyUrl = conversionConfig.calendlyUrl;
+
+    return (
+      <div className="py-2" data-testid="smart-cta-card">
+        <Card className="border-2" style={{ borderColor: `${color}40` }}>
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${color}15` }}>
+                <Target className="w-4 h-4" style={{ color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm" data-testid="text-cta-title">
+                  {cta.title || "Tertarik dengan layanan kami?"}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-cta-description">
+                  {cta.description || "Hubungi kami untuk konsultasi lebih lanjut"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {cta.buttonText && (
+                <Button
+                  size="sm"
+                  className="text-xs text-white"
+                  style={{ backgroundColor: color }}
+                  onClick={() => {
+                    if (cta.buttonUrl) {
+                      window.open(cta.buttonUrl, "_blank");
+                    } else {
+                      setShowLeadForm(true);
+                    }
+                  }}
+                  data-testid="button-cta-primary"
+                >
+                  <ExternalLink className="w-3 h-3 mr-1.5" />
+                  {cta.buttonText}
+                </Button>
+              )}
+              {!cta.buttonText && (
+                <Button
+                  size="sm"
+                  className="text-xs text-white"
+                  style={{ backgroundColor: color }}
+                  onClick={() => setShowLeadForm(true)}
+                  data-testid="button-cta-lead"
+                >
+                  <Send className="w-3 h-3 mr-1.5" />
+                  Hubungi Kami
+                </Button>
+              )}
+              {whatsappCta && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs text-green-600 border-green-200"
+                  onClick={() => window.open(`https://wa.me/${whatsappCta.replace(/[^0-9]/g, "")}`, "_blank")}
+                  data-testid="button-cta-whatsapp"
+                >
+                  <Phone className="w-3 h-3 mr-1.5" />
+                  WhatsApp
+                </Button>
+              )}
+              {calendlyUrl && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={() => window.open(calendlyUrl, "_blank")}
+                  data-testid="button-cta-calendly"
+                >
+                  <Calendar className="w-3 h-3 mr-1.5" />
+                  Jadwalkan Meeting
+                </Button>
+              )}
+            </div>
+
+            {offers.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <p className="text-xs font-medium text-muted-foreground">Penawaran untuk Anda:</p>
+                {offers.map((offer: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="rounded-lg border p-3 space-y-1.5"
+                    style={{ borderColor: `${color}20` }}
+                    data-testid={`card-offer-${idx}`}
+                  >
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="font-medium text-sm">{offer.title}</span>
+                      {offer.price && (
+                        <Badge variant="secondary" className="text-xs no-default-hover-elevate no-default-active-elevate" style={{ color }}>
+                          {offer.price}
+                        </Badge>
+                      )}
+                    </div>
+                    {offer.features && offer.features.length > 0 && (
+                      <ul className="space-y-0.5">
+                        {offer.features.map((feat: string, fi: number) => (
+                          <li key={fi} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <CheckCircle className="w-3 h-3 shrink-0" style={{ color }} />
+                            {feat}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {offer.ctaButton && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs w-full mt-1"
+                        onClick={() => {
+                          if (offer.ctaUrl) {
+                            window.open(offer.ctaUrl, "_blank");
+                          } else {
+                            setShowLeadForm(true);
+                          }
+                        }}
+                        data-testid={`button-offer-cta-${idx}`}
+                      >
+                        {offer.ctaButton}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  const LeadCaptureForm = () => {
+    if (!showLeadForm) return null;
+
+    const fields = conversionConfig?.leadCaptureFields && conversionConfig.leadCaptureFields.length > 0
+      ? conversionConfig.leadCaptureFields
+      : [
+          { name: "name", label: "Nama", type: "text", required: true },
+          { name: "email", label: "Email", type: "email", required: true },
+          { name: "phone", label: "Telepon", type: "phone", required: false },
+        ];
+
+    if (leadSubmitted) {
+      return (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4" data-testid="lead-form-success">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6 text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
+                  <CheckCircle className="w-8 h-8" style={{ color }} />
+                </div>
+              </div>
+              <h2 className="text-xl font-semibold" data-testid="text-lead-success-title">Terima Kasih!</h2>
+              <p className="text-sm text-muted-foreground">
+                Data Anda telah kami terima. Tim kami akan segera menghubungi Anda.
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowLeadForm(false)}
+                data-testid="button-lead-success-close"
+              >
+                Tutup
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    return (
+      <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4" data-testid="lead-capture-form">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
+                  <Target className="w-5 h-5" style={{ color }} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold" data-testid="text-lead-form-title">Hubungi Kami</h2>
+                  <p className="text-xs text-muted-foreground">Isi data berikut dan kami akan menghubungi Anda</p>
+                </div>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setShowLeadForm(false)}
+                data-testid="button-lead-form-close"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {fields.map((field: any) => (
+                <div key={field.name} className="space-y-1.5">
+                  <label className="text-sm font-medium">
+                    {field.label}
+                    {field.required && <span className="text-destructive ml-0.5">*</span>}
+                  </label>
+                  <input
+                    type={field.type === "phone" ? "tel" : field.type || "text"}
+                    value={leadFormData[field.name] || ""}
+                    onChange={(e) => setLeadFormData(prev => ({ ...prev, [field.name]: e.target.value }))}
+                    placeholder={field.placeholder || field.label}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    data-testid={`input-lead-${field.name}`}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <Button
+              className="w-full text-white"
+              style={{ backgroundColor: color }}
+              onClick={handleLeadSubmit}
+              disabled={fields.some((f: any) => f.required && !leadFormData[f.name]?.trim())}
+              data-testid="button-lead-submit"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Kirim
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
@@ -1328,6 +1620,8 @@ export default function AgentChat() {
           </Card>
         </div>
       )}
+
+      <LeadCaptureForm />
 
       {/* Header */}
       <header
@@ -1785,6 +2079,8 @@ export default function AgentChat() {
                   </div>
                 </div>
               ))}
+
+              <SmartCtaCard />
 
               {isTyping && (
                 <div className="flex gap-2 sm:gap-3">

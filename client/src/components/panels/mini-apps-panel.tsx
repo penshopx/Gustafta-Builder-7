@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,10 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   project_snapshot: "Project Snapshot",
   decision_summary: "Decision Summary",
   risk_radar: "Risk Radar",
+  scoring_assessment: "Scoring & Assessment",
+  gap_analysis: "Gap Analysis",
+  recommendation_engine: "Recommendation Engine",
+  lead_capture_form: "Lead Capture Form",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -46,6 +50,10 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   project_snapshot: BarChart3,
   decision_summary: ClipboardList,
   risk_radar: Radar,
+  scoring_assessment: Target,
+  gap_analysis: GitCompare,
+  recommendation_engine: Lightbulb,
+  lead_capture_form: UserPlus,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -61,9 +69,13 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   project_snapshot: "Snapshot status proyek dari data Otak Proyek (AI-powered)",
   decision_summary: "Ringkasan keputusan eksekutif dari data Otak Proyek (AI-powered)",
   risk_radar: "Penilaian risiko proyek dari data Otak Proyek (AI-powered)",
+  scoring_assessment: "Penilaian & scoring otomatis untuk mengukur kesiapan pengguna (AI-powered)",
+  gap_analysis: "Analisis gap antara kondisi saat ini vs target ideal (AI-powered)",
+  recommendation_engine: "Rekomendasi tindakan berdasarkan data dan scoring (AI-powered)",
+  lead_capture_form: "Formulir penangkapan lead terintegrasi dengan chat",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine"];
 
 const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; description: string; items?: string[]; config?: Record<string, any> }>> = {
   checklist: {

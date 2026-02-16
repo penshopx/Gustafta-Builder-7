@@ -3884,7 +3884,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
 
@@ -4057,6 +4057,99 @@ Recommendations:
 - Audit trail completeness check
 
 Be professional and suitable for management review.`;
+      } else if (appType === "scoring_assessment") {
+        modePrompt = `You are an assessment and scoring AI assistant. Based on the Project Brain data below, produce a SCORING ASSESSMENT.
+If a Mini App Configuration is provided, use the scoring categories and weights defined in "rubric". Apply the thresholds from "thresholds" to determine the overall level.
+
+Output format (use JSON-compatible structure):
+
+SCORING ASSESSMENT
+
+Overall Score: X / 100
+Level: (Perlu Peningkatan / Cukup Baik / Sangat Baik)
+
+Category Breakdown:
+For each assessment category:
+- Category: (name)
+- Score: X / (max)
+- Weight: (weight factor)
+- Analysis: (2-3 sentences explaining the score)
+- Strengths: (what's good)
+- Weaknesses: (what needs improvement)
+
+Key Findings:
+- Top 3 strengths
+- Top 3 areas for improvement
+
+Recommendations:
+- 3-5 prioritized action items based on lowest scoring areas
+- Each with priority level (High/Medium/Low) and estimated effort
+
+Be objective, data-driven, and constructive.`;
+      } else if (appType === "gap_analysis") {
+        modePrompt = `You are a gap analysis AI assistant. Based on the Project Brain data below, produce a GAP ANALYSIS.
+If a Mini App Configuration is provided, use the "areas" to focus the analysis and "targets" as benchmark standards.
+
+Output format:
+
+GAP ANALYSIS REPORT
+
+Executive Summary: (2-3 sentences overview)
+
+For each area analyzed:
+- Area: (name)
+- Current State: (assessment from data)
+- Target/Ideal State: (industry standard or configured target)
+- Gap Level: (Critical / Significant / Moderate / Minor / None)
+- Gap Description: (specific differences)
+- Impact if Not Addressed: (consequences)
+- Recommended Actions: (specific steps to close the gap)
+- Priority: (Immediate / Short-term / Medium-term / Long-term)
+- Estimated Effort: (Low / Medium / High)
+
+Priority Matrix:
+- Immediate actions (gaps with Critical/Significant level)
+- Short-term improvements
+- Long-term strategic changes
+
+Overall Gap Score: X% (percentage of gaps addressed vs total areas)
+
+Be specific, actionable, and realistic.`;
+      } else if (appType === "recommendation_engine") {
+        modePrompt = `You are a strategic recommendation AI assistant. Based on the Project Brain data below, produce PERSONALIZED RECOMMENDATIONS.
+If a Mini App Configuration is provided, use the scoring results, gap analysis, and user context to prioritize recommendations.
+
+Output format:
+
+PERSONALIZED RECOMMENDATIONS
+
+Context Summary: (brief overview of the user's situation based on data)
+
+Priority Recommendations:
+
+For each recommendation (provide 5-8 total):
+- Title: (clear, actionable title)
+- Category: (which area this addresses)
+- Priority: (High / Medium / Low)
+- Description: (2-3 sentences explaining what to do and why)
+- Expected Outcome: (what will improve)
+- Estimated Timeline: (when results can be expected)
+- Resources Needed: (what's required to implement)
+- Related Products/Services: (if applicable, suggest relevant solutions)
+
+Quick Wins (implement within 1 week):
+- List 2-3 easy, high-impact actions
+
+Strategic Improvements (1-3 months):
+- List 2-3 medium-effort improvements
+
+Long-term Roadmap (3-12 months):
+- List 2-3 strategic initiatives
+
+Next Steps:
+- Specific, ordered action plan for the first 30 days
+
+Be practical, specific, and commercially aware. Link recommendations to available products/services when relevant.`;
       }
 
       const agent = await storage.getAgent(agentId);
@@ -4960,6 +5053,137 @@ Be professional and suitable for management review.`;
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message || "Failed to scrape tenders" });
+    }
+  });
+
+  // Lead routes (Protected - admin)
+  app.get("/api/leads/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const leads = await storage.getLeads(req.params.agentId as string);
+      res.json(leads);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch leads" });
+    }
+  });
+
+  app.get("/api/lead/:id", isAuthenticated, async (req, res) => {
+    try {
+      const lead = await storage.getLead(req.params.id as string);
+      if (!lead) return res.status(404).json({ error: "Lead not found" });
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch lead" });
+    }
+  });
+
+  app.patch("/api/lead/:id", isAuthenticated, async (req, res) => {
+    try {
+      const lead = await storage.updateLead(req.params.id as string, req.body);
+      if (!lead) return res.status(404).json({ error: "Lead not found" });
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update lead" });
+    }
+  });
+
+  app.delete("/api/lead/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteLead(req.params.id as string);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete lead" });
+    }
+  });
+
+  // Lead capture (Public - from chat)
+  app.post("/api/leads/capture", async (req, res) => {
+    try {
+      const { agentId, sessionId, name, email, phone, company, source, metadata } = req.body;
+      if (!agentId) return res.status(400).json({ error: "agentId is required" });
+      const lead = await storage.createLead({
+        agentId: parseInt(agentId),
+        sessionId: sessionId || "",
+        name: name || "",
+        email: email || "",
+        phone: phone || "",
+        company: company || "",
+        source: source || "chat",
+        status: "new",
+        score: 0,
+        scoreBreakdown: {},
+        metadata: metadata || {},
+        notes: "",
+      });
+      res.json(lead);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to capture lead" });
+    }
+  });
+
+  // Scoring routes (Protected - admin)
+  app.get("/api/scoring/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const results = await storage.getScoringResults(req.params.agentId as string);
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch scoring results" });
+    }
+  });
+
+  app.get("/api/scoring/result/:id", isAuthenticated, async (req, res) => {
+    try {
+      const result = await storage.getScoringResult(req.params.id as string);
+      if (!result) return res.status(404).json({ error: "Scoring result not found" });
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch scoring result" });
+    }
+  });
+
+  // Scoring result (Public - from chat)
+  app.post("/api/scoring/result", async (req, res) => {
+    try {
+      const { agentId, sessionId, leadId, totalScore, maxScore, level, breakdown, recommendations, gapAnalysis, metadata } = req.body;
+      if (!agentId) return res.status(400).json({ error: "agentId is required" });
+      const result = await storage.createScoringResult({
+        agentId: parseInt(agentId),
+        sessionId: sessionId || "",
+        leadId: leadId ? parseInt(leadId) : undefined,
+        totalScore: totalScore || 0,
+        maxScore: maxScore || 100,
+        level: level || "low",
+        breakdown: breakdown || [],
+        recommendations: recommendations || [],
+        gapAnalysis: gapAnalysis || [],
+        metadata: metadata || {},
+      });
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create scoring result" });
+    }
+  });
+
+  // Conversion config (Public - for chat widget)
+  app.get("/api/conversion-config/:agentId", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.agentId as string);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      res.json({
+        conversionEnabled: agent.conversionEnabled,
+        conversionGoal: agent.conversionGoal,
+        conversionCta: agent.conversionCta,
+        conversionOffers: agent.conversionOffers,
+        leadCaptureFields: agent.leadCaptureFields,
+        scoringEnabled: agent.scoringEnabled,
+        scoringRubric: agent.scoringRubric,
+        scoringThresholds: agent.scoringThresholds,
+        ctaTriggerAfterMessages: agent.ctaTriggerAfterMessages,
+        ctaTriggerOnScore: agent.ctaTriggerOnScore,
+        whatsappCta: agent.whatsappCta,
+        calendlyUrl: agent.calendlyUrl,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch conversion config" });
     }
   });
 

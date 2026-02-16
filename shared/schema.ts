@@ -143,6 +143,19 @@ export const agents = pgTable("agents", {
   ragChunkSize: integer("rag_chunk_size").default(800),
   ragChunkOverlap: integer("rag_chunk_overlap").default(200),
   ragTopK: integer("rag_top_k").default(5),
+  // Conversion Layer Settings
+  conversionEnabled: boolean("conversion_enabled").default(false),
+  conversionGoal: text("conversion_goal").default("lead_capture"),
+  conversionCta: jsonb("conversion_cta").default({}),
+  conversionOffers: jsonb("conversion_offers").default([]),
+  leadCaptureFields: jsonb("lead_capture_fields").default([]),
+  scoringEnabled: boolean("scoring_enabled").default(false),
+  scoringRubric: jsonb("scoring_rubric").default([]),
+  scoringThresholds: jsonb("scoring_thresholds").default({}),
+  ctaTriggerAfterMessages: integer("cta_trigger_after_messages").default(5),
+  ctaTriggerOnScore: integer("cta_trigger_on_score").default(0),
+  whatsappCta: text("whatsapp_cta").default(""),
+  calendlyUrl: text("calendly_url").default(""),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -475,6 +488,57 @@ export const insertAgentSchema = z.object({
   ragChunkSize: z.number().min(200).max(2000).optional().default(800),
   ragChunkOverlap: z.number().min(0).max(500).optional().default(200),
   ragTopK: z.number().min(1).max(20).optional().default(5),
+  // Conversion Layer Settings
+  conversionEnabled: z.boolean().optional().default(false),
+  conversionGoal: z.enum(["lead_capture", "assessment", "consultation", "product_sale", "registration"]).optional().default("lead_capture"),
+  conversionCta: z.object({
+    title: z.string().optional().default(""),
+    description: z.string().optional().default(""),
+    buttonText: z.string().optional().default(""),
+    buttonUrl: z.string().optional().default(""),
+    style: z.enum(["banner", "card", "floating", "inline"]).optional().default("card"),
+  }).optional().default({}),
+  conversionOffers: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string().optional().default(""),
+    price: z.string().optional().default(""),
+    features: z.array(z.string()).optional().default([]),
+    ctaText: z.string().optional().default(""),
+    ctaUrl: z.string().optional().default(""),
+    isPopular: z.boolean().optional().default(false),
+  })).optional().default([]),
+  leadCaptureFields: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    type: z.enum(["text", "email", "phone", "select", "textarea"]),
+    required: z.boolean().optional().default(true),
+    placeholder: z.string().optional().default(""),
+    options: z.array(z.string()).optional().default([]),
+  })).optional().default([]),
+  scoringEnabled: z.boolean().optional().default(false),
+  scoringRubric: z.array(z.object({
+    id: z.string(),
+    category: z.string(),
+    maxScore: z.number().optional().default(100),
+    weight: z.number().optional().default(1),
+    description: z.string().optional().default(""),
+  })).optional().default([]),
+  scoringThresholds: z.object({
+    low: z.number().optional().default(30),
+    medium: z.number().optional().default(60),
+    high: z.number().optional().default(80),
+    lowLabel: z.string().optional().default("Perlu Peningkatan"),
+    mediumLabel: z.string().optional().default("Cukup Baik"),
+    highLabel: z.string().optional().default("Sangat Baik"),
+    lowRecommendation: z.string().optional().default(""),
+    mediumRecommendation: z.string().optional().default(""),
+    highRecommendation: z.string().optional().default(""),
+  }).optional().default({}),
+  ctaTriggerAfterMessages: z.number().min(1).max(50).optional().default(5),
+  ctaTriggerOnScore: z.number().min(0).max(100).optional().default(0),
+  whatsappCta: z.string().optional().default(""),
+  calendlyUrl: z.string().optional().default(""),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId
@@ -768,12 +832,107 @@ export type ProjectBrainInstance = InsertProjectBrainInstance & {
   updatedAt: string;
 };
 
+// ==================== LEADS (Conversion Layer) ====================
+
+export const leads = pgTable("leads", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  sessionId: text("session_id").default(""),
+  name: text("name").default(""),
+  email: text("email").default(""),
+  phone: text("phone").default(""),
+  company: text("company").default(""),
+  source: text("source").default("chat"),
+  status: text("status").default("new"),
+  score: integer("score").default(0),
+  scoreBreakdown: jsonb("score_breakdown").default({}),
+  metadata: jsonb("metadata").default({}),
+  notes: text("notes").default(""),
+  convertedAt: timestamp("converted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLeadSchema = z.object({
+  agentId: z.number(),
+  sessionId: z.string().optional().default(""),
+  name: z.string().optional().default(""),
+  email: z.string().optional().default(""),
+  phone: z.string().optional().default(""),
+  company: z.string().optional().default(""),
+  source: z.enum(["chat", "widget", "whatsapp", "form", "mini_app"]).optional().default("chat"),
+  status: z.enum(["new", "contacted", "qualified", "converted", "lost"]).optional().default("new"),
+  score: z.number().optional().default(0),
+  scoreBreakdown: z.record(z.any()).optional().default({}),
+  metadata: z.record(z.any()).optional().default({}),
+  notes: z.string().optional().default(""),
+});
+
+export type InsertLead = z.infer<typeof insertLeadSchema>;
+export type Lead = InsertLead & {
+  id: number;
+  convertedAt: string | null;
+  createdAt: string;
+};
+
+// ==================== SCORING RESULTS (Conversion Layer) ====================
+
+export const scoringResults = pgTable("scoring_results", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agent_id").notNull(),
+  sessionId: text("session_id").default(""),
+  leadId: integer("lead_id"),
+  totalScore: integer("total_score").default(0),
+  maxScore: integer("max_score").default(100),
+  level: text("level").default("low"),
+  breakdown: jsonb("breakdown").default([]),
+  recommendations: jsonb("recommendations").default([]),
+  gapAnalysis: jsonb("gap_analysis").default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertScoringResultSchema = z.object({
+  agentId: z.number(),
+  sessionId: z.string().optional().default(""),
+  leadId: z.number().optional(),
+  totalScore: z.number().optional().default(0),
+  maxScore: z.number().optional().default(100),
+  level: z.enum(["low", "medium", "high"]).optional().default("low"),
+  breakdown: z.array(z.object({
+    category: z.string(),
+    score: z.number(),
+    maxScore: z.number(),
+    notes: z.string().optional().default(""),
+  })).optional().default([]),
+  recommendations: z.array(z.object({
+    title: z.string(),
+    description: z.string().optional().default(""),
+    priority: z.enum(["low", "medium", "high"]).optional().default("medium"),
+    actionUrl: z.string().optional().default(""),
+  })).optional().default([]),
+  gapAnalysis: z.array(z.object({
+    area: z.string(),
+    current: z.string().optional().default(""),
+    target: z.string().optional().default(""),
+    gap: z.string().optional().default(""),
+    recommendation: z.string().optional().default(""),
+  })).optional().default([]),
+  metadata: z.record(z.any()).optional().default({}),
+});
+
+export type InsertScoringResult = z.infer<typeof insertScoringResultSchema>;
+export type ScoringResult = InsertScoringResult & {
+  id: number;
+  createdAt: string;
+};
+
 // ==================== MINI APPS ====================
 
 export const miniAppTypeSchema = z.enum([
   "checklist", "calculator", "risk_assessment", "progress_tracker", "document_generator", "custom",
   "issue_log", "action_tracker", "change_log",
-  "project_snapshot", "decision_summary", "risk_radar"
+  "project_snapshot", "decision_summary", "risk_radar",
+  "scoring_assessment", "gap_analysis", "recommendation_engine", "lead_capture_form"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 

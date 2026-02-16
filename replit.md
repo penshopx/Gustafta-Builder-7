@@ -58,7 +58,7 @@ The server manages CRUD operations for agents, knowledge bases, integrations, me
 - **Database**: PostgreSQL (with in-memory fallback for development)
 - **Session Store**: connect-pg-simple
 
-The schema includes tables for `agents` (with extensive configuration options, AI model settings, enhanced persona fields, access control, and product monetization fields), `knowledgeBases`, `integrations`, `agentMessages`, `users`, `userProfiles`, `analytics`, `bigIdeas` (with `seriesId` and `sortOrder` fields), `toolboxes`, `series` (top-level grouping entity), `subscriptionsNew`, `project_brain_templates`, `project_brain_instances`, `mini_apps`, `mini_app_results`, `clientSubscriptions` (end-user subscriptions to chatbot products), and `affiliates` (referral partnership tracking). A hierarchical structure (`series` -> `bigIdeas` -> `toolboxes` -> `agents`) is enforced, where Series is the optional top-level grouping.
+The schema includes tables for `agents` (with extensive configuration options, AI model settings, enhanced persona fields, access control, product monetization fields, and conversion layer settings), `knowledgeBases`, `integrations`, `agentMessages`, `users`, `userProfiles`, `analytics`, `bigIdeas` (with `seriesId` and `sortOrder` fields), `toolboxes`, `series` (top-level grouping entity), `subscriptionsNew`, `project_brain_templates`, `project_brain_instances`, `mini_apps`, `mini_app_results`, `clientSubscriptions` (end-user subscriptions to chatbot products), `affiliates` (referral partnership tracking), `leads` (conversion layer lead capture), and `scoring_results` (conversion layer assessment scoring). A hierarchical structure (`series` -> `bigIdeas` -> `toolboxes` -> `agents`) is enforced, where Series is the optional top-level grouping.
 
 ### Design Patterns
 - **Two-Panel Layout**: Left navigation, right content.
@@ -68,8 +68,9 @@ The schema includes tables for `agents` (with extensive configuration options, A
 - **Context API**: Unified API for managing active `Big Idea` and `Toolbox` context.
 - **Streaming Chat**: Real-time AI responses via Server-Sent Events (SSE).
 - **Project Brain**: Structured template and instance data for contextual chatbot interactions, with anti-prompt injection mechanisms.
-- **Mini Apps**: Configuration-driven, AI-powered applications that leverage Project Brain data for specialized outputs (e.g., project snapshots, risk radars).
+- **Mini Apps**: Configuration-driven, AI-powered applications that leverage Project Brain data for specialized outputs (e.g., project snapshots, risk radars, scoring assessments, gap analyses, recommendations).
 - **Chatbot Series**: Grouping multiple Big Ideas into structured topic packages with public catalog (`/series`), detail pages (`/series/:slug`), and admin management dialog in dashboard.
+- **Conversion Layer**: Revenue-oriented system that transforms chatbots from knowledge bots into revenue engines. Includes: lead capture (with configurable form fields), scoring & assessment (rubrics with thresholds), CTA triggers (after N messages or on score threshold), offer/paket penawaran cards, WhatsApp CTA, Calendly integration. Configured via "Conversion" panel in dashboard. Smart CTA cards appear in public chat automatically based on configured triggers. New mini app types: scoring_assessment, gap_analysis, recommendation_engine, lead_capture_form. Schema tables: `leads`, `scoring_results`. Agent fields: conversionEnabled, conversionGoal, conversionCta, conversionOffers, leadCaptureFields, scoringEnabled, scoringRubric, scoringThresholds, ctaTriggerAfterMessages, ctaTriggerOnScore, whatsappCta, calendlyUrl.
 
 ### UI/UX Decisions
 - Inspired by Botika Online's two-panel dashboard.

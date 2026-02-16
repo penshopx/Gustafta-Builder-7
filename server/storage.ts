@@ -52,6 +52,10 @@ import type {
   InsertTenderSource,
   Tender,
   InsertTender,
+  Lead,
+  InsertLead,
+  ScoringResult,
+  InsertScoringResult,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -250,6 +254,20 @@ export interface IStorage {
   upsertTender(tender: InsertTender): Promise<Tender>;
   getLatestTenders(limit?: number): Promise<Tender[]>;
   deleteTender(id: string): Promise<boolean>;
+
+  // Lead methods (Conversion Layer)
+  getLeads(agentId: string): Promise<Lead[]>;
+  getLead(id: string): Promise<Lead | undefined>;
+  createLead(lead: InsertLead): Promise<Lead>;
+  updateLead(id: string, data: Partial<InsertLead>): Promise<Lead | undefined>;
+  deleteLead(id: string): Promise<boolean>;
+  getLeadsBySession(agentId: string, sessionId: string): Promise<Lead[]>;
+
+  // Scoring Result methods (Conversion Layer)
+  getScoringResults(agentId: string): Promise<ScoringResult[]>;
+  getScoringResult(id: string): Promise<ScoringResult | undefined>;
+  createScoringResult(result: InsertScoringResult): Promise<ScoringResult>;
+  getScoringResultsBySession(agentId: string, sessionId: string): Promise<ScoringResult[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -273,6 +291,8 @@ export class MemStorage implements IStorage {
   private vouchersMap: Map<string, Voucher>;
   private voucherRedemptionsMap: Map<string, VoucherRedemption>;
   private userMemoriesMap: Map<string, UserMemory>;
+  private leadsMap: Map<string, Lead>;
+  private scoringResultsMap: Map<string, ScoringResult>;
 
   constructor() {
     this.users = new Map();
@@ -295,6 +315,8 @@ export class MemStorage implements IStorage {
     this.vouchersMap = new Map();
     this.voucherRedemptionsMap = new Map();
     this.userMemoriesMap = new Map();
+    this.leadsMap = new Map();
+    this.scoringResultsMap = new Map();
   }
 
   // User methods
@@ -1669,6 +1691,75 @@ export class MemStorage implements IStorage {
   async upsertTender(tender: InsertTender): Promise<Tender> { return { id: 1, ...tender, createdAt: new Date(), updatedAt: new Date() } as any; }
   async getLatestTenders(_limit?: number): Promise<Tender[]> { return []; }
   async deleteTender(_id: string): Promise<boolean> { return false; }
+
+  // Lead methods
+  async getLeads(agentId: string): Promise<Lead[]> {
+    return Array.from(this.leadsMap.values())
+      .filter((l) => l.agentId === parseInt(agentId))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getLead(id: string): Promise<Lead | undefined> {
+    return this.leadsMap.get(id);
+  }
+
+  async createLead(lead: InsertLead): Promise<Lead> {
+    const id = this.leadsMap.size + 1;
+    const created: Lead = {
+      ...lead,
+      id,
+      convertedAt: null,
+      createdAt: new Date().toISOString(),
+    };
+    this.leadsMap.set(String(id), created);
+    return created;
+  }
+
+  async updateLead(id: string, data: Partial<InsertLead>): Promise<Lead | undefined> {
+    const lead = this.leadsMap.get(id);
+    if (!lead) return undefined;
+    const updated: Lead = { ...lead, ...data, id: lead.id, createdAt: lead.createdAt, convertedAt: lead.convertedAt };
+    this.leadsMap.set(id, updated);
+    return updated;
+  }
+
+  async deleteLead(id: string): Promise<boolean> {
+    return this.leadsMap.delete(id);
+  }
+
+  async getLeadsBySession(agentId: string, sessionId: string): Promise<Lead[]> {
+    return Array.from(this.leadsMap.values())
+      .filter((l) => l.agentId === parseInt(agentId) && l.sessionId === sessionId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  // Scoring Result methods
+  async getScoringResults(agentId: string): Promise<ScoringResult[]> {
+    return Array.from(this.scoringResultsMap.values())
+      .filter((r) => r.agentId === parseInt(agentId))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getScoringResult(id: string): Promise<ScoringResult | undefined> {
+    return this.scoringResultsMap.get(id);
+  }
+
+  async createScoringResult(result: InsertScoringResult): Promise<ScoringResult> {
+    const id = this.scoringResultsMap.size + 1;
+    const created: ScoringResult = {
+      ...result,
+      id,
+      createdAt: new Date().toISOString(),
+    };
+    this.scoringResultsMap.set(String(id), created);
+    return created;
+  }
+
+  async getScoringResultsBySession(agentId: string, sessionId: string): Promise<ScoringResult[]> {
+    return Array.from(this.scoringResultsMap.values())
+      .filter((r) => r.agentId === parseInt(agentId) && r.sessionId === sessionId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
 }
 
 import { dbStorage } from "./db-storage";

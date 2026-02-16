@@ -28,6 +28,8 @@ import {
   waBroadcastRuns,
   tenderSources,
   tenders,
+  leads,
+  scoringResults,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 import type {
@@ -83,6 +85,10 @@ import type {
   InsertTenderSource,
   Tender,
   InsertTender,
+  Lead,
+  InsertLead,
+  ScoringResult,
+  InsertScoringResult,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -2402,6 +2408,153 @@ export class DatabaseStorage implements IStorage {
   async deleteTender(id: string): Promise<boolean> {
     const result = await db.delete(tenders).where(eq(tenders.id, Number(id)));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // Lead methods
+  private mapLeadRow(row: any): Lead {
+    return {
+      id: row.id,
+      agentId: row.agentId,
+      sessionId: row.sessionId || "",
+      name: row.name || "",
+      email: row.email || "",
+      phone: row.phone || "",
+      company: row.company || "",
+      source: (row.source || "chat") as Lead["source"],
+      status: (row.status || "new") as Lead["status"],
+      score: row.score || 0,
+      scoreBreakdown: (row.scoreBreakdown as Record<string, any>) || {},
+      metadata: (row.metadata as Record<string, any>) || {},
+      notes: row.notes || "",
+      convertedAt: row.convertedAt ? row.convertedAt.toISOString() : null,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getLeads(agentId: string): Promise<Lead[]> {
+    const result = await db.select().from(leads)
+      .where(eq(leads.agentId, parseInt(agentId)))
+      .orderBy(desc(leads.createdAt));
+    return result.map(row => this.mapLeadRow(row));
+  }
+
+  async getLead(id: string): Promise<Lead | undefined> {
+    const result = await db.select().from(leads)
+      .where(eq(leads.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapLeadRow(result[0]);
+  }
+
+  async createLead(lead: InsertLead): Promise<Lead> {
+    const result = await db.insert(leads).values({
+      agentId: lead.agentId,
+      sessionId: lead.sessionId || "",
+      name: lead.name || "",
+      email: lead.email || "",
+      phone: lead.phone || "",
+      company: lead.company || "",
+      source: lead.source || "chat",
+      status: lead.status || "new",
+      score: lead.score || 0,
+      scoreBreakdown: lead.scoreBreakdown || {},
+      metadata: lead.metadata || {},
+      notes: lead.notes || "",
+    }).returning();
+    return this.mapLeadRow(result[0]);
+  }
+
+  async updateLead(id: string, data: Partial<InsertLead>): Promise<Lead | undefined> {
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.email !== undefined) updateData.email = data.email;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.company !== undefined) updateData.company = data.company;
+    if (data.source !== undefined) updateData.source = data.source;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.score !== undefined) updateData.score = data.score;
+    if (data.scoreBreakdown !== undefined) updateData.scoreBreakdown = data.scoreBreakdown;
+    if (data.metadata !== undefined) updateData.metadata = data.metadata;
+    if (data.notes !== undefined) updateData.notes = data.notes;
+
+    const result = await db.update(leads)
+      .set(updateData)
+      .where(eq(leads.id, parseInt(id)))
+      .returning();
+    if (result.length === 0) return undefined;
+    return this.mapLeadRow(result[0]);
+  }
+
+  async deleteLead(id: string): Promise<boolean> {
+    const result = await db.delete(leads).where(eq(leads.id, parseInt(id)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getLeadsBySession(agentId: string, sessionId: string): Promise<Lead[]> {
+    const result = await db.select().from(leads)
+      .where(and(
+        eq(leads.agentId, parseInt(agentId)),
+        eq(leads.sessionId, sessionId)
+      ))
+      .orderBy(desc(leads.createdAt));
+    return result.map(row => this.mapLeadRow(row));
+  }
+
+  // Scoring Result methods
+  private mapScoringResultRow(row: any): ScoringResult {
+    return {
+      id: row.id,
+      agentId: row.agentId,
+      sessionId: row.sessionId || "",
+      leadId: row.leadId || undefined,
+      totalScore: row.totalScore || 0,
+      maxScore: row.maxScore || 100,
+      level: (row.level || "low") as ScoringResult["level"],
+      breakdown: (row.breakdown as any[]) || [],
+      recommendations: (row.recommendations as any[]) || [],
+      gapAnalysis: (row.gapAnalysis as any[]) || [],
+      metadata: (row.metadata as Record<string, any>) || {},
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getScoringResults(agentId: string): Promise<ScoringResult[]> {
+    const result = await db.select().from(scoringResults)
+      .where(eq(scoringResults.agentId, parseInt(agentId)))
+      .orderBy(desc(scoringResults.createdAt));
+    return result.map(row => this.mapScoringResultRow(row));
+  }
+
+  async getScoringResult(id: string): Promise<ScoringResult | undefined> {
+    const result = await db.select().from(scoringResults)
+      .where(eq(scoringResults.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapScoringResultRow(result[0]);
+  }
+
+  async createScoringResult(resultData: InsertScoringResult): Promise<ScoringResult> {
+    const result = await db.insert(scoringResults).values({
+      agentId: resultData.agentId,
+      sessionId: resultData.sessionId || "",
+      leadId: resultData.leadId || null,
+      totalScore: resultData.totalScore || 0,
+      maxScore: resultData.maxScore || 100,
+      level: resultData.level || "low",
+      breakdown: resultData.breakdown || [],
+      recommendations: resultData.recommendations || [],
+      gapAnalysis: resultData.gapAnalysis || [],
+      metadata: resultData.metadata || {},
+    }).returning();
+    return this.mapScoringResultRow(result[0]);
+  }
+
+  async getScoringResultsBySession(agentId: string, sessionId: string): Promise<ScoringResult[]> {
+    const result = await db.select().from(scoringResults)
+      .where(and(
+        eq(scoringResults.agentId, parseInt(agentId)),
+        eq(scoringResults.sessionId, sessionId)
+      ))
+      .orderBy(desc(scoringResults.createdAt));
+    return result.map(row => this.mapScoringResultRow(row));
   }
 }
 
