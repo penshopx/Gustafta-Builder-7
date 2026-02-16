@@ -764,6 +764,10 @@ export class MemStorage implements IStorage {
       widgetShowBranding: data.widgetShowBranding !== undefined ? data.widgetShowBranding : agent.widgetShowBranding,
       widgetWelcomeMessage: data.widgetWelcomeMessage !== undefined ? data.widgetWelcomeMessage : agent.widgetWelcomeMessage,
       widgetButtonIcon: data.widgetButtonIcon !== undefined ? data.widgetButtonIcon : agent.widgetButtonIcon,
+      adCopies: (data as any).adCopies !== undefined ? (data as any).adCopies : (agent as any).adCopies,
+      imageHookPrompts: (data as any).imageHookPrompts !== undefined ? (data as any).imageHookPrompts : (agent as any).imageHookPrompts,
+      videoReelPrompts: (data as any).videoReelPrompts !== undefined ? (data as any).videoReelPrompts : (agent as any).videoReelPrompts,
+      metaPixelId: (data as any).metaPixelId !== undefined ? (data as any).metaPixelId : (agent as any).metaPixelId,
     };
     
     this.agents.set(id, updated);

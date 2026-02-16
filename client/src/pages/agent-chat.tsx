@@ -68,6 +68,35 @@ interface AgentConfig {
   toneOfVoice: string;
   language: string;
   contextQuestions?: ContextQuestion[];
+  metaPixelId?: string;
+}
+
+function injectMetaPixel(pixelId: string) {
+  const sanitized = pixelId.replace(/[^0-9]/g, "");
+  if (!sanitized || document.getElementById("meta-pixel-script")) return;
+  const loader = document.createElement("script");
+  loader.id = "meta-pixel-script";
+  loader.async = true;
+  loader.src = "https://connect.facebook.net/en_US/fbevents.js";
+  loader.onload = () => {
+    if (typeof (window as any).fbq === "function") {
+      (window as any).fbq("init", sanitized);
+      (window as any).fbq("track", "PageView");
+    }
+  };
+  const w = window as any;
+  if (!w.fbq) {
+    const n: any = (w.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); });
+    if (!w._fbq) w._fbq = n;
+    n.push = n; n.loaded = true; n.version = "2.0"; n.queue = [];
+  }
+  document.head.appendChild(loader);
+}
+
+function trackMetaEvent(eventName: string, params?: Record<string, any>) {
+  if (typeof (window as any).fbq === "function") {
+    (window as any).fbq("track", eventName, params);
+  }
 }
 
 function processInlineText(text: string): (string | JSX.Element)[] {
@@ -604,6 +633,10 @@ export default function AgentChat() {
           const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
           if (appleTitle) appleTitle.setAttribute("content", data.name);
 
+          if (data.metaPixelId) {
+            injectMetaPixel(data.metaPixelId);
+          }
+
           fetch(`/api/conversion-config/${params.agentId}`).then(r => r.json()).then(convData => {
             setConversionConfig(convData);
           }).catch(() => {});
@@ -702,6 +735,10 @@ export default function AgentChat() {
   const sendMessage = async (content: string) => {
     if ((!content.trim() && pendingFiles.length === 0) || isTyping || !config) return;
     if (needsContext) return;
+
+    if (messages.length === 0) {
+      trackMetaEvent("ViewContent", { content_name: config.name });
+    }
 
     // Check guest limit for non-registered mode
     if (config && !config.requireRegistration && !clientToken) {

@@ -169,6 +169,11 @@ export const agents = pgTable("agents", {
   ctaTriggerOnScore: integer("cta_trigger_on_score").default(0),
   whatsappCta: text("whatsapp_cta").default(""),
   calendlyUrl: text("calendly_url").default(""),
+  // Marketing Kit - Ad Copy & Prompts
+  adCopies: jsonb("ad_copies").default({}),
+  imageHookPrompts: jsonb("image_hook_prompts").default([]),
+  videoReelPrompts: jsonb("video_reel_prompts").default([]),
+  metaPixelId: text("meta_pixel_id").default(""),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -581,6 +586,29 @@ export const insertAgentSchema = z.object({
   ctaTriggerOnScore: z.number().min(0).max(100).optional().default(0),
   whatsappCta: z.string().optional().default(""),
   calendlyUrl: z.string().optional().default(""),
+  // Marketing Kit
+  adCopies: z.record(z.string(), z.object({
+    headline: z.string().optional().default(""),
+    primaryText: z.string().optional().default(""),
+    description: z.string().optional().default(""),
+    callToAction: z.string().optional().default(""),
+    hashtags: z.string().optional().default(""),
+  })).optional().default({}),
+  imageHookPrompts: z.array(z.object({
+    id: z.string(),
+    title: z.string().optional().default(""),
+    prompt: z.string(),
+    platform: z.string().optional().default("general"),
+    style: z.string().optional().default(""),
+  })).optional().default([]),
+  videoReelPrompts: z.array(z.object({
+    id: z.string(),
+    title: z.string().optional().default(""),
+    prompt: z.string(),
+    platform: z.string().optional().default("general"),
+    duration: z.string().optional().default("15-30s"),
+  })).optional().default([]),
+  metaPixelId: z.string().optional().default(""),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId

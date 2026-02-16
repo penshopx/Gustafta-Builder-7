@@ -3396,6 +3396,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         toneOfVoice: agent.toneOfVoice || "professional",
         language: agent.language || "id",
         contextQuestions: agent.contextQuestions || [],
+        metaPixelId: agent.metaPixelId || "",
       });
     } catch (error) {
       console.error("Chat config error:", error);
@@ -5187,6 +5188,109 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
     }
   });
 
+  app.post("/api/agents/:id/generate-ad-copy", isAuthenticated, async (req, res) => {
+    try {
+      const { platform, agentName, agentDescription, agentTagline, productFeatures, landingBenefits } = req.body;
+      
+      const platformSpecs: Record<string, string> = {
+        meta: "Facebook/Meta Ads: headline max 40 chars, primary text 125 chars ideal (max 250), description max 30 chars. Focus on pain points and solutions.",
+        instagram: "Instagram Ads: headline catchy & short, primary text max 125 chars for feed (use line breaks), include emojis sparingly, hashtags relevant. Visual-first messaging.",
+        google: "Google Ads: headline max 30 chars (3 headlines), description max 90 chars (2 descriptions). Keyword-focused, direct benefits, strong CTA.",
+        tiktok: "TikTok Ads: casual & authentic tone, hook in first line, trending language, 1-2 hashtags, short & punchy. Speak like a creator not a brand.",
+        linkedin: "LinkedIn Ads: professional tone, headline max 70 chars, intro text max 150 chars, focus on business value, ROI, and thought leadership.",
+      };
+
+      const spec = platformSpecs[platform] || "General ad copy";
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert digital marketing copywriter specializing in ad copy for various platforms. Write compelling ad copy in Indonesian (Bahasa Indonesia). Return JSON only.`
+          },
+          {
+            role: "user",
+            content: `Create ad copy for platform: ${platform}
+Specs: ${spec}
+
+Product: ${agentName}
+Description: ${agentDescription}
+Tagline: ${agentTagline || ""}
+Features: ${(productFeatures || []).join(", ")}
+Benefits: ${(landingBenefits || []).join(", ")}
+
+Return JSON format:
+{
+  "headline": "...",
+  "primaryText": "...",
+  "description": "...",
+  "callToAction": "...",
+  "hashtags": "..."
+}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.8,
+      });
+
+      const adCopy = JSON.parse(completion.choices[0].message.content || "{}");
+      res.json({ adCopy });
+    } catch (error) {
+      console.error("Generate ad copy error:", error);
+      res.status(500).json({ error: "Failed to generate ad copy" });
+    }
+  });
+
+  app.post("/api/agents/:id/generate-creative-prompts", isAuthenticated, async (req, res) => {
+    try {
+      const { type, agentName, agentDescription, agentTagline } = req.body;
+
+      const promptInstruction = type === "image"
+        ? `Generate 3 image hook prompts for ads. Each prompt should be detailed enough for AI image generators (Midjourney, DALL-E). Include visual composition, colors, mood, text overlay suggestions. Focus on scroll-stopping visuals.`
+        : `Generate 3 video reel script prompts for short-form content. Each should include: opening hook (first 3 seconds), main content flow, visual transitions, text overlays, and closing CTA. Focus on engagement and watch-time.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `You are a creative director specializing in digital ad creatives. Write prompts in English (for AI tools) but titles in Indonesian. Return JSON only.`
+          },
+          {
+            role: "user",
+            content: `${promptInstruction}
+
+Product: ${agentName}
+Description: ${agentDescription}
+Tagline: ${agentTagline || ""}
+
+Return JSON format:
+{
+  "prompts": [
+    {
+      "id": "unique_id",
+      "title": "Judul prompt dalam Bahasa Indonesia",
+      "prompt": "Detailed creative prompt in English...",
+      "platform": "general",
+      ${type === "image" ? '"style": "Professional Photography"' : '"duration": "15-30s"'}
+    }
+  ]
+}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.9,
+      });
+
+      const result = JSON.parse(completion.choices[0].message.content || '{"prompts":[]}');
+      res.json(result);
+    } catch (error) {
+      console.error("Generate creative prompts error:", error);
+      res.status(500).json({ error: "Failed to generate creative prompts" });
+    }
+  });
+
   app.get("/api/landing/:agentId", async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.agentId as string);
@@ -5213,6 +5317,7 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
         productFeatures: agent.productFeatures,
         conversionOffers: agent.conversionOffers,
         monthlyPrice: agent.monthlyPrice,
+        metaPixelId: agent.metaPixelId || "",
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch landing page" });

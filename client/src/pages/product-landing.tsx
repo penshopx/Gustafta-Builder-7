@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,28 @@ interface Authority {
   credentials?: string[];
 }
 
+function injectMetaPixel(pixelId: string) {
+  const sanitized = pixelId.replace(/[^0-9]/g, "");
+  if (!sanitized || document.getElementById("meta-pixel-script")) return;
+  const loader = document.createElement("script");
+  loader.id = "meta-pixel-script";
+  loader.async = true;
+  loader.src = "https://connect.facebook.net/en_US/fbevents.js";
+  loader.onload = () => {
+    if (typeof (window as any).fbq === "function") {
+      (window as any).fbq("init", sanitized);
+      (window as any).fbq("track", "PageView");
+    }
+  };
+  const w = window as any;
+  if (!w.fbq) {
+    const n: any = (w.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); });
+    if (!w._fbq) w._fbq = n;
+    n.push = n; n.loaded = true; n.version = "2.0"; n.queue = [];
+  }
+  document.head.appendChild(loader);
+}
+
 export default function ProductLanding() {
   const params = useParams<{ agentId: string }>();
   const agentId = params.agentId || "";
@@ -63,6 +85,12 @@ export default function ProductLanding() {
   const { data: agent, isLoading } = useQuery<any>({
     queryKey: ["/api/landing", agentId],
   });
+
+  useEffect(() => {
+    if (agent?.metaPixelId) {
+      injectMetaPixel(agent.metaPixelId);
+    }
+  }, [agent]);
 
   if (isLoading) {
     return <LoadingSkeleton />;

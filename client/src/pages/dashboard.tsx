@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -34,6 +34,7 @@ import { BroadcastPanel } from "@/components/panels/broadcast-panel";
 import { TenderPanel } from "@/components/panels/tender-panel";
 import { ConversionPanel } from "@/components/panels/conversion-panel";
 import { LandingPagePanel } from "@/components/panels/landing-page-panel";
+import { MarketingPanel } from "@/components/panels/marketing-panel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,7 +64,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page";
+type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
@@ -77,6 +78,7 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "tenders", label: "Info Tender", shortLabel: "Tender", icon: FileText },
   { id: "conversion", label: "Conversion", shortLabel: "Convert", icon: Target },
   { id: "landing-page", label: "Landing Page", shortLabel: "Landing", icon: Globe },
+  { id: "marketing", label: "Marketing Kit", shortLabel: "Marketing", icon: Megaphone },
   { id: "product-settings", label: "Monetisasi", shortLabel: "Produk", icon: ShoppingBag },
   { id: "revenue", label: "Revenue & Klien", shortLabel: "Revenue", icon: TrendingUp },
   { id: "affiliates", label: "Afiliasi", shortLabel: "Afiliasi", icon: Users2 },
@@ -369,6 +371,8 @@ export default function Dashboard() {
         return <ConversionPanel agent={activeAgent} />;
       case "landing-page":
         return <LandingPagePanel agent={activeAgent} />;
+      case "marketing":
+        return <MarketingPanel agent={activeAgent} />;
       case "product-settings":
         return <ProductSettingsPanel agent={activeAgent} />;
       case "revenue":
