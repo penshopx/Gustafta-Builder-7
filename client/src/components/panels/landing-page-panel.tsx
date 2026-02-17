@@ -1,298 +1,187 @@
-import { useState, useEffect } from "react";
-import { FileText, Plus, Trash2, Copy, Check, ExternalLink, ChevronDown, ChevronUp, HelpCircle, Shield, Award, Star, AlertTriangle, Quote, Image, Link, Download, ClipboardCopy } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { FileText, Download, ClipboardCopy, Check, Bot, Target, MessageSquare, Zap, Globe, BookOpen, Shield, Users, ExternalLink, Link } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
-interface DemoItem {
-  title: string;
-  description: string;
-  imageUrl: string;
-}
-
-interface Testimonial {
-  name: string;
-  role: string;
-  company: string;
-  quote: string;
-}
-
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
-interface AuthorityData {
-  title: string;
-  description: string;
-  credentials: string[];
-}
+const escHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 
 export function LandingPagePanel({ agent }: { agent: any }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const [enabled, setEnabled] = useState(agent.landingPageEnabled ?? false);
-  const [heroHeadline, setHeroHeadline] = useState(agent.landingHeroHeadline || "");
-  const [heroSubheadline, setHeroSubheadline] = useState(agent.landingHeroSubheadline || "");
-  const [heroCtaText, setHeroCtaText] = useState(agent.landingHeroCtaText || "Mulai Sekarang");
-  const [painPoints, setPainPoints] = useState<string[]>((agent.landingPainPoints as string[]) || []);
-  const [solutionText, setSolutionText] = useState(agent.landingSolutionText || "");
-  const [benefits, setBenefits] = useState<string[]>((agent.landingBenefits as string[]) || []);
-  const [demoItems, setDemoItems] = useState<DemoItem[]>((agent.landingDemoItems as DemoItem[]) || []);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>((agent.landingTestimonials as Testimonial[]) || []);
-  const [faq, setFaq] = useState<FaqItem[]>((agent.landingFaq as FaqItem[]) || []);
-  const [authority, setAuthority] = useState<AuthorityData>(() => {
-    const raw = (agent.landingAuthority as AuthorityData) || {};
-    return {
-      title: raw.title || "",
-      description: raw.description || "",
-      credentials: raw.credentials || [],
-    };
-  });
-  const [guarantees, setGuarantees] = useState<string[]>((agent.landingGuarantees as string[]) || []);
+  const [copied, setCopied] = useState(false);
   const [landingPageUrl, setLandingPageUrl] = useState(agent.landingPageUrl || "");
 
-  const [newPainPoint, setNewPainPoint] = useState("");
-  const [newBenefit, setNewBenefit] = useState("");
-  const [newGuarantee, setNewGuarantee] = useState("");
-  const [newCredential, setNewCredential] = useState("");
-  const [copiedUrl, setCopiedUrl] = useState(false);
-  const [expandedSection, setExpandedSection] = useState<string | null>("hero");
-
-  useEffect(() => {
-    setEnabled(agent.landingPageEnabled ?? false);
-    setHeroHeadline(agent.landingHeroHeadline || "");
-    setHeroSubheadline(agent.landingHeroSubheadline || "");
-    setHeroCtaText(agent.landingHeroCtaText || "Mulai Sekarang");
-    setPainPoints((agent.landingPainPoints as string[]) || []);
-    setSolutionText(agent.landingSolutionText || "");
-    setBenefits((agent.landingBenefits as string[]) || []);
-    setDemoItems((agent.landingDemoItems as DemoItem[]) || []);
-    setTestimonials((agent.landingTestimonials as Testimonial[]) || []);
-    setFaq((agent.landingFaq as FaqItem[]) || []);
-    const rawAuth = (agent.landingAuthority as AuthorityData) || {};
-    setAuthority({
-      title: rawAuth.title || "",
-      description: rawAuth.description || "",
-      credentials: rawAuth.credentials || [],
-    });
-    setGuarantees((agent.landingGuarantees as string[]) || []);
-    setLandingPageUrl(agent.landingPageUrl || "");
-  }, [agent]);
+  const { data: knowledgeBases = [] } = useQuery<any[]>({
+    queryKey: [`/api/knowledge-base/${agent.id}`],
+  });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: Record<string, unknown>) => {
-      const response = await apiRequest("PATCH", `/api/agents/${agent.id}`, data);
-      return response.json();
-    },
+    mutationFn: (data: any) => apiRequest("PATCH", `/api/agents/${agent.id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
-      toast({ title: "Berhasil", description: "Landing page berhasil disimpan" });
-    },
-    onError: () => {
-      toast({ title: "Gagal", description: "Gagal menyimpan landing page", variant: "destructive" });
+      toast({ title: "Tersimpan", description: "URL landing page berhasil disimpan" });
     },
   });
 
-  const handleSave = () => {
-    updateMutation.mutate({
-      landingPageEnabled: enabled,
-      landingHeroHeadline: heroHeadline,
-      landingHeroSubheadline: heroSubheadline,
-      landingHeroCtaText: heroCtaText,
-      landingPainPoints: painPoints,
-      landingSolutionText: solutionText,
-      landingBenefits: benefits,
-      landingDemoItems: demoItems,
-      landingTestimonials: testimonials,
-      landingFaq: faq,
-      landingAuthority: authority,
-      landingGuarantees: guarantees,
-      landingPageUrl: landingPageUrl.trim(),
-    });
+  const handleSaveUrl = () => {
+    updateMutation.mutate({ landingPageUrl: landingPageUrl.trim() });
   };
 
-  const getLandingUrl = () => `${window.location.origin}/product/${agent.id}`;
-
-  const copyUrl = () => {
-    navigator.clipboard.writeText(getLandingUrl());
-    setCopiedUrl(true);
-    setTimeout(() => setCopiedUrl(false), 2000);
-    toast({ title: "Disalin!", description: "URL landing page berhasil disalin" });
-  };
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };
-
-  const addToList = (list: string[], setList: (v: string[]) => void, value: string, setValue: (v: string) => void) => {
-    if (value.trim()) {
-      setList([...list, value.trim()]);
-      setValue("");
-    }
-  };
-
-  const removeFromList = (list: string[], setList: (v: string[]) => void, index: number) => {
-    setList(list.filter((_, i) => i !== index));
-  };
-
-  const generateMarkdown = () => {
+  const buildSummary = () => {
     const lines: string[] = [];
-    lines.push(`# Landing Page - ${agent.name || "Chatbot"}`);
+    lines.push(`# Rangkuman Chatbot: ${agent.name || "(Tanpa Nama)"}`);
     lines.push("");
     lines.push("---");
     lines.push("");
 
-    if (heroHeadline || heroSubheadline) {
-      lines.push("## HERO SECTION");
+    lines.push("## 1. IDENTITAS");
+    lines.push("");
+    if (agent.name) lines.push(`- **Nama:** ${agent.name}`);
+    if (agent.tagline) lines.push(`- **Tagline:** ${agent.tagline}`);
+    if (agent.description) lines.push(`- **Deskripsi:** ${agent.description}`);
+    if (agent.category) lines.push(`- **Kategori:** ${agent.category}`);
+    if (agent.subcategory) lines.push(`- **Subkategori:** ${agent.subcategory}`);
+    if (agent.language) lines.push(`- **Bahasa:** ${agent.language === "id" ? "Indonesia" : agent.language === "en" ? "English" : agent.language}`);
+    if (agent.brandingName) lines.push(`- **Branding:** ${agent.brandingName}`);
+    lines.push(`- **URL Chat:** ${window.location.origin}/bot/${agent.id}`);
+    lines.push("");
+
+    if (agent.personality || agent.communicationStyle || agent.toneOfVoice || agent.philosophy) {
+      lines.push("## 2. PERSONA & KARAKTER");
       lines.push("");
-      if (heroHeadline) lines.push(`**Headline:** ${heroHeadline}`);
-      if (heroSubheadline) lines.push(`**Subheadline:** ${heroSubheadline}`);
-      if (heroCtaText) lines.push(`**Tombol CTA:** ${heroCtaText}`);
+      if (agent.personality) lines.push(`- **Personality:** ${agent.personality}`);
+      if (agent.communicationStyle) lines.push(`- **Gaya Komunikasi:** ${agent.communicationStyle}`);
+      if (agent.toneOfVoice) lines.push(`- **Tone of Voice:** ${agent.toneOfVoice}`);
+      if (agent.responseFormat) lines.push(`- **Format Respon:** ${agent.responseFormat}`);
+      if (agent.philosophy) lines.push(`- **Filosofi:** ${agent.philosophy}`);
       lines.push("");
     }
 
-    if (painPoints.length > 0) {
-      lines.push("## PAIN POINTS (Problem Agitation)");
+    const expertise = agent.expertise || [];
+    if (expertise.length > 0) {
+      lines.push("## 3. KEAHLIAN / EXPERTISE");
       lines.push("");
-      painPoints.forEach((p, i) => lines.push(`${i + 1}. ${p}`));
-      lines.push("");
-    }
-
-    if (solutionText) {
-      lines.push("## SOLUSI");
-      lines.push("");
-      lines.push(solutionText);
+      expertise.forEach((e: string) => lines.push(`- ${e}`));
       lines.push("");
     }
 
-    if (benefits.length > 0) {
-      lines.push("## MANFAAT (Outcome Benefits)");
+    if (agent.greetingMessage || (agent.conversationStarters || []).length > 0) {
+      lines.push("## 4. SAPAAN & CONVERSATION STARTERS");
       lines.push("");
-      benefits.forEach((b, i) => lines.push(`${i + 1}. ${b}`));
-      lines.push("");
-    }
-
-    if (demoItems.length > 0) {
-      lines.push("## DEMO / PREVIEW");
-      lines.push("");
-      demoItems.forEach((d, i) => {
-        lines.push(`### Demo ${i + 1}: ${d.title || "(Tanpa judul)"}`);
-        if (d.description) lines.push(d.description);
-        if (d.imageUrl) lines.push(`Gambar: ${d.imageUrl}`);
+      if (agent.greetingMessage) lines.push(`**Pesan Sapaan:** ${agent.greetingMessage}`);
+      const starters = agent.conversationStarters || [];
+      if (starters.length > 0) {
         lines.push("");
-      });
-    }
-
-    if (testimonials.length > 0) {
-      lines.push("## TESTIMONI / SOCIAL PROOF");
-      lines.push("");
-      testimonials.forEach((t, i) => {
-        lines.push(`### Testimoni ${i + 1}`);
-        lines.push(`> "${t.quote}"`);
-        lines.push(`> — **${t.name}**, ${t.role}${t.company ? `, ${t.company}` : ""}`);
-        lines.push("");
-      });
-    }
-
-    if (faq.length > 0) {
-      lines.push("## FAQ");
-      lines.push("");
-      faq.forEach((f, i) => {
-        lines.push(`**Q${i + 1}: ${f.question}**`);
-        lines.push(`A: ${f.answer}`);
-        lines.push("");
-      });
-    }
-
-    if (authority.title || authority.description || authority.credentials.length > 0) {
-      lines.push("## AUTHORITY / KREDENSIAL");
-      lines.push("");
-      if (authority.title) lines.push(`**${authority.title}**`);
-      if (authority.description) lines.push(authority.description);
-      if (authority.credentials.length > 0) {
-        lines.push("");
-        authority.credentials.forEach(c => lines.push(`- ${c}`));
+        lines.push("**Conversation Starters:**");
+        starters.forEach((s: string) => lines.push(`- ${s}`));
       }
       lines.push("");
     }
 
-    if (guarantees.length > 0) {
-      lines.push("## JAMINAN / RISK REVERSAL");
+    const features = agent.productFeatures || [];
+    if (features.length > 0 || agent.productSummary) {
+      lines.push("## 5. FITUR PRODUK");
       lines.push("");
-      guarantees.forEach(g => lines.push(`- ${g}`));
+      if (agent.productSummary) lines.push(agent.productSummary);
+      if (features.length > 0) {
+        lines.push("");
+        features.forEach((f: string) => lines.push(`- ${f}`));
+      }
+      lines.push("");
+    }
+
+    const keyPhrases = agent.keyPhrases || [];
+    if (keyPhrases.length > 0) {
+      lines.push("## 6. KEY PHRASES / KATA KUNCI");
+      lines.push("");
+      keyPhrases.forEach((p: string) => lines.push(`- ${p}`));
+      lines.push("");
+    }
+
+    if (knowledgeBases.length > 0) {
+      lines.push("## 7. KNOWLEDGE BASE");
+      lines.push("");
+      knowledgeBases.forEach((kb: any) => {
+        lines.push(`- **${kb.name}** (${kb.type})${kb.description ? `: ${kb.description}` : ""}`);
+      });
+      lines.push("");
+    }
+
+    const contextQuestions = agent.contextQuestions || [];
+    if (contextQuestions.length > 0) {
+      lines.push("## 8. KONTEKS PROYEK (Pertanyaan Awal)");
+      lines.push("");
+      contextQuestions.forEach((q: any) => {
+        lines.push(`- **${q.label}** (${q.type})${q.required ? " *wajib*" : ""}`);
+        if (q.options && q.options.length > 0) {
+          lines.push(`  Opsi: ${q.options.join(", ")}`);
+        }
+      });
+      lines.push("");
+    }
+
+    lines.push("## 9. PENGATURAN TEKNIS");
+    lines.push("");
+    lines.push(`- **Model AI:** ${agent.aiModel || "gpt-4o-mini"}`);
+    lines.push(`- **Temperature:** ${agent.temperature ?? 0.7}`);
+    lines.push(`- **Max Tokens:** ${agent.maxTokens ?? 1024}`);
+    if (agent.isOrchestrator) lines.push(`- **Peran:** Orchestrator (${agent.orchestratorRole})`);
+    if (agent.agenticMode) lines.push("- **Mode Agentik:** Aktif");
+    if (agent.emotionalIntelligence) lines.push("- **Kecerdasan Emosional:** Aktif");
+    if (agent.multiStepReasoning) lines.push("- **Multi-Step Reasoning:** Aktif");
+    lines.push("");
+
+    if (agent.monthlyPrice || agent.guestMessageLimit || agent.trialEnabled) {
+      lines.push("## 10. MONETISASI");
+      lines.push("");
+      if (agent.monthlyPrice) lines.push(`- **Harga Bulanan:** Rp ${agent.monthlyPrice.toLocaleString("id-ID")}`);
+      if (agent.guestMessageLimit) lines.push(`- **Limit Pesan Tamu:** ${agent.guestMessageLimit} pesan`);
+      if (agent.messageQuotaDaily) lines.push(`- **Kuota Harian:** ${agent.messageQuotaDaily} pesan`);
+      if (agent.messageQuotaMonthly) lines.push(`- **Kuota Bulanan:** ${agent.messageQuotaMonthly} pesan`);
+      if (agent.trialEnabled) lines.push(`- **Trial:** ${agent.trialDays || 7} hari`);
+      lines.push("");
+    }
+
+    const avoidTopics = agent.avoidTopics || [];
+    if (avoidTopics.length > 0) {
+      lines.push("## 11. TOPIK YANG DIHINDARI");
+      lines.push("");
+      avoidTopics.forEach((t: string) => lines.push(`- ${t}`));
       lines.push("");
     }
 
     lines.push("---");
-    lines.push(`*Dokumen ini di-generate oleh Gustafta AI untuk chatbot "${agent.name || ""}"*`);
+    lines.push(`*Rangkuman ini di-generate otomatis oleh Gustafta AI dari data chatbot "${agent.name || ""}"*`);
+    lines.push(`*Gunakan sebagai referensi untuk membuat landing page, marketing material, atau proposal di platform lain.*`);
     return lines.join("\n");
-  };
-
-  const downloadMarkdown = () => {
-    const md = generateMarkdown();
-    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `landing-page-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "Berhasil", description: "Dokumen Markdown berhasil diunduh" });
-  };
-
-  const copyAllContent = () => {
-    const md = generateMarkdown();
-    navigator.clipboard.writeText(md);
-    toast({ title: "Disalin!", description: "Semua konten landing page berhasil disalin ke clipboard" });
   };
 
   const mdToHtml = (md: string) => {
     const lines = md.split("\n");
     const result: string[] = [];
     let inList = false;
-    let listType = "";
 
     const closePendingList = () => {
-      if (inList) {
-        result.push(listType === "ol" ? "</ol>" : "</ul>");
-        inList = false;
-      }
+      if (inList) { result.push("</ul>"); inList = false; }
     };
-
-    const fmt = (t: string) => t.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>");
+    const fmt = (t: string) => escHtml(t).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>");
 
     for (const line of lines) {
-      const isOl = /^\d+\.\s/.test(line);
-      const isUl = line.startsWith("- ");
-
-      if (isOl || isUl) {
-        const newType = isOl ? "ol" : "ul";
-        if (!inList || listType !== newType) {
-          closePendingList();
-          result.push(newType === "ol" ? "<ol>" : "<ul>");
-          inList = true;
-          listType = newType;
-        }
-        const content = isOl ? line.replace(/^\d+\.\s/, "") : line.slice(2);
-        result.push(`<li>${fmt(content)}</li>`);
+      if (line.startsWith("- ")) {
+        if (!inList) { result.push("<ul>"); inList = true; }
+        result.push(`<li>${fmt(line.slice(2))}</li>`);
         continue;
       }
-
       closePendingList();
-
       if (line.startsWith("# ")) { result.push(`<h1>${fmt(line.slice(2))}</h1>`); continue; }
       if (line.startsWith("## ")) { result.push(`<h2>${fmt(line.slice(3))}</h2>`); continue; }
       if (line.startsWith("### ")) { result.push(`<h3>${fmt(line.slice(4))}</h3>`); continue; }
-      if (line.startsWith("> ")) { result.push(`<blockquote>${fmt(line.slice(2))}</blockquote>`); continue; }
       if (line === "---") { result.push("<hr>"); continue; }
       if (line === "") continue;
       result.push(`<p>${fmt(line)}</p>`);
@@ -301,100 +190,75 @@ export function LandingPagePanel({ agent }: { agent: any }) {
     return result.join("\n");
   };
 
-  const downloadHtml = () => {
-    const md = generateMarkdown();
-    const body = mdToHtml(md);
-    const html = `<!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Landing Page - ${agent.name || "Chatbot"}</title>
-<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.7;color:#333}
-h1{color:#1a1a2e;border-bottom:3px solid #4361ee;padding-bottom:.5rem}
-h2{color:#3a0ca3;margin-top:2rem}h3{color:#4361ee}
-blockquote{border-left:4px solid #4361ee;margin:1rem 0;padding:.5rem 1rem;background:#f8f9fa;font-style:italic}
-ol,ul{margin:.5rem 0;padding-left:1.5rem}li{margin:.3rem 0}hr{border:none;border-top:2px solid #eee;margin:2rem 0}
-strong{color:#1a1a2e}</style></head>
-<body>${body}</body></html>`;
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const downloadFile = (content: string, filename: string, mimeType: string) => {
+    const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `landing-page-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.html`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Berhasil", description: "Dokumen HTML berhasil diunduh" });
   };
 
-  const SectionHeader = ({ id, icon: Icon, title, count }: { id: string; icon: any; title: string; count?: number }) => (
-    <button
-      onClick={() => toggleSection(id)}
-      className="w-full flex items-center justify-between gap-2 p-3 text-left"
-      data-testid={`button-toggle-${id}`}
-    >
-      <div className="flex items-center gap-2">
-        <Icon className="w-4 h-4 text-primary" />
-        <span className="font-medium">{title}</span>
-        {count !== undefined && count > 0 && (
-          <Badge variant="secondary" className="text-xs">{count}</Badge>
-        )}
-      </div>
-      {expandedSection === id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-    </button>
-  );
+  const slug = (agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase();
+
+  const downloadMarkdown = () => {
+    downloadFile(buildSummary(), `rangkuman-${slug}.md`, "text/markdown");
+    toast({ title: "Berhasil", description: "File Markdown berhasil diunduh" });
+  };
+
+  const downloadHtml = () => {
+    const body = mdToHtml(buildSummary());
+    const html = `<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Rangkuman Chatbot - ${agent.name || "Chatbot"}</title>
+<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.7;color:#333}
+h1{color:#1a1a2e;border-bottom:3px solid #4361ee;padding-bottom:.5rem}
+h2{color:#3a0ca3;margin-top:2rem}h3{color:#4361ee}
+ul{margin:.5rem 0;padding-left:1.5rem}li{margin:.3rem 0}hr{border:none;border-top:2px solid #eee;margin:2rem 0}
+strong{color:#1a1a2e}em{color:#666}</style></head>
+<body>${body}</body></html>`;
+    downloadFile(html, `rangkuman-${slug}.html`, "text/html");
+    toast({ title: "Berhasil", description: "File HTML berhasil diunduh" });
+  };
+
+  const copyAll = () => {
+    navigator.clipboard.writeText(buildSummary());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Disalin!", description: "Rangkuman chatbot berhasil disalin ke clipboard" });
+  };
+
+  const summary = buildSummary();
+  const sectionCount = (summary.match(/^## /gm) || []).length;
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6 p-4 md:p-6 max-w-4xl overflow-y-auto max-h-[calc(100vh-80px)]">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <FileText className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Landing Page</h2>
-            <p className="text-muted-foreground">Halaman marketing untuk onboarding chatbot Anda</p>
+            <h2 className="text-lg font-semibold text-foreground" data-testid="text-summary-title">Rangkuman Chatbot</h2>
+            <p className="text-sm text-muted-foreground">Data lengkap chatbot untuk bahan landing page & marketing</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" onClick={copyAllContent} data-testid="button-copy-all-landing">
-            <ClipboardCopy className="w-4 h-4 mr-1.5" />
-            Salin Semua
+          <Button variant="outline" onClick={copyAll} data-testid="button-copy-all-summary">
+            {copied ? <Check className="w-4 h-4 mr-1.5" /> : <ClipboardCopy className="w-4 h-4 mr-1.5" />}
+            {copied ? "Tersalin" : "Salin Semua"}
           </Button>
-          <Button variant="outline" onClick={downloadMarkdown} data-testid="button-download-md-landing">
+          <Button variant="outline" onClick={downloadMarkdown} data-testid="button-download-md-summary">
             <Download className="w-4 h-4 mr-1.5" />
             .md
           </Button>
-          <Button variant="outline" onClick={downloadHtml} data-testid="button-download-html-landing">
+          <Button variant="outline" onClick={downloadHtml} data-testid="button-download-html-summary">
             <Download className="w-4 h-4 mr-1.5" />
             .html
           </Button>
-          <Button onClick={handleSave} disabled={updateMutation.isPending} data-testid="button-save-landing">
-            {updateMutation.isPending ? "Menyimpan..." : "Simpan"}
-          </Button>
         </div>
       </div>
-
-      <Card>
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="space-y-0.5">
-              <Label className="text-base font-semibold">Aktifkan Landing Page</Label>
-              <p className="text-xs text-muted-foreground">Landing page publik yang berfungsi sebagai etalase chatbot Anda</p>
-            </div>
-            <Switch checked={enabled} onCheckedChange={setEnabled} data-testid="switch-landing-enabled" />
-          </div>
-
-          {enabled && (
-            <div className="flex items-center gap-2 pt-2">
-              <Input value={getLandingUrl()} readOnly className="text-sm" data-testid="input-landing-url" />
-              <Button size="icon" variant="outline" onClick={copyUrl} data-testid="button-copy-landing-url">
-                {copiedUrl ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
-              <Button size="icon" variant="outline" onClick={() => window.open(getLandingUrl(), "_blank")} data-testid="button-preview-landing">
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       <Card>
         <CardContent className="pt-6 space-y-3">
@@ -403,388 +267,63 @@ strong{color:#1a1a2e}</style></head>
             <Label className="text-base font-semibold">Link Landing Page Eksternal</Label>
           </div>
           <p className="text-xs text-muted-foreground">
-            Jika Anda sudah membuat landing page di platform lain (Notion, Carrd, Google Sites, dll), masukkan URL-nya di sini
+            Jika Anda sudah membuat landing page di platform lain (Carrd, Notion, Google Sites, dll), masukkan URL-nya di sini sebagai referensi
           </p>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={landingPageUrl}
-                onChange={(e) => setLandingPageUrl(e.target.value)}
-                placeholder="https://contoh.com/landing-page-chatbot-anda"
-                className="pl-10 text-sm"
-                data-testid="input-external-landing-url"
-              />
-            </div>
-            {landingPageUrl.trim() && (
-              <Button size="icon" variant="outline" onClick={() => window.open(landingPageUrl.trim(), "_blank")} data-testid="button-open-external-landing">
-                <ExternalLink className="w-4 h-4" />
+          <div className="flex gap-2">
+            <Input
+              value={landingPageUrl}
+              onChange={(e) => setLandingPageUrl(e.target.value)}
+              placeholder="https://contoh.carrd.co atau https://site.google.com/..."
+              data-testid="input-landing-page-url"
+            />
+            <Button onClick={handleSaveUrl} disabled={updateMutation.isPending} data-testid="button-save-landing-url">
+              {updateMutation.isPending ? "..." : "Simpan"}
+            </Button>
+            {landingPageUrl && (
+              <Button variant="outline" size="icon" asChild>
+                <a href={landingPageUrl} target="_blank" rel="noopener noreferrer" data-testid="button-open-landing-url">
+                  <ExternalLink className="w-4 h-4" />
+                </a>
               </Button>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {enabled && (
-        <div className="space-y-3">
-          <Card>
-            <SectionHeader id="hero" icon={Star} title="Hero Section" />
-            {expandedSection === "hero" && (
-              <CardContent className="space-y-4 pt-0">
-                <div className="space-y-2">
-                  <Label>Headline Utama</Label>
-                  <Input
-                    value={heroHeadline}
-                    onChange={(e) => setHeroHeadline(e.target.value)}
-                    placeholder="Contoh: Apakah Perusahaan Anda Siap Lolos Tender?"
-                    data-testid="input-hero-headline"
-                  />
-                  <p className="text-xs text-muted-foreground">Hook yang tajam, bukan hype AI. Fokus ke masalah user.</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Subheadline</Label>
-                  <Input
-                    value={heroSubheadline}
-                    onChange={(e) => setHeroSubheadline(e.target.value)}
-                    placeholder="Contoh: Cek kesiapan tender Anda dalam 5 menit"
-                    data-testid="input-hero-subheadline"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Teks Tombol CTA</Label>
-                  <Input
-                    value={heroCtaText}
-                    onChange={(e) => setHeroCtaText(e.target.value)}
-                    placeholder="Mulai Sekarang"
-                    data-testid="input-hero-cta"
-                  />
-                </div>
-              </CardContent>
-            )}
-          </Card>
+      <Card>
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Bot className="w-4 h-4 text-primary" />
+              <span className="font-semibold">Preview Rangkuman</span>
+            </div>
+            <Badge variant="secondary">{sectionCount} bagian</Badge>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Rangkuman ini otomatis diambil dari konfigurasi chatbot Anda. Edit data chatbot di panel lain untuk memperbarui rangkuman ini.
+          </p>
+          <div className="bg-muted/50 rounded-md p-4 max-h-[500px] overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-sm font-mono text-foreground leading-relaxed" data-testid="text-summary-preview">
+              {summary}
+            </pre>
+          </div>
+        </CardContent>
+      </Card>
 
-          <Card>
-            <SectionHeader id="pain" icon={AlertTriangle} title="Problem Agitation (Pain Points)" count={painPoints.length} />
-            {expandedSection === "pain" && (
-              <CardContent className="space-y-4 pt-0">
-                <p className="text-xs text-muted-foreground">Masalah yang membuat calon pengguna merasa &quot;ini relevan untuk saya&quot;</p>
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={newPainPoint}
-                    onChange={(e) => setNewPainPoint(e.target.value)}
-                    placeholder="Contoh: 70% kontraktor kecil gugur karena dokumen tidak sistematis"
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addToList(painPoints, setPainPoints, newPainPoint, setNewPainPoint); } }}
-                    data-testid="input-new-pain-point"
-                  />
-                  <Button size="icon" variant="outline" onClick={() => addToList(painPoints, setPainPoints, newPainPoint, setNewPainPoint)} disabled={!newPainPoint.trim()} data-testid="button-add-pain-point">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                {painPoints.map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                    <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
-                    <span className="flex-1 text-sm">{item}</span>
-                    <Button size="icon" variant="ghost" onClick={() => removeFromList(painPoints, setPainPoints, i)} data-testid={`button-remove-pain-${i}`}>
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </CardContent>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader id="solution" icon={FileText} title="Solution Framing" />
-            {expandedSection === "solution" && (
-              <CardContent className="space-y-4 pt-0">
-                <div className="space-y-2">
-                  <Label>Deskripsi Solusi</Label>
-                  <Textarea
-                    value={solutionText}
-                    onChange={(e) => setSolutionText(e.target.value)}
-                    placeholder="Contoh: Chatbot ini bukan sekadar tanya jawab. Ia menganalisis kondisi perusahaan Anda dan menunjukkan gap yang menghambat kelolosan tender."
-                    rows={3}
-                    data-testid="input-solution-text"
-                  />
-                  <p className="text-xs text-muted-foreground">Jelaskan bagaimana chatbot menyelesaikan masalah. Tekankan diagnosis personal, rekomendasi spesifik, roadmap tindakan.</p>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader id="benefits" icon={Star} title="Outcome Benefits" count={benefits.length} />
-            {expandedSection === "benefits" && (
-              <CardContent className="space-y-4 pt-0">
-                <p className="text-xs text-muted-foreground">Fokus pada HASIL, bukan fitur teknis. Tulis apa yang user dapatkan.</p>
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={newBenefit}
-                    onChange={(e) => setNewBenefit(e.target.value)}
-                    placeholder="Contoh: Kurangi risiko gugur administrasi"
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addToList(benefits, setBenefits, newBenefit, setNewBenefit); } }}
-                    data-testid="input-new-benefit"
-                  />
-                  <Button size="icon" variant="outline" onClick={() => addToList(benefits, setBenefits, newBenefit, setNewBenefit)} disabled={!newBenefit.trim()} data-testid="button-add-benefit">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                {benefits.map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                    <Star className="w-4 h-4 text-primary shrink-0" />
-                    <span className="flex-1 text-sm">{item}</span>
-                    <Button size="icon" variant="ghost" onClick={() => removeFromList(benefits, setBenefits, i)} data-testid={`button-remove-benefit-${i}`}>
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </CardContent>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader id="demo" icon={Image} title="Demo / Preview" count={demoItems.length} />
-            {expandedSection === "demo" && (
-              <CardContent className="space-y-4 pt-0">
-                <p className="text-xs text-muted-foreground">Tampilkan contoh output: screenshot flow chatbot, contoh skor, contoh gap analysis. Orang harus melihat output sebelum beli.</p>
-                <Button
-                  variant="outline"
-                  onClick={() => setDemoItems([...demoItems, { title: "", description: "", imageUrl: "" }])}
-                  data-testid="button-add-demo"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Tambah Demo Item
-                </Button>
-                {demoItems.map((item, i) => (
-                  <Card key={i} className="p-4 space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-sm font-medium">Demo #{i + 1}</Label>
-                      <Button size="icon" variant="ghost" onClick={() => setDemoItems(demoItems.filter((_, idx) => idx !== i))} data-testid={`button-remove-demo-${i}`}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <Input
-                      value={item.title}
-                      onChange={(e) => { const updated = [...demoItems]; updated[i] = { ...updated[i], title: e.target.value }; setDemoItems(updated); }}
-                      placeholder="Judul demo"
-                      data-testid={`input-demo-title-${i}`}
-                    />
-                    <Input
-                      value={item.description}
-                      onChange={(e) => { const updated = [...demoItems]; updated[i] = { ...updated[i], description: e.target.value }; setDemoItems(updated); }}
-                      placeholder="Deskripsi singkat"
-                      data-testid={`input-demo-desc-${i}`}
-                    />
-                    <Input
-                      value={item.imageUrl}
-                      onChange={(e) => { const updated = [...demoItems]; updated[i] = { ...updated[i], imageUrl: e.target.value }; setDemoItems(updated); }}
-                      placeholder="URL gambar (opsional)"
-                      data-testid={`input-demo-image-${i}`}
-                    />
-                  </Card>
-                ))}
-              </CardContent>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader id="testimonials" icon={Quote} title="Social Proof / Testimoni" count={testimonials.length} />
-            {expandedSection === "testimonials" && (
-              <CardContent className="space-y-4 pt-0">
-                <p className="text-xs text-muted-foreground">Testimoni klien, studi kasus singkat, before/after. Wajib untuk B2B.</p>
-                <Button
-                  variant="outline"
-                  onClick={() => setTestimonials([...testimonials, { name: "", role: "", company: "", quote: "" }])}
-                  data-testid="button-add-testimonial"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Tambah Testimoni
-                </Button>
-                {testimonials.map((item, i) => (
-                  <Card key={i} className="p-4 space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-sm font-medium">Testimoni #{i + 1}</Label>
-                      <Button size="icon" variant="ghost" onClick={() => setTestimonials(testimonials.filter((_, idx) => idx !== i))} data-testid={`button-remove-testimonial-${i}`}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <Input
-                        value={item.name}
-                        onChange={(e) => { const u = [...testimonials]; u[i] = { ...u[i], name: e.target.value }; setTestimonials(u); }}
-                        placeholder="Nama"
-                        data-testid={`input-testimonial-name-${i}`}
-                      />
-                      <Input
-                        value={item.role}
-                        onChange={(e) => { const u = [...testimonials]; u[i] = { ...u[i], role: e.target.value }; setTestimonials(u); }}
-                        placeholder="Jabatan"
-                        data-testid={`input-testimonial-role-${i}`}
-                      />
-                      <Input
-                        value={item.company}
-                        onChange={(e) => { const u = [...testimonials]; u[i] = { ...u[i], company: e.target.value }; setTestimonials(u); }}
-                        placeholder="Perusahaan"
-                        data-testid={`input-testimonial-company-${i}`}
-                      />
-                    </div>
-                    <Textarea
-                      value={item.quote}
-                      onChange={(e) => { const u = [...testimonials]; u[i] = { ...u[i], quote: e.target.value }; setTestimonials(u); }}
-                      placeholder="Kutipan testimoni..."
-                      rows={2}
-                      data-testid={`input-testimonial-quote-${i}`}
-                    />
-                  </Card>
-                ))}
-              </CardContent>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader id="guarantees" icon={Shield} title="Risk Reversal / Jaminan" count={guarantees.length} />
-            {expandedSection === "guarantees" && (
-              <CardContent className="space-y-4 pt-0">
-                <p className="text-xs text-muted-foreground">Jaminan menurunkan resistance pembelian. Contoh: revisi sampai sesuai, garansi kepuasan, konsultasi awal gratis.</p>
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={newGuarantee}
-                    onChange={(e) => setNewGuarantee(e.target.value)}
-                    placeholder="Contoh: Revisi sampai sesuai kebutuhan Anda"
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addToList(guarantees, setGuarantees, newGuarantee, setNewGuarantee); } }}
-                    data-testid="input-new-guarantee"
-                  />
-                  <Button size="icon" variant="outline" onClick={() => addToList(guarantees, setGuarantees, newGuarantee, setNewGuarantee)} disabled={!newGuarantee.trim()} data-testid="button-add-guarantee">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                {guarantees.map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                    <Shield className="w-4 h-4 text-primary shrink-0" />
-                    <span className="flex-1 text-sm">{item}</span>
-                    <Button size="icon" variant="ghost" onClick={() => removeFromList(guarantees, setGuarantees, i)} data-testid={`button-remove-guarantee-${i}`}>
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </CardContent>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader id="authority" icon={Award} title="Authority / Kredensial" count={authority.credentials.length} />
-            {expandedSection === "authority" && (
-              <CardContent className="space-y-4 pt-0">
-                <p className="text-xs text-muted-foreground">Tampilkan kredensial: pengalaman, sertifikasi, proyek yang pernah ditangani. Market ini peduli trust.</p>
-                <div className="space-y-2">
-                  <Label>Judul</Label>
-                  <Input
-                    value={authority.title}
-                    onChange={(e) => setAuthority({ ...authority, title: e.target.value })}
-                    placeholder="Contoh: Didukung oleh Praktisi Konstruksi Berpengalaman"
-                    data-testid="input-authority-title"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Deskripsi</Label>
-                  <Textarea
-                    value={authority.description}
-                    onChange={(e) => setAuthority({ ...authority, description: e.target.value })}
-                    placeholder="Ceritakan latar belakang dan pengalaman yang relevan..."
-                    rows={3}
-                    data-testid="input-authority-description"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Kredensial / Pencapaian</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={newCredential}
-                      onChange={(e) => setNewCredential(e.target.value)}
-                      placeholder="Contoh: 15+ tahun pengalaman konstruksi"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          if (newCredential.trim()) {
-                            setAuthority({ ...authority, credentials: [...authority.credentials, newCredential.trim()] });
-                            setNewCredential("");
-                          }
-                        }
-                      }}
-                      data-testid="input-new-credential"
-                    />
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        if (newCredential.trim()) {
-                          setAuthority({ ...authority, credentials: [...authority.credentials, newCredential.trim()] });
-                          setNewCredential("");
-                        }
-                      }}
-                      disabled={!newCredential.trim()}
-                      data-testid="button-add-credential"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {authority.credentials.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                      <Award className="w-4 h-4 text-primary shrink-0" />
-                      <span className="flex-1 text-sm">{item}</span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => setAuthority({ ...authority, credentials: authority.credentials.filter((_, idx) => idx !== i) })}
-                        data-testid={`button-remove-credential-${i}`}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader id="faq" icon={HelpCircle} title="FAQ" count={faq.length} />
-            {expandedSection === "faq" && (
-              <CardContent className="space-y-4 pt-0">
-                <p className="text-xs text-muted-foreground">Atasi keberatan umum: keamanan data, jaminan hasil, cocok untuk skala kecil, dst.</p>
-                <Button
-                  variant="outline"
-                  onClick={() => setFaq([...faq, { question: "", answer: "" }])}
-                  data-testid="button-add-faq"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Tambah FAQ
-                </Button>
-                {faq.map((item, i) => (
-                  <Card key={i} className="p-4 space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-sm font-medium">FAQ #{i + 1}</Label>
-                      <Button size="icon" variant="ghost" onClick={() => setFaq(faq.filter((_, idx) => idx !== i))} data-testid={`button-remove-faq-${i}`}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <Input
-                      value={item.question}
-                      onChange={(e) => { const u = [...faq]; u[i] = { ...u[i], question: e.target.value }; setFaq(u); }}
-                      placeholder="Pertanyaan"
-                      data-testid={`input-faq-question-${i}`}
-                    />
-                    <Textarea
-                      value={item.answer}
-                      onChange={(e) => { const u = [...faq]; u[i] = { ...u[i], answer: e.target.value }; setFaq(u); }}
-                      placeholder="Jawaban"
-                      rows={2}
-                      data-testid={`input-faq-answer-${i}`}
-                    />
-                  </Card>
-                ))}
-              </CardContent>
-            )}
-          </Card>
-        </div>
-      )}
+      <Card>
+        <CardContent className="pt-6 space-y-3">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary" />
+            <span className="font-semibold">Cara Pakai</span>
+          </div>
+          <div className="text-sm text-muted-foreground space-y-2">
+            <p>1. Klik "Salin Semua" atau download file (.md / .html)</p>
+            <p>2. Paste ke platform landing page pilihan Anda (Carrd, Notion, Google Sites, WordPress, dll.)</p>
+            <p>3. Sesuaikan desain dan tambahkan visual sesuai kebutuhan</p>
+            <p>4. Simpan URL landing page di field di atas sebagai referensi</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
