@@ -191,9 +191,14 @@ const MODE_RISK_RADAR = `Assess and report current project risks based on Projec
 Keep it non-technical and actionable.`;
 
 // Initialize OpenAI client with Replit AI Integrations
+const openaiApiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+if (!openaiApiKey) {
+  console.warn("[WARNING] AI_INTEGRATIONS_OPENAI_API_KEY is not set - AI chat will not work");
+}
 const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: openaiApiKey || "missing-key",
+  baseURL: openaiBaseURL,
 });
 
 // Configure multer for file uploads
@@ -2028,6 +2033,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         });
         modelName = agent.customModelName || agentModel;
       } else {
+        if (!openaiApiKey) {
+          res.write(`data: ${JSON.stringify({ type: "error", error: "AI service is not configured. Please check API key settings." })}\n\n`);
+          cleanup();
+          res.end();
+          return;
+        }
         streamClient = openai;
       }
       

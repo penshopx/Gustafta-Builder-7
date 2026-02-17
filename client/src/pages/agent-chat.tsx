@@ -905,6 +905,20 @@ export default function AgentChat() {
 
             try {
               const parsed = JSON.parse(data);
+              if (parsed.type === "error") {
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  const lastIdx = updated.length - 1;
+                  if (updated[lastIdx]?.role === "assistant") {
+                    updated[lastIdx] = {
+                      ...updated[lastIdx],
+                      content: "Maaf, terjadi kesalahan saat memproses pesan. Silakan coba lagi nanti.",
+                    };
+                  }
+                  return updated;
+                });
+                break;
+              }
               if (parsed.content) {
                 assistantContent += parsed.content;
                 const displayContent = assistantContent
