@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   Megaphone, Copy, Check, Sparkles, Plus, Trash2, ChevronDown, ChevronUp,
-  Image, Video, Eye, Loader2, Link, ExternalLink
+  Image, Video, Eye, Loader2, Link, ExternalLink, Download, ClipboardCopy
 } from "lucide-react";
 import { SiFacebook, SiInstagram, SiGoogle, SiTiktok, SiLinkedin } from "react-icons/si";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -225,6 +225,156 @@ export function MarketingPanel({ agent }: { agent: any }) {
     setVideoPrompts(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
 
+  const generateMarkdown = () => {
+    const lines: string[] = [];
+    lines.push(`# Marketing Kit - ${agent.name || "Chatbot"}`);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+
+    const filledPlatforms = AD_PLATFORMS.filter(p => {
+      const copy = adCopies[p.id];
+      return copy && (copy.headline || copy.primaryText || copy.description);
+    });
+
+    if (filledPlatforms.length > 0) {
+      lines.push("## AD COPY");
+      lines.push("");
+      filledPlatforms.forEach(p => {
+        const copy = adCopies[p.id];
+        lines.push(`### ${p.label}`);
+        lines.push("");
+        if (copy.headline) lines.push(`**Headline:** ${copy.headline}`);
+        if (copy.primaryText) lines.push(`**Primary Text:** ${copy.primaryText}`);
+        if (copy.description) lines.push(`**Description:** ${copy.description}`);
+        if (copy.callToAction) lines.push(`**Call to Action:** ${copy.callToAction}`);
+        if (copy.hashtags) lines.push(`**Hashtags:** ${copy.hashtags}`);
+        lines.push("");
+      });
+    }
+
+    if (imagePrompts.length > 0) {
+      lines.push("## IMAGE HOOK PROMPTS");
+      lines.push("");
+      imagePrompts.forEach((p, i) => {
+        lines.push(`### ${i + 1}. ${p.title || "(Tanpa judul)"}`);
+        lines.push(`- **Platform:** ${p.platform}`);
+        lines.push(`- **Style:** ${p.style}`);
+        lines.push(`- **Prompt:** ${p.prompt}`);
+        lines.push("");
+      });
+    }
+
+    if (videoPrompts.length > 0) {
+      lines.push("## VIDEO REEL PROMPTS");
+      lines.push("");
+      videoPrompts.forEach((p, i) => {
+        lines.push(`### ${i + 1}. ${p.title || "(Tanpa judul)"}`);
+        lines.push(`- **Platform:** ${p.platform}`);
+        lines.push(`- **Duration:** ${p.duration}`);
+        lines.push(`- **Prompt:** ${p.prompt}`);
+        lines.push("");
+      });
+    }
+
+    if (metaPixelId) {
+      lines.push("## META PIXEL");
+      lines.push("");
+      lines.push(`**Pixel ID:** ${metaPixelId}`);
+      lines.push("");
+    }
+
+    lines.push("---");
+    lines.push(`*Dokumen ini di-generate oleh Gustafta AI untuk chatbot "${agent.name || ""}"*`);
+    return lines.join("\n");
+  };
+
+  const downloadMarkdown = () => {
+    const md = generateMarkdown();
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `marketing-kit-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Berhasil", description: "Dokumen Markdown berhasil diunduh" });
+  };
+
+  const copyAllContent = () => {
+    const md = generateMarkdown();
+    navigator.clipboard.writeText(md);
+    toast({ title: "Disalin!", description: "Semua konten marketing kit berhasil disalin ke clipboard" });
+  };
+
+  const mdToHtml = (md: string) => {
+    const lines = md.split("\n");
+    const result: string[] = [];
+    let inList = false;
+    let listType = "";
+
+    const closePendingList = () => {
+      if (inList) {
+        result.push(listType === "ol" ? "</ol>" : "</ul>");
+        inList = false;
+      }
+    };
+
+    const fmt = (t: string) => t.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+    for (const line of lines) {
+      const isOl = /^\d+\.\s/.test(line);
+      const isUl = line.startsWith("- ");
+
+      if (isOl || isUl) {
+        const newType = isOl ? "ol" : "ul";
+        if (!inList || listType !== newType) {
+          closePendingList();
+          result.push(newType === "ol" ? "<ol>" : "<ul>");
+          inList = true;
+          listType = newType;
+        }
+        const content = isOl ? line.replace(/^\d+\.\s/, "") : line.slice(2);
+        result.push(`<li>${fmt(content)}</li>`);
+        continue;
+      }
+
+      closePendingList();
+
+      if (line.startsWith("# ")) { result.push(`<h1>${fmt(line.slice(2))}</h1>`); continue; }
+      if (line.startsWith("## ")) { result.push(`<h2>${fmt(line.slice(3))}</h2>`); continue; }
+      if (line.startsWith("### ")) { result.push(`<h3>${fmt(line.slice(4))}</h3>`); continue; }
+      if (line.startsWith("> ")) { result.push(`<blockquote>${fmt(line.slice(2))}</blockquote>`); continue; }
+      if (line === "---") { result.push("<hr>"); continue; }
+      if (line === "") continue;
+      result.push(`<p>${fmt(line)}</p>`);
+    }
+    closePendingList();
+    return result.join("\n");
+  };
+
+  const downloadHtml = () => {
+    const md = generateMarkdown();
+    const body = mdToHtml(md);
+    const html = `<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Marketing Kit - ${agent.name || "Chatbot"}</title>
+<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.7;color:#333}
+h1{color:#1a1a2e;border-bottom:3px solid #4361ee;padding-bottom:.5rem}
+h2{color:#3a0ca3;margin-top:2rem}h3{color:#4361ee}
+ol,ul{margin:.5rem 0;padding-left:1.5rem}li{margin:.3rem 0}hr{border:none;border-top:2px solid #eee;margin:2rem 0}
+strong{color:#1a1a2e}</style></head>
+<body>${body}</body></html>`;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `marketing-kit-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Berhasil", description: "Dokumen HTML berhasil diunduh" });
+  };
+
   const renderCopyButton = (text: string, fieldId: string) => (
     <Button
       size="icon"
@@ -248,10 +398,24 @@ export function MarketingPanel({ agent }: { agent: any }) {
             <p className="text-sm text-muted-foreground">Ad copy, creative prompts, dan tracking pixel</p>
           </div>
         </div>
-        <Button onClick={handleSave} disabled={updateMutation.isPending} data-testid="button-save-marketing">
-          {updateMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          Simpan
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" onClick={copyAllContent} data-testid="button-copy-all-marketing">
+            <ClipboardCopy className="w-4 h-4 mr-1.5" />
+            Salin Semua
+          </Button>
+          <Button variant="outline" onClick={downloadMarkdown} data-testid="button-download-md-marketing">
+            <Download className="w-4 h-4 mr-1.5" />
+            .md
+          </Button>
+          <Button variant="outline" onClick={downloadHtml} data-testid="button-download-html-marketing">
+            <Download className="w-4 h-4 mr-1.5" />
+            .html
+          </Button>
+          <Button onClick={handleSave} disabled={updateMutation.isPending} data-testid="button-save-marketing">
+            {updateMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            Simpan
+          </Button>
+        </div>
       </div>
 
       <Card>

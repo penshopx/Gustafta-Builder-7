@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Plus, Trash2, Copy, Check, ExternalLink, ChevronDown, ChevronUp, HelpCircle, Shield, Award, Star, AlertTriangle, Quote, Image, Link } from "lucide-react";
+import { FileText, Plus, Trash2, Copy, Check, ExternalLink, ChevronDown, ChevronUp, HelpCircle, Shield, Award, Star, AlertTriangle, Quote, Image, Link, Download, ClipboardCopy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,6 +144,186 @@ export function LandingPagePanel({ agent }: { agent: any }) {
     setList(list.filter((_, i) => i !== index));
   };
 
+  const generateMarkdown = () => {
+    const lines: string[] = [];
+    lines.push(`# Landing Page - ${agent.name || "Chatbot"}`);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+
+    if (heroHeadline || heroSubheadline) {
+      lines.push("## HERO SECTION");
+      lines.push("");
+      if (heroHeadline) lines.push(`**Headline:** ${heroHeadline}`);
+      if (heroSubheadline) lines.push(`**Subheadline:** ${heroSubheadline}`);
+      if (heroCtaText) lines.push(`**Tombol CTA:** ${heroCtaText}`);
+      lines.push("");
+    }
+
+    if (painPoints.length > 0) {
+      lines.push("## PAIN POINTS (Problem Agitation)");
+      lines.push("");
+      painPoints.forEach((p, i) => lines.push(`${i + 1}. ${p}`));
+      lines.push("");
+    }
+
+    if (solutionText) {
+      lines.push("## SOLUSI");
+      lines.push("");
+      lines.push(solutionText);
+      lines.push("");
+    }
+
+    if (benefits.length > 0) {
+      lines.push("## MANFAAT (Outcome Benefits)");
+      lines.push("");
+      benefits.forEach((b, i) => lines.push(`${i + 1}. ${b}`));
+      lines.push("");
+    }
+
+    if (demoItems.length > 0) {
+      lines.push("## DEMO / PREVIEW");
+      lines.push("");
+      demoItems.forEach((d, i) => {
+        lines.push(`### Demo ${i + 1}: ${d.title || "(Tanpa judul)"}`);
+        if (d.description) lines.push(d.description);
+        if (d.imageUrl) lines.push(`Gambar: ${d.imageUrl}`);
+        lines.push("");
+      });
+    }
+
+    if (testimonials.length > 0) {
+      lines.push("## TESTIMONI / SOCIAL PROOF");
+      lines.push("");
+      testimonials.forEach((t, i) => {
+        lines.push(`### Testimoni ${i + 1}`);
+        lines.push(`> "${t.quote}"`);
+        lines.push(`> — **${t.name}**, ${t.role}${t.company ? `, ${t.company}` : ""}`);
+        lines.push("");
+      });
+    }
+
+    if (faq.length > 0) {
+      lines.push("## FAQ");
+      lines.push("");
+      faq.forEach((f, i) => {
+        lines.push(`**Q${i + 1}: ${f.question}**`);
+        lines.push(`A: ${f.answer}`);
+        lines.push("");
+      });
+    }
+
+    if (authority.title || authority.description || authority.credentials.length > 0) {
+      lines.push("## AUTHORITY / KREDENSIAL");
+      lines.push("");
+      if (authority.title) lines.push(`**${authority.title}**`);
+      if (authority.description) lines.push(authority.description);
+      if (authority.credentials.length > 0) {
+        lines.push("");
+        authority.credentials.forEach(c => lines.push(`- ${c}`));
+      }
+      lines.push("");
+    }
+
+    if (guarantees.length > 0) {
+      lines.push("## JAMINAN / RISK REVERSAL");
+      lines.push("");
+      guarantees.forEach(g => lines.push(`- ${g}`));
+      lines.push("");
+    }
+
+    lines.push("---");
+    lines.push(`*Dokumen ini di-generate oleh Gustafta AI untuk chatbot "${agent.name || ""}"*`);
+    return lines.join("\n");
+  };
+
+  const downloadMarkdown = () => {
+    const md = generateMarkdown();
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `landing-page-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Berhasil", description: "Dokumen Markdown berhasil diunduh" });
+  };
+
+  const copyAllContent = () => {
+    const md = generateMarkdown();
+    navigator.clipboard.writeText(md);
+    toast({ title: "Disalin!", description: "Semua konten landing page berhasil disalin ke clipboard" });
+  };
+
+  const mdToHtml = (md: string) => {
+    const lines = md.split("\n");
+    const result: string[] = [];
+    let inList = false;
+    let listType = "";
+
+    const closePendingList = () => {
+      if (inList) {
+        result.push(listType === "ol" ? "</ol>" : "</ul>");
+        inList = false;
+      }
+    };
+
+    const fmt = (t: string) => t.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+    for (const line of lines) {
+      const isOl = /^\d+\.\s/.test(line);
+      const isUl = line.startsWith("- ");
+
+      if (isOl || isUl) {
+        const newType = isOl ? "ol" : "ul";
+        if (!inList || listType !== newType) {
+          closePendingList();
+          result.push(newType === "ol" ? "<ol>" : "<ul>");
+          inList = true;
+          listType = newType;
+        }
+        const content = isOl ? line.replace(/^\d+\.\s/, "") : line.slice(2);
+        result.push(`<li>${fmt(content)}</li>`);
+        continue;
+      }
+
+      closePendingList();
+
+      if (line.startsWith("# ")) { result.push(`<h1>${fmt(line.slice(2))}</h1>`); continue; }
+      if (line.startsWith("## ")) { result.push(`<h2>${fmt(line.slice(3))}</h2>`); continue; }
+      if (line.startsWith("### ")) { result.push(`<h3>${fmt(line.slice(4))}</h3>`); continue; }
+      if (line.startsWith("> ")) { result.push(`<blockquote>${fmt(line.slice(2))}</blockquote>`); continue; }
+      if (line === "---") { result.push("<hr>"); continue; }
+      if (line === "") continue;
+      result.push(`<p>${fmt(line)}</p>`);
+    }
+    closePendingList();
+    return result.join("\n");
+  };
+
+  const downloadHtml = () => {
+    const md = generateMarkdown();
+    const body = mdToHtml(md);
+    const html = `<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Landing Page - ${agent.name || "Chatbot"}</title>
+<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.7;color:#333}
+h1{color:#1a1a2e;border-bottom:3px solid #4361ee;padding-bottom:.5rem}
+h2{color:#3a0ca3;margin-top:2rem}h3{color:#4361ee}
+blockquote{border-left:4px solid #4361ee;margin:1rem 0;padding:.5rem 1rem;background:#f8f9fa;font-style:italic}
+ol,ul{margin:.5rem 0;padding-left:1.5rem}li{margin:.3rem 0}hr{border:none;border-top:2px solid #eee;margin:2rem 0}
+strong{color:#1a1a2e}</style></head>
+<body>${body}</body></html>`;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `landing-page-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Berhasil", description: "Dokumen HTML berhasil diunduh" });
+  };
+
   const SectionHeader = ({ id, icon: Icon, title, count }: { id: string; icon: any; title: string; count?: number }) => (
     <button
       onClick={() => toggleSection(id)}
@@ -173,9 +353,23 @@ export function LandingPagePanel({ agent }: { agent: any }) {
             <p className="text-muted-foreground">Halaman marketing untuk onboarding chatbot Anda</p>
           </div>
         </div>
-        <Button onClick={handleSave} disabled={updateMutation.isPending} data-testid="button-save-landing">
-          {updateMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" onClick={copyAllContent} data-testid="button-copy-all-landing">
+            <ClipboardCopy className="w-4 h-4 mr-1.5" />
+            Salin Semua
+          </Button>
+          <Button variant="outline" onClick={downloadMarkdown} data-testid="button-download-md-landing">
+            <Download className="w-4 h-4 mr-1.5" />
+            .md
+          </Button>
+          <Button variant="outline" onClick={downloadHtml} data-testid="button-download-html-landing">
+            <Download className="w-4 h-4 mr-1.5" />
+            .html
+          </Button>
+          <Button onClick={handleSave} disabled={updateMutation.isPending} data-testid="button-save-landing">
+            {updateMutation.isPending ? "Menyimpan..." : "Simpan"}
+          </Button>
+        </div>
       </div>
 
       <Card>
