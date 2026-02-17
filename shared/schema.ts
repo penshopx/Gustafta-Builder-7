@@ -157,6 +157,8 @@ export const agents = pgTable("agents", {
   ragTopK: integer("rag_top_k").default(5),
   // Landing Page Settings
   landingPageEnabled: boolean("landing_page_enabled").default(false),
+  landingPageUrl: text("landing_page_url").default(""),
+  marketingKitUrl: text("marketing_kit_url").default(""),
   landingHeroHeadline: text("landing_hero_headline").default(""),
   landingHeroSubheadline: text("landing_hero_subheadline").default(""),
   landingHeroCtaText: text("landing_hero_cta_text").default("Mulai Sekarang"),
@@ -539,6 +541,8 @@ export const insertAgentSchema = z.object({
   ragTopK: z.number().min(1).max(20).optional().default(5),
   // Landing Page Settings
   landingPageEnabled: z.boolean().optional().default(false),
+  landingPageUrl: z.string().optional().default(""),
+  marketingKitUrl: z.string().optional().default(""),
   landingHeroHeadline: z.string().optional().default(""),
   landingHeroSubheadline: z.string().optional().default(""),
   landingHeroCtaText: z.string().optional().default("Mulai Sekarang"),
