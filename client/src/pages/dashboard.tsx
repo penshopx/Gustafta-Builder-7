@@ -362,7 +362,7 @@ export default function Dashboard() {
       case "widget":
         return <WidgetPanel agent={activeAgent} />;
       case "chat":
-        return <ChatConsolePanel agent={activeAgent} />;
+        return null;
       case "project-brain":
         return <ProjectBrainPanel agent={activeAgent} />;
       case "mini-apps":
@@ -993,7 +993,12 @@ export default function Dashboard() {
         </header>
 
         <div className="flex-1 overflow-auto pb-16 md:pb-0">
-          {renderPanel()}
+          {activeAgent && (
+            <div style={{ display: activeNav === "chat" ? "block" : "none" }} className="h-full">
+              <ChatConsolePanel key={activeAgent.id} agent={activeAgent} />
+            </div>
+          )}
+          {activeNav === "chat" ? (activeAgent ? null : renderPanel()) : renderPanel()}
         </div>
 
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-40">
