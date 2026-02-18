@@ -424,7 +424,7 @@ export default function Dashboard() {
       case "integrations":
         return <IntegrationsPanel agent={activeAgent} />;
       case "widget":
-        return <WidgetPanel agent={activeAgent} />;
+        return <WidgetPanel agent={activeAgent} bigIdeaId={effectiveBigIdeaId} />;
       case "chat":
         return null;
       case "project-brain":

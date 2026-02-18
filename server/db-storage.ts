@@ -897,6 +897,7 @@ export class DatabaseStorage implements IStorage {
       brandingLogo: row.brandingLogo || "",
       contextQuestions: (row.contextQuestions as any[]) || [],
       guestMessageLimit: row.guestMessageLimit ?? 10,
+      ragEnabled: row.ragEnabled ?? true,
       ragChunkSize: row.ragChunkSize ?? 800,
       ragChunkOverlap: row.ragChunkOverlap ?? 200,
       ragTopK: row.ragTopK ?? 5,

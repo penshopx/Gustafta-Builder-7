@@ -14,6 +14,7 @@ import type { Agent } from "@shared/schema";
 
 interface WidgetPanelProps {
   agent: Agent;
+  bigIdeaId?: string;
 }
 
 const positionOptions = [
@@ -48,7 +49,7 @@ const colorPresets = [
   "#06b6d4", "#3b82f6", "#1e293b", "#0f172a"
 ];
 
-export function WidgetPanel({ agent }: WidgetPanelProps) {
+export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
@@ -393,6 +394,43 @@ export function WidgetPanel({ agent }: WidgetPanelProps) {
               </div>
             </CardContent>
           </Card>
+
+          {bigIdeaId && (
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                <div>
+                  <h3 className="font-semibold text-sm mb-1">Link Perspektif (Multi-Chatbot)</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Bagikan satu link untuk semua chatbot dalam Perspektif ini.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={`${getBaseUrl()}/perspektif/${bigIdeaId}`}
+                    readOnly
+                    className="text-sm font-mono"
+                    data-testid="input-perspektif-link"
+                  />
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${getBaseUrl()}/perspektif/${bigIdeaId}`);
+                      toast({ title: "Disalin!", description: "Link Perspektif berhasil disalin ke clipboard" });
+                    }}
+                    data-testid="button-copy-perspektif-link"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                  <a href={`/perspektif/${bigIdeaId}`} target="_blank" rel="noopener noreferrer">
+                    <Button size="icon" variant="outline" data-testid="button-open-perspektif">
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

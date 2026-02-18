@@ -1451,14 +1451,16 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Agent not found" });
       }
       
-      // Get knowledge base for context (RAG-enhanced)
-      const ragChunks = await storage.getChunksByAgent(parsed.data.agentId);
+      // Get knowledge base for context (RAG-enhanced) - skip if ragEnabled is false
       let knowledgeContext = "";
-      if (ragChunks.length > 0) {
-        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunks, agent.ragTopK ?? 5);
-      } else {
-        const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
-        knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+      if (agent.ragEnabled !== false) {
+        const ragChunks = await storage.getChunksByAgent(parsed.data.agentId);
+        if (ragChunks.length > 0) {
+          knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunks, agent.ragTopK ?? 5);
+        } else {
+          const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
+          knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+        }
       }
 
       // Load user memories
@@ -1878,14 +1880,16 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       // Save user message
       const userMessage = await storage.createMessage(parsed.data);
       
-      // Get knowledge base for context (RAG-enhanced)
-      const ragChunksStream = await storage.getChunksByAgent(parsed.data.agentId);
+      // Get knowledge base for context (RAG-enhanced) - skip if ragEnabled is false
       let knowledgeContext = "";
-      if (ragChunksStream.length > 0) {
-        knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunksStream, agent.ragTopK ?? 5);
-      } else {
-        const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
-        knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+      if (agent.ragEnabled !== false) {
+        const ragChunksStream = await storage.getChunksByAgent(parsed.data.agentId);
+        if (ragChunksStream.length > 0) {
+          knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunksStream, agent.ragTopK ?? 5);
+        } else {
+          const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
+          knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+        }
       }
 
       // Load user memories for this agent+session
@@ -2411,14 +2415,16 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       return "Agent tidak ditemukan.";
     }
     
-    // Get knowledge base for context (RAG-enhanced)
-    const ragChunksExt = await storage.getChunksByAgent(agentId);
+    // Get knowledge base for context (RAG-enhanced) - skip if ragEnabled is false
     let knowledgeContext = "";
-    if (ragChunksExt.length > 0) {
-      knowledgeContext = await searchKnowledgeBase(userMessage, ragChunksExt, agent.ragTopK ?? 5);
-    } else {
-      const knowledgeBases = await storage.getKnowledgeBases(agentId);
-      knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+    if (agent.ragEnabled !== false) {
+      const ragChunksExt = await storage.getChunksByAgent(agentId);
+      if (ragChunksExt.length > 0) {
+        knowledgeContext = await searchKnowledgeBase(userMessage, ragChunksExt, agent.ragTopK ?? 5);
+      } else {
+        const knowledgeBases = await storage.getKnowledgeBases(agentId);
+        knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+      }
     }
     
     // Build system prompt from agent persona
@@ -3447,6 +3453,65 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
     return agent;
   }
+
+  app.get("/api/public/perspektif/:bigIdeaId", async (req, res) => {
+    try {
+      const bigIdea = await storage.getBigIdea(req.params.bigIdeaId);
+      if (!bigIdea || !bigIdea.isActive) {
+        return res.status(404).json({ error: "Perspektif not found" });
+      }
+
+      if (bigIdea.seriesId) {
+        const parentSeries = await storage.getSeriesById(String(bigIdea.seriesId));
+        if (parentSeries && (!parentSeries.isPublic || !parentSeries.isActive)) {
+          return res.status(404).json({ error: "Perspektif not found" });
+        }
+      }
+
+      const allToolboxes = await storage.getToolboxes(req.params.bigIdeaId);
+      const activeToolboxes = allToolboxes.filter(t => t.isActive && !t.isOrchestrator);
+
+      const chatbots: any[] = [];
+      for (const toolbox of activeToolboxes) {
+        const toolboxAgents = await storage.getAgents(toolbox.id);
+        const publicAgents = toolboxAgents.filter(a => a.isPublic);
+        for (const agent of publicAgents) {
+          chatbots.push({
+            agentId: agent.id,
+            name: agent.name,
+            avatar: agent.avatar || "",
+            description: agent.description || "",
+            tagline: agent.tagline || "",
+            greetingMessage: agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
+            conversationStarters: agent.conversationStarters || [],
+            color: agent.widgetColor || "#6366f1",
+            category: agent.category || "",
+            subcategory: agent.subcategory || "",
+            toolboxName: toolbox.name,
+            toolboxId: toolbox.id,
+            slug: agent.productSlug || "",
+          });
+        }
+      }
+
+      let series = null;
+      if (bigIdea.seriesId) {
+        series = await storage.getSeriesById(String(bigIdea.seriesId));
+      }
+
+      res.json({
+        id: bigIdea.id,
+        name: bigIdea.name,
+        description: bigIdea.description || "",
+        purpose: bigIdea.purpose || "",
+        seriesName: series?.name || "",
+        chatbots,
+      });
+    } catch (error: any) {
+      console.error("Error fetching public perspektif:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
   app.get("/api/chat/config/:agentId", async (req, res) => {
     try {

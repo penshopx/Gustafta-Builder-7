@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2, Settings2, RotateCcw } from "lucide-react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2, Settings2, RotateCcw, Power } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile, useUpdateKnowledgeBase, useRagStats, useReprocessRag } from "@/hooks/use-knowledge-base";
 import { useUpdateAgent } from "@/hooks/use-agents";
@@ -373,13 +374,27 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             Kelola informasi yang dapat diakses chatbot Anda
           </p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Knowledge
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={agent.ragEnabled !== false}
+              onCheckedChange={(checked) => {
+                updateAgent.mutate({ id: String(agent.id), data: { ragEnabled: checked } });
+                toast({ title: checked ? "RAG Diaktifkan" : "RAG Dinonaktifkan", description: checked ? "Knowledge base akan digunakan dalam percakapan" : "Knowledge base tidak akan digunakan dalam percakapan" });
+              }}
+              data-testid="switch-rag-toggle"
+            />
+            <Badge variant={agent.ragEnabled !== false ? "default" : "secondary"} className="text-xs">
+              {agent.ragEnabled !== false ? "Aktif" : "Nonaktif"}
+            </Badge>
+          </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={agent.ragEnabled === false}>
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah Knowledge
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Tambah Knowledge Base</DialogTitle>
@@ -515,6 +530,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="relative">
