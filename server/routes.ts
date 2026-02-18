@@ -703,9 +703,24 @@ export async function registerRoutes(
           parsed.data.seriesId = String(bigIdea.seriesId);
         }
       }
-      const toolbox = await storage.createToolbox(parsed.data);
+      let toolbox;
+      let retries = 2;
+      while (retries >= 0) {
+        try {
+          toolbox = await storage.createToolbox(parsed.data);
+          break;
+        } catch (dbError: any) {
+          if (retries > 0 && (dbError?.code === '57P01' || dbError?.message?.includes('terminating connection'))) {
+            retries--;
+            await new Promise(r => setTimeout(r, 500));
+            continue;
+          }
+          throw dbError;
+        }
+      }
       res.status(201).json(toolbox);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to create toolbox:", error);
       res.status(500).json({ error: "Failed to create toolbox" });
     }
   });
