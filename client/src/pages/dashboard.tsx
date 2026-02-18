@@ -54,7 +54,7 @@ import { UserProfileDialog } from "@/components/dialogs/user-profile-dialog";
 import { ChatPopup } from "@/components/chat-popup";
 import { SeriesManagementDialog } from "@/components/series-management-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useAgents, useActiveAgent, useSetActiveAgent } from "@/hooks/use-agents";
+import { useAgents, useActiveAgent, useSetActiveAgent, useDeleteAgent } from "@/hooks/use-agents";
 import { useBigIdeas, useActiveBigIdea, useActivateBigIdea, useDeleteBigIdea } from "@/hooks/use-big-ideas";
 import { useToolboxes, useActiveToolbox, useActivateToolbox, useDeleteToolbox, useOrchestratorToolbox, useCreateToolbox } from "@/hooks/use-toolboxes";
 import { useProfile } from "@/hooks/use-profile";
@@ -111,6 +111,7 @@ export default function Dashboard() {
   const [editingToolbox, setEditingToolbox] = useState<Toolbox | null>(null);
   const [deleteBigIdeaConfirm, setDeleteBigIdeaConfirm] = useState<BigIdea | null>(null);
   const [deleteToolboxConfirm, setDeleteToolboxConfirm] = useState<Toolbox | null>(null);
+  const [deleteAgentConfirm, setDeleteAgentConfirm] = useState<Agent | null>(null);
   
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -319,6 +320,18 @@ export default function Dashboard() {
       setDeleteToolboxConfirm(null);
     } catch (error) {
       toast({ title: "Error", description: "Gagal menghapus Chatbot", variant: "destructive" });
+    }
+  };
+
+  const deleteAgent = useDeleteAgent();
+
+  const handleDeleteAgent = async (agent: Agent) => {
+    try {
+      await deleteAgent.mutateAsync(String(agent.id));
+      toast({ title: "Berhasil", description: `Alat Bantu "${agent.name}" berhasil dihapus` });
+      setDeleteAgentConfirm(null);
+    } catch (error) {
+      toast({ title: "Error", description: "Gagal menghapus Alat Bantu", variant: "destructive" });
     }
   };
 
@@ -855,6 +868,15 @@ export default function Dashboard() {
                         {agent.isOrchestrator && (
                           <Badge className="text-[9px] bg-purple-500/20 text-purple-600 border-purple-500/30 shrink-0">Orch</Badge>
                         )}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="shrink-0 w-6 h-6 invisible group-hover:visible"
+                          onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
+                          data-testid={`button-delete-agent-${agent.id}`}
+                        >
+                          <Trash2 className="w-3 h-3 text-destructive" />
+                        </Button>
                       </div>
                     ))
                   )}
@@ -1318,6 +1340,28 @@ export default function Dashboard() {
               data-testid="button-confirm-delete-toolbox"
             >
               {deleteToolbox.isPending ? "Menghapus..." : "Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteAgentConfirm} onOpenChange={(open) => { if (!open) setDeleteAgentConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Alat Bantu?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus Alat Bantu "{deleteAgentConfirm?.name}"? 
+              Semua pesan dan knowledge base terkait juga akan dihapus. Tindakan ini tidak bisa dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete-agent">Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteAgentConfirm && handleDeleteAgent(deleteAgentConfirm)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete-agent"
+            >
+              {deleteAgent.isPending ? "Menghapus..." : "Hapus"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
