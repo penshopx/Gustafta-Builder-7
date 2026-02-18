@@ -553,15 +553,15 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 <div>
                   <p className="font-medium text-sm">RAG (Retrieval Augmented Generation)</p>
                   <p className="text-xs text-muted-foreground">
-                    {ragStats.ragEnabled
+                    {agent.ragEnabled !== false
                       ? `${ragStats.totalChunks} potongan dokumen dari ${ragStats.totalKnowledgeBases} knowledge base`
-                      : "Belum ada dokumen yang diproses"}
+                      : "RAG dinonaktifkan untuk chatbot ini"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant={ragStats.ragEnabled ? "default" : "secondary"} data-testid="badge-rag-status">
-                  {ragStats.ragEnabled ? "Aktif" : "Belum Aktif"}
+                <Badge variant={agent.ragEnabled !== false ? "default" : "secondary"} data-testid="badge-rag-status">
+                  {agent.ragEnabled !== false ? "Aktif" : "Nonaktif"}
                 </Badge>
                 <Button
                   variant="ghost"
