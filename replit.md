@@ -4,6 +4,18 @@
 
 Gustafta is an AI chatbot builder platform designed to help users create, configure, and deploy intelligent conversational assistants. It features a two-panel dashboard for managing multiple chatbot agents, each with custom personas, knowledge bases, and multi-channel integrations. The platform supports various AI models and allows for extensive customization, including persona details, greeting messages, and language options. Users can integrate chatbots with popular messaging platforms, embed them as web widgets, and access analytics. Gustafta also includes a built-in assistant chatbot for guidance and offers templates for various industries. The platform uses an Indonesian purpose-driven hierarchical structure: Tujuan (Goal/Series) → Perspektif (Big Idea) → Chatbot (Toolbox/Domain) → Alat Bantu (Agent). Tujuan = overarching purpose/mission, Perspektif = perspective/angle to approach the goal, Chatbot = a complete chatbot handling one operational area (with sequential numbering showing execution order based on prerequisites), Alat Bantu = specific tools/modules within a chatbot. Chatbot Orkestrator (HUB) sits directly under Tujuan (not inside any Perspektif) to coordinate all specialist chatbots across Perspektifs; max 1 HUB per Tujuan. Schema: toolboxes.isOrchestrator (boolean) + toolboxes.seriesId (nullable FK to series) + toolboxes.bigIdeaId made nullable for HUB toolboxes. DB tables still use original English names (series, big_ideas, toolboxes, agents) while UI labels use Indonesian terms. The "Chatbot Series" feature allows organizing multiple Big Ideas into structured topic packages with public catalog and detail pages. A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots, decision summaries, and risk assessments. The platform integrates with Mayar.id for subscription management. Each chatbot has a dedicated public chat page (`/bot/:agentId`) serving as its "home" where end-users can interact directly without needing dashboard access. Dynamic PWA manifest per chatbot: each bot shows its own avatar/name when installed on mobile devices.
 
+### RAG Toggle
+- **Purpose**: Allows admins to enable/disable RAG (Retrieval Augmented Generation) per chatbot. Useful for orchestrator chatbots that don't need knowledge base lookups.
+- **Schema**: `ragEnabled` boolean field on `agents` table (default true).
+- **UI**: Toggle switch in Knowledge Base panel header. When disabled, "Tambah Knowledge" button is also disabled.
+- **Server-side**: All three chat endpoints (non-stream, stream, external/WhatsApp) check `agent.ragEnabled !== false` before querying RAG chunks or knowledge bases.
+
+### Perspektif Public Chat Page
+- **Purpose**: Share all chatbots within a Perspektif (Big Idea) via a single link at `/perspektif/:bigIdeaId`.
+- **API**: `GET /api/public/perspektif/:bigIdeaId` returns Perspektif info + list of public agents across active, non-orchestrator toolboxes. Validates isActive on BigIdea and isPublic+isActive on parent Series.
+- **UI**: Grid of chatbot cards with avatar, name, tagline, category. Clicking a card opens inline chat with streaming support.
+- **Widget Panel**: Shows "Link Perspektif (Multi-Chatbot)" section with copy/open buttons when bigIdeaId is available.
+
 ### Project Context (Konteks Proyek)
 - **Purpose**: Allows chatbots to ask context questions at the start of conversations (e.g., "What type of project are you managing?") to personalize responses.
 - **Configuration**: Admin defines context questions in Persona Panel → "Konteks Proyek" section. Each question has a label, type (text/select), options (for select type), and required flag.
