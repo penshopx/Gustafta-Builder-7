@@ -427,6 +427,7 @@ export const insertToolboxSchema = z.object({
   purpose: z.string().optional().default(""),
   capabilities: z.array(z.string()).optional().default([]),
   limitations: z.array(z.string()).optional().default([]),
+  sortOrder: z.number().optional().default(0),
 });
 
 export type InsertToolbox = z.infer<typeof insertToolboxSchema>;

@@ -572,7 +572,7 @@ export class MemStorage implements IStorage {
       toolboxes = toolboxes.filter(t => t.bigIdeaId === bigIdeaId);
     }
     return toolboxes.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
     );
   }
 
@@ -600,6 +600,7 @@ export class MemStorage implements IStorage {
       purpose: insertToolbox.purpose || "",
       capabilities: insertToolbox.capabilities || [],
       limitations: insertToolbox.limitations || [],
+      sortOrder: insertToolbox.sortOrder || 0,
       isActive: true,
       createdAt: new Date().toISOString(),
     };

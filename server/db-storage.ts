@@ -535,8 +535,8 @@ export class DatabaseStorage implements IStorage {
   // Toolbox methods
   async getToolboxes(bigIdeaId?: string): Promise<Toolbox[]> {
     const query = bigIdeaId 
-      ? db.select().from(toolboxes).where(eq(toolboxes.bigIdeaId, parseInt(bigIdeaId))).orderBy(desc(toolboxes.createdAt))
-      : db.select().from(toolboxes).orderBy(desc(toolboxes.createdAt));
+      ? db.select().from(toolboxes).where(eq(toolboxes.bigIdeaId, parseInt(bigIdeaId))).orderBy(toolboxes.sortOrder)
+      : db.select().from(toolboxes).orderBy(toolboxes.sortOrder);
     const result = await query;
     return result.map(row => ({
       id: String(row.id),
@@ -546,6 +546,7 @@ export class DatabaseStorage implements IStorage {
       purpose: row.purpose || "",
       capabilities: (row.capabilities as string[]) || [],
       limitations: (row.limitations as string[]) || [],
+      sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     }));
@@ -563,6 +564,7 @@ export class DatabaseStorage implements IStorage {
       purpose: row.purpose || "",
       capabilities: (row.capabilities as string[]) || [],
       limitations: (row.limitations as string[]) || [],
+      sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };
@@ -580,6 +582,7 @@ export class DatabaseStorage implements IStorage {
       purpose: row.purpose || "",
       capabilities: (row.capabilities as string[]) || [],
       limitations: (row.limitations as string[]) || [],
+      sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };
@@ -594,6 +597,7 @@ export class DatabaseStorage implements IStorage {
       purpose: insertToolbox.purpose || "",
       capabilities: insertToolbox.capabilities || [],
       limitations: insertToolbox.limitations || [],
+      sortOrder: insertToolbox.sortOrder || 0,
       isActive: true,
     }).returning();
     const row = result[0];
@@ -605,6 +609,7 @@ export class DatabaseStorage implements IStorage {
       purpose: row.purpose || "",
       capabilities: (row.capabilities as string[]) || [],
       limitations: (row.limitations as string[]) || [],
+      sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };
@@ -617,6 +622,7 @@ export class DatabaseStorage implements IStorage {
     if (data.purpose !== undefined) updateData.purpose = data.purpose;
     if (data.capabilities !== undefined) updateData.capabilities = data.capabilities;
     if (data.limitations !== undefined) updateData.limitations = data.limitations;
+    if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
     
     const result = await db.update(toolboxes)
       .set(updateData)
@@ -632,6 +638,7 @@ export class DatabaseStorage implements IStorage {
       purpose: row.purpose || "",
       capabilities: (row.capabilities as string[]) || [],
       limitations: (row.limitations as string[]) || [],
+      sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };
@@ -653,6 +660,7 @@ export class DatabaseStorage implements IStorage {
       purpose: row.purpose || "",
       capabilities: (row.capabilities as string[]) || [],
       limitations: (row.limitations as string[]) || [],
+      sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };

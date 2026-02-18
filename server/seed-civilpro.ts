@@ -50,35 +50,22 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "1. SKK Ahli Utama",
-            description: "Domain persiapan SKK untuk jenjang Ahli Utama - penanggung jawab teknis tingkat tertinggi",
-            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Utama",
-            capabilities: ["Materi unit kompetensi Ahli Utama", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
+            name: "1. SKK Operator & Teknisi",
+            description: "Domain persiapan SKK jenjang dasar — titik awal karir di lapangan konstruksi",
+            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Operator dan Teknisi",
+            capabilities: ["Materi operasional lapangan", "Simulasi ujian praktik", "Panduan keselamatan kerja", "Checklist kompetensi"],
             sortOrder: 1,
             agents: [
-              { name: "Simulasi Ujian Ahli Utama", desc: "Simulasi soal ujian tertulis dan pilihan ganda untuk persiapan SKK Ahli Utama.", tagline: "Simulasi ujian SKK Ahli Utama", prompt: "Kamu adalah simulator ujian SKK Ahli Utama bidang Sipil. Berikan soal-soal latihan yang sesuai dengan unit kompetensi Ahli Utama. Evaluasi jawaban pengguna dan berikan penjelasan detail." },
-              { name: "Wawancara Kompetensi Ahli Utama", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Utama.", tagline: "Latihan wawancara SKK Ahli Utama", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Utama. Ajukan pertanyaan berbasis kompetensi, evaluasi jawaban pengguna, dan berikan feedback untuk perbaikan." },
-              { name: "Portofolio Ahli Utama", desc: "Panduan penyusunan portofolio dan bukti kompetensi untuk SKK Ahli Utama.", tagline: "Panduan portofolio SKK Ahli Utama", prompt: "Kamu adalah asisten penyusunan portofolio SKK Ahli Utama. Bantu pengguna menyusun portofolio yang memenuhi persyaratan asesmen: format, bukti kerja, surat referensi, dan dokumentasi proyek." },
+              { name: "Simulasi Ujian Operator/Teknisi", desc: "Simulasi soal ujian untuk persiapan SKK Operator dan Teknisi.", tagline: "Simulasi ujian SKK Operator/Teknisi", prompt: "Kamu adalah simulator ujian SKK Operator/Teknisi bidang Sipil. Berikan soal latihan yang fokus pada keterampilan operasional dan teknis lapangan." },
+              { name: "Checklist Kompetensi Operasional", desc: "Checklist verifikasi kompetensi operasional untuk tenaga operator dan teknisi konstruksi.", tagline: "Checklist kompetensi operator/teknisi", prompt: "Kamu adalah asisten checklist kompetensi operasional. Bantu pengguna memverifikasi penguasaan keterampilan teknis: pengoperasian alat, keselamatan kerja, prosedur standar, dan dokumentasi." },
             ]
           },
           {
-            name: "2. SKK Ahli Madya",
-            description: "Domain persiapan SKK untuk jenjang Ahli Madya - pelaksana teknis senior",
-            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Madya",
-            capabilities: ["Materi unit kompetensi Ahli Madya", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
-            sortOrder: 2,
-            agents: [
-              { name: "Simulasi Ujian Ahli Madya", desc: "Simulasi soal ujian tertulis dan pilihan ganda untuk persiapan SKK Ahli Madya.", tagline: "Simulasi ujian SKK Ahli Madya", prompt: "Kamu adalah simulator ujian SKK Ahli Madya bidang Sipil. Berikan soal-soal latihan sesuai unit kompetensi Ahli Madya." },
-              { name: "Wawancara Kompetensi Ahli Madya", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Madya.", tagline: "Latihan wawancara SKK Ahli Madya", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Madya. Ajukan pertanyaan berbasis kompetensi dan berikan feedback." },
-              { name: "Pembekalan Materi Ahli Madya", desc: "Materi pembekalan dan pembelajaran untuk persiapan SKK Ahli Madya.", tagline: "Pembekalan materi SKK Ahli Madya", prompt: "Kamu adalah tutor pembekalan materi SKK Ahli Madya bidang Sipil. Berikan materi pembelajaran yang terstruktur sesuai unit kompetensi." },
-            ]
-          },
-          {
-            name: "3. SKK Ahli Muda",
-            description: "Domain persiapan SKK untuk jenjang Ahli Muda - pelaksana teknis junior",
+            name: "2. SKK Ahli Muda",
+            description: "Domain persiapan SKK jenjang Ahli Muda — langkah pertama menjadi tenaga ahli",
             purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Muda",
             capabilities: ["Materi unit kompetensi Ahli Muda", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
-            sortOrder: 3,
+            sortOrder: 2,
             agents: [
               { name: "Simulasi Ujian Ahli Muda", desc: "Simulasi soal ujian untuk persiapan SKK Ahli Muda.", tagline: "Simulasi ujian SKK Ahli Muda", prompt: "Kamu adalah simulator ujian SKK Ahli Muda bidang Sipil. Berikan soal-soal latihan sesuai unit kompetensi Ahli Muda." },
               { name: "Wawancara Kompetensi Ahli Muda", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Muda.", tagline: "Latihan wawancara SKK Ahli Muda", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Muda. Ajukan pertanyaan berbasis kompetensi dan berikan feedback." },
@@ -86,14 +73,27 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "4. SKK Operator & Teknisi",
-            description: "Domain persiapan SKK untuk jenjang Operator dan Teknisi - pelaksana operasional lapangan",
-            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Operator dan Teknisi",
-            capabilities: ["Materi operasional lapangan", "Simulasi ujian praktik", "Panduan keselamatan kerja", "Checklist kompetensi"],
+            name: "3. SKK Ahli Madya",
+            description: "Domain persiapan SKK jenjang Ahli Madya — peningkatan ke pelaksana teknis senior",
+            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Madya",
+            capabilities: ["Materi unit kompetensi Ahli Madya", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
+            sortOrder: 3,
+            agents: [
+              { name: "Simulasi Ujian Ahli Madya", desc: "Simulasi soal ujian tertulis dan pilihan ganda untuk persiapan SKK Ahli Madya.", tagline: "Simulasi ujian SKK Ahli Madya", prompt: "Kamu adalah simulator ujian SKK Ahli Madya bidang Sipil. Berikan soal-soal latihan sesuai unit kompetensi Ahli Madya." },
+              { name: "Wawancara Kompetensi Ahli Madya", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Madya.", tagline: "Latihan wawancara SKK Ahli Madya", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Madya. Ajukan pertanyaan berbasis kompetensi dan berikan feedback." },
+              { name: "Pembekalan Materi Ahli Madya", desc: "Materi pembekalan dan pembelajaran untuk persiapan SKK Ahli Madya.", tagline: "Pembekalan materi SKK Ahli Madya", prompt: "Kamu adalah tutor pembekalan materi SKK Ahli Madya bidang Sipil. Berikan materi pembelajaran yang terstruktur sesuai unit kompetensi." },
+            ]
+          },
+          {
+            name: "4. SKK Ahli Utama",
+            description: "Domain persiapan SKK jenjang tertinggi — penanggung jawab teknis level puncak",
+            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Utama",
+            capabilities: ["Materi unit kompetensi Ahli Utama", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
             sortOrder: 4,
             agents: [
-              { name: "Simulasi Ujian Operator/Teknisi", desc: "Simulasi soal ujian untuk persiapan SKK Operator dan Teknisi.", tagline: "Simulasi ujian SKK Operator/Teknisi", prompt: "Kamu adalah simulator ujian SKK Operator/Teknisi bidang Sipil. Berikan soal latihan yang fokus pada keterampilan operasional dan teknis lapangan." },
-              { name: "Checklist Kompetensi Operasional", desc: "Checklist verifikasi kompetensi operasional untuk tenaga operator dan teknisi konstruksi.", tagline: "Checklist kompetensi operator/teknisi", prompt: "Kamu adalah asisten checklist kompetensi operasional. Bantu pengguna memverifikasi penguasaan keterampilan teknis: pengoperasian alat, keselamatan kerja, prosedur standar, dan dokumentasi." },
+              { name: "Simulasi Ujian Ahli Utama", desc: "Simulasi soal ujian tertulis dan pilihan ganda untuk persiapan SKK Ahli Utama.", tagline: "Simulasi ujian SKK Ahli Utama", prompt: "Kamu adalah simulator ujian SKK Ahli Utama bidang Sipil. Berikan soal-soal latihan yang sesuai dengan unit kompetensi Ahli Utama. Evaluasi jawaban pengguna dan berikan penjelasan detail." },
+              { name: "Wawancara Kompetensi Ahli Utama", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Utama.", tagline: "Latihan wawancara SKK Ahli Utama", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Utama. Ajukan pertanyaan berbasis kompetensi, evaluasi jawaban pengguna, dan berikan feedback untuk perbaikan." },
+              { name: "Portofolio Ahli Utama", desc: "Panduan penyusunan portofolio dan bukti kompetensi untuk SKK Ahli Utama.", tagline: "Panduan portofolio SKK Ahli Utama", prompt: "Kamu adalah asisten penyusunan portofolio SKK Ahli Utama. Bantu pengguna menyusun portofolio yang memenuhi persyaratan asesmen: format, bukti kerja, surat referensi, dan dokumentasi proyek." },
             ]
           },
         ]
@@ -109,19 +109,19 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "1. Diagnosis Struktur",
-            description: "Domain diagnosis dan pemecahan masalah struktur: beton, baja, pondasi",
-            purpose: "Membantu menganalisis kerusakan dan kegagalan struktur",
-            capabilities: ["Analisis retak beton", "Evaluasi kapasitas struktur", "Diagnosis pondasi", "Rekomendasi perkuatan"],
+            name: "1. Risiko & K3",
+            description: "Domain keselamatan kerja dan manajemen risiko — fondasi yang harus dipenuhi sebelum memulai pekerjaan apapun",
+            purpose: "Meminimalkan risiko proyek dan memastikan keselamatan kerja sebagai prasyarat operasional",
+            capabilities: ["Risk assessment", "JSA/HIRARC", "Rencana K3", "Investigasi insiden"],
             sortOrder: 1,
             agents: [
-              { name: "Analisis Kerusakan Struktur", desc: "Alat diagnosis kerusakan struktural beton, baja, dan material konstruksi lainnya.", tagline: "Diagnosis kerusakan struktur bangunan", prompt: "Kamu adalah spesialis diagnosis kerusakan struktur. Bantu pengguna menganalisis kerusakan: jenis retak (struktural/non-struktural), pola kerusakan, penyebab probable, dan rekomendasi penanganan. Minta foto atau deskripsi detail kerusakan." },
-              { name: "Evaluasi Kondisi Pondasi", desc: "Alat evaluasi kondisi pondasi dan rekomendasi perkuatan.", tagline: "Evaluasi dan rekomendasi pondasi", prompt: "Kamu adalah spesialis geoteknik dan pondasi. Bantu pengguna mengevaluasi kondisi pondasi: jenis tanah, daya dukung, settlement, dan perlunya perkuatan. Berikan rekomendasi teknis yang terukur." },
+              { name: "Risk Assessment Proyek", desc: "Alat identifikasi dan mitigasi risiko proyek konstruksi.", tagline: "Identifikasi dan mitigasi risiko proyek", prompt: "Kamu adalah risk manager proyek konstruksi. Bantu pengguna mengidentifikasi risiko proyek: teknis, jadwal, biaya, eksternal. Berikan probability-impact matrix dan rencana mitigasi." },
+              { name: "Checklist K3 Konstruksi", desc: "Checklist keselamatan dan kesehatan kerja untuk proyek konstruksi.", tagline: "Checklist K3 proyek konstruksi", prompt: "Kamu adalah safety officer konstruksi. Berikan checklist K3 yang komprehensif: APD, prosedur kerja aman, JSA/HIRARC, emergency response plan, dan kepatuhan regulasi K3." },
             ]
           },
           {
             name: "2. Quality Control & Mutu",
-            description: "Domain pengendalian mutu material dan pekerjaan konstruksi",
+            description: "Domain pengendalian mutu material dan pekerjaan — memastikan kualitas sebelum dan selama pelaksanaan",
             purpose: "Membantu identifikasi masalah mutu dan memastikan kepatuhan standar",
             capabilities: ["Inspeksi material", "Uji mutu beton/baja", "Checklist inspeksi", "Kepatuhan SNI"],
             sortOrder: 2,
@@ -131,19 +131,19 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "3. Pengambilan Keputusan Proyek",
-            description: "Domain decision support untuk keputusan proyek konstruksi berbasis multi-kriteria",
-            purpose: "Membantu pengambilan keputusan proyek yang terukur dan defensible",
-            capabilities: ["Analisis multi-kriteria", "Cost-benefit analysis", "Risk assessment", "Value engineering"],
+            name: "3. Diagnosis Struktur",
+            description: "Domain diagnosis dan pemecahan masalah struktur — analisis ketika ditemukan kerusakan atau masalah",
+            purpose: "Membantu menganalisis kerusakan dan kegagalan struktur",
+            capabilities: ["Analisis retak beton", "Evaluasi kapasitas struktur", "Diagnosis pondasi", "Rekomendasi perkuatan"],
             sortOrder: 3,
             agents: [
-              { name: "Analisis Multi-Kriteria", desc: "Alat bantu analisis pengambilan keputusan proyek berbasis multi-kriteria (mutu, biaya, waktu, risiko).", tagline: "Analisis keputusan multi-kriteria", prompt: "Kamu adalah analis keputusan proyek konstruksi. Bantu pengguna membuat keputusan berbasis multi-kriteria: definisikan kriteria (mutu, biaya, waktu, risiko, K3), bobot masing-masing, dan evaluasi opsi secara sistematis." },
-              { name: "Cost-Benefit Analyzer", desc: "Alat analisis biaya-manfaat dan value engineering untuk proyek konstruksi.", tagline: "Analisis biaya-manfaat proyek", prompt: "Kamu adalah analis cost-benefit proyek konstruksi. Bantu pengguna mengevaluasi opsi berdasarkan analisis biaya-manfaat: bandingkan alternatif, hitung ROI, identifikasi value engineering opportunities." },
+              { name: "Analisis Kerusakan Struktur", desc: "Alat diagnosis kerusakan struktural beton, baja, dan material konstruksi lainnya.", tagline: "Diagnosis kerusakan struktur bangunan", prompt: "Kamu adalah spesialis diagnosis kerusakan struktur. Bantu pengguna menganalisis kerusakan: jenis retak (struktural/non-struktural), pola kerusakan, penyebab probable, dan rekomendasi penanganan. Minta foto atau deskripsi detail kerusakan." },
+              { name: "Evaluasi Kondisi Pondasi", desc: "Alat evaluasi kondisi pondasi dan rekomendasi perkuatan.", tagline: "Evaluasi dan rekomendasi pondasi", prompt: "Kamu adalah spesialis geoteknik dan pondasi. Bantu pengguna mengevaluasi kondisi pondasi: jenis tanah, daya dukung, settlement, dan perlunya perkuatan. Berikan rekomendasi teknis yang terukur." },
             ]
           },
           {
             name: "4. Dokumentasi Teknis",
-            description: "Domain penyusunan dokumen teknis dan laporan proyek konstruksi",
+            description: "Domain penyusunan dokumen teknis — mendokumentasikan proses dan hasil pekerjaan secara terstandar",
             purpose: "Membantu penyusunan dokumen teknis yang terstandar",
             capabilities: ["Metode pelaksanaan", "Laporan harian/mingguan", "Method statement", "Dokumen as-built"],
             sortOrder: 4,
@@ -153,14 +153,14 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "5. Risiko & K3",
-            description: "Domain manajemen risiko proyek dan keselamatan kesehatan kerja konstruksi",
-            purpose: "Meminimalkan risiko proyek dan meningkatkan keselamatan kerja",
-            capabilities: ["Risk assessment", "JSA/HIRARC", "Rencana K3", "Investigasi insiden"],
+            name: "5. Pengambilan Keputusan Proyek",
+            description: "Domain decision support — pengambilan keputusan strategis berbasis data dan multi-kriteria",
+            purpose: "Membantu pengambilan keputusan proyek yang terukur dan defensible",
+            capabilities: ["Analisis multi-kriteria", "Cost-benefit analysis", "Risk assessment", "Value engineering"],
             sortOrder: 5,
             agents: [
-              { name: "Risk Assessment Proyek", desc: "Alat identifikasi dan mitigasi risiko proyek konstruksi.", tagline: "Identifikasi dan mitigasi risiko proyek", prompt: "Kamu adalah risk manager proyek konstruksi. Bantu pengguna mengidentifikasi risiko proyek: teknis, jadwal, biaya, eksternal. Berikan probability-impact matrix dan rencana mitigasi." },
-              { name: "Checklist K3 Konstruksi", desc: "Checklist keselamatan dan kesehatan kerja untuk proyek konstruksi.", tagline: "Checklist K3 proyek konstruksi", prompt: "Kamu adalah safety officer konstruksi. Berikan checklist K3 yang komprehensif: APD, prosedur kerja aman, JSA/HIRARC, emergency response plan, dan kepatuhan regulasi K3." },
+              { name: "Analisis Multi-Kriteria", desc: "Alat bantu analisis pengambilan keputusan proyek berbasis multi-kriteria (mutu, biaya, waktu, risiko).", tagline: "Analisis keputusan multi-kriteria", prompt: "Kamu adalah analis keputusan proyek konstruksi. Bantu pengguna membuat keputusan berbasis multi-kriteria: definisikan kriteria (mutu, biaya, waktu, risiko, K3), bobot masing-masing, dan evaluasi opsi secara sistematis." },
+              { name: "Cost-Benefit Analyzer", desc: "Alat analisis biaya-manfaat dan value engineering untuk proyek konstruksi.", tagline: "Analisis biaya-manfaat proyek", prompt: "Kamu adalah analis cost-benefit proyek konstruksi. Bantu pengguna mengevaluasi opsi berdasarkan analisis biaya-manfaat: bandingkan alternatif, hitung ROI, identifikasi value engineering opportunities." },
             ]
           },
         ]
@@ -176,19 +176,19 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "1. Transformasi Digital",
-            description: "Domain adopsi teknologi digital: BIM, IoT, AI, drone dalam konstruksi",
-            purpose: "Memandu penerapan teknologi digital di proyek konstruksi",
-            capabilities: ["Implementasi BIM", "IoT monitoring", "AI dalam konstruksi", "Drone survey"],
+            name: "1. Optimasi Metode Konstruksi",
+            description: "Domain optimasi metode pelaksanaan — perbaikan proses yang sudah ada sebagai langkah awal inovasi",
+            purpose: "Meningkatkan efisiensi dan kualitas melalui inovasi metode konstruksi konvensional",
+            capabilities: ["Lean construction", "Prefabrikasi", "Modular construction", "Optimasi jadwal"],
             sortOrder: 1,
             agents: [
-              { name: "Panduan BIM Implementation", desc: "Panduan implementasi Building Information Modeling (BIM) di proyek konstruksi.", tagline: "Panduan implementasi BIM konstruksi", prompt: "Kamu adalah konsultan BIM. Bantu pengguna mengimplementasikan BIM: pemilihan software, level of development (LOD), standar BIM, workflow kolaborasi, dan manfaat untuk berbagai fase proyek." },
-              { name: "Teknologi Konstruksi 4.0", desc: "Eksplorasi teknologi Industry 4.0 untuk konstruksi: IoT, AI, robotik, 3D printing.", tagline: "Eksplorasi teknologi konstruksi masa depan", prompt: "Kamu adalah futuris konstruksi. Bantu pengguna mengeksplorasi teknologi konstruksi 4.0: IoT monitoring, AI quality control, robotic construction, 3D printing beton, dan digital twin." },
+              { name: "Lean Construction Advisor", desc: "Panduan penerapan prinsip lean construction untuk mengurangi waste dan meningkatkan value.", tagline: "Lean construction & efisiensi proyek", prompt: "Kamu adalah konsultan lean construction. Bantu pengguna menerapkan prinsip lean: identifikasi waste, value stream mapping, just-in-time delivery, last planner system, dan continuous improvement." },
+              { name: "Prefabrikasi & Modular", desc: "Panduan metode prefabrikasi dan konstruksi modular untuk efisiensi proyek.", tagline: "Konstruksi prefabrikasi & modular", prompt: "Kamu adalah spesialis prefabrikasi dan konstruksi modular. Bantu pengguna mempertimbangkan dan menerapkan metode prefab/modular: analisis kelayakan, design for manufacture, logistik, dan instalasi." },
             ]
           },
           {
             name: "2. Green Construction",
-            description: "Domain konstruksi berkelanjutan dan ramah lingkungan",
+            description: "Domain konstruksi berkelanjutan — penerapan prinsip ramah lingkungan yang semakin menjadi standar industri",
             purpose: "Mendorong penerapan prinsip sustainability dalam konstruksi",
             capabilities: ["Green building certification", "Material berkelanjutan", "Efisiensi energi", "Life cycle assessment"],
             sortOrder: 2,
@@ -197,14 +197,14 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "3. Optimasi Metode Konstruksi",
-            description: "Domain inovasi dan optimasi metode pelaksanaan konstruksi",
-            purpose: "Meningkatkan efisiensi dan kualitas melalui inovasi metode",
-            capabilities: ["Lean construction", "Prefabrikasi", "Modular construction", "Optimasi jadwal"],
+            name: "3. Transformasi Digital",
+            description: "Domain adopsi teknologi digital — inovasi lanjutan untuk daya saing jangka panjang",
+            purpose: "Memandu penerapan teknologi digital canggih di proyek konstruksi",
+            capabilities: ["Implementasi BIM", "IoT monitoring", "AI dalam konstruksi", "Drone survey"],
             sortOrder: 3,
             agents: [
-              { name: "Lean Construction Advisor", desc: "Panduan penerapan prinsip lean construction untuk mengurangi waste dan meningkatkan value.", tagline: "Lean construction & efisiensi proyek", prompt: "Kamu adalah konsultan lean construction. Bantu pengguna menerapkan prinsip lean: identifikasi waste, value stream mapping, just-in-time delivery, last planner system, dan continuous improvement." },
-              { name: "Prefabrikasi & Modular", desc: "Panduan metode prefabrikasi dan konstruksi modular untuk efisiensi proyek.", tagline: "Konstruksi prefabrikasi & modular", prompt: "Kamu adalah spesialis prefabrikasi dan konstruksi modular. Bantu pengguna mempertimbangkan dan menerapkan metode prefab/modular: analisis kelayakan, design for manufacture, logistik, dan instalasi." },
+              { name: "Panduan BIM Implementation", desc: "Panduan implementasi Building Information Modeling (BIM) di proyek konstruksi.", tagline: "Panduan implementasi BIM konstruksi", prompt: "Kamu adalah konsultan BIM. Bantu pengguna mengimplementasikan BIM: pemilihan software, level of development (LOD), standar BIM, workflow kolaborasi, dan manfaat untuk berbagai fase proyek." },
+              { name: "Teknologi Konstruksi 4.0", desc: "Eksplorasi teknologi Industry 4.0 untuk konstruksi: IoT, AI, robotik, 3D printing.", tagline: "Eksplorasi teknologi konstruksi masa depan", prompt: "Kamu adalah futuris konstruksi. Bantu pengguna mengeksplorasi teknologi konstruksi 4.0: IoT monitoring, AI quality control, robotic construction, 3D printing beton, dan digital twin." },
             ]
           },
         ]
