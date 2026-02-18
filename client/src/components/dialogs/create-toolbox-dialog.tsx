@@ -36,7 +36,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
     if (!name.trim()) {
       toast({
         title: "Error",
-        description: "Nama toolbox wajib diisi",
+        description: "Nama domain wajib diisi",
         variant: "destructive",
       });
       return;
@@ -55,7 +55,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
       
       toast({
         title: "Berhasil",
-        description: "Toolbox berhasil dibuat",
+        description: "Domain berhasil dibuat",
       });
       
       resetForm();
@@ -63,7 +63,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
     } catch (error) {
       toast({
         title: "Error",
-        description: "Gagal membuat Toolbox",
+        description: "Gagal membuat Domain",
         variant: "destructive",
       });
     }
@@ -104,26 +104,26 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wrench className="h-5 w-5 text-blue-500" />
-            Buat Toolbox Baru
+            Buat Domain Baru
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Info Box - Explain what Toolbox is */}
           <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">Apa itu Toolbox?</h4>
+            <h4 className="font-medium text-blue-900 dark:text-blue-100">Apa itu Domain?</h4>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Toolbox adalah kumpulan kemampuan dan tools yang akan digunakan oleh chatbot Anda. 
-              Toolbox berasal dari Big Idea dan menentukan apa yang bisa dilakukan chatbot.
+              Domain adalah area operasional spesifik di bawah suatu Perspektif. 
+              Domain menentukan fokus dan cakupan dari chatbot yang ada di dalamnya.
             </p>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Contoh: Dari Big Idea "Layanan Customer Service", Anda bisa membuat Toolbox untuk 
-              "FAQ Handler", "Complaint Resolution", atau "Product Recommendation".
+              Contoh: Dari Perspektif "Kepatuhan & Compliance", Anda bisa membuat Domain untuk 
+              "SBU & Klasifikasi", "SKK & Tenaga Ahli", atau "Perijinan Usaha".
             </p>
           </div>
 
           <div className="p-4 bg-muted rounded-lg">
-            <Label className="text-xs text-muted-foreground">Dari Big Idea:</Label>
+            <Label className="text-xs text-muted-foreground">Dari Perspektif:</Label>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="secondary">{bigIdea.type}</Badge>
               <span className="font-medium">{bigIdea.name}</span>
@@ -134,10 +134,10 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nama Toolbox *</Label>
+            <Label htmlFor="name">Nama Domain *</Label>
             <Input
               id="name"
-              placeholder="Contoh: Customer Service Toolbox"
+              placeholder="Contoh: SBU & Klasifikasi"
               value={name}
               onChange={(e) => setName(e.target.value)}
              
@@ -148,7 +148,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
             <Label htmlFor="description">Deskripsi</Label>
             <Textarea
               id="description"
-              placeholder="Jelaskan tentang toolbox ini..."
+              placeholder="Jelaskan tentang domain ini..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -157,10 +157,10 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="purpose">Tujuan Toolbox</Label>
+            <Label htmlFor="purpose">Tujuan Domain</Label>
             <Textarea
               id="purpose"
-              placeholder="Tujuan utama dari toolbox ini..."
+              placeholder="Tujuan utama dari domain ini..."
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               rows={2}
@@ -245,7 +245,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
               disabled={createToolbox.isPending}
              
             >
-              {createToolbox.isPending ? "Membuat..." : "Buat Toolbox"}
+              {createToolbox.isPending ? "Membuat..." : "Buat Domain"}
             </Button>
           </div>
         </div>

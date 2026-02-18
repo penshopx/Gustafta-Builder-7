@@ -79,14 +79,14 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
 
       toast({
         title: "Berhasil",
-        description: "Big Idea berhasil diperbarui",
+        description: "Perspektif berhasil diperbarui",
       });
 
       onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Gagal memperbarui Big Idea",
+        description: "Gagal memperbarui Perspektif",
         variant: "destructive",
       });
     }
@@ -122,19 +122,19 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-5 w-5 text-yellow-500" />
-            Edit Big Idea
+            Edit Perspektif
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label>Series / Topik</Label>
+            <Label>Tujuan</Label>
             <Select value={selectedSeriesId} onValueChange={setSelectedSeriesId}>
               <SelectTrigger data-testid="select-series-edit">
-                <SelectValue placeholder="Pilih Series" />
+                <SelectValue placeholder="Pilih Tujuan" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none" data-testid="select-series-none">Tanpa Series</SelectItem>
+                <SelectItem value="none" data-testid="select-series-none">Tanpa Tujuan</SelectItem>
                 {allSeries.map((s: any) => (
                   <SelectItem key={s.id} value={String(s.id)} data-testid={`select-series-${s.id}`}>{s.name}</SelectItem>
                 ))}
@@ -160,7 +160,7 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           )}
 
           <div className="space-y-2">
-            <Label>Tipe Big Idea</Label>
+            <Label>Tipe Perspektif</Label>
             <RadioGroup
               value={type}
               onValueChange={(value) => setType(value as any)}
@@ -182,10 +182,10 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Nama Big Idea *</Label>
+            <Label htmlFor="edit-name">Nama Perspektif *</Label>
             <Input
               id="edit-name"
-              placeholder="Contoh: Otomasi Customer Service"
+              placeholder="Contoh: Kepatuhan & Compliance"
               value={name}
               onChange={(e) => setName(e.target.value)}
               data-testid="input-edit-bigidea-name"

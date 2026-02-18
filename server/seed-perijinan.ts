@@ -8,23 +8,29 @@ function log(msg: string) {
 export async function seedPerijinanSertifikasi(userId: string) {
   try {
     const existingSeries = await storage.getSeries();
-    const existing = existingSeries.find((s: any) => s.name === "Perijinan dan Sertifikasi Jasa Konstruksi");
+    const existing = existingSeries.find((s: any) => s.name === "Regulasi Jasa Konstruksi");
     if (existing) {
-      log("[Seed] Perijinan & Sertifikasi series already exists, skipping");
+      log("[Seed] Regulasi Jasa Konstruksi series already exists, skipping");
       return;
     }
 
-    log("[Seed] Creating Perijinan & Sertifikasi Jasa Konstruksi ecosystem...");
+    const oldExisting = existingSeries.find((s: any) => s.name === "Perijinan dan Sertifikasi Jasa Konstruksi");
+    if (oldExisting) {
+      log("[Seed] Legacy Perijinan series exists, skipping");
+      return;
+    }
+
+    log("[Seed] Creating Regulasi Jasa Konstruksi ecosystem...");
 
     const series = await storage.createSeries({
-      name: "Perijinan dan Sertifikasi Jasa Konstruksi",
-      slug: "perijinan-sertifikasi-konstruksi",
-      description: "Ekosistem chatbot AI untuk membantu profesional dan perusahaan jasa konstruksi dalam mengurus perijinan usaha, sertifikasi badan usaha (SBU), sertifikasi kompetensi kerja (SKK), dan kepatuhan regulasi sektor konstruksi di Indonesia. Mencakup panduan LPJK, LKPP, OSS, dan standar nasional terkait.",
-      tagline: "Panduan Lengkap Perijinan & Sertifikasi Konstruksi Indonesia",
+      name: "Regulasi Jasa Konstruksi",
+      slug: "regulasi-jasa-konstruksi",
+      description: "Ekosistem chatbot AI untuk membantu profesional dan perusahaan jasa konstruksi dalam memahami dan mematuhi regulasi, mengurus perijinan, sertifikasi, serta mengembangkan bisnis di sektor konstruksi Indonesia. Mencakup kepatuhan hukum, pengembangan usaha, manajemen risiko regulasi, dan tender pengadaan.",
+      tagline: "Panduan Lengkap Regulasi & Bisnis Jasa Konstruksi Indonesia",
       coverImage: "",
       color: "#059669",
       category: "engineering",
-      tags: ["perijinan", "sertifikasi", "konstruksi", "SBU", "SKK", "LPJK", "OSS"],
+      tags: ["regulasi", "konstruksi", "kepatuhan", "sertifikasi", "tender", "bisnis"],
       language: "id",
       isPublic: true,
       isFeatured: true,
@@ -35,86 +41,158 @@ export async function seedPerijinanSertifikasi(userId: string) {
 
     const bigIdeasData = [
       {
-        name: "Sertifikasi Badan Usaha (SBU)",
-        type: "mentoring",
-        description: "Panduan lengkap pengurusan Sertifikasi Badan Usaha (SBU) jasa konstruksi melalui LPJK/OSS. Mencakup klasifikasi dan kualifikasi usaha, persyaratan dokumen, proses pengajuan, hingga perpanjangan dan peningkatan grade.",
-        goals: ["Memahami klasifikasi dan kualifikasi SBU", "Panduan proses pengajuan SBU baru", "Strategi peningkatan grade SBU", "Perpanjangan dan pemeliharaan SBU"],
-        targetAudience: "Perusahaan jasa konstruksi, direktur perusahaan, admin perijinan",
-        expectedOutcome: "Perusahaan berhasil mendapatkan dan memelihara SBU sesuai klasifikasi yang tepat",
+        name: "Kepatuhan & Compliance",
+        type: "problem",
+        description: "Perspektif kepatuhan: memastikan perusahaan dan tenaga kerja konstruksi memenuhi seluruh persyaratan hukum, regulasi, dan standar yang berlaku. Fokus pada pemenuhan kewajiban legal agar dapat beroperasi secara sah dan terhindar dari sanksi.",
+        goals: ["Memastikan kelengkapan perijinan usaha", "Menjaga validitas sertifikasi badan usaha dan tenaga kerja", "Kepatuhan terhadap standar dan regulasi teknis", "Persiapan audit dan inspeksi"],
+        targetAudience: "Perusahaan jasa konstruksi, admin perijinan, compliance officer, tenaga ahli konstruksi",
+        expectedOutcome: "Perusahaan dan tenaga kerja beroperasi sepenuhnya sesuai regulasi yang berlaku",
         sortOrder: 1,
         isActive: true,
         toolboxes: [
-          { name: "Klasifikasi & Kualifikasi SBU", description: "Panduan klasifikasi (umum/spesialis) dan kualifikasi (kecil/menengah/besar) SBU jasa konstruksi", purpose: "Membantu menentukan klasifikasi dan kualifikasi SBU yang tepat untuk perusahaan", capabilities: ["Analisis bidang usaha", "Penentuan sub-klasifikasi", "Rekomendasi kualifikasi grade"], sortOrder: 1 },
-          { name: "Pengajuan & Proses SBU", description: "Panduan lengkap proses pengajuan SBU baru melalui LPJK dan OSS", purpose: "Memandu proses pengajuan SBU dari awal hingga terbit", capabilities: ["Checklist dokumen", "Panduan pengisian formulir", "Tracking status pengajuan"], sortOrder: 2 },
-          { name: "Perpanjangan & Peningkatan SBU", description: "Panduan perpanjangan masa berlaku dan peningkatan grade SBU", purpose: "Membantu proses perpanjangan dan peningkatan kualifikasi SBU", capabilities: ["Syarat perpanjangan", "Strategi peningkatan grade", "Timeline dan biaya"], sortOrder: 3 },
-          { name: "Persyaratan Teknis SBU", description: "Detail persyaratan teknis dan administrasi SBU per klasifikasi", purpose: "Menyediakan informasi detail persyaratan SBU", capabilities: ["Persyaratan PJT/PJBU", "Syarat pengalaman", "Persyaratan keuangan"], sortOrder: 4 },
+          {
+            name: "SBU (Sertifikasi Badan Usaha)",
+            description: "Domain sertifikasi badan usaha jasa konstruksi melalui LPJK/OSS",
+            purpose: "Memandu proses pengurusan, perpanjangan, dan peningkatan SBU",
+            capabilities: ["Klasifikasi & kualifikasi SBU", "Proses pengajuan baru", "Perpanjangan & peningkatan grade", "Persyaratan PJT/PJBU"],
+            sortOrder: 1,
+            agents: [
+              { name: "Checklist Persyaratan SBU", desc: "Checklist interaktif untuk memverifikasi kelengkapan dokumen dan persyaratan pengajuan SBU berdasarkan klasifikasi dan kualifikasi yang dipilih.", tagline: "Verifikasi kelengkapan persyaratan SBU", prompt: "Kamu adalah asisten checklist SBU. Bantu pengguna memverifikasi kelengkapan dokumen dan persyaratan untuk pengajuan, perpanjangan, atau peningkatan SBU jasa konstruksi. Tanyakan klasifikasi (umum/spesialis), sub-klasifikasi, dan kualifikasi (kecil/menengah/besar) terlebih dahulu, lalu berikan checklist yang sesuai." },
+              { name: "Formulir Pengajuan SBU", desc: "Panduan pengisian formulir dan proses step-by-step pengajuan SBU baru melalui sistem LPJK dan OSS.", tagline: "Panduan pengisian formulir SBU", prompt: "Kamu adalah asisten formulir SBU. Pandu pengguna dalam mengisi formulir pengajuan SBU secara step-by-step. Jelaskan setiap field yang perlu diisi, dokumen yang perlu dilampirkan, dan tips agar pengajuan berhasil." },
+              { name: "Kalkulator Grade SBU", desc: "Alat bantu untuk menghitung dan menentukan grade SBU yang sesuai berdasarkan kekayaan bersih, pengalaman, dan tenaga ahli perusahaan.", tagline: "Hitung kualifikasi grade SBU Anda", prompt: "Kamu adalah kalkulator grade SBU. Bantu pengguna menentukan grade SBU yang tepat berdasarkan: kekayaan bersih perusahaan, pengalaman pekerjaan, jumlah dan kualifikasi tenaga ahli, serta peralatan. Berikan analisis apakah perusahaan memenuhi syarat untuk grade tertentu." },
+            ]
+          },
+          {
+            name: "SKK (Sertifikasi Kompetensi Kerja)",
+            description: "Domain sertifikasi kompetensi kerja untuk tenaga kerja konstruksi",
+            purpose: "Membantu persiapan dan pengurusan SKK di semua jenjang",
+            capabilities: ["Jenjang kualifikasi SKK", "Persiapan portofolio", "Simulasi ujian", "Pemeliharaan sertifikat"],
+            sortOrder: 2,
+            agents: [
+              { name: "Checklist Dokumen SKK", desc: "Checklist persyaratan dokumen untuk pengajuan SKK per jenjang kualifikasi (Ahli Utama, Madya, Muda, Operator/Teknisi).", tagline: "Verifikasi kelengkapan dokumen SKK", prompt: "Kamu adalah asisten checklist SKK. Tanyakan jenjang kualifikasi yang dituju (Ahli Utama/Madya/Muda/Operator/Teknisi) dan sub-bidang, lalu berikan checklist dokumen yang diperlukan secara lengkap dan terstruktur." },
+              { name: "Panduan Portofolio SKK", desc: "Panduan penyusunan portofolio dan bukti kompetensi untuk asesmen SKK.", tagline: "Susun portofolio SKK yang memenuhi syarat", prompt: "Kamu adalah asisten penyusunan portofolio SKK. Bantu pengguna menyusun portofolio yang memenuhi persyaratan asesmen. Jelaskan format, contoh bukti kerja yang valid, dan tips agar portofolio lolos evaluasi." },
+              { name: "Simulasi Ujian SKK", desc: "Simulasi soal ujian dan wawancara kompetensi untuk persiapan asesmen SKK.", tagline: "Latihan simulasi ujian SKK", prompt: "Kamu adalah simulator ujian SKK. Berikan soal-soal latihan yang relevan dengan jenjang dan sub-bidang yang dipilih. Simulasikan juga sesi wawancara kompetensi. Berikan feedback dan penjelasan untuk setiap jawaban." },
+            ]
+          },
+          {
+            name: "Perijinan Usaha",
+            description: "Domain perijinan usaha jasa konstruksi melalui OSS dan instansi terkait",
+            purpose: "Memandu pengurusan NIB, IUJK, dan izin operasional konstruksi",
+            capabilities: ["Registrasi OSS/NIB", "Pengurusan IUJK", "KBLI konstruksi", "Kepatuhan PP 14/2021"],
+            sortOrder: 3,
+            agents: [
+              { name: "Checklist Perijinan Usaha", desc: "Checklist lengkap persyaratan perijinan usaha jasa konstruksi dari NIB hingga izin operasional.", tagline: "Verifikasi kelengkapan perijinan usaha", prompt: "Kamu adalah asisten checklist perijinan usaha konstruksi. Bantu pengguna memverifikasi kelengkapan perijinan dari NIB, IUJK, hingga izin sektoral. Tanyakan jenis usaha dan skala perusahaan terlebih dahulu." },
+              { name: "Formulir Registrasi OSS", desc: "Panduan step-by-step registrasi dan pengisian data di sistem OSS RBA untuk usaha jasa konstruksi.", tagline: "Panduan registrasi OSS untuk konstruksi", prompt: "Kamu adalah asisten registrasi OSS. Pandu pengguna dalam proses registrasi OSS RBA step-by-step: pemilihan KBLI konstruksi yang tepat, pengisian data perusahaan, dan pengurusan perijinan berusaha berbasis risiko." },
+              { name: "Panduan Kepatuhan PP 14/2021", desc: "Panduan pemahaman dan kepatuhan terhadap PP No. 14 Tahun 2021 tentang Usaha Jasa Konstruksi.", tagline: "Panduan PP 14/2021 Jasa Konstruksi", prompt: "Kamu adalah asisten regulasi PP 14/2021. Bantu pengguna memahami kewajiban dan hak berdasarkan PP 14/2021. Jelaskan persyaratan yang berlaku, sanksi pelanggaran, dan cara memastikan kepatuhan." },
+            ]
+          },
+          {
+            name: "Standar & Regulasi Teknis",
+            description: "Domain standar nasional dan regulasi teknis yang berlaku di sektor konstruksi",
+            purpose: "Membantu pemahaman dan penerapan SNI, UU, PP, dan Permen terkait konstruksi",
+            capabilities: ["UU 2/2017 Jasa Konstruksi", "SNI konstruksi", "Permen PUPR", "Interpretasi regulasi"],
+            sortOrder: 4,
+            agents: [
+              { name: "Panduan UU Jasa Konstruksi", desc: "Panduan pemahaman UU No. 2/2017 tentang Jasa Konstruksi dan PP turunannya.", tagline: "Navigasi regulasi jasa konstruksi", prompt: "Kamu adalah asisten regulasi jasa konstruksi. Bantu pengguna memahami UU No. 2/2017 dan peraturan turunannya. Jelaskan pasal-pasal penting, kewajiban para pihak, dan implikasi praktisnya." },
+              { name: "Referensi SNI Konstruksi", desc: "Panduan dan referensi Standar Nasional Indonesia yang berlaku di sektor konstruksi.", tagline: "Referensi standar SNI konstruksi", prompt: "Kamu adalah asisten referensi SNI konstruksi. Bantu pengguna menemukan dan memahami SNI yang relevan: SNI beton, baja, gempa, keselamatan, dan standar teknis lainnya. Jelaskan penerapan praktisnya." },
+            ]
+          },
         ]
       },
       {
-        name: "Sertifikasi Kompetensi Kerja (SKK)",
-        type: "mentoring",
-        description: "Panduan persiapan dan pengurusan Sertifikasi Kompetensi Kerja (SKK) untuk tenaga kerja konstruksi. Mencakup jenjang kualifikasi, unit kompetensi, portofolio, simulasi ujian, dan pemeliharaan sertifikat.",
-        goals: ["Memahami jenjang kualifikasi SKK", "Persiapan portofolio dan dokumen", "Simulasi ujian sertifikasi", "Pemeliharaan dan perpanjangan SKK"],
-        targetAudience: "Tenaga ahli konstruksi, insinyur, teknisi, operator",
-        expectedOutcome: "Tenaga kerja lulus sertifikasi dan memiliki SKK yang valid",
+        name: "Pengembangan Bisnis",
+        type: "inspiration",
+        description: "Perspektif pengembangan bisnis: membantu perusahaan jasa konstruksi bertumbuh melalui strategi tender, perluasan klasifikasi, peningkatan kapasitas, dan penguatan daya saing di pasar konstruksi Indonesia.",
+        goals: ["Memenangkan tender secara kompetitif", "Memperluas klasifikasi dan kualifikasi usaha", "Meningkatkan kapasitas organisasi", "Membangun reputasi dan track record"],
+        targetAudience: "Direktur perusahaan konstruksi, manajer pengembangan bisnis, estimator, admin tender",
+        expectedOutcome: "Perusahaan mampu tumbuh dan bersaing secara strategis di pasar konstruksi",
         sortOrder: 2,
         isActive: true,
         toolboxes: [
-          { name: "Jenjang & Unit Kompetensi SKK", description: "Panduan jenjang kualifikasi SKK dan unit kompetensi yang diujikan", purpose: "Memahami struktur jenjang dan materi uji SKK", capabilities: ["Jenjang Ahli Utama/Madya/Muda", "Unit kompetensi per jenjang", "Mapping kompetensi"], sortOrder: 1 },
-          { name: "Persiapan Dokumen & Portofolio SKK", description: "Panduan penyusunan portofolio dan dokumen persyaratan SKK", purpose: "Membantu menyiapkan dokumen yang memenuhi syarat", capabilities: ["Template portofolio", "Checklist dokumen", "Tips penyusunan"], sortOrder: 2 },
-          { name: "Simulasi Ujian SKK", description: "Simulasi ujian sertifikasi kompetensi kerja konstruksi", purpose: "Latihan dan simulasi untuk persiapan ujian SKK", capabilities: ["Soal latihan per jenjang", "Simulasi wawancara", "Penilaian mandiri"], sortOrder: 3 },
-          { name: "Pemeliharaan & Perpanjangan SKK", description: "Panduan pemeliharaan kompetensi dan perpanjangan sertifikat SKK", purpose: "Memastikan SKK tetap valid dan ter-update", capabilities: ["Syarat perpanjangan", "Pengembangan profesional berkelanjutan", "Rekam jejak kompetensi"], sortOrder: 4 },
+          {
+            name: "Tender & Pengadaan",
+            description: "Domain tender dan pengadaan jasa konstruksi baik pemerintah maupun swasta",
+            purpose: "Membantu perusahaan mengikuti dan memenangkan tender secara kompetitif",
+            capabilities: ["e-Procurement LKPP/LPSE", "Penyusunan dokumen penawaran", "Strategi pricing", "Evaluasi dan negosiasi"],
+            sortOrder: 1,
+            agents: [
+              { name: "Checklist Dokumen Tender", desc: "Checklist lengkap dokumen kualifikasi dan penawaran untuk mengikuti tender konstruksi.", tagline: "Verifikasi kelengkapan dokumen tender", prompt: "Kamu adalah asisten checklist tender konstruksi. Bantu pengguna memverifikasi kelengkapan dokumen untuk tender: dokumen kualifikasi (administratif, teknis, keuangan), dokumen penawaran teknis, dan penawaran harga. Tanyakan jenis tender (pemerintah/swasta) dan metode evaluasi." },
+              { name: "Formulir Evaluasi Penawaran", desc: "Alat bantu untuk mengevaluasi kekuatan dan kelemahan dokumen penawaran sebelum disubmit.", tagline: "Evaluasi kualitas penawaran tender Anda", prompt: "Kamu adalah asisten evaluasi penawaran tender. Bantu pengguna mengevaluasi dokumen penawarannya: apakah sudah lengkap, apakah harga kompetitif, apakah metode pelaksanaan realistis, dan apakah jadwal feasible. Berikan skor dan rekomendasi perbaikan." },
+              { name: "Panduan e-Procurement", desc: "Panduan penggunaan sistem e-procurement pemerintah (LPSE/LKPP) untuk tender konstruksi.", tagline: "Panduan sistem e-procurement LKPP", prompt: "Kamu adalah asisten e-procurement. Pandu pengguna dalam menggunakan sistem LPSE: registrasi, pencarian tender, upload dokumen, aanwijzing online, pembukaan penawaran, dan tracking status tender." },
+            ]
+          },
+          {
+            name: "Strategi Peningkatan Grade",
+            description: "Domain strategi dan perencanaan peningkatan kualifikasi dan klasifikasi usaha",
+            purpose: "Membantu perusahaan merencanakan dan melaksanakan peningkatan kapasitas usaha",
+            capabilities: ["Analisis gap kualifikasi", "Roadmap peningkatan", "Strategi penambahan klasifikasi", "Perencanaan sumber daya"],
+            sortOrder: 2,
+            agents: [
+              { name: "Analisis Gap Kualifikasi", desc: "Alat analisis kesenjangan antara posisi perusahaan saat ini dengan target grade/klasifikasi yang diinginkan.", tagline: "Identifikasi gap menuju grade target", prompt: "Kamu adalah analis gap kualifikasi. Bantu pengguna mengidentifikasi kesenjangan antara kondisi perusahaan saat ini (kekayaan bersih, pengalaman, tenaga ahli, peralatan) dengan persyaratan grade SBU yang ditargetkan. Berikan roadmap perbaikan." },
+              { name: "Roadmap Pengembangan Usaha", desc: "Panduan penyusunan roadmap strategis untuk pengembangan dan pertumbuhan usaha konstruksi.", tagline: "Susun roadmap pertumbuhan bisnis", prompt: "Kamu adalah konsultan pengembangan bisnis konstruksi. Bantu pengguna menyusun roadmap pengembangan usaha: dari peningkatan grade, penambahan klasifikasi, hingga strategi pasar. Berikan timeline dan milestone yang realistis." },
+            ]
+          },
+          {
+            name: "Kontrak & Klaim",
+            description: "Domain manajemen kontrak konstruksi, addendum, dan penyelesaian klaim",
+            purpose: "Membantu pengelolaan kontrak konstruksi secara efektif dan penyelesaian sengketa",
+            capabilities: ["Administrasi kontrak", "Change order", "Klaim dan dispute", "FIDIC dan standar kontrak"],
+            sortOrder: 3,
+            agents: [
+              { name: "Checklist Kontrak Konstruksi", desc: "Checklist poin-poin penting yang harus diperhatikan dalam kontrak konstruksi.", tagline: "Review poin kritis kontrak konstruksi", prompt: "Kamu adalah asisten review kontrak konstruksi. Bantu pengguna mereview kontrak: klausul pembayaran, lingkup pekerjaan, jadwal, denda keterlambatan, force majeure, penyelesaian sengketa, dan jaminan. Identifikasi poin risiko tinggi." },
+              { name: "Panduan Klaim Konstruksi", desc: "Panduan penyusunan dan pengelolaan klaim dalam proyek konstruksi.", tagline: "Panduan penyusunan klaim proyek", prompt: "Kamu adalah asisten klaim konstruksi. Bantu pengguna menyusun klaim: perpanjangan waktu, eskalasi harga, pekerjaan tambah kurang, dan dispute. Jelaskan prosedur, dokumen pendukung, dan strategi negosiasi." },
+            ]
+          },
         ]
       },
       {
-        name: "Perijinan Usaha Konstruksi",
-        type: "problem",
-        description: "Panduan lengkap perijinan usaha jasa konstruksi melalui sistem OSS (Online Single Submission) dan instansi terkait. Mencakup NIB, IUJK, izin usaha, dan kepatuhan regulasi PP 14/2021.",
-        goals: ["Memahami alur perijinan OSS", "Pengurusan NIB dan IUJK", "Kepatuhan PP 14/2021", "Persyaratan dan dokumen perijinan"],
-        targetAudience: "Calon pengusaha konstruksi, perusahaan baru, admin perijinan",
-        expectedOutcome: "Perusahaan memiliki seluruh perijinan usaha konstruksi yang lengkap dan valid",
+        name: "Manajemen Risiko Regulasi",
+        type: "mentoring",
+        description: "Perspektif manajemen risiko: mengidentifikasi, menilai, dan memitigasi risiko yang timbul dari perubahan regulasi, ketidakpatuhan, dan kompleksitas birokrasi di sektor konstruksi Indonesia.",
+        goals: ["Identifikasi risiko regulasi proaktif", "Mitigasi risiko ketidakpatuhan", "Persiapan menghadapi audit dan inspeksi", "Monitoring perubahan regulasi"],
+        targetAudience: "Risk manager, compliance officer, manajer proyek, konsultan hukum konstruksi",
+        expectedOutcome: "Perusahaan memiliki sistem manajemen risiko regulasi yang proaktif dan terstruktur",
         sortOrder: 3,
         isActive: true,
         toolboxes: [
-          { name: "NIB & Izin Usaha via OSS", description: "Panduan pengurusan Nomor Induk Berusaha dan izin usaha melalui OSS RBA", purpose: "Memandu proses perijinan usaha konstruksi online", capabilities: ["Registrasi OSS", "Pengurusan NIB", "KBLI konstruksi", "Izin usaha sektoral"], sortOrder: 1 },
-          { name: "IUJK & Izin Pelaksanaan", description: "Panduan Izin Usaha Jasa Konstruksi dan izin pelaksanaan kegiatan", purpose: "Membantu pengurusan IUJK dan izin operasional", capabilities: ["Syarat IUJK", "Proses pengajuan", "Izin pelaksanaan proyek"], sortOrder: 2 },
-          { name: "Persyaratan Administrasi Perusahaan", description: "Panduan kelengkapan administrasi perusahaan jasa konstruksi", purpose: "Memastikan kelengkapan dokumen administrasi perusahaan", capabilities: ["Akta perusahaan", "NPWP", "Domisili", "Laporan keuangan"], sortOrder: 3 },
-          { name: "Kepatuhan & Audit Perijinan", description: "Panduan kepatuhan regulasi dan persiapan audit perijinan", purpose: "Membantu perusahaan menjaga kepatuhan perijinan", capabilities: ["Checklist kepatuhan", "Persiapan audit", "Sanksi dan remedi"], sortOrder: 4 },
-        ]
-      },
-      {
-        name: "Regulasi dan Standar Konstruksi",
-        type: "inspiration",
-        description: "Pemahaman regulasi, undang-undang, peraturan pemerintah, dan standar nasional yang berlaku di sektor jasa konstruksi Indonesia. Mencakup UU Jasa Konstruksi, PP turunan, Permen PUPR, dan SNI terkait.",
-        goals: ["Memahami UU No. 2/2017 Jasa Konstruksi", "Menguasai PP dan Permen terkait", "Kepatuhan standar SNI konstruksi", "Update regulasi terbaru"],
-        targetAudience: "Profesional konstruksi, konsultan hukum konstruksi, pemilik perusahaan",
-        expectedOutcome: "Pemahaman komprehensif regulasi jasa konstruksi Indonesia",
-        sortOrder: 4,
-        isActive: true,
-        toolboxes: [
-          { name: "UU Jasa Konstruksi & PP Turunan", description: "Pemahaman UU No. 2/2017 tentang Jasa Konstruksi dan Peraturan Pemerintah turunannya", purpose: "Penguasaan kerangka hukum utama jasa konstruksi", capabilities: ["UU 2/2017", "PP 14/2021", "PP 22/2020", "Interpretasi pasal"], sortOrder: 1 },
-          { name: "Permen PUPR & Regulasi Teknis", description: "Peraturan Menteri PUPR dan regulasi teknis terkait jasa konstruksi", purpose: "Memahami regulasi teknis yang berlaku", capabilities: ["Permen PUPR terkini", "Standar teknis", "Pedoman pelaksanaan"], sortOrder: 2 },
-          { name: "SNI & Standar Konstruksi", description: "Standar Nasional Indonesia yang berlaku di sektor konstruksi", purpose: "Penguasaan standar teknis konstruksi", capabilities: ["SNI beton", "SNI baja", "SNI gempa", "SNI keselamatan"], sortOrder: 3 },
-          { name: "Update Regulasi & Kebijakan", description: "Informasi terbaru perubahan regulasi dan kebijakan sektor konstruksi", purpose: "Mengikuti perkembangan regulasi terkini", capabilities: ["Perubahan regulasi", "Kebijakan baru", "Masa transisi", "Dampak industri"], sortOrder: 4 },
-        ]
-      },
-      {
-        name: "Tender dan Pengadaan Jasa Konstruksi",
-        type: "problem",
-        description: "Panduan mengikuti proses tender dan pengadaan jasa konstruksi baik pemerintah (e-procurement LKPP) maupun swasta. Mencakup persyaratan kualifikasi, penyusunan dokumen penawaran, evaluasi, dan kontrak.",
-        goals: ["Memahami sistem e-procurement", "Penyusunan dokumen penawaran", "Strategi memenangkan tender", "Manajemen kontrak konstruksi"],
-        targetAudience: "Perusahaan kontraktor, estimator, manajer proyek, admin tender",
-        expectedOutcome: "Perusahaan mampu mengikuti dan memenangkan tender secara kompetitif",
-        sortOrder: 5,
-        isActive: true,
-        toolboxes: [
-          { name: "Sistem e-Procurement & LKPP", description: "Panduan penggunaan sistem e-procurement pemerintah melalui LKPP/LPSE", purpose: "Menguasai platform tender elektronik", capabilities: ["Registrasi LPSE", "e-Tendering", "e-Purchasing", "Katalog elektronik"], sortOrder: 1 },
-          { name: "Penyusunan Dokumen Penawaran", description: "Panduan menyusun dokumen penawaran teknis dan harga yang kompetitif", purpose: "Menyusun penawaran yang memenuhi syarat dan kompetitif", capabilities: ["Dokumen kualifikasi", "Penawaran teknis", "RAB/penawaran harga", "Jadwal pelaksanaan"], sortOrder: 2 },
-          { name: "Evaluasi & Negosiasi Kontrak", description: "Panduan proses evaluasi penawaran dan negosiasi kontrak konstruksi", purpose: "Memahami proses evaluasi dan kontrak", capabilities: ["Metode evaluasi", "Negosiasi harga", "Klausul kontrak", "FIDIC/standar kontrak"], sortOrder: 3 },
-          { name: "Manajemen Kontrak & Klaim", description: "Panduan manajemen kontrak, addendum, dan penyelesaian klaim", purpose: "Mengelola kontrak konstruksi secara efektif", capabilities: ["Administrasi kontrak", "Change order", "Klaim dan dispute", "Penyelesaian sengketa"], sortOrder: 4 },
+          {
+            name: "Audit & Inspeksi",
+            description: "Domain persiapan dan pelaksanaan audit kepatuhan dan inspeksi regulasi",
+            purpose: "Membantu perusahaan mempersiapkan dan melewati proses audit dengan lancar",
+            capabilities: ["Checklist audit kepatuhan", "Simulasi inspeksi", "Dokumentasi bukti kepatuhan", "Remediasi temuan"],
+            sortOrder: 1,
+            agents: [
+              { name: "Checklist Kesiapan Audit", desc: "Checklist komprehensif untuk mempersiapkan audit kepatuhan perijinan dan sertifikasi konstruksi.", tagline: "Persiapan audit perijinan dan sertifikasi", prompt: "Kamu adalah asisten persiapan audit konstruksi. Bantu pengguna mempersiapkan audit: kelengkapan dokumen perijinan, validitas sertifikasi, kepatuhan K3, dan standar mutu. Berikan checklist terstruktur per area audit." },
+              { name: "Panduan Remediasi Temuan", desc: "Panduan penanganan dan remediasi temuan audit atau pelanggaran regulasi.", tagline: "Tindak lanjut temuan audit", prompt: "Kamu adalah asisten remediasi audit. Bantu pengguna menangani temuan audit: prioritasi temuan, rencana tindak lanjut, timeline perbaikan, dan dokumentasi remediasi. Berikan contoh surat tanggapan dan rencana aksi." },
+            ]
+          },
+          {
+            name: "Monitoring Regulasi",
+            description: "Domain pemantauan perubahan regulasi dan kebijakan sektor konstruksi",
+            purpose: "Membantu perusahaan tetap update dengan perubahan regulasi terbaru",
+            capabilities: ["Tracking perubahan UU/PP", "Analisis dampak regulasi baru", "Masa transisi regulasi", "Alert regulasi"],
+            sortOrder: 2,
+            agents: [
+              { name: "Analisis Dampak Regulasi", desc: "Alat analisis dampak perubahan regulasi terhadap operasional perusahaan konstruksi.", tagline: "Analisis dampak regulasi baru", prompt: "Kamu adalah analis dampak regulasi. Bantu pengguna menganalisis dampak perubahan regulasi terhadap perusahaannya: apa yang berubah, apa yang harus dilakukan, timeline kepatuhan, dan estimasi biaya adaptasi." },
+              { name: "Panduan Masa Transisi", desc: "Panduan navigasi masa transisi ketika terjadi perubahan regulasi di sektor konstruksi.", tagline: "Navigasi transisi regulasi baru", prompt: "Kamu adalah asisten transisi regulasi. Bantu pengguna menavigasi masa transisi regulasi baru: ketentuan yang masih berlaku, ketentuan baru yang harus dipatuhi, timeline compliance, dan langkah-langkah migrasi." },
+            ]
+          },
+          {
+            name: "Sanksi & Penyelesaian",
+            description: "Domain penanganan sanksi, sengketa, dan penyelesaian masalah regulasi",
+            purpose: "Membantu perusahaan menangani dan menyelesaikan masalah sanksi atau sengketa regulasi",
+            capabilities: ["Jenis sanksi dan remedi", "Prosedur banding", "Mediasi dan arbitrase", "Pencegahan pengulangan"],
+            sortOrder: 3,
+            agents: [
+              { name: "Panduan Penanganan Sanksi", desc: "Panduan penanganan sanksi administratif, denda, atau pencabutan izin di sektor konstruksi.", tagline: "Tangani sanksi regulasi konstruksi", prompt: "Kamu adalah asisten penanganan sanksi konstruksi. Bantu pengguna memahami jenis sanksi yang dihadapi, opsi penyelesaian (banding, remediasi, mediasi), timeline penanganan, dan langkah pencegahan pengulangan." },
+            ]
+          },
         ]
       },
     ];
+
+    let totalToolboxes = 0;
+    let totalAgents = 0;
 
     for (const biData of bigIdeasData) {
       const bigIdea = await storage.createBigIdea({
@@ -129,8 +207,26 @@ export async function seedPerijinanSertifikasi(userId: string) {
         isActive: biData.isActive,
       } as any);
 
+      const orchestrator = await storage.createAgent({
+        name: `Orchestrator ${biData.name}`,
+        description: `Chatbot orkestrator untuk perspektif "${biData.name}" dalam regulasi jasa konstruksi. Mengarahkan pengguna ke domain dan alat bantu yang tepat sesuai kebutuhan mereka.`,
+        tagline: `Orkestrator ${biData.name}`,
+        category: "engineering",
+        subcategory: "construction-regulation",
+        isPublic: true,
+        isOrchestrator: true,
+        aiModel: "gpt-4o",
+        temperature: "0.7",
+        maxTokens: 2048,
+        bigIdeaId: parseInt(bigIdea.id),
+        systemPrompt: `Kamu adalah Orchestrator untuk perspektif "${biData.name}" dalam ekosistem Regulasi Jasa Konstruksi.\n\nDESKRIPSI: ${biData.description}\n\nTUJUAN:\n${biData.goals.map((g: string) => `- ${g}`).join('\n')}\n\nTARGET PENGGUNA: ${biData.targetAudience}\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke domain (toolbox) dan alat bantu (agent) yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke alat spesifik\n4. Menjawab pertanyaan umum tentang ${biData.name.toLowerCase()} di sektor konstruksi`,
+        greetingMessage: `Selamat datang! Saya orkestrator untuk ${biData.name} dalam regulasi jasa konstruksi.\n\n${biData.description}\n\nSilakan ceritakan kebutuhan Anda, dan saya akan mengarahkan ke alat bantu yang paling tepat.`,
+        conversationStarters: JSON.stringify(biData.goals.slice(0, 4)),
+        personality: "Profesional, terstruktur, dan responsif",
+      } as any);
+
       for (const tbData of biData.toolboxes) {
-        await storage.createToolbox({
+        const toolbox = await storage.createToolbox({
           bigIdeaId: bigIdea.id,
           name: tbData.name,
           description: tbData.description,
@@ -139,14 +235,35 @@ export async function seedPerijinanSertifikasi(userId: string) {
           sortOrder: tbData.sortOrder,
           isActive: true,
         } as any);
+        totalToolboxes++;
+
+        for (const agentData of tbData.agents) {
+          await storage.createAgent({
+            name: agentData.name,
+            description: agentData.desc,
+            tagline: agentData.tagline,
+            category: "engineering",
+            subcategory: "construction-regulation",
+            isPublic: true,
+            aiModel: "gpt-4o-mini",
+            temperature: "0.7",
+            maxTokens: 1024,
+            toolboxId: parseInt(toolbox.id),
+            parentAgentId: parseInt(orchestrator.id),
+            systemPrompt: agentData.prompt,
+            greetingMessage: `Halo! Saya ${agentData.name}. ${agentData.desc}\n\nSilakan mulai dengan menceritakan kebutuhan Anda.`,
+            personality: "Profesional, detail, dan membantu",
+          } as any);
+          totalAgents++;
+        }
       }
 
-      log(`[Seed] Created Big Idea: ${biData.name} with ${biData.toolboxes.length} toolboxes`);
+      log(`[Seed] Created Big Idea: ${biData.name} (1 orchestrator, ${biData.toolboxes.length} toolboxes, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
     }
 
-    log("[Seed] Perijinan & Sertifikasi Jasa Konstruksi ecosystem created successfully!");
-    log(`[Seed] Total: 1 Series, ${bigIdeasData.length} Big Ideas, ${bigIdeasData.reduce((sum, bi) => sum + bi.toolboxes.length, 0)} Toolboxes`);
+    log(`[Seed] Regulasi Jasa Konstruksi ecosystem created successfully!`);
+    log(`[Seed] Total: 1 Series (Goal), ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat), ${bigIdeasData.length} Orchestrators`);
   } catch (error) {
-    log(`[Seed] Error creating Perijinan ecosystem: ${error}`);
+    log(`[Seed] Error creating Regulasi Jasa Konstruksi ecosystem: ${error}`);
   }
 }

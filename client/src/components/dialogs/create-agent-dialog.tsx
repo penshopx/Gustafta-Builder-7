@@ -114,7 +114,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
     if (isOrchestrator && !activeBigIdea) {
       toast({
         title: "Validation Error",
-        description: "Orchestrator membutuhkan Big Idea yang aktif.",
+        description: "Orchestrator membutuhkan Perspektif yang aktif.",
         variant: "destructive",
       });
       return;
@@ -124,7 +124,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
     if (!isOrchestrator && !activeToolbox) {
       toast({
         title: "Validation Error",
-        description: "Chatbot modul membutuhkan Toolbox yang aktif. Silakan pilih Toolbox terlebih dahulu.",
+        description: "Chatbot modul membutuhkan Domain yang aktif. Silakan pilih Domain terlebih dahulu.",
         variant: "destructive",
       });
       return;
@@ -271,7 +271,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Chatbot utama untuk Big Idea "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke modul-modul chatbot lainnya.
+                    Chatbot utama untuk Perspektif "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke modul-modul chatbot lainnya.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -295,7 +295,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 <CardContent>
                   <CardDescription>
                     {activeToolbox 
-                      ? `Buat chatbot modul untuk Toolbox "${activeToolbox.name}" dengan template siap pakai.`
+                      ? `Buat chatbot modul untuk Domain "${activeToolbox.name}" dengan template siap pakai.`
                       : "Mulai dengan template siap pakai untuk berbagai industri."}
                   </CardDescription>
                 </CardContent>
@@ -318,7 +318,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 <CardContent>
                   <CardDescription>
                     {activeToolbox 
-                      ? `Buat chatbot modul untuk Toolbox "${activeToolbox.name}" dari awal.`
+                      ? `Buat chatbot modul untuk Domain "${activeToolbox.name}" dari awal.`
                       : "Buat chatbot custom dengan konfigurasi sendiri."}
                   </CardDescription>
                 </CardContent>
@@ -337,7 +337,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
           <ScrollArea className="h-[400px] pr-4">
             {forceOrchestrator && activeBigIdea && (
               <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20 space-y-1 mb-3">
-                <p className="text-xs text-muted-foreground">Orchestrator untuk Big Idea:</p>
+                <p className="text-xs text-muted-foreground">Orchestrator untuk Perspektif:</p>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="gap-1">
                     <Lightbulb className="h-3 w-3" />
@@ -345,7 +345,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                   </Badge>
                   <Badge className="gap-1 bg-purple-500/20 text-purple-600 border-purple-500/30">
                     <Network className="h-3 w-3" />
-                    Orchestrator (di atas semua Toolbox)
+                    Orchestrator (di atas semua Domain)
                   </Badge>
                 </div>
               </div>

@@ -80,17 +80,17 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
       
       toast({
         title: "Berhasil",
-        description: "Big Idea berhasil dibuat",
+        description: "Perspektif berhasil dibuat",
       });
       
       resetForm();
       onOpenChange(false);
     } catch (error: any) {
       console.error("[CreateBigIdea] Error:", error?.message || error);
-      const errorMsg = error?.message || "Gagal membuat Big Idea";
+      const errorMsg = error?.message || "Gagal membuat Perspektif";
       toast({
         title: "Error",
-        description: errorMsg.includes("401") ? "Sesi login habis, silakan login ulang" : `Gagal membuat Big Idea: ${errorMsg}`,
+        description: errorMsg.includes("401") ? "Sesi login habis, silakan login ulang" : `Gagal membuat Perspektif: ${errorMsg}`,
         variant: "destructive",
       });
     }
@@ -143,20 +143,20 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-yellow-500" />
-            Buat Big Idea Baru
+            Buat Perspektif Baru
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {allSeries.length > 0 && (
             <div className="space-y-2">
-              <Label>Series / Topik</Label>
+              <Label>Tujuan</Label>
               <Select value={selectedSeriesId} onValueChange={setSelectedSeriesId}>
                 <SelectTrigger data-testid="select-series">
-                  <SelectValue placeholder="Pilih Series" />
+                  <SelectValue placeholder="Pilih Tujuan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Tanpa Series</SelectItem>
+                  <SelectItem value="none">Tanpa Tujuan</SelectItem>
                   {allSeries.map((s: any) => (
                     <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                   ))}
@@ -183,7 +183,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
           )}
 
           <div className="space-y-2">
-            <Label>Tipe Big Idea</Label>
+            <Label>Tipe Perspektif</Label>
             <RadioGroup
               value={type}
               onValueChange={(value) => setType(value as "problem" | "idea" | "inspiration" | "mentoring")}
@@ -206,10 +206,10 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nama Big Idea *</Label>
+            <Label htmlFor="name">Nama Perspektif *</Label>
             <Input
               id="name"
-              placeholder="Contoh: Otomasi Customer Service"
+              placeholder="Contoh: Kepatuhan & Compliance"
               value={name}
               onChange={(e) => setName(e.target.value)}
              
@@ -294,7 +294,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
               disabled={createBigIdea.isPending}
              
             >
-              {createBigIdea.isPending ? "Membuat..." : "Buat Big Idea"}
+              {createBigIdea.isPending ? "Membuat..." : "Buat Perspektif"}
             </Button>
           </div>
         </div>

@@ -26,12 +26,12 @@ export async function seedCivilproEcosystem(userId: string) {
     const series = await storage.createSeries({
       name: "CIVILPRO",
       slug: "civilpro",
-      description: "CIVILPRO adalah ekosistem chatbot AI yang dirancang khusus untuk para profesional di bidang Teknik Sipil (Civil Engineering). Platform ini menggabungkan berbagai kemampuan AI mulai dari pemecahan masalah teknis proyek nyata, edukasi dan pengembangan kompetensi bertahap, pembekalan dan simulasi uji Sertifikasi Kompetensi Kerja (SKK), hingga eksplorasi ide inovatif dan masa depan infrastruktur.",
+      description: "CIVILPRO adalah ekosistem chatbot AI untuk profesional Teknik Sipil. Goal utama: memberdayakan insinyur sipil dan profesional konstruksi dengan alat AI untuk kompetensi, problem-solving, inovasi, dan pengambilan keputusan proyek.",
       tagline: "Ekosistem AI untuk Profesional Teknik Sipil",
       coverImage: "",
       color: "#6366f1",
       category: "engineering",
-      tags: ["civil-engineering", "construction", "SKK"],
+      tags: ["civil-engineering", "construction", "SKK", "problem-solving"],
       language: "id",
       isPublic: true,
       isFeatured: true,
@@ -39,228 +39,303 @@ export async function seedCivilproEcosystem(userId: string) {
     } as any, userId);
 
     const bigIdeasData = [
-      { name: "CIVILPRO Inspire", type: "inspiration", description: "CIVILPRO Inspire bertujuan untuk mendorong pemikiran inovatif dan eksplorasi masa depan di bidang teknik sipil.", isActive: true, sortOrder: 1 },
-      { name: "CIVILPRO Solver", type: "problem", description: "CIVILPRO Solver difokuskan pada pemecahan masalah teknis nyata yang dihadapi Insinyur Sipil dalam proyek konstruksi dan infrastruktur.", isActive: false, sortOrder: 2 },
-      { name: "CIVILPRO SKK", type: "mentoring", description: "CIVILPRO SKK dirancang khusus untuk pembekalan dan simulasi uji Sertifikasi Kompetensi Kerja (SKK) bidang Sipil.", isActive: false, sortOrder: 3 },
-      { name: "CIVILPRO Learn", type: "mentoring", description: "CIVILPRO Learn menyediakan platform edukasi dan pengembangan kompetensi bertahap untuk profesional teknik sipil.", isActive: false, sortOrder: 4 },
-      { name: "Konsultasi Teknis & Pengambilan Keputusan Proyek", type: "problem", description: "Big Idea untuk membantu para profesional teknik sipil dan manajemen konstruksi dalam melakukan konsultasi teknis, diagnosis masalah lapangan, serta pengambilan keputusan proyek berbasis parameter mutu, waktu, biaya, dan risiko.", isActive: false, sortOrder: 5 },
+      {
+        name: "Sertifikasi & Kompetensi",
+        type: "mentoring",
+        description: "Perspektif pembekalan dan sertifikasi: mempersiapkan tenaga kerja konstruksi menghadapi uji kompetensi SKK di semua jenjang, mulai dari pemahaman unit kompetensi, penyusunan portofolio, hingga simulasi ujian dan wawancara.",
+        goals: ["Lulus uji kompetensi SKK", "Menyusun portofolio yang memenuhi syarat", "Menguasai materi per jenjang kualifikasi", "Mempersiapkan wawancara asesmen"],
+        targetAudience: "Tenaga ahli konstruksi, insinyur sipil, teknisi, operator",
+        expectedOutcome: "Tenaga kerja lulus sertifikasi SKK dan memiliki kompetensi tervalidasi",
+        sortOrder: 1,
+        isActive: true,
+        toolboxes: [
+          {
+            name: "SKK Ahli Utama",
+            description: "Domain persiapan SKK untuk jenjang Ahli Utama - penanggung jawab teknis tingkat tertinggi",
+            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Utama",
+            capabilities: ["Materi unit kompetensi Ahli Utama", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
+            sortOrder: 1,
+            agents: [
+              { name: "Simulasi Ujian Ahli Utama", desc: "Simulasi soal ujian tertulis dan pilihan ganda untuk persiapan SKK Ahli Utama.", tagline: "Simulasi ujian SKK Ahli Utama", prompt: "Kamu adalah simulator ujian SKK Ahli Utama bidang Sipil. Berikan soal-soal latihan yang sesuai dengan unit kompetensi Ahli Utama. Evaluasi jawaban pengguna dan berikan penjelasan detail." },
+              { name: "Wawancara Kompetensi Ahli Utama", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Utama.", tagline: "Latihan wawancara SKK Ahli Utama", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Utama. Ajukan pertanyaan berbasis kompetensi, evaluasi jawaban pengguna, dan berikan feedback untuk perbaikan." },
+              { name: "Portofolio Ahli Utama", desc: "Panduan penyusunan portofolio dan bukti kompetensi untuk SKK Ahli Utama.", tagline: "Panduan portofolio SKK Ahli Utama", prompt: "Kamu adalah asisten penyusunan portofolio SKK Ahli Utama. Bantu pengguna menyusun portofolio yang memenuhi persyaratan asesmen: format, bukti kerja, surat referensi, dan dokumentasi proyek." },
+            ]
+          },
+          {
+            name: "SKK Ahli Madya",
+            description: "Domain persiapan SKK untuk jenjang Ahli Madya - pelaksana teknis senior",
+            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Madya",
+            capabilities: ["Materi unit kompetensi Ahli Madya", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
+            sortOrder: 2,
+            agents: [
+              { name: "Simulasi Ujian Ahli Madya", desc: "Simulasi soal ujian tertulis dan pilihan ganda untuk persiapan SKK Ahli Madya.", tagline: "Simulasi ujian SKK Ahli Madya", prompt: "Kamu adalah simulator ujian SKK Ahli Madya bidang Sipil. Berikan soal-soal latihan sesuai unit kompetensi Ahli Madya." },
+              { name: "Wawancara Kompetensi Ahli Madya", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Madya.", tagline: "Latihan wawancara SKK Ahli Madya", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Madya. Ajukan pertanyaan berbasis kompetensi dan berikan feedback." },
+              { name: "Pembekalan Materi Ahli Madya", desc: "Materi pembekalan dan pembelajaran untuk persiapan SKK Ahli Madya.", tagline: "Pembekalan materi SKK Ahli Madya", prompt: "Kamu adalah tutor pembekalan materi SKK Ahli Madya bidang Sipil. Berikan materi pembelajaran yang terstruktur sesuai unit kompetensi." },
+            ]
+          },
+          {
+            name: "SKK Ahli Muda",
+            description: "Domain persiapan SKK untuk jenjang Ahli Muda - pelaksana teknis junior",
+            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Muda",
+            capabilities: ["Materi unit kompetensi Ahli Muda", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
+            sortOrder: 3,
+            agents: [
+              { name: "Simulasi Ujian Ahli Muda", desc: "Simulasi soal ujian untuk persiapan SKK Ahli Muda.", tagline: "Simulasi ujian SKK Ahli Muda", prompt: "Kamu adalah simulator ujian SKK Ahli Muda bidang Sipil. Berikan soal-soal latihan sesuai unit kompetensi Ahli Muda." },
+              { name: "Wawancara Kompetensi Ahli Muda", desc: "Latihan wawancara asesmen kompetensi untuk SKK level Ahli Muda.", tagline: "Latihan wawancara SKK Ahli Muda", prompt: "Kamu adalah asesor simulasi wawancara SKK Ahli Muda. Ajukan pertanyaan berbasis kompetensi dan berikan feedback." },
+              { name: "Pembekalan Materi Ahli Muda", desc: "Materi pembekalan dasar untuk persiapan SKK Ahli Muda.", tagline: "Pembekalan materi SKK Ahli Muda", prompt: "Kamu adalah tutor pembekalan materi SKK Ahli Muda bidang Sipil. Berikan materi dasar yang terstruktur." },
+            ]
+          },
+          {
+            name: "SKK Operator & Teknisi",
+            description: "Domain persiapan SKK untuk jenjang Operator dan Teknisi - pelaksana operasional lapangan",
+            purpose: "Pembekalan dan simulasi uji kompetensi SKK level Operator dan Teknisi",
+            capabilities: ["Materi operasional lapangan", "Simulasi ujian praktik", "Panduan keselamatan kerja", "Checklist kompetensi"],
+            sortOrder: 4,
+            agents: [
+              { name: "Simulasi Ujian Operator/Teknisi", desc: "Simulasi soal ujian untuk persiapan SKK Operator dan Teknisi.", tagline: "Simulasi ujian SKK Operator/Teknisi", prompt: "Kamu adalah simulator ujian SKK Operator/Teknisi bidang Sipil. Berikan soal latihan yang fokus pada keterampilan operasional dan teknis lapangan." },
+              { name: "Checklist Kompetensi Operasional", desc: "Checklist verifikasi kompetensi operasional untuk tenaga operator dan teknisi konstruksi.", tagline: "Checklist kompetensi operator/teknisi", prompt: "Kamu adalah asisten checklist kompetensi operasional. Bantu pengguna memverifikasi penguasaan keterampilan teknis: pengoperasian alat, keselamatan kerja, prosedur standar, dan dokumentasi." },
+            ]
+          },
+        ]
+      },
+      {
+        name: "Konsultasi Teknis & Keputusan Proyek",
+        type: "problem",
+        description: "Perspektif pemecahan masalah: membantu profesional teknik sipil melakukan konsultasi teknis, diagnosis masalah lapangan, dan pengambilan keputusan proyek berbasis parameter mutu, waktu, biaya, dan risiko.",
+        goals: ["Diagnosis masalah teknis yang akurat", "Pengambilan keputusan berbasis data", "Solusi teknis yang terukur dan defensible", "Dokumentasi teknis yang standar"],
+        targetAudience: "Manajer proyek, site engineer, konsultan teknis, quality control",
+        expectedOutcome: "Keputusan proyek yang terukur dan masalah teknis terselesaikan secara sistematis",
+        sortOrder: 2,
+        isActive: true,
+        toolboxes: [
+          {
+            name: "Diagnosis Struktur",
+            description: "Domain diagnosis dan pemecahan masalah struktur: beton, baja, pondasi",
+            purpose: "Membantu menganalisis kerusakan dan kegagalan struktur",
+            capabilities: ["Analisis retak beton", "Evaluasi kapasitas struktur", "Diagnosis pondasi", "Rekomendasi perkuatan"],
+            sortOrder: 1,
+            agents: [
+              { name: "Analisis Kerusakan Struktur", desc: "Alat diagnosis kerusakan struktural beton, baja, dan material konstruksi lainnya.", tagline: "Diagnosis kerusakan struktur bangunan", prompt: "Kamu adalah spesialis diagnosis kerusakan struktur. Bantu pengguna menganalisis kerusakan: jenis retak (struktural/non-struktural), pola kerusakan, penyebab probable, dan rekomendasi penanganan. Minta foto atau deskripsi detail kerusakan." },
+              { name: "Evaluasi Kondisi Pondasi", desc: "Alat evaluasi kondisi pondasi dan rekomendasi perkuatan.", tagline: "Evaluasi dan rekomendasi pondasi", prompt: "Kamu adalah spesialis geoteknik dan pondasi. Bantu pengguna mengevaluasi kondisi pondasi: jenis tanah, daya dukung, settlement, dan perlunya perkuatan. Berikan rekomendasi teknis yang terukur." },
+            ]
+          },
+          {
+            name: "Quality Control & Mutu",
+            description: "Domain pengendalian mutu material dan pekerjaan konstruksi",
+            purpose: "Membantu identifikasi masalah mutu dan memastikan kepatuhan standar",
+            capabilities: ["Inspeksi material", "Uji mutu beton/baja", "Checklist inspeksi", "Kepatuhan SNI"],
+            sortOrder: 2,
+            agents: [
+              { name: "Checklist Inspeksi Mutu", desc: "Checklist inspeksi mutu untuk berbagai jenis pekerjaan konstruksi.", tagline: "Checklist inspeksi mutu konstruksi", prompt: "Kamu adalah inspektor mutu konstruksi. Berikan checklist inspeksi yang terstruktur berdasarkan jenis pekerjaan: beton, baja, pasangan bata, waterproofing, dll. Sertakan referensi SNI yang berlaku." },
+              { name: "Panduan Uji Material", desc: "Panduan prosedur pengujian material konstruksi sesuai standar.", tagline: "Panduan uji material konstruksi", prompt: "Kamu adalah spesialis pengujian material konstruksi. Berikan panduan prosedur uji: uji slump beton, kuat tekan, tarik baja, CBR tanah, dll. Jelaskan standar yang berlaku dan interpretasi hasil." },
+            ]
+          },
+          {
+            name: "Pengambilan Keputusan Proyek",
+            description: "Domain decision support untuk keputusan proyek konstruksi berbasis multi-kriteria",
+            purpose: "Membantu pengambilan keputusan proyek yang terukur dan defensible",
+            capabilities: ["Analisis multi-kriteria", "Cost-benefit analysis", "Risk assessment", "Value engineering"],
+            sortOrder: 3,
+            agents: [
+              { name: "Analisis Multi-Kriteria", desc: "Alat bantu analisis pengambilan keputusan proyek berbasis multi-kriteria (mutu, biaya, waktu, risiko).", tagline: "Analisis keputusan multi-kriteria", prompt: "Kamu adalah analis keputusan proyek konstruksi. Bantu pengguna membuat keputusan berbasis multi-kriteria: definisikan kriteria (mutu, biaya, waktu, risiko, K3), bobot masing-masing, dan evaluasi opsi secara sistematis." },
+              { name: "Cost-Benefit Analyzer", desc: "Alat analisis biaya-manfaat dan value engineering untuk proyek konstruksi.", tagline: "Analisis biaya-manfaat proyek", prompt: "Kamu adalah analis cost-benefit proyek konstruksi. Bantu pengguna mengevaluasi opsi berdasarkan analisis biaya-manfaat: bandingkan alternatif, hitung ROI, identifikasi value engineering opportunities." },
+            ]
+          },
+          {
+            name: "Dokumentasi Teknis",
+            description: "Domain penyusunan dokumen teknis dan laporan proyek konstruksi",
+            purpose: "Membantu penyusunan dokumen teknis yang terstandar",
+            capabilities: ["Metode pelaksanaan", "Laporan harian/mingguan", "Method statement", "Dokumen as-built"],
+            sortOrder: 4,
+            agents: [
+              { name: "Penyusunan Metode Pelaksanaan", desc: "Panduan penyusunan metode pelaksanaan (method statement) proyek konstruksi.", tagline: "Susun metode pelaksanaan proyek", prompt: "Kamu adalah asisten penyusunan metode pelaksanaan. Bantu pengguna menyusun method statement: lingkup pekerjaan, tahapan pelaksanaan, sumber daya, jadwal, K3, dan pengendalian mutu." },
+              { name: "Template Laporan Proyek", desc: "Template dan panduan penyusunan laporan proyek harian, mingguan, dan bulanan.", tagline: "Template laporan proyek konstruksi", prompt: "Kamu adalah asisten dokumentasi proyek. Bantu pengguna menyusun laporan proyek yang terstandar: laporan harian (progress, material, tenaga kerja, cuaca), mingguan (ringkasan progress, kendala), dan bulanan (evaluasi kinerja)." },
+            ]
+          },
+          {
+            name: "Risiko & K3",
+            description: "Domain manajemen risiko proyek dan keselamatan kesehatan kerja konstruksi",
+            purpose: "Meminimalkan risiko proyek dan meningkatkan keselamatan kerja",
+            capabilities: ["Risk assessment", "JSA/HIRARC", "Rencana K3", "Investigasi insiden"],
+            sortOrder: 5,
+            agents: [
+              { name: "Risk Assessment Proyek", desc: "Alat identifikasi dan mitigasi risiko proyek konstruksi.", tagline: "Identifikasi dan mitigasi risiko proyek", prompt: "Kamu adalah risk manager proyek konstruksi. Bantu pengguna mengidentifikasi risiko proyek: teknis, jadwal, biaya, eksternal. Berikan probability-impact matrix dan rencana mitigasi." },
+              { name: "Checklist K3 Konstruksi", desc: "Checklist keselamatan dan kesehatan kerja untuk proyek konstruksi.", tagline: "Checklist K3 proyek konstruksi", prompt: "Kamu adalah safety officer konstruksi. Berikan checklist K3 yang komprehensif: APD, prosedur kerja aman, JSA/HIRARC, emergency response plan, dan kepatuhan regulasi K3." },
+            ]
+          },
+        ]
+      },
+      {
+        name: "Inovasi & Pengembangan",
+        type: "inspiration",
+        description: "Perspektif inovasi: mendorong eksplorasi metode konstruksi baru, teknologi digital, konstruksi berkelanjutan, dan tren masa depan infrastruktur untuk meningkatkan daya saing profesional teknik sipil.",
+        goals: ["Menerapkan teknologi digital (BIM, IoT, AI)", "Mengadopsi konstruksi berkelanjutan", "Meningkatkan efisiensi metode konstruksi", "Mengikuti tren infrastruktur masa depan"],
+        targetAudience: "Insinyur sipil inovatif, manajer proyek, konsultan, akademisi",
+        expectedOutcome: "Profesional yang mampu menerapkan inovasi untuk meningkatkan kualitas dan efisiensi proyek",
+        sortOrder: 3,
+        isActive: true,
+        toolboxes: [
+          {
+            name: "Transformasi Digital",
+            description: "Domain adopsi teknologi digital: BIM, IoT, AI, drone dalam konstruksi",
+            purpose: "Memandu penerapan teknologi digital di proyek konstruksi",
+            capabilities: ["Implementasi BIM", "IoT monitoring", "AI dalam konstruksi", "Drone survey"],
+            sortOrder: 1,
+            agents: [
+              { name: "Panduan BIM Implementation", desc: "Panduan implementasi Building Information Modeling (BIM) di proyek konstruksi.", tagline: "Panduan implementasi BIM konstruksi", prompt: "Kamu adalah konsultan BIM. Bantu pengguna mengimplementasikan BIM: pemilihan software, level of development (LOD), standar BIM, workflow kolaborasi, dan manfaat untuk berbagai fase proyek." },
+              { name: "Teknologi Konstruksi 4.0", desc: "Eksplorasi teknologi Industry 4.0 untuk konstruksi: IoT, AI, robotik, 3D printing.", tagline: "Eksplorasi teknologi konstruksi masa depan", prompt: "Kamu adalah futuris konstruksi. Bantu pengguna mengeksplorasi teknologi konstruksi 4.0: IoT monitoring, AI quality control, robotic construction, 3D printing beton, dan digital twin." },
+            ]
+          },
+          {
+            name: "Green Construction",
+            description: "Domain konstruksi berkelanjutan dan ramah lingkungan",
+            purpose: "Mendorong penerapan prinsip sustainability dalam konstruksi",
+            capabilities: ["Green building certification", "Material berkelanjutan", "Efisiensi energi", "Life cycle assessment"],
+            sortOrder: 2,
+            agents: [
+              { name: "Panduan Green Building", desc: "Panduan sertifikasi dan penerapan prinsip green building dalam konstruksi.", tagline: "Panduan green building & sustainability", prompt: "Kamu adalah konsultan green building. Bantu pengguna menerapkan prinsip konstruksi berkelanjutan: sertifikasi EDGE/Greenship, material ramah lingkungan, efisiensi energi dan air, dan pengelolaan limbah konstruksi." },
+            ]
+          },
+          {
+            name: "Optimasi Metode Konstruksi",
+            description: "Domain inovasi dan optimasi metode pelaksanaan konstruksi",
+            purpose: "Meningkatkan efisiensi dan kualitas melalui inovasi metode",
+            capabilities: ["Lean construction", "Prefabrikasi", "Modular construction", "Optimasi jadwal"],
+            sortOrder: 3,
+            agents: [
+              { name: "Lean Construction Advisor", desc: "Panduan penerapan prinsip lean construction untuk mengurangi waste dan meningkatkan value.", tagline: "Lean construction & efisiensi proyek", prompt: "Kamu adalah konsultan lean construction. Bantu pengguna menerapkan prinsip lean: identifikasi waste, value stream mapping, just-in-time delivery, last planner system, dan continuous improvement." },
+              { name: "Prefabrikasi & Modular", desc: "Panduan metode prefabrikasi dan konstruksi modular untuk efisiensi proyek.", tagline: "Konstruksi prefabrikasi & modular", prompt: "Kamu adalah spesialis prefabrikasi dan konstruksi modular. Bantu pengguna mempertimbangkan dan menerapkan metode prefab/modular: analisis kelayakan, design for manufacture, logistik, dan instalasi." },
+            ]
+          },
+        ]
+      },
+      {
+        name: "Edukasi & Pengembangan Kompetensi",
+        type: "mentoring",
+        description: "Perspektif pembelajaran: menyediakan materi edukasi terstruktur dan pengembangan kompetensi bertahap untuk profesional teknik sipil, dari dasar hingga advanced, termasuk pemahaman standar dan keterampilan praktis lapangan.",
+        goals: ["Menguasai dasar teknik sipil", "Memahami standar dan regulasi teknis", "Mengembangkan keterampilan praktis lapangan", "Merencanakan pengembangan karir"],
+        targetAudience: "Fresh graduate, insinyur junior, profesional yang ingin meningkatkan kompetensi",
+        expectedOutcome: "Profesional dengan kompetensi teknis dan soft skills yang komprehensif",
+        sortOrder: 4,
+        isActive: true,
+        toolboxes: [
+          {
+            name: "Fundamental Engineering",
+            description: "Domain pembelajaran dasar teknik sipil: mekanika, struktur, hidrologi, geoteknik",
+            purpose: "Menyediakan materi edukasi dasar teknik sipil secara bertahap",
+            capabilities: ["Mekanika struktur", "Hidrologi dasar", "Geoteknik dasar", "Material konstruksi"],
+            sortOrder: 1,
+            agents: [
+              { name: "Tutor Mekanika Struktur", desc: "Tutor AI untuk pembelajaran dasar mekanika struktur dan analisis struktur.", tagline: "Belajar mekanika struktur step-by-step", prompt: "Kamu adalah tutor mekanika struktur. Ajarkan konsep dasar secara bertahap: gaya, momen, diagram geser dan momen, analisis rangka batang, portal, dan defleksi. Gunakan contoh soal dan penjelasan visual." },
+              { name: "Tutor Material Konstruksi", desc: "Tutor AI untuk pembelajaran properti dan perilaku material konstruksi.", tagline: "Belajar properti material konstruksi", prompt: "Kamu adalah tutor material konstruksi. Ajarkan properti material: beton (mix design, kuat tekan, curing), baja (grade, tegangan leleh), kayu, bata. Sertakan standar yang berlaku dan contoh aplikasi." },
+            ]
+          },
+          {
+            name: "Standar & Kode Teknis",
+            description: "Domain pemahaman standar dan regulasi teknis konstruksi Indonesia",
+            purpose: "Menguasai standar teknis yang berlaku di konstruksi Indonesia",
+            capabilities: ["SNI beton & baja", "Standar gempa", "Kode bangunan", "Interpretasi standar"],
+            sortOrder: 2,
+            agents: [
+              { name: "Panduan SNI Konstruksi", desc: "Panduan pemahaman dan penerapan Standar Nasional Indonesia di bidang konstruksi.", tagline: "Panduan SNI untuk konstruksi", prompt: "Kamu adalah ahli standar konstruksi Indonesia. Bantu pengguna memahami dan menerapkan SNI: SNI 2847 (beton), SNI 1729 (baja), SNI 1726 (gempa), dan standar terkait. Jelaskan pasal-pasal penting dan contoh penerapan." },
+            ]
+          },
+          {
+            name: "Keterampilan Praktis Lapangan",
+            description: "Domain pengembangan keterampilan praktis untuk pelaksanaan dan pengawasan proyek",
+            purpose: "Mengembangkan kemampuan praktis lapangan untuk profesional konstruksi",
+            capabilities: ["Supervisi pekerjaan", "Pengukuran dan survey", "Manajemen material", "Koordinasi subkontraktor"],
+            sortOrder: 3,
+            agents: [
+              { name: "Panduan Supervisi Lapangan", desc: "Panduan keterampilan supervisi dan pengawasan pekerjaan konstruksi di lapangan.", tagline: "Panduan supervisi pekerjaan konstruksi", prompt: "Kamu adalah mentor supervisi konstruksi. Ajarkan keterampilan supervisi: inspeksi pekerjaan, komunikasi dengan mandor dan pekerja, penanganan masalah lapangan, dan dokumentasi progress." },
+              { name: "Perencanaan Karir Sipil", desc: "Panduan perencanaan dan pengembangan karir di bidang teknik sipil.", tagline: "Rencanakan karir teknik sipil Anda", prompt: "Kamu adalah konsultan karir teknik sipil. Bantu pengguna merencanakan karir: jenjang karir (engineer, PM, direktur teknis), sertifikasi yang dibutuhkan, skill yang harus dikembangkan, dan peluang di berbagai sektor." },
+            ]
+          },
+        ]
+      },
     ];
+
+    let totalToolboxes = 0;
+    let totalAgents = 0;
 
     const bigIdeas: Record<string, any> = {};
-    for (const bi of bigIdeasData) {
-      const created = await storage.createBigIdea({
-        ...bi,
-        seriesId: parseInt(series.id),
-      } as any);
-      bigIdeas[bi.name] = created;
-    }
-
-    const toolboxesData: Array<{ name: string; bigIdea: string; description: string; purpose: string }> = [
-      { name: "SKK Ahli Utama Toolbox", bigIdea: "CIVILPRO SKK", description: "Toolbox untuk persiapan SKK Ahli Utama", purpose: "Mempersiapkan tenaga konstruksi level Ahli Utama menghadapi uji kompetensi SKK bidang Sipil" },
-      { name: "SKK Ahli Madya Toolbox", bigIdea: "CIVILPRO SKK", description: "Toolbox untuk persiapan SKK Ahli Madya", purpose: "Mempersiapkan tenaga konstruksi level Ahli Madya menghadapi uji kompetensi SKK bidang Sipil" },
-      { name: "SKK Ahli Muda Toolbox", bigIdea: "CIVILPRO SKK", description: "Toolbox untuk persiapan SKK Ahli Muda", purpose: "Mempersiapkan tenaga konstruksi level Ahli Muda menghadapi uji kompetensi SKK bidang Sipil" },
-      { name: "SKK Operator / Teknisi Toolbox", bigIdea: "CIVILPRO SKK", description: "Toolbox untuk persiapan SKK Operator dan Teknisi", purpose: "Mempersiapkan tenaga konstruksi level Operator dan Teknisi menghadapi uji kompetensi SKK bidang Sipil" },
-      { name: "Innovation & Optimization Toolbox", bigIdea: "CIVILPRO Inspire", description: "Eksplorasi metode inovatif dan optimasi proses konstruksi menggunakan teknologi terbaru", purpose: "Membantu pengguna menemukan pendekatan inovatif untuk meningkatkan efisiensi dan kualitas konstruksi" },
-      { name: "Sustainability & Green Construction Toolbox", bigIdea: "CIVILPRO Inspire", description: "Panduan konstruksi berkelanjutan dan ramah lingkungan", purpose: "Mendorong penerapan prinsip green construction dan keberlanjutan dalam proyek sipil" },
-      { name: "Digital Transformation Toolbox", bigIdea: "CIVILPRO Inspire", description: "Transformasi digital dalam industri konstruksi: BIM, IoT, AI", purpose: "Memperkenalkan dan membimbing penerapan teknologi digital di proyek konstruksi" },
-      { name: "Future Infrastructure Toolbox", bigIdea: "CIVILPRO Inspire", description: "Eksplorasi masa depan infrastruktur dan tren teknologi sipil", purpose: "Membuka wawasan tentang perkembangan infrastruktur masa depan" },
-      { name: "Structural Problem Solving Toolbox", bigIdea: "CIVILPRO Solver", description: "Diagnosis dan pemecahan masalah struktur: beton, baja, kayu", purpose: "Membantu menganalisis kegagalan struktur dan memberikan rekomendasi solusi teknis" },
-      { name: "Geotechnical & Foundation Toolbox", bigIdea: "CIVILPRO Solver", description: "Analisis masalah geoteknik dan fondasi", purpose: "Membantu diagnosis masalah tanah, fondasi, dan perkuatan struktur bawah" },
-      { name: "Quality Control & Materials Toolbox", bigIdea: "CIVILPRO Solver", description: "Pengendalian mutu material dan pekerjaan konstruksi", purpose: "Membantu identifikasi masalah mutu dan rekomendasi penanganan material" },
-      { name: "Schedule & Cost Control Toolbox", bigIdea: "CIVILPRO Solver", description: "Pengendalian jadwal dan biaya proyek konstruksi", purpose: "Membantu analisis keterlambatan dan pembengkakan biaya proyek" },
-      { name: "Safety & Risk Management Toolbox", bigIdea: "CIVILPRO Solver", description: "Manajemen risiko dan keselamatan kerja konstruksi", purpose: "Membantu identifikasi risiko K3 dan mitigasi bahaya di proyek konstruksi" },
-      { name: "Fundamental Engineering Toolbox", bigIdea: "CIVILPRO Learn", description: "Pembelajaran dasar teknik sipil: mekanika, struktur, hidrologi", purpose: "Menyediakan materi edukasi dasar teknik sipil secara bertahap" },
-      { name: "Standards & Codes Toolbox", bigIdea: "CIVILPRO Learn", description: "Pemahaman standar dan regulasi konstruksi Indonesia", purpose: "Membantu mempelajari SNI, peraturan konstruksi, dan standar teknis" },
-      { name: "Practical Skills Toolbox", bigIdea: "CIVILPRO Learn", description: "Keterampilan praktis lapangan dan supervisi", purpose: "Mengembangkan kemampuan praktis untuk pelaksanaan dan pengawasan proyek" },
-      { name: "Professional Development Toolbox", bigIdea: "CIVILPRO Learn", description: "Pengembangan karir profesional teknik sipil", purpose: "Membantu perencanaan dan pengembangan karir di bidang teknik sipil" },
-      { name: "Core Foundation", bigIdea: "Konsultasi Teknis & Pengambilan Keputusan Proyek", description: "Toolbox dasar yang menjadi fondasi seluruh sistem konsultasi teknis.", purpose: "Menyediakan framework dasar untuk intake proyek dan diagnosis awal masalah teknis" },
-      { name: "Decision Support", bigIdea: "Konsultasi Teknis & Pengambilan Keputusan Proyek", description: "Toolbox untuk mendukung pengambilan keputusan proyek berbasis multi-kriteria.", purpose: "Membantu pengambilan keputusan proyek yang terukur dan defensible" },
-      { name: "Field Diagnosis", bigIdea: "Konsultasi Teknis & Pengambilan Keputusan Proyek", description: "Toolbox untuk diagnosis masalah lapangan.", purpose: "Diagnosis cepat dan akurat untuk masalah lapangan konstruksi" },
-      { name: "Risk & Safety", bigIdea: "Konsultasi Teknis & Pengambilan Keputusan Proyek", description: "Toolbox untuk manajemen risiko proyek, K3 konstruksi.", purpose: "Meminimalkan risiko dan meningkatkan keselamatan proyek" },
-      { name: "Quality & Compliance", bigIdea: "Konsultasi Teknis & Pengambilan Keputusan Proyek", description: "Toolbox untuk pengendalian mutu, kepatuhan standar.", purpose: "Memastikan mutu proyek sesuai standar dan spesifikasi" },
-      { name: "Documentation & Reporting", bigIdea: "Konsultasi Teknis & Pengambilan Keputusan Proyek", description: "Toolbox untuk penyusunan dokumen teknis.", purpose: "Mempercepat dan menstandardisasi dokumentasi proyek" },
-      { name: "Mentoring & Evaluation", bigIdea: "Konsultasi Teknis & Pengambilan Keputusan Proyek", description: "Toolbox untuk evaluasi kesehatan proyek, mentoring tim teknis.", purpose: "Meningkatkan kapasitas tim dan mengevaluasi performa proyek" },
-    ];
-
     const toolboxes: Record<string, any> = {};
-    for (const tb of toolboxesData) {
-      const biId = bigIdeas[tb.bigIdea]?.id;
-      if (!biId) continue;
-      const created = await storage.createToolbox({
-        name: tb.name,
-        bigIdeaId: parseInt(biId),
-        description: tb.description,
-        purpose: tb.purpose,
+
+    for (const biData of bigIdeasData) {
+      const bigIdea = await storage.createBigIdea({
+        seriesId: parseInt(series.id),
+        name: biData.name,
+        type: biData.type,
+        description: biData.description,
+        goals: biData.goals,
+        targetAudience: biData.targetAudience,
+        expectedOutcome: biData.expectedOutcome,
+        sortOrder: biData.sortOrder,
+        isActive: biData.isActive,
       } as any);
-      toolboxes[tb.name] = created;
-    }
+      bigIdeas[biData.name] = bigIdea;
 
-    const skkOrchestrator = await storage.createAgent({
-      name: "SKK Sipil Orchestrator",
-      description: "Chatbot Orchestrator untuk Sertifikasi Kompetensi Kerja (SKK) bidang Sipil.",
-      tagline: "Asisten Digital Pembekalan & Simulasi Uji Kompetensi SKK Bidang Sipil",
-      category: "engineering",
-      subcategory: "civil-engineering",
-      isPublic: true,
-      aiModel: "gpt-4o",
-      temperature: "0.7",
-      maxTokens: 2048,
-      systemPrompt: `Kamu adalah SKK Sipil Orchestrator — asisten AI utama untuk pembekalan dan simulasi uji Sertifikasi Kompetensi Kerja (SKK) bidang Sipil di Indonesia.
-
-PERAN UTAMA:
-- Menjadi pusat kendali yang mengarahkan pengguna ke modul spesialis berdasarkan level klasifikasi dan jabatan kerja
-- Mendukung dua mode pengguna: MODE ASESI (peserta uji kompetensi) dan MODE ASESOR (penguji kompetensi)
-
-LEVEL KLASIFIKASI:
-- Ahli Utama: Penanggung jawab teknis tingkat tertinggi
-- Ahli Madya: Pelaksana teknis senior
-- Ahli Muda: Pelaksana teknis junior
-- Operator/Teknisi: Pelaksana operasional dan teknis lapangan`,
-      greetingMessage: "Selamat datang di SKK Sipil Orchestrator! Saya adalah asisten digital Anda untuk pembekalan dan simulasi uji Sertifikasi Kompetensi Kerja (SKK) bidang Sipil.",
-      conversationStarters: JSON.stringify(["Saya ingin mempersiapkan uji kompetensi SKK", "Bantu saya simulasi ujian SKK Sipil", "Apa saja jabatan kerja SKK bidang Sipil?"]),
-      personality: "Profesional, suportif, terstruktur, dan berbasis data.",
-    } as any);
-
-    const skkLevels = [
-      { name: "SKK Ahli Utama", toolbox: "SKK Ahli Utama Toolbox", tagline: "Pembekalan SKK Level Ahli Utama", desc: "Chatbot spesialis untuk pembekalan dan simulasi uji kompetensi SKK level Ahli Utama bidang Sipil.", greeting: "Selamat datang di modul SKK Ahli Utama!", prompt: "Kamu adalah chatbot spesialis SKK Ahli Utama bidang Sipil. Fokus pada penanggung jawab teknis tingkat tertinggi." },
-      { name: "SKK Ahli Madya", toolbox: "SKK Ahli Madya Toolbox", tagline: "Pembekalan SKK Level Ahli Madya", desc: "Chatbot spesialis untuk pembekalan dan simulasi uji kompetensi SKK level Ahli Madya bidang Sipil.", greeting: "Selamat datang di modul SKK Ahli Madya!", prompt: "Kamu adalah chatbot spesialis SKK Ahli Madya bidang Sipil. Fokus pada pelaksana teknis senior." },
-      { name: "SKK Ahli Muda", toolbox: "SKK Ahli Muda Toolbox", tagline: "Pembekalan SKK Level Ahli Muda", desc: "Chatbot spesialis untuk pembekalan dan simulasi uji kompetensi SKK level Ahli Muda bidang Sipil.", greeting: "Selamat datang di modul SKK Ahli Muda!", prompt: "Kamu adalah chatbot spesialis SKK Ahli Muda bidang Sipil. Fokus pada pelaksana teknis junior." },
-      { name: "SKK Operator / Teknisi", toolbox: "SKK Operator / Teknisi Toolbox", tagline: "Pembekalan SKK Level Operator/Teknisi", desc: "Chatbot spesialis untuk pembekalan dan simulasi uji kompetensi SKK level Operator dan Teknisi bidang Sipil.", greeting: "Selamat datang di modul SKK Operator/Teknisi!", prompt: "Kamu adalah chatbot spesialis SKK Operator/Teknisi bidang Sipil. Fokus pada keterampilan operasional." },
-    ];
-
-    const skkParentAgents: Record<string, any> = {};
-    for (const level of skkLevels) {
-      const tbId = toolboxes[level.toolbox]?.id;
-      const agent = await storage.createAgent({
-        name: level.name,
-        description: level.desc,
-        tagline: level.tagline,
+      const orchestrator = await storage.createAgent({
+        name: biData.name === "Sertifikasi & Kompetensi" ? "SKK Sipil Orchestrator" : 
+              biData.name === "Konsultasi Teknis & Keputusan Proyek" ? "CIVILOPRO" :
+              `Orchestrator ${biData.name}`,
+        description: `Chatbot orkestrator untuk perspektif "${biData.name}" dalam ekosistem CIVILPRO. Mengarahkan pengguna ke domain dan alat bantu yang tepat.`,
+        tagline: biData.name === "Sertifikasi & Kompetensi" ? "Asisten Digital Pembekalan & Simulasi Uji Kompetensi SKK Bidang Sipil" :
+                 biData.name === "Konsultasi Teknis & Keputusan Proyek" ? "Asisten AI untuk Konsultasi Teknis & Keputusan Proyek Konstruksi" :
+                 `Orkestrator ${biData.name} - CIVILPRO`,
         category: "engineering",
         subcategory: "civil-engineering",
         isPublic: true,
+        isOrchestrator: true,
         aiModel: "gpt-4o",
         temperature: "0.7",
         maxTokens: 2048,
-        toolboxId: tbId ? parseInt(tbId) : undefined,
-        parentAgentId: parseInt(skkOrchestrator.id),
-        systemPrompt: level.prompt,
-        greetingMessage: level.greeting,
-        conversationStarters: JSON.stringify(["Simulasi ujian", "Latihan wawancara", "Unit kompetensi", "Panduan portofolio"]),
-        personality: "Profesional dan suportif",
+        bigIdeaId: parseInt(bigIdea.id),
+        systemPrompt: `Kamu adalah Orchestrator untuk perspektif "${biData.name}" dalam ekosistem CIVILPRO.\n\nDESKRIPSI: ${biData.description}\n\nTUJUAN:\n${biData.goals.map((g: string) => `- ${g}`).join('\n')}\n\nTARGET PENGGUNA: ${biData.targetAudience}\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke domain (toolbox) dan alat bantu (agent) yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang ${biData.name.toLowerCase()}`,
+        greetingMessage: `Selamat datang di ${biData.name} - CIVILPRO!\n\n${biData.description}\n\nSilakan ceritakan kebutuhan Anda, dan saya akan mengarahkan ke alat bantu yang paling tepat.`,
+        conversationStarters: JSON.stringify(biData.goals.slice(0, 4)),
+        personality: "Profesional, suportif, terstruktur, dan berbasis data",
       } as any);
-      skkParentAgents[level.name] = agent;
-    }
 
-    const skkSubModules = [
-      { prefix: "Ahli Utama", parent: "SKK Ahli Utama", toolbox: "SKK Ahli Utama Toolbox" },
-      { prefix: "Ahli Madya", parent: "SKK Ahli Madya", toolbox: "SKK Ahli Madya Toolbox" },
-      { prefix: "Ahli Muda", parent: "SKK Ahli Muda", toolbox: "SKK Ahli Muda Toolbox" },
-      { prefix: "Operator/Teknisi", parent: "SKK Operator / Teknisi", toolbox: "SKK Operator / Teknisi Toolbox" },
-    ];
-
-    const subModuleTypes = [
-      { suffix: "Simulasi Ujian", desc: "Agen simulasi ujian tertulis dan pilihan ganda", tagline: "Simulasi Ujian SKK", temp: "0.5" },
-      { suffix: "Wawancara Kompetensi", desc: "Agen latihan wawancara asesmen kompetensi", tagline: "Latihan Wawancara SKK", temp: "0.7" },
-      { suffix: "Portofolio & Bukti", desc: "Agen panduan penyusunan portofolio dan bukti kompetensi", tagline: "Panduan Portofolio SKK", temp: "0.7" },
-      { suffix: "Pembekalan Materi", desc: "Agen pembekalan materi dan pembelajaran", tagline: "Pembekalan Materi SKK", temp: "0.7" },
-    ];
-
-    for (const mod of skkSubModules) {
-      const parentAgent = skkParentAgents[mod.parent];
-      const tbId = toolboxes[mod.toolbox]?.id;
-      for (const sub of subModuleTypes) {
-        await storage.createAgent({
-          name: `${sub.suffix} ${mod.prefix}`,
-          description: `${sub.desc} untuk SKK level ${mod.prefix}.`,
-          tagline: `${sub.tagline} ${mod.prefix}`,
-          category: "engineering",
-          subcategory: "civil-engineering",
-          isPublic: true,
-          aiModel: "gpt-4o",
-          temperature: sub.temp,
-          maxTokens: 2048,
-          toolboxId: tbId ? parseInt(tbId) : undefined,
-          parentAgentId: parentAgent ? parseInt(parentAgent.id) : undefined,
-          systemPrompt: `Kamu adalah ${sub.suffix} untuk SKK level ${mod.prefix} bidang Sipil.`,
-          greetingMessage: `Selamat datang di modul ${sub.suffix} ${mod.prefix}!`,
-          personality: "Profesional dan suportif",
+      for (const tbData of biData.toolboxes) {
+        const toolbox = await storage.createToolbox({
+          name: tbData.name,
+          bigIdeaId: parseInt(bigIdea.id),
+          description: tbData.description,
+          purpose: tbData.purpose,
+          capabilities: tbData.capabilities,
+          sortOrder: tbData.sortOrder,
+          isActive: true,
         } as any);
+        toolboxes[tbData.name] = toolbox;
+        totalToolboxes++;
+
+        for (const agentData of tbData.agents) {
+          await storage.createAgent({
+            name: agentData.name,
+            description: agentData.desc,
+            tagline: agentData.tagline,
+            category: "engineering",
+            subcategory: "civil-engineering",
+            isPublic: true,
+            aiModel: "gpt-4o-mini",
+            temperature: "0.7",
+            maxTokens: 1024,
+            toolboxId: parseInt(toolbox.id),
+            parentAgentId: parseInt(orchestrator.id),
+            systemPrompt: agentData.prompt,
+            greetingMessage: `Halo! Saya ${agentData.name}. ${agentData.desc}\n\nSilakan mulai dengan menceritakan kebutuhan Anda.`,
+            personality: "Profesional, detail, dan membantu",
+          } as any);
+          totalAgents++;
+        }
       }
+
+      log(`[Seed] Created Perspektif: ${biData.name} (1 orchestrator, ${biData.toolboxes.length} domains, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
     }
 
-    const civiloproOrchestrator = await storage.createAgent({
-      name: "CIVILOPRO",
-      description: `CIVILOPRO adalah chatbot orkestrator untuk bidang teknik sipil dan manajemen konstruksi yang membantu pengguna melakukan konsultasi teknis, analisis masalah lapangan, serta pengambilan keputusan proyek berbasis parameter mutu, waktu, biaya, dan risiko.`,
-      tagline: "Asisten AI untuk Konsultasi Teknis & Keputusan Proyek Konstruksi",
-      category: "engineering",
-      subcategory: "civil_engineer",
-      isPublic: true,
-      aiModel: "gpt-4o-mini",
-      temperature: "0.7",
-      maxTokens: 1024,
-      bigIdeaId: bigIdeas["Konsultasi Teknis & Pengambilan Keputusan Proyek"] ? parseInt(bigIdeas["Konsultasi Teknis & Pengambilan Keputusan Proyek"].id) : undefined,
-      systemPrompt: `You are CIVILOPRO, an orchestrator chatbot for technical consultation and project decision-making in civil engineering and construction projects.
-
-Your role is to act as a professional project consultant who:
-- understands project context,
-- references the CIVILOPRO Knowledge Base,
-- coordinates internal specialist reasoning when needed,
-- and delivers a single, structured, actionable response.
-
-MANDATORY RESPONSE STRUCTURE
-Every response must follow this structure:
-1. Ringkasan Masalah
-2. Data yang Dibutuhkan / Asumsi
-3. Analisis Teknis
-4. Opsi Solusi
-5. Rekomendasi Tindakan
-6. Checklist Lapangan
-7. Risiko Utama`,
-      greetingMessage: `Halo! Saya CIVILOPRO \u{1F477}\u200D\u2642\uFE0F\u{1F4D0}
-Asisten AI untuk konsultasi teknis dan pengambilan keputusan proyek konstruksi.
-
-Ceritakan kondisi proyek atau masalah yang Anda hadapi\u2014saya akan bantu menganalisis dan memberi rekomendasi terbaik.`,
-      conversationStarters: JSON.stringify(["Analisis masalah retak pada struktur beton", "Bantu pilih metode perbaikan pondasi", "Evaluasi risiko keterlambatan proyek", "Cek kepatuhan spesifikasi terhadap SNI", "Susunkan laporan harian proyek"]),
-    } as any);
-
-    const civiloproModules = [
-      { name: "Intake & Data Collection", toolbox: "Core Foundation", desc: "Modul spesialis untuk pengumpulan data awal proyek, checklist intake, dan verifikasi kelengkapan informasi proyek.", tagline: "Pengumpulan data & checklist awal proyek" },
-      { name: "Problem Diagnosis", toolbox: "Core Foundation", desc: "Modul spesialis untuk diagnosis awal masalah teknis proyek.", tagline: "Diagnosis awal masalah teknis proyek" },
-      { name: "Multi-Criteria Analysis", toolbox: "Decision Support", desc: "Modul spesialis untuk analisis pengambilan keputusan berbasis multi-kriteria.", tagline: "Analisis keputusan multi-kriteria proyek" },
-      { name: "Cost-Benefit Analyzer", toolbox: "Decision Support", desc: "Modul spesialis untuk analisis biaya-manfaat dan value engineering.", tagline: "Analisis biaya-manfaat & value engineering" },
-      { name: "Structural Damage Analyzer", toolbox: "Field Diagnosis", desc: "Modul spesialis untuk analisis kerusakan struktural.", tagline: "Analisis kerusakan struktural proyek" },
-      { name: "Site Condition Evaluator", toolbox: "Field Diagnosis", desc: "Modul spesialis untuk evaluasi kondisi lapangan.", tagline: "Evaluasi kondisi lapangan & lingkungan proyek" },
-      { name: "Risk Mitigation Planner", toolbox: "Risk & Safety", desc: "Modul spesialis untuk identifikasi risiko proyek dan mitigasi.", tagline: "Identifikasi & mitigasi risiko proyek" },
-      { name: "K3 Safety Advisor", toolbox: "Risk & Safety", desc: "Modul spesialis untuk keselamatan dan kesehatan kerja (K3) konstruksi.", tagline: "Konsultasi K3 & keselamatan konstruksi" },
-      { name: "Standards Compliance Checker", toolbox: "Quality & Compliance", desc: "Modul spesialis untuk verifikasi kepatuhan standar SNI, ACI, ASTM.", tagline: "Cek kepatuhan standar & regulasi teknis" },
-      { name: "Quality Control Inspector", toolbox: "Quality & Compliance", desc: "Modul spesialis untuk pengendalian mutu material dan inspeksi.", tagline: "Pengendalian mutu & inspeksi proyek" },
-      { name: "Technical Document Drafter", toolbox: "Documentation & Reporting", desc: "Modul spesialis untuk penyusunan dokumen teknis proyek.", tagline: "Penyusunan dokumen teknis proyek" },
-      { name: "Method Statement Writer", toolbox: "Documentation & Reporting", desc: "Modul spesialis untuk penyusunan metode pelaksanaan.", tagline: "Penyusunan metode kerja & SOP proyek" },
-      { name: "Project Health Evaluator", toolbox: "Mentoring & Evaluation", desc: "Modul spesialis untuk evaluasi kesehatan proyek secara menyeluruh.", tagline: "Evaluasi kesehatan & performa proyek" },
-      { name: "Technical Mentor", toolbox: "Mentoring & Evaluation", desc: "Modul spesialis untuk mentoring dan coaching tim teknis proyek.", tagline: "Mentoring teknis & pengembangan kompetensi" },
-    ];
-
-    for (const mod of civiloproModules) {
-      const tbId = toolboxes[mod.toolbox]?.id;
-      await storage.createAgent({
-        name: mod.name,
-        description: mod.desc,
-        tagline: mod.tagline,
-        category: "engineering",
-        subcategory: "civil_engineer",
-        isPublic: true,
-        aiModel: "gpt-4o-mini",
-        temperature: "0.7",
-        maxTokens: 1024,
-        toolboxId: tbId ? parseInt(tbId) : undefined,
-        parentAgentId: parseInt(civiloproOrchestrator.id),
-        systemPrompt: `Kamu adalah ${mod.name}, bagian dari sistem CIVILOPRO. ${mod.desc}`,
-        greetingMessage: `Halo! Saya ${mod.name}. ${mod.desc}`,
-        personality: "Profesional, objektif, dan detail",
-      } as any);
-    }
-
-    log("[Seed] CIVILPRO ecosystem created successfully (1 series, 5 big ideas, 24 toolboxes, 36 agents)");
+    log(`[Seed] CIVILPRO ecosystem created successfully!`);
+    log(`[Seed] Total: 1 Series (Goal), ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat), ${bigIdeasData.length} Orchestrators`);
   } catch (err) {
     log("[Seed] Failed to create CIVILPRO ecosystem: " + (err as Error).message);
     console.error(err);

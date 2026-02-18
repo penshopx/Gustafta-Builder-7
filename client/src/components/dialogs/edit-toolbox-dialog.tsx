@@ -52,7 +52,7 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
     if (!name.trim()) {
       toast({
         title: "Error",
-        description: "Nama toolbox wajib diisi",
+        description: "Nama domain wajib diisi",
         variant: "destructive",
       });
       return;
@@ -72,14 +72,14 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
 
       toast({
         title: "Berhasil",
-        description: "Toolbox berhasil diperbarui",
+        description: "Domain berhasil diperbarui",
       });
 
       onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Gagal memperbarui Toolbox",
+        description: "Gagal memperbarui Domain",
         variant: "destructive",
       });
     }
@@ -110,16 +110,16 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-5 w-5 text-blue-500" />
-            Edit Toolbox
+            Edit Domain
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-tb-name">Nama Toolbox *</Label>
+            <Label htmlFor="edit-tb-name">Nama Domain *</Label>
             <Input
               id="edit-tb-name"
-              placeholder="Contoh: Customer Service Toolbox"
+              placeholder="Contoh: SBU & Klasifikasi"
               value={name}
               onChange={(e) => setName(e.target.value)}
               data-testid="input-edit-toolbox-name"
@@ -130,7 +130,7 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
             <Label htmlFor="edit-tb-description">Deskripsi</Label>
             <Textarea
               id="edit-tb-description"
-              placeholder="Jelaskan tentang toolbox ini..."
+              placeholder="Jelaskan tentang domain ini..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -139,10 +139,10 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-tb-purpose">Tujuan Toolbox</Label>
+            <Label htmlFor="edit-tb-purpose">Tujuan Domain</Label>
             <Textarea
               id="edit-tb-purpose"
-              placeholder="Tujuan utama dari toolbox ini..."
+              placeholder="Tujuan utama dari domain ini..."
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               rows={2}

@@ -290,10 +290,10 @@ export default function Dashboard() {
   const handleDeleteBigIdea = async (bi: BigIdea) => {
     try {
       await deleteBigIdea.mutateAsync(String(bi.id));
-      toast({ title: "Berhasil", description: `Big Idea "${bi.name}" berhasil dihapus` });
+      toast({ title: "Berhasil", description: `Perspektif "${bi.name}" berhasil dihapus` });
       setDeleteBigIdeaConfirm(null);
     } catch (error) {
-      toast({ title: "Error", description: "Gagal menghapus Big Idea", variant: "destructive" });
+      toast({ title: "Error", description: "Gagal menghapus Perspektif", variant: "destructive" });
     }
   };
 
@@ -305,10 +305,10 @@ export default function Dashboard() {
   const handleDeleteToolbox = async (tb: Toolbox) => {
     try {
       await deleteToolbox.mutateAsync(String(tb.id));
-      toast({ title: "Berhasil", description: `Toolbox "${tb.name}" berhasil dihapus` });
+      toast({ title: "Berhasil", description: `Domain "${tb.name}" berhasil dihapus` });
       setDeleteToolboxConfirm(null);
     } catch (error) {
-      toast({ title: "Error", description: "Gagal menghapus Toolbox", variant: "destructive" });
+      toast({ title: "Error", description: "Gagal menghapus Domain", variant: "destructive" });
     }
   };
 
@@ -332,13 +332,13 @@ export default function Dashboard() {
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-foreground">Selamat Datang di Gustafta</h2>
               <p className="text-sm md:text-base text-muted-foreground mt-2">
-                Mulai dengan membuat Big Idea atau Chatbot pertama Anda.
+                Mulai dengan membuat Perspektif atau Chatbot pertama Anda.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button onClick={() => setBigIdeaDialogOpen(true)} variant="outline" className="w-full sm:w-auto">
                 <Lightbulb className="w-4 h-4 mr-2" />
-                Buat Big Idea
+                Buat Perspektif
               </Button>
               <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
@@ -436,24 +436,24 @@ export default function Dashboard() {
                 <DropdownMenuLabel>Navigasi</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => { navigateToLevel('series'); setSidebarCollapsed(false); }} className="gap-2">
                   <FolderOpen className="w-4 h-4 text-purple-500" />
-                  <span>Series</span>
+                  <span>Tujuan</span>
                 </DropdownMenuItem>
                 {activeSeries && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('bigIdeas'); setSidebarCollapsed(false); }} className="gap-2 pl-6">
                     <Lightbulb className="w-4 h-4 text-yellow-500" />
-                    <span className="truncate">Big Ideas - {activeSeries.name}</span>
+                    <span className="truncate">Perspektif - {activeSeries.name}</span>
                   </DropdownMenuItem>
                 )}
                 {activeBigIdea && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('toolboxes'); setSidebarCollapsed(false); }} className="gap-2 pl-8">
                     <Wrench className="w-4 h-4 text-blue-500" />
-                    <span className="truncate">Toolboxes - {activeBigIdea.name}</span>
+                    <span className="truncate">Domain - {activeBigIdea.name}</span>
                   </DropdownMenuItem>
                 )}
                 {activeToolbox && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('agents'); setSidebarCollapsed(false); }} className="gap-2 pl-10">
                     <Bot className="w-4 h-4 text-primary" />
-                    <span className="truncate">Agents - {activeToolbox.name}</span>
+                    <span className="truncate">Alat Bantu - {activeToolbox.name}</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -471,7 +471,7 @@ export default function Dashboard() {
                 )}
                 data-testid="breadcrumb-series"
               >
-                Series
+                Tujuan
               </button>
               {activeSeriesId && activeSeries && (
                 <>
@@ -525,7 +525,7 @@ export default function Dashboard() {
                 <>
                   {allSeries.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Series
+                      Belum ada Tujuan
                     </div>
                   ) : (
                     allSeries.map((s: any) => (
@@ -552,7 +552,7 @@ export default function Dashboard() {
                     data-testid="button-manage-series"
                   >
                     <Settings className="w-4 h-4" />
-                    <span>Kelola Series</span>
+                    <span>Kelola Tujuan</span>
                   </button>
                 </>
               )}
@@ -565,11 +565,11 @@ export default function Dashboard() {
                     data-testid="button-back-to-series"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Kembali ke Series</span>
+                    <span>Kembali ke Tujuan</span>
                   </button>
                   {filteredBigIdeas.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Big Idea
+                      Belum ada Perspektif
                     </div>
                   ) : (
                     filteredBigIdeas.map((bi) => (
@@ -618,7 +618,7 @@ export default function Dashboard() {
                     data-testid="button-add-bigidea"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Buat Big Idea Baru</span>
+                    <span>Buat Perspektif Baru</span>
                   </button>
                 </>
               )}
@@ -631,11 +631,11 @@ export default function Dashboard() {
                     data-testid="button-back-to-bigideas"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Kembali ke Big Ideas</span>
+                    <span>Kembali ke Perspektif</span>
                   </button>
                   {toolboxes.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Toolbox
+                      Belum ada Domain
                     </div>
                   ) : (
                     toolboxes.map((tb) => (
@@ -684,7 +684,7 @@ export default function Dashboard() {
                     data-testid="button-add-toolbox"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Buat Toolbox Baru</span>
+                    <span>Buat Domain Baru</span>
                   </button>
                   <button
                     onClick={() => {
@@ -708,7 +708,7 @@ export default function Dashboard() {
                     data-testid="button-back-to-toolboxes"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Kembali ke Toolboxes</span>
+                    <span>Kembali ke Domain</span>
                   </button>
                   {agentsLoading ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">Memuat...</div>
@@ -921,11 +921,11 @@ export default function Dashboard() {
                 <DropdownMenuLabel>Chatbots{activeToolbox ? ` - ${activeToolbox.name}` : ""}</DropdownMenuLabel>
                 {!activeToolbox ? (
                   <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                    Pilih Toolbox terlebih dahulu
+                    Pilih Domain terlebih dahulu
                   </div>
                 ) : filteredAgents.length === 0 ? (
                   <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                    Belum ada chatbot di toolbox ini
+                    Belum ada chatbot di domain ini
                   </div>
                 ) : (
                   filteredAgents.map((agent) => (
@@ -1125,10 +1125,10 @@ export default function Dashboard() {
       <AlertDialog open={!!deleteBigIdeaConfirm} onOpenChange={(open) => { if (!open) setDeleteBigIdeaConfirm(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Big Idea?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Perspektif?</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus Big Idea "{deleteBigIdeaConfirm?.name}"? 
-              Semua Toolbox dan Agent di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
+              Apakah Anda yakin ingin menghapus Perspektif "{deleteBigIdeaConfirm?.name}"? 
+              Semua Domain dan Chatbot di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1147,10 +1147,10 @@ export default function Dashboard() {
       <AlertDialog open={!!deleteToolboxConfirm} onOpenChange={(open) => { if (!open) setDeleteToolboxConfirm(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Toolbox?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Domain?</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus Toolbox "{deleteToolboxConfirm?.name}"? 
-              Semua Agent di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
+              Apakah Anda yakin ingin menghapus Domain "{deleteToolboxConfirm?.name}"? 
+              Semua Chatbot di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
