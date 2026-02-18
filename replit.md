@@ -33,6 +33,14 @@ Gustafta is an AI chatbot builder platform designed to help users create, config
 - **Schema**: `user_memories` table with `agentId`, `sessionId`, `category`, `content`, `createdAt`.
 - **API**: `GET/POST/DELETE /api/memories/:agentId`, `DELETE /api/memories/agent/:agentId`.
 
+### Perspektif Bundle Monetization
+- **Purpose**: Dual monetization system — per-Perspektif bundle pricing (access all specialist chatbots) and per-Chatbot individual pricing. HUB/Orchestrator always free.
+- **Schema**: `monthlyPrice`, `trialEnabled`, `trialDays`, `requireRegistration` fields on `big_ideas` table. `bigIdeaId` column on `client_subscriptions` for bundle subscriptions.
+- **API**: `POST /api/perspektif/:bigIdeaId/subscribe` creates bundle subscription. `GET /api/perspektif/:bigIdeaId/access?email=&token=` checks access. Public perspektif API returns `pricing` object.
+- **Admin UI**: Pricing fields in Create/Edit Perspektif dialogs under "Monetisasi Perspektif" section.
+- **Public UI**: Paywall/upgrade wall in perspektif-chat.tsx. Shows pricing card, trial/subscribe buttons, and registration form when perspektif has monthlyPrice > 0. Supports Mayar.id payment flow with redirect and localStorage-based access token persistence.
+- **Access Logic**: Free perspektifs (monthlyPrice=0) always accessible. Paid perspektifs check for active bundle subscription by email or access token.
+
 ### Monetization Protection System
 - **Guest Message Limit**: Configurable per chatbot (default: 10). Server-side tracking via IP+UA fingerprint. When guests exceed limit, upgrade wall is shown prompting registration.
 - **Trial Period**: Configurable trial days (default: 7). Auto-expires subscriptions. Frontend warns users when trial has ≤2 days left.
