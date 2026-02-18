@@ -141,6 +141,8 @@ Gustafta adalah platform pembuatan chatbot AI berbasis cloud yang dirancang untu
 - **Chatbot Series**: Organisasi chatbot dalam paket topik terstruktur
 - **PWA Support**: Bisa diinstall di HP seperti aplikasi mobile
 - **File Processing**: Upload gambar, PDF, Word, Excel, video untuk diproses AI
+- **Conversion Layer**: Ubah chatbot menjadi mesin revenue dengan lead capture, scoring, dan CTA
+- **Rangkuman & Brief**: Export ringkasan chatbot dan brief marketing otomatis
 
 ### Keterbatasan yang Harus Diketahui:
 - Platform masih dalam pengembangan, beberapa fitur mungkin berubah
@@ -230,7 +232,7 @@ Gustafta adalah platform pembuatan chatbot AI berbasis cloud yang dirancang untu
 Interface visual yang memungkinkan Anda membuat chatbot AI tanpa menulis kode sama sekali.
 
 **Cara Menggunakan:**
-1. Klik "Buat Chatbot Baru" di dashboard
+1. Klik "Buat Alat Bantu Baru" di dashboard
 2. Pilih mulai dari template atau dari awal
 3. Isi nama dan deskripsi chatbot
 4. Konfigurasi persona dan kepribadian
@@ -692,25 +694,25 @@ Edukator keuangan untuk membantu memahami konsep keuangan dan investasi dasar.
 ## BAGIAN 5B: FITUR-FITUR LANJUTAN (TERBARU)
 ## ═══════════════════════════════════════════════════════════════
 
-### 5B.1 ORGANISASI HIERARKIS (Series → Big Idea → Toolbox → Agent)
+### 5B.1 ORGANISASI HIERARKIS (Tujuan → Perspektif → Chatbot → Alat Bantu)
 
 **Apa itu?**
 Gustafta menggunakan sistem hierarki untuk mengorganisasi chatbot:
-- **Series**: Paket topik terbesar (contoh: "CIVILPRO" untuk konstruksi)
-- **Big Idea**: Brand atau ide besar di dalam series (contoh: "CIVILPRO SKK" untuk sertifikasi)
-- **Toolbox**: Kategori atau kelompok chatbot di dalam Big Idea
-- **Agent**: Chatbot individual yang melakukan tugas spesifik
+- **Tujuan (Goal)**: Tujuan besar atau misi yang ingin dicapai (contoh: "CIVILPRO" untuk konstruksi)
+- **Perspektif**: Sudut pandang atau pendekatan untuk mencapai tujuan (contoh: "Kepatuhan & Compliance")
+- **Chatbot**: Unit chatbot utuh yang menangani satu area operasional, dengan nomor urut menunjukkan prioritas eksekusi (contoh: "1. SBU & Klasifikasi")
+- **Alat Bantu**: Modul spesifik di dalam chatbot (contoh: "Panduan SBU Konstruksi")
 
 **Manfaat:**
 - Organisasi rapi untuk banyak chatbot
 - Mudah dikelola per topik/brand
-- Series bisa ditampilkan di halaman katalog publik (/series)
+- Tujuan bisa ditampilkan di halaman katalog publik (/series)
 
 **Cara Menggunakan:**
-1. Buat Series terlebih dahulu di dashboard (ikon Series)
-2. Buat Big Idea di dalam Series
-3. (Opsional) Buat Toolbox di dalam Big Idea
-4. Buat Agent/Chatbot di dalam struktur tersebut
+1. Buat Tujuan terlebih dahulu di dashboard
+2. Buat Perspektif di dalam Tujuan
+3. Buat Chatbot di dalam Perspektif
+4. Buat Alat Bantu di dalam Chatbot
 
 ---
 
@@ -771,7 +773,7 @@ Aplikasi mini yang didukung AI, memanfaatkan data Project Brain untuk menghasilk
 ### 5B.5 CHATBOT SERIES & KATALOG PUBLIK
 
 **Apa itu?**
-Fitur untuk mengelompokkan beberapa Big Idea ke dalam paket topik terstruktur yang bisa ditampilkan di halaman publik.
+Fitur untuk mengelompokkan beberapa Perspektif ke dalam paket topik terstruktur (Tujuan) yang bisa ditampilkan di halaman publik.
 
 **Fitur:**
 - Halaman katalog publik di /series
@@ -927,6 +929,69 @@ Gustafta memiliki landing page generik di / serta halaman per sektor di /sector/
 
 Setiap halaman sektor menampilkan konten yang disesuaikan dengan industri tersebut.
 
+---
+
+### 5B.13 CONVERSION LAYER (Lapisan Konversi)
+
+**Apa itu?**
+Sistem yang mengubah chatbot dari sekedar bot pengetahuan menjadi mesin penghasil revenue. Termasuk:
+
+**Fitur:**
+- **Lead Capture**: Form pengambilan data prospek (nama, email, telepon, dll) yang bisa dikonfigurasi
+- **Scoring & Assessment**: Penilaian berbasis rubrik dengan threshold untuk menentukan level pengguna
+- **CTA Triggers**: Pemicu Call-to-Action otomatis setelah N pesan atau berdasarkan skor
+- **Paket Penawaran (Offers)**: Kartu penawaran yang muncul dalam chat publik
+- **WhatsApp CTA**: Tombol hubungi via WhatsApp
+- **Calendly Integration**: Penjadwalan meeting langsung dari chat
+
+**Cara Menggunakan:**
+1. Buka panel "Conversion" di dashboard
+2. Aktifkan Conversion Layer
+3. Konfigurasi Lead Capture Fields
+4. Atur Scoring Rubric dan Thresholds (jika diperlukan)
+5. Buat Paket Penawaran/Offers
+6. Atur CTA Triggers (setelah berapa pesan atau skor berapa)
+7. Kartu CTA akan muncul otomatis di halaman chat publik
+
+---
+
+### 5B.14 RANGKUMAN CHATBOT (Chatbot Summary Export)
+
+**Apa itu?**
+Auto-generated summary lengkap dari seluruh data chatbot (identitas, persona, expertise, fitur, knowledge base, pengaturan, monetisasi) untuk digunakan sebagai referensi saat membangun landing page di platform eksternal (Carrd, Notion, Google Sites, dll).
+
+**Fitur:**
+- Copy ke clipboard
+- Download sebagai Markdown (.md)
+- Download sebagai HTML (.html)
+- Field URL eksternal untuk link ke landing page yang dibangun di luar
+
+**Cara Menggunakan:**
+1. Buka panel "Rangkuman Chatbot" di dashboard
+2. Lihat ringkasan yang otomatis dihasilkan
+3. Copy atau download dalam format yang diinginkan
+4. Gunakan sebagai referensi untuk membuat landing page
+
+---
+
+### 5B.15 BRIEF MARKETING (Marketing Brief Export)
+
+**Apa itu?**
+Auto-generated marketing brief dari data chatbot (profil produk, USP, brand voice, harga, penawaran, pain points, benefit, testimonial, FAQ) untuk digunakan saat membuat ad copy, konten sosial media, dan materi marketing.
+
+**Fitur:**
+- Copy ke clipboard
+- Download sebagai Markdown (.md)
+- Download sebagai HTML (.html)
+- Field URL eksternal untuk link kit marketing
+- Meta Pixel ID untuk tracking
+
+**Cara Menggunakan:**
+1. Buka panel "Brief Marketing" di dashboard
+2. Lihat brief marketing yang otomatis dihasilkan
+3. Copy atau download dalam format yang diinginkan
+4. Gunakan untuk membuat materi marketing di platform manapun
+
 ## ═══════════════════════════════════════════════════════════════
 ## BAGIAN 6: PANDUAN LANGKAH DEMI LANGKAH
 ## ═══════════════════════════════════════════════════════════════
@@ -937,8 +1002,8 @@ Setiap halaman sektor menampilkan konten yang disesuaikan dengan industri terseb
 3. Login atau buat akun Replit
 4. Anda akan diarahkan ke dashboard
 
-### Langkah 2: Membuat Chatbot Pertama
-1. Klik tombol "Buat Chatbot Baru" atau "+"
+### Langkah 2: Membuat Alat Bantu Pertama
+1. Klik tombol "Buat Alat Bantu Baru" atau "+"
 2. Pilih "Mulai dari Template" untuk pemula
 3. Pilih template yang sesuai bisnis Anda
 4. Klik "Gunakan Template"
@@ -1036,6 +1101,15 @@ A: Ya, semua data dienkripsi dan disimpan dengan aman di server.
 
 **Q: Bagaimana cara menghubungi support?**
 A: Anda bisa chat dengan Gustafta Helpdesk (saya!) atau hubungi tim via email.
+
+**Q: Apa bedanya Chatbot dan Alat Bantu?**
+A: Chatbot adalah unit utuh yang menangani satu area operasional (seperti "SBU & Klasifikasi"). Alat Bantu adalah modul spesifik di dalam Chatbot (seperti "Panduan SBU Konstruksi"). Hierarki lengkap: Tujuan → Perspektif → Chatbot → Alat Bantu.
+
+**Q: Apa itu Conversion Layer?**
+A: Fitur untuk mengubah chatbot menjadi mesin revenue. Termasuk lead capture, scoring, CTA otomatis, dan paket penawaran yang muncul di chat publik.
+
+**Q: Apa itu Rangkuman Chatbot dan Brief Marketing?**
+A: Rangkuman Chatbot menghasilkan ringkasan lengkap data chatbot untuk referensi landing page. Brief Marketing menghasilkan brief marketing untuk materi promosi. Keduanya bisa di-copy atau di-download.
 
 ## ═══════════════════════════════════════════════════════════════
 ## BAGIAN 9: MONETISASI & MODEL BISNIS (TRANSPARANSI PENUH)

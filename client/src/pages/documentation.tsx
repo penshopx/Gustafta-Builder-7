@@ -8,7 +8,8 @@ import { ChatPopup } from "@/components/chat-popup";
 import { 
   Bot, Lightbulb, Wrench, MessageSquare, BookOpen, 
   Sparkles, Globe, Settings, Shield, BarChart3, Zap, Code, 
-  FileText, Users, Play, Puzzle, Layers, Brain, Key, Webhook
+  FileText, Users, Play, Puzzle, Layers, Brain, Key, Webhook,
+  Target, Megaphone, ShoppingBag, Radio, Ticket, TrendingUp
 } from "lucide-react";
 
 interface DocCard {
@@ -21,22 +22,15 @@ interface DocCard {
 
 const mainDocs: DocCard[] = [
   {
-    icon: Lightbulb,
-    title: "Big Idea Framework",
-    description: "Mulai dari masalah, ide, inspirasi, atau mentoring untuk membangun chatbot yang tepat sasaran.",
-    tags: ["hierarki", "strategi", "planning"],
-    href: "#big-idea",
-  },
-  {
-    icon: Wrench,
-    title: "Toolbox System",
-    description: "Kumpulkan kemampuan dan fitur yang dibutuhkan untuk mencapai Big Idea Anda.",
-    tags: ["capabilities", "features", "tools"],
-    href: "#toolbox",
+    icon: Layers,
+    title: "Hierarki Gustafta",
+    description: "Pahami struktur Tujuan, Perspektif, Chatbot, dan Alat Bantu untuk mengorganisasi chatbot Anda.",
+    tags: ["hierarki", "struktur", "organisasi"],
+    href: "#hierarchy",
   },
   {
     icon: Bot,
-    title: "Persona Configuration",
+    title: "Persona & Konfigurasi",
     description: "Konfigurasi nama, tagline, filosofi, system prompt, dan kepribadian chatbot Anda.",
     tags: ["persona", "branding", "identity"],
     href: "#persona",
@@ -57,10 +51,17 @@ const mainDocs: DocCard[] = [
   },
   {
     icon: Globe,
-    title: "Multi-Channel Integration",
-    description: "Hubungkan chatbot ke WhatsApp, Telegram, Discord, Slack, Web Widget, dan API.",
-    tags: ["integrasi", "channels", "deployment"],
+    title: "Multi-Channel & Widget",
+    description: "Hubungkan chatbot ke WhatsApp, Telegram, Web Widget, halaman chat publik, dan API.",
+    tags: ["integrasi", "channels", "widget"],
     href: "#integrations",
+  },
+  {
+    icon: Target,
+    title: "Conversion Layer",
+    description: "Ubah chatbot menjadi mesin revenue dengan lead capture, scoring, CTA, dan paket penawaran.",
+    tags: ["konversi", "revenue", "leads"],
+    href: "#conversion",
   },
 ];
 
@@ -73,11 +74,11 @@ const gettingStarted: DocCard[] = [
     href: "#quick-start",
   },
   {
-    icon: Layers,
-    title: "Hierarki Chatbot",
-    description: "Pahami alur Big Idea → Toolbox → Chatbot Orchestrator → Specialist.",
-    tags: ["arsitektur", "struktur"],
-    href: "#hierarchy",
+    icon: Brain,
+    title: "Otak Proyek & Mini Apps",
+    description: "Berikan konteks data terstruktur ke chatbot dan jalankan aplikasi mini berbasis AI.",
+    tags: ["project-brain", "mini-apps"],
+    href: "#project-brain",
   },
   {
     icon: Puzzle,
@@ -95,27 +96,79 @@ const gettingStarted: DocCard[] = [
   },
 ];
 
-const apiReference: DocCard[] = [
+const monetizationDocs: DocCard[] = [
   {
-    icon: FileText,
-    title: "Message Structure",
-    description: "Struktur pesan, roles, dan metadata yang digunakan dalam chat.",
-    tags: ["schema", "roles", "metadata"],
-    href: "#message-structure",
+    icon: ShoppingBag,
+    title: "Monetisasi Chatbot",
+    description: "Jadikan chatbot sebagai produk berbayar dengan pengaturan langganan dan batas pesan.",
+    tags: ["produk", "langganan", "harga"],
+    href: "#monetization",
   },
   {
-    icon: Webhook,
-    title: "REST API Endpoints",
-    description: "HTTP endpoints untuk integrasi server-to-server.",
-    tags: ["http", "endpoints", "auth"],
-    href: "#rest-api",
+    icon: TrendingUp,
+    title: "Revenue & Klien",
+    description: "Pantau pendapatan dan kelola langganan klien end-user chatbot Anda.",
+    tags: ["pendapatan", "klien", "tracking"],
+    href: "#revenue",
+  },
+  {
+    icon: Ticket,
+    title: "Voucher",
+    description: "Buat kode voucher untuk akses unlimited atau kuota tambahan bagi pengguna chatbot.",
+    tags: ["voucher", "promo", "diskon"],
+    href: "#voucher",
+  },
+  {
+    icon: Users,
+    title: "Afiliasi",
+    description: "Program referral untuk mengajak pengguna baru dan dapatkan komisi.",
+    tags: ["afiliasi", "referral", "partner"],
+    href: "#affiliate",
+  },
+  {
+    icon: Megaphone,
+    title: "Brief Marketing",
+    description: "Export brief marketing otomatis dari data chatbot untuk materi promosi dan ad copy.",
+    tags: ["marketing", "brief", "export"],
+    href: "#marketing-brief",
+  },
+  {
+    icon: FileText,
+    title: "Rangkuman Chatbot",
+    description: "Export ringkasan lengkap data chatbot untuk referensi landing page di platform eksternal.",
+    tags: ["rangkuman", "export", "landing"],
+    href: "#chatbot-summary",
+  },
+];
+
+const advancedDocs: DocCard[] = [
+  {
+    icon: Radio,
+    title: "Broadcast WA",
+    description: "Kirim pesan WhatsApp broadcast terjadwal ke banyak kontak sekaligus.",
+    tags: ["whatsapp", "broadcast", "pesan"],
+    href: "#broadcast",
+  },
+  {
+    icon: FileText,
+    title: "Info Tender",
+    description: "Ambil dan kelola data tender pengadaan dari situs LPSE/INAPROC pemerintah Indonesia.",
+    tags: ["tender", "pengadaan", "LPSE"],
+    href: "#tender",
   },
   {
     icon: Key,
     title: "Access Control",
-    description: "Token akses, mode publik/privat, dan kontrol domain untuk monetisasi.",
+    description: "Token akses, mode publik/privat, dan kontrol domain untuk keamanan chatbot.",
     tags: ["security", "token", "auth"],
     href: "#access-control",
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics",
+    description: "Pantau performa chatbot dengan grafik percakapan, pesan, dan kepuasan pengguna.",
+    tags: ["statistik", "performa", "insight"],
+    href: "#analytics",
   },
 ];
 
@@ -198,10 +251,10 @@ export default function Documentation() {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">Dokumentasi Gustafta</h1>
+            <h1 className="text-4xl font-bold mb-4" data-testid="text-doc-title">Dokumentasi Gustafta</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Pelajari cara membangun dengan Gustafta — tambahkan pengetahuan, gunakan Agentic AI, 
-              buat chatbot khusus, dan hubungkan ke berbagai channel.
+              Pelajari cara membangun dengan Gustafta — organisasi hierarkis, konfigurasi persona, 
+              knowledge base, Agentic AI, integrasi multi-channel, dan monetisasi chatbot.
             </p>
           </div>
 
@@ -218,84 +271,204 @@ export default function Documentation() {
           />
 
           <DocSection 
+            title="Monetisasi & Pemasaran"
+            description="Kelola produk, pendapatan, voucher, afiliasi, dan export data marketing."
+            docs={monetizationDocs}
+          />
+
+          <DocSection 
+            title="Fitur Lanjutan"
+            description="Broadcast WhatsApp, info tender, kontrol akses, dan analytics."
+            docs={advancedDocs}
+          />
+
+          <DocSection 
             title="Sistem Manajemen"
             description="Panduan khusus untuk implementasi chatbot di bidang compliance dan manajemen."
             docs={managementSystems}
           />
 
-          <DocSection 
-            title="Referensi API" 
-            description="Dokumentasi referensi untuk integrasi dan pengembangan lanjutan."
-            docs={apiReference}
-          />
-
-          <section id="big-idea" className="mb-12 scroll-mt-20">
+          <section id="hierarchy" className="mb-12 scroll-mt-20">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Lightbulb className="h-6 w-6 text-primary" />
+                    <Layers className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl">Big Idea Framework</CardTitle>
-                    <p className="text-muted-foreground">Fondasi strategi chatbot Anda</p>
+                    <CardTitle className="text-2xl">Hierarki Gustafta</CardTitle>
+                    <p className="text-muted-foreground">Tujuan, Perspektif, Chatbot, Alat Bantu</p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="prose prose-sm dark:prose-invert max-w-none">
                 <p>
-                  Big Idea adalah titik awal dalam hierarki Gustafta. Ini adalah visi besar atau masalah 
-                  yang ingin Anda selesaikan dengan chatbot AI.
+                  Gustafta menggunakan struktur hierarkis berbasis tujuan (purpose-driven) untuk mengorganisasi 
+                  chatbot. Setiap level memiliki peran yang jelas:
                 </p>
                 
-                <h3>Tipe Big Idea</h3>
-                <ul>
-                  <li><strong>Problem</strong> - Masalah bisnis yang akan diatasi oleh chatbot</li>
-                  <li><strong>Idea</strong> - Ide inovatif untuk mencapai tujuan tertentu</li>
-                  <li><strong>Inspiration</strong> - Inspirasi untuk inovasi dan transformasi</li>
-                  <li><strong>Mentoring</strong> - Program edukasi dan pendampingan</li>
-                </ul>
+                <div className="grid md:grid-cols-2 gap-4 not-prose my-4">
+                  {[
+                    { level: "1. Tujuan", desc: "Tujuan besar atau misi yang ingin dicapai. Contoh: CIVILPRO (Konstruksi)", color: "bg-amber-500/10 text-amber-700 dark:text-amber-400" },
+                    { level: "2. Perspektif", desc: "Sudut pandang atau pendekatan untuk mencapai tujuan. Contoh: Kepatuhan & Compliance", color: "bg-purple-500/10 text-purple-700 dark:text-purple-400" },
+                    { level: "3. Chatbot", desc: "Unit chatbot utuh yang menangani satu area operasional. Nomor urut menunjukkan prioritas. Contoh: 1. SBU & Klasifikasi", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400" },
+                    { level: "4. Alat Bantu", desc: "Modul spesifik di dalam chatbot. Contoh: Panduan SBU Konstruksi, Kalkulator Klasifikasi", color: "bg-green-500/10 text-green-700 dark:text-green-400" },
+                  ].map((item) => (
+                    <div key={item.level} className={`p-4 rounded-lg ${item.color}`}>
+                      <p className="font-bold text-sm">{item.level}</p>
+                      <p className="text-xs mt-1 opacity-80">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
 
-                <h3>Contoh Big Idea</h3>
+                <h3>Cara Membuat Hierarki</h3>
+                <ol>
+                  <li>Buat <strong>Tujuan</strong> di dashboard (menu Tujuan/Series)</li>
+                  <li>Buat <strong>Perspektif</strong> di dalam Tujuan</li>
+                  <li>Buat <strong>Chatbot</strong> di dalam Perspektif</li>
+                  <li>Buat <strong>Alat Bantu</strong> di dalam Chatbot</li>
+                </ol>
+
+                <h3>Orchestrator</h3>
+                <p>
+                  Di setiap Perspektif, Anda bisa membuat satu <strong>Orchestrator</strong> yang berfungsi sebagai 
+                  pintu masuk utama dan pengarah ke chatbot-chatbot lainnya. Orchestrator beroperasi 
+                  di atas semua Chatbot dalam Perspektif tersebut.
+                </p>
+
                 <div className="bg-muted p-4 rounded-lg not-prose">
-                  <p className="font-medium mb-2">Problem: Otomasi Customer Service</p>
+                  <p className="font-medium mb-2">Contoh Hierarki Lengkap:</p>
                   <p className="text-sm text-muted-foreground">
-                    "Tim customer service kami kewalahan dengan pertanyaan berulang. 
-                    Kami ingin chatbot yang bisa menjawab FAQ, membantu tracking order, 
-                    dan mengalihkan ke manusia hanya untuk kasus kompleks."
+                    <strong>Tujuan:</strong> CIVILPRO (Konstruksi &amp; Infrastruktur)<br />
+                    &nbsp;&nbsp;<strong>Perspektif:</strong> Kepatuhan &amp; Compliance<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 1. SBU &amp; Klasifikasi<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Panduan SBU Konstruksi<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Kalkulator Klasifikasi<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 2. SKK &amp; Tenaga Ahli<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Panduan SKK<br />
                   </p>
                 </div>
               </CardContent>
             </Card>
           </section>
 
-          <section id="toolbox" className="mb-12 scroll-mt-20">
+          <section id="persona" className="mb-12 scroll-mt-20">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Wrench className="h-6 w-6 text-primary" />
+                    <Bot className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl">Toolbox System</CardTitle>
-                    <p className="text-muted-foreground">Kumpulan kemampuan untuk chatbot</p>
+                    <CardTitle className="text-2xl">Persona & Konfigurasi</CardTitle>
+                    <p className="text-muted-foreground">Identitas dan kepribadian alat bantu</p>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="prose prose-sm dark:prose-invert max-w-none">
                 <p>
-                  Toolbox adalah kumpulan kemampuan (capabilities) yang dibutuhkan untuk mencapai 
-                  Big Idea. Setiap Toolbox terhubung ke satu Big Idea dan bisa memiliki 
-                  beberapa chatbot.
+                  Panel Persona memungkinkan Anda mengkonfigurasi identitas, kepribadian, dan perilaku 
+                  setiap alat bantu secara detail.
+                </p>
+
+                <h3>Komponen Persona</h3>
+                <ul>
+                  <li><strong>Nama</strong> - Identitas alat bantu Anda</li>
+                  <li><strong>Tagline</strong> - Slogan singkat (maks 50 karakter)</li>
+                  <li><strong>Philosophy</strong> - Prinsip atau nilai yang dianut</li>
+                  <li><strong>System Prompt</strong> - Instruksi detail tentang peran dan perilaku</li>
+                  <li><strong>Personality</strong> - Sifat dan karakter (ramah, profesional, dll)</li>
+                  <li><strong>Communication Style</strong> - Gaya berkomunikasi (formal, casual, friendly)</li>
+                  <li><strong>Tone of Voice</strong> - Nada suara (professional, caring, enthusiastic)</li>
+                </ul>
+
+                <h3>Fitur Lanjutan</h3>
+                <ul>
+                  <li><strong>Greeting Message</strong> - Pesan sambutan saat user pertama kali chat</li>
+                  <li><strong>Conversation Starters</strong> - Tombol quick-reply (maksimal 5)</li>
+                  <li><strong>Off-Topic Handling</strong> - Cara menangani topik di luar scope</li>
+                  <li><strong>Avoid Topics</strong> - Topik yang harus dihindari</li>
+                  <li><strong>Key Phrases</strong> - Frasa penting yang harus diingat</li>
+                  <li><strong>Konteks Proyek</strong> - Pertanyaan konteks di awal percakapan untuk personalisasi</li>
+                </ul>
+
+                <h3>Model AI yang Tersedia</h3>
+                <div className="grid md:grid-cols-2 gap-3 not-prose">
+                  {[
+                    { name: "GPT-4o", desc: "Model terbaru OpenAI, sangat cerdas dan akurat" },
+                    { name: "GPT-4o-mini", desc: "Versi ringan GPT-4o, cepat dan hemat" },
+                    { name: "GPT-3.5-turbo", desc: "Model klasik, cepat dan ekonomis" },
+                    { name: "Claude", desc: "Model AI Anthropic dengan gaya berbeda" },
+                    { name: "DeepSeek", desc: "Model AI alternatif" },
+                    { name: "Custom Model", desc: "Gunakan API key sendiri" },
+                  ].map((item) => (
+                    <div key={item.name} className="bg-muted p-3 rounded-lg">
+                      <p className="font-medium text-sm">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Persona</strong></li>
+                  <li>Edit nama, tagline, dan personality</li>
+                  <li>Tulis system prompt yang detail</li>
+                  <li>Atur conversation starters dan greeting message</li>
+                  <li>Perubahan tersimpan otomatis</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="knowledge-base" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Knowledge Base</CardTitle>
+                    <p className="text-muted-foreground">Basis pengetahuan untuk chatbot</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Knowledge Base adalah fitur untuk "melatih" chatbot dengan dokumen dan informasi 
+                  spesifik bisnis Anda. Chatbot akan menjawab berdasarkan konten yang Anda upload.
                 </p>
                 
-                <h3>Komponen Toolbox</h3>
+                <h3>Format File yang Didukung</h3>
                 <ul>
-                  <li><strong>Nama & Deskripsi</strong> - Identitas toolbox</li>
-                  <li><strong>Purpose</strong> - Tujuan spesifik toolbox</li>
-                  <li><strong>Capabilities</strong> - Daftar kemampuan yang tersedia</li>
-                  <li><strong>Limitations</strong> - Batasan yang perlu diketahui</li>
+                  <li><strong>PDF</strong> - Dokumen, manual, katalog</li>
+                  <li><strong>DOCX</strong> - Dokumen Word</li>
+                  <li><strong>XLSX</strong> - Data spreadsheet Excel</li>
+                  <li><strong>TXT</strong> - Teks biasa</li>
+                  <li><strong>CSV</strong> - Data tabular</li>
+                  <li><strong>URL</strong> - Konten dari website</li>
                 </ul>
+
+                <h3>Pemrosesan File Cerdas</h3>
+                <p>Selain knowledge base, chatbot juga bisa memproses file yang dikirim langsung saat chat:</p>
+                <ul>
+                  <li><strong>Gambar</strong> - Analisis gambar via GPT-4o vision</li>
+                  <li><strong>Video</strong> - Transkripsi audio dari file video</li>
+                  <li><strong>YouTube</strong> - Ambil transkrip dari video YouTube</li>
+                  <li><strong>Google Drive/OneDrive</strong> - Baca file dari cloud storage</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Knowledge Base</strong></li>
+                  <li>Klik "Tambah Konten"</li>
+                  <li>Upload file atau masukkan URL</li>
+                  <li>Tunggu proses indexing selesai</li>
+                  <li>Chatbot sekarang bisa menjawab berdasarkan dokumen Anda</li>
+                </ol>
               </CardContent>
             </Card>
           </section>
@@ -305,7 +478,7 @@ export default function Documentation() {
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Brain className="h-6 w-6 text-primary" />
+                    <Sparkles className="h-6 w-6 text-primary" />
                   </div>
                   <div>
                     <CardTitle className="text-2xl">Attentive Agentic AI</CardTitle>
@@ -323,7 +496,7 @@ export default function Documentation() {
                 <div className="grid md:grid-cols-2 gap-4 not-prose">
                   {[
                     { title: "Attentive Listening", desc: "Memahami maksud pengguna dengan baik" },
-                    { title: "Context Retention", desc: "Mengingat konteks percakapan sebelumnya" },
+                    { title: "Context Retention", desc: "Mengingat konteks percakapan sebelumnya (1-20 pesan)" },
                     { title: "Emotional Intelligence", desc: "Merespons dengan empati dan pemahaman" },
                     { title: "Multi-step Reasoning", desc: "Menyelesaikan masalah kompleks bertahap" },
                     { title: "Proactive Assistance", desc: "Memberikan saran tanpa diminta" },
@@ -337,6 +510,457 @@ export default function Documentation() {
                     </div>
                   ))}
                 </div>
+
+                <h3>Ingatan Pengguna (User Memory)</h3>
+                <p>
+                  Chatbot bisa mengingat informasi pengguna lintas percakapan (nama, preferensi, catatan). 
+                  AI mendeteksi informasi penting secara otomatis dan menyimpannya per sesi. 
+                  Kategori ingatan: <strong>Memory</strong> (fakta/preferensi) dan <strong>Note</strong> (catatan/to-do).
+                </p>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Agentic AI</strong></li>
+                  <li>Aktifkan fitur yang diinginkan (toggle on/off)</li>
+                  <li>Atur Context Retention sesuai kebutuhan</li>
+                  <li>Perubahan tersimpan otomatis</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="integrations" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Globe className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Multi-Channel & Widget</CardTitle>
+                    <p className="text-muted-foreground">Deploy chatbot ke berbagai platform</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <h3>Halaman Chat Publik</h3>
+                <p>
+                  Setiap alat bantu punya halaman publik di <code>/bot/:agentId</code> dimana end-user bisa langsung 
+                  chat tanpa perlu akses dashboard. Halaman ini juga mendukung <strong>PWA</strong> (Progressive Web App) — 
+                  bisa diinstall di HP seperti aplikasi mobile, dengan avatar dan nama chatbot sendiri.
+                </p>
+
+                <h3>Web Widget</h3>
+                <p>Bubble chat yang bisa dipasang di website manapun. Kustomisasi mencakup:</p>
+                <ul>
+                  <li>Warna, posisi, ukuran, border radius</li>
+                  <li>Ikon tombol (chat, help, robot)</li>
+                  <li>Welcome message dan branding</li>
+                </ul>
+
+                <h3>WhatsApp Integration</h3>
+                <p>Provider yang didukung: Fonnte, Kirimi.id, Multichat, WhatsApp Cloud API.</p>
+
+                <h3>Telegram Integration</h3>
+                <p>Buat bot via @BotFather, dapatkan Bot Token, masukkan di pengaturan integrasi.</p>
+
+                <h3>API & Webhook</h3>
+                <p>REST API dan webhook untuk integrasi kustom ke aplikasi Anda.</p>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Integrations</strong> untuk WhatsApp/Telegram</li>
+                  <li>Buka tab <strong>Widget</strong> untuk embed widget</li>
+                  <li>Ikuti panduan setup untuk masing-masing channel</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="conversion" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Target className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Conversion Layer</CardTitle>
+                    <p className="text-muted-foreground">Ubah chatbot menjadi mesin revenue</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Conversion Layer mengubah chatbot dari sekedar bot pengetahuan menjadi alat penghasil revenue. 
+                  Fitur ini mencakup lead capture, scoring, CTA otomatis, dan paket penawaran.
+                </p>
+                
+                <h3>Fitur Conversion Layer</h3>
+                <div className="grid md:grid-cols-2 gap-4 not-prose">
+                  {[
+                    { title: "Lead Capture", desc: "Form pengambilan data prospek (nama, email, telepon, dll)" },
+                    { title: "Scoring & Assessment", desc: "Penilaian berbasis rubrik dengan threshold untuk level pengguna" },
+                    { title: "CTA Triggers", desc: "Pemicu Call-to-Action otomatis setelah N pesan atau berdasarkan skor" },
+                    { title: "Paket Penawaran", desc: "Kartu penawaran yang muncul dalam chat publik" },
+                    { title: "WhatsApp CTA", desc: "Tombol hubungi langsung via WhatsApp" },
+                    { title: "Calendly", desc: "Penjadwalan meeting langsung dari chat" },
+                  ].map((item) => (
+                    <div key={item.title} className="bg-muted p-3 rounded-lg">
+                      <p className="font-medium text-sm">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Conversion</strong></li>
+                  <li>Aktifkan Conversion Layer</li>
+                  <li>Konfigurasi Lead Capture Fields</li>
+                  <li>Atur Scoring Rubric dan Thresholds (jika diperlukan)</li>
+                  <li>Buat Paket Penawaran/Offers</li>
+                  <li>Atur CTA Triggers (setelah berapa pesan atau skor berapa)</li>
+                  <li>Kartu CTA akan muncul otomatis di halaman chat publik</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="project-brain" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Brain className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Otak Proyek & Mini Apps</CardTitle>
+                    <p className="text-muted-foreground">Data kontekstual dan aplikasi mini AI</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <h3>Otak Proyek (Project Brain)</h3>
+                <p>
+                  Fitur untuk memberikan data kontekstual terstruktur kepada chatbot. Admin membuat template 
+                  dengan field yang terstruktur, lalu mengisi data instance berdasarkan template tersebut. 
+                  Chatbot akan menggunakan data ini sebagai konteks saat menjawab.
+                </p>
+
+                <h3>Mini Apps</h3>
+                <p>Aplikasi mini yang didukung AI, memanfaatkan data Otak Proyek untuk menghasilkan output spesialis:</p>
+                <ul>
+                  <li><strong>Project Snapshot</strong> - Ringkasan status proyek</li>
+                  <li><strong>Decision Summary</strong> - Rangkuman keputusan penting</li>
+                  <li><strong>Risk Radar</strong> - Penilaian risiko proyek</li>
+                  <li><strong>Scoring Assessment</strong> - Penilaian berbasis skor</li>
+                  <li><strong>Gap Analysis</strong> - Analisis kesenjangan</li>
+                  <li><strong>Recommendation Engine</strong> - Rekomendasi berbasis data</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Buka tab <strong>Otak Proyek</strong> di dashboard</li>
+                  <li>Buat template dengan field yang dibutuhkan</li>
+                  <li>Isi data instance berdasarkan template</li>
+                  <li>Aktifkan proyek sebagai konteks chatbot</li>
+                  <li>Buka tab <strong>Mini Apps</strong> untuk menjalankan aplikasi mini berbasis AI</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="monetization" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <ShoppingBag className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Monetisasi Chatbot</CardTitle>
+                    <p className="text-muted-foreground">Jadikan chatbot sebagai produk berbayar</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Anda bisa menjadikan chatbot sebagai produk berbayar yang bisa diakses oleh end-user 
+                  melalui langganan. Semua pembayaran diproses melalui Mayar.id.
+                </p>
+
+                <h3>Pengaturan Produk</h3>
+                <ul>
+                  <li><strong>Mode Publik</strong> - Chatbot muncul di katalog publik</li>
+                  <li><strong>Batas Pesan Tamu</strong> - Batasi pesan untuk pengunjung tanpa akun (default: 10)</li>
+                  <li><strong>Masa Percobaan</strong> - Durasi trial yang bisa dikonfigurasi</li>
+                  <li><strong>Kuota Pengguna</strong> - Batas pesan harian dan bulanan</li>
+                  <li><strong>Upgrade Wall</strong> - Overlay profesional saat batas tercapai</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Monetisasi</strong></li>
+                  <li>Aktifkan mode publik dan atur sebagai produk</li>
+                  <li>Konfigurasi batas pesan, trial, dan kuota</li>
+                  <li>End-user bisa berlangganan via Mayar.id</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="chatbot-summary" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Rangkuman Chatbot</CardTitle>
+                    <p className="text-muted-foreground">Export ringkasan lengkap data chatbot</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Fitur ini menghasilkan ringkasan komprehensif dari seluruh data chatbot (identitas, persona, 
+                  expertise, fitur, knowledge base, pengaturan, monetisasi) secara otomatis. Gunakan sebagai 
+                  referensi saat membangun landing page di platform eksternal seperti Carrd, Notion, atau Google Sites.
+                </p>
+                
+                <h3>Format Export</h3>
+                <ul>
+                  <li><strong>Copy ke Clipboard</strong> - Salin langsung untuk paste di manapun</li>
+                  <li><strong>Download Markdown (.md)</strong> - Format teks terstruktur</li>
+                  <li><strong>Download HTML (.html)</strong> - Siap digunakan di website</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Rangkuman Chatbot</strong></li>
+                  <li>Lihat ringkasan yang otomatis dihasilkan</li>
+                  <li>Copy atau download dalam format yang diinginkan</li>
+                  <li>Gunakan sebagai referensi untuk membuat landing page</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="marketing-brief" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Megaphone className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Brief Marketing</CardTitle>
+                    <p className="text-muted-foreground">Export brief marketing otomatis</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Menghasilkan brief marketing dari data chatbot secara otomatis: profil produk, USP, brand voice, 
+                  harga, penawaran, pain points, benefit, testimonial, dan FAQ. Gunakan untuk membuat ad copy, 
+                  konten sosial media, dan materi marketing.
+                </p>
+                
+                <h3>Format Export</h3>
+                <ul>
+                  <li><strong>Copy ke Clipboard</strong> - Salin langsung</li>
+                  <li><strong>Download Markdown (.md)</strong> - Format teks terstruktur</li>
+                  <li><strong>Download HTML (.html)</strong> - Siap digunakan di website</li>
+                </ul>
+
+                <h3>Fitur Tambahan</h3>
+                <ul>
+                  <li><strong>URL Eksternal</strong> - Link ke kit marketing yang dibangun di luar</li>
+                  <li><strong>Meta Pixel ID</strong> - Untuk tracking konversi iklan</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Brief Marketing</strong></li>
+                  <li>Lihat brief yang otomatis dihasilkan dari data chatbot</li>
+                  <li>Copy atau download dalam format yang diinginkan</li>
+                  <li>Gunakan untuk membuat materi marketing di platform manapun</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="broadcast" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Radio className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Broadcast WA</CardTitle>
+                    <p className="text-muted-foreground">Kirim pesan massal via WhatsApp</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Fitur untuk mengirim pesan WhatsApp broadcast terjadwal ke banyak kontak sekaligus.
+                </p>
+
+                <h3>Tab Kontak WA</h3>
+                <ul>
+                  <li>Daftar kontak WA yang terhubung dengan chatbot</li>
+                  <li>Kontak otomatis tersimpan dari pesan masuk via webhook</li>
+                  <li>Bisa menambahkan kontak manual (nama + nomor)</li>
+                  <li>Kelola status opt-out</li>
+                </ul>
+
+                <h3>Tab Broadcast</h3>
+                <ul>
+                  <li>Buat broadcast baru dengan template pesan</li>
+                  <li>Placeholder dinamis: {"{{name}}"}, {"{{date}}"}, {"{{tender_list}}"}, {"{{count}}"}</li>
+                  <li>Jadwal: sekali kirim atau harian pada jam tertentu</li>
+                  <li>Sumber data: pesan kustom atau data tender terbaru</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Buka panel <strong>Broadcast WA</strong> di dashboard</li>
+                  <li>Tab Kontak WA: tambahkan kontak penerima</li>
+                  <li>Tab Broadcast: buat broadcast baru</li>
+                  <li>Isi template pesan dengan placeholder</li>
+                  <li>Atur jadwal dan aktifkan broadcast</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="tender" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Info Tender</CardTitle>
+                    <p className="text-muted-foreground">Kelola data tender pengadaan LPSE/INAPROC</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Fitur untuk mengambil dan mengelola data tender pengadaan dari situs LPSE/INAPROC pemerintah Indonesia.
+                </p>
+
+                <h3>Tab Sumber Tender</h3>
+                <ul>
+                  <li>Tambahkan URL situs LPSE (nasional, daerah, BUMN)</li>
+                  <li>Klik "Scrape Sekarang" untuk mengambil data tender</li>
+                </ul>
+
+                <h3>Tab Data Tender</h3>
+                <ul>
+                  <li>Daftar tender yang berhasil diambil (nama, instansi, anggaran, jenis, status)</li>
+                  <li>Input manual: tambahkan data tender satu per satu</li>
+                  <li>Upload CSV: import banyak data tender sekaligus</li>
+                  <li>Integrasi dengan Broadcast WA untuk pengiriman otomatis</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Buka panel <strong>Info Tender</strong></li>
+                  <li>Tab Sumber Tender: tambahkan URL LPSE</li>
+                  <li>Klik "Scrape Sekarang" untuk mengambil data</li>
+                  <li>Jika gagal, gunakan Input Manual atau Upload CSV</li>
+                  <li>Hubungkan dengan Broadcast WA untuk pengiriman otomatis</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="voucher" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Ticket className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Voucher</CardTitle>
+                    <p className="text-muted-foreground">Kode voucher untuk akses chatbot</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Admin bisa membuat kode voucher untuk memberikan akses unlimited atau kuota tambahan kepada pengguna chatbot.
+                </p>
+
+                <h3>Tipe Voucher</h3>
+                <ul>
+                  <li><strong>Akses Unlimited</strong> - Pengguna bypass semua batas kuota</li>
+                  <li><strong>Kuota Tambahan</strong> - Tambahan jumlah pesan</li>
+                </ul>
+
+                <h3>Konfigurasi</h3>
+                <ul>
+                  <li>Batas waktu berlaku (tanggal kedaluwarsa)</li>
+                  <li>Jumlah pemakaian maksimal</li>
+                  <li>Scope per alat bantu atau global</li>
+                  <li>Aktifkan/nonaktifkan voucher</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Buka tab <strong>Voucher</strong> di dashboard</li>
+                  <li>Buat voucher baru dengan kode unik</li>
+                  <li>Atur tipe, batas waktu, dan scope</li>
+                  <li>Bagikan kode ke pengguna</li>
+                  <li>Pengguna redeem voucher di upgrade wall saat limit tercapai</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="analytics" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Analytics</CardTitle>
+                    <p className="text-muted-foreground">Pantau performa chatbot</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>Pantau performa alat bantu dengan data real-time:</p>
+                <ul>
+                  <li>Total percakapan dan pesan</li>
+                  <li>Sesi aktif dan rata-rata pesan per sesi</li>
+                  <li>Rating kepuasan pengguna</li>
+                  <li>Tren penggunaan harian/mingguan</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Analytics</strong></li>
+                  <li>Lihat grafik dan metrik performa</li>
+                  <li>Gunakan insight untuk optimasi chatbot</li>
+                </ol>
               </CardContent>
             </Card>
           </section>
@@ -367,15 +991,6 @@ export default function Documentation() {
                   <li><strong>Pelaporan Insiden</strong> - Memandu proses whistleblowing</li>
                   <li><strong>Due Diligence</strong> - Membantu proses evaluasi mitra bisnis</li>
                   <li><strong>Audit Internal</strong> - Menyediakan informasi untuk audit ABMS</li>
-                </ul>
-
-                <h3>Knowledge Base yang Direkomendasikan</h3>
-                <ul>
-                  <li>Dokumen kebijakan anti penyuapan perusahaan</li>
-                  <li>Prosedur pelaporan dan investigasi</li>
-                  <li>Standar ISO 37001:2016</li>
-                  <li>Regulasi anti korupsi yang berlaku</li>
-                  <li>Studi kasus dan contoh situasi</li>
                 </ul>
               </CardContent>
             </Card>
@@ -409,24 +1024,6 @@ export default function Documentation() {
                   <li><strong>APD</strong> - Panduan penggunaan alat pelindung diri</li>
                   <li><strong>Tanggap Darurat</strong> - Prosedur emergency response</li>
                 </ul>
-
-                <h3>Kategori Knowledge Base</h3>
-                <div className="grid md:grid-cols-2 gap-4 not-prose">
-                  {[
-                    "Kebijakan K3 Perusahaan",
-                    "Prosedur Kerja Aman",
-                    "HIRADC Register",
-                    "Panduan APD",
-                    "Prosedur Tanggap Darurat",
-                    "Permit to Work System",
-                    "JSA (Job Safety Analysis)",
-                    "Regulasi K3 (PP 50/2012)",
-                  ].map((item) => (
-                    <div key={item} className="bg-muted p-3 rounded-lg text-sm">
-                      {item}
-                    </div>
-                  ))}
-                </div>
               </CardContent>
             </Card>
           </section>
@@ -445,24 +1042,27 @@ export default function Documentation() {
                 </div>
               </CardHeader>
               <CardContent className="prose prose-sm dark:prose-invert max-w-none">
-                <h3>Langkah 1: Buat Big Idea</h3>
-                <p>Tentukan masalah atau tujuan yang ingin dicapai oleh chatbot Anda.</p>
+                <h3>Langkah 1: Buat Tujuan</h3>
+                <p>Tentukan tujuan besar atau misi yang ingin dicapai (contoh: konstruksi, pendidikan, dll).</p>
 
-                <h3>Langkah 2: Buat Toolbox</h3>
-                <p>Definisikan kemampuan yang dibutuhkan untuk mencapai Big Idea.</p>
+                <h3>Langkah 2: Buat Perspektif</h3>
+                <p>Tentukan sudut pandang atau pendekatan untuk mencapai tujuan.</p>
 
                 <h3>Langkah 3: Buat Chatbot</h3>
-                <p>Konfigurasi persona, system prompt, dan greeting message.</p>
+                <p>Buat unit chatbot yang menangani satu area operasional di dalam perspektif.</p>
 
-                <h3>Langkah 4: Tambah Knowledge Base</h3>
+                <h3>Langkah 4: Buat Alat Bantu</h3>
+                <p>Konfigurasi persona, system prompt, dan greeting message untuk modul spesifik.</p>
+
+                <h3>Langkah 5: Tambah Knowledge Base</h3>
                 <p>Upload dokumen atau tambahkan teks untuk melatih chatbot.</p>
 
-                <h3>Langkah 5: Test & Deploy</h3>
-                <p>Uji chatbot melalui Chat Console, lalu deploy ke channel pilihan Anda.</p>
+                <h3>Langkah 6: Test & Deploy</h3>
+                <p>Uji melalui Chat Console, lalu deploy ke WhatsApp, Telegram, atau embed di website.</p>
 
                 <div className="not-prose mt-6">
                   <Link href="/dashboard">
-                    <Button className="gap-2">
+                    <Button className="gap-2" data-testid="button-start-building">
                       Mulai Membangun
                       <Zap className="h-4 w-4" />
                     </Button>
@@ -475,11 +1075,13 @@ export default function Documentation() {
           <div className="bg-muted/50 rounded-lg p-8 text-center">
             <h2 className="text-2xl font-bold mb-2">Butuh Bantuan?</h2>
             <p className="text-muted-foreground mb-4">
-              Hubungi tim dukungan kami untuk pertanyaan lebih lanjut.
+              Gunakan Gustafta Helpdesk (chatbot di pojok kanan bawah) atau hubungi tim dukungan kami.
             </p>
-            <Button variant="outline">
-              Hubungi Dukungan
-            </Button>
+            <Link href="/dashboard">
+              <Button variant="outline" data-testid="button-contact-support">
+                Buka Dashboard
+              </Button>
+            </Link>
           </div>
         </div>
       </main>
