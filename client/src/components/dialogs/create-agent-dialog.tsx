@@ -104,7 +104,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
     if (!formData.name.trim()) {
       toast({
         title: "Validation Error",
-        description: "Please enter a name for your chatbot.",
+        description: "Masukkan nama untuk alat bantu Anda.",
         variant: "destructive",
       });
       return;
@@ -124,7 +124,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
     if (!isOrchestrator && !activeToolbox) {
       toast({
         title: "Validation Error",
-        description: "Chatbot modul membutuhkan Domain yang aktif. Silakan pilih Domain terlebih dahulu.",
+        description: "Alat Bantu membutuhkan Chatbot yang aktif. Silakan pilih Chatbot terlebih dahulu.",
         variant: "destructive",
       });
       return;
@@ -146,8 +146,8 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
         onSuccess: () => {
           onCreated?.();
           toast({
-            title: "Chatbot Created",
-            description: `${formData.name} has been created successfully.`,
+            title: "Alat Bantu Dibuat",
+            description: `${formData.name} berhasil dibuat.`,
           });
           onOpenChange(false);
           setFormData({ name: "", description: "", tagline: "", category: "", subcategory: "" });
@@ -155,19 +155,19 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
         },
         onError: (error: any) => {
           let title = "Error";
-          let description = "Failed to create chatbot. Please try again.";
+          let description = "Gagal membuat alat bantu. Silakan coba lagi.";
           
           try {
             const errorData = error?.response?.data || error?.data || error;
             if (errorData?.code === "NO_SUBSCRIPTION") {
               title = "Langganan Diperlukan";
-              description = "Silakan berlangganan terlebih dahulu untuk membuat chatbot.";
+              description = "Silakan berlangganan terlebih dahulu untuk membuat alat bantu.";
             } else if (errorData?.code === "SUBSCRIPTION_EXPIRED") {
               title = "Langganan Habis";
-              description = "Langganan Anda sudah habis. Silakan perpanjang untuk membuat chatbot baru.";
+              description = "Langganan Anda sudah habis. Silakan perpanjang untuk membuat alat bantu baru.";
             } else if (errorData?.code === "LIMIT_REACHED") {
-              title = "Batas Chatbot Tercapai";
-              description = errorData?.message || "Upgrade paket untuk menambah chatbot.";
+              title = "Batas Alat Bantu Tercapai";
+              description = errorData?.message || "Upgrade paket untuk menambah alat bantu.";
             } else if (errorData?.message) {
               description = errorData.message;
             }
@@ -209,16 +209,16 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 <Bot className="w-4 h-4 text-primary" />
               )}
             </div>
-            {step === "start" && "Buat Chatbot Baru"}
+            {step === "start" && "Buat Alat Bantu Baru"}
             {step === "category" && (isOrchestrator ? "Kategori Orchestrator" : "Pilih Kategori")}
             {step === "subcategory" && selectedCategory?.label}
-            {step === "details" && (isOrchestrator ? "Detail Orchestrator" : "Detail Chatbot")}
+            {step === "details" && (isOrchestrator ? "Detail Orchestrator" : "Detail Alat Bantu")}
           </DialogTitle>
           <DialogDescription>
-            {step === "start" && "Pilih cara untuk memulai pembuatan chatbot"}
-            {step === "category" && (isOrchestrator ? "Pilih kategori untuk chatbot orchestrator Anda" : "Pilih kategori bisnis untuk chatbot Anda")}
+            {step === "start" && "Pilih cara untuk memulai pembuatan alat bantu"}
+            {step === "category" && (isOrchestrator ? "Pilih kategori untuk orchestrator Anda" : "Pilih kategori untuk alat bantu Anda")}
             {step === "subcategory" && "Pilih peran atau profesi spesifik"}
-            {step === "details" && (isOrchestrator ? "Konfigurasi chatbot orchestrator Anda" : "Konfigurasi informasi dasar chatbot Anda")}
+            {step === "details" && (isOrchestrator ? "Konfigurasi orchestrator Anda" : "Konfigurasi informasi dasar alat bantu Anda")}
           </DialogDescription>
         </DialogHeader>
 
@@ -226,7 +226,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
           <div className="space-y-4 py-4">
             {(activeToolbox || activeBigIdea) && (
               <div className="p-3 rounded-lg bg-muted/50 border space-y-2">
-                <p className="text-xs text-muted-foreground">Chatbot akan dibuat dalam konteks:</p>
+                <p className="text-xs text-muted-foreground">Alat Bantu akan dibuat dalam konteks:</p>
                 <div className="flex flex-wrap gap-2">
                   {activeBigIdea && (
                     <Badge variant="outline" className="gap-1">
@@ -267,11 +267,11 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                   <div className="p-2 rounded-lg bg-purple-500/10 w-fit">
                     <Network className="w-5 h-5 text-purple-500" />
                   </div>
-                  <CardTitle className="text-base mt-2">Buat Chatbot Orchestrator</CardTitle>
+                  <CardTitle className="text-base mt-2">Buat Orchestrator</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Chatbot utama untuk Perspektif "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke modul-modul chatbot lainnya.
+                    Orchestrator utama untuk Perspektif "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke chatbot-chatbot lainnya.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -295,7 +295,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 <CardContent>
                   <CardDescription>
                     {activeToolbox 
-                      ? `Buat chatbot modul untuk Domain "${activeToolbox.name}" dengan template siap pakai.`
+                      ? `Buat alat bantu untuk Chatbot "${activeToolbox.name}" dengan template siap pakai.`
                       : "Mulai dengan template siap pakai untuk berbagai industri."}
                   </CardDescription>
                 </CardContent>
@@ -318,8 +318,8 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 <CardContent>
                   <CardDescription>
                     {activeToolbox 
-                      ? `Buat chatbot modul untuk Domain "${activeToolbox.name}" dari awal.`
-                      : "Buat chatbot custom dengan konfigurasi sendiri."}
+                      ? `Buat alat bantu untuk Chatbot "${activeToolbox.name}" dari awal.`
+                      : "Buat alat bantu custom dengan konfigurasi sendiri."}
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -345,7 +345,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                   </Badge>
                   <Badge className="gap-1 bg-purple-500/20 text-purple-600 border-purple-500/30">
                     <Network className="h-3 w-3" />
-                    Orchestrator (di atas semua Domain)
+                    Orchestrator (di atas semua Chatbot)
                   </Badge>
                 </div>
               </div>
@@ -435,7 +435,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 id="create-description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe what your chatbot does..."
+                placeholder="Jelaskan fungsi alat bantu ini..."
                 rows={3}
                
               />
@@ -460,7 +460,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
               disabled={createAgent.isPending}
              
             >
-              {createAgent.isPending ? "Membuat..." : "Buat Chatbot"}
+              {createAgent.isPending ? "Membuat..." : "Buat Alat Bantu"}
             </Button>
           )}
         </DialogFooter>

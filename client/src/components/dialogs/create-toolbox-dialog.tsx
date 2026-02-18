@@ -36,7 +36,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
     if (!name.trim()) {
       toast({
         title: "Error",
-        description: "Nama domain wajib diisi",
+        description: "Nama chatbot wajib diisi",
         variant: "destructive",
       });
       return;
@@ -55,7 +55,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
       
       toast({
         title: "Berhasil",
-        description: "Domain berhasil dibuat",
+        description: "Chatbot berhasil dibuat",
       });
       
       resetForm();
@@ -63,7 +63,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
     } catch (error) {
       toast({
         title: "Error",
-        description: "Gagal membuat Domain",
+        description: "Gagal membuat Chatbot",
         variant: "destructive",
       });
     }
@@ -104,20 +104,20 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wrench className="h-5 w-5 text-blue-500" />
-            Buat Domain Baru
+            Buat Chatbot Baru
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Info Box - Explain what Toolbox is */}
           <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
-            <h4 className="font-medium text-blue-900 dark:text-blue-100">Apa itu Domain?</h4>
+            <h4 className="font-medium text-blue-900 dark:text-blue-100">Apa itu Chatbot?</h4>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Domain adalah area operasional spesifik di bawah suatu Perspektif. 
-              Domain menentukan fokus dan cakupan dari chatbot yang ada di dalamnya.
+              Chatbot adalah unit utuh yang menangani satu area operasional di bawah suatu Perspektif. 
+              Setiap Chatbot memiliki Alat Bantu (modul spesifik) di dalamnya.
             </p>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Contoh: Dari Perspektif "Kepatuhan & Compliance", Anda bisa membuat Domain untuk 
+              Contoh: Dari Perspektif "Kepatuhan & Compliance", Anda bisa membuat Chatbot untuk 
               "SBU & Klasifikasi", "SKK & Tenaga Ahli", atau "Perijinan Usaha".
             </p>
           </div>
@@ -134,7 +134,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nama Domain *</Label>
+            <Label htmlFor="name">Nama Chatbot *</Label>
             <Input
               id="name"
               placeholder="Contoh: SBU & Klasifikasi"
@@ -148,7 +148,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
             <Label htmlFor="description">Deskripsi</Label>
             <Textarea
               id="description"
-              placeholder="Jelaskan tentang domain ini..."
+              placeholder="Jelaskan tentang chatbot ini..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -157,10 +157,10 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="purpose">Tujuan Domain</Label>
+            <Label htmlFor="purpose">Tujuan Chatbot</Label>
             <Textarea
               id="purpose"
-              placeholder="Tujuan utama dari domain ini..."
+              placeholder="Tujuan utama dari chatbot ini..."
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               rows={2}
@@ -245,7 +245,7 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
               disabled={createToolbox.isPending}
              
             >
-              {createToolbox.isPending ? "Membuat..." : "Buat Domain"}
+              {createToolbox.isPending ? "Membuat..." : "Buat Chatbot"}
             </Button>
           </div>
         </div>

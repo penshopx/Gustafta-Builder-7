@@ -52,7 +52,7 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
     if (!name.trim()) {
       toast({
         title: "Error",
-        description: "Nama domain wajib diisi",
+        description: "Nama chatbot wajib diisi",
         variant: "destructive",
       });
       return;
@@ -72,14 +72,14 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
 
       toast({
         title: "Berhasil",
-        description: "Domain berhasil diperbarui",
+        description: "Chatbot berhasil diperbarui",
       });
 
       onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Gagal memperbarui Domain",
+        description: "Gagal memperbarui Chatbot",
         variant: "destructive",
       });
     }
@@ -110,13 +110,13 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-5 w-5 text-blue-500" />
-            Edit Domain
+            Edit Chatbot
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-tb-name">Nama Domain *</Label>
+            <Label htmlFor="edit-tb-name">Nama Chatbot *</Label>
             <Input
               id="edit-tb-name"
               placeholder="Contoh: SBU & Klasifikasi"
@@ -130,7 +130,7 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
             <Label htmlFor="edit-tb-description">Deskripsi</Label>
             <Textarea
               id="edit-tb-description"
-              placeholder="Jelaskan tentang domain ini..."
+              placeholder="Jelaskan tentang chatbot ini..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -139,10 +139,10 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-tb-purpose">Tujuan Domain</Label>
+            <Label htmlFor="edit-tb-purpose">Tujuan Chatbot</Label>
             <Textarea
               id="edit-tb-purpose"
-              placeholder="Tujuan utama dari domain ini..."
+              placeholder="Tujuan utama dari chatbot ini..."
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               rows={2}

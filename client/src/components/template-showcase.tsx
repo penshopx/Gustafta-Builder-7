@@ -102,7 +102,7 @@ export function TemplateShowcase({
       });
       
       toast({
-        title: "Chatbot Dibuat",
+        title: "Alat Bantu Dibuat",
         description: `${customName || selectedTemplate.name} berhasil dibuat dari template.`,
       });
 
@@ -116,7 +116,7 @@ export function TemplateShowcase({
     } catch (error) {
       toast({
         title: "Gagal",
-        description: "Gagal membuat chatbot dari template.",
+        description: "Gagal membuat alat bantu dari template.",
         variant: "destructive",
       });
     }
@@ -255,12 +255,12 @@ export function TemplateShowcase({
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="agent-name">Nama Chatbot</Label>
+              <Label htmlFor="agent-name">Nama Alat Bantu</Label>
               <Input
                 id="agent-name"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
-                placeholder="Masukkan nama chatbot"
+                placeholder="Masukkan nama alat bantu"
                
               />
             </div>
@@ -286,7 +286,7 @@ export function TemplateShowcase({
               disabled={createFromTemplate.isPending}
              
             >
-              {createFromTemplate.isPending ? "Membuat..." : "Buat Chatbot"}
+              {createFromTemplate.isPending ? "Membuat..." : "Buat Alat Bantu"}
             </Button>
           </DialogFooter>
         </DialogContent>

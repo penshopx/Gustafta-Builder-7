@@ -305,10 +305,10 @@ export default function Dashboard() {
   const handleDeleteToolbox = async (tb: Toolbox) => {
     try {
       await deleteToolbox.mutateAsync(String(tb.id));
-      toast({ title: "Berhasil", description: `Domain "${tb.name}" berhasil dihapus` });
+      toast({ title: "Berhasil", description: `Chatbot "${tb.name}" berhasil dihapus` });
       setDeleteToolboxConfirm(null);
     } catch (error) {
-      toast({ title: "Error", description: "Gagal menghapus Domain", variant: "destructive" });
+      toast({ title: "Error", description: "Gagal menghapus Chatbot", variant: "destructive" });
     }
   };
 
@@ -342,7 +342,7 @@ export default function Dashboard() {
               </Button>
               <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
-                Buat Chatbot
+                Buat Alat Bantu
               </Button>
             </div>
           </div>
@@ -447,7 +447,7 @@ export default function Dashboard() {
                 {activeBigIdea && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('toolboxes'); setSidebarCollapsed(false); }} className="gap-2 pl-8">
                     <Wrench className="w-4 h-4 text-blue-500" />
-                    <span className="truncate">Domain - {activeBigIdea.name}</span>
+                    <span className="truncate">Chatbot - {activeBigIdea.name}</span>
                   </DropdownMenuItem>
                 )}
                 {activeToolbox && (
@@ -635,7 +635,7 @@ export default function Dashboard() {
                   </button>
                   {toolboxes.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Domain
+                      Belum ada Chatbot
                     </div>
                   ) : (
                     toolboxes.map((tb) => (
@@ -684,7 +684,7 @@ export default function Dashboard() {
                     data-testid="button-add-toolbox"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Buat Domain Baru</span>
+                    <span>Buat Chatbot Baru</span>
                   </button>
                   <button
                     onClick={() => {
@@ -708,13 +708,13 @@ export default function Dashboard() {
                     data-testid="button-back-to-toolboxes"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Kembali ke Domain</span>
+                    <span>Kembali ke Chatbot</span>
                   </button>
                   {agentsLoading ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">Memuat...</div>
                   ) : filteredAgents.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Chatbot
+                      Belum ada Alat Bantu
                     </div>
                   ) : (
                     filteredAgents.map((agent) => (
@@ -750,7 +750,7 @@ export default function Dashboard() {
                     data-testid="button-add-agent-sidebar"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Buat Chatbot Baru</span>
+                    <span>Buat Alat Bantu Baru</span>
                   </button>
                 </>
               )}
@@ -912,20 +912,20 @@ export default function Dashboard() {
                       )}
                     </>
                   ) : (
-                    <span className="text-muted-foreground text-sm">Pilih Chatbot</span>
+                    <span className="text-muted-foreground text-sm">Pilih Alat Bantu</span>
                   )}
                   <ChevronDown className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel>Chatbots{activeToolbox ? ` - ${activeToolbox.name}` : ""}</DropdownMenuLabel>
+                <DropdownMenuLabel>Alat Bantu{activeToolbox ? ` - ${activeToolbox.name}` : ""}</DropdownMenuLabel>
                 {!activeToolbox ? (
                   <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                    Pilih Domain terlebih dahulu
+                    Pilih Chatbot terlebih dahulu
                   </div>
                 ) : filteredAgents.length === 0 ? (
                   <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                    Belum ada chatbot di domain ini
+                    Belum ada alat bantu di chatbot ini
                   </div>
                 ) : (
                   filteredAgents.map((agent) => (
@@ -964,7 +964,7 @@ export default function Dashboard() {
                  
                 >
                   <Plus className="w-4 h-4" />
-                  Buat Chatbot Baru
+                  Buat Alat Bantu Baru
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -979,7 +979,7 @@ export default function Dashboard() {
              
             >
               <Plus className="w-4 h-4 mr-2" />
-              New Chatbot
+              Alat Bantu Baru
             </Button>
             <Button
               onClick={() => setCreateDialogOpen(true)}
@@ -1128,7 +1128,7 @@ export default function Dashboard() {
             <AlertDialogTitle>Hapus Perspektif?</AlertDialogTitle>
             <AlertDialogDescription>
               Apakah Anda yakin ingin menghapus Perspektif "{deleteBigIdeaConfirm?.name}"? 
-              Semua Domain dan Chatbot di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
+              Semua Chatbot dan Alat Bantu di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1147,10 +1147,10 @@ export default function Dashboard() {
       <AlertDialog open={!!deleteToolboxConfirm} onOpenChange={(open) => { if (!open) setDeleteToolboxConfirm(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Domain?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Chatbot?</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus Domain "{deleteToolboxConfirm?.name}"? 
-              Semua Chatbot di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
+              Apakah Anda yakin ingin menghapus Chatbot "{deleteToolboxConfirm?.name}"? 
+              Semua Alat Bantu di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
