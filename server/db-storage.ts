@@ -838,6 +838,17 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
+  private parseJsonArray(value: unknown): unknown[] {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {}
+    }
+    return [];
+  }
+
   private mapAgentRow(row: typeof agents.$inferSelect): Agent {
     return {
       id: String(row.id),
@@ -856,7 +867,7 @@ export class DatabaseStorage implements IStorage {
       customBaseUrl: row.customBaseUrl || "",
       customModelName: row.customModelName || "",
       greetingMessage: row.greetingMessage || "",
-      conversationStarters: (row.conversationStarters as string[]) || [],
+      conversationStarters: this.parseJsonArray(row.conversationStarters) as string[],
       language: row.language || "id",
       category: row.category || "",
       subcategory: row.subcategory || "",
