@@ -457,6 +457,10 @@ export class DatabaseStorage implements IStorage {
       coreId: row.coreId ? String(row.coreId) : undefined,
       sortOrder: row.sortOrder || 0,
       isActive: row.isActive || false,
+      monthlyPrice: row.monthlyPrice ?? 0,
+      trialEnabled: row.trialEnabled ?? true,
+      trialDays: row.trialDays ?? 7,
+      requireRegistration: row.requireRegistration ?? false,
       createdAt: row.createdAt.toISOString(),
     };
   }
@@ -491,6 +495,10 @@ export class DatabaseStorage implements IStorage {
       coreId: insertBigIdea.coreId ? parseInt(insertBigIdea.coreId) : null,
       sortOrder: insertBigIdea.sortOrder || 0,
       isActive: true,
+      monthlyPrice: insertBigIdea.monthlyPrice ?? 0,
+      trialEnabled: insertBigIdea.trialEnabled ?? true,
+      trialDays: insertBigIdea.trialDays ?? 7,
+      requireRegistration: insertBigIdea.requireRegistration ?? false,
     }).returning();
     return this.mapBigIdeaRow(result[0]);
   }
@@ -1777,6 +1785,7 @@ export class DatabaseStorage implements IStorage {
     return result.map((row) => ({
       id: String(row.id),
       agentId: String(row.agentId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
       customerName: row.customerName,
       customerEmail: row.customerEmail,
       customerPhone: row.customerPhone || "",
@@ -1807,6 +1816,7 @@ export class DatabaseStorage implements IStorage {
     return {
       id: String(row.id),
       agentId: String(row.agentId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
       customerName: row.customerName,
       customerEmail: row.customerEmail,
       customerPhone: row.customerPhone || "",
@@ -1837,6 +1847,7 @@ export class DatabaseStorage implements IStorage {
     return {
       id: String(row.id),
       agentId: String(row.agentId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
       customerName: row.customerName,
       customerEmail: row.customerEmail,
       customerPhone: row.customerPhone || "",
@@ -1870,6 +1881,42 @@ export class DatabaseStorage implements IStorage {
     return {
       id: String(row.id),
       agentId: String(row.agentId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone || "",
+      plan: row.plan as "trial" | "monthly" | "yearly" | "lifetime",
+      status: (row.status || "active") as "active" | "expired" | "cancelled" | "pending",
+      accessToken: row.accessToken,
+      mayarOrderId: row.mayarOrderId || undefined,
+      mayarPaymentUrl: row.mayarPaymentUrl || undefined,
+      amount: row.amount || 0,
+      currency: row.currency || "IDR",
+      referralCode: row.referralCode || undefined,
+      startDate: row.startDate ? row.startDate.toISOString() : undefined,
+      endDate: row.endDate ? row.endDate.toISOString() : undefined,
+      messageUsedToday: row.messageUsedToday || 0,
+      messageUsedMonth: row.messageUsedMonth || 0,
+      lastMessageDate: row.lastMessageDate || null,
+      lastMonthReset: row.lastMonthReset || null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  async getClientSubscriptionByBigIdea(bigIdeaId: string, email: string): Promise<ClientSubscription | undefined> {
+    const result = await db.select().from(clientSubscriptions)
+      .where(and(
+        eq(clientSubscriptions.bigIdeaId, parseInt(bigIdeaId)),
+        eq(clientSubscriptions.customerEmail, email),
+        eq(clientSubscriptions.status, "active")
+      )).limit(1);
+    if (result.length === 0) return undefined;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      agentId: String(row.agentId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
       customerName: row.customerName,
       customerEmail: row.customerEmail,
       customerPhone: row.customerPhone || "",
@@ -1895,6 +1942,7 @@ export class DatabaseStorage implements IStorage {
   async createClientSubscription(insertSub: InsertClientSubscription): Promise<ClientSubscription> {
     const result = await db.insert(clientSubscriptions).values({
       agentId: parseInt(insertSub.agentId),
+      bigIdeaId: insertSub.bigIdeaId ? parseInt(insertSub.bigIdeaId) : null,
       customerName: insertSub.customerName,
       customerEmail: insertSub.customerEmail,
       customerPhone: insertSub.customerPhone || "",
@@ -1913,6 +1961,7 @@ export class DatabaseStorage implements IStorage {
     return {
       id: String(row.id),
       agentId: String(row.agentId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
       customerName: row.customerName,
       customerEmail: row.customerEmail,
       customerPhone: row.customerPhone || "",
@@ -1960,6 +2009,7 @@ export class DatabaseStorage implements IStorage {
     return {
       id: String(row.id),
       agentId: String(row.agentId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
       customerName: row.customerName,
       customerEmail: row.customerEmail,
       customerPhone: row.customerPhone || "",

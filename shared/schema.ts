@@ -65,6 +65,10 @@ export const bigIdeas = pgTable("big_ideas", {
   expectedOutcome: text("expected_outcome").default(""),
   sortOrder: integer("sort_order").default(0),
   isActive: boolean("is_active").default(false),
+  monthlyPrice: integer("monthly_price").default(0),
+  trialEnabled: boolean("trial_enabled").default(true),
+  trialDays: integer("trial_days").default(7),
+  requireRegistration: boolean("require_registration").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -262,6 +266,7 @@ export const analyticsTable = pgTable("analytics", {
 export const clientSubscriptions = pgTable("client_subscriptions", {
   id: serial("id").primaryKey(),
   agentId: integer("agent_id").notNull(),
+  bigIdeaId: integer("big_idea_id"),
   customerName: text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
   customerPhone: text("customer_phone").default(""),
@@ -413,6 +418,10 @@ export const insertBigIdeaSchema = z.object({
   seriesId: z.string().optional(),
   coreId: z.string().optional(),
   sortOrder: z.number().optional().default(0),
+  monthlyPrice: z.number().min(0).optional().default(0),
+  trialEnabled: z.boolean().optional().default(true),
+  trialDays: z.number().optional().default(7),
+  requireRegistration: z.boolean().optional().default(false),
 });
 
 export type InsertBigIdea = z.infer<typeof insertBigIdeaSchema>;
@@ -821,6 +830,7 @@ export type ClientSubscriptionPlan = z.infer<typeof clientSubscriptionPlanSchema
 
 export const insertClientSubscriptionSchema = z.object({
   agentId: z.string(),
+  bigIdeaId: z.string().optional(),
   customerName: z.string().min(1, "Name is required"),
   customerEmail: z.string().email("Valid email is required"),
   customerPhone: z.string().optional().default(""),

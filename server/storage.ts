@@ -195,6 +195,7 @@ export interface IStorage {
   getClientSubscription(id: string): Promise<ClientSubscription | undefined>;
   getClientSubscriptionByToken(token: string): Promise<ClientSubscription | undefined>;
   getClientSubscriptionByEmail(agentId: string, email: string): Promise<ClientSubscription | undefined>;
+  getClientSubscriptionByBigIdea(bigIdeaId: string, email: string): Promise<ClientSubscription | undefined>;
   createClientSubscription(sub: InsertClientSubscription): Promise<ClientSubscription>;
   updateClientSubscription(id: string, data: Partial<InsertClientSubscription & { messageUsedToday: number; messageUsedMonth: number; lastMessageDate: string; lastMonthReset: string }>): Promise<ClientSubscription | undefined>;
   deleteClientSubscription(id: string): Promise<boolean>;
@@ -501,6 +502,10 @@ export class MemStorage implements IStorage {
       coreId: insertBigIdea.coreId || undefined,
       sortOrder: insertBigIdea.sortOrder || 0,
       isActive: true,
+      monthlyPrice: insertBigIdea.monthlyPrice ?? 0,
+      trialEnabled: insertBigIdea.trialEnabled ?? true,
+      trialDays: insertBigIdea.trialDays ?? 7,
+      requireRegistration: insertBigIdea.requireRegistration ?? false,
       createdAt: new Date().toISOString(),
     };
     
@@ -1466,6 +1471,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.clientSubscriptions.values()).find(
       (sub) => sub.agentId === agentId && sub.customerEmail === email
     );
+  }
+
+  async getClientSubscriptionByBigIdea(bigIdeaId: string, email: string): Promise<ClientSubscription | undefined> {
+    return undefined;
   }
 
   async createClientSubscription(insertSub: InsertClientSubscription): Promise<ClientSubscription> {

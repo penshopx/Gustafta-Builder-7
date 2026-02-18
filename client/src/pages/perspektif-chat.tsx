@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, Loader2, ArrowLeft, MessageCircle, ChevronRight } from "lucide-react";
+import { Send, Bot, Loader2, ArrowLeft, MessageCircle, ChevronRight, Lock, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +32,12 @@ interface PerspektifData {
   purpose: string;
   seriesName: string;
   chatbots: ChatbotInfo[];
+  pricing?: {
+    monthlyPrice: number;
+    trialEnabled: boolean;
+    trialDays: number;
+    requireRegistration: boolean;
+  };
 }
 
 interface Message {
@@ -53,6 +60,22 @@ export default function PerspektifChat() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const sessionIdRef = useRef<string>(`perspektif_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
 
+  const [hasAccess, setHasAccess] = useState(true);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [showUpgradeWall, setShowUpgradeWall] = useState(false);
+  const [subName, setSubName] = useState("");
+  const [subEmail, setSubEmail] = useState("");
+  const [subPhone, setSubPhone] = useState("");
+  const [subscribing, setSubscribing] = useState(false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("subscribed") === "true") {
+      setHasAccess(true);
+      setAccessChecked(true);
+    }
+  }, []);
+
   useEffect(() => {
     fetch(`/api/public/perspektif/${params.bigIdeaId}`)
       .then(r => {
@@ -62,6 +85,29 @@ export default function PerspektifChat() {
       .then((data: PerspektifData) => {
         setPerspektif(data);
         setLoading(false);
+        const urlParams = new URLSearchParams(window.location.search);
+        const justSubscribed = urlParams.get("subscribed") === "true";
+        if (justSubscribed) {
+          setHasAccess(true);
+          setAccessChecked(true);
+          return;
+        }
+        if (data.pricing && data.pricing.monthlyPrice > 0) {
+          const savedToken = localStorage.getItem(`perspektif_access_${params.bigIdeaId}`);
+          const savedEmail = localStorage.getItem(`perspektif_email_${params.bigIdeaId}`);
+          fetch(`/api/perspektif/${params.bigIdeaId}/access?${savedEmail ? `email=${encodeURIComponent(savedEmail)}` : ""}${savedToken ? `&token=${encodeURIComponent(savedToken)}` : ""}`)
+            .then(r => r.json())
+            .then(result => {
+              setHasAccess(result.hasAccess);
+              setAccessChecked(true);
+            })
+            .catch(() => {
+              setHasAccess(false);
+              setAccessChecked(true);
+            });
+        } else {
+          setAccessChecked(true);
+        }
       })
       .catch(err => {
         setError(err.message);
@@ -172,6 +218,38 @@ export default function PerspektifChat() {
     }
   }, [sendMessage]);
 
+  const handleSubscribe = useCallback(async (plan: string) => {
+    if (!subName.trim() || !subEmail.trim()) return;
+    setSubscribing(true);
+    try {
+      const res = await fetch(`/api/perspektif/${params.bigIdeaId}/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: subName.trim(),
+          customerEmail: subEmail.trim(),
+          customerPhone: subPhone.trim(),
+          plan,
+        }),
+      });
+      const data = await res.json();
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+        return;
+      }
+      if (data.subscription) {
+        localStorage.setItem(`perspektif_access_${params.bigIdeaId}`, data.subscription.accessToken || data.accessToken || "");
+        localStorage.setItem(`perspektif_email_${params.bigIdeaId}`, subEmail.trim());
+        setHasAccess(true);
+        setShowUpgradeWall(false);
+      }
+    } catch (err) {
+      console.error("Subscribe error:", err);
+    } finally {
+      setSubscribing(false);
+    }
+  }, [subName, subEmail, subPhone, params.bigIdeaId]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -222,58 +300,142 @@ export default function PerspektifChat() {
             )}
           </div>
 
-          {perspektif.chatbots.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-1">Belum Ada Chatbot</h3>
-                <p className="text-muted-foreground text-sm">Perspektif ini belum memiliki chatbot aktif.</p>
+          {accessChecked && !hasAccess && perspektif.pricing && perspektif.pricing.monthlyPrice > 0 ? (
+            <Card data-testid="perspektif-upgrade-wall">
+              <CardContent className="p-6 sm:p-8">
+                <div className="text-center mb-6">
+                  <Lock className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Akses Premium</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Langganan bundle untuk mengakses semua {perspektif.chatbots.length} chatbot dalam Perspektif ini.
+                  </p>
+                </div>
+                <div className="text-center mb-6">
+                  <p className="text-3xl font-bold">
+                    Rp {perspektif.pricing.monthlyPrice.toLocaleString("id-ID")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">per bulan</p>
+                </div>
+                {!showUpgradeWall ? (
+                  <div className="flex flex-col items-center gap-3">
+                    {perspektif.pricing.trialEnabled && (
+                      <Button onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-start-trial">
+                        Coba Gratis {perspektif.pricing.trialDays} Hari
+                      </Button>
+                    )}
+                    <Button variant="outline" onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-subscribe">
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Langganan Sekarang
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="max-w-sm mx-auto space-y-3">
+                    <Input
+                      placeholder="Nama Lengkap"
+                      value={subName}
+                      onChange={(e) => setSubName(e.target.value)}
+                      data-testid="input-sub-name"
+                    />
+                    <Input
+                      placeholder="Email"
+                      type="email"
+                      value={subEmail}
+                      onChange={(e) => setSubEmail(e.target.value)}
+                      data-testid="input-sub-email"
+                    />
+                    <Input
+                      placeholder="No. WhatsApp (opsional)"
+                      value={subPhone}
+                      onChange={(e) => setSubPhone(e.target.value)}
+                      data-testid="input-sub-phone"
+                    />
+                    <div className="flex flex-col gap-2">
+                      {perspektif.pricing.trialEnabled && (
+                        <Button
+                          onClick={() => handleSubscribe("trial")}
+                          disabled={subscribing || !subName.trim() || !subEmail.trim()}
+                          className="w-full"
+                          data-testid="button-confirm-trial"
+                        >
+                          {subscribing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                          Mulai Trial {perspektif.pricing.trialDays} Hari
+                        </Button>
+                      )}
+                      {perspektif.pricing.monthlyPrice > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleSubscribe("monthly")}
+                          disabled={subscribing || !subName.trim() || !subEmail.trim()}
+                          className="w-full"
+                          data-testid="button-confirm-monthly"
+                        >
+                          Bayar Rp {perspektif.pricing.monthlyPrice.toLocaleString("id-ID")}/bulan
+                        </Button>
+                      )}
+                    </div>
+                    <Button variant="ghost" onClick={() => setShowUpgradeWall(false)} className="w-full" size="sm">
+                      Kembali
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {perspektif.chatbots.map((bot) => (
-                <Card
-                  key={bot.agentId}
-                  className="cursor-pointer hover-elevate transition-all"
-                  onClick={() => selectBot(bot)}
-                  data-testid={`card-chatbot-${bot.agentId}`}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="w-12 h-12 shrink-0">
-                        <AvatarImage src={bot.avatar} alt={bot.name} />
-                        <AvatarFallback style={{ backgroundColor: bot.color }}>
-                          <Bot className="w-6 h-6 text-white" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold truncate" data-testid={`text-bot-name-${bot.agentId}`}>
-                            {bot.name}
-                          </h3>
-                          {bot.category && (
-                            <Badge variant="secondary" className="text-xs">
-                              {bot.category}
-                            </Badge>
-                          )}
-                        </div>
-                        {bot.tagline && (
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                            {bot.tagline}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                          <MessageCircle className="w-3.5 h-3.5" />
-                          <span>{bot.toolboxName}</span>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
-                    </div>
+            <>
+              {perspektif.chatbots.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium mb-1">Belum Ada Chatbot</h3>
+                    <p className="text-muted-foreground text-sm">Perspektif ini belum memiliki chatbot aktif.</p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {perspektif.chatbots.map((bot) => (
+                    <Card
+                      key={bot.agentId}
+                      className="cursor-pointer hover-elevate transition-all"
+                      onClick={() => selectBot(bot)}
+                      data-testid={`card-chatbot-${bot.agentId}`}
+                    >
+                      <CardContent className="p-5">
+                        <div className="flex items-start gap-4">
+                          <Avatar className="w-12 h-12 shrink-0">
+                            <AvatarImage src={bot.avatar} alt={bot.name} />
+                            <AvatarFallback style={{ backgroundColor: bot.color }}>
+                              <Bot className="w-6 h-6 text-white" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-semibold truncate" data-testid={`text-bot-name-${bot.agentId}`}>
+                                {bot.name}
+                              </h3>
+                              {bot.category && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {bot.category}
+                                </Badge>
+                              )}
+                            </div>
+                            {bot.tagline && (
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {bot.tagline}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              <span>{bot.toolboxName}</span>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
           <div className="text-center mt-8 text-xs text-muted-foreground">

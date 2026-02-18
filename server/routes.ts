@@ -3506,6 +3506,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         purpose: bigIdea.purpose || "",
         seriesName: series?.name || "",
         chatbots,
+        pricing: {
+          monthlyPrice: bigIdea.monthlyPrice || 0,
+          trialEnabled: bigIdea.trialEnabled ?? true,
+          trialDays: bigIdea.trialDays ?? 7,
+          requireRegistration: bigIdea.requireRegistration ?? false,
+        },
       });
     } catch (error: any) {
       console.error("Error fetching public perspektif:", error);
@@ -4548,6 +4554,142 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
     } catch (error) {
       console.error("Subscribe error:", error);
       res.status(500).json({ error: "Failed to create subscription" });
+    }
+  });
+
+  app.post("/api/perspektif/:bigIdeaId/subscribe", async (req, res) => {
+    try {
+      const { customerName, customerEmail, customerPhone, plan } = req.body;
+      if (!customerName || !customerEmail) {
+        return res.status(400).json({ error: "Name and email are required" });
+      }
+
+      const bigIdea = await storage.getBigIdea(req.params.bigIdeaId);
+      if (!bigIdea) {
+        return res.status(404).json({ error: "Perspektif not found" });
+      }
+
+      const existing = await storage.getClientSubscriptionByBigIdea(req.params.bigIdeaId, customerEmail);
+      if (existing && existing.status === "active") {
+        return res.json({ subscription: existing, message: "Already subscribed" });
+      }
+
+      const crypto = await import("crypto");
+      const accessToken = crypto.randomBytes(32).toString("hex");
+
+      const startDate = new Date();
+      let endDate = new Date();
+      let amount = 0;
+
+      if (plan === "trial" || !plan) {
+        if (!bigIdea.trialEnabled && bigIdea.monthlyPrice && bigIdea.monthlyPrice > 0) {
+          return res.status(400).json({ error: "Trial not available. Please choose a paid plan." });
+        }
+        endDate.setDate(endDate.getDate() + (bigIdea.trialDays || 7));
+      } else if (plan === "monthly") {
+        endDate.setDate(endDate.getDate() + 30);
+        amount = bigIdea.monthlyPrice || 0;
+      } else if (plan === "yearly") {
+        endDate.setDate(endDate.getDate() + 365);
+        amount = (bigIdea.monthlyPrice || 0) * 10;
+      }
+
+      if (amount > 0) {
+        const mayarApiKey = process.env.MAYAR_API_KEY;
+        if (mayarApiKey) {
+          try {
+            const { createPaymentLink } = await import("./lib/mayar");
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+            const payment = await createPaymentLink(mayarApiKey, {
+              name: customerName,
+              email: customerEmail,
+              amount,
+              description: `Langganan Bundle Perspektif: ${bigIdea.name} - ${plan}`,
+              redirectUrl: `${baseUrl}/perspektif/${bigIdea.id}?subscribed=true`,
+            });
+
+            const subscription = await storage.createClientSubscription({
+              agentId: "0",
+              bigIdeaId: req.params.bigIdeaId,
+              customerName,
+              customerEmail,
+              customerPhone: customerPhone || "",
+              plan: plan || "trial",
+              status: "pending",
+              accessToken,
+              mayarOrderId: payment.data.id,
+              mayarPaymentUrl: payment.data.link,
+              amount,
+              currency: "IDR",
+              startDate: startDate.toISOString(),
+              endDate: endDate.toISOString(),
+            });
+
+            return res.json({ subscription, paymentUrl: payment.data.link });
+          } catch (payErr) {
+            console.error("Bundle payment creation failed:", payErr);
+          }
+        }
+      }
+
+      const subscription = await storage.createClientSubscription({
+        agentId: "0",
+        bigIdeaId: req.params.bigIdeaId,
+        customerName,
+        customerEmail,
+        customerPhone: customerPhone || "",
+        plan: plan || "trial",
+        status: "active",
+        accessToken,
+        amount: 0,
+        currency: "IDR",
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
+
+      res.status(201).json({ subscription, accessToken });
+    } catch (error) {
+      console.error("Perspektif subscribe error:", error);
+      res.status(500).json({ error: "Failed to create bundle subscription" });
+    }
+  });
+
+  app.get("/api/perspektif/:bigIdeaId/access", async (req, res) => {
+    try {
+      const { email, token } = req.query;
+      const bigIdeaId = req.params.bigIdeaId;
+
+      if (!email && !token) {
+        return res.json({ hasAccess: false });
+      }
+
+      const bigIdea = await storage.getBigIdea(bigIdeaId);
+      if (!bigIdea) {
+        return res.status(404).json({ error: "Perspektif not found" });
+      }
+
+      if (!bigIdea.monthlyPrice || bigIdea.monthlyPrice <= 0) {
+        return res.json({ hasAccess: true, reason: "free" });
+      }
+
+      if (email) {
+        const bundleSub = await storage.getClientSubscriptionByBigIdea(bigIdeaId, email as string);
+        if (bundleSub && bundleSub.status === "active") {
+          return res.json({ hasAccess: true, reason: "bundle", subscription: bundleSub });
+        }
+      }
+
+      if (token) {
+        const sub = await storage.getClientSubscriptionByToken(token as string);
+        if (sub && sub.status === "active" && sub.bigIdeaId === bigIdeaId) {
+          return res.json({ hasAccess: true, reason: "bundle", subscription: sub });
+        }
+      }
+
+      return res.json({ hasAccess: false });
+    } catch (error) {
+      console.error("Perspektif access check error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 

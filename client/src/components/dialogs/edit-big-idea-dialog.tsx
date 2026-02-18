@@ -14,7 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery } from "@tanstack/react-query";
 import { useUpdateBigIdea } from "@/hooks/use-big-ideas";
 import { useToast } from "@/hooks/use-toast";
-import { Lightbulb, AlertTriangle, Sparkles, Plus, X, GraduationCap, Pencil } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Lightbulb, AlertTriangle, Sparkles, Plus, X, GraduationCap, Pencil, DollarSign } from "lucide-react";
 import type { BigIdea } from "@shared/schema";
 
 interface EditBigIdeaDialogProps {
@@ -32,6 +33,10 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
   const [expectedOutcome, setExpectedOutcome] = useState("");
   const [selectedSeriesId, setSelectedSeriesId] = useState<string>("none");
   const [selectedCoreId, setSelectedCoreId] = useState<string>("none");
+  const [monthlyPrice, setMonthlyPrice] = useState(0);
+  const [trialEnabled, setTrialEnabled] = useState(true);
+  const [trialDays, setTrialDays] = useState(7);
+  const [requireRegistration, setRequireRegistration] = useState(false);
 
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
   const { data: allCores = [] } = useQuery<any[]>({ queryKey: ["/api/cores"] });
@@ -49,6 +54,10 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
       setExpectedOutcome(bigIdea.expectedOutcome || "");
       setSelectedSeriesId(bigIdea.seriesId ? String(bigIdea.seriesId) : "none");
       setSelectedCoreId(bigIdea.coreId ? String(bigIdea.coreId) : "none");
+      setMonthlyPrice(bigIdea.monthlyPrice || 0);
+      setTrialEnabled(bigIdea.trialEnabled ?? true);
+      setTrialDays(bigIdea.trialDays || 7);
+      setRequireRegistration(bigIdea.requireRegistration || false);
     }
   }, [open, bigIdea]);
 
@@ -72,6 +81,10 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           goals: goals.filter(g => g.trim()),
           targetAudience: targetAudience.trim(),
           expectedOutcome: expectedOutcome.trim(),
+          monthlyPrice,
+          trialEnabled,
+          trialDays,
+          requireRegistration,
           seriesId: selectedSeriesId !== "none" ? String(selectedSeriesId) : "",
           coreId: selectedCoreId !== "none" ? String(selectedCoreId) : null,
         },
@@ -245,6 +258,57 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
               onChange={(e) => setExpectedOutcome(e.target.value)}
               rows={3}
             />
+          </div>
+
+          <div className="space-y-4 border-t pt-4">
+            <Label className="flex items-center gap-2 text-base font-semibold">
+              <DollarSign className="h-4 w-4" />
+              Monetisasi Perspektif
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Atur harga bundle untuk akses semua chatbot dalam Perspektif ini. HUB/Orkestrator tetap gratis.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="edit-monthlyPrice">Harga Bulanan (IDR)</Label>
+              <Input
+                id="edit-monthlyPrice"
+                type="number"
+                placeholder="0 = Gratis"
+                value={monthlyPrice}
+                onChange={(e) => setMonthlyPrice(Number(e.target.value) || 0)}
+                data-testid="input-edit-bigidea-monthly-price"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="edit-trialEnabled">Aktifkan Trial</Label>
+              <Switch
+                id="edit-trialEnabled"
+                checked={trialEnabled}
+                onCheckedChange={setTrialEnabled}
+                data-testid="switch-edit-bigidea-trial"
+              />
+            </div>
+            {trialEnabled && (
+              <div className="space-y-2">
+                <Label htmlFor="edit-trialDays">Durasi Trial (hari)</Label>
+                <Input
+                  id="edit-trialDays"
+                  type="number"
+                  value={trialDays}
+                  onChange={(e) => setTrialDays(Number(e.target.value) || 7)}
+                  data-testid="input-edit-bigidea-trial-days"
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="edit-requireRegistration">Wajib Registrasi</Label>
+              <Switch
+                id="edit-requireRegistration"
+                checked={requireRegistration}
+                onCheckedChange={setRequireRegistration}
+                data-testid="switch-edit-bigidea-registration"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
