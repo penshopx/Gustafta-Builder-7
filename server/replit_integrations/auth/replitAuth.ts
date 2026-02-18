@@ -142,28 +142,37 @@ async function performTokenRefresh(user: any, req: any): Promise<boolean> {
   }
 
   const refreshPromise = (async () => {
-    try {
-      const refreshToken = user.refresh_token;
-      if (!refreshToken) return false;
-      const config = await getOidcConfig();
-      const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-      updateUserSession(user, tokenResponse);
-      await new Promise<void>((resolve, reject) => {
-        req.session?.save((err: any) => {
-          if (err) reject(err);
-          else resolve();
+    const maxRetries = 2;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const refreshToken = user.refresh_token;
+        if (!refreshToken) return false;
+        const config = await getOidcConfig();
+        const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+        updateUserSession(user, tokenResponse);
+        await new Promise<void>((resolve, reject) => {
+          req.session?.save((err: any) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
-      });
-      return true;
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      return false;
-    } finally {
-      setTimeout(() => refreshLocks.delete(sessionId), 1000);
+        return true;
+      } catch (error: any) {
+        const isLastAttempt = attempt === maxRetries;
+        if (isLastAttempt) {
+          console.error("Token refresh failed after retries:", error?.message || error);
+          return false;
+        }
+        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+      }
     }
+    return false;
   })();
 
   refreshLocks.set(sessionId, refreshPromise);
+  refreshPromise.finally(() => {
+    setTimeout(() => refreshLocks.delete(sessionId), 2000);
+  });
   return refreshPromise;
 }
 
@@ -179,7 +188,11 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
+  const gracePeriod = 5 * 60;
+  if (now <= user.expires_at + gracePeriod) {
+    if (now > user.expires_at - 60) {
+      performTokenRefresh(user, req).catch(() => {});
+    }
     return next();
   }
 
