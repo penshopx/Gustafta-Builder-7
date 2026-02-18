@@ -98,9 +98,10 @@ export interface IStorage {
   deleteBigIdea(id: string): Promise<boolean>;
 
   // Toolbox methods
-  getToolboxes(bigIdeaId?: string): Promise<Toolbox[]>;
+  getToolboxes(bigIdeaId?: string, seriesId?: string): Promise<Toolbox[]>;
   getToolbox(id: string): Promise<Toolbox | undefined>;
   getActiveToolbox(): Promise<Toolbox | null>;
+  getOrchestratorToolbox(seriesId: string): Promise<Toolbox | null>;
   createToolbox(toolbox: InsertToolbox): Promise<Toolbox>;
   updateToolbox(id: string, data: Partial<InsertToolbox>): Promise<Toolbox | undefined>;
   setActiveToolbox(id: string): Promise<Toolbox | undefined>;
@@ -566,10 +567,12 @@ export class MemStorage implements IStorage {
   }
 
   // Toolbox methods
-  async getToolboxes(bigIdeaId?: string): Promise<Toolbox[]> {
+  async getToolboxes(bigIdeaId?: string, seriesId?: string): Promise<Toolbox[]> {
     let toolboxes = Array.from(this.toolboxes.values());
     if (bigIdeaId) {
       toolboxes = toolboxes.filter(t => t.bigIdeaId === bigIdeaId);
+    } else if (seriesId) {
+      toolboxes = toolboxes.filter(t => t.seriesId === seriesId);
     }
     return toolboxes.sort(
       (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
@@ -585,6 +588,13 @@ export class MemStorage implements IStorage {
     return toolbox || null;
   }
 
+  async getOrchestratorToolbox(seriesId: string): Promise<Toolbox | null> {
+    const toolbox = Array.from(this.toolboxes.values()).find(
+      (t) => t.seriesId === seriesId && t.isOrchestrator === true
+    );
+    return toolbox || null;
+  }
+
   async createToolbox(insertToolbox: InsertToolbox): Promise<Toolbox> {
     const id = randomUUID();
     
@@ -595,6 +605,8 @@ export class MemStorage implements IStorage {
     const toolbox: Toolbox = {
       id,
       bigIdeaId: insertToolbox.bigIdeaId,
+      seriesId: insertToolbox.seriesId,
+      isOrchestrator: insertToolbox.isOrchestrator || false,
       name: insertToolbox.name,
       description: insertToolbox.description || "",
       purpose: insertToolbox.purpose || "",

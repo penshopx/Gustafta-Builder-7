@@ -645,7 +645,8 @@ export async function registerRoutes(
   app.get("/api/toolboxes", isAuthenticated, async (req, res) => {
     try {
       const bigIdeaId = req.query.bigIdeaId as string | undefined;
-      const toolboxes = await storage.getToolboxes(bigIdeaId);
+      const seriesId = req.query.seriesId as string | undefined;
+      const toolboxes = await storage.getToolboxes(bigIdeaId, seriesId);
       res.json(toolboxes);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch toolboxes" });
@@ -675,12 +676,32 @@ export async function registerRoutes(
     }
   });
 
-  // Create toolbox
+  app.get("/api/toolboxes/orchestrator/:seriesId", isAuthenticated, async (req, res) => {
+    try {
+      const hub = await storage.getOrchestratorToolbox(req.params.seriesId as string);
+      res.json(hub);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch orchestrator" });
+    }
+  });
+
   app.post("/api/toolboxes", isAuthenticated, async (req, res) => {
     try {
       const parsed = insertToolboxSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
+      }
+      if (parsed.data.isOrchestrator && parsed.data.seriesId) {
+        const existing = await storage.getOrchestratorToolbox(parsed.data.seriesId);
+        if (existing) {
+          return res.status(409).json({ error: "Tujuan ini sudah memiliki Chatbot Orkestrator" });
+        }
+      }
+      if (parsed.data.bigIdeaId && !parsed.data.seriesId) {
+        const bigIdea = await storage.getBigIdea(parsed.data.bigIdeaId);
+        if (bigIdea && bigIdea.seriesId) {
+          parsed.data.seriesId = String(bigIdea.seriesId);
+        }
       }
       const toolbox = await storage.createToolbox(parsed.data);
       res.status(201).json(toolbox);

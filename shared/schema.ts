@@ -71,7 +71,9 @@ export const bigIdeas = pgTable("big_ideas", {
 // Toolboxes Table
 export const toolboxes = pgTable("toolboxes", {
   id: serial("id").primaryKey(),
-  bigIdeaId: integer("big_idea_id").notNull(),
+  bigIdeaId: integer("big_idea_id"),
+  seriesId: integer("series_id"),
+  isOrchestrator: boolean("is_orchestrator").default(false),
   name: text("name").notNull(),
   description: text("description").default(""),
   purpose: text("purpose").default(""),
@@ -419,9 +421,11 @@ export type BigIdea = InsertBigIdea & {
   createdAt: string;
 };
 
-// Toolbox schema - Created from Big Idea
+// Toolbox schema - Created from Big Idea or directly under Series (for Orchestrator/HUB)
 export const insertToolboxSchema = z.object({
-  bigIdeaId: z.string(),
+  bigIdeaId: z.string().optional(),
+  seriesId: z.string().optional(),
+  isOrchestrator: z.boolean().optional().default(false),
   name: z.string().min(1, "Name is required"),
   description: z.string().optional().default(""),
   purpose: z.string().optional().default(""),
@@ -434,6 +438,7 @@ export type InsertToolbox = z.infer<typeof insertToolboxSchema>;
 export type Toolbox = InsertToolbox & {
   id: string;
   isActive: boolean;
+  isOrchestrator: boolean;
   createdAt: string;
 };
 

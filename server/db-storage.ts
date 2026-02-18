@@ -278,7 +278,9 @@ export class DatabaseStorage implements IStorage {
         totalAgents += agentRows.length;
         toolboxesWithAgents.push({
           id: String(tb.id),
-          bigIdeaId: String(tb.bigIdeaId),
+          bigIdeaId: tb.bigIdeaId ? String(tb.bigIdeaId) : undefined,
+          seriesId: tb.seriesId ? String(tb.seriesId) : undefined,
+          isOrchestrator: tb.isOrchestrator || false,
           name: tb.name,
           description: tb.description || "",
           purpose: tb.purpose || "",
@@ -533,14 +535,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Toolbox methods
-  async getToolboxes(bigIdeaId?: string): Promise<Toolbox[]> {
+  async getToolboxes(bigIdeaId?: string, seriesId?: string): Promise<Toolbox[]> {
     const query = bigIdeaId 
       ? db.select().from(toolboxes).where(eq(toolboxes.bigIdeaId, parseInt(bigIdeaId))).orderBy(toolboxes.sortOrder)
-      : db.select().from(toolboxes).orderBy(toolboxes.sortOrder);
+      : seriesId
+        ? db.select().from(toolboxes).where(eq(toolboxes.seriesId, parseInt(seriesId))).orderBy(toolboxes.sortOrder)
+        : db.select().from(toolboxes).orderBy(toolboxes.sortOrder);
     const result = await query;
     return result.map(row => ({
       id: String(row.id),
-      bigIdeaId: String(row.bigIdeaId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      isOrchestrator: row.isOrchestrator || false,
       name: row.name,
       description: row.description || "",
       purpose: row.purpose || "",
@@ -558,7 +564,9 @@ export class DatabaseStorage implements IStorage {
     const row = result[0];
     return {
       id: String(row.id),
-      bigIdeaId: String(row.bigIdeaId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      isOrchestrator: row.isOrchestrator || false,
       name: row.name,
       description: row.description || "",
       purpose: row.purpose || "",
@@ -576,7 +584,9 @@ export class DatabaseStorage implements IStorage {
     const row = result[0];
     return {
       id: String(row.id),
-      bigIdeaId: String(row.bigIdeaId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      isOrchestrator: row.isOrchestrator || false,
       name: row.name,
       description: row.description || "",
       purpose: row.purpose || "",
@@ -591,7 +601,9 @@ export class DatabaseStorage implements IStorage {
   async createToolbox(insertToolbox: InsertToolbox): Promise<Toolbox> {
     await db.update(toolboxes).set({ isActive: false });
     const result = await db.insert(toolboxes).values({
-      bigIdeaId: parseInt(insertToolbox.bigIdeaId),
+      bigIdeaId: insertToolbox.bigIdeaId ? parseInt(insertToolbox.bigIdeaId) : null,
+      seriesId: insertToolbox.seriesId ? parseInt(insertToolbox.seriesId) : null,
+      isOrchestrator: insertToolbox.isOrchestrator || false,
       name: insertToolbox.name,
       description: insertToolbox.description || "",
       purpose: insertToolbox.purpose || "",
@@ -603,7 +615,9 @@ export class DatabaseStorage implements IStorage {
     const row = result[0];
     return {
       id: String(row.id),
-      bigIdeaId: String(row.bigIdeaId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      isOrchestrator: row.isOrchestrator || false,
       name: row.name,
       description: row.description || "",
       purpose: row.purpose || "",
@@ -623,6 +637,9 @@ export class DatabaseStorage implements IStorage {
     if (data.capabilities !== undefined) updateData.capabilities = data.capabilities;
     if (data.limitations !== undefined) updateData.limitations = data.limitations;
     if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
+    if (data.isOrchestrator !== undefined) updateData.isOrchestrator = data.isOrchestrator;
+    if (data.seriesId !== undefined) updateData.seriesId = data.seriesId ? parseInt(data.seriesId) : null;
+    if (data.bigIdeaId !== undefined) updateData.bigIdeaId = data.bigIdeaId ? parseInt(data.bigIdeaId) : null;
     
     const result = await db.update(toolboxes)
       .set(updateData)
@@ -632,7 +649,9 @@ export class DatabaseStorage implements IStorage {
     const row = result[0];
     return {
       id: String(row.id),
-      bigIdeaId: String(row.bigIdeaId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      isOrchestrator: row.isOrchestrator || false,
       name: row.name,
       description: row.description || "",
       purpose: row.purpose || "",
@@ -654,7 +673,31 @@ export class DatabaseStorage implements IStorage {
     const row = result[0];
     return {
       id: String(row.id),
-      bigIdeaId: String(row.bigIdeaId),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      isOrchestrator: row.isOrchestrator || false,
+      name: row.name,
+      description: row.description || "",
+      purpose: row.purpose || "",
+      capabilities: (row.capabilities as string[]) || [],
+      limitations: (row.limitations as string[]) || [],
+      sortOrder: row.sortOrder || 0,
+      isActive: row.isActive || false,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getOrchestratorToolbox(seriesId: string): Promise<Toolbox | null> {
+    const result = await db.select().from(toolboxes)
+      .where(and(eq(toolboxes.seriesId, parseInt(seriesId)), eq(toolboxes.isOrchestrator, true)))
+      .limit(1);
+    if (result.length === 0) return null;
+    const row = result[0];
+    return {
+      id: String(row.id),
+      bigIdeaId: row.bigIdeaId ? String(row.bigIdeaId) : undefined,
+      seriesId: row.seriesId ? String(row.seriesId) : undefined,
+      isOrchestrator: row.isOrchestrator || false,
       name: row.name,
       description: row.description || "",
       purpose: row.purpose || "",

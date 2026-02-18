@@ -56,12 +56,17 @@ import { SeriesManagementDialog } from "@/components/series-management-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAgents, useActiveAgent, useSetActiveAgent } from "@/hooks/use-agents";
 import { useBigIdeas, useActiveBigIdea, useActivateBigIdea, useDeleteBigIdea } from "@/hooks/use-big-ideas";
-import { useToolboxes, useActiveToolbox, useActivateToolbox, useDeleteToolbox } from "@/hooks/use-toolboxes";
+import { useToolboxes, useActiveToolbox, useActivateToolbox, useDeleteToolbox, useOrchestratorToolbox, useCreateToolbox } from "@/hooks/use-toolboxes";
 import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
 type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing";
@@ -91,6 +96,9 @@ export default function Dashboard() {
   const [activeNav, setActiveNav] = useState<NavItem>("persona");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createAsOrchestrator, setCreateAsOrchestrator] = useState(false);
+  const [hubDialogOpen, setHubDialogOpen] = useState(false);
+  const [hubName, setHubName] = useState("");
+  const [hubDescription, setHubDescription] = useState("");
   const [bigIdeaDialogOpen, setBigIdeaDialogOpen] = useState(false);
   const [toolboxDialogOpen, setToolboxDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -182,9 +190,11 @@ export default function Dashboard() {
   const deleteBigIdea = useDeleteBigIdea();
   
   const { data: toolboxes = [] } = useToolboxes(effectiveBigIdeaId);
+  const { data: orchestratorHub } = useOrchestratorToolbox(activeSeriesId);
   const { data: activeToolbox } = useActiveToolbox();
   const activateToolbox = useActivateToolbox();
   const deleteToolbox = useDeleteToolbox();
+  const createToolboxMutation = useCreateToolbox();
 
   const effectiveToolboxId = localToolboxId || activeToolbox?.id;
   const shouldFetchAgents = !!effectiveToolboxId;
@@ -309,6 +319,29 @@ export default function Dashboard() {
       setDeleteToolboxConfirm(null);
     } catch (error) {
       toast({ title: "Error", description: "Gagal menghapus Chatbot", variant: "destructive" });
+    }
+  };
+
+  const handleCreateHub = async () => {
+    if (!hubName.trim() || !activeSeriesId) return;
+    try {
+      await createToolboxMutation.mutateAsync({
+        seriesId: activeSeriesId,
+        isOrchestrator: true,
+        name: hubName.trim(),
+        description: hubDescription.trim(),
+        purpose: "",
+        capabilities: [],
+        limitations: [],
+        sortOrder: 0,
+      });
+      setHubDialogOpen(false);
+      setHubName("");
+      setHubDescription("");
+      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes/orchestrator"] });
+      toast({ title: "Berhasil", description: "Chatbot Orkestrator berhasil dibuat" });
+    } catch (error: any) {
+      toast({ title: "Error", description: error?.message || "Gagal membuat Chatbot Orkestrator", variant: "destructive" });
     }
   };
 
@@ -567,6 +600,59 @@ export default function Dashboard() {
                     <ArrowLeft className="w-3 h-3" />
                     <span>Kembali ke Tujuan</span>
                   </button>
+                  {orchestratorHub ? (
+                    <div
+                      className={cn(
+                        "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors mb-2 border border-purple-500/30",
+                        orchestratorHub.isActive
+                          ? "bg-purple-500/15 text-purple-700 dark:text-purple-300"
+                          : "text-purple-600/70 dark:text-purple-400/70 hover:bg-purple-500/10"
+                      )}
+                      onClick={() => handleToolboxDrillDown(orchestratorHub)}
+                      data-testid="nav-hub-orchestrator"
+                    >
+                      <Network className="w-4 h-4 text-purple-500 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="truncate block">{orchestratorHub.name}</span>
+                        <span className="text-[10px] text-purple-500/70">Orkestrator</span>
+                      </div>
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <div className="invisible group-hover:visible flex items-center gap-0.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5"
+                            onClick={(e) => { e.stopPropagation(); handleEditToolbox(orchestratorHub); }}
+                            data-testid="button-edit-hub"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 text-destructive"
+                            onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(orchestratorHub); }}
+                            data-testid="button-delete-hub"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                      </div>
+                    </div>
+                  ) : activeSeriesId ? (
+                    <button
+                      onClick={() => setHubDialogOpen(true)}
+                      className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors mb-2 border border-dashed border-purple-500/30"
+                      data-testid="button-create-hub"
+                    >
+                      <Network className="w-4 h-4" />
+                      <span>Buat Chatbot Orkestrator</span>
+                    </button>
+                  ) : null}
+                  {(orchestratorHub || activeSeriesId) && (
+                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 py-1">Perspektif</div>
+                  )}
                   {filteredBigIdeas.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
                       Belum ada Perspektif
@@ -686,29 +772,25 @@ export default function Dashboard() {
                     <Plus className="w-4 h-4" />
                     <span>Buat Chatbot Baru</span>
                   </button>
-                  <button
-                    onClick={() => {
-                      setCreateDialogOpen(true);
-                      setCreateAsOrchestrator(true);
-                    }}
-                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors"
-                    data-testid="button-add-orchestrator"
-                  >
-                    <Network className="w-4 h-4" />
-                    <span>Buat Orchestrator</span>
-                  </button>
                 </>
               )}
 
               {navLevel === 'agents' && (
                 <>
                   <button
-                    onClick={() => navigateToLevel('toolboxes')}
+                    onClick={() => {
+                      const activeToolboxData = toolboxes.find(t => String(t.id) === effectiveToolboxId) || orchestratorHub;
+                      if (activeToolboxData?.isOrchestrator) {
+                        navigateToLevel('bigIdeas');
+                      } else {
+                        navigateToLevel('toolboxes');
+                      }
+                    }}
                     className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors mb-1"
                     data-testid="button-back-to-toolboxes"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Kembali ke Chatbot</span>
+                    <span>{orchestratorHub && String(effectiveToolboxId) === String(orchestratorHub.id) ? "Kembali ke Perspektif" : "Kembali ke Chatbot"}</span>
                   </button>
                   {agentsLoading ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">Memuat...</div>
@@ -1099,6 +1181,39 @@ export default function Dashboard() {
       )}
       <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
       <SeriesManagementDialog open={seriesDialogOpen} onOpenChange={setSeriesDialogOpen} />
+
+      <Dialog open={hubDialogOpen} onOpenChange={(open) => { setHubDialogOpen(open); if (!open) { setHubName(""); setHubDescription(""); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Network className="h-5 w-5 text-purple-500" />
+              Buat Chatbot Orkestrator
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg space-y-2">
+              <h4 className="font-medium text-purple-900 dark:text-purple-100">Apa itu Chatbot Orkestrator?</h4>
+              <p className="text-sm text-purple-700 dark:text-purple-300">
+                Chatbot Orkestrator (HUB) adalah pintu masuk utama ekosistem multi-chatbot. Ia mengarahkan pengguna ke chatbot spesialis yang tepat, menjaga alur prasyarat, dan menyimpan konteks lintas chatbot. Setiap Tujuan hanya memiliki 1 Orkestrator.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hub-name">Nama Orkestrator *</Label>
+              <Input id="hub-name" placeholder="Contoh: HUB Regulasi Konstruksi" value={hubName} onChange={(e) => setHubName(e.target.value)} data-testid="input-hub-name" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hub-desc">Deskripsi</Label>
+              <Textarea id="hub-desc" placeholder="Jelaskan peran orkestrator ini..." value={hubDescription} onChange={(e) => setHubDescription(e.target.value)} rows={3} data-testid="input-hub-description" />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setHubDialogOpen(false)}>Batal</Button>
+              <Button onClick={handleCreateHub} disabled={createToolboxMutation.isPending || !hubName.trim()} data-testid="button-submit-hub">
+                {createToolboxMutation.isPending ? "Membuat..." : "Buat Orkestrator"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {editingBigIdea && (
         <EditBigIdeaDialog

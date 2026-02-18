@@ -45,11 +45,13 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
     try {
       await createToolbox.mutateAsync({
         bigIdeaId: bigIdea.id,
+        isOrchestrator: false,
         name: name.trim(),
         description: description.trim(),
         purpose: purpose.trim(),
         capabilities: capabilities.filter(c => c.trim()),
         limitations: limitations.filter(l => l.trim()),
+        sortOrder: 0,
       });
       onCreated?.();
       

@@ -31,6 +31,19 @@ export function useToolboxes(bigIdeaId?: number | string) {
   });
 }
 
+export function useOrchestratorToolbox(seriesId?: string | null) {
+  return useQuery<Toolbox | null>({
+    queryKey: ["/api/toolboxes/orchestrator", seriesId],
+    queryFn: async () => {
+      if (!seriesId) return null;
+      const res = await fetch(`/api/toolboxes/orchestrator/${seriesId}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch orchestrator");
+      return res.json();
+    },
+    enabled: !!seriesId,
+  });
+}
+
 export function useActiveToolbox() {
   return useQuery<Toolbox | null>({
     queryKey: ["/api/toolboxes/active"],

@@ -330,23 +330,40 @@ export default function Documentation() {
                   <li>Buat <strong>Alat Bantu</strong> di dalam Chatbot</li>
                 </ol>
 
-                <h3>Orchestrator</h3>
+                <h3>Chatbot Orkestrator (HUB)</h3>
                 <p>
-                  Di setiap Perspektif, Anda bisa membuat satu <strong>Orchestrator</strong> yang berfungsi sebagai 
-                  pintu masuk utama dan pengarah ke chatbot-chatbot lainnya. Orchestrator beroperasi 
-                  di atas semua Chatbot dalam Perspektif tersebut.
+                  Di setiap Tujuan, Anda bisa membuat satu <strong>Chatbot Orkestrator</strong> (HUB) yang berfungsi sebagai 
+                  pintu masuk utama ekosistem multi-chatbot. Orkestrator berada langsung di bawah Tujuan 
+                  (bukan di dalam Perspektif manapun) dan mengoordinasi semua chatbot spesialis lintas Perspektif.
+                </p>
+                <ul>
+                  <li><strong>Routing</strong> - Mengarahkan pengguna ke chatbot spesialis yang tepat</li>
+                  <li><strong>Prasyarat</strong> - Menjaga urutan logis antar chatbot (sortOrder)</li>
+                  <li><strong>Konteks</strong> - Menyimpan dan meneruskan konteks lintas chatbot</li>
+                  <li><strong>Intake</strong> - Memetakan kondisi dan kebutuhan pengguna</li>
+                </ul>
+
+                <h3>Ekosistem Multi-Chatbot</h3>
+                <p>
+                  Ketika sebuah Tujuan memiliki Orkestrator + beberapa chatbot spesialis yang saling 
+                  terhubung dengan alur prasyarat, itu disebut <strong>ekosistem multi-chatbot</strong>. 
+                  Bukan satu AI besar, tapi banyak AI spesialis yang bekerja dalam satu arsitektur.
                 </p>
 
                 <div className="bg-muted p-4 rounded-lg not-prose">
                   <p className="font-medium mb-2">Contoh Hierarki Lengkap:</p>
                   <p className="text-sm text-muted-foreground">
-                    <strong>Tujuan:</strong> CIVILPRO (Konstruksi &amp; Infrastruktur)<br />
+                    <strong>Tujuan:</strong> Regulasi Jasa Konstruksi<br />
+                    &nbsp;&nbsp;<strong>Orkestrator:</strong> HUB Regulasi Konstruksi<br />
                     &nbsp;&nbsp;<strong>Perspektif:</strong> Kepatuhan &amp; Compliance<br />
-                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 1. SBU &amp; Klasifikasi<br />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Panduan SBU Konstruksi<br />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Kalkulator Klasifikasi<br />
-                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 2. SKK &amp; Tenaga Ahli<br />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Panduan SKK<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 1. Perijinan Usaha Dasar<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 2. SKK (Sertifikat Kompetensi)<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 3. SBU (Sertifikat Badan Usaha)<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Panduan SBU<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Mapping Subklasifikasi<br />
+                    &nbsp;&nbsp;<strong>Perspektif:</strong> Pengembangan Bisnis<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 4. Tender &amp; LPSE<br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 5. Kemitraan &amp; JO<br />
                   </p>
                 </div>
               </CardContent>
