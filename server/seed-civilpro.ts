@@ -50,7 +50,7 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "SKK Ahli Utama",
+            name: "1. SKK Ahli Utama",
             description: "Domain persiapan SKK untuk jenjang Ahli Utama - penanggung jawab teknis tingkat tertinggi",
             purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Utama",
             capabilities: ["Materi unit kompetensi Ahli Utama", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
@@ -62,7 +62,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "SKK Ahli Madya",
+            name: "2. SKK Ahli Madya",
             description: "Domain persiapan SKK untuk jenjang Ahli Madya - pelaksana teknis senior",
             purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Madya",
             capabilities: ["Materi unit kompetensi Ahli Madya", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
@@ -74,7 +74,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "SKK Ahli Muda",
+            name: "3. SKK Ahli Muda",
             description: "Domain persiapan SKK untuk jenjang Ahli Muda - pelaksana teknis junior",
             purpose: "Pembekalan dan simulasi uji kompetensi SKK level Ahli Muda",
             capabilities: ["Materi unit kompetensi Ahli Muda", "Simulasi ujian tertulis", "Latihan wawancara asesmen", "Panduan portofolio"],
@@ -86,7 +86,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "SKK Operator & Teknisi",
+            name: "4. SKK Operator & Teknisi",
             description: "Domain persiapan SKK untuk jenjang Operator dan Teknisi - pelaksana operasional lapangan",
             purpose: "Pembekalan dan simulasi uji kompetensi SKK level Operator dan Teknisi",
             capabilities: ["Materi operasional lapangan", "Simulasi ujian praktik", "Panduan keselamatan kerja", "Checklist kompetensi"],
@@ -109,7 +109,7 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "Diagnosis Struktur",
+            name: "1. Diagnosis Struktur",
             description: "Domain diagnosis dan pemecahan masalah struktur: beton, baja, pondasi",
             purpose: "Membantu menganalisis kerusakan dan kegagalan struktur",
             capabilities: ["Analisis retak beton", "Evaluasi kapasitas struktur", "Diagnosis pondasi", "Rekomendasi perkuatan"],
@@ -120,7 +120,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Quality Control & Mutu",
+            name: "2. Quality Control & Mutu",
             description: "Domain pengendalian mutu material dan pekerjaan konstruksi",
             purpose: "Membantu identifikasi masalah mutu dan memastikan kepatuhan standar",
             capabilities: ["Inspeksi material", "Uji mutu beton/baja", "Checklist inspeksi", "Kepatuhan SNI"],
@@ -131,7 +131,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Pengambilan Keputusan Proyek",
+            name: "3. Pengambilan Keputusan Proyek",
             description: "Domain decision support untuk keputusan proyek konstruksi berbasis multi-kriteria",
             purpose: "Membantu pengambilan keputusan proyek yang terukur dan defensible",
             capabilities: ["Analisis multi-kriteria", "Cost-benefit analysis", "Risk assessment", "Value engineering"],
@@ -142,7 +142,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Dokumentasi Teknis",
+            name: "4. Dokumentasi Teknis",
             description: "Domain penyusunan dokumen teknis dan laporan proyek konstruksi",
             purpose: "Membantu penyusunan dokumen teknis yang terstandar",
             capabilities: ["Metode pelaksanaan", "Laporan harian/mingguan", "Method statement", "Dokumen as-built"],
@@ -153,7 +153,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Risiko & K3",
+            name: "5. Risiko & K3",
             description: "Domain manajemen risiko proyek dan keselamatan kesehatan kerja konstruksi",
             purpose: "Meminimalkan risiko proyek dan meningkatkan keselamatan kerja",
             capabilities: ["Risk assessment", "JSA/HIRARC", "Rencana K3", "Investigasi insiden"],
@@ -176,7 +176,7 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "Transformasi Digital",
+            name: "1. Transformasi Digital",
             description: "Domain adopsi teknologi digital: BIM, IoT, AI, drone dalam konstruksi",
             purpose: "Memandu penerapan teknologi digital di proyek konstruksi",
             capabilities: ["Implementasi BIM", "IoT monitoring", "AI dalam konstruksi", "Drone survey"],
@@ -187,7 +187,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Green Construction",
+            name: "2. Green Construction",
             description: "Domain konstruksi berkelanjutan dan ramah lingkungan",
             purpose: "Mendorong penerapan prinsip sustainability dalam konstruksi",
             capabilities: ["Green building certification", "Material berkelanjutan", "Efisiensi energi", "Life cycle assessment"],
@@ -197,7 +197,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Optimasi Metode Konstruksi",
+            name: "3. Optimasi Metode Konstruksi",
             description: "Domain inovasi dan optimasi metode pelaksanaan konstruksi",
             purpose: "Meningkatkan efisiensi dan kualitas melalui inovasi metode",
             capabilities: ["Lean construction", "Prefabrikasi", "Modular construction", "Optimasi jadwal"],
@@ -220,7 +220,7 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "Fundamental Engineering",
+            name: "1. Fundamental Engineering",
             description: "Domain pembelajaran dasar teknik sipil: mekanika, struktur, hidrologi, geoteknik",
             purpose: "Menyediakan materi edukasi dasar teknik sipil secara bertahap",
             capabilities: ["Mekanika struktur", "Hidrologi dasar", "Geoteknik dasar", "Material konstruksi"],
@@ -231,7 +231,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Standar & Kode Teknis",
+            name: "2. Standar & Kode Teknis",
             description: "Domain pemahaman standar dan regulasi teknis konstruksi Indonesia",
             purpose: "Menguasai standar teknis yang berlaku di konstruksi Indonesia",
             capabilities: ["SNI beton & baja", "Standar gempa", "Kode bangunan", "Interpretasi standar"],
@@ -241,7 +241,7 @@ export async function seedCivilproEcosystem(userId: string) {
             ]
           },
           {
-            name: "Keterampilan Praktis Lapangan",
+            name: "3. Keterampilan Praktis Lapangan",
             description: "Domain pengembangan keterampilan praktis untuk pelaksanaan dan pengawasan proyek",
             purpose: "Mengembangkan kemampuan praktis lapangan untuk profesional konstruksi",
             capabilities: ["Supervisi pekerjaan", "Pengukuran dan survey", "Manajemen material", "Koordinasi subkontraktor"],
