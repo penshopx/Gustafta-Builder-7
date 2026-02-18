@@ -354,8 +354,39 @@ export default function Dashboard() {
       .slice(0, 2);
   };
 
+  const currentToolbox = localToolboxId
+    ? [...toolboxes, orchestratorHub].find(tb => tb && String(tb.id) === localToolboxId)
+    : activeToolbox;
+  const isCurrentToolboxHub = currentToolbox?.isOrchestrator === true;
+
   const renderPanel = () => {
     if (!activeAgent) {
+      if (isCurrentToolboxHub && currentToolbox) {
+        return (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center space-y-4 md:space-y-6 max-w-lg">
+              <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-purple-500/10 flex items-center justify-center">
+                <Network className="w-8 h-8 md:w-10 md:h-10 text-purple-500" />
+              </div>
+              <div>
+                <h2 className="text-lg md:text-xl font-semibold text-foreground">{currentToolbox.name}</h2>
+                <p className="text-sm md:text-base text-muted-foreground mt-2">
+                  {currentToolbox.description || "Chatbot Orkestrator (HUB) mengoordinasikan semua chatbot spesialis dalam ekosistem ini."}
+                </p>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Buat Alat Bantu pertama untuk mulai mengatur persona dan fungsi orkestrasi HUB Anda.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Buat Alat Bantu HUB
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      }
       return (
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="text-center space-y-4 md:space-y-6 max-w-lg">
@@ -451,6 +482,7 @@ export default function Dashboard() {
   const handleToolboxDrillDown = (tb: Toolbox) => {
     setLocalToolboxId(String(tb.id));
     handleToolboxSelect(tb);
+    queryClient.setQueryData(["/api/agents/active"], null);
     setNavLevel('agents');
   };
 
@@ -992,6 +1024,16 @@ export default function Dashboard() {
                       {activeAgent.orchestratorRole === "orchestrator" && (
                         <Badge variant="secondary" className="text-[10px] md:text-xs hidden sm:inline-flex">Orchestrator</Badge>
                       )}
+                    </>
+                  ) : isCurrentToolboxHub && currentToolbox ? (
+                    <>
+                      <Avatar className="w-5 h-5 md:w-6 md:h-6">
+                        <AvatarFallback className="text-[10px] md:text-xs bg-purple-500/10 text-purple-500">
+                          <Network className="w-3 h-3" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium text-sm md:text-base truncate">{currentToolbox.name}</span>
+                      <Badge variant="secondary" className="text-[10px] md:text-xs hidden sm:inline-flex">HUB</Badge>
                     </>
                   ) : (
                     <span className="text-muted-foreground text-sm">Pilih Alat Bantu</span>
