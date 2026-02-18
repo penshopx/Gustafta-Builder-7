@@ -51,7 +51,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "SBU (Sertifikasi Badan Usaha)",
+            name: "1. SBU (Sertifikasi Badan Usaha)",
             description: "Domain sertifikasi badan usaha jasa konstruksi melalui LPJK/OSS",
             purpose: "Memandu proses pengurusan, perpanjangan, dan peningkatan SBU",
             capabilities: ["Klasifikasi & kualifikasi SBU", "Proses pengajuan baru", "Perpanjangan & peningkatan grade", "Persyaratan PJT/PJBU"],
@@ -63,7 +63,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
             ]
           },
           {
-            name: "SKK (Sertifikasi Kompetensi Kerja)",
+            name: "2. SKK (Sertifikasi Kompetensi Kerja)",
             description: "Domain sertifikasi kompetensi kerja untuk tenaga kerja konstruksi",
             purpose: "Membantu persiapan dan pengurusan SKK di semua jenjang",
             capabilities: ["Jenjang kualifikasi SKK", "Persiapan portofolio", "Simulasi ujian", "Pemeliharaan sertifikat"],
@@ -75,7 +75,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
             ]
           },
           {
-            name: "Perijinan Usaha",
+            name: "3. Perijinan Usaha",
             description: "Domain perijinan usaha jasa konstruksi melalui OSS dan instansi terkait",
             purpose: "Memandu pengurusan NIB, IUJK, dan izin operasional konstruksi",
             capabilities: ["Registrasi OSS/NIB", "Pengurusan IUJK", "KBLI konstruksi", "Kepatuhan PP 14/2021"],
@@ -87,7 +87,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
             ]
           },
           {
-            name: "Standar & Regulasi Teknis",
+            name: "4. Standar & Regulasi Teknis",
             description: "Domain standar nasional dan regulasi teknis yang berlaku di sektor konstruksi",
             purpose: "Membantu pemahaman dan penerapan SNI, UU, PP, dan Permen terkait konstruksi",
             capabilities: ["UU 2/2017 Jasa Konstruksi", "SNI konstruksi", "Permen PUPR", "Interpretasi regulasi"],
@@ -110,7 +110,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "Tender & Pengadaan",
+            name: "1. Tender & Pengadaan",
             description: "Domain tender dan pengadaan jasa konstruksi baik pemerintah maupun swasta",
             purpose: "Membantu perusahaan mengikuti dan memenangkan tender secara kompetitif",
             capabilities: ["e-Procurement LKPP/LPSE", "Penyusunan dokumen penawaran", "Strategi pricing", "Evaluasi dan negosiasi"],
@@ -122,7 +122,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
             ]
           },
           {
-            name: "Strategi Peningkatan Grade",
+            name: "2. Strategi Peningkatan Grade",
             description: "Domain strategi dan perencanaan peningkatan kualifikasi dan klasifikasi usaha",
             purpose: "Membantu perusahaan merencanakan dan melaksanakan peningkatan kapasitas usaha",
             capabilities: ["Analisis gap kualifikasi", "Roadmap peningkatan", "Strategi penambahan klasifikasi", "Perencanaan sumber daya"],
@@ -133,7 +133,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
             ]
           },
           {
-            name: "Kontrak & Klaim",
+            name: "3. Kontrak & Klaim",
             description: "Domain manajemen kontrak konstruksi, addendum, dan penyelesaian klaim",
             purpose: "Membantu pengelolaan kontrak konstruksi secara efektif dan penyelesaian sengketa",
             capabilities: ["Administrasi kontrak", "Change order", "Klaim dan dispute", "FIDIC dan standar kontrak"],
@@ -156,7 +156,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
         isActive: true,
         toolboxes: [
           {
-            name: "Audit & Inspeksi",
+            name: "1. Audit & Inspeksi",
             description: "Domain persiapan dan pelaksanaan audit kepatuhan dan inspeksi regulasi",
             purpose: "Membantu perusahaan mempersiapkan dan melewati proses audit dengan lancar",
             capabilities: ["Checklist audit kepatuhan", "Simulasi inspeksi", "Dokumentasi bukti kepatuhan", "Remediasi temuan"],
@@ -167,7 +167,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
             ]
           },
           {
-            name: "Monitoring Regulasi",
+            name: "2. Monitoring Regulasi",
             description: "Domain pemantauan perubahan regulasi dan kebijakan sektor konstruksi",
             purpose: "Membantu perusahaan tetap update dengan perubahan regulasi terbaru",
             capabilities: ["Tracking perubahan UU/PP", "Analisis dampak regulasi baru", "Masa transisi regulasi", "Alert regulasi"],
@@ -178,7 +178,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
             ]
           },
           {
-            name: "Sanksi & Penyelesaian",
+            name: "3. Sanksi & Penyelesaian",
             description: "Domain penanganan sanksi, sengketa, dan penyelesaian masalah regulasi",
             purpose: "Membantu perusahaan menangani dan menyelesaikan masalah sanksi atau sengketa regulasi",
             capabilities: ["Jenis sanksi dan remedi", "Prosedur banding", "Mediasi dan arbitrase", "Pencegahan pengulangan"],
