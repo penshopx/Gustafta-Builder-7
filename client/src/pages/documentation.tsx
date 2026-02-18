@@ -197,21 +197,22 @@ const managementSystems: DocCard[] = [
 ];
 
 function DocCardComponent({ doc }: { doc: DocCard }) {
+  const testId = `card-doc-${doc.href.replace('#', '')}`;
   return (
-    <a href={doc.href}>
-      <Card className="h-full hover-elevate cursor-pointer transition-all">
+    <a href={doc.href} data-testid={`link-doc-${doc.href.replace('#', '')}`}>
+      <Card className="h-full hover-elevate cursor-pointer transition-all" data-testid={testId}>
         <CardHeader className="pb-3">
           <div className="flex items-start gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
               <doc.icon className="h-5 w-5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-base">{doc.title}</CardTitle>
+              <CardTitle className="text-base" data-testid={`text-doc-title-${doc.href.replace('#', '')}`}>{doc.title}</CardTitle>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <p className="text-sm text-muted-foreground mb-3">{doc.description}</p>
+          <p className="text-sm text-muted-foreground mb-3" data-testid={`text-doc-desc-${doc.href.replace('#', '')}`}>{doc.description}</p>
           <div className="flex flex-wrap gap-1">
             {doc.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
@@ -965,6 +966,189 @@ export default function Documentation() {
             </Card>
           </section>
 
+          <section id="embed" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Puzzle className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Web Widget Embed</CardTitle>
+                    <p className="text-muted-foreground">Pasang chatbot di website manapun</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Widget adalah bubble chat yang bisa dipasang di website manapun. Pengunjung website 
+                  bisa langsung chat dengan chatbot Anda tanpa meninggalkan halaman.
+                </p>
+
+                <h3>Kustomisasi Widget</h3>
+                <ul>
+                  <li><strong>Warna</strong> - Sesuaikan dengan brand Anda</li>
+                  <li><strong>Posisi</strong> - Kiri bawah atau kanan bawah</li>
+                  <li><strong>Ukuran</strong> - Kecil, sedang, atau besar</li>
+                  <li><strong>Border Radius</strong> - Kotak atau membulat</li>
+                  <li><strong>Ikon</strong> - Pilih ikon button (chat, help, robot)</li>
+                  <li><strong>Branding</strong> - Tampilkan/sembunyikan "Powered by Gustafta"</li>
+                </ul>
+
+                <h3>Cara Memasang</h3>
+                <ol>
+                  <li>Pilih alat bantu dari sidebar</li>
+                  <li>Buka tab <strong>Widget</strong></li>
+                  <li>Kustomisasi tampilan widget</li>
+                  <li>Copy kode embed yang disediakan</li>
+                  <li>Paste ke website Anda (sebelum tag &lt;/body&gt;)</li>
+                  <li>Widget langsung aktif dan konfigurasi diambil otomatis dari server</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="api" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Code className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">API Integration</CardTitle>
+                    <p className="text-muted-foreground">Integrasikan chatbot ke aplikasi Anda</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Gustafta menyediakan REST API untuk integrasi kustom ke aplikasi Anda.
+                </p>
+
+                <h3>Endpoint Utama</h3>
+                <ul>
+                  <li><strong>GET /api/agents/:id</strong> - Ambil konfigurasi chatbot</li>
+                  <li><strong>POST /api/messages/stream</strong> - Kirim pesan dan terima respons streaming</li>
+                  <li><strong>GET /api/messages/:agentId</strong> - Ambil riwayat pesan</li>
+                </ul>
+
+                <h3>Autentikasi</h3>
+                <p>
+                  Gunakan Access Token yang tersedia di pengaturan chatbot untuk autentikasi API.
+                </p>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="revenue" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Revenue & Klien</CardTitle>
+                    <p className="text-muted-foreground">Pantau pendapatan dan kelola klien</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Pantau pendapatan dari chatbot berbayar dan kelola langganan klien end-user.
+                </p>
+
+                <h3>Fitur</h3>
+                <ul>
+                  <li><strong>Dashboard Revenue</strong> - Lihat total pendapatan dan tren</li>
+                  <li><strong>Daftar Klien</strong> - Kelola langganan end-user chatbot Anda</li>
+                  <li><strong>Integrasi Mayar.id</strong> - Pembayaran otomatis via payment gateway</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Buka tab <strong>Revenue & Klien</strong> di dashboard</li>
+                  <li>Lihat ringkasan pendapatan dan daftar klien</li>
+                  <li>Kelola status langganan klien</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="affiliate" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Afiliasi</CardTitle>
+                    <p className="text-muted-foreground">Program referral dan partner</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  Program afiliasi memungkinkan Anda membuat link referral untuk mengajak pengguna baru 
+                  ke chatbot Anda dan mendapatkan komisi.
+                </p>
+
+                <h3>Fitur</h3>
+                <ul>
+                  <li><strong>Link Referral</strong> - Buat link unik untuk setiap affiliate</li>
+                  <li><strong>Tracking Komisi</strong> - Pantau performa dan komisi affiliate</li>
+                  <li><strong>Manajemen Partner</strong> - Kelola daftar affiliate</li>
+                </ul>
+
+                <h3>Cara Menggunakan</h3>
+                <ol>
+                  <li>Buka tab <strong>Afiliasi</strong> di dashboard</li>
+                  <li>Buat affiliate baru dengan link referral</li>
+                  <li>Bagikan link ke partner</li>
+                  <li>Pantau performa dan komisi</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="access-control" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Key className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">Access Control</CardTitle>
+                    <p className="text-muted-foreground">Keamanan dan kontrol akses chatbot</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <h3>Access Token</h3>
+                <ul>
+                  <li>Token unik untuk setiap chatbot</li>
+                  <li>Digunakan untuk akses API</li>
+                  <li>Bisa di-regenerate jika bocor</li>
+                </ul>
+
+                <h3>Public/Private Mode</h3>
+                <ul>
+                  <li><strong>Public</strong> - Chatbot bisa diakses siapa saja</li>
+                  <li><strong>Private</strong> - Hanya domain tertentu yang bisa akses widget</li>
+                </ul>
+
+                <h3>Allowed Domains</h3>
+                <p>
+                  Daftar domain website yang diizinkan mengakses widget. 
+                  Contoh: mywebsite.com, shop.mywebsite.com
+                </p>
+              </CardContent>
+            </Card>
+          </section>
+
           <section id="iso-37001" className="mb-12 scroll-mt-20">
             <Card>
               <CardHeader>
@@ -1023,6 +1207,36 @@ export default function Documentation() {
                   <li><strong>HIRADC</strong> - Informasi hazard identification dan risk assessment</li>
                   <li><strong>APD</strong> - Panduan penggunaan alat pelindung diri</li>
                   <li><strong>Tanggap Darurat</strong> - Prosedur emergency response</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="iso-9001" className="mb-12 scroll-mt-20">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Shield className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl">ISO 9001:2015 - Sistem Manajemen Mutu</CardTitle>
+                    <p className="text-muted-foreground">Quality Management System (QMS)</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="prose prose-sm dark:prose-invert max-w-none">
+                <p>
+                  ISO 9001:2015 adalah standar internasional untuk sistem manajemen mutu. 
+                  Chatbot bisa membantu organisasi dalam implementasi dan pemeliharaan QMS.
+                </p>
+                
+                <h3>Penggunaan Chatbot untuk ISO 9001</h3>
+                <ul>
+                  <li><strong>Dokumentasi QMS</strong> - Akses cepat ke prosedur dan kebijakan mutu</li>
+                  <li><strong>Audit Internal</strong> - Panduan pelaksanaan audit mutu internal</li>
+                  <li><strong>Customer Satisfaction</strong> - Pengukuran dan peningkatan kepuasan pelanggan</li>
+                  <li><strong>Continuous Improvement</strong> - Sistem pelaporan dan tindak lanjut ketidaksesuaian</li>
                 </ul>
               </CardContent>
             </Card>
