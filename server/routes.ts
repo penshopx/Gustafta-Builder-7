@@ -900,23 +900,34 @@ export async function registerRoutes(
         return res.status(400).json({ error: parsed.error.message, details: parsed.error.format() });
       }
 
-      // Enforce hierarchy: Orchestrator requires bigIdeaId, Module requires toolboxId
-      const { isOrchestrator, bigIdeaId, toolboxId } = parsed.data;
+      const { isOrchestrator: isOrch, toolboxId } = parsed.data;
       
-      if (isOrchestrator && !bigIdeaId) {
+      if (!toolboxId) {
         return res.status(400).json({ 
-          error: "Orchestrator requires Big Idea",
-          message: "Chatbot orchestrator membutuhkan Big Idea yang aktif.",
-          code: "ORCHESTRATOR_NO_BIGIDEA"
-        });
-      }
-      
-      if (!isOrchestrator && !toolboxId) {
-        return res.status(400).json({ 
-          error: "Module requires Toolbox",
-          message: "Chatbot modul membutuhkan Toolbox yang aktif.",
+          error: "Agent requires Toolbox",
+          message: "Alat Bantu membutuhkan Chatbot/HUB yang aktif.",
           code: "MODULE_NO_TOOLBOX"
         });
+      }
+
+      if (isOrch && toolboxId) {
+        const targetToolbox = await storage.getToolbox(String(toolboxId));
+        if (!targetToolbox || !targetToolbox.isOrchestrator) {
+          return res.status(400).json({
+            error: "Orchestrator must be in HUB",
+            message: "Orchestrator hanya bisa dibuat di dalam Chatbot HUB.",
+            code: "ORCHESTRATOR_NOT_IN_HUB"
+          });
+        }
+        const existingAgents = await storage.getAgents(String(toolboxId));
+        const existingOrchestrator = existingAgents.find(a => a.isOrchestrator);
+        if (existingOrchestrator) {
+          return res.status(400).json({
+            error: "Orchestrator already exists",
+            message: "HUB sudah memiliki 1 orchestrator. Maksimal 1 orchestrator per HUB.",
+            code: "ORCHESTRATOR_EXISTS"
+          });
+        }
       }
       
       // Auto-generate slug from name if not provided

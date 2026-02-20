@@ -194,6 +194,36 @@ export async function seedPerijinanSertifikasi(userId: string) {
     let totalToolboxes = 0;
     let totalAgents = 0;
 
+    const hubToolbox = await storage.createToolbox({
+      name: `Regulasi Jasa Konstruksi HUB`,
+      description: `Chatbot Orkestrator yang mengoordinasikan semua chatbot spesialis dalam Regulasi Jasa Konstruksi.`,
+      isOrchestrator: true,
+      seriesId: seriesId,
+      bigIdeaId: null,
+      isActive: true,
+      sortOrder: 0,
+      purpose: "Mengoordinasikan semua chatbot spesialis dalam Regulasi Jasa Konstruksi",
+      capabilities: [],
+      limitations: [],
+    } as any);
+
+    const orchestrator = await storage.createAgent({
+      name: "Regulasi Jasa Konstruksi Orchestrator",
+      description: "Chatbot orkestrator utama untuk ekosistem Regulasi Jasa Konstruksi. Mengarahkan pengguna ke perspektif dan alat bantu yang tepat.",
+      tagline: "Asisten AI Utama Regulasi Jasa Konstruksi",
+      category: "engineering",
+      subcategory: "construction-regulation",
+      isPublic: true,
+      isOrchestrator: true,
+      aiModel: "gpt-4o",
+      temperature: "0.7",
+      maxTokens: 2048,
+      toolboxId: parseInt(hubToolbox.id),
+      systemPrompt: `Kamu adalah Orchestrator utama untuk ekosistem Regulasi Jasa Konstruksi.\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke perspektif dan alat bantu yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang regulasi jasa konstruksi`,
+      greetingMessage: `Selamat datang di Regulasi Jasa Konstruksi!\n\nSaya adalah asisten utama yang akan membantu mengarahkan Anda ke layanan yang tepat.\n\nSilakan ceritakan kebutuhan Anda.`,
+      personality: "Profesional, terstruktur, dan responsif",
+    } as any);
+
     for (const biData of bigIdeasData) {
       const bigIdea = await storage.createBigIdea({
         seriesId: seriesId,
@@ -205,24 +235,6 @@ export async function seedPerijinanSertifikasi(userId: string) {
         expectedOutcome: biData.expectedOutcome,
         sortOrder: biData.sortOrder,
         isActive: biData.isActive,
-      } as any);
-
-      const orchestrator = await storage.createAgent({
-        name: `Orchestrator ${biData.name}`,
-        description: `Chatbot orkestrator untuk perspektif "${biData.name}" dalam regulasi jasa konstruksi. Mengarahkan pengguna ke domain dan alat bantu yang tepat sesuai kebutuhan mereka.`,
-        tagline: `Orkestrator ${biData.name}`,
-        category: "engineering",
-        subcategory: "construction-regulation",
-        isPublic: true,
-        isOrchestrator: true,
-        aiModel: "gpt-4o",
-        temperature: "0.7",
-        maxTokens: 2048,
-        bigIdeaId: parseInt(bigIdea.id),
-        systemPrompt: `Kamu adalah Orchestrator untuk perspektif "${biData.name}" dalam ekosistem Regulasi Jasa Konstruksi.\n\nDESKRIPSI: ${biData.description}\n\nTUJUAN:\n${biData.goals.map((g: string) => `- ${g}`).join('\n')}\n\nTARGET PENGGUNA: ${biData.targetAudience}\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke domain (toolbox) dan alat bantu (agent) yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke alat spesifik\n4. Menjawab pertanyaan umum tentang ${biData.name.toLowerCase()} di sektor konstruksi`,
-        greetingMessage: `Selamat datang! Saya orkestrator untuk ${biData.name} dalam regulasi jasa konstruksi.\n\n${biData.description}\n\nSilakan ceritakan kebutuhan Anda, dan saya akan mengarahkan ke alat bantu yang paling tepat.`,
-        conversationStarters: JSON.stringify(biData.goals.slice(0, 4)),
-        personality: "Profesional, terstruktur, dan responsif",
       } as any);
 
       for (const tbData of biData.toolboxes) {
@@ -258,11 +270,11 @@ export async function seedPerijinanSertifikasi(userId: string) {
         }
       }
 
-      log(`[Seed] Created Big Idea: ${biData.name} (1 orchestrator, ${biData.toolboxes.length} toolboxes, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
+      log(`[Seed] Created Big Idea: ${biData.name} (${biData.toolboxes.length} toolboxes, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
     }
 
     log(`[Seed] Regulasi Jasa Konstruksi ecosystem created successfully!`);
-    log(`[Seed] Total: 1 Series (Goal), ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat), ${bigIdeasData.length} Orchestrators`);
+    log(`[Seed] Total: 1 Series (Goal), 1 HUB + 1 Orchestrator, ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat)`);
   } catch (error) {
     log(`[Seed] Error creating Regulasi Jasa Konstruksi ecosystem: ${error}`);
   }

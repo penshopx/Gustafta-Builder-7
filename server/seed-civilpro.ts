@@ -261,6 +261,36 @@ export async function seedCivilproEcosystem(userId: string) {
     const bigIdeas: Record<string, any> = {};
     const toolboxes: Record<string, any> = {};
 
+    const hubToolbox = await storage.createToolbox({
+      name: `CIVILPRO HUB`,
+      description: `Chatbot Orkestrator yang mengoordinasikan semua chatbot spesialis dalam CIVILPRO.`,
+      isOrchestrator: true,
+      seriesId: parseInt(series.id),
+      bigIdeaId: null,
+      isActive: true,
+      sortOrder: 0,
+      purpose: "Mengoordinasikan semua chatbot spesialis dalam CIVILPRO",
+      capabilities: [],
+      limitations: [],
+    } as any);
+
+    const orchestrator = await storage.createAgent({
+      name: "CIVILPRO Orchestrator",
+      description: "Chatbot orkestrator utama untuk ekosistem CIVILPRO. Mengarahkan pengguna ke perspektif dan alat bantu yang tepat.",
+      tagline: "Asisten AI Utama Ekosistem CIVILPRO",
+      category: "engineering",
+      subcategory: "civil-engineering",
+      isPublic: true,
+      isOrchestrator: true,
+      aiModel: "gpt-4o",
+      temperature: "0.7",
+      maxTokens: 2048,
+      toolboxId: parseInt(hubToolbox.id),
+      systemPrompt: `Kamu adalah Orchestrator utama untuk ekosistem CIVILPRO.\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke perspektif dan alat bantu yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang teknik sipil`,
+      greetingMessage: `Selamat datang di CIVILPRO!\n\nSaya adalah asisten utama yang akan membantu mengarahkan Anda ke layanan yang tepat.\n\nSilakan ceritakan kebutuhan Anda.`,
+      personality: "Profesional, suportif, terstruktur, dan berbasis data",
+    } as any);
+
     for (const biData of bigIdeasData) {
       const bigIdea = await storage.createBigIdea({
         seriesId: parseInt(series.id),
@@ -274,28 +304,6 @@ export async function seedCivilproEcosystem(userId: string) {
         isActive: biData.isActive,
       } as any);
       bigIdeas[biData.name] = bigIdea;
-
-      const orchestrator = await storage.createAgent({
-        name: biData.name === "Sertifikasi & Kompetensi" ? "SKK Sipil Orchestrator" : 
-              biData.name === "Konsultasi Teknis & Keputusan Proyek" ? "CIVILOPRO" :
-              `Orchestrator ${biData.name}`,
-        description: `Chatbot orkestrator untuk perspektif "${biData.name}" dalam ekosistem CIVILPRO. Mengarahkan pengguna ke domain dan alat bantu yang tepat.`,
-        tagline: biData.name === "Sertifikasi & Kompetensi" ? "Asisten Digital Pembekalan & Simulasi Uji Kompetensi SKK Bidang Sipil" :
-                 biData.name === "Konsultasi Teknis & Keputusan Proyek" ? "Asisten AI untuk Konsultasi Teknis & Keputusan Proyek Konstruksi" :
-                 `Orkestrator ${biData.name} - CIVILPRO`,
-        category: "engineering",
-        subcategory: "civil-engineering",
-        isPublic: true,
-        isOrchestrator: true,
-        aiModel: "gpt-4o",
-        temperature: "0.7",
-        maxTokens: 2048,
-        bigIdeaId: parseInt(bigIdea.id),
-        systemPrompt: `Kamu adalah Orchestrator untuk perspektif "${biData.name}" dalam ekosistem CIVILPRO.\n\nDESKRIPSI: ${biData.description}\n\nTUJUAN:\n${biData.goals.map((g: string) => `- ${g}`).join('\n')}\n\nTARGET PENGGUNA: ${biData.targetAudience}\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke domain (toolbox) dan alat bantu (agent) yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang ${biData.name.toLowerCase()}`,
-        greetingMessage: `Selamat datang di ${biData.name} - CIVILPRO!\n\n${biData.description}\n\nSilakan ceritakan kebutuhan Anda, dan saya akan mengarahkan ke alat bantu yang paling tepat.`,
-        conversationStarters: JSON.stringify(biData.goals.slice(0, 4)),
-        personality: "Profesional, suportif, terstruktur, dan berbasis data",
-      } as any);
 
       for (const tbData of biData.toolboxes) {
         const toolbox = await storage.createToolbox({
@@ -331,11 +339,11 @@ export async function seedCivilproEcosystem(userId: string) {
         }
       }
 
-      log(`[Seed] Created Perspektif: ${biData.name} (1 orchestrator, ${biData.toolboxes.length} domains, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
+      log(`[Seed] Created Perspektif: ${biData.name} (${biData.toolboxes.length} domains, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
     }
 
     log(`[Seed] CIVILPRO ecosystem created successfully!`);
-    log(`[Seed] Total: 1 Series (Goal), ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat), ${bigIdeasData.length} Orchestrators`);
+    log(`[Seed] Total: 1 Series (Goal), 1 HUB + 1 Orchestrator, ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat)`);
   } catch (err) {
     log("[Seed] Failed to create CIVILPRO ecosystem: " + (err as Error).message);
     console.error(err);

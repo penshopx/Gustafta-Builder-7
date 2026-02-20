@@ -22,7 +22,7 @@ export async function fixOrphanedOrchestrators() {
   const allSeries = await db.select().from(series);
 
   for (const seriesRow of allSeries) {
-    const existingHub = await db
+    let existingHub = await db
       .select()
       .from(toolboxes)
       .where(and(eq(toolboxes.isOrchestrator, true), eq(toolboxes.seriesId, seriesRow.id)))
@@ -59,13 +59,27 @@ export async function fixOrphanedOrchestrators() {
 
     const bigIdeaIds = new Set(bigIdeasForSeries.map((bi) => bi.id));
 
+    const hubAgents = await db
+      .select()
+      .from(agents)
+      .where(and(eq(agents.isOrchestrator, true), eq(agents.toolboxId, hubId)));
+    const hubAlreadyHasOrchestrator = hubAgents.length > 0;
+
     for (const agent of orphanedOrchestrators) {
       if (agent.bigIdeaId && bigIdeaIds.has(agent.bigIdeaId)) {
-        await db
-          .update(agents)
-          .set({ toolboxId: hubId })
-          .where(eq(agents.id, agent.id));
-        log(`[Fix] Linked orchestrator "${agent.name}" (id=${agent.id}) to HUB (id=${hubId})`);
+        if (hubAlreadyHasOrchestrator) {
+          await db
+            .update(agents)
+            .set({ toolboxId: hubId, isOrchestrator: false, orchestratorRole: "standalone" })
+            .where(eq(agents.id, agent.id));
+          log(`[Fix] Linked orchestrator "${agent.name}" (id=${agent.id}) to HUB (id=${hubId}) as regular agent (max 1 orchestrator per HUB)`);
+        } else {
+          await db
+            .update(agents)
+            .set({ toolboxId: hubId })
+            .where(eq(agents.id, agent.id));
+          log(`[Fix] Linked orchestrator "${agent.name}" (id=${agent.id}) to HUB (id=${hubId})`);
+        }
       }
     }
   }
@@ -87,9 +101,9 @@ export async function fixOrphanedOrchestrators() {
       if (defaultHub.length > 0) {
         await db
           .update(agents)
-          .set({ toolboxId: defaultHub[0].id })
+          .set({ toolboxId: defaultHub[0].id, isOrchestrator: false, orchestratorRole: "standalone" })
           .where(eq(agents.id, agent.id));
-        log(`[Fix] Linked orphaned orchestrator "${agent.name}" (id=${agent.id}) to default HUB (id=${defaultHub[0].id})`);
+        log(`[Fix] Linked orphaned orchestrator "${agent.name}" (id=${agent.id}) to default HUB (id=${defaultHub[0].id}) as regular agent`);
       }
     }
   }
