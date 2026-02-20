@@ -110,21 +110,12 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
       return;
     }
 
-    // Validation for orchestrator: requires Big Idea
-    if (isOrchestrator && !activeBigIdea) {
+    if (!activeToolbox) {
       toast({
         title: "Validation Error",
-        description: "Orchestrator membutuhkan Perspektif yang aktif.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validation for module: requires Toolbox
-    if (!isOrchestrator && !activeToolbox) {
-      toast({
-        title: "Validation Error",
-        description: "Alat Bantu membutuhkan Chatbot yang aktif. Silakan pilih Chatbot terlebih dahulu.",
+        description: isOrchestrator 
+          ? "Chatbot Orkestrator (HUB) belum dipilih. Silakan masuk ke HUB terlebih dahulu."
+          : "Alat Bantu membutuhkan Chatbot yang aktif. Silakan pilih Chatbot terlebih dahulu.",
         variant: "destructive",
       });
       return;
@@ -135,8 +126,8 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
       name: formData.name.trim(),
       description: formData.description.trim(),
       tagline: formData.tagline.trim(),
-      toolboxId: isOrchestrator ? undefined : activeToolbox?.id,
-      bigIdeaId: isOrchestrator ? activeBigIdea?.id : undefined,
+      toolboxId: activeToolbox?.id,
+      bigIdeaId: activeBigIdea?.id || undefined,
       isOrchestrator: isOrchestrator,
     };
 
