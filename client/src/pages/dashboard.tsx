@@ -799,11 +799,14 @@ export default function Dashboard() {
                       Belum ada Chatbot
                     </div>
                   ) : (
-                    toolboxes.map((tb) => (
+                    toolboxes.map((tb: any) => (
                       <div
                         key={tb.id}
                         className={cn(
                           "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                          tb.hasOrchestrator
+                            ? "border border-purple-500/20"
+                            : "",
                           tb.isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
                             : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
@@ -811,8 +814,15 @@ export default function Dashboard() {
                         onClick={() => handleToolboxDrillDown(tb)}
                         data-testid={`nav-toolbox-${tb.id}`}
                       >
-                        <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
+                        {tb.hasOrchestrator ? (
+                          <Network className="w-4 h-4 text-purple-500 shrink-0" />
+                        ) : (
+                          <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
+                        )}
                         <span className="truncate flex-1">{tb.name}</span>
+                        {tb.hasOrchestrator && (
+                          <Badge className="text-[9px] bg-purple-500/20 text-purple-600 border-purple-500/30 shrink-0 px-1 py-0">Orch</Badge>
+                        )}
                         <div className="flex items-center gap-0.5 shrink-0">
                           <div className="invisible group-hover:visible flex items-center gap-0.5">
                             <Button

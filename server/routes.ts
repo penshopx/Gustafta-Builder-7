@@ -646,8 +646,15 @@ export async function registerRoutes(
     try {
       const bigIdeaId = req.query.bigIdeaId as string | undefined;
       const seriesId = req.query.seriesId as string | undefined;
-      const toolboxes = await storage.getToolboxes(bigIdeaId, seriesId);
-      res.json(toolboxes);
+      const toolboxList = await storage.getToolboxes(bigIdeaId, seriesId);
+      const enriched = await Promise.all(
+        toolboxList.map(async (tb) => {
+          const tbAgents = await storage.getAgents(String(tb.id));
+          const hasOrchestrator = tbAgents.some(a => a.isOrchestrator);
+          return { ...tb, hasOrchestrator };
+        })
+      );
+      res.json(enriched);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch toolboxes" });
     }
