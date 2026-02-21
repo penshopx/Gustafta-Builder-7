@@ -957,49 +957,100 @@ export default function Dashboard() {
                     <ArrowLeft className="w-3 h-3" />
                     <span>{orchestratorHub && String(effectiveToolboxId) === String(orchestratorHub.id) ? "Kembali ke Perspektif" : "Kembali ke Chatbot"}</span>
                   </button>
-                  {agentsLoading ? (
-                    <div className="py-3 text-sm text-muted-foreground text-center">Memuat...</div>
-                  ) : filteredAgents.length === 0 ? (
-                    <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Alat Bantu
-                    </div>
-                  ) : (
-                    filteredAgents.map((agent) => (
-                      <div
-                        key={agent.id}
-                        className={cn(
-                          "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
-                          String(agent.id) === String(activeAgent?.id)
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                  {(() => {
+                    const hasOrchAgent = filteredAgents.some((a: any) => a.isOrchestrator);
+                    const orchAgents = filteredAgents.filter((a: any) => a.isOrchestrator);
+                    const regularAgents = filteredAgents.filter((a: any) => !a.isOrchestrator);
+                    return agentsLoading ? (
+                      <div className="py-3 text-sm text-muted-foreground text-center">Memuat...</div>
+                    ) : (
+                      <>
+                        {orchAgents.map((agent) => (
+                          <div
+                            key={agent.id}
+                            className={cn(
+                              "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors mb-1 border border-purple-500/30",
+                              String(agent.id) === String(activeAgent?.id)
+                                ? "bg-purple-500/20 text-purple-700 dark:text-purple-300"
+                                : "bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/15"
+                            )}
+                            onClick={() => handleAgentSelect(agent)}
+                            data-testid={`nav-agent-${agent.id}`}
+                          >
+                            <Avatar className="w-5 h-5 shrink-0">
+                              <AvatarFallback className="text-[9px] bg-purple-500/10 text-purple-600">
+                                <Network className="w-3 h-3" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <span className="truncate block">{agent.name}</span>
+                              <span className="text-[10px] text-purple-500/70">Orkestrator</span>
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="shrink-0 w-6 h-6 invisible group-hover:visible"
+                              onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
+                              data-testid={`button-delete-agent-${agent.id}`}
+                            >
+                              <Trash2 className="w-3 h-3 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                        {!hasOrchAgent && (
+                          <button
+                            onClick={() => {
+                              setCreateAsOrchestrator(true);
+                              setCreateDialogOpen(true);
+                            }}
+                            className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors mb-1 border border-dashed border-purple-500/30"
+                            data-testid="button-create-orch-agent"
+                          >
+                            <Network className="w-4 h-4" />
+                            <span>Buat Orkestrator</span>
+                          </button>
                         )}
-                        onClick={() => handleAgentSelect(agent)}
-                        data-testid={`nav-agent-${agent.id}`}
-                      >
-                        <Avatar className="w-5 h-5 shrink-0">
-                          <AvatarFallback className={cn(
-                            "text-[9px]",
-                            agent.isOrchestrator ? "bg-purple-500/10 text-purple-600" : "bg-primary/10 text-primary"
-                          )}>
-                            {agent.isOrchestrator ? <Network className="w-3 h-3" /> : agent.name.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="truncate flex-1">{agent.name}</span>
-                        {agent.isOrchestrator && (
-                          <Badge className="text-[9px] bg-purple-500/20 text-purple-600 border-purple-500/30 shrink-0">Orch</Badge>
+                        {regularAgents.length > 0 && (
+                          <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 py-1">Alat Bantu</div>
                         )}
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="shrink-0 w-6 h-6 invisible group-hover:visible"
-                          onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
-                          data-testid={`button-delete-agent-${agent.id}`}
-                        >
-                          <Trash2 className="w-3 h-3 text-destructive" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
+                        {regularAgents.length === 0 && orchAgents.length === 0 ? (
+                          <div className="py-3 text-sm text-muted-foreground text-center">
+                            Belum ada Alat Bantu
+                          </div>
+                        ) : (
+                          regularAgents.map((agent) => (
+                            <div
+                              key={agent.id}
+                              className={cn(
+                                "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
+                                String(agent.id) === String(activeAgent?.id)
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                              )}
+                              onClick={() => handleAgentSelect(agent)}
+                              data-testid={`nav-agent-${agent.id}`}
+                            >
+                              <Avatar className="w-5 h-5 shrink-0">
+                                <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                                  {agent.name.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="truncate flex-1">{agent.name}</span>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="shrink-0 w-6 h-6 invisible group-hover:visible"
+                                onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
+                                data-testid={`button-delete-agent-${agent.id}`}
+                              >
+                                <Trash2 className="w-3 h-3 text-destructive" />
+                              </Button>
+                            </div>
+                          ))
+                        )}
+                      </>
+                    );
+                  })()}
                   <button
                     onClick={() => setCreateDialogOpen(true)}
                     className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
