@@ -135,6 +135,7 @@ export default function Dashboard() {
   const agentCreationCooldown = useRef(false);
   const bigIdeaCreationCooldown = useRef(false);
   const toolboxCreationCooldown = useRef(false);
+  const forceOrchestratorSelect = useRef(false);
   
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
   const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
@@ -230,6 +231,18 @@ export default function Dashboard() {
     if (agentCreationCooldown.current) return;
     if (toolboxCreationCooldown.current) return;
     if (bigIdeaCreationCooldown.current) return;
+
+    if (forceOrchestratorSelect.current) {
+      const orchestratorAgent = filteredAgents.find(a => a.isOrchestrator);
+      if (orchestratorAgent) {
+        forceOrchestratorSelect.current = false;
+        if (String(activeAgent?.id) !== String(orchestratorAgent.id)) {
+          setActiveAgent.mutate(String(orchestratorAgent.id));
+        }
+        return;
+      }
+    }
+
     if (activeAgent?.isOrchestrator) return;
 
     const pickDefault = () => {
@@ -512,6 +525,9 @@ export default function Dashboard() {
     setLocalToolboxId(String(tb.id));
     handleToolboxSelect(tb);
     queryClient.setQueryData(["/api/agents/active"], null);
+    if (tb.isOrchestrator) {
+      forceOrchestratorSelect.current = true;
+    }
     setNavLevel('agents');
   };
 
