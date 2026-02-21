@@ -233,9 +233,9 @@ export default function Dashboard() {
     if (bigIdeaCreationCooldown.current) return;
 
     if (forceOrchestratorSelect.current) {
+      forceOrchestratorSelect.current = false;
       const orchestratorAgent = filteredAgents.find(a => a.isOrchestrator);
       if (orchestratorAgent) {
-        forceOrchestratorSelect.current = false;
         if (String(activeAgent?.id) !== String(orchestratorAgent.id)) {
           setActiveAgent.mutate(String(orchestratorAgent.id));
         }
@@ -393,17 +393,17 @@ export default function Dashboard() {
 
   const renderPanel = () => {
     if (!activeAgent) {
-      if (isCurrentToolboxHub && currentToolbox) {
-        if (filteredAgents.length > 0 || agentsLoading) {
-          return (
-            <div className="flex-1 flex items-center justify-center p-4">
-              <div className="text-center space-y-3">
-                <Loader2 className="w-8 h-8 animate-spin text-purple-500 mx-auto" />
-                <p className="text-sm text-muted-foreground">Memuat persona HUB...</p>
-              </div>
+      if (filteredAgents.length > 0 || agentsLoading) {
+        return (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center space-y-3">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+              <p className="text-sm text-muted-foreground">Memuat...</p>
             </div>
-          );
-        }
+          </div>
+        );
+      }
+      if (isCurrentToolboxHub && currentToolbox) {
         return (
           <div className="flex-1 flex items-center justify-center p-4">
             <div className="text-center space-y-4 md:space-y-6 max-w-lg">
@@ -525,9 +525,7 @@ export default function Dashboard() {
     setLocalToolboxId(String(tb.id));
     handleToolboxSelect(tb);
     queryClient.setQueryData(["/api/agents/active"], null);
-    if (tb.isOrchestrator) {
-      forceOrchestratorSelect.current = true;
-    }
+    forceOrchestratorSelect.current = true;
     setNavLevel('agents');
   };
 

@@ -911,20 +911,12 @@ export async function registerRoutes(
       }
 
       if (isOrch && toolboxId) {
-        const targetToolbox = await storage.getToolbox(String(toolboxId));
-        if (!targetToolbox || !targetToolbox.isOrchestrator) {
-          return res.status(400).json({
-            error: "Orchestrator must be in HUB",
-            message: "Orchestrator hanya bisa dibuat di dalam Chatbot HUB.",
-            code: "ORCHESTRATOR_NOT_IN_HUB"
-          });
-        }
         const existingAgents = await storage.getAgents(String(toolboxId));
         const existingOrchestrator = existingAgents.find(a => a.isOrchestrator);
         if (existingOrchestrator) {
           return res.status(400).json({
             error: "Orchestrator already exists",
-            message: "HUB sudah memiliki 1 orchestrator. Maksimal 1 orchestrator per HUB.",
+            message: "Chatbot ini sudah memiliki 1 orchestrator. Maksimal 1 orchestrator per Chatbot.",
             code: "ORCHESTRATOR_EXISTS"
           });
         }

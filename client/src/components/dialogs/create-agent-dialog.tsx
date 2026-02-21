@@ -114,7 +114,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
       toast({
         title: "Validation Error",
         description: isOrchestrator 
-          ? "Chatbot Orkestrator (HUB) belum dipilih. Silakan masuk ke HUB terlebih dahulu."
+          ? "Chatbot belum dipilih. Silakan masuk ke Chatbot terlebih dahulu."
           : "Alat Bantu membutuhkan Chatbot yang aktif. Silakan pilih Chatbot terlebih dahulu.",
         variant: "destructive",
       });
@@ -225,7 +225,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                       {activeBigIdea.name}
                     </Badge>
                   )}
-                  {activeToolbox && !isOrchestrator && (
+                  {activeToolbox && (
                     <Badge variant="secondary" className="gap-1">
                       <Wrench className="h-3 w-3" />
                       {activeToolbox.name}
