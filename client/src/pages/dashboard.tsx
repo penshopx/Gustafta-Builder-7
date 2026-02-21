@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -381,6 +381,16 @@ export default function Dashboard() {
   const renderPanel = () => {
     if (!activeAgent) {
       if (isCurrentToolboxHub && currentToolbox) {
+        if (filteredAgents.length > 0 || agentsLoading) {
+          return (
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="text-center space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-500 mx-auto" />
+                <p className="text-sm text-muted-foreground">Memuat persona HUB...</p>
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="flex-1 flex items-center justify-center p-4">
             <div className="text-center space-y-4 md:space-y-6 max-w-lg">
