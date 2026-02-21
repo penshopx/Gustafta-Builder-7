@@ -61,7 +61,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -99,6 +99,9 @@ export default function Dashboard() {
   const [hubDialogOpen, setHubDialogOpen] = useState(false);
   const [hubName, setHubName] = useState("");
   const [hubDescription, setHubDescription] = useState("");
+  const [perspektifOrchDialogOpen, setPerspektifOrchDialogOpen] = useState(false);
+  const [perspektifOrchName, setPerspektifOrchName] = useState("");
+  const [perspektifOrchDescription, setPerspektifOrchDescription] = useState("");
   const [bigIdeaDialogOpen, setBigIdeaDialogOpen] = useState(false);
   const [toolboxDialogOpen, setToolboxDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -374,6 +377,47 @@ export default function Dashboard() {
       toast({ title: "Berhasil", description: "Chatbot Orkestrator berhasil dibuat" });
     } catch (error: any) {
       toast({ title: "Error", description: error?.message || "Gagal membuat Chatbot Orkestrator", variant: "destructive" });
+    }
+  };
+
+  const handleCreatePerspektifOrchestrator = async () => {
+    if (!perspektifOrchName.trim() || !activeBigIdea) return;
+    let newToolboxId: number | null = null;
+    try {
+      const newToolbox = await createToolboxMutation.mutateAsync({
+        bigIdeaId: activeBigIdea.id,
+        seriesId: activeSeriesId || undefined,
+        isOrchestrator: false,
+        name: perspektifOrchName.trim(),
+        description: perspektifOrchDescription.trim(),
+        purpose: "Orchestrator untuk Perspektif " + activeBigIdea.name,
+        capabilities: [],
+        limitations: [],
+        sortOrder: 0,
+      });
+      newToolboxId = newToolbox.id;
+      await apiRequest("POST", "/api/agents", {
+        name: perspektifOrchName.trim(),
+        description: perspektifOrchDescription.trim() || `Orchestrator untuk ${activeBigIdea.name}`,
+        toolboxId: newToolbox.id,
+        bigIdeaId: activeBigIdea.id,
+        isOrchestrator: true,
+        orchestratorRole: "orchestrator",
+        isActive: true,
+        isPublic: true,
+      });
+      setPerspektifOrchDialogOpen(false);
+      setPerspektifOrchName("");
+      setPerspektifOrchDescription("");
+      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      toast({ title: "Berhasil", description: "Orkestrator Perspektif berhasil dibuat" });
+    } catch (error: any) {
+      if (newToolboxId) {
+        try { await apiRequest("DELETE", `/api/toolboxes/${newToolboxId}`); } catch {}
+        queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      }
+      toast({ title: "Error", description: error?.message || "Gagal membuat Orkestrator Perspektif", variant: "destructive" });
     }
   };
 
@@ -794,19 +838,62 @@ export default function Dashboard() {
                     <ArrowLeft className="w-3 h-3" />
                     <span>Kembali ke Perspektif</span>
                   </button>
-                  {toolboxes.length === 0 ? (
+                  {(() => {
+                    const orchToolboxes = toolboxes.filter((tb: any) => tb.hasOrchestrator);
+                    return orchToolboxes.length > 0 ? (
+                      <>
+                        {orchToolboxes.map((orchTb: any) => (
+                          <div
+                            key={orchTb.id}
+                            className={cn(
+                              "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors mb-1 border border-purple-500/30",
+                              "bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/15"
+                            )}
+                            onClick={() => handleToolboxDrillDown(orchTb)}
+                            data-testid={`nav-perspektif-orchestrator-${orchTb.id}`}
+                          >
+                            <Network className="w-4 h-4 text-purple-500 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <span className="truncate block">{orchTb.name}</span>
+                              <span className="text-[10px] text-purple-500/70">Orkestrator Perspektif</span>
+                            </div>
+                            <div className="flex items-center gap-0.5 shrink-0">
+                              <div className="invisible group-hover:visible flex items-center gap-0.5">
+                                <Button variant="ghost" size="icon" className="h-5 w-5"
+                                  onClick={(e) => { e.stopPropagation(); handleEditToolbox(orchTb); }}
+                                  data-testid={`button-edit-perspektif-orch-${orchTb.id}`}
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                            </div>
+                          </div>
+                        ))}
+                        <div className="mb-1" />
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => setPerspektifOrchDialogOpen(true)}
+                        className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors mb-2 border border-dashed border-purple-500/30"
+                        data-testid="button-create-perspektif-orch"
+                      >
+                        <Network className="w-4 h-4" />
+                        <span>Buat Orkestrator Perspektif</span>
+                      </button>
+                    );
+                  })()}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 py-1">Chatbot</div>
+                  {toolboxes.filter((tb: any) => !tb.hasOrchestrator).length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
                       Belum ada Chatbot
                     </div>
                   ) : (
-                    toolboxes.map((tb: any) => (
+                    toolboxes.filter((tb: any) => !tb.hasOrchestrator).map((tb: any) => (
                       <div
                         key={tb.id}
                         className={cn(
                           "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
-                          tb.hasOrchestrator
-                            ? "border border-purple-500/20"
-                            : "",
                           tb.isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
                             : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
@@ -814,15 +901,8 @@ export default function Dashboard() {
                         onClick={() => handleToolboxDrillDown(tb)}
                         data-testid={`nav-toolbox-${tb.id}`}
                       >
-                        {tb.hasOrchestrator ? (
-                          <Network className="w-4 h-4 text-purple-500 shrink-0" />
-                        ) : (
-                          <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                        )}
+                        <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
                         <span className="truncate flex-1">{tb.name}</span>
-                        {tb.hasOrchestrator && (
-                          <Badge className="text-[9px] bg-purple-500/20 text-purple-600 border-purple-500/30 shrink-0 px-1 py-0">Orch</Badge>
-                        )}
                         <div className="flex items-center gap-0.5 shrink-0">
                           <div className="invisible group-hover:visible flex items-center gap-0.5">
                             <Button
@@ -1312,6 +1392,39 @@ export default function Dashboard() {
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="outline" onClick={() => setHubDialogOpen(false)}>Batal</Button>
               <Button onClick={handleCreateHub} disabled={createToolboxMutation.isPending || !hubName.trim()} data-testid="button-submit-hub">
+                {createToolboxMutation.isPending ? "Membuat..." : "Buat Orkestrator"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={perspektifOrchDialogOpen} onOpenChange={(open) => { setPerspektifOrchDialogOpen(open); if (!open) { setPerspektifOrchName(""); setPerspektifOrchDescription(""); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Network className="h-5 w-5 text-purple-500" />
+              Buat Orkestrator Perspektif
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg space-y-2">
+              <h4 className="font-medium text-purple-900 dark:text-purple-100">Apa itu Orkestrator Perspektif?</h4>
+              <p className="text-sm text-purple-700 dark:text-purple-300">
+                Orkestrator Perspektif mengoordinasikan chatbot-chatbot spesialis di dalam satu Perspektif. Ia menjadi pintu masuk utama dan mengarahkan pengguna ke chatbot yang tepat berdasarkan kebutuhan.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="persp-orch-name">Nama Orkestrator *</Label>
+              <Input id="persp-orch-name" placeholder={`Contoh: Orkestrator ${activeBigIdea?.name || 'Perspektif'}`} value={perspektifOrchName} onChange={(e) => setPerspektifOrchName(e.target.value)} data-testid="input-perspektif-orch-name" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="persp-orch-desc">Deskripsi</Label>
+              <Textarea id="persp-orch-desc" placeholder="Jelaskan peran orkestrator perspektif ini..." value={perspektifOrchDescription} onChange={(e) => setPerspektifOrchDescription(e.target.value)} rows={3} data-testid="input-perspektif-orch-description" />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setPerspektifOrchDialogOpen(false)}>Batal</Button>
+              <Button onClick={handleCreatePerspektifOrchestrator} disabled={createToolboxMutation.isPending || !perspektifOrchName.trim()} data-testid="button-submit-perspektif-orch">
                 {createToolboxMutation.isPending ? "Membuat..." : "Buat Orkestrator"}
               </Button>
             </div>
