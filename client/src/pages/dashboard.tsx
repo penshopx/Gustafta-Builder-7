@@ -231,12 +231,18 @@ export default function Dashboard() {
     if (toolboxCreationCooldown.current) return;
     if (bigIdeaCreationCooldown.current) return;
     if (activeAgent?.isOrchestrator) return;
+
+    const pickDefault = () => {
+      const orchestratorAgent = filteredAgents.find(a => a.isOrchestrator);
+      return orchestratorAgent || filteredAgents[0];
+    };
+
     if (!activeAgent) {
-      setActiveAgent.mutate(String(filteredAgents[0].id));
+      setActiveAgent.mutate(String(pickDefault().id));
     } else {
       const agentBelongs = filteredAgents.some((a) => String(a.id) === String(activeAgent.id));
       if (!agentBelongs) {
-        setActiveAgent.mutate(String(filteredAgents[0].id));
+        setActiveAgent.mutate(String(pickDefault().id));
       }
     }
   }, [effectiveToolboxId, filteredAgents, activeAgent?.id]);
