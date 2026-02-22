@@ -18,7 +18,7 @@ import SeriesCatalog from "@/pages/series-catalog";
 import SeriesDetail from "@/pages/series-detail";
 import SectorLanding from "@/pages/sector-landing";
 import ProductLanding from "@/pages/product-landing";
-import PerspektifChat from "@/pages/perspektif-chat";
+import ModulChat from "@/pages/modul-chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -38,7 +38,7 @@ function Router() {
       <Route path="/series/:slug" component={SeriesDetail} />
       <Route path="/sector/:sectorId" component={SectorLanding} />
       <Route path="/product/:agentId" component={ProductLanding} />
-      <Route path="/perspektif/:bigIdeaId" component={PerspektifChat} />
+      <Route path="/modul/:bigIdeaId" component={ModulChat} />
       <Route component={NotFound} />
     </Switch>
   );

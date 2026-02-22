@@ -2,7 +2,7 @@
 
 ## Overview
 
-Gustafta is an AI chatbot builder platform designed to help users create, configure, and deploy intelligent conversational assistants. It features a two-panel dashboard for managing multiple chatbot agents, each with custom personas, knowledge bases, and multi-channel integrations. The platform supports various AI models and allows for extensive customization, including persona details, greeting messages, and language options. Users can integrate chatbots with popular messaging platforms, embed them as web widgets, and access analytics. Gustafta also includes a built-in assistant chatbot for guidance and offers templates for various industries. The platform uses an Indonesian purpose-driven hierarchical structure: Tujuan (Goal/Series) → Perspektif (Big Idea) → Chatbot (Toolbox/Domain) → Alat Bantu (Agent). Tujuan = overarching purpose/mission, Perspektif = perspective/angle to approach the goal, Chatbot = a complete chatbot handling one operational area (with sequential numbering showing execution order based on prerequisites), Alat Bantu = specific tools/modules within a chatbot. Chatbot Orkestrator (HUB) sits directly under Tujuan (not inside any Perspektif) to coordinate all specialist chatbots across Perspektifs; max 1 HUB per Tujuan. Schema: toolboxes.isOrchestrator (boolean) + toolboxes.seriesId (nullable FK to series) + toolboxes.bigIdeaId made nullable for HUB toolboxes. DB tables still use original English names (series, big_ideas, toolboxes, agents) while UI labels use Indonesian terms. The "Chatbot Series" feature allows organizing multiple Big Ideas into structured topic packages with public catalog and detail pages. A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots, decision summaries, and risk assessments. The platform integrates with Mayar.id for subscription management. Each chatbot has a dedicated public chat page (`/bot/:agentId`) serving as its "home" where end-users can interact directly without needing dashboard access. Dynamic PWA manifest per chatbot: each bot shows its own avatar/name when installed on mobile devices.
+Gustafta is an AI chatbot builder platform designed to help users create, configure, and deploy intelligent conversational assistants. It features a two-panel dashboard for managing multiple chatbot agents, each with custom personas, knowledge bases, and multi-channel integrations. The platform supports various AI models and allows for extensive customization, including persona details, greeting messages, and language options. Users can integrate chatbots with popular messaging platforms, embed them as web widgets, and access analytics. Gustafta also includes a built-in assistant chatbot for guidance and offers templates for various industries. The platform uses an Indonesian purpose-driven hierarchical structure: Tujuan (Goal/Series) → Modul (Big Idea) → Chatbot (Toolbox/Domain) → Alat Bantu (Agent). Tujuan = overarching purpose/mission, Modul = perspective/angle to approach the goal, Chatbot = a complete chatbot handling one operational area (with sequential numbering showing execution order based on prerequisites), Alat Bantu = specific tools/modules within a chatbot. Chatbot Orkestrator (HUB) sits directly under Tujuan (not inside any Modul) to coordinate all specialist chatbots across Moduls; max 1 HUB per Tujuan. Schema: toolboxes.isOrchestrator (boolean) + toolboxes.seriesId (nullable FK to series) + toolboxes.bigIdeaId made nullable for HUB toolboxes. DB tables still use original English names (series, big_ideas, toolboxes, agents) while UI labels use Indonesian terms. The "Chatbot Series" feature allows organizing multiple Big Ideas into structured topic packages with public catalog and detail pages. A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots, decision summaries, and risk assessments. The platform integrates with Mayar.id for subscription management. Each chatbot has a dedicated public chat page (`/bot/:agentId`) serving as its "home" where end-users can interact directly without needing dashboard access. Dynamic PWA manifest per chatbot: each bot shows its own avatar/name when installed on mobile devices.
 
 ### RAG Toggle
 - **Purpose**: Allows admins to enable/disable RAG (Retrieval Augmented Generation) per chatbot. Useful for orchestrator chatbots that don't need knowledge base lookups.
@@ -10,11 +10,11 @@ Gustafta is an AI chatbot builder platform designed to help users create, config
 - **UI**: Toggle switch in Knowledge Base panel header. When disabled, "Tambah Knowledge" button is also disabled.
 - **Server-side**: All three chat endpoints (non-stream, stream, external/WhatsApp) check `agent.ragEnabled !== false` before querying RAG chunks or knowledge bases.
 
-### Perspektif Public Chat Page
-- **Purpose**: Share all chatbots within a Perspektif (Big Idea) via a single link at `/perspektif/:bigIdeaId`.
-- **API**: `GET /api/public/perspektif/:bigIdeaId` returns Perspektif info + list of public agents across active, non-orchestrator toolboxes. Validates isActive on BigIdea and isPublic+isActive on parent Series.
+### Modul Public Chat Page
+- **Purpose**: Share all chatbots within a Modul (Big Idea) via a single link at `/modul/:bigIdeaId`.
+- **API**: `GET /api/public/modul/:bigIdeaId` returns Modul info + list of public agents across active, non-orchestrator toolboxes. Validates isActive on BigIdea and isPublic+isActive on parent Series.
 - **UI**: Grid of chatbot cards with avatar, name, tagline, category. Clicking a card opens inline chat with streaming support.
-- **Widget Panel**: Shows "Link Perspektif (Multi-Chatbot)" section with copy/open buttons when bigIdeaId is available.
+- **Widget Panel**: Shows "Link Modul (Multi-Chatbot)" section with copy/open buttons when bigIdeaId is available.
 
 ### Project Context (Konteks Proyek)
 - **Purpose**: Allows chatbots to ask context questions at the start of conversations (e.g., "What type of project are you managing?") to personalize responses.
@@ -33,13 +33,13 @@ Gustafta is an AI chatbot builder platform designed to help users create, config
 - **Schema**: `user_memories` table with `agentId`, `sessionId`, `category`, `content`, `createdAt`.
 - **API**: `GET/POST/DELETE /api/memories/:agentId`, `DELETE /api/memories/agent/:agentId`.
 
-### Perspektif Bundle Monetization
-- **Purpose**: Dual monetization system — per-Perspektif bundle pricing (access all specialist chatbots) and per-Chatbot individual pricing. HUB/Orchestrator always free.
+### Modul Bundle Monetization
+- **Purpose**: Dual monetization system — per-Modul bundle pricing (access all specialist chatbots) and per-Chatbot individual pricing. HUB/Orchestrator always free.
 - **Schema**: `monthlyPrice`, `trialEnabled`, `trialDays`, `requireRegistration` fields on `big_ideas` table. `bigIdeaId` column on `client_subscriptions` for bundle subscriptions.
-- **API**: `POST /api/perspektif/:bigIdeaId/subscribe` creates bundle subscription. `GET /api/perspektif/:bigIdeaId/access?email=&token=` checks access. Public perspektif API returns `pricing` object.
-- **Admin UI**: Pricing fields in Create/Edit Perspektif dialogs under "Monetisasi Perspektif" section.
-- **Public UI**: Paywall/upgrade wall in perspektif-chat.tsx. Shows pricing card, trial/subscribe buttons, and registration form when perspektif has monthlyPrice > 0. Supports Mayar.id payment flow with redirect and localStorage-based access token persistence.
-- **Access Logic**: Free perspektifs (monthlyPrice=0) always accessible. Paid perspektifs check for active bundle subscription by email or access token.
+- **API**: `POST /api/modul/:bigIdeaId/subscribe` creates bundle subscription. `GET /api/modul/:bigIdeaId/access?email=&token=` checks access. Public modul API returns `pricing` object.
+- **Admin UI**: Pricing fields in Create/Edit Modul dialogs under "Monetisasi Modul" section.
+- **Public UI**: Paywall/upgrade wall in modul-chat.tsx. Shows pricing card, trial/subscribe buttons, and registration form when modul has monthlyPrice > 0. Supports Mayar.id payment flow with redirect and localStorage-based access token persistence.
+- **Access Logic**: Free moduls (monthlyPrice=0) always accessible. Paid moduls check for active bundle subscription by email or access token.
 
 ### Monetization Protection System
 - **Guest Message Limit**: Configurable per chatbot (default: 10). Server-side tracking via IP+UA fingerprint. When guests exceed limit, upgrade wall is shown prompting registration.

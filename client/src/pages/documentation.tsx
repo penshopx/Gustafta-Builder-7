@@ -24,7 +24,7 @@ const mainDocs: DocCard[] = [
   {
     icon: Layers,
     title: "Hierarki Gustafta",
-    description: "Pahami struktur Tujuan, Perspektif, Chatbot, dan Alat Bantu untuk mengorganisasi chatbot Anda.",
+    description: "Pahami struktur Tujuan, Modul, Chatbot, dan Alat Bantu untuk mengorganisasi chatbot Anda.",
     tags: ["hierarki", "struktur", "organisasi"],
     href: "#hierarchy",
   },
@@ -298,7 +298,7 @@ export default function Documentation() {
                   </div>
                   <div>
                     <CardTitle className="text-2xl">Hierarki Gustafta</CardTitle>
-                    <p className="text-muted-foreground">Tujuan, Perspektif, Chatbot, Alat Bantu</p>
+                    <p className="text-muted-foreground">Tujuan, Modul, Chatbot, Alat Bantu</p>
                   </div>
                 </div>
               </CardHeader>
@@ -311,7 +311,7 @@ export default function Documentation() {
                 <div className="grid md:grid-cols-2 gap-4 not-prose my-4">
                   {[
                     { level: "1. Tujuan", desc: "Tujuan besar atau misi yang ingin dicapai. Contoh: CIVILPRO (Konstruksi)", color: "bg-amber-500/10 text-amber-700 dark:text-amber-400" },
-                    { level: "2. Perspektif", desc: "Sudut pandang atau pendekatan untuk mencapai tujuan. Contoh: Kepatuhan & Compliance", color: "bg-purple-500/10 text-purple-700 dark:text-purple-400" },
+                    { level: "2. Modul", desc: "Sudut pandang atau pendekatan untuk mencapai tujuan. Contoh: Kepatuhan & Compliance", color: "bg-purple-500/10 text-purple-700 dark:text-purple-400" },
                     { level: "3. Chatbot", desc: "Unit chatbot utuh yang menangani satu area operasional. Nomor urut menunjukkan prioritas. Contoh: 1. SBU & Klasifikasi", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400" },
                     { level: "4. Alat Bantu", desc: "Modul spesifik di dalam chatbot. Contoh: Panduan SBU Konstruksi, Kalkulator Klasifikasi", color: "bg-green-500/10 text-green-700 dark:text-green-400" },
                   ].map((item) => (
@@ -325,8 +325,8 @@ export default function Documentation() {
                 <h3>Cara Membuat Hierarki</h3>
                 <ol>
                   <li>Buat <strong>Tujuan</strong> di dashboard (menu Tujuan/Series)</li>
-                  <li>Buat <strong>Perspektif</strong> di dalam Tujuan</li>
-                  <li>Buat <strong>Chatbot</strong> di dalam Perspektif</li>
+                  <li>Buat <strong>Modul</strong> di dalam Tujuan</li>
+                  <li>Buat <strong>Chatbot</strong> di dalam Modul</li>
                   <li>Buat <strong>Alat Bantu</strong> di dalam Chatbot</li>
                 </ol>
 
@@ -334,7 +334,7 @@ export default function Documentation() {
                 <p>
                   Di setiap Tujuan, Anda bisa membuat satu <strong>Chatbot Orkestrator</strong> (HUB) yang berfungsi sebagai 
                   pintu masuk utama ekosistem multi-chatbot. Orkestrator berada langsung di bawah Tujuan 
-                  (bukan di dalam Perspektif manapun) dan mengoordinasi semua chatbot spesialis lintas Perspektif.
+                  (bukan di dalam Modul manapun) dan mengoordinasi semua chatbot spesialis lintas Modul.
                 </p>
                 <ul>
                   <li><strong>Routing</strong> - Mengarahkan pengguna ke chatbot spesialis yang tepat</li>
@@ -355,13 +355,13 @@ export default function Documentation() {
                   <p className="text-sm text-muted-foreground">
                     <strong>Tujuan:</strong> Regulasi Jasa Konstruksi<br />
                     &nbsp;&nbsp;<strong>Orkestrator:</strong> HUB Regulasi Konstruksi<br />
-                    &nbsp;&nbsp;<strong>Perspektif:</strong> Kepatuhan &amp; Compliance<br />
+                    &nbsp;&nbsp;<strong>Modul:</strong> Kepatuhan &amp; Compliance<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 1. Perijinan Usaha Dasar<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 2. SKK (Sertifikat Kompetensi)<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 3. SBU (Sertifikat Badan Usaha)<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Panduan SBU<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Alat Bantu:</strong> Mapping Subklasifikasi<br />
-                    &nbsp;&nbsp;<strong>Perspektif:</strong> Pengembangan Bisnis<br />
+                    &nbsp;&nbsp;<strong>Modul:</strong> Pengembangan Bisnis<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 4. Tender &amp; LPSE<br />
                     &nbsp;&nbsp;&nbsp;&nbsp;<strong>Chatbot:</strong> 5. Kemitraan &amp; JO<br />
                   </p>
@@ -1276,11 +1276,11 @@ export default function Documentation() {
                 <h3>Langkah 1: Buat Tujuan</h3>
                 <p>Tentukan tujuan besar atau misi yang ingin dicapai (contoh: konstruksi, pendidikan, dll).</p>
 
-                <h3>Langkah 2: Buat Perspektif</h3>
+                <h3>Langkah 2: Buat Modul</h3>
                 <p>Tentukan sudut pandang atau pendekatan untuk mencapai tujuan.</p>
 
                 <h3>Langkah 3: Buat Chatbot</h3>
-                <p>Buat unit chatbot yang menangani satu area operasional di dalam perspektif.</p>
+                <p>Buat unit chatbot yang menangani satu area operasional di dalam modul.</p>
 
                 <h3>Langkah 4: Buat Alat Bantu</h3>
                 <p>Konfigurasi persona, system prompt, dan greeting message untuk modul spesifik.</p>

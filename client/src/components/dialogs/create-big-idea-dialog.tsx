@@ -89,17 +89,17 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
       
       toast({
         title: "Berhasil",
-        description: "Perspektif berhasil dibuat",
+        description: "Modul berhasil dibuat",
       });
       
       resetForm();
       onOpenChange(false);
     } catch (error: any) {
       console.error("[CreateBigIdea] Error:", error?.message || error);
-      const errorMsg = error?.message || "Gagal membuat Perspektif";
+      const errorMsg = error?.message || "Gagal membuat Modul";
       toast({
         title: "Error",
-        description: errorMsg.includes("401") ? "Sesi login habis, silakan login ulang" : `Gagal membuat Perspektif: ${errorMsg}`,
+        description: errorMsg.includes("401") ? "Sesi login habis, silakan login ulang" : `Gagal membuat Modul: ${errorMsg}`,
         variant: "destructive",
       });
     }
@@ -156,7 +156,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-yellow-500" />
-            Buat Perspektif Baru
+            Buat Modul Baru
           </DialogTitle>
         </DialogHeader>
 
@@ -196,7 +196,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
           )}
 
           <div className="space-y-2">
-            <Label>Tipe Perspektif</Label>
+            <Label>Tipe Modul</Label>
             <RadioGroup
               value={type}
               onValueChange={(value) => setType(value as "problem" | "idea" | "inspiration" | "mentoring")}
@@ -219,7 +219,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nama Perspektif *</Label>
+            <Label htmlFor="name">Nama Modul *</Label>
             <Input
               id="name"
               placeholder="Contoh: Kepatuhan & Compliance"
@@ -301,10 +301,10 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
           <div className="space-y-4 border-t pt-4">
             <Label className="flex items-center gap-2 text-base font-semibold">
               <DollarSign className="h-4 w-4" />
-              Monetisasi Perspektif
+              Monetisasi Modul
             </Label>
             <p className="text-sm text-muted-foreground">
-              Atur harga bundle untuk akses semua chatbot dalam Perspektif ini. HUB/Orkestrator tetap gratis.
+              Atur harga bundle untuk akses semua chatbot dalam Modul ini. HUB/Orkestrator tetap gratis.
             </p>
             <div className="space-y-2">
               <Label htmlFor="monthlyPrice">Harga Bulanan (IDR)</Label>
@@ -358,7 +358,7 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
               disabled={createBigIdea.isPending}
              
             >
-              {createBigIdea.isPending ? "Membuat..." : "Buat Perspektif"}
+              {createBigIdea.isPending ? "Membuat..." : "Buat Modul"}
             </Button>
           </div>
         </div>

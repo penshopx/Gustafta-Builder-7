@@ -43,7 +43,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
       {
         name: "Kepatuhan & Compliance",
         type: "problem",
-        description: "Perspektif kepatuhan: memastikan perusahaan dan tenaga kerja konstruksi memenuhi seluruh persyaratan hukum, regulasi, dan standar yang berlaku. Fokus pada pemenuhan kewajiban legal agar dapat beroperasi secara sah dan terhindar dari sanksi.",
+        description: "Modul kepatuhan: memastikan perusahaan dan tenaga kerja konstruksi memenuhi seluruh persyaratan hukum, regulasi, dan standar yang berlaku. Fokus pada pemenuhan kewajiban legal agar dapat beroperasi secara sah dan terhindar dari sanksi.",
         goals: ["Memastikan kelengkapan perijinan usaha", "Menjaga validitas sertifikasi badan usaha dan tenaga kerja", "Kepatuhan terhadap standar dan regulasi teknis", "Persiapan audit dan inspeksi"],
         targetAudience: "Perusahaan jasa konstruksi, admin perijinan, compliance officer, tenaga ahli konstruksi",
         expectedOutcome: "Perusahaan dan tenaga kerja beroperasi sepenuhnya sesuai regulasi yang berlaku",
@@ -102,7 +102,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
       {
         name: "Pengembangan Bisnis",
         type: "inspiration",
-        description: "Perspektif pengembangan bisnis: membantu perusahaan jasa konstruksi bertumbuh melalui strategi tender, perluasan klasifikasi, peningkatan kapasitas, dan penguatan daya saing di pasar konstruksi Indonesia.",
+        description: "Modul pengembangan bisnis: membantu perusahaan jasa konstruksi bertumbuh melalui strategi tender, perluasan klasifikasi, peningkatan kapasitas, dan penguatan daya saing di pasar konstruksi Indonesia.",
         goals: ["Memenangkan tender secara kompetitif", "Memperluas klasifikasi dan kualifikasi usaha", "Meningkatkan kapasitas organisasi", "Membangun reputasi dan track record"],
         targetAudience: "Direktur perusahaan konstruksi, manajer pengembangan bisnis, estimator, admin tender",
         expectedOutcome: "Perusahaan mampu tumbuh dan bersaing secara strategis di pasar konstruksi",
@@ -148,7 +148,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
       {
         name: "Manajemen Risiko Regulasi",
         type: "mentoring",
-        description: "Perspektif manajemen risiko: mengidentifikasi, menilai, dan memitigasi risiko yang timbul dari perubahan regulasi, ketidakpatuhan, dan kompleksitas birokrasi di sektor konstruksi Indonesia.",
+        description: "Modul manajemen risiko: mengidentifikasi, menilai, dan memitigasi risiko yang timbul dari perubahan regulasi, ketidakpatuhan, dan kompleksitas birokrasi di sektor konstruksi Indonesia.",
         goals: ["Identifikasi risiko regulasi proaktif", "Mitigasi risiko ketidakpatuhan", "Persiapan menghadapi audit dan inspeksi", "Monitoring perubahan regulasi"],
         targetAudience: "Risk manager, compliance officer, manajer proyek, konsultan hukum konstruksi",
         expectedOutcome: "Perusahaan memiliki sistem manajemen risiko regulasi yang proaktif dan terstruktur",
@@ -209,7 +209,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
 
     const orchestrator = await storage.createAgent({
       name: "Regulasi Jasa Konstruksi Orchestrator",
-      description: "Chatbot orkestrator utama untuk ekosistem Regulasi Jasa Konstruksi. Mengarahkan pengguna ke perspektif dan alat bantu yang tepat.",
+      description: "Chatbot orkestrator utama untuk ekosistem Regulasi Jasa Konstruksi. Mengarahkan pengguna ke modul dan alat bantu yang tepat.",
       tagline: "Asisten AI Utama Regulasi Jasa Konstruksi",
       category: "engineering",
       subcategory: "construction-regulation",
@@ -219,7 +219,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
       temperature: "0.7",
       maxTokens: 2048,
       toolboxId: parseInt(hubToolbox.id),
-      systemPrompt: `Kamu adalah Orchestrator utama untuk ekosistem Regulasi Jasa Konstruksi.\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke perspektif dan alat bantu yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang regulasi jasa konstruksi`,
+      systemPrompt: `Kamu adalah Orchestrator utama untuk ekosistem Regulasi Jasa Konstruksi.\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke modul dan alat bantu yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang regulasi jasa konstruksi`,
       greetingMessage: `Selamat datang di Regulasi Jasa Konstruksi!\n\nSaya adalah asisten utama yang akan membantu mengarahkan Anda ke layanan yang tepat.\n\nSilakan ceritakan kebutuhan Anda.`,
       personality: "Profesional, terstruktur, dan responsif",
     } as any);
@@ -274,7 +274,7 @@ export async function seedPerijinanSertifikasi(userId: string) {
     }
 
     log(`[Seed] Regulasi Jasa Konstruksi ecosystem created successfully!`);
-    log(`[Seed] Total: 1 Series (Goal), 1 HUB + 1 Orchestrator, ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat)`);
+    log(`[Seed] Total: 1 Series (Goal), 1 HUB + 1 Orchestrator, ${bigIdeasData.length} Big Ideas (Modul), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat)`);
   } catch (error) {
     log(`[Seed] Error creating Regulasi Jasa Konstruksi ecosystem: ${error}`);
   }

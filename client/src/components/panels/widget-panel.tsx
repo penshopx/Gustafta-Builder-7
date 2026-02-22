@@ -399,31 +399,31 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
             <Card>
               <CardContent className="p-4 space-y-3">
                 <div>
-                  <h3 className="font-semibold text-sm mb-1">Link Perspektif (Multi-Chatbot)</h3>
+                  <h3 className="font-semibold text-sm mb-1">Link Modul (Multi-Chatbot)</h3>
                   <p className="text-xs text-muted-foreground">
-                    Bagikan satu link untuk semua chatbot dalam Perspektif ini.
+                    Bagikan satu link untuk semua chatbot dalam Modul ini.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Input
-                    value={`${getBaseUrl()}/perspektif/${bigIdeaId}`}
+                    value={`${getBaseUrl()}/modul/${bigIdeaId}`}
                     readOnly
                     className="text-sm font-mono"
-                    data-testid="input-perspektif-link"
+                    data-testid="input-modul-link"
                   />
                   <Button
                     size="icon"
                     variant="outline"
                     onClick={() => {
-                      navigator.clipboard.writeText(`${getBaseUrl()}/perspektif/${bigIdeaId}`);
-                      toast({ title: "Disalin!", description: "Link Perspektif berhasil disalin ke clipboard" });
+                      navigator.clipboard.writeText(`${getBaseUrl()}/modul/${bigIdeaId}`);
+                      toast({ title: "Disalin!", description: "Link Modul berhasil disalin ke clipboard" });
                     }}
-                    data-testid="button-copy-perspektif-link"
+                    data-testid="button-copy-modul-link"
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <a href={`/perspektif/${bigIdeaId}`} target="_blank" rel="noopener noreferrer">
-                    <Button size="icon" variant="outline" data-testid="button-open-perspektif">
+                  <a href={`/modul/${bigIdeaId}`} target="_blank" rel="noopener noreferrer">
+                    <Button size="icon" variant="outline" data-testid="button-open-modul">
                       <ExternalLink className="w-4 h-4" />
                     </Button>
                   </a>

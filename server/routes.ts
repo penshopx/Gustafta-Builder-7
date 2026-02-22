@@ -3464,17 +3464,17 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     return agent;
   }
 
-  app.get("/api/public/perspektif/:bigIdeaId", async (req, res) => {
+  app.get("/api/public/modul/:bigIdeaId", async (req, res) => {
     try {
       const bigIdea = await storage.getBigIdea(req.params.bigIdeaId);
       if (!bigIdea || !bigIdea.isActive) {
-        return res.status(404).json({ error: "Perspektif not found" });
+        return res.status(404).json({ error: "Modul not found" });
       }
 
       if (bigIdea.seriesId) {
         const parentSeries = await storage.getSeriesById(String(bigIdea.seriesId));
         if (parentSeries && (!parentSeries.isPublic || !parentSeries.isActive)) {
-          return res.status(404).json({ error: "Perspektif not found" });
+          return res.status(404).json({ error: "Modul not found" });
         }
       }
 
@@ -3524,7 +3524,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         },
       });
     } catch (error: any) {
-      console.error("Error fetching public perspektif:", error);
+      console.error("Error fetching public modul:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -4567,7 +4567,7 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
     }
   });
 
-  app.post("/api/perspektif/:bigIdeaId/subscribe", async (req, res) => {
+  app.post("/api/modul/:bigIdeaId/subscribe", async (req, res) => {
     try {
       const { customerName, customerEmail, customerPhone, plan } = req.body;
       if (!customerName || !customerEmail) {
@@ -4576,7 +4576,7 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
 
       const bigIdea = await storage.getBigIdea(req.params.bigIdeaId);
       if (!bigIdea) {
-        return res.status(404).json({ error: "Perspektif not found" });
+        return res.status(404).json({ error: "Modul not found" });
       }
 
       const existing = await storage.getClientSubscriptionByBigIdea(req.params.bigIdeaId, customerEmail);
@@ -4614,8 +4614,8 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
               name: customerName,
               email: customerEmail,
               amount,
-              description: `Langganan Bundle Perspektif: ${bigIdea.name} - ${plan}`,
-              redirectUrl: `${baseUrl}/perspektif/${bigIdea.id}?subscribed=true`,
+              description: `Langganan Bundle Modul: ${bigIdea.name} - ${plan}`,
+              redirectUrl: `${baseUrl}/modul/${bigIdea.id}?subscribed=true`,
             });
 
             const subscription = await storage.createClientSubscription({
@@ -4659,12 +4659,12 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
 
       res.status(201).json({ subscription, accessToken });
     } catch (error) {
-      console.error("Perspektif subscribe error:", error);
+      console.error("Modul subscribe error:", error);
       res.status(500).json({ error: "Failed to create bundle subscription" });
     }
   });
 
-  app.get("/api/perspektif/:bigIdeaId/access", async (req, res) => {
+  app.get("/api/modul/:bigIdeaId/access", async (req, res) => {
     try {
       const { email, token } = req.query;
       const bigIdeaId = req.params.bigIdeaId;
@@ -4675,7 +4675,7 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
 
       const bigIdea = await storage.getBigIdea(bigIdeaId);
       if (!bigIdea) {
-        return res.status(404).json({ error: "Perspektif not found" });
+        return res.status(404).json({ error: "Modul not found" });
       }
 
       if (!bigIdea.monthlyPrice || bigIdea.monthlyPrice <= 0) {
@@ -4698,7 +4698,7 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
 
       return res.json({ hasAccess: false });
     } catch (error) {
-      console.error("Perspektif access check error:", error);
+      console.error("Modul access check error:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

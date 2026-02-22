@@ -694,25 +694,25 @@ Edukator keuangan untuk membantu memahami konsep keuangan dan investasi dasar.
 ## BAGIAN 5B: FITUR-FITUR LANJUTAN (TERBARU)
 ## ═══════════════════════════════════════════════════════════════
 
-### 5B.1 ORGANISASI HIERARKIS (Tujuan → Perspektif → Chatbot → Alat Bantu)
+### 5B.1 ORGANISASI HIERARKIS (Tujuan → Modul → Chatbot → Alat Bantu)
 
 **Apa itu?**
 Gustafta menggunakan sistem hierarki berbasis tujuan (purpose-driven) untuk mengorganisasi chatbot:
 - **Tujuan (Level 1)**: Tujuan besar atau misi strategis jangka panjang (contoh: "Regulasi Jasa Konstruksi")
-- **Perspektif (Level 2)**: Sudut pandang atau pendekatan untuk mencapai tujuan (contoh: "Kepatuhan & Compliance")
+- **Modul (Level 2)**: Sudut pandang atau pendekatan untuk mencapai tujuan (contoh: "Kepatuhan & Compliance")
 - **Chatbot (Level 3)**: Unit chatbot utuh yang menangani satu area operasional, dengan nomor urut (sortOrder) menunjukkan prioritas eksekusi berdasarkan prasyarat (contoh: "1. Perijinan Usaha Dasar")
 - **Alat Bantu (Level 4)**: Modul spesifik di dalam chatbot (contoh: "Panduan SBU Konstruksi")
 
 **Prinsip Hierarki:**
 - Sinkron vertikal: dari abstrak (Tujuan) ke konkret (Alat Bantu)
-- Sinkron horizontal: antar Perspektif saling melengkapi, antar Chatbot berurutan logis
+- Sinkron horizontal: antar Modul saling melengkapi, antar Chatbot berurutan logis
 - Setiap level tidak boleh melompat level di bawahnya
 
 **Cara Menggunakan:**
 1. Buat Tujuan terlebih dahulu di dashboard
 2. (Opsional) Buat Chatbot Orkestrator di bawah Tujuan
-3. Buat Perspektif di dalam Tujuan
-4. Buat Chatbot di dalam Perspektif
+3. Buat Modul di dalam Tujuan
+4. Buat Chatbot di dalam Modul
 5. Buat Alat Bantu di dalam Chatbot
 
 ---
@@ -720,11 +720,11 @@ Gustafta menggunakan sistem hierarki berbasis tujuan (purpose-driven) untuk meng
 ### 5B.1b CHATBOT ORKESTRATOR (HUB)
 
 **Apa itu?**
-Chatbot Orkestrator (HUB) adalah chatbot khusus yang berfungsi sebagai pintu masuk utama dan pengatur lalu lintas dalam ekosistem multi-chatbot. HUB berada langsung di bawah Tujuan (bukan di dalam Perspektif manapun) dan mengoordinasi semua chatbot spesialis lintas Perspektif.
+Chatbot Orkestrator (HUB) adalah chatbot khusus yang berfungsi sebagai pintu masuk utama dan pengatur lalu lintas dalam ekosistem multi-chatbot. HUB berada langsung di bawah Tujuan (bukan di dalam Modul manapun) dan mengoordinasi semua chatbot spesialis lintas Modul.
 
 **Posisi dalam Hierarki:**
 - HUB berada di Level 3 (sama dengan chatbot spesialis)
-- HUB TIDAK masuk ke dalam satu Perspektif karena bersifat lintas Perspektif
+- HUB TIDAK masuk ke dalam satu Modul karena bersifat lintas Modul
 - Setiap Tujuan hanya memiliki maksimal 1 HUB
 - Analogi: HUB = Direktur Operasional (COO) yang mengoordinasi semua divisi
 
@@ -746,7 +746,7 @@ Chatbot Orkestrator (HUB) adalah chatbot khusus yang berfungsi sebagai pintu mas
 1. Pilih Tujuan di sidebar dashboard
 2. Klik "Buat Chatbot Orkestrator" (tombol dengan ikon ungu)
 3. Isi nama dan deskripsi HUB
-4. HUB akan muncul di atas daftar Perspektif dengan warna ungu
+4. HUB akan muncul di atas daftar Modul dengan warna ungu
 5. Tambahkan Alat Bantu ke dalam HUB seperti chatbot biasa
 
 **Kapan Sistem Disebut Ekosistem Multi-Chatbot?**
@@ -755,14 +755,14 @@ Ketika memenuhi: 1 Tujuan payung + 1 HUB orkestrator + beberapa chatbot spesiali
 **Contoh Arsitektur Regulasi Konstruksi:**
 - Tujuan: Regulasi Jasa Konstruksi
   - HUB: Orkestrator Regulasi Konstruksi
-  - Perspektif 1: Kepatuhan & Compliance
+  - Modul 1: Kepatuhan & Compliance
     - Chatbot 1: Perijinan Usaha Dasar
     - Chatbot 2: SKK (Sertifikat Kompetensi)
     - Chatbot 3: SBU (Sertifikat Badan Usaha)
-  - Perspektif 2: Pengembangan Bisnis
+  - Modul 2: Pengembangan Bisnis
     - Chatbot 4: Tender & LPSE
     - Chatbot 5: Kemitraan & JO
-  - Perspektif 3: Manajemen Risiko
+  - Modul 3: Manajemen Risiko
     - Chatbot 6: Audit Kepatuhan
 
 ---
@@ -824,7 +824,7 @@ Aplikasi mini yang didukung AI, memanfaatkan data Project Brain untuk menghasilk
 ### 5B.5 CHATBOT SERIES & KATALOG PUBLIK
 
 **Apa itu?**
-Fitur untuk mengelompokkan beberapa Perspektif ke dalam paket topik terstruktur (Tujuan) yang bisa ditampilkan di halaman publik.
+Fitur untuk mengelompokkan beberapa Modul ke dalam paket topik terstruktur (Tujuan) yang bisa ditampilkan di halaman publik.
 
 **Fitur:**
 - Halaman katalog publik di /series
@@ -1154,16 +1154,16 @@ A: Ya, semua data dienkripsi dan disimpan dengan aman di server.
 A: Anda bisa chat dengan Gustafta Helpdesk (saya!) atau hubungi tim via email.
 
 **Q: Apa bedanya Chatbot dan Alat Bantu?**
-A: Chatbot adalah unit utuh yang menangani satu area operasional (seperti "SBU & Klasifikasi"). Alat Bantu adalah modul spesifik di dalam Chatbot (seperti "Panduan SBU Konstruksi"). Hierarki lengkap: Tujuan → (Orkestrator) → Perspektif → Chatbot → Alat Bantu.
+A: Chatbot adalah unit utuh yang menangani satu area operasional (seperti "SBU & Klasifikasi"). Alat Bantu adalah modul spesifik di dalam Chatbot (seperti "Panduan SBU Konstruksi"). Hierarki lengkap: Tujuan → (Orkestrator) → Modul → Chatbot → Alat Bantu.
 
 **Q: Apa itu Chatbot Orkestrator (HUB)?**
-A: HUB adalah chatbot khusus yang menjadi pintu masuk utama ekosistem multi-chatbot. HUB berada langsung di bawah Tujuan (bukan di dalam Perspektif) dan bertugas mengarahkan pengguna ke chatbot spesialis yang tepat, menjaga urutan prasyarat, dan menyimpan konteks lintas chatbot. Setiap Tujuan hanya memiliki maksimal 1 HUB.
+A: HUB adalah chatbot khusus yang menjadi pintu masuk utama ekosistem multi-chatbot. HUB berada langsung di bawah Tujuan (bukan di dalam Modul) dan bertugas mengarahkan pengguna ke chatbot spesialis yang tepat, menjaga urutan prasyarat, dan menyimpan konteks lintas chatbot. Setiap Tujuan hanya memiliki maksimal 1 HUB.
 
 **Q: Apa bedanya HUB dengan chatbot biasa?**
-A: Chatbot biasa (spesialis) menangani satu area tertentu dan berada di dalam Perspektif. HUB mengoordinasi SEMUA chatbot spesialis lintas Perspektif. Knowledge base HUB berisi peta ekosistem dan aturan routing, bukan konten spesialis. Analogi: chatbot biasa = dokter spesialis, HUB = dokter umum yang merujuk ke spesialis.
+A: Chatbot biasa (spesialis) menangani satu area tertentu dan berada di dalam Modul. HUB mengoordinasi SEMUA chatbot spesialis lintas Modul. Knowledge base HUB berisi peta ekosistem dan aturan routing, bukan konten spesialis. Analogi: chatbot biasa = dokter spesialis, HUB = dokter umum yang merujuk ke spesialis.
 
 **Q: Bagaimana cara membuat HUB?**
-A: Pilih Tujuan di sidebar dashboard, lalu klik tombol "Buat Chatbot Orkestrator" (ikon ungu). Isi nama dan deskripsi, lalu HUB akan muncul di atas daftar Perspektif. Anda bisa menambahkan Alat Bantu ke dalam HUB seperti chatbot biasa.
+A: Pilih Tujuan di sidebar dashboard, lalu klik tombol "Buat Chatbot Orkestrator" (ikon ungu). Isi nama dan deskripsi, lalu HUB akan muncul di atas daftar Modul. Anda bisa menambahkan Alat Bantu ke dalam HUB seperti chatbot biasa.
 
 **Q: Apa itu Conversion Layer?**
 A: Fitur untuk mengubah chatbot menjadi mesin revenue. Termasuk lead capture, scoring, CTA otomatis, dan paket penawaran yang muncul di chat publik.

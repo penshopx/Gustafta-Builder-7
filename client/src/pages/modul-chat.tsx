@@ -25,7 +25,7 @@ interface ChatbotInfo {
   slug: string;
 }
 
-interface PerspektifData {
+interface ModulData {
   id: string;
   name: string;
   description: string;
@@ -47,9 +47,9 @@ interface Message {
   timestamp: Date;
 }
 
-export default function PerspektifChat() {
+export default function ModulChat() {
   const params = useParams<{ bigIdeaId: string }>();
-  const [perspektif, setPerspektif] = useState<PerspektifData | null>(null);
+  const [modul, setModul] = useState<ModulData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBot, setSelectedBot] = useState<ChatbotInfo | null>(null);
@@ -58,7 +58,7 @@ export default function PerspektifChat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const sessionIdRef = useRef<string>(`perspektif_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+  const sessionIdRef = useRef<string>(`modul_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
 
   const [hasAccess, setHasAccess] = useState(true);
   const [accessChecked, setAccessChecked] = useState(false);
@@ -77,13 +77,13 @@ export default function PerspektifChat() {
   }, []);
 
   useEffect(() => {
-    fetch(`/api/public/perspektif/${params.bigIdeaId}`)
+    fetch(`/api/public/modul/${params.bigIdeaId}`)
       .then(r => {
-        if (!r.ok) throw new Error("Perspektif tidak ditemukan");
+        if (!r.ok) throw new Error("Modul tidak ditemukan");
         return r.json();
       })
-      .then((data: PerspektifData) => {
-        setPerspektif(data);
+      .then((data: ModulData) => {
+        setModul(data);
         setLoading(false);
         const urlParams = new URLSearchParams(window.location.search);
         const justSubscribed = urlParams.get("subscribed") === "true";
@@ -93,9 +93,9 @@ export default function PerspektifChat() {
           return;
         }
         if (data.pricing && data.pricing.monthlyPrice > 0) {
-          const savedToken = localStorage.getItem(`perspektif_access_${params.bigIdeaId}`);
-          const savedEmail = localStorage.getItem(`perspektif_email_${params.bigIdeaId}`);
-          fetch(`/api/perspektif/${params.bigIdeaId}/access?${savedEmail ? `email=${encodeURIComponent(savedEmail)}` : ""}${savedToken ? `&token=${encodeURIComponent(savedToken)}` : ""}`)
+          const savedToken = localStorage.getItem(`modul_access_${params.bigIdeaId}`);
+          const savedEmail = localStorage.getItem(`modul_email_${params.bigIdeaId}`);
+          fetch(`/api/modul/${params.bigIdeaId}/access?${savedEmail ? `email=${encodeURIComponent(savedEmail)}` : ""}${savedToken ? `&token=${encodeURIComponent(savedToken)}` : ""}`)
             .then(r => r.json())
             .then(result => {
               setHasAccess(result.hasAccess);
@@ -127,7 +127,7 @@ export default function PerspektifChat() {
       content: bot.greetingMessage || "Halo! Ada yang bisa saya bantu?",
       timestamp: new Date(),
     }]);
-    sessionIdRef.current = `perspektif_${bot.agentId}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    sessionIdRef.current = `modul_${bot.agentId}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }, []);
 
   const goBack = useCallback(() => {
@@ -222,7 +222,7 @@ export default function PerspektifChat() {
     if (!subName.trim() || !subEmail.trim()) return;
     setSubscribing(true);
     try {
-      const res = await fetch(`/api/perspektif/${params.bigIdeaId}/subscribe`, {
+      const res = await fetch(`/api/modul/${params.bigIdeaId}/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -238,8 +238,8 @@ export default function PerspektifChat() {
         return;
       }
       if (data.subscription) {
-        localStorage.setItem(`perspektif_access_${params.bigIdeaId}`, data.subscription.accessToken || data.accessToken || "");
-        localStorage.setItem(`perspektif_email_${params.bigIdeaId}`, subEmail.trim());
+        localStorage.setItem(`modul_access_${params.bigIdeaId}`, data.subscription.accessToken || data.accessToken || "");
+        localStorage.setItem(`modul_email_${params.bigIdeaId}`, subEmail.trim());
         setHasAccess(true);
         setShowUpgradeWall(false);
       }
@@ -255,19 +255,19 @@ export default function PerspektifChat() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Memuat Perspektif...</p>
+          <p className="text-muted-foreground">Memuat Modul...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !perspektif) {
+  if (error || !modul) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card>
           <CardContent className="p-8 text-center">
             <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-semibold mb-2">Perspektif Tidak Ditemukan</h2>
+            <h2 className="text-xl font-semibold mb-2">Modul Tidak Ditemukan</h2>
             <p className="text-muted-foreground">{error || "Halaman yang Anda cari tidak tersedia."}</p>
           </CardContent>
         </Card>
@@ -277,50 +277,50 @@ export default function PerspektifChat() {
 
   if (!selectedBot) {
     return (
-      <div className="min-h-screen bg-background" data-testid="perspektif-chat-page">
+      <div className="min-h-screen bg-background" data-testid="modul-chat-page">
         <div className="max-w-4xl mx-auto p-4 sm:p-6">
           <div className="text-center mb-8">
-            {perspektif.seriesName && (
+            {modul.seriesName && (
               <Badge variant="secondary" className="mb-3" data-testid="badge-series-name">
-                {perspektif.seriesName}
+                {modul.seriesName}
               </Badge>
             )}
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-perspektif-name">
-              {perspektif.name}
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-modul-name">
+              {modul.name}
             </h1>
-            {perspektif.description && (
-              <p className="text-muted-foreground max-w-2xl mx-auto" data-testid="text-perspektif-description">
-                {perspektif.description}
+            {modul.description && (
+              <p className="text-muted-foreground max-w-2xl mx-auto" data-testid="text-modul-description">
+                {modul.description}
               </p>
             )}
-            {perspektif.purpose && (
+            {modul.purpose && (
               <p className="text-sm text-muted-foreground mt-2">
-                {perspektif.purpose}
+                {modul.purpose}
               </p>
             )}
           </div>
 
-          {accessChecked && !hasAccess && perspektif.pricing && perspektif.pricing.monthlyPrice > 0 ? (
-            <Card data-testid="perspektif-upgrade-wall">
+          {accessChecked && !hasAccess && modul.pricing && modul.pricing.monthlyPrice > 0 ? (
+            <Card data-testid="modul-upgrade-wall">
               <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-6">
                   <Lock className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
                   <h3 className="text-lg font-semibold mb-2">Akses Premium</h3>
                   <p className="text-muted-foreground text-sm">
-                    Langganan bundle untuk mengakses semua {perspektif.chatbots.length} chatbot dalam Perspektif ini.
+                    Langganan bundle untuk mengakses semua {modul.chatbots.length} chatbot dalam Modul ini.
                   </p>
                 </div>
                 <div className="text-center mb-6">
                   <p className="text-3xl font-bold">
-                    Rp {perspektif.pricing.monthlyPrice.toLocaleString("id-ID")}
+                    Rp {modul.pricing.monthlyPrice.toLocaleString("id-ID")}
                   </p>
                   <p className="text-sm text-muted-foreground">per bulan</p>
                 </div>
                 {!showUpgradeWall ? (
                   <div className="flex flex-col items-center gap-3">
-                    {perspektif.pricing.trialEnabled && (
+                    {modul.pricing.trialEnabled && (
                       <Button onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-start-trial">
-                        Coba Gratis {perspektif.pricing.trialDays} Hari
+                        Coba Gratis {modul.pricing.trialDays} Hari
                       </Button>
                     )}
                     <Button variant="outline" onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-subscribe">
@@ -350,7 +350,7 @@ export default function PerspektifChat() {
                       data-testid="input-sub-phone"
                     />
                     <div className="flex flex-col gap-2">
-                      {perspektif.pricing.trialEnabled && (
+                      {modul.pricing.trialEnabled && (
                         <Button
                           onClick={() => handleSubscribe("trial")}
                           disabled={subscribing || !subName.trim() || !subEmail.trim()}
@@ -358,10 +358,10 @@ export default function PerspektifChat() {
                           data-testid="button-confirm-trial"
                         >
                           {subscribing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                          Mulai Trial {perspektif.pricing.trialDays} Hari
+                          Mulai Trial {modul.pricing.trialDays} Hari
                         </Button>
                       )}
-                      {perspektif.pricing.monthlyPrice > 0 && (
+                      {modul.pricing.monthlyPrice > 0 && (
                         <Button
                           variant="outline"
                           onClick={() => handleSubscribe("monthly")}
@@ -369,7 +369,7 @@ export default function PerspektifChat() {
                           className="w-full"
                           data-testid="button-confirm-monthly"
                         >
-                          Bayar Rp {perspektif.pricing.monthlyPrice.toLocaleString("id-ID")}/bulan
+                          Bayar Rp {modul.pricing.monthlyPrice.toLocaleString("id-ID")}/bulan
                         </Button>
                       )}
                     </div>
@@ -382,17 +382,17 @@ export default function PerspektifChat() {
             </Card>
           ) : (
             <>
-              {perspektif.chatbots.length === 0 ? (
+              {modul.chatbots.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
                     <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                     <h3 className="text-lg font-medium mb-1">Belum Ada Chatbot</h3>
-                    <p className="text-muted-foreground text-sm">Perspektif ini belum memiliki chatbot aktif.</p>
+                    <p className="text-muted-foreground text-sm">Modul ini belum memiliki chatbot aktif.</p>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {perspektif.chatbots.map((bot) => (
+                  {modul.chatbots.map((bot) => (
                     <Card
                       key={bot.agentId}
                       className="cursor-pointer hover-elevate transition-all"
@@ -447,7 +447,7 @@ export default function PerspektifChat() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background" data-testid="perspektif-chat-conversation">
+    <div className="flex flex-col h-screen bg-background" data-testid="modul-chat-conversation">
       <header className="flex items-center gap-3 p-3 border-b shrink-0">
         <Button variant="ghost" size="icon" onClick={goBack} data-testid="button-back-to-list">
           <ArrowLeft className="w-5 h-5" />
@@ -463,7 +463,7 @@ export default function PerspektifChat() {
           <p className="text-xs text-muted-foreground truncate">{selectedBot.tagline || selectedBot.toolboxName}</p>
         </div>
         <Badge variant="secondary" className="text-xs shrink-0">
-          {perspektif.name}
+          {modul.name}
         </Badge>
       </header>
 

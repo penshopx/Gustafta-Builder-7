@@ -92,14 +92,14 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
 
       toast({
         title: "Berhasil",
-        description: "Perspektif berhasil diperbarui",
+        description: "Modul berhasil diperbarui",
       });
 
       onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Gagal memperbarui Perspektif",
+        description: "Gagal memperbarui Modul",
         variant: "destructive",
       });
     }
@@ -135,7 +135,7 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-5 w-5 text-yellow-500" />
-            Edit Perspektif
+            Edit Modul
           </DialogTitle>
         </DialogHeader>
 
@@ -173,7 +173,7 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           )}
 
           <div className="space-y-2">
-            <Label>Tipe Perspektif</Label>
+            <Label>Tipe Modul</Label>
             <RadioGroup
               value={type}
               onValueChange={(value) => setType(value as any)}
@@ -195,7 +195,7 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Nama Perspektif *</Label>
+            <Label htmlFor="edit-name">Nama Modul *</Label>
             <Input
               id="edit-name"
               placeholder="Contoh: Kepatuhan & Compliance"
@@ -263,10 +263,10 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           <div className="space-y-4 border-t pt-4">
             <Label className="flex items-center gap-2 text-base font-semibold">
               <DollarSign className="h-4 w-4" />
-              Monetisasi Perspektif
+              Monetisasi Modul
             </Label>
             <p className="text-sm text-muted-foreground">
-              Atur harga bundle untuk akses semua chatbot dalam Perspektif ini. HUB/Orkestrator tetap gratis.
+              Atur harga bundle untuk akses semua chatbot dalam Modul ini. HUB/Orkestrator tetap gratis.
             </p>
             <div className="space-y-2">
               <Label htmlFor="edit-monthlyPrice">Harga Bulanan (IDR)</Label>

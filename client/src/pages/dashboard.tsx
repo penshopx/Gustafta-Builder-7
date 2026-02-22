@@ -99,9 +99,9 @@ export default function Dashboard() {
   const [hubDialogOpen, setHubDialogOpen] = useState(false);
   const [hubName, setHubName] = useState("");
   const [hubDescription, setHubDescription] = useState("");
-  const [perspektifOrchDialogOpen, setPerspektifOrchDialogOpen] = useState(false);
-  const [perspektifOrchName, setPerspektifOrchName] = useState("");
-  const [perspektifOrchDescription, setPerspektifOrchDescription] = useState("");
+  const [modulOrchDialogOpen, setModulOrchDialogOpen] = useState(false);
+  const [modulOrchName, setModulOrchName] = useState("");
+  const [modulOrchDescription, setModulOrchDescription] = useState("");
   const [bigIdeaDialogOpen, setBigIdeaDialogOpen] = useState(false);
   const [toolboxDialogOpen, setToolboxDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -323,10 +323,10 @@ export default function Dashboard() {
   const handleDeleteBigIdea = async (bi: BigIdea) => {
     try {
       await deleteBigIdea.mutateAsync(String(bi.id));
-      toast({ title: "Berhasil", description: `Perspektif "${bi.name}" berhasil dihapus` });
+      toast({ title: "Berhasil", description: `Modul "${bi.name}" berhasil dihapus` });
       setDeleteBigIdeaConfirm(null);
     } catch (error) {
-      toast({ title: "Error", description: "Gagal menghapus Perspektif", variant: "destructive" });
+      toast({ title: "Error", description: "Gagal menghapus Modul", variant: "destructive" });
     }
   };
 
@@ -380,25 +380,25 @@ export default function Dashboard() {
     }
   };
 
-  const handleCreatePerspektifOrchestrator = async () => {
-    if (!perspektifOrchName.trim() || !activeBigIdea) return;
+  const handleCreateModulOrchestrator = async () => {
+    if (!modulOrchName.trim() || !activeBigIdea) return;
     let newToolboxId: number | null = null;
     try {
       const newToolbox = await createToolboxMutation.mutateAsync({
         bigIdeaId: activeBigIdea.id,
         seriesId: activeSeriesId || undefined,
         isOrchestrator: false,
-        name: perspektifOrchName.trim(),
-        description: perspektifOrchDescription.trim(),
-        purpose: "Orchestrator untuk Perspektif " + activeBigIdea.name,
+        name: modulOrchName.trim(),
+        description: modulOrchDescription.trim(),
+        purpose: "Orchestrator untuk Modul " + activeBigIdea.name,
         capabilities: [],
         limitations: [],
         sortOrder: 0,
       });
       newToolboxId = newToolbox.id;
       await apiRequest("POST", "/api/agents", {
-        name: perspektifOrchName.trim(),
-        description: perspektifOrchDescription.trim() || `Orchestrator untuk ${activeBigIdea.name}`,
+        name: modulOrchName.trim(),
+        description: modulOrchDescription.trim() || `Orchestrator untuk ${activeBigIdea.name}`,
         toolboxId: newToolbox.id,
         bigIdeaId: activeBigIdea.id,
         isOrchestrator: true,
@@ -406,18 +406,18 @@ export default function Dashboard() {
         isActive: true,
         isPublic: true,
       });
-      setPerspektifOrchDialogOpen(false);
-      setPerspektifOrchName("");
-      setPerspektifOrchDescription("");
+      setModulOrchDialogOpen(false);
+      setModulOrchName("");
+      setModulOrchDescription("");
       queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
       queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
-      toast({ title: "Berhasil", description: "Orkestrator Perspektif berhasil dibuat" });
+      toast({ title: "Berhasil", description: "Orkestrator Modul berhasil dibuat" });
     } catch (error: any) {
       if (newToolboxId) {
         try { await apiRequest("DELETE", `/api/toolboxes/${newToolboxId}`); } catch {}
         queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
       }
-      toast({ title: "Error", description: error?.message || "Gagal membuat Orkestrator Perspektif", variant: "destructive" });
+      toast({ title: "Error", description: error?.message || "Gagal membuat Orkestrator Modul", variant: "destructive" });
     }
   };
 
@@ -482,13 +482,13 @@ export default function Dashboard() {
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-foreground">Selamat Datang di Gustafta</h2>
               <p className="text-sm md:text-base text-muted-foreground mt-2">
-                Mulai dengan membuat Perspektif atau Chatbot pertama Anda.
+                Mulai dengan membuat Modul atau Chatbot pertama Anda.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button onClick={() => setBigIdeaDialogOpen(true)} variant="outline" className="w-full sm:w-auto">
                 <Lightbulb className="w-4 h-4 mr-2" />
-                Buat Perspektif
+                Buat Modul
               </Button>
               <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
@@ -593,7 +593,7 @@ export default function Dashboard() {
                 {activeSeries && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('bigIdeas'); setSidebarCollapsed(false); }} className="gap-2 pl-6">
                     <Lightbulb className="w-4 h-4 text-yellow-500" />
-                    <span className="truncate">Perspektif - {activeSeries.name}</span>
+                    <span className="truncate">Modul - {activeSeries.name}</span>
                   </DropdownMenuItem>
                 )}
                 {activeBigIdea && (
@@ -770,11 +770,11 @@ export default function Dashboard() {
                     </button>
                   ) : null}
                   {(orchestratorHub || activeSeriesId) && (
-                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 py-1">Perspektif</div>
+                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 py-1">Modul</div>
                   )}
                   {filteredBigIdeas.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Perspektif
+                      Belum ada Modul
                     </div>
                   ) : (
                     filteredBigIdeas.map((bi) => (
@@ -823,7 +823,7 @@ export default function Dashboard() {
                     data-testid="button-add-bigidea"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Buat Perspektif Baru</span>
+                    <span>Buat Modul Baru</span>
                   </button>
                 </>
               )}
@@ -836,7 +836,7 @@ export default function Dashboard() {
                     data-testid="button-back-to-bigideas"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Kembali ke Perspektif</span>
+                    <span>Kembali ke Modul</span>
                   </button>
                   {(() => {
                     const orchToolboxes = toolboxes.filter((tb: any) => tb.hasOrchestrator);
@@ -850,18 +850,18 @@ export default function Dashboard() {
                               "bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/15"
                             )}
                             onClick={() => handleToolboxDrillDown(orchTb)}
-                            data-testid={`nav-perspektif-orchestrator-${orchTb.id}`}
+                            data-testid={`nav-modul-orchestrator-${orchTb.id}`}
                           >
                             <Network className="w-4 h-4 text-purple-500 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <span className="truncate block">{orchTb.name}</span>
-                              <span className="text-[10px] text-purple-500/70">Orkestrator Perspektif</span>
+                              <span className="text-[10px] text-purple-500/70">Orkestrator Modul</span>
                             </div>
                             <div className="flex items-center gap-0.5 shrink-0">
                               <div className="invisible group-hover:visible flex items-center gap-0.5">
                                 <Button variant="ghost" size="icon" className="h-5 w-5"
                                   onClick={(e) => { e.stopPropagation(); handleEditToolbox(orchTb); }}
-                                  data-testid={`button-edit-perspektif-orch-${orchTb.id}`}
+                                  data-testid={`button-edit-modul-orch-${orchTb.id}`}
                                 >
                                   <Pencil className="w-3 h-3" />
                                 </Button>
@@ -874,12 +874,12 @@ export default function Dashboard() {
                       </>
                     ) : (
                       <button
-                        onClick={() => setPerspektifOrchDialogOpen(true)}
+                        onClick={() => setModulOrchDialogOpen(true)}
                         className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors mb-2 border border-dashed border-purple-500/30"
-                        data-testid="button-create-perspektif-orch"
+                        data-testid="button-create-modul-orch"
                       >
                         <Network className="w-4 h-4" />
-                        <span>Buat Orkestrator Perspektif</span>
+                        <span>Buat Orkestrator Modul</span>
                       </button>
                     );
                   })()}
@@ -955,7 +955,7 @@ export default function Dashboard() {
                     data-testid="button-back-to-toolboxes"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>{orchestratorHub && String(effectiveToolboxId) === String(orchestratorHub.id) ? "Kembali ke Perspektif" : "Kembali ke Chatbot"}</span>
+                    <span>{orchestratorHub && String(effectiveToolboxId) === String(orchestratorHub.id) ? "Kembali ke Modul" : "Kembali ke Chatbot"}</span>
                   </button>
                   {(() => {
                     const hasOrchAgent = filteredAgents.some((a: any) => a.isOrchestrator);
@@ -1450,32 +1450,32 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={perspektifOrchDialogOpen} onOpenChange={(open) => { setPerspektifOrchDialogOpen(open); if (!open) { setPerspektifOrchName(""); setPerspektifOrchDescription(""); } }}>
+      <Dialog open={modulOrchDialogOpen} onOpenChange={(open) => { setModulOrchDialogOpen(open); if (!open) { setModulOrchName(""); setModulOrchDescription(""); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Network className="h-5 w-5 text-purple-500" />
-              Buat Orkestrator Perspektif
+              Buat Orkestrator Modul
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="p-4 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg space-y-2">
-              <h4 className="font-medium text-purple-900 dark:text-purple-100">Apa itu Orkestrator Perspektif?</h4>
+              <h4 className="font-medium text-purple-900 dark:text-purple-100">Apa itu Orkestrator Modul?</h4>
               <p className="text-sm text-purple-700 dark:text-purple-300">
-                Orkestrator Perspektif mengoordinasikan chatbot-chatbot spesialis di dalam satu Perspektif. Ia menjadi pintu masuk utama dan mengarahkan pengguna ke chatbot yang tepat berdasarkan kebutuhan.
+                Orkestrator Modul mengoordinasikan chatbot-chatbot spesialis di dalam satu Modul. Ia menjadi pintu masuk utama dan mengarahkan pengguna ke chatbot yang tepat berdasarkan kebutuhan.
               </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="persp-orch-name">Nama Orkestrator *</Label>
-              <Input id="persp-orch-name" placeholder={`Contoh: Orkestrator ${activeBigIdea?.name || 'Perspektif'}`} value={perspektifOrchName} onChange={(e) => setPerspektifOrchName(e.target.value)} data-testid="input-perspektif-orch-name" />
+              <Input id="persp-orch-name" placeholder={`Contoh: Orkestrator ${activeBigIdea?.name || 'Modul'}`} value={modulOrchName} onChange={(e) => setModulOrchName(e.target.value)} data-testid="input-modul-orch-name" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="persp-orch-desc">Deskripsi</Label>
-              <Textarea id="persp-orch-desc" placeholder="Jelaskan peran orkestrator perspektif ini..." value={perspektifOrchDescription} onChange={(e) => setPerspektifOrchDescription(e.target.value)} rows={3} data-testid="input-perspektif-orch-description" />
+              <Textarea id="persp-orch-desc" placeholder="Jelaskan peran orkestrator modul ini..." value={modulOrchDescription} onChange={(e) => setModulOrchDescription(e.target.value)} rows={3} data-testid="input-modul-orch-description" />
             </div>
             <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={() => setPerspektifOrchDialogOpen(false)}>Batal</Button>
-              <Button onClick={handleCreatePerspektifOrchestrator} disabled={createToolboxMutation.isPending || !perspektifOrchName.trim()} data-testid="button-submit-perspektif-orch">
+              <Button variant="outline" onClick={() => setModulOrchDialogOpen(false)}>Batal</Button>
+              <Button onClick={handleCreateModulOrchestrator} disabled={createToolboxMutation.isPending || !modulOrchName.trim()} data-testid="button-submit-modul-orch">
                 {createToolboxMutation.isPending ? "Membuat..." : "Buat Orkestrator"}
               </Button>
             </div>
@@ -1508,9 +1508,9 @@ export default function Dashboard() {
       <AlertDialog open={!!deleteBigIdeaConfirm} onOpenChange={(open) => { if (!open) setDeleteBigIdeaConfirm(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Perspektif?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Modul?</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus Perspektif "{deleteBigIdeaConfirm?.name}"? 
+              Apakah Anda yakin ingin menghapus Modul "{deleteBigIdeaConfirm?.name}"? 
               Semua Chatbot dan Alat Bantu di dalamnya juga akan terpengaruh. Tindakan ini tidak bisa dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>

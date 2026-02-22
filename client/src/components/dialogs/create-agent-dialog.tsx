@@ -262,7 +262,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Orchestrator utama untuk Perspektif "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke chatbot-chatbot lainnya.
+                    Orchestrator utama untuk Modul "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke chatbot-chatbot lainnya.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -328,7 +328,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
           <ScrollArea className="h-[400px] pr-4">
             {forceOrchestrator && activeBigIdea && (
               <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20 space-y-1 mb-3">
-                <p className="text-xs text-muted-foreground">Orchestrator untuk Perspektif:</p>
+                <p className="text-xs text-muted-foreground">Orchestrator untuk Modul:</p>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="gap-1">
                     <Lightbulb className="h-3 w-3" />

@@ -42,7 +42,7 @@ export async function seedCivilproEcosystem(userId: string) {
       {
         name: "Sertifikasi & Kompetensi",
         type: "mentoring",
-        description: "Perspektif pembekalan dan sertifikasi: mempersiapkan tenaga kerja konstruksi menghadapi uji kompetensi SKK di semua jenjang, mulai dari pemahaman unit kompetensi, penyusunan portofolio, hingga simulasi ujian dan wawancara.",
+        description: "Modul pembekalan dan sertifikasi: mempersiapkan tenaga kerja konstruksi menghadapi uji kompetensi SKK di semua jenjang, mulai dari pemahaman unit kompetensi, penyusunan portofolio, hingga simulasi ujian dan wawancara.",
         goals: ["Lulus uji kompetensi SKK", "Menyusun portofolio yang memenuhi syarat", "Menguasai materi per jenjang kualifikasi", "Mempersiapkan wawancara asesmen"],
         targetAudience: "Tenaga ahli konstruksi, insinyur sipil, teknisi, operator",
         expectedOutcome: "Tenaga kerja lulus sertifikasi SKK dan memiliki kompetensi tervalidasi",
@@ -101,7 +101,7 @@ export async function seedCivilproEcosystem(userId: string) {
       {
         name: "Konsultasi Teknis & Keputusan Proyek",
         type: "problem",
-        description: "Perspektif pemecahan masalah: membantu profesional teknik sipil melakukan konsultasi teknis, diagnosis masalah lapangan, dan pengambilan keputusan proyek berbasis parameter mutu, waktu, biaya, dan risiko.",
+        description: "Modul pemecahan masalah: membantu profesional teknik sipil melakukan konsultasi teknis, diagnosis masalah lapangan, dan pengambilan keputusan proyek berbasis parameter mutu, waktu, biaya, dan risiko.",
         goals: ["Diagnosis masalah teknis yang akurat", "Pengambilan keputusan berbasis data", "Solusi teknis yang terukur dan defensible", "Dokumentasi teknis yang standar"],
         targetAudience: "Manajer proyek, site engineer, konsultan teknis, quality control",
         expectedOutcome: "Keputusan proyek yang terukur dan masalah teknis terselesaikan secara sistematis",
@@ -168,7 +168,7 @@ export async function seedCivilproEcosystem(userId: string) {
       {
         name: "Inovasi & Pengembangan",
         type: "inspiration",
-        description: "Perspektif inovasi: mendorong eksplorasi metode konstruksi baru, teknologi digital, konstruksi berkelanjutan, dan tren masa depan infrastruktur untuk meningkatkan daya saing profesional teknik sipil.",
+        description: "Modul inovasi: mendorong eksplorasi metode konstruksi baru, teknologi digital, konstruksi berkelanjutan, dan tren masa depan infrastruktur untuk meningkatkan daya saing profesional teknik sipil.",
         goals: ["Menerapkan teknologi digital (BIM, IoT, AI)", "Mengadopsi konstruksi berkelanjutan", "Meningkatkan efisiensi metode konstruksi", "Mengikuti tren infrastruktur masa depan"],
         targetAudience: "Insinyur sipil inovatif, manajer proyek, konsultan, akademisi",
         expectedOutcome: "Profesional yang mampu menerapkan inovasi untuk meningkatkan kualitas dan efisiensi proyek",
@@ -212,7 +212,7 @@ export async function seedCivilproEcosystem(userId: string) {
       {
         name: "Edukasi & Pengembangan Kompetensi",
         type: "mentoring",
-        description: "Perspektif pembelajaran: menyediakan materi edukasi terstruktur dan pengembangan kompetensi bertahap untuk profesional teknik sipil, dari dasar hingga advanced, termasuk pemahaman standar dan keterampilan praktis lapangan.",
+        description: "Modul pembelajaran: menyediakan materi edukasi terstruktur dan pengembangan kompetensi bertahap untuk profesional teknik sipil, dari dasar hingga advanced, termasuk pemahaman standar dan keterampilan praktis lapangan.",
         goals: ["Menguasai dasar teknik sipil", "Memahami standar dan regulasi teknis", "Mengembangkan keterampilan praktis lapangan", "Merencanakan pengembangan karir"],
         targetAudience: "Fresh graduate, insinyur junior, profesional yang ingin meningkatkan kompetensi",
         expectedOutcome: "Profesional dengan kompetensi teknis dan soft skills yang komprehensif",
@@ -276,7 +276,7 @@ export async function seedCivilproEcosystem(userId: string) {
 
     const orchestrator = await storage.createAgent({
       name: "CIVILPRO Orchestrator",
-      description: "Chatbot orkestrator utama untuk ekosistem CIVILPRO. Mengarahkan pengguna ke perspektif dan alat bantu yang tepat.",
+      description: "Chatbot orkestrator utama untuk ekosistem CIVILPRO. Mengarahkan pengguna ke modul dan alat bantu yang tepat.",
       tagline: "Asisten AI Utama Ekosistem CIVILPRO",
       category: "engineering",
       subcategory: "civil-engineering",
@@ -286,7 +286,7 @@ export async function seedCivilproEcosystem(userId: string) {
       temperature: "0.7",
       maxTokens: 2048,
       toolboxId: parseInt(hubToolbox.id),
-      systemPrompt: `Kamu adalah Orchestrator utama untuk ekosistem CIVILPRO.\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke perspektif dan alat bantu yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang teknik sipil`,
+      systemPrompt: `Kamu adalah Orchestrator utama untuk ekosistem CIVILPRO.\n\nPeran kamu adalah:\n1. Memahami kebutuhan pengguna\n2. Mengarahkan ke modul dan alat bantu yang tepat\n3. Memberikan gambaran umum sebelum mengarahkan ke spesialis\n4. Menjawab pertanyaan umum tentang teknik sipil`,
       greetingMessage: `Selamat datang di CIVILPRO!\n\nSaya adalah asisten utama yang akan membantu mengarahkan Anda ke layanan yang tepat.\n\nSilakan ceritakan kebutuhan Anda.`,
       personality: "Profesional, suportif, terstruktur, dan berbasis data",
     } as any);
@@ -339,11 +339,11 @@ export async function seedCivilproEcosystem(userId: string) {
         }
       }
 
-      log(`[Seed] Created Perspektif: ${biData.name} (${biData.toolboxes.length} domains, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
+      log(`[Seed] Created Modul: ${biData.name} (${biData.toolboxes.length} domains, ${biData.toolboxes.reduce((sum: number, tb: any) => sum + tb.agents.length, 0)} agents)`);
     }
 
     log(`[Seed] CIVILPRO ecosystem created successfully!`);
-    log(`[Seed] Total: 1 Series (Goal), 1 HUB + 1 Orchestrator, ${bigIdeasData.length} Big Ideas (Perspektif), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat)`);
+    log(`[Seed] Total: 1 Series (Goal), 1 HUB + 1 Orchestrator, ${bigIdeasData.length} Big Ideas (Modul), ${totalToolboxes} Toolboxes (Domain), ${totalAgents} Agents (Alat)`);
   } catch (err) {
     log("[Seed] Failed to create CIVILPRO ecosystem: " + (err as Error).message);
     console.error(err);

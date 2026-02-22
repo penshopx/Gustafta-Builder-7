@@ -115,17 +115,17 @@ export function CreateToolboxDialog({ open, onOpenChange, bigIdea, onCreated }: 
           <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
             <h4 className="font-medium text-blue-900 dark:text-blue-100">Apa itu Chatbot?</h4>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Chatbot adalah unit utuh yang menangani satu area operasional di bawah suatu Perspektif. 
+              Chatbot adalah unit utuh yang menangani satu area operasional di bawah suatu Modul. 
               Setiap Chatbot memiliki Alat Bantu (modul spesifik) di dalamnya.
             </p>
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              Contoh: Dari Perspektif "Kepatuhan & Compliance", Anda bisa membuat Chatbot untuk 
+              Contoh: Dari Modul "Kepatuhan & Compliance", Anda bisa membuat Chatbot untuk 
               "SBU & Klasifikasi", "SKK & Tenaga Ahli", atau "Perijinan Usaha".
             </p>
           </div>
 
           <div className="p-4 bg-muted rounded-lg">
-            <Label className="text-xs text-muted-foreground">Dari Perspektif:</Label>
+            <Label className="text-xs text-muted-foreground">Dari Modul:</Label>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="secondary">{bigIdea.type}</Badge>
               <span className="font-medium">{bigIdea.name}</span>

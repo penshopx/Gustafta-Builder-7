@@ -213,7 +213,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Hapus tujuan ini? Perspektif yang terkait tidak akan dihapus.")) {
+    if (confirm("Hapus tujuan ini? Modul yang terkait tidak akan dihapus.")) {
       deleteMutation.mutate(id);
     }
   };
@@ -296,7 +296,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                         </div>
                         {s.tagline && <p className="text-xs text-muted-foreground truncate">{s.tagline}</p>}
                         <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
-                          <span>{assigned.length} Perspektif</span>
+                          <span>{assigned.length} Modul</span>
                           {s.category && <span>{s.category}</span>}
                           <span>/{s.slug}</span>
                         </div>
@@ -332,7 +332,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                        
                       >
                         <Layers className="w-3.5 h-3.5 mr-1" />
-                        Perspektif ({assigned.length})
+                        Modul ({assigned.length})
                       </Button>
                       {s.isPublic && s.isActive && (
                         <Button
@@ -377,7 +377,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                                   <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
                                   <span className="text-sm font-medium truncate">{core.name}</span>
                                   <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate shrink-0">
-                                    {coreBigIdeas.length} Perspektif
+                                    {coreBigIdeas.length} Modul
                                   </Badge>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
@@ -396,7 +396,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => {
-                                      if (confirm("Hapus Core ini? Perspektif terkait akan jadi tanpa Core.")) {
+                                      if (confirm("Hapus Core ini? Modul terkait akan jadi tanpa Core.")) {
                                         deleteCoreMutation.mutate(core.id);
                                       }
                                     }}
@@ -428,7 +428,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                               )}
                               {bigIdeas.filter(bi => bi.seriesId === String(s.id) && !bi.coreId).length > 0 && (
                                 <div className="pl-4 pt-1 border-t space-y-1">
-                                  <p className="text-[10px] text-muted-foreground">Tambahkan Perspektif:</p>
+                                  <p className="text-[10px] text-muted-foreground">Tambahkan Modul:</p>
                                   {bigIdeas.filter(bi => bi.seriesId === String(s.id) && !bi.coreId).map(bi => (
                                     <div key={bi.id} className="flex items-center justify-between gap-2 text-xs">
                                       <span className="truncate">{bi.name}</span>
@@ -517,9 +517,9 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
                     {assignOpen === String(s.id) && (
                       <div className="border rounded-lg p-3 space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Perspektif dalam tujuan ini:</p>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Modul dalam tujuan ini:</p>
                         {assigned.length === 0 && (
-                          <p className="text-xs text-muted-foreground">Belum ada Perspektif yang ditambahkan.</p>
+                          <p className="text-xs text-muted-foreground">Belum ada Modul yang ditambahkan.</p>
                         )}
                         {assigned.map(bi => (
                           <div key={bi.id} className="flex items-center justify-between gap-2 py-1">
@@ -537,7 +537,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                         ))}
                         {getUnassignedBigIdeas().length > 0 && (
                           <>
-                            <p className="text-xs font-medium text-muted-foreground mt-3 pt-2 border-t">Tambahkan Perspektif:</p>
+                            <p className="text-xs font-medium text-muted-foreground mt-3 pt-2 border-t">Tambahkan Modul:</p>
                             {getUnassignedBigIdeas().map(bi => (
                               <div key={bi.id} className="flex items-center justify-between gap-2 py-1">
                                 <span className="text-sm truncate">{bi.name}</span>
