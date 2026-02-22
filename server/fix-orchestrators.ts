@@ -109,4 +109,37 @@ export async function fixOrphanedOrchestrators() {
   }
 
   log(`[Fix] Orphaned orchestrator fix complete`);
+
+  await reactivateInactiveToolboxesAndAgents();
+}
+
+async function reactivateInactiveToolboxesAndAgents() {
+  const inactiveToolboxes = await db
+    .select({ id: toolboxes.id, name: toolboxes.name })
+    .from(toolboxes)
+    .where(eq(toolboxes.isActive, false));
+
+  if (inactiveToolboxes.length === 0) return;
+
+  let fixedTb = 0;
+  let fixedAg = 0;
+
+  for (const tb of inactiveToolboxes) {
+    await db.update(toolboxes).set({ isActive: true }).where(eq(toolboxes.id, tb.id));
+    fixedTb++;
+
+    const inactiveAgents = await db
+      .select({ id: agents.id, name: agents.name })
+      .from(agents)
+      .where(and(eq(agents.toolboxId, tb.id), eq(agents.isActive, false)));
+
+    for (const ag of inactiveAgents) {
+      await db.update(agents).set({ isActive: true }).where(eq(agents.id, ag.id));
+      fixedAg++;
+    }
+  }
+
+  if (fixedTb > 0 || fixedAg > 0) {
+    log(`[Fix] Reactivated ${fixedTb} toolbox(es) and ${fixedAg} agent(s)`);
+  }
 }
