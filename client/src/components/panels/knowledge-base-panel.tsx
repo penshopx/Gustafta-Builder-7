@@ -135,10 +135,10 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 50 * 1024 * 1024) {
       toast({
         title: "Error",
-        description: "Ukuran file maksimal 10MB",
+        description: "Ukuran file maksimal 50MB",
         variant: "destructive",
       });
       return;
@@ -278,10 +278,10 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 50 * 1024 * 1024) {
       toast({
         title: "Error",
-        description: "Ukuran file maksimal 10MB",
+        description: "Ukuran file maksimal 50MB",
         variant: "destructive",
       });
       return;
@@ -458,7 +458,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                           Drag & drop atau klik untuk upload
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          PDF, PPT, Excel, Word (Max 10MB)
+                          PDF, PPT, Excel, Word (Max 50MB)
                         </p>
                         <Button
                           variant="outline"
