@@ -78,8 +78,34 @@ export async function seedRegulasiJasaKonstruksi(userId: string) {
       s.name === "Regulasi Jasa Konstruksi" || s.name === "Perijinan dan Sertifikasi Jasa Konstruksi"
     );
     if (existing) {
-      log("[Seed] Regulasi Jasa Konstruksi series already exists, skipping");
-      return;
+      const toolboxes = await storage.getToolboxes(undefined, existing.id);
+      const hubUtama = toolboxes.find((t: any) => t.name === "HUB Regulasi Jasa Konstruksi" && t.seriesId === existing.id && !t.bigIdeaId);
+      if (hubUtama) {
+        log("[Seed] Regulasi Jasa Konstruksi 5-level architecture already exists, skipping");
+        return;
+      }
+      log("[Seed] Old architecture detected, replacing with 5-level architecture...");
+      const bigIdeas = await storage.getBigIdeas(existing.id);
+      for (const bi of bigIdeas) {
+        const biToolboxes = await storage.getToolboxes(bi.id);
+        for (const tb of biToolboxes) {
+          const agents = await storage.getAgents(tb.id);
+          for (const agent of agents) {
+            await storage.deleteAgent(agent.id);
+          }
+          await storage.deleteToolbox(tb.id);
+        }
+        await storage.deleteBigIdea(bi.id);
+      }
+      for (const tb of toolboxes) {
+        const agents = await storage.getAgents(tb.id);
+        for (const agent of agents) {
+          await storage.deleteAgent(agent.id);
+        }
+        await storage.deleteToolbox(tb.id);
+      }
+      await storage.deleteSeries(existing.id);
+      log("[Seed] Old data cleared successfully");
     }
 
     log("[Seed] Creating Regulasi Jasa Konstruksi ecosystem (5-level architecture)...");
