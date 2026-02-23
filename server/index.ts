@@ -6,8 +6,7 @@ import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
-import { seedCivilproEcosystem } from "./seed-civilpro";
-import { seedPerijinanSertifikasi } from "./seed-perijinan";
+import { seedRegulasiJasaKonstruksi } from "./seed-regulasi";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -177,15 +176,9 @@ for (const envVar of requiredEnvVars) {
       }
 
       try {
-        await seedCivilproEcosystem("49465846");
+        await seedRegulasiJasaKonstruksi("49465846");
       } catch (err) {
-        log("Failed to seed CIVILPRO ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedPerijinanSertifikasi("49465846");
-      } catch (err) {
-        log("Failed to seed Perijinan & Sertifikasi ecosystem: " + (err as Error).message);
+        log("Failed to seed Regulasi Jasa Konstruksi ecosystem: " + (err as Error).message);
       }
 
       try {
