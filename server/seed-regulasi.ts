@@ -2136,8 +2136,78 @@ Jika user memberikan *_SUMMARY v1 (LICENSING_SUMMARY, SBU_SUMMARY, SKK_SUMMARY, 
 6) DATA BARU:
 - Jika user memberi data baru yang bertentangan dengan SUMMARY, minta user memilih mana yang benar, atau gunakan data terbaru jika jelas lebih valid.`;
 
-async function patchHubBotsWithRulebook(seriesId: string) {
+const SERIES_DESCRIPTION_SYNCED = "Ekosistem chatbot AI modular untuk kepatuhan regulasi jasa konstruksi Indonesia — fokus utama: Perizinan Usaha berbasis OSS RBA (PP 5/2021, UU Cipta Kerja). Arsitektur 5 level: Tujuan → Hub Utama → Modul Hub → Toolbox Spesialis → Agen. 25 chatbot mencakup 4 domain: Perizinan Usaha (7 spesialis termasuk KBLI, NIB, Sertifikat Standar), SBU (4 spesialis), SKK (5 spesialis), dan Tender & Pengadaan (4 spesialis). Terintegrasi melalui Summary Protocol v1 (SKK_SUMMARY, SBU_SUMMARY, LICENSING_SUMMARY, TENDER_REQ_SUMMARY) dengan SUMMARY_RULEBOOK v1, RISK_AGGREGATION_RULE v1, dan SUMMARY_GENERATOR_MODE.";
+
+const PERIZINAN_DESCRIPTION_SYNCED = "Modul Perizinan Usaha mengelola legalitas badan usaha konstruksi berbasis OSS RBA (PP 5/2021, UU Cipta Kerja). 7 chatbot spesialis mencakup: KBLI & Klasifikasi Risiko Usaha, Prasyarat & Kelengkapan Dasar NIB, Pendaftaran NIB & OSS, Sertifikat Standar & Perizinan Berbasis Risiko, IUJK & Izin Pelaksana Konstruksi, Validasi Badan Hukum, serta Kepatuhan & Audit Perizinan. Menghasilkan LICENSING_SUMMARY v1 yang kompatibel dengan TRC dan ECSG.";
+
+const HUB_UTAMA_SYNCED_PROMPT = `You are HUB Regulasi Jasa Konstruksi, the Global Navigator for construction industry compliance.
+
+Your role is to:
+1. Identify the user's compliance need.
+2. Categorize it into one of the following domains:
+   - Perizinan Usaha (Legal & OSS RBA) → for KBLI & klasifikasi risiko usaha, prasyarat & kelengkapan dasar NIB, pendaftaran NIB & OSS, sertifikat standar & perizinan berbasis risiko, IUJK, validasi badan hukum, audit kepatuhan perizinan (7 spesialis)
+   - SBU (Sertifikat Badan Usaha) → for business classification, workforce requirements, SBU documents, upgrade planning (4 spesialis)
+   - SKK (Sertifikasi Kompetensi Kerja) → for worker certification, eligibility, renewal, SKK-SBU dependency (5 spesialis)
+   - Tender & Pengadaan → for tender readiness, executive compliance summary, tender documents, risk scoring (4 spesialis)
+3. Route the user to the correct Modul Hub.
+
+Routing hints for Perizinan Usaha (domain terbesar, 7 spesialis):
+- Tanya tentang KBLI, kode usaha, atau klasifikasi risiko → KBLI & Klasifikasi Risiko Usaha Konstruksi
+- Tanya tentang dokumen dasar sebelum daftar NIB (akta, NPWP, dll) → Prasyarat & Kelengkapan Dasar NIB
+- Tanya tentang pendaftaran NIB, proses OSS → NIB & OSS Registration Guide
+- Tanya tentang sertifikat standar, kewajiban pasca-NIB, pemenuhan komitmen → Sertifikat Standar & Perizinan Berbasis Risiko
+- Tanya tentang IUJK, izin pelaksana konstruksi → IUJK & Izin Pelaksana Konstruksi Guide
+- Tanya tentang validasi badan hukum, pengecekan entitas → Legal Entity Validator
+- Tanya tentang audit kepatuhan, evaluasi perizinan menyeluruh → Kepatuhan & Audit Perizinan Checker
+
+You are NOT allowed to:
+- Perform regulatory analysis.
+- Provide detailed checklists.
+- Make eligibility decisions.
+- Calculate workforce requirements.
+- Interpret regulations deeply.
+
+If the user's intent is ambiguous:
+- Ask ONE clarifying question to determine the correct domain.
+- Then route immediately.
+
+Output format:
+"Kebutuhan Anda termasuk dalam domain [DOMAIN].
+Saya arahkan Anda ke: [Modul Hub Name] → [Spesialis] untuk bantuan lebih lanjut."
+
+Respond in Bahasa Indonesia. Keep responses concise and professional.
+Never act as a specialist.${GOVERNANCE_RULES}`;
+
+const HUB_UTAMA_SYNCED_GREETING = "Selamat datang di HUB Regulasi Jasa Konstruksi.\nSilakan sampaikan kebutuhan Anda terkait perizinan usaha, SBU, SKK, atau tender, dan saya akan mengarahkan Anda ke layanan yang tepat.\n\n4 domain tersedia:\n• Perizinan Usaha (7 spesialis — KBLI, NIB, Sertifikat Standar, IUJK, dll)\n• SBU (4 spesialis)\n• SKK (5 spesialis)\n• Tender & Pengadaan (4 spesialis)";
+
+const HUB_UTAMA_SYNCED_STARTERS = [
+  "Saya ingin tahu kode KBLI dan risiko usaha konstruksi saya",
+  "Saya ingin mengurus NIB atau OSS",
+  "Saya ingin mengetahui persyaratan SBU",
+  "Saya ingin mengurus atau memperpanjang SKK",
+  "Saya ingin mengecek kesiapan tender",
+  "Saya ingin evaluasi kepatuhan usaha konstruksi",
+];
+
+async function syncMetadataAndPatchBots(seriesId: string) {
   try {
+    const existingSeries = await storage.getSeries();
+    const series = existingSeries.find((s: any) => s.id === seriesId || s.id === parseInt(seriesId));
+    if (series && !(series as any).description?.includes("SUMMARY_RULEBOOK v1")) {
+      await storage.updateSeries(series.id, { description: SERIES_DESCRIPTION_SYNCED } as any);
+      log("[Seed] Series description synced with latest features");
+    }
+
+    const bigIdeas = await storage.getBigIdeas(seriesId);
+    const perizinanModul = bigIdeas.find((bi: any) => bi.name === "Perizinan Usaha");
+    if (perizinanModul && !(perizinanModul as any).description?.includes("7 chatbot spesialis")) {
+      await storage.updateBigIdea(perizinanModul.id, {
+        description: PERIZINAN_DESCRIPTION_SYNCED,
+        goals: ["Memastikan kelengkapan perizinan usaha berbasis OSS RBA", "Validasi legalitas badan hukum", "Identifikasi KBLI & klasifikasi risiko usaha konstruksi", "Kepatuhan perizinan OSS, NIB, Sertifikat Standar & IUJK", "Audit kesiapan perizinan dan sinkronisasi data"],
+      } as any);
+      log("[Seed] Perizinan Usaha modul description synced");
+    }
+
     const allToolboxes = await storage.getToolboxes(undefined, seriesId);
     const hubUtama = allToolboxes.find((t: any) => t.name === "HUB Regulasi Jasa Konstruksi" && t.seriesId === seriesId && !t.bigIdeaId);
     if (!hubUtama) return;
@@ -2145,15 +2215,21 @@ async function patchHubBotsWithRulebook(seriesId: string) {
     const hubAgents = await storage.getAgents(hubUtama.id);
     for (const agent of hubAgents) {
       const prompt = (agent as any).systemPrompt || "";
-      if (prompt.includes("GOVERNANCE RULES") && !prompt.includes("SUMMARY_RULEBOOK v1")) {
+      if (!prompt.includes("Routing hints for Perizinan Usaha")) {
+        await storage.updateAgent(agent.id, {
+          systemPrompt: HUB_UTAMA_SYNCED_PROMPT,
+          greetingMessage: HUB_UTAMA_SYNCED_GREETING,
+          starters: HUB_UTAMA_SYNCED_STARTERS,
+        } as any);
+        log("[Seed] Hub Utama synced with expanded Perizinan routing + SUMMARY_RULEBOOK v1");
+      } else if (!prompt.includes("SUMMARY_RULEBOOK v1")) {
         await storage.updateAgent(agent.id, {
           systemPrompt: prompt + SUMMARY_RULEBOOK_PATCH,
         } as any);
-        log(`[Seed] Hub Utama patched with SUMMARY_RULEBOOK v1`);
+        log("[Seed] Hub Utama patched with SUMMARY_RULEBOOK v1");
       }
     }
 
-    const bigIdeas = await storage.getBigIdeas(seriesId);
     for (const modul of bigIdeas) {
       const modulToolboxes = await storage.getToolboxes(modul.id);
       for (const tb of modulToolboxes) {
@@ -2174,7 +2250,7 @@ async function patchHubBotsWithRulebook(seriesId: string) {
       }
     }
   } catch (err) {
-    log(`[Seed] Warning: Could not patch Hub bots: ${err}`);
+    log(`[Seed] Warning: Could not sync metadata/patch bots: ${err}`);
   }
 }
 
@@ -2264,7 +2340,7 @@ export async function seedRegulasiJasaKonstruksi(userId: string) {
         log("[Seed] Regulasi Jasa Konstruksi 5-level architecture already exists");
         await updateTenderToolboxAgents(existing.id);
         await updateModuleAgents(existing.id);
-        await patchHubBotsWithRulebook(existing.id);
+        await syncMetadataAndPatchBots(existing.id);
         return;
       }
       log("[Seed] Old architecture detected, replacing with 5-level architecture...");
@@ -2296,7 +2372,7 @@ export async function seedRegulasiJasaKonstruksi(userId: string) {
     const series = await storage.createSeries({
       name: "Regulasi Jasa Konstruksi",
       slug: "regulasi-jasa-konstruksi",
-      description: "Ekosistem chatbot AI modular untuk kepatuhan regulasi jasa konstruksi Indonesia. Arsitektur 5 level: Tujuan → Hub Utama → Modul Hub → Toolbox Spesialis → Agen. Mencakup 4 domain: Perizinan Usaha, SBU, SKK, dan Tender & Pengadaan. Terintegrasi melalui Summary Protocol (SKK_SUMMARY, SBU_SUMMARY, LICENSING_SUMMARY).",
+      description: "Ekosistem chatbot AI modular untuk kepatuhan regulasi jasa konstruksi Indonesia — fokus utama: Perizinan Usaha berbasis OSS RBA (PP 5/2021, UU Cipta Kerja). Arsitektur 5 level: Tujuan → Hub Utama → Modul Hub → Toolbox Spesialis → Agen. 25 chatbot mencakup 4 domain: Perizinan Usaha (7 spesialis termasuk KBLI, NIB, Sertifikat Standar), SBU (4 spesialis), SKK (5 spesialis), dan Tender & Pengadaan (4 spesialis). Terintegrasi melalui Summary Protocol v1 (SKK_SUMMARY, SBU_SUMMARY, LICENSING_SUMMARY, TENDER_REQ_SUMMARY) dengan SUMMARY_RULEBOOK v1, RISK_AGGREGATION_RULE v1, dan SUMMARY_GENERATOR_MODE.",
       tagline: "Platform AI Kepatuhan Regulasi Jasa Konstruksi Indonesia",
       coverImage: "",
       color: "#059669",
@@ -2344,11 +2420,20 @@ export async function seedRegulasiJasaKonstruksi(userId: string) {
 Your role is to:
 1. Identify the user's compliance need.
 2. Categorize it into one of the following domains:
-   - Perizinan Usaha (Legal & OSS) → for NIB, OSS, IUJK, legal entity matters
-   - SBU (Sertifikat Badan Usaha) → for business classification, workforce requirements, SBU documents
-   - SKK (Sertifikasi Kompetensi Kerja) → for worker certification, eligibility, renewal
-   - Tender & Pengadaan → for tender readiness, tender documents, risk scoring
+   - Perizinan Usaha (Legal & OSS RBA) → for KBLI & klasifikasi risiko usaha, prasyarat & kelengkapan dasar NIB, pendaftaran NIB & OSS, sertifikat standar & perizinan berbasis risiko, IUJK, validasi badan hukum, audit kepatuhan perizinan (7 spesialis)
+   - SBU (Sertifikat Badan Usaha) → for business classification, workforce requirements, SBU documents, upgrade planning (4 spesialis)
+   - SKK (Sertifikasi Kompetensi Kerja) → for worker certification, eligibility, renewal, SKK-SBU dependency (5 spesialis)
+   - Tender & Pengadaan → for tender readiness, executive compliance summary, tender documents, risk scoring (4 spesialis)
 3. Route the user to the correct Modul Hub.
+
+Routing hints for Perizinan Usaha (domain terbesar, 7 spesialis):
+- Tanya tentang KBLI, kode usaha, atau klasifikasi risiko → KBLI & Klasifikasi Risiko Usaha Konstruksi
+- Tanya tentang dokumen dasar sebelum daftar NIB (akta, NPWP, dll) → Prasyarat & Kelengkapan Dasar NIB
+- Tanya tentang pendaftaran NIB, proses OSS → NIB & OSS Registration Guide
+- Tanya tentang sertifikat standar, kewajiban pasca-NIB, pemenuhan komitmen → Sertifikat Standar & Perizinan Berbasis Risiko
+- Tanya tentang IUJK, izin pelaksana konstruksi → IUJK & Izin Pelaksana Konstruksi Guide
+- Tanya tentang validasi badan hukum, pengecekan entitas → Legal Entity Validator
+- Tanya tentang audit kepatuhan, evaluasi perizinan menyeluruh → Kepatuhan & Audit Perizinan Checker
 
 You are NOT allowed to:
 - Perform regulatory analysis.
@@ -2363,12 +2448,13 @@ If the user's intent is ambiguous:
 
 Output format:
 "Kebutuhan Anda termasuk dalam domain [DOMAIN].
-Saya arahkan Anda ke: [Modul Hub Name] untuk bantuan lebih lanjut."
+Saya arahkan Anda ke: [Modul Hub Name] → [Spesialis] untuk bantuan lebih lanjut."
 
 Respond in Bahasa Indonesia. Keep responses concise and professional.
 Never act as a specialist.${GOVERNANCE_RULES}`,
-      greetingMessage: "Selamat datang di HUB Regulasi Jasa Konstruksi.\nSilakan sampaikan kebutuhan Anda terkait perizinan usaha, SBU, SKK, atau tender, dan saya akan mengarahkan Anda ke layanan yang tepat.",
+      greetingMessage: "Selamat datang di HUB Regulasi Jasa Konstruksi.\nSilakan sampaikan kebutuhan Anda terkait perizinan usaha, SBU, SKK, atau tender, dan saya akan mengarahkan Anda ke layanan yang tepat.\n\n4 domain tersedia:\n• Perizinan Usaha (7 spesialis — KBLI, NIB, Sertifikat Standar, IUJK, dll)\n• SBU (4 spesialis)\n• SKK (5 spesialis)\n• Tender & Pengadaan (4 spesialis)",
       conversationStarters: [
+        "Saya ingin tahu kode KBLI dan risiko usaha konstruksi saya",
         "Saya ingin mengurus NIB atau OSS",
         "Saya ingin mengetahui persyaratan SBU",
         "Saya ingin mengurus atau memperpanjang SKK",
@@ -2399,8 +2485,8 @@ Never act as a specialist.${GOVERNANCE_RULES}`,
       seriesId: seriesId,
       name: "Perizinan Usaha",
       type: "problem",
-      description: "Modul Perizinan Usaha mengelola legalitas badan usaha konstruksi. Mencakup NIB, OSS, IUJK, validasi badan hukum, dan audit kepatuhan perizinan. Hub ini berfungsi sebagai navigator domain, mengarahkan ke chatbot spesialis yang sesuai.",
-      goals: ["Memastikan kelengkapan perizinan usaha", "Validasi legalitas badan hukum", "Kepatuhan perizinan OSS & IUJK", "Audit kesiapan perizinan"],
+      description: "Modul Perizinan Usaha mengelola legalitas badan usaha konstruksi berbasis OSS RBA (PP 5/2021, UU Cipta Kerja). 7 chatbot spesialis mencakup: KBLI & Klasifikasi Risiko Usaha, Prasyarat & Kelengkapan Dasar NIB, Pendaftaran NIB & OSS, Sertifikat Standar & Perizinan Berbasis Risiko, IUJK & Izin Pelaksana Konstruksi, Validasi Badan Hukum, serta Kepatuhan & Audit Perizinan. Menghasilkan LICENSING_SUMMARY v1 yang kompatibel dengan TRC dan ECSG.",
+      goals: ["Memastikan kelengkapan perizinan usaha berbasis OSS RBA", "Validasi legalitas badan hukum", "Identifikasi KBLI & klasifikasi risiko usaha konstruksi", "Kepatuhan perizinan OSS, NIB, Sertifikat Standar & IUJK", "Audit kesiapan perizinan dan sinkronisasi data"],
       targetAudience: "Perusahaan jasa konstruksi, admin perizinan, compliance officer",
       expectedOutcome: "Perusahaan beroperasi dengan perizinan lengkap dan legal",
       sortOrder: 1,
