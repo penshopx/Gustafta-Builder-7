@@ -7,6 +7,10 @@ import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 import { seedRegulasiJasaKonstruksi } from "./seed-regulasi";
+import { seedAsesorSertifikasi } from "./seed-asesor";
+import { seedSmapPancek } from "./seed-smap-pancek";
+import { seedOdooKonstruksi } from "./seed-odoo";
+import { seedCsmas } from "./seed-csmas";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -179,6 +183,30 @@ for (const envVar of requiredEnvVars) {
         await seedRegulasiJasaKonstruksi("49465846");
       } catch (err) {
         log("Failed to seed Regulasi Jasa Konstruksi ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedAsesorSertifikasi("49465846");
+      } catch (err) {
+        log("Failed to seed Asesor Sertifikasi ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedSmapPancek("49465846");
+      } catch (err) {
+        log("Failed to seed SMAP & PANCEK ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedOdooKonstruksi("49465846");
+      } catch (err) {
+        log("Failed to seed Odoo Jasa Konstruksi ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedCsmas("49465846");
+      } catch (err) {
+        log("Failed to seed CSMAS ecosystem: " + (err as Error).message);
       }
 
       try {
