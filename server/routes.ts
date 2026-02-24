@@ -3513,7 +3513,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         id: bigIdea.id,
         name: bigIdea.name,
         description: bigIdea.description || "",
-        purpose: bigIdea.purpose || "",
+        purpose: (bigIdea as any).purpose || "",
         seriesName: series?.name || "",
         chatbots,
         pricing: {

@@ -1512,7 +1512,15 @@ async function updateTenderToolboxAgents(seriesId: string) {
         const trcPromptWithLink = TENDER_READINESS_SYSTEM_PROMPT.replace("{{ECSG_LINK}}", ecsgLink);
 
         if (trc.systemPrompt?.includes("OUTPUT PROTOCOL v1")) {
-          log("[Seed] Tender Readiness Checker already has Protocol v1, skipping update");
+          const currentEcsgLink = trc.systemPrompt?.match(/Buka ECSG: (\/bot\/\d+|#)/)?.[1];
+          if (currentEcsgLink && currentEcsgLink !== ecsgLink) {
+            await storage.updateAgent(trc.id, {
+              systemPrompt: trcPromptWithLink,
+            } as any);
+            log(`[Seed] Tender Readiness Checker ECSG link refreshed: ${currentEcsgLink} → ${ecsgLink}`);
+          } else {
+            log("[Seed] Tender Readiness Checker already has Protocol v1, skipping update");
+          }
         } else {
           await storage.updateAgent(trc.id, {
             systemPrompt: trcPromptWithLink,
