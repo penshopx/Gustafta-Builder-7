@@ -12,7 +12,34 @@ GOVERNANCE RULES (WAJIB):
 - Integrasi lintas domain hanya melalui SUMMARY protocol (SKK_SUMMARY, SBU_SUMMARY, LICENSING_SUMMARY).
 - Jika pertanyaan di luar domain, tolak sopan dan arahkan ke Hub terkait.
 - Bahasa Indonesia profesional, tidak spekulatif.
-- Jika data kurang, minta data minimum (maksimal 3 pertanyaan).`;
+- Jika data kurang, minta data minimum (maksimal 3 pertanyaan).
+
+═══ SUMMARY_RULEBOOK v1 (WAJIB DIPATUHI) ═══
+Jika user memberikan *_SUMMARY v1 (LICENSING_SUMMARY, SBU_SUMMARY, SKK_SUMMARY, TENDER_REQ_SUMMARY):
+
+1) PRIORITAS OVERALL:
+- Gunakan bagian OVERALL sebagai sumber utama status & risk.
+- Jangan menilai ulang data mentah jika OVERALL tersedia.
+
+2) NO DOWNGRADE:
+- Jangan menurunkan risk level atau status readiness yang sudah dinyatakan di SUMMARY.
+- Risk boleh tetap atau naik, tidak boleh turun, kecuali user memberikan data baru yang jelas memperbaiki gap.
+
+3) UNKNOWN HANDLING:
+- Jika field = UNKNOWN, tandai sebagai BUTUH_VERIFIKASI.
+- UNKNOWN tidak boleh dianggap fatal secara otomatis.
+- UNKNOWN hanya boleh menaikkan risk maksimal 1 level (contoh: Rendah → Sedang), kecuali ada red flag lain.
+
+4) EXPIRED / INVALID RULE:
+- Jika ada status EXPIRED/INVALID pada komponen inti yang relevan, risk minimal Tinggi.
+- Jika lebih dari satu komponen inti EXPIRED/INVALID atau ada red flag berat, risk boleh Kritis.
+
+5) DATA CONSISTENCY:
+- Jika DATA_CONSISTENCY_CHECK menyatakan MISMATCH pada nama entitas atau pengurus/direksi → risk minimal Tinggi.
+- Mismatch alamat saja → risk minimal Sedang (kecuali disertai red flag lain).
+
+6) DATA BARU:
+- Jika user memberi data baru yang bertentangan dengan SUMMARY, minta user memilih mana yang benar, atau gunakan data terbaru jika jelas lebih valid.`;
 
 const SKK_SUMMARY_PROTOCOL = `
 
@@ -69,7 +96,17 @@ const SPECIALIST_RESPONSE_FORMAT = `
 Format Respons Standar (gunakan sesuai konteks):
 - Jika analitis: Dasar Regulasi → Analisis → Risiko → Rekomendasi
 - Jika checklist: Tujuan → Daftar Dokumen → Catatan Penting
-- Jika validasi: Data Diterima → Evaluasi → Status → Tindakan`;
+- Jika validasi: Data Diterima → Evaluasi → Status → Tindakan
+
+═══ SUMMARY_GENERATOR_MODE ═══
+Jika user memberikan data mentah (narasi / poin-poin / dokumen ringkas) dan BUKAN dalam format *_SUMMARY v1, maka setelah analisis selesai, tawarkan:
+
+"Apakah Anda ingin saya ubah data ini menjadi format *_SUMMARY v1 agar bisa digunakan di chatbot lain (TRC / ECSG / modul terkait)?"
+
+Jika user setuju:
+→ Outputkan *_SUMMARY v1 saja (tanpa analisis ulang panjang).
+→ Gunakan format schema resmi sesuai domain (SKK_SUMMARY / SBU_SUMMARY / LICENSING_SUMMARY).
+→ Jangan tambahkan opini di dalam summary. Gunakan UNKNOWN jika data tidak tersedia.`;
 
 const TENDER_READINESS_SYSTEM_PROMPT = `You are Tender Readiness Checker — the INTEGRATION ENGINE for Jasa Konstruksi compliance — OUTPUT PROTOCOL v1.
 
@@ -274,6 +311,17 @@ Jika user ingin menambahkan requirement spesifik tender:
   }
 }
 
+═══ RISK_AGGREGATION_RULE v1 ═══
+Jika menerima lebih dari satu SUMMARY v1:
+- Tentukan FINAL_RISK_LEVEL = level TERTINGGI dari semua risk yang tersedia:
+  {Rendah < Sedang < Tinggi < Kritis}
+- FINAL_READINESS_STATUS mengikuti kaidah:
+  - Jika ada area status "Tidak Memenuhi" pada Legalitas/SBU/SKK → minimal "Tidak Siap"
+  - Jika semua area "Memenuhi" dan tidak ada red flag → "Siap"
+  - Selain itu → "Bersyarat"
+- Jangan menurunkan FINAL_RISK_LEVEL walaupun ada area lain yang rendah.
+- Jika satu area UNKNOWN tapi area lain Tinggi/Kritis → FINAL tetap Tinggi/Kritis (UNKNOWN tidak mengalahkan data kuat).
+
 ═══ BATASAN (TIDAK BOLEH) ═══
 - JANGAN menghitung ulang detail workforce → arahkan ke SBU Requirement Checker
 - JANGAN interpretasi regulasi mendalam → arahkan ke modul terkait
@@ -433,6 +481,17 @@ TIDAK tampilkan CTA. Berikan catatan positif dan rekomendasi pemeliharaan.
 - JANGAN gunakan jargon teknis tanpa penjelasan bisnis.
 - Setiap risiko harus ada dampak bisnis-nya.
 - Tindakan harus punya timeline dan bisa di-action.
+
+═══ RISK_AGGREGATION_RULE v1 ═══
+Jika menerima lebih dari satu SUMMARY v1:
+- Tentukan FINAL_RISK_LEVEL = level TERTINGGI dari semua risk yang tersedia:
+  {Rendah < Sedang < Tinggi < Kritis}
+- FINAL_READINESS_STATUS mengikuti kaidah:
+  - Jika ada area status "Tidak Memenuhi" pada Legalitas/SBU/SKK → minimal "Tidak Siap"
+  - Jika semua area "Memenuhi" dan tidak ada red flag → "Siap"
+  - Selain itu → "Bersyarat"
+- Jangan menurunkan FINAL_RISK_LEVEL walaupun ada area lain yang rendah.
+- Jika satu area UNKNOWN tapi area lain Tinggi/Kritis → FINAL tetap Tinggi/Kritis (UNKNOWN tidak mengalahkan data kuat).
 
 ═══ BATASAN (TIDAK BOLEH) ═══
 - JANGAN melakukan kalkulasi ulang detail dari data mentah.
@@ -2024,22 +2083,98 @@ async function updateModuleAgents(seriesId: string) {
           const name = (agent as any).name;
           const currentPrompt = (agent as any).systemPrompt || "";
 
-          if (currentPrompt.includes("ENHANCED PROTOCOL v1")) continue;
-
           let enhanced = ENHANCED_SKK_PROMPTS[name] || ENHANCED_SBU_PROMPTS[name] || ENHANCED_PERIZINAN_PROMPTS[name];
           if (!enhanced) continue;
 
-          await storage.updateAgent(agent.id, {
-            systemPrompt: enhanced.systemPrompt,
-            greetingMessage: enhanced.greetingMessage,
-            starters: enhanced.starters,
-          } as any);
-          log(`[Seed] ${name} updated with Enhanced Protocol v1`);
+          if (!currentPrompt.includes("ENHANCED PROTOCOL v1")) {
+            await storage.updateAgent(agent.id, {
+              systemPrompt: enhanced.systemPrompt,
+              greetingMessage: enhanced.greetingMessage,
+              starters: enhanced.starters,
+            } as any);
+            log(`[Seed] ${name} updated with Enhanced Protocol v1`);
+          } else if (!currentPrompt.includes("SUMMARY_RULEBOOK v1")) {
+            await storage.updateAgent(agent.id, {
+              systemPrompt: enhanced.systemPrompt,
+            } as any);
+            log(`[Seed] ${name} patched with SUMMARY_RULEBOOK v1 + SUMMARY_GENERATOR_MODE`);
+          }
         }
       }
     }
   } catch (err) {
     log(`[Seed] Warning: Could not update module agents: ${err}`);
+  }
+}
+
+const SUMMARY_RULEBOOK_PATCH = `
+
+═══ SUMMARY_RULEBOOK v1 (WAJIB DIPATUHI) ═══
+Jika user memberikan *_SUMMARY v1 (LICENSING_SUMMARY, SBU_SUMMARY, SKK_SUMMARY, TENDER_REQ_SUMMARY):
+
+1) PRIORITAS OVERALL:
+- Gunakan bagian OVERALL sebagai sumber utama status & risk.
+- Jangan menilai ulang data mentah jika OVERALL tersedia.
+
+2) NO DOWNGRADE:
+- Jangan menurunkan risk level atau status readiness yang sudah dinyatakan di SUMMARY.
+- Risk boleh tetap atau naik, tidak boleh turun, kecuali user memberikan data baru yang jelas memperbaiki gap.
+
+3) UNKNOWN HANDLING:
+- Jika field = UNKNOWN, tandai sebagai BUTUH_VERIFIKASI.
+- UNKNOWN tidak boleh dianggap fatal secara otomatis.
+- UNKNOWN hanya boleh menaikkan risk maksimal 1 level (contoh: Rendah → Sedang), kecuali ada red flag lain.
+
+4) EXPIRED / INVALID RULE:
+- Jika ada status EXPIRED/INVALID pada komponen inti yang relevan, risk minimal Tinggi.
+- Jika lebih dari satu komponen inti EXPIRED/INVALID atau ada red flag berat, risk boleh Kritis.
+
+5) DATA CONSISTENCY:
+- Jika DATA_CONSISTENCY_CHECK menyatakan MISMATCH pada nama entitas atau pengurus/direksi → risk minimal Tinggi.
+- Mismatch alamat saja → risk minimal Sedang (kecuali disertai red flag lain).
+
+6) DATA BARU:
+- Jika user memberi data baru yang bertentangan dengan SUMMARY, minta user memilih mana yang benar, atau gunakan data terbaru jika jelas lebih valid.`;
+
+async function patchHubBotsWithRulebook(seriesId: string) {
+  try {
+    const allToolboxes = await storage.getToolboxes(undefined, seriesId);
+    const hubUtama = allToolboxes.find((t: any) => t.name === "HUB Regulasi Jasa Konstruksi" && t.seriesId === seriesId && !t.bigIdeaId);
+    if (!hubUtama) return;
+
+    const hubAgents = await storage.getAgents(hubUtama.id);
+    for (const agent of hubAgents) {
+      const prompt = (agent as any).systemPrompt || "";
+      if (prompt.includes("GOVERNANCE RULES") && !prompt.includes("SUMMARY_RULEBOOK v1")) {
+        await storage.updateAgent(agent.id, {
+          systemPrompt: prompt + SUMMARY_RULEBOOK_PATCH,
+        } as any);
+        log(`[Seed] Hub Utama patched with SUMMARY_RULEBOOK v1`);
+      }
+    }
+
+    const bigIdeas = await storage.getBigIdeas(seriesId);
+    for (const modul of bigIdeas) {
+      const modulToolboxes = await storage.getToolboxes(modul.id);
+      for (const tb of modulToolboxes) {
+        const agents = await storage.getAgents(tb.id);
+        for (const agent of agents) {
+          const name = (agent as any).name;
+          const prompt = (agent as any).systemPrompt || "";
+          const isSpecialist = ENHANCED_SKK_PROMPTS[name] || ENHANCED_SBU_PROMPTS[name] || ENHANCED_PERIZINAN_PROMPTS[name];
+          const isTrcEcsg = name === "Tender Readiness Checker" || name === "Executive Compliance Summary Generator";
+
+          if (!isSpecialist && !isTrcEcsg && prompt.includes("GOVERNANCE RULES") && !prompt.includes("SUMMARY_RULEBOOK v1")) {
+            await storage.updateAgent(agent.id, {
+              systemPrompt: prompt + SUMMARY_RULEBOOK_PATCH,
+            } as any);
+            log(`[Seed] ${name} patched with SUMMARY_RULEBOOK v1`);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    log(`[Seed] Warning: Could not patch Hub bots: ${err}`);
   }
 }
 
@@ -2062,13 +2197,21 @@ async function updateTenderToolboxAgents(seriesId: string) {
 
         if (trc.systemPrompt?.includes("OUTPUT PROTOCOL v1")) {
           const currentEcsgLink = trc.systemPrompt?.match(/Buka ECSG: (\/bot\/\d+|#)/)?.[1];
-          if (currentEcsgLink && currentEcsgLink !== ecsgLink) {
+          const needsRiskAggregation = !trc.systemPrompt?.includes("RISK_AGGREGATION_RULE v1");
+          const needsSummaryRulebook = !trc.systemPrompt?.includes("SUMMARY_RULEBOOK v1");
+
+          if (needsRiskAggregation || needsSummaryRulebook) {
+            await storage.updateAgent(trc.id, {
+              systemPrompt: trcPromptWithLink,
+            } as any);
+            log(`[Seed] Tender Readiness Checker patched with${needsRiskAggregation ? ' RISK_AGGREGATION_RULE v1' : ''}${needsSummaryRulebook ? ' SUMMARY_RULEBOOK v1' : ''}`);
+          } else if (currentEcsgLink && currentEcsgLink !== ecsgLink) {
             await storage.updateAgent(trc.id, {
               systemPrompt: trcPromptWithLink,
             } as any);
             log(`[Seed] Tender Readiness Checker ECSG link refreshed: ${currentEcsgLink} → ${ecsgLink}`);
           } else {
-            log("[Seed] Tender Readiness Checker already has Protocol v1, skipping update");
+            log("[Seed] Tender Readiness Checker already has all patches, skipping update");
           }
         } else {
           await storage.updateAgent(trc.id, {
@@ -2082,7 +2225,17 @@ async function updateTenderToolboxAgents(seriesId: string) {
 
       if (ecsg) {
         if (ecsg.systemPrompt?.includes("INPUT_PACKET dari Tender Readiness Checker")) {
-          log("[Seed] Executive Compliance Summary Generator already has INPUT_PACKET support, skipping update");
+          const needsRiskAggregation = !ecsg.systemPrompt?.includes("RISK_AGGREGATION_RULE v1");
+          const needsSummaryRulebook = !ecsg.systemPrompt?.includes("SUMMARY_RULEBOOK v1");
+
+          if (needsRiskAggregation || needsSummaryRulebook) {
+            await storage.updateAgent(ecsg.id, {
+              systemPrompt: ECSG_SYSTEM_PROMPT,
+            } as any);
+            log(`[Seed] Executive Compliance Summary Generator patched with${needsRiskAggregation ? ' RISK_AGGREGATION_RULE v1' : ''}${needsSummaryRulebook ? ' SUMMARY_RULEBOOK v1' : ''}`);
+          } else {
+            log("[Seed] Executive Compliance Summary Generator already has all patches, skipping update");
+          }
         } else {
           await storage.updateAgent(ecsg.id, {
             systemPrompt: ECSG_SYSTEM_PROMPT,
@@ -2111,6 +2264,7 @@ export async function seedRegulasiJasaKonstruksi(userId: string) {
         log("[Seed] Regulasi Jasa Konstruksi 5-level architecture already exists");
         await updateTenderToolboxAgents(existing.id);
         await updateModuleAgents(existing.id);
+        await patchHubBotsWithRulebook(existing.id);
         return;
       }
       log("[Seed] Old architecture detected, replacing with 5-level architecture...");
