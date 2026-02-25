@@ -4,7 +4,7 @@
 
 Gustafta is an AI chatbot builder platform enabling users to create, configure, and deploy intelligent conversational assistants. It features a two-panel dashboard for managing multiple chatbot agents, each with custom personas, knowledge bases, and multi-channel integrations. The platform supports various AI models and extensive customization, including persona details, greeting messages, and language options. Users can integrate chatbots with popular messaging platforms, embed them as web widgets, and access analytics. Gustafta also includes a built-in assistant chatbot for guidance and offers templates for various industries.
 
-The platform employs a 5-level modular hierarchical structure (Tujuan → Hub Utama → Modul Hub → Toolbox → Agen) for Jasa Konstruksi compliance across 6 series totaling 83 chatbot agents:
+The platform employs a 5-level modular hierarchical structure (Tujuan → Hub Utama → Modul Hub → Toolbox → Agen) for Jasa Konstruksi compliance across 7 series totaling 92 chatbot agents:
 
 1. **Regulasi Jasa Konstruksi** (25 chatbots) — Perizinan Usaha (7), SBU (4), SKK (5), Tender & Pengadaan (4), + Hubs. Seed: `server/seed-regulasi.ts`
 2. **Asesor Sertifikasi Konstruksi** (11 chatbots) — Asesor Badan Usaha/LSBU (4), Asesor Kompetensi/LSP (4), + Hubs. Seed: `server/seed-asesor.ts`
@@ -12,6 +12,7 @@ The platform employs a 5-level modular hierarchical structure (Tujuan → Hub Ut
 4. **Odoo untuk Jasa Konstruksi** (12 chatbots) — Readiness & Assessment (2), Blueprint & Implementation (3), Governance & Control (3), + Hubs. Seed: `server/seed-odoo.ts`
 5. **CSMAS Contractor Safety** (12 chatbots) — Safety Assessment (2), HSE Planning & Risk (3), Safety Performance & Governance (3), + Hubs. Seed: `server/seed-csmas.ts`
 6. **CIVILPRO — Professional Mentoring Sipil** (12 chatbots) — Skema & Navigasi SKK (2), Competency Prep & Mentoring (3), Operational Problem Solver (3), + Hubs. Seed: `server/seed-civilpro.ts`. Positioning: AI Professional Mentor & Strategic Advisor. 2 modes (Uji Kompetensi + Problem Solver). Tiered Intelligence (Teknisi → Supervisor → Manajer). Schemas: SKK_SCHEME_CARD v1, SKK_READY_SUMMARY v1, PORTOFOLIO_PACKET v1.
+7. **SIP-PJBU — Sistem Informasi Pembinaan PJBU** (9 chatbots) — PJBU-Kontraktor (Asesmen Level, PUB, LKUT), PJBU-Konsultan (Asesmen Level, PUB, LKUT), + Hubs. Seed: `server/seed-sip-pjbu.ts`. Berbasis Permen PUPR 7/2024. Scoring: Kontraktor (40% Proyek + 60% Manajemen), Konsultan (60% Proyek + 40% Manajemen). Leveling: Tahap Dasar → Berkembang → Stabil → Mapan → Korporasi. Murni pembinaan internal asosiasi — bukan sertifikasi resmi. Admin: aspekindopub@gmail.com | WA: +6282299417818.
 
 A key feature is "Project Brain," providing contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots, decision summaries, and risk assessments. The platform integrates with Mayar.id for subscription management and provides public chat pages for individual bots and multi-chatbot modules. Dynamic PWA manifests are supported for individual chatbots.
 
