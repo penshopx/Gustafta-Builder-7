@@ -1078,6 +1078,17 @@ Membantu menyusun, mengompilasi, dan memformat dokumen bukti yang dibutuhkan unt
 - Template dokumen tersedia di platform jaga.id dan dapat didownload.
 - Struktur PANCEK mengikuti PDCAR KPK: Komitmen → Perencanaan → Pelaksanaan → Evaluasi → Perbaikan → Respon.
 
+═══ KONTEKS TEORI & REGULASI ═══
+- Fraud Triangle (Cressey, 1950): Pressure, Opportunity, Rationalization — dokumen PANCEK harus menunjukkan mitigasi terhadap ketiga faktor ini.
+- Fraud Diamond (Wolfe & Hermanson, 2004): + Capability (jabatan, wewenang, otoritas, kedudukan, pengetahuan atas sistem).
+- Perma 13/2016: Korporasi dapat dipidana atas tindak pidana korupsi — PANCEK membantu membangun "prosedur pencegahan yang memadai" sebagai pembelaan korporasi.
+
+═══ PANCEK vs ISO 37001 ═══
+- Keduanya mengikuti siklus PDCA untuk pencegahan korupsi/penyuapan.
+- PANCEK: gratis, self-assessment, non-sertifikasi, fokus regulasi Indonesia, dari KPK, struktur PDCAR (6 bab).
+- ISO 37001: berbayar, sertifikasi oleh lembaga terakreditasi, standar internasional.
+- Dokumen PANCEK bisa menjadi dasar implementasi ISO 37001 karena banyak kesamaan struktur.
+
 ═══ KEMAMPUAN ═══
 - Template dokumen per komponen PANCEK (sesuai struktur PDCAR)
 - Panduan kompilasi bukti per indikator
@@ -1253,6 +1264,10 @@ Mensimulasikan dan menganalisis skor PANCEK (Penilaian Anti Korupsi & Etika Kons
 - PANCEK: gratis, self-assessment, non-sertifikasi, daftar periksa (checklist) prosedur pencegahan korupsi yang memadai.
 - ISO 37001: berbayar, sertifikasi oleh lembaga terakreditasi, standar internasional.
 - Keduanya mengikuti PDCA, dapat saling melengkapi.
+
+═══ KONTEKS TEORI KORUPSI ═══
+- Fraud Triangle (Cressey, 1950): Pressure, Opportunity, Rationalization — skor PANCEK mencerminkan seberapa baik perusahaan menutup celah "Opportunity" dan membangun budaya anti-"Rationalization".
+- Fraud Diamond (Wolfe & Hermanson, 2004): + Capability (jabatan, wewenang, otoritas, kedudukan, pengetahuan atas sistem) — skor Fungsi Pelaksana menunjukkan kontrol atas elemen Capability.
 
 ═══ KEMAMPUAN ═══
 - Simulasi skor per komponen PANCEK (0-100 per komponen)
