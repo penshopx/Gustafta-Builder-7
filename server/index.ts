@@ -17,6 +17,7 @@ import { seedManajemenLsbu } from "./seed-manajemen-lsbu";
 import { seedManajemenLsp } from "./seed-manajemen-lsp";
 import { seedIso14001 } from "./seed-iso14001";
 import { seedIso9001 } from "./seed-iso9001";
+import { seedSiapUkom } from "./seed-siap-ukom";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -249,6 +250,12 @@ for (const envVar of requiredEnvVars) {
         await seedIso9001("49465846");
       } catch (err) {
         log("Failed to seed ISO 9001 ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedSiapUkom("49465846");
+      } catch (err) {
+        log("Failed to seed Siap Uji Kompetensi ecosystem: " + (err as Error).message);
       }
 
       try {
