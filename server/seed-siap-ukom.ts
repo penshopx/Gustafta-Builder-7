@@ -30,95 +30,292 @@ Format Respons Standar (gunakan sesuai konteks):
 - Jika checklist portofolio: Dokumen Wajib → Format → Contoh → Status Kelengkapan
 - Jika analisis kesiapan: Profil Peserta → Gap Analysis → Rekomendasi → Timeline Persiapan`;
 
+const SKKNI_REF_SIPIL = `
+═══ DAFTAR JABATAN KERJA RESMI KLASIFIKASI SIPIL (B) ═══
+Total: 160+ jabatan kerja | KKNI Level 1-9
+
+▸ GEDUNG (38 jabatan):
+  Ahli: Perencana Beton Pracetak Struktur Gedung (KKNI 7, SKKNI 336-2013) | Rekayasa Konstruksi Bangunan Gedung (KKNI 8-9, SKKNI 106-2015) | Penilai Kelaikan Gedung Aspek Arsitektur (KKNI 9, SKKNI 113-2015) | Manajer Pengelolaan Bangunan Gedung (KKNI 7, SKKNI 115-2015) | Pemeriksa Kelaikan Fungsi Struktur Gedung (KKNI 9, SKKNI 193-2013) | Penilai Bangunan Hijau (KKNI 7-9, SKKNI 2-2023) | Bangunan Gedung Hijau (KKNI 7-9, SKKNI 2-2023) | Penilai Kegagalan Bangunan Gedung (KKNI 8-9, SKKNI 58-2022) | Teknik Bangunan Gedung (KKNI 7-9, SKKNI 192-2016) | Perawatan Bangunan Gedung (KKNI 7-9, SKKNI 255-2019)
+  Teknisi/Analis: Manajer Lapangan Pekerjaan Gedung (KKNI 6, SKKNI 108-2015) | Kepala Pengelola Lingkungan Gedung (KKNI 6, SKKNI 046-2015) | Supervisor Perawatan Gedung Bertingkat (KKNI 4-6) | Pelaksana Lapangan Pekerjaan Gedung (KKNI 2-5, SKKNI 193-2021) | Pengawas Pekerjaan Struktur Gedung (KKNI 4-6, SKKNI 340-2013)
+  Operator: Tukang Pasang Water Proofing (KKNI 1-2, SKKNI 377-2013) | Tukang Pasang Rangka Atap Baja Ringan (KKNI 1, SKKNI 184-2016) | Tukang Pasang Bata (KKNI 1-2, SKKNI 317-2016) | Tukang Bangunan Gedung (KKNI 1-2, SKKNI 31-2014) | Tukang Plester (KKNI 1-2, SKKNI 307-2016) | Tukang Pasang Ubin (KKNI 1-2, SKKNI 309-2016) | Tukang Kayu Konstruksi (KKNI 1-2, SKKNI 085-2015) | Tukang Cat (KKNI 1-2, SKKNI 310-2016) | Juru Gambar Gedung (KKNI 2-4, SKKNI 033-2021) | Tukang Besi Beton (KKNI 1-2, SKKNI 319-2016) | Pemasang Perancah/Cetakan Beton (KKNI 3, SKKNI 054-2015) | Mandor Konstruksi (KKNI 2-3, SKKK 32-2022) | Perencana/Perakit/Pembuat RISHA (SKKNI 221-2018)
+
+▸ MATERIAL (7 jabatan):
+  Ahli Material Jalan (KKNI 7-9, SKKNI 325-2013) | Pengawas Konstruksi Fabrikasi Sipil & Struktur (KKNI 6, SKKNI 171-2018) | Teknisi Lab Beton Aspal (KKNI 4-6, SKKNI 196-2013) | Teknisi Lab Beton (KKNI 4-6) | Teknisi Lab Tanah (KKNI 4-6) | Pelaksana/Manajer Produksi Campuran Aspal Panas (SKKNI 384-2013, 329-2009)
+
+▸ JALAN (12 jabatan):
+  Ahli: Manajer Pelaksanaan Jalan/Jembatan (KKNI 7, SKKNI 371-2013) | Pemeliharaan Jalan & Jembatan (KKNI 7-9, SKKNI 112-2015) | Teknik Jalan (KKNI 7-9, SKKNI 126-2021) | Keselamatan Jalan (KKNI 7-9, SKKNI 324-2013)
+  Teknisi: Pelaksana Lapangan Perkerasan Jalan Beton (KKNI 4-6, SKKNI 317-2009) | Pelaksana Pemeliharaan Jalan (KKNI 4-6, SKKNI 192-2021) | Pelaksana Pemasangan Perlengkapan Jalan (KKNI 4-6, SKKNI 57-2021)
+  Operator: Mandor Perkerasan Jalan (KKNI 2-3, SKKNI 192-2013) | Pelaksana Lapangan Pekerjaan Jalan (KKNI 2-5, SKKNI 373-2013) | Juru Gambar Jalan & Jembatan (KKNI 2-4, SKKNI 327-2009)
+
+▸ JEMBATAN (12 jabatan):
+  Ahli: Perencanaan Jembatan Rangka Baja (KKNI 7-9, SKKNI 130-2015) | Rehabilitasi Jembatan (KKNI 7-9, SKKNI 93-2015) | Penilai Kegagalan Jalan Layang & Jembatan (KKNI 8-9, SKKNI 57-2022) | Teknik Jembatan (KKNI 7-9, SKKNI 84-2021)
+  Teknisi: Teknisi Jembatan Rangka Baja (KKNI 4-6, SKKNI 079-2015) | Pelaksana Pemeliharaan Jembatan (KKNI 4-6, SKKNI 195-2015) | Pelaksana/Pengawas Jembatan Bailey (SKKNI 16-2023)
+  Operator: Tukang Pasang Jembatan Bailey (KKNI 2, SKKNI 16-2023)
+
+▸ LANDASAN UDARA (1 jabatan):
+  Ahli Teknik Landasan Terbang (KKNI 7-9, RSKKNI)
+
+▸ TEROWONGAN (3 jabatan):
+  Ahli Perencanaan Terowongan Jalan (KKNI 8-9, SKKNI 328-2013) | Ahli Teknik Terowongan (KKNI 7-9, RSKKNI) | Pelaksana Terowongan (KKNI 5-6, SKKK 29-2022)
+
+▸ BENDUNG & BENDUNGAN (9 jabatan):
+  Ahli: Operasi & Pemeliharaan Bendungan Urukan (KKNI 8-9, SKKNI 375-2013) | Pengawas Konstruksi Sipil PLTMH (KKNI 8, SKKNI 335-2013) | Teknik Perencana Bendungan (KKNI 7-9, SKKNI 61-2022) | Teknik Bendungan Besar (KKNI 7-9, SKKNI 308-2016)
+  Teknisi: Pelaksana OP Bendungan Urukan (KKNI 5-6, SKKNI 081-2015) | Inspektur Bendungan (KKNI 5-6, SKKNI 068-2009) | Pelaksana Bendungan (KKNI 5-6, SKKK 26-2022)
+  Operator: Mandor Timbunan Tubuh Bendungan (KKNI 3, SKKNI 180-2019)
+
+▸ IRIGASI & RAWA (11 jabatan):
+  Ahli: Perencana Irigasi (KKNI 7, SKKNI 337-2013) | Teknik Perencanaan Irigasi Rawa (KKNI 8-9, SKKNI 51-2015) | Perencanaan OP Jaringan Irigasi (KKNI 7-9, SKKNI 53-2015) | Teknik Rawa (KKNI 7-9, SKKNI 169-2019)
+  Teknisi: Pelaksana Pemeliharaan Jaringan Irigasi (KKNI 3-4, SKKNI 110-2015) | Pengamat Irigasi (KKNI 6, SKKK 1-2022) | Juru Pengairan (KKNI 4, SKKK 2-2022) | Pelaksana OP Jaringan Irigasi (KKNI 4, SKKNI 55-2022) | Pelaksana Pemasangan Pintu Air (KKNI 5-6, SKKNI 183-2009)
+  Operator: Pelaksana Lapangan Saluran Irigasi (KKNI 2-5, SKKNI 378-2013)
+
+▸ SUNGAI & PANTAI (7 jabatan):
+  Ahli: Perencanaan Pengamanan Pantai (KKNI 8-9, SKKNI 97-2015) | Teknik Pantai (KKNI 7-9, SKKNI 206-2019) | Perencanaan OP Prasarana Sungai (KKNI 7-9, SKKNI 50-2015)
+  Teknisi: Pelaksana Lapangan Bronjong (KKNI 3-4, SKKNI 365-2013) | Pelaksana Bangunan Pengaman Pantai (KKNI 5-6, SKKNI 069-2009) | Pelaksana Pemeliharaan Sungai (KKNI 3-4, SKKNI 087-2015) | Teknisi Pengerukan (KKNI 4, SKKK 28-2022)
+
+▸ AIR TANAH & AIR BAKU (7 jabatan):
+  Ahli: Hidrologi (KKNI 7-9, SKKNI 32-2014) | Hidrolika (KKNI 7-9, SKKNI 151-2019) | Penilai Kegagalan Bangunan SDA (KKNI 8-9, SKKNI 063-2022) | Teknik Sumber Daya Air (KKNI 7-9, SKKNI 124-2021)
+  Teknisi: Pelaksana Pengeboran Air Tanah (KKNI 4-5) | Pengawas Pengeboran Air Tanah (KKNI 5-6)
+
+▸ BANGUNAN AIR MINUM (4 jabatan):
+  Pelaksana Konstruksi Bangunan Unit Produksi SPAM (KKNI 7, SKKNI 318-2009) | Manajer Pelaksana Konstruksi SPAM (KKNI 6, SKKNI 344-2013) | Pelaksana Konstruksi Unit Distribusi SPAM (KKNI 3-4, SKKNI 170-2010)
+
+▸ BANGUNAN AIR LIMBAH & PERSAMPAHAN (6 jabatan):
+  Ahli Teknik Bangunan Air Limbah SPALD (KKNI 7-8, SKKNI 29-2023) | Ahli Teknik Bangunan Persampahan TPA (KKNI 7-8, SKKNI 29-2023) | Pelaksana Lapangan berbagai spesialisasi (SKKNI 312-2009, 313-2009, 319-2009, 29-2023)
+
+▸ DRAINASE PERKOTAAN (3 jabatan):
+  Ahli Perencanaan Jaringan Drainase (KKNI 7-9, SKKNI 86-2015) | Pelaksana Lapangan Drainase (KKNI 4, SKKNI 197-2013) | Pengawas Lapangan Drainase (KKNI 5-6, SKKNI 095-2015)
+
+▸ GEOTEKNIK (8 jabatan):
+  Ahli: Geologi Pekerjaan Konstruksi (KKNI 8-9, SKKNI 149-2019) | Perencana Pondasi (KKNI 7-9, SKKNI 277-2010) | Geoteknik (KKNI 7-9, SKKNI 305-2016)
+  Teknisi: Operator Alat Penyelidikan Tanah (KKNI 2) | Tukang Pekerjaan Tanah/Pondasi (KKNI 1-2) | Teknisi Sondir (KKNI 4-5) | Teknisi Geoteknik (KKNI 5-6, SKKNI 181-2009)
+
+▸ GEODESI & SURVEY (8 jabatan):
+  Ahli: Spesialis SIG (KKNI 7, SKKNI 172-2020) | Sistem Informasi Geografis (KKNI 8, SKKNI 172-2020) | Survei Pemetaan Udara (KKNI 7-9, SKKNI 172-2020) | Teknik Geodesi (KKNI 7-9, SKKNI 172-2020) | Kewilayahan (KKNI 8-9, SKKNI 172-2020)
+  Teknisi: Surveyor (KKNI 4-5, SKKNI 087-2010) | Manager Proyek Survei (KKNI 7, SKKNI 172-2020)
+
+▸ PELABUHAN, REKLAMASI, PERUMAHAN (lainnya):
+  Ahli Teknik Pelabuhan (KKNI 7-9) | Ahli Rekayasa Pantai (KKNI 7-9, SKKNI 206-2019) | Manajer Lapangan Pekerjaan Perumahan (KKNI 6)`;
+
+const SKKNI_REF_MEKANIKAL = `
+═══ DAFTAR JABATAN KERJA RESMI KLASIFIKASI MEKANIKAL (C) ═══
+Total: 81 jabatan kerja | KKNI Level 1-9
+
+▸ TEKNIK TATA UDARA & REFRIGASI (1 jabatan):
+  Ahli Perencanaan Sistem Tata Udara (KKNI 7-9, SKKNI 131-2015)
+
+▸ PLUMBING & POMPA MEKANIK (7 jabatan):
+  Ahli: Teknik Plambing dan Pompa Mekanik (KKNI 7-9, Skema LPJKN)
+  Teknisi: Pelaksana Teknik Plambing (KKNI 4-5, SKKNI 083-2015) | Pengawas Plambing (KKNI 4-5, Skema LPJKN)
+  Operator: Tukang Pasang Pipa (KKNI 2, SKKNI 28-2023) | Tukang Plambing (KKNI 2-3, SKKNI 304-2016) | Mandor Plambing (KKNI 3)
+
+▸ PROTEKSI KEBAKARAN (2 jabatan):
+  Pengkaji Teknis Proteksi Kebakaran (KKNI 7-9, SKKNI 127-2015) | Teknisi Fire Alarm (KKNI 4, SKKNI 304-2009)
+
+▸ TRANSPORTASI DALAM GEDUNG (3 jabatan):
+  Ahli Pesawat Lift dan Eskalator (KKNI 7-9, SKKNI 297-2009) | Pelaksana Perawatan Transportasi Vertikal (KKNI 2) | Ahli Teknik Transportasi Gedung Freshgraduate (KKNI 7, SKKNI 297-2009)
+
+▸ TEKNIK MEKANIKAL (7 jabatan):
+  Ahli: Pemeriksa Kelaikan Fungsi Mekanikal Gedung (KKNI 8-9, SKKNI 195-2013) | Pemeriksa Kelaikan Fungsi Elektrikal Gedung (KKNI 8-9, SKKNI 208-2013) | Bidang Keahlian Teknik Mekanikal (KKNI 7-9, SKKNI 391-2015) | Elektrikal Konstruksi Bangunan Gedung (KKNI 7-9, SKKNI 162-2019)
+  Teknisi: Manajer Pelaksana Lapangan Pekerjaan Mekanikal (KKNI 6, SKKNI 061-2014) | Pengawas Pekerjaan Mekanikal Gedung (KKNI 4-6, SKKNI 107-2015) | Penyambung Pipa Polietilena Fusi Panas (KKNI 4, SKKNI 029-2021)
+
+▸ LAS & FABRIKASI (10 jabatan):
+  Operator: Tukang Las/Welder/Gas & Electric (KKNI 1-2, SKKNI 98-2018/27-2021) | Juru Las Oxyacetylene (KKNI 2) | Tukang Las Konstruksi Plat & Pipa (KKNI 1-2) | Tukang Las TIG (KKNI 1-2) | Tukang Las Listrik (KKNI 1-2) | Operator Mesin Bubut Logam (KKNI 2) | Operator Mesin Bubut Kayu (KKNI 2) | Pelaksana Lapangan M&E Gedung Bertingkat (KKNI 2)
+  Teknisi: Teknisi Prestressing Equipment (KKNI 4, SKKNI 091-2015)
+
+▸ JURU GAMBAR MEKANIKAL (1 jabatan):
+  Juru Gambar/Draftman Mekanikal (KKNI 2-4)
+
+▸ ALAT BERAT (30+ jabatan):
+  Ahli: Manajer Alat Berat (KKNI 8, SKKNI 206-2013)
+  Operator: Pneumatic Tire Roller (SKKNI 164-2019) | Hydraulic Hammer Breaker (SKKNI 158-2019) | Ripper Tractor (SKKNI 165-2019) | Crane Jembatan (SKKNI 135-2015) | Bulldozer (SKKK 27-2022) | Motor Grader (SKKK 30-2022) | Wheel Excavator (SKKNI 91-2010) | Tandem Roller (SKKNI 159-2019) | Wheel Loader (SKKK 33-2022) | Crawler Crane | Rough Terrain Crane (SKKNI 97-2021) | Truck Mounted Crane (SKKNI 85-2021) | Tower Crane (SKKK 43-2022) | Crane Mobile (SKKNI 135-2015) | Backhoe Loader (SKKNI 089-2010) | Pile Drive Hammer (SKKNI 150-2019) | Dump Truck (SKKNI 132-2015) | Pompa Beton (SKKNI 381-2013) | Bore Pile (SKKNI 111-2015) | Vibrator Roller (SKKNI 168-2019) | Cold Milling Machine (SKKK 40-2022) | Mesin Pemecah Batu (SKKK 42-2022) | Concrete Paver (SKKK 41-2022) | Batching Plant (SKKK 39-2022) | Mobile Crane >50 Ton (SKKNI 092-2021) | Forklift (SKKNI 135-2015)
+  Mekanik: Hidrolik Alat Berat (SKKNI 88-2010) | Mekanik Tower Crane (SKKK 34-2022) | Mekanik AMP (SKKNI 326-2009) | Mekanik Kapal Keruk (SKKNI 70-2009) | Mekanik Engine (SKKNI 382-2015)
+
+▸ SCAFFOLDING (3 jabatan):
+  Pengawas Scaffolding (KKNI 4, SKKNI 46-2022) | Teknisi Scaffolding (KKNI 4, SKKNI 46-2022) | Operator Scaffolding (KKNI 1-2, SKKNI 46-2022)
+
+▸ TEKNIK LIFTING (7 jabatan):
+  Ahli Launching Girder (KKNI 7-8, SKKNI 18-2023) | Pengawas/Pelaksana Launching Gantry (KKNI 5-6, SKKNI 18-2023) | Pengawas/Pelaksana Erection Girder (KKNI 5-6, SKKNI 18-2023) | Operator Gondola (KKNI 2-3, SKKNI 296-2009) | Operator Launching Girder (KKNI 3, SKKNI 18-2023) | Operator Slinging & Rigging (KKNI 2, SKKNI 135-2015)
+
+▸ HVAC (1 jabatan):
+  Mekanik HVAC (KKNI 3, SKKNI 298-2009)`;
+
+const SKKNI_REF_TATA_LINGKUNGAN = `
+═══ DAFTAR JABATAN KERJA RESMI KLASIFIKASI TATA LINGKUNGAN (D) ═══
+Total: 28 jabatan kerja | KKNI Level 2-9
+
+▸ TEKNIK AIR MINUM (12 jabatan):
+  Ahli: Penanggulangan Kehilangan Air (KKNI 8-9, SKKNI 169-2010) | Deteksi Kebocoran & Commissioning Jaringan Perpipaan SPAM (KKNI 9, SKKNI 167-2010) | Teknik Air Minum (KKNI 7-9, R-SKKNI)
+  Teknisi: Pelaksana Pemeriksa Kualitas Air SPAM (KKNI 5, SKKNI 422-2014) | Teknisi OP Unit Pelayanan Air Minum (KKNI 4-5, SKKNI 334-2013) | Commissioning IPA (KKNI 5-6, SKKNI 141-2010) | Analis Laboratorium Air Minum (KKNI 4, SKKNI 422-2014) | Supervisor Mekanikal Elektrikal Air Minum (KKNI 4, SKKNI 422-2014) | Kepala Laboratorium Air Minum (KKNI 5, SKKNI 422-2014)
+  Operator: Instalatur Unit Pelayanan Air Minum (KKNI 2-3, SKKNI 346-2013) | Operator Instalasi Pengolahan Air Minum (KKNI 2, SKKNI 422-2014)
+
+▸ TEKNIK AIR LIMBAH (3 jabatan):
+  Ahli Perencana Sistem Sanitasi Lingkungan/Air Limbah Pemukiman (KKNI 7-9, SKKNI 29-2023) | Fasilitator Teknis Pembangunan Sarana Sanitasi Berbasis Masyarakat (KKNI 5-6, SKKNI 204-2015) | Operator Instalasi Pengolahan Lumpur Tinja (KKNI 2-3, SKKNI 204-2010)
+
+▸ TEKNIK LINGKUNGAN (3 jabatan):
+  Ahli Teknik Lingkungan Bidang Jasa Konstruksi (KKNI 7-9, SKKNI 109-2015) | Ahli Teknik Lingkungan Freshgraduate (KKNI 7, SKKNI 109-2015) | Juru Gambar/Draftman Tata Lingkungan (KKNI 2-4)
+
+▸ TEKNIK PERPIPAAN (6 jabatan):
+  Ahli Bidang Teknik Perpipaan (KKNI 7-9, SKKNI 28-2023) | Pengawas Yunior Pekerjaan Perpipaan Air Limbah RT (KKNI 5, SKKNI 206-2010) | Pengawas Senior Pekerjaan Perpipaan Air Limbah RT (KKNI 6, SKKNI 206-2010) | Teknisi Yunior Pemasangan Pipa Transmisi & Distribusi (KKNI 4, SKKNI 062-2014) | Pengawas Pekerjaan Teknik Perpipaan (KKNI 4-6, SKKNI 28-2023) | Pelaksana Lapangan Pekerjaan Perpipaan (KKNI 4-5, SKKNI 28-2023)
+
+▸ TEKNIK PERSAMPAHAN (4 jabatan):
+  Ahli Perencana Pengelolaan Sampah (KKNI 7-9, SKKNI 205-2010) | Pengawas Pengelolaan TPA Sampah (KKNI 4-6, SKKNI 329-2013) | Pelaksana Pengelolaan TPA Sampah (KKNI 3-4, SKKNI 338-2013) | Pelaksana Pengolahan Sampah (KKNI 3-4, SKKNI 345-2013)`;
+
+const SKKNI_REF_MANAJEMEN = `
+═══ DAFTAR JABATAN KERJA RESMI KLASIFIKASI MANAJEMEN PELAKSANAAN (E) ═══
+Total: 18 jabatan kerja (43 jenjang) | KKNI Level 3-9
+
+▸ KESELAMATAN KONSTRUKSI (6 jabatan):
+  Ahli Keselamatan Konstruksi (KKNI 7-9, SKKNI 60-2022) | Ahli K3 Konstruksi (KKNI 7-9, SKKNI 350-2014) | Personil K3 (KKNI 4, SKKNI 038-2019) | Petugas K3 Konstruksi (KKNI 3, SKKNI 307-2013) | Petugas Keselamatan Konstruksi (KKNI 3, SKKNI 60-2022) | Supervisor K3 (KKNI 5-6, SKKNI 350-2014)
+
+▸ MANAJEMEN KONSTRUKSI / MANAJEMEN PROYEK (4 jabatan):
+  Manajer Logistik Proyek (KKNI 7, SKKNI 386-2013) | Ahli Bidang Keahlian Manajemen Konstruksi (KKNI 7-9, SKKNI 390-2015) | Ahli Manajemen Proyek Konstruksi (KKNI 7-9, SKKK 035-2022) | Fasilitator Teknis Pembangunan Infrastruktur Berbasis Masyarakat (KKNI 5-6, SKKNI 260-2018)
+
+▸ PENGENDALIAN MUTU PEKERJAAN KONSTRUKSI (3 jabatan):
+  Quality Engineer (KKNI 5-6, SKKNI 333-2013) | Quality Assurance Engineer (KKNI 5-6, SKKNI 387-2013) | Ahli Sistem Manajemen Mutu Konstruksi (KKNI 7-9, SKKNI 145-2019)
+
+▸ HUKUM KONTRAK KONSTRUKSI (1 jabatan):
+  Ahli Kontrak Kerja Konstruksi (KKNI 8-9, SKKNI 88-2015)
+
+▸ ESTIMASI BIAYA KONSTRUKSI (4 jabatan):
+  Juru Hitung Kuantitas (KKNI 4-6, SKKK 038-2022) | Estimator Biaya Jalan (KKNI 5-6, SKKNI 385-2013) | Quantity Surveyor (KKNI 5-6, SKKNI 06-2011) | Ahli Quantity Surveyor (KKNI 7-9, SKKNI 6-2011)`;
+
+const SKKNI_REF_LANSKAP = `
+═══ DAFTAR JABATAN KERJA RESMI KLASIFIKASI ARSITEKTUR LANSKAP, ILUMINASI DAN DESAIN INTERIOR (F) ═══
+Total: 13 jabatan kerja | KKNI Level 1-9
+
+▸ ARSITEKTUR LANSKAP (4 jabatan):
+  Ahli Perencana Ruang Terbuka Hijau (KKNI 8-9, SKKNI 63-2014) | Perancang Lanskap (KKNI 7-9, SKKNI 209-2013) | Tukang Taman Pada Bangunan Gedung (KKNI 1-2, SKKNI 245-2009) | Pelaksana Taman Bangunan & Fasilitas Umum (KKNI 4-6, SKKNI 374-2013)
+
+▸ TEKNIK ILUMINASI (4 jabatan):
+  Ahli Perencanaan Iluminasi (KKNI 7-9, SKKNI 379-2013) | Ahli Iluminasi Freshgraduate (KKNI 7, SKKNI 379-2013) | Pengawas Pekerjaan Iluminasi (KKNI 4-5, SKKNI 339-2013) | Pelaksana Pekerjaan Iluminasi (KKNI 2-3, SKKNI 312-2013)
+
+▸ DESAIN INTERIOR (5 jabatan):
+  Arsitek Interior (KKNI 7-9, SKKNI 207-2013) | Desain Interior (KKNI 7-9, RSKKNI) | Ahli Desain Interior Freshgraduate (KKNI 7, SKKNI 207-2013) | Pengawas Pekerjaan Interior (KKNI 5-6, SKKNI 342-2013) | Pelaksana Pekerjaan Interior (KKNI 4-5, SKKNI 308-2013)`;
+
+const SKKNI_REF_WILAYAH_KOTA = `
+═══ DAFTAR JABATAN KERJA RESMI KLASIFIKASI PERENCANAAN WILAYAH DAN KOTA (G) ═══
+Total: 5 jabatan kerja | KKNI Level 7-9
+
+▸ PERENCANAAN WILAYAH (4 jabatan):
+  Ahli Perencana Wilayah Pesisir dan Pulau-Pulau Kecil (KKNI 7, SKKNI 376-2013) | Ahli Penyusunan Peraturan Zonasi (KKNI 8-9, SKKNI 380-2013) | Ahli Perencana Tata Bangunan dan Lingkungan (KKNI 8-9, SKKNI 82-2015) | Ahli Perencana Tata Ruang Wilayah dan Kota (KKNI 7-9, SKKNI 177-2015)
+
+▸ PERENCANAAN KOTA / URBAN PLANNING (1 jabatan):
+  Ahli Perencanaan Wilayah dan Kota Freshgraduate (KKNI 7, SKKNI 177-2015)
+
+Catatan: Semua jabatan di klasifikasi ini adalah level Ahli (KKNI 7-9). Bidang ini membutuhkan latar belakang pendidikan Perencanaan Wilayah & Kota (PWK/Planologi).`;
+
+const SKKNI_REF_SAINS_REKAYASA = `
+═══ DAFTAR JABATAN KERJA RESMI KLASIFIKASI SAINS DAN REKAYASA TEKNIK (H) ═══
+Total: 6 jabatan kerja | KKNI Level 2-9
+
+▸ INVESTASI INFRASTRUKTUR (2 jabatan):
+  Ahli Perencana Proyek Infrastruktur (KKNI 8-9, SKKNI 372-2013) | Ahli Rekayasa Nilai / Value Engineering (KKNI 9, SKKNI 159-2015)
+
+▸ KOMPUTASI KONSTRUKSI / BIM (4 jabatan):
+  Manager BIM (KKNI 7-8, SKKNI 3-2023) | Koordinator BIM (KKNI 6, SKKNI 3-2023) | Modeller BIM (KKNI 4-5, SKKNI 3-2023) | Juru Gambar BIM (KKNI 2-3, SKKNI 3-2023)
+
+▸ PELEDAKAN: Belum ada jabatan kerja yang ditetapkan
+
+Catatan: Bidang BIM (Building Information Modeling) semakin penting — semua jenjang dari operator hingga manajer. SKKNI 3-2023 adalah standar terbaru untuk kompetensi BIM.`;
+
 const BIDANG_KLASIFIKASI = [
   {
     key: "sipil",
     name: "Sipil",
     fullName: "Klasifikasi Bidang Sipil",
-    description: "Mencakup 160+ jabatan kerja konstruksi sipil meliputi jalan, jembatan, bendungan, irigasi, pelabuhan, bandar udara, gedung, struktur bangunan, dan infrastruktur sipil lainnya.",
-    subklasifikasi: "Jalan & Jembatan, Bendungan & Irigasi, Pelabuhan & Dermaga, Bandar Udara, Gedung & Bangunan, Struktur Baja & Beton, Geoteknik & Fondasi, Drainase & Sanitasi, Terowongan, Reklamasi, Survey & Pengukuran",
-    contohJabatan: "Pelaksana Lapangan Jalan, Site Manager Gedung, Quality Control Beton, Surveyor, Drafter Struktur, Pengawas K3 Konstruksi, Estimator, Ahli Geoteknik",
-    jenjang: "Operator/Teknisi → Teknisi/Analis → Ahli Muda → Ahli Madya → Ahli Utama",
+    description: "Klasifikasi terbesar dengan 160+ jabatan kerja konstruksi sipil meliputi 16 subklasifikasi: Gedung, Material, Jalan, Jembatan, Landasan Udara, Terowongan, Bendung & Bendungan, Irigasi & Rawa, Sungai & Pantai, Air Tanah & Air Baku, Bangunan Air Minum, Bangunan Air Limbah & Persampahan, Drainase Perkotaan, Geoteknik, Geodesi & Survey, Pelabuhan.",
+    subklasifikasi: "Gedung, Material, Jalan, Jembatan, Landasan Udara, Terowongan, Bendung & Bendungan, Irigasi & Rawa, Sungai & Pantai, Air Tanah & Air Baku, Bangunan Air Minum, Bangunan Air Limbah, Bangunan Persampahan, Drainase Perkotaan, Geoteknik, Geodesi & Survey",
+    contohJabatan: "Ahli Teknik Jalan, Ahli Teknik Jembatan, Ahli Geoteknik, Ahli Teknik Bangunan Gedung, Pelaksana Lapangan Pekerjaan Gedung, Tukang Besi Beton, Mandor Konstruksi, Ahli Hidrologi, Surveyor, Teknisi Lab Beton",
+    jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: SKKNI_REF_SIPIL,
     color: "#DC2626",
   },
   {
     key: "arsitektur",
     name: "Arsitektur",
     fullName: "Klasifikasi Bidang Arsitektur",
-    description: "Mencakup jabatan kerja di bidang perancangan arsitektur bangunan gedung, perumahan, fasilitas publik, dan perencanaan tapak.",
+    description: "Mencakup jabatan kerja di bidang perancangan arsitektur bangunan gedung, perumahan, fasilitas publik, dan perencanaan tapak. Data jabatan kerja detail akan ditambahkan setelah klasifikasi resmi tersedia.",
     subklasifikasi: "Arsitektur Bangunan Gedung, Arsitektur Perumahan, Arsitektur Fasilitas Publik, Perencanaan Tapak, Preservasi & Konservasi Bangunan",
     contohJabatan: "Arsitek, Drafter Arsitektur, Perencana Tapak, Pengawas Arsitektur, Ahli Preservasi Bangunan",
-    jenjang: "Teknisi → Ahli Muda → Ahli Madya → Ahli Utama",
+    jenjang: "Teknisi (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: "",
     color: "#9333EA",
   },
   {
     key: "energi",
     name: "Energi, Ketenagalistrikan & Pertambangan",
     fullName: "Klasifikasi Bidang Energi, Ketenagalistrikan dan Pertambangan",
-    description: "Mencakup jabatan kerja di bidang pembangkit listrik, transmisi & distribusi, instalasi listrik, pertambangan, dan energi terbarukan. Catatan: Sebagian skema ini berada di luar lingkup jasa konstruksi murni.",
-    subklasifikasi: "Pembangkit Listrik, Transmisi & Distribusi, Instalasi Listrik, Pertambangan, Energi Terbarukan (Solar, Wind, Hydro), Jaringan Gas",
+    description: "Mencakup jabatan kerja di bidang pembangkit listrik, transmisi & distribusi, instalasi listrik, pertambangan, dan energi terbarukan. CATATAN: Klasifikasi ini sementara berada di luar lingkup jasa konstruksi. Data jabatan kerja akan ditambahkan setelah pengaturan lebih lanjut.",
+    subklasifikasi: "Pembangkit Listrik, Transmisi & Distribusi, Instalasi Listrik, Pertambangan, Energi Terbarukan, Jaringan Gas",
     contohJabatan: "Teknisi Listrik, Ahli Pembangkit, Installer Panel Surya, Pengawas Kelistrikan, Ahli Jaringan Transmisi",
-    jenjang: "Operator/Teknisi → Teknisi/Analis → Ahli Muda → Ahli Madya → Ahli Utama",
+    jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: "",
     color: "#F59E0B",
   },
   {
     key: "sains-rekayasa",
     name: "Sains & Rekayasa Teknik",
     fullName: "Klasifikasi Bidang Sains dan Rekayasa Teknik",
-    description: "Mencakup jabatan kerja di bidang rekayasa teknik, laboratorium konstruksi, pengujian material, dan teknologi konstruksi terapan.",
-    subklasifikasi: "Rekayasa Teknik Sipil, Laboratorium Konstruksi, Pengujian Material, Teknologi Beton, Teknologi Baja, Mekanika Tanah, Hidrologi & Hidrolika",
-    contohJabatan: "Ahli Laboratorium Beton, Teknisi Pengujian Material, Ahli Mekanika Tanah, Rekayasa Hidrologi, Ahli Teknologi Beton",
-    jenjang: "Teknisi → Analis → Ahli Muda → Ahli Madya → Ahli Utama",
+    description: "Mencakup 6 jabatan kerja di bidang investasi infrastruktur, rekayasa nilai (value engineering), dan komputasi konstruksi (BIM). Bidang BIM berkembang pesat dengan standar SKKNI 3-2023.",
+    subklasifikasi: "Investasi Infrastruktur, Komputasi Konstruksi (BIM), Peledakan",
+    contohJabatan: "Manager BIM, Koordinator BIM, Modeller BIM, Juru Gambar BIM, Ahli Perencana Proyek Infrastruktur, Ahli Rekayasa Nilai",
+    jenjang: "Operator (KKNI 2-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: SKKNI_REF_SAINS_REKAYASA,
     color: "#0EA5E9",
   },
   {
     key: "mekanikal",
     name: "Mekanikal",
     fullName: "Klasifikasi Bidang Mekanikal",
-    description: "Mencakup jabatan kerja di bidang instalasi mekanikal bangunan, perpipaan, HVAC, fire protection, elevator, dan sistem mekanikal lainnya.",
-    subklasifikasi: "Perpipaan (Plumbing), HVAC (Heating, Ventilation, Air Conditioning), Fire Protection, Elevator & Eskalator, Pompa & Kompresor, Instalasi Gas Medis",
-    contohJabatan: "Teknisi Plumbing, Ahli HVAC, Installer Fire Protection, Teknisi Elevator, Ahli Perpipaan, Pengawas Mekanikal",
-    jenjang: "Operator/Teknisi → Teknisi/Analis → Ahli Muda → Ahli Madya → Ahli Utama",
+    description: "Klasifikasi kedua terbesar dengan 81 jabatan kerja meliputi 10 subklasifikasi: Tata Udara & Refrigasi, Plumbing & Pompa, Proteksi Kebakaran, Transportasi dalam Gedung, Teknik Mekanikal, Las & Fabrikasi, Juru Gambar, Alat Berat (30+ operator), Scaffolding, Teknik Lifting, HVAC.",
+    subklasifikasi: "Teknik Tata Udara & Refrigasi, Plumbing & Pompa Mekanik, Proteksi Kebakaran, Transportasi dalam Gedung, Teknik Mekanikal, Las & Fabrikasi, Alat Berat, Scaffolding, Teknik Lifting, HVAC",
+    contohJabatan: "Ahli Perencanaan Sistem Tata Udara, Ahli Teknik Plambing, Pengkaji Teknis Proteksi Kebakaran, Ahli Pesawat Lift, Operator Tower Crane, Operator Bulldozer, Tukang Las, Mekanik Alat Berat",
+    jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: SKKNI_REF_MEKANIKAL,
     color: "#6366F1",
   },
   {
     key: "manajemen-pelaksanaan",
     name: "Manajemen Pelaksanaan",
     fullName: "Klasifikasi Bidang Manajemen Pelaksanaan",
-    description: "Mencakup jabatan kerja di bidang manajemen proyek konstruksi, pengendalian biaya, waktu, mutu, K3, dan administrasi kontrak.",
-    subklasifikasi: "Manajemen Proyek, Pengendalian Biaya (Cost Control), Penjadwalan (Scheduling), Manajemen Mutu, Manajemen K3 Konstruksi, Administrasi Kontrak, Pengadaan (Procurement)",
-    contohJabatan: "Project Manager, Site Manager, Cost Controller, Scheduler, Quality Manager, HSE Manager, Quantity Surveyor, Contract Administrator",
-    jenjang: "Pelaksana → Supervisor → Manajer → Manajer Senior → Direktur",
+    description: "Mencakup 18 jabatan kerja di 5 subklasifikasi: Keselamatan Konstruksi (K3), Manajemen Konstruksi/Proyek, Pengendalian Mutu, Hukum Kontrak Konstruksi, dan Estimasi Biaya Konstruksi.",
+    subklasifikasi: "Keselamatan Konstruksi, Manajemen Konstruksi/Manajemen Proyek, Pengendalian Mutu Pekerjaan Konstruksi, Hukum Kontrak Konstruksi, Estimasi Biaya Konstruksi",
+    contohJabatan: "Ahli Keselamatan Konstruksi, Ahli K3 Konstruksi, Ahli Manajemen Proyek Konstruksi, Quality Engineer, Ahli Kontrak Kerja Konstruksi, Ahli Quantity Surveyor, Estimator Biaya Jalan",
+    jenjang: "Operator (KKNI 3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: SKKNI_REF_MANAJEMEN,
     color: "#14B8A6",
   },
   {
     key: "pengembangan-wilayah",
     name: "Pengembangan Wilayah & Kota",
-    fullName: "Klasifikasi Bidang Pengembangan Wilayah dan Kota",
-    description: "Mencakup jabatan kerja di bidang perencanaan tata ruang, pengembangan wilayah, perencanaan kota, dan infrastruktur perkotaan.",
-    subklasifikasi: "Perencanaan Tata Ruang, Pengembangan Wilayah, Perencanaan Kota, Infrastruktur Perkotaan, Transportasi Perkotaan, Perumahan & Permukiman",
-    contohJabatan: "Perencana Kota, Ahli Tata Ruang, Perencana Wilayah, Ahli Transportasi Perkotaan, Perencana Permukiman",
-    jenjang: "Teknisi → Analis → Ahli Muda → Ahli Madya → Ahli Utama",
+    fullName: "Klasifikasi Perencanaan Wilayah dan Kota",
+    description: "Mencakup 5 jabatan kerja di 2 subklasifikasi: Perencanaan Wilayah dan Perencanaan Kota (Urban Planning). Semua jabatan adalah level Ahli (KKNI 7-9). Membutuhkan latar belakang pendidikan PWK/Planologi.",
+    subklasifikasi: "Perencanaan Wilayah, Perencanaan Kota (Urban Planning)",
+    contohJabatan: "Ahli Perencana Tata Ruang Wilayah dan Kota, Ahli Penyusunan Peraturan Zonasi, Ahli Perencana Tata Bangunan dan Lingkungan, Ahli Perencana Wilayah Pesisir",
+    jenjang: "Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: SKKNI_REF_WILAYAH_KOTA,
     color: "#84CC16",
   },
   {
     key: "lanskap-interior-iluminasi",
     name: "Arsitek Lanskap, Desain Interior & Iluminasi",
-    fullName: "Klasifikasi Bidang Arsitek Lanskap, Desain Interior, dan Iluminasi",
-    description: "Mencakup jabatan kerja di bidang arsitektur lanskap, desain interior bangunan, dan desain pencahayaan (iluminasi).",
-    subklasifikasi: "Arsitektur Lanskap, Desain Taman & Ruang Terbuka, Desain Interior Komersial, Desain Interior Residensial, Desain Pencahayaan (Iluminasi), Desain Pameran & Display",
-    contohJabatan: "Arsitek Lanskap, Desainer Interior, Ahli Iluminasi, Drafter Lanskap, Pengawas Lanskap, Desainer Pencahayaan",
-    jenjang: "Teknisi → Ahli Muda → Ahli Madya → Ahli Utama",
+    fullName: "Klasifikasi Bidang Arsitek Lanskap, Iluminasi dan Desain Interior",
+    description: "Mencakup 13 jabatan kerja di 3 subklasifikasi: Arsitektur Lanskap, Teknik Iluminasi, dan Desain Interior. Rentang dari Tukang Taman (KKNI 1) hingga Arsitek Interior Utama (KKNI 9).",
+    subklasifikasi: "Arsitektur Lanskap, Teknik Iluminasi, Desain Interior",
+    contohJabatan: "Ahli Perencana Ruang Terbuka Hijau, Perancang Lanskap, Ahli Perencanaan Iluminasi, Arsitek Interior, Desain Interior, Pelaksana Taman, Tukang Taman",
+    jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: SKKNI_REF_LANSKAP,
     color: "#EC4899",
   },
   {
     key: "tata-lingkungan",
     name: "Tata Lingkungan",
     fullName: "Klasifikasi Bidang Tata Lingkungan",
-    description: "Mencakup jabatan kerja di bidang pengelolaan lingkungan konstruksi, AMDAL, pengelolaan limbah, pengendalian pencemaran, dan rehabilitasi lahan.",
-    subklasifikasi: "Pengelolaan Lingkungan Hidup, AMDAL/UKL-UPL, Pengelolaan Limbah B3, Pengendalian Pencemaran (Air, Udara, Tanah), Rehabilitasi Lahan, Konservasi Sumber Daya Air, Sanitasi Lingkungan",
-    contohJabatan: "Ahli Lingkungan, Penyusun AMDAL, Ahli Pengelolaan Limbah, Ahli Konservasi Air, Pengawas Lingkungan, Ahli Sanitasi",
-    jenjang: "Teknisi → Analis → Ahli Muda → Ahli Madya → Ahli Utama",
+    description: "Mencakup 28 jabatan kerja di 5 subklasifikasi: Teknik Air Minum (12 jabatan), Teknik Air Limbah (3), Teknik Lingkungan (3), Teknik Perpipaan (6), dan Teknik Persampahan (4).",
+    subklasifikasi: "Teknik Air Minum, Teknik Air Limbah, Teknik Lingkungan, Teknik Perpipaan, Teknik Persampahan",
+    contohJabatan: "Ahli Teknik Lingkungan, Ahli Teknik Air Minum, Ahli Perencana Pengelolaan Sampah, Ahli Bidang Teknik Perpipaan, Ahli Perencana Sistem Sanitasi, Teknisi OP Air Minum, Operator Pengolahan Lumpur Tinja",
+    jenjang: "Operator (KKNI 2-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
+    skkniRef: SKKNI_REF_TATA_LINGKUNGAN,
     color: "#22C55E",
   },
 ];
@@ -160,12 +357,12 @@ export async function seedSiapUkom(userId: string) {
     const series = await storage.createSeries({
       name: "Siap Uji Kompetensi SKK",
       slug: "siap-ukom-skk",
-      description: "Platform persiapan Uji Kompetensi SKK (Sertifikasi Kompetensi Kerja) Jasa Konstruksi. Mencakup 9 klasifikasi bidang: Sipil, Arsitektur, Energi & Ketenagalistrikan, Sains & Rekayasa Teknik, Mekanikal, Manajemen Pelaksanaan, Pengembangan Wilayah & Kota, Arsitek Lanskap/Desain Interior/Iluminasi, dan Tata Lingkungan. Setiap bidang memiliki hub yang siap diisi chatbot per jabatan kerja.",
+      description: "Platform persiapan Uji Kompetensi SKK (Sertifikasi Kompetensi Kerja) Jasa Konstruksi. Mencakup 9 klasifikasi bidang: Sipil (160+ jabatan), Arsitektur, Energi & Ketenagalistrikan, Sains & Rekayasa Teknik (BIM), Mekanikal (81 jabatan), Manajemen Pelaksanaan (18 jabatan), Pengembangan Wilayah & Kota (5 jabatan), Arsitek Lanskap/Desain Interior/Iluminasi (13 jabatan), dan Tata Lingkungan (28 jabatan). Dilengkapi referensi SKKNI resmi dan link Kemnaker.",
       tagline: "Persiapan Uji Kompetensi SKK untuk Seluruh Klasifikasi Jasa Konstruksi",
       coverImage: "",
       color: "#B91C1C",
       category: "engineering",
-      tags: ["skk", "uji-kompetensi", "sertifikasi", "jabatan-kerja", "bnsp", "lsp", "konstruksi", "kkni", "bimtek"],
+      tags: ["skk", "uji-kompetensi", "sertifikasi", "jabatan-kerja", "bnsp", "lsp", "konstruksi", "kkni", "bimtek", "skkni"],
       language: "id",
       isPublic: true,
       isFeatured: true,
@@ -214,15 +411,15 @@ SKK (Sertifikasi Kompetensi Kerja) adalah sertifikasi wajib bagi tenaga kerja ko
 - LSP (Lembaga Sertifikasi Profesi) sebagai pelaksana uji kompetensi
 
 ═══ 9 KLASIFIKASI BIDANG ═══
-1. **Sipil** — Jalan, jembatan, bendungan, gedung, struktur, geoteknik, dll (160+ jabatan kerja)
-2. **Arsitektur** — Perancangan bangunan, perencanaan tapak, preservasi
-3. **Energi, Ketenagalistrikan & Pertambangan** — Pembangkit, transmisi, instalasi listrik, tambang
-4. **Sains & Rekayasa Teknik** — Laboratorium, pengujian material, mekanika tanah, hidrologi
-5. **Mekanikal** — Perpipaan, HVAC, fire protection, elevator
-6. **Manajemen Pelaksanaan** — Project management, cost control, scheduling, K3, kontrak
-7. **Pengembangan Wilayah & Kota** — Tata ruang, perencanaan kota, transportasi perkotaan
-8. **Arsitek Lanskap, Desain Interior & Iluminasi** — Lanskap, interior, pencahayaan
-9. **Tata Lingkungan** — AMDAL, limbah, pencemaran, rehabilitasi lahan
+1. **(B) Sipil** — 160+ jabatan kerja: Gedung, Jalan, Jembatan, Bendungan, Irigasi, Geoteknik, Geodesi, Drainase, dll
+2. **(A) Arsitektur** — Perancangan bangunan, perencanaan tapak, preservasi
+3. **(I) Energi, Ketenagalistrikan & Pertambangan** — Sementara di luar lingkup jasa konstruksi
+4. **(H) Sains & Rekayasa Teknik** — 6 jabatan: BIM (SKKNI 3-2023), Value Engineering, Investasi Infrastruktur
+5. **(C) Mekanikal** — 81 jabatan: Plumbing, HVAC, Proteksi Kebakaran, Lift, Alat Berat, Las, Scaffolding, Lifting
+6. **(E) Manajemen Pelaksanaan** — 18 jabatan: K3, Manajemen Proyek, Quality, Kontrak, Estimasi Biaya
+7. **(G) Pengembangan Wilayah & Kota** — 5 jabatan: Tata Ruang, Zonasi, Tata Bangunan (semua level Ahli)
+8. **(F) Arsitek Lanskap, Desain Interior & Iluminasi** — 13 jabatan: Lanskap, Iluminasi, Interior
+9. **(D) Tata Lingkungan** — 28 jabatan: Air Minum, Air Limbah, Lingkungan, Perpipaan, Persampahan
 
 ═══ ROUTING ═══
 Identifikasi bidang klasifikasi dari profil atau pertanyaan user, lalu arahkan ke Hub Bidang yang sesuai.
@@ -230,6 +427,14 @@ Jika user belum tahu bidangnya, tanyakan:
 1. Latar belakang pendidikan/pekerjaan
 2. Jenis proyek yang biasa dikerjakan
 3. Jabatan saat ini
+
+Contoh routing cepat:
+- "Saya tukang las" → Hub Mekanikal (Las & Fabrikasi)
+- "Saya perencana kota" → Hub Pengembangan Wilayah & Kota
+- "Saya operator alat berat" → Hub Mekanikal (Alat Berat)
+- "Saya ahli K3" → Hub Manajemen Pelaksanaan (Keselamatan Konstruksi)
+- "Saya bekerja di proyek jalan" → Hub Sipil (Jalan)
+- "Saya BIM modeler" → Hub Sains & Rekayasa Teknik (BIM)
 
 ═══ PROSES UJI KOMPETENSI ═══
 1. Pendaftaran ke LSP terakreditasi
@@ -239,26 +444,33 @@ Jika user belum tahu bidangnya, tanyakan:
 5. Keputusan: Kompeten / Belum Kompeten
 6. Penerbitan SKK oleh LSP
 
+═══ JENJANG KKNI ═══
+Level 1-3: Operator (tukang, mandor, operator alat)
+Level 4-6: Teknisi/Analis (pelaksana, pengawas, supervisor, teknisi)
+Level 7: Ahli Muda
+Level 8: Ahli Madya
+Level 9: Ahli Utama
+
 Respond dalam Bahasa Indonesia. Suportif, profesional, berorientasi mentoring.${GOVERNANCE_RULES}`,
-      greetingMessage: `Selamat datang di Siap Uji Kompetensi SKK — platform persiapan sertifikasi kompetensi kerja jasa konstruksi! 🎯
+      greetingMessage: `Selamat datang di Siap Uji Kompetensi SKK — platform persiapan sertifikasi kompetensi kerja jasa konstruksi!
 
 Saya siap membantu Anda mempersiapkan uji kompetensi di 9 bidang klasifikasi:
 
-1. 🏗️ **Sipil** — 160+ jabatan kerja
-2. 🏛️ **Arsitektur**
-3. ⚡ **Energi, Ketenagalistrikan & Pertambangan**
-4. 🔬 **Sains & Rekayasa Teknik**
-5. ⚙️ **Mekanikal**
-6. 📋 **Manajemen Pelaksanaan**
-7. 🌆 **Pengembangan Wilayah & Kota**
-8. 🌿 **Arsitek Lanskap, Desain Interior & Iluminasi**
-9. 🌍 **Tata Lingkungan**
+1. **(B) Sipil** — 160+ jabatan kerja
+2. **(A) Arsitektur**
+3. **(I) Energi, Ketenagalistrikan & Pertambangan**
+4. **(H) Sains & Rekayasa Teknik** — termasuk BIM
+5. **(C) Mekanikal** — 81 jabatan kerja
+6. **(E) Manajemen Pelaksanaan** — K3, Proyek, Mutu, Kontrak, Biaya
+7. **(G) Pengembangan Wilayah & Kota**
+8. **(F) Arsitek Lanskap, Desain Interior & Iluminasi**
+9. **(D) Tata Lingkungan** — Air, Limbah, Perpipaan, Sampah
 
 Bidang apa yang ingin Anda persiapkan?`,
       conversationStarters: [
         "Saya ingin persiapan uji kompetensi bidang Sipil",
         "Bagaimana proses uji kompetensi SKK?",
-        "Saya engineer mekanikal, skema apa yang cocok?",
+        "Saya operator alat berat, skema apa yang cocok?",
         "Apa saja persyaratan mengikuti uji kompetensi?",
       ],
       contextQuestions: [
@@ -273,7 +485,7 @@ Bidang apa yang ingin Anda persiapkan?`,
           id: "ukom-jenjang",
           label: "Jenjang yang dituju?",
           type: "select",
-          options: ["Operator/Teknisi", "Teknisi/Analis", "Ahli Muda", "Ahli Madya", "Ahli Utama", "Belum tahu"],
+          options: ["Operator (KKNI 1-3)", "Teknisi/Analis (KKNI 4-6)", "Ahli Muda (KKNI 7)", "Ahli Madya (KKNI 8)", "Ahli Utama (KKNI 9)", "Belum tahu"],
           required: false,
         },
       ],
@@ -284,6 +496,7 @@ Bidang apa yang ingin Anda persiapkan?`,
 
     for (let i = 0; i < BIDANG_KLASIFIKASI.length; i++) {
       const bidang = BIDANG_KLASIFIKASI[i];
+      const hasSkkniData = bidang.skkniRef && bidang.skkniRef.length > 0;
 
       const modul = await storage.createBigIdea({
         seriesId: seriesId,
@@ -314,13 +527,18 @@ Bidang apa yang ingin Anda persiapkan?`,
           `Identifikasi jabatan kerja di ${bidang.fullName}`,
           "Informasi skema sertifikasi dan jenjang KKNI",
           "Routing ke chatbot persiapan per jabatan kerja",
+          hasSkkniData ? "Referensi SKKNI resmi lengkap per jabatan kerja" : "Panduan umum bidang klasifikasi",
         ],
         limitations: ["Tidak melakukan uji kompetensi langsung", "Tidak menerbitkan sertifikat"],
       } as any);
 
+      const skkniSection = hasSkkniData
+        ? `\n${bidang.skkniRef}\n`
+        : `\n═══ DATA JABATAN KERJA ═══\nData jabatan kerja detail untuk ${bidang.fullName} akan ditambahkan setelah klasifikasi resmi tersedia. Gunakan pengetahuan umum Anda tentang bidang ini untuk membantu peserta.\n`;
+
       await storage.createAgent({
         name: `Hub ${bidang.name}`,
-        description: `Hub persiapan uji kompetensi ${bidang.fullName} — mengarahkan ke chatbot per jabatan kerja.`,
+        description: `Hub persiapan uji kompetensi ${bidang.fullName} — mengarahkan ke chatbot per jabatan kerja. ${hasSkkniData ? "Dilengkapi referensi SKKNI resmi." : ""}`,
         tagline: `Persiapan Uji Kompetensi ${bidang.fullName}`,
         category: "engineering",
         subcategory: "construction-competency",
@@ -335,7 +553,7 @@ Bidang apa yang ingin Anda persiapkan?`,
         systemPrompt: `You are Hub ${bidang.name} — orchestrator untuk persiapan Uji Kompetensi SKK ${bidang.fullName}.
 
 ═══ PERAN ═══
-Anda adalah hub bidang ${bidang.name} yang membantu peserta menavigasi jabatan kerja dan mempersiapkan uji kompetensi di bidang ini.
+Anda adalah hub bidang ${bidang.name} yang membantu peserta menavigasi jabatan kerja dan mempersiapkan uji kompetensi di bidang ini. Anda memiliki DATABASE LENGKAP jabatan kerja, SKKNI, dan jenjang KKNI untuk klasifikasi ini.
 
 ═══ KLASIFIKASI BIDANG ═══
 ${bidang.fullName}
@@ -343,17 +561,14 @@ ${bidang.description}
 
 ═══ SUBKLASIFIKASI ═══
 ${bidang.subklasifikasi}
-
-═══ CONTOH JABATAN KERJA ═══
-${bidang.contohJabatan}
-
+${skkniSection}
 ═══ JENJANG KUALIFIKASI ═══
 ${bidang.jenjang}
 
 ═══ KEMAMPUAN ANDA ═══
-1. **Identifikasi Jabatan Kerja** — Bantu peserta menemukan jabatan kerja yang sesuai dengan profil dan pengalaman mereka
-2. **Informasi Skema SKK** — Jelaskan skema sertifikasi, unit kompetensi wajib, dan persyaratan per jenjang
-3. **Pemetaan KKNI** — Mapping antara jabatan kerja, level KKNI, dan kualifikasi yang dibutuhkan
+1. **Identifikasi Jabatan Kerja** — Bantu peserta menemukan jabatan kerja yang sesuai dari daftar resmi di atas berdasarkan profil dan pengalaman mereka
+2. **Informasi SKKNI** — Berikan nomor SKKNI yang menjadi acuan untuk setiap jabatan kerja
+3. **Pemetaan KKNI** — Jelaskan jenjang KKNI yang tersedia untuk setiap jabatan kerja
 4. **Panduan Persiapan Umum** — Tips persiapan uji kompetensi: portofolio, wawancara, praktik
 5. **Routing** — Arahkan ke chatbot jabatan kerja spesifik jika tersedia
 
@@ -366,14 +581,16 @@ Untuk setiap jabatan kerja, peserta perlu menyiapkan:
 5. **Mental**: Kesiapan menghadapi wawancara asesor dan demonstrasi praktik
 
 ═══ INSTRUKSI KHUSUS ═══
-- Jika chatbot jabatan kerja spesifik belum tersedia, berikan panduan umum persiapan berdasarkan pengetahuan Anda tentang bidang ${bidang.name}
-- Selalu tanyakan jenjang yang dituju (${bidang.jenjang})
-- Berikan informasi tentang unit kompetensi inti yang biasa diujikan di bidang ini
+- Gunakan daftar jabatan kerja resmi di atas untuk menjawab pertanyaan peserta dengan AKURAT
+- Jika peserta menyebut jabatan yang tidak ada di daftar, cari yang paling mendekati dan jelaskan
+- Selalu sebutkan SKKNI terkait dan jenjang KKNI saat membahas jabatan kerja
+- Jika chatbot jabatan kerja spesifik belum tersedia, berikan panduan umum persiapan berdasarkan SKKNI yang tercantum
 - Dorong peserta untuk berlatih dengan simulasi pertanyaan asesor
+- Informasikan bahwa dokumen SKKNI dapat diunduh dari skkni.kemnaker.go.id
 
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
-        greetingMessage: `Selamat datang di Hub ${bidang.name}! 🎯
+        greetingMessage: `Selamat datang di Hub ${bidang.name}!
 
 Saya akan membantu Anda mempersiapkan Uji Kompetensi SKK di ${bidang.fullName}.
 
@@ -385,11 +602,13 @@ ${bidang.contohJabatan.split(", ").map((j: string) => `• ${j}`).join("\n")}
 
 **Jenjang:** ${bidang.jenjang}
 
+${hasSkkniData ? "Saya memiliki database lengkap jabatan kerja dan referensi SKKNI resmi untuk bidang ini." : ""}
+
 Silakan sampaikan jabatan kerja dan jenjang yang ingin Anda persiapkan!`,
         conversationStarters: [
           `Jabatan kerja apa saja yang ada di bidang ${bidang.name}?`,
           `Saya ingin persiapan uji kompetensi jenjang Ahli Muda`,
-          `Apa saja unit kompetensi yang diujikan?`,
+          `SKKNI apa yang menjadi acuan untuk jabatan saya?`,
           `Bantu saya menyiapkan portofolio untuk uji kompetensi`,
         ],
         contextQuestions: [
@@ -403,7 +622,7 @@ Silakan sampaikan jabatan kerja dan jenjang yang ingin Anda persiapkan!`,
             id: `${bidang.key}-jenjang`,
             label: "Jenjang kualifikasi yang dituju?",
             type: "select",
-            options: bidang.jenjang.split(" → "),
+            options: bidang.jenjang.split(" → ").map((j: string) => j.trim()),
             required: true,
           },
           {
@@ -420,8 +639,8 @@ Silakan sampaikan jabatan kerja dan jenjang yang ingin Anda persiapkan!`,
       log(`[Seed] Created Hub Bidang ${bidang.name}`);
     }
 
-    log(`[Seed] ✅ Siap Uji Kompetensi SKK created: 1 Hub Utama + ${BIDANG_KLASIFIKASI.length} Hub Bidang = ${1 + BIDANG_KLASIFIKASI.length} chatbots`);
-    log("[Seed] 💡 Chatbot per jabatan kerja dapat ditambahkan melalui dashboard di bawah masing-masing Hub Bidang");
+    log(`[Seed] Siap Uji Kompetensi SKK created: 1 Hub Utama + ${BIDANG_KLASIFIKASI.length} Hub Bidang = ${1 + BIDANG_KLASIFIKASI.length} chatbots`);
+    log("[Seed] Chatbot per jabatan kerja dapat ditambahkan melalui dashboard di bawah masing-masing Hub Bidang");
 
   } catch (error) {
     log(`[Seed] Error creating Siap Uji Kompetensi SKK: ${error}`);
