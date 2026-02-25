@@ -15,6 +15,8 @@ import { seedCivilpro } from "./seed-civilpro";
 import { seedSipPjbu } from "./seed-sip-pjbu";
 import { seedManajemenLsbu } from "./seed-manajemen-lsbu";
 import { seedManajemenLsp } from "./seed-manajemen-lsp";
+import { seedIso14001 } from "./seed-iso14001";
+import { seedIso9001 } from "./seed-iso9001";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -235,6 +237,18 @@ for (const envVar of requiredEnvVars) {
         await seedManajemenLsp("49465846");
       } catch (err) {
         log("Failed to seed Manajemen LSP ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedIso14001("49465846");
+      } catch (err) {
+        log("Failed to seed ISO 14001 ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedIso9001("49465846");
+      } catch (err) {
+        log("Failed to seed ISO 9001 ecosystem: " + (err as Error).message);
       }
 
       try {
