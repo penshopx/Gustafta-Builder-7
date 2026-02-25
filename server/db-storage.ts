@@ -483,7 +483,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBigIdea(insertBigIdea: InsertBigIdea): Promise<BigIdea> {
-    await db.update(bigIdeas).set({ isActive: false });
     const result = await db.insert(bigIdeas).values({
       name: insertBigIdea.name,
       type: insertBigIdea.type,
