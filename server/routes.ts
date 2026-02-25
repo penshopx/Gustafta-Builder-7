@@ -426,6 +426,7 @@ export async function registerRoutes(
   // Admin: Get all series
   app.get("/api/series", isAuthenticated, async (_req, res) => {
     try {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       const allSeries = await storage.getSeries();
       res.json(allSeries);
     } catch (error) {
@@ -551,6 +552,7 @@ export async function registerRoutes(
   // Get all big ideas
   app.get("/api/big-ideas", isAuthenticated, async (_req, res) => {
     try {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       const bigIdeas = await storage.getBigIdeas();
       res.json(bigIdeas);
     } catch (error) {
