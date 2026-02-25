@@ -18,6 +18,7 @@ import { seedManajemenLsp } from "./seed-manajemen-lsp";
 import { seedIso14001 } from "./seed-iso14001";
 import { seedIso9001 } from "./seed-iso9001";
 import { seedSiapUkom } from "./seed-siap-ukom";
+import { seedKompetensiTeknis } from "./seed-kompetensi-teknis";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -256,6 +257,12 @@ for (const envVar of requiredEnvVars) {
         await seedSiapUkom("49465846");
       } catch (err) {
         log("Failed to seed Siap Uji Kompetensi ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedKompetensiTeknis("49465846");
+      } catch (err) {
+        log("Failed to seed Kompetensi Teknis ecosystem: " + (err as Error).message);
       }
 
       try {
