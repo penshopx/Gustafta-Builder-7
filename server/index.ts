@@ -13,6 +13,8 @@ import { seedOdooKonstruksi } from "./seed-odoo";
 import { seedCsmas } from "./seed-csmas";
 import { seedCivilpro } from "./seed-civilpro";
 import { seedSipPjbu } from "./seed-sip-pjbu";
+import { seedManajemenLsbu } from "./seed-manajemen-lsbu";
+import { seedManajemenLsp } from "./seed-manajemen-lsp";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -221,6 +223,18 @@ for (const envVar of requiredEnvVars) {
         await seedSipPjbu("49465846");
       } catch (err) {
         log("Failed to seed SIP-PJBU ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedManajemenLsbu("49465846");
+      } catch (err) {
+        log("Failed to seed Manajemen LSBU ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedManajemenLsp("49465846");
+      } catch (err) {
+        log("Failed to seed Manajemen LSP ecosystem: " + (err as Error).message);
       }
 
       try {
