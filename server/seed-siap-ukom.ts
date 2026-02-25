@@ -357,6 +357,191 @@ Perpanjangan: Tidak memerlukan ujian ulang
 
 Catatan: Walaupun sektor ketenagalistrikan diatur oleh ESDM (bukan PUPR), banyak pekerjaan listrik di proyek konstruksi membutuhkan SKTTK. Pemegang SKTTK sering bekerja di proyek jasa konstruksi, terutama untuk instalasi listrik gedung, pembangkit, dan infrastruktur kelistrikan.`;
 
+const EBOOK_REF_PENGELOLAAN_GEDUNG = `
+═══ REFERENSI E-BOOK: PENGELOLAAN BANGUNAN GEDUNG ═══
+Jabatan terkait: Manajer Pengelolaan Bangunan Gedung (KKNI 7, SKKNI 115-2015), Perawatan Bangunan Gedung (KKNI 7-9, SKKNI 255-2019), Kepala Pengelola Lingkungan Gedung (KKNI 6, SKKNI 046-2015), Supervisor Perawatan Gedung Bertingkat (KKNI 4-6)
+Sumber: 9 E-book Pengelolaan Bangunan Gedung (Basic → Intermediate → Advance)
+Referensi regulasi: UU 2/2017 Jasa Konstruksi, UU 13/2003 Ketenagakerjaan, Permen PU 09/PER/M/2008 SMK3, SKKNI 115-2015 Manajer Pengelolaan Bangunan Gedung (11 Elemen Kompetensi)
+
+▸ TRILOGI E-BOOK (3 Level × 3 Buku = 9 Total):
+BASIC:
+  1. Dasar-Dasar Pengelolaan Gedung: Memastikan Fungsionalitas, Keamanan, dan Kepatuhan Hukum
+     → Kepatuhan & Operasional Dasar, UU Jasa Konstruksi (sertifikasi kompetensi), UU Ketenagakerjaan, Pengelolaan Keamanan, Pengoperasian rutin
+  2. Protokol Aksi: Panduan Praktis Pemeliharaan Preventif dan Korektif Rutin
+     → Pemeliharaan taman, Housekeeping, Pembersihan saluran air, Implementasi K3 dasar (APD: Helm, Safety Shoes, Sarung Tangan)
+  3. Manajemen Sumber Daya Dasar: SDM, Urusan Umum, dan Laporan Harian
+     → Perencanaan SDM, General Affairs, Laporan Pengelolaan Harian
+
+INTERMEDIATE:
+  4. Optimalisasi Kinerja Gedung: Pengelolaan Energi, Air, dan Sistem MEP Kritis
+     → Efisiensi energi listrik & air, Green Building, Evaluasi inefisiensi ruang, OP sistem kritis (listrik, lift, sanitasi)
+  5. Menuju Green Building dan Ekonomi Sirkular: Strategi Pengelolaan Lingkungan dan Sampah Berbasis Kawasan
+     → Pergub DKI 60/2022 Bangunan Gedung Hijau, Prinsip 9R Ekonomi Sirkular (Rethink, Reduce, Reuse, Recycle), Triple Planetary Crisis
+  6. Manajemen Kontrak dan Risiko: Pengawasan Vendor, Kepatuhan K3 Konstruksi, dan Aspek Keamanan Lanjutan
+     → SMK3 Konstruksi Bidang PU, RK3K (Rencana K3 Kontrak), CPTED (Crime Prevention Through Environmental Design): zonasi, pencahayaan, aksesibilitas
+
+ADVANCE:
+  7. Strategi Finansial Bangunan Gedung: Analisis Keuntungan, Anggaran, dan Kemandirian Finansial Jangka Panjang
+     → Analisis SWOT, Target Keuntungan, Cashflow/RAB, Optimalisasi parkir era 4.0, Nilai ekonomis daur ulang sampah
+  8. Manajemen Aset 4.0: Integrasi Teknologi (BIM) dan Re-evaluasi Aset untuk Pembangunan Berkelanjutan
+     → BIM untuk pengelolaan gedung, Re-evaluasi material/energi/tata ruang, De-konstruksi/End-of-life aset
+  9. Kepemimpinan Profesional: Program Pengembangan Kompetensi SDM dan Laporan Manajemen Strategis
+     → Program HRD, Laporan manajemen untuk pengambil keputusan, Perumusan regulasi internal
+
+▸ 11 ELEMEN KOMPETENSI SKKNI MANAJER PENGELOLAAN BANGUNAN GEDUNG:
+  1. Menerapkan SMK3 dan Lingkungan Hidup (SMK3-LH)
+  2. Merencanakan SDM
+  3. Mengelola SDM
+  4. Melaksanakan Pengelolaan Urusan Umum (General Affairs)
+  5. Menentukan Target Keuntungan
+  6. Membuat Anggaran
+  7. Melaksanakan Pengelolaan Keamanan
+  8. Melaksanakan Pengelolaan Pengoperasian
+  9. Melaksanakan Pengelolaan Pemeliharaan
+  10. Melaksanakan Pengelolaan Perawatan
+  11. Membuat Laporan Pengelolaan Bangunan Gedung
+
+▸ DETAIL E-BOOK 1 (BASIC) — Struktur Materi Uji Kompetensi:
+  Bagian 1: Pengantar Pengelolaan Bangunan Gedung
+    - Latar Belakang: Inefisiensi ruang, penumpukan aset, Era 4.0, Triple Planetary Crisis
+    - Definisi & Peran Manajer: operasional, pemeliharaan, kinerja gedung
+    - Dasar Hukum: UU 2/2017 (sertifikasi SKK), UU 13/2003 (pelatihan), Permen PU 09/PER/M/2008 (SMK3)
+  Bagian 2: Pengelolaan Operasional Dasar
+    - Kompetensi 8: SOP harian lift/AC/air, Struktur Organisasi, Checklist Harian
+    - Kompetensi 9 & 10: Maintenance vs Housekeeping, Preventif vs Korektif
+  Bagian 3: Pengelolaan Keamanan dan Keselamatan
+    - Kompetensi 7: Zonasi Keamanan (Zona 1-6), Protokol Darurat, Jalur Evakuasi
+    - Kompetensi 1: SMK3-LH, APD (Safety Helmet warna, Glasses, Shoes, Ear Plugs)
+  Bagian 4: Administrasi dan Pelaporan
+    - Kompetensi 4: General Affairs, hubungan vendor, monitoring
+    - Kompetensi 11: Laporan Harian/Mingguan, format laporan, pengarsipan
+
+▸ KONTEKS PERSIAPAN UKOM:
+  - Fokus asesmen pada 11 Elemen Kompetensi SKKNI
+  - Portofolio: SOP operasional, laporan pemeliharaan, dokumen K3, sertifikat pelatihan
+  - Praktik: Simulasi pengelolaan operasional, penyusunan laporan, identifikasi risiko K3
+  - Wawancara: Studi kasus manajemen gedung, pemecahan masalah operasional`;
+
+const EBOOK_REF_PEKERJAAN_TANAH = `
+═══ REFERENSI E-BOOK: PEKERJAAN TANAH DAN PENGENDALIAN MUTU ═══
+Jabatan terkait: Ahli Geoteknik (KKNI 7-9, SKKNI 305-2016), Ahli Geologi Pekerjaan Konstruksi (KKNI 8-9, SKKNI 149-2019), Ahli Perencana Pondasi (KKNI 7-9, SKKNI 277-2010), Teknisi Geoteknik (KKNI 5-6, SKKNI 181-2009), Teknisi Sondir (KKNI 4-5), Tukang Pekerjaan Tanah/Pondasi (KKNI 1-2), Operator Alat Penyelidikan Tanah (KKNI 2), Teknisi Lab Tanah (KKNI 4-6)
+Sumber: 9 E-book Pekerjaan Tanah dan Pengendalian Mutu (Basic → Intermediate → Advance)
+
+▸ TRILOGI E-BOOK (3 Level × 3 Buku = 9 Total):
+BASIC:
+  1. Prinsip Dasar Pekerjaan Tanah: Panduan Lapangan untuk Pemula
+     → Jenis tanah (berbutir kasar/halus), definisi galian & timbunan, alat berat dasar (excavator, bulldozer), keselamatan kerja
+  2. Menguasai Klasifikasi Tanah: Kunci Memahami Material Konstruksi
+     → Sistem Klasifikasi USCS/AASHTO, parameter tanah (kadar air, berat isi), cara membaca laporan uji tanah
+  3. Pengendalian Mutu Level 1: Mengukur Kepadatan Tanah di Proyek
+     → Uji kepadatan lapangan (Sand Cone Method), Maximum Dry Density (MDD), faktor yang memengaruhi pemadatan
+
+INTERMEDIATE:
+  4. Teknik Efisien Pekerjaan Timbunan: Dari Desain ke Kualitas Akhir
+     → Perhitungan volume Cut & Fill, Kadar Air Optimum (OMC), teknik layering & rolling, tanah bermasalah (ekspansif/lunak)
+  5. Perencanaan Galian Aman: Stabilitas Lereng dan Pengamanan Sementara
+     → Analisis stabilitas lereng (Factor of Safety), shoring & bracing, dewatering, risiko runtuhnya galian
+  6. Kontrol Kualitas Geoteknik: Panduan Uji Laboratorium dan Analisis Data
+     → Uji Proktor Standar/Modifikasi, Uji Batas Atterberg, interpretasi kurva pemadatan, spesifikasi material timbunan
+
+ADVANCE:
+  7. Optimasi dan Mitigasi Risiko: Studi Kasus Pekerjaan Tanah Skala Besar
+     → Studi kasus kegagalan, mitigasi risiko galian/timbunan tinggi, value engineering, monitoring instrumentasi
+  8. Desain dan Implementasi Perbaikan Tanah (Ground Improvement) Modern
+     → Deep Soil Mixing, Stone Columns, Preloading dengan PVD (Prefabricated Vertical Drains), Geosynthetics
+  9. Audit Mutu Komprehensif: Standar, Spesifikasi, dan Sertifikasi Pekerjaan Tanah
+     → Spesifikasi Teknis SNI, Dokumentasi mutu (IQC, OQC), prosedur non-conformity, peran konsultan Geoteknik
+
+▸ DETAIL E-BOOK 1 (BASIC) — Struktur Materi Uji Kompetensi:
+  BAB 1: Mengenal Tanah sebagai Material Konstruksi
+    - Definisi pekerjaan tanah (Galian, Timbunan, Perataan)
+    - Tanah Berbutir Kasar (Pasir & Kerikil): drainase baik
+    - Tanah Berbutir Halus (Lempung & Lanau): plastisitas, sensitif terhadap air
+    - Terminologi: In-Situ, Loose Soil, Compacted Soil, Natural Water Content
+  BAB 2: Pekerjaan Galian (Excavation)
+    - Galian Struktur (fondasi, footing, pile cap) vs Galian Umum (perataan, parit utilitas)
+    - Kemiringan lereng galian (Slope) untuk stabilitas
+    - Pengelolaan Spoil Material: material layak timbunan vs waste material
+  BAB 3: Pekerjaan Timbunan (Fill)
+    - Persyaratan gradasi dan kebersihan material
+    - Mengapa material lempung/organik harus dihindari
+    - Penyiapan permukaan dasar (Topsoil removal)
+    - Teknik layering: penentuan tebal loose layer
+    - Peralatan pemadatan: Smooth Wheel, Pneumatic Tire, Sheepfoot/Tamping Roller
+  BAB 4: Kontrol Kualitas Dasar dan Keselamatan
+    - MDD (Maximum Dry Density), OMC (Optimum Moisture Content)
+    - Sand Cone Method: tujuan, prosedur, interpretasi (target 95% MDD)
+    - K3: bahaya runtuh galian, terperosok alat berat, APD wajib, barikade
+
+▸ KONTEKS PERSIAPAN UKOM:
+  - Fokus asesmen: pemahaman jenis tanah, prosedur galian/timbunan, pengendalian mutu pemadatan
+  - Portofolio: laporan uji tanah, foto pekerjaan lapangan, dokumentasi kontrol mutu, sertifikat pelatihan
+  - Praktik: simulasi pembacaan laporan uji tanah, identifikasi jenis tanah, prosedur pemadatan
+  - Wawancara: studi kasus kegagalan pekerjaan tanah, metode perbaikan tanah`;
+
+const EBOOK_REF_MANAJEMEN_KONSTRUKSI = `
+═══ REFERENSI DOMAIN: MANAJEMEN KONSTRUKSI ═══
+Jabatan terkait: Ahli Bidang Keahlian Manajemen Konstruksi (KKNI 7-9, SKKNI 390-2015), Ahli Manajemen Proyek Konstruksi (KKNI 7-9, SKKK 035-2022), Manajer Logistik Proyek (KKNI 7, SKKNI 386-2013), Quality Engineer (KKNI 5-6, SKKNI 333-2013), Quality Assurance Engineer (KKNI 5-6, SKKNI 387-2013), Ahli Sistem Manajemen Mutu Konstruksi (KKNI 7-9, SKKNI 145-2019), Ahli Kontrak Kerja Konstruksi (KKNI 8-9, SKKNI 88-2015), Ahli Keselamatan Konstruksi (KKNI 7-9, SKKNI 60-2022)
+Sumber: Pengetahuan domain Manajemen Konstruksi untuk persiapan uji kompetensi
+
+▸ TRILOGI MATERI (3 Level × 3 Topik = 9 Total):
+BASIC:
+  1. Dasar-Dasar Manajemen Konstruksi: Organisasi, Peran, dan Siklus Proyek
+     → Siklus proyek konstruksi (Inisiasi → Perencanaan → Pelaksanaan → Pengendalian → Penutupan)
+     → Struktur organisasi proyek (Owner, Konsultan MK, Kontraktor, Subkontraktor)
+     → Perbedaan Manajemen Konstruksi vs Manajemen Proyek
+     → FIDIC, standar kontrak konstruksi Indonesia
+  2. Pengendalian Mutu Konstruksi Level Dasar: ITP, Method Statement, dan NCR
+     → Inspection Test Plan (ITP): hold point, witness point, review point
+     → Method Statement: format standar, approval flow
+     → Non-Conformance Report (NCR): identifikasi, klasifikasi, tindakan korektif
+     → Quality Plan proyek: struktur dan implementasi
+  3. Manajemen Biaya dan Waktu Proyek: RAB, Scheduling, dan Kurva-S
+     → Rencana Anggaran Biaya (RAB): komponen, AHSP, markup
+     → Scheduling: CPM, Gantt Chart, milestone
+     → Kurva-S: perencanaan, monitoring deviasi, earned value
+     → Cash flow proyek: perencanaan dan pengendalian
+
+INTERMEDIATE:
+  4. Manajemen Risiko dan K3 Konstruksi: Identifikasi, Mitigasi, dan SMK3
+     → Manajemen risiko proyek: risk register, risk matrix (probability × impact)
+     → SMK3 Konstruksi (Permen PU 05/PRT/M/2014)
+     → RK3K (Rencana K3 Kontrak): struktur dan implementasi
+     → Kecelakaan kerja konstruksi: root cause analysis, reporting
+  5. Administrasi Kontrak dan Klaim: FIDIC, Variasi, dan Dispute Resolution
+     → Jenis kontrak: Lump Sum, Unit Price, Cost Plus, Design-Build, Turnkey
+     → Administrasi kontrak: progress claim, variation order, extension of time
+     → Dispute resolution: negosiasi, mediasi, arbitrase, ajudikasi
+     → Addendum dan amandemen kontrak
+  6. Pengendalian Mutu Lanjutan: Sistem ISO 9001 untuk Konstruksi
+     → Implementasi ISO 9001 di proyek konstruksi
+     → Audit internal mutu: perencanaan, pelaksanaan, pelaporan
+     → CAPA (Corrective and Preventive Action): root cause → tindakan → verifikasi
+     → KPI mutu konstruksi: defect rate, rework rate, first-time pass rate
+
+ADVANCE:
+  7. Manajemen Proyek Digital: BIM, Lean Construction, dan Industri 4.0
+     → BIM (Building Information Modeling) untuk MK: clash detection, 4D/5D scheduling
+     → Lean Construction: Last Planner System, waste elimination, pull planning
+     → Digital twin, IoT sensor monitoring, drone inspection
+     → Integrasi ERP (Odoo/SAP) dengan manajemen proyek
+  8. Earned Value Management dan Analisis Kinerja Proyek
+     → EVM: PV, EV, AC, SPI, CPI, EAC, ETC, TCPI
+     → Analisis deviasi: schedule variance, cost variance
+     → Forecasting: estimate at completion, to-complete performance index
+     → Reporting ke stakeholder: dashboard KPI proyek
+  9. Kepemimpinan dan Strategi Penyelesaian Proyek Kompleks
+     → Leadership dalam proyek konstruksi besar
+     → Multi-project management: resource allocation, portfolio management
+     → Commissioning dan handover: prosedur, dokumentasi as-built
+     → Lesson learned dan knowledge management proyek
+
+▸ KONTEKS PERSIAPAN UKOM:
+  - Fokus asesmen: pengelolaan proyek end-to-end, pengendalian mutu/biaya/waktu, kontrak
+  - Portofolio: laporan proyek, schedule, kurva-S, laporan mutu, dokumen kontrak, sertifikat K3
+  - Praktik: simulasi pengelolaan proyek, penyusunan ITP, analisis earned value
+  - Wawancara: studi kasus proyek bermasalah, dispute resolution, risk management`;
+
 const BIDANG_KLASIFIKASI = [
   {
     key: "sipil",
@@ -367,6 +552,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Ahli Teknik Jalan, Ahli Teknik Jembatan, Ahli Geoteknik, Ahli Teknik Bangunan Gedung, Pelaksana Lapangan Pekerjaan Gedung, Tukang Besi Beton, Mandor Konstruksi, Ahli Hidrologi, Surveyor, Teknisi Lab Beton",
     jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: SKKNI_REF_SIPIL,
+    ebookRef: EBOOK_REF_PENGELOLAAN_GEDUNG + "\n\n" + EBOOK_REF_PEKERJAAN_TANAH,
     color: "#DC2626",
   },
   {
@@ -378,6 +564,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Arsitek, Drafter Arsitektur, Perencana Tapak, Pengawas Arsitektur, Ahli Preservasi Bangunan",
     jenjang: "Teknisi (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: "",
+    ebookRef: "",
     color: "#9333EA",
   },
   {
@@ -389,6 +576,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Instalatir Pemanfaatan Tegangan Rendah, Teknisi Gardu Distribusi, Kepala Regu JTM, Supervisor Transmisi, Operator PLTU, Plant Manager Pembangkit, Pelaksana PDKB Distribusi, Pemeriksa & Penguji Instalasi, Konsultan Perencana Kelistrikan, Ahli Ketenagalistrikan",
     jenjang: "Pelaksana Muda (Level 1) → Pelaksana Madya (Level 2) → Pelaksana Utama (Level 3) → Teknisi Muda (Level 4) → Teknisi Madya (Level 5) → Teknisi Utama (Level 6)",
     skkniRef: SKTTK_REF_ENERGI,
+    ebookRef: "",
     color: "#F59E0B",
   },
   {
@@ -400,6 +588,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Manager BIM, Koordinator BIM, Modeller BIM, Juru Gambar BIM, Ahli Perencana Proyek Infrastruktur, Ahli Rekayasa Nilai",
     jenjang: "Operator (KKNI 2-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: SKKNI_REF_SAINS_REKAYASA,
+    ebookRef: "",
     color: "#0EA5E9",
   },
   {
@@ -411,6 +600,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Ahli Perencanaan Sistem Tata Udara, Ahli Teknik Plambing, Pengkaji Teknis Proteksi Kebakaran, Ahli Pesawat Lift, Operator Tower Crane, Operator Bulldozer, Tukang Las, Mekanik Alat Berat",
     jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: SKKNI_REF_MEKANIKAL,
+    ebookRef: "",
     color: "#6366F1",
   },
   {
@@ -422,6 +612,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Ahli Keselamatan Konstruksi, Ahli K3 Konstruksi, Ahli Manajemen Proyek Konstruksi, Quality Engineer, Ahli Kontrak Kerja Konstruksi, Ahli Quantity Surveyor, Estimator Biaya Jalan",
     jenjang: "Operator (KKNI 3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: SKKNI_REF_MANAJEMEN,
+    ebookRef: EBOOK_REF_MANAJEMEN_KONSTRUKSI,
     color: "#14B8A6",
   },
   {
@@ -433,6 +624,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Ahli Perencana Tata Ruang Wilayah dan Kota, Ahli Penyusunan Peraturan Zonasi, Ahli Perencana Tata Bangunan dan Lingkungan, Ahli Perencana Wilayah Pesisir",
     jenjang: "Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: SKKNI_REF_WILAYAH_KOTA,
+    ebookRef: "",
     color: "#84CC16",
   },
   {
@@ -444,6 +636,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Ahli Perencana Ruang Terbuka Hijau, Perancang Lanskap, Ahli Perencanaan Iluminasi, Arsitek Interior, Desain Interior, Pelaksana Taman, Tukang Taman",
     jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: SKKNI_REF_LANSKAP,
+    ebookRef: "",
     color: "#EC4899",
   },
   {
@@ -455,6 +648,7 @@ const BIDANG_KLASIFIKASI = [
     contohJabatan: "Ahli Teknik Lingkungan, Ahli Teknik Air Minum, Ahli Perencana Pengelolaan Sampah, Ahli Bidang Teknik Perpipaan, Ahli Perencana Sistem Sanitasi, Teknisi OP Air Minum, Operator Pengolahan Lumpur Tinja",
     jenjang: "Operator (KKNI 2-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
     skkniRef: SKKNI_REF_TATA_LINGKUNGAN,
+    ebookRef: "",
     color: "#22C55E",
   },
 ];
@@ -677,13 +871,17 @@ Bidang apa yang ingin Anda persiapkan?`,
         limitations: ["Tidak melakukan uji kompetensi langsung", "Tidak menerbitkan sertifikat"],
       } as any);
 
+      const hasEbookData = bidang.ebookRef && bidang.ebookRef.length > 0;
       const skkniSection = hasSkkniData
         ? `\n${bidang.skkniRef}\n`
         : `\n═══ DATA JABATAN KERJA ═══\nData jabatan kerja detail untuk ${bidang.fullName} akan ditambahkan setelah klasifikasi resmi tersedia. Gunakan pengetahuan umum Anda tentang bidang ini untuk membantu peserta.\n`;
+      const ebookSection = hasEbookData
+        ? `\n${bidang.ebookRef}\n\n═══ INSTRUKSI PENGGUNAAN REFERENSI E-BOOK ═══\n- Gunakan materi e-book di atas sebagai CONTOH KONKRET untuk membantu peserta memahami lingkup kompetensi yang diuji\n- Saat peserta bertanya tentang jabatan kerja terkait, kaitkan dengan materi e-book yang relevan\n- Jelaskan level e-book (Basic/Intermediate/Advance) sesuai jenjang KKNI peserta\n- Gunakan struktur BAB dan topik sebagai panduan simulasi pertanyaan asesor\n- Referensi e-book ini BUKAN pengganti SKKNI — tetapi PELENGKAP untuk memahami konteks praktis\n`
+        : "";
 
       await storage.createAgent({
         name: `Hub ${bidang.name}`,
-        description: `Hub persiapan uji kompetensi ${bidang.fullName} — mengarahkan ke chatbot per jabatan kerja. ${hasSkkniData ? "Dilengkapi referensi SKKNI resmi." : ""}`,
+        description: `Hub persiapan uji kompetensi ${bidang.fullName} — mengarahkan ke chatbot per jabatan kerja. ${hasSkkniData ? "Dilengkapi referensi SKKNI resmi." : ""}${hasEbookData ? " Dilengkapi referensi e-book domain spesifik." : ""}`,
         tagline: `Persiapan Uji Kompetensi ${bidang.fullName}`,
         category: "engineering",
         subcategory: "construction-competency",
@@ -732,7 +930,7 @@ Untuk setiap jabatan kerja, peserta perlu menyiapkan:
 - Jika chatbot jabatan kerja spesifik belum tersedia, berikan panduan umum persiapan berdasarkan SKKNI yang tercantum
 - Dorong peserta untuk berlatih dengan simulasi pertanyaan asesor
 - Informasikan bahwa dokumen SKKNI dapat diunduh dari skkni.kemnaker.go.id
-
+${ebookSection}
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
         greetingMessage: `Selamat datang di Hub ${bidang.name}!
@@ -747,7 +945,7 @@ ${bidang.contohJabatan.split(", ").map((j: string) => `• ${j}`).join("\n")}
 
 **Jenjang:** ${bidang.jenjang}
 
-${hasSkkniData ? "Saya memiliki database lengkap jabatan kerja dan referensi SKKNI resmi untuk bidang ini." : ""}
+${hasSkkniData ? "Saya memiliki database lengkap jabatan kerja dan referensi SKKNI resmi untuk bidang ini." : ""}${hasEbookData ? "\n\nSaya juga dilengkapi referensi e-book domain spesifik yang dapat membantu Anda memahami lingkup kompetensi yang diuji." : ""}
 
 Silakan sampaikan jabatan kerja dan jenjang yang ingin Anda persiapkan!`,
         conversationStarters: [
