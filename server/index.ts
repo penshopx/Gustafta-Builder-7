@@ -11,6 +11,7 @@ import { seedAsesorSertifikasi } from "./seed-asesor";
 import { seedSmapPancek } from "./seed-smap-pancek";
 import { seedOdooKonstruksi } from "./seed-odoo";
 import { seedCsmas } from "./seed-csmas";
+import { seedCivilpro } from "./seed-civilpro";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -207,6 +208,12 @@ for (const envVar of requiredEnvVars) {
         await seedCsmas("49465846");
       } catch (err) {
         log("Failed to seed CSMAS ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedCivilpro("49465846");
+      } catch (err) {
+        log("Failed to seed CIVILPRO ecosystem: " + (err as Error).message);
       }
 
       try {
