@@ -12,7 +12,7 @@ GOVERNANCE RULES (WAJIB):
 - Jika pertanyaan di luar domain klasifikasi Anda, tolak sopan dan arahkan ke Hub Siap UKom.
 - Bahasa Indonesia profesional, suportif, berorientasi mentoring & persiapan uji kompetensi.
 - Jika data kurang, minta data minimum (maksimal 3 pertanyaan).
-- Selalu disclaimer: "Panduan ini bersifat referensi persiapan. Keputusan akhir kelulusan ditentukan oleh LSP dan asesor resmi sesuai skema BNSP."
+- Selalu disclaimer: "Panduan ini bersifat referensi persiapan. Keputusan akhir kelulusan ditentukan oleh LSP/asesor resmi (BNSP) atau LIT/LAIK (DJK/ESDM untuk SKTTK Ketenagalistrikan)."
 
 ═══ SUMMARY_RULEBOOK v1 (WAJIB DIPATUHI) ═══
 Jika user memberikan *_SUMMARY v1:
@@ -218,6 +218,145 @@ Total: 6 jabatan kerja | KKNI Level 2-9
 
 Catatan: Bidang BIM (Building Information Modeling) semakin penting — semua jenjang dari operator hingga manajer. SKKNI 3-2023 adalah standar terbaru untuk kompetensi BIM.`;
 
+const SKTTK_REF_ENERGI = `
+═══ DAFTAR JABATAN KERJA SKTTK KETENAGALISTRIKAN (DJK/ESDM) ═══
+PENTING: Bidang Ketenagalistrikan menggunakan SKTTK (Sertifikat Kompetensi Tenaga Teknik Ketenagalistrikan), BUKAN SKKNI/BNSP.
+Regulator: Direktorat Jenderal Ketenagalistrikan (DJK), Kementerian ESDM
+Level: 1-6 (bukan KKNI 1-9)
+Total: 1.700+ jabatan kerja | 7 kegiatan | 11 bidang
+Sumber: sertifikat-keahlian.com/sertifikat-profesi/skttk-kelistrikan-djkesdm/
+
+═══ JENJANG SKTTK (Level 1-6) ═══
+Level 1: Pelaksana Muda — tenaga bantu, asisten pelaksana
+Level 2: Pelaksana Madya — pelaksana tugas, teknisi, instalatir
+Level 3: Pelaksana Utama — kepala regu, koordinator, pelaksana senior
+Level 4: Teknisi/Analis Muda — supervisor
+Level 5: Teknisi/Analis Madya — asisten manajer
+Level 6: Teknisi/Analis Utama — manajer, plant manager, site manager
+
+═══ 7 KEGIATAN UTAMA ═══
+1. Bangsang (Pembangunan & Pemasangan)
+2. Pengoperasian
+3. Pemeliharaan
+4. Konsultasi (Perencanaan & Pengawasan)
+5. Pemeriksaan dan Pengujian
+6. PDKB (Pekerjaan Dalam Keadaan Bertegangan)
+7. Ahli
+
+═══ 11 BIDANG SKTTK ═══
+
+▸ INSTALASI PEMANFAATAN / IPTL (86+ jabatan):
+  Sub-bidang: Tegangan Rendah (TR), Tegangan Menengah (TM), Tegangan Tinggi (TT), SPKLU (Stasiun Pengisian Kendaraan Listrik Umum)
+  Level 1: Asisten Pelaksana Pembangunan & Pemasangan Pemanfaatan Tenaga Listrik | Asisten Pelaksana Pembangunan & Pemasangan SPKLU
+  Level 2: Instalatir Pemanfaatan TR/TM/TT | Pelaksana Pembangunan & Pemasangan SPKLU | Operator Pengoperasian Pemanfaatan TR/TM/TT
+  Level 3: Koordinator/Ketua Grup Pembangunan & Pemasangan TR/TM/TT/SPKLU | Kepala Regu Pengoperasian
+  Level 4: Supervisor Pembangunan & Pemasangan TR/TM/TT/SPKLU | Supervisor Pengoperasian | Supervisor Pemeliharaan
+  Level 5: Asisten Manajer Pembangunan & Pemasangan TR/TM/TT/SPKLU | Asisten Manajer Pengoperasian/Pemeliharaan
+  Level 6: Manajer Pembangunan & Pemasangan Instalasi Pemanfaatan TR/TM/TT | Manajer SPKLU | Manajer Pengoperasian/Pemeliharaan
+  Kompetensi utama: Komponen & sirkit instalasi, proteksi, panel kontrol, APP (Alat Pengukur & Pembatas), motor listrik, PJU, penangkal petir, DC power supply, SKUTR/SKTR
+
+▸ DISTRIBUSI (91+ jabatan):
+  Sub-bidang: Gardu Distribusi, JTM (Jaringan Tegangan Menengah), JTR (Jaringan Tegangan Rendah), APP, SCADA & Telekomunikasi, Fiber Optik
+  Level 1: Tenaga Bantu Pembangunan & Pemasangan Distribusi | Pelaksana Muda Fiber Optik pada Tiang SUTM/SUTR
+  Level 2: Teknisi Gardu Distribusi | Teknisi JTM | Teknisi JTR | Teknisi APP | Teknisi SCADA & Telekomunikasi | Pelaksana Fiber Optik
+  Level 3: Kepala Regu Gardu Distribusi | Kepala Regu JTM | Kepala Regu JTR | Kepala Regu APP | Kepala Regu SCADA | Pengawas Fiber Optik
+  Level 4: Supervisor Pembangunan & Pemasangan Distribusi TM/TR | Supervisor Fiber Optik
+  Level 5: Asisten Manajer Distribusi TM/TR | Asisten Manajer Fiber Optik
+  Level 6: Manajer Pembangunan & Pemasangan Sistem Distribusi
+  Kompetensi utama: SUTM, SUTR, SKTM, SKTR, switching TM, PHB-TR, RTU, gardu pasang dalam/luar, proteksi gardu, sistem pembumian
+
+▸ TRANSMISI (67+ jabatan):
+  Sub-bidang: SUTT (Saluran Udara Tegangan Tinggi), SUTET (Tegangan Ekstra Tinggi), SKTT (Saluran Kabel TT), SKLT (Saluran Kabel Laut TT), Gardu Induk, Switchgear, Common Facility
+  Level 1: Tenaga Bantu Transmisi
+  Level 2: Pelaksana SUTT/SUTET | Pelaksana SKTT/SKLT | Pelaksana Gardu Induk/GITET | Pelaksana Switchgear | Pelaksana Common Facility
+  Level 3: Kepala Regu SUTT/SUTET | Kepala Regu SKTT/SKLT | Kepala Regu Gardu Induk | Kepala Regu Switchgear | Kepala Regu Common Facility
+  Level 4: Supervisor Jaringan Transmisi | Supervisor Gardu Induk
+  Level 5: Asisten Manajer (Asman) Jaringan | Asman Gardu Induk
+  Level 6: Manajer/Project Manajer Transmisi
+  Kompetensi utama: Pondasi & tiang SUTT/SUTET, konduktor, cross bounding, sealing end, sambungan kabel, insulasi transformator, proteksi bay, GIS, SCADA/TEL
+
+▸ PEMBANGKIT PLT EBT (43+ jabatan):
+  Jenis: PLTS (Surya), PLTB (Bayu/Angin), PLT Sampah, PLT Biomas, PLT Biogas
+  Level 1: Tenaga Bantu Pelaksana
+  Level 2: Pelaksana Peralatan Listrik/Pemadam/Trafo/PLTS/PLTB/PLT Sampah/Biomas/Biogas
+  Level 3: Pelaksana Senior Peralatan Listrik/Trafo/Turbin Angin/Panel Surya/PLTB/Limbah B3
+  Level 4: Supervisor Kontrol & Instrumen/Mekanikal/Elektrikal/BOP/Instalasi Gas Buang/Limbah
+  Level 5: Supervisor Senior Elektrikal/Kontrol Instrumen/Mekanikal
+  Level 6: Plant Manager/Site Manajer/Plant Manager PLTS/PLTB
+
+▸ PEMBANGKIT PLTD — Diesel (104+ jabatan):
+  Level 2: Pelaksana Alat Berat/Pemadam/Peralatan PLTD/Trafo/Listrik/BOP
+  Level 3: Pelaksana Senior Alat Berat/Pemadam/PLTD/Listrik/Mesin Diesel/Generator/Trafo/BOP/Gas Buang/Limbah
+  Level 4: Supervisor Alat Berat/Kontrol Instrumen/Mesin Diesel/Generator/Trafo/BOP/Gas Buang/Limbah
+  Level 5: Supervisor Senior Elektrikal/Kontrol Instrumen/Mekanikal
+  Level 6: Plant Manager/Site Manajer
+
+▸ PEMBANGKIT PLTU — Uap (152+ jabatan — terbanyak):
+  Peralatan utama: Turbin Uap, Boiler, Generator & Exciter, Air Heater, BOP
+  Level 2: Pelaksana Peralatan Bantu Turbin Uap/Boiler/BOP/Pemadam/Abu/Listrik/Coal Handling/Bahan Bakar
+  Level 3: Pelaksana Senior Turbin Uap/Boiler/Generator/BOP/Coal Handling/Listrik/Gas Buang/Limbah
+  Level 4: Supervisor Turbin Uap/Boiler/Generator/Coal Handling/Kontrol/BOP/Pemadam/Gas Buang/Limbah
+  Level 5: Supervisor Senior Elektrikal/Kontrol Instrumen/Mekanikal
+  Level 6: Plant Manager/Site Manajer
+
+▸ PEMBANGKIT PLTG — Gas (106+ jabatan):
+  Peralatan utama: Turbin Gas, Generator, HRSG, BOP
+  Level 2-6: Struktur serupa PLTU, fokus pada turbin gas, generator, BOP, kontrol instrumen, elektrikal
+
+▸ PEMBANGKIT PLTGU — Gas-Uap Kombinasi (128+ jabatan):
+  Kombinasi PLTG + PLTU: Turbin Gas + Turbin Uap + HRSG
+  Level 2-6: Mencakup kedua domain turbin gas dan turbin uap
+
+▸ PEMBANGKIT PLTP — Panas Bumi/Geothermal (112+ jabatan):
+  Peralatan: Turbin Uap Geothermal, Wellhead, Separator, Silencer, Cooling Tower
+  Level 2-6: Spesifik geothermal: wellhead equipment, separator, demister, H2S abatement
+
+▸ PEMBANGKIT PLTA — Air/Hydro (102+ jabatan):
+  Peralatan: Turbin Air, Generator, Dam/Intake, Penstock, Spillway
+  Level 2-6: Spesifik hidro: turbin air, katup utama/governor, intake/dam, penstock
+
+▸ PEMBANGKIT PLTMH — Mini/Mikro Hidro (88+ jabatan):
+  Skala kecil dari PLTA, peralatan serupa tetapi kapasitas lebih kecil
+  Level 2-6: Serupa PLTA dalam skala lebih kecil
+
+═══ KEGIATAN KONSULTASI ═══
+Setiap bidang juga memiliki jabatan Konsultasi yang terbagi:
+- Konsultasi Perencanaan (Level 4-6): Perencana Muda → Perencana Madya → Perencana Utama
+- Konsultasi Pengawasan (Level 4-6): Pengawas Muda → Pengawas Madya → Pengawas Utama
+
+═══ KEGIATAN PEMERIKSAAN & PENGUJIAN ═══
+Tersedia untuk IPTL, Distribusi, Transmisi: Pemeriksa/Penguji Level 2-6
+
+═══ KEGIATAN PDKB (Pekerjaan Dalam Keadaan Bertegangan) ═══
+Tersedia untuk Distribusi dan Transmisi: pelaksanaan pekerjaan pada instalasi bertegangan tanpa pemadaman
+
+═══ AHLI KETENAGALISTRIKAN ═══
+Level 4-6: Ahli di berbagai sub-bidang IPTL, Distribusi, Transmisi, Pembangkit
+
+═══ BIAYA SKTTK ═══
+IPTL/Distribusi/Pembangkit: Rp 3.800.000 (Level 1-3) — Rp 4.100.000 (Level 4-6)
+Transmisi: Rp 7.000.000 (Level 1-3) — Rp 7.500.000 (Level 4-6)
+Perpanjangan: Tidak memerlukan ujian ulang
+
+═══ SYARAT UMUM SKTTK ═══
+1. Form Daftar Riwayat Hidup
+2. KTP
+3. Ijazah Terakhir
+4. Pas Foto 3x4 (latar merah, berkerah, resolusi baik)
+5. Foto/Video Kerja sesuai jabatan kerja (min. 5 foto)
+6. Makalah & Power Point Studi Kasus (khusus Level 5-6)
+
+═══ PERBEDAAN SKTTK vs SKK/SKKNI ═══
+| Aspek | SKTTK | SKK (SKKNI) |
+| Regulator | DJK/ESDM | BNSP/Kemnaker |
+| Level | 1-6 | KKNI 1-9 |
+| Sektor | Ketenagalistrikan | Jasa Konstruksi (PUPR) |
+| Lembaga Uji | Lembaga Inspeksi Teknik (LIT) / LAIK | LSP (Lembaga Sertifikasi Profesi) |
+| Dasar Hukum | UU 30/2009 Ketenagalistrikan | UU 2/2017 Jasa Konstruksi |
+| Berlaku | 5 tahun | 5 tahun |
+
+Catatan: Walaupun sektor ketenagalistrikan diatur oleh ESDM (bukan PUPR), banyak pekerjaan listrik di proyek konstruksi membutuhkan SKTTK. Pemegang SKTTK sering bekerja di proyek jasa konstruksi, terutama untuk instalasi listrik gedung, pembangkit, dan infrastruktur kelistrikan.`;
+
 const BIDANG_KLASIFIKASI = [
   {
     key: "sipil",
@@ -244,12 +383,12 @@ const BIDANG_KLASIFIKASI = [
   {
     key: "energi",
     name: "Energi, Ketenagalistrikan & Pertambangan",
-    fullName: "Klasifikasi Bidang Energi, Ketenagalistrikan dan Pertambangan",
-    description: "Mencakup jabatan kerja di bidang pembangkit listrik, transmisi & distribusi, instalasi listrik, pertambangan, dan energi terbarukan. CATATAN: Klasifikasi ini sementara berada di luar lingkup jasa konstruksi. Data jabatan kerja akan ditambahkan setelah pengaturan lebih lanjut.",
-    subklasifikasi: "Pembangkit Listrik, Transmisi & Distribusi, Instalasi Listrik, Pertambangan, Energi Terbarukan, Jaringan Gas",
-    contohJabatan: "Teknisi Listrik, Ahli Pembangkit, Installer Panel Surya, Pengawas Kelistrikan, Ahli Jaringan Transmisi",
-    jenjang: "Operator (KKNI 1-3) → Teknisi/Analis (KKNI 4-6) → Ahli Muda (KKNI 7) → Ahli Madya (KKNI 8) → Ahli Utama (KKNI 9)",
-    skkniRef: "",
+    fullName: "Klasifikasi Bidang Energi, Ketenagalistrikan dan Pertambangan (SKTTK DJK/ESDM)",
+    description: "Mencakup 1.700+ jabatan kerja ketenagalistrikan menggunakan SKTTK (bukan SKKNI/BNSP). Diatur oleh DJK/ESDM dengan Level 1-6. Terdiri dari 11 bidang: IPTL (86+ jabatan), Distribusi (91+), Transmisi (67+), dan 8 jenis Pembangkit (PLT EBT, PLTD, PLTU, PLTG, PLTGU, PLTP, PLTA, PLTMH). Setiap bidang memiliki 7 kegiatan: Bangsang, Pengoperasian, Pemeliharaan, Konsultasi, Pemeriksaan & Pengujian, PDKB, dan Ahli.",
+    subklasifikasi: "Instalasi Pemanfaatan/IPTL (TR/TM/TT/SPKLU), Distribusi (Gardu/JTM/JTR/APP/SCADA/Fiber Optik), Transmisi (SUTT/SUTET/SKTT/SKLT/Gardu Induk/Switchgear), Pembangkit PLT EBT (PLTS/PLTB/Biomas/Biogas/Sampah), Pembangkit PLTD, Pembangkit PLTU, Pembangkit PLTG, Pembangkit PLTGU, Pembangkit PLTP, Pembangkit PLTA, Pembangkit PLTMH",
+    contohJabatan: "Instalatir Pemanfaatan Tegangan Rendah, Teknisi Gardu Distribusi, Kepala Regu JTM, Supervisor Transmisi, Operator PLTU, Plant Manager Pembangkit, Pelaksana PDKB Distribusi, Pemeriksa & Penguji Instalasi, Konsultan Perencana Kelistrikan, Ahli Ketenagalistrikan",
+    jenjang: "Pelaksana Muda (Level 1) → Pelaksana Madya (Level 2) → Pelaksana Utama (Level 3) → Teknisi Muda (Level 4) → Teknisi Madya (Level 5) → Teknisi Utama (Level 6)",
+    skkniRef: SKTTK_REF_ENERGI,
     color: "#F59E0B",
   },
   {
@@ -357,7 +496,7 @@ export async function seedSiapUkom(userId: string) {
     const series = await storage.createSeries({
       name: "Siap Uji Kompetensi SKK",
       slug: "siap-ukom-skk",
-      description: "Platform persiapan Uji Kompetensi SKK (Sertifikasi Kompetensi Kerja) Jasa Konstruksi. Mencakup 9 klasifikasi bidang: Sipil (160+ jabatan), Arsitektur, Energi & Ketenagalistrikan, Sains & Rekayasa Teknik (BIM), Mekanikal (81 jabatan), Manajemen Pelaksanaan (18 jabatan), Pengembangan Wilayah & Kota (5 jabatan), Arsitek Lanskap/Desain Interior/Iluminasi (13 jabatan), dan Tata Lingkungan (28 jabatan). Dilengkapi referensi SKKNI resmi dan link Kemnaker.",
+      description: "Platform persiapan Uji Kompetensi SKK (Sertifikasi Kompetensi Kerja) Jasa Konstruksi. Mencakup 9 klasifikasi bidang: Sipil (160+ jabatan), Arsitektur, Energi & Ketenagalistrikan (1.700+ jabatan SKTTK DJK/ESDM), Sains & Rekayasa Teknik/BIM (6 jabatan), Mekanikal (81 jabatan), Manajemen Pelaksanaan (18 jabatan), Pengembangan Wilayah & Kota (5 jabatan), Arsitek Lanskap/Desain Interior/Iluminasi (13 jabatan), dan Tata Lingkungan (28 jabatan). Dilengkapi referensi SKKNI resmi, data SKTTK DJK/ESDM, dan link Kemnaker.",
       tagline: "Persiapan Uji Kompetensi SKK untuk Seluruh Klasifikasi Jasa Konstruksi",
       coverImage: "",
       color: "#B91C1C",
@@ -413,7 +552,7 @@ SKK (Sertifikasi Kompetensi Kerja) adalah sertifikasi wajib bagi tenaga kerja ko
 ═══ 9 KLASIFIKASI BIDANG ═══
 1. **(B) Sipil** — 160+ jabatan kerja: Gedung, Jalan, Jembatan, Bendungan, Irigasi, Geoteknik, Geodesi, Drainase, dll
 2. **(A) Arsitektur** — Perancangan bangunan, perencanaan tapak, preservasi
-3. **(I) Energi, Ketenagalistrikan & Pertambangan** — Sementara di luar lingkup jasa konstruksi
+3. **(I) Energi, Ketenagalistrikan & Pertambangan** — 1.700+ jabatan SKTTK (DJK/ESDM, Level 1-6): IPTL, Distribusi, Transmisi, 8 jenis Pembangkit
 4. **(H) Sains & Rekayasa Teknik** — 6 jabatan: BIM (SKKNI 3-2023), Value Engineering, Investasi Infrastruktur
 5. **(C) Mekanikal** — 81 jabatan: Plumbing, HVAC, Proteksi Kebakaran, Lift, Alat Berat, Las, Scaffolding, Lifting
 6. **(E) Manajemen Pelaksanaan** — 18 jabatan: K3, Manajemen Proyek, Quality, Kontrak, Estimasi Biaya
@@ -435,6 +574,12 @@ Contoh routing cepat:
 - "Saya ahli K3" → Hub Manajemen Pelaksanaan (Keselamatan Konstruksi)
 - "Saya bekerja di proyek jalan" → Hub Sipil (Jalan)
 - "Saya BIM modeler" → Hub Sains & Rekayasa Teknik (BIM)
+- "Saya instalatir listrik" → Hub Energi (IPTL — SKTTK)
+- "Saya operator PLTU" → Hub Energi (Pembangkit PLTU — SKTTK)
+- "Saya teknisi gardu distribusi" → Hub Energi (Distribusi — SKTTK)
+- "Saya kerja di transmisi tegangan tinggi" → Hub Energi (Transmisi — SKTTK)
+
+PENTING: Untuk bidang Energi/Ketenagalistrikan, sertifikasinya BUKAN SKK/SKKNI tetapi SKTTK (DJK/ESDM) dengan Level 1-6.
 
 ═══ PROSES UJI KOMPETENSI ═══
 1. Pendaftaran ke LSP terakreditasi
@@ -458,7 +603,7 @@ Saya siap membantu Anda mempersiapkan uji kompetensi di 9 bidang klasifikasi:
 
 1. **(B) Sipil** — 160+ jabatan kerja
 2. **(A) Arsitektur**
-3. **(I) Energi, Ketenagalistrikan & Pertambangan**
+3. **(I) Energi, Ketenagalistrikan & Pertambangan** — 1.700+ jabatan SKTTK
 4. **(H) Sains & Rekayasa Teknik** — termasuk BIM
 5. **(C) Mekanikal** — 81 jabatan kerja
 6. **(E) Manajemen Pelaksanaan** — K3, Proyek, Mutu, Kontrak, Biaya
