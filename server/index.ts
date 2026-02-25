@@ -19,6 +19,7 @@ import { seedIso14001 } from "./seed-iso14001";
 import { seedIso9001 } from "./seed-iso9001";
 import { seedSiapUkom } from "./seed-siap-ukom";
 import { seedKompetensiTeknis } from "./seed-kompetensi-teknis";
+import { seedAspekindo } from "./seed-aspekindo";
 import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
@@ -263,6 +264,12 @@ for (const envVar of requiredEnvVars) {
         await seedKompetensiTeknis("49465846");
       } catch (err) {
         log("Failed to seed Kompetensi Teknis ecosystem: " + (err as Error).message);
+      }
+
+      try {
+        await seedAspekindo("49465846");
+      } catch (err) {
+        log("Failed to seed Pembinaan ASPEKINDO ecosystem: " + (err as Error).message);
       }
 
       try {
