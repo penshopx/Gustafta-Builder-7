@@ -189,15 +189,15 @@ const MODE_RISK_RADAR = `Assess and report current project risks based on Projec
 - Provide 2-5 short reasons for each risk rating
 Keep it non-technical and actionable.`;
 
-// Initialize OpenAI client with Replit AI Integrations
 const openaiApiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
-const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+const rawBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+const openaiBaseURL = rawBaseURL && rawBaseURL.startsWith("http") ? rawBaseURL : undefined;
 if (!openaiApiKey) {
-  console.warn("[WARNING] AI_INTEGRATIONS_OPENAI_API_KEY is not set - AI chat will not work");
+  console.warn("[WARNING] No OpenAI API key found - AI chat will not work");
 }
 const openai = new OpenAI({
   apiKey: openaiApiKey || "missing-key",
-  baseURL: openaiBaseURL,
+  ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}),
 });
 
 // Configure multer for file uploads
