@@ -122,90 +122,94 @@ for (const envVar of requiredEnvVars) {
     async () => {
       log(`serving on port ${port}`);
       
-      try {
-        const { gustaftaKnowledgeBaseAgent, dokumentenderAgent } = await import("./seed-knowledge-base");
-        const existingAgents = await storage.getAgents();
-        
-        const helpdeskExists = existingAgents.some(
-          (agent: any) => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
-        );
-        if (!helpdeskExists) {
-          await storage.createAgent(gustaftaKnowledgeBaseAgent as any);
-          log("Gustafta Helpdesk chatbot auto-seeded successfully");
-        } else {
-          const helpdesk = existingAgents.find(
+      if (process.env.NODE_ENV !== "production") {
+        try {
+          const { gustaftaKnowledgeBaseAgent, dokumentenderAgent } = await import("./seed-knowledge-base");
+          const existingAgents = await storage.getAgents();
+          
+          const helpdeskExists = existingAgents.some(
             (agent: any) => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
           );
-          if (helpdesk) {
-            await storage.updateAgent(helpdesk.id, {
-              systemPrompt: gustaftaKnowledgeBaseAgent.systemPrompt,
-              greetingMessage: gustaftaKnowledgeBaseAgent.greetingMessage,
-              conversationStarters: gustaftaKnowledgeBaseAgent.conversationStarters,
-              personality: gustaftaKnowledgeBaseAgent.personality,
-              tagline: gustaftaKnowledgeBaseAgent.tagline,
-              description: gustaftaKnowledgeBaseAgent.description,
-            } as any);
-            log("Gustafta Helpdesk chatbot updated with latest configuration");
+          if (!helpdeskExists) {
+            await storage.createAgent(gustaftaKnowledgeBaseAgent as any);
+            log("Gustafta Helpdesk chatbot auto-seeded successfully");
+          } else {
+            const helpdesk = existingAgents.find(
+              (agent: any) => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
+            );
+            if (helpdesk) {
+              await storage.updateAgent(helpdesk.id, {
+                systemPrompt: gustaftaKnowledgeBaseAgent.systemPrompt,
+                greetingMessage: gustaftaKnowledgeBaseAgent.greetingMessage,
+                conversationStarters: gustaftaKnowledgeBaseAgent.conversationStarters,
+                personality: gustaftaKnowledgeBaseAgent.personality,
+                tagline: gustaftaKnowledgeBaseAgent.tagline,
+                description: gustaftaKnowledgeBaseAgent.description,
+              } as any);
+              log("Gustafta Helpdesk chatbot updated with latest configuration");
+            }
           }
-        }
 
-        const dokExists = existingAgents.some(
-          (agent: any) => agent.name === "Dokumentender Assistant"
-        );
-        if (!dokExists) {
-          await storage.createAgent(dokumentenderAgent as any);
-          log("Dokumentender Assistant chatbot auto-seeded successfully");
-        } else {
-          const dok = existingAgents.find(
+          const dokExists = existingAgents.some(
             (agent: any) => agent.name === "Dokumentender Assistant"
           );
-          if (dok) {
-            await storage.updateAgent(dok.id, {
-              systemPrompt: dokumentenderAgent.systemPrompt,
-              greetingMessage: dokumentenderAgent.greetingMessage,
-              conversationStarters: dokumentenderAgent.conversationStarters,
-              personality: dokumentenderAgent.personality,
-              tagline: dokumentenderAgent.tagline,
-              description: dokumentenderAgent.description,
-            } as any);
-            log("Dokumentender Assistant chatbot updated with latest configuration");
+          if (!dokExists) {
+            await storage.createAgent(dokumentenderAgent as any);
+            log("Dokumentender Assistant chatbot auto-seeded successfully");
+          } else {
+            const dok = existingAgents.find(
+              (agent: any) => agent.name === "Dokumentender Assistant"
+            );
+            if (dok) {
+              await storage.updateAgent(dok.id, {
+                systemPrompt: dokumentenderAgent.systemPrompt,
+                greetingMessage: dokumentenderAgent.greetingMessage,
+                conversationStarters: dokumentenderAgent.conversationStarters,
+                personality: dokumentenderAgent.personality,
+                tagline: dokumentenderAgent.tagline,
+                description: dokumentenderAgent.description,
+              } as any);
+              log("Dokumentender Assistant chatbot updated with latest configuration");
+            }
+          }
+        } catch (err) {
+          log("Failed to auto-seed knowledge base agents: " + (err as Error).message);
+        }
+
+        const seedTasks = [
+          { name: "Regulasi Jasa Konstruksi", module: "./seed-regulasi", fn: "seedRegulasiJasaKonstruksi" },
+          { name: "Asesor Sertifikasi", module: "./seed-asesor", fn: "seedAsesorSertifikasi" },
+          { name: "SMAP & PANCEK", module: "./seed-smap-pancek", fn: "seedSmapPancek" },
+          { name: "Odoo Jasa Konstruksi", module: "./seed-odoo", fn: "seedOdooKonstruksi" },
+          { name: "CSMAS", module: "./seed-csmas", fn: "seedCsmas" },
+          { name: "CIVILPRO", module: "./seed-civilpro", fn: "seedCivilpro" },
+          { name: "SIP-PJBU", module: "./seed-sip-pjbu", fn: "seedSipPjbu" },
+          { name: "Manajemen LSBU", module: "./seed-manajemen-lsbu", fn: "seedManajemenLsbu" },
+          { name: "Manajemen LSP", module: "./seed-manajemen-lsp", fn: "seedManajemenLsp" },
+          { name: "ISO 14001", module: "./seed-iso14001", fn: "seedIso14001" },
+          { name: "ISO 9001", module: "./seed-iso9001", fn: "seedIso9001" },
+          { name: "Siap Uji Kompetensi", module: "./seed-siap-ukom", fn: "seedSiapUkom" },
+          { name: "Kompetensi Teknis", module: "./seed-kompetensi-teknis", fn: "seedKompetensiTeknis" },
+          { name: "Pembinaan ASPEKINDO", module: "./seed-aspekindo", fn: "seedAspekindo" },
+        ];
+
+        for (const seed of seedTasks) {
+          try {
+            const mod = await import(seed.module);
+            await mod[seed.fn]("49465846");
+          } catch (err) {
+            log(`Failed to seed ${seed.name} ecosystem: ` + (err as Error).message);
           }
         }
-      } catch (err) {
-        log("Failed to auto-seed knowledge base agents: " + (err as Error).message);
-      }
 
-      const seedTasks = [
-        { name: "Regulasi Jasa Konstruksi", module: "./seed-regulasi", fn: "seedRegulasiJasaKonstruksi" },
-        { name: "Asesor Sertifikasi", module: "./seed-asesor", fn: "seedAsesorSertifikasi" },
-        { name: "SMAP & PANCEK", module: "./seed-smap-pancek", fn: "seedSmapPancek" },
-        { name: "Odoo Jasa Konstruksi", module: "./seed-odoo", fn: "seedOdooKonstruksi" },
-        { name: "CSMAS", module: "./seed-csmas", fn: "seedCsmas" },
-        { name: "CIVILPRO", module: "./seed-civilpro", fn: "seedCivilpro" },
-        { name: "SIP-PJBU", module: "./seed-sip-pjbu", fn: "seedSipPjbu" },
-        { name: "Manajemen LSBU", module: "./seed-manajemen-lsbu", fn: "seedManajemenLsbu" },
-        { name: "Manajemen LSP", module: "./seed-manajemen-lsp", fn: "seedManajemenLsp" },
-        { name: "ISO 14001", module: "./seed-iso14001", fn: "seedIso14001" },
-        { name: "ISO 9001", module: "./seed-iso9001", fn: "seedIso9001" },
-        { name: "Siap Uji Kompetensi", module: "./seed-siap-ukom", fn: "seedSiapUkom" },
-        { name: "Kompetensi Teknis", module: "./seed-kompetensi-teknis", fn: "seedKompetensiTeknis" },
-        { name: "Pembinaan ASPEKINDO", module: "./seed-aspekindo", fn: "seedAspekindo" },
-      ];
-
-      for (const seed of seedTasks) {
         try {
-          const mod = await import(seed.module);
-          await mod[seed.fn]("49465846");
+          const { fixOrphanedOrchestrators } = await import("./fix-orchestrators");
+          await fixOrphanedOrchestrators();
         } catch (err) {
-          log(`Failed to seed ${seed.name} ecosystem: ` + (err as Error).message);
+          log("Failed to fix orphaned orchestrators: " + (err as Error).message);
         }
-      }
-
-      try {
-        const { fixOrphanedOrchestrators } = await import("./fix-orchestrators");
-        await fixOrphanedOrchestrators();
-      } catch (err) {
-        log("Failed to fix orphaned orchestrators: " + (err as Error).message);
+      } else {
+        log("Production mode — skipping seed operations (data already in database)");
       }
 
       startScheduler();
