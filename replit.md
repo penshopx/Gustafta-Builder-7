@@ -40,6 +40,34 @@ Core features include a RAG toggle for controlling knowledge base lookups, "Proj
 - **SUMMARY_GENERATOR_MODE**: Applied to all 16 specialist bots. After analysis, bots offer to convert raw data into standardized *_SUMMARY v1 format for cross-bot use.
 - **Summary Protocols**: SKK_SUMMARY, SBU_SUMMARY, LICENSING_SUMMARY, TENDER_REQ_SUMMARY — standardized text-based integration format for data portability between chatbots.
 
+### Roadmap Ekspansi Series (Belum Diimplementasi)
+
+Arah pengembangan ke depan — setiap bidang/klasifikasi menjadi series tersendiri karena potensi ribuan chatbot:
+
+**Siap Uji Kompetensi (pecahan dari "Siap Uji Kompetensi SKK"):**
+- CIVILPRO (Sipil), Arsitek Pro, Mekanikal Pro, Elektrikal Pro, Rekayasa Pro, Tata Lingkungan Pro, Arsitek Lanskap Pro, PWK Pro, Manajemen Pro
+
+**Siap Audit KBLI Kontraktor (pecahan dari "Kompetensi Teknis"):**
+- Kontraktor Gedung, Sipil, Instalasi, Konstruksi Khusus, Pra Pabrikasi, Finishing, Persiapan
+
+**Siap Audit Konsultan:**
+- Arsitek, Rekayasa, Rekayasa Terpadu, Arsitektur Lanskap, Konsultansi Ilmiah & Teknis, Pengujian & Analisis Teknis
+
+**Siap Audit Kontraktor Terintegrasi:**
+- Terintegrasi Bangunan Gedung, Terintegrasi Bangunan Sipil
+
+**Siap Tender** — (detail TBD)
+
+**Siap Bisnis Konstruksi** — (detail TBD)
+
+Pasar potensial: konstruksi, ketenagalistrikan, energi baru & terbarukan, mineral & pertambangan, migas, lingkungan, K3/Safety.
+
+Catatan arsitektur untuk skala ribuan chatbot:
+- Chatbot dibuat via dashboard/API, bukan seed file statis
+- Template chatbot per kategori — individual di-generate dari template + data spesifik
+- Pagination & lazy loading di semua API
+- Index database untuk pencarian cepat
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
