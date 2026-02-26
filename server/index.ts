@@ -7,21 +7,6 @@ import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
 import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
-import { seedRegulasiJasaKonstruksi } from "./seed-regulasi";
-import { seedAsesorSertifikasi } from "./seed-asesor";
-import { seedSmapPancek } from "./seed-smap-pancek";
-import { seedOdooKonstruksi } from "./seed-odoo";
-import { seedCsmas } from "./seed-csmas";
-import { seedCivilpro } from "./seed-civilpro";
-import { seedSipPjbu } from "./seed-sip-pjbu";
-import { seedManajemenLsbu } from "./seed-manajemen-lsbu";
-import { seedManajemenLsp } from "./seed-manajemen-lsp";
-import { seedIso14001 } from "./seed-iso14001";
-import { seedIso9001 } from "./seed-iso9001";
-import { seedSiapUkom } from "./seed-siap-ukom";
-import { seedKompetensiTeknis } from "./seed-kompetensi-teknis";
-import { seedAspekindo } from "./seed-aspekindo";
-import { fixOrphanedOrchestrators } from "./fix-orchestrators";
 
 const app = express();
 const httpServer = createServer(app);
@@ -190,91 +175,34 @@ for (const envVar of requiredEnvVars) {
         log("Failed to auto-seed Dokumentender: " + (err as Error).message);
       }
 
-      try {
-        await seedRegulasiJasaKonstruksi("49465846");
-      } catch (err) {
-        log("Failed to seed Regulasi Jasa Konstruksi ecosystem: " + (err as Error).message);
+      const seedTasks = [
+        { name: "Regulasi Jasa Konstruksi", module: "./seed-regulasi", fn: "seedRegulasiJasaKonstruksi" },
+        { name: "Asesor Sertifikasi", module: "./seed-asesor", fn: "seedAsesorSertifikasi" },
+        { name: "SMAP & PANCEK", module: "./seed-smap-pancek", fn: "seedSmapPancek" },
+        { name: "Odoo Jasa Konstruksi", module: "./seed-odoo", fn: "seedOdooKonstruksi" },
+        { name: "CSMAS", module: "./seed-csmas", fn: "seedCsmas" },
+        { name: "CIVILPRO", module: "./seed-civilpro", fn: "seedCivilpro" },
+        { name: "SIP-PJBU", module: "./seed-sip-pjbu", fn: "seedSipPjbu" },
+        { name: "Manajemen LSBU", module: "./seed-manajemen-lsbu", fn: "seedManajemenLsbu" },
+        { name: "Manajemen LSP", module: "./seed-manajemen-lsp", fn: "seedManajemenLsp" },
+        { name: "ISO 14001", module: "./seed-iso14001", fn: "seedIso14001" },
+        { name: "ISO 9001", module: "./seed-iso9001", fn: "seedIso9001" },
+        { name: "Siap Uji Kompetensi", module: "./seed-siap-ukom", fn: "seedSiapUkom" },
+        { name: "Kompetensi Teknis", module: "./seed-kompetensi-teknis", fn: "seedKompetensiTeknis" },
+        { name: "Pembinaan ASPEKINDO", module: "./seed-aspekindo", fn: "seedAspekindo" },
+      ];
+
+      for (const seed of seedTasks) {
+        try {
+          const mod = await import(seed.module);
+          await mod[seed.fn]("49465846");
+        } catch (err) {
+          log(`Failed to seed ${seed.name} ecosystem: ` + (err as Error).message);
+        }
       }
 
       try {
-        await seedAsesorSertifikasi("49465846");
-      } catch (err) {
-        log("Failed to seed Asesor Sertifikasi ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedSmapPancek("49465846");
-      } catch (err) {
-        log("Failed to seed SMAP & PANCEK ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedOdooKonstruksi("49465846");
-      } catch (err) {
-        log("Failed to seed Odoo Jasa Konstruksi ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedCsmas("49465846");
-      } catch (err) {
-        log("Failed to seed CSMAS ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedCivilpro("49465846");
-      } catch (err) {
-        log("Failed to seed CIVILPRO ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedSipPjbu("49465846");
-      } catch (err) {
-        log("Failed to seed SIP-PJBU ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedManajemenLsbu("49465846");
-      } catch (err) {
-        log("Failed to seed Manajemen LSBU ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedManajemenLsp("49465846");
-      } catch (err) {
-        log("Failed to seed Manajemen LSP ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedIso14001("49465846");
-      } catch (err) {
-        log("Failed to seed ISO 14001 ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedIso9001("49465846");
-      } catch (err) {
-        log("Failed to seed ISO 9001 ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedSiapUkom("49465846");
-      } catch (err) {
-        log("Failed to seed Siap Uji Kompetensi ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedKompetensiTeknis("49465846");
-      } catch (err) {
-        log("Failed to seed Kompetensi Teknis ecosystem: " + (err as Error).message);
-      }
-
-      try {
-        await seedAspekindo("49465846");
-      } catch (err) {
-        log("Failed to seed Pembinaan ASPEKINDO ecosystem: " + (err as Error).message);
-      }
-
-      try {
+        const { fixOrphanedOrchestrators } = await import("./fix-orchestrators");
         await fixOrphanedOrchestrators();
       } catch (err) {
         log("Failed to fix orphaned orchestrators: " + (err as Error).message);
