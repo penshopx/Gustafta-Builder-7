@@ -2,6 +2,15 @@ process.on("SIGHUP", () => {
   console.log(`${new Date().toLocaleTimeString()} [express] SIGHUP received — ignoring to keep server alive`);
 });
 
+const originalExit = process.exit;
+(process as any).exit = function(code?: number) {
+  if (code === 1 && process.env.NODE_ENV !== "production") {
+    console.error(`${new Date().toLocaleTimeString()} [express] Suppressed process.exit(1) in dev mode — server stays alive`);
+    return undefined as never;
+  }
+  return originalExit.call(process, code);
+};
+
 import express, { type Request, Response, NextFunction } from "express";
 
 import { registerRoutes } from "./routes";
