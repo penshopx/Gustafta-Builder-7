@@ -190,7 +190,7 @@ const MODE_RISK_RADAR = `Assess and report current project risks based on Projec
 Keep it non-technical and actionable.`;
 
 // Initialize OpenAI client with Replit AI Integrations
-const openaiApiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+const openaiApiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
 const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
 if (!openaiApiKey) {
   console.warn("[WARNING] AI_INTEGRATIONS_OPENAI_API_KEY is not set - AI chat will not work");
