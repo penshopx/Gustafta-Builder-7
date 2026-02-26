@@ -527,7 +527,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setActiveBigIdea(id: string): Promise<BigIdea | undefined> {
-    await db.update(bigIdeas).set({ isActive: false });
     const result = await db.update(bigIdeas)
       .set({ isActive: true })
       .where(eq(bigIdeas.id, parseInt(id)))
@@ -606,7 +605,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createToolbox(insertToolbox: InsertToolbox): Promise<Toolbox> {
-    await db.update(toolboxes).set({ isActive: false });
     const result = await db.insert(toolboxes).values({
       bigIdeaId: insertToolbox.bigIdeaId ? parseInt(insertToolbox.bigIdeaId) : null,
       seriesId: insertToolbox.seriesId ? parseInt(insertToolbox.seriesId) : null,
@@ -671,7 +669,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setActiveToolbox(id: string): Promise<Toolbox | undefined> {
-    await db.update(toolboxes).set({ isActive: false });
     const result = await db.update(toolboxes)
       .set({ isActive: true })
       .where(eq(toolboxes.id, parseInt(id)))
@@ -743,7 +740,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAgent(insertAgent: InsertAgent): Promise<Agent> {
-    await db.update(agents).set({ isActive: false });
     
     // Auto-generate access token if not provided
     const accessToken = insertAgent.accessToken || `gus_${randomUUID().replace(/-/g, "")}`;
@@ -823,7 +819,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setActiveAgent(id: string): Promise<Agent | undefined> {
-    await db.update(agents).set({ isActive: false });
     const result = await db.update(agents)
       .set({ isActive: true })
       .where(eq(agents.id, parseInt(id)))

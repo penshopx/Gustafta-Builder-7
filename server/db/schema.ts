@@ -30,7 +30,7 @@ export const bigIdeas = pgTable("big_ideas", {
   goals: jsonb("goals").default([]),
   targetAudience: text("target_audience").default(""),
   expectedOutcome: text("expected_outcome").default(""),
-  isActive: boolean("is_active").default(false),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -42,7 +42,7 @@ export const toolboxes = pgTable("toolboxes", {
   purpose: text("purpose").default(""),
   capabilities: jsonb("capabilities").default([]),
   limitations: jsonb("limitations").default([]),
-  isActive: boolean("is_active").default(false),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -88,7 +88,7 @@ export const agents = pgTable("agents", {
   responseFormat: text("response_format").default("conversational"),
   avoidTopics: jsonb("avoid_topics").default([]),
   keyPhrases: jsonb("key_phrases").default([]),
-  isActive: boolean("is_active").default(false),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
