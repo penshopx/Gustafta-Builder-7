@@ -88,6 +88,7 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
+
 (async () => {
   await setupAuth(app);
   registerAuthRoutes(app);
