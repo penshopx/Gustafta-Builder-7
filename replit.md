@@ -109,6 +109,10 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 - TypeScript
 - PostCSS
 
+### Stability Notes
+- The server registers a SIGHUP handler in `server/index.ts` to prevent the Replit workflow system from killing the process during file-change events. Without this handler, the default SIGHUP behavior terminates the Node.js process.
+- All 14 seed file imports use dynamic `import()` (lazy loading) to reduce initial memory footprint during server startup.
+
 ### Integrations
 - OpenAI (GPT-4o, GPT-3.5)
 - DeepSeek

@@ -21,7 +21,6 @@ import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
 import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type SubscriptionPlanKey } from "./lib/mayar";
-import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import { processAttachmentsAndUrls, type FileAttachment } from "./lib/file-processing";
@@ -1002,15 +1001,16 @@ export async function registerRoutes(
         agent => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
       );
       if (!helpdeskExists) {
+        const { gustaftaKnowledgeBaseAgent } = await import("./seed-knowledge-base");
         const helpdesk = await storage.createAgent(gustaftaKnowledgeBaseAgent as any);
         createdAgents.push(helpdesk);
       }
       
-      // Create Dokumentender Assistant
       const dokumentenderExists = existingAgents.some(
         agent => agent.name === "Dokumentender Assistant"
       );
       if (!dokumentenderExists) {
+        const { dokumentenderAgent } = await import("./seed-knowledge-base");
         const dokumentender = await storage.createAgent(dokumentenderAgent as any);
         createdAgents.push(dokumentender);
       }

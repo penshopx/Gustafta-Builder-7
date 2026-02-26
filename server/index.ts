@@ -1,3 +1,7 @@
+process.on("SIGHUP", () => {
+  console.log(`${new Date().toLocaleTimeString()} [express] SIGHUP received — ignoring to keep server alive`);
+});
+
 import express, { type Request, Response, NextFunction } from "express";
 
 import { registerRoutes } from "./routes";
@@ -6,7 +10,6 @@ import { createServer } from "http";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
-import { gustaftaKnowledgeBaseAgent, dokumentenderAgent } from "./seed-knowledge-base";
 
 const app = express();
 const httpServer = createServer(app);
@@ -120,7 +123,9 @@ for (const envVar of requiredEnvVars) {
       log(`serving on port ${port}`);
       
       try {
+        const { gustaftaKnowledgeBaseAgent, dokumentenderAgent } = await import("./seed-knowledge-base");
         const existingAgents = await storage.getAgents();
+        
         const helpdeskExists = existingAgents.some(
           (agent: any) => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
         );
@@ -143,20 +148,15 @@ for (const envVar of requiredEnvVars) {
             log("Gustafta Helpdesk chatbot updated with latest configuration");
           }
         }
-      } catch (err) {
-        log("Failed to auto-seed Gustafta Helpdesk: " + (err as Error).message);
-      }
 
-      try {
-        const allAgents = await storage.getAgents();
-        const dokExists = allAgents.some(
+        const dokExists = existingAgents.some(
           (agent: any) => agent.name === "Dokumentender Assistant"
         );
         if (!dokExists) {
           await storage.createAgent(dokumentenderAgent as any);
           log("Dokumentender Assistant chatbot auto-seeded successfully");
         } else {
-          const dok = allAgents.find(
+          const dok = existingAgents.find(
             (agent: any) => agent.name === "Dokumentender Assistant"
           );
           if (dok) {
@@ -172,7 +172,7 @@ for (const envVar of requiredEnvVars) {
           }
         }
       } catch (err) {
-        log("Failed to auto-seed Dokumentender: " + (err as Error).message);
+        log("Failed to auto-seed knowledge base agents: " + (err as Error).message);
       }
 
       const seedTasks = [
