@@ -147,8 +147,14 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 - PostCSS
 
 ### Stability Notes
-- The server registers a SIGHUP handler in `server/index.ts` to prevent the Replit workflow system from killing the process during file-change events. Without this handler, the default SIGHUP behavior terminates the Node.js process.
-- All 14 seed file imports use dynamic `import()` (lazy loading) to reduce initial memory footprint during server startup.
+- **SIGHUP handler**: `server/index.ts` ignores SIGHUP to prevent Replit workflow from killing the process during file changes.
+- **Global error handlers**: `unhandledRejection` and `uncaughtException` are caught and logged (never crash silently).
+- **Health endpoint**: `GET /health` returns 200 immediately for fast deployment healthchecks.
+- **Seed operations**: Skipped in production (`NODE_ENV=production`). In development, seeds run inside `listen` callback with individual try/catch.
+- **isActive defaults**: Schema defaults to `true` for bigIdeas, toolboxes, and agents. No bulk reset patterns — `createAgent/Toolbox/BigIdea` and `setActive*` never reset other records.
+- **OpenAI baseURL validation**: Only used if value starts with `http` (prevents API keys from being used as URLs).
+- **Model**: Integration chat uses `gpt-4o-mini` (not `gpt-5.1`).
+- **API key guard**: Both streaming and non-streaming chat endpoints check for valid API key before calling OpenAI.
 
 ### Integrations
 - OpenAI (GPT-4o, GPT-3.5)

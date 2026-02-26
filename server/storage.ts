@@ -486,10 +486,6 @@ export class MemStorage implements IStorage {
   async createBigIdea(insertBigIdea: InsertBigIdea): Promise<BigIdea> {
     const id = randomUUID();
     
-    Array.from(this.bigIdeas.entries()).forEach(([bigIdeaId, b]) => {
-      this.bigIdeas.set(bigIdeaId, { ...b, isActive: false });
-    });
-    
     const bigIdea: BigIdea = {
       id,
       name: insertBigIdea.name,
@@ -537,10 +533,6 @@ export class MemStorage implements IStorage {
   async setActiveBigIdea(id: string): Promise<BigIdea | undefined> {
     const bigIdea = this.bigIdeas.get(id);
     if (!bigIdea) return undefined;
-
-    Array.from(this.bigIdeas.entries()).forEach(([bigIdeaId, b]) => {
-      this.bigIdeas.set(bigIdeaId, { ...b, isActive: false });
-    });
 
     const updated: BigIdea = { ...bigIdea, isActive: true };
     this.bigIdeas.set(id, updated);
@@ -603,10 +595,6 @@ export class MemStorage implements IStorage {
   async createToolbox(insertToolbox: InsertToolbox): Promise<Toolbox> {
     const id = randomUUID();
     
-    Array.from(this.toolboxes.entries()).forEach(([toolboxId, t]) => {
-      this.toolboxes.set(toolboxId, { ...t, isActive: false });
-    });
-    
     const toolbox: Toolbox = {
       id,
       bigIdeaId: insertToolbox.bigIdeaId,
@@ -646,10 +634,6 @@ export class MemStorage implements IStorage {
   async setActiveToolbox(id: string): Promise<Toolbox | undefined> {
     const toolbox = this.toolboxes.get(id);
     if (!toolbox) return undefined;
-
-    Array.from(this.toolboxes.entries()).forEach(([toolboxId, t]) => {
-      this.toolboxes.set(toolboxId, { ...t, isActive: false });
-    });
 
     const updated: Toolbox = { ...toolbox, isActive: true };
     this.toolboxes.set(id, updated);
@@ -702,10 +686,6 @@ export class MemStorage implements IStorage {
 
   async createAgent(insertAgent: InsertAgent): Promise<Agent> {
     const id = randomUUID();
-    
-    Array.from(this.agents.entries()).forEach(([agentId, a]) => {
-      this.agents.set(agentId, { ...a, isActive: false });
-    });
     
     const accessToken = `gus_${randomUUID().replace(/-/g, "")}`;
     
@@ -846,10 +826,6 @@ export class MemStorage implements IStorage {
   async setActiveAgent(id: string): Promise<Agent | undefined> {
     const agent = this.agents.get(id);
     if (!agent) return undefined;
-
-    Array.from(this.agents.entries()).forEach(([agentId, a]) => {
-      this.agents.set(agentId, { ...a, isActive: false });
-    });
 
     const updated: Agent = { ...agent, isActive: true };
     this.agents.set(id, updated);

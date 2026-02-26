@@ -41,7 +41,7 @@ export async function fixOrphanedOrchestrators() {
           isOrchestrator: true,
           seriesId: seriesRow.id,
           bigIdeaId: null,
-          isActive: false,
+          isActive: true,
           sortOrder: 0,
           purpose: "",
           capabilities: [],

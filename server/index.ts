@@ -2,6 +2,14 @@ process.on("SIGHUP", () => {
   console.log(`${new Date().toLocaleTimeString()} [express] SIGHUP received — ignoring to keep server alive`);
 });
 
+process.on("unhandledRejection", (reason, promise) => {
+  console.error(`${new Date().toLocaleTimeString()} [express] Unhandled Promise Rejection:`, reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error(`${new Date().toLocaleTimeString()} [express] Uncaught Exception:`, err);
+});
+
 import express, { type Request, Response, NextFunction } from "express";
 
 import { registerRoutes } from "./routes";

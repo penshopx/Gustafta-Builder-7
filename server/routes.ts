@@ -1665,7 +1665,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         }
         
       } else {
-        // OpenAI models (default) - use the built-in integration
+        if (!openaiApiKey) {
+          return res.status(503).json({ error: "AI service is not configured. Please check API key settings." });
+        }
         const completion = await openai.chat.completions.create({
           model: agentModel,
           messages: chatMessages,
