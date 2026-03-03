@@ -301,6 +301,8 @@ export class DatabaseStorage implements IStorage {
             isActive: a.isActive || false,
             productSlug: a.productSlug || "",
             widgetColor: a.widgetColor || "#6366f1",
+            isOrchestrator: a.isOrchestrator || false,
+            orchestratorRole: a.orchestratorRole || "standalone",
           })),
         });
       }

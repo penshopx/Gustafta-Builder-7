@@ -382,6 +382,8 @@ type AgentSummary = {
   isActive: boolean;
   productSlug: string;
   widgetColor: string;
+  isOrchestrator: boolean;
+  orchestratorRole: string;
 };
 
 type ToolboxWithAgents = Toolbox & { agents: AgentSummary[] };

@@ -389,6 +389,24 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Marketplace Hierarchy ====================
+
+  app.get("/api/marketplace/hierarchy", async (_req, res) => {
+    try {
+      const allSeries = await storage.getPublicSeries();
+      const result = [];
+      for (const s of allSeries) {
+        const hierarchy = await storage.getSeriesWithHierarchy(String(s.id));
+        if (hierarchy) {
+          result.push(hierarchy);
+        }
+      }
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch marketplace data" });
+    }
+  });
+
   // ==================== Series Routes ====================
 
   // Public: Get all public series with stats
