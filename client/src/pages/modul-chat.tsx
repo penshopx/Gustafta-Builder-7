@@ -163,7 +163,7 @@ export default function ModulChat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          agentId: Number(selectedBot.agentId),
+          agentId: String(selectedBot.agentId),
           content: messageContent,
           role: "user",
           sessionId: sessionIdRef.current,
@@ -508,8 +508,72 @@ export default function ModulChat() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setInput(starter);
-                  setTimeout(() => sendMessage(), 0);
+                  if (!selectedBot || isStreaming) return;
+                  const userMsg: Message = {
+                    id: `user_${Date.now()}`,
+                    role: "user",
+                    content: starter,
+                    timestamp: new Date(),
+                  };
+                  setMessages(prev => [...prev, userMsg]);
+                  setInput("");
+
+                  const assistantId = `assistant_${Date.now()}`;
+                  setMessages(prev => [...prev, {
+                    id: assistantId,
+                    role: "assistant",
+                    content: "",
+                    timestamp: new Date(),
+                  }]);
+                  setIsStreaming(true);
+
+                  fetch("/api/messages/stream", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      agentId: String(selectedBot.agentId),
+                      content: starter,
+                      role: "user",
+                      sessionId: sessionIdRef.current,
+                    }),
+                  }).then(async (res) => {
+                    if (!res.ok) throw new Error("Failed");
+                    const reader = res.body?.getReader();
+                    const decoder = new TextDecoder();
+                    if (reader) {
+                      let accumulated = "";
+                      while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split("\n");
+                        for (const line of lines) {
+                          if (line.startsWith("data: ")) {
+                            const data = line.slice(6);
+                            if (data === "[DONE]") continue;
+                            try {
+                              const parsed = JSON.parse(data);
+                              if (parsed.content) {
+                                accumulated += parsed.content;
+                                const cleaned = accumulated
+                                  .replace(/\[SAVE_MEMORY\][\s\S]*?\[\/SAVE_MEMORY\]/g, "")
+                                  .replace(/\[DELETE_MEMORY\][\s\S]*?\[\/DELETE_MEMORY\]/g, "");
+                                setMessages(prev => prev.map(m =>
+                                  m.id === assistantId ? { ...m, content: cleaned } : m
+                                ));
+                              }
+                            } catch {}
+                          }
+                        }
+                      }
+                    }
+                  }).catch(() => {
+                    setMessages(prev => prev.map(m =>
+                      m.id === assistantId ? { ...m, content: "Maaf, terjadi kesalahan. Silakan coba lagi." } : m
+                    ));
+                  }).finally(() => {
+                    setIsStreaming(false);
+                  });
                 }}
                 data-testid={`button-starter-${i}`}
               >

@@ -397,8 +397,38 @@ export async function registerRoutes(
       const result = [];
       for (const s of allSeries) {
         const hierarchy = await storage.getSeriesWithHierarchy(String(s.id));
-        if (hierarchy) {
-          result.push(hierarchy);
+        if (!hierarchy) continue;
+
+        const filterAgents = (agents: any[]) =>
+          agents.filter((a: any) => a.isActive);
+
+        const filterToolboxes = (toolboxes: any[]) =>
+          toolboxes
+            .filter((tb: any) => tb.isActive)
+            .map((tb: any) => ({ ...tb, agents: filterAgents(tb.agents || []) }))
+            .filter((tb: any) => tb.agents.length > 0);
+
+        const filterBigIdeas = (bigIdeas: any[]) =>
+          bigIdeas
+            .map((bi: any) => ({ ...bi, toolboxes: filterToolboxes(bi.toolboxes || []) }))
+            .filter((bi: any) => bi.toolboxes.length > 0);
+
+        const filteredCores = hierarchy.cores
+          .map((c: any) => ({ ...c, bigIdeas: filterBigIdeas(c.bigIdeas || []) }))
+          .filter((c: any) => c.bigIdeas.length > 0);
+
+        const filteredBigIdeas = filterBigIdeas(hierarchy.bigIdeas);
+
+        const totalAgents = [...filteredBigIdeas, ...filteredCores.flatMap((c: any) => c.bigIdeas)]
+          .reduce((sum: number, bi: any) => sum + bi.toolboxes.reduce((s2: number, tb: any) => s2 + tb.agents.length, 0), 0);
+
+        if (totalAgents > 0) {
+          result.push({
+            ...hierarchy,
+            cores: filteredCores,
+            bigIdeas: filteredBigIdeas,
+            totalAgents,
+          });
         }
       }
       res.json(result);
