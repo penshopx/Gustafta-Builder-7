@@ -262,9 +262,9 @@ const langLabels: Record<string, string> = {
 };
 
 function InstallBanner({ color, agentName }: { color: string; agentName: string }) {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(() => window.__pwaInstallPrompt || null);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
-  const [installed, setInstalled] = useState(false);
+  const [installed, setInstalled] = useState(() => window.__pwaInstalled || false);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   useEffect(() => {
@@ -274,8 +274,15 @@ function InstallBanner({ color, agentName }: { color: string; agentName: string 
     };
     window.addEventListener("beforeinstallprompt", handler);
 
-    const installedHandler = () => setInstalled(true);
+    const installedHandler = () => {
+      setInstalled(true);
+      setDeferredPrompt(null);
+    };
     window.addEventListener("appinstalled", installedHandler);
+
+    if (window.__pwaInstallPrompt && !deferredPrompt) {
+      setDeferredPrompt(window.__pwaInstallPrompt);
+    }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
@@ -290,8 +297,12 @@ function InstallBanner({ color, agentName }: { color: string; agentName: string 
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === "accepted") setInstalled(true);
+      if (choice.outcome === "accepted") {
+        setInstalled(true);
+        window.__pwaInstalled = true;
+      }
       setDeferredPrompt(null);
+      window.__pwaInstallPrompt = undefined;
     } else if (isIOS) {
       setShowIOSGuide(!showIOSGuide);
     }

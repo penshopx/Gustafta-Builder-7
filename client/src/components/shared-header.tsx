@@ -1,14 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag } from "lucide-react";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone } from "lucide-react";
 
 interface SharedHeaderProps {
   transparent?: boolean;
+}
+
+function PWAInstallButton() {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(() => window.__pwaInstallPrompt || null);
+  const [installed, setInstalled] = useState(() => window.__pwaInstalled || false);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    const installedHandler = () => {
+      setInstalled(true);
+      setDeferredPrompt(null);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", installedHandler);
+    if (window.__pwaInstallPrompt && !deferredPrompt) {
+      setDeferredPrompt(window.__pwaInstallPrompt);
+    }
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
+  }, []);
+
+  if (installed || isStandalone) return null;
+  if (!deferredPrompt && !isIOS) return null;
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        setInstalled(true);
+        window.__pwaInstalled = true;
+      }
+      setDeferredPrompt(null);
+      window.__pwaInstallPrompt = undefined;
+    } else if (isIOS) {
+      setShowIOSGuide(prev => !prev);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleInstall}
+        className="gap-1.5 text-xs"
+        data-testid="button-pwa-install"
+      >
+        <Smartphone className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Install App</span>
+      </Button>
+      {showIOSGuide && (
+        <div className="absolute top-full right-0 mt-2 w-64 p-3 bg-popover border rounded-lg shadow-lg z-50 text-xs text-muted-foreground space-y-1">
+          <p className="font-medium text-foreground">Install di iPhone/iPad:</p>
+          <p>1. Tap tombol Share <span className="font-mono">⬆</span> di Safari</p>
+          <p>2. Pilih "Add to Home Screen"</p>
+          <p>3. Tap "Add" di pojok kanan atas</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function SharedHeader({ transparent }: SharedHeaderProps) {
@@ -39,7 +108,6 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive(item.href) ? "secondary" : "ghost"}
-               
               >
                 {item.label}
               </Button>
@@ -49,13 +117,13 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             <Link href="/subscription">
               <Button
                 variant={isActive("/subscription") ? "secondary" : "ghost"}
-               
               >
                 <CreditCard className="h-4 w-4 mr-2" />
                 Langganan
               </Button>
             </Link>
           )}
+          <PWAInstallButton />
           <ThemeToggle />
           {isLoading ? (
             <Button disabled>Loading...</Button>
@@ -88,6 +156,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
         </div>
 
         <div className="flex md:hidden items-center gap-2">
+          <PWAInstallButton />
           <ThemeToggle />
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
