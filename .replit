@@ -13,6 +13,10 @@ externalPort = 80
 localPort = 5001
 externalPort = 3000
 
+[[ports]]
+localPort = 5904
+externalPort = 3001
+
 [env]
 PORT = "5000"
 
@@ -20,7 +24,6 @@ PORT = "5000"
 deploymentTarget = "autoscale"
 run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
-publicDir = "dist/public"
 
 [workflows]
 runButton = "Project"
