@@ -33,6 +33,7 @@ type Settings = {
   attentiveListening: boolean;
   contextRetention: number;
   selfCorrection: boolean;
+  multiStepReasoning: boolean;
   behaviorPreset: string;
   autonomyLevel: string;
   responseDepth: string;
@@ -124,6 +125,7 @@ const DEFAULT_SETTINGS: Settings = {
   attentiveListening: true,
   contextRetention: 10,
   selfCorrection: true,
+  multiStepReasoning: true,
   behaviorPreset: "Balanced",
   autonomyLevel: "Terbatas",
   responseDepth: "Terstruktur",
@@ -186,6 +188,115 @@ function MultiSelectField({
               className="text-sm cursor-pointer"
             >
               {opt}
+            </label>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SortableMultiSelect({
+  label,
+  helper,
+  options,
+  value,
+  onChange,
+  dataTestId,
+}: {
+  label: string;
+  helper: string;
+  options: string[];
+  value: string[];
+  onChange: (val: string[]) => void;
+  dataTestId?: string;
+}) {
+  const toggle = (opt: string) => {
+    if (value.includes(opt)) {
+      onChange(value.filter((v) => v !== opt));
+    } else {
+      onChange([...value, opt]);
+    }
+  };
+  const moveUp = (i: number) => {
+    if (i === 0) return;
+    const next = [...value];
+    [next[i - 1], next[i]] = [next[i], next[i - 1]];
+    onChange(next);
+  };
+  const moveDown = (i: number) => {
+    if (i === value.length - 1) return;
+    const next = [...value];
+    [next[i], next[i + 1]] = [next[i + 1], next[i]];
+    onChange(next);
+  };
+  const unchecked = options.filter((o) => !value.includes(o));
+  return (
+    <div className="space-y-2">
+      <div>
+        <Label className="text-sm font-medium">{label}</Label>
+        <p className="text-xs text-muted-foreground mt-0.5">{helper}</p>
+      </div>
+      <div className="space-y-1" data-testid={dataTestId}>
+        {value.map((item, i) => (
+          <div
+            key={item}
+            className="flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-md px-3 py-1.5"
+            data-testid={`sortable-checked-${dataTestId}-${i}`}
+          >
+            <Checkbox
+              id={`${dataTestId}-checked-${item}`}
+              checked={true}
+              onCheckedChange={() => toggle(item)}
+              data-testid={`checkbox-${dataTestId}-${item}`}
+            />
+            <span className="text-xs text-primary font-medium w-4 shrink-0">{i + 1}.</span>
+            <label
+              htmlFor={`${dataTestId}-checked-${item}`}
+              className="text-sm flex-1 cursor-pointer"
+            >
+              {item}
+            </label>
+            <div className="flex gap-0.5">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => moveUp(i)}
+                disabled={i === 0}
+                data-testid={`btn-up-${dataTestId}-${i}`}
+              >
+                <ChevronUp className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => moveDown(i)}
+                disabled={i === value.length - 1}
+                data-testid={`btn-down-${dataTestId}-${i}`}
+              >
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        ))}
+        {unchecked.map((item) => (
+          <div
+            key={item}
+            className="flex items-center gap-2 bg-muted/30 rounded-md px-3 py-1.5"
+          >
+            <Checkbox
+              id={`${dataTestId}-unchecked-${item}`}
+              checked={false}
+              onCheckedChange={() => toggle(item)}
+              data-testid={`checkbox-${dataTestId}-${item}`}
+            />
+            <label
+              htmlFor={`${dataTestId}-unchecked-${item}`}
+              className="text-sm flex-1 cursor-pointer text-muted-foreground"
+            >
+              {item}
             </label>
           </div>
         ))}
@@ -343,6 +454,7 @@ export function AgenticAIPanel() {
         attentiveListening: (agent as any).attentiveListening ?? true,
         contextRetention: (agent as any).contextRetention ?? 10,
         selfCorrection: (agent as any).selfCorrection ?? true,
+        multiStepReasoning: (agent as any).multiStepReasoning ?? true,
         behaviorPreset: (agent as any).behaviorPreset || "Balanced",
         autonomyLevel: (agent as any).autonomyLevel || "Terbatas",
         responseDepth: (agent as any).responseDepth || "Terstruktur",
@@ -561,6 +673,15 @@ export function AgenticAIPanel() {
               dataTestId="toggle-self-correction"
             />
           </div>
+          <div className="border-t pt-4">
+            <ToggleRow
+              label="Penalaran Multi-Langkah"
+              helper="AI memecah masalah menjadi langkah-langkah terstruktur."
+              value={settings.multiStepReasoning}
+              onChange={(v) => save({ multiStepReasoning: v })}
+              dataTestId="toggle-multi-step-reasoning"
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -652,10 +773,18 @@ export function AgenticAIPanel() {
           </div>
           {isAdvanced && (
             <div className="border-t pt-4">
-              <SortableList
+              <SortableMultiSelect
                 label="Prioritas Konteks"
-                helper="Urutan konteks yang paling diutamakan."
-                items={settings.contextPriority}
+                helper="Centang dan urutkan konteks yang paling diutamakan AI."
+                options={[
+                  "Pertanyaan terakhir",
+                  "Tujuan pengguna",
+                  "Profil pengguna",
+                  "Data proyek",
+                  "Riwayat percakapan",
+                  "Hasil tools",
+                ]}
+                value={settings.contextPriority}
                 onChange={(v) => save({ contextPriority: v })}
                 dataTestId="sortable-context-priority"
               />
