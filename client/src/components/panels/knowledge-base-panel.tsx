@@ -27,9 +27,9 @@ const typeIcons = {
 };
 
 const typeLabels = {
-  text: "Text Content",
-  file: "File Upload",
-  url: "Web URL",
+  text: "Teks",
+  file: "Upload File",
+  url: "URL Website",
 };
 
 const fileTypeLabels: Record<string, string> = {
@@ -397,9 +397,9 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Tambah Knowledge Base</DialogTitle>
+              <DialogTitle>Tambah Knowledge</DialogTitle>
               <DialogDescription>
-                Tambahkan informasi baru untuk referensi chatbot
+                Tambahkan sumber informasi baru agar chatbot dapat menjawab lebih akurat.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -409,7 +409,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   id="kb-name"
                   value={newItem.name}
                   onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                  placeholder="FAQ Produk, Info Perusahaan, dll."
+                  placeholder="Contoh: FAQ NIB, Syarat OSS, Alur Pendaftaran"
                  
                 />
               </div>
@@ -425,9 +425,9 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="text">Text Content</SelectItem>
-                    <SelectItem value="file">Upload File (PDF, PPT, Excel, Word)</SelectItem>
-                    <SelectItem value="url">Web URL</SelectItem>
+                    <SelectItem value="text">Teks</SelectItem>
+                    <SelectItem value="file">Upload File</SelectItem>
+                    <SelectItem value="url">URL Website</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -482,7 +482,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 </div>
               ) : newItem.type === "url" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="kb-content">URL</Label>
+                  <Label htmlFor="kb-content">URL Website</Label>
                   <Input
                     id="kb-content"
                     value={newItem.content}
@@ -490,18 +490,20 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     placeholder="https://..."
                    
                   />
+                  <p className="text-xs text-muted-foreground">Masukkan URL halaman yang ingin dijadikan sumber knowledge.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="kb-content">Content</Label>
+                  <Label htmlFor="kb-content">Konten</Label>
                   <Textarea
                     id="kb-content"
                     value={newItem.content}
                     onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
-                    placeholder="Masukkan konten knowledge..."
+                    placeholder="Tempel informasi, SOP, FAQ, atau panduan di sini..."
                     rows={6}
                    
                   />
+                  <p className="text-xs text-muted-foreground">Gunakan judul bagian: "Syarat", "Langkah-langkah", "Biaya", "Waktu proses", "Masalah umum".</p>
                 </div>
               )}
               
@@ -576,6 +578,36 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             {ragSettingsOpen && (
               <div className="mt-4 space-y-4 border-t pt-4">
                 <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Preset Cepat</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => { setRagChunkSize(600); setRagChunkOverlap(120); setRagTopK(3); }}
+                      data-testid="button-preset-hemat"
+                    >
+                      Hemat
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => { setRagChunkSize(800); setRagChunkOverlap(200); setRagTopK(5); }}
+                      data-testid="button-preset-seimbang"
+                    >
+                      Seimbang
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => { setRagChunkSize(1000); setRagChunkOverlap(200); setRagTopK(7); }}
+                      data-testid="button-preset-akurat"
+                    >
+                      Akurat
+                    </Button>
+                    <span className="text-xs text-muted-foreground">— atau atur manual di bawah</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm">Ukuran Chunk (token)</Label>
                     <span className="text-sm font-medium text-muted-foreground">{ragChunkSize}</span>
@@ -588,7 +620,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     onValueChange={([v]) => setRagChunkSize(v)}
                     data-testid="slider-chunk-size"
                   />
-                  <p className="text-xs text-muted-foreground">Ukuran setiap potongan dokumen. Lebih besar = konteks lebih lengkap, lebih kecil = pencarian lebih presisi. Default: 800</p>
+                  <p className="text-xs text-muted-foreground">Semakin besar = konteks lebih lengkap, tapi risiko meleset naik.</p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -603,7 +635,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     onValueChange={([v]) => setRagChunkOverlap(v)}
                     data-testid="slider-chunk-overlap"
                   />
-                  <p className="text-xs text-muted-foreground">Tumpang tindih antar potongan. Lebih besar = transisi lebih halus. Default: 200</p>
+                  <p className="text-xs text-muted-foreground">Semakin besar = transisi antar potongan lebih mulus, biaya pemrosesan naik.</p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -613,12 +645,12 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   <Slider
                     value={[ragTopK]}
                     min={1}
-                    max={20}
+                    max={10}
                     step={1}
                     onValueChange={([v]) => setRagTopK(v)}
                     data-testid="slider-top-k"
                   />
-                  <p className="text-xs text-muted-foreground">Jumlah potongan paling relevan yang diambil saat menjawab. Lebih banyak = konteks lebih luas. Default: 5</p>
+                  <p className="text-xs text-muted-foreground">Jumlah potongan yang disisipkan saat menjawab. Terlalu besar bisa membuat jawaban melebar.</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <Button
@@ -683,16 +715,16 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         <Card>
           <CardContent className="py-12 text-center">
             <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-1">Belum Ada Knowledge Base</h3>
+            <h3 className="font-semibold text-lg mb-1">Belum ada knowledge</h3>
             <p className="text-muted-foreground mb-4">
               {searchQuery
                 ? "Tidak ada item yang cocok dengan pencarian"
-                : "Tambahkan informasi untuk referensi chatbot Anda"}
+                : "Tambahkan dokumen/FAQ/SOP agar chatbot bisa menjawab lebih akurat."}
             </p>
             {!searchQuery && (
               <Button onClick={() => setDialogOpen(true)} variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
-                Tambah Item Pertama
+                Tambah item knowledge
               </Button>
             )}
           </CardContent>
@@ -867,9 +899,9 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Knowledge Base</DialogTitle>
+            <DialogTitle>Edit Knowledge</DialogTitle>
             <DialogDescription>
-              Perbarui informasi knowledge base
+              Perbarui informasi item knowledge
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
