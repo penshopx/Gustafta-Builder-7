@@ -66,8 +66,8 @@ export function useCreateMiniAppResult() {
 
 export function useRunAIMiniApp() {
   return useMutation({
-    mutationFn: async ({ id, agentId }: { id: string; agentId: string }) => {
-      const response = await apiRequest("POST", `/api/mini-app/${id}/run`, {});
+    mutationFn: async ({ id, agentId, extraParams }: { id: string; agentId: string; extraParams?: Record<string, any> }) => {
+      const response = await apiRequest("POST", `/api/mini-app/${id}/run`, extraParams || {});
       return { data: await response.json(), agentId, miniAppId: id };
     },
     onSuccess: (result) => {

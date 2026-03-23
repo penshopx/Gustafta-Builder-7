@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,7 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   gap_analysis: "Gap Analysis",
   recommendation_engine: "Recommendation Engine",
   lead_capture_form: "Lead Capture Form",
+  nib_status_report: "Laporan Status NIB (OSS)",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -54,6 +55,7 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   gap_analysis: GitCompare,
   recommendation_engine: Lightbulb,
   lead_capture_form: UserPlus,
+  nib_status_report: FileSearch,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -73,9 +75,11 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   gap_analysis: "Analisis gap antara kondisi saat ini vs target ideal (AI-powered)",
   recommendation_engine: "Rekomendasi tindakan berdasarkan data dan scoring (AI-powered)",
   lead_capture_form: "Formulir penangkapan lead terintegrasi dengan chat",
+  nib_status_report: "Ringkasan status + timeline OSS/NIB dari data Otak Proyek — otomatis disesuaikan untuk audiens internal atau klien (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report"];
+const NIB_REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report"];
 
 const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; description: string; items?: string[]; config?: Record<string, any> }>> = {
   checklist: {
@@ -161,6 +165,23 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
         style: "bullet_first",
       },
       rules: { no_hallucination: true, mark_missing_as: "Data belum tersedia" },
+    },
+  },
+  nib_status_report: {
+    name: "Ringkasan Status NIB (OSS)",
+    description: "Dokumen 1-halaman berisi status, timeline, dan langkah berikutnya untuk pengurusan NIB di OSS.",
+    config: {
+      mode: "nib_status_report",
+      sources: ["client_name", "project_name", "nib_number", "process_stage", "process_status", "last_checked_date", "timeline_summary", "latest_update", "next_action"],
+      ai_blocks: ["summarize_timeline", "suggest_next_steps"],
+      output_formats: ["copy_text", "save_as_draft"],
+      guardrails: {
+        no_hallucination: true,
+        no_invented_dates: true,
+        mark_missing_as: "Belum tercantum di OSS",
+        max_timeline_bullets: 5,
+        max_next_steps: 3,
+      },
     },
   },
   custom: {
@@ -252,6 +273,12 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const runAIMiniApp = useRunAIMiniApp();
 
   const [aiAnalysisResult, setAiAnalysisResult] = useState<string | null>(null);
+  const [resultCopied, setResultCopied] = useState(false);
+  const [nibParams, setNibParams] = useState({
+    audience: "Internal" as "Internal" | "Klien",
+    tone: "Profesional" as "Profesional" | "Formal" | "Ramah",
+    note_to_recipient: "",
+  });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -359,8 +386,10 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const handleRunAIMiniApp = () => {
     if (!viewingApp) return;
     setAiAnalysisResult(null);
+    setResultCopied(false);
+    const extraParams = viewingApp.type === "nib_status_report" ? { ...nibParams } : undefined;
     runAIMiniApp.mutate(
-      { id: String(viewingApp.id), agentId },
+      { id: String(viewingApp.id), agentId, extraParams },
       {
         onSuccess: (result) => {
           setAiAnalysisResult(result.data.analysis);
@@ -726,9 +755,59 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                         {viewingApp.type === "issue_log" && "Menghasilkan daftar isu aktif & histori berdasarkan data Otak Proyek. Mencakup prioritas isu, status, dan rekomendasi langkah selanjutnya."}
                         {viewingApp.type === "action_tracker" && "Menghasilkan daftar tindak lanjut berdasarkan isu dan keputusan di Otak Proyek. Mencakup aksi, PIC, due date, dan status."}
                         {viewingApp.type === "change_log" && "Menganalisis perubahan desain/metode/scope dari data Otak Proyek. Mencakup dampak dan kebutuhan approval."}
+                        {viewingApp.type === "nib_status_report" && "Menghasilkan dokumen ringkasan status NIB (OSS) 1-halaman dari data Otak Proyek. Termasuk header, status terkini, timeline, dan langkah berikutnya."}
                       </p>
                       <p className="text-xs text-muted-foreground">Pastikan ada Otak Proyek yang aktif sebelum menjalankan.</p>
                     </div>
+
+                    {viewingApp.type === "nib_status_report" && (
+                      <div className="space-y-3 border rounded-md p-4 bg-background">
+                        <p className="text-sm font-medium">Parameter Dokumen</p>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Audiens</Label>
+                          <Select
+                            value={nibParams.audience}
+                            onValueChange={(v) => setNibParams({ ...nibParams, audience: v as "Internal" | "Klien" })}
+                          >
+                            <SelectTrigger className="h-8 text-sm" data-testid="select-nib-audience">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Internal">Internal — detail teknis + saran lengkap</SelectItem>
+                              <SelectItem value="Klien">Klien — ringkas, sopan, fokus tindakan klien</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Nada Bahasa</Label>
+                          <Select
+                            value={nibParams.tone}
+                            onValueChange={(v) => setNibParams({ ...nibParams, tone: v as "Profesional" | "Formal" | "Ramah" })}
+                          >
+                            <SelectTrigger className="h-8 text-sm" data-testid="select-nib-tone">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Profesional">Profesional</SelectItem>
+                              <SelectItem value="Formal">Formal</SelectItem>
+                              <SelectItem value="Ramah">Ramah</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Catatan khusus (opsional)</Label>
+                          <Textarea
+                            value={nibParams.note_to_recipient}
+                            onChange={(e) => setNibParams({ ...nibParams, note_to_recipient: e.target.value })}
+                            placeholder="Contoh: Mohon perhatian untuk jadwal yang mepet…"
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-nib-note"
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     <Button
                       onClick={handleRunAIMiniApp}
                       disabled={runAIMiniApp.isPending}
@@ -738,18 +817,35 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       {runAIMiniApp.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Menganalisis...
+                          Membuat dokumen...
                         </>
                       ) : (
                         <>
                           <Play className="w-4 h-4 mr-2" />
-                          Jalankan Analisis AI
+                          {viewingApp.type === "nib_status_report" ? "Generate Ringkasan NIB" : "Jalankan Analisis AI"}
                         </>
                       )}
                     </Button>
                     {aiAnalysisResult && (
-                      <div className="bg-muted/30 border rounded-md p-4 space-y-2">
-                        <h4 className="text-sm font-medium">Hasil Analisis</h4>
+                      <div className="bg-muted/30 border rounded-md p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium">
+                            {viewingApp.type === "nib_status_report" ? "Dokumen Ringkasan NIB" : "Hasil Analisis"}
+                          </h4>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(aiAnalysisResult);
+                              setResultCopied(true);
+                              setTimeout(() => setResultCopied(false), 2000);
+                            }}
+                            data-testid="button-copy-result"
+                          >
+                            {resultCopied ? <CheckCheck className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                            <span className="ml-1 text-xs">{resultCopied ? "Disalin!" : "Salin"}</span>
+                          </Button>
+                        </div>
                         <div className="text-sm whitespace-pre-wrap leading-relaxed">
                           {aiAnalysisResult}
                         </div>

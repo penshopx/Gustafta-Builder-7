@@ -4122,9 +4122,10 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
+      const extraParams = req.body && typeof req.body === "object" ? req.body as Record<string, any> : {};
 
       const agentId = String(miniApp.agentId);
       const activeInstance = await storage.getActiveProjectBrainInstance(agentId);
@@ -4388,6 +4389,55 @@ Next Steps:
 - Specific, ordered action plan for the first 30 days
 
 Be practical, specific, and commercially aware. Link recommendations to available products/services when relevant.`;
+      } else if (appType === "nib_status_report") {
+        const audience = extraParams.audience || "Internal";
+        const tone = extraParams.tone || "Profesional";
+        const noteToRecipient = extraParams.note_to_recipient ? `\n\nCatatan Khusus: ${extraParams.note_to_recipient}` : "";
+
+        modePrompt = `Kamu adalah AI asisten administrasi perizinan konstruksi Indonesia. Buat RINGKASAN STATUS NIB (OSS) dalam format dokumen 1 halaman yang rapi berdasarkan data Otak Proyek di bawah.
+
+Audiens: ${audience}
+Nada Bahasa: ${tone}${noteToRecipient}
+
+ATURAN KETAT (anti-halusinasi):
+- Hanya gunakan data yang tersedia di Otak Proyek. JANGAN menambahkan tahapan/tanggal/informasi yang tidak ada.
+- Jika suatu field tidak tersedia, tulis: "Belum tercantum di OSS"
+- Jangan menebak tanggal. Jika tidak ada, tulis "Belum tercantum"
+- Maksimal 5 poin timeline, maksimal 3 langkah berikutnya.
+- Jika field "timeline_summary" kosong: tampilkan peringatan "[PERHATIAN: Belum ada timeline. Jalankan Action 'Ambil Status + Timeline' dulu.]"
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RINGKASAN STATUS NIB (OSS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HEADER
+Klien      : [client_name atau "Belum tercantum"]
+Proyek     : [project_name atau "Belum tercantum"]
+Nomor NIB  : [nib_number atau "Belum tercantum"]
+Terakhir dicek: [last_checked_date atau "Belum tercantum"]
+
+STATUS SAAT INI
+Tahap saat ini : [process_stage atau "Belum tercantum"]
+Status umum    : [process_status atau "Belum tercantum"]
+Update terakhir: [latest_update atau "Belum ada update"]
+
+TIMELINE TAHAPAN (dari OSS)
+[Ringkas timeline_summary menjadi 3–5 poin bullet. Jika kosong, tampilkan peringatan di atas.]
+• [poin 1]
+• [poin 2]
+• [dst.]
+
+LANGKAH BERIKUTNYA
+${audience === "Internal" ? `[Berikan 1–3 langkah teknis operasional. Jika next_action tersedia, gunakan itu sebagai dasar. Jika tidak, sarankan berdasarkan status & timeline. Jika status "Menunggu", sarankan "tunggu & cek ulang" atau "siapkan dokumen jika diminta". Jika ada indikasi "Blocked/Revisi", sarankan tindakan follow-up.]` : `[Versi ringkas & sopan untuk klien. Fokus pada apa yang perlu KLIEN lakukan (mis. dokumen kurang, dokumen perlu dilengkapi). Maksimal 2–3 poin. Hindari jargon teknis.]`}
+1. [langkah 1]
+2. [langkah 2]
+3. [langkah 3 — opsional]
+${extraParams.note_to_recipient ? `\nCATATAN KHUSUS\n${extraParams.note_to_recipient}` : ""}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Gunakan nada ${tone.toLowerCase()}. Buat dokumen ini siap digunakan langsung — tidak perlu penjelasan tambahan di luar format.`;
       }
 
       const agent = await storage.getAgent(agentId);
@@ -4396,11 +4446,15 @@ Be practical, specific, and commercially aware. Link recommendations to availabl
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [
         {
           role: "system",
-          content: `${modePrompt}\n\nRespons dalam bahasa ${language}.`
+          content: appType === "nib_status_report"
+            ? modePrompt
+            : `${modePrompt}\n\nRespons dalam bahasa ${language}.`
         },
         {
           role: "user",
-          content: `Here is the project data:\n\n${projectBrainBlock}${configBlock}\n\nPlease generate the analysis now. Follow the configuration rules and focus areas if provided.`
+          content: appType === "nib_status_report"
+            ? `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`
+            : `Here is the project data:\n\n${projectBrainBlock}${configBlock}\n\nPlease generate the analysis now. Follow the configuration rules and focus areas if provided.`
         }
       ];
 
