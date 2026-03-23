@@ -964,6 +964,22 @@ export class DatabaseStorage implements IStorage {
       imageHookPrompts: (row.imageHookPrompts as any[]) || [],
       videoReelPrompts: (row.videoReelPrompts as any[]) || [],
       metaPixelId: row.metaPixelId || "",
+      // Atentif Agentic AI — Multi-Agent Architecture
+      agentRole: (row as any).agentRole || "Standalone",
+      workMode: (row as any).workMode || "Answer Mode",
+      executionGatePolicy: (row as any).executionGatePolicy || "Konfirmasi untuk write",
+      clarificationTriggers: ((row as any).clarificationTriggers as string[]) || ["Output target tidak jelas", "Risiko salah tinggi", "Butuh data spesifik untuk eksekusi"],
+      // Tujuan & KPI
+      primaryOutcome: (row as any).primaryOutcome || "",
+      conversationWinConditions: (row as any).conversationWinConditions || "",
+      fallbackObjective: (row as any).fallbackObjective || "Kumpulkan data untuk tindak lanjut",
+      // Kebijakan & Domain Charter
+      brandVoiceSpec: (row as any).brandVoiceSpec || "",
+      reasoningPolicy: (row as any).reasoningPolicy || "Langkah demi langkah",
+      interactionPolicy: (row as any).interactionPolicy || "",
+      domainCharter: (row as any).domainCharter || "",
+      qualityBar: (row as any).qualityBar || "",
+      riskCompliance: (row as any).riskCompliance || "",
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };

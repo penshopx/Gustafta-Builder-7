@@ -26,6 +26,8 @@ import {
   Layers,
   HelpCircle,
   RefreshCcw,
+  Network,
+  Lock,
 } from "lucide-react";
 
 type Settings = {
@@ -52,6 +54,11 @@ type Settings = {
   adaptiveLearningMode: string;
   storeInteractionSignals: boolean;
   sourcePriority: string[];
+  // Multi-Agent Architecture fields
+  agentRole: string;
+  workMode: string;
+  executionGatePolicy: string;
+  clarificationTriggers: string[];
 };
 
 const PRESET_DEFAULTS: Record<string, Partial<Settings>> = {
@@ -144,6 +151,10 @@ const DEFAULT_SETTINGS: Settings = {
   adaptiveLearningMode: "Off",
   storeInteractionSignals: false,
   sourcePriority: ["System Prompt", "Knowledge Engine", "Riwayat percakapan", "Mini Apps", "Integrations", "Sumber eksternal"],
+  agentRole: "Standalone",
+  workMode: "Answer Mode",
+  executionGatePolicy: "Konfirmasi untuk write",
+  clarificationTriggers: ["Output target tidak jelas", "Risiko salah tinggi", "Butuh data spesifik untuk eksekusi"],
 };
 
 function MultiSelectField({
@@ -473,6 +484,10 @@ export function AgenticAIPanel() {
         adaptiveLearningMode: (agent as any).adaptiveLearningMode || "Off",
         storeInteractionSignals: (agent as any).storeInteractionSignals ?? false,
         sourcePriority: (agent as any).sourcePriority || ["System Prompt", "Knowledge Engine", "Riwayat percakapan", "Mini Apps", "Integrations", "Sumber eksternal"],
+        agentRole: (agent as any).agentRole || "Standalone",
+        workMode: (agent as any).workMode || "Answer Mode",
+        executionGatePolicy: (agent as any).executionGatePolicy || "Konfirmasi untuk write",
+        clarificationTriggers: (agent as any).clarificationTriggers || ["Output target tidak jelas", "Risiko salah tinggi", "Butuh data spesifik untuk eksekusi"],
       });
     }
   }, [agent]);
@@ -638,6 +653,91 @@ export function AgenticAIPanel() {
         )}
       </Card>
 
+      {/* 3b. Peran & Mode Kerja */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Network className="h-4 w-4 text-cyan-500" />
+            Peran & Mode Kerja
+          </CardTitle>
+          <CardDescription>Tentukan peran agen dalam sistem multi-agent dan mode operasinya.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <SelectRow
+            label="Peran Agen"
+            helper="Posisi agen dalam ekosistem multi-agent."
+            value={settings.agentRole}
+            onChange={(v) => save({ agentRole: v })}
+            options={[
+              "Standalone",
+              "Orchestrator",
+              "Spesialis: Clarifier",
+              "Spesialis: Knowledge Curator",
+              "Spesialis: Compliance",
+              "Spesialis: Copywriter",
+              "Spesialis: Data Analyst",
+              "Spesialis: Executor",
+            ]}
+            dataTestId="select-agent-role"
+          />
+          <div className="border-t pt-4">
+            <SelectRow
+              label="Mode Kerja"
+              helper="Mode operasi aktif agen saat ini."
+              value={settings.workMode}
+              onChange={(v) => save({ workMode: v })}
+              options={[
+                "Answer Mode",
+                "Advisor Mode",
+                "Task Intake Mode",
+                "Execution Mode",
+                "Review Mode",
+              ]}
+              dataTestId="select-work-mode"
+            />
+            <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
+              {[
+                { mode: "Answer Mode", desc: "Jawab cepat berbasis KB." },
+                { mode: "Advisor Mode", desc: "Beri opsi + tradeoff." },
+                { mode: "Task Intake Mode", desc: "Kumpulkan requirement tugas." },
+                { mode: "Execution Mode", desc: "Jalankan tool dan laporkan hasil." },
+                { mode: "Review Mode", desc: "Verifikasi dan minta persetujuan." },
+              ].map(({ mode, desc }) => (
+                <div
+                  key={mode}
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded ${settings.workMode === mode ? "bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 font-medium" : ""}`}
+                >
+                  <span className="shrink-0">·</span>
+                  <span className="font-medium">{mode}:</span>
+                  <span>{desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {isAdvanced && (
+            <div className="border-t pt-4">
+              <SelectRow
+                label="Gerbang Eksekusi (OpenClaw)"
+                helper="Level konfirmasi sebelum AI melakukan tindakan."
+                value={settings.executionGatePolicy}
+                onChange={(v) => save({ executionGatePolicy: v })}
+                options={[
+                  "Hanya baca (tanpa konfirmasi)",
+                  "Konfirmasi untuk write",
+                  "Konfirmasi ganda untuk destructive",
+                ]}
+                dataTestId="select-execution-gate-policy"
+              />
+              <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1"><Lock className="h-3 w-3 text-green-500" /><span>Hanya baca: ambil data, rangkum — bebas tanpa konfirmasi.</span></div>
+                <div className="flex items-center gap-1"><Lock className="h-3 w-3 text-yellow-500" /><span>Write: buat dokumen, update sistem — butuh konfirmasi 1×.</span></div>
+                <div className="flex items-center gap-1"><Lock className="h-3 w-3 text-red-500" /><span>Destructive: hapus, publish, kirim massal — konfirmasi ganda.</span></div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* 4. Kualitas Respons */}
       <Card>
         <CardHeader className="pb-3">
@@ -727,6 +827,24 @@ export function AgenticAIPanel() {
               dataTestId="toggle-show-risk-warnings"
             />
           </div>
+          {isAdvanced && (
+            <div className="border-t pt-4">
+              <MultiSelectField
+                label="Pemicu Klarifikasi"
+                helper="Kondisi yang membuat AI otomatis meminta klarifikasi."
+                options={[
+                  "Output target tidak jelas",
+                  "Risiko salah tinggi",
+                  "Butuh data spesifik untuk eksekusi",
+                  "Pertanyaan ambigu / multi-tafsir",
+                  "Informasi pengguna tampak bertentangan",
+                ]}
+                value={settings.clarificationTriggers}
+                onChange={(v) => save({ clarificationTriggers: v })}
+                dataTestId="multiselect-clarification-triggers"
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -90,6 +90,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     fileSize: 0,
     fileType: undefined as string | undefined,
     fileUrl: "",
+    knowledgeLayer: "operational" as "foundational" | "operational" | "case_memory",
   });
   const [editItem, setEditItem] = useState({
     name: "",
@@ -99,6 +100,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     fileSize: 0,
     fileType: undefined as string | undefined,
     fileUrl: "",
+    knowledgeLayer: "operational" as "foundational" | "operational" | "case_memory",
   });
 
   const filteredItems = knowledgeBases.filter(
@@ -191,6 +193,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         fileUrl: newItem.fileUrl,
         processingStatus: "completed" as const,
         extractedText: "",
+        knowledgeLayer: newItem.knowledgeLayer,
       },
       {
         onSuccess: () => {
@@ -208,6 +211,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             fileSize: 0,
             fileType: undefined,
             fileUrl: "",
+            knowledgeLayer: "operational",
           });
         },
         onError: (error: any) => {
@@ -246,6 +250,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       fileSize: item.fileSize || 0,
       fileType: item.fileType,
       fileUrl: item.fileUrl || "",
+      knowledgeLayer: ((item as any).knowledgeLayer || "operational") as "foundational" | "operational" | "case_memory",
     });
     setEditDialogOpen(true);
   };
@@ -332,6 +337,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           fileSize: editItem.fileSize,
           fileType: editItem.fileType as any,
           fileUrl: editItem.fileUrl,
+          knowledgeLayer: editItem.knowledgeLayer,
         },
       },
       {
@@ -430,6 +436,23 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     <SelectItem value="url">URL Website</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="kb-layer">Lapisan Knowledge</Label>
+                <Select
+                  value={newItem.knowledgeLayer}
+                  onValueChange={(v) => setNewItem({ ...newItem, knowledgeLayer: v as "foundational" | "operational" | "case_memory" })}
+                >
+                  <SelectTrigger id="kb-layer" data-testid="select-new-knowledge-layer">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="foundational">Foundational — dokumen dasar & referensi tetap</SelectItem>
+                    <SelectItem value="operational">Operational — SOP harian & prosedur aktif</SelectItem>
+                    <SelectItem value="case_memory">Case Memory — histori kasus & preseden</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Tentukan di lapisan mana dokumen ini berada dalam hierarki knowledge agen.</p>
               </div>
               
               {newItem.type === "file" ? (
@@ -772,6 +795,20 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                             </Badge>
                           )}
                           {(() => {
+                            const layer = (item as any).knowledgeLayer || "operational";
+                            const layerConfig: Record<string, { label: string; className: string }> = {
+                              foundational: { label: "Foundational", className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800" },
+                              operational: { label: "Operational", className: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800" },
+                              case_memory: { label: "Case Memory", className: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800" },
+                            };
+                            const cfg = layerConfig[layer] || layerConfig.operational;
+                            return (
+                              <Badge variant="outline" className={`shrink-0 text-xs ${cfg.className}`} data-testid={`badge-layer-${item.id}`}>
+                                {cfg.label}
+                              </Badge>
+                            );
+                          })()}
+                          {(() => {
                             const kbStat = ragStats?.chunksByKb?.find(s => s.kbId === item.id);
                             if (!kbStat) return null;
                             if (item.processingStatus === "processing" || kbStat.processingStatus === "processing") {
@@ -924,6 +961,22 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 placeholder="Deskripsi singkat"
                
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-kb-layer">Lapisan Knowledge</Label>
+              <Select
+                value={editItem.knowledgeLayer}
+                onValueChange={(v) => setEditItem({ ...editItem, knowledgeLayer: v as "foundational" | "operational" | "case_memory" })}
+              >
+                <SelectTrigger id="edit-kb-layer" data-testid="select-edit-knowledge-layer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="foundational">Foundational — dokumen dasar & referensi tetap</SelectItem>
+                  <SelectItem value="operational">Operational — SOP harian & prosedur aktif</SelectItem>
+                  <SelectItem value="case_memory">Case Memory — histori kasus & preseden</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {editingItem?.type === "text" && (
               <div className="space-y-2">

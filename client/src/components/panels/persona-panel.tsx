@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, GripVertical, Trash2 } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, GripVertical, Trash2, Target, BookOpen, Scale, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -67,6 +67,17 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     isPublic: agent.isPublic || false,
     allowedDomains: agent.allowedDomains || [],
     contextQuestions: (agent as any).contextQuestions || [],
+    // Tujuan & KPI
+    primaryOutcome: (agent as any).primaryOutcome || "",
+    conversationWinConditions: (agent as any).conversationWinConditions || "",
+    fallbackObjective: (agent as any).fallbackObjective || "Kumpulkan data untuk tindak lanjut",
+    // Kebijakan Agen
+    brandVoiceSpec: (agent as any).brandVoiceSpec || "",
+    reasoningPolicy: (agent as any).reasoningPolicy || "Langkah demi langkah",
+    interactionPolicy: (agent as any).interactionPolicy || "",
+    domainCharter: (agent as any).domainCharter || "",
+    qualityBar: (agent as any).qualityBar || "",
+    riskCompliance: (agent as any).riskCompliance || "",
   });
 
   const [newStarter, setNewStarter] = useState("");
@@ -101,6 +112,15 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       isPublic: agent.isPublic || false,
       allowedDomains: agent.allowedDomains || [],
       contextQuestions: (agent as any).contextQuestions || [],
+      primaryOutcome: (agent as any).primaryOutcome || "",
+      conversationWinConditions: (agent as any).conversationWinConditions || "",
+      fallbackObjective: (agent as any).fallbackObjective || "Kumpulkan data untuk tindak lanjut",
+      brandVoiceSpec: (agent as any).brandVoiceSpec || "",
+      reasoningPolicy: (agent as any).reasoningPolicy || "Langkah demi langkah",
+      interactionPolicy: (agent as any).interactionPolicy || "",
+      domainCharter: (agent as any).domainCharter || "",
+      qualityBar: (agent as any).qualityBar || "",
+      riskCompliance: (agent as any).riskCompliance || "",
     });
   }, [agent]);
 
@@ -939,6 +959,193 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
                 </Button>
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tujuan & KPI */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Target className="w-5 h-5 text-emerald-500" />
+            Tujuan & KPI Agen
+          </CardTitle>
+          <CardDescription>Definisikan target keberhasilan dan respons fallback saat target tidak tercapai.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              Outcome Utama
+            </Label>
+            <p className="text-xs text-muted-foreground">Tujuan bisnis utama yang harus dicapai agen.</p>
+            <Select
+              value={formData.primaryOutcome}
+              onValueChange={(v) => {
+                setFormData({ ...formData, primaryOutcome: v });
+                autoSaveField("primaryOutcome", v);
+              }}
+            >
+              <SelectTrigger data-testid="select-primary-outcome">
+                <SelectValue placeholder="Pilih outcome utama…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Menyelesaikan tiket">Menyelesaikan tiket / dukungan pelanggan</SelectItem>
+                <SelectItem value="Menghasilkan dokumen">Menghasilkan dokumen / laporan</SelectItem>
+                <SelectItem value="Menutup penjualan">Menutup penjualan / konversi leads</SelectItem>
+                <SelectItem value="Mendidik pengguna">Mendidik & onboard pengguna</SelectItem>
+                <SelectItem value="Mengumpulkan data">Mengumpulkan data / requirement</SelectItem>
+                <SelectItem value="Audit & compliance">Audit & kepatuhan regulasi</SelectItem>
+                <SelectItem value="Lainnya">Lainnya</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Kondisi Percakapan Berhasil (Win Conditions)</Label>
+            <p className="text-xs text-muted-foreground">Deskripsikan kapan percakapan dianggap berhasil. Contoh: "Pengguna mendapatkan nomor RAB yang disetujui dan bisa diunduh."</p>
+            <Textarea
+              value={formData.conversationWinConditions}
+              onChange={(e) => setFormData({ ...formData, conversationWinConditions: e.target.value })}
+              onBlur={(e) => autoSaveField("conversationWinConditions", e.target.value)}
+              placeholder="Contoh: Pengguna menerima jawaban definitif dan tidak perlu eskalasi ke manusia…"
+              rows={3}
+              data-testid="textarea-win-conditions"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Fallback Objective</Label>
+            <p className="text-xs text-muted-foreground">Tindakan terbaik saat agen tidak bisa mencapai outcome utama.</p>
+            <Select
+              value={formData.fallbackObjective}
+              onValueChange={(v) => {
+                setFormData({ ...formData, fallbackObjective: v });
+                autoSaveField("fallbackObjective", v);
+              }}
+            >
+              <SelectTrigger data-testid="select-fallback-objective">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Kumpulkan data untuk tindak lanjut">Kumpulkan data untuk tindak lanjut</SelectItem>
+                <SelectItem value="Eskalasi ke manusia">Eskalasi ke manusia / supervisor</SelectItem>
+                <SelectItem value="Buat ringkasan">Buat ringkasan percakapan & simpan</SelectItem>
+                <SelectItem value="Berikan disclaimer">Berikan disclaimer & arahkan ke sumber resmi</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Kebijakan Agen */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-violet-500" />
+            Kebijakan Agen
+          </CardTitle>
+          <CardDescription>Aturan tetap yang tidak boleh diubah oleh pengguna — suara merek, batas domain, standar kualitas, dan kepatuhan.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 text-violet-500" />
+              Spesifikasi Brand Voice
+            </Label>
+            <p className="text-xs text-muted-foreground">Gaya bahasa, tingkat formalitas, dan karakter komunikasi yang harus dipertahankan.</p>
+            <Textarea
+              value={formData.brandVoiceSpec}
+              onChange={(e) => setFormData({ ...formData, brandVoiceSpec: e.target.value })}
+              onBlur={(e) => autoSaveField("brandVoiceSpec", e.target.value)}
+              placeholder="Contoh: Gunakan bahasa formal namun ramah. Hindari jargon teknis. Selalu gunakan sapaan 'Bapak/Ibu'. Nada: profesional, suportif, berbasis data…"
+              rows={3}
+              data-testid="textarea-brand-voice"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-violet-500" />
+              Kebijakan Penalaran (Reasoning Policy)
+            </Label>
+            <p className="text-xs text-muted-foreground">Cara agen menyajikan proses berpikirnya kepada pengguna.</p>
+            <Select
+              value={formData.reasoningPolicy}
+              onValueChange={(v) => {
+                setFormData({ ...formData, reasoningPolicy: v });
+                autoSaveField("reasoningPolicy", v);
+              }}
+            >
+              <SelectTrigger data-testid="select-reasoning-policy">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Ringkas">Ringkas — langsung ke jawaban akhir</SelectItem>
+                <SelectItem value="Langkah demi langkah">Langkah demi langkah — tampilkan proses</SelectItem>
+                <SelectItem value="Tanya klarifikasi">Tanya klarifikasi — validasi dulu sebelum menjawab</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Kebijakan Interaksi</Label>
+            <p className="text-xs text-muted-foreground">Aturan kapan agen bertanya balik vs. menyimpulkan sendiri.</p>
+            <Textarea
+              value={formData.interactionPolicy}
+              onChange={(e) => setFormData({ ...formData, interactionPolicy: e.target.value })}
+              onBlur={(e) => autoSaveField("interactionPolicy", e.target.value)}
+              placeholder="Contoh: Tanya kembali jika ada lebih dari satu interpretasi. Jangan bertanya lebih dari 2 hal sekaligus…"
+              rows={2}
+              data-testid="textarea-interaction-policy"
+            />
+          </div>
+
+          <div className="border-t pt-4 space-y-5">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Scale className="w-4 h-4 text-amber-500" />
+                Domain Charter
+              </Label>
+              <p className="text-xs text-muted-foreground">Topik dan tindakan yang boleh dan tidak boleh dilakukan agen.</p>
+              <Textarea
+                value={formData.domainCharter}
+                onChange={(e) => setFormData({ ...formData, domainCharter: e.target.value })}
+                onBlur={(e) => autoSaveField("domainCharter", e.target.value)}
+                placeholder="Contoh: Agen HANYA membahas topik konstruksi dan teknik sipil. Dilarang memberikan saran medis atau hukum. Dilarang membuat kontrak yang mengikat secara hukum…"
+                rows={3}
+                data-testid="textarea-domain-charter"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Quality Bar</Label>
+              <p className="text-xs text-muted-foreground">Standar minimum kualitas jawaban yang harus dipenuhi.</p>
+              <Textarea
+                value={formData.qualityBar}
+                onChange={(e) => setFormData({ ...formData, qualityBar: e.target.value })}
+                onBlur={(e) => autoSaveField("qualityBar", e.target.value)}
+                placeholder="Contoh: Setiap jawaban harus menyertakan referensi standar (SNI/PUPR). Jangan memberikan angka tanpa konteks. Jawaban > 3 paragraf wajib ada ringkasan…"
+                rows={2}
+                data-testid="textarea-quality-bar"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Shield className="w-4 h-4 text-red-500" />
+                Kepatuhan & Risiko
+              </Label>
+              <p className="text-xs text-muted-foreground">Aturan regulasi, disclaimer wajib, dan batasan risiko.</p>
+              <Textarea
+                value={formData.riskCompliance}
+                onChange={(e) => setFormData({ ...formData, riskCompliance: e.target.value })}
+                onBlur={(e) => autoSaveField("riskCompliance", e.target.value)}
+                placeholder="Contoh: Tambahkan disclaimer 'Konsultasikan dengan ahli bersertifikat' untuk semua saran struktural. Patuhi UU ITE. Jangan simpan data sensitif pengguna…"
+                rows={3}
+                data-testid="textarea-risk-compliance"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

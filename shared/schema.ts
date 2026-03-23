@@ -214,6 +214,22 @@ export const agents = pgTable("agents", {
   imageHookPrompts: jsonb("image_hook_prompts").default([]),
   videoReelPrompts: jsonb("video_reel_prompts").default([]),
   metaPixelId: text("meta_pixel_id").default(""),
+  // Atentif Agentic AI — Multi-Agent Architecture
+  agentRole: text("agent_role").default("Standalone"),
+  workMode: text("work_mode").default("Answer Mode"),
+  executionGatePolicy: text("execution_gate_policy").default("Konfirmasi untuk write"),
+  clarificationTriggers: jsonb("clarification_triggers").default(["Output target tidak jelas", "Risiko salah tinggi", "Butuh data spesifik untuk eksekusi"]),
+  // Tujuan & KPI
+  primaryOutcome: text("primary_outcome").default(""),
+  conversationWinConditions: text("conversation_win_conditions").default(""),
+  fallbackObjective: text("fallback_objective").default("Kumpulkan data untuk tindak lanjut"),
+  // Kebijakan & Domain Charter
+  brandVoiceSpec: text("brand_voice_spec").default(""),
+  reasoningPolicy: text("reasoning_policy").default("Langkah demi langkah"),
+  interactionPolicy: text("interaction_policy").default(""),
+  domainCharter: text("domain_charter").default(""),
+  qualityBar: text("quality_bar").default(""),
+  riskCompliance: text("risk_compliance").default(""),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -232,6 +248,7 @@ export const knowledgeBases = pgTable("knowledge_bases", {
   fileUrl: text("file_url").default(""),
   processingStatus: text("processing_status").default("completed"),
   extractedText: text("extracted_text").default(""),
+  knowledgeLayer: text("knowledge_layer").default("operational"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -737,6 +754,7 @@ export const insertKnowledgeBaseSchema = z.object({
   // Processing status
   processingStatus: z.enum(["pending", "processing", "completed", "failed"]).optional().default("completed"),
   extractedText: z.string().optional().default(""),
+  knowledgeLayer: z.enum(["foundational", "operational", "case_memory"]).optional().default("operational"),
 });
 
 export type InsertKnowledgeBase = z.infer<typeof insertKnowledgeBaseSchema>;
