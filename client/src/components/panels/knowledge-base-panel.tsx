@@ -125,9 +125,13 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
 
   // Notion import state
   const [notionImportOpen, setNotionImportOpen] = useState(false);
+  const [notionBrowseTab, setNotionBrowseTab] = useState<"browse" | "search">("browse");
   const [notionSearchQuery, setNotionSearchQuery] = useState("");
   const [notionPages, setNotionPages] = useState<Array<{ id: string; title: string; url: string; lastEdited: string }>>([]);
   const [notionSearchLoading, setNotionSearchLoading] = useState(false);
+  const [notionAllPages, setNotionAllPages] = useState<Array<{ id: string; title: string; url: string; lastEdited: string }>>([]);
+  const [notionBrowseLoading, setNotionBrowseLoading] = useState(false);
+  const [notionBrowseFilter, setNotionBrowseFilter] = useState("");
   const [notionImportingId, setNotionImportingId] = useState<string | null>(null);
   const [notionImportLayer, setNotionImportLayer] = useState<"foundational" | "operational" | "case_memory">("operational");
   const [newItem, setNewItem] = useState({
@@ -623,6 +627,31 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       toast({ title: "Error", description: e?.message || "Gagal mencari halaman Notion.", variant: "destructive" });
     } finally {
       setNotionSearchLoading(false);
+    }
+  };
+
+  const handleLoadAllNotionPages = async (force = false) => {
+    if (!force && notionAllPages.length > 0) return; // already loaded
+    setNotionBrowseLoading(true);
+    setNotionAllPages([]);
+    try {
+      const res = await apiRequest("GET", "/api/notion/pages");
+      const data = await res.json();
+      const pages = (data.results || []).map((p: any) => {
+        const titleProp = Object.values(p.properties || {}).find((v: any) => v.type === "title") as any;
+        const title = titleProp?.title?.map((t: any) => t.plain_text).join("") || "(Tanpa Judul)";
+        return {
+          id: p.id,
+          title,
+          url: p.url || "",
+          lastEdited: p.last_edited_time ? new Date(p.last_edited_time).toLocaleDateString("id-ID") : "",
+        };
+      });
+      setNotionAllPages(pages);
+    } catch (e: any) {
+      toast({ title: "Error", description: "Gagal memuat daftar halaman Notion.", variant: "destructive" });
+    } finally {
+      setNotionBrowseLoading(false);
     }
   };
 
@@ -1327,7 +1356,17 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={notionImportOpen} onOpenChange={setNotionImportOpen}>
+          <Dialog open={notionImportOpen} onOpenChange={(open) => {
+            setNotionImportOpen(open);
+            if (open) {
+              setNotionBrowseTab("browse");
+              handleLoadAllNotionPages();
+            } else {
+              setNotionPages([]);
+              setNotionSearchQuery("");
+              setNotionBrowseFilter("");
+            }
+          }}>
             <DialogTrigger asChild>
               <Button variant="outline" disabled={agent.ragEnabled === false} data-testid="button-import-notion">
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
@@ -1345,22 +1384,30 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   Import Halaman dari Notion
                 </DialogTitle>
                 <DialogDescription>
-                  Cari halaman Notion lalu impor kontennya sebagai Knowledge Base agen.
+                  Pilih halaman dari workspace Notion Anda untuk diimpor ke Knowledge Base agen.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-2">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Cari halaman Notion..."
-                    value={notionSearchQuery}
-                    onChange={(e) => setNotionSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleNotionSearch()}
-                    data-testid="input-notion-search"
-                  />
-                  <Button onClick={handleNotionSearch} disabled={notionSearchLoading} data-testid="button-notion-search">
-                    {notionSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                  </Button>
+
+                {/* Tab switcher */}
+                <div className="flex rounded-lg border p-1 gap-1 bg-muted/40">
+                  <button
+                    onClick={() => setNotionBrowseTab("browse")}
+                    data-testid="tab-notion-browse"
+                    className={`flex-1 text-sm py-1.5 rounded-md transition-all font-medium ${notionBrowseTab === "browse" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Semua Halaman
+                  </button>
+                  <button
+                    onClick={() => setNotionBrowseTab("search")}
+                    data-testid="tab-notion-search"
+                    className={`flex-1 text-sm py-1.5 rounded-md transition-all font-medium ${notionBrowseTab === "search" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    Cari
+                  </button>
                 </div>
+
+                {/* Layer selector — shared across both tabs */}
                 <div className="space-y-2">
                   <Label>Lapisan Knowledge untuk import ini</Label>
                   <Select
@@ -1377,7 +1424,8 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     </SelectContent>
                   </Select>
                 </div>
-                {/* AI Enhancement option */}
+
+                {/* AI Enhancement option — shared */}
                 <div className="rounded-lg border p-3 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
@@ -1403,56 +1451,150 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                   )}
                 </div>
 
-                {notionSearchLoading && (
-                  <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span className="text-sm">Mencari di Notion...</span>
+                {/* ── BROWSE TAB ── */}
+                {notionBrowseTab === "browse" && (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Filter halaman..."
+                          value={notionBrowseFilter}
+                          onChange={(e) => setNotionBrowseFilter(e.target.value)}
+                          className="pl-9"
+                          data-testid="input-notion-browse-filter"
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleLoadAllNotionPages(true)}
+                        disabled={notionBrowseLoading}
+                        title="Muat ulang daftar halaman"
+                        data-testid="button-notion-refresh"
+                      >
+                        {notionBrowseLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                    {notionBrowseLoading && (
+                      <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="text-sm">Memuat halaman dari Notion...</span>
+                      </div>
+                    )}
+                    {!notionBrowseLoading && (() => {
+                      const filtered = notionAllPages.filter(p =>
+                        p.title.toLowerCase().includes(notionBrowseFilter.toLowerCase())
+                      );
+                      return filtered.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded-lg">
+                          {notionBrowseFilter ? "Tidak ada halaman yang cocok." : "Workspace Notion kosong atau belum terhubung."}
+                        </p>
+                      ) : (
+                        <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                          {notionBrowseFilter === "" && (
+                            <p className="text-xs text-muted-foreground px-1 pb-1">{notionAllPages.length} halaman ditemukan</p>
+                          )}
+                          {filtered.map((page) => (
+                            <div key={page.id} className="flex items-center justify-between gap-3 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{page.title}</p>
+                                {page.lastEdited && (
+                                  <p className="text-xs text-muted-foreground">{page.lastEdited}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {page.url && (
+                                  <a href={page.url} target="_blank" rel="noopener noreferrer">
+                                    <Button variant="ghost" size="icon" className="w-7 h-7" data-testid={`button-notion-open-${page.id}`}>
+                                      <ExternalLink className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </a>
+                                )}
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleNotionImportPage(page)}
+                                  disabled={notionImportingId === page.id || createKnowledgeBase.isPending}
+                                  data-testid={`button-notion-import-${page.id}`}
+                                >
+                                  {notionImportingId === page.id ? (
+                                    <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />Mengimpor...</>
+                                  ) : "Import"}
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
-                {!notionSearchLoading && notionPages.length === 0 && notionSearchQuery && (
-                  <p className="text-sm text-muted-foreground text-center py-4">Tidak ada halaman ditemukan. Coba kata kunci lain.</p>
-                )}
-                {!notionSearchLoading && notionPages.length === 0 && !notionSearchQuery && (
-                  <p className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded-lg">Ketik kata kunci lalu tekan Enter atau klik ikon cari.</p>
-                )}
-                {notionPages.length > 0 && (
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {notionPages.map((page) => (
-                      <div key={page.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{page.title || "(Tanpa Judul)"}</p>
-                          {page.lastEdited && (
-                            <p className="text-xs text-muted-foreground">Terakhir diubah: {page.lastEdited}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          {page.url && (
-                            <a href={page.url} target="_blank" rel="noopener noreferrer">
-                              <Button variant="ghost" size="icon" className="w-7 h-7" data-testid={`button-notion-open-${page.id}`}>
-                                <ExternalLink className="w-3.5 h-3.5" />
-                              </Button>
-                            </a>
-                          )}
-                          <Button
-                            size="sm"
-                            onClick={() => handleNotionImportPage(page)}
-                            disabled={notionImportingId === page.id || createKnowledgeBase.isPending}
-                            data-testid={`button-notion-import-${page.id}`}
-                          >
-                            {notionImportingId === page.id ? (
-                              <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />Mengimpor...</>
-                            ) : (
-                              "Import"
-                            )}
-                          </Button>
-                        </div>
+
+                {/* ── SEARCH TAB ── */}
+                {notionBrowseTab === "search" && (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Cari halaman Notion..."
+                        value={notionSearchQuery}
+                        onChange={(e) => setNotionSearchQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleNotionSearch()}
+                        data-testid="input-notion-search"
+                      />
+                      <Button onClick={handleNotionSearch} disabled={notionSearchLoading} data-testid="button-notion-search">
+                        {notionSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                    {notionSearchLoading && (
+                      <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="text-sm">Mencari di Notion...</span>
                       </div>
-                    ))}
+                    )}
+                    {!notionSearchLoading && notionPages.length === 0 && notionSearchQuery && (
+                      <p className="text-sm text-muted-foreground text-center py-4">Tidak ada halaman ditemukan. Coba kata kunci lain.</p>
+                    )}
+                    {!notionSearchLoading && notionPages.length === 0 && !notionSearchQuery && (
+                      <p className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded-lg">Ketik kata kunci lalu tekan Enter atau klik ikon cari.</p>
+                    )}
+                    {notionPages.length > 0 && (
+                      <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                        {notionPages.map((page) => (
+                          <div key={page.id} className="flex items-center justify-between gap-3 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{page.title || "(Tanpa Judul)"}</p>
+                              {page.lastEdited && (
+                                <p className="text-xs text-muted-foreground">Terakhir diubah: {page.lastEdited}</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {page.url && (
+                                <a href={page.url} target="_blank" rel="noopener noreferrer">
+                                  <Button variant="ghost" size="icon" className="w-7 h-7" data-testid={`button-notion-open-${page.id}`}>
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </Button>
+                                </a>
+                              )}
+                              <Button
+                                size="sm"
+                                onClick={() => handleNotionImportPage(page)}
+                                disabled={notionImportingId === page.id || createKnowledgeBase.isPending}
+                                data-testid={`button-notion-import-${page.id}`}
+                              >
+                                {notionImportingId === page.id ? (
+                                  <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />Mengimpor...</>
+                                ) : "Import"}
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => { setNotionImportOpen(false); setNotionPages([]); setNotionSearchQuery(""); }}>
+                <Button variant="outline" onClick={() => setNotionImportOpen(false)}>
                   Tutup
                 </Button>
               </DialogFooter>
