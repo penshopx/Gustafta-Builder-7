@@ -25,6 +25,15 @@ import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import { processAttachmentsAndUrls, type FileAttachment } from "./lib/file-processing";
 import { processKnowledgeBaseForRAG, searchKnowledgeBase } from "./lib/rag-service";
+import {
+  searchNotionPages,
+  searchNotionDatabases,
+  getNotionWorkspacePages,
+  extractNotionPageContent,
+  getNotionPage,
+  getNotionPageTitle,
+  createNotionPage,
+} from "./notion";
 
 const guestMessageTracker = new Map<string, { count: number; lastReset: string }>();
 
@@ -5861,6 +5870,68 @@ Return JSON format:
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch landing page" });
+    }
+  });
+
+  // ─── Notion Integration Routes ────────────────────────────────────────────
+  // Search Notion pages
+  app.post("/api/notion/search", isAuthenticated, async (req, res) => {
+    try {
+      const { query = "", type = "page" } = req.body;
+      const result = type === "database"
+        ? await searchNotionDatabases(query)
+        : await searchNotionPages(query);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Notion search error:", error);
+      res.status(500).json({ error: "Gagal mencari halaman Notion: " + (error?.message || "Unknown error") });
+    }
+  });
+
+  // List all accessible Notion pages (for picker)
+  app.get("/api/notion/pages", isAuthenticated, async (req, res) => {
+    try {
+      const result = await getNotionWorkspacePages();
+      res.json(result);
+    } catch (error: any) {
+      console.error("Notion pages error:", error);
+      res.status(500).json({ error: "Gagal memuat halaman Notion: " + (error?.message || "Unknown error") });
+    }
+  });
+
+  // Get full text content of a Notion page (for KB import)
+  app.get("/api/notion/page/:pageId/content", isAuthenticated, async (req, res) => {
+    try {
+      const { pageId } = req.params;
+      const [page, content] = await Promise.all([
+        getNotionPage(pageId),
+        extractNotionPageContent(pageId),
+      ]);
+      const title = getNotionPageTitle(page);
+      const url = (page as any).url || `https://notion.so/${pageId.replace(/-/g, "")}`;
+      res.json({ title, content, url, pageId });
+    } catch (error: any) {
+      console.error("Notion page content error:", error);
+      res.status(500).json({ error: "Gagal mengambil konten halaman Notion: " + (error?.message || "Unknown error") });
+    }
+  });
+
+  // Export content to a new Notion page
+  app.post("/api/notion/export", isAuthenticated, async (req, res) => {
+    try {
+      const { parentPageId, title, content } = req.body;
+      if (!parentPageId || !title || !content) {
+        return res.status(400).json({ error: "parentPageId, title, dan content wajib diisi" });
+      }
+      const result = await createNotionPage(parentPageId, title, content);
+      res.json({
+        success: true,
+        pageId: (result as any).id,
+        url: (result as any).url || `https://notion.so/${((result as any).id || "").replace(/-/g, "")}`,
+      });
+    } catch (error: any) {
+      console.error("Notion export error:", error);
+      res.status(500).json({ error: "Gagal mengekspor ke Notion: " + (error?.message || "Unknown error") });
     }
   });
 

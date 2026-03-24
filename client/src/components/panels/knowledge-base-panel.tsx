@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2, Settings2, RotateCcw, Power } from "lucide-react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2, Settings2, RotateCcw, Power, ExternalLink } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -81,6 +82,14 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<KnowledgeBase | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Notion import state
+  const [notionImportOpen, setNotionImportOpen] = useState(false);
+  const [notionSearchQuery, setNotionSearchQuery] = useState("");
+  const [notionPages, setNotionPages] = useState<Array<{ id: string; title: string; url: string; lastEdited: string }>>([]);
+  const [notionSearchLoading, setNotionSearchLoading] = useState(false);
+  const [notionImportingId, setNotionImportingId] = useState<string | null>(null);
+  const [notionImportLayer, setNotionImportLayer] = useState<"foundational" | "operational" | "case_memory">("operational");
   const [newItem, setNewItem] = useState({
     name: "",
     type: "text" as "text" | "file" | "url",
@@ -368,6 +377,64 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  const handleNotionSearch = async () => {
+    setNotionSearchLoading(true);
+    try {
+      const res = await apiRequest("POST", "/api/notion/search", {
+        query: notionSearchQuery,
+        type: "page",
+      });
+      const data = await res.json();
+      const pages = (data.results || []).map((p: any) => {
+        const titleProp = Object.values(p.properties || {}).find((v: any) => v.type === "title") as any;
+        const title = titleProp?.title?.map((t: any) => t.plain_text).join("") || p.id;
+        return {
+          id: p.id,
+          title,
+          url: p.url || "",
+          lastEdited: p.last_edited_time ? new Date(p.last_edited_time).toLocaleDateString("id-ID") : "",
+        };
+      });
+      setNotionPages(pages);
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "Gagal mencari halaman Notion.", variant: "destructive" });
+    } finally {
+      setNotionSearchLoading(false);
+    }
+  };
+
+  const handleNotionImportPage = async (page: { id: string; title: string; url: string }) => {
+    setNotionImportingId(page.id);
+    try {
+      const res = await apiRequest("GET", `/api/notion/page/${page.id}/content`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      createKnowledgeBase.mutate(
+        {
+          agentId: agent.id,
+          name: data.title || page.title,
+          type: "text",
+          content: data.content || "(konten kosong)",
+          description: `Import dari Notion — ${page.url}`,
+          knowledgeLayer: notionImportLayer,
+        },
+        {
+          onSuccess: () => {
+            toast({ title: "Berhasil Diimpor", description: `Halaman "${data.title || page.title}" berhasil ditambahkan ke Knowledge Base.` });
+            setNotionImportingId(null);
+          },
+          onError: () => {
+            toast({ title: "Error", description: "Gagal menyimpan konten Notion ke Knowledge Base.", variant: "destructive" });
+            setNotionImportingId(null);
+          },
+        }
+      );
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "Gagal mengambil konten halaman Notion.", variant: "destructive" });
+      setNotionImportingId(null);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
@@ -394,6 +461,112 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
               {agent.ragEnabled !== false ? "Aktif" : "Nonaktif"}
             </Badge>
           </div>
+          <Dialog open={notionImportOpen} onOpenChange={setNotionImportOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" disabled={agent.ragEnabled === false} data-testid="button-import-notion">
+                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"/>
+                </svg>
+                Import dari Notion
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"/>
+                  </svg>
+                  Import Halaman dari Notion
+                </DialogTitle>
+                <DialogDescription>
+                  Cari halaman Notion lalu impor kontennya sebagai Knowledge Base agen.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Cari halaman Notion..."
+                    value={notionSearchQuery}
+                    onChange={(e) => setNotionSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleNotionSearch()}
+                    data-testid="input-notion-search"
+                  />
+                  <Button onClick={handleNotionSearch} disabled={notionSearchLoading} data-testid="button-notion-search">
+                    {notionSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  <Label>Lapisan Knowledge untuk import ini</Label>
+                  <Select
+                    value={notionImportLayer}
+                    onValueChange={(v) => setNotionImportLayer(v as "foundational" | "operational" | "case_memory")}
+                  >
+                    <SelectTrigger data-testid="select-notion-import-layer">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="foundational">Foundational — dokumen dasar & referensi tetap</SelectItem>
+                      <SelectItem value="operational">Operational — SOP harian & prosedur aktif</SelectItem>
+                      <SelectItem value="case_memory">Case Memory — histori kasus & preseden</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {notionSearchLoading && (
+                  <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span className="text-sm">Mencari di Notion...</span>
+                  </div>
+                )}
+                {!notionSearchLoading && notionPages.length === 0 && notionSearchQuery && (
+                  <p className="text-sm text-muted-foreground text-center py-4">Tidak ada halaman ditemukan. Coba kata kunci lain.</p>
+                )}
+                {!notionSearchLoading && notionPages.length === 0 && !notionSearchQuery && (
+                  <p className="text-sm text-muted-foreground text-center py-4 border border-dashed rounded-lg">Ketik kata kunci lalu tekan Enter atau klik ikon cari.</p>
+                )}
+                {notionPages.length > 0 && (
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {notionPages.map((page) => (
+                      <div key={page.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{page.title || "(Tanpa Judul)"}</p>
+                          {page.lastEdited && (
+                            <p className="text-xs text-muted-foreground">Terakhir diubah: {page.lastEdited}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {page.url && (
+                            <a href={page.url} target="_blank" rel="noopener noreferrer">
+                              <Button variant="ghost" size="icon" className="w-7 h-7" data-testid={`button-notion-open-${page.id}`}>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </Button>
+                            </a>
+                          )}
+                          <Button
+                            size="sm"
+                            onClick={() => handleNotionImportPage(page)}
+                            disabled={notionImportingId === page.id || createKnowledgeBase.isPending}
+                            data-testid={`button-notion-import-${page.id}`}
+                          >
+                            {notionImportingId === page.id ? (
+                              <><Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />Mengimpor...</>
+                            ) : (
+                              "Import"
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setNotionImportOpen(false); setNotionPages([]); setNotionSearchQuery(""); }}>
+                  Tutup
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button disabled={agent.ragEnabled === false}>
