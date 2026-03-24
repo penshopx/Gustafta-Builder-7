@@ -241,6 +241,7 @@ export default function TenderWizardPage() {
   const [tenderProfile, setTenderProfile] = useState({
     packageName: "", institution: "", location: "",
     deadline: "", hpsValue: "", qualification: "Non-Kecil", evaluationMethod: "",
+    jenisKonstruksi: "", sumberDana: "APBD", tahunAnggaran: "",
   });
   const [requirements, setRequirements] = useState({
     qualificationReqs: "", personnelReqs: "", experienceReqs: "",
@@ -250,6 +251,7 @@ export default function TenderWizardPage() {
     packType === "pelaksana_konstruksi" ? {
       understanding: "", executionMethod: "", schedule: "",
       qualityPlan: "", smkkPlan: "", risks: "",
+      alatBerat: "", materialUtama: "", subkon: "",
     } : {
       understanding: "", methodology: "", teamOrg: "",
       workSchedule: "", qaQcPlan: "", smkkMentoring: "", risks: "",
@@ -923,6 +925,38 @@ export default function TenderWizardPage() {
                 <Label className="flex items-center">Metode Evaluasi <AutoBadge field="evaluationMethod" /></Label>
                 <Input value={tenderProfile.evaluationMethod} onChange={e => setTenderProfile(p => ({ ...p, evaluationMethod: e.target.value }))} placeholder="Harga terendah / Kualitas-Harga / dll" />
               </div>
+
+              {/* Detail tambahan */}
+              {packType === "pelaksana_konstruksi" && (
+                <>
+                  <div className="col-span-2 space-y-1.5">
+                    <Label>Jenis Konstruksi</Label>
+                    <Select value={tenderProfile.jenisKonstruksi} onValueChange={v => setTenderProfile(p => ({ ...p, jenisKonstruksi: v }))}>
+                      <SelectTrigger><SelectValue placeholder="Pilih jenis pekerjaan..." /></SelectTrigger>
+                      <SelectContent>
+                        {["Gedung / Bangunan", "Jalan Raya / Jalan Lingkungan", "Jembatan", "Irigasi / Drainase", "Fasilitas Umum / Taman Kota", "Dermaga / Pelabuhan", "Bendungan / Waduk", "Lainnya"].map(j => (
+                          <SelectItem key={j} value={j}>{j}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Sumber Dana</Label>
+                    <Select value={tenderProfile.sumberDana} onValueChange={v => setTenderProfile(p => ({ ...p, sumberDana: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {["APBD", "APBN", "DAK", "DBH", "Hibah", "BUMN/BUMD", "Swasta/KPBU"].map(s => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Tahun Anggaran</Label>
+                    <Input value={tenderProfile.tahunAnggaran} onChange={e => setTenderProfile(p => ({ ...p, tahunAnggaran: e.target.value }))} placeholder="2025" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -1080,9 +1114,24 @@ export default function TenderWizardPage() {
                 <TextareaField label="Rencana SMKK / K3 *" helper="Wajib untuk semua paket konstruksi. Minimal 5 poin."
                   value={(technicalApproach as any).smkkPlan} onChange={v => setTechnicalApproach(p => ({ ...p, smkkPlan: v }))}
                   placeholder="1. Toolbox meeting setiap pagi sebelum kerja\n2. Inspeksi K3 mingguan oleh Petugas K3\n3. APD wajib semua pekerja: helm, sepatu, rompi\n4. JSA (Job Safety Analysis) per pekerjaan berisiko tinggi\n5. Emergency response plan..." />
-                <TextareaField label="Risiko & Mitigasi" helper="Minimal 3 risiko + mitigasi."
+                <TextareaField label="Risiko & Mitigasi" helper="Minimal 3 risiko + mitigasi spesifik."
                   value={(technicalApproach as any).risks} onChange={v => setTechnicalApproach(p => ({ ...p, risks: v }))}
                   placeholder="1. Risiko cuaca buruk → Jadwal buffer 10% + protective cover\n2. Risiko keterlambatan material → Vendor list cadangan + stok minimum\n3. Risiko konflik sosial → Koordinasi dengan RT/RW setempat..." />
+
+                <Separator />
+                <p className="text-sm font-semibold text-muted-foreground">Sumber Daya & Subkontrak</p>
+
+                <TextareaField label="Alat Berat / Peralatan Utama" helper="Daftar alat yang akan digunakan + status kepemilikan."
+                  value={(technicalApproach as any).alatBerat} onChange={v => setTechnicalApproach(p => ({ ...p, alatBerat: v }))}
+                  placeholder="1. Excavator 0.8 m³ — milik sendiri\n2. Concrete pump — sewa jangka panjang\n3. Scaffolding sistem — milik sendiri (1.500 m²)\n4. Truck mixer — sewa per volume..." />
+
+                <TextareaField label="Material Utama & Vendor" helper="Material kritis + rencana pengadaan."
+                  value={(technicalApproach as any).materialUtama} onChange={v => setTechnicalApproach(p => ({ ...p, materialUtama: v }))}
+                  placeholder="1. Beton ready-mix fc'30 — PT Holcim / Wika Beton (kontrak tahunan)\n2. Baja tulangan BJTS 420 — distributor resmi SNI\n3. Keramik/granit — PT Arwana (approved supplier)..." />
+
+                <TextareaField label="Rencana Subkontrak (opsional)" helper="Jika ada bagian pekerjaan yang disubkonkan (maks 30% nilai kontrak per Perpres 46/2025)."
+                  value={(technicalApproach as any).subkon} onChange={v => setTechnicalApproach(p => ({ ...p, subkon: v }))}
+                  placeholder="1. Pekerjaan MEP (M/E/P) → PT Elektra Jaya (maks 15% nilai kontrak)\n2. Pekerjaan waterproofing → spesialis berpengalaman\nCatatan: semua subkon harus persetujuan PPK..." />
               </>
             ) : (
               <>
@@ -1193,6 +1242,22 @@ export default function TenderWizardPage() {
               </div>
             ) : generateResult ? (
               <div className="space-y-8">
+
+                {/* Executive Summary */}
+                {generateResult.executiveSummary && (
+                  <Card className={`border-2 ${meta.color === "blue" ? "border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20" : "border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20"}`}>
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <Sparkles className={`h-5 w-5 shrink-0 mt-0.5 ${meta.color === "blue" ? "text-blue-600" : "text-purple-600"}`} />
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Ringkasan Eksekutif</p>
+                          <p className="text-sm leading-relaxed">{generateResult.executiveSummary}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Score dashboard */}
                 {(generateResult.scoreKelengkapan != null || generateResult.scoreTeknis != null) && (
                   <div>
@@ -1212,17 +1277,55 @@ export default function TenderWizardPage() {
                   </div>
                 )}
 
+                {/* Prioritas Tindakan */}
+                {generateResult.prioritasTindakan && generateResult.prioritasTindakan.length > 0 && (
+                  <div>
+                    <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-orange-500" /> Prioritas Tindakan
+                    </h3>
+                    <div className="space-y-2">
+                      {generateResult.prioritasTindakan.map((item: any, i: number) => (
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
+                            i === 0 ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
+                            i === 1 ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" :
+                            i === 2 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" :
+                            "bg-muted text-muted-foreground"
+                          }`}>
+                            {item.urutan || i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium leading-snug">{item.tindakan}</p>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              {item.kategori && (
+                                <Badge variant="outline" className="text-[10px] py-0">{item.kategori}</Badge>
+                              )}
+                              {item.estimasiWaktu && (
+                                <span className="text-xs text-muted-foreground">{item.estimasiWaktu}</span>
+                              )}
+                              {item.penanggungjawab && (
+                                <span className="text-xs text-muted-foreground">· {item.penanggungjawab}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Checklist */}
                 {generateResult.checklist && generateResult.checklist.length > 0 && (
                   <div>
-                    <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                    <Separator />
+                    <h3 className="text-base font-semibold mb-4 mt-4 flex items-center gap-2">
                       <CheckSquare className="h-4 w-4" /> Checklist Kelengkapan
                     </h3>
                     <ChecklistTable items={generateResult.checklist} />
                   </div>
                 )}
 
-                {/* Gap Analysis - v1.2 */}
+                {/* Gap Analysis */}
                 {generateResult.gapAnalysis && generateResult.gapAnalysis.length > 0 && (
                   <div>
                     <Separator />
@@ -1231,10 +1334,29 @@ export default function TenderWizardPage() {
                     </h3>
                     <div className="space-y-2">
                       {generateResult.gapAnalysis.map((gap: any, i: number) => (
-                        <div key={i} className="p-3 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10">
-                          <p className="text-sm font-medium">{gap.item}</p>
+                        <div key={i} className={`p-3 rounded-lg border-l-4 ${
+                          gap.priority === "tinggi" ? "border-red-400 bg-red-50 dark:bg-red-900/10" :
+                          gap.priority === "sedang" ? "border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10" :
+                          "border-muted-foreground/30 bg-muted/30"
+                        }`}>
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <p className="text-sm font-medium">{gap.item}</p>
+                            {gap.priority && (
+                              <Badge variant="outline" className={`text-[10px] py-0 shrink-0 ${
+                                gap.priority === "tinggi" ? "border-red-400 text-red-700" :
+                                gap.priority === "sedang" ? "border-yellow-400 text-yellow-700" :
+                                "text-muted-foreground"
+                              }`}>{gap.priority}</Badge>
+                            )}
+                          </div>
+                          {gap.kondisiPerusahaan && (
+                            <p className="text-xs text-muted-foreground mt-1"><span className="font-medium">Kondisi saat ini:</span> {gap.kondisiPerusahaan}</p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-1"><span className="font-medium">Gap:</span> {gap.gap}</p>
-                          <p className="text-xs text-muted-foreground"><span className="font-medium">Tindakan:</span> {gap.action}</p>
+                          <p className="text-xs text-muted-foreground mt-1"><span className="font-medium">Tindakan:</span> {gap.action}</p>
+                          {gap.deadline && (
+                            <p className="text-xs text-muted-foreground mt-1"><span className="font-medium">Target:</span> {gap.deadline}</p>
+                          )}
                         </div>
                       ))}
                     </div>

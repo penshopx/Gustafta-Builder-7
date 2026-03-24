@@ -4753,55 +4753,150 @@ Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapang
 
       const isPelaksana = packType === "pelaksana_konstruksi";
       const scoringWeights = isPelaksana
-        ? "Bobot skor: Administrasi 30%, Kualifikasi 30%, Teknis 20%, SMKK/K3 10%, Kepatuhan Perpres 46/2025 10%."
-        : "Bobot skor: Administrasi 20%, Kualifikasi 25%, Teknis 35%, SMKK pendampingan 10%, Kepatuhan 10%.";
+        ? "Bobot skor kelengkapan: A-Administrasi 30%, B-Kualifikasi/SBU 30%, C-Teknis/Pengalaman 20%, E-SMKK/K3 10%, F-Kepatuhan Perpres 46/2025 10%."
+        : "Bobot skor kelengkapan: A-Administrasi 20%, B-Kualifikasi/SKA 25%, C-Teknis/Metodologi 35%, E-SMKK Pendampingan 10%, F-Kepatuhan 10%.";
 
-      const systemPrompt = `Kamu adalah AI spesialis pengadaan barang/jasa pemerintah Indonesia, khususnya tender konstruksi LPSE.
+      const checklistGuide = isPelaksana ? `
+CHECKLIST WAJIB untuk Pelaksana Konstruksi (minimal items per bagian):
+A. Administrasi (min. 8 item):
+  A1. Surat Penawaran bermaterai — wajib sesuai format LKPBJ
+  A2. Pakta Integritas bermaterai — Pasal 7 Perpres 46/2025
+  A3. Surat Pernyataan Kebenaran Dokumen bermaterai
+  A4. NIB (Nomor Induk Berusaha) — valid, kode KBLI sesuai
+  A5. NPWP Perusahaan + status aktif (tidak kena sanksi pajak)
+  A6. Akta Pendirian Perusahaan + Perubahan terakhir (jika ada)
+  A7. Surat Keputusan Kemenkumham
+  A8. Surat Kuasa (jika penandatangan bukan direktur)
+  A9. Surat Referensi/Dukungan Bank (jika disyaratkan)
+
+B. Kualifikasi & SBU (min. 6 item):
+  B1. SBU valid — kode sub-bidang sesuai pekerjaan, masa berlaku tidak habis
+  B2. Kualifikasi usaha sesuai (Kecil/Non-Kecil/Besar) sesuai HPS
+  B3. SBU sub-bidang spesifik (BG009/SI001/SI002/dll) sesuai dokumen pemilihan
+  B4. ISO 9001 (jika disyaratkan oleh dokumen)
+  B5. Daftar peralatan perusahaan (form isian LKPBJ)
+  B6. Neraca perusahaan / laporan keuangan terakhir (jika disyaratkan)
+
+C. Teknis & Pengalaman (min. 7 item):
+  C1. Daftar pengalaman pekerjaan 10 tahun terakhir (form sesuai LKPBJ)
+  C2. Kontrak + BAST pekerjaan sejenis (nilai ≥ syarat minimum)
+  C3. Metode Pelaksanaan — wajib ada, detail per tahap
+  C4. Jadwal Pelaksanaan (Bar Chart / Kurva-S)
+  C5. Daftar Personel Inti + SKA/SKT + KTP + CV
+  C6. PKS atau surat penugasan personel
+  C7. Daftar Alat Berat / Peralatan Utama (kepemilikan/sewa)
+  C8. Rencana Subkontrak (jika ada bagian yang disubkonkan)
+
+D. Harga & Jaminan (min. 4 item):
+  D1. Surat Penawaran Harga — total penawaran
+  D2. Rekapitulasi RAB (Rencana Anggaran Biaya)
+  D3. Jaminan Penawaran — dari bank/perusahaan asuransi, nilai ≥1% HPS, berlaku min 60 hari
+  D4. Analisa Harga Satuan (jika disyaratkan)
+
+E. SMKK/K3 (min. 5 item, wajib per Permen PUPR 10/2021):
+  E1. RKK (Rencana Keselamatan Konstruksi) — format sesuai Permen PUPR 10/2021
+  E2. Struktur Organisasi SMKK + nama personel K3
+  E3. Petugas K3 bersertifikat (AK3U / SKT K3 Konstruksi) — sesuai risiko pekerjaan
+  E4. Identifikasi Bahaya & Risiko (IBPR) per jenis pekerjaan
+  E5. Rencana APD, rambu K3, dan safety net
+
+F. Kepatuhan Perpres 46/2025 (min. 4 item):
+  F1. Pernyataan tidak konflik kepentingan — Pasal 10 Perpres 46/2025
+  F2. Pernyataan tidak masuk daftar hitam — Pasal 11 Perpres 46/2025
+  F3. Pernyataan anti-penyuapan/gratifikasi — Pasal 12 Perpres 46/2025
+  F4. Pernyataan TKDN (Tingkat Komponen Dalam Negeri) — jika disyaratkan` : `
+CHECKLIST WAJIB untuk Konsultansi MK (minimal items per bagian):
+A. Administrasi (min. 6 item): Penawaran administrasi, Pakta Integritas, NIB, NPWP, Akta, Surat Kuasa
+B. Kualifikasi SKA (min. 5 item): SKA Team Leader (min. Ahli Madya), SKA per tenaga ahli, CV + referensi, PKS penugasan, portofolio sejenis
+C. Teknis & Metodologi (min. 8 item): Proposal Teknis, Metodologi per bidang pengendalian (mutu/waktu/biaya/K3/dokumen), Struktur Organisasi Tim, Jadwal Penugasan, Deliverable list, Laporan progress, QA/QC plan, Pendampingan SMKK
+D. Biaya (min. 3 item): Penawaran biaya, Rincian biaya langsung (remuneration), Biaya non-personel
+E. SMKK Pendampingan (min. 4 item): RKK pendampingan, Rencana coaching toolbox meeting, Template laporan K3, Prosedur penanganan NCR
+F. Kepatuhan (min. 4 item): Pakta integritas, Anti-blacklist, Anti-penyuapan, TKDN`;
+
+      const draftGuide = isPelaksana ? `
+PANDUAN DRAFT DOKUMEN (setiap draft harus minimal 400 kata, profesional, siap pakai):
+- surat_penawaran: Format surat resmi perusahaan. Wajib ada: kop surat, nomor surat, tanggal, perihal, kepada (Pokja/PPK), paragraf pembuka (pernyataan penawaran), nilai penawaran dalam angka DAN huruf, masa berlaku penawaran (min. 60 hari), penutup, tanda tangan direktur. Cantumkan nama paket dan instansi.
+- metode_pelaksanaan: Minimal 6 tahap kerja dengan deskripsi detail per tahap. Sertakan: tahap persiapan & mobilisasi, pekerjaan struktur, pekerjaan arsitektur/finishing, MEP (jika relevan), pengujian & commissioning, demobilisasi & serah terima. Setiap tahap: uraian kegiatan, metode kerja, alat yang digunakan, estimasi durasi.
+- rencana_smkk: Format RKK sesuai Permen PUPR No. 10/2021 Lampiran I. Wajib ada: kebijakan K3 perusahaan, identifikasi bahaya per pekerjaan (IBPR), rencana pengendalian risiko (hierarki: eliminasi → substitusi → rekayasa → administrasi → APD), program K3 (toolbox meeting harian, inspeksi mingguan, P3K, APD), struktur organisasi SMKK, prosedur keadaan darurat.
+- pernyataan_kepatuhan: Surat pernyataan formal bermaterai. Satu surat untuk semua pernyataan: tidak konflik kepentingan (Pasal 10), tidak blacklist (Pasal 11), anti-penyuapan/gratifikasi (Pasal 12 Perpres 46/2025). Format: kop, nomor, tanggal, identitas penandatangan, 3-4 butir pernyataan bernomor, kalimat penutup, materai 10.000, tanda tangan + nama + jabatan.` : `
+PANDUAN DRAFT DOKUMEN Konsultansi MK (setiap draft minimal 400 kata):
+- surat_penawaran: Surat penawaran administrasi formal dengan nilai penawaran (remuneration + non-personel), masa berlaku, dan nama proyek yang diawasi.
+- proposal_teknis: Metodologi lengkap per bidang pengendalian MK (mutu, waktu, biaya, K3, dokumen), struktur tim, deliverable, jadwal penugasan. Sebutkan tools/software yang digunakan (MS Project, dll).
+- laporan_smkk: Template laporan pendampingan SMKK mingguan. Sertakan: ringkasan kegiatan K3, temuan & NCR, status CAPA, foto dokumentasi (placeholder), rekomendasi minggu depan.
+- pernyataan_kepatuhan: Pernyataan integritas bermaterai sesuai Perpres 46/2025.`;
+
+      const systemPrompt = `Kamu adalah konsultan senior pengadaan barang/jasa pemerintah Indonesia dengan spesialisasi tender konstruksi LPSE, berpengalaman 20+ tahun.
 Pack: Tender LPSE Assistant – ${packLabel}.
-Regulasi acuan: Perpres No. 46 Tahun 2025 (menggantikan Perpres 16/2018), Permen PUPR No. 10/2021 (SMKK), LKPP, format LPSE.
+Regulasi utama: Perpres No. 46 Tahun 2025 (ganti Perpres 16/2018), Permen PUPR No. 10/2021 (SMKK), Permen PUPR No. 8/2023 (SBU), Perka LKPP 12/2021, SNI yang relevan.
 ${scoringWeights}
 
-Tugas kamu: analisis mendalam data tender dan hasilkan:
-1. Checklist kelengkapan dokumen (kode A-F, status Ada/Belum/Perlu revisi, catatan regulasi)
-2. Gap Analysis: persyaratan vs kondisi perusahaan yang diberikan
-3. Risk & Compliance Review (Red/Yellow/Green) berdasarkan Perpres 46/2025
-4. Draft dokumen sesuai pilihan user
-5. Skor 0-100 untuk kelengkapan dan kesiapan teknis
+${checklistGuide}
 
-Aturan: no hallucination, kutip pasal/regulasi konkret jika ada.
-Checklist 6 bagian: A=Administrasi, B=Kualifikasi Usaha & SBU, C=Teknis & Pengalaman, D=Harga & Jaminan, E=SMKK/K3 (Permen PUPR 10/2021), F=Kepatuhan Perpres 46/2025.
-${isPelaksana ? "Untuk Pelaksana: cek SBU subklasifikasi (BG009/SI001/dll), pengalaman sejenis, SKA/SKT personel, RKK, Jaminan Penawaran." : "Untuk Konsultansi MK: cek SKA tenaga ahli, metodologi pengendalian mutu-waktu-biaya, pendampingan SMKK, proposal teknis modular."}`;
+${draftGuide}
 
-      const userPrompt = `DATA TENDER:
-Pack Type: ${packLabel}
-Profil Perusahaan: ${JSON.stringify(companyProfile || {}, null, 2)}
-Detail Tender: ${JSON.stringify(tenderProfile || {}, null, 2)}
-Persyaratan dari Dokumen Tender: ${JSON.stringify(requirements || {}, null, 2)}
-Strategi Teknis: ${JSON.stringify(technicalApproach || {}, null, 2)}
-Jawaban Kepatuhan: ${JSON.stringify(complianceAnswers || {}, null, 2)}
-Output yang diminta: ${(selectedOutputs || ["semua"]).join(", ")}
+ATURAN KERAS:
+- Checklist WAJIB memiliki minimal 30 item total (distribusi ke 6 bagian A-F)
+- Setiap item checklist HARUS memiliki "note" yang konkret (nama dokumen, pasal, atau tindakan)
+- Status checklist dinilai dari data yang diberikan: jika tidak ada informasi, status = "Belum"
+- Gap Analysis: bandingkan secara eksplisit kondisi perusahaan (dari data) vs persyaratan tender
+- Draft dokumen: WAJIB panjang, spesifik, dan menggunakan data nama perusahaan/tender yang diberikan
+- Risk Review: minimal 6 items, campuran red/yellow/green, dengan finding yang spesifik dan measurable
+- Prioritas Tindakan: 5 aksi paling mendesak yang harus dilakukan dalam waktu dekat sebelum deadline
+- Executive Summary: paragraf 4-5 kalimat yang memberi gambaran kesiapan tender secara keseluruhan`;
 
-Hasilkan output dalam format JSON berikut (semua field wajib ada):
+      const userPrompt = `DATA LENGKAP TENDER:
+=== PACK TYPE ===
+${packLabel}
+
+=== PROFIL PERUSAHAAN ===
+${JSON.stringify(companyProfile || {}, null, 2)}
+
+=== DETAIL TENDER ===
+${JSON.stringify(tenderProfile || {}, null, 2)}
+
+=== PERSYARATAN DARI DOKUMEN TENDER ===
+${JSON.stringify(requirements || {}, null, 2)}
+
+=== STRATEGI TEKNIS ===
+${JSON.stringify(technicalApproach || {}, null, 2)}
+
+=== JAWABAN KEPATUHAN ===
+${JSON.stringify(complianceAnswers || {}, null, 2)}
+
+=== OUTPUT YANG DIMINTA ===
+${(selectedOutputs || ["semua"]).join(", ")}
+
+Hasilkan output dalam format JSON yang SANGAT DETAIL dan LENGKAP berikut:
 {
-  "scoreKelengkapan": <0-100, integer>,
-  "scoreTeknis": <0-100, integer>,
+  "scoreKelengkapan": <0-100, integer, berdasarkan bobot per bagian>,
+  "scoreTeknis": <0-100, integer, berdasarkan kelengkapan strategi teknis>,
+  "executiveSummary": "paragraf 4-5 kalimat: kesimpulan kesiapan, kekuatan utama perusahaan, risiko terbesar, rekomendasi utama",
   "checklist": [
-    { "code": "A1", "section": "Administrasi", "item": "...", "status": "Ada|Belum|Perlu revisi", "note": "referensi regulasi/pasal jika ada" }
+    { "code": "A1", "section": "Administrasi", "item": "nama dokumen/persyaratan spesifik", "status": "Ada|Belum|Perlu revisi", "note": "nama dokumen lengkap / pasal regulasi / tindakan konkret" }
   ],
   "gapAnalysis": [
-    { "item": "nama persyaratan", "gap": "kondisi perusahaan vs yang disyaratkan", "action": "tindakan konkret yang perlu dilakukan", "priority": "tinggi|sedang|rendah" }
+    { "item": "nama persyaratan tender", "kondisiPerusahaan": "kondisi aktual dari data yang diberikan", "gap": "perbedaan/kekurangan spesifik", "action": "tindakan konkret dengan nama dokumen/langkah yang jelas", "priority": "tinggi|sedang|rendah", "deadline": "estimasi waktu penyelesaian" }
+  ],
+  "prioritasTindakan": [
+    { "urutan": 1, "tindakan": "aksi spesifik yang harus dilakukan", "kategori": "Administrasi|Kualifikasi|Teknis|SMKK|Kepatuhan", "estimasiWaktu": "x hari kerja", "penanggungjawab": "siapa yang harus mengerjakan" }
   ],
   "riskReview": [
-    { "level": "red|yellow|green", "finding": "temuan spesifik", "impact": "dampak jika tidak ditangani", "recommendation": "langkah konkret" }
+    { "level": "red|yellow|green", "finding": "temuan spesifik dengan data/angka jika ada", "impact": "dampak konkret jika tidak ditangani (gugur/risiko hukum/dll)", "recommendation": "langkah konkret dengan nama dokumen/regulasi" }
   ],
   "drafts": {
-    "surat_penawaran": "draft lengkap surat penawaran formal...",
-    "metode_pelaksanaan": "draft metode pelaksanaan/proposal teknis...",
-    "rencana_smkk": "draft rencana SMKK/RKK...",
-    "pernyataan_kepatuhan": "draft pernyataan kepatuhan Perpres 46/2025..."
+    "surat_penawaran": "draft surat penawaran LENGKAP dengan semua elemen formal...",
+    "metode_pelaksanaan": "draft metode pelaksanaan DETAIL 6+ tahap...",
+    "rencana_smkk": "draft RKK LENGKAP sesuai Permen PUPR 10/2021...",
+    "pernyataan_kepatuhan": "draft pernyataan LENGKAP bermaterai per Perpres 46/2025..."
   }
 }
-Catatan: hanya sertakan key dalam "drafts" yang diminta user di selectedOutputs. Untuk gapAnalysis, sertakan hanya jika ada gap nyata antara kondisi perusahaan vs persyaratan tender.`;
+
+PENTING: 
+- Gunakan nama perusahaan, nama paket, dan nama instansi dari data yang diberikan dalam semua draft dokumen
+- Checklist minimal 30 item, terdistribusi ke bagian A sampai F
+- Jika data tidak diberikan, buat draft dengan placeholder [NAMA_PERUSAHAAN], [NILAI_HPS], dll
+- Sertakan hanya key draft yang diminta dalam selectedOutputs
+- prioritasTindakan wajib ada 5 item, sorted dari paling mendesak`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -4809,8 +4904,8 @@ Catatan: hanya sertakan key dalam "drafts" yang diminta user di selectedOutputs.
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.2,
-        max_tokens: 8000,
+        temperature: 0.15,
+        max_tokens: 12000,
         response_format: { type: "json_object" },
       });
 
