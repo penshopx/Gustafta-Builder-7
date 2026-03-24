@@ -4751,44 +4751,57 @@ Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapang
         ? "Pelaksana Konstruksi (Gedung/Jalan)"
         : "Konsultansi Konstruksi – Manajemen Konstruksi (MK)";
 
+      const isPelaksana = packType === "pelaksana_konstruksi";
+      const scoringWeights = isPelaksana
+        ? "Bobot skor: Administrasi 30%, Kualifikasi 30%, Teknis 20%, SMKK/K3 10%, Kepatuhan Perpres 46/2025 10%."
+        : "Bobot skor: Administrasi 20%, Kualifikasi 25%, Teknis 35%, SMKK pendampingan 10%, Kepatuhan 10%.";
+
       const systemPrompt = `Kamu adalah AI spesialis pengadaan barang/jasa pemerintah Indonesia, khususnya tender konstruksi LPSE.
 Pack: Tender LPSE Assistant – ${packLabel}.
-Regulasi acuan: Perpres No. 46 Tahun 2025, LKPP, format LPSE.
-Tugas kamu: menganalisis data tender yang diberikan dan menghasilkan:
-1. Checklist kelengkapan dokumen (format JSON terstruktur dengan kode A1/B1/C1 dll, status Ada/Belum/Perlu revisi, catatan)
-2. Risk & Compliance Review (Red flag / Yellow flag / Green)
-3. Draft dokumen tender yang dipilih
-4. Skor kelengkapan (0–100) dan skor kesiapan teknis (0–100)
+Regulasi acuan: Perpres No. 46 Tahun 2025 (menggantikan Perpres 16/2018), Permen PUPR No. 10/2021 (SMKK), LKPP, format LPSE.
+${scoringWeights}
 
-Aturan: no hallucination, selalu kutip pasal/regulasi jika ada. Format output dalam JSON yang diminta.
-Untuk checklist gunakan 6 bagian: A=Administrasi, B=Kualifikasi, C=Teknis, D=Harga, E=SMKK/K3, F=Kepatuhan Perpres 46/2025.`;
+Tugas kamu: analisis mendalam data tender dan hasilkan:
+1. Checklist kelengkapan dokumen (kode A-F, status Ada/Belum/Perlu revisi, catatan regulasi)
+2. Gap Analysis: persyaratan vs kondisi perusahaan yang diberikan
+3. Risk & Compliance Review (Red/Yellow/Green) berdasarkan Perpres 46/2025
+4. Draft dokumen sesuai pilihan user
+5. Skor 0-100 untuk kelengkapan dan kesiapan teknis
+
+Aturan: no hallucination, kutip pasal/regulasi konkret jika ada.
+Checklist 6 bagian: A=Administrasi, B=Kualifikasi Usaha & SBU, C=Teknis & Pengalaman, D=Harga & Jaminan, E=SMKK/K3 (Permen PUPR 10/2021), F=Kepatuhan Perpres 46/2025.
+${isPelaksana ? "Untuk Pelaksana: cek SBU subklasifikasi (BG009/SI001/dll), pengalaman sejenis, SKA/SKT personel, RKK, Jaminan Penawaran." : "Untuk Konsultansi MK: cek SKA tenaga ahli, metodologi pengendalian mutu-waktu-biaya, pendampingan SMKK, proposal teknis modular."}`;
 
       const userPrompt = `DATA TENDER:
 Pack Type: ${packLabel}
 Profil Perusahaan: ${JSON.stringify(companyProfile || {}, null, 2)}
 Detail Tender: ${JSON.stringify(tenderProfile || {}, null, 2)}
-Persyaratan: ${JSON.stringify(requirements || {}, null, 2)}
+Persyaratan dari Dokumen Tender: ${JSON.stringify(requirements || {}, null, 2)}
 Strategi Teknis: ${JSON.stringify(technicalApproach || {}, null, 2)}
 Jawaban Kepatuhan: ${JSON.stringify(complianceAnswers || {}, null, 2)}
 Output yang diminta: ${(selectedOutputs || ["semua"]).join(", ")}
 
-Hasilkan output dalam format JSON berikut:
+Hasilkan output dalam format JSON berikut (semua field wajib ada):
 {
-  "scoreKelengkapan": <0-100>,
-  "scoreTeknis": <0-100>,
+  "scoreKelengkapan": <0-100, integer>,
+  "scoreTeknis": <0-100, integer>,
   "checklist": [
-    { "code": "A1", "section": "Administrasi", "item": "...", "status": "Ada|Belum|Perlu revisi", "note": "..." }
+    { "code": "A1", "section": "Administrasi", "item": "...", "status": "Ada|Belum|Perlu revisi", "note": "referensi regulasi/pasal jika ada" }
+  ],
+  "gapAnalysis": [
+    { "item": "nama persyaratan", "gap": "kondisi perusahaan vs yang disyaratkan", "action": "tindakan konkret yang perlu dilakukan", "priority": "tinggi|sedang|rendah" }
   ],
   "riskReview": [
-    { "level": "red|yellow|green", "finding": "...", "impact": "...", "recommendation": "..." }
+    { "level": "red|yellow|green", "finding": "temuan spesifik", "impact": "dampak jika tidak ditangani", "recommendation": "langkah konkret" }
   ],
   "drafts": {
-    "surat_penawaran": "...",
-    "metode_pelaksanaan": "...",
-    "rencana_smkk": "...",
-    "pernyataan_kepatuhan": "..."
+    "surat_penawaran": "draft lengkap surat penawaran formal...",
+    "metode_pelaksanaan": "draft metode pelaksanaan/proposal teknis...",
+    "rencana_smkk": "draft rencana SMKK/RKK...",
+    "pernyataan_kepatuhan": "draft pernyataan kepatuhan Perpres 46/2025..."
   }
-}`;
+}
+Catatan: hanya sertakan key dalam "drafts" yang diminta user di selectedOutputs. Untuk gapAnalysis, sertakan hanya jika ada gap nyata antara kondisi perusahaan vs persyaratan tender.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -4797,7 +4810,7 @@ Hasilkan output dalam format JSON berikut:
           { role: "user", content: userPrompt },
         ],
         temperature: 0.2,
-        max_tokens: 6000,
+        max_tokens: 8000,
         response_format: { type: "json_object" },
       });
 
@@ -4809,6 +4822,92 @@ Hasilkan output dalam format JSON berikut:
     } catch (error: any) {
       console.error("Tender wizard generation error:", error);
       res.status(500).json({ error: "Gagal generate output wizard: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ==================== Tender Document Auto-Extract ====================
+
+  const tenderDocUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      const allowed = ["application/pdf", "text/plain"];
+      if (allowed.includes(file.mimetype) || file.originalname.endsWith(".pdf") || file.originalname.endsWith(".txt")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Hanya file PDF atau TXT yang didukung"));
+      }
+    },
+  });
+
+  app.post("/api/ai/tender-extract", isAuthenticated, tenderDocUpload.single("document"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "File tidak ditemukan dalam upload" });
+      }
+
+      let rawText = "";
+
+      if (req.file.mimetype === "text/plain" || req.file.originalname.endsWith(".txt")) {
+        rawText = req.file.buffer.toString("utf-8");
+      } else {
+        // PDF parsing
+        const pdfParse = (await import("pdf-parse")).default;
+        const parsed = await pdfParse(req.file.buffer);
+        rawText = parsed.text || "";
+      }
+
+      if (!rawText || rawText.trim().length < 50) {
+        return res.status(422).json({ error: "Dokumen tidak dapat dibaca atau terlalu singkat. Pastikan PDF tidak terenkripsi." });
+      }
+
+      // Truncate if too long
+      const maxChars = 18000;
+      const truncated = rawText.length > maxChars ? rawText.slice(0, maxChars) + "\n[... dipotong untuk efisiensi ...]" : rawText;
+
+      const openai = new OpenAI();
+
+      const extractPrompt = `Kamu adalah AI spesialis pengadaan konstruksi LPSE Indonesia. 
+Berikut adalah isi teks dokumen tender (KAK/RKS/LDP/LKPBJ):
+
+${truncated}
+
+Tugas kamu: ekstrak informasi berikut dari dokumen dan kembalikan sebagai JSON.
+Jika informasi tidak ditemukan, isi dengan string kosong "".
+
+{
+  "packageName": "nama paket pekerjaan",
+  "institution": "nama instansi / satuan kerja / UKPBJ",
+  "location": "lokasi pekerjaan",
+  "deadline": "batas akhir pemasukan penawaran (format YYYY-MM-DD jika bisa, atau teks asli)",
+  "hpsValue": "nilai HPS atau pagu anggaran (beserta satuan, contoh: Rp 5.000.000.000)",
+  "qualification": "kualifikasi usaha: Kecil / Non-Kecil / Besar",
+  "evaluationMethod": "metode evaluasi: harga terendah / kualitas-harga / dll",
+  "packType": "pelaksana_konstruksi atau konsultansi_mk (pilih berdasarkan isi dokumen)",
+  "qualificationReqs": "persyaratan kualifikasi usaha, bidang/sub-bidang, SBU (narasi lengkap)",
+  "personnelReqs": "persyaratan personel inti: role, jumlah, sertifikat yang diminta",
+  "experienceReqs": "persyaratan pengalaman perusahaan: tahun, nilai, jenis pekerjaan",
+  "smkkReqs": "persyaratan SMKK / K3 / RKK / personel K3",
+  "bondReqs": "persyaratan jaminan penawaran, pelaksanaan, uang muka",
+  "summary": "ringkasan 2-3 kalimat tentang pekerjaan ini"
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: extractPrompt }],
+        temperature: 0.1,
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+      });
+
+      const raw = response.choices[0]?.message?.content || "{}";
+      let extracted: any = {};
+      try { extracted = JSON.parse(raw); } catch { extracted = { error: "Parse error" }; }
+
+      res.json({ ...extracted, charCount: rawText.length });
+    } catch (error: any) {
+      console.error("Tender extract error:", error);
+      res.status(500).json({ error: "Gagal mengekstrak dokumen: " + (error.message || "Unknown error") });
     }
   });
 

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useRef } from "react";
 import { useLocation, useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -18,12 +18,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CompanyProfile } from "@shared/schema";
 import {
   Building2, ClipboardList, CheckSquare, AlertTriangle, FileText,
-  ChevronRight, ChevronLeft, Sparkles, Loader2, Plus, Edit3,
+  ChevronRight, ChevronLeft, Sparkles, Loader2, Plus, Trash2,
   CheckCircle2, XCircle, AlertCircle, Copy, BarChart3, Shield, RotateCcw,
-  ArrowLeft
+  ArrowLeft, Upload, X, Wand2, Users, Briefcase, FileUp, Info,
 } from "lucide-react";
 
 type PackType = "pelaksana_konstruksi" | "konsultansi_mk";
+
+interface Experience { projectName: string; client: string; year: string; value: string; scope: string; }
+interface Personnel { role: string; name: string; certification: string; experience: string; }
 
 const PACK_META: Record<PackType, { label: string; icon: React.ReactNode; color: string; description: string }> = {
   pelaksana_konstruksi: {
@@ -63,19 +66,30 @@ function ScoreBadge({ score }: { score: number }) {
   const color = score >= 80 ? "text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400" :
     score >= 60 ? "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30 dark:text-yellow-400" :
     "text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400";
-  const label = score >= 80 ? "Green" : score >= 60 ? "Yellow" : "Red";
+  const label = score >= 80 ? "Siap" : score >= 60 ? "Perlu Persiapan" : "Risiko Tinggi";
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${color} font-semibold text-sm`}>
-      <span className="text-2xl font-bold">{score}</span>
-      <span className="text-xs opacity-80">/ 100 · {label}</span>
+    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${color} font-semibold text-sm`}>
+      <span className="text-3xl font-bold">{score}</span>
+      <div>
+        <p className="text-xs opacity-70">/ 100</p>
+        <p className="text-xs font-medium">{label}</p>
+      </div>
     </div>
   );
 }
 
 function ChecklistTable({ items }: { items: Array<{ code: string; section: string; item: string; status: string; note?: string }> }) {
   const sections = Array.from(new Set(items.map(i => i.section)));
+  const adaCount = items.filter(i => i.status === "Ada").length;
+  const total = items.length;
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> Ada: {adaCount}</span>
+        <span className="flex items-center gap-1.5"><AlertCircle className="h-3.5 w-3.5 text-yellow-600" /> Perlu revisi: {items.filter(i => i.status === "Perlu revisi").length}</span>
+        <span className="flex items-center gap-1.5"><XCircle className="h-3.5 w-3.5 text-muted-foreground" /> Belum: {items.filter(i => i.status === "Belum").length}</span>
+        <span className="ml-auto text-xs">{adaCount}/{total} terpenuhi</span>
+      </div>
       {sections.map(section => (
         <div key={section}>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{section}</p>
@@ -85,7 +99,7 @@ function ChecklistTable({ items }: { items: Array<{ code: string; section: strin
                 <span className="font-mono text-xs text-muted-foreground w-8 shrink-0 pt-0.5">{item.code}</span>
                 <div className="flex-1 min-w-0">
                   <p className="leading-snug">{item.item}</p>
-                  {item.note && <p className="text-xs text-muted-foreground mt-1">{item.note}</p>}
+                  {item.note && <p className="text-xs text-muted-foreground mt-1 italic">{item.note}</p>}
                 </div>
                 <div className="shrink-0">
                   {item.status === "Ada" ? (
@@ -129,7 +143,7 @@ function RiskCards({ items }: { items: Array<{ level: string; finding: string; i
             <span className={`text-xs font-bold uppercase ${
               item.level === "red" ? "text-red-700" : item.level === "yellow" ? "text-yellow-700" : "text-green-700"
             }`}>
-              {item.level === "red" ? "Red Flag" : item.level === "yellow" ? "Yellow Flag" : "Green"}
+              {item.level === "red" ? "Red Flag" : item.level === "yellow" ? "Yellow Flag" : "Siap"}
             </span>
           </div>
           <p className="text-sm font-medium mb-1">{item.finding}</p>
@@ -190,12 +204,16 @@ function DraftViewer({ drafts }: { drafts: Record<string, string> }) {
   );
 }
 
+const emptyExperience = (): Experience => ({ projectName: "", client: "", year: "", value: "", scope: "" });
+const emptyPersonnel = (): Personnel => ({ role: "", name: "", certification: "", experience: "" });
+
 export default function TenderWizardPage() {
   const params = useParams<{ packId: string }>();
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const packType: PackType = params.packId === "tender-konsultansi" ? "konsultansi_mk" : "pelaksana_konstruksi";
   const meta = PACK_META[packType];
@@ -206,11 +224,20 @@ export default function TenderWizardPage() {
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
   const [showNewProfile, setShowNewProfile] = useState(false);
 
-  // Form states
+  // ── v1.2: Structured company profile ──
   const [newProfile, setNewProfile] = useState({
     name: "", businessType: "PT", nib: "", nibStatus: "Ada",
     npwp: "", npwpStatus: "Ada", address: "", picName: "", picContact: "",
+    sbuCode: "", sbuScope: "", sbuQualification: "Non-Kecil",
   });
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [personnel, setPersonnel] = useState<Personnel[]>([]);
+  const [showAddExp, setShowAddExp] = useState(false);
+  const [showAddPersonnel, setShowAddPersonnel] = useState(false);
+  const [newExp, setNewExp] = useState<Experience>(emptyExperience());
+  const [newPersonnel, setNewPersonnel] = useState<Personnel>(emptyPersonnel());
+
+  // ── Tender & requirements ──
   const [tenderProfile, setTenderProfile] = useState({
     packageName: "", institution: "", location: "",
     deadline: "", hpsValue: "", qualification: "Non-Kecil", evaluationMethod: "",
@@ -235,6 +262,12 @@ export default function TenderWizardPage() {
 
   const [generateResult, setGenerateResult] = useState<any>(null);
 
+  // ── v2: Document extraction state ──
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [extractedSummary, setExtractedSummary] = useState<string>("");
+  const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
+  const [isDragging, setIsDragging] = useState(false);
+
   // Queries
   const profilesQ = useQuery<CompanyProfile[]>({
     queryKey: ["/api/company-profiles"],
@@ -257,13 +290,9 @@ export default function TenderWizardPage() {
   });
 
   const generateMut = useMutation({
-    mutationFn: async (payload: any) => {
-      const res = await apiRequest("POST", "/api/ai/tender-wizard", payload);
-      return res;
-    },
+    mutationFn: async (payload: any) => apiRequest("POST", "/api/ai/tender-wizard", payload),
     onSuccess: (data: any) => {
       setGenerateResult(data);
-      // Save result to session if we have one
       if (sessionId) {
         apiRequest("PATCH", `/api/tender-sessions/${sessionId}`, {
           status: "completed",
@@ -277,6 +306,51 @@ export default function TenderWizardPage() {
     },
     onError: () => {
       toast({ description: "Gagal generate output. Coba lagi.", variant: "destructive" });
+    },
+  });
+
+  // ── v2: Document extract mutation ──
+  const extractMut = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("document", file);
+      const res = await fetch("/api/ai/tender-extract", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Gagal ekstrak dokumen");
+      }
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      const filled = new Set<string>();
+      // Auto-fill tender profile
+      if (data.packageName) { setTenderProfile(p => ({ ...p, packageName: data.packageName })); filled.add("packageName"); }
+      if (data.institution) { setTenderProfile(p => ({ ...p, institution: data.institution })); filled.add("institution"); }
+      if (data.location) { setTenderProfile(p => ({ ...p, location: data.location })); filled.add("location"); }
+      if (data.deadline) { setTenderProfile(p => ({ ...p, deadline: data.deadline })); filled.add("deadline"); }
+      if (data.hpsValue) { setTenderProfile(p => ({ ...p, hpsValue: data.hpsValue })); filled.add("hpsValue"); }
+      if (data.qualification && ["Kecil", "Non-Kecil", "Besar"].includes(data.qualification)) {
+        setTenderProfile(p => ({ ...p, qualification: data.qualification })); filled.add("qualification");
+      }
+      if (data.evaluationMethod) { setTenderProfile(p => ({ ...p, evaluationMethod: data.evaluationMethod })); filled.add("evaluationMethod"); }
+      // Auto-fill requirements
+      if (data.qualificationReqs) { setRequirements(p => ({ ...p, qualificationReqs: data.qualificationReqs })); filled.add("qualificationReqs"); }
+      if (data.personnelReqs) { setRequirements(p => ({ ...p, personnelReqs: data.personnelReqs })); filled.add("personnelReqs"); }
+      if (data.experienceReqs) { setRequirements(p => ({ ...p, experienceReqs: data.experienceReqs })); filled.add("experienceReqs"); }
+      if (data.smkkReqs) { setRequirements(p => ({ ...p, smkkReqs: data.smkkReqs })); filled.add("smkkReqs"); }
+      if (data.bondReqs) { setRequirements(p => ({ ...p, bondReqs: data.bondReqs })); filled.add("bondReqs"); }
+      setAutoFilledFields(filled);
+      setExtractedSummary(data.summary || "");
+      toast({
+        description: `Berhasil mengekstrak ${filled.size} field dari dokumen. Data Tender & Persyaratan sudah diisi otomatis.`,
+      });
+    },
+    onError: (err: any) => {
+      toast({ description: err.message || "Gagal mengekstrak dokumen", variant: "destructive" });
     },
   });
 
@@ -302,7 +376,9 @@ export default function TenderWizardPage() {
     }
     generateMut.mutate({
       packType,
-      companyProfile: selectedProfile || newProfile,
+      companyProfile: selectedProfile
+        ? { ...selectedProfile, experiences, personnel }
+        : { ...newProfile, experiences, personnel },
       tenderProfile,
       requirements,
       technicalApproach,
@@ -312,14 +388,40 @@ export default function TenderWizardPage() {
     setStep(6);
   };
 
+  const handleFileSelect = (file: File) => {
+    if (!file.name.endsWith(".pdf") && !file.name.endsWith(".txt")) {
+      toast({ description: "Hanya file PDF atau TXT yang didukung", variant: "destructive" });
+      return;
+    }
+    setUploadedFile(file);
+    extractMut.mutate(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+  };
+
   const progress = Math.round((step / 6) * 100);
 
-  const TextareaField = ({ label, helper, value, onChange, placeholder }: {
+  const AutoBadge = ({ field }: { field: string }) =>
+    autoFilledFields.has(field) ? (
+      <Badge variant="secondary" className="text-[10px] py-0 gap-1 ml-2 text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400">
+        <Wand2 className="h-2.5 w-2.5" /> Auto
+      </Badge>
+    ) : null;
+
+  const TextareaField = ({ label, helper, value, onChange, placeholder, fieldKey }: {
     label: string; helper?: string; value: string;
-    onChange: (v: string) => void; placeholder?: string;
+    onChange: (v: string) => void; placeholder?: string; fieldKey?: string;
   }) => (
     <div className="space-y-1.5">
-      <Label className="text-sm font-medium">{label}</Label>
+      <Label className="text-sm font-medium flex items-center">
+        {label}
+        {fieldKey && <AutoBadge field={fieldKey} />}
+      </Label>
       {helper && <p className="text-xs text-muted-foreground">{helper}</p>}
       <Textarea
         value={value} onChange={e => onChange(e.target.value)}
@@ -342,7 +444,12 @@ export default function TenderWizardPage() {
               <span className={`text-xs font-semibold ${meta.color === "blue" ? "text-blue-600" : "text-purple-600"}`}>
                 {meta.label}
               </span>
-              <Badge variant="outline" className="text-xs font-normal py-0">Tender LPSE Assistant</Badge>
+              <Badge variant="outline" className="text-xs font-normal py-0">Tender LPSE Assistant v1.2</Badge>
+              {uploadedFile && (
+                <Badge variant="secondary" className="text-[10px] py-0 gap-1 text-green-700 bg-green-100 dark:bg-green-900/30">
+                  <FileUp className="h-2.5 w-2.5" /> {uploadedFile.name}
+                </Badge>
+              )}
             </div>
             <Progress value={progress} className="h-1.5 mt-1.5" />
           </div>
@@ -367,13 +474,30 @@ export default function TenderWizardPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
-        {/* ─── STEP 0: Pilih Output ────────────────────────────────────────────── */}
+
+        {/* ─── STEP 0: Pilih Output ── */}
         {step === 0 && (
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold mb-1">Selamat datang di Tender LPSE Wizard</h2>
               <p className="text-muted-foreground">{meta.description}</p>
             </div>
+
+            {/* v2 hint */}
+            <Card className="border-dashed border-primary/40 bg-primary/5">
+              <CardContent className="pt-4">
+                <div className="flex items-start gap-3 text-sm">
+                  <Wand2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-foreground mb-0.5">Upload dokumen tender untuk auto-extract</p>
+                    <p className="text-xs text-muted-foreground">
+                      Di Langkah 3 nanti, kamu bisa upload PDF dokumen tender (KAK/RKS/LDP) dan AI akan otomatis mengisi persyaratan &amp; detail tender.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className={`border-2 ${meta.color === "blue" ? "border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20" : "border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20"}`}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">{meta.icon} {meta.label}</CardTitle>
@@ -382,11 +506,12 @@ export default function TenderWizardPage() {
                 <p className="text-sm text-muted-foreground">{meta.description}</p>
               </CardContent>
             </Card>
+
             <div>
               <p className="text-sm font-semibold mb-3">Pilih output yang ingin dihasilkan:</p>
               <div className="space-y-2.5">
                 {OUTPUT_OPTIONS.map(opt => (
-                  <label key={opt.id} className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors">
+                  <label key={opt.id} className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors" data-testid={`checkbox-output-${opt.id}`}>
                     <Checkbox
                       checked={selectedOutputs.includes(opt.id)}
                       onCheckedChange={checked => {
@@ -406,13 +531,14 @@ export default function TenderWizardPage() {
           </div>
         )}
 
-        {/* ─── STEP 1: Company Profile ──────────────────────────────────────────── */}
+        {/* ─── STEP 1: Company Profile ── */}
         {step === 1 && (
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-bold mb-1">Profil Perusahaan</h2>
               <p className="text-muted-foreground text-sm">Profil ini reusable — sekali dibuat, bisa dipakai untuk tender berikutnya.</p>
             </div>
+
             {profilesQ.isLoading ? (
               <div className="space-y-2"><Skeleton className="h-16 w-full" /><Skeleton className="h-16 w-full" /></div>
             ) : (profilesQ.data || []).length > 0 && !showNewProfile ? (
@@ -423,6 +549,7 @@ export default function TenderWizardPage() {
                     key={p.id}
                     onClick={() => setSelectedProfileId(p.id)}
                     className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedProfileId === p.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
+                    data-testid={`button-profile-${p.id}`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -433,7 +560,7 @@ export default function TenderWizardPage() {
                     </div>
                   </button>
                 ))}
-                <Button variant="outline" className="gap-2 w-full" onClick={() => setShowNewProfile(true)}>
+                <Button variant="outline" className="gap-2 w-full" onClick={() => setShowNewProfile(true)} data-testid="button-new-profile">
                   <Plus className="h-4 w-4" /> Buat Profil Baru
                 </Button>
               </div>
@@ -445,10 +572,12 @@ export default function TenderWizardPage() {
                   </Button>
                 )}
                 <p className="text-sm font-medium">Isi profil perusahaan baru:</p>
+
+                {/* Basic info */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2 space-y-1.5">
                     <Label>Nama Perusahaan</Label>
-                    <Input value={newProfile.name} onChange={e => setNewProfile(p => ({ ...p, name: e.target.value }))} placeholder="PT Maju Jaya Konstruksi" />
+                    <Input value={newProfile.name} onChange={e => setNewProfile(p => ({ ...p, name: e.target.value }))} placeholder="PT Maju Jaya Konstruksi" data-testid="input-company-name" />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Bentuk Usaha</Label>
@@ -489,48 +618,300 @@ export default function TenderWizardPage() {
                     <Input value={newProfile.picContact} onChange={e => setNewProfile(p => ({ ...p, picContact: e.target.value }))} placeholder="08123456789" />
                   </div>
                 </div>
+
+                {/* SBU section - v1.2 */}
+                <Separator />
+                <div>
+                  <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    Sertifikat Badan Usaha (SBU)
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label>Kode SBU (opsional)</Label>
+                      <Input value={newProfile.sbuCode} onChange={e => setNewProfile(p => ({ ...p, sbuCode: e.target.value }))} placeholder="BG009 / SI001 / MK001" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Kualifikasi SBU</Label>
+                      <Select value={newProfile.sbuQualification} onValueChange={v => setNewProfile(p => ({ ...p, sbuQualification: v }))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {["Kecil", "Non-Kecil", "Besar"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-2 space-y-1.5">
+                      <Label>Ruang Lingkup SBU (opsional)</Label>
+                      <Input value={newProfile.sbuScope} onChange={e => setNewProfile(p => ({ ...p, sbuScope: e.target.value }))} placeholder="Konstruksi Gedung Hunian · Jalan Raya" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Experiences - v1.2 */}
+                <Separator />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-semibold flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                      Pengalaman Perusahaan
+                      <Badge variant="secondary" className="text-[10px] py-0">{experiences.length}</Badge>
+                    </p>
+                    <Button size="sm" variant="outline" className="gap-1.5 h-7 text-xs" onClick={() => setShowAddExp(true)} data-testid="button-add-experience">
+                      <Plus className="h-3 w-3" /> Tambah
+                    </Button>
+                  </div>
+                  {experiences.length === 0 && !showAddExp && (
+                    <p className="text-xs text-muted-foreground border border-dashed rounded-lg p-4 text-center">
+                      Belum ada pengalaman. Tambahkan proyek selesai untuk memperkuat checklist.
+                    </p>
+                  )}
+                  {experiences.map((exp, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30 mb-2 text-sm">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{exp.projectName || "—"}</p>
+                        <p className="text-xs text-muted-foreground">{exp.client} · {exp.year} · {exp.value}</p>
+                        {exp.scope && <p className="text-xs text-muted-foreground truncate">{exp.scope}</p>}
+                      </div>
+                      <button onClick={() => setExperiences(prev => prev.filter((_, j) => j !== i))} className="shrink-0 text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {showAddExp && (
+                    <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase">Proyek Baru</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2 space-y-1">
+                          <Label className="text-xs">Nama Proyek</Label>
+                          <Input className="h-8 text-sm" value={newExp.projectName} onChange={e => setNewExp(p => ({ ...p, projectName: e.target.value }))} placeholder="Pembangunan Gedung Puskesmas..." />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Pemberi Kerja</Label>
+                          <Input className="h-8 text-sm" value={newExp.client} onChange={e => setNewExp(p => ({ ...p, client: e.target.value }))} placeholder="Dinas Kesehatan Kab X" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Tahun Selesai</Label>
+                          <Input className="h-8 text-sm" value={newExp.year} onChange={e => setNewExp(p => ({ ...p, year: e.target.value }))} placeholder="2023" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Nilai Kontrak</Label>
+                          <Input className="h-8 text-sm" value={newExp.value} onChange={e => setNewExp(p => ({ ...p, value: e.target.value }))} placeholder="Rp 3.500.000.000" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Lingkup Pekerjaan</Label>
+                          <Input className="h-8 text-sm" value={newExp.scope} onChange={e => setNewExp(p => ({ ...p, scope: e.target.value }))} placeholder="Struktur + Arsitektur + MEP" />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="h-7 text-xs" disabled={!newExp.projectName}
+                          onClick={() => { setExperiences(p => [...p, newExp]); setNewExp(emptyExperience()); setShowAddExp(false); }}>
+                          Simpan
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowAddExp(false)}>Batal</Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Personnel - v1.2 */}
+                <Separator />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-semibold flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      Personel Inti
+                      <Badge variant="secondary" className="text-[10px] py-0">{personnel.length}</Badge>
+                    </p>
+                    <Button size="sm" variant="outline" className="gap-1.5 h-7 text-xs" onClick={() => setShowAddPersonnel(true)} data-testid="button-add-personnel">
+                      <Plus className="h-3 w-3" /> Tambah
+                    </Button>
+                  </div>
+                  {personnel.length === 0 && !showAddPersonnel && (
+                    <p className="text-xs text-muted-foreground border border-dashed rounded-lg p-4 text-center">
+                      Belum ada personel. Tambahkan PJT, tenaga ahli, dan personel K3.
+                    </p>
+                  )}
+                  {personnel.map((p, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30 mb-2 text-sm">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium">{p.name || "—"} <span className="font-normal text-muted-foreground">({p.role})</span></p>
+                        <p className="text-xs text-muted-foreground">{p.certification} · {p.experience}</p>
+                      </div>
+                      <button onClick={() => setPersonnel(prev => prev.filter((_, j) => j !== i))} className="shrink-0 text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {showAddPersonnel && (
+                    <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase">Personel Baru</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Jabatan / Role</Label>
+                          <Input className="h-8 text-sm" value={newPersonnel.role} onChange={e => setNewPersonnel(p => ({ ...p, role: e.target.value }))} placeholder="Penanggung Jawab Teknik" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Nama</Label>
+                          <Input className="h-8 text-sm" value={newPersonnel.name} onChange={e => setNewPersonnel(p => ({ ...p, name: e.target.value }))} placeholder="Ir. Ahmad Sutrisno" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Sertifikat (SKA/SKT)</Label>
+                          <Input className="h-8 text-sm" value={newPersonnel.certification} onChange={e => setNewPersonnel(p => ({ ...p, certification: e.target.value }))} placeholder="SKA Ahli Madya Sipil" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Pengalaman</Label>
+                          <Input className="h-8 text-sm" value={newPersonnel.experience} onChange={e => setNewPersonnel(p => ({ ...p, experience: e.target.value }))} placeholder="15 tahun konstruksi gedung" />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="h-7 text-xs" disabled={!newPersonnel.role}
+                          onClick={() => { setPersonnel(p => [...p, newPersonnel]); setNewPersonnel(emptyPersonnel()); setShowAddPersonnel(false); }}>
+                          Simpan
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowAddPersonnel(false)}>Batal</Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <Button
                   className="gap-2" disabled={!newProfile.name || createProfileMut.isPending}
-                  onClick={() => createProfileMut.mutate({ ...newProfile, experiences: [], personnel: [] })}
+                  onClick={() => createProfileMut.mutate({ ...newProfile, experiences, personnel })}
+                  data-testid="button-save-profile"
                 >
                   {createProfileMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckSquare className="h-4 w-4" />}
                   Simpan Profil
                 </Button>
               </div>
             )}
+
+            {/* Inline experience/personnel editor for existing profile */}
+            {selectedProfile && (
+              <div className="space-y-4 pt-2">
+                <Separator />
+                <p className="text-xs text-muted-foreground">Data di bawah digunakan untuk sesi tender ini (tidak mengubah profil tersimpan):</p>
+
+                {/* Experiences for this session */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium flex items-center gap-2">
+                      <Briefcase className="h-3.5 w-3.5" /> Pengalaman untuk sesi ini
+                      <Badge variant="secondary" className="text-[10px] py-0">{experiences.length}</Badge>
+                    </p>
+                    <Button size="sm" variant="outline" className="gap-1 h-7 text-xs" onClick={() => setShowAddExp(true)}>
+                      <Plus className="h-3 w-3" /> Tambah
+                    </Button>
+                  </div>
+                  {experiences.map((exp, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30 mb-2 text-sm">
+                      <div className="flex-1">
+                        <p className="font-medium">{exp.projectName}</p>
+                        <p className="text-xs text-muted-foreground">{exp.client} · {exp.year} · {exp.value}</p>
+                      </div>
+                      <button onClick={() => setExperiences(prev => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {showAddExp && (
+                    <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2 space-y-1"><Label className="text-xs">Nama Proyek</Label><Input className="h-8 text-sm" value={newExp.projectName} onChange={e => setNewExp(p => ({ ...p, projectName: e.target.value }))} /></div>
+                        <div className="space-y-1"><Label className="text-xs">Pemberi Kerja</Label><Input className="h-8 text-sm" value={newExp.client} onChange={e => setNewExp(p => ({ ...p, client: e.target.value }))} /></div>
+                        <div className="space-y-1"><Label className="text-xs">Tahun</Label><Input className="h-8 text-sm" value={newExp.year} onChange={e => setNewExp(p => ({ ...p, year: e.target.value }))} /></div>
+                        <div className="space-y-1"><Label className="text-xs">Nilai</Label><Input className="h-8 text-sm" value={newExp.value} onChange={e => setNewExp(p => ({ ...p, value: e.target.value }))} /></div>
+                        <div className="space-y-1"><Label className="text-xs">Lingkup</Label><Input className="h-8 text-sm" value={newExp.scope} onChange={e => setNewExp(p => ({ ...p, scope: e.target.value }))} /></div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="h-7 text-xs" disabled={!newExp.projectName} onClick={() => { setExperiences(p => [...p, newExp]); setNewExp(emptyExperience()); setShowAddExp(false); }}>Simpan</Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowAddExp(false)}>Batal</Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Personnel for this session */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium flex items-center gap-2">
+                      <Users className="h-3.5 w-3.5" /> Personel untuk sesi ini
+                      <Badge variant="secondary" className="text-[10px] py-0">{personnel.length}</Badge>
+                    </p>
+                    <Button size="sm" variant="outline" className="gap-1 h-7 text-xs" onClick={() => setShowAddPersonnel(true)}>
+                      <Plus className="h-3 w-3" /> Tambah
+                    </Button>
+                  </div>
+                  {personnel.map((p, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30 mb-2 text-sm">
+                      <div className="flex-1">
+                        <p className="font-medium">{p.name} <span className="font-normal text-muted-foreground">({p.role})</span></p>
+                        <p className="text-xs text-muted-foreground">{p.certification}</p>
+                      </div>
+                      <button onClick={() => setPersonnel(prev => prev.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {showAddPersonnel && (
+                    <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1"><Label className="text-xs">Jabatan</Label><Input className="h-8 text-sm" value={newPersonnel.role} onChange={e => setNewPersonnel(p => ({ ...p, role: e.target.value }))} /></div>
+                        <div className="space-y-1"><Label className="text-xs">Nama</Label><Input className="h-8 text-sm" value={newPersonnel.name} onChange={e => setNewPersonnel(p => ({ ...p, name: e.target.value }))} /></div>
+                        <div className="space-y-1"><Label className="text-xs">Sertifikat</Label><Input className="h-8 text-sm" value={newPersonnel.certification} onChange={e => setNewPersonnel(p => ({ ...p, certification: e.target.value }))} /></div>
+                        <div className="space-y-1"><Label className="text-xs">Pengalaman</Label><Input className="h-8 text-sm" value={newPersonnel.experience} onChange={e => setNewPersonnel(p => ({ ...p, experience: e.target.value }))} /></div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="h-7 text-xs" disabled={!newPersonnel.role} onClick={() => { setPersonnel(p => [...p, newPersonnel]); setNewPersonnel(emptyPersonnel()); setShowAddPersonnel(false); }}>Simpan</Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setShowAddPersonnel(false)}>Batal</Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* ─── STEP 2: Data Tender ────────────────────────────────────────────── */}
+        {/* ─── STEP 2: Data Tender ── */}
         {step === 2 && (
           <div className="space-y-5">
             <div>
               <h2 className="text-xl font-bold mb-1">Detail Tender</h2>
               <p className="text-muted-foreground text-sm">Data ini diisi per tender. Nama paket + instansi + deadline wajib diisi.</p>
             </div>
+            {autoFilledFields.size > 0 && (
+              <Card className="border-green-200 bg-green-50 dark:bg-green-900/10">
+                <CardContent className="pt-3 pb-3">
+                  <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                    <Wand2 className="h-4 w-4 shrink-0" />
+                    <span>Beberapa field sudah diisi otomatis dari dokumen yang diupload. Periksa dan sesuaikan jika perlu.</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 space-y-1.5">
-                <Label>Nama Paket Pekerjaan <span className="text-red-500">*</span></Label>
-                <Input value={tenderProfile.packageName} onChange={e => setTenderProfile(p => ({ ...p, packageName: e.target.value }))} placeholder="Pembangunan Gedung Kantor Dinas Pekerjaan Umum..." />
+                <Label className="flex items-center">Nama Paket Pekerjaan <span className="text-red-500 ml-1">*</span> <AutoBadge field="packageName" /></Label>
+                <Input value={tenderProfile.packageName} onChange={e => setTenderProfile(p => ({ ...p, packageName: e.target.value }))} placeholder="Pembangunan Gedung Kantor Dinas Pekerjaan Umum..." data-testid="input-package-name" />
               </div>
               <div className="col-span-2 space-y-1.5">
-                <Label>Instansi / UKPBJ <span className="text-red-500">*</span></Label>
+                <Label className="flex items-center">Instansi / UKPBJ <span className="text-red-500 ml-1">*</span> <AutoBadge field="institution" /></Label>
                 <Input value={tenderProfile.institution} onChange={e => setTenderProfile(p => ({ ...p, institution: e.target.value }))} placeholder="Dinas PUPR Kabupaten X" />
               </div>
               <div className="space-y-1.5">
-                <Label>Lokasi Pekerjaan</Label>
+                <Label className="flex items-center">Lokasi Pekerjaan <AutoBadge field="location" /></Label>
                 <Input value={tenderProfile.location} onChange={e => setTenderProfile(p => ({ ...p, location: e.target.value }))} placeholder="Kabupaten X, Provinsi Y" />
               </div>
               <div className="space-y-1.5">
-                <Label>Batas Akhir Pemasukan <span className="text-red-500">*</span></Label>
+                <Label className="flex items-center">Batas Akhir Pemasukan <span className="text-red-500 ml-1">*</span> <AutoBadge field="deadline" /></Label>
                 <Input type="date" value={tenderProfile.deadline} onChange={e => setTenderProfile(p => ({ ...p, deadline: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label>Nilai HPS/Pagu (opsional)</Label>
+                <Label className="flex items-center">Nilai HPS/Pagu <AutoBadge field="hpsValue" /></Label>
                 <Input value={tenderProfile.hpsValue} onChange={e => setTenderProfile(p => ({ ...p, hpsValue: e.target.value }))} placeholder="Rp 5.000.000.000" />
               </div>
               <div className="space-y-1.5">
-                <Label>Kualifikasi</Label>
+                <Label className="flex items-center">Kualifikasi <AutoBadge field="qualification" /></Label>
                 <Select value={tenderProfile.qualification} onValueChange={v => setTenderProfile(p => ({ ...p, qualification: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -539,22 +920,96 @@ export default function TenderWizardPage() {
                 </Select>
               </div>
               <div className="col-span-2 space-y-1.5">
-                <Label>Metode Evaluasi (opsional)</Label>
+                <Label className="flex items-center">Metode Evaluasi <AutoBadge field="evaluationMethod" /></Label>
                 <Input value={tenderProfile.evaluationMethod} onChange={e => setTenderProfile(p => ({ ...p, evaluationMethod: e.target.value }))} placeholder="Harga terendah / Kualitas-Harga / dll" />
               </div>
             </div>
           </div>
         )}
 
-        {/* ─── STEP 3: Persyaratan ─────────────────────────────────────────────── */}
+        {/* ─── STEP 3: Persyaratan + v2 Upload ── */}
         {step === 3 && (
           <div className="space-y-5">
             <div>
               <h2 className="text-xl font-bold mb-1">Persyaratan Tender</h2>
-              <p className="text-muted-foreground text-sm">Copy-paste poin persyaratan dari dokumen pemilihan. Boleh kosong — output akan bersifat generik.</p>
+              <p className="text-muted-foreground text-sm">Upload dokumen tender untuk auto-extract, atau isi manual.</p>
             </div>
+
+            {/* v2: Document upload zone */}
+            <div
+              className={`border-2 border-dashed rounded-xl p-6 transition-all ${
+                isDragging ? "border-primary bg-primary/5" :
+                uploadedFile ? "border-green-400 bg-green-50 dark:bg-green-900/10" :
+                "border-border hover:border-primary/50 hover:bg-muted/30"
+              }`}
+              onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.txt"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }}
+              />
+
+              {extractMut.isPending ? (
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                  <div>
+                    <p className="font-medium text-sm">Mengekstrak dokumen dengan AI...</p>
+                    <p className="text-xs text-muted-foreground">Membaca teks → Mengidentifikasi persyaratan → Auto-fill</p>
+                  </div>
+                </div>
+              ) : uploadedFile ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{uploadedFile.name}</p>
+                    <p className="text-xs text-green-600 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      {autoFilledFields.size} field berhasil diisi otomatis
+                    </p>
+                    {extractedSummary && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{extractedSummary}</p>}
+                  </div>
+                  <Button
+                    size="sm" variant="ghost" className="shrink-0 gap-1 text-xs h-7"
+                    onClick={() => { setUploadedFile(null); setAutoFilledFields(new Set()); setExtractedSummary(""); }}
+                  >
+                    <X className="h-3 w-3" /> Hapus
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Upload Dokumen Tender (PDF/TXT)</p>
+                    <p className="text-xs text-muted-foreground">KAK, RKS, LDP, atau LKPBJ · Maks 20MB</p>
+                  </div>
+                  <Button
+                    size="sm" variant="outline" className="gap-2"
+                    onClick={() => fileInputRef.current?.click()}
+                    data-testid="button-upload-document"
+                  >
+                    <FileUp className="h-4 w-4" /> Pilih File
+                  </Button>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Info className="h-3 w-3" /> AI akan mengekstrak persyaratan dan mengisi field di bawah secara otomatis
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
             <TextareaField
               label="Persyaratan Kualifikasi"
+              fieldKey="qualificationReqs"
               helper="Kualifikasi usaha, bidang/sub-bidang, SBU yang disyaratkan."
               value={requirements.qualificationReqs}
               onChange={v => setRequirements(p => ({ ...p, qualificationReqs: v }))}
@@ -562,6 +1017,7 @@ export default function TenderWizardPage() {
             />
             <TextareaField
               label="Persyaratan Personel Inti"
+              fieldKey="personnelReqs"
               helper="Role, jumlah, dan sertifikat yang disyaratkan."
               value={requirements.personnelReqs}
               onChange={v => setRequirements(p => ({ ...p, personnelReqs: v }))}
@@ -569,6 +1025,7 @@ export default function TenderWizardPage() {
             />
             <TextareaField
               label="Persyaratan Pengalaman"
+              fieldKey="experienceReqs"
               helper="Minimal pengalaman proyek sejenis."
               value={requirements.experienceReqs}
               onChange={v => setRequirements(p => ({ ...p, experienceReqs: v }))}
@@ -576,6 +1033,7 @@ export default function TenderWizardPage() {
             />
             <TextareaField
               label="Persyaratan SMKK / K3 / Mutu"
+              fieldKey="smkkReqs"
               helper="Persyaratan Sistem Manajemen Keselamatan Konstruksi."
               value={requirements.smkkReqs}
               onChange={v => setRequirements(p => ({ ...p, smkkReqs: v }))}
@@ -583,6 +1041,7 @@ export default function TenderWizardPage() {
             />
             <TextareaField
               label="Persyaratan Jaminan (opsional)"
+              fieldKey="bondReqs"
               helper="Jaminan penawaran, pelaksanaan, uang muka."
               value={requirements.bondReqs}
               onChange={v => setRequirements(p => ({ ...p, bondReqs: v }))}
@@ -591,7 +1050,7 @@ export default function TenderWizardPage() {
           </div>
         )}
 
-        {/* ─── STEP 4: Strategi Teknis ─────────────────────────────────────────── */}
+        {/* ─── STEP 4: Strategi Teknis ── */}
         {step === 4 && (
           <div className="space-y-5">
             <div>
@@ -609,21 +1068,21 @@ export default function TenderWizardPage() {
                 <TextareaField label="Pemahaman Pekerjaan" helper="3–7 poin pemahaman terhadap ruang lingkup tender."
                   value={(technicalApproach as any).understanding} onChange={v => setTechnicalApproach(p => ({ ...p, understanding: v }))}
                   placeholder="1. Pekerjaan meliputi pembangunan 3 lantai...\n2. Lokasi di daerah perkotaan padat..." />
-                <TextareaField label="Metode Pelaksanaan *" helper="Minimal 5 tahap pekerjaan."
+                <TextareaField label="Metode Pelaksanaan *" helper="Minimal 5 tahap pekerjaan utama."
                   value={(technicalApproach as any).executionMethod} onChange={v => setTechnicalApproach(p => ({ ...p, executionMethod: v }))}
-                  placeholder="Tahap 1: Persiapan & Mobilisasi\nTahap 2: Pekerjaan Pondasi\n..." />
+                  placeholder="Tahap 1: Persiapan & Mobilisasi (minggu 1-2)\nTahap 2: Pekerjaan Pondasi (minggu 3-8)\nTahap 3: Struktur Beton (minggu 9-20)\n..." />
                 <TextareaField label="Rencana Jadwal" helper="Tahap pekerjaan + estimasi durasi."
                   value={(technicalApproach as any).schedule} onChange={v => setTechnicalApproach(p => ({ ...p, schedule: v }))}
-                  placeholder="Persiapan: 2 minggu\nPondasi: 4 minggu\n..." />
+                  placeholder="Persiapan: 2 minggu\nPondasi: 4 minggu\nStruktur: 12 minggu\n..." />
                 <TextareaField label="Rencana Mutu" helper="3–7 poin rencana kendali mutu."
                   value={(technicalApproach as any).qualityPlan} onChange={v => setTechnicalApproach(p => ({ ...p, qualityPlan: v }))}
-                  placeholder="1. Pemeriksaan material sebelum digunakan\n2. Uji beton sesuai SNI..." />
-                <TextareaField label="Rencana SMKK / K3 *" helper="Wajib untuk konstruksi. 3–7 poin."
+                  placeholder="1. Pemeriksaan material sebelum digunakan\n2. Uji beton sesuai SNI 2847\n3. Inspeksi pekerjaan struktur per lantai..." />
+                <TextareaField label="Rencana SMKK / K3 *" helper="Wajib untuk semua paket konstruksi. Minimal 5 poin."
                   value={(technicalApproach as any).smkkPlan} onChange={v => setTechnicalApproach(p => ({ ...p, smkkPlan: v }))}
-                  placeholder="1. Toolbox meeting setiap pagi\n2. Inspeksi K3 mingguan\n3. APD wajib semua pekerja..." />
+                  placeholder="1. Toolbox meeting setiap pagi sebelum kerja\n2. Inspeksi K3 mingguan oleh Petugas K3\n3. APD wajib semua pekerja: helm, sepatu, rompi\n4. JSA (Job Safety Analysis) per pekerjaan berisiko tinggi\n5. Emergency response plan..." />
                 <TextareaField label="Risiko & Mitigasi" helper="Minimal 3 risiko + mitigasi."
                   value={(technicalApproach as any).risks} onChange={v => setTechnicalApproach(p => ({ ...p, risks: v }))}
-                  placeholder="1. Risiko cuaca buruk → Jadwal buffer 10%\n2. ..." />
+                  placeholder="1. Risiko cuaca buruk → Jadwal buffer 10% + protective cover\n2. Risiko keterlambatan material → Vendor list cadangan + stok minimum\n3. Risiko konflik sosial → Koordinasi dengan RT/RW setempat..." />
               </>
             ) : (
               <>
@@ -647,13 +1106,13 @@ export default function TenderWizardPage() {
                   placeholder="Coaching toolbox meeting, monitoring K3 mingguan, laporan temuan & CAPA..." />
                 <TextareaField label="Risiko & Mitigasi"
                   value={(technicalApproach as any).risks} onChange={v => setTechnicalApproach(p => ({ ...p, risks: v }))}
-                  placeholder="1. Keterlambatan informasi dari kontraktor → Protok komunikasi tertulis..." />
+                  placeholder="1. Keterlambatan informasi dari kontraktor → Protokol komunikasi tertulis..." />
               </>
             )}
           </div>
         )}
 
-        {/* ─── STEP 5: Kepatuhan ───────────────────────────────────────────────── */}
+        {/* ─── STEP 5: Kepatuhan ── */}
         {step === 5 && (
           <div className="space-y-5">
             <div>
@@ -688,6 +1147,7 @@ export default function TenderWizardPage() {
                             : "border-primary bg-primary/10 text-primary"
                           : "border-border hover:border-primary/50"
                       }`}
+                      data-testid={`button-compliance-${key}-${opt}`}
                     >
                       {opt}
                     </button>
@@ -703,7 +1163,7 @@ export default function TenderWizardPage() {
           </div>
         )}
 
-        {/* ─── STEP 6: Hasil ───────────────────────────────────────────────────── */}
+        {/* ─── STEP 6: Hasil ── */}
         {step === 6 && (
           <div className="space-y-6">
             {generateMut.isPending ? (
@@ -716,7 +1176,14 @@ export default function TenderWizardPage() {
                   <p className="text-muted-foreground text-sm">AI sedang menyusun checklist, risk review, dan draft dokumen.</p>
                 </div>
                 <div className="w-full max-w-sm space-y-2">
-                  {["Memvalidasi profil perusahaan", "Menjalankan compliance check Perpres 46/2025", "Menyusun checklist LPSE", "Menghasilkan risk review", "Menyusun draft dokumen"].map((t, i) => (
+                  {[
+                    "Memvalidasi profil & SBU perusahaan",
+                    "Mencocokkan pengalaman & personel vs persyaratan",
+                    "Menjalankan compliance check Perpres 46/2025",
+                    "Menyusun checklist LPSE (A–F)",
+                    "Menghasilkan risk review",
+                    "Menyusun draft dokumen",
+                  ].map((t, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" style={{ animationDelay: `${i * 0.3}s` }} />
                       {t}
@@ -730,15 +1197,15 @@ export default function TenderWizardPage() {
                 {(generateResult.scoreKelengkapan != null || generateResult.scoreTeknis != null) && (
                   <div>
                     <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4" /> Skor Kesiapan
+                      <BarChart3 className="h-4 w-4" /> Skor Kesiapan Tender
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
-                      <Card className="text-center p-4">
-                        <p className="text-xs text-muted-foreground mb-2">Kelengkapan Dokumen</p>
+                      <Card className="text-center p-5">
+                        <p className="text-xs text-muted-foreground mb-3">Kelengkapan Dokumen</p>
                         <ScoreBadge score={generateResult.scoreKelengkapan || 0} />
                       </Card>
-                      <Card className="text-center p-4">
-                        <p className="text-xs text-muted-foreground mb-2">Kesiapan Teknis</p>
+                      <Card className="text-center p-5">
+                        <p className="text-xs text-muted-foreground mb-3">Kesiapan Teknis</p>
                         <ScoreBadge score={generateResult.scoreTeknis || 0} />
                       </Card>
                     </div>
@@ -752,6 +1219,25 @@ export default function TenderWizardPage() {
                       <CheckSquare className="h-4 w-4" /> Checklist Kelengkapan
                     </h3>
                     <ChecklistTable items={generateResult.checklist} />
+                  </div>
+                )}
+
+                {/* Gap Analysis - v1.2 */}
+                {generateResult.gapAnalysis && generateResult.gapAnalysis.length > 0 && (
+                  <div>
+                    <Separator />
+                    <h3 className="text-base font-semibold mb-4 mt-4 flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-yellow-600" /> Gap Analysis
+                    </h3>
+                    <div className="space-y-2">
+                      {generateResult.gapAnalysis.map((gap: any, i: number) => (
+                        <div key={i} className="p-3 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10">
+                          <p className="text-sm font-medium">{gap.item}</p>
+                          <p className="text-xs text-muted-foreground mt-1"><span className="font-medium">Gap:</span> {gap.gap}</p>
+                          <p className="text-xs text-muted-foreground"><span className="font-medium">Tindakan:</span> {gap.action}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -777,7 +1263,6 @@ export default function TenderWizardPage() {
                   </div>
                 )}
 
-                {/* Error fallback */}
                 {generateResult.error && (
                   <Card className="border-red-200 bg-red-50 dark:bg-red-900/10">
                     <CardContent className="pt-4 text-sm text-red-700">
@@ -789,6 +1274,9 @@ export default function TenderWizardPage() {
                 <Button variant="outline" className="gap-2" onClick={() => {
                   setGenerateResult(null);
                   setStep(0);
+                  setAutoFilledFields(new Set());
+                  setUploadedFile(null);
+                  setExtractedSummary("");
                 }}>
                   <RotateCcw className="h-4 w-4" /> Mulai Wizard Baru
                 </Button>
@@ -801,10 +1289,10 @@ export default function TenderWizardPage() {
           </div>
         )}
 
-        {/* ─── Navigation ──────────────────────────────────────────────────────── */}
+        {/* ─── Navigation ── */}
         {step < 6 && (
           <div className="flex justify-between pt-8 mt-4 border-t">
-            <Button variant="outline" disabled={step === 0} onClick={() => setStep(s => s - 1)} className="gap-2">
+            <Button variant="outline" disabled={step === 0} onClick={() => setStep(s => s - 1)} className="gap-2" data-testid="button-prev-step">
               <ChevronLeft className="h-4 w-4" /> Sebelumnya
             </Button>
             {step < 5 ? (
@@ -812,6 +1300,7 @@ export default function TenderWizardPage() {
                 onClick={() => setStep(s => s + 1)}
                 disabled={step === 0 && selectedOutputs.length === 0}
                 className="gap-2"
+                data-testid="button-next-step"
               >
                 Selanjutnya <ChevronRight className="h-4 w-4" />
               </Button>
@@ -820,6 +1309,7 @@ export default function TenderWizardPage() {
                 onClick={handleGenerate}
                 disabled={generateMut.isPending || !tenderProfile.packageName}
                 className="gap-2 bg-gradient-to-r from-primary to-primary/80"
+                data-testid="button-generate"
               >
                 {generateMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 Generate Output
