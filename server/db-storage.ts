@@ -31,6 +31,8 @@ import {
   tenders,
   leads,
   scoringResults,
+  companyProfiles,
+  tenderSessions,
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 import type {
@@ -92,6 +94,10 @@ import type {
   InsertLead,
   ScoringResult,
   InsertScoringResult,
+  CompanyProfile,
+  InsertCompanyProfile,
+  TenderSession,
+  InsertTenderSession,
 } from "@shared/schema";
 
 const { Pool } = pg;
@@ -2748,6 +2754,139 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(scoringResults.createdAt));
     return result.map(row => this.mapScoringResultRow(row));
+  }
+
+  // ─── Company Profile methods ───────────────────────────────────────────────
+  private mapCompanyProfile(row: any): CompanyProfile {
+    return {
+      id: row.id,
+      userId: row.userId,
+      name: row.name,
+      businessType: row.businessType || "PT",
+      nib: row.nib || "",
+      nibStatus: row.nibStatus || "Ada",
+      npwp: row.npwp || "",
+      npwpStatus: row.npwpStatus || "Ada",
+      address: row.address || "",
+      picName: row.picName || "",
+      picContact: row.picContact || "",
+      experiences: (row.experiences as any) || [],
+      personnel: (row.personnel as any) || [],
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
+  }
+
+  async getCompanyProfiles(userId: string): Promise<CompanyProfile[]> {
+    const rows = await db.select().from(companyProfiles)
+      .where(eq(companyProfiles.userId, userId))
+      .orderBy(desc(companyProfiles.updatedAt));
+    return rows.map(r => this.mapCompanyProfile(r));
+  }
+
+  async getCompanyProfile(id: number): Promise<CompanyProfile | undefined> {
+    const rows = await db.select().from(companyProfiles)
+      .where(eq(companyProfiles.id, id)).limit(1);
+    if (rows.length === 0) return undefined;
+    return this.mapCompanyProfile(rows[0]);
+  }
+
+  async createCompanyProfile(data: InsertCompanyProfile): Promise<CompanyProfile> {
+    const rows = await db.insert(companyProfiles).values({
+      userId: data.userId,
+      name: data.name,
+      businessType: data.businessType || "PT",
+      nib: data.nib || "",
+      nibStatus: data.nibStatus || "Ada",
+      npwp: data.npwp || "",
+      npwpStatus: data.npwpStatus || "Ada",
+      address: data.address || "",
+      picName: data.picName || "",
+      picContact: data.picContact || "",
+      experiences: (data.experiences as any) || [],
+      personnel: (data.personnel as any) || [],
+    }).returning();
+    return this.mapCompanyProfile(rows[0]);
+  }
+
+  async updateCompanyProfile(id: number, data: Partial<InsertCompanyProfile>): Promise<CompanyProfile | undefined> {
+    const rows = await db.update(companyProfiles)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(companyProfiles.id, id))
+      .returning();
+    if (rows.length === 0) return undefined;
+    return this.mapCompanyProfile(rows[0]);
+  }
+
+  async deleteCompanyProfile(id: number): Promise<boolean> {
+    const result = await db.delete(companyProfiles).where(eq(companyProfiles.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // ─── Tender Session methods ─────────────────────────────────────────────────
+  private mapTenderSession(row: any): TenderSession {
+    return {
+      id: row.id,
+      userId: row.userId,
+      packType: row.packType || "pelaksana_konstruksi",
+      companyProfileId: row.companyProfileId || null,
+      status: row.status || "draft",
+      selectedOutputs: (row.selectedOutputs as string[]) || [],
+      tenderProfile: (row.tenderProfile as any) || {},
+      requirements: (row.requirements as any) || {},
+      technicalApproach: (row.technicalApproach as any) || {},
+      complianceAnswers: (row.complianceAnswers as any) || {},
+      scoreKelengkapan: row.scoreKelengkapan || null,
+      scoreTeknis: row.scoreTeknis || null,
+      generatedChecklist: (row.generatedChecklist as any) || null,
+      generatedRiskReview: (row.generatedRiskReview as any) || null,
+      generatedDrafts: (row.generatedDrafts as any) || null,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
+  }
+
+  async getTenderSessions(userId: string): Promise<TenderSession[]> {
+    const rows = await db.select().from(tenderSessions)
+      .where(eq(tenderSessions.userId, userId))
+      .orderBy(desc(tenderSessions.updatedAt));
+    return rows.map(r => this.mapTenderSession(r));
+  }
+
+  async getTenderSession(id: number): Promise<TenderSession | undefined> {
+    const rows = await db.select().from(tenderSessions)
+      .where(eq(tenderSessions.id, id)).limit(1);
+    if (rows.length === 0) return undefined;
+    return this.mapTenderSession(rows[0]);
+  }
+
+  async createTenderSession(data: InsertTenderSession): Promise<TenderSession> {
+    const rows = await db.insert(tenderSessions).values({
+      userId: data.userId,
+      packType: data.packType || "pelaksana_konstruksi",
+      companyProfileId: data.companyProfileId || null,
+      status: data.status || "draft",
+      selectedOutputs: (data.selectedOutputs as any) || [],
+      tenderProfile: (data.tenderProfile as any) || {},
+      requirements: (data.requirements as any) || {},
+      technicalApproach: (data.technicalApproach as any) || {},
+      complianceAnswers: (data.complianceAnswers as any) || {},
+    }).returning();
+    return this.mapTenderSession(rows[0]);
+  }
+
+  async updateTenderSession(id: number, data: Partial<InsertTenderSession>): Promise<TenderSession | undefined> {
+    const rows = await db.update(tenderSessions)
+      .set({ ...data, updatedAt: new Date() } as any)
+      .where(eq(tenderSessions.id, id))
+      .returning();
+    if (rows.length === 0) return undefined;
+    return this.mapTenderSession(rows[0]);
+  }
+
+  async deleteTenderSession(id: number): Promise<boolean> {
+    const result = await db.delete(tenderSessions).where(eq(tenderSessions.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 

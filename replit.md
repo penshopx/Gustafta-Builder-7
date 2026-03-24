@@ -158,6 +158,39 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 - **Model**: Integration chat uses `gpt-4o-mini` (not `gpt-5.1`).
 - **API key guard**: Both streaming and non-streaming chat endpoints check for valid API key before calling OpenAI.
 
+### SaaS Pack System (Tender LPSE Assistant)
+The platform includes a **Domain Solution Pack** system for selling domain-specific AI wizard workflows as add-ons to the core engine.
+
+**Pack Marketplace** (`/packs`): Grid of available + coming-soon packs. Accessible via `/packs` route and linked from dashboard sidebar ("Paket Domain" button) and landing page footer.
+
+**Tender LPSE Pack** (2 packs, both available):
+1. `tender-pelaksana` — Pelaksana Konstruksi (gedung/jalan/jembatan)
+2. `tender-konsultansi` — Konsultansi Manajemen Konstruksi (MK)
+
+**Wizard** (`/packs/:packId`): 7-step guided wizard for tender document prep:
+- Step 0: Output selector (checklist, risk review, draft docs)
+- Step 1: Company Profile (reusable entity — create once, use across tenders)
+- Step 2: Data Tender (package name, institution, location, deadline, HPS, qualification)
+- Step 3: Persyaratan (copy-paste requirements from tender documents)
+- Step 4: Strategi Teknis (execution method, SMKK plan, risks)
+- Step 5: Kepatuhan Perpres 46/2025 (conflict of interest, blacklist, anti-bribery)
+- Step 6: Results — Scoring dashboard (0–100), Checklist table with A1/B1/C1 codes, Red/Yellow/Green risk cards, Draft document viewer with copy button
+
+**Schema tables added**: `company_profiles` (reusable vendor entity per user), `tender_sessions` (per-tender wizard runs with all step data + AI-generated outputs)
+
+**Backend**:
+- `GET/POST/PATCH/DELETE /api/company-profiles` — CRUD company profiles
+- `GET/POST/PATCH/DELETE /api/tender-sessions` — CRUD tender sessions
+- `POST /api/ai/tender-wizard` — GPT-4o powered, JSON output: scoreKelengkapan, scoreTeknis, checklist[], riskReview[], drafts{}
+
+**Checklist scoring (Pelaksana)**:
+- Administrasi: 30%, Kualifikasi: 30%, Teknis: 20%, SMKK/K3: 10%, Kepatuhan Perpres 46/2025: 10%
+
+**Checklist scoring (Konsultansi MK)**:
+- Administrasi: 20%, Kualifikasi: 25%, Teknis: 35%, SMKK pendampingan: 10%, Kepatuhan: 10%
+
+**Coming Soon packs**: Perizinan & Sertifikasi, SMAP + Pancek KPK, SMKK, Laporan Tahunan BUJK
+
 ### Integrations
 - OpenAI (GPT-4o, GPT-3.5)
 - DeepSeek

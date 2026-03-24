@@ -58,6 +58,10 @@ import type {
   InsertLead,
   ScoringResult,
   InsertScoringResult,
+  CompanyProfile,
+  InsertCompanyProfile,
+  TenderSession,
+  InsertTenderSession,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -279,6 +283,20 @@ export interface IStorage {
   getScoringResult(id: string): Promise<ScoringResult | undefined>;
   createScoringResult(result: InsertScoringResult): Promise<ScoringResult>;
   getScoringResultsBySession(agentId: string, sessionId: string): Promise<ScoringResult[]>;
+
+  // Company Profile methods (Tender LPSE Pack)
+  getCompanyProfiles(userId: string): Promise<CompanyProfile[]>;
+  getCompanyProfile(id: number): Promise<CompanyProfile | undefined>;
+  createCompanyProfile(data: InsertCompanyProfile): Promise<CompanyProfile>;
+  updateCompanyProfile(id: number, data: Partial<InsertCompanyProfile>): Promise<CompanyProfile | undefined>;
+  deleteCompanyProfile(id: number): Promise<boolean>;
+
+  // Tender Session methods (Tender LPSE Pack)
+  getTenderSessions(userId: string): Promise<TenderSession[]>;
+  getTenderSession(id: number): Promise<TenderSession | undefined>;
+  createTenderSession(data: InsertTenderSession): Promise<TenderSession>;
+  updateTenderSession(id: number, data: Partial<InsertTenderSession>): Promise<TenderSession | undefined>;
+  deleteTenderSession(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1849,6 +1867,24 @@ export class MemStorage implements IStorage {
       .filter((r) => r.agentId === parseInt(agentId) && r.sessionId === sessionId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
+
+  // Company Profile stubs (MemStorage)
+  async getCompanyProfiles(_userId: string): Promise<CompanyProfile[]> { return []; }
+  async getCompanyProfile(_id: number): Promise<CompanyProfile | undefined> { return undefined; }
+  async createCompanyProfile(data: InsertCompanyProfile): Promise<CompanyProfile> {
+    return { id: 1, ...data, createdAt: new Date(), updatedAt: new Date() } as CompanyProfile;
+  }
+  async updateCompanyProfile(_id: number, _data: Partial<InsertCompanyProfile>): Promise<CompanyProfile | undefined> { return undefined; }
+  async deleteCompanyProfile(_id: number): Promise<boolean> { return false; }
+
+  // Tender Session stubs (MemStorage)
+  async getTenderSessions(_userId: string): Promise<TenderSession[]> { return []; }
+  async getTenderSession(_id: number): Promise<TenderSession | undefined> { return undefined; }
+  async createTenderSession(data: InsertTenderSession): Promise<TenderSession> {
+    return { id: 1, ...data, createdAt: new Date(), updatedAt: new Date() } as TenderSession;
+  }
+  async updateTenderSession(_id: number, _data: Partial<InsertTenderSession>): Promise<TenderSession | undefined> { return undefined; }
+  async deleteTenderSession(_id: number): Promise<boolean> { return false; }
 }
 
 import { dbStorage } from "./db-storage";

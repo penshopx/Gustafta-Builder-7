@@ -4634,6 +4634,184 @@ Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapang
     }
   });
 
+  // ==================== Company Profile Routes (Tender LPSE Pack) ====================
+
+  app.get("/api/company-profiles", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id;
+      const profiles = await storage.getCompanyProfiles(userId);
+      res.json(profiles);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal mengambil profil perusahaan" });
+    }
+  });
+
+  app.get("/api/company-profiles/:id", isAuthenticated, async (req, res) => {
+    try {
+      const profile = await storage.getCompanyProfile(parseInt(req.params.id));
+      if (!profile) return res.status(404).json({ error: "Profil tidak ditemukan" });
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal mengambil profil perusahaan" });
+    }
+  });
+
+  app.post("/api/company-profiles", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id;
+      const profile = await storage.createCompanyProfile({ ...req.body, userId });
+      res.status(201).json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal membuat profil perusahaan" });
+    }
+  });
+
+  app.patch("/api/company-profiles/:id", isAuthenticated, async (req, res) => {
+    try {
+      const profile = await storage.updateCompanyProfile(parseInt(req.params.id), req.body);
+      if (!profile) return res.status(404).json({ error: "Profil tidak ditemukan" });
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal mengubah profil perusahaan" });
+    }
+  });
+
+  app.delete("/api/company-profiles/:id", isAuthenticated, async (req, res) => {
+    try {
+      const ok = await storage.deleteCompanyProfile(parseInt(req.params.id));
+      if (!ok) return res.status(404).json({ error: "Profil tidak ditemukan" });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Gagal menghapus profil perusahaan" });
+    }
+  });
+
+  // ==================== Tender Session Routes (Tender LPSE Pack) ====================
+
+  app.get("/api/tender-sessions", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id;
+      const sessions = await storage.getTenderSessions(userId);
+      res.json(sessions);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal mengambil sesi tender" });
+    }
+  });
+
+  app.get("/api/tender-sessions/:id", isAuthenticated, async (req, res) => {
+    try {
+      const session = await storage.getTenderSession(parseInt(req.params.id));
+      if (!session) return res.status(404).json({ error: "Sesi tidak ditemukan" });
+      res.json(session);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal mengambil sesi tender" });
+    }
+  });
+
+  app.post("/api/tender-sessions", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id;
+      const session = await storage.createTenderSession({ ...req.body, userId });
+      res.status(201).json(session);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal membuat sesi tender" });
+    }
+  });
+
+  app.patch("/api/tender-sessions/:id", isAuthenticated, async (req, res) => {
+    try {
+      const session = await storage.updateTenderSession(parseInt(req.params.id), req.body);
+      if (!session) return res.status(404).json({ error: "Sesi tidak ditemukan" });
+      res.json(session);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal mengubah sesi tender" });
+    }
+  });
+
+  app.delete("/api/tender-sessions/:id", isAuthenticated, async (req, res) => {
+    try {
+      const ok = await storage.deleteTenderSession(parseInt(req.params.id));
+      if (!ok) return res.status(404).json({ error: "Sesi tidak ditemukan" });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Gagal menghapus sesi tender" });
+    }
+  });
+
+  // ==================== Tender Wizard AI Generate Route ====================
+
+  app.post("/api/ai/tender-wizard", isAuthenticated, async (req, res) => {
+    try {
+      const { packType, companyProfile, tenderProfile, requirements, technicalApproach, complianceAnswers, selectedOutputs } = req.body;
+      if (!packType) return res.status(400).json({ error: "packType wajib diisi" });
+
+      const openai = new OpenAI();
+
+      const packLabel = packType === "pelaksana_konstruksi"
+        ? "Pelaksana Konstruksi (Gedung/Jalan)"
+        : "Konsultansi Konstruksi – Manajemen Konstruksi (MK)";
+
+      const systemPrompt = `Kamu adalah AI spesialis pengadaan barang/jasa pemerintah Indonesia, khususnya tender konstruksi LPSE.
+Pack: Tender LPSE Assistant – ${packLabel}.
+Regulasi acuan: Perpres No. 46 Tahun 2025, LKPP, format LPSE.
+Tugas kamu: menganalisis data tender yang diberikan dan menghasilkan:
+1. Checklist kelengkapan dokumen (format JSON terstruktur dengan kode A1/B1/C1 dll, status Ada/Belum/Perlu revisi, catatan)
+2. Risk & Compliance Review (Red flag / Yellow flag / Green)
+3. Draft dokumen tender yang dipilih
+4. Skor kelengkapan (0–100) dan skor kesiapan teknis (0–100)
+
+Aturan: no hallucination, selalu kutip pasal/regulasi jika ada. Format output dalam JSON yang diminta.
+Untuk checklist gunakan 6 bagian: A=Administrasi, B=Kualifikasi, C=Teknis, D=Harga, E=SMKK/K3, F=Kepatuhan Perpres 46/2025.`;
+
+      const userPrompt = `DATA TENDER:
+Pack Type: ${packLabel}
+Profil Perusahaan: ${JSON.stringify(companyProfile || {}, null, 2)}
+Detail Tender: ${JSON.stringify(tenderProfile || {}, null, 2)}
+Persyaratan: ${JSON.stringify(requirements || {}, null, 2)}
+Strategi Teknis: ${JSON.stringify(technicalApproach || {}, null, 2)}
+Jawaban Kepatuhan: ${JSON.stringify(complianceAnswers || {}, null, 2)}
+Output yang diminta: ${(selectedOutputs || ["semua"]).join(", ")}
+
+Hasilkan output dalam format JSON berikut:
+{
+  "scoreKelengkapan": <0-100>,
+  "scoreTeknis": <0-100>,
+  "checklist": [
+    { "code": "A1", "section": "Administrasi", "item": "...", "status": "Ada|Belum|Perlu revisi", "note": "..." }
+  ],
+  "riskReview": [
+    { "level": "red|yellow|green", "finding": "...", "impact": "...", "recommendation": "..." }
+  ],
+  "drafts": {
+    "surat_penawaran": "...",
+    "metode_pelaksanaan": "...",
+    "rencana_smkk": "...",
+    "pernyataan_kepatuhan": "..."
+  }
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.2,
+        max_tokens: 6000,
+        response_format: { type: "json_object" },
+      });
+
+      const raw = response.choices[0]?.message?.content || "{}";
+      let parsed: any = {};
+      try { parsed = JSON.parse(raw); } catch { parsed = { error: "Parse error", raw }; }
+
+      res.json(parsed);
+    } catch (error: any) {
+      console.error("Tender wizard generation error:", error);
+      res.status(500).json({ error: "Gagal generate output wizard: " + (error.message || "Unknown error") });
+    }
+  });
+
   // ==================== Mini App Results Routes (Protected) ====================
 
   app.get("/api/mini-app-results/:miniAppId", isAuthenticated, async (req, res) => {

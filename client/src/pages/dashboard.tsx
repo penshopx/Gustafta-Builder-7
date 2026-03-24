@@ -1071,6 +1071,25 @@ export default function Dashboard() {
       </div>
 
       <nav className={cn("flex-1 min-h-0 space-y-0.5 overflow-y-auto", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
+        {/* Packs shortcut */}
+        <Link
+          href="/packs"
+          className={cn(
+            "w-full flex items-center rounded-md text-sm font-medium transition-colors mb-1",
+            sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
+            "text-primary/80 hover:bg-primary/10 hover:text-primary border border-primary/20 bg-primary/5"
+          )}
+          title={sidebarCollapsed ? "Paket Domain" : undefined}
+          data-testid="link-packs-sidebar"
+        >
+          <ShoppingBag className="w-4 h-4 shrink-0" />
+          {!sidebarCollapsed && (
+            <span className="flex-1 flex items-center justify-between">
+              Paket Domain
+              <Badge variant="secondary" className="text-[10px] py-0 ml-1">Pack</Badge>
+            </span>
+          )}
+        </Link>
         {navItems.map((item) => (
           <button
             key={item.id}

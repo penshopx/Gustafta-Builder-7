@@ -1398,3 +1398,73 @@ export const messages = pgTable("voice_messages", {
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// ─── Tender LPSE Pack: Company Profile (reusable entity per user) ──────────
+export const companyProfiles = pgTable("company_profiles", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  name: text("name").notNull(),
+  businessType: text("business_type").notNull().default("PT"),
+  nib: text("nib").notNull().default(""),
+  nibStatus: text("nib_status").notNull().default("Ada"),
+  npwp: text("npwp").notNull().default(""),
+  npwpStatus: text("npwp_status").notNull().default("Ada"),
+  address: text("address").notNull().default(""),
+  picName: text("pic_name").notNull().default(""),
+  picContact: text("pic_contact").notNull().default(""),
+  experiences: jsonb("experiences").notNull().$type<Array<{
+    projectName: string;
+    year: string;
+    role: string;
+    summary: string;
+    value?: string;
+  }>>().default([]),
+  personnel: jsonb("personnel").notNull().$type<Array<{
+    name: string;
+    position: string;
+    education: string;
+    certifications: Array<{ name: string; number?: string; issuer: string; validUntil?: string }>;
+    experiences: Array<{ project: string; role: string; tasks: string; output: string; year: string }>;
+    competencies: string[];
+  }>>().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCompanyProfileSchema = createInsertSchema(companyProfiles).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCompanyProfile = z.infer<typeof insertCompanyProfileSchema>;
+export type CompanyProfile = typeof companyProfiles.$inferSelect;
+
+// ─── Tender LPSE Pack: Session (per-tender wizard run) ────────────────────
+export const tenderPackTypeSchema = z.enum(["pelaksana_konstruksi", "konsultansi_mk"]);
+export type TenderPackType = z.infer<typeof tenderPackTypeSchema>;
+
+export const tenderSessions = pgTable("tender_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  packType: text("pack_type").notNull().default("pelaksana_konstruksi"),
+  companyProfileId: integer("company_profile_id"),
+  status: text("status").notNull().default("draft"),
+  selectedOutputs: text("selected_outputs").array().notNull().default([]),
+  tenderProfile: jsonb("tender_profile").$type<Record<string, string>>().default({}),
+  requirements: jsonb("requirements").$type<Record<string, string>>().default({}),
+  technicalApproach: jsonb("technical_approach").$type<Record<string, string>>().default({}),
+  complianceAnswers: jsonb("compliance_answers").$type<Record<string, string>>().default({}),
+  scoreKelengkapan: integer("score_kelengkapan"),
+  scoreTeknis: integer("score_teknis"),
+  generatedChecklist: jsonb("generated_checklist").$type<Array<{
+    code: string; section: string; item: string;
+    status: "Ada" | "Belum" | "Perlu revisi"; note?: string;
+  }>>(),
+  generatedRiskReview: jsonb("generated_risk_review").$type<Array<{
+    level: "red" | "yellow" | "green";
+    finding: string; impact: string; recommendation: string;
+  }>>(),
+  generatedDrafts: jsonb("generated_drafts").$type<Record<string, string>>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertTenderSessionSchema = createInsertSchema(tenderSessions).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTenderSession = z.infer<typeof insertTenderSessionSchema>;
+export type TenderSession = typeof tenderSessions.$inferSelect;

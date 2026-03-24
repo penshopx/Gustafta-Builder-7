@@ -19,6 +19,8 @@ import SeriesDetail from "@/pages/series-detail";
 import SectorLanding from "@/pages/sector-landing";
 import ProductLanding from "@/pages/product-landing";
 import ModulChat from "@/pages/modul-chat";
+import PacksPage from "@/pages/packs";
+import TenderWizard from "@/pages/tender-wizard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -39,6 +41,8 @@ function Router() {
       <Route path="/sector/:sectorId" component={SectorLanding} />
       <Route path="/product/:agentId" component={ProductLanding} />
       <Route path="/modul/:bigIdeaId" component={ModulChat} />
+      <Route path="/packs" component={PacksPage} />
+      <Route path="/packs/:packId" component={TenderWizard} />
       <Route component={NotFound} />
     </Switch>
   );
