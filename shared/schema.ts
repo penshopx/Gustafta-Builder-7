@@ -230,6 +230,8 @@ export const agents = pgTable("agents", {
   domainCharter: text("domain_charter").default(""),
   qualityBar: text("quality_bar").default(""),
   riskCompliance: text("risk_compliance").default(""),
+  deliverables: jsonb("deliverables").default([]),
+  deliverableBundle: text("deliverable_bundle").default(""),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -718,6 +720,9 @@ export const insertAgentSchema = z.object({
     duration: z.string().optional().default("15-30s"),
   })).optional().default([]),
   metaPixelId: z.string().optional().default(""),
+  // Deliverables
+  deliverables: z.array(z.string()).optional().default([]),
+  deliverableBundle: z.string().optional().default(""),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId
