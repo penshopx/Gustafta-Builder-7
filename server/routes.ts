@@ -5919,7 +5919,7 @@ Return JSON format:
   // AI-generate a KB document, optionally push to Notion
   app.post("/api/notion/ai-generate", isAuthenticated, async (req, res) => {
     try {
-      const { topic, documentType, layer, agentId, notionParentId } = req.body;
+      const { topic, documentType, layer, agentId, notionParentId, additionalContext, detailLevel = "standar" } = req.body;
       if (!topic || !documentType || !layer) {
         return res.status(400).json({ error: "topic, documentType, dan layer wajib diisi" });
       }
@@ -5935,38 +5935,52 @@ Return JSON format:
         }
       }
 
+      const detailConfig: Record<string, { maxTokens: number; instruction: string }> = {
+        ringkas: { maxTokens: 1200, instruction: "Buat versi RINGKAS (padat, poin-poin utama saja). Maksimal 400 kata." },
+        standar: { maxTokens: 2800, instruction: "Buat versi STANDAR (lengkap dan siap pakai, 500–900 kata)." },
+        lengkap: { maxTokens: 4500, instruction: "Buat versi LENGKAP dan MENDALAM (sangat detail, contoh konkret, selengkap mungkin, tidak ada batasan panjang)." },
+      };
+      const detail = detailConfig[detailLevel] || detailConfig.standar;
+
       const docTypeInstructions: Record<string, string> = {
-        sop: "Buat SOP lengkap. Wajib ada bagian: ## Syarat, ## Langkah-langkah (bernomor), ## Biaya, ## Waktu proses, ## Masalah umum (format Masalah → Solusi). Minimal 5 langkah utama.",
-        template: "Buat template siap pakai. Wajib ada: penjelasan tujuan, struktur tabel atau form (dalam format teks), instruksi pengisian per kolom, dan contoh pengisian.",
-        bank_soal: "Buat bank soal. Minimal 10 soal. Setiap soal: nomor, pertanyaan (pilihan ganda ABCD atau essay), jawaban benar, dan pembahasan singkat 2-4 kalimat.",
-        studi_kasus: "Buat studi kasus. Wajib ada bagian: ## Situasi, ## Masalah yang Ditemukan, ## Aturan yang Berlaku, ## Langkah Penyelesaian, ## Dokumen Output, ## Risiko dan Mitigasi.",
-        checklist: "Buat checklist lengkap. Format: daftar poin dengan [ ] di depannya. Kelompokkan dalam sub-bagian jika perlu. Minimal 15 poin.",
-        rubrik: "Buat rubrik penilaian. Buat tabel: Kriteria | Skor 0 | Skor 1 | Skor 2 | Skor 3 | Skor 4. Minimal 5 kriteria. Tambahkan petunjuk penggunaan rubrik.",
-        cheat_sheet: "Buat cheat sheet padat 1 halaman. Gunakan format yang sangat ringkas: poin-poin utama, definisi singkat, urutan proses, dan jebakan umum yang perlu dihindari.",
-        narasi_portofolio: "Buat panduan narasi portofolio. Wajib ada: template struktur STAR (Situasi-Tugas-Aksi-Hasil), contoh narasi yang baik, contoh narasi yang lemah + perbaikan, dan checklist 'narasi siap asesor'.",
-        custom: "Buat dokumen KB sesuai topik. Gunakan struktur heading yang logis dan konten yang lengkap, actionable, dan mudah dipahami.",
+        sop: `Buat SOP lengkap dengan struktur: ## Tujuan, ## Syarat & Prasyarat, ## Langkah-langkah (bernomor — setiap langkah minimal 2 kalimat penjelasan), ## Biaya, ## Waktu Proses, ## Output yang Dihasilkan, ## Masalah Umum & Solusi (minimal 3 skenario Masalah → Solusi → Tindakan Pencegahan). Gunakan **bold** untuk istilah teknis penting.`,
+        template: `Buat template siap pakai. Wajib ada: ## Tujuan Template, ## Instruksi Pengisian, ## Struktur Template (tabel atau form dengan header, contoh pengisian per baris), ## Catatan Penting. Buat tabel dalam format Markdown (| Kolom | Kolom |). Sertakan minimal 3 baris contoh isi.`,
+        bank_soal: `Buat bank soal. Setiap soal wajib: nomor, level kesulitan (★/★★/★★★), pertanyaan (pilihan ganda ABCD untuk soal hafalan, essay singkat untuk soal analitis), jawaban benar dicetak **bold**, pembahasan 3-5 kalimat yang menjelaskan "mengapa jawaban ini benar dan yang lain salah". Kelompokkan per sub-topik dengan heading ## Sub-topik. ${detailLevel === "ringkas" ? "Minimal 5 soal." : detailLevel === "lengkap" ? "Minimal 20 soal." : "Minimal 10 soal."}`,
+        studi_kasus: `Buat studi kasus realistis dengan struktur: ## Latar Belakang Kasus (narasi situasi, 3-5 kalimat), ## Identifikasi Masalah (daftar masalah yang ditemukan), ## Aturan yang Berlaku (regulasi/SOP/kebijakan yang relevan), ## Analisis (why-why atau root cause), ## Langkah Penyelesaian (bernomor, masing-masing dengan output konkret), ## Dokumen yang Harus Disiapkan, ## Risiko dan Mitigasi, ## Pembelajaran Kunci (takeaway). Gunakan bahasa naratif yang realistis.`,
+        checklist: `Buat checklist audit siap pakai. Format WAJIB: daftar poin dengan [ ] di depannya (satu poin per baris). Kelompokkan dalam ## Sub-bagian. Setiap poin harus spesifik, actionable, dan dapat diverifikasi. Tambahkan ## Cara Menggunakan Checklist ini di awal dan ## Catatan Penting di akhir. ${detailLevel === "ringkas" ? "Minimal 10 poin." : detailLevel === "lengkap" ? "Minimal 25 poin." : "Minimal 15 poin."}`,
+        rubrik: `Buat rubrik penilaian dalam format tabel Markdown. Kolom: | Kriteria | Deskripsi Skor 0 | Skor 1 | Skor 2 | Skor 3 | Skor 4 |. Setiap sel deskripsi harus spesifik dan observable (bukan hanya "baik/cukup/kurang"). Tambahkan ## Petunjuk Penggunaan Rubrik, ## Cara Menghitung Skor Akhir, ## Interpretasi Skor. ${detailLevel === "ringkas" ? "Minimal 4 kriteria." : detailLevel === "lengkap" ? "Minimal 8 kriteria." : "Minimal 5 kriteria."}`,
+        cheat_sheet: `Buat cheat sheet SANGAT PADAT untuk referensi cepat. Gunakan format super ringkas: **Istilah**: definisi singkat. Kelompokkan dalam ## bagian. Sertakan: ## Definisi Kunci, ## Prinsip/Aturan Utama (numbered), ## Urutan Proses/Alur, ## Dokumen Kunci per Tahap, ## Jebakan Umum yang Harus Dihindari, ## Angka/Batas Penting (jika ada). TIDAK perlu penjelasan panjang — ini untuk referensi cepat.`,
+        narasi_portofolio: `Buat panduan narasi portofolio komprehensif. Wajib ada: ## Kerangka STAR (Situasi-Tugas-Aksi-Hasil) dengan penjelasan tiap elemen, ## Template Narasi (dengan placeholder [NAMA], [JABATAN], [KEGIATAN], dll.), ## Contoh Narasi BAIK (dengan anotasi mengapa bagus), ## Contoh Narasi LEMAH (dengan catatan perbaikan → versi revisi), ## Tips Menulis yang Meyakinkan, ## Checklist Narasi Siap Asesor (format [ ] poin). Gunakan contoh yang spesifik dan realistis.`,
+        custom: `Buat dokumen KB dengan struktur yang paling sesuai untuk topik ini. Gunakan heading ## yang logis, konten yang lengkap dan actionable. Sertakan contoh konkret, prosedur yang jelas, dan referensi yang relevan.`,
       };
 
       const instruction = docTypeInstructions[documentType] || docTypeInstructions.custom;
-      const layerContext = layer === "foundational" ? "dokumen referensi tetap (definisi, prinsip, kerangka aturan)"
-        : layer === "operational" ? "prosedur aktif dan siap pakai (SOP, template, latihan)"
-        : "histori kasus dan preseden (contoh nyata, kesalahan umum, pembelajaran)";
+      const layerContext = layer === "foundational" ? "dokumen referensi tetap (definisi, prinsip, kerangka aturan — tidak sering berubah)"
+        : layer === "operational" ? "prosedur aktif dan siap pakai (SOP, template, latihan — digunakan sehari-hari)"
+        : "histori kasus dan preseden (contoh nyata, kesalahan umum, pembelajaran dari pengalaman)";
 
-      const systemPrompt = `Anda adalah asisten AI expert yang membuat dokumen Knowledge Base terstruktur dalam Bahasa Indonesia untuk platform chatbot AI bidang konstruksi, pengadaan, dan sertifikasi profesi.
+      const additionalContextBlock = additionalContext?.trim()
+        ? `\nKonteks tambahan dari pengguna: "${additionalContext.trim()}"`
+        : "";
 
-Instruksi:
-- Tulis dalam Bahasa Indonesia yang profesional dan mudah dipahami.
-- Gunakan format Markdown: ## untuk heading, ### untuk sub-heading, **bold** untuk istilah kunci, - atau 1. untuk list.
-- Layer dokumen ini adalah "${layer}" (${layerContext}).
+      const systemPrompt = `Anda adalah asisten AI expert yang membuat dokumen Knowledge Base terstruktur dalam Bahasa Indonesia untuk platform chatbot AI bidang konstruksi, pengadaan (PBJP/LKPP), dan sertifikasi profesi.
+
+Instruksi utama:
+- Tulis dalam Bahasa Indonesia yang profesional, jelas, dan mudah dipahami oleh praktisi lapangan.
+- Gunakan format Markdown konsisten: # untuk judul, ## untuk bagian utama, ### untuk sub-bagian, **bold** untuk istilah kunci, 1. untuk langkah bernomor, - atau • untuk poin, [ ] untuk checklist, | untuk tabel.
+- Layer dokumen ini adalah "${layer}" — artinya: ${layerContext}.
+- ${detail.instruction}
 - ${instruction}
-- Jangan tulis pengantar panjang atau disclaimer. Langsung mulai dengan judul dokumen (# Judul) lalu konten.
-- Konten harus lengkap, spesifik, dan bisa langsung digunakan tanpa modifikasi besar.${agentContext}`;
+- Jangan tulis pembuka/penutup generik ("Berikut adalah...", "Semoga bermanfaat", dll.). Langsung mulai dengan # Judul Dokumen.
+- Konten harus spesifik, actionable, dan langsung bisa digunakan tanpa modifikasi besar.
+- Sertakan contoh konkret, bukan contoh abstrak.${agentContext}${additionalContextBlock}`;
 
       const userPrompt = `Tipe Dokumen: ${documentType.replace(/_/g, " ").toUpperCase()}
 Layer: ${layer}
+Level Detail: ${detailLevel.toUpperCase()}
 Topik: ${topic}
 
-Buat dokumen KB yang lengkap, praktis, dan siap pakai.`;
+Buat dokumen KB berkualitas tinggi untuk topik ini.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -5974,8 +5988,8 @@ Buat dokumen KB yang lengkap, praktis, dan siap pakai.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        max_tokens: 2500,
-        temperature: 0.4,
+        max_tokens: detail.maxTokens,
+        temperature: 0.35,
       });
 
       const content = completion.choices[0]?.message?.content || "";

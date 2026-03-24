@@ -120,51 +120,187 @@ export function getNotionPageTitle(page: any): string {
   return page.id;
 }
 
+// Parse inline markdown into Notion rich_text array (handles **bold**, *italic*, `code`)
+function parseInlineMarkdown(text: string): any[] {
+  const segments: any[] = [];
+  // Split on bold, italic, inline-code patterns
+  const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
+  let last = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) {
+      segments.push({ type: "text", text: { content: text.slice(last, match.index) } });
+    }
+    if (match[2] !== undefined) {
+      segments.push({ type: "text", text: { content: match[2] }, annotations: { bold: true } });
+    } else if (match[3] !== undefined) {
+      segments.push({ type: "text", text: { content: match[3] }, annotations: { italic: true } });
+    } else if (match[4] !== undefined) {
+      segments.push({ type: "text", text: { content: match[4] }, annotations: { code: true } });
+    }
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) {
+    segments.push({ type: "text", text: { content: text.slice(last) } });
+  }
+  return segments.length > 0 ? segments : [{ type: "text", text: { content: text } }];
+}
+
+function markdownToNotionBlocks(markdown: string): any[] {
+  const lines = markdown.split("\n");
+  const blocks: any[] = [];
+  let numberedIndex = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Divider
+    if (/^-{3,}$/.test(line.trim())) {
+      blocks.push({ object: "block", type: "divider", divider: {} });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Empty line
+    if (!line.trim()) {
+      blocks.push({ object: "block", type: "paragraph", paragraph: { rich_text: [] } });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Heading 1
+    if (line.startsWith("# ")) {
+      blocks.push({ object: "block", type: "heading_1", heading_1: { rich_text: parseInlineMarkdown(line.slice(2).trim()) } });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Heading 2
+    if (line.startsWith("## ")) {
+      blocks.push({ object: "block", type: "heading_2", heading_2: { rich_text: parseInlineMarkdown(line.slice(3).trim()) } });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Heading 3
+    if (line.startsWith("### ")) {
+      blocks.push({ object: "block", type: "heading_3", heading_3: { rich_text: parseInlineMarkdown(line.slice(4).trim()) } });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Checkbox [ ] or [x]
+    const checkMatch = line.match(/^\[([x ])\]\s+(.+)/i);
+    if (checkMatch) {
+      blocks.push({
+        object: "block", type: "to_do",
+        to_do: {
+          checked: checkMatch[1].toLowerCase() === "x",
+          rich_text: parseInlineMarkdown(checkMatch[2]),
+        },
+      });
+      continue;
+    }
+
+    // Numbered list (1. 2. 3.)
+    const numberedMatch = line.match(/^(\d+)\.\s+(.+)/);
+    if (numberedMatch) {
+      blocks.push({ object: "block", type: "numbered_list_item", numbered_list_item: { rich_text: parseInlineMarkdown(numberedMatch[2]) } });
+      numberedIndex++;
+      continue;
+    }
+
+    // Bullet list (- or • or *)
+    const bulletMatch = line.match(/^([•\-\*])\s+(.+)/);
+    if (bulletMatch) {
+      blocks.push({ object: "block", type: "bulleted_list_item", bulleted_list_item: { rich_text: parseInlineMarkdown(bulletMatch[2]) } });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Blockquote
+    if (line.startsWith("> ")) {
+      blocks.push({ object: "block", type: "quote", quote: { rich_text: parseInlineMarkdown(line.slice(2)) } });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Callout (💡 or ⚠️ at start)
+    if (/^[💡⚠️ℹ️✅❌🔴🟡🟢]/.test(line)) {
+      blocks.push({ object: "block", type: "callout", callout: { rich_text: parseInlineMarkdown(line), icon: { type: "emoji", emoji: "💡" } } });
+      numberedIndex = 0;
+      continue;
+    }
+
+    // Table row (| col | col |)
+    if (line.startsWith("|") && line.endsWith("|")) {
+      // Skip separator rows (|---|---|)
+      if (/^\|[-:\s|]+\|$/.test(line)) continue;
+      // Convert table rows to bullet items
+      const cells = line.split("|").filter(c => c.trim()).map(c => c.trim());
+      const text = cells.join(" · ");
+      blocks.push({ object: "block", type: "bulleted_list_item", bulleted_list_item: { rich_text: parseInlineMarkdown(text) } });
+      continue;
+    }
+
+    // Code block fence
+    if (line.startsWith("```")) {
+      const codeLines: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith("```")) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      blocks.push({
+        object: "block", type: "code",
+        code: { rich_text: [{ type: "text", text: { content: codeLines.join("\n") } }], language: "plain text" },
+      });
+      continue;
+    }
+
+    // Regular paragraph
+    blocks.push({ object: "block", type: "paragraph", paragraph: { rich_text: parseInlineMarkdown(line) } });
+    numberedIndex = 0;
+  }
+
+  return blocks;
+}
+
 export async function createNotionPage(
   parentPageId: string,
   title: string,
   markdownContent: string
 ) {
-  const lines = markdownContent.split("\n");
-  const children: any[] = [];
+  const allBlocks = markdownToNotionBlocks(markdownContent);
 
-  for (const line of lines) {
-    if (!line.trim()) {
-      children.push({
-        object: "block",
-        type: "paragraph",
-        paragraph: { rich_text: [] },
-      });
-      continue;
-    }
-    if (line.startsWith("# ")) {
-      children.push({ object: "block", type: "heading_1", heading_1: { rich_text: [{ type: "text", text: { content: line.slice(2) } }] } });
-    } else if (line.startsWith("## ")) {
-      children.push({ object: "block", type: "heading_2", heading_2: { rich_text: [{ type: "text", text: { content: line.slice(3) } }] } });
-    } else if (line.startsWith("### ")) {
-      children.push({ object: "block", type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: line.slice(4) } }] } });
-    } else if (line.startsWith("• ") || line.startsWith("- ")) {
-      children.push({ object: "block", type: "bulleted_list_item", bulleted_list_item: { rich_text: [{ type: "text", text: { content: line.slice(2) } }] } });
-    } else if (line.startsWith("> ")) {
-      children.push({ object: "block", type: "quote", quote: { rich_text: [{ type: "text", text: { content: line.slice(2) } }] } });
-    } else {
-      children.push({ object: "block", type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: line } }] } });
-    }
-    if (children.length >= 95) break;
-  }
+  // Notion API limit: 100 blocks per request. Create page with first batch, then append.
+  const BATCH = 90;
+  const firstBatch = allBlocks.slice(0, BATCH);
+  const rest = allBlocks.slice(BATCH);
 
-  return notionProxy("/v1/pages", {
+  const page: any = await notionProxy("/v1/pages", {
     method: "POST",
     body: JSON.stringify({
       parent: { page_id: parentPageId },
       properties: {
-        title: {
-          title: [{ type: "text", text: { content: title } }],
-        },
+        title: { title: [{ type: "text", text: { content: title } }] },
       },
-      children,
+      children: firstBatch,
     }),
   });
+
+  // Append remaining blocks in batches
+  if (rest.length > 0 && page?.id) {
+    for (let i = 0; i < rest.length; i += BATCH) {
+      const batch = rest.slice(i, i + BATCH);
+      await notionProxy(`/v1/blocks/${page.id}/children`, {
+        method: "PATCH",
+        body: JSON.stringify({ children: batch }),
+      });
+    }
+  }
+
+  return page;
 }
 
 export async function getNotionWorkspacePages() {
