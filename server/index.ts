@@ -11,6 +11,7 @@ process.on("uncaughtException", (err) => {
 });
 
 import express, { type Request, Response, NextFunction } from "express";
+import { execSync } from "child_process";
 
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -18,6 +19,17 @@ import { createServer } from "http";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
+
+// Push DB schema on startup in production (build time has no DB access)
+if (process.env.NODE_ENV === "production") {
+  try {
+    console.log("[startup] Pushing database schema...");
+    execSync("npx drizzle-kit push --force", { stdio: "inherit", timeout: 60000 });
+    console.log("[startup] Schema ready.");
+  } catch (err) {
+    console.error("[startup] db:push failed — continuing anyway:", err);
+  }
+}
 
 const app = express();
 const httpServer = createServer(app);
