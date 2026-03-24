@@ -1145,7 +1145,10 @@ export const miniAppTypeSchema = z.enum([
   "issue_log", "action_tracker", "change_log",
   "project_snapshot", "decision_summary", "risk_radar",
   "scoring_assessment", "gap_analysis", "recommendation_engine", "lead_capture_form",
-  "nib_status_report", "whatsapp_status_update", "internal_project_report"
+  "nib_status_report", "whatsapp_status_update", "internal_project_report",
+  // Tender/Pengadaan — OpenClaw Document Types
+  "compliance_matrix", "tender_audit_report", "go_no_go_checklist",
+  "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 

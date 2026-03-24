@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,14 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   nib_status_report: "Laporan Status NIB (OSS)",
   whatsapp_status_update: "Pesan WhatsApp Status Klien",
   internal_project_report: "Laporan Internal Snapshot Proyek",
+  // Tender/Pengadaan
+  compliance_matrix: "Compliance Matrix — Matriks Kepatuhan",
+  tender_audit_report: "Laporan Audit/Review Penawaran",
+  go_no_go_checklist: "Checklist Final Submission (Go/No-Go)",
+  pqp_document: "Project Quality Plan (PQP)",
+  hse_plan: "HSE Plan / Rencana K3",
+  executive_summary_penawaran: "Executive Summary Penawaran",
+  metode_pelaksanaan: "Metode Pelaksanaan (Versi Tender)",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -60,6 +68,14 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   nib_status_report: FileSearch,
   whatsapp_status_update: MessageSquare,
   internal_project_report: Layers,
+  // Tender/Pengadaan
+  compliance_matrix: ClipboardCheck,
+  tender_audit_report: FileSearch,
+  go_no_go_checklist: ShieldCheck,
+  pqp_document: ClipboardList,
+  hse_plan: HardHat,
+  executive_summary_penawaran: FileText,
+  metode_pelaksanaan: LayoutList,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -82,10 +98,19 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   nib_status_report: "Ringkasan status + timeline OSS/NIB dari data Otak Proyek — otomatis disesuaikan untuk audiens internal atau klien (AI-powered)",
   whatsapp_status_update: "Pesan WhatsApp singkat, sopan, dan CTA jelas untuk update status proyek ke klien (AI-powered)",
   internal_project_report: "Laporan internal detail: status proyek, risiko aktif, kendala, keputusan tertunda, dan langkah mitigasi (AI-powered)",
+  // Tender/Pengadaan
+  compliance_matrix: "Matriks kepatuhan butir spesifikasi/KAK vs respon penawaran dengan status Comply/Partial/No dan bukti rujukan (AI-powered, OpenClaw)",
+  tender_audit_report: "Laporan review/audit penawaran — temuan prioritas, klausul acuan, bukti, rekomendasi perbaikan + PIC + due date (AI-powered, OpenClaw)",
+  go_no_go_checklist: "Checklist go/no-go sebelum submit: kelengkapan file, format, validitas administrasi, dan sign-off internal (OpenClaw, PBJ Formal)",
+  pqp_document: "Draft Project Quality Plan standar tender komersial: lingkup, prosedur mutu, inspeksi, dan kontrol dokumen (AI-powered)",
+  hse_plan: "Draft Rencana K3 / HSE Plan untuk tender komersial: bahaya, risiko, pengendalian, dan prosedur darurat (AI-powered)",
+  executive_summary_penawaran: "Executive summary singkat dan terstruktur untuk lampiran penawaran komersial (AI-powered)",
+  metode_pelaksanaan: "Draft metode pelaksanaan terstruktur untuk versi tender: sequence kerja, sumber daya, dan jadwal ringkas (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report"];
-const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
+const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
+const TENDER_DOC_TYPES: MiniAppType[] = ["compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 
 const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; description: string; items?: string[]; config?: Record<string, any> }>> = {
   checklist: {
@@ -299,7 +324,148 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
       sources: ["decision_risk_level", "issue_status", "time_constraint", "cost_constraint", "environmental_factors"],
     },
   },
+  // Tender/Pengadaan Templates
+  compliance_matrix: {
+    name: "Compliance Matrix — Matriks Kepatuhan",
+    description: "Matriks kepatuhan butir spesifikasi/KAK vs respon penawaran.",
+    config: {
+      mode: "compliance_matrix",
+      track: "PBJ Formal (Pemerintah/BUMN)",
+      openclaw: true,
+      clause_ref_required: true,
+      columns: ["butir_spesifikasi", "nomor_klausul", "respon_penawaran", "status", "bukti_rujukan", "catatan"],
+      status_values: ["Comply", "Partial Comply", "No Comply", "N/A"],
+      sections: ["Persyaratan Teknis", "Persyaratan Administratif", "Persyaratan Kualifikasi", "Persyaratan Keuangan"],
+      guardrails: { mark_missing_as: "Belum terisi", require_clause_for_partial_or_no: true },
+    },
+  },
+  tender_audit_report: {
+    name: "Laporan Audit/Review Penawaran",
+    description: "Review dan audit dokumen penawaran — temuan, klausul, dan rekomendasi.",
+    config: {
+      mode: "tender_audit_report",
+      track: "auto",
+      openclaw: true,
+      sections: ["ringkasan_eksekutif", "temuan_prioritas", "klausul_acuan", "bukti", "rekomendasi_perbaikan"],
+      finding_levels: ["High", "Medium", "Low"],
+      fields_per_finding: ["deskripsi", "level", "klausul_acuan", "bukti", "rekomendasi", "pic", "due_date"],
+      guardrails: { no_hallucination: true, require_clause_ref_for_pbj: true },
+    },
+  },
+  go_no_go_checklist: {
+    name: "Checklist Final Submission (Go/No-Go)",
+    description: "Checklist sign-off sebelum submit penawaran — kelengkapan, format, validitas.",
+    items: [
+      "Dokumen administrasi lengkap (SIUJK, NIB, NPWP, Akta)",
+      "Surat penawaran ditandatangani & bermeterai",
+      "Jaminan penawaran valid & jumlah sesuai",
+      "Kelengkapan dokumen teknis (Metpel, PQP, HSE, Daftar Personel Inti)",
+      "Daftar kuantitas & harga (BoQ) lengkap dan terkunci",
+      "Dokumen kualifikasi (SPT, neraca, pengalaman) terlampir",
+      "Persyaratan K/L terpenuhi (sesuai Dokpem/KAK)",
+      "Penamaan file sesuai panduan pengarsipan",
+      "Semua file sudah PDF/A dan ukuran di bawah batas",
+      "Upload final pada sistem SPSE/e-Procurement selesai",
+      "Sign-off tim teknis & komersial (Go/No-Go)",
+    ],
+    config: {
+      mode: "go_no_go_checklist",
+      track: "PBJ Formal (Pemerintah/BUMN)",
+      openclaw: true,
+      clause_ref_required: true,
+      rules: { block_submit_if_unfinished: true, require_signoff_before_go: true, show_completion_rate: true },
+    },
+  },
+  pqp_document: {
+    name: "Project Quality Plan (PQP)",
+    description: "Draft PQP standar tender komersial: lingkup, prosedur mutu, inspeksi, kontrol dokumen.",
+    config: {
+      mode: "pqp_document",
+      track: "Komersial",
+      openclaw: true,
+      sections: [
+        "Informasi Proyek & Lingkup Pekerjaan",
+        "Struktur Organisasi & Tanggung Jawab Mutu",
+        "Prosedur Pengendalian Dokumen",
+        "Rencana Inspeksi & Pengujian (ITP)",
+        "Kriteria Penerimaan Hasil Pekerjaan",
+        "Prosedur Penanganan Ketidaksesuaian",
+        "Daftar Rekaman Mutu",
+      ],
+      guardrails: { no_hallucination: true, mark_missing_as: "Disesuaikan saat pelaksanaan" },
+    },
+  },
+  hse_plan: {
+    name: "HSE Plan / Rencana K3",
+    description: "Draft Rencana K3 / HSE Plan untuk tender komersial.",
+    config: {
+      mode: "hse_plan",
+      track: "Komersial",
+      openclaw: true,
+      sections: [
+        "Kebijakan K3 & Komitmen Manajemen",
+        "Identifikasi Bahaya & Penilaian Risiko (HIRARC/IBPR)",
+        "Pengendalian Risiko (Hierarchy of Controls)",
+        "Program K3 Proyek",
+        "Prosedur Tanggap Darurat",
+        "Alat Pelindung Diri (APD) & Persyaratan",
+        "Rencana Inspeksi & Audit K3",
+      ],
+      guardrails: { no_hallucination: true, require_risk_matrix: true },
+    },
+  },
+  executive_summary_penawaran: {
+    name: "Executive Summary Penawaran",
+    description: "Executive summary singkat dan terstruktur untuk lampiran penawaran.",
+    config: {
+      mode: "executive_summary_penawaran",
+      track: "Komersial",
+      openclaw: true,
+      sections: [
+        "Gambaran Umum Proyek",
+        "Pemahaman Lingkup & Deliverable",
+        "Metodologi & Pendekatan",
+        "Kualifikasi & Pengalaman Relevan",
+        "Nilai Tambah & Diferensiasi",
+        "Ringkasan Harga & Jadwal",
+      ],
+      guardrails: { max_words: 600, no_hallucination: true, focus: "kekuatan_penawaran" },
+    },
+  },
+  metode_pelaksanaan: {
+    name: "Metode Pelaksanaan (Versi Tender)",
+    description: "Draft metode pelaksanaan terstruktur untuk versi tender.",
+    config: {
+      mode: "metode_pelaksanaan",
+      track: "Komersial",
+      openclaw: true,
+      sections: [
+        "Pendahuluan & Pemahaman Proyek",
+        "Sequence & Tahapan Pekerjaan",
+        "Metode Teknis per Item Pekerjaan Utama",
+        "Sumber Daya (Personel, Alat, Material)",
+        "Rencana Jadwal Ringkas",
+        "Pengendalian Mutu Selama Pelaksanaan",
+        "Pengendalian K3 & Lingkungan",
+      ],
+      guardrails: { no_hallucination: true, use_local_standard: true },
+    },
+  },
 };
+
+function buildTenderPrompt(docType: MiniAppType, ctx: { namaProyek: string; nomorPaket: string; tahunAnggaran: string; konteksPermasalahan: string }, track: string): string {
+  const header = `Kamu adalah AI spesialis dokumen pengadaan/tender konstruksi Indonesia. Track aktif: ${track}. Proyek: ${ctx.namaProyek || "(belum diisi)"}. Nomor Paket: ${ctx.nomorPaket || "-"}. Tahun Anggaran: ${ctx.tahunAnggaran}. Konteks tambahan: ${ctx.konteksPermasalahan || "-"}.`;
+  const instructions: Record<string, string> = {
+    compliance_matrix: `Buat Compliance Matrix lengkap dalam format tabel Markdown. Kolom: No | Butir Spesifikasi/KAK | Nomor Klausul | Respon Penawaran | Status (Comply/Partial Comply/No Comply/N/A) | Bukti Rujukan | Catatan. Kelompokkan per seksi: Persyaratan Teknis, Administratif, Kualifikasi, Keuangan. Minimal 15 baris. Tulis dalam Bahasa Indonesia profesional. Sertakan catatan guardrail di akhir.`,
+    tender_audit_report: `Buat Laporan Audit/Review Penawaran lengkap dalam Bahasa Indonesia. Format: Ringkasan Eksekutif → Temuan Prioritas (tabel: No | Deskripsi | Level | Klausul Acuan | Bukti | Rekomendasi | PIC | Due Date) → Penutup & Rekomendasi Strategis. Minimal 5 temuan dengan level High/Medium/Low.`,
+    go_no_go_checklist: `Buat Checklist Final Submission Go/No-Go. Format tabel Markdown: No | Item Pengecekan | Kategori | Status (✅/⚠️/❌) | Catatan. Kelompokkan: Administrasi, Teknis, Keuangan, Upload & Format. Minimal 15 item. Sertakan tabel sign-off di akhir.`,
+    pqp_document: `Buat draft Project Quality Plan (PQP) lengkap dalam Bahasa Indonesia dengan format dokumen formal. Sertakan semua seksi standar: Informasi Proyek, Struktur Organisasi & Tanggung Jawab, Pengendalian Dokumen, Rencana Inspeksi & Pengujian (ITP), Kriteria Penerimaan, Penanganan Ketidaksesuaian, Daftar Rekaman Mutu. Profesional dan siap pakai.`,
+    hse_plan: `Buat draft HSE Plan / Rencana K3 lengkap dalam Bahasa Indonesia dengan format dokumen formal. Sertakan: Kebijakan K3, Identifikasi Bahaya & Penilaian Risiko (tabel HIRARC), Pengendalian Risiko (hierarki kontrol), Program K3, Prosedur Tanggap Darurat, Daftar APD, Rencana Inspeksi K3. Profesional dan komprehensif.`,
+    executive_summary_penawaran: `Buat Executive Summary Penawaran yang ringkas, terstruktur, dan persuasif dalam Bahasa Indonesia. Seksi: Gambaran Umum Proyek, Pemahaman Lingkup, Metodologi & Pendekatan, Kualifikasi & Pengalaman Relevan, Nilai Tambah & Diferensiasi, Ringkasan Harga & Jadwal. Maksimal 600 kata. Format profesional, siap lampir.`,
+    metode_pelaksanaan: `Buat draft Metode Pelaksanaan untuk versi tender dalam Bahasa Indonesia. Format dokumen formal dengan seksi: Pendahuluan & Pemahaman Proyek, Sequence & Tahapan Pekerjaan, Metode Teknis per Item Pekerjaan Utama, Sumber Daya (Personel, Alat, Material), Rencana Jadwal Ringkas, Pengendalian Mutu, Pengendalian K3 & Lingkungan. Profesional dan komprehensif.`,
+  };
+  return `${header}\n\n${instructions[docType] || "Buat dokumen tender yang relevan dalam Bahasa Indonesia profesional."}\n\nPenting: Jangan tambahkan disclaimer tidak perlu. Tulis dalam format Markdown yang rapi dan siap digunakan.`;
+}
 
 export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const { toast } = useToast();
@@ -336,6 +502,106 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
     focus_area: "semua" as "semua" | "risiko" | "kendala" | "keputusan",
     urgency_flag: false,
   });
+
+  // Tender Document Hub (OpenClaw)
+  const [tenderWizardOpen, setTenderWizardOpen] = useState(false);
+  const [tenderWizardType, setTenderWizardType] = useState<MiniAppType | null>(null);
+  const [tenderWizardStep, setTenderWizardStep] = useState(1);
+  const [tenderContext, setTenderContext] = useState({
+    namaProyek: "",
+    nomorPaket: "",
+    tahunAnggaran: new Date().getFullYear().toString(),
+    konteksPermasalahan: "",
+  });
+  const [tenderResult, setTenderResult] = useState<string | null>(null);
+  const [tenderGenerating, setTenderGenerating] = useState(false);
+  const [tenderResultCopied, setTenderResultCopied] = useState(false);
+  const [tenderNotionExportOpen, setTenderNotionExportOpen] = useState(false);
+  const [tenderNotionParentPages, setTenderNotionParentPages] = useState<Array<{ id: string; title: string }>>([]);
+  const [tenderNotionParentPagesLoading, setTenderNotionParentPagesLoading] = useState(false);
+  const [tenderNotionParentId, setTenderNotionParentId] = useState("");
+  const [tenderNotionExportTitle, setTenderNotionExportTitle] = useState("");
+  const [tenderNotionExporting, setTenderNotionExporting] = useState(false);
+
+  const openTenderWizard = (type: MiniAppType) => {
+    setTenderWizardType(type);
+    setTenderWizardStep(1);
+    setTenderResult(null);
+    setTenderResultCopied(false);
+    setTenderContext({ namaProyek: "", nomorPaket: "", tahunAnggaran: new Date().getFullYear().toString(), konteksPermasalahan: "" });
+    setTenderWizardOpen(true);
+  };
+
+  const handleTenderGenerate = async () => {
+    if (!tenderWizardType) return;
+    setTenderGenerating(true);
+    setTenderWizardStep(2);
+    const config = DEFAULT_MINI_APP_CONFIGS[tenderWizardType];
+    const track = (config?.config as any)?.track || (agent.openClawTrack || "PBJ Formal (Pemerintah/BUMN)");
+    const prompt = buildTenderPrompt(tenderWizardType, tenderContext, track);
+    try {
+      const res = await fetch("/api/ai/tender-doc", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, docType: tenderWizardType, context: tenderContext, track }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generasi gagal");
+      setTenderResult(data.result);
+      setTenderWizardStep(3);
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message || "Gagal generate dokumen tender.", variant: "destructive" });
+      setTenderWizardStep(1);
+    } finally {
+      setTenderGenerating(false);
+    }
+  };
+
+  const handleTenderNotionExport = async () => {
+    if (!tenderNotionParentId || !tenderResult || !tenderNotionExportTitle) return;
+    setTenderNotionExporting(true);
+    try {
+      const res = await fetch("/api/notion/export", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ parentPageId: tenderNotionParentId, title: tenderNotionExportTitle, content: tenderResult }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Export gagal");
+      toast({ title: "Berhasil Diekspor ke Notion", description: tenderNotionExportTitle });
+      setTenderNotionExportOpen(false);
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setTenderNotionExporting(false);
+    }
+  };
+
+  const handleOpenTenderNotionExport = async () => {
+    if (!tenderWizardType) return;
+    const label = miniAppTypeLabels[tenderWizardType] || tenderWizardType;
+    setTenderNotionExportTitle(`${label} — ${tenderContext.namaProyek || "Proyek"} — ${new Date().toLocaleDateString("id-ID")}`);
+    setTenderNotionExportOpen(true);
+    setTenderNotionParentPagesLoading(true);
+    try {
+      const res = await fetch("/api/notion/pages", { credentials: "include" });
+      const data = await res.json();
+      const pages = (data.results || []).map((p: any) => {
+        const titleProp = Object.values(p.properties || {}).find((v: any) => v.type === "title") as any;
+        const title = titleProp?.title?.map((t: any) => t.plain_text).join("") || "(Tanpa Judul)";
+        return { id: p.id, title };
+      });
+      setTenderNotionParentPages(pages);
+      if (pages.length > 0) setTenderNotionParentId(pages[0].id);
+    } catch {
+      toast({ title: "Error", description: "Gagal memuat halaman Notion.", variant: "destructive" });
+    } finally {
+      setTenderNotionParentPagesLoading(false);
+    }
+  };
+
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -636,6 +902,49 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
           Buat Mini App
         </Button>
       </div>
+
+      {/* OpenClaw Tender Document Hub */}
+      <Card className="border-orange-200 dark:border-orange-800 bg-orange-50/40 dark:bg-orange-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm">Tender / Pengadaan — OpenClaw Generator</h3>
+              <p className="text-xs text-muted-foreground">Generate dokumen tender siap pakai dengan guardrail OpenClaw & PBJ Track</p>
+            </div>
+            <Badge variant="outline" className="ml-auto text-xs border-orange-300 text-orange-700 dark:text-orange-400 shrink-0">
+              {agent.openClawTrack || "PBJ Formal"}
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {TENDER_DOC_TYPES.map((type) => {
+              const TIcon = miniAppTypeIcons[type] || FileText;
+              const cfg = DEFAULT_MINI_APP_CONFIGS[type];
+              const trackBadge = (cfg?.config as any)?.track || "Komersial";
+              return (
+                <div
+                  key={type}
+                  className="flex items-start gap-2.5 p-3 rounded-lg border border-orange-100 dark:border-orange-900 bg-white dark:bg-background hover:border-orange-300 dark:hover:border-orange-700 transition-colors cursor-pointer group"
+                  onClick={() => openTenderWizard(type)}
+                  data-testid={`tender-doc-card-${type}`}
+                >
+                  <div className="w-8 h-8 rounded-md bg-orange-500/10 flex items-center justify-center shrink-0 group-hover:bg-orange-500/20 transition-colors">
+                    <TIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium leading-tight line-clamp-2">{miniAppTypeLabels[type]}</p>
+                    <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 border-orange-200 text-orange-600 dark:text-orange-400">
+                      {trackBadge}
+                    </Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1355,6 +1664,212 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
               ) : (
                 "Ekspor ke Notion"
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tender Wizard Dialog */}
+      <Dialog open={tenderWizardOpen} onOpenChange={(open) => { if (!open && !tenderGenerating) { setTenderWizardOpen(false); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-orange-500" />
+              {tenderWizardType ? miniAppTypeLabels[tenderWizardType] : "Dokumen Tender"}
+            </DialogTitle>
+            <DialogDescription className="flex items-center gap-2 flex-wrap">
+              <span>Generator OpenClaw</span>
+              {tenderWizardType && (
+                <Badge variant="outline" className="text-xs border-orange-300 text-orange-600">
+                  {(DEFAULT_MINI_APP_CONFIGS[tenderWizardType]?.config as any)?.track || agent.openClawTrack || "PBJ Formal"}
+                </Badge>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Step indicator */}
+          <div className="flex items-center gap-2 py-1">
+            {[{ n: 1, label: "Konteks" }, { n: 2, label: "Generate" }, { n: 3, label: "Hasil" }].map((step, idx) => (
+              <div key={step.n} className="flex items-center gap-1.5">
+                {idx > 0 && <div className={`h-px w-8 ${tenderWizardStep > idx ? "bg-primary" : "bg-muted"}`} />}
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-colors ${tenderWizardStep === step.n ? "border-primary bg-primary text-primary-foreground" : tenderWizardStep > step.n ? "border-primary bg-primary/20 text-primary" : "border-muted bg-muted text-muted-foreground"}`}>
+                  {tenderWizardStep > step.n ? "✓" : step.n}
+                </div>
+                <span className={`text-xs ${tenderWizardStep === step.n ? "font-semibold text-primary" : "text-muted-foreground"}`}>{step.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Step 1: Context Input */}
+          {tenderWizardStep === 1 && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label>Nama Proyek</Label>
+                  <Input
+                    value={tenderContext.namaProyek}
+                    onChange={(e) => setTenderContext(c => ({ ...c, namaProyek: e.target.value }))}
+                    placeholder="Pembangunan Jembatan XYZ"
+                    data-testid="input-tender-nama-proyek"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Nomor Paket</Label>
+                  <Input
+                    value={tenderContext.nomorPaket}
+                    onChange={(e) => setTenderContext(c => ({ ...c, nomorPaket: e.target.value }))}
+                    placeholder="Opsional — 001/DPUPR/2025"
+                    data-testid="input-tender-nomor-paket"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Tahun Anggaran</Label>
+                <Input
+                  value={tenderContext.tahunAnggaran}
+                  onChange={(e) => setTenderContext(c => ({ ...c, tahunAnggaran: e.target.value }))}
+                  placeholder="2025"
+                  data-testid="input-tender-tahun"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Konteks / Catatan Tambahan <span className="text-muted-foreground">(opsional)</span></Label>
+                <Textarea
+                  value={tenderContext.konteksPermasalahan}
+                  onChange={(e) => setTenderContext(c => ({ ...c, konteksPermasalahan: e.target.value }))}
+                  placeholder="Proyek jembatan baja bentang 50m, anggaran APBD 2025, lokasi Kab. Grobogan, Jawa Tengah..."
+                  rows={4}
+                  data-testid="input-tender-konteks"
+                />
+              </div>
+              {tenderWizardType && (
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900">
+                  <ShieldCheck className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-700 dark:text-orange-400">
+                    Dokumen di-generate dengan guardrail OpenClaw track <strong>{(DEFAULT_MINI_APP_CONFIGS[tenderWizardType]?.config as any)?.track || agent.openClawTrack || "PBJ Formal"}</strong>. Klausul acuan dicantumkan sesuai aturan PBJ.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 2: Generating */}
+          {tenderWizardStep === 2 && (
+            <div className="flex flex-col items-center justify-center py-12 gap-4">
+              <div className="relative w-16 h-16">
+                <div className="w-16 h-16 rounded-full border-4 border-orange-200 dark:border-orange-900" />
+                <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-t-orange-500 animate-spin" />
+                <ShieldCheck className="absolute inset-0 m-auto w-7 h-7 text-orange-500" />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold">OpenClaw sedang menyusun dokumen...</p>
+                <p className="text-sm text-muted-foreground mt-1">Menganalisis konteks & menerapkan guardrail PBJ</p>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Result */}
+          {tenderWizardStep === 3 && tenderResult && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-green-700 dark:text-green-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                  Dokumen berhasil di-generate
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { navigator.clipboard.writeText(tenderResult); setTenderResultCopied(true); setTimeout(() => setTenderResultCopied(false), 2000); }}
+                  data-testid="button-tender-copy-result"
+                >
+                  {tenderResultCopied ? <><Check className="w-3.5 h-3.5 mr-1" />Tersalin</> : <><Copy className="w-3.5 h-3.5 mr-1" />Salin</>}
+                </Button>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-4 max-h-80 overflow-y-auto">
+                <pre className="text-xs leading-relaxed whitespace-pre-wrap font-mono">{tenderResult}</pre>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            {tenderWizardStep === 1 && (
+              <>
+                <Button variant="outline" onClick={() => setTenderWizardOpen(false)} data-testid="button-tender-cancel">Batal</Button>
+                <Button
+                  onClick={handleTenderGenerate}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  data-testid="button-tender-generate"
+                >
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  Generate dengan OpenClaw
+                </Button>
+              </>
+            )}
+            {tenderWizardStep === 3 && (
+              <>
+                <Button variant="outline" onClick={() => setTenderWizardStep(1)} data-testid="button-tender-back">Ubah Konteks</Button>
+                <Button variant="outline" onClick={handleOpenTenderNotionExport} data-testid="button-tender-notion-export">
+                  Simpan ke Notion
+                </Button>
+                <Button onClick={() => setTenderWizardOpen(false)} data-testid="button-tender-done">Selesai</Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tender Notion Export Dialog */}
+      <Dialog open={tenderNotionExportOpen} onOpenChange={setTenderNotionExportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Simpan Dokumen Tender ke Notion</DialogTitle>
+            <DialogDescription>Buat halaman baru di Notion workspace Anda.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Judul Halaman</Label>
+              <Input
+                value={tenderNotionExportTitle}
+                onChange={(e) => setTenderNotionExportTitle(e.target.value)}
+                placeholder="Judul halaman..."
+                data-testid="input-tender-notion-title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Simpan di bawah halaman</Label>
+              {tenderNotionParentPagesLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Memuat halaman Notion...
+                </div>
+              ) : tenderNotionParentPages.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Tidak ada halaman yang dapat diakses di Notion.</p>
+              ) : (
+                <div className="max-h-44 overflow-y-auto space-y-0.5 rounded-md border p-1">
+                  {tenderNotionParentPages.map(page => (
+                    <button
+                      key={page.id}
+                      onClick={() => setTenderNotionParentId(page.id)}
+                      className={`w-full text-left px-2.5 py-1.5 rounded text-sm transition-colors ${tenderNotionParentId === page.id ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                      data-testid={`tender-notion-page-${page.id}`}
+                    >
+                      {page.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTenderNotionExportOpen(false)}>Batal</Button>
+            <Button
+              onClick={handleTenderNotionExport}
+              disabled={tenderNotionExporting || !tenderNotionParentId || !tenderNotionExportTitle}
+              data-testid="button-tender-confirm-notion"
+            >
+              {tenderNotionExporting ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Mengekspor...</>
+              ) : "Simpan ke Notion"}
             </Button>
           </DialogFooter>
         </DialogContent>

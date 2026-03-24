@@ -4131,7 +4131,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
       const extraParams = req.body && typeof req.body === "object" ? req.body as Record<string, any> : {};
@@ -4602,6 +4602,35 @@ Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapang
     } catch (error: any) {
       console.error("Mini app AI execution error:", error);
       res.status(500).json({ error: "Failed to execute mini app: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ==================== Tender Document Generator (OpenClaw) ====================
+
+  app.post("/api/ai/tender-doc", isAuthenticated, async (req, res) => {
+    try {
+      const { prompt, docType, context, track } = req.body;
+      if (!prompt || !docType) {
+        return res.status(400).json({ error: "prompt and docType are required" });
+      }
+      const openai = new OpenAI();
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `Kamu adalah AI spesialis pengadaan dan kontrak konstruksi Indonesia. Track: ${track || "PBJ Formal (Pemerintah/BUMN)"}. Tugas: menyusun dokumen tender profesional dalam Bahasa Indonesia sesuai aturan Perpres 16/2018 jo. Perpres 12/2021 dan standar industri konstruksi. Guardrail: no hallucination, kutip klausul acuan jika PBJ Formal, format Markdown rapi.`,
+          },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.3,
+        max_tokens: 4000,
+      });
+      const result = response.choices[0]?.message?.content || "Tidak ada hasil yang di-generate.";
+      res.json({ result, docType, context, track });
+    } catch (error: any) {
+      console.error("Tender doc generation error:", error);
+      res.status(500).json({ error: "Gagal generate dokumen tender: " + (error.message || "Unknown error") });
     }
   });
 
