@@ -21,6 +21,8 @@ import {
   ChevronDown,
   AlertTriangle,
   Shield,
+  ShieldCheck,
+  ShieldX,
   MessageSquare,
   Target,
   Layers,
@@ -28,6 +30,11 @@ import {
   RefreshCcw,
   Network,
   Lock,
+  Activity,
+  Bell,
+  Eye,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
 type Settings = {
@@ -59,6 +66,12 @@ type Settings = {
   workMode: string;
   executionGatePolicy: string;
   clarificationTriggers: string[];
+  // OpenClaw Execution Engine
+  openClawTrustedActions: string[];
+  openClawBlockedActions: string[];
+  openClawAuditLog: boolean;
+  openClawNotifyOnGate: boolean;
+  openClawStepTrace: boolean;
 };
 
 const PRESET_DEFAULTS: Record<string, Partial<Settings>> = {
@@ -496,6 +509,11 @@ export function AgenticAIPanel() {
         workMode: (agent as any).workMode || "Answer Mode",
         executionGatePolicy: (agent as any).executionGatePolicy || "Konfirmasi untuk write",
         clarificationTriggers: (agent as any).clarificationTriggers || ["Output target tidak jelas", "Risiko salah tinggi", "Butuh data spesifik untuk eksekusi"],
+        openClawTrustedActions: (agent as any).openClawTrustedActions || ["Cari di Knowledge Base", "Hitung formula", "Ringkas dokumen", "Sarankan langkah selanjutnya"],
+        openClawBlockedActions: (agent as any).openClawBlockedActions || ["Hapus data pengguna", "Kirim email massal", "Publish ke publik tanpa konfirmasi"],
+        openClawAuditLog: (agent as any).openClawAuditLog ?? true,
+        openClawNotifyOnGate: (agent as any).openClawNotifyOnGate ?? false,
+        openClawStepTrace: (agent as any).openClawStepTrace ?? true,
       });
     }
   }, [agent]);
@@ -726,26 +744,192 @@ export function AgenticAIPanel() {
               ))}
             </div>
           </div>
-          {isAdvanced && (
-            <div className="border-t pt-4">
-              <SelectRow
-                label="Gerbang Eksekusi (OpenClaw)"
-                helper="Level konfirmasi sebelum AI melakukan tindakan."
-                value={settings.executionGatePolicy}
-                onChange={(v) => save({ executionGatePolicy: v })}
-                options={[
-                  "Hanya baca (tanpa konfirmasi)",
-                  "Konfirmasi untuk write",
-                  "Konfirmasi ganda untuk destructive",
-                ]}
-                dataTestId="select-execution-gate-policy"
-                disabled={!settings.agenticMode}
-              />
-              <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1"><Lock className="h-3 w-3 text-green-500" /><span>Hanya baca: ambil data, rangkum — bebas tanpa konfirmasi.</span></div>
-                <div className="flex items-center gap-1"><Lock className="h-3 w-3 text-yellow-500" /><span>Write: buat dokumen, update sistem — butuh konfirmasi 1×.</span></div>
-                <div className="flex items-center gap-1"><Lock className="h-3 w-3 text-red-500" /><span>Destructive: hapus, publish, kirim massal — konfirmasi ganda.</span></div>
+        </CardContent>
+      </Card>
+
+      {/* OpenClaw Execution Engine Card */}
+      <Card className={`border-2 transition-colors ${settings.agenticMode ? "border-orange-400/60 dark:border-orange-600/40" : "border-border opacity-60"}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-7 h-7 rounded-md bg-orange-500/15">
+                <Shield className="h-4 w-4 text-orange-500" />
               </div>
+              <CardTitle className="text-base">OpenClaw</CardTitle>
+              <Badge variant="outline" className={`text-[10px] font-semibold px-1.5 py-0 ${settings.agenticMode ? "border-orange-400 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30" : "text-muted-foreground"}`}>
+                {settings.agenticMode ? "AKTIF" : "NONAKTIF"}
+              </Badge>
+            </div>
+            <span className="text-[10px] font-mono text-muted-foreground tracking-widest">EXECUTION ENGINE</span>
+          </div>
+          <CardDescription className="text-xs mt-1">
+            Lapisan keamanan eksekusi multi-level. Setiap tindakan AI dicegat, dikategorikan, dan dikonfirmasi sebelum berjalan — memberi Anda kontrol penuh atas apa yang dilakukan AI.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!settings.agenticMode && (
+            <div className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
+              <AlertTriangle className="h-3.5 w-3.5 text-orange-500 shrink-0" />
+              <p className="text-xs text-muted-foreground">Aktifkan Mode Agentic untuk mengaktifkan OpenClaw.</p>
+            </div>
+          )}
+
+          {/* Gate Level */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Gerbang Eksekusi</Label>
+            <p className="text-xs text-muted-foreground">Level konfirmasi sebelum AI melakukan tindakan.</p>
+            <Select
+              value={settings.executionGatePolicy}
+              onValueChange={(v) => save({ executionGatePolicy: v })}
+              disabled={!settings.agenticMode}
+            >
+              <SelectTrigger data-testid="select-execution-gate-policy">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Hanya baca (tanpa konfirmasi)">Hanya Baca — bebas tanpa konfirmasi</SelectItem>
+                <SelectItem value="Konfirmasi untuk write">Write Gate — konfirmasi 1× untuk tindakan tulis</SelectItem>
+                <SelectItem value="Konfirmasi ganda untuk destructive">Full Gate — konfirmasi ganda untuk tindakan destruktif</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Action Matrix */}
+          <div className="rounded-lg border overflow-hidden">
+            <div className="px-3 py-1.5 bg-muted/40 border-b">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Matriks Tindakan</p>
+            </div>
+            {[
+              {
+                level: "READ",
+                color: "green",
+                icon: <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />,
+                examples: "Cari KB · Hitung · Rangkum · Sarankan",
+                gate: "Otomatis",
+                gateClass: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30",
+              },
+              {
+                level: "WRITE",
+                color: "yellow",
+                icon: <Lock className="h-3.5 w-3.5 text-yellow-500" />,
+                examples: "Draft dokumen · Update rekaman · Buat laporan",
+                gate: "1× Konfirmasi",
+                gateClass: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/30",
+              },
+              {
+                level: "DESTRUCTIVE",
+                color: "red",
+                icon: <XCircle className="h-3.5 w-3.5 text-red-500" />,
+                examples: "Hapus data · Publish · Kirim massal",
+                gate: "Konfirmasi Ganda",
+                gateClass: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30",
+              },
+            ].map(({ level, icon, examples, gate, gateClass }) => (
+              <div key={level} className="flex items-center gap-3 px-3 py-2 border-b last:border-0 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-1.5 w-28 shrink-0">
+                  {icon}
+                  <span className="text-xs font-mono font-semibold">{level}</span>
+                </div>
+                <span className="text-xs text-muted-foreground flex-1 truncate">{examples}</span>
+                <Badge variant="secondary" className={`text-[10px] shrink-0 ${gateClass}`}>{gate}</Badge>
+              </div>
+            ))}
+          </div>
+
+          {/* Advanced OpenClaw settings */}
+          {isAdvanced && (
+            <div className="space-y-4 border-t pt-4">
+              {/* Trusted Actions */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
+                  <span className="text-xs font-semibold text-green-700 dark:text-green-400">Aksi Selalu Diizinkan (Trusted)</span>
+                </div>
+                <MultiSelectField
+                  label=""
+                  helper="Tindakan ini dijalankan tanpa konfirmasi apapun."
+                  options={[
+                    "Cari di Knowledge Base",
+                    "Hitung formula",
+                    "Ringkas dokumen",
+                    "Sarankan langkah selanjutnya",
+                    "Tampilkan mini app",
+                    "Arahkan ke chatbot lain",
+                    "Generate teks saja",
+                  ]}
+                  value={settings.openClawTrustedActions}
+                  onChange={(v) => save({ openClawTrustedActions: v })}
+                  dataTestId="multiselect-trusted-actions"
+                  disabled={!settings.agenticMode}
+                />
+              </div>
+
+              {/* Blocked Actions */}
+              <div className="border-t pt-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <ShieldX className="h-3.5 w-3.5 text-red-500" />
+                  <span className="text-xs font-semibold text-red-700 dark:text-red-400">Aksi Selalu Diblokir (Blocked)</span>
+                </div>
+                <MultiSelectField
+                  label=""
+                  helper="Tindakan ini tidak bisa dijalankan meski diminta."
+                  options={[
+                    "Hapus data pengguna",
+                    "Kirim email massal",
+                    "Publish ke publik tanpa konfirmasi",
+                    "Akses data sensitif langsung",
+                    "Ubah konfigurasi sistem",
+                    "Bayar atau charge kartu",
+                  ]}
+                  value={settings.openClawBlockedActions}
+                  onChange={(v) => save({ openClawBlockedActions: v })}
+                  dataTestId="multiselect-blocked-actions"
+                  disabled={!settings.agenticMode}
+                />
+              </div>
+
+              {/* Trace & Audit */}
+              <div className="border-t pt-4 space-y-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Transparansi & Audit</p>
+                <ToggleRow
+                  label="Lacak Langkah Eksekusi"
+                  helper="Tampilkan rantai tindakan AI step-by-step di chat."
+                  value={settings.openClawStepTrace}
+                  onChange={(v) => save({ openClawStepTrace: v })}
+                  dataTestId="toggle-openclaw-step-trace"
+                  disabled={!settings.agenticMode}
+                />
+                <div className="border-t pt-3">
+                  <ToggleRow
+                    label="Simpan Audit Log Sesi"
+                    helper="Catat semua tindakan AI dalam sesi ke log internal."
+                    value={settings.openClawAuditLog}
+                    onChange={(v) => save({ openClawAuditLog: v })}
+                    dataTestId="toggle-openclaw-audit-log"
+                    disabled={!settings.agenticMode}
+                  />
+                </div>
+                <div className="border-t pt-3">
+                  <ToggleRow
+                    label="Notifikasi saat Gate Terpicu"
+                    helper="Kirim notifikasi ketika AI meminta konfirmasi eksekusi."
+                    value={settings.openClawNotifyOnGate}
+                    onChange={(v) => save({ openClawNotifyOnGate: v })}
+                    dataTestId="toggle-openclaw-notify"
+                    disabled={!settings.agenticMode}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Compact summary when not in Advanced */}
+          {!isAdvanced && settings.agenticMode && (
+            <div className="rounded-md bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 px-3 py-2 flex items-center gap-2">
+              <Activity className="h-3.5 w-3.5 text-orange-500 shrink-0" />
+              <span className="text-xs text-orange-700 dark:text-orange-400">
+                Gate: <strong>{settings.executionGatePolicy === "Hanya baca (tanpa konfirmasi)" ? "Hanya Baca" : settings.executionGatePolicy === "Konfirmasi untuk write" ? "Write Gate" : "Full Gate"}</strong> · {settings.openClawStepTrace ? "Step trace ON" : "Step trace OFF"} · {settings.openClawAuditLog ? "Audit log ON" : "Audit log OFF"}
+              </span>
             </div>
           )}
         </CardContent>
