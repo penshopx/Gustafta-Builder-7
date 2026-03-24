@@ -164,6 +164,7 @@ function MultiSelectField({
   value,
   onChange,
   dataTestId,
+  disabled,
 }: {
   label: string;
   helper: string;
@@ -171,8 +172,10 @@ function MultiSelectField({
   value: string[];
   onChange: (val: string[]) => void;
   dataTestId?: string;
+  disabled?: boolean;
 }) {
   const toggle = (opt: string) => {
+    if (disabled) return;
     if (value.includes(opt)) {
       onChange(value.filter((v) => v !== opt));
     } else {
@@ -180,7 +183,7 @@ function MultiSelectField({
     }
   };
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${disabled ? "opacity-40 pointer-events-none select-none" : ""}`}>
       <div>
         <Label className="text-sm font-medium">{label}</Label>
         <p className="text-xs text-muted-foreground mt-0.5">{helper}</p>
@@ -391,15 +394,17 @@ function ToggleRow({
   value,
   onChange,
   dataTestId,
+  disabled,
 }: {
   label: string;
   helper: string;
   value: boolean;
   onChange: (v: boolean) => void;
   dataTestId?: string;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div className={`flex items-start justify-between gap-4 ${disabled ? "opacity-40 pointer-events-none select-none" : ""}`}>
       <div>
         <Label className="text-sm font-medium">{label}</Label>
         <p className="text-xs text-muted-foreground mt-0.5">{helper}</p>
@@ -409,6 +414,7 @@ function ToggleRow({
         onCheckedChange={onChange}
         data-testid={dataTestId}
         className="shrink-0"
+        disabled={disabled}
       />
     </div>
   );
@@ -421,6 +427,7 @@ function SelectRow({
   onChange,
   options,
   dataTestId,
+  disabled,
 }: {
   label: string;
   helper: string;
@@ -428,14 +435,15 @@ function SelectRow({
   onChange: (v: string) => void;
   options: string[];
   dataTestId?: string;
+  disabled?: boolean;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className={`space-y-1.5 ${disabled ? "opacity-40 pointer-events-none select-none" : ""}`}>
       <div>
         <Label className="text-sm font-medium">{label}</Label>
         <p className="text-xs text-muted-foreground mt-0.5">{helper}</p>
       </div>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger data-testid={dataTestId}>
           <SelectValue />
         </SelectTrigger>
@@ -546,7 +554,7 @@ export function AgenticAIPanel() {
         <div className="flex items-center gap-2 shrink-0">
           <div className="text-right">
             <Label className="text-sm font-medium" data-testid="label-advanced-mode">Mode Lanjutan</Label>
-            <p className="text-xs text-muted-foreground">Pengaturan detail untuk pengguna berpengalaman.</p>
+            <p className="text-xs text-muted-foreground">Tampilkan pengaturan detail untuk pengguna berpengalaman.</p>
           </div>
           <Switch
             checked={isAdvanced}
@@ -681,19 +689,23 @@ export function AgenticAIPanel() {
             dataTestId="select-agent-role"
           />
           <div className="border-t pt-4">
+            {!settings.agenticMode && (
+              <div className="mb-3 flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
+                <AlertTriangle className="h-3.5 w-3.5 text-orange-500 shrink-0" />
+                <p className="text-xs text-muted-foreground">Mode Agentic OFF — hanya "Answer Mode" tersedia.</p>
+              </div>
+            )}
             <SelectRow
               label="Mode Kerja"
               helper="Mode operasi aktif agen saat ini."
-              value={settings.workMode}
+              value={settings.agenticMode ? settings.workMode : "Answer Mode"}
               onChange={(v) => save({ workMode: v })}
-              options={[
-                "Answer Mode",
-                "Advisor Mode",
-                "Task Intake Mode",
-                "Execution Mode",
-                "Review Mode",
-              ]}
+              options={settings.agenticMode
+                ? ["Answer Mode", "Advisor Mode", "Task Intake Mode", "Execution Mode", "Review Mode"]
+                : ["Answer Mode"]
+              }
               dataTestId="select-work-mode"
+              disabled={!settings.agenticMode}
             />
             <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
               {[
@@ -727,6 +739,7 @@ export function AgenticAIPanel() {
                   "Konfirmasi ganda untuk destructive",
                 ]}
                 dataTestId="select-execution-gate-policy"
+                disabled={!settings.agenticMode}
               />
               <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1"><Lock className="h-3 w-3 text-green-500" /><span>Hanya baca: ambil data, rangkum — bebas tanpa konfirmasi.</span></div>
@@ -815,6 +828,7 @@ export function AgenticAIPanel() {
                   value={settings.multiStepReasoning}
                   onChange={(v) => save({ multiStepReasoning: v })}
                   dataTestId="toggle-multi-step-reasoning"
+                  disabled={!settings.agenticMode}
                 />
               </div>
             </CardContent>
@@ -876,6 +890,7 @@ export function AgenticAIPanel() {
                   value={settings.clarificationTriggers}
                   onChange={(v) => save({ clarificationTriggers: v })}
                   dataTestId="multiselect-clarification-triggers"
+                  disabled={!settings.agenticMode}
                 />
               </div>
             </CardContent>
@@ -954,7 +969,7 @@ export function AgenticAIPanel() {
             <CardContent className="space-y-4">
               <SelectRow
                 label="Bantuan Proaktif"
-                helper="Seberapa sering AI memberi bantuan tambahan tanpa diminta."
+                helper="Seberapa sering AI memberi bantuan tambahan."
                 value={settings.proactiveAssistanceLevel}
                 onChange={(v) => save({ proactiveAssistanceLevel: v })}
                 options={["Off", "Rendah", "Sedang", "Tinggi"]}
