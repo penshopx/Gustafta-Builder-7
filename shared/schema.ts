@@ -219,6 +219,19 @@ export const agents = pgTable("agents", {
   workMode: text("work_mode").default("Answer Mode"),
   executionGatePolicy: text("execution_gate_policy").default("Konfirmasi untuk write"),
   clarificationTriggers: jsonb("clarification_triggers").default(["Output target tidak jelas", "Risiko salah tinggi", "Butuh data spesifik untuk eksekusi"]),
+  // OpenClaw Execution Engine
+  openClawTrustedActions: jsonb("open_claw_trusted_actions").default(["Cari di Knowledge Base", "Hitung formula", "Ringkas dokumen", "Sarankan langkah selanjutnya"]),
+  openClawBlockedActions: jsonb("open_claw_blocked_actions").default(["Hapus data pengguna", "Kirim email massal", "Publish ke publik tanpa konfirmasi"]),
+  openClawAuditLog: boolean("open_claw_audit_log").default(true),
+  openClawNotifyOnGate: boolean("open_claw_notify_on_gate").default(false),
+  openClawStepTrace: boolean("open_claw_step_trace").default(true),
+  // OpenClaw — PBJ Track Routing
+  openClawTrack: text("open_claw_track").default("Komersial"),
+  openClawEntityOwner: text("open_claw_entity_owner").default(""),
+  openClawRulebook: text("open_claw_rulebook").default(""),
+  openClawRulebookCategory: jsonb("open_claw_rulebook_category").default([]),
+  openClawRulebookStatus: text("open_claw_rulebook_status").default("Active"),
+  openClawClauseRefRequired: boolean("open_claw_clause_ref_required").default(false),
   // Tujuan & KPI
   primaryOutcome: text("primary_outcome").default(""),
   conversationWinConditions: text("conversation_win_conditions").default(""),
@@ -723,6 +736,19 @@ export const insertAgentSchema = z.object({
   // Deliverables
   deliverables: z.array(z.string()).optional().default([]),
   deliverableBundle: z.string().optional().default(""),
+  // OpenClaw Execution Engine
+  openClawTrustedActions: z.array(z.string()).optional().default(["Cari di Knowledge Base", "Hitung formula", "Ringkas dokumen", "Sarankan langkah selanjutnya"]),
+  openClawBlockedActions: z.array(z.string()).optional().default(["Hapus data pengguna", "Kirim email massal", "Publish ke publik tanpa konfirmasi"]),
+  openClawAuditLog: z.boolean().optional().default(true),
+  openClawNotifyOnGate: z.boolean().optional().default(false),
+  openClawStepTrace: z.boolean().optional().default(true),
+  // OpenClaw — PBJ Track Routing
+  openClawTrack: z.string().optional().default("Komersial"),
+  openClawEntityOwner: z.string().optional().default(""),
+  openClawRulebook: z.string().optional().default(""),
+  openClawRulebookCategory: z.array(z.string()).optional().default([]),
+  openClawRulebookStatus: z.string().optional().default("Active"),
+  openClawClauseRefRequired: z.boolean().optional().default(false),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId
