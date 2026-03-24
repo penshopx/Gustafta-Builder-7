@@ -83,6 +83,19 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const [editingItem, setEditingItem] = useState<KnowledgeBase | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // AI Generate state
+  const [aiGenOpen, setAiGenOpen] = useState(false);
+  const [aiGenTopic, setAiGenTopic] = useState("");
+  const [aiGenDocType, setAiGenDocType] = useState("sop");
+  const [aiGenLayer, setAiGenLayer] = useState<"foundational" | "operational" | "case_memory">("operational");
+  const [aiGenLoading, setAiGenLoading] = useState(false);
+  const [aiGenResult, setAiGenResult] = useState<{ title: string; content: string; layer: string; url?: string } | null>(null);
+  const [aiGenPushNotion, setAiGenPushNotion] = useState(false);
+  const [aiGenNotionParentId, setAiGenNotionParentId] = useState("");
+  const [aiGenNotionPages, setAiGenNotionPages] = useState<Array<{ id: string; title: string }>>([]);
+  const [aiGenNotionPagesLoading, setAiGenNotionPagesLoading] = useState(false);
+  const [aiGenSaving, setAiGenSaving] = useState(false);
+
   // Notion import state
   const [notionImportOpen, setNotionImportOpen] = useState(false);
   const [notionSearchQuery, setNotionSearchQuery] = useState("");
@@ -377,6 +390,87 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  const handleOpenAiGen = async () => {
+    setAiGenOpen(true);
+    setAiGenResult(null);
+    setAiGenTopic("");
+    if (aiGenNotionPages.length === 0) {
+      setAiGenNotionPagesLoading(true);
+      try {
+        const res = await fetch("/api/notion/pages", { credentials: "include" });
+        const data = await res.json();
+        const pages = (data.results || []).map((p: any) => {
+          const titleProp = Object.values(p.properties || {}).find((v: any) => v.type === "title") as any;
+          const title = titleProp?.title?.map((t: any) => t.plain_text).join("") || "(Tanpa Judul)";
+          return { id: p.id, title };
+        });
+        setAiGenNotionPages(pages);
+        if (pages.length > 0) setAiGenNotionParentId(pages[0].id);
+      } catch {
+        // Notion not available - that's ok
+      } finally {
+        setAiGenNotionPagesLoading(false);
+      }
+    }
+  };
+
+  const handleAiGenerate = async () => {
+    if (!aiGenTopic.trim()) {
+      toast({ title: "Topik kosong", description: "Masukkan topik dokumen yang ingin di-generate.", variant: "destructive" });
+      return;
+    }
+    setAiGenLoading(true);
+    setAiGenResult(null);
+    try {
+      const res = await apiRequest("POST", "/api/notion/ai-generate", {
+        topic: aiGenTopic,
+        documentType: aiGenDocType,
+        layer: aiGenLayer,
+        agentId: agent.id,
+        notionParentId: aiGenPushNotion && aiGenNotionParentId ? aiGenNotionParentId : undefined,
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setAiGenResult(data);
+      if (data.url) {
+        toast({ title: "Berhasil di-generate + Push ke Notion", description: `Halaman "${data.title}" dibuat di Notion.` });
+      } else {
+        toast({ title: "Dokumen berhasil di-generate", description: "Review konten lalu simpan ke Knowledge Base." });
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "Gagal generate dokumen.", variant: "destructive" });
+    } finally {
+      setAiGenLoading(false);
+    }
+  };
+
+  const handleAiGenSaveToKb = () => {
+    if (!aiGenResult) return;
+    setAiGenSaving(true);
+    createKnowledgeBase.mutate(
+      {
+        agentId: agent.id,
+        name: aiGenResult.title,
+        type: "text",
+        content: aiGenResult.content,
+        description: `AI-generated · ${aiGenDocType.replace(/_/g, " ")} · ${aiGenLayer}`,
+        knowledgeLayer: aiGenLayer,
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Disimpan ke Knowledge Base", description: `"${aiGenResult.title}" berhasil ditambahkan.` });
+          setAiGenSaving(false);
+          setAiGenResult(null);
+          setAiGenOpen(false);
+        },
+        onError: () => {
+          toast({ title: "Error", description: "Gagal menyimpan ke Knowledge Base.", variant: "destructive" });
+          setAiGenSaving(false);
+        },
+      }
+    );
+  };
+
   const handleNotionSearch = async () => {
     setNotionSearchLoading(true);
     try {
@@ -461,6 +555,185 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
               {agent.ragEnabled !== false ? "Aktif" : "Nonaktif"}
             </Badge>
           </div>
+          {/* AI Generate + Notion Dialog */}
+          <Dialog open={aiGenOpen} onOpenChange={(open) => { setAiGenOpen(open); if (!open) setAiGenResult(null); }}>
+            <DialogTrigger asChild>
+              <Button variant="outline" onClick={handleOpenAiGen} disabled={agent.ragEnabled === false} data-testid="button-ai-gen-kb">
+                <Loader2 className="w-4 h-4 mr-2 hidden" />
+                ✦ Generate dengan AI
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
+              <DialogHeader className="shrink-0">
+                <DialogTitle className="flex items-center gap-2">
+                  ✦ Generate Dokumen KB dengan AI
+                </DialogTitle>
+                <DialogDescription>
+                  AI akan membuat dokumen terstruktur siap-pakai. Simpan ke KB dan/atau push langsung ke Notion.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="flex-1 overflow-y-auto space-y-4 py-2 pr-1">
+                {/* Topic input */}
+                <div className="space-y-2">
+                  <Label>Topik Dokumen</Label>
+                  <Textarea
+                    value={aiGenTopic}
+                    onChange={(e) => setAiGenTopic(e.target.value)}
+                    placeholder="Contoh: SOP Persiapan Uji PBJP LKPP Level 1 (H-14 s.d. H-1)&#10;Contoh: Bank Soal Prinsip & Etika Pengadaan PBJP (50 soal)&#10;Contoh: Checklist Dokumen Pemilihan Penyedia siap audit"
+                    rows={3}
+                    data-testid="textarea-ai-gen-topic"
+                  />
+                </div>
+
+                {/* Document type + layer side by side */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Tipe Dokumen</Label>
+                    <Select value={aiGenDocType} onValueChange={setAiGenDocType}>
+                      <SelectTrigger data-testid="select-ai-gen-doctype">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sop">SOP (Prosedur Operasional)</SelectItem>
+                        <SelectItem value="template">Template / Form</SelectItem>
+                        <SelectItem value="bank_soal">Bank Soal + Pembahasan</SelectItem>
+                        <SelectItem value="studi_kasus">Studi Kasus</SelectItem>
+                        <SelectItem value="checklist">Checklist Audit</SelectItem>
+                        <SelectItem value="rubrik">Rubrik Penilaian</SelectItem>
+                        <SelectItem value="cheat_sheet">Cheat Sheet</SelectItem>
+                        <SelectItem value="narasi_portofolio">Narasi Portofolio (STAR)</SelectItem>
+                        <SelectItem value="custom">Custom (bebas)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Lapisan Knowledge</Label>
+                    <Select value={aiGenLayer} onValueChange={(v) => setAiGenLayer(v as any)}>
+                      <SelectTrigger data-testid="select-ai-gen-layer">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="foundational">Foundational — referensi tetap</SelectItem>
+                        <SelectItem value="operational">Operational — prosedur aktif</SelectItem>
+                        <SelectItem value="case_memory">Case Memory — kasus & preseden</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Notion push option */}
+                <div className="rounded-lg border p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"/>
+                        </svg>
+                        Push ke Notion sekaligus
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Dokumen langsung dibuat di Notion saat generate.</p>
+                    </div>
+                    <Switch
+                      checked={aiGenPushNotion}
+                      onCheckedChange={setAiGenPushNotion}
+                      data-testid="switch-ai-gen-push-notion"
+                    />
+                  </div>
+                  {aiGenPushNotion && (
+                    <div className="space-y-1">
+                      <Label className="text-xs">Simpan di bawah halaman</Label>
+                      {aiGenNotionPagesLoading ? (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground py-1">
+                          <Loader2 className="w-3 h-3 animate-spin" /> Memuat halaman Notion...
+                        </div>
+                      ) : aiGenNotionPages.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">Tidak ada halaman Notion yang dapat diakses.</p>
+                      ) : (
+                        <Select value={aiGenNotionParentId} onValueChange={setAiGenNotionParentId}>
+                          <SelectTrigger className="h-8 text-sm" data-testid="select-ai-gen-notion-parent">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {aiGenNotionPages.map((p) => (
+                              <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Generate button */}
+                <Button
+                  onClick={handleAiGenerate}
+                  disabled={aiGenLoading || !aiGenTopic.trim()}
+                  className="w-full"
+                  data-testid="button-run-ai-gen"
+                >
+                  {aiGenLoading ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating dokumen...</>
+                  ) : (
+                    <>✦ Generate Dokumen</>
+                  )}
+                </Button>
+
+                {/* Preview result */}
+                {aiGenResult && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold">{aiGenResult.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
+                            aiGenResult.layer === "foundational" ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800" :
+                            aiGenResult.layer === "case_memory" ? "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-800" :
+                            "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
+                          }`}>{aiGenResult.layer}</span>
+                          {aiGenResult.url && (
+                            <a href={aiGenResult.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                              <ExternalLink className="w-3 h-3" /> Buka di Notion
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(aiGenResult.content);
+                          toast({ title: "Disalin!", description: "Konten disalin ke clipboard." });
+                        }}
+                      >
+                        <Search className="w-3.5 h-3.5 mr-1 hidden" />
+                        Salin
+                      </Button>
+                    </div>
+                    <div className="bg-muted/40 border rounded-lg p-4 max-h-64 overflow-y-auto">
+                      <pre className="text-xs whitespace-pre-wrap leading-relaxed font-sans">{aiGenResult.content}</pre>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <DialogFooter className="shrink-0 pt-2 border-t">
+                <Button variant="outline" onClick={() => { setAiGenOpen(false); setAiGenResult(null); }}>
+                  Tutup
+                </Button>
+                {aiGenResult && (
+                  <Button
+                    onClick={handleAiGenSaveToKb}
+                    disabled={aiGenSaving || createKnowledgeBase.isPending}
+                    data-testid="button-ai-gen-save-kb"
+                  >
+                    {aiGenSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Menyimpan...</> : "Simpan ke Knowledge Base"}
+                  </Button>
+                )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={notionImportOpen} onOpenChange={setNotionImportOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" disabled={agent.ragEnabled === false} data-testid="button-import-notion">

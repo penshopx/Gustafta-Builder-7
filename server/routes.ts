@@ -5916,6 +5916,95 @@ Return JSON format:
     }
   });
 
+  // AI-generate a KB document, optionally push to Notion
+  app.post("/api/notion/ai-generate", isAuthenticated, async (req, res) => {
+    try {
+      const { topic, documentType, layer, agentId, notionParentId } = req.body;
+      if (!topic || !documentType || !layer) {
+        return res.status(400).json({ error: "topic, documentType, dan layer wajib diisi" });
+      }
+
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Get agent context if agentId provided
+      let agentContext = "";
+      if (agentId) {
+        const agent = await storage.getAgent(String(agentId));
+        if (agent) {
+          agentContext = `\nKonteks agen: "${agent.name}" — ${agent.description || ""}`;
+        }
+      }
+
+      const docTypeInstructions: Record<string, string> = {
+        sop: "Buat SOP lengkap. Wajib ada bagian: ## Syarat, ## Langkah-langkah (bernomor), ## Biaya, ## Waktu proses, ## Masalah umum (format Masalah → Solusi). Minimal 5 langkah utama.",
+        template: "Buat template siap pakai. Wajib ada: penjelasan tujuan, struktur tabel atau form (dalam format teks), instruksi pengisian per kolom, dan contoh pengisian.",
+        bank_soal: "Buat bank soal. Minimal 10 soal. Setiap soal: nomor, pertanyaan (pilihan ganda ABCD atau essay), jawaban benar, dan pembahasan singkat 2-4 kalimat.",
+        studi_kasus: "Buat studi kasus. Wajib ada bagian: ## Situasi, ## Masalah yang Ditemukan, ## Aturan yang Berlaku, ## Langkah Penyelesaian, ## Dokumen Output, ## Risiko dan Mitigasi.",
+        checklist: "Buat checklist lengkap. Format: daftar poin dengan [ ] di depannya. Kelompokkan dalam sub-bagian jika perlu. Minimal 15 poin.",
+        rubrik: "Buat rubrik penilaian. Buat tabel: Kriteria | Skor 0 | Skor 1 | Skor 2 | Skor 3 | Skor 4. Minimal 5 kriteria. Tambahkan petunjuk penggunaan rubrik.",
+        cheat_sheet: "Buat cheat sheet padat 1 halaman. Gunakan format yang sangat ringkas: poin-poin utama, definisi singkat, urutan proses, dan jebakan umum yang perlu dihindari.",
+        narasi_portofolio: "Buat panduan narasi portofolio. Wajib ada: template struktur STAR (Situasi-Tugas-Aksi-Hasil), contoh narasi yang baik, contoh narasi yang lemah + perbaikan, dan checklist 'narasi siap asesor'.",
+        custom: "Buat dokumen KB sesuai topik. Gunakan struktur heading yang logis dan konten yang lengkap, actionable, dan mudah dipahami.",
+      };
+
+      const instruction = docTypeInstructions[documentType] || docTypeInstructions.custom;
+      const layerContext = layer === "foundational" ? "dokumen referensi tetap (definisi, prinsip, kerangka aturan)"
+        : layer === "operational" ? "prosedur aktif dan siap pakai (SOP, template, latihan)"
+        : "histori kasus dan preseden (contoh nyata, kesalahan umum, pembelajaran)";
+
+      const systemPrompt = `Anda adalah asisten AI expert yang membuat dokumen Knowledge Base terstruktur dalam Bahasa Indonesia untuk platform chatbot AI bidang konstruksi, pengadaan, dan sertifikasi profesi.
+
+Instruksi:
+- Tulis dalam Bahasa Indonesia yang profesional dan mudah dipahami.
+- Gunakan format Markdown: ## untuk heading, ### untuk sub-heading, **bold** untuk istilah kunci, - atau 1. untuk list.
+- Layer dokumen ini adalah "${layer}" (${layerContext}).
+- ${instruction}
+- Jangan tulis pengantar panjang atau disclaimer. Langsung mulai dengan judul dokumen (# Judul) lalu konten.
+- Konten harus lengkap, spesifik, dan bisa langsung digunakan tanpa modifikasi besar.${agentContext}`;
+
+      const userPrompt = `Tipe Dokumen: ${documentType.replace(/_/g, " ").toUpperCase()}
+Layer: ${layer}
+Topik: ${topic}
+
+Buat dokumen KB yang lengkap, praktis, dan siap pakai.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 2500,
+        temperature: 0.4,
+      });
+
+      const content = completion.choices[0]?.message?.content || "";
+
+      // Extract title from first # heading
+      const titleMatch = content.match(/^#\s+(.+)/m);
+      const title = titleMatch ? titleMatch[1].trim() : topic;
+
+      // Optionally push to Notion
+      let notionResult: { pageId?: string; url?: string } = {};
+      if (notionParentId) {
+        try {
+          const np = await createNotionPage(notionParentId, title, content);
+          notionResult = {
+            pageId: (np as any).id,
+            url: (np as any).url || `https://notion.so/${((np as any).id || "").replace(/-/g, "")}`,
+          };
+        } catch (ne) {
+          console.error("Notion push error (non-fatal):", ne);
+        }
+      }
+
+      res.json({ title, content, layer, documentType, ...notionResult });
+    } catch (error: any) {
+      console.error("AI generate KB error:", error);
+      res.status(500).json({ error: "Gagal generate dokumen: " + (error?.message || "Unknown error") });
+    }
+  });
+
   // Export content to a new Notion page
   app.post("/api/notion/export", isAuthenticated, async (req, res) => {
     try {
