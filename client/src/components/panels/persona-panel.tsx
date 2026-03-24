@@ -724,13 +724,13 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Cpu className="w-5 h-5 text-primary" />
-            AI Model Configuration
+            Konfigurasi Model AI
           </CardTitle>
-          <CardDescription>Select which AI model powers your chatbot</CardDescription>
+          <CardDescription>Pilih model AI yang menggerakkan chatbot Anda</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="aiModel">AI Model</Label>
+            <Label htmlFor="aiModel">Model AI</Label>
             <Select
               value={formData.aiModel}
               onValueChange={(value) => setFormData({ ...formData, aiModel: value as typeof formData.aiModel })}
@@ -831,15 +831,15 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       {/* Model Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Model Parameters</CardTitle>
-          <CardDescription>Fine-tune the AI model behavior</CardDescription>
+          <CardTitle className="text-lg">Parameter Model</CardTitle>
+          <CardDescription>Sesuaikan parameter perilaku model AI</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="temperature">Temperature: {formData.temperature.toFixed(1)}</Label>
+              <Label htmlFor="temperature">Kreativitas: {formData.temperature.toFixed(1)}</Label>
               <span className="text-xs text-muted-foreground">
-                {formData.temperature < 0.5 ? "More focused" : formData.temperature > 1 ? "More creative" : "Balanced"}
+                {formData.temperature < 0.5 ? "Lebih fokus" : formData.temperature > 1 ? "Lebih kreatif" : "Seimbang"}
               </span>
             </div>
             <Slider
@@ -854,9 +854,9 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="maxTokens">Max Tokens: {formData.maxTokens}</Label>
+              <Label htmlFor="maxTokens">Panjang Respons Maks: {formData.maxTokens}</Label>
               <span className="text-xs text-muted-foreground">
-                Response length limit
+                Batas panjang respons
               </span>
             </div>
             <Slider
@@ -877,16 +877,16 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Shield className="w-5 h-5 text-primary" />
-            Access Control & Security
+            Kontrol Akses & Keamanan
           </CardTitle>
-          <CardDescription>Control who can access your chatbot</CardDescription>
+          <CardDescription>Atur siapa saja yang dapat mengakses chatbot Anda</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="isPublic">Public Access</Label>
+              <Label htmlFor="isPublic">Akses Publik</Label>
               <p className="text-xs text-muted-foreground">
-                Allow anyone to access this chatbot without authentication
+                Izinkan siapa saja mengakses chatbot ini tanpa otentikasi
               </p>
             </div>
             <Switch
@@ -910,7 +910,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
                
               />
               <Button variant="outline" onClick={copyAccessToken}>
-                Copy
+                Salin
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -920,9 +920,9 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Allowed Domains</Label>
+            <Label>Domain yang Diizinkan</Label>
             <p className="text-xs text-muted-foreground mb-2">
-              Restrict web widget access to specific domains (leave empty for all domains)
+              Batasi akses widget ke domain tertentu. Kosongkan untuk mengizinkan semua domain.
             </p>
             <div className="flex flex-wrap gap-2 mb-2">
               {formData.allowedDomains.map((domain, index) => (
@@ -1119,7 +1119,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Quality Bar</Label>
+              <Label className="text-sm font-medium">Standar Kualitas (Quality Bar)</Label>
               <p className="text-xs text-muted-foreground">Standar minimum kualitas jawaban yang harus dipenuhi.</p>
               <Textarea
                 value={formData.qualityBar}

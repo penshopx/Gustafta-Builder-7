@@ -198,7 +198,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       {
         onSuccess: () => {
           toast({
-            title: "Knowledge Added",
+            title: "Knowledge Ditambahkan",
             description: "Item knowledge base berhasil ditambahkan.",
           });
           setDialogOpen(false);
@@ -232,7 +232,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       {
         onSuccess: () => {
           toast({
-            title: "Deleted",
+            title: "Berhasil Dihapus",
             description: "Item knowledge base berhasil dihapus.",
           });
         },
@@ -568,6 +568,27 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           data-testid="input-search-kb"
         />
       </div>
+
+      {/* Knowledge Layer Legend */}
+      <Card className="border border-dashed bg-muted/20">
+        <CardContent className="p-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Lapisan Knowledge (Knowledge Layers)</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="space-y-1">
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-300 text-blue-700 px-2 py-0.5 font-medium">Foundational</span>
+              <p className="text-muted-foreground">Dokumen dasar, referensi tetap: regulasi, standar, data produk.</p>
+            </div>
+            <div className="space-y-1">
+              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300 text-emerald-700 px-2 py-0.5 font-medium">Operational</span>
+              <p className="text-muted-foreground">SOP harian, prosedur aktif: panduan kerja, FAQ, template.</p>
+            </div>
+            <div className="space-y-1">
+              <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 dark:bg-violet-950/40 dark:border-violet-800 dark:text-violet-300 text-violet-700 px-2 py-0.5 font-medium">Case Memory</span>
+              <p className="text-muted-foreground">Histori kasus & preseden: notulen, keputusan, pembelajaran.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {ragStats && (
         <Card>
