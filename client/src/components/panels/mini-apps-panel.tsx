@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -319,6 +319,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const [notionParentPages, setNotionParentPages] = useState<Array<{ id: string; title: string }>>([]);
   const [notionParentPagesLoading, setNotionParentPagesLoading] = useState(false);
   const [notionParentId, setNotionParentId] = useState("");
+  const [notionParentFilter, setNotionParentFilter] = useState("");
   const [notionExporting, setNotionExporting] = useState(false);
   const [notionExportTitle, setNotionExportTitle] = useState("");
   const [nibParams, setNibParams] = useState({
@@ -517,6 +518,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
         ) : "Halaman berhasil dibuat di Notion.",
       });
       setNotionExportOpen(false);
+      setNotionParentFilter("");
     } catch (e: any) {
       toast({ title: "Error", description: e?.message || "Gagal mengekspor ke Notion.", variant: "destructive" });
     } finally {
@@ -1307,22 +1309,42 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
               ) : notionParentPages.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Tidak ada halaman yang dapat diakses di Notion.</p>
               ) : (
-                <Select value={notionParentId} onValueChange={setNotionParentId}>
-                  <SelectTrigger data-testid="select-notion-parent">
-                    <SelectValue placeholder="Pilih halaman induk..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {notionParentPages.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-1.5">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Filter halaman..."
+                      value={notionParentFilter}
+                      onChange={(e) => setNotionParentFilter(e.target.value)}
+                      className="pl-8 h-8 text-sm"
+                      data-testid="input-notion-parent-filter"
+                    />
+                  </div>
+                  <div className="max-h-44 overflow-y-auto space-y-0.5 rounded-md border p-1">
+                    {notionParentPages
+                      .filter(p => p.title.toLowerCase().includes(notionParentFilter.toLowerCase()))
+                      .map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => setNotionParentId(p.id)}
+                          data-testid={`option-notion-parent-${p.id}`}
+                          className={`w-full text-left text-sm px-2.5 py-1.5 rounded-sm transition-colors truncate ${notionParentId === p.id ? "bg-primary text-primary-foreground" : "hover:bg-muted/60"}`}
+                        >
+                          {p.title}
+                        </button>
+                      ))
+                    }
+                    {notionParentPages.filter(p => p.title.toLowerCase().includes(notionParentFilter.toLowerCase())).length === 0 && (
+                      <p className="text-xs text-muted-foreground text-center py-2">Tidak ada yang cocok.</p>
+                    )}
+                  </div>
+                </div>
               )}
               <p className="text-xs text-muted-foreground">Halaman baru akan dibuat sebagai sub-halaman di sini.</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNotionExportOpen(false)}>Batal</Button>
+            <Button variant="outline" onClick={() => { setNotionExportOpen(false); setNotionParentFilter(""); }}>Batal</Button>
             <Button
               onClick={handleNotionExport}
               disabled={notionExporting || !notionParentId || !notionExportTitle}

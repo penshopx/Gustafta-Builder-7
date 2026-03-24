@@ -121,6 +121,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const [notionSyncPages, setNotionSyncPages] = useState<Array<{ id: string; title: string }>>([]);
   const [notionSyncPagesLoading, setNotionSyncPagesLoading] = useState(false);
   const [notionSyncParentId, setNotionSyncParentId] = useState("");
+  const [notionSyncFilter, setNotionSyncFilter] = useState("");
   const [notionSyncDone, setNotionSyncDone] = useState<{ url: string; title: string } | null>(null);
 
   // Notion import state
@@ -1285,7 +1286,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           </Dialog>
 
           {/* === Notion Sync Dialog (KB → Notion) === */}
-          <Dialog open={notionSyncOpen} onOpenChange={(o) => { setNotionSyncOpen(o); if (!o) { setNotionSyncItem(null); setNotionSyncDone(null); } }}>
+          <Dialog open={notionSyncOpen} onOpenChange={(o) => { setNotionSyncOpen(o); if (!o) { setNotionSyncItem(null); setNotionSyncDone(null); setNotionSyncFilter(""); } }}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-base">
@@ -1322,16 +1323,36 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     ) : notionSyncPages.length === 0 ? (
                       <p className="text-xs text-amber-600">Tidak ada halaman Notion yang dapat diakses.</p>
                     ) : (
-                      <Select value={notionSyncParentId} onValueChange={setNotionSyncParentId}>
-                        <SelectTrigger className="text-sm" data-testid="select-notion-sync-parent">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {notionSyncPages.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-1.5">
+                        <div className="relative">
+                          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                          <Input
+                            placeholder="Filter halaman..."
+                            value={notionSyncFilter}
+                            onChange={(e) => setNotionSyncFilter(e.target.value)}
+                            className="pl-8 h-8 text-sm"
+                            data-testid="input-notion-sync-filter"
+                          />
+                        </div>
+                        <div className="max-h-44 overflow-y-auto space-y-0.5 rounded-md border p-1">
+                          {notionSyncPages
+                            .filter(p => p.title.toLowerCase().includes(notionSyncFilter.toLowerCase()))
+                            .map((p) => (
+                              <button
+                                key={p.id}
+                                onClick={() => setNotionSyncParentId(p.id)}
+                                data-testid={`option-notion-sync-${p.id}`}
+                                className={`w-full text-left text-sm px-2.5 py-1.5 rounded-sm transition-colors truncate ${notionSyncParentId === p.id ? "bg-primary text-primary-foreground" : "hover:bg-muted/60"}`}
+                              >
+                                {p.title}
+                              </button>
+                            ))
+                          }
+                          {notionSyncPages.filter(p => p.title.toLowerCase().includes(notionSyncFilter.toLowerCase())).length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-2">Tidak ada halaman yang cocok.</p>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                   {notionSyncItem?.content && (
