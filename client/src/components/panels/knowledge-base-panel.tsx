@@ -99,6 +99,30 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const [aiGenContext, setAiGenContext] = useState("");
   const [aiGenShowContext, setAiGenShowContext] = useState(false);
 
+  // Notion AI inline actions on KB items
+  const [kbAiActionItem, setKbAiActionItem] = useState<KnowledgeBase | null>(null);
+  const [kbAiActionOpen, setKbAiActionOpen] = useState(false);
+  const [kbAiAction, setKbAiAction] = useState("improve");
+  const [kbAiActionLanguage, setKbAiActionLanguage] = useState("Bahasa Indonesia");
+  const [kbAiActionLoading, setKbAiActionLoading] = useState(false);
+  const [kbAiActionResult, setKbAiActionResult] = useState("");
+  const [kbAiActionSaving, setKbAiActionSaving] = useState(false);
+  const [kbAiActionCustomPrompt, setKbAiActionCustomPrompt] = useState("");
+  const [kbAiActionView, setKbAiActionView] = useState<"split" | "result">("split");
+
+  // Notion import AI enhancement
+  const [notionImportAiEnhance, setNotionImportAiEnhance] = useState(false);
+  const [notionImportAiAction, setNotionImportAiAction] = useState("improve");
+
+  // KB → Notion sync
+  const [notionSyncItem, setNotionSyncItem] = useState<KnowledgeBase | null>(null);
+  const [notionSyncOpen, setNotionSyncOpen] = useState(false);
+  const [notionSyncLoading, setNotionSyncLoading] = useState(false);
+  const [notionSyncPages, setNotionSyncPages] = useState<Array<{ id: string; title: string }>>([]);
+  const [notionSyncPagesLoading, setNotionSyncPagesLoading] = useState(false);
+  const [notionSyncParentId, setNotionSyncParentId] = useState("");
+  const [notionSyncDone, setNotionSyncDone] = useState<{ url: string; title: string } | null>(null);
+
   // Notion import state
   const [notionImportOpen, setNotionImportOpen] = useState(false);
   const [notionSearchQuery, setNotionSearchQuery] = useState("");
@@ -476,6 +500,106 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     );
   };
 
+  // KB → Notion AI inline action handlers
+  const handleOpenKbAiAction = (item: KnowledgeBase) => {
+    setKbAiActionItem(item);
+    setKbAiAction("improve");
+    setKbAiActionResult("");
+    setKbAiActionCustomPrompt("");
+    setKbAiActionView("split");
+    setKbAiActionOpen(true);
+  };
+
+  const handleRunKbAiAction = async () => {
+    if (!kbAiActionItem) return;
+    setKbAiActionLoading(true);
+    setKbAiActionResult("");
+    setKbAiActionView("split");
+    try {
+      const res = await apiRequest("POST", "/api/kb/ai-action", {
+        content: kbAiActionItem.content || "",
+        action: kbAiAction,
+        language: kbAiActionLanguage,
+        customPrompt: kbAiAction === "custom" ? kbAiActionCustomPrompt : undefined,
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setKbAiActionResult(data.result);
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "Gagal menjalankan AI action.", variant: "destructive" });
+    } finally {
+      setKbAiActionLoading(false);
+    }
+  };
+
+  const handleSaveKbAiAction = (replaceOrAppend: "replace" | "append") => {
+    if (!kbAiActionItem || !kbAiActionResult) return;
+    setKbAiActionSaving(true);
+    const newContent = replaceOrAppend === "replace"
+      ? kbAiActionResult
+      : (kbAiActionItem.content || "") + "\n\n---\n\n" + kbAiActionResult;
+    updateKnowledgeBase.mutate(
+      { id: kbAiActionItem.id, data: { content: newContent } },
+      {
+        onSuccess: () => {
+          toast({ title: "Konten diperbarui", description: `"${kbAiActionItem.name}" diperbarui dengan hasil AI.` });
+          setKbAiActionSaving(false);
+          setKbAiActionOpen(false);
+          setKbAiActionResult("");
+        },
+        onError: () => {
+          toast({ title: "Error", description: "Gagal menyimpan.", variant: "destructive" });
+          setKbAiActionSaving(false);
+        },
+      }
+    );
+  };
+
+  // KB → Notion sync handlers
+  const handleOpenNotionSync = async (item: KnowledgeBase) => {
+    setNotionSyncItem(item);
+    setNotionSyncDone(null);
+    setNotionSyncOpen(true);
+    if (notionSyncPages.length === 0) {
+      setNotionSyncPagesLoading(true);
+      try {
+        const res = await fetch("/api/notion/pages", { credentials: "include" });
+        const data = await res.json();
+        const pages = (data.results || []).map((p: any) => {
+          const titleProp = Object.values(p.properties || {}).find((v: any) => v.type === "title") as any;
+          const title = titleProp?.title?.map((t: any) => t.plain_text).join("") || "(Tanpa Judul)";
+          return { id: p.id, title };
+        });
+        setNotionSyncPages(pages);
+        if (pages.length > 0) setNotionSyncParentId(pages[0].id);
+      } catch {
+        // ok
+      } finally {
+        setNotionSyncPagesLoading(false);
+      }
+    }
+  };
+
+  const handleRunNotionSync = async () => {
+    if (!notionSyncItem || !notionSyncParentId) return;
+    setNotionSyncLoading(true);
+    try {
+      const res = await apiRequest("POST", "/api/notion/export", {
+        parentPageId: notionSyncParentId,
+        title: notionSyncItem.name,
+        content: notionSyncItem.content || `Konten KB: ${notionSyncItem.name}\n\n${notionSyncItem.description || ""}`,
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setNotionSyncDone({ url: data.url, title: notionSyncItem.name });
+      toast({ title: "Berhasil disinkronkan ke Notion", description: `"${notionSyncItem.name}" telah dibuat sebagai halaman Notion.` });
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.message || "Gagal sinkronisasi ke Notion.", variant: "destructive" });
+    } finally {
+      setNotionSyncLoading(false);
+    }
+  };
+
   const handleNotionSearch = async () => {
     setNotionSearchLoading(true);
     try {
@@ -505,25 +629,48 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const handleNotionImportPage = async (page: { id: string; title: string; url: string }) => {
     setNotionImportingId(page.id);
     try {
-      const res = await apiRequest("GET", `/api/notion/page/${page.id}/content`);
-      const data = await res.json();
+      const contentRes = await apiRequest("GET", `/api/notion/page/${page.id}/content`);
+      const data = await contentRes.json();
       if (data.error) throw new Error(data.error);
+
+      let finalContent = data.content || "(konten kosong)";
+      let descSuffix = "";
+
+      // AI enhancement before saving
+      if (notionImportAiEnhance && finalContent.length > 50) {
+        toast({ title: "Memproses dengan AI...", description: `Sedang ${notionImportAiAction === "improve" ? "memperbaiki" : notionImportAiAction === "summarize" ? "meringkas" : "menerjemahkan"} konten...` });
+        try {
+          const aiRes = await apiRequest("POST", "/api/kb/ai-action", {
+            content: finalContent,
+            action: notionImportAiAction,
+            language: "Bahasa Indonesia",
+          });
+          const aiData = await aiRes.json();
+          if (aiData.result) {
+            finalContent = aiData.result;
+            descSuffix = ` · AI-enhanced (${notionImportAiAction})`;
+          }
+        } catch {
+          // fallback to original content if AI fails
+        }
+      }
+
       createKnowledgeBase.mutate(
         {
           agentId: agent.id,
           name: data.title || page.title,
           type: "text",
-          content: data.content || "(konten kosong)",
-          description: `Import dari Notion — ${page.url}`,
+          content: finalContent,
+          description: `Import dari Notion — ${page.url}${descSuffix}`,
           knowledgeLayer: notionImportLayer,
         },
         {
           onSuccess: () => {
-            toast({ title: "Berhasil Diimpor", description: `Halaman "${data.title || page.title}" berhasil ditambahkan ke Knowledge Base.` });
+            toast({ title: "Berhasil Diimpor", description: `"${data.title || page.title}" berhasil ditambahkan ke Knowledge Base.` });
             setNotionImportingId(null);
           },
           onError: () => {
-            toast({ title: "Error", description: "Gagal menyimpan konten Notion ke Knowledge Base.", variant: "destructive" });
+            toast({ title: "Error", description: "Gagal menyimpan konten ke Knowledge Base.", variant: "destructive" });
             setNotionImportingId(null);
           },
         }
@@ -971,6 +1118,215 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             );
           })()}
 
+          {/* === KB AI Action Dialog (Notion AI-style inline editing) === */}
+          <Dialog open={kbAiActionOpen} onOpenChange={(o) => { setKbAiActionOpen(o); if (!o) { setKbAiActionResult(""); setKbAiActionItem(null); } }}>
+            <DialogContent className="sm:max-w-3xl max-h-[92vh] flex flex-col gap-0 p-0">
+              <div className="shrink-0 px-6 pt-5 pb-4 border-b">
+                <DialogTitle className="text-base flex items-center gap-2">
+                  ✦ Aksi AI pada Knowledge Base
+                  {kbAiActionItem && <span className="text-sm font-normal text-muted-foreground truncate max-w-xs">— {kbAiActionItem.name}</span>}
+                </DialogTitle>
+                <DialogDescription className="text-xs mt-1">Pilih aksi AI lalu jalankan. Preview hasil di bawah sebelum menyimpan.</DialogDescription>
+              </div>
+
+              <div className="flex-1 overflow-hidden flex flex-col px-6 py-4 gap-4">
+                {/* Action selector */}
+                {(() => {
+                  const ACTIONS = [
+                    { id: "improve", label: "✍️ Perbaiki", desc: "Tingkatkan kualitas tulisan" },
+                    { id: "summarize", label: "📋 Ringkas", desc: "Buat ringkasan padat" },
+                    { id: "shorten", label: "📏 Persingkat", desc: "Kurangi 50% panjang" },
+                    { id: "lengthen", label: "📚 Perluas", desc: "Kembangkan lebih detail" },
+                    { id: "explain", label: "💡 Jelaskan", desc: "Sederhanakan bahasa" },
+                    { id: "fix_grammar", label: "✅ Tata Bahasa", desc: "Perbaiki ejaan & grammar" },
+                    { id: "action_items", label: "☑ Action Items", desc: "Ekstrak daftar tugas" },
+                    { id: "continue_writing", label: "▶ Lanjutkan", desc: "Tambah konten baru" },
+                    { id: "extract_key_points", label: "🎯 Poin Kunci", desc: "Ekstrak poin utama" },
+                    { id: "translate", label: "🌐 Terjemahkan", desc: "Ubah ke bahasa lain" },
+                    { id: "custom", label: "✏️ Custom", desc: "Prompt bebas" },
+                  ];
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-1.5">
+                        {ACTIONS.map((a) => (
+                          <button
+                            key={a.id}
+                            type="button"
+                            onClick={() => { setKbAiAction(a.id); setKbAiActionResult(""); }}
+                            title={a.desc}
+                            className={`text-xs px-2.5 py-1.5 rounded-full border transition-all cursor-pointer ${kbAiAction === a.id ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted border-border"}`}
+                            data-testid={`button-ai-action-${a.id}`}
+                          >
+                            {a.label}
+                          </button>
+                        ))}
+                      </div>
+                      {kbAiAction === "translate" && (
+                        <div className="flex items-center gap-2">
+                          <Label className="text-xs shrink-0">Terjemahkan ke:</Label>
+                          <Select value={kbAiActionLanguage} onValueChange={setKbAiActionLanguage}>
+                            <SelectTrigger className="h-7 text-xs w-52">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Bahasa Indonesia">Bahasa Indonesia</SelectItem>
+                              <SelectItem value="English">English</SelectItem>
+                              <SelectItem value="Bahasa Melayu">Bahasa Melayu</SelectItem>
+                              <SelectItem value="Japanese">Japanese</SelectItem>
+                              <SelectItem value="Arabic">Arabic</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      {kbAiAction === "custom" && (
+                        <Textarea
+                          value={kbAiActionCustomPrompt}
+                          onChange={(e) => setKbAiActionCustomPrompt(e.target.value)}
+                          placeholder="Deskripsikan apa yang ingin dilakukan dengan konten ini..."
+                          rows={2}
+                          className="text-xs resize-none"
+                          data-testid="textarea-ai-action-custom"
+                        />
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* Side-by-side: original | result */}
+                <div className="flex-1 overflow-hidden grid grid-cols-2 gap-3 min-h-0">
+                  <div className="flex flex-col min-h-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <Label className="text-xs text-muted-foreground">Konten Asli</Label>
+                      <span className="text-xs text-muted-foreground">{(kbAiActionItem?.content || "").split(/\s+/).filter(Boolean).length} kata</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto bg-muted/30 border rounded-lg p-3">
+                      <pre className="text-xs whitespace-pre-wrap leading-relaxed font-sans text-muted-foreground">{kbAiActionItem?.content || "(tidak ada konten)"}</pre>
+                    </div>
+                  </div>
+                  <div className="flex flex-col min-h-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <Label className="text-xs text-muted-foreground">Hasil AI</Label>
+                      {kbAiActionResult && <span className="text-xs text-muted-foreground">{kbAiActionResult.split(/\s+/).filter(Boolean).length} kata</span>}
+                    </div>
+                    <div className="flex-1 overflow-y-auto border rounded-lg p-3 bg-background relative">
+                      {kbAiActionLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground">
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                          <p className="text-xs">AI sedang memproses...</p>
+                        </div>
+                      ) : kbAiActionResult ? (
+                        <pre className="text-xs whitespace-pre-wrap leading-relaxed font-sans">{kbAiActionResult}</pre>
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-muted-foreground">
+                          <p className="text-xs text-center">Pilih aksi lalu klik "Jalankan AI" untuk melihat hasil di sini</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Run button */}
+                <Button
+                  onClick={handleRunKbAiAction}
+                  disabled={kbAiActionLoading || !kbAiActionItem?.content || (kbAiAction === "custom" && !kbAiActionCustomPrompt.trim())}
+                  className="w-full h-9"
+                  data-testid="button-run-kb-ai-action"
+                >
+                  {kbAiActionLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Memproses...</> : "✦ Jalankan AI"}
+                </Button>
+              </div>
+
+              <div className="shrink-0 px-6 py-4 border-t flex items-center justify-between gap-3">
+                <Button variant="ghost" size="sm" onClick={() => setKbAiActionOpen(false)}>Tutup</Button>
+                {kbAiActionResult && (
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(kbAiActionResult); toast({ title: "Disalin!" }); }} data-testid="button-ai-action-copy">
+                      Salin Hasil
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleSaveKbAiAction("append")} disabled={kbAiActionSaving} data-testid="button-ai-action-append">
+                      Tambahkan ke Bawah
+                    </Button>
+                    <Button size="sm" onClick={() => handleSaveKbAiAction("replace")} disabled={kbAiActionSaving} data-testid="button-ai-action-replace">
+                      {kbAiActionSaving ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Menyimpan...</> : "Ganti Konten"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* === Notion Sync Dialog (KB → Notion) === */}
+          <Dialog open={notionSyncOpen} onOpenChange={(o) => { setNotionSyncOpen(o); if (!o) { setNotionSyncItem(null); setNotionSyncDone(null); } }}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-base">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"/>
+                  </svg>
+                  Sinkronkan ke Notion
+                </DialogTitle>
+                <DialogDescription className="text-xs">
+                  Kirim konten KB item ini ke Notion sebagai halaman baru.
+                  {notionSyncItem && <span className="block mt-1 font-medium text-foreground">"{notionSyncItem.name}"</span>}
+                </DialogDescription>
+              </DialogHeader>
+
+              {notionSyncDone ? (
+                <div className="py-4 space-y-3 text-center">
+                  <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto">
+                    <span className="text-2xl">✓</span>
+                  </div>
+                  <p className="font-medium text-sm">Berhasil disinkronkan ke Notion!</p>
+                  <p className="text-xs text-muted-foreground">"{notionSyncDone.title}" sekarang ada di Notion.</p>
+                  <a href={notionSyncDone.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                    <ExternalLink className="w-3.5 h-3.5" /> Buka di Notion
+                  </a>
+                </div>
+              ) : (
+                <div className="py-3 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Simpan sebagai sub-halaman di bawah:</Label>
+                    {notionSyncPagesLoading ? (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Memuat halaman Notion...
+                      </div>
+                    ) : notionSyncPages.length === 0 ? (
+                      <p className="text-xs text-amber-600">Tidak ada halaman Notion yang dapat diakses.</p>
+                    ) : (
+                      <Select value={notionSyncParentId} onValueChange={setNotionSyncParentId}>
+                        <SelectTrigger className="text-sm" data-testid="select-notion-sync-parent">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {notionSyncPages.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                  {notionSyncItem?.content && (
+                    <div className="bg-muted/30 border rounded-lg p-3 max-h-40 overflow-y-auto">
+                      <p className="text-xs text-muted-foreground mb-1">Preview konten yang akan dikirim:</p>
+                      <pre className="text-xs whitespace-pre-wrap font-sans text-foreground leading-relaxed line-clamp-10">{(notionSyncItem.content || "").slice(0, 600)}{(notionSyncItem.content || "").length > 600 ? "..." : ""}</pre>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button variant="outline" size="sm" onClick={() => { setNotionSyncOpen(false); setNotionSyncItem(null); setNotionSyncDone(null); }}>
+                  {notionSyncDone ? "Tutup" : "Batal"}
+                </Button>
+                {!notionSyncDone && (
+                  <Button size="sm" onClick={handleRunNotionSync} disabled={notionSyncLoading || !notionSyncParentId} data-testid="button-run-notion-sync">
+                    {notionSyncLoading ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Menyinkronkan...</> : "Sinkronkan ke Notion"}
+                  </Button>
+                )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={notionImportOpen} onOpenChange={setNotionImportOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" disabled={agent.ragEnabled === false} data-testid="button-import-notion">
@@ -1021,6 +1377,32 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                     </SelectContent>
                   </Select>
                 </div>
+                {/* AI Enhancement option */}
+                <div className="rounded-lg border p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium flex items-center gap-1.5">✦ Proses dengan AI sebelum simpan</p>
+                      <p className="text-xs text-muted-foreground">AI akan memproses konten Notion sebelum masuk ke KB.</p>
+                    </div>
+                    <Switch checked={notionImportAiEnhance} onCheckedChange={setNotionImportAiEnhance} data-testid="switch-notion-import-ai" />
+                  </div>
+                  {notionImportAiEnhance && (
+                    <Select value={notionImportAiAction} onValueChange={setNotionImportAiAction}>
+                      <SelectTrigger className="h-8 text-sm" data-testid="select-notion-import-ai-action">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="improve">✍️ Perbaiki tulisan</SelectItem>
+                        <SelectItem value="summarize">📋 Ringkas konten</SelectItem>
+                        <SelectItem value="shorten">📏 Persingkat</SelectItem>
+                        <SelectItem value="extract_key_points">🎯 Ekstrak poin kunci</SelectItem>
+                        <SelectItem value="translate">🌐 Terjemahkan ke Bahasa Indonesia</SelectItem>
+                        <SelectItem value="fix_grammar">✅ Perbaiki tata bahasa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
                 {notionSearchLoading && (
                   <div className="flex items-center justify-center py-8 text-muted-foreground gap-2">
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -1560,6 +1942,33 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      {/* Notion AI actions — only for text items with content */}
+                      {item.type === "text" && (item.content || "").length > 10 && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2.5 text-xs font-medium text-primary"
+                            onClick={() => handleOpenKbAiAction(item)}
+                            title="Aksi AI Notion — Perbaiki, Ringkas, Terjemahkan, dll."
+                            data-testid={`button-kb-ai-action-${item.id}`}
+                          >
+                            ✦ AI
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-8 h-8"
+                            onClick={() => handleOpenNotionSync(item)}
+                            title="Sinkronkan ke Notion"
+                            data-testid={`button-kb-notion-sync-${item.id}`}
+                          >
+                            <svg className="w-3.5 h-3.5 text-muted-foreground" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"/>
+                            </svg>
+                          </Button>
+                        </>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"

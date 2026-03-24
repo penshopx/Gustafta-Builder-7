@@ -5916,6 +5916,48 @@ Return JSON format:
     }
   });
 
+  // Notion AI-style actions on existing KB content
+  app.post("/api/kb/ai-action", isAuthenticated, async (req, res) => {
+    try {
+      const { content, action, language = "Bahasa Indonesia", customPrompt } = req.body;
+      if (!content || !action) return res.status(400).json({ error: "content dan action wajib diisi" });
+
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const actionPrompts: Record<string, string> = {
+        improve: `Anda adalah editor profesional. Perbaiki kualitas tulisan berikut: buat lebih jelas, lebih kohesif, lebih profesional, dan lebih mudah dipahami — tanpa mengubah fakta atau makna aslinya. Pertahankan format Markdown yang ada. Kembalikan hanya teks yang sudah diperbaiki, tanpa komentar.`,
+        summarize: `Anda adalah asisten ringkasan. Buat ringkasan padat dari konten berikut — tangkap semua poin utama, keputusan kunci, dan informasi penting dalam format yang jauh lebih singkat. Gunakan bullet points jika sesuai. Mulai langsung dengan ringkasan, tanpa pengantar.`,
+        shorten: `Anda adalah editor yang ahli memadatkan informasi. Persingkat teks berikut menjadi sekitar 40-50% dari panjang aslinya — hilangkan redundansi, contoh yang terlalu panjang, dan kata-kata filler, tapi pertahankan semua poin penting. Pertahankan format Markdown. Kembalikan hanya teks yang sudah dipersingkat.`,
+        lengthen: `Anda adalah penulis konten ahli. Perluas dan kembangkan teks berikut menjadi sekitar 2x lebih panjang — tambahkan penjelasan lebih detail, contoh konkret, konteks, dan sub-poin yang relevan. Pertahankan format Markdown dan nada tulisan asli. Kembalikan hanya teks yang sudah diperluas.`,
+        explain: `Anda adalah edukator yang mampu menjelaskan konsep kompleks dengan sederhana. Jelaskan ulang konten berikut dalam bahasa yang lebih sederhana dan mudah dipahami oleh orang awam, tanpa menghilangkan informasi penting. Gunakan analogi jika membantu. Kembalikan hanya penjelasan yang sudah disederhanakan.`,
+        fix_grammar: `Anda adalah proofreader profesional. Perbaiki semua kesalahan tata bahasa, ejaan, tanda baca, dan gaya penulisan dalam teks berikut — tanpa mengubah konten atau makna. Pertahankan format Markdown. Kembalikan hanya teks yang sudah diperbaiki.`,
+        action_items: `Anda adalah asisten produktivitas. Dari konten berikut, ekstrak semua action items, tugas, kewajiban, dan hal-hal yang perlu ditindaklanjuti. Format hasilnya sebagai checklist Markdown dengan [ ] di depan setiap item. Kelompokkan berdasarkan kategori jika memungkinkan. Kembalikan hanya daftar action items.`,
+        continue_writing: `Anda adalah penulis konten ahli. Lanjutkan tulisan berikut secara natural — pertahankan nada, gaya, dan format yang sama, lanjutkan ide terakhir, dan tambahkan konten baru yang relevan dan bermanfaat. Jangan ulangi konten yang sudah ada. Kembalikan hanya bagian lanjutan (tanpa mengulang teks asli).`,
+        translate: `Anda adalah penerjemah profesional. Terjemahkan konten berikut ke ${language} — pertahankan makna, nada, dan format Markdown aslinya seakurat mungkin. Kembalikan hanya hasil terjemahan.`,
+        extract_key_points: `Anda adalah analis konten. Dari teks berikut, ekstrak dan sajikan poin-poin kunci dalam format bullet points Markdown yang padat dan jelas. Setiap poin harus spesifik dan actionable. Kembalikan hanya daftar poin kunci dengan format ## Poin Kunci di atas.`,
+        custom: customPrompt || "Analisis dan kembangkan konten berikut.",
+      };
+
+      const systemPrompt = actionPrompts[action] || actionPrompts.improve;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: content },
+        ],
+        max_tokens: action === "shorten" || action === "summarize" || action === "action_items" || action === "extract_key_points" ? 1200 : action === "lengthen" || action === "continue_writing" ? 3000 : 2000,
+        temperature: action === "improve" || action === "fix_grammar" || action === "translate" ? 0.3 : 0.5,
+      });
+
+      const result = completion.choices[0]?.message?.content || "";
+      res.json({ result });
+    } catch (error: any) {
+      console.error("KB AI action error:", error);
+      res.status(500).json({ error: "Gagal menjalankan AI action: " + (error?.message || "Unknown error") });
+    }
+  });
+
   // AI-generate a KB document, optionally push to Notion
   app.post("/api/notion/ai-generate", isAuthenticated, async (req, res) => {
     try {
