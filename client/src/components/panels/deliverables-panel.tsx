@@ -3,6 +3,7 @@ import {
   FileText, Zap, ClipboardList, BookOpen, HelpCircle, Star,
   BarChart2, Clock, AlignLeft, FileSignature, MessageSquare, Download,
   PackageCheck, CheckSquare, Info, Wand2, ChevronDown, ChevronUp, Sparkles,
+  MousePointer2, Copy, CheckCheck,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -251,6 +252,83 @@ const CATEGORY_COLORS: Record<string, string> = {
   D: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
 };
 
+const CHAT_QUICK_ACTIONS: Record<DeliverableKey, { buttonLabel: string; prompt: string }> = {
+  ringkasan_jawaban: {
+    buttonLabel: "📋 Buat Ringkasan",
+    prompt: "Tolong buatkan ringkasan poin-poin penting dari percakapan kita tadi.",
+  },
+  rencana_aksi: {
+    buttonLabel: "⚡ Buat Rencana Aksi",
+    prompt: "Berdasarkan diskusi kita, tolong susunkan rencana aksi dengan langkah, PIC, dan risiko.",
+  },
+  checklist: {
+    buttonLabel: "✅ Buat Checklist",
+    prompt: "Tolong buatkan checklist yang bisa saya gunakan berdasarkan topik yang kita bahas.",
+  },
+  handout_materi: {
+    buttonLabel: "📖 Buat Handout",
+    prompt: "Buatkan handout materi 1 halaman dari materi yang kita pelajari hari ini.",
+  },
+  latihan_kuis: {
+    buttonLabel: "🎯 Buat Latihan/Kuis",
+    prompt: "Tolong buatkan soal latihan atau kuis beserta pembahasannya dari materi ini.",
+  },
+  feedback_rubrik: {
+    buttonLabel: "⭐ Beri Feedback & Penilaian",
+    prompt: "Tolong berikan feedback dan penilaian berdasarkan rubrik untuk pekerjaan atau jawaban saya.",
+  },
+  snapshot_proyek: {
+    buttonLabel: "📊 Snapshot Proyek",
+    prompt: "Buatkan snapshot status proyek — isu aktif, risiko, keputusan terakhir, dan next action.",
+  },
+  timeline_report: {
+    buttonLabel: "🗓️ Buat Timeline Report",
+    prompt: "Tolong buatkan laporan timeline proyek dengan tahapan, status, dan tanggal target.",
+  },
+  notulen_sesi: {
+    buttonLabel: "📝 Buat Notulen",
+    prompt: "Buatkan notulen dari sesi ini: poin penting, keputusan, dan tindak lanjut.",
+  },
+  dokumen_draft: {
+    buttonLabel: "📄 Buat Draft Dokumen",
+    prompt: "Tolong buatkan draft dokumen profesional (surat/proposal/SOP/laporan) sesuai kebutuhan saya.",
+  },
+  pesan_siap_kirim: {
+    buttonLabel: "💬 Buat Pesan WA/Email",
+    prompt: "Buatkan pesan update klien yang siap dikirim via WhatsApp atau Email — singkat, sopan, dengan CTA jelas.",
+  },
+  ekspor_data: {
+    buttonLabel: "📥 Ekspor Data",
+    prompt: "Tolong siapkan data yang bisa diekspor dalam format terstruktur (PDF/DOCX/CSV).",
+  },
+};
+
+function ChatPromptRow({ label, prompt }: { label: string; prompt: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(prompt).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+  return (
+    <div className="rounded-md border border-border/60 bg-background px-3 py-2 flex items-start gap-2">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-foreground mb-0.5">{label}</p>
+        <p className="text-xs text-muted-foreground italic truncate">{prompt}</p>
+      </div>
+      <button
+        onClick={copy}
+        className="shrink-0 text-muted-foreground hover:text-foreground transition-colors mt-0.5"
+        title="Salin prompt"
+        data-testid={`copy-prompt-${label}`}
+      >
+        {copied ? <CheckCheck className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+      </button>
+    </div>
+  );
+}
+
 export function DeliverablesPanel({ agent }: DeliverablesPanelProps) {
   const { toast } = useToast();
   const updateAgent = useUpdateAgent();
@@ -478,6 +556,59 @@ export function DeliverablesPanel({ agent }: DeliverablesPanelProps) {
           </Card>
         ))}
       </div>
+
+      {/* Tombol di Chat — preview quick action buttons */}
+      <Card className="border border-primary/20 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <MousePointer2 className="w-4 h-4 text-primary" />
+            Tombol di Chat (Preview)
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Tombol-tombol ini muncul di antarmuka chat sehingga pengguna bisa meminta deliverable hanya dengan satu klik.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3 pt-0">
+          {selected.length === 0 ? (
+            <div className="text-xs text-muted-foreground italic py-2">
+              Belum ada deliverable aktif. Pilih deliverable di atas untuk menampilkan tombol chat.
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-2" data-testid="chat-buttons-preview">
+                {selected.map((key) => {
+                  const action = CHAT_QUICK_ACTIONS[key];
+                  if (!action) return null;
+                  return (
+                    <span
+                      key={key}
+                      className="inline-flex items-center rounded-full border border-primary/30 bg-background px-3 py-1.5 text-xs font-medium text-primary shadow-sm"
+                      data-testid={`chat-button-${key}`}
+                    >
+                      {action.buttonLabel}
+                    </span>
+                  );
+                })}
+              </div>
+              <div className="space-y-2 pt-1">
+                <p className="text-xs font-medium text-muted-foreground">Prompt yang dikirim ke AI:</p>
+                {selected.map((key) => {
+                  const action = CHAT_QUICK_ACTIONS[key];
+                  const def = DELIVERABLES.find((d) => d.key === key);
+                  if (!action || !def) return null;
+                  return (
+                    <ChatPromptRow
+                      key={key}
+                      label={action.buttonLabel}
+                      prompt={action.prompt}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="border border-dashed bg-muted/20">
         <CardContent className="p-4">

@@ -738,256 +738,283 @@ export function AgenticAIPanel() {
         </CardContent>
       </Card>
 
-      {/* 4. Kualitas Respons */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <MessageSquare className="h-4 w-4 text-emerald-500" />
-            Kualitas Respons
-          </CardTitle>
-          <CardDescription>Kontrol cara jawaban disajikan.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <SelectRow
-            label="Kedalaman Jawaban"
-            helper="Atur tingkat detail penjelasan AI."
-            value={settings.responseDepth}
-            onChange={(v) => save({ responseDepth: v })}
-            options={["Singkat", "Normal", "Terstruktur", "Mendalam"]}
-            dataTestId="select-response-depth"
-          />
-          <SelectRow
-            label="Format Output Utama"
-            helper="Bentuk jawaban yang paling sering digunakan."
-            value={settings.outputFormat}
-            onChange={(v) => save({ outputFormat: v })}
-            options={["Paragraf", "Poin-poin", "Langkah demi langkah", "Checklist", "Ringkasan + langkah"]}
-            dataTestId="select-output-format"
-          />
-          <div className="border-t pt-4">
-            <ToggleRow
-              label="Pemeriksaan Mandiri"
-              helper="AI mengecek ulang jawaban sebelum dikirim."
-              value={settings.selfCorrection}
-              onChange={(v) => save({ selfCorrection: v })}
-              dataTestId="toggle-self-correction"
-            />
-          </div>
-          <div className="border-t pt-4">
-            <ToggleRow
-              label="Penalaran Multi-Langkah"
-              helper="AI memecah masalah menjadi langkah-langkah terstruktur."
-              value={settings.multiStepReasoning}
-              onChange={(v) => save({ multiStepReasoning: v })}
-              dataTestId="toggle-multi-step-reasoning"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Basic mode summary — shown only when Advanced is OFF */}
+      {!isAdvanced && (
+        <Card className="border border-dashed bg-muted/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+              <Settings2 className="h-4 w-4" />
+              Pengaturan lanjutan (ringkasan)
+            </CardTitle>
+            <CardDescription className="text-xs">Aktifkan Mode Lanjutan di atas untuk mengubah nilai ini.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+              {[
+                { label: "Kedalaman Jawaban", value: settings.responseDepth },
+                { label: "Format Output", value: settings.outputFormat },
+                { label: "Gaya Interaksi", value: settings.interactionStyle },
+                { label: "Bantuan Proaktif", value: settings.proactiveAssistanceLevel },
+                { label: "Minta Klarifikasi", value: settings.clarifyBeforeAnswer ? "Ya" : "Tidak" },
+                { label: "Peringatan Risiko", value: settings.showRiskWarnings ? "Aktif" : "Tidak aktif" },
+                { label: "Retensi Konteks", value: `${settings.contextRetention} pesan` },
+                { label: "Saat Tidak Yakin", value: settings.uncertaintyHandling.length > 22 ? settings.uncertaintyHandling.slice(0, 22) + "…" : settings.uncertaintyHandling },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between border-b border-border/40 py-1 last:border-0">
+                  <span className="text-muted-foreground">{label}</span>
+                  <Badge variant="secondary" className="text-xs py-0 font-normal">{value}</Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* 5. Klarifikasi & Ketidakpastian */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <HelpCircle className="h-4 w-4 text-yellow-500" />
-            Klarifikasi & Ketidakpastian
-          </CardTitle>
-          <CardDescription>Mengurangi halusinasi dan meningkatkan kualitas dialog.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <ToggleRow
-            label="Minta Klarifikasi Dulu"
-            helper="AI bertanya jika informasi belum cukup."
-            value={settings.clarifyBeforeAnswer}
-            onChange={(v) => save({ clarifyBeforeAnswer: v })}
-            dataTestId="toggle-clarify-before-answer"
-          />
-          <div className="border-t pt-4">
-            <SelectRow
-              label="Saat Tidak Yakin"
-              helper="Cara AI merespons ketika informasinya tidak pasti."
-              value={settings.uncertaintyHandling}
-              onChange={(v) => save({ uncertaintyHandling: v })}
-              options={[
-                "Jawab normal",
-                "Jelaskan keterbatasan",
-                "Minta klarifikasi",
-                "Sarankan verifikasi ke sumber resmi",
-                "Jangan jawab jika tidak cukup yakin",
-              ]}
-              dataTestId="select-uncertainty-handling"
-            />
-          </div>
-          <div className="border-t pt-4">
-            <ToggleRow
-              label="Tampilkan Peringatan Risiko"
-              helper="Tambahkan catatan kehati-hatian untuk topik sensitif."
-              value={settings.showRiskWarnings}
-              onChange={(v) => save({ showRiskWarnings: v })}
-              dataTestId="toggle-show-risk-warnings"
-            />
-          </div>
-          {isAdvanced && (
-            <div className="border-t pt-4">
-              <MultiSelectField
-                label="Pemicu Klarifikasi"
-                helper="Kondisi yang membuat AI otomatis meminta klarifikasi."
-                options={[
-                  "Output target tidak jelas",
-                  "Risiko salah tinggi",
-                  "Butuh data spesifik untuk eksekusi",
-                  "Pertanyaan ambigu / multi-tafsir",
-                  "Informasi pengguna tampak bertentangan",
-                ]}
-                value={settings.clarificationTriggers}
-                onChange={(v) => save({ clarificationTriggers: v })}
-                dataTestId="multiselect-clarification-triggers"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 6. Memori & Konteks */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Ear className="h-4 w-4 text-blue-500" />
-            Memori & Konteks
-          </CardTitle>
-          <CardDescription>Kontrol apa yang diingat dan diprioritaskan AI.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <ToggleRow
-            label="Mendengarkan dengan Teliti"
-            helper="AI membaca konteks dan maksud lebih cermat."
-            value={settings.attentiveListening}
-            onChange={(v) => save({ attentiveListening: v })}
-            dataTestId="toggle-attentive-listening"
-          />
-          <div className="border-t pt-4 space-y-3">
-            <div>
-              <Label className="text-sm font-medium">Retensi Konteks</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">Banyaknya pesan terakhir yang jadi acuan.</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{settings.contextRetention} pesan</span>
-              <Badge variant="secondary" className="text-xs">
-                {settings.contextRetention <= 5 ? "Minimal" : settings.contextRetention <= 15 ? "Normal" : settings.contextRetention <= 30 ? "Tinggi" : "Maksimal"}
-              </Badge>
-            </div>
-            <Slider
-              value={[settings.contextRetention]}
-              onValueChange={([v]) => save({ contextRetention: v })}
-              min={1}
-              max={50}
-              step={1}
-              data-testid="slider-context-retention"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>1 pesan</span>
-              <span>50 pesan</span>
-            </div>
-          </div>
-          {isAdvanced && (
-            <div className="border-t pt-4">
-              <SortableMultiSelect
-                label="Prioritas Konteks"
-                helper="Centang dan urutkan konteks yang paling diutamakan AI."
-                options={[
-                  "Pertanyaan terakhir",
-                  "Tujuan pengguna",
-                  "Profil pengguna",
-                  "Data proyek",
-                  "Riwayat percakapan",
-                  "Hasil tools",
-                ]}
-                value={settings.contextPriority}
-                onChange={(v) => save({ contextPriority: v })}
-                dataTestId="sortable-context-priority"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 7. Bantuan Proaktif */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Zap className="h-4 w-4 text-yellow-500" />
-            Bantuan Proaktif
-          </CardTitle>
-          <CardDescription>Seberapa sering AI memberi bantuan tambahan.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <SelectRow
-            label="Bantuan Proaktif"
-            helper="Seberapa sering AI memberi bantuan tambahan tanpa diminta."
-            value={settings.proactiveAssistanceLevel}
-            onChange={(v) => save({ proactiveAssistanceLevel: v })}
-            options={["Off", "Rendah", "Sedang", "Tinggi"]}
-            dataTestId="select-proactive-assistance"
-          />
-          {isAdvanced && settings.proactiveAssistanceLevel !== "Off" && (
-            <div className="border-t pt-4">
-              <MultiSelectField
-                label="Jenis Bantuan Proaktif"
-                helper="Jenis bantuan yang boleh ditampilkan."
-                options={[
-                  "Saran langkah berikutnya",
-                  "Pertanyaan klarifikasi",
-                  "Checklist",
-                  "Peringatan risiko",
-                  "Rekomendasi mini apps",
-                  "Rekomendasi chatbot spesialis",
-                  "Rekomendasi dokumen",
-                ]}
-                value={settings.proactiveHelpTypes}
-                onChange={(v) => save({ proactiveHelpTypes: v })}
-                dataTestId="multi-proactive-help-types"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 8. Gaya Interaksi */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <MessageSquare className="h-4 w-4 text-pink-500" />
-            Gaya Interaksi & Empati
-          </CardTitle>
-          <CardDescription>Nada dan cara AI berkomunikasi.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <SelectRow
-            label="Gaya Interaksi"
-            helper="Cara AI menyampaikan jawaban."
-            value={settings.interactionStyle}
-            onChange={(v) => save({ interactionStyle: v })}
-            options={["Formal", "Profesional", "Ramah", "Konsultatif", "Mentor"]}
-            dataTestId="select-interaction-style"
-          />
-          {isAdvanced && (
-            <div className="border-t pt-4">
-              <SelectRow
-                label="Empati Kontekstual"
-                helper="Seberapa peka AI terhadap emosi pengguna."
-                value={settings.contextualEmpathy}
-                onChange={(v) => save({ contextualEmpathy: v })}
-                options={["Off", "Ringan", "Sedang", "Tinggi"]}
-                dataTestId="select-contextual-empathy"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Advanced-only cards */}
+      {/* Advanced-only cards (4-12) */}
       {isAdvanced && (
         <>
+          {/* 4. Kualitas Respons */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageSquare className="h-4 w-4 text-emerald-500" />
+                Kualitas Respons
+              </CardTitle>
+              <CardDescription>Kontrol cara jawaban disajikan.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SelectRow
+                label="Kedalaman Jawaban"
+                helper="Atur tingkat detail penjelasan AI."
+                value={settings.responseDepth}
+                onChange={(v) => save({ responseDepth: v })}
+                options={["Singkat", "Normal", "Terstruktur", "Mendalam"]}
+                dataTestId="select-response-depth"
+              />
+              <SelectRow
+                label="Format Output Utama"
+                helper="Bentuk jawaban yang paling sering digunakan."
+                value={settings.outputFormat}
+                onChange={(v) => save({ outputFormat: v })}
+                options={["Paragraf", "Poin-poin", "Langkah demi langkah", "Checklist", "Ringkasan + langkah"]}
+                dataTestId="select-output-format"
+              />
+              <div className="border-t pt-4">
+                <ToggleRow
+                  label="Pemeriksaan Mandiri"
+                  helper="AI mengecek ulang jawaban sebelum dikirim."
+                  value={settings.selfCorrection}
+                  onChange={(v) => save({ selfCorrection: v })}
+                  dataTestId="toggle-self-correction"
+                />
+              </div>
+              <div className="border-t pt-4">
+                <ToggleRow
+                  label="Penalaran Multi-Langkah"
+                  helper="AI memecah masalah menjadi langkah-langkah terstruktur."
+                  value={settings.multiStepReasoning}
+                  onChange={(v) => save({ multiStepReasoning: v })}
+                  dataTestId="toggle-multi-step-reasoning"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 5. Klarifikasi & Ketidakpastian */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <HelpCircle className="h-4 w-4 text-yellow-500" />
+                Klarifikasi & Ketidakpastian
+              </CardTitle>
+              <CardDescription>Mengurangi halusinasi dan meningkatkan kualitas dialog.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ToggleRow
+                label="Minta Klarifikasi Dulu"
+                helper="AI bertanya jika informasi belum cukup."
+                value={settings.clarifyBeforeAnswer}
+                onChange={(v) => save({ clarifyBeforeAnswer: v })}
+                dataTestId="toggle-clarify-before-answer"
+              />
+              <div className="border-t pt-4">
+                <SelectRow
+                  label="Saat Tidak Yakin"
+                  helper="Cara AI merespons ketika informasinya tidak pasti."
+                  value={settings.uncertaintyHandling}
+                  onChange={(v) => save({ uncertaintyHandling: v })}
+                  options={[
+                    "Jawab normal",
+                    "Jelaskan keterbatasan",
+                    "Minta klarifikasi",
+                    "Sarankan verifikasi ke sumber resmi",
+                    "Jangan jawab jika tidak cukup yakin",
+                  ]}
+                  dataTestId="select-uncertainty-handling"
+                />
+              </div>
+              <div className="border-t pt-4">
+                <ToggleRow
+                  label="Tampilkan Peringatan Risiko"
+                  helper="Tambahkan catatan kehati-hatian untuk topik sensitif."
+                  value={settings.showRiskWarnings}
+                  onChange={(v) => save({ showRiskWarnings: v })}
+                  dataTestId="toggle-show-risk-warnings"
+                />
+              </div>
+              <div className="border-t pt-4">
+                <MultiSelectField
+                  label="Pemicu Klarifikasi"
+                  helper="Kondisi yang membuat AI otomatis meminta klarifikasi."
+                  options={[
+                    "Output target tidak jelas",
+                    "Risiko salah tinggi",
+                    "Butuh data spesifik untuk eksekusi",
+                    "Pertanyaan ambigu / multi-tafsir",
+                    "Informasi pengguna tampak bertentangan",
+                  ]}
+                  value={settings.clarificationTriggers}
+                  onChange={(v) => save({ clarificationTriggers: v })}
+                  dataTestId="multiselect-clarification-triggers"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 6. Memori & Konteks */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Ear className="h-4 w-4 text-blue-500" />
+                Memori & Konteks
+              </CardTitle>
+              <CardDescription>Kontrol apa yang diingat dan diprioritaskan AI.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ToggleRow
+                label="Mendengarkan dengan Teliti"
+                helper="AI membaca konteks dan maksud lebih cermat."
+                value={settings.attentiveListening}
+                onChange={(v) => save({ attentiveListening: v })}
+                dataTestId="toggle-attentive-listening"
+              />
+              <div className="border-t pt-4 space-y-3">
+                <div>
+                  <Label className="text-sm font-medium">Retensi Konteks</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Banyaknya pesan terakhir yang jadi acuan.</p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{settings.contextRetention} pesan</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {settings.contextRetention <= 5 ? "Minimal" : settings.contextRetention <= 15 ? "Normal" : settings.contextRetention <= 30 ? "Tinggi" : "Maksimal"}
+                  </Badge>
+                </div>
+                <Slider
+                  value={[settings.contextRetention]}
+                  onValueChange={([v]) => save({ contextRetention: v })}
+                  min={1}
+                  max={50}
+                  step={1}
+                  data-testid="slider-context-retention"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>1 pesan</span>
+                  <span>50 pesan</span>
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <SortableMultiSelect
+                  label="Prioritas Konteks"
+                  helper="Urutan konteks yang paling diutamakan."
+                  options={[
+                    "Pertanyaan terakhir",
+                    "Tujuan pengguna",
+                    "Profil pengguna",
+                    "Data proyek",
+                    "Riwayat percakapan",
+                    "Hasil tools",
+                  ]}
+                  value={settings.contextPriority}
+                  onChange={(v) => save({ contextPriority: v })}
+                  dataTestId="sortable-context-priority"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 7. Bantuan Proaktif */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Zap className="h-4 w-4 text-yellow-500" />
+                Bantuan Proaktif
+              </CardTitle>
+              <CardDescription>Seberapa sering AI memberi bantuan tambahan.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SelectRow
+                label="Bantuan Proaktif"
+                helper="Seberapa sering AI memberi bantuan tambahan tanpa diminta."
+                value={settings.proactiveAssistanceLevel}
+                onChange={(v) => save({ proactiveAssistanceLevel: v })}
+                options={["Off", "Rendah", "Sedang", "Tinggi"]}
+                dataTestId="select-proactive-assistance"
+              />
+              {settings.proactiveAssistanceLevel !== "Off" && (
+                <div className="border-t pt-4">
+                  <MultiSelectField
+                    label="Jenis Bantuan Proaktif"
+                    helper="Jenis bantuan yang boleh ditampilkan."
+                    options={[
+                      "Saran langkah berikutnya",
+                      "Pertanyaan klarifikasi",
+                      "Checklist",
+                      "Peringatan risiko",
+                      "Rekomendasi mini apps",
+                      "Rekomendasi chatbot spesialis",
+                      "Rekomendasi dokumen",
+                    ]}
+                    value={settings.proactiveHelpTypes}
+                    onChange={(v) => save({ proactiveHelpTypes: v })}
+                    dataTestId="multi-proactive-help-types"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 8. Gaya Interaksi */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageSquare className="h-4 w-4 text-pink-500" />
+                Gaya Interaksi & Empati
+              </CardTitle>
+              <CardDescription>Nada dan cara AI berkomunikasi.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SelectRow
+                label="Gaya Interaksi"
+                helper="Cara AI menyampaikan jawaban."
+                value={settings.interactionStyle}
+                onChange={(v) => save({ interactionStyle: v })}
+                options={["Formal", "Profesional", "Ramah", "Konsultatif", "Mentor"]}
+                dataTestId="select-interaction-style"
+              />
+              <div className="border-t pt-4">
+                <SelectRow
+                  label="Empati Kontekstual"
+                  helper="Seberapa peka AI terhadap emosi pengguna."
+                  value={settings.contextualEmpathy}
+                  onChange={(v) => save({ contextualEmpathy: v })}
+                  options={["Off", "Ringan", "Sedang", "Tinggi"]}
+                  dataTestId="select-contextual-empathy"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 9-12: deeper advanced-only cards */}
           {/* 9. Batas Tindakan & Eskalasi */}
           <Card>
             <CardHeader className="pb-3">
