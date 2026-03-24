@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { useActiveAgent, useUpdateAgent } from "@/hooks/use-agents";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -72,6 +73,13 @@ type Settings = {
   openClawAuditLog: boolean;
   openClawNotifyOnGate: boolean;
   openClawStepTrace: boolean;
+  // OpenClaw — PBJ Track Routing
+  openClawTrack: string;
+  openClawEntityOwner: string;
+  openClawRulebook: string;
+  openClawRulebookCategory: string[];
+  openClawRulebookStatus: string;
+  openClawClauseRefRequired: boolean;
 };
 
 const PRESET_DEFAULTS: Record<string, Partial<Settings>> = {
@@ -514,6 +522,12 @@ export function AgenticAIPanel() {
         openClawAuditLog: (agent as any).openClawAuditLog ?? true,
         openClawNotifyOnGate: (agent as any).openClawNotifyOnGate ?? false,
         openClawStepTrace: (agent as any).openClawStepTrace ?? true,
+        openClawTrack: (agent as any).openClawTrack || "Komersial",
+        openClawEntityOwner: (agent as any).openClawEntityOwner || "",
+        openClawRulebook: (agent as any).openClawRulebook || "",
+        openClawRulebookCategory: (agent as any).openClawRulebookCategory || [],
+        openClawRulebookStatus: (agent as any).openClawRulebookStatus || "Active",
+        openClawClauseRefRequired: (agent as any).openClawClauseRefRequired ?? false,
       });
     }
   }, [agent]);
@@ -920,16 +934,172 @@ export function AgenticAIPanel() {
                   />
                 </div>
               </div>
+
+              {/* PBJ Track Routing */}
+              <div className="border-t pt-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-5 h-5 rounded bg-blue-500/15">
+                    <Layers className="h-3 w-3 text-blue-500" />
+                  </div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Track & Routing Dokumen</p>
+                </div>
+
+                {/* Track Selector */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Track Pengadaan</Label>
+                  <p className="text-xs text-muted-foreground">Menentukan skema routing dan persyaratan dokumen yang dihasilkan.</p>
+                  <div className="grid grid-cols-3 gap-2 mt-1.5">
+                    {["Komersial", "PBJ Formal (Pemerintah/BUMN)", "Internal"].map((track) => (
+                      <button
+                        key={track}
+                        data-testid={`btn-track-${track}`}
+                        disabled={!settings.agenticMode}
+                        onClick={() => save({ openClawTrack: track })}
+                        className={`rounded-md border px-2 py-2 text-[11px] font-medium text-center transition-colors ${
+                          settings.openClawTrack === track
+                            ? track === "PBJ Formal (Pemerintah/BUMN)"
+                              ? "bg-blue-600 border-blue-600 text-white"
+                              : "bg-primary border-primary text-primary-foreground"
+                            : "bg-background hover:bg-muted text-muted-foreground"
+                        } ${!settings.agenticMode ? "opacity-40 pointer-events-none" : ""}`}
+                      >
+                        {track === "PBJ Formal (Pemerintah/BUMN)" ? "PBJ Formal" : track}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* PBJ Formal — extended fields */}
+                {settings.openClawTrack === "PBJ Formal (Pemerintah/BUMN)" && (
+                  <div className="space-y-4 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 p-4">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] border-blue-400 text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30">PBJ FORMAL</Badge>
+                      <p className="text-xs text-blue-700 dark:text-blue-400">Konfigurasi rulebook wajib untuk kepatuhan pengadaan pemerintah/BUMN.</p>
+                    </div>
+
+                    {/* Entity/Owner */}
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Entity / Owner</Label>
+                      <p className="text-xs text-muted-foreground">Nama BUMN, K/L, atau instansi yang menjadi acuan rulebook.</p>
+                      <Input
+                        data-testid="input-openclaw-entity-owner"
+                        placeholder="Contoh: BUMN Karya X, Kementerian PUPR, BUMN B Subholding"
+                        value={settings.openClawEntityOwner}
+                        onChange={(e) => save({ openClawEntityOwner: e.target.value })}
+                        disabled={!settings.agenticMode}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+
+                    {/* Rulebook Aktif */}
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Rulebook Aktif</Label>
+                      <p className="text-xs text-muted-foreground">Nama dokumen pedoman yang berlaku (misal: Pedoman PBJ BUMN X 2025, Dokpem Paket Y).</p>
+                      <Input
+                        data-testid="input-openclaw-rulebook"
+                        placeholder="Contoh: Pedoman PBJ BUMN X 2025"
+                        value={settings.openClawRulebook}
+                        onChange={(e) => save({ openClawRulebook: e.target.value })}
+                        disabled={!settings.agenticMode}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+
+                    {/* Kategori Rulebook */}
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Kategori Rulebook</Label>
+                      <p className="text-xs text-muted-foreground">Jenis dokumen pedoman yang dipakai sebagai acuan.</p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {["Regulasi", "SOP Internal", "Dokumen Pemilihan (Dokpem)", "Syarat Vendor", "Contract Template"].map((cat) => {
+                          const selected = settings.openClawRulebookCategory.includes(cat);
+                          return (
+                            <button
+                              key={cat}
+                              data-testid={`btn-rulebook-cat-${cat}`}
+                              disabled={!settings.agenticMode}
+                              onClick={() => {
+                                const next = selected
+                                  ? settings.openClawRulebookCategory.filter((c) => c !== cat)
+                                  : [...settings.openClawRulebookCategory, cat];
+                                save({ openClawRulebookCategory: next });
+                              }}
+                              className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
+                                selected
+                                  ? "bg-blue-600 border-blue-600 text-white"
+                                  : "bg-background border-border text-muted-foreground hover:bg-muted"
+                              } ${!settings.agenticMode ? "opacity-40 pointer-events-none" : ""}`}
+                            >
+                              {cat}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Status Rulebook */}
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Status Rulebook</Label>
+                      <Select
+                        value={settings.openClawRulebookStatus}
+                        onValueChange={(v) => save({ openClawRulebookStatus: v })}
+                        disabled={!settings.agenticMode}
+                      >
+                        <SelectTrigger className="h-8 text-xs" data-testid="select-rulebook-status">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Active">Active — berlaku saat ini</SelectItem>
+                          <SelectItem value="Superseded">Superseded — sudah digantikan versi baru</SelectItem>
+                          <SelectItem value="Deprecated">Deprecated — tidak berlaku lagi</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Wajib Referensi Klausul */}
+                    <div className="border-t border-blue-200 dark:border-blue-800 pt-3">
+                      <ToggleRow
+                        label="Wajib Referensi Klausul"
+                        helper="Setiap temuan/klaim kepatuhan harus disertai nomor klausul dan bukti (halaman/section) dari rulebook."
+                        value={settings.openClawClauseRefRequired}
+                        onChange={(v) => save({ openClawClauseRefRequired: v })}
+                        dataTestId="toggle-clause-ref-required"
+                        disabled={!settings.agenticMode}
+                      />
+                    </div>
+
+                    {/* Routing summary */}
+                    <div className="rounded-md bg-white/60 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 p-3 space-y-1.5 text-[11px] text-blue-800 dark:text-blue-300">
+                      <p className="font-semibold">Alur Routing OpenClaw — PBJ Formal:</p>
+                      <ol className="list-decimal ml-4 space-y-0.5">
+                        <li>Tentukan <strong>Entity/Owner</strong> {settings.openClawEntityOwner ? `→ ${settings.openClawEntityOwner}` : "(belum diisi)"}</li>
+                        <li>Pilih <strong>Rulebook</strong> {settings.openClawRulebook ? `→ "${settings.openClawRulebook}"` : "(belum diisi)"} {settings.openClawRulebook && <span className={`ml-1 font-medium ${settings.openClawRulebookStatus === "Active" ? "text-green-600 dark:text-green-400" : "text-red-500"}`}>({settings.openClawRulebookStatus})</span>}</li>
+                        <li>Pilih <strong>Document Type</strong> berdasarkan konteks permintaan</li>
+                        <li>Generate dokumen {settings.openClawClauseRefRequired ? <strong className="text-blue-700 dark:text-blue-300">+ rujukan klausul wajib</strong> : "tanpa kewajiban klausul"}</li>
+                      </ol>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Compact summary when not in Advanced */}
           {!isAdvanced && settings.agenticMode && (
-            <div className="rounded-md bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 px-3 py-2 flex items-center gap-2">
-              <Activity className="h-3.5 w-3.5 text-orange-500 shrink-0" />
-              <span className="text-xs text-orange-700 dark:text-orange-400">
-                Gate: <strong>{settings.executionGatePolicy === "Hanya baca (tanpa konfirmasi)" ? "Hanya Baca" : settings.executionGatePolicy === "Konfirmasi untuk write" ? "Write Gate" : "Full Gate"}</strong> · {settings.openClawStepTrace ? "Step trace ON" : "Step trace OFF"} · {settings.openClawAuditLog ? "Audit log ON" : "Audit log OFF"}
-              </span>
+            <div className="rounded-md bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 px-3 py-2 space-y-1">
+              <div className="flex items-center gap-2">
+                <Activity className="h-3.5 w-3.5 text-orange-500 shrink-0" />
+                <span className="text-xs text-orange-700 dark:text-orange-400">
+                  Gate: <strong>{settings.executionGatePolicy === "Hanya baca (tanpa konfirmasi)" ? "Hanya Baca" : settings.executionGatePolicy === "Konfirmasi untuk write" ? "Write Gate" : "Full Gate"}</strong> · {settings.openClawStepTrace ? "Step trace ON" : "Step trace OFF"} · {settings.openClawAuditLog ? "Audit log ON" : "Audit log OFF"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Layers className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                <span className="text-xs text-blue-700 dark:text-blue-400">
+                  Track: <strong>{settings.openClawTrack === "PBJ Formal (Pemerintah/BUMN)" ? "PBJ Formal" : settings.openClawTrack}</strong>
+                  {settings.openClawTrack === "PBJ Formal (Pemerintah/BUMN)" && settings.openClawEntityOwner && <span> · {settings.openClawEntityOwner}</span>}
+                  {settings.openClawTrack === "PBJ Formal (Pemerintah/BUMN)" && settings.openClawClauseRefRequired && <span> · Klausul wajib</span>}
+                </span>
+              </div>
             </div>
           )}
         </CardContent>
