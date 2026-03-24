@@ -144,8 +144,71 @@ const PRESET_DEFAULTS: Record<string, Partial<Settings>> = {
     proactiveAssistanceLevel: "Rendah",
     clarifyBeforeAnswer: true,
     uncertaintyHandling: "Sarankan verifikasi ke sumber resmi",
+    showRiskWarnings: true,
     interactionStyle: "Formal",
   },
+};
+
+const PRESET_DESCRIPTIONS: Record<string, { tagline: string; detail: string; color: string; chips: string[] }> = {
+  Balanced: {
+    tagline: "Seimbang & Fleksibel",
+    detail: "Cocok untuk sebagian besar kasus. AI responsif, memberikan jawaban terstruktur, dan meminta klarifikasi sebelum bertindak.",
+    color: "indigo",
+    chips: ["Otonomi Sedang", "Terstruktur", "Tanya Dulu"],
+  },
+  Learn: {
+    tagline: "Mode Belajar & Edukasi",
+    detail: "AI bertindak sebagai mentor — penjelasan mendalam, sabar, langkah demi langkah. Ideal untuk onboarding atau pelatihan.",
+    color: "blue",
+    chips: ["Otonomi Pasif", "Mendalam", "Gaya Mentor"],
+  },
+  Mentor: {
+    tagline: "Mentor Profesional",
+    detail: "AI membimbing dengan penjelasan mendalam dan gaya mentor. Baik untuk diskusi strategis dan pengambilan keputusan.",
+    color: "violet",
+    chips: ["Otonomi Sedang", "Mendalam", "Poin-poin"],
+  },
+  Solve: {
+    tagline: "Fokus Solusi",
+    detail: "AI langsung ke inti masalah. Tidak banyak tanya, langsung jawab dan eksekusi. Cocok untuk troubleshooting cepat.",
+    color: "orange",
+    chips: ["Otonomi Tinggi", "Langsung Eksekusi", "Formal"],
+  },
+  Expert: {
+    tagline: "Mode Ahli Teknis",
+    detail: "Untuk pengguna berpengalaman yang butuh jawaban mendalam tanpa banyak basa-basi. AI langsung ke detail teknis.",
+    color: "red",
+    chips: ["Otonomi Tinggi", "Mendalam", "Tanpa Proaktif"],
+  },
+  "Brain Project": {
+    tagline: "Manajemen Proyek",
+    detail: "AI dirancang untuk Project Brain — tracking proyek, risiko, keputusan, dan tindak lanjut. Sangat proaktif dan konsultatif.",
+    color: "emerald",
+    chips: ["Otonomi Tinggi", "Sangat Proaktif", "Konsultatif"],
+  },
+  Compliance: {
+    tagline: "Kepatuhan & Regulasi",
+    detail: "AI hati-hati dan akurat — selalu menyarankan verifikasi ke sumber resmi. Ideal untuk tender, hukum, dan audit.",
+    color: "amber",
+    chips: ["Otonomi Terbatas", "Verifikasi Wajib", "Formal"],
+  },
+  Custom: {
+    tagline: "Konfigurasi Manual",
+    detail: "Semua pengaturan dikontrol secara manual. Gunakan untuk kebutuhan khusus yang tidak dicakup preset lain.",
+    color: "gray",
+    chips: ["Manual", "Fleksibel Penuh"],
+  },
+};
+
+const PRESET_COLOR_MAP: Record<string, { bg: string; border: string; text: string; chip: string }> = {
+  indigo: { bg: "bg-indigo-50 dark:bg-indigo-950/30", border: "border-indigo-200 dark:border-indigo-800", text: "text-indigo-700 dark:text-indigo-300", chip: "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300" },
+  blue: { bg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-200 dark:border-blue-800", text: "text-blue-700 dark:text-blue-300", chip: "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300" },
+  violet: { bg: "bg-violet-50 dark:bg-violet-950/30", border: "border-violet-200 dark:border-violet-800", text: "text-violet-700 dark:text-violet-300", chip: "bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300" },
+  orange: { bg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800", text: "text-orange-700 dark:text-orange-300", chip: "bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300" },
+  red: { bg: "bg-red-50 dark:bg-red-950/30", border: "border-red-200 dark:border-red-800", text: "text-red-700 dark:text-red-300", chip: "bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300" },
+  emerald: { bg: "bg-emerald-50 dark:bg-emerald-950/30", border: "border-emerald-200 dark:border-emerald-800", text: "text-emerald-700 dark:text-emerald-300", chip: "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300" },
+  amber: { bg: "bg-amber-50 dark:bg-amber-950/30", border: "border-amber-200 dark:border-amber-800", text: "text-amber-700 dark:text-amber-300", chip: "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300" },
+  gray: { bg: "bg-muted/40", border: "border-border", text: "text-muted-foreground", chip: "bg-muted text-muted-foreground" },
 };
 
 const DEFAULT_SETTINGS: Settings = {
@@ -619,25 +682,45 @@ export function AgenticAIPanel() {
               ))}
             </SelectContent>
           </Select>
-          {settings.behaviorPreset !== "Custom" ? (
-            <div className="flex items-center justify-between rounded-md bg-muted/50 px-3 py-2">
-              <p className="text-xs text-muted-foreground">Sebagian pengaturan mengikuti preset.</p>
-              {isAdvanced && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 text-xs gap-1"
-                  onClick={() => applyPreset(settings.behaviorPreset)}
-                  data-testid="btn-reset-preset"
-                >
-                  <RefreshCcw className="h-3 w-3" />
-                  Reset ke Preset
-                </Button>
-              )}
-            </div>
-          ) : (
+
+          {/* Preset description card */}
+          {(() => {
+            const desc = PRESET_DESCRIPTIONS[settings.behaviorPreset];
+            const colors = PRESET_COLOR_MAP[desc?.color || "gray"];
+            if (!desc) return null;
+            return (
+              <div className={`rounded-lg border p-3 space-y-2 ${colors.bg} ${colors.border}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className={`text-xs font-semibold ${colors.text}`}>{desc.tagline}</span>
+                  {settings.behaviorPreset !== "Custom" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-6 text-[11px] gap-1 shrink-0 ${colors.text} hover:bg-black/5 dark:hover:bg-white/5`}
+                      onClick={() => applyPreset(settings.behaviorPreset)}
+                      data-testid="btn-reset-preset"
+                    >
+                      <RefreshCcw className="h-2.5 w-2.5" />
+                      Reset ke Preset
+                    </Button>
+                  )}
+                </div>
+                <p className={`text-xs ${colors.text} opacity-80`}>{desc.detail}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {desc.chips.map((chip) => (
+                    <span key={chip} className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${colors.chip}`}>{chip}</span>
+                  ))}
+                </div>
+                {settings.behaviorPreset !== "Custom" && (
+                  <p className="text-[10px] text-muted-foreground pt-0.5">Sebagian pengaturan mengikuti preset. Aktifkan Mode Lanjutan untuk detail.</p>
+                )}
+              </div>
+            );
+          })()}
+
+          {settings.behaviorPreset === "Custom" && (
             <p className="text-xs text-muted-foreground">
-              Anda bisa mengatur detail di bagian pengaturan di bawah.
+              Semua pengaturan dikontrol manual. Aktifkan Mode Lanjutan untuk detail.
             </p>
           )}
         </CardContent>
@@ -1107,31 +1190,101 @@ export function AgenticAIPanel() {
 
       {/* Basic mode summary — shown only when Advanced is OFF */}
       {!isAdvanced && (
-        <Card className="border border-dashed bg-muted/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-              <Settings2 className="h-4 w-4" />
-              Pengaturan lanjutan (ringkasan)
-            </CardTitle>
-            <CardDescription className="text-xs">Aktifkan Mode Lanjutan di atas untuk mengubah nilai ini.</CardDescription>
+        <Card className="border border-dashed bg-muted/10">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
+                <Settings2 className="h-4 w-4" />
+                Pengaturan Lanjutan — Ringkasan
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1.5"
+                onClick={() => setIsAdvanced(true)}
+                data-testid="btn-enable-advanced-from-summary"
+              >
+                <Settings2 className="h-3 w-3" />
+                Ubah
+              </Button>
+            </div>
+            <CardDescription className="text-xs">Aktifkan Mode Lanjutan di pojok kanan atas untuk mengubah nilai ini secara detail.</CardDescription>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-              {[
-                { label: "Kedalaman Jawaban", value: settings.responseDepth },
-                { label: "Format Output", value: settings.outputFormat },
-                { label: "Gaya Interaksi", value: settings.interactionStyle },
-                { label: "Bantuan Proaktif", value: settings.proactiveAssistanceLevel },
-                { label: "Minta Klarifikasi", value: settings.clarifyBeforeAnswer ? "Ya" : "Tidak" },
-                { label: "Peringatan Risiko", value: settings.showRiskWarnings ? "Aktif" : "Tidak aktif" },
-                { label: "Retensi Konteks", value: `${settings.contextRetention} pesan` },
-                { label: "Saat Tidak Yakin", value: settings.uncertaintyHandling.length > 22 ? settings.uncertaintyHandling.slice(0, 22) + "…" : settings.uncertaintyHandling },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between border-b border-border/40 py-1 last:border-0">
-                  <span className="text-muted-foreground">{label}</span>
-                  <Badge variant="secondary" className="text-xs py-0 font-normal">{value}</Badge>
-                </div>
-              ))}
+          <CardContent className="pt-0 space-y-4">
+            {/* Kualitas Respons */}
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <MessageSquare className="h-3 w-3" /> Kualitas Respons
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Kedalaman Jawaban", value: settings.responseDepth },
+                  { label: "Format Output Utama", value: settings.outputFormat },
+                  { label: "Pemeriksaan Mandiri", value: settings.selfCorrection ? "Aktif" : "Nonaktif", bool: true, ok: settings.selfCorrection },
+                ].map(({ label, value, bool, ok }) => (
+                  <div key={label} className="flex items-center justify-between gap-2 bg-muted/40 rounded-md px-2.5 py-1.5">
+                    <span className="text-xs text-muted-foreground truncate">{label}</span>
+                    <Badge variant="secondary" className={`text-xs py-0 font-normal shrink-0 ${bool ? (ok ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 border-0" : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 border-0") : ""}`}>{value}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Klarifikasi & Risiko */}
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <HelpCircle className="h-3 w-3" /> Klarifikasi & Risiko
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Minta Klarifikasi Dulu", value: settings.clarifyBeforeAnswer ? "Ya" : "Tidak", bool: true, ok: settings.clarifyBeforeAnswer },
+                  { label: "Tampilkan Peringatan Risiko", value: settings.showRiskWarnings ? "Aktif" : "Nonaktif", bool: true, ok: settings.showRiskWarnings },
+                  { label: "Saat Tidak Yakin", value: settings.uncertaintyHandling.length > 24 ? settings.uncertaintyHandling.slice(0, 24) + "…" : settings.uncertaintyHandling },
+                ].map(({ label, value, bool, ok }: { label: string; value: string; bool?: boolean; ok?: boolean }) => (
+                  <div key={label} className="flex items-center justify-between gap-2 bg-muted/40 rounded-md px-2.5 py-1.5">
+                    <span className="text-xs text-muted-foreground truncate">{label}</span>
+                    <Badge variant="secondary" className={`text-xs py-0 font-normal shrink-0 ${bool ? (ok ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 border-0" : "bg-muted text-muted-foreground border-0") : ""}`}>{value}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Memori & Interaksi */}
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <Ear className="h-3 w-3" /> Memori & Interaksi
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Retensi Konteks", value: `${settings.contextRetention} pesan` },
+                  { label: "Bantuan Proaktif", value: settings.proactiveAssistanceLevel },
+                  { label: "Gaya Interaksi", value: settings.interactionStyle },
+                  { label: "Empati Kontekstual", value: settings.contextualEmpathy },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between gap-2 bg-muted/40 rounded-md px-2.5 py-1.5">
+                    <span className="text-xs text-muted-foreground truncate">{label}</span>
+                    <Badge variant="secondary" className="text-xs py-0 font-normal shrink-0">{value}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pembelajaran */}
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <GraduationCap className="h-3 w-3" /> Pembelajaran Adaptif
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Mode Pembelajaran", value: settings.adaptiveLearningMode },
+                  { label: "Simpan Sinyal Interaksi", value: settings.storeInteractionSignals ? "Ya" : "Tidak", bool: true, ok: settings.storeInteractionSignals },
+                ].map(({ label, value, bool, ok }: { label: string; value: string; bool?: boolean; ok?: boolean }) => (
+                  <div key={label} className="flex items-center justify-between gap-2 bg-muted/40 rounded-md px-2.5 py-1.5">
+                    <span className="text-xs text-muted-foreground truncate">{label}</span>
+                    <Badge variant="secondary" className={`text-xs py-0 font-normal shrink-0 ${bool ? (ok ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 border-0" : "bg-muted text-muted-foreground border-0") : ""}`}>{value}</Badge>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
