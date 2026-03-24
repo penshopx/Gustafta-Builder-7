@@ -1114,7 +1114,7 @@ export const miniAppTypeSchema = z.enum([
   "issue_log", "action_tracker", "change_log",
   "project_snapshot", "decision_summary", "risk_radar",
   "scoring_assessment", "gap_analysis", "recommendation_engine", "lead_capture_form",
-  "nib_status_report"
+  "nib_status_report", "whatsapp_status_update", "internal_project_report"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 

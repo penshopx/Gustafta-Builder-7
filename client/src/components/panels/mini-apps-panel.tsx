@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +36,8 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   recommendation_engine: "Recommendation Engine",
   lead_capture_form: "Lead Capture Form",
   nib_status_report: "Laporan Status NIB (OSS)",
+  whatsapp_status_update: "Pesan WhatsApp Status Klien",
+  internal_project_report: "Laporan Internal Snapshot Proyek",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -56,6 +58,8 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   recommendation_engine: Lightbulb,
   lead_capture_form: UserPlus,
   nib_status_report: FileSearch,
+  whatsapp_status_update: MessageSquare,
+  internal_project_report: Layers,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -76,10 +80,12 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   recommendation_engine: "Rekomendasi tindakan berdasarkan data dan scoring (AI-powered)",
   lead_capture_form: "Formulir penangkapan lead terintegrasi dengan chat",
   nib_status_report: "Ringkasan status + timeline OSS/NIB dari data Otak Proyek — otomatis disesuaikan untuk audiens internal atau klien (AI-powered)",
+  whatsapp_status_update: "Pesan WhatsApp singkat, sopan, dan CTA jelas untuk update status proyek ke klien (AI-powered)",
+  internal_project_report: "Laporan internal detail: status proyek, risiko aktif, kendala, keputusan tertunda, dan langkah mitigasi (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report"];
-const NIB_REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report"];
+const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report"];
 
 const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; description: string; items?: string[]; config?: Record<string, any> }>> = {
   checklist: {
@@ -184,6 +190,41 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
       },
     },
   },
+  whatsapp_status_update: {
+    name: "Pesan WhatsApp Status Klien",
+    description: "Update status proyek ke klien via WhatsApp — singkat, sopan, CTA jelas.",
+    config: {
+      mode: "whatsapp_status_update",
+      sources: ["client_name", "project_name", "process_stage", "process_status", "latest_update", "next_action", "last_checked_date"],
+      guardrails: {
+        max_words: 150,
+        no_jargon: true,
+        must_have_cta: true,
+        tone: "friendly_professional",
+      },
+    },
+  },
+  internal_project_report: {
+    name: "Laporan Internal Snapshot Proyek",
+    description: "Laporan detail untuk tim internal — status, risiko, kendala, keputusan tertunda, dan mitigasi.",
+    config: {
+      mode: "internal_project_report",
+      sources: [
+        "project_name", "project_type", "project_stage", "owner_client",
+        "process_status", "latest_update", "timeline_summary",
+        "issue_type", "issue_location", "issue_status",
+        "decision_summary", "decision_risk_level",
+        "time_constraint", "cost_constraint", "environmental_factors",
+        "next_action",
+      ],
+      sections: ["ringkasan_eksekutif", "status_terkini", "risiko_aktif", "kendala", "keputusan_tertunda", "langkah_mitigasi"],
+      guardrails: {
+        no_hallucination: true,
+        mark_missing_as: "Data belum tersedia",
+        highlight_critical: true,
+      },
+    },
+  },
   custom: {
     name: "Custom",
     description: "Aplikasi kustom untuk kebutuhan spesifik proyek.",
@@ -278,6 +319,15 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
     audience: "Internal" as "Internal" | "Klien",
     tone: "Profesional" as "Profesional" | "Formal" | "Ramah",
     note_to_recipient: "",
+  });
+  const [waParams, setWaParams] = useState({
+    cta_action: "Mohon konfirmasi ketersediaan untuk meeting" as string,
+    sender_name: "",
+    additional_context: "",
+  });
+  const [internalReportParams, setInternalReportParams] = useState({
+    focus_area: "semua" as "semua" | "risiko" | "kendala" | "keputusan",
+    urgency_flag: false,
   });
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -387,7 +437,11 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
     if (!viewingApp) return;
     setAiAnalysisResult(null);
     setResultCopied(false);
-    const extraParams = viewingApp.type === "nib_status_report" ? { ...nibParams } : undefined;
+    const extraParams =
+      viewingApp.type === "nib_status_report" ? { ...nibParams } :
+      viewingApp.type === "whatsapp_status_update" ? { ...waParams } :
+      viewingApp.type === "internal_project_report" ? { ...internalReportParams } :
+      undefined;
     runAIMiniApp.mutate(
       { id: String(viewingApp.id), agentId, extraParams },
       {
@@ -756,6 +810,8 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                         {viewingApp.type === "action_tracker" && "Menghasilkan daftar tindak lanjut berdasarkan isu dan keputusan di Otak Proyek. Mencakup aksi, PIC, due date, dan status."}
                         {viewingApp.type === "change_log" && "Menganalisis perubahan desain/metode/scope dari data Otak Proyek. Mencakup dampak dan kebutuhan approval."}
                         {viewingApp.type === "nib_status_report" && "Menghasilkan dokumen ringkasan status NIB (OSS) 1-halaman dari data Otak Proyek. Termasuk header, status terkini, timeline, dan langkah berikutnya."}
+                        {viewingApp.type === "whatsapp_status_update" && "Menghasilkan pesan WhatsApp singkat dan sopan untuk update status proyek ke klien. Maks 150 kata, CTA jelas, nada ramah-profesional."}
+                        {viewingApp.type === "internal_project_report" && "Laporan snapshot proyek detail untuk tim internal. Mencakup ringkasan eksekutif, status, risiko aktif, kendala, keputusan tertunda, dan langkah mitigasi."}
                       </p>
                       <p className="text-xs text-muted-foreground">Pastikan ada Otak Proyek yang aktif sebelum menjalankan.</p>
                     </div>
@@ -808,6 +864,82 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       </div>
                     )}
 
+                    {viewingApp.type === "whatsapp_status_update" && (
+                      <div className="space-y-3 border rounded-md p-4 bg-background">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4 text-green-600" />
+                          <p className="text-sm font-medium">Parameter Pesan WhatsApp</p>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">CTA — Tindakan yang diminta klien</Label>
+                          <Input
+                            value={waParams.cta_action}
+                            onChange={(e) => setWaParams({ ...waParams, cta_action: e.target.value })}
+                            placeholder="Contoh: Mohon konfirmasi dokumen berikut sebelum Jumat..."
+                            className="text-sm h-8"
+                            data-testid="input-wa-cta"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Nama pengirim (opsional)</Label>
+                          <Input
+                            value={waParams.sender_name}
+                            onChange={(e) => setWaParams({ ...waParams, sender_name: e.target.value })}
+                            placeholder="Contoh: Budi dari Tim CiviloPro"
+                            className="text-sm h-8"
+                            data-testid="input-wa-sender"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Konteks tambahan (opsional)</Label>
+                          <Textarea
+                            value={waParams.additional_context}
+                            onChange={(e) => setWaParams({ ...waParams, additional_context: e.target.value })}
+                            placeholder="Contoh: Klien sempat menanyakan soal tenggat waktu izin gangguan..."
+                            rows={2}
+                            className="text-sm"
+                            data-testid="textarea-wa-context"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {viewingApp.type === "internal_project_report" && (
+                      <div className="space-y-3 border rounded-md p-4 bg-background">
+                        <div className="flex items-center gap-2">
+                          <Layers className="w-4 h-4 text-indigo-500" />
+                          <p className="text-sm font-medium">Parameter Laporan Internal</p>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Fokus Laporan</Label>
+                          <Select
+                            value={internalReportParams.focus_area}
+                            onValueChange={(v) => setInternalReportParams({ ...internalReportParams, focus_area: v as "semua" | "risiko" | "kendala" | "keputusan" })}
+                          >
+                            <SelectTrigger className="h-8 text-sm" data-testid="select-report-focus">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="semua">Semua bagian (laporan lengkap)</SelectItem>
+                              <SelectItem value="risiko">Fokus risiko aktif</SelectItem>
+                              <SelectItem value="kendala">Fokus kendala & hambatan</SelectItem>
+                              <SelectItem value="keputusan">Fokus keputusan tertunda</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={internalReportParams.urgency_flag}
+                            onChange={(e) => setInternalReportParams({ ...internalReportParams, urgency_flag: e.target.checked })}
+                            className="rounded"
+                            data-testid="checkbox-report-urgency"
+                          />
+                          <span className="text-sm">Tandai sebagai laporan mendesak</span>
+                        </label>
+                      </div>
+                    )}
+
                     <Button
                       onClick={handleRunAIMiniApp}
                       disabled={runAIMiniApp.isPending}
@@ -822,7 +954,10 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       ) : (
                         <>
                           <Play className="w-4 h-4 mr-2" />
-                          {viewingApp.type === "nib_status_report" ? "Generate Ringkasan NIB" : "Jalankan Analisis AI"}
+                          {viewingApp.type === "nib_status_report" ? "Generate Ringkasan NIB" :
+                           viewingApp.type === "whatsapp_status_update" ? "Generate Pesan WhatsApp" :
+                           viewingApp.type === "internal_project_report" ? "Generate Laporan Internal" :
+                           "Jalankan Analisis AI"}
                         </>
                       )}
                     </Button>
@@ -830,7 +965,10 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       <div className="bg-muted/30 border rounded-md p-4 space-y-3">
                         <div className="flex items-center justify-between">
                           <h4 className="text-sm font-medium">
-                            {viewingApp.type === "nib_status_report" ? "Dokumen Ringkasan NIB" : "Hasil Analisis"}
+                            {viewingApp.type === "nib_status_report" ? "Dokumen Ringkasan NIB" :
+                             viewingApp.type === "whatsapp_status_update" ? "Pesan WhatsApp" :
+                             viewingApp.type === "internal_project_report" ? "Laporan Internal Snapshot" :
+                             "Hasil Analisis"}
                           </h4>
                           <Button
                             variant="ghost"

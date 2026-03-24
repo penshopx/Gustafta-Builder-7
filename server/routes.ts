@@ -4122,7 +4122,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
       const extraParams = req.body && typeof req.body === "object" ? req.body as Record<string, any> : {};
@@ -4438,22 +4438,135 @@ ${extraParams.note_to_recipient ? `\nCATATAN KHUSUS\n${extraParams.note_to_recip
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Gunakan nada ${tone.toLowerCase()}. Buat dokumen ini siap digunakan langsung — tidak perlu penjelasan tambahan di luar format.`;
+      } else if (appType === "whatsapp_status_update") {
+        const ctaAction = extraParams.cta_action || "Mohon konfirmasi ketersediaan Anda";
+        const senderName = extraParams.sender_name ? ` — ${extraParams.sender_name}` : "";
+        const additionalContext = extraParams.additional_context ? `\n\nKonteks tambahan dari tim: ${extraParams.additional_context}` : "";
+
+        modePrompt = `Kamu adalah asisten komunikasi profesional untuk konsultan konstruksi/engineering Indonesia. Buat PESAN WHATSAPP singkat dan sopan untuk update status proyek ke klien.
+
+ATURAN KETAT:
+- Maksimal 150 kata
+- Bahasa Indonesia yang ramah namun profesional
+- Wajib ada satu CTA yang jelas di akhir pesan
+- JANGAN cantumkan informasi yang tidak ada di data Otak Proyek
+- Jika field tidak tersedia, jangan tebak — hilangkan saja dari pesan
+- Format siap kirim: gunakan bullet point (•) dan singkat
+- JANGAN tambahkan penjelasan atau heading di luar pesan itu sendiri
+- Mulai pesan dengan sapaan sopan ke klien${additionalContext}
+
+CTA yang diminta: ${ctaAction}
+Tanda tangan pengirim: ${senderName || "[Tim CiviloPro]"}
+
+FORMAT OUTPUT (tulis pesan langsung, tanpa label/header tambahan):
+
+Halo Bapak/Ibu [client_name],
+
+[1–2 kalimat ringkas tentang status proyek saat ini berdasarkan data]
+
+Update terkini:
+• [poin 1 — status/progress]
+• [poin 2 — jika relevan]
+
+Langkah berikutnya:
+• [next_action atau kondisi yang perlu diperhatikan klien]
+
+[CTA: ${ctaAction}]
+
+Terima kasih atas kepercayaan Bapak/Ibu.
+${senderName || "Tim CiviloPro"}`;
+      } else if (appType === "internal_project_report") {
+        const focusArea = extraParams.focus_area || "semua";
+        const urgencyFlag = extraParams.urgency_flag === true || extraParams.urgency_flag === "true";
+        const urgencyBanner = urgencyFlag ? "\n⚠️ LAPORAN MENDESAK — Perlu perhatian segera\n" : "";
+
+        const sectionFilter = focusArea === "risiko"
+          ? "Fokus utama pada bagian RISIKO AKTIF. Bagian lain boleh diringkas singkat."
+          : focusArea === "kendala"
+          ? "Fokus utama pada bagian KENDALA & HAMBATAN. Bagian lain boleh diringkas singkat."
+          : focusArea === "keputusan"
+          ? "Fokus utama pada bagian KEPUTUSAN TERTUNDA. Bagian lain boleh diringkas singkat."
+          : "Tampilkan semua bagian secara lengkap.";
+
+        modePrompt = `Kamu adalah asisten manajemen proyek konstruksi Indonesia. Buat LAPORAN INTERNAL SNAPSHOT PROYEK yang detail untuk konsumsi tim internal (PM, Engineer, Manajemen).
+
+ATURAN KETAT (anti-halusinasi):
+- Hanya gunakan data yang ada di Otak Proyek. JANGAN mengarang data.
+- Jika suatu data tidak tersedia, tulis: "Data belum tersedia"
+- Jangan tebak angka, tanggal, atau nama yang tidak ada.
+- Tandai item KRITIS dengan [KRITIS] di depan poin.
+- ${sectionFilter}${urgencyBanner}
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAPORAN INTERNAL SNAPSHOT PROYEK${urgencyFlag ? "\n⚠️ MENDESAK" : ""}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. RINGKASAN EKSEKUTIF
+[1–3 kalimat: kondisi proyek secara keseluruhan. Nyatakan apakah proyek on-track, perlu perhatian, atau kritis.]
+
+2. STATUS TERKINI
+Proyek        : [project_name atau "Belum tercantum"]
+Jenis         : [project_type atau "Belum tercantum"]
+Tahap         : [project_stage atau "Belum tercantum"]
+Klien/Owner   : [owner_client atau "Belum tercantum"]
+Status Proses : [process_status atau "Belum tercantum"]
+Update Terkini: [latest_update atau "Belum ada update"]
+Timeline      : [timeline_summary — ringkas jika panjang, maks 3 poin]
+
+3. RISIKO AKTIF
+[Identifikasi risiko dari data issue_type, issue_status, decision_risk_level, environmental_factors. Tandai dengan level: Rendah / Sedang / Tinggi]
+• [Risiko 1] — Level: [level]
+• [Risiko 2 — jika ada]
+• Jika tidak ada risiko teridentifikasi, tulis: "Tidak ada risiko aktif teridentifikasi dari data saat ini."
+
+4. KENDALA & HAMBATAN
+[Dari data time_constraint, cost_constraint, issue_location, issue_status. Pisahkan per kategori jika perlu.]
+• Waktu: [time_constraint atau "Tidak ada data"]
+• Biaya: [cost_constraint atau "Tidak ada data"]
+• Teknis/Lapangan: [dari issue data atau "Tidak ada data"]
+• Lingkungan: [environmental_factors atau "Tidak ada data"]
+
+5. KEPUTUSAN TERTUNDA / PERLU TINDAK LANJUT
+[Dari decision_summary, decision_risk_level. Jika ada keputusan berisiko tinggi, tandai [KRITIS].]
+• [Keputusan 1 — ringkasan + level risiko]
+• [Keputusan 2 — jika ada]
+• Jika tidak ada, tulis: "Tidak ada keputusan tertunda yang teridentifikasi."
+
+6. LANGKAH MITIGASI & AKSI BERIKUTNYA
+[Dari next_action dan analisis risiko/kendala di atas. Berikan max 4 langkah konkret dan spesifik.]
+1. [Aksi 1]
+2. [Aksi 2]
+3. [Aksi 3 — opsional]
+4. [Aksi 4 — opsional]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapangan tetap diperlukan.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       }
 
       const agent = await storage.getAgent(agentId);
       const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
 
+      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report"].includes(appType);
+      const userPromptById: Record<string, string> = {
+        nib_status_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`,
+        whatsapp_status_update: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat pesan WhatsApp status proyek untuk klien sesuai format dan aturan di atas.`,
+        internal_project_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Laporan Internal Snapshot Proyek sesuai format dan aturan di atas.`,
+      };
+
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [
         {
           role: "system",
-          content: appType === "nib_status_report"
+          content: isIndonesianReport
             ? modePrompt
             : `${modePrompt}\n\nRespons dalam bahasa ${language}.`
         },
         {
           role: "user",
-          content: appType === "nib_status_report"
-            ? `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`
+          content: isIndonesianReport
+            ? (userPromptById[appType] || `Berikut data Otak Proyek:\n\n${projectBrainBlock}`)
             : `Here is the project data:\n\n${projectBrainBlock}${configBlock}\n\nPlease generate the analysis now. Follow the configuration rules and focus areas if provided.`
         }
       ];
