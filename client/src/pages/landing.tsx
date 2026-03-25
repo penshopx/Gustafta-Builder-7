@@ -927,46 +927,40 @@ export default function Landing() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Dokumentender */}
-              <Card className="hover-elevate overflow-visible border-2 border-emerald-200 dark:border-emerald-800">
+              {/* 1. Konstruksi AI */}
+              <Card className="hover-elevate overflow-visible border-2 border-yellow-200 dark:border-yellow-800">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                      <Wrench className="h-6 w-6 text-emerald-500" />
+                    <div className="h-12 w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+                      <HardHat className="h-6 w-6 text-yellow-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold">Dokumentender</h3>
-                      <p className="text-xs text-muted-foreground">Knowledge Base Keteknikan & Konstruksi</p>
+                      <h3 className="text-lg font-bold">Konstruksi AI</h3>
+                      <p className="text-xs text-muted-foreground">Asisten AI Proyek Konstruksi</p>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Akses pengetahuan lengkap tentang Teknik Sipil, Mesin, Elektro — standar SNI, ISO, metode pelaksanaan, RAB, K3, dokumen tender, kontrak, dan peraturan LKPP. Jawaban akurat dari dokumen asli.
+                    Asisten AI khusus proyek konstruksi — perencanaan jadwal, estimasi biaya, monitoring progres lapangan, manajemen subkontraktor, dan pelaporan proyek berbasis AI.
                   </p>
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["Teknik Sipil", "SNI & ISO", "RAB & K3", "Pengadaan", "LKPP"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-emerald-700 border-emerald-300 dark:text-emerald-400">{tag}</Badge>
+                      {["Jadwal Proyek", "Estimasi Biaya", "Progres Lapangan", "Subkontraktor", "Pelaporan"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-yellow-700 border-yellow-300 dark:text-yellow-400">{tag}</Badge>
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-xs" data-testid="button-dokumentender">
+                      <a href="https://falling-bloom-7842.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-yellow-600 hover:bg-yellow-700 text-xs" data-testid="button-konstruksi-ai">
                           <ExternalLink className="h-3.5 w-3.5" />
-                          chat.dokumentender.com
+                          Buka Konstruksi AI
                         </Button>
                       </a>
-                      <Link href="/bot/dokumentender">
-                        <Button size="sm" variant="outline" className="gap-1.5 text-xs" data-testid="button-chat-dokumentender">
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          Chat
-                        </Button>
-                      </Link>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Uji Kompetensi / Assessment */}
+              {/* 2. Siap Uji Kompetensi */}
               <Card className="hover-elevate overflow-visible border-2 border-blue-200 dark:border-blue-800">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
@@ -1005,7 +999,46 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              {/* Aplikasi Industri */}
+              {/* 3. Dokumentender */}
+              <Card className="hover-elevate overflow-visible border-2 border-emerald-200 dark:border-emerald-800">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      <Wrench className="h-6 w-6 text-emerald-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Dokumentender</h3>
+                      <p className="text-xs text-muted-foreground">Knowledge Base Keteknikan & Konstruksi</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Akses pengetahuan lengkap tentang Teknik Sipil, Mesin, Elektro — standar SNI, ISO, metode pelaksanaan, RAB, K3, dokumen tender, kontrak, dan peraturan LKPP. Jawaban akurat dari dokumen asli.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["Teknik Sipil", "SNI & ISO", "RAB & K3", "Pengadaan", "LKPP"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-emerald-700 border-emerald-300 dark:text-emerald-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-xs" data-testid="button-dokumentender">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          chat.dokumentender.com
+                        </Button>
+                      </a>
+                      <Link href="/bot/dokumentender">
+                        <Button size="sm" variant="outline" className="gap-1.5 text-xs" data-testid="button-chat-dokumentender">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Chat
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 4. Aplikasi Industri */}
               <Card className="hover-elevate overflow-visible border-2 border-orange-200 dark:border-orange-800">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
@@ -1038,73 +1071,7 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              {/* Konstruksi AI */}
-              <Card className="hover-elevate overflow-visible border-2 border-yellow-200 dark:border-yellow-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
-                      <HardHat className="h-6 w-6 text-yellow-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Konstruksi AI</h3>
-                      <p className="text-xs text-muted-foreground">Asisten AI Proyek Konstruksi</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Asisten AI khusus proyek konstruksi — perencanaan jadwal, estimasi biaya, monitoring progres lapangan, manajemen subkontraktor, dan pelaporan proyek berbasis AI.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["Jadwal Proyek", "Estimasi Biaya", "Progres Lapangan", "Subkontraktor", "Pelaporan"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-yellow-700 border-yellow-300 dark:text-yellow-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <a href="https://falling-bloom-7842.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-yellow-600 hover:bg-yellow-700 text-xs" data-testid="button-konstruksi-ai">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          Buka Konstruksi AI
-                        </Button>
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Aplikasi Hukum */}
-              <Card className="hover-elevate overflow-visible border-2 border-rose-200 dark:border-rose-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
-                      <Scale className="h-6 w-6 text-rose-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Aplikasi Hukum</h3>
-                      <p className="text-xs text-muted-foreground">Asisten AI Bidang Hukum & Kontrak</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Asisten AI untuk kebutuhan hukum bisnis dan konstruksi — review kontrak, analisis klausul, draf perjanjian, kepatuhan regulasi, dan konsultasi hukum pengadaan.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["Review Kontrak", "Analisis Klausul", "Regulasi", "Pengadaan", "Hukum Bisnis"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-rose-700 border-rose-300 dark:text-rose-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <a href="https://open-token-0622.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-rose-600 hover:bg-rose-700 text-xs" data-testid="button-aplikasi-hukum">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          Buka Aplikasi Hukum
-                        </Button>
-                      </a>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Manajemen ISO */}
+              {/* 5. Manajemen ISO */}
               <Card className="hover-elevate overflow-visible border-2 border-violet-200 dark:border-violet-800">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
@@ -1130,6 +1097,39 @@ export default function Landing() {
                         <Button size="sm" className="w-full gap-1.5 bg-violet-600 hover:bg-violet-700 text-xs" data-testid="button-manajemen-iso">
                           <ExternalLink className="h-3.5 w-3.5" />
                           Buka Manajemen ISO
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 6. Aplikasi Hukum */}
+              <Card className="hover-elevate overflow-visible border-2 border-rose-200 dark:border-rose-800">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                      <Scale className="h-6 w-6 text-rose-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Aplikasi Hukum</h3>
+                      <p className="text-xs text-muted-foreground">Asisten AI Bidang Hukum & Kontrak</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Asisten AI untuk kebutuhan hukum bisnis dan konstruksi — review kontrak, analisis klausul, draf perjanjian, kepatuhan regulasi, dan konsultasi hukum pengadaan.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["Review Kontrak", "Analisis Klausul", "Regulasi", "Pengadaan", "Hukum Bisnis"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-rose-700 border-rose-300 dark:text-rose-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://open-token-0622.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-rose-600 hover:bg-rose-700 text-xs" data-testid="button-aplikasi-hukum">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Buka Aplikasi Hukum
                         </Button>
                       </a>
                     </div>
