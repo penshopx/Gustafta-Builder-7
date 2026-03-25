@@ -21,7 +21,7 @@ import {
   HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
   Brain, Blocks, Camera, Plug, ExternalLink, Wrench,
   GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
-  Package, ChevronRight, Flame
+  Package, ChevronRight, Flame, Factory
 } from "lucide-react";
 
 export default function Landing() {
@@ -926,7 +926,7 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Dokumentender */}
               <Card className="hover-elevate overflow-visible border-2 border-emerald-200 dark:border-emerald-800">
                 <CardContent className="p-6">
@@ -1000,6 +1000,39 @@ export default function Landing() {
                           Chat
                         </Button>
                       </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Aplikasi Industri */}
+              <Card className="hover-elevate overflow-visible border-2 border-orange-200 dark:border-orange-800">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
+                      <Factory className="h-6 w-6 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Aplikasi Industri</h3>
+                      <p className="text-xs text-muted-foreground">Tools Operasional Sektor Industri</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Aplikasi AI terintegrasi untuk kebutuhan operasional industri — manajemen produksi, quality control, efisiensi proses, dan digitalisasi sistem kerja di lapangan.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["Produksi", "Quality Control", "Efisiensi Proses", "Digitalisasi", "Lapangan"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-orange-700 border-orange-300 dark:text-orange-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://dual-voxel-1743.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-orange-600 hover:bg-orange-700 text-xs" data-testid="button-aplikasi-industri">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Buka Aplikasi Industri
+                        </Button>
+                      </a>
                     </div>
                   </div>
                 </CardContent>
@@ -1127,6 +1160,11 @@ export default function Landing() {
                 <li>
                   <a href="https://linear-snow-8672.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
                     <ExternalLink className="h-3 w-3" /> Siap Uji Kompetensi
+                  </a>
+                </li>
+                <li>
+                  <a href="https://dual-voxel-1743.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Aplikasi Industri
                   </a>
                 </li>
               </ul>
