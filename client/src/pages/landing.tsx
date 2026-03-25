@@ -910,61 +910,100 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-muted/20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10">
               <Badge variant="secondary" className="mb-4">
                 <Globe className="h-3 w-3 mr-1" />
-                Knowledge Partner
+                Chatbot Terintegrasi
               </Badge>
               <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                Terhubung dengan Dokumentender
+                Ekosistem AI Konstruksi & Teknik
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Akses pengetahuan lengkap tentang keteknikan, konstruksi, pengadaan, dan berbagai bidang lainnya
-                melalui platform AI knowledge base Dokumentender.
+                Gustafta terintegrasi dengan chatbot AI spesialis untuk mendukung kebutuhan belajar, bekerja, dan berusaha di sektor konstruksi dan keteknikan.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <Card className="hover-elevate overflow-visible">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Dokumentender */}
+              <Card className="hover-elevate overflow-visible border-2 border-emerald-200 dark:border-emerald-800">
                 <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
-                    <Wrench className="h-6 w-6 text-emerald-500" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      <Wrench className="h-6 w-6 text-emerald-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Dokumentender</h3>
+                      <p className="text-xs text-muted-foreground">Knowledge Base Keteknikan & Konstruksi</p>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Keteknikan</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Teknik Sipil, Mesin, Elektro, Lingkungan - standar SNI, ISO, perhitungan teknis, dan referensi lengkap.
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Akses pengetahuan lengkap tentang Teknik Sipil, Mesin, Elektro — standar SNI, ISO, metode pelaksanaan, RAB, K3, dokumen tender, kontrak, dan peraturan LKPP. Jawaban akurat dari dokumen asli.
                   </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["Teknik Sipil", "SNI & ISO", "RAB & K3", "Pengadaan", "LKPP"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-emerald-700 border-emerald-300 dark:text-emerald-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-xs" data-testid="button-dokumentender">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          chat.dokumentender.com
+                        </Button>
+                      </a>
+                      <Link href="/bot/dokumentender">
+                        <Button size="sm" variant="outline" className="gap-1.5 text-xs" data-testid="button-chat-dokumentender">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Chat
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-              <Card className="hover-elevate overflow-visible">
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
-                    <Blocks className="h-6 w-6 text-emerald-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Konstruksi & Pengadaan</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Metode pelaksanaan, spesifikasi material, RAB, K3, dokumen tender, kontrak, dan peraturan LKPP.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer">
-                <Button size="lg" className="w-full sm:w-auto gap-2" data-testid="button-dokumentender">
-                  <ExternalLink className="h-5 w-5" />
-                  Buka chat.dokumentender.com
-                </Button>
-              </a>
-              <Link href="/bot/dokumentender">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2" data-testid="button-chat-dokumentender">
-                  <MessageSquare className="h-5 w-5" />
-                  Chat di Gustafta
-                </Button>
-              </Link>
+              {/* Uji Kompetensi / Assessment */}
+              <Card className="hover-elevate overflow-visible border-2 border-blue-200 dark:border-blue-800">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                      <GraduationCap className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Siap Uji Kompetensi</h3>
+                      <p className="text-xs text-muted-foreground">Chatbot Persiapan SKK, Asesmen & Audit</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Persiapkan diri menghadapi Uji Kompetensi SKK, Asesmen Tenaga Ahli, dan Audit Sistem Manajemen. Latihan soal interaktif, simulasi wawancara asesor, dan panduan dokumen portofolio berbasis AI.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["SKK Konstruksi", "Asesmen Ahli", "Audit SMKK", "Portofolio", "Simulasi"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-blue-700 border-blue-300 dark:text-blue-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://linear-snow-8672.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-blue-600 hover:bg-blue-700 text-xs" data-testid="button-uji-kompetensi">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Buka Chatbot Persiapan
+                        </Button>
+                      </a>
+                      <Link href="/bot/siap-ukom">
+                        <Button size="sm" variant="outline" className="gap-1.5 text-xs" data-testid="button-chat-ukom">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Chat
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
@@ -1080,7 +1119,16 @@ export default function Landing() {
                 <li><Link href="/documentation" className="hover:text-foreground">Dokumentasi</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">API Reference</Link></li>
                 <li><Link href="/series" className="hover:text-foreground">Chatbot Series</Link></li>
-                <li><Link href="/documentation" className="hover:text-foreground">Blog</Link></li>
+                <li>
+                  <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Dokumentender
+                  </a>
+                </li>
+                <li>
+                  <a href="https://linear-snow-8672.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Siap Uji Kompetensi
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
