@@ -53,13 +53,13 @@ export default function Landing() {
       bg: "bg-blue-500/10",
       border: "border-blue-500/30",
       label: "Untuk Belajar",
-      tagline: "AI sebagai tutor, mentor, dan asisten belajar personal",
-      description: "Chatbot AI yang memahami materi kuliah, modul pelatihan, atau regulasi yang perlu dipelajari. Tanya jawab interaktif, rangkuman otomatis, latihan soal, dan simulasi ujian — kapan saja, tanpa batas.",
+      tagline: "AI sebagai tutor, mentor BIMTEK, dan asisten belajar personal",
+      description: "Chatbot AI untuk modul pembelajaran, sertifikasi, dan pelatihan teknis. Mulai dari BIMTEK konstruksi, sertifikasi SKK, quiz interaktif, bank soal, hingga toolbox perhitungan — semuanya tersedia 24/7 tanpa batas.",
       useCases: [
-        { title: "Tutor AI Kampus", desc: "Upload silabus & materi kuliah. AI siap menjawab pertanyaan mahasiswa 24/7 berdasarkan konten yang Anda unggah." },
+        { title: "Mentoring & BIMTEK Konstruksi", desc: "Modul pembelajaran terstruktur, progress tracking, quiz interaktif, dan AI expert agent untuk pelatihan teknis konstruksi." },
+        { title: "Simulasi Ujian SKK", desc: "Latihan soal Sertifikasi Kompetensi Kerja (SKK) dengan AI yang mengoreksi, menjelaskan, dan memberi saran belajar personal." },
         { title: "Belajar Regulasi Konstruksi", desc: "Chatbot khusus Perpres 46/2025, Permen PUPR, SNI — tanya langsung, jawaban akurat dari dokumen asli." },
-        { title: "Simulasi Ujian SKK", desc: "Latihan soal Sertifikasi Kompetensi Kerja (SKK) dengan AI yang mengoreksi, menjelaskan, dan memberi saran belajar." },
-        { title: "E-Learning Perusahaan", desc: "Onboarding karyawan, pelatihan K3, SOP produk — semua bisa diakses via chatbot kapan pun dibutuhkan." },
+        { title: "E-Learning & Onboarding", desc: "Onboarding karyawan, pelatihan K3, SOP produk, dan quiz evaluasi — semua bisa diakses via chatbot kapan pun dibutuhkan." },
       ]
     },
     bekerja: {
@@ -140,7 +140,7 @@ export default function Landing() {
     {
       icon: Lightbulb,
       title: "Hierarki Terstruktur",
-      description: "Organisir chatbot dengan Series (Topik), Big Idea (Brand), Toolbox (Kategori), dan Agent (Chatbot) untuk manajemen yang rapi."
+      description: "Bangun chatbot secara bertahap: Domain → Tujuan → Modul → Toolbox → Agen. Skala bebas tanpa kacau saat berkembang."
     },
     {
       icon: Sparkles,
@@ -231,7 +231,7 @@ export default function Landing() {
     { feature: "Otak Proyek / Project Brain (Data Terpusat)", gustafta: true, others: false },
     { feature: "Mini Apps AI (12 Tools)", gustafta: true, others: false },
     { feature: "Paket Domain (Tender LPSE, dll)", gustafta: true, others: false },
-    { feature: "Hierarki Series > Big Idea > Toolbox > Agent", gustafta: true, others: false },
+    { feature: "Hierarki Domain → Tujuan → Modul → Toolbox → Agen", gustafta: true, others: false },
     { feature: "Multi-Channel (WhatsApp, Telegram, dll)", gustafta: "6+ channel", others: "1–2 channel" },
     { feature: "Multi-Model AI (GPT-4o, Claude, DeepSeek)", gustafta: true, others: "Terbatas" },
     { feature: "Widget & PWA Customization", gustafta: true, others: "Basic" },
@@ -274,20 +274,30 @@ export default function Landing() {
     {
       number: "1",
       title: "Buat Big Idea & Agent",
-      description: "Buat Series → Big Idea → Toolbox → Agent, isi Knowledge Base dengan dokumen bisnis, dan konfigurasi Persona AI",
-      time: "3 menit"
+      description: "Definisikan brand dan persona. Tentukan Domain, Tujuan, dan gaya jawaban (ringkas / detail / step-by-step).",
+      time: "± 10 menit",
+      bullets: ["Nama chatbot & domain", "Tujuan utama & output style", "Persona AI (mentor, konsultan, CS, dll)"]
     },
     {
-      number: "2", 
-      title: "Setup Fitur & Mini Apps",
-      description: "Pilih Mini Apps yang dibutuhkan, aktifkan Otak Proyek, dan tambahkan Integrations channel",
-      time: "3 menit"
+      number: "2",
+      title: "Isi Knowledge Base",
+      description: "Upload sumber pengetahuan agar AI bisa menjawab berdasarkan data asli Anda — bukan tebakan.",
+      time: "± 10–15 menit",
+      bullets: ["Upload PDF, PPT, Excel, atau URL", "Rapikan kategori & topik", "AI otomatis memahami isi dokumen"]
     },
     {
       number: "3",
-      title: "Widget & Mulai Melayani",
-      description: "Setup Widget embed di website, hubungkan Broadcast WA, atau bagikan link /bot/[agent] ke pelanggan",
-      time: "1 menit"
+      title: "Setup Fitur & Mini Apps",
+      description: "Pilih tools yang dibutuhkan dan aktifkan Otak Proyek untuk konteks bisnis yang lebih tajam.",
+      time: "± 5–7 menit",
+      bullets: ["Aktifkan Mini Apps (Checklist, Quiz, Kalkulator, dll)", "Atur Otak Proyek untuk konteks", "Tambahkan Integrations channel"]
+    },
+    {
+      number: "4",
+      title: "Deploy & Uji Coba",
+      description: "Hubungkan ke channel, tes pertanyaan kunci, lalu bagikan ke pengguna.",
+      time: "± 3–5 menit",
+      bullets: ["Hubungkan WhatsApp / Web Widget", "Tes 5 pertanyaan kunci", "Bagikan link /bot/[agent]"]
     },
   ];
 
@@ -323,15 +333,16 @@ export default function Landing() {
             </div>
             
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight" data-testid="text-hero-title">
-              Chatbot AI untuk
+              Buat Chatbot AI Cerdas untuk
               <br className="hidden md:block" />
               <span className="text-primary">Belajar, Bekerja</span>
-              <span> & </span>
+              <span>, dan </span>
               <span className="text-primary">Berusaha</span>
+              <span className="block text-2xl sm:text-3xl md:text-4xl mt-1 text-muted-foreground font-semibold">— Tanpa Coding</span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Platform all-in-one untuk membangun chatbot AI yang memahami konteks Anda — dari tutor kampus, asisten tender konstruksi, hingga CS bisnis 24/7. Tanpa coding, siap dalam 7 menit.
+              Platform all-in-one untuk membangun chatbot AI yang memahami konteks Anda. Cocok untuk <strong>customer service bisnis</strong> dan juga <strong>learning & mentoring</strong> — termasuk BIMTEK konstruksi, sertifikasi SKK, quiz interaktif, dan toolbox perhitungan teknis. Tanpa coding, siap dalam ± 30 menit.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -537,26 +548,36 @@ export default function Landing() {
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Cara Kerja</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              3 Langkah Mudah, 7 Menit Saja
+              4 Langkah, ± 30 Menit Sampai Deploy
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Tidak perlu developer, tidak perlu koding. Buat chatbot AI untuk bisnis Anda dalam hitungan menit.
+              Tidak perlu developer, tidak perlu coding. Setup pertama memang butuh waktu untuk menyiapkan dokumen & integrasi — tapi hasilnya chatbot yang benar-benar memahami bisnis Anda.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {steps.map((step, index) => (
               <div key={step.number} className="relative">
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-border" />
+                  <div className="hidden lg:block absolute top-10 left-[calc(50%+2rem)] w-[calc(100%-2rem)] h-0.5 bg-border z-0" />
                 )}
-                <div className="relative bg-background rounded-xl p-6 border text-center hover-elevate">
-                  <div className="h-16 w-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                    {step.number}
+                <div className="relative bg-background rounded-xl p-6 border hover-elevate h-full flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-bold shrink-0">
+                      {step.number}
+                    </div>
+                    <Badge variant="outline" className="text-xs">{step.time}</Badge>
                   </div>
-                  <Badge variant="outline" className="mb-3">{step.time}</Badge>
-                  <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground text-sm">{step.description}</p>
+                  <h3 className="text-base font-semibold mb-2">{step.title}</h3>
+                  <p className="text-muted-foreground text-xs mb-3 leading-relaxed">{step.description}</p>
+                  <ul className="space-y-1 mt-auto">
+                    {step.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                        <Check className="h-3 w-3 text-primary mt-0.5 shrink-0" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             ))}
