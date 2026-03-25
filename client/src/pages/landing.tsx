@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,13 +19,16 @@ import {
   Zap, Palette, Code, Cpu, Layers,
   Clock, TrendingUp, Users, Star, CheckCircle2, XCircle, AlertTriangle,
   HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
-  Brain, Blocks, Camera, Plug, ExternalLink, Wrench
+  Brain, Blocks, Camera, Plug, ExternalLink, Wrench,
+  GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
+  Package, ChevronRight, Flame
 } from "lucide-react";
 
 export default function Landing() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
   const { data: templatesData } = useTemplates();
+  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha">("belajar");
 
   useEffect(() => {
     trackViewContent({ content_name: 'Landing Page', content_category: 'Homepage' });
@@ -42,6 +45,63 @@ export default function Landing() {
   const handlePricingClick = () => {
     trackViewContent({ content_name: 'Pricing Page', content_category: 'Pricing' });
   };
+
+  const personaContent = {
+    belajar: {
+      icon: GraduationCap,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/30",
+      label: "Untuk Belajar",
+      tagline: "AI sebagai tutor, mentor, dan asisten belajar personal",
+      description: "Chatbot AI yang memahami materi kuliah, modul pelatihan, atau regulasi yang perlu dipelajari. Tanya jawab interaktif, rangkuman otomatis, latihan soal, dan simulasi ujian — kapan saja, tanpa batas.",
+      useCases: [
+        { title: "Tutor AI Kampus", desc: "Upload silabus & materi kuliah. AI siap menjawab pertanyaan mahasiswa 24/7 berdasarkan konten yang Anda unggah." },
+        { title: "Belajar Regulasi Konstruksi", desc: "Chatbot khusus Perpres 46/2025, Permen PUPR, SNI — tanya langsung, jawaban akurat dari dokumen asli." },
+        { title: "Simulasi Ujian SKK", desc: "Latihan soal Sertifikasi Kompetensi Kerja (SKK) dengan AI yang mengoreksi, menjelaskan, dan memberi saran belajar." },
+        { title: "E-Learning Perusahaan", desc: "Onboarding karyawan, pelatihan K3, SOP produk — semua bisa diakses via chatbot kapan pun dibutuhkan." },
+      ]
+    },
+    bekerja: {
+      icon: Briefcase,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/30",
+      label: "Untuk Bekerja",
+      tagline: "AI sebagai asisten profesional, manajer proyek, dan konsultan teknis",
+      description: "Chatbot yang memahami konteks pekerjaan Anda — proyek konstruksi, dokumen teknis, laporan, analisis risiko, dan koordinasi tim. Kerja lebih cepat, lebih akurat, dengan dukungan AI yang selalu siap.",
+      useCases: [
+        { title: "Asisten Tender LPSE", desc: "Analisis dokumen tender, checklist 30+ item, gap analysis, dan draft dokumen otomatis sesuai Perpres 46/2025." },
+        { title: "Manajemen Risiko Proyek", desc: "Risk assessment otomatis, SMKK plan, identifikasi isu dari laporan harian — semua berbasis data proyek Anda." },
+        { title: "Knowledge Base Tim", desc: "Pusat pengetahuan teknis yang bisa diakses seluruh tim via WhatsApp atau web — SOP, standar, prosedur kerja." },
+        { title: "Laporan & Dokumentasi", desc: "AI membantu menyusun laporan mingguan, notulen rapat, ringkasan proyek, dan dokumen teknis dalam hitungan menit." },
+      ]
+    },
+    berusaha: {
+      icon: Store,
+      color: "text-orange-500",
+      bg: "bg-orange-500/10",
+      border: "border-orange-500/30",
+      label: "Untuk Berusaha",
+      tagline: "AI sebagai CS, sales, dan tim operasional yang tidak pernah tidur",
+      description: "Dari menjawab pertanyaan pelanggan hingga menutup penjualan — chatbot AI bekerja 24/7 untuk bisnis Anda. Lebih banyak leads, lebih sedikit biaya operasional, pelayanan yang konsisten di semua channel.",
+      useCases: [
+        { title: "Customer Service Otomatis", desc: "Jawab 80%+ pertanyaan pelanggan secara otomatis. Tim CS bisa fokus pada kasus kompleks yang butuh sentuhan manusia." },
+        { title: "Lead Generation 24/7", desc: "Chatbot menangkap prospek, kualifikasi leads, dan kirim notifikasi ke tim sales — bahkan saat bisnis sudah tutup." },
+        { title: "WhatsApp Business AI", desc: "Satu chatbot untuk ribuan percakapan WhatsApp secara bersamaan. Broadcast, follow-up, dan layanan otomatis." },
+        { title: "Konsultan Tender Konstruksi", desc: "Kontraktor bisa analisis peluang tender, cek kesiapan dokumen, dan dapatkan saran strategi penawaran lewat AI." },
+      ]
+    }
+  };
+
+  const tenderFeatures = [
+    { icon: ClipboardCheck, title: "Checklist 30+ Item", desc: "Validasi kelengkapan dokumen administrasi, kualifikasi SBU, teknis, SMKK/K3, dan kepatuhan Perpres 46/2025 secara otomatis." },
+    { icon: BarChart3, title: "Skor Kesiapan Tender", desc: "Skor Kelengkapan Dokumen + Skor Teknis (0–100) dengan penjelasan detail per bagian dan prioritas perbaikan." },
+    { icon: AlertTriangle, title: "Gap Analysis Prioritas", desc: "Identifikasi kekurangan spesifik vs persyaratan tender, dengan rekomendasi tindakan dan estimasi waktu penyelesaian." },
+    { icon: FileText, title: "Draft Dokumen AI", desc: "Proposal teknis, rencana mutu, SMKK plan, risk assessment, dan metode pelaksanaan — draf pertama siap dalam menit." },
+    { icon: Brain, title: "Executive Summary", desc: "Ringkasan kesiapan tender 4–5 kalimat: kekuatan utama, risiko terbesar, dan rekomendasi strategis untuk diputuskan." },
+    { icon: HardHat, title: "Wizard 7 Langkah", desc: "Input profil perusahaan, data tender, upload dokumen (auto-extract AI), strategi teknis, compliance, dan pilih output." },
+  ];
 
   const painPoints = [
     {
@@ -134,34 +194,46 @@ export default function Landing() {
 
   const testimonials = [
     {
-      name: "Rina Kusuma",
-      role: "CEO, Digital Agency Jakarta",
-      avatar: "RK",
-      content: "Gustafta membantu kami membuat chatbot untuk 15 klien dari berbagai industri. Setup cepat dan fleksibel untuk setiap sektor.",
-      rating: 5
+      name: "Budi Santoso",
+      role: "Direktur Teknik, PT Bangun Nusa Konstruksi",
+      avatar: "BS",
+      content: "Tender LPSE Assistant menghemat 2–3 hari kerja per tender. Checklist 30+ item langsung muncul, gap analysis akurat, draft dokumen tinggal edit. Tim kami bisa fokus ke strategi, bukan administrasi.",
+      rating: 5,
+      tag: "Konstruksi"
     },
     {
       name: "Ahmad Fadli",
       role: "Head of Digital, Retail Company",
       avatar: "AF",
-      content: "Chatbot WhatsApp kami menjawab 80% pertanyaan pelanggan otomatis. Tim CS bisa fokus pada kasus yang benar-benar butuh sentuhan manusia.",
-      rating: 5
+      content: "Chatbot WhatsApp kami menjawab 80% pertanyaan pelanggan otomatis. Tim CS bisa fokus pada kasus yang benar-benar butuh sentuhan manusia. ROI-nya luar biasa.",
+      rating: 5,
+      tag: "Retail"
     },
     {
       name: "Dewi Pratiwi",
       role: "Founder, EdTech Startup",
       avatar: "DP",
-      content: "Knowledge Base dan Mini Apps sangat powerful. Tutor AI kami sekarang bisa menjawab berdasarkan materi kuliah yang di-upload.",
-      rating: 5
+      content: "Knowledge Base dan Mini Apps sangat powerful. Tutor AI kami menjawab berdasarkan materi kuliah yang di-upload. Mahasiswa bisa belajar 24/7 tanpa menunggu dosen.",
+      rating: 5,
+      tag: "Pendidikan"
+    },
+    {
+      name: "Rina Kusuma",
+      role: "CEO, Digital Agency Jakarta",
+      avatar: "RK",
+      content: "Kami membuat chatbot untuk 15 klien dari berbagai industri dalam 2 bulan. Setup cepat, fleksibel untuk setiap sektor, dan hasilnya konsisten di semua channel.",
+      rating: 5,
+      tag: "Agency"
     },
   ];
 
   const comparisonData = [
     { feature: "Project Brain (Data Terpusat)", gustafta: true, others: false },
     { feature: "Mini Apps AI (12 Tools)", gustafta: true, others: false },
+    { feature: "Paket Domain (Tender LPSE, dll)", gustafta: true, others: false },
     { feature: "Hierarki Series > Big Idea > Toolbox > Agent", gustafta: true, others: false },
-    { feature: "Multi-Channel (WhatsApp, Telegram, dll)", gustafta: "6+ channels", others: "1-2 channels" },
-    { feature: "Multi-Model AI (GPT-4, Claude, DeepSeek)", gustafta: true, others: "Limited" },
+    { feature: "Multi-Channel (WhatsApp, Telegram, dll)", gustafta: "6+ channel", others: "1–2 channel" },
+    { feature: "Multi-Model AI (GPT-4o, Claude, DeepSeek)", gustafta: true, others: "Terbatas" },
     { feature: "Widget & PWA Customization", gustafta: true, others: "Basic" },
     { feature: "Analytics & Laporan Otomatis", gustafta: true, others: "Basic" },
     { feature: "Monetisasi & Voucher System", gustafta: true, others: false },
@@ -170,27 +242,31 @@ export default function Landing() {
   const faqItems = [
     {
       question: "Apa itu Gustafta?",
-      answer: "Gustafta adalah platform AI chatbot builder yang memungkinkan Anda membuat, mengkonfigurasi, dan men-deploy chatbot cerdas untuk bisnis Anda. Cocok untuk berbagai sektor usaha - dari retail, kesehatan, pendidikan, hingga konstruksi dan logistik."
+      answer: "Gustafta adalah platform AI chatbot builder yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun chatbot AI cerdas untuk tujuan belajar, bekerja, dan berusaha. Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding."
+    },
+    {
+      question: "Apa itu Tender LPSE Assistant dan bagaimana cara kerjanya?",
+      answer: "Tender LPSE Assistant adalah alat AI khusus untuk kontraktor dan konsultan MK yang ingin mengikuti tender pengadaan pemerintah (LPSE). Wizard 7 langkah memandu Anda dari input profil perusahaan → data tender → upload dokumen (auto-extract AI) → strategi teknis → compliance Perpres 46/2025 → pilih output. Hasilnya: checklist 30+ item, gap analysis, skor kesiapan, executive summary, risk review, dan draft dokumen siap pakai."
     },
     {
       question: "Apakah saya perlu keahlian coding?",
-      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual yang mudah. Project Brain, Mini Apps, Persona AI, dan Knowledge Base semuanya bisa di-setup tanpa menulis kode apapun."
+      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual yang mudah. Project Brain, Mini Apps, Persona AI, dan Knowledge Base semuanya bisa di-setup tanpa menulis kode apapun. Tender LPSE Assistant pun berjalan via wizard yang ramah pengguna."
     },
     {
-      question: "Apa itu hierarki Series, Big Idea, Toolbox, dan Agent?",
-      answer: "Ini adalah sistem pengorganisasian chatbot Anda. Series adalah topik/paket teratas, Big Idea adalah brand/visi, Toolbox adalah kategori kerja, dan Agent adalah chatbot spesifik. Struktur ini membantu mengelola banyak chatbot secara terorganisir."
+      question: "Apa itu Paket Domain?",
+      answer: "Paket Domain adalah modul AI siap pakai yang dirancang untuk kebutuhan spesifik industri tertentu. Saat ini tersedia dua paket untuk sektor konstruksi: Pelaksana Konstruksi (kontraktor) dan Konsultansi MK (pengawas). Lebih banyak paket domain untuk sektor lain sedang dalam pengembangan."
     },
     {
       question: "Channel apa saja yang didukung?",
-      answer: "Gustafta mendukung WhatsApp, Telegram, Discord, Slack, Web Widget, REST API, dan PWA. Satu chatbot bisa terhubung ke semua channel sekaligus."
+      answer: "Gustafta mendukung WhatsApp, Telegram, Discord, Slack, Web Widget, REST API, dan PWA. Satu chatbot bisa terhubung ke semua channel sekaligus dengan konteks yang konsisten."
     },
     {
       question: "Bagaimana dengan keamanan data?",
-      answer: "Data Anda aman dengan enkripsi, token akses per chatbot, mode publik/privat, dan kontrol domain. Anda memiliki kontrol penuh atas siapa yang bisa mengakses chatbot dan data Anda."
+      answer: "Data Anda aman dengan enkripsi end-to-end, token akses per chatbot, mode publik/privat, dan kontrol domain. Anda memiliki kontrol penuh atas siapa yang bisa mengakses chatbot dan data Anda."
     },
     {
       question: "Bisa digunakan untuk sektor usaha apa saja?",
-      answer: "Gustafta dirancang untuk semua sektor usaha - retail, kesehatan, pendidikan, keuangan, hukum, properti, hospitality, logistik, marketing, kreatif, dan masih banyak lagi. Setiap chatbot bisa dikustomisasi sesuai kebutuhan industri Anda."
+      answer: "Gustafta dirancang untuk 30+ sektor usaha — retail, kesehatan, pendidikan, keuangan, hukum, properti, hospitality, logistik, marketing, konstruksi, dan masih banyak lagi. Setiap chatbot bisa dikustomisasi dengan Knowledge Base, Persona, dan Mini Apps sesuai kebutuhan industri Anda."
     },
   ];
 
@@ -240,23 +316,35 @@ export default function Landing() {
         
         <div className="container mx-auto px-4 relative">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-pulse">
-              <Bot className="h-4 w-4" />
-              <span>AI Chatbot Builder untuk Semua Sektor Usaha</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
+              <span>Platform AI Chatbot Builder — Baru: Tender LPSE Assistant</span>
+              <Flame className="h-4 w-4 text-orange-500" />
             </div>
             
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight" data-testid="text-hero-title">
-              Buat Chatbot AI Cerdas
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight" data-testid="text-hero-title">
+              Chatbot AI untuk
               <br className="hidden md:block" />
-              untuk
-              <span className="text-primary"> Bisnis Anda</span>
+              <span className="text-primary">Belajar, Bekerja</span>
+              <span> & </span>
+              <span className="text-primary">Berusaha</span>
             </h1>
-            
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Platform all-in-one untuk membangun, mengkonfigurasi, dan men-deploy chatbot AI yang memahami bisnis Anda. 
-              Untuk semua sektor usaha - tanpa coding.
+
+            <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Platform all-in-one untuk membangun chatbot AI yang memahami konteks Anda — dari tutor kampus, asisten tender konstruksi, hingga CS bisnis 24/7. Tanpa coding, siap dalam 7 menit.
             </p>
+
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm">
+                <GraduationCap className="h-4 w-4" /> Pelajar & Mahasiswa
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm">
+                <Briefcase className="h-4 w-4" /> Profesional & Kontraktor
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-sm">
+                <Store className="h-4 w-4" /> Pemilik Usaha & UMKM
+              </div>
+            </div>
             
             <div className="flex flex-wrap justify-center gap-4 mb-8">
               {trustBadges.map((badge) => (
@@ -285,16 +373,12 @@ export default function Landing() {
                   </Button>
                 </a>
               )}
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="w-full sm:w-auto gap-2 text-lg px-8 py-6" 
-                data-testid="button-demo"
-                onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
-              >
-                <Play className="h-5 w-5" />
-                Lihat Fitur
-              </Button>
+              <Link href="/packs" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full gap-2 text-lg px-8 py-6 border-primary/30" data-testid="button-packs">
+                  <Package className="h-5 w-5" />
+                  Tender LPSE Assistant
+                </Button>
+              </Link>
             </div>
             
             <p className="text-sm text-muted-foreground">
@@ -320,12 +404,100 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ─── SECTION: 3 Persona Tabs ── */}
+      <section className="py-16 md:py-24 bg-muted/20" id="persona">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <Badge variant="secondary" className="mb-4">Untuk Siapa Gustafta?</Badge>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">
+              Satu Platform, Tiga Peran AI
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Chatbot AI bukan hanya untuk bisnis. Gustafta hadir untuk mendukung siapa pun yang ingin belajar lebih cerdas, bekerja lebih efisien, dan membangun usaha yang lebih kuat.
+            </p>
+          </div>
+
+          {/* Tab switcher */}
+          <div className="flex justify-center gap-2 mb-8 flex-wrap">
+            {(["belajar", "bekerja", "berusaha"] as const).map((key) => {
+              const p = personaContent[key];
+              const Icon = p.icon;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActivePersona(key)}
+                  data-testid={`tab-persona-${key}`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all border ${
+                    activePersona === key
+                      ? `${p.bg} ${p.color} ${p.border} border-2 shadow-sm`
+                      : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active persona content */}
+          {(() => {
+            const p = personaContent[activePersona];
+            const Icon = p.icon;
+            return (
+              <div className="max-w-5xl mx-auto">
+                <div className={`rounded-2xl border-2 ${p.border} p-6 md:p-8 mb-6 ${p.bg}`}>
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className={`w-12 h-12 rounded-xl ${p.bg} border ${p.border} flex items-center justify-center shrink-0`}>
+                      <Icon className={`h-6 w-6 ${p.color}`} />
+                    </div>
+                    <div>
+                      <p className={`text-xs font-bold uppercase tracking-wide ${p.color} mb-1`}>{p.label}</p>
+                      <h3 className="text-lg md:text-xl font-bold mb-2">{p.tagline}</h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{p.description}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {p.useCases.map((uc, i) => (
+                    <Card key={i} className="hover-elevate overflow-visible border">
+                      <CardContent className="p-5">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-8 h-8 rounded-lg ${p.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                            <CheckCircle2 className={`h-4 w-4 ${p.color}`} />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-sm mb-1">{uc.title}</h4>
+                            <p className="text-muted-foreground text-xs leading-relaxed">{uc.desc}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {activePersona === "bekerja" && (
+                  <div className="text-center mt-6">
+                    <Link href="/packs">
+                      <Button className="gap-2" data-testid="button-try-tender">
+                        <HardHat className="h-4 w-4" />
+                        Coba Tender LPSE Assistant
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      </section>
+
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Masalah & Solusi</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Tantangan Bisnis yang Kami Selesaikan
+              Tantangan yang Kami Selesaikan
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Apapun sektor usaha Anda, tantangan ini pasti familiar. Gustafta hadir sebagai solusi cerdas.
@@ -431,6 +603,106 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ─── SECTION: Tender LPSE Spotlight ── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-emerald-500/5 via-background to-blue-500/5" id="tender">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <Badge className="mb-4 gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
+                <Flame className="h-3 w-3" /> Flagship — Paket Domain Konstruksi
+              </Badge>
+              <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                Tender LPSE Assistant
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Alat AI pertama di Indonesia khusus untuk kontraktor dan konsultan MK yang ingin memenangkan tender pengadaan pemerintah. Analisis mendalam sesuai <strong>Perpres 46/2025</strong> — dari checklist dokumen hingga draft teknis siap kirim.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Left: Pack cards */}
+              <div className="space-y-4">
+                <Card className="border-2 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                        <HardHat className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">Pelaksana Konstruksi</p>
+                        <p className="text-xs text-muted-foreground">Kontraktor / Penyedia Jasa</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">Analisis kesiapan tender sebagai kontraktor: SBU, pengalaman proyek, personel, alat berat, metode pelaksanaan, SMKK/K3, dan kepatuhan regulasi.</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20">
+                  <CardContent className="p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
+                        <Briefcase className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">Konsultansi MK</p>
+                        <p className="text-xs text-muted-foreground">Manajemen Konstruksi / Pengawas</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">Analisis kesiapan sebagai konsultan MK: metodologi pengawasan, organisasi tim, pengalaman MK, rencana QA/QC, dan SMKK mentoring.</p>
+                  </CardContent>
+                </Card>
+                <div className="flex gap-3">
+                  <Link href="/packs" className="flex-1">
+                    <Button className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700" data-testid="button-go-packs">
+                      <Package className="h-4 w-4" />
+                      Buka Paket Domain
+                    </Button>
+                  </Link>
+                  {!isAuthenticated && (
+                    <a href="/api/login" onClick={handleStartNowClick}>
+                      <Button variant="outline" className="gap-2">
+                        <Rocket className="h-4 w-4" />
+                        Daftar Gratis
+                      </Button>
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Feature grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {tenderFeatures.map((f, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <f.icon className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold mb-0.5">{f.title}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* How it works wizard */}
+            <div className="rounded-xl border bg-card p-5">
+              <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">Alur Wizard 7 Langkah</p>
+              <div className="flex flex-wrap gap-2">
+                {["Pilih Pack", "Profil Perusahaan", "Data Tender", "Upload Dokumen (AI)", "Strategi Teknis", "Compliance Check", "Generate Hasil"].map((step, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">
+                      {i + 1}
+                    </div>
+                    <span className="text-xs text-muted-foreground">{step}</span>
+                    {i < 6 && <ChevronRight className="h-3 w-3 text-muted-foreground/50" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 md:py-24 bg-muted/30" id="sectors">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -484,19 +756,22 @@ export default function Landing() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="hover-elevate overflow-visible" data-testid={`card-testimonial-${index}`}>
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <Badge variant="outline" className="text-xs">{testimonial.tag}</Badge>
                   </div>
-                  <p className="text-muted-foreground mb-6 italic">"{testimonial.content}"</p>
+                  <p className="text-muted-foreground mb-5 italic text-sm leading-relaxed">"{testimonial.content}"</p>
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
                         {testimonial.avatar}
                       </AvatarFallback>
                     </Avatar>
