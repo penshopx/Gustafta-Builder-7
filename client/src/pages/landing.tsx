@@ -21,7 +21,7 @@ import {
   HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
   Brain, Blocks, Camera, Plug, ExternalLink, Wrench,
   GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
-  Package, ChevronRight, Flame, Factory, ShieldCheck
+  Package, ChevronRight, Flame, Factory, ShieldCheck, Scale
 } from "lucide-react";
 
 export default function Landing() {
@@ -1071,6 +1071,39 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
+              {/* Aplikasi Hukum */}
+              <Card className="hover-elevate overflow-visible border-2 border-rose-200 dark:border-rose-800">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                      <Scale className="h-6 w-6 text-rose-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Aplikasi Hukum</h3>
+                      <p className="text-xs text-muted-foreground">Asisten AI Bidang Hukum & Kontrak</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Asisten AI untuk kebutuhan hukum bisnis dan konstruksi — review kontrak, analisis klausul, draf perjanjian, kepatuhan regulasi, dan konsultasi hukum pengadaan.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["Review Kontrak", "Analisis Klausul", "Regulasi", "Pengadaan", "Hukum Bisnis"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-rose-700 border-rose-300 dark:text-rose-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://open-token-0622.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-rose-600 hover:bg-rose-700 text-xs" data-testid="button-aplikasi-hukum">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Buka Aplikasi Hukum
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Manajemen ISO */}
               <Card className="hover-elevate overflow-visible border-2 border-violet-200 dark:border-violet-800">
                 <CardContent className="p-6">
@@ -1241,6 +1274,11 @@ export default function Landing() {
                 <li>
                   <a href="https://falling-bloom-7842.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
                     <ExternalLink className="h-3 w-3" /> Konstruksi AI
+                  </a>
+                </li>
+                <li>
+                  <a href="https://open-token-0622.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Aplikasi Hukum
                   </a>
                 </li>
               </ul>
