@@ -21,7 +21,7 @@ import {
   HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
   Brain, Blocks, Camera, Plug, ExternalLink, Wrench,
   GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
-  Package, ChevronRight, Flame, Factory
+  Package, ChevronRight, Flame, Factory, ShieldCheck
 } from "lucide-react";
 
 export default function Landing() {
@@ -926,7 +926,7 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Dokumentender */}
               <Card className="hover-elevate overflow-visible border-2 border-emerald-200 dark:border-emerald-800">
                 <CardContent className="p-6">
@@ -1031,6 +1031,39 @@ export default function Landing() {
                         <Button size="sm" className="w-full gap-1.5 bg-orange-600 hover:bg-orange-700 text-xs" data-testid="button-aplikasi-industri">
                           <ExternalLink className="h-3.5 w-3.5" />
                           Buka Aplikasi Industri
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Manajemen ISO */}
+              <Card className="hover-elevate overflow-visible border-2 border-violet-200 dark:border-violet-800">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="h-6 w-6 text-violet-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Manajemen ISO</h3>
+                      <p className="text-xs text-muted-foreground">Sistem Manajemen Mutu & Kepatuhan ISO</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Kelola implementasi standar ISO secara menyeluruh — dokumentasi prosedur, audit internal, tindakan korektif, pemantauan KPI mutu, dan persiapan sertifikasi berbasis AI.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["ISO 9001", "ISO 14001", "ISO 45001", "Audit Internal", "Sertifikasi"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-violet-700 border-violet-300 dark:text-violet-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://soft-reed-1971.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-violet-600 hover:bg-violet-700 text-xs" data-testid="button-manajemen-iso">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Buka Manajemen ISO
                         </Button>
                       </a>
                     </div>
@@ -1165,6 +1198,11 @@ export default function Landing() {
                 <li>
                   <a href="https://dual-voxel-1743.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
                     <ExternalLink className="h-3 w-3" /> Aplikasi Industri
+                  </a>
+                </li>
+                <li>
+                  <a href="https://soft-reed-1971.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Manajemen ISO
                   </a>
                 </li>
               </ul>
