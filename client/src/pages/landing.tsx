@@ -394,7 +394,7 @@ export default function Landing() {
             
             <p className="text-sm text-muted-foreground">
               <CheckCircle2 className="h-4 w-4 inline mr-1 text-green-500" />
-              Gratis untuk memulai. Tidak perlu kartu kredit. Setup dalam 7 menit.
+              Gratis untuk memulai. Tidak perlu kartu kredit. Setup dalam ± 30 menit.
             </p>
           </div>
         </div>
@@ -1184,7 +1184,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
-              <span>Setup 7 menit</span>
+              <span>Setup ± 30 menit</span>
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
