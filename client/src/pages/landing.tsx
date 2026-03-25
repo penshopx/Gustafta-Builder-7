@@ -1038,6 +1038,39 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
+              {/* Konstruksi AI */}
+              <Card className="hover-elevate overflow-visible border-2 border-yellow-200 dark:border-yellow-800">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+                      <HardHat className="h-6 w-6 text-yellow-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Konstruksi AI</h3>
+                      <p className="text-xs text-muted-foreground">Asisten AI Proyek Konstruksi</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Asisten AI khusus proyek konstruksi — perencanaan jadwal, estimasi biaya, monitoring progres lapangan, manajemen subkontraktor, dan pelaporan proyek berbasis AI.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {["Jadwal Proyek", "Estimasi Biaya", "Progres Lapangan", "Subkontraktor", "Pelaporan"].map(tag => (
+                        <Badge key={tag} variant="outline" className="text-xs text-yellow-700 border-yellow-300 dark:text-yellow-400">{tag}</Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <a href="https://falling-bloom-7842.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button size="sm" className="w-full gap-1.5 bg-yellow-600 hover:bg-yellow-700 text-xs" data-testid="button-konstruksi-ai">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          Buka Konstruksi AI
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Manajemen ISO */}
               <Card className="hover-elevate overflow-visible border-2 border-violet-200 dark:border-violet-800">
                 <CardContent className="p-6">
@@ -1203,6 +1236,11 @@ export default function Landing() {
                 <li>
                   <a href="https://soft-reed-1971.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
                     <ExternalLink className="h-3 w-3" /> Manajemen ISO
+                  </a>
+                </li>
+                <li>
+                  <a href="https://falling-bloom-7842.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Konstruksi AI
                   </a>
                 </li>
               </ul>
