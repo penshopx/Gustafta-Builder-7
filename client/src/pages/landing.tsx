@@ -342,7 +342,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Platform all-in-one untuk membangun chatbot AI yang memahami konteks Anda. Cocok untuk <strong>customer service bisnis</strong> dan juga <strong>learning & mentoring</strong> — termasuk BIMTEK konstruksi, sertifikasi SKK, quiz interaktif, dan toolbox perhitungan teknis. Tanpa coding, siap dalam ± 30 menit.
+              Platform all-in-one untuk membangun chatbot AI yang memahami konteks Anda. Cocok untuk <strong>customer service bisnis</strong> dan juga <strong>learning & mentoring</strong> — termasuk BIMTEK konstruksi, sertifikasi SKK, quiz interaktif, dan toolbox perhitungan teknis. Tanpa coding, siap dalam kurang dari 30 menit.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -394,7 +394,7 @@ export default function Landing() {
             
             <p className="text-sm text-muted-foreground">
               <CheckCircle2 className="h-4 w-4 inline mr-1 text-green-500" />
-              Gratis untuk memulai. Tidak perlu kartu kredit. Setup dalam ± 30 menit.
+              Gratis untuk memulai. Tidak perlu kartu kredit. Setup kurang dari 30 menit.
             </p>
           </div>
         </div>
@@ -548,7 +548,7 @@ export default function Landing() {
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Cara Kerja</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              4 Langkah, ± 30 Menit Sampai Deploy
+              4 Langkah, Kurang dari 30 Menit Sampai Deploy
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Tidak perlu developer, tidak perlu coding. Setup pertama memang butuh waktu untuk menyiapkan dokumen & integrasi — tapi hasilnya chatbot yang benar-benar memahami bisnis Anda.
@@ -1184,7 +1184,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
-              <span>Setup ± 30 menit</span>
+              <span>Setup &lt; 30 menit</span>
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
