@@ -129,7 +129,7 @@ export default function Landing() {
   const features = [
     {
       icon: Brain,
-      title: "Project Brain",
+      title: "Otak Proyek",
       description: "Pusatkan semua data dan konteks bisnis dalam satu tempat. AI menggunakan data ini untuk memberikan jawaban yang akurat dan kontekstual."
     },
     {
@@ -228,7 +228,7 @@ export default function Landing() {
   ];
 
   const comparisonData = [
-    { feature: "Project Brain (Data Terpusat)", gustafta: true, others: false },
+    { feature: "Otak Proyek / Project Brain (Data Terpusat)", gustafta: true, others: false },
     { feature: "Mini Apps AI (12 Tools)", gustafta: true, others: false },
     { feature: "Paket Domain (Tender LPSE, dll)", gustafta: true, others: false },
     { feature: "Hierarki Series > Big Idea > Toolbox > Agent", gustafta: true, others: false },
@@ -250,7 +250,7 @@ export default function Landing() {
     },
     {
       question: "Apakah saya perlu keahlian coding?",
-      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual yang mudah. Project Brain, Mini Apps, Persona AI, dan Knowledge Base semuanya bisa di-setup tanpa menulis kode apapun. Tender LPSE Assistant pun berjalan via wizard yang ramah pengguna."
+      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual yang mudah. Otak Proyek, Mini Apps, Persona AI, dan Knowledge Base semuanya bisa di-setup tanpa menulis kode apapun. Tender LPSE Assistant pun berjalan via wizard yang ramah pengguna."
     },
     {
       question: "Apa itu Paket Domain?",
@@ -273,20 +273,20 @@ export default function Landing() {
   const steps = [
     {
       number: "1",
-      title: "Buat Big Idea & Chatbot",
-      description: "Definisikan brand, isi Knowledge Base dengan dokumen bisnis, dan konfigurasi persona AI",
+      title: "Buat Big Idea & Agent",
+      description: "Buat Series → Big Idea → Toolbox → Agent, isi Knowledge Base dengan dokumen bisnis, dan konfigurasi Persona AI",
       time: "3 menit"
     },
     {
       number: "2", 
       title: "Setup Fitur & Mini Apps",
-      description: "Pilih Mini Apps yang dibutuhkan, aktifkan Project Brain, dan tambahkan integrasi channel",
+      description: "Pilih Mini Apps yang dibutuhkan, aktifkan Otak Proyek, dan tambahkan Integrations channel",
       time: "3 menit"
     },
     {
       number: "3",
-      title: "Deploy & Mulai Melayani",
-      description: "Hubungkan ke WhatsApp, embed di website, atau bagikan link chatbot ke pelanggan",
+      title: "Widget & Mulai Melayani",
+      description: "Setup Widget embed di website, hubungkan Broadcast WA, atau bagikan link /bot/[agent] ke pelanggan",
       time: "1 menit"
     },
   ];
