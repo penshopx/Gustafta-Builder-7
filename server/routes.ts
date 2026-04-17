@@ -817,7 +817,7 @@ export async function registerRoutes(
       if (parsed.data.isOrchestrator && parsed.data.seriesId) {
         const existing = await storage.getOrchestratorToolbox(parsed.data.seriesId);
         if (existing) {
-          return res.status(409).json({ error: "Tujuan ini sudah memiliki Chatbot Orkestrator" });
+          return res.status(409).json({ error: "Series ini sudah memiliki Chatbot Orkestrator" });
         }
       }
       if (parsed.data.bigIdeaId && !parsed.data.seriesId) {

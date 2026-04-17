@@ -141,13 +141,13 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label>Tujuan</Label>
+            <Label>Series (L1)</Label>
             <Select value={selectedSeriesId} onValueChange={setSelectedSeriesId}>
               <SelectTrigger data-testid="select-series-edit">
-                <SelectValue placeholder="Pilih Tujuan" />
+                <SelectValue placeholder="Pilih Series" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none" data-testid="select-series-none">Tanpa Tujuan</SelectItem>
+                <SelectItem value="none" data-testid="select-series-none">Tanpa Series</SelectItem>
                 {allSeries.map((s: any) => (
                   <SelectItem key={s.id} value={String(s.id)} data-testid={`select-series-${s.id}`}>{s.name}</SelectItem>
                 ))}

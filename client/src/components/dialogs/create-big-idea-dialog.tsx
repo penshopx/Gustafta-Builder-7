@@ -163,13 +163,13 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
         <div className="space-y-6 py-4">
           {allSeries.length > 0 && (
             <div className="space-y-2">
-              <Label>Tujuan</Label>
+              <Label>Series (L1)</Label>
               <Select value={selectedSeriesId} onValueChange={setSelectedSeriesId}>
                 <SelectTrigger data-testid="select-series">
-                  <SelectValue placeholder="Pilih Tujuan" />
+                  <SelectValue placeholder="Pilih Series" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Tanpa Tujuan</SelectItem>
+                  <SelectItem value="none">Tanpa Series</SelectItem>
                   {allSeries.map((s: any) => (
                     <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>
                   ))}

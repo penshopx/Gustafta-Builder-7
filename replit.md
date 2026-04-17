@@ -103,6 +103,20 @@ All major features are synchronized into a unified agentic intelligence loop:
 - L4: Toolbox (chatbot spesialis per area kerja)
 - L5: Agent (unit tugas mikro spesifik)
 
+### Feature Sync & Terminology Cleanup (Apr 2026 — v4)
+
+#### AI Big Idea Generator (NEW)
+- **Backend**: `POST /api/ai/generate-big-ideas` — accepts `{topic, referenceText, urls, seriesId}`, calls OpenAI gpt-4o with JSON response_format, returns array of up to 5 Big Idea suggestions each with `{name, type, description, goals[], targetAudience, reasoning, expectedOutcome}`
+- **Frontend**: `client/src/components/dialogs/generate-big-ideas-dialog.tsx` — 2-step dialog: Step 1 input (topic + reference text + URLs), Step 2 review & select suggestions with checkbox + bulk create via `useCreateBigIdea` hook
+- **Dashboard integration**: "✨ Generate dari Referensi" button in Big Idea sidebar section, `generateBigIdeasOpen` state, dialog rendered with `activeSeriesId` prop
+
+#### Terminology Cleanup (Hierarchy Labels)
+All remaining old L1/L2/L3 labels (Tujuan/Modul/Chatbot/Alat Bantu) eliminated from:
+- `edit-big-idea-dialog.tsx` & `create-big-idea-dialog.tsx`: Series selector label fixed (Tujuan→Series, Tanpa Tujuan→Tanpa Series)
+- `documentation.tsx`: Full hierarchy section rewritten — 5 level cards (L1 Series, L2 Core, L3 Big Idea/Orkestrator, L4 Toolbox, L5 Agent), updated step-by-step guide, Orkestrator section, example hierarchy, and header subtitle
+- `server/routes.ts`: Error message "Tujuan ini sudah memiliki Chatbot Orkestrator" → "Series ini sudah memiliki Chatbot Orkestrator"
+- NOTE: "Tujuan" retained where it means "goals/objectives" (not L1 hierarchy) — e.g., Tujuan Konversi, Tujuan KPI, goals list in Big Idea form
+
 ### Roadmap Ekspansi Series (Belum Diimplementasi)
 
 Arah pengembangan ke depan — setiap bidang/klasifikasi menjadi series tersendiri karena potensi ribuan chatbot:
