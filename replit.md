@@ -4,7 +4,7 @@
 
 Gustafta is an AI chatbot builder platform enabling users to create, configure, and deploy intelligent conversational assistants. It features a two-panel dashboard for managing multiple chatbot agents, each with custom personas, knowledge bases, and multi-channel integrations. The platform supports various AI models and extensive customization, including persona details, greeting messages, and language options. Users can integrate chatbots with popular messaging platforms, embed them as web widgets, and access analytics. Gustafta also includes a built-in assistant chatbot for guidance and offers templates for various industries.
 
-The platform employs a 5-level modular hierarchical structure (Tujuan → Hub Utama → Modul Hub → Toolbox → Agen) for Jasa Konstruksi compliance across 14 series totaling 158 chatbot agents, organized into 5 categories:
+The platform employs a 5-level modular hierarchical structure (Series → Core → Big Idea/Orkestrator → Toolbox → Agent) for Jasa Konstruksi compliance across 14 series totaling 158 chatbot agents, organized into 5 categories:
 
 ### Kategori 1: Regulasi & Perizinan (`regulasi-perizinan`)
 1. **Regulasi Jasa Konstruksi** (25 chatbots) — Perizinan Usaha (7), SBU (4), SKK (5), Tender & Pengadaan (4), + Hubs. Seed: `server/seed-regulasi.ts`
@@ -76,6 +76,32 @@ All major features are synchronized into a unified agentic intelligence loop:
 - **Upload route**: Extended multer fileTypeMap to include `.mp4/.webm/.mov` → `video_*` and `.mp3/.wav/.m4a/.aac` → `audio_*` fileType labels
 - **New route**: `POST /api/knowledge-base/process-url` — on-demand extract for youtube/cloud_drive before saving
 - **UI improvements**: Type-specific icons (Youtube=red, Cloud=sky, Video=purple, Audio=orange), per-type processing badge labels ("Mengambil transkrip...", "Mengunduh file...", etc.), "chunks RAG" badge in emerald green, file upload UI for video/audio with helpful description
+
+### Feature Sync & Landing Page Update (Apr 2026 — v3)
+
+#### Helpdesk System Prompt v3 (`server/seed-knowledge-base.ts`)
+- Interactive/akrab tone (bukan formal), persona Gustafta Helpdesk Assistant v3
+- Methodology: AGENTIC + MULTI-AGENT + OPENCLAW (INPUT→CONTEXT GRAB→MULTI-LAYER REASON→TOOL INVOKE→SYNTHESIZE→LOOP)
+- Full 5-level hierarchy docs: Series(L1) → Core(L2) → Big Idea/Orkestrator(L3) → Toolbox(L4) → Agent(L5)
+- KB 7 tipe, Custom Domain guide, bank transfer payment info (BCA/Mandiri/BRI)
+- contextRetention:20, temperature:0.75, 5 updated conversation starters
+
+#### Landing Page Sync (`client/src/pages/landing.tsx`)
+- **Hero**: Badge "Baru: Custom Domain · KB YouTube/Video/Audio · Hierarki 5 Level", deskripsi baru mencantumkan full 5-level path
+- **Tombol**: "Lihat Series & Packs" (sebelumnya "Tender LPSE Assistant")
+- **Features array**: Hierarki 5 Level + Custom Domain + Agentic AI+OpenClaw + KB 7 Tipe
+- **Advanced Features**: Multi-Model AI (GPT-4o/4o-mini/Claude), Widget & Embed Kustom, Access Control, API & Integrasi Kustom
+- **New section**: "Custom Domain + Hierarki 5 Level Highlight" — dua kartu detail Custom Domain dan Hierarki 5 Level dengan bullet + CTA buttons
+- **Comparison table**: 9 baris termasuk Custom Domain, KB types, Tender Wizard
+- **FAQ**: 9 item mencakup Custom Domain & KB types
+- **Footer**: "Series & Packs" + link Custom Domain
+
+#### Hierarchy Naming Finalized
+- L1: Series (payung ekosistem strategis)
+- L2: Core (modul tematik dalam Series)
+- L3: Big Idea / Orkestrator (hub routing cerdas — menerima query user & mendelegasikan ke Toolbox)
+- L4: Toolbox (chatbot spesialis per area kerja)
+- L5: Agent (unit tugas mikro spesifik)
 
 ### Roadmap Ekspansi Series (Belum Diimplementasi)
 

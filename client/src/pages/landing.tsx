@@ -133,29 +133,29 @@ export default function Landing() {
       description: "Pusatkan semua data dan konteks bisnis dalam satu tempat. AI menggunakan data ini untuk memberikan jawaban yang akurat dan kontekstual."
     },
     {
-      icon: Blocks,
-      title: "Mini Apps (12 Tools)",
-      description: "6 tools dasar (Checklist, Kalkulator, Risk Assessment, Progress Tracker, Doc Generator, Custom) + 6 AI-powered tools untuk analisis otomatis."
+      icon: Layers,
+      title: "Hierarki 5 Level",
+      description: "Bangun ekosistem multi-agent terstruktur: Series → Core → Big Idea (Orkestrator) → Toolbox → Agent. Skala bebas, koordinasi cerdas."
     },
     {
-      icon: Lightbulb,
-      title: "Hierarki Terstruktur",
-      description: "Bangun chatbot secara bertahap: Domain → Tujuan → Modul → Toolbox → Agen. Skala bebas tanpa kacau saat berkembang."
+      icon: Globe,
+      title: "Custom Domain",
+      description: "Pasang domain kustom (misal: bot.perusahaan.com) ke chatbot manapun. CNAME setup, verifikasi otomatis, embed code siap pakai."
     },
     {
       icon: Sparkles,
-      title: "Agentic AI",
-      description: "AI cerdas dengan kemampuan mendengar aktif, retensi konteks, koreksi diri, dan pemahaman mendalam tentang bisnis Anda."
+      title: "Agentic AI + OpenClaw",
+      description: "Metodologi agentic berlapis: listen → detect → plan → execute → follow-up. Multi-agent dengan Big Idea sebagai orkestrator routing cerdas."
     },
     {
       icon: BookOpen,
-      title: "Knowledge Base",
-      description: "Upload PDF, PPT, Excel, gambar, video, atau URL. AI otomatis memahami dan bisa menjawab berdasarkan dokumen Anda."
+      title: "Knowledge Base 7 Tipe",
+      description: "Upload teks, file (PDF/DOCX/Excel), URL, YouTube, Cloud Drive, Video, atau Audio. AI transkripsi & RAG otomatis dari semua sumber."
     },
     {
       icon: Plug,
       title: "Multi-Channel",
-      description: "WhatsApp, Telegram, Discord, Slack, Web Widget, dan REST API. Satu chatbot, semua channel terhubung."
+      description: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget, REST API, dan Custom Domain. Satu chatbot, semua channel terhubung."
     },
   ];
 
@@ -173,22 +173,22 @@ export default function Landing() {
     {
       icon: Cpu,
       title: "Multi-Model AI",
-      description: "GPT-4o, GPT-3.5, DeepSeek, Claude, atau model custom dengan API endpoint sendiri sesuai kebutuhan"
+      description: "GPT-4o, GPT-4o-mini, Claude, atau model custom dengan API endpoint sendiri sesuai kebutuhan dan budget"
     },
     {
       icon: Palette,
-      title: "Widget Customization",
-      description: "Kustomisasi tampilan widget chat sesuai branding - warna, posisi, ukuran, logo, dan pesan sapaan"
+      title: "Widget & Embed Kustom",
+      description: "Widget floating atau iframe embed. Kustomisasi warna, posisi, ukuran, logo, dan welcome message sesuai brand"
     },
     {
       icon: Shield,
       title: "Access Control & Keamanan",
-      description: "Token akses per chatbot, mode publik/privat, kontrol domain, dan enkripsi data untuk keamanan bisnis"
+      description: "Token akses per chatbot, mode publik/privat, Custom Domain verifikasi, OAuth Replit Identity, dan enkripsi data"
     },
     {
       icon: Code,
-      title: "API & Webhook",
-      description: "REST API lengkap dan webhook untuk integrasi dengan sistem bisnis, CRM, ERP, atau tools lainnya"
+      title: "API & Integrasi Kustom",
+      description: "REST API lengkap, webhook, dan Broadcast WA. Integrasi dengan CRM, ERP, LPSE tender scraper, atau tools lainnya"
     },
   ];
 
@@ -228,76 +228,84 @@ export default function Landing() {
   ];
 
   const comparisonData = [
-    { feature: "Otak Proyek / Project Brain (Data Terpusat)", gustafta: true, others: false },
-    { feature: "Mini Apps AI (12 Tools)", gustafta: true, others: false },
-    { feature: "Paket Domain (Tender LPSE, dll)", gustafta: true, others: false },
-    { feature: "Hierarki Domain → Tujuan → Modul → Toolbox → Agen", gustafta: true, others: false },
-    { feature: "Multi-Channel (WhatsApp, Telegram, dll)", gustafta: "6+ channel", others: "1–2 channel" },
-    { feature: "Multi-Model AI (GPT-4o, Claude, DeepSeek)", gustafta: true, others: "Terbatas" },
-    { feature: "Widget & PWA Customization", gustafta: true, others: "Basic" },
-    { feature: "Analytics & Laporan Otomatis", gustafta: true, others: "Basic" },
-    { feature: "Monetisasi & Voucher System", gustafta: true, others: false },
+    { feature: "Hierarki 5 Level: Series → Core → Big Idea → Toolbox → Agent", gustafta: true, others: false },
+    { feature: "Multi-Agent Orchestration (Big Idea sebagai Hub)", gustafta: true, others: false },
+    { feature: "Custom Domain (bot.perusahaan.com → chatbot)", gustafta: true, others: false },
+    { feature: "Knowledge Base 7 Tipe (YouTube, Video, Audio, Cloud Drive)", gustafta: true, others: "Terbatas" },
+    { feature: "Otak Proyek / Project Brain + Tender Wizard", gustafta: true, others: false },
+    { feature: "Multi-Channel (WhatsApp, Telegram, Widget, API)", gustafta: "4+ channel", others: "1–2 channel" },
+    { feature: "Multi-Model AI (GPT-4o, Claude, Custom API)", gustafta: true, others: "Terbatas" },
+    { feature: "Widget Embed + Embed Code Dialog", gustafta: true, others: "Basic" },
+    { feature: "Monetisasi, Voucher & Afiliasi", gustafta: true, others: false },
   ];
 
   const faqItems = [
     {
       question: "Apa itu Gustafta?",
-      answer: "Gustafta adalah platform AI chatbot builder yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun chatbot AI cerdas untuk tujuan belajar, bekerja, dan berusaha. Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding."
+      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding."
+    },
+    {
+      question: "Apa itu hierarki Series → Core → Big Idea → Toolbox → Agent?",
+      answer: "Ini adalah arsitektur multi-agent Gustafta: Series (L1) = payung ekosistem, Core (L2) = modul tematik, Big Idea (L3) = orkestrator hub yang routing pengguna ke chatbot tepat, Toolbox (L4) = chatbot spesialis per area, Agent (L5) = unit tugas mikro di dalam Toolbox. Dengan hierarki ini Anda bisa bangun ekosistem chatbot skalabel yang terkoordinasi cerdas."
+    },
+    {
+      question: "Apa itu Custom Domain dan bagaimana cara pakainya?",
+      answer: "Custom Domain memungkinkan Anda memasang domain kustom (misal: bot.perusahaan.com) yang langsung mengarah ke chatbot Anda. Caranya: tambahkan CNAME record di provider domain → arahkan ke host Gustafta → verifikasi di dashboard → domain aktif. Tersedia juga embed code (iframe & floating widget) untuk dipasang di website lain."
     },
     {
       question: "Apa itu Tender LPSE Assistant dan bagaimana cara kerjanya?",
-      answer: "Tender LPSE Assistant adalah alat AI khusus untuk kontraktor dan konsultan MK yang ingin mengikuti tender pengadaan pemerintah (LPSE). Wizard 7 langkah memandu Anda dari input profil perusahaan → data tender → upload dokumen (auto-extract AI) → strategi teknis → compliance Perpres 46/2025 → pilih output. Hasilnya: checklist 30+ item, gap analysis, skor kesiapan, executive summary, risk review, dan draft dokumen siap pakai."
+      answer: "Tender LPSE Assistant adalah alat AI khusus untuk kontraktor dan konsultan MK yang ingin mengikuti tender pengadaan pemerintah (LPSE). Wizard 7 langkah memandu Anda dari input profil perusahaan → data tender → upload dokumen (auto-extract AI) → strategi teknis → compliance Perpres 46/2025 → pilih output. Hasilnya: checklist 30+ item, gap analysis, skor kesiapan, executive summary, dan draft dokumen siap pakai."
+    },
+    {
+      question: "Tipe sumber apa saja yang bisa jadi Knowledge Base?",
+      answer: "7 tipe sumber: Teks (ketik langsung), File (PDF/DOCX/CSV/Excel), URL (crawl website), YouTube (ambil transkrip otomatis), Cloud Drive (Google Drive/OneDrive), Video (.mp4/.webm/.mov → transkripsi), dan Audio (.mp3/.wav/.m4a/.aac → transkripsi). Semua diproses otomatis di background dan tersedia sebagai RAG chunks untuk chatbot."
     },
     {
       question: "Apakah saya perlu keahlian coding?",
-      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual yang mudah. Otak Proyek, Mini Apps, Persona AI, dan Knowledge Base semuanya bisa di-setup tanpa menulis kode apapun. Tender LPSE Assistant pun berjalan via wizard yang ramah pengguna."
-    },
-    {
-      question: "Apa itu Paket Domain?",
-      answer: "Paket Domain adalah modul AI siap pakai yang dirancang untuk kebutuhan spesifik industri tertentu. Saat ini tersedia dua paket untuk sektor konstruksi: Pelaksana Konstruksi (kontraktor) dan Konsultansi MK (pengawas). Lebih banyak paket domain untuk sektor lain sedang dalam pengembangan."
+      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual. Otak Proyek, Knowledge Base 7 tipe, Custom Domain, Persona AI, dan Tender Wizard semuanya bisa di-setup tanpa menulis kode apapun."
     },
     {
       question: "Channel apa saja yang didukung?",
-      answer: "Gustafta mendukung WhatsApp, Telegram, Discord, Slack, Web Widget, REST API, dan PWA. Satu chatbot bisa terhubung ke semua channel sekaligus dengan konteks yang konsisten."
+      answer: "Gustafta mendukung WhatsApp (Fonnte/Kirimi/Multichat/Cloud API), Telegram, Web Widget (iframe & floating), Custom Domain, REST API, dan PWA (bisa install di HP). Discord dan Slack akan hadir segera."
     },
     {
       question: "Bagaimana dengan keamanan data?",
-      answer: "Data Anda aman dengan enkripsi end-to-end, token akses per chatbot, mode publik/privat, dan kontrol domain. Anda memiliki kontrol penuh atas siapa yang bisa mengakses chatbot dan data Anda."
+      answer: "Data Anda aman dengan enkripsi, token akses per chatbot, mode publik/privat, kontrol domain, dan OAuth via Replit Identity. Anda memiliki kontrol penuh atas siapa yang bisa mengakses chatbot dan data Anda."
     },
     {
       question: "Bisa digunakan untuk sektor usaha apa saja?",
-      answer: "Gustafta dirancang untuk 30+ sektor usaha — retail, kesehatan, pendidikan, keuangan, hukum, properti, hospitality, logistik, marketing, konstruksi, dan masih banyak lagi. Setiap chatbot bisa dikustomisasi dengan Knowledge Base, Persona, dan Mini Apps sesuai kebutuhan industri Anda."
+      answer: "Gustafta dirancang untuk 30+ sektor usaha — konstruksi, retail, kesehatan, pendidikan, keuangan, hukum, properti, hospitality, logistik, marketing, dan masih banyak lagi. Setiap chatbot bisa dikustomisasi dengan Knowledge Base 7 tipe, Persona, Custom Domain, dan Conversion Layer sesuai kebutuhan industri."
     },
   ];
 
   const steps = [
     {
       number: "1",
-      title: "Buat Big Idea & Agent",
-      description: "Definisikan brand dan persona. Tentukan Domain, Tujuan, dan gaya jawaban (ringkas / detail / step-by-step).",
+      title: "Bangun Hierarki Series → Agent",
+      description: "Definisikan ekosistem chatbot Anda. Buat Series, Core, Big Idea (orkestrator), Toolbox, dan Agent sesuai kebutuhan.",
       time: "± 10 menit",
-      bullets: ["Nama chatbot & domain", "Tujuan utama & output style", "Persona AI (mentor, konsultan, CS, dll)"]
+      bullets: ["Buat Series sebagai payung ekosistem", "Tambahkan Core & Toolbox spesialis", "Buat Big Idea sebagai orkestrator hub (opsional)"]
     },
     {
       number: "2",
-      title: "Isi Knowledge Base",
-      description: "Upload sumber pengetahuan agar AI bisa menjawab berdasarkan data asli Anda — bukan tebakan.",
+      title: "Isi Knowledge Base (7 Tipe)",
+      description: "Upload sumber pengetahuan — teks, file, URL, YouTube, Cloud Drive, video, atau audio. AI transkripsi & RAG otomatis.",
       time: "± 10–15 menit",
-      bullets: ["Upload PDF, PPT, Excel, atau URL", "Rapikan kategori & topik", "AI otomatis memahami isi dokumen"]
+      bullets: ["Upload PDF/DOCX/Excel atau paste URL", "Tambahkan link YouTube untuk transkripsi otomatis", "Upload video/audio — AI transkripsi background"]
     },
     {
       number: "3",
-      title: "Setup Fitur & Mini Apps",
-      description: "Pilih tools yang dibutuhkan dan aktifkan Otak Proyek untuk konteks bisnis yang lebih tajam.",
+      title: "Konfigurasi & Custom Domain",
+      description: "Aktifkan Otak Proyek, setup persona, dan opsional pasang custom domain untuk branding profesional.",
       time: "± 5–7 menit",
-      bullets: ["Aktifkan Mini Apps (Checklist, Quiz, Kalkulator, dll)", "Atur Otak Proyek untuk konteks", "Tambahkan Integrations channel"]
+      bullets: ["Isi Otak Proyek dengan data bisnis", "Atur persona, greeting & conversation starters", "Setup Custom Domain (CNAME → chatbot Anda)"]
     },
     {
       number: "4",
       title: "Deploy & Uji Coba",
-      description: "Hubungkan ke channel, tes pertanyaan kunci, lalu bagikan ke pengguna.",
+      description: "Hubungkan ke channel, tes pertanyaan kunci, lalu bagikan ke pengguna melalui link, widget, atau domain kustom.",
       time: "± 3–5 menit",
-      bullets: ["Hubungkan WhatsApp / Web Widget", "Tes 5 pertanyaan kunci", "Bagikan link /bot/[agent]"]
+      bullets: ["Hubungkan WhatsApp / Web Widget", "Tes 5 pertanyaan kunci via chat console", "Bagikan link atau embed code ke website"]
     },
   ];
 
@@ -310,8 +318,8 @@ export default function Landing() {
 
   const stats = [
     { value: "30+", label: "Sektor Usaha" },
-    { value: "12", label: "Mini Apps Tersedia" },
-    { value: "6+", label: "Channel Terintegrasi" },
+    { value: "7", label: "Tipe Knowledge Base" },
+    { value: "5", label: "Level Hierarki" },
     { value: "24/7", label: "AI Selalu Aktif" },
   ];
 
@@ -328,7 +336,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              <span>Platform AI Chatbot Builder — Baru: Tender LPSE Assistant</span>
+              <span>Baru: Custom Domain · KB YouTube/Video/Audio · Hierarki 5 Level</span>
               <Flame className="h-4 w-4 text-orange-500" />
             </div>
             
@@ -342,7 +350,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Platform all-in-one untuk membangun chatbot AI yang memahami konteks Anda. Cocok untuk <strong>customer service bisnis</strong> dan juga <strong>learning & mentoring</strong> — termasuk BIMTEK konstruksi, sertifikasi SKK, quiz interaktif, dan toolbox perhitungan teknis. Tanpa coding, siap dalam kurang dari 30 menit.
+              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -387,7 +395,7 @@ export default function Landing() {
               <Link href="/packs" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full gap-2 text-lg px-8 py-6 border-primary/30" data-testid="button-packs">
                   <Package className="h-5 w-5" />
-                  Tender LPSE Assistant
+                  Lihat Series & Packs
                 </Button>
               </Link>
             </div>
@@ -620,6 +628,91 @@ export default function Landing() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION: Custom Domain + Hierarki 5 Level Highlight ── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-violet-500/5">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Custom Domain card */}
+              <Card className="border-2 border-primary/30 hover-elevate overflow-visible">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Globe className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <Badge className="mb-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">Fitur Baru</Badge>
+                      <h3 className="text-xl font-bold">Custom Domain</h3>
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                    Pasang domain kustom Anda sendiri (misal: <strong>bot.perusahaan.com</strong>) langsung ke chatbot manapun. Cocok untuk branding profesional dan white-label deployment.
+                  </p>
+                  <ul className="space-y-2 mb-4">
+                    {[
+                      "CNAME setup + verifikasi otomatis",
+                      "Redirect langsung ke halaman chat",
+                      "Embed code: iframe & floating widget",
+                      "Ganti chatbot tujuan tanpa hapus domain",
+                    ].map(item => (
+                      <li key={item} className="flex items-start gap-2 text-sm">
+                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/domains">
+                    <Button variant="outline" size="sm" className="gap-2 border-primary/30" data-testid="button-custom-domain">
+                      <Globe className="h-4 w-4" />
+                      Kelola Domain
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {/* Hierarki 5 Level card */}
+              <Card className="border-2 border-violet-500/30 hover-elevate overflow-visible">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-12 w-12 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                      <Layers className="h-6 w-6 text-violet-500" />
+                    </div>
+                    <div>
+                      <Badge className="mb-1 text-xs bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20 border-violet-500/20">Multi-Agent</Badge>
+                      <h3 className="text-xl font-bold">Hierarki 5 Level</h3>
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                    Bangun ekosistem chatbot yang terkoordinasi dan skalabel menggunakan arsitektur multi-agent unik Gustafta — dari payung strategis hingga unit tugas mikro.
+                  </p>
+                  <div className="space-y-2 mb-4">
+                    {[
+                      { level: "L1", name: "Series", desc: "Payung ekosistem strategis" },
+                      { level: "L2", name: "Core", desc: "Modul tematik dalam Series" },
+                      { level: "L3", name: "Big Idea", desc: "Orkestrator hub — routing cerdas" },
+                      { level: "L4", name: "Toolbox", desc: "Chatbot spesialis per area" },
+                      { level: "L5", name: "Agent", desc: "Unit tugas mikro spesifik" },
+                    ].map(item => (
+                      <div key={item.level} className="flex items-center gap-3 text-sm">
+                        <span className="h-6 w-8 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold flex items-center justify-center shrink-0">{item.level}</span>
+                        <span className="font-semibold w-20 shrink-0">{item.name}</span>
+                        <span className="text-muted-foreground">{item.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Link href="/dashboard">
+                    <Button variant="outline" size="sm" className="gap-2 border-violet-500/30 text-violet-600 dark:text-violet-400" data-testid="button-hierarchy">
+                      <Layers className="h-4 w-4" />
+                      Mulai Bangun Ekosistem
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
@@ -1248,7 +1341,8 @@ export default function Landing() {
               <h4 className="font-semibold mb-4">Produk</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/marketplace" className="hover:text-foreground">Marketplace</Link></li>
-                <li><Link href="/packs" className="hover:text-foreground">Paket Domain</Link></li>
+                <li><Link href="/packs" className="hover:text-foreground">Series & Packs</Link></li>
+                <li><Link href="/domains" className="hover:text-foreground">Custom Domain</Link></li>
                 <li><Link href="/pricing" className="hover:text-foreground">Harga</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Template</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Integrasi</Link></li>
