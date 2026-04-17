@@ -279,7 +279,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
 
   const handleCreateSelected = async () => {
     if (selected.size === 0) {
-      toast({ title: "Pilih minimal 1 Big Idea", variant: "destructive" });
+      toast({ title: "Pilih minimal 1 Modul", variant: "destructive" });
       return;
     }
     setIsCreating(true);
@@ -307,7 +307,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
       }
     }
     setIsCreating(false);
-    toast({ title: `${successCount} Big Idea berhasil dibuat!`, description: "Sekarang tambahkan Toolbox di setiap Big Idea." });
+    toast({ title: `${successCount} Modul berhasil dibuat!`, description: "Sekarang tambahkan Chatbot di setiap Modul." });
     onCreated?.();
     handleClose();
   };
@@ -334,12 +334,12 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            {step === "input" ? "Generate Big Idea dari Referensi" : `${suggestions.length} Saran Big Idea Ditemukan`}
+            {step === "input" ? "Generate Modul dari Referensi" : `${suggestions.length} Saran Modul Ditemukan`}
           </DialogTitle>
           <DialogDescription>
             {step === "input"
-              ? "Masukkan referensi (upload file, teks, URL, atau topik) — AI akan menyarankan Big Idea chatbot terbaik."
-              : "Pilih Big Idea yang ingin langsung dibuat di ekosistem Anda."}
+              ? "Masukkan referensi (upload file, teks, URL, atau topik) — AI akan menyarankan Modul chatbot terbaik."
+              : "Pilih Modul yang ingin langsung dibuat di ekosistem Anda."}
           </DialogDescription>
         </DialogHeader>
 
@@ -563,7 +563,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
               {isGenerating ? (
                 <><Loader2 className="w-4 h-4 animate-spin" />AI sedang menganalisis referensi...</>
               ) : (
-                <><Sparkles className="w-4 h-4" />Generate Saran Big Idea</>
+                <><Sparkles className="w-4 h-4" />Generate Saran Modul</>
               )}
             </Button>
           </div>
@@ -661,9 +661,9 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                 data-testid="button-create-selected"
               >
                 {isCreating ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" />Membuat {selected.size} Big Idea...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" />Membuat {selected.size} Modul...</>
                 ) : (
-                  <><CheckCircle2 className="w-4 h-4" />Buat {selected.size} Big Idea Terpilih</>
+                  <><CheckCircle2 className="w-4 h-4" />Buat {selected.size} Modul Terpilih</>
                 )}
               </Button>
             </div>

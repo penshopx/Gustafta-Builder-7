@@ -220,15 +220,15 @@ function SeriesCard({ series: s, featured = false }: { series: SeriesWithStats; 
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>{s.totalBigIdeas} Big Idea</span>
+                <span>{s.totalBigIdeas} Modul</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Layers className="w-3.5 h-3.5" />
-                <span>{s.totalToolboxes} Toolbox</span>
+                <span>{s.totalToolboxes} Chatbot</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Bot className="w-3.5 h-3.5" />
-                <span>{s.totalAgents} Chatbot</span>
+                <span>{s.totalAgents} Alat Bantu</span>
               </div>
             </div>
 

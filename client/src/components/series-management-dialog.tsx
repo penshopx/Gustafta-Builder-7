@@ -213,7 +213,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Hapus Series ini? Big Idea yang terkait tidak akan dihapus.")) {
+    if (confirm("Hapus Series ini? Modul yang terkait tidak akan dihapus.")) {
       deleteMutation.mutate(id);
     }
   };
@@ -517,9 +517,9 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
                     {assignOpen === String(s.id) && (
                       <div className="border rounded-lg p-3 space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Big Idea dalam Series ini (L3 — orkestrator):</p>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Modul dalam Series ini:</p>
                         {assigned.length === 0 && (
-                          <p className="text-xs text-muted-foreground">Belum ada Big Idea yang ditambahkan ke Series ini.</p>
+                          <p className="text-xs text-muted-foreground">Belum ada Modul yang ditambahkan ke Series ini.</p>
                         )}
                         {assigned.map(bi => (
                           <div key={bi.id} className="flex items-center justify-between gap-2 py-1">

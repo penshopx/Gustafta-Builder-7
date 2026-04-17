@@ -134,8 +134,8 @@ export default function Landing() {
     },
     {
       icon: Layers,
-      title: "Hierarki 5 Level",
-      description: "Bangun ekosistem multi-agent terstruktur: Series → Core → Big Idea (Orkestrator) → Toolbox → Agent. Skala bebas, koordinasi cerdas."
+      title: "Hierarki 4 Level",
+      description: "Bangun ekosistem multi-agent terstruktur: Series → Modul → Chatbot → Alat Bantu. Skala bebas, koordinasi cerdas."
     },
     {
       icon: Globe,
@@ -145,7 +145,7 @@ export default function Landing() {
     {
       icon: Sparkles,
       title: "Agentic AI + OpenClaw",
-      description: "Metodologi agentic berlapis: listen → detect → plan → execute → follow-up. Multi-agent dengan Big Idea sebagai orkestrator routing cerdas."
+      description: "Metodologi agentic berlapis: listen → detect → plan → execute → follow-up. Multi-agent dengan Orkestrator sebagai hub routing cerdas."
     },
     {
       icon: BookOpen,
@@ -228,8 +228,8 @@ export default function Landing() {
   ];
 
   const comparisonData = [
-    { feature: "Hierarki 5 Level: Series → Core → Big Idea → Toolbox → Agent", gustafta: true, others: false },
-    { feature: "Multi-Agent Orchestration (Big Idea sebagai Hub)", gustafta: true, others: false },
+    { feature: "Hierarki 4 Level: Series → Modul → Chatbot → Alat Bantu", gustafta: true, others: false },
+    { feature: "Multi-Agent Orchestration (Orkestrator sebagai Hub)", gustafta: true, others: false },
     { feature: "Custom Domain (bot.perusahaan.com → chatbot)", gustafta: true, others: false },
     { feature: "Knowledge Base 7 Tipe (YouTube, Video, Audio, Cloud Drive)", gustafta: true, others: "Terbatas" },
     { feature: "Otak Proyek / Project Brain + Tender Wizard", gustafta: true, others: false },
@@ -242,11 +242,11 @@ export default function Landing() {
   const faqItems = [
     {
       question: "Apa itu Gustafta?",
-      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding."
+      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 4 level (Series → Modul → Chatbot → Alat Bantu). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding."
     },
     {
-      question: "Apa itu hierarki Series → Core → Big Idea → Toolbox → Agent?",
-      answer: "Ini adalah arsitektur multi-agent Gustafta: Series (L1) = payung ekosistem, Core (L2) = modul tematik, Big Idea (L3) = orkestrator hub yang routing pengguna ke chatbot tepat, Toolbox (L4) = chatbot spesialis per area, Agent (L5) = unit tugas mikro di dalam Toolbox. Dengan hierarki ini Anda bisa bangun ekosistem chatbot skalabel yang terkoordinasi cerdas."
+      question: "Apa itu hierarki Series → Modul → Chatbot → Alat Bantu?",
+      answer: "Ini adalah arsitektur multi-agent Gustafta: Series (L1) = payung ekosistem, Modul (L2) = fokus tematik dalam Series, Chatbot (L3) = unit chatbot spesialis per area (dengan tipe Orkestrator sebagai hub routing cerdas), Alat Bantu (L4) = sub-agen mikro eksekutor di dalam Chatbot. Dengan hierarki ini Anda bisa bangun ekosistem chatbot skalabel yang terkoordinasi cerdas."
     },
     {
       question: "Apa itu Custom Domain dan bagaimana cara pakainya?",
@@ -281,10 +281,10 @@ export default function Landing() {
   const steps = [
     {
       number: "1",
-      title: "Bangun Hierarki Series → Agent",
-      description: "Definisikan ekosistem chatbot Anda. Buat Series, Core, Big Idea (orkestrator), Toolbox, dan Agent sesuai kebutuhan.",
+      title: "Bangun Hierarki Series → Alat Bantu",
+      description: "Definisikan ekosistem chatbot Anda. Buat Series, Modul, Chatbot (termasuk Orkestrator), dan Alat Bantu sesuai kebutuhan.",
       time: "± 10 menit",
-      bullets: ["Buat Series sebagai payung ekosistem", "Tambahkan Core & Toolbox spesialis", "Buat Big Idea sebagai orkestrator hub (opsional)"]
+      bullets: ["Buat Series sebagai payung ekosistem", "Tambahkan Modul & Chatbot spesialis", "Buat Orkestrator sebagai hub routing (opsional)"]
     },
     {
       number: "2",
@@ -350,7 +350,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
+              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 4 level: <strong>Series → Modul → Chatbot → Alat Bantu</strong>. Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -692,10 +692,9 @@ export default function Landing() {
                   <div className="space-y-2 mb-4">
                     {[
                       { level: "L1", name: "Series", desc: "Payung ekosistem strategis" },
-                      { level: "L2", name: "Core", desc: "Modul tematik dalam Series" },
-                      { level: "L3", name: "Big Idea", desc: "Orkestrator hub — routing cerdas" },
-                      { level: "L4", name: "Toolbox", desc: "Chatbot spesialis per area" },
-                      { level: "L5", name: "Agent", desc: "Unit tugas mikro spesifik" },
+                      { level: "L2", name: "Modul", desc: "Fokus tematik dalam Series" },
+                      { level: "L3", name: "Chatbot", desc: "Chatbot spesialis (+ Orkestrator hub)" },
+                      { level: "L4", name: "Alat Bantu", desc: "Sub-agen mikro eksekutor" },
                     ].map(item => (
                       <div key={item.level} className="flex items-center gap-3 text-sm">
                         <span className="h-6 w-8 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold flex items-center justify-center shrink-0">{item.level}</span>

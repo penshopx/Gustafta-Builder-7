@@ -182,7 +182,7 @@ export default function SeriesDetail() {
                 </div>
                 <div>
                   <p className="text-lg font-bold">{s.totalBigIdeas}</p>
-                  <p className="text-[10px] text-white/60">Big Ideas</p>
+                  <p className="text-[10px] text-white/60">Modul</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-white/90">
@@ -191,7 +191,7 @@ export default function SeriesDetail() {
                 </div>
                 <div>
                   <p className="text-lg font-bold">{s.totalToolboxes}</p>
-                  <p className="text-[10px] text-white/60">Toolboxes</p>
+                  <p className="text-[10px] text-white/60">Chatbot</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-white/90">
@@ -200,7 +200,7 @@ export default function SeriesDetail() {
                 </div>
                 <div>
                   <p className="text-lg font-bold">{s.totalAgents}</p>
-                  <p className="text-[10px] text-white/60">Chatbots</p>
+                  <p className="text-[10px] text-white/60">Alat Bantu</p>
                 </div>
               </div>
             </div>
@@ -393,7 +393,7 @@ export default function SeriesDetail() {
 
                       {bi.toolboxes.length === 0 && (
                         <p className="text-xs text-muted-foreground text-center py-3 pl-14 sm:pl-16">
-                          Belum ada toolbox di Big Idea ini.
+                          Belum ada chatbot di Modul ini.
                         </p>
                       )}
                     </div>
