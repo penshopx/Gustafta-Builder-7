@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CreateAgentDialog } from "@/components/dialogs/create-agent-dialog";
 import { CreateBigIdeaDialog } from "@/components/dialogs/create-big-idea-dialog";
+import { GenerateBigIdeasDialog } from "@/components/dialogs/generate-big-ideas-dialog";
 import { CreateToolboxDialog } from "@/components/dialogs/create-toolbox-dialog";
 import { EditBigIdeaDialog } from "@/components/dialogs/edit-big-idea-dialog";
 import { EditToolboxDialog } from "@/components/dialogs/edit-toolbox-dialog";
@@ -105,6 +106,7 @@ export default function Dashboard() {
   const [modulOrchName, setModulOrchName] = useState("");
   const [modulOrchDescription, setModulOrchDescription] = useState("");
   const [bigIdeaDialogOpen, setBigIdeaDialogOpen] = useState(false);
+  const [generateBigIdeasOpen, setGenerateBigIdeasOpen] = useState(false);
   const [toolboxDialogOpen, setToolboxDialogOpen] = useState(false);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
@@ -952,6 +954,14 @@ export default function Dashboard() {
                     <Plus className="w-4 h-4" />
                     <span>Buat Modul Baru</span>
                   </button>
+                  <button
+                    onClick={() => setGenerateBigIdeasOpen(true)}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors border border-dashed border-primary/30"
+                    data-testid="button-generate-bigideas"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>✨ Generate dari Referensi</span>
+                  </button>
                 </>
               )}
 
@@ -1583,6 +1593,12 @@ export default function Dashboard() {
           agentCreationCooldown.current = true;
           setTimeout(() => { agentCreationCooldown.current = false; }, 3000);
         }}
+      />
+      <GenerateBigIdeasDialog
+        open={generateBigIdeasOpen}
+        onOpenChange={setGenerateBigIdeasOpen}
+        seriesId={activeSeriesId ? Number(activeSeriesId) : null}
+        onCreated={() => setGenerateBigIdeasOpen(false)}
       />
       <CreateBigIdeaDialog 
         open={bigIdeaDialogOpen} 

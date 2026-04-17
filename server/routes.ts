@@ -6690,5 +6690,67 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
     }
   });
 
+  // ─── AI Big Idea Generator ────────────────────────────────────
+  app.post("/api/ai/generate-big-ideas", isAuthenticated, async (req, res) => {
+    try {
+      const { referenceText, urls, topic, count = 6 } = req.body;
+      if (!referenceText && (!urls || urls.length === 0) && !topic) {
+        return res.status(400).json({ error: "Butuh minimal satu referensi: teks, URL, atau topik" });
+      }
+
+      const refBlock = referenceText ? `\n\n=== KONTEN REFERENSI ===\n${referenceText.slice(0, 8000)}` : "";
+      const urlBlock = urls && urls.length > 0 ? `\n\n=== URL REFERENSI ===\n${urls.join("\n")}` : "";
+      const topicBlock = topic ? `\n\nTOPIK/BIDANG: ${topic}` : "";
+
+      const systemPrompt = `Kamu adalah AI konsultan ekosistem chatbot untuk platform Gustafta (Indonesia). Tugasmu adalah menganalisis referensi yang diberikan dan menghasilkan saran Big Idea/Modul chatbot yang paling menarik dan bernilai tinggi untuk dibangun.
+
+Setiap Big Idea harus:
+- Spesifik dan actionable (bukan generik)
+- Bernilai tinggi bagi pengguna target
+- Dapat diimplementasikan sebagai chatbot interaktif berbasis AI
+- Relevan dengan konteks Indonesia (konstruksi, bisnis, pendidikan, hukum, dll)
+
+Selalu return JSON valid dengan format yang diminta.`;
+
+      const userPrompt = `Analisis referensi berikut dan hasilkan TEPAT ${count} saran Big Idea/Modul chatbot yang paling menarik:${topicBlock}${refBlock}${urlBlock}
+
+Return HANYA JSON berikut (tanpa penjelasan lain):
+{
+  "suggestions": [
+    {
+      "name": "Nama Big Idea (max 60 karakter)",
+      "type": "idea|inspiration|problem|mentoring",
+      "description": "Deskripsi 2-3 kalimat tentang apa yang dilakukan chatbot ini",
+      "goals": ["Goal 1", "Goal 2", "Goal 3"],
+      "targetAudience": "Target pengguna spesifik",
+      "reasoning": "Kenapa Big Idea ini menarik dan bernilai tinggi (1-2 kalimat)",
+      "expectedOutcome": "Apa yang didapat pengguna setelah berinteraksi"
+    }
+  ]
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.8,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+
+      const raw = response.choices[0]?.message?.content || "{}";
+      let parsed: any = {};
+      try { parsed = JSON.parse(raw); } catch { parsed = { suggestions: [] }; }
+      if (!parsed.suggestions) parsed.suggestions = [];
+
+      res.json({ suggestions: parsed.suggestions });
+    } catch (error: any) {
+      console.error("Generate big ideas error:", error);
+      res.status(500).json({ error: "Gagal generate saran Big Idea: " + (error.message || "Unknown error") });
+    }
+  });
+
   return httpServer;
 }
