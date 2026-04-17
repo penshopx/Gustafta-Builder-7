@@ -395,7 +395,7 @@ export default function Landing() {
               <Link href="/packs" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full gap-2 text-lg px-8 py-6 border-primary/30" data-testid="button-packs">
                   <Package className="h-5 w-5" />
-                  Lihat Series & Packs
+                  Lihat Paket Domain
                 </Button>
               </Link>
             </div>
@@ -1341,8 +1341,8 @@ export default function Landing() {
               <h4 className="font-semibold mb-4">Produk</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/marketplace" className="hover:text-foreground">Marketplace</Link></li>
-                <li><Link href="/packs" className="hover:text-foreground">Series & Packs</Link></li>
-                <li><Link href="/domains" className="hover:text-foreground">Custom Domain</Link></li>
+                <li><Link href="/packs" className="hover:text-foreground">Paket Domain</Link></li>
+                <li><Link href="/domains" className="hover:text-foreground">Domain Kustom (URL)</Link></li>
                 <li><Link href="/pricing" className="hover:text-foreground">Harga</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Template</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Integrasi</Link></li>
