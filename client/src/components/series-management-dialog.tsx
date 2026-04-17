@@ -90,29 +90,29 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
     mutationFn: (data: any) => apiRequest("POST", "/api/series", data),
     onSuccess: () => {
       invalidateAll();
-      toast({ title: "Tujuan berhasil dibuat" });
+      toast({ title: "Series berhasil dibuat" });
       resetForm();
     },
-    onError: () => toast({ title: "Gagal membuat tujuan", variant: "destructive" }),
+    onError: () => toast({ title: "Gagal membuat Series", variant: "destructive" }),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => apiRequest("PATCH", `/api/series/${id}`, data),
     onSuccess: () => {
       invalidateAll();
-      toast({ title: "Tujuan berhasil diperbarui" });
+      toast({ title: "Series berhasil diperbarui" });
       resetForm();
     },
-    onError: () => toast({ title: "Gagal memperbarui tujuan", variant: "destructive" }),
+    onError: () => toast({ title: "Gagal memperbarui Series", variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/series/${id}`),
     onSuccess: () => {
       invalidateAll();
-      toast({ title: "Tujuan berhasil dihapus" });
+      toast({ title: "Series berhasil dihapus" });
     },
-    onError: () => toast({ title: "Gagal menghapus tujuan", variant: "destructive" }),
+    onError: () => toast({ title: "Gagal menghapus Series", variant: "destructive" }),
   });
 
   const assignBigIdeaMutation = useMutation({
@@ -176,7 +176,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
   const handleSubmit = () => {
     if (!form.name.trim()) {
-      toast({ title: "Nama tujuan harus diisi", variant: "destructive" });
+      toast({ title: "Nama Series harus diisi", variant: "destructive" });
       return;
     }
     const payload = {
@@ -213,7 +213,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Hapus tujuan ini? Modul yang terkait tidak akan dihapus.")) {
+    if (confirm("Hapus Series ini? Big Idea yang terkait tidak akan dihapus.")) {
       deleteMutation.mutate(id);
     }
   };
@@ -237,10 +237,10 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
               </Button>
             )}
             <BookOpen className="w-5 h-5 text-primary" />
-            {view === "list" ? "Kelola Tujuan" : view === "create" ? "Buat Tujuan Baru" : "Edit Tujuan"}
+            {view === "list" ? "Kelola Series" : view === "create" ? "Buat Series Baru" : "Edit Series"}
           </DialogTitle>
           <DialogDescription>
-            {view === "list" ? "Kelola tujuan dan paket chatbot terstruktur Anda." : "Isi detail tujuan."}
+            {view === "list" ? "Kelola Series ekosistem chatbot AI Anda (L1 — payung strategis)." : "Isi detail Series baru Anda."}
           </DialogDescription>
         </DialogHeader>
 
@@ -248,7 +248,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
           <div className="space-y-4">
             <Button onClick={() => setView("create")} className="w-full">
               <Plus className="w-4 h-4 mr-2" />
-              Buat Tujuan Baru
+              Buat Series Baru
             </Button>
 
             {isLoading && (
@@ -258,7 +258,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
             {!isLoading && allSeries.length === 0 && (
               <div className="text-center py-8">
                 <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground text-sm">Belum ada tujuan. Buat yang pertama!</p>
+                <p className="text-muted-foreground text-sm">Belum ada Series. Buat yang pertama!</p>
               </div>
             )}
 
@@ -364,9 +364,9 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
                     {coresOpen === String(s.id) && (
                       <div className="border rounded-lg p-3 space-y-3">
-                        <p className="text-xs font-medium text-muted-foreground">Cores dalam tujuan ini (payung strategis):</p>
+                        <p className="text-xs font-medium text-muted-foreground">Cores dalam Series ini (L2 — pengelompokan tematik):</p>
                         {getCoresForSeries(String(s.id)).length === 0 && (
-                          <p className="text-xs text-muted-foreground">Belum ada Core. Core bersifat opsional - gunakan untuk tujuan besar yang butuh pengelompokan.</p>
+                          <p className="text-xs text-muted-foreground">Belum ada Core. Core bersifat opsional - gunakan untuk Series besar yang butuh pengelompokan.</p>
                         )}
                         {getCoresForSeries(String(s.id)).map((core: Core) => {
                           const coreBigIdeas = bigIdeas.filter(bi => bi.coreId === core.id);
@@ -517,9 +517,9 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
                     {assignOpen === String(s.id) && (
                       <div className="border rounded-lg p-3 space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Modul dalam tujuan ini:</p>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Big Idea dalam Series ini (L3 — orkestrator):</p>
                         {assigned.length === 0 && (
-                          <p className="text-xs text-muted-foreground">Belum ada Modul yang ditambahkan.</p>
+                          <p className="text-xs text-muted-foreground">Belum ada Big Idea yang ditambahkan ke Series ini.</p>
                         )}
                         {assigned.map(bi => (
                           <div key={bi.id} className="flex items-center justify-between gap-2 py-1">
@@ -567,7 +567,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
         {(view === "create" || view === "edit") && (
           <div className="space-y-4">
             <div>
-              <Label className="text-sm">Nama Tujuan *</Label>
+              <Label className="text-sm">Nama Series *</Label>
               <input
                 type="text"
                 value={form.name}
@@ -610,7 +610,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 className="w-full mt-1 px-3 py-2 rounded-md border border-input bg-background text-sm min-h-[80px]"
-                placeholder="Deskripsi lengkap tujuan..."
+                placeholder="Deskripsi lengkap Series..."
                
               />
             </div>
@@ -726,7 +726,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                 disabled={createMutation.isPending || updateMutation.isPending}
                
               >
-                {createMutation.isPending || updateMutation.isPending ? "Menyimpan..." : view === "edit" ? "Perbarui" : "Buat Tujuan"}
+                {createMutation.isPending || updateMutation.isPending ? "Menyimpan..." : view === "edit" ? "Perbarui" : "Buat Series"}
               </Button>
             </div>
           </div>

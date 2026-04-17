@@ -192,7 +192,7 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/series"] });
       setEditSeriesTarget(null);
-      toast({ title: "Tujuan berhasil diperbarui" });
+      toast({ title: "Series berhasil diperbarui" });
     },
     onError: () => toast({ title: "Gagal memperbarui", variant: "destructive" }),
   });
@@ -206,7 +206,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/series"] });
       setDeleteSeriesConfirm(null);
       if (activeSeriesId === String(deleteSeriesConfirm?.id)) setActiveSeriesId(null);
-      toast({ title: "Tujuan berhasil dihapus" });
+      toast({ title: "Series berhasil dihapus" });
     },
     onError: () => toast({ title: "Gagal menghapus", variant: "destructive" }),
   });
@@ -696,12 +696,12 @@ export default function Dashboard() {
                 <DropdownMenuLabel>Navigasi</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => { navigateToLevel('series'); setSidebarCollapsed(false); }} className="gap-2">
                   <FolderOpen className="w-4 h-4 text-purple-500" />
-                  <span>Tujuan</span>
+                  <span>Series (L1)</span>
                 </DropdownMenuItem>
                 {activeSeries && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('bigIdeas'); setSidebarCollapsed(false); }} className="gap-2 pl-6">
                     <Lightbulb className="w-4 h-4 text-yellow-500" />
-                    <span className="truncate">Modul - {activeSeries.name}</span>
+                    <span className="truncate">Big Idea - {activeSeries.name}</span>
                   </DropdownMenuItem>
                 )}
                 {activeBigIdea && (
@@ -731,7 +731,7 @@ export default function Dashboard() {
                 )}
                 data-testid="breadcrumb-series"
               >
-                Tujuan
+                Series
               </button>
               {activeSeriesId && activeSeries && (
                 <>
@@ -785,7 +785,7 @@ export default function Dashboard() {
                 <>
                   {allSeries.length === 0 ? (
                     <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Tujuan
+                      Belum ada Series
                     </div>
                   ) : (
                     allSeries.map((s: any) => (
@@ -831,7 +831,7 @@ export default function Dashboard() {
                     data-testid="button-manage-series"
                   >
                     <Settings className="w-4 h-4" />
-                    <span>Kelola Tujuan</span>
+                    <span>Kelola Series</span>
                   </button>
                 </>
               )}
@@ -844,7 +844,7 @@ export default function Dashboard() {
                     data-testid="button-back-to-series"
                   >
                     <ArrowLeft className="w-3 h-3" />
-                    <span>Kembali ke Tujuan</span>
+                    <span>Kembali ke Series</span>
                   </button>
                   {orchestratorHub ? (
                     <div
@@ -1607,20 +1607,20 @@ export default function Dashboard() {
       <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
       <SeriesManagementDialog open={seriesDialogOpen} onOpenChange={setSeriesDialogOpen} />
 
-      {/* Dialog Edit Tujuan (Series) */}
+      {/* Dialog Edit Series */}
       <Dialog open={!!editSeriesTarget} onOpenChange={(open) => { if (!open) setEditSeriesTarget(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Tujuan</DialogTitle>
+            <DialogTitle>Edit Series</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-series-name">Nama Tujuan *</Label>
+              <Label htmlFor="edit-series-name">Nama Series *</Label>
               <Input
                 id="edit-series-name"
                 value={editSeriesName}
                 onChange={(e) => setEditSeriesName(e.target.value)}
-                placeholder="Nama tujuan..."
+                placeholder="Nama series..."
                 data-testid="input-edit-series-name"
               />
             </div>
@@ -1630,7 +1630,7 @@ export default function Dashboard() {
                 id="edit-series-desc"
                 value={editSeriesDesc}
                 onChange={(e) => setEditSeriesDesc(e.target.value)}
-                placeholder="Deskripsi tujuan..."
+                placeholder="Deskripsi series..."
                 rows={3}
                 data-testid="input-edit-series-desc"
               />
@@ -1649,13 +1649,13 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Konfirmasi Hapus Tujuan (Series) */}
+      {/* Konfirmasi Hapus Series */}
       <AlertDialog open={!!deleteSeriesConfirm} onOpenChange={(open) => { if (!open) setDeleteSeriesConfirm(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Tujuan?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Series?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tujuan "<strong>{deleteSeriesConfirm?.name}</strong>" beserta semua Modul dan Alat Bantu di dalamnya akan dihapus secara permanen.
+              Series "<strong>{deleteSeriesConfirm?.name}</strong>" beserta semua Big Idea dan Toolbox di dalamnya akan dihapus secara permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1725,7 +1725,7 @@ export default function Dashboard() {
             <div className="p-4 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg space-y-2">
               <h4 className="font-medium text-purple-900 dark:text-purple-100">Apa itu Chatbot Orkestrator?</h4>
               <p className="text-sm text-purple-700 dark:text-purple-300">
-                Chatbot Orkestrator (HUB) adalah pintu masuk utama ekosistem multi-chatbot. Ia mengarahkan pengguna ke chatbot spesialis yang tepat, menjaga alur prasyarat, dan menyimpan konteks lintas chatbot. Setiap Tujuan hanya memiliki 1 Orkestrator.
+                Chatbot Orkestrator (HUB) adalah pintu masuk utama ekosistem multi-chatbot. Ia mengarahkan pengguna ke chatbot spesialis yang tepat, menjaga alur prasyarat, dan menyimpan konteks lintas chatbot. Setiap Series hanya memiliki 1 Orkestrator.
               </p>
             </div>
             <div className="space-y-2">
