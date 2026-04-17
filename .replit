@@ -56,3 +56,7 @@ integrations = ["javascript_openai_ai_integrations:2.0.0", "javascript_log_in_wi
 
 [userenv.shared]
 ADMIN_USER_IDS = "49465846"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
