@@ -1621,17 +1621,17 @@ export default function Dashboard() {
           setTimeout(() => { bigIdeaCreationCooldown.current = false; }, 3000);
         }}
       />
-      {effectiveBigIdeaObj && (
-        <CreateToolboxDialog 
-          open={toolboxDialogOpen} 
-          onOpenChange={setToolboxDialogOpen} 
-          bigIdea={effectiveBigIdeaObj}
-          onCreated={() => {
-            toolboxCreationCooldown.current = true;
-            setTimeout(() => { toolboxCreationCooldown.current = false; }, 3000);
-          }}
-        />
-      )}
+      <CreateToolboxDialog 
+        open={toolboxDialogOpen} 
+        onOpenChange={setToolboxDialogOpen} 
+        bigIdea={effectiveBigIdeaObj}
+        activeSeriesId={activeSeriesId}
+        onCreateModule={() => setBigIdeaDialogOpen(true)}
+        onCreated={() => {
+          toolboxCreationCooldown.current = true;
+          setTimeout(() => { toolboxCreationCooldown.current = false; }, 3000);
+        }}
+      />
       <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
       <SeriesManagementDialog open={seriesDialogOpen} onOpenChange={setSeriesDialogOpen} />
 
