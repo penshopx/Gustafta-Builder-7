@@ -29,6 +29,13 @@ interface Suggestion {
   expectedOutcome: string;
 }
 
+interface UploadedFile {
+  name: string;
+  size: number;
+  charCount: number;
+  text: string;
+}
+
 interface GenerateBigIdeasDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -60,8 +67,8 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [isCreating, setIsCreating] = useState(false);
 
-  const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number; charCount: number } | null>(null);
-  const [isExtracting, setIsExtracting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [extractingCount, setExtractingCount] = useState(0);
   const [extractError, setExtractError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const dragCounter = useRef(0);
@@ -70,25 +77,32 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const { toast } = useToast();
   const createBigIdea = useCreateBigIdea();
 
+  const isExtracting = extractingCount > 0;
+
   const addUrl = () => setUrls(prev => [...prev, ""]);
   const removeUrl = (i: number) => setUrls(prev => prev.filter((_, idx) => idx !== i));
   const updateUrl = (i: number, val: string) => setUrls(prev => prev.map((u, idx) => idx === i ? val : u));
 
-  const processFile = async (file: File) => {
+  const extractSingleFile = async (file: File): Promise<UploadedFile | null> => {
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      setExtractError(`File terlalu besar (${formatBytes(file.size)}). Maksimal 5 MB.`);
-      return;
+      toast({
+        title: `File terlalu besar: ${file.name}`,
+        description: `${formatBytes(file.size)} — Maksimal 5 MB per file.`,
+        variant: "destructive",
+      });
+      return null;
     }
 
     const ext = file.name.toLowerCase();
     if (!ext.endsWith(".pdf") && !ext.endsWith(".docx") && !ext.endsWith(".txt")) {
-      setExtractError("Format tidak didukung. Gunakan PDF, DOCX, atau TXT.");
-      return;
+      toast({
+        title: `Format tidak didukung: ${file.name}`,
+        description: "Gunakan PDF, DOCX, atau TXT.",
+        variant: "destructive",
+      });
+      return null;
     }
-
-    setExtractError(null);
-    setIsExtracting(true);
 
     try {
       const formData = new FormData();
@@ -101,25 +115,58 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal mengekstrak teks");
 
-      const extracted: string = data.text;
-      setReferenceText(prev => {
-        if (prev.trim()) return prev.trim() + "\n\n--- Dari file: " + file.name + " ---\n" + extracted;
-        return extracted;
-      });
-      setUploadedFile({ name: file.name, size: file.size, charCount: data.charCount });
-      toast({ title: "File berhasil dibaca", description: `${data.charCount.toLocaleString()} karakter diekstrak dari ${file.name}` });
+      return { name: file.name, size: file.size, charCount: data.charCount, text: data.text };
     } catch (err: any) {
-      setExtractError(err.message || "Gagal membaca file");
-    } finally {
-      setIsExtracting(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      toast({
+        title: `Gagal membaca: ${file.name}`,
+        description: err.message || "Gagal membaca file",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
+  const processFiles = async (fileList: File[]) => {
+    const alreadyNames = new Set(uploadedFiles.map(f => f.name));
+    const newFiles = fileList.filter(f => {
+      if (alreadyNames.has(f.name)) {
+        toast({
+          title: `File sudah ada: ${f.name}`,
+          description: "File ini sudah ditambahkan sebelumnya.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      return true;
+    });
+
+    if (newFiles.length === 0) return;
+
+    setExtractError(null);
+    setExtractingCount(prev => prev + newFiles.length);
+
+    const results = await Promise.all(newFiles.map(extractSingleFile));
+    const successful = results.filter((r): r is UploadedFile => r !== null);
+
+    setUploadedFiles(prev => [...prev, ...successful]);
+    setExtractingCount(prev => prev - newFiles.length);
+
+    if (successful.length > 0) {
+      const totalChars = successful.reduce((sum, f) => sum + f.charCount, 0);
+      toast({
+        title: successful.length === 1
+          ? "File berhasil dibaca"
+          : `${successful.length} file berhasil dibaca`,
+        description: `${totalChars.toLocaleString()} karakter diekstrak`,
+      });
     }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await processFile(file);
+    const files = Array.from(e.target.files || []);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (files.length === 0) return;
+    await processFiles(files);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -147,19 +194,29 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
     dragCounter.current = 0;
     setIsDragOver(false);
     if (isExtracting) return;
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    await processFile(file);
+    const files = Array.from(e.dataTransfer.files || []);
+    if (files.length === 0) return;
+    await processFiles(files);
   };
 
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
-    setExtractError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
+
+  const buildCombinedReferenceText = () => {
+    const parts: string[] = [];
+    if (referenceText.trim()) parts.push(referenceText.trim());
+    for (const f of uploadedFiles) {
+      parts.push(`--- Dari file: ${f.name} ---\n${f.text}`);
+    }
+    return parts.join("\n\n");
+  };
+
+  const totalCharsFromFiles = uploadedFiles.reduce((sum, f) => sum + f.charCount, 0);
+  const totalReferenceChars = referenceText.length + totalCharsFromFiles;
 
   const handleGenerate = async () => {
-    const hasContent = referenceText.trim() || urls.some(u => u.trim()) || topic.trim();
+    const hasContent = referenceText.trim() || uploadedFiles.length > 0 || urls.some(u => u.trim()) || topic.trim();
     if (!hasContent) {
       toast({ title: "Butuh referensi", description: "Isi minimal satu dari: topik, teks referensi, URL, atau upload file", variant: "destructive" });
       return;
@@ -167,9 +224,10 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
 
     setIsGenerating(true);
     try {
+      const combinedRef = buildCombinedReferenceText();
       const res = await apiRequest("POST", "/api/ai/generate-big-ideas", {
         topic: topic.trim() || undefined,
-        referenceText: referenceText.trim() || undefined,
+        referenceText: combinedRef || undefined,
         urls: urls.filter(u => u.trim()),
         count,
       });
@@ -240,7 +298,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
     setCount(6);
     setSuggestions([]);
     setSelected(new Set());
-    setUploadedFile(null);
+    setUploadedFiles([]);
     setExtractError(null);
     setIsDragOver(false);
     dragCounter.current = 0;
@@ -291,72 +349,84 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                 className="resize-none"
                 data-testid="textarea-reference"
               />
-              <p className="text-xs text-muted-foreground">AI membaca hingga 8.000 karakter pertama · {referenceText.length.toLocaleString()} karakter saat ini</p>
+              <p className="text-xs text-muted-foreground">
+                AI membaca hingga 8.000 karakter pertama · {totalReferenceChars.toLocaleString()} karakter total
+                {uploadedFiles.length > 0 && ` (termasuk ${uploadedFiles.length} file)`}
+              </p>
             </div>
 
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
                 <Upload className="w-3.5 h-3.5 text-violet-500" />
                 Upload File Referensi
-                <span className="text-xs text-muted-foreground font-normal">(PDF, DOCX, TXT — maks 5 MB)</span>
+                <span className="text-xs text-muted-foreground font-normal">(PDF, DOCX, TXT — maks 5 MB/file)</span>
               </Label>
 
               <input
                 ref={fileInputRef}
                 type="file"
                 accept=".pdf,.docx,.txt"
+                multiple
                 onChange={handleFileChange}
                 className="hidden"
                 data-testid="input-file-upload"
               />
 
-              {!uploadedFile ? (
-                <div
-                  className={cn(
-                    "border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors",
-                    isDragOver
-                      ? "border-primary bg-primary/10 scale-[1.01]"
-                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
-                    isExtracting && "pointer-events-none opacity-60"
-                  )}
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  data-testid="dropzone-file"
-                >
-                  {isExtracting ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                      <p className="text-sm text-muted-foreground">Mengekstrak teks dari file...</p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <Upload className={cn("w-6 h-6", isDragOver ? "text-primary" : "text-muted-foreground")} />
-                      <p className="text-sm font-medium">{isDragOver ? "Lepaskan file di sini" : "Klik atau seret file ke sini"}</p>
-                      <p className="text-xs text-muted-foreground">PDF, DOCX, atau TXT (maks 5 MB)</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 p-3 rounded-lg border bg-green-500/5 border-green-500/30">
-                  <FileCheck className="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{uploadedFile.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatBytes(uploadedFile.size)} · {uploadedFile.charCount.toLocaleString()} karakter diekstrak
-                    </p>
+              <div
+                className={cn(
+                  "border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors",
+                  isDragOver
+                    ? "border-primary bg-primary/10 scale-[1.01]"
+                    : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
+                  isExtracting && "pointer-events-none opacity-60"
+                )}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                data-testid="dropzone-file"
+              >
+                {isExtracting ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    <p className="text-sm text-muted-foreground">Mengekstrak teks dari file...</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="shrink-0 h-7 w-7 text-muted-foreground hover:text-destructive"
-                    onClick={handleRemoveFile}
-                    data-testid="button-remove-file"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </Button>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className={cn("w-6 h-6", isDragOver ? "text-primary" : "text-muted-foreground")} />
+                    <p className="text-sm font-medium">{isDragOver ? "Lepaskan file di sini" : "Klik atau seret beberapa file ke sini"}</p>
+                    <p className="text-xs text-muted-foreground">PDF, DOCX, atau TXT (maks 5 MB per file)</p>
+                  </div>
+                )}
+              </div>
+
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2" data-testid="list-uploaded-files">
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={file.name}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-green-500/5 border-green-500/30"
+                      data-testid={`uploaded-file-${index}`}
+                    >
+                      <FileCheck className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatBytes(file.size)} · {file.charCount.toLocaleString()} karakter diekstrak
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={(e) => { e.stopPropagation(); handleRemoveFile(index); }}
+                        data-testid={`button-remove-file-${index}`}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
 
