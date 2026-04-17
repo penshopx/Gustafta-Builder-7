@@ -164,6 +164,7 @@ export default function Dashboard() {
   const [localToolboxId, setLocalToolboxId] = useState<string | undefined>();
 
   const effectiveBigIdeaId = localBigIdeaId || activeBigIdea?.id;
+  const effectiveBigIdeaObj = (bigIdeas as BigIdea[]).find(bi => String(bi.id) === String(effectiveBigIdeaId)) || activeBigIdea;
 
   useEffect(() => {
     if (activeBigIdea?.id && localBigIdeaId && String(activeBigIdea.id) === localBigIdeaId) {
@@ -664,8 +665,19 @@ export default function Dashboard() {
   };
 
   const handleSeriesDrillDown = (seriesId: string | number) => {
-    setActiveSeriesId(String(seriesId));
+    const seriesIdStr = String(seriesId);
+    setActiveSeriesId(seriesIdStr);
     setNavLevel('bigIdeas');
+    // If the current active big idea belongs to a different series, auto-activate
+    // the first big idea of the selected series so dialogs show the correct module
+    if (!activeBigIdea || String(activeBigIdea.seriesId) !== seriesIdStr) {
+      const firstBigIdea = bigIdeas.find((bi: BigIdea) => String(bi.seriesId) === seriesIdStr);
+      if (firstBigIdea) {
+        setLocalBigIdeaId(String(firstBigIdea.id));
+        setLocalToolboxId(undefined);
+        activateBigIdea.mutate(String(firstBigIdea.id));
+      }
+    }
   };
 
   const handleBigIdeaDrillDown = (bi: BigIdea) => {
@@ -1609,11 +1621,11 @@ export default function Dashboard() {
           setTimeout(() => { bigIdeaCreationCooldown.current = false; }, 3000);
         }}
       />
-      {activeBigIdea && (
+      {effectiveBigIdeaObj && (
         <CreateToolboxDialog 
           open={toolboxDialogOpen} 
           onOpenChange={setToolboxDialogOpen} 
-          bigIdea={activeBigIdea}
+          bigIdea={effectiveBigIdeaObj}
           onCreated={() => {
             toolboxCreationCooldown.current = true;
             setTimeout(() => { toolboxCreationCooldown.current = false; }, 3000);
