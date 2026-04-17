@@ -215,6 +215,11 @@ export default function TenderWizardPage() {
   const qc = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Extract agentId from URL query param (e.g. /packs/tender-pelaksana?agentId=5)
+  const urlAgentId = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("agentId") || undefined
+    : undefined;
+
   const packType: PackType = params.packId === "tender-konsultansi" ? "konsultansi_mk" : "pelaksana_konstruksi";
   const meta = PACK_META[packType];
 
@@ -386,6 +391,7 @@ export default function TenderWizardPage() {
       technicalApproach,
       complianceAnswers,
       selectedOutputs,
+      ...(urlAgentId ? { agentId: urlAgentId } : {}),
     });
     setStep(6);
   };

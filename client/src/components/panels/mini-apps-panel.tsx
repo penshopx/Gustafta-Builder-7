@@ -544,7 +544,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, docType: tenderWizardType, context: tenderContext, track }),
+        body: JSON.stringify({ prompt, docType: tenderWizardType, context: tenderContext, track, agentId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generasi gagal");

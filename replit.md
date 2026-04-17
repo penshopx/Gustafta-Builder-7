@@ -36,6 +36,13 @@ A key feature is "Project Brain," providing contextual data for chatbots, enabli
 
 Core features include a RAG toggle for controlling knowledge base lookups, "Project Context" for personalizing conversations via user-provided information, and a "User Memory System" allowing chatbots to recall facts across sessions. Monetization is handled via per-Modul bundle pricing and per-Chatbot individual pricing, with guest message limits, trial periods, registered user quotas, and a voucher system protected by server-side enforcement. A "Conversion Layer" transforms chatbots into revenue engines through lead capture, scoring, and smart CTA triggers.
 
+### Feature Synchronization (Agentic Integration Layer)
+All major features are synchronized into a unified agentic intelligence loop:
+- **Chat ↔ Project Brain (bidirectional)**: Chatbot reads Project Brain as context AND can automatically update Project Brain fields during conversation using `[UPDATE_BRAIN:key]value[/UPDATE_BRAIN]` tags. Works in both streaming and non-streaming chat endpoints.
+- **Tender Wizard ↔ Knowledge Base**: Both `/api/ai/tender-wizard` and `/api/ai/tender-doc` now automatically fetch relevant KB content (via RAG search) and active Project Brain data, injecting them into the AI analysis for richer, company-specific outputs. Frontend passes `agentId` via URL query param (`?agentId=...`) or request body.
+- **External Channels (Telegram/WhatsApp) ↔ Project Brain**: The `generateAIResponse` function for external integrations now also injects the active Project Brain context.
+- **Agentic AI Principles**: All chat endpoints include "PRINSIP AGENTIC AI" system instructions: attentive listening, implicit need detection, proactive suggestions, and consistency checking.
+
 ### Integration Protocols (Cross-Bot Consistency)
 - **SUMMARY_RULEBOOK v1**: Enforced across all 83 chatbots. Rules for interpreting *_SUMMARY v1 data: NO DOWNGRADE (risk can only stay or rise), UNKNOWN HANDLING (max +1 level), EXPIRED/INVALID RULE (minimum Tinggi), DATA CONSISTENCY (mismatch = minimum Tinggi).
 - **RISK_AGGREGATION_RULE v1**: Applied to TRC and ECSG only. When combining multiple summaries, FINAL_RISK_LEVEL = highest risk across all domains.
