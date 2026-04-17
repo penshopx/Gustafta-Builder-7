@@ -119,6 +119,7 @@ All major features are synchronized into a unified agentic intelligence loop:
   - `const pdfParse = _require("pdf-parse");` (typed sebagai `(buffer: Buffer) => Promise<{text: string}>`)
 - Diperbaiki di dua endpoint: `POST /api/ai/tender-extract` dan `POST /api/ai/extract-file-text`
 - **Production build fix**: `script/build.ts` ditambah `define: { "import.meta.url": "__filename" }` di esbuild config sehingga `createRequire(import.meta.url)` di-compile menjadi `createRequire(__filename)` di CJS bundle, yang valid di Node.js production runtime
+- **v2 API fix**: pdf-parse v2.4.5 tidak lagi ekspor wrapper function — API baru gunakan `new PDFParse({ data: buffer, verbosity: VerbosityLevel.ERRORS })` lalu `await parser.getText()` yang return `{ pages: [{text, num}] }`. Dibungkus dalam helper `parsePdfBuffer(buffer)` yang dipakai di kedua endpoint
 
 #### File Upload di Generate Big Idea (NEW)
 - **Backend**: `POST /api/ai/extract-file-text` — multer memoryStorage, max 5MB, accept PDF/DOCX/TXT. Ekstrak teks via `pdf-parse` (PDF) / `mammoth` (DOCX) / plain buffer (TXT). Returns `{text, filename, charCount}`. Multer error di-wrap ke `{error: ...}` JSON (413 untuk oversize, 400 untuk format invalid, 422 untuk file tak terbaca/terenkripsi).

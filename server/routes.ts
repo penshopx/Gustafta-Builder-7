@@ -46,7 +46,17 @@ import {
 } from "./notion";
 
 const _require = createRequire(import.meta.url);
-const pdfParse: (buffer: Buffer) => Promise<{ text: string }> = _require("pdf-parse");
+const { PDFParse: _PDFParse, VerbosityLevel: _VerbosityLevel } = _require("pdf-parse") as {
+  PDFParse: new (opts: { data: Buffer; verbosity: number }) => {
+    getText: () => Promise<{ pages: Array<{ text: string }> }>;
+  };
+  VerbosityLevel: { ERRORS: number };
+};
+async function parsePdfBuffer(buffer: Buffer): Promise<string> {
+  const parser = new _PDFParse({ data: buffer, verbosity: _VerbosityLevel.ERRORS });
+  const result = await parser.getText();
+  return result.pages.map((p) => p.text).join("\n");
+}
 
 const guestMessageTracker = new Map<string, { count: number; lastReset: string }>();
 
@@ -5124,10 +5134,8 @@ PENTING:
       if (req.file.mimetype === "text/plain" || req.file.originalname.endsWith(".txt")) {
         rawText = req.file.buffer.toString("utf-8");
       } else {
-        // PDF parsing
-        
-        const parsed = await pdfParse(req.file.buffer);
-        rawText = parsed.text || "";
+        // PDF parsing (pdf-parse v2 API)
+        rawText = await parsePdfBuffer(req.file.buffer);
       }
 
       if (!rawText || rawText.trim().length < 50) {
@@ -6744,8 +6752,8 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
         text = result.value;
       } else {
         
-        const parsed = await pdfParse(buffer);
-        text = parsed.text || "";
+        // PDF parsing (pdf-parse v2 API)
+        text = await parsePdfBuffer(buffer);
       }
 
       text = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
