@@ -6807,8 +6807,25 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
   ]
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+      const deepseekKey = process.env.DEEPSEEK_API_KEY;
+      const integrationKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const integrationBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+
+      let aiClient: OpenAI;
+      let aiModel: string;
+
+      if (deepseekKey) {
+        aiClient = new OpenAI({ apiKey: deepseekKey, baseURL: "https://api.deepseek.com/v1" });
+        aiModel = "deepseek-chat";
+      } else if (integrationKey && integrationBaseURL) {
+        aiClient = new OpenAI({ apiKey: integrationKey, baseURL: integrationBaseURL });
+        aiModel = "gpt-4o-mini";
+      } else {
+        return res.status(503).json({ error: "Tidak ada AI provider yang tersedia. Silakan hubungi admin." });
+      }
+
+      const response = await aiClient.chat.completions.create({
+        model: aiModel,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
