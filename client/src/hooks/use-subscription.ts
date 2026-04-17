@@ -15,8 +15,6 @@ export interface Subscription {
   userId: string;
   plan: string;
   status: string;
-  mayarOrderId?: string;
-  mayarPaymentUrl?: string;
   amount: number;
   currency: string;
   chatbotLimit: number;
@@ -26,16 +24,28 @@ export interface Subscription {
   updatedAt: string;
 }
 
+export interface BankAccount {
+  bank: string;
+  noRek: string;
+  atas: string;
+}
+
 export interface PaymentStatus {
   paymentConfigured: boolean;
   provider: string;
+  bankAccounts?: BankAccount[];
+  whatsapp?: string;
 }
 
 export interface CreateSubscriptionResponse {
   success: boolean;
   subscription: Subscription;
-  paymentUrl?: string;
-  paymentId?: string;
+  invoiceNo?: string;
+  amount?: number;
+  planName?: string;
+  bankAccounts?: BankAccount[];
+  whatsapp?: string;
+  message?: string;
 }
 
 export function useSubscriptionPlans() {

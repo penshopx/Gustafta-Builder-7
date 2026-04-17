@@ -708,7 +708,7 @@ export default function Documentation() {
               <CardContent className="prose prose-sm dark:prose-invert max-w-none">
                 <p>
                   Anda bisa menjadikan chatbot sebagai produk berbayar yang bisa diakses oleh end-user 
-                  melalui langganan. Semua pembayaran diproses melalui Mayar.id.
+                  melalui langganan. Pembayaran dilakukan via transfer bank manual.
                 </p>
 
                 <h3>Pengaturan Produk</h3>
@@ -726,7 +726,7 @@ export default function Documentation() {
                   <li>Buka tab <strong>Monetisasi</strong></li>
                   <li>Aktifkan mode publik dan atur sebagai produk</li>
                   <li>Konfigurasi batas pesan, trial, dan kuota</li>
-                  <li>End-user bisa berlangganan via Mayar.id</li>
+                  <li>End-user bisa berlangganan via transfer bank manual</li>
                 </ol>
               </CardContent>
             </Card>
@@ -1080,7 +1080,7 @@ export default function Documentation() {
                 <ul>
                   <li><strong>Dashboard Revenue</strong> - Lihat total pendapatan dan tren</li>
                   <li><strong>Daftar Klien</strong> - Kelola langganan end-user chatbot Anda</li>
-                  <li><strong>Integrasi Mayar.id</strong> - Pembayaran otomatis via payment gateway</li>
+                  <li><strong>Transfer Bank Manual</strong> - Konfirmasi pembayaran via WhatsApp</li>
                 </ul>
 
                 <h3>Cara Menggunakan</h3>

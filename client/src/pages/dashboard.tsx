@@ -63,7 +63,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -117,6 +117,13 @@ export default function Dashboard() {
   const [deleteBigIdeaConfirm, setDeleteBigIdeaConfirm] = useState<BigIdea | null>(null);
   const [deleteToolboxConfirm, setDeleteToolboxConfirm] = useState<Toolbox | null>(null);
   const [deleteAgentConfirm, setDeleteAgentConfirm] = useState<Agent | null>(null);
+  const [editSeriesTarget, setEditSeriesTarget] = useState<any | null>(null);
+  const [editSeriesName, setEditSeriesName] = useState("");
+  const [editSeriesDesc, setEditSeriesDesc] = useState("");
+  const [deleteSeriesConfirm, setDeleteSeriesConfirm] = useState<any | null>(null);
+  const [editAgentTarget, setEditAgentTarget] = useState<Agent | null>(null);
+  const [editAgentName, setEditAgentName] = useState("");
+  const [editAgentDesc, setEditAgentDesc] = useState("");
   
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -175,6 +182,46 @@ export default function Dashboard() {
   const filteredBigIdeas = activeSeriesId
     ? bigIdeas.filter((bi: any) => String(bi.seriesId) === activeSeriesId)
     : bigIdeas;
+
+  const updateSeriesMutation = useMutation({
+    mutationFn: async ({ id, name, description }: { id: number; name: string; description?: string }) => {
+      const res = await apiRequest("PATCH", `/api/series/${id}`, { name, description });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+      setEditSeriesTarget(null);
+      toast({ title: "Tujuan berhasil diperbarui" });
+    },
+    onError: () => toast({ title: "Gagal memperbarui", variant: "destructive" }),
+  });
+
+  const deleteSeriesMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/series/${id}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+      setDeleteSeriesConfirm(null);
+      if (activeSeriesId === String(deleteSeriesConfirm?.id)) setActiveSeriesId(null);
+      toast({ title: "Tujuan berhasil dihapus" });
+    },
+    onError: () => toast({ title: "Gagal menghapus", variant: "destructive" }),
+  });
+
+  const updateAgentMutation = useMutation({
+    mutationFn: async ({ id, name, description }: { id: string; name: string; description?: string }) => {
+      const res = await apiRequest("PATCH", `/api/agents/${id}`, { name, description });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      setEditAgentTarget(null);
+      toast({ title: "Alat Bantu berhasil diperbarui" });
+    },
+    onError: () => toast({ title: "Gagal memperbarui", variant: "destructive" }),
+  });
 
   const handleSeriesSelect = (seriesId: string | null) => {
     if (bigIdeaCreationCooldown.current) return;
@@ -698,7 +745,26 @@ export default function Dashboard() {
                       >
                         <FolderOpen className="w-4 h-4 text-purple-500 shrink-0" />
                         <span className="truncate flex-1">{s.name}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <div className="flex items-center gap-0.5 invisible group-hover:visible shrink-0">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="w-6 h-6"
+                            onClick={(e) => { e.stopPropagation(); setEditSeriesTarget(s); setEditSeriesName(s.name); setEditSeriesDesc(s.description || ""); }}
+                            data-testid={`button-edit-series-${s.id}`}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="w-6 h-6"
+                            onClick={(e) => { e.stopPropagation(); setDeleteSeriesConfirm(s); }}
+                            data-testid={`button-delete-series-${s.id}`}
+                          >
+                            <Trash2 className="w-3 h-3 text-destructive" />
+                          </Button>
+                        </div>
                       </div>
                     ))
                   )}
@@ -990,15 +1056,26 @@ export default function Dashboard() {
                               <span className="truncate block">{agent.name}</span>
                               <span className="text-[10px] text-purple-500/70">Orkestrator</span>
                             </div>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="shrink-0 w-6 h-6 invisible group-hover:visible"
-                              onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
-                              data-testid={`button-delete-agent-${agent.id}`}
-                            >
-                              <Trash2 className="w-3 h-3 text-destructive" />
-                            </Button>
+                            <div className="flex gap-0.5 invisible group-hover:visible shrink-0">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="w-6 h-6"
+                                onClick={(e) => { e.stopPropagation(); setEditAgentTarget(agent as Agent); setEditAgentName(agent.name); setEditAgentDesc((agent as any).description || ""); }}
+                                data-testid={`button-edit-agent-${agent.id}`}
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="w-6 h-6"
+                                onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
+                                data-testid={`button-delete-agent-${agent.id}`}
+                              >
+                                <Trash2 className="w-3 h-3 text-destructive" />
+                              </Button>
+                            </div>
                           </div>
                         ))}
                         {!hasOrchAgent && (
@@ -1040,15 +1117,26 @@ export default function Dashboard() {
                                 </AvatarFallback>
                               </Avatar>
                               <span className="truncate flex-1">{agent.name}</span>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="shrink-0 w-6 h-6 invisible group-hover:visible"
-                                onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
-                                data-testid={`button-delete-agent-${agent.id}`}
-                              >
-                                <Trash2 className="w-3 h-3 text-destructive" />
-                              </Button>
+                              <div className="flex gap-0.5 invisible group-hover:visible shrink-0">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="w-6 h-6"
+                                  onClick={(e) => { e.stopPropagation(); setEditAgentTarget(agent as Agent); setEditAgentName(agent.name); setEditAgentDesc((agent as any).description || ""); }}
+                                  data-testid={`button-edit-agent-${agent.id}`}
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="w-6 h-6"
+                                  onClick={(e) => { e.stopPropagation(); setDeleteAgentConfirm(agent as Agent); }}
+                                  data-testid={`button-delete-agent-${agent.id}`}
+                                >
+                                  <Trash2 className="w-3 h-3 text-destructive" />
+                                </Button>
+                              </div>
                             </div>
                           ))
                         )}
@@ -1439,6 +1527,112 @@ export default function Dashboard() {
       )}
       <UserProfileDialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen} />
       <SeriesManagementDialog open={seriesDialogOpen} onOpenChange={setSeriesDialogOpen} />
+
+      {/* Dialog Edit Tujuan (Series) */}
+      <Dialog open={!!editSeriesTarget} onOpenChange={(open) => { if (!open) setEditSeriesTarget(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Tujuan</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-series-name">Nama Tujuan *</Label>
+              <Input
+                id="edit-series-name"
+                value={editSeriesName}
+                onChange={(e) => setEditSeriesName(e.target.value)}
+                placeholder="Nama tujuan..."
+                data-testid="input-edit-series-name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-series-desc">Deskripsi</Label>
+              <Textarea
+                id="edit-series-desc"
+                value={editSeriesDesc}
+                onChange={(e) => setEditSeriesDesc(e.target.value)}
+                placeholder="Deskripsi tujuan..."
+                rows={3}
+                data-testid="input-edit-series-desc"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setEditSeriesTarget(null)}>Batal</Button>
+              <Button
+                onClick={() => updateSeriesMutation.mutate({ id: editSeriesTarget.id, name: editSeriesName, description: editSeriesDesc })}
+                disabled={!editSeriesName.trim() || updateSeriesMutation.isPending}
+                data-testid="button-save-edit-series"
+              >
+                {updateSeriesMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</> : "Simpan"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Konfirmasi Hapus Tujuan (Series) */}
+      <AlertDialog open={!!deleteSeriesConfirm} onOpenChange={(open) => { if (!open) setDeleteSeriesConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Tujuan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tujuan "<strong>{deleteSeriesConfirm?.name}</strong>" beserta semua Modul dan Alat Bantu di dalamnya akan dihapus secara permanen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleteSeriesMutation.mutate(deleteSeriesConfirm!.id)}
+              data-testid="button-confirm-delete-series"
+            >
+              {deleteSeriesMutation.isPending ? "Menghapus..." : "Ya, Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog Edit Alat Bantu (Agent) */}
+      <Dialog open={!!editAgentTarget} onOpenChange={(open) => { if (!open) setEditAgentTarget(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Alat Bantu</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-agent-name">Nama *</Label>
+              <Input
+                id="edit-agent-name"
+                value={editAgentName}
+                onChange={(e) => setEditAgentName(e.target.value)}
+                placeholder="Nama alat bantu..."
+                data-testid="input-edit-agent-name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-agent-desc">Deskripsi</Label>
+              <Textarea
+                id="edit-agent-desc"
+                value={editAgentDesc}
+                onChange={(e) => setEditAgentDesc(e.target.value)}
+                placeholder="Deskripsi singkat..."
+                rows={3}
+                data-testid="input-edit-agent-desc"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setEditAgentTarget(null)}>Batal</Button>
+              <Button
+                onClick={() => updateAgentMutation.mutate({ id: String(editAgentTarget!.id), name: editAgentName, description: editAgentDesc })}
+                disabled={!editAgentName.trim() || updateAgentMutation.isPending}
+                data-testid="button-save-edit-agent"
+              >
+                {updateAgentMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Menyimpan...</> : "Simpan"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={hubDialogOpen} onOpenChange={(open) => { setHubDialogOpen(open); if (!open) { setHubName(""); setHubDescription(""); } }}>
         <DialogContent className="max-w-lg">

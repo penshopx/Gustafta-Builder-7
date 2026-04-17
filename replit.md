@@ -211,5 +211,13 @@ The platform includes a **Domain Solution Pack** system for selling domain-speci
 - DeepSeek
 - Claude
 - Fonnte (WhatsApp)
-- Mayar.id (payment gateway)
+- Transfer Bank Manual (BCA/Mandiri/BRI — konfirmasi via WhatsApp, tanpa payment gateway)
 - Replit Auth (OAuth/OIDC)
+
+### Audit Apr 2026 — Mayar.id Removal + Hierarchy Edit/Delete
+- **Mayar.id dihapus sepenuhnya**: Import `createPaymentLink`/`parseWebhookPayload` dihapus, webhook handler dihapus, field `mayarOrderId`/`mayarPaymentUrl` tidak lagi digunakan. Diganti sistem transfer bank konvensional: backend mengembalikan rekening bank + nomor WA konfirmasi saat berlangganan.
+- **Hierarchy Edit/Delete UI**:
+  - **Series (Tujuan)**: Tombol Pencil (edit nama/deskripsi) + Trash2 (delete confirm) muncul saat hover di sidebar.
+  - **Agent (Alat Bantu — Orkestrator & Regular)**: Tombol Pencil (edit cepat nama/deskripsi) + Trash2 muncul saat hover, menggantikan single Trash2 sebelumnya.
+  - Mutations: `updateSeriesMutation` (PATCH /api/series/:id), `deleteSeriesMutation` (DELETE /api/series/:id), `updateAgentMutation` (PATCH /api/agents/:id) — semua sudah ada endpoint-nya di backend.
+- **Subscription flow**: Paket berbayar → status "pending" → tampilkan instruksi transfer bank di pricing.tsx (step 2 dialog) dan subscription.tsx. Free trial tetap langsung "active".

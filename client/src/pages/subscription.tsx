@@ -193,26 +193,37 @@ export default function Subscription() {
                   </div>
                 </div>
 
-                {subscription.status === "pending" && subscription.mayarPaymentUrl && (
+                {subscription.status === "pending" && (
                   <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                     <div className="flex items-start gap-3">
                       <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="font-medium text-yellow-600 dark:text-yellow-400">
-                          Menunggu Pembayaran
+                          Menunggu Konfirmasi Pembayaran
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Silakan selesaikan pembayaran untuk mengaktifkan langganan Anda.
+                          Silakan transfer ke salah satu rekening di bawah ini lalu konfirmasi via WhatsApp.
                         </p>
-                        <Button 
-                          className="mt-3" 
-                          size="sm"
-                          onClick={() => window.location.href = subscription.mayarPaymentUrl!}
-                         
+                        <div className="mt-3 space-y-2">
+                          {[
+                            { bank: "BCA", noRek: "1234567890", atas: "PT Gustafta Teknologi" },
+                            { bank: "Mandiri", noRek: "0987654321", atas: "PT Gustafta Teknologi" },
+                            { bank: "BRI", noRek: "1122334455", atas: "PT Gustafta Teknologi" },
+                          ].map((b) => (
+                            <div key={b.bank} className="text-sm bg-background/60 rounded px-3 py-2 border">
+                              <span className="font-semibold">{b.bank}</span>: {b.noRek} a/n {b.atas}
+                            </div>
+                          ))}
+                        </div>
+                        <a
+                          href="https://wa.me/628123456789?text=Konfirmasi%20Pembayaran%20Gustafta"
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          Lanjutkan Pembayaran
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
+                          <Button className="mt-3" size="sm" variant="outline">
+                            Konfirmasi via WhatsApp
+                          </Button>
+                        </a>
                       </div>
                     </div>
                   </div>

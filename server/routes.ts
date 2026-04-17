@@ -20,7 +20,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
-import { createPaymentLink, subscriptionPlans, parseWebhookPayload, type SubscriptionPlanKey } from "./lib/mayar";
+import { subscriptionPlans, type SubscriptionPlanKey } from "./lib/mayar";
 import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import { processAttachmentsAndUrls, type FileAttachment } from "./lib/file-processing";
@@ -2377,7 +2377,15 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
-  // ==================== Payment/Subscription Routes (Mayar.id) ====================
+  // ==================== Payment/Subscription Routes (Konvensional - Transfer Bank) ====================
+
+  // Informasi rekening bank untuk pembayaran manual
+  const BANK_ACCOUNTS = [
+    { bank: "BCA", noRek: "1234567890", atas: "PT Gustafta Teknologi" },
+    { bank: "Mandiri", noRek: "0987654321", atas: "PT Gustafta Teknologi" },
+    { bank: "BRI", noRek: "1122334455", atas: "PT Gustafta Teknologi" },
+  ];
+  const WHATSAPP_KONFIRMASI = "628123456789"; // Nomor WA konfirmasi pembayaran
 
   // Get subscription plans
   app.get("/api/subscriptions/plans", (_req, res) => {
@@ -2388,33 +2396,32 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     res.json(plans);
   });
 
-  // Check Mayar configuration status
+  // Payment system status
   app.get("/api/subscriptions/status", (_req, res) => {
-    const mayarApiKey = process.env.MAYAR_API_KEY;
     res.json({
-      paymentConfigured: !!mayarApiKey,
-      provider: "mayar.id",
+      paymentConfigured: true,
+      provider: "transfer_bank",
+      bankAccounts: BANK_ACCOUNTS,
+      whatsapp: WHATSAPP_KONFIRMASI,
     });
   });
 
-  // Create subscription/payment order
+  // Create subscription order (conventional - manual transfer)
   app.post("/api/subscriptions/create", async (req, res) => {
     try {
-      const { plan, customerName, customerEmail, customerPhone } = req.body;
-      
-      // Validate plan
+      const { plan, customerName, customerEmail } = req.body;
+
       if (!plan || !subscriptionPlans[plan as SubscriptionPlanKey]) {
         return res.status(400).json({ error: "Invalid subscription plan" });
       }
-      
+
       const selectedPlan = plan as SubscriptionPlanKey;
       const pricing = subscriptionPlans[selectedPlan];
-      
-      // For free trial, create subscription directly
+      const now = new Date();
+      const endDate = new Date(now.getTime() + pricing.duration * 24 * 60 * 60 * 1000);
+
+      // Free trial — langsung aktif
       if (selectedPlan === "free_trial") {
-        const now = new Date();
-        const endDate = new Date(now.getTime() + pricing.duration * 24 * 60 * 60 * 1000);
-        
         const subscription = await storage.createSubscription({
           userId: customerEmail,
           plan: selectedPlan,
@@ -2425,53 +2432,29 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           startDate: now.toISOString(),
           endDate: endDate.toISOString(),
         });
-        
-        return res.status(201).json({
-          subscription,
-          message: "Free trial activated successfully",
-        });
+        return res.status(201).json({ subscription, message: "Free trial activated" });
       }
-      
-      // Check if Mayar is configured
-      const mayarApiKey = process.env.MAYAR_API_KEY;
-      if (!mayarApiKey) {
-        return res.status(503).json({ 
-          error: "Payment gateway not configured",
-          message: "Mayar.id API key is not configured. Please contact administrator."
-        });
-      }
-      
-      // Get redirect URL from environment or use default
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
-        : "http://localhost:5000";
-      
-      // Create Mayar payment link
-      const mayarPayment = await createPaymentLink(mayarApiKey, {
-        name: customerName,
-        email: customerEmail,
-        mobile: customerPhone,
-        amount: pricing.price,
-        description: `Gustafta Subscription: ${pricing.name}`,
-        redirectUrl: `${baseUrl}/payment-success`,
-      });
-      
-      // Create pending subscription
+
+      // Paket berbayar — buat pending, menunggu konfirmasi transfer
+      const invoiceNo = `INV-${Date.now()}`;
       const subscription = await storage.createSubscription({
         userId: customerEmail,
         plan: selectedPlan,
         status: "pending",
-        mayarOrderId: mayarPayment.data.id,
-        mayarPaymentUrl: mayarPayment.data.link,
         amount: pricing.price,
         currency: "IDR",
         chatbotLimit: pricing.chatbotLimit,
       });
-      
+
       res.status(201).json({
         subscription,
-        paymentUrl: mayarPayment.data.link,
-        paymentId: mayarPayment.data.id,
+        invoiceNo,
+        amount: pricing.price,
+        planName: pricing.name,
+        customerName,
+        bankAccounts: BANK_ACCOUNTS,
+        whatsapp: WHATSAPP_KONFIRMASI,
+        message: `Silakan transfer Rp ${pricing.price.toLocaleString("id-ID")} ke salah satu rekening di bawah, lalu konfirmasi via WhatsApp dengan menyertakan bukti transfer dan nomor invoice ${invoiceNo}.`,
       });
     } catch (error) {
       console.error("Failed to create subscription:", error);
@@ -2479,69 +2462,25 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
-  // Mayar webhook handler with signature verification
-  app.post("/api/webhooks/mayar", async (req, res) => {
+  // Admin: Aktifkan subscription setelah transfer dikonfirmasi
+  app.post("/api/subscriptions/activate/:id", isAuthenticated, async (req, res) => {
     try {
-      // Verify webhook signature if webhook secret is configured
-      const webhookSecret = process.env.MAYAR_WEBHOOK_SECRET;
-      if (webhookSecret) {
-        const signature = req.headers["x-mayar-signature"] || req.headers["x-webhook-signature"];
-        if (!signature) {
-          console.warn("Mayar webhook received without signature");
-          return res.status(401).json({ error: "Missing webhook signature" });
-        }
-        
-        // Verify HMAC signature
-        const crypto = await import("crypto");
-        const expectedSignature = crypto
-          .createHmac("sha256", webhookSecret)
-          .update(JSON.stringify(req.body))
-          .digest("hex");
-        
-        if (signature !== expectedSignature && signature !== `sha256=${expectedSignature}`) {
-          console.warn("Mayar webhook signature verification failed");
-          return res.status(401).json({ error: "Invalid webhook signature" });
-        }
-      } else {
-        console.warn("MAYAR_WEBHOOK_SECRET not configured - webhook signature verification skipped");
+      const subscription = await storage.getSubscriptionById ? 
+        await (storage as any).getSubscriptionById(req.params.id) : null;
+      if (!subscription) {
+        return res.status(404).json({ error: "Subscription not found" });
       }
-      
-      const payload = parseWebhookPayload(req.body);
-      
-      if (!payload || !payload.event) {
-        return res.status(400).json({ error: "Invalid webhook payload" });
-      }
-      
-      // Handle transaction completed event
-      if (payload.event === "transaction.completed" || payload.status === "paid") {
-        // Find subscription by payment ID
-        const subscription = await storage.getSubscriptionByMayarOrderId(payload.id);
-        
-        if (subscription) {
-          const planDetails = subscriptionPlans[subscription.plan as SubscriptionPlanKey];
-          const now = new Date();
-          const endDate = new Date(now.getTime() + planDetails.duration * 24 * 60 * 60 * 1000);
-          
-          await storage.updateSubscription(subscription.id, {
-            status: "active",
-            startDate: now.toISOString(),
-            endDate: endDate.toISOString(),
-          });
-        }
-      } else if (payload.status === "expired" || payload.status === "cancelled" || payload.status === "failed") {
-        const subscription = await storage.getSubscriptionByMayarOrderId(payload.id);
-        
-        if (subscription) {
-          await storage.updateSubscription(subscription.id, {
-            status: "cancelled",
-          });
-        }
-      }
-      
-      res.json({ status: "success" });
+      const planDetails = subscriptionPlans[subscription.plan as SubscriptionPlanKey];
+      const now = new Date();
+      const endDate = new Date(now.getTime() + planDetails.duration * 24 * 60 * 60 * 1000);
+      await storage.updateSubscription(req.params.id, {
+        status: "active",
+        startDate: now.toISOString(),
+        endDate: endDate.toISOString(),
+      });
+      res.json({ success: true, message: "Subscription activated" });
     } catch (error) {
-      console.error("Mayar webhook processing error:", error);
-      res.status(500).json({ error: "Webhook processing failed" });
+      res.status(500).json({ error: "Failed to activate subscription" });
     }
   });
 
@@ -5306,53 +5245,15 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         amount = (agent.monthlyPrice || 0) * 10;
       }
 
-      if (amount > 0) {
-        const mayarApiKey = process.env.MAYAR_API_KEY;
-        if (mayarApiKey) {
-          try {
-            const { createPaymentLink } = await import("./lib/mayar");
-            const baseUrl = `${req.protocol}://${req.get("host")}`;
-            const payment = await createPaymentLink(mayarApiKey, {
-              name: customerName,
-              email: customerEmail,
-              amount,
-              description: `Langganan ${agent.name} - ${plan}`,
-              redirectUrl: `${baseUrl}/bot/${agent.id}?subscribed=true`,
-            });
-
-            const subscription = await storage.createClientSubscription({
-              agentId: req.params.agentId as string,
-              customerName,
-              customerEmail,
-              customerPhone: customerPhone || "",
-              plan: plan || "trial",
-              status: "pending",
-              accessToken,
-              mayarOrderId: payment.data.id,
-              mayarPaymentUrl: payment.data.link,
-              amount,
-              currency: "IDR",
-              referralCode: referralCode || undefined,
-              startDate: startDate.toISOString(),
-              endDate: endDate.toISOString(),
-            });
-
-            return res.json({ subscription, paymentUrl: payment.data.link });
-          } catch (payErr) {
-            console.error("Payment creation failed:", payErr);
-          }
-        }
-      }
-
       const subscription = await storage.createClientSubscription({
         agentId: req.params.agentId as string,
         customerName,
         customerEmail,
         customerPhone: customerPhone || "",
         plan: plan || "trial",
-        status: "active",
+        status: amount > 0 ? "pending" : "active",
         accessToken,
-        amount: 0,
+        amount,
         currency: "IDR",
         referralCode: referralCode || undefined,
         startDate: startDate.toISOString(),
@@ -5409,44 +5310,6 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         amount = (bigIdea.monthlyPrice || 0) * 10;
       }
 
-      if (amount > 0) {
-        const mayarApiKey = process.env.MAYAR_API_KEY;
-        if (mayarApiKey) {
-          try {
-            const { createPaymentLink } = await import("./lib/mayar");
-            const baseUrl = `${req.protocol}://${req.get("host")}`;
-            const payment = await createPaymentLink(mayarApiKey, {
-              name: customerName,
-              email: customerEmail,
-              amount,
-              description: `Langganan Bundle Modul: ${bigIdea.name} - ${plan}`,
-              redirectUrl: `${baseUrl}/modul/${bigIdea.id}?subscribed=true`,
-            });
-
-            const subscription = await storage.createClientSubscription({
-              agentId: "0",
-              bigIdeaId: req.params.bigIdeaId,
-              customerName,
-              customerEmail,
-              customerPhone: customerPhone || "",
-              plan: plan || "trial",
-              status: "pending",
-              accessToken,
-              mayarOrderId: payment.data.id,
-              mayarPaymentUrl: payment.data.link,
-              amount,
-              currency: "IDR",
-              startDate: startDate.toISOString(),
-              endDate: endDate.toISOString(),
-            });
-
-            return res.json({ subscription, paymentUrl: payment.data.link });
-          } catch (payErr) {
-            console.error("Bundle payment creation failed:", payErr);
-          }
-        }
-      }
-
       const subscription = await storage.createClientSubscription({
         agentId: "0",
         bigIdeaId: req.params.bigIdeaId,
@@ -5454,9 +5317,9 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         customerEmail,
         customerPhone: customerPhone || "",
         plan: plan || "trial",
-        status: "active",
+        status: amount > 0 ? "pending" : "active",
         accessToken,
-        amount: 0,
+        amount,
         currency: "IDR",
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),

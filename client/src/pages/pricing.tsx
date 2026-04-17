@@ -346,6 +346,11 @@ export default function Pricing() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [paymentInfo, setPaymentInfo] = useState<{
+    invoiceNo?: string; amount?: number; planName?: string;
+    bankAccounts?: { bank: string; noRek: string; atas: string }[];
+    whatsapp?: string; message?: string;
+  } | null>(null);
 
   const handleSelectPlan = (planKey: string) => {
     if (!isAuthenticated) {
@@ -381,20 +386,29 @@ export default function Pricing() {
         name: customerName,
       });
 
-      if (result.paymentUrl) {
-        window.location.href = result.paymentUrl;
-      } else if (selectedPlan === "free_trial") {
+      if (selectedPlan === "free_trial") {
         toast({
           title: "Free Trial Aktif!",
           description: "Selamat! Free trial 14 hari Anda sudah aktif.",
         });
         setShowPaymentDialog(false);
+        setPaymentInfo(null);
         navigate("/dashboard");
+      } else {
+        // Tampilkan instruksi transfer bank
+        setPaymentInfo({
+          invoiceNo: result.invoiceNo,
+          amount: result.amount,
+          planName: result.planName,
+          bankAccounts: result.bankAccounts,
+          whatsapp: result.whatsapp,
+          message: result.message,
+        });
       }
     } catch (error) {
       toast({
         title: "Gagal Memproses",
-        description: "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.",
+        description: "Terjadi kesalahan saat memproses. Silakan coba lagi.",
         variant: "destructive",
       });
     }
@@ -402,65 +416,107 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Konfirmasi Pembayaran</DialogTitle>
-            <DialogDescription>
-              {selectedPlan === "free_trial" 
-                ? "Masukkan data Anda untuk memulai free trial 14 hari."
-                : "Masukkan data Anda untuk melanjutkan ke pembayaran."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="customer-name">Nama Lengkap</Label>
-              <Input
-                id="customer-name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Masukkan nama lengkap"
-               
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="customer-email">Email</Label>
-              <Input
-                id="customer-email"
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="email@example.com"
-               
-              />
-            </div>
-            {!paymentStatus?.paymentConfigured && selectedPlan !== "free_trial" && (
-              <div className="p-3 bg-yellow-500/10 rounded-lg text-sm text-yellow-600 dark:text-yellow-400">
-                Payment gateway belum dikonfigurasi. Hubungi admin untuk informasi pembayaran.
+      <Dialog open={showPaymentDialog} onOpenChange={(open) => { setShowPaymentDialog(open); if (!open) setPaymentInfo(null); }}>
+        <DialogContent className="max-w-md">
+          {!paymentInfo ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Konfirmasi Langganan</DialogTitle>
+                <DialogDescription>
+                  {selectedPlan === "free_trial"
+                    ? "Masukkan data Anda untuk memulai free trial 14 hari."
+                    : "Masukkan nama & email, lalu ikuti instruksi transfer bank."}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="customer-name">Nama Lengkap</Label>
+                  <Input
+                    id="customer-name"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Masukkan nama lengkap"
+                    data-testid="input-customer-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="customer-email">Email</Label>
+                  <Input
+                    id="customer-email"
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="email@example.com"
+                    data-testid="input-customer-email"
+                  />
+                </div>
               </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
-              Batal
-            </Button>
-            <Button 
-              onClick={handleConfirmPayment}
-              disabled={createSubscription.isPending}
-             
-            >
-              {createSubscription.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Memproses...
-                </>
-              ) : selectedPlan === "free_trial" ? (
-                "Mulai Free Trial"
-              ) : (
-                "Lanjut ke Pembayaran"
-              )}
-            </Button>
-          </DialogFooter>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+                  Batal
+                </Button>
+                <Button
+                  onClick={handleConfirmPayment}
+                  disabled={createSubscription.isPending}
+                  data-testid="button-confirm-payment"
+                >
+                  {createSubscription.isPending ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Memproses...</>
+                  ) : selectedPlan === "free_trial" ? "Mulai Free Trial" : "Lanjutkan"}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Instruksi Pembayaran</DialogTitle>
+                <DialogDescription>
+                  Transfer ke salah satu rekening berikut, lalu konfirmasi via WhatsApp.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                {paymentInfo.invoiceNo && (
+                  <div className="text-sm font-medium text-muted-foreground">
+                    No. Invoice: <span className="text-foreground font-bold">{paymentInfo.invoiceNo}</span>
+                  </div>
+                )}
+                {paymentInfo.amount && (
+                  <div className="text-lg font-bold text-primary">
+                    Total: Rp {paymentInfo.amount.toLocaleString("id-ID")}
+                    <span className="text-sm text-muted-foreground font-normal ml-1">({paymentInfo.planName})</span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {paymentInfo.bankAccounts?.map((b) => (
+                    <div key={b.bank} className="p-3 rounded-lg border bg-muted/40 text-sm">
+                      <p className="font-semibold">{b.bank}</p>
+                      <p className="text-foreground">{b.noRek}</p>
+                      <p className="text-muted-foreground">a/n {b.atas}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Setelah transfer, konfirmasi via WhatsApp dengan sertakan bukti transfer dan No. Invoice.
+                </p>
+              </div>
+              <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                <Button variant="outline" onClick={() => { setShowPaymentDialog(false); setPaymentInfo(null); }}>
+                  Tutup
+                </Button>
+                {paymentInfo.whatsapp && (
+                  <a
+                    href={`https://wa.me/${paymentInfo.whatsapp}?text=Konfirmasi%20pembayaran%20${paymentInfo.invoiceNo}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button data-testid="button-wa-confirm">
+                      Konfirmasi via WhatsApp
+                    </Button>
+                  </a>
+                )}
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
