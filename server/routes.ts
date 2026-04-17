@@ -5121,7 +5121,7 @@ PENTING:
         rawText = req.file.buffer.toString("utf-8");
       } else {
         // PDF parsing
-        const pdfParse = (await import("pdf-parse")).default;
+        const pdfParse = (await import("pdf-parse")).PDFParse;
         const parsed = await pdfParse(req.file.buffer);
         rawText = parsed.text || "";
       }
@@ -6739,7 +6739,7 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
         const result = await mammoth.extractRawText({ buffer });
         text = result.value;
       } else {
-        const pdfParse = (await import("pdf-parse")).default;
+        const pdfParse = (await import("pdf-parse")).PDFParse;
         const parsed = await pdfParse(buffer);
         text = parsed.text || "";
       }

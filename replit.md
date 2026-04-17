@@ -110,6 +110,11 @@ All major features are synchronized into a unified agentic intelligence loop:
 - **Frontend**: `client/src/components/dialogs/generate-big-ideas-dialog.tsx` — 2-step dialog: Step 1 input (topic + reference text + URLs), Step 2 review & select suggestions with checkbox + bulk create via `useCreateBigIdea` hook
 - **Dashboard integration**: "✨ Generate dari Referensi" button in Big Idea sidebar section, `generateBigIdeasOpen` state, dialog rendered with `activeSeriesId` prop
 
+#### Bugfix: pdf-parse Dynamic Import
+- `(await import("pdf-parse")).default` mengembalikan `undefined` di runtime tsx karena `pdf-parse` adalah CJS module yang tidak memiliki named export `default`
+- Diperbaiki di dua lokasi: endpoint `/api/ai/tender-extract` (L5124) dan `/api/ai/extract-file-text` (L6742)
+- Solusi: ganti ke `(await import("pdf-parse")).PDFParse` yang merupakan named export yang benar dan terkonfirmasi sebagai function
+
 #### File Upload di Generate Big Idea (NEW)
 - **Backend**: `POST /api/ai/extract-file-text` — multer memoryStorage, max 5MB, accept PDF/DOCX/TXT. Ekstrak teks via `pdf-parse` (PDF) / `mammoth` (DOCX) / plain buffer (TXT). Returns `{text, filename, charCount}`. Multer error di-wrap ke `{error: ...}` JSON (413 untuk oversize, 400 untuk format invalid, 422 untuk file tak terbaca/terenkripsi).
 - **Frontend**: Section "Upload File Referensi" di `generate-big-ideas-dialog.tsx` — posisi di bawah Teks Referensi, di atas URL Referensi. Click-to-upload area bergaya dropzone, loading spinner saat ekstraksi, success card (nama file + ukuran + jumlah karakter), tombol hapus. Teks yang diekstrak di-append ke textarea referenceText dengan separator jika sudah ada isi. Generate button disabled selama ekstraksi berlangsung.
