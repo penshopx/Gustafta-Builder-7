@@ -6695,14 +6695,14 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
-      const allowed = [
+      const ext = file.originalname.toLowerCase();
+      const validExt = ext.endsWith(".pdf") || ext.endsWith(".txt") || ext.endsWith(".docx");
+      const validMime = [
         "application/pdf",
         "text/plain",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/msword",
-      ];
-      const ext = file.originalname.toLowerCase();
-      if (allowed.includes(file.mimetype) || ext.endsWith(".pdf") || ext.endsWith(".txt") || ext.endsWith(".docx")) {
+      ].includes(file.mimetype);
+      if (validExt || validMime) {
         cb(null, true);
       } else {
         cb(new Error("Format tidak didukung. Gunakan PDF, DOCX, atau TXT."));
@@ -6710,7 +6710,18 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
     },
   });
 
-  app.post("/api/ai/extract-file-text", isAuthenticated, extractFileUpload.single("file"), async (req, res) => {
+  app.post("/api/ai/extract-file-text", isAuthenticated, (req, res, next) => {
+    extractFileUpload.single("file")(req, res, (err) => {
+      if (err) {
+        const msg = err.message || "Upload gagal";
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(413).json({ error: "File terlalu besar. Maksimal 5 MB." });
+        }
+        return res.status(400).json({ error: msg });
+      }
+      next();
+    });
+  }, async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "File tidak ditemukan" });

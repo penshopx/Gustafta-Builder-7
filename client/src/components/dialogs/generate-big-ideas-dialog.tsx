@@ -243,6 +243,23 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
 
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-blue-500" />
+                Teks Referensi
+                <span className="text-xs text-muted-foreground font-normal">(paste manual dari dokumen)</span>
+              </Label>
+              <Textarea
+                placeholder="Paste teks dari PDF, dokumen Word, modul pelatihan, catatan kuliah, artikel, atau konten apapun yang ingin dijadikan dasar saran..."
+                value={referenceText}
+                onChange={(e) => setReferenceText(e.target.value)}
+                rows={5}
+                className="resize-none"
+                data-testid="textarea-reference"
+              />
+              <p className="text-xs text-muted-foreground">AI membaca hingga 8.000 karakter pertama · {referenceText.length.toLocaleString()} karakter saat ini</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
                 <Upload className="w-3.5 h-3.5 text-violet-500" />
                 Upload File Referensi
                 <span className="text-xs text-muted-foreground font-normal">(PDF, DOCX, TXT — maks 5 MB)</span>
@@ -307,23 +324,6 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                   {extractError}
                 </div>
               )}
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-blue-500" />
-                Teks Referensi
-                <span className="text-xs text-muted-foreground font-normal">(atau paste manual dari dokumen)</span>
-              </Label>
-              <Textarea
-                placeholder="Paste teks dari PDF, dokumen Word, modul pelatihan, catatan kuliah, artikel, atau konten apapun yang ingin dijadikan dasar saran..."
-                value={referenceText}
-                onChange={(e) => setReferenceText(e.target.value)}
-                rows={5}
-                className="resize-none"
-                data-testid="textarea-reference"
-              />
-              <p className="text-xs text-muted-foreground">AI membaca hingga 8.000 karakter pertama · {referenceText.length.toLocaleString()} karakter saat ini</p>
             </div>
 
             <div className="space-y-1.5">
