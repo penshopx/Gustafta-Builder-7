@@ -1,4 +1,4 @@
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { randomUUID } from "crypto";
@@ -338,6 +338,51 @@ export class DatabaseStorage implements IStorage {
       ungroupedMapped.push(await buildBigIdeaWithToolboxes(bi));
     }
 
+    // === FIX: Fetch orchestrator toolboxes that bypass BigIdea (seriesId-only, no bigIdeaId) ===
+    const seriesOrchestratorTbRows = await db.select().from(toolboxes)
+      .where(and(
+        eq(toolboxes.seriesId, sid),
+        eq(toolboxes.isOrchestrator, true),
+        isNull(toolboxes.bigIdeaId)
+      ))
+      .orderBy(toolboxes.sortOrder);
+
+    const orchestratorToolboxes = [];
+    for (const tb of seriesOrchestratorTbRows) {
+      totalToolboxes++;
+      const agentRows = await db.select().from(agents).where(eq(agents.toolboxId, tb.id));
+      totalAgents += agentRows.length;
+      orchestratorToolboxes.push({
+        id: String(tb.id),
+        bigIdeaId: undefined,
+        seriesId: String(sid),
+        isOrchestrator: true,
+        name: tb.name,
+        description: tb.description || "",
+        purpose: tb.purpose || "",
+        capabilities: (tb.capabilities as string[]) || [],
+        limitations: (tb.limitations as string[]) || [],
+        sortOrder: tb.sortOrder || 0,
+        isActive: tb.isActive || false,
+        createdAt: tb.createdAt.toISOString(),
+        agents: agentRows.map(a => ({
+          id: String(a.id),
+          name: a.name,
+          description: a.description || "",
+          avatar: a.avatar || "",
+          tagline: a.tagline || "",
+          category: a.category || "",
+          subcategory: a.subcategory || "",
+          isPublic: a.isPublic || false,
+          isActive: a.isActive || false,
+          productSlug: a.productSlug || "",
+          widgetColor: a.widgetColor || "#6366f1",
+          isOrchestrator: a.isOrchestrator || false,
+          orchestratorRole: a.orchestratorRole || "orchestrator",
+        })),
+      });
+    }
+
     return {
       ...mapped,
       totalBigIdeas: biRows.length,
@@ -346,6 +391,7 @@ export class DatabaseStorage implements IStorage {
       totalCores: coreRows.length,
       cores: coresWithBigIdeas,
       bigIdeas: ungroupedMapped,
+      orchestratorToolboxes, // Series-level orchestrators that bypass BigIdea
     };
   }
 
@@ -652,7 +698,16 @@ export class DatabaseStorage implements IStorage {
     if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
     if (data.isOrchestrator !== undefined) updateData.isOrchestrator = data.isOrchestrator;
     if (data.seriesId !== undefined) updateData.seriesId = data.seriesId ? parseInt(data.seriesId) : null;
-    if (data.bigIdeaId !== undefined) updateData.bigIdeaId = data.bigIdeaId ? parseInt(data.bigIdeaId) : null;
+    if (data.bigIdeaId !== undefined) {
+      updateData.bigIdeaId = data.bigIdeaId ? parseInt(data.bigIdeaId) : null;
+      // === FIX: Auto-sync seriesId when bigIdeaId changes ===
+      if (data.bigIdeaId && data.seriesId === undefined) {
+        const biRows = await db.select().from(bigIdeas).where(eq(bigIdeas.id, parseInt(data.bigIdeaId))).limit(1);
+        if (biRows.length > 0 && biRows[0].seriesId) {
+          updateData.seriesId = biRows[0].seriesId;
+        }
+      }
+    }
     
     const result = await db.update(toolboxes)
       .set(updateData)

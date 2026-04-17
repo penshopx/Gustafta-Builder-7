@@ -265,8 +265,10 @@ export default function Marketplace() {
       const allBigIdeas = [...s.bigIdeas, ...s.cores.flatMap(c => c.bigIdeas)];
       allBigIdeas.forEach(bi => {
         biIds.add(bi.id);
-        bi.toolboxes.forEach(tb => tbIds.add(tb.id));
+        (bi as any).toolboxes?.forEach((tb: any) => tbIds.add(tb.id));
       });
+      // === Include series-level orchestrator toolboxes ===
+      ((s as any).orchestratorToolboxes || []).forEach((tb: any) => tbIds.add(tb.id));
     });
     setExpandedSeries(sIds);
     setExpandedBigIdeas(biIds);
@@ -474,13 +476,22 @@ export default function Marketplace() {
                         </div>
                       </button>
 
-                      {isSeriesExpanded && allBigIdeas.length > 0 && (
+                      {isSeriesExpanded && (allBigIdeas.length > 0 || (series as any).orchestratorToolboxes?.length > 0) && (
                         <div className="px-4 md:px-5 pb-4 md:pb-5 space-y-2">
                           {series.description && (
                             <p className="text-sm text-muted-foreground mb-3 pl-8">
                               {series.description}
                             </p>
                           )}
+                          {/* Series-level orchestrator toolboxes that bypass BigIdea */}
+                          {((series as any).orchestratorToolboxes || []).map((tb: ToolboxSection) => (
+                            <ToolboxGroup
+                              key={tb.id}
+                              toolbox={tb}
+                              isExpanded={expandedToolboxes.has(tb.id)}
+                              onToggle={() => toggleToolbox(tb.id)}
+                            />
+                          ))}
                           {allBigIdeas.map(bi => (
                             <BigIdeaGroup
                               key={bi.id}

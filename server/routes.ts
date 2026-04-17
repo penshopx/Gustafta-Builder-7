@@ -428,14 +428,26 @@ export async function registerRoutes(
 
         const filteredBigIdeas = filterBigIdeas(hierarchy.bigIdeas);
 
-        const totalAgents = [...filteredBigIdeas, ...filteredCores.flatMap((c: any) => c.bigIdeas)]
+        // Count agents in BigIdea-bound toolboxes
+        const agentsFromBigIdeas = [...filteredBigIdeas, ...filteredCores.flatMap((c: any) => c.bigIdeas)]
           .reduce((sum: number, bi: any) => sum + bi.toolboxes.reduce((s2: number, tb: any) => s2 + tb.agents.length, 0), 0);
+
+        // === FIX: Also count agents in series-level orchestrator toolboxes ===
+        const filteredOrchestrators = (hierarchy.orchestratorToolboxes || [])
+          .filter((tb: any) => tb.isActive)
+          .map((tb: any) => ({ ...tb, agents: (tb.agents || []).filter((a: any) => a.isActive) }))
+          .filter((tb: any) => tb.agents.length > 0);
+        const agentsFromOrchestrators = filteredOrchestrators
+          .reduce((sum: number, tb: any) => sum + tb.agents.length, 0);
+
+        const totalAgents = agentsFromBigIdeas + agentsFromOrchestrators;
 
         if (totalAgents > 0) {
           result.push({
             ...hierarchy,
             cores: filteredCores,
             bigIdeas: filteredBigIdeas,
+            orchestratorToolboxes: filteredOrchestrators,
             totalAgents,
           });
         }
@@ -661,9 +673,23 @@ export async function registerRoutes(
   // Update big idea
   app.patch("/api/big-ideas/:id", isAuthenticated, async (req, res) => {
     try {
-      const bigIdea = await storage.updateBigIdea(req.params.id as string, req.body);
+      const bigIdeaId = req.params.id as string;
+      const bigIdea = await storage.updateBigIdea(bigIdeaId, req.body);
       if (!bigIdea) {
         return res.status(404).json({ error: "Big idea not found" });
+      }
+      // === FIX: Cascade seriesId to child Toolboxes when BigIdea moves to another Series ===
+      if (req.body.seriesId && bigIdea.seriesId) {
+        try {
+          const childToolboxes = await storage.getToolboxes(bigIdeaId);
+          for (const tb of childToolboxes) {
+            if (String(tb.seriesId) !== String(bigIdea.seriesId)) {
+              await storage.updateToolbox(String(tb.id), { seriesId: String(bigIdea.seriesId) });
+            }
+          }
+        } catch (cascadeErr) {
+          console.error("Failed to cascade seriesId to toolboxes:", cascadeErr);
+        }
       }
       res.json(bigIdea);
     } catch (error) {
@@ -973,6 +999,20 @@ export async function registerRoutes(
           message: "Alat Bantu membutuhkan Chatbot/HUB yang aktif.",
           code: "MODULE_NO_TOOLBOX"
         });
+      }
+
+      // === FIX: Auto-inherit bigIdeaId and seriesId from parent Toolbox ===
+      if (toolboxId && !parsed.data.bigIdeaId) {
+        try {
+          const parentToolbox = await storage.getToolbox(String(toolboxId));
+          if (parentToolbox) {
+            if (parentToolbox.bigIdeaId) {
+              parsed.data.bigIdeaId = String(parentToolbox.bigIdeaId);
+            }
+          }
+        } catch (tbLookupErr) {
+          console.error("Failed to inherit bigIdeaId from toolbox:", tbLookupErr);
+        }
       }
 
       if (isOrch && toolboxId) {
