@@ -118,6 +118,7 @@ All major features are synchronized into a unified agentic intelligence loop:
   - `const _require = createRequire(import.meta.url);` (setelah semua import)
   - `const pdfParse = _require("pdf-parse");` (typed sebagai `(buffer: Buffer) => Promise<{text: string}>`)
 - Diperbaiki di dua endpoint: `POST /api/ai/tender-extract` dan `POST /api/ai/extract-file-text`
+- **Production build fix**: `script/build.ts` ditambah `define: { "import.meta.url": "__filename" }` di esbuild config sehingga `createRequire(import.meta.url)` di-compile menjadi `createRequire(__filename)` di CJS bundle, yang valid di Node.js production runtime
 
 #### File Upload di Generate Big Idea (NEW)
 - **Backend**: `POST /api/ai/extract-file-text` — multer memoryStorage, max 5MB, accept PDF/DOCX/TXT. Ekstrak teks via `pdf-parse` (PDF) / `mammoth` (DOCX) / plain buffer (TXT). Returns `{text, filename, charCount}`. Multer error di-wrap ke `{error: ...}` JSON (413 untuk oversize, 400 untuk format invalid, 422 untuk file tak terbaca/terenkripsi).
