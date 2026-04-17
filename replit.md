@@ -57,6 +57,26 @@ All major features are synchronized into a unified agentic intelligence loop:
 - **SUMMARY_GENERATOR_MODE**: Applied to all 16 specialist bots. After analysis, bots offer to convert raw data into standardized *_SUMMARY v1 format for cross-bot use.
 - **Summary Protocols**: SKK_SUMMARY, SBU_SUMMARY, LICENSING_SUMMARY, TENDER_REQ_SUMMARY — standardized text-based integration format for data portability between chatbots.
 
+### Feature Sync & Integration Update (Apr 2026 — v2)
+
+#### Custom Domain Management
+- **Schema**: `customDomains` table — `id, userId, agentId, domain, status (pending/active/failed), verifiedAt, createdAt, updatedAt`
+- **Backend routes**: `GET/POST /api/domains`, `PATCH /api/domains/:id`, `DELETE /api/domains/:id`, `POST /api/domains/:id/verify` (CNAME DNS lookup), `GET /api/domains/resolve?domain=xxx` (public, returns agentId for active custom domain)
+- **Custom Domain Middleware**: On every non-API/non-asset request, server checks `Host` header against active custom domains → auto-redirects to `/chat/:agentId`
+- **Frontend**: `/domains` page — full CRUD with DNS CNAME instruction table, verify button, status badge, **edit agent link** dialog, **embed code** dialog (iframe + floating widget script snippet)
+- **Dashboard sidebar**: "Manajemen Domain" link with green badge showing active domain count. Quick stats panel on home screen shows 4 metrics (Alat Bantu, Modul, Domain Aktif, Series)
+
+#### Expanded Knowledge Base Upload Types
+- **New KB types**: `youtube`, `cloud_drive`, `video`, `audio` (added to state and Select dropdown)
+- **Auto-processing**: KB POST route detects type → calls appropriate extraction:
+  - `youtube`: `extractYouTubeContent(url)` — fetches YT transcript via `youtube-transcript` lib
+  - `cloud_drive`: `extractCloudDriveContent(url)` — downloads from Google Drive/OneDrive/SharePoint, extracts text
+  - `video`: `extractVideoContent(filePath)` — ffmpeg audio extraction + speech-to-text
+  - `audio`: `speechToText(audioBuffer)` — direct transcription
+- **Upload route**: Extended multer fileTypeMap to include `.mp4/.webm/.mov` → `video_*` and `.mp3/.wav/.m4a/.aac` → `audio_*` fileType labels
+- **New route**: `POST /api/knowledge-base/process-url` — on-demand extract for youtube/cloud_drive before saving
+- **UI improvements**: Type-specific icons (Youtube=red, Cloud=sky, Video=purple, Audio=orange), per-type processing badge labels ("Mengambil transkrip...", "Mengunduh file...", etc.), "chunks RAG" badge in emerald green, file upload UI for video/audio with helpful description
+
 ### Roadmap Ekspansi Series (Belum Diimplementasi)
 
 Arah pengembangan ke depan — setiap bidang/klasifikasi menjadi series tersendiri karena potensi ribuan chatbot:

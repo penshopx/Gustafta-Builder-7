@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2, Settings2, RotateCcw, Power, ExternalLink } from "lucide-react";
+import { BookOpen, Plus, FileText, Link, Type, Trash2, Search, Upload, File, Image as ImageIcon, Pencil, Brain, RefreshCw, Loader2, Settings2, RotateCcw, Power, ExternalLink, Youtube, Cloud, Music, Video, Globe } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -21,32 +21,45 @@ interface KnowledgeBasePanelProps {
   agent: Agent;
 }
 
-const typeIcons = {
+const typeIcons: Record<string, any> = {
   text: Type,
   file: FileText,
-  url: Link,
+  url: Globe,
+  youtube: Youtube,
+  cloud_drive: Cloud,
+  video: Video,
+  audio: Music,
 };
 
-const typeLabels = {
+const typeLabels: Record<string, string> = {
   text: "Teks",
-  file: "Upload File",
-  url: "URL Website",
+  file: "Dokumen",
+  url: "URL Web",
+  youtube: "YouTube",
+  cloud_drive: "Cloud Drive",
+  video: "Video",
+  audio: "Audio",
+};
+
+const typeColors: Record<string, string> = {
+  text: "text-primary",
+  file: "text-blue-500",
+  url: "text-green-500",
+  youtube: "text-red-500",
+  cloud_drive: "text-sky-500",
+  video: "text-purple-500",
+  audio: "text-orange-500",
 };
 
 const fileTypeLabels: Record<string, string> = {
   pdf: "PDF",
-  ppt: "PowerPoint",
-  pptx: "PowerPoint",
-  xls: "Excel",
-  xlsx: "Excel",
-  doc: "Word",
-  docx: "Word",
+  ppt: "PowerPoint", pptx: "PowerPoint",
+  xls: "Excel", xlsx: "Excel",
+  doc: "Word", docx: "Word",
   txt: "Text",
-  jpg: "Image",
-  jpeg: "Image",
-  png: "Image",
-  gif: "Image",
-  webp: "Image",
+  jpg: "Image", jpeg: "Image", png: "Image", gif: "Image", webp: "Image",
+  video_mp4: "MP4", video_webm: "WebM", video_mov: "MOV", video_avi: "AVI",
+  audio_mp3: "MP3", audio_wav: "WAV", audio_m4a: "M4A", audio_aac: "AAC", audio_ogg: "OGG",
   other: "File",
 };
 
@@ -2100,7 +2113,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                           {isImageType(item.fileType) ? (
                             <ImageIcon className="w-5 h-5 text-primary" />
                           ) : (
-                            <Icon className="w-5 h-5 text-primary" />
+                            <Icon className={`w-5 h-5 ${typeColors[item.type] || "text-primary"}`} />
                           )}
                         </div>
                       )}
@@ -2131,20 +2144,26 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                           })()}
                           {(() => {
                             const kbStat = ragStats?.chunksByKb?.find(s => s.kbId === item.id);
-                            if (!kbStat) return null;
-                            if (item.processingStatus === "processing" || kbStat.processingStatus === "processing") {
+                            const isProcessing = item.processingStatus === "processing" || kbStat?.processingStatus === "processing";
+                            if (isProcessing) {
+                              const processingLabel: Record<string, string> = {
+                                youtube: "Mengambil transkrip...",
+                                cloud_drive: "Mengunduh file...",
+                                video: "Mentranskripsi video...",
+                                audio: "Mentranskrip audio...",
+                              };
                               return (
-                                <Badge variant="outline" className="shrink-0 text-yellow-600" data-testid={`badge-processing-${item.id}`}>
+                                <Badge variant="outline" className="shrink-0 text-yellow-600 border-yellow-300 bg-yellow-50 dark:bg-yellow-950/30" data-testid={`badge-processing-${item.id}`}>
                                   <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                  Processing
+                                  {processingLabel[item.type] || "Memproses..."}
                                 </Badge>
                               );
                             }
-                            if (kbStat.chunkCount > 0) {
+                            if (kbStat && kbStat.chunkCount > 0) {
                               return (
-                                <Badge variant="outline" className="shrink-0" data-testid={`badge-chunks-${item.id}`}>
+                                <Badge variant="outline" className="shrink-0 text-emerald-600 border-emerald-300 bg-emerald-50 dark:bg-emerald-950/30" data-testid={`badge-chunks-${item.id}`}>
                                   <Brain className="w-3 h-3 mr-1" />
-                                  {kbStat.chunkCount} chunks
+                                  {kbStat.chunkCount} chunks RAG
                                 </Badge>
                               );
                             }

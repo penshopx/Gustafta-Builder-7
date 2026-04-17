@@ -26,7 +26,13 @@ import OpenAI from "openai";
 import { subscriptionPlans, type SubscriptionPlanKey } from "./lib/mayar";
 import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
-import { processAttachmentsAndUrls, type FileAttachment } from "./lib/file-processing";
+import {
+  processAttachmentsAndUrls,
+  extractYouTubeContent,
+  extractCloudDriveContent,
+  extractVideoContent,
+  type FileAttachment,
+} from "./lib/file-processing";
 import { processKnowledgeBaseForRAG, searchKnowledgeBase } from "./lib/rag-service";
 import {
   searchNotionPages,
@@ -321,6 +327,29 @@ export async function registerRoutes(
     } else {
       next();
     }
+  });
+
+  // ==================== Custom Domain Middleware ====================
+  // Detects non-platform host headers and redirects to the linked agent
+  app.use(async (req: any, res: any, next: any) => {
+    try {
+      // Only apply on page requests (not API/assets/uploads)
+      const host = (req.headers["host"] || "").split(":")[0].toLowerCase();
+      const isApiOrStatic = req.path.startsWith("/api") || req.path.startsWith("/uploads") || req.path.startsWith("/assets") || req.path.startsWith("/@") || req.path.includes(".");
+      if (isApiOrStatic || !host) return next();
+
+      // Skip known Replit/Gustafta hosts
+      const knownHosts = ["localhost", "0.0.0.0", "127.0.0.1"];
+      if (knownHosts.includes(host) || host.endsWith(".replit.dev") || host.endsWith(".repl.co") || host.endsWith(".replit.app")) return next();
+
+      // Lookup in custom domains
+      const [row] = await db.select().from(customDomains)
+        .where(and(eq(customDomains.domain, host), eq(customDomains.status, "active")));
+      if (row?.agentId && req.path === "/") {
+        return res.redirect(302, `/chat/${row.agentId}`);
+      }
+    } catch {}
+    next();
   });
 
   // ==================== User Profile Routes (Protected) ====================
@@ -1154,33 +1183,90 @@ export async function registerRoutes(
       });
       res.status(201).json(kb);
 
-      const textContent = parsed.data.extractedText || parsed.data.content || "";
-      if (textContent.trim().length > 0) {
+      // Background processing: extract content depending on KB type
+      (async () => {
         try {
-          const agentForRag = await storage.getAgent(kb.agentId);
-          const chunks = await processKnowledgeBaseForRAG(
-            parseInt(kb.id),
-            parseInt(kb.agentId),
-            textContent,
-            kb.name,
-            agentForRag?.ragChunkSize ?? 800,
-            agentForRag?.ragChunkOverlap ?? 200
-          );
-          if (chunks.length > 0) {
-            await storage.createChunks(chunks);
+          let textContent = parsed.data.extractedText || "";
+          const kbType = parsed.data.type as string;
+          const rawContent = parsed.data.content || "";
+
+          if (!textContent) {
+            if (kbType === "youtube") {
+              console.log(`[KB] Extracting YouTube transcript: ${rawContent}`);
+              const extracted = await extractYouTubeContent(rawContent);
+              textContent = extracted.content;
+              await storage.updateKnowledgeBase(kb.id, {
+                extractedText: textContent,
+                name: parsed.data.name || extracted.title,
+              });
+            } else if (kbType === "cloud_drive") {
+              console.log(`[KB] Extracting Cloud Drive content: ${rawContent}`);
+              const extracted = await extractCloudDriveContent(rawContent);
+              textContent = extracted.content;
+              await storage.updateKnowledgeBase(kb.id, { extractedText: textContent });
+            } else if (kbType === "video" && parsed.data.fileUrl) {
+              console.log(`[KB] Extracting video transcript: ${parsed.data.fileUrl}`);
+              const filePath = path.join(process.cwd(), parsed.data.fileUrl);
+              const extracted = await extractVideoContent(filePath);
+              textContent = extracted.content;
+              await storage.updateKnowledgeBase(kb.id, { extractedText: textContent });
+            } else if (kbType === "audio" && parsed.data.fileUrl) {
+              console.log(`[KB] Transcribing audio: ${parsed.data.fileUrl}`);
+              const filePath = path.join(process.cwd(), parsed.data.fileUrl);
+              const { speechToText } = await import("./replit_integrations/audio/client");
+              const audioBuffer = require("fs").readFileSync(filePath);
+              const ext = path.extname(filePath).slice(1) || "mp3";
+              const transcript = await speechToText(audioBuffer, ext as any);
+              textContent = `Transkripsi audio:\n\n${transcript}`;
+              await storage.updateKnowledgeBase(kb.id, { extractedText: textContent });
+            } else {
+              textContent = rawContent;
+            }
+          }
+
+          if (textContent.trim().length > 0) {
+            const agentForRag = await storage.getAgent(kb.agentId);
+            const chunks = await processKnowledgeBaseForRAG(
+              parseInt(kb.id),
+              parseInt(kb.agentId),
+              textContent,
+              kb.name,
+              agentForRag?.ragChunkSize ?? 800,
+              agentForRag?.ragChunkOverlap ?? 200
+            );
+            if (chunks.length > 0) {
+              await storage.createChunks(chunks);
+            }
+            console.log(`[RAG] KB "${kb.name}" (${kbType}) processed: ${chunks.length} chunks`);
           }
           await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
-          console.log(`[RAG] KB "${kb.name}" processed: ${chunks.length} chunks`);
-        } catch (ragError) {
-          console.error(`[RAG] Processing failed for KB "${kb.name}":`, ragError);
+        } catch (bgError) {
+          console.error(`[RAG] Background processing failed for KB "${kb.name}":`, bgError);
           await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
         }
-      } else {
-        await storage.updateKnowledgeBase(kb.id, { processingStatus: "completed" });
-      }
+      })();
     } catch (error) {
       console.error("KB creation error:", error);
       res.status(500).json({ error: "Failed to create knowledge base", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Process URL (YouTube / Cloud Drive) on-the-fly for preview before saving
+  app.post("/api/knowledge-base/process-url", isAuthenticated, async (req, res) => {
+    try {
+      const { url, type } = req.body as { url: string; type: string };
+      if (!url || !type) return res.status(400).json({ error: "url and type required" });
+      let extracted: { content: string; title: string };
+      if (type === "youtube") {
+        extracted = await extractYouTubeContent(url);
+      } else if (type === "cloud_drive") {
+        extracted = await extractCloudDriveContent(url);
+      } else {
+        return res.status(400).json({ error: "type must be youtube or cloud_drive" });
+      }
+      res.json({ content: extracted.content, title: extracted.title });
+    } catch (error) {
+      res.status(500).json({ error: "Gagal memproses URL" });
     }
   });
 
@@ -1192,49 +1278,19 @@ export async function registerRoutes(
       }
 
       const ext = path.extname(req.file.originalname).toLowerCase();
-      let fileType: string;
-      switch (ext) {
-        case ".pdf":
-          fileType = "pdf";
-          break;
-        case ".ppt":
-          fileType = "ppt";
-          break;
-        case ".pptx":
-          fileType = "pptx";
-          break;
-        case ".xls":
-          fileType = "xls";
-          break;
-        case ".xlsx":
-          fileType = "xlsx";
-          break;
-        case ".doc":
-          fileType = "doc";
-          break;
-        case ".docx":
-          fileType = "docx";
-          break;
-        case ".txt":
-          fileType = "txt";
-          break;
-        case ".jpg":
-        case ".jpeg":
-          fileType = "jpeg";
-          break;
-        case ".png":
-          fileType = "png";
-          break;
-        case ".gif":
-          fileType = "gif";
-          break;
-        case ".webp":
-          fileType = "webp";
-          break;
-        default:
-          fileType = "other";
-      }
-
+      const fileTypeMap: Record<string, string> = {
+        ".pdf": "pdf", ".ppt": "ppt", ".pptx": "pptx",
+        ".xls": "xls", ".xlsx": "xlsx",
+        ".doc": "doc", ".docx": "docx",
+        ".txt": "txt",
+        ".jpg": "jpeg", ".jpeg": "jpeg", ".png": "png", ".gif": "gif", ".webp": "webp",
+        // Video
+        ".mp4": "video_mp4", ".webm": "video_webm", ".mov": "video_mov", ".avi": "video_avi",
+        // Audio
+        ".mp3": "audio_mp3", ".wav": "audio_wav", ".m4a": "audio_m4a",
+        ".aac": "audio_aac", ".ogg": "audio_ogg",
+      };
+      const fileType = fileTypeMap[ext] || "other";
       const fileUrl = `/uploads/${req.file.filename}`;
       
       res.json({
@@ -6587,6 +6643,20 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Gagal menghapus domain" });
+    }
+  });
+
+  // Public: resolve domain to agent (for custom domain routing)
+  app.get("/api/domains/resolve", async (req: any, res) => {
+    try {
+      const domain = (req.query.domain as string || "").toLowerCase().trim();
+      if (!domain) return res.status(400).json({ error: "domain required" });
+      const [row] = await db.select().from(customDomains)
+        .where(and(eq(customDomains.domain, domain), eq(customDomains.status, "active")));
+      if (!row || !row.agentId) return res.status(404).json({ error: "Domain tidak ditemukan atau belum aktif" });
+      res.json({ agentId: row.agentId, domain: row.domain });
+    } catch (error) {
+      res.status(500).json({ error: "Gagal resolve domain" });
     }
   });
 

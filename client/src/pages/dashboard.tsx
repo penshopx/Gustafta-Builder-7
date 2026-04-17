@@ -150,6 +150,7 @@ export default function Dashboard() {
   const forceOrchestratorSelect = useRef(false);
   
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
+  const { data: activeDomains = [] } = useQuery<any[]>({ queryKey: ["/api/domains"], select: (d: any[]) => d.filter((x: any) => x.status === "active") });
   const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
   const activeSeries = allSeries.find((s: any) => String(s.id) === activeSeriesId) || null;
   
@@ -523,26 +524,82 @@ export default function Dashboard() {
         );
       }
       return (
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center space-y-4 md:space-y-6 max-w-lg">
-            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-              <Bot className="w-8 h-8 md:w-10 md:h-10 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg md:text-xl font-semibold text-foreground">Selamat Datang di Gustafta</h2>
-              <p className="text-sm md:text-base text-muted-foreground mt-2">
-                Mulai dengan membuat Modul atau Chatbot pertama Anda.
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
+            {/* Welcome header */}
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                <Bot className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold">Selamat Datang di Gustafta</h2>
+              <p className="text-sm text-muted-foreground">
+                Platform AI Chatbot Builder untuk sektor konstruksi & profesional Indonesia.
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Button onClick={() => setBigIdeaDialogOpen(true)} variant="outline" className="w-full sm:w-auto">
-                <Lightbulb className="w-4 h-4 mr-2" />
-                Buat Modul
-              </Button>
-              <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
-                <Plus className="w-4 h-4 mr-2" />
-                Buat Alat Bantu
-              </Button>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: "Alat Bantu", value: agents?.length || 0, icon: Bot, color: "text-primary" },
+                { label: "Modul Aktif", value: bigIdeas?.length || 0, icon: Lightbulb, color: "text-yellow-500" },
+                { label: "Domain Aktif", value: activeDomains?.length || 0, icon: Globe, color: "text-green-500" },
+                { label: "Series", value: allSeries?.length || 0, icon: FolderOpen, color: "text-blue-500" },
+              ].map((stat) => (
+                <div key={stat.label} className="bg-card border rounded-lg p-3 text-center space-y-1">
+                  <stat.icon className={`w-5 h-5 mx-auto ${stat.color}`} />
+                  <p className="text-xl font-bold">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Aksi Cepat</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={() => setBigIdeaDialogOpen(true)}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-dashed hover:border-primary hover:bg-primary/5 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-md bg-yellow-500/10 flex items-center justify-center shrink-0">
+                    <Lightbulb className="w-4 h-4 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Buat Modul Baru</p>
+                    <p className="text-xs text-muted-foreground">Tambah Modul di hierarki Anda</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-dashed hover:border-primary hover:bg-primary/5 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                    <Plus className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Buat Alat Bantu</p>
+                    <p className="text-xs text-muted-foreground">Buat Chatbot AI baru</p>
+                  </div>
+                </button>
+                <a href="/domains" className="flex items-center gap-3 p-3 rounded-lg border border-dashed hover:border-green-500 hover:bg-green-500/5 transition-colors">
+                  <div className="w-8 h-8 rounded-md bg-green-500/10 flex items-center justify-center shrink-0">
+                    <Globe className="w-4 h-4 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Kelola Domain</p>
+                    <p className="text-xs text-muted-foreground">Hubungkan domain kustom</p>
+                  </div>
+                </a>
+                <a href="/packs" className="flex items-center gap-3 p-3 rounded-lg border border-dashed hover:border-primary hover:bg-primary/5 transition-colors">
+                  <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                    <ShoppingBag className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Paket & Tender</p>
+                    <p className="text-xs text-muted-foreground">Tools Wizard untuk tender</p>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -1189,7 +1246,16 @@ export default function Dashboard() {
           data-testid="link-domains-sidebar"
         >
           <Globe className="w-4 h-4 shrink-0" />
-          {!sidebarCollapsed && <span>Manajemen Domain</span>}
+          {!sidebarCollapsed && (
+            <span className="flex-1 flex items-center justify-between">
+              Manajemen Domain
+              {activeDomains.length > 0 && (
+                <Badge variant="default" className="text-[10px] py-0 ml-1 bg-green-600 text-white">
+                  {activeDomains.length} aktif
+                </Badge>
+              )}
+            </span>
+          )}
         </Link>
         {navItems.map((item) => (
           <button

@@ -19,7 +19,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Globe, Plus, Trash2, RefreshCw, Info, ArrowLeft, CheckCircle, Clock, XCircle, Bot, Copy } from "lucide-react";
+import { Globe, Plus, Trash2, RefreshCw, Info, ArrowLeft, CheckCircle, Clock, XCircle, Bot, Copy, Pencil, Code2 } from "lucide-react";
 import { useAgents } from "@/hooks/use-agents";
 import type { CustomDomain } from "@shared/schema";
 
@@ -41,6 +41,9 @@ export default function DomainsPage() {
   const [newAgentId, setNewAgentId] = useState<string>("none");
   const [deleteTarget, setDeleteTarget] = useState<CustomDomain | null>(null);
   const [verifyingId, setVerifyingId] = useState<number | null>(null);
+  const [editTarget, setEditTarget] = useState<CustomDomain | null>(null);
+  const [editAgentId, setEditAgentId] = useState<string>("none");
+  const [embedTarget, setEmbedTarget] = useState<CustomDomain | null>(null);
 
   const { data: domains = [], isLoading } = useQuery<CustomDomain[]>({
     queryKey: ["/api/domains"],
@@ -76,6 +79,21 @@ export default function DomainsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/domains"] });
       setDeleteTarget(null);
       toast({ title: "Domain dihapus" });
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: async ({ id, agentId }: { id: number; agentId: string | null }) => {
+      const res = await apiRequest("PATCH", `/api/domains/${id}`, { agentId });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/domains"] });
+      setEditTarget(null);
+      toast({ title: "Domain diperbarui" });
+    },
+    onError: () => {
+      toast({ title: "Gagal", description: "Tidak dapat memperbarui domain", variant: "destructive" });
     },
   });
 
@@ -213,7 +231,7 @@ export default function DomainsPage() {
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                         {d.status !== "active" && (
                           <Button
                             size="sm"
@@ -226,6 +244,25 @@ export default function DomainsPage() {
                             Verifikasi
                           </Button>
                         )}
+                        {d.status === "active" && d.agentId && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEmbedTarget(d)}
+                            data-testid={`button-embed-domain-${d.id}`}
+                          >
+                            <Code2 className="w-3.5 h-3.5 mr-1.5" />
+                            Embed
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => { setEditTarget(d); setEditAgentId(d.agentId || "none"); }}
+                          data-testid={`button-edit-domain-${d.id}`}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"
@@ -350,6 +387,100 @@ export default function DomainsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Domain Dialog */}
+      <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Domain</DialogTitle>
+            <DialogDescription>
+              Ubah chatbot yang terhubung ke domain <strong>{editTarget?.domain}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Hubungkan ke Chatbot</Label>
+              <Select value={editAgentId} onValueChange={setEditAgentId}>
+                <SelectTrigger data-testid="select-edit-agent-domain">
+                  <SelectValue placeholder="Pilih chatbot..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Tidak dihubungkan</SelectItem>
+                  {(agents as any[]).map((a) => (
+                    <SelectItem key={a.id} value={String(a.id)}>{a.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditTarget(null)}>Batal</Button>
+            <Button
+              onClick={() => editMutation.mutate({ id: editTarget!.id, agentId: editAgentId === "none" ? null : editAgentId })}
+              disabled={editMutation.isPending}
+              data-testid="button-save-edit-domain"
+            >
+              {editMutation.isPending ? "Menyimpan..." : "Simpan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Embed Code Dialog */}
+      <Dialog open={!!embedTarget} onOpenChange={(o) => { if (!o) setEmbedTarget(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Kode Embed — {embedTarget?.domain}</DialogTitle>
+            <DialogDescription>
+              Tempelkan kode ini di halaman website Anda untuk menampilkan chatbot via domain kustom.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {embedTarget?.agentId && (() => {
+              const agent = (agents as any[]).find(a => String(a.id) === embedTarget.agentId);
+              const iframeCode = `<iframe\n  src="https://${embedTarget.domain}/embed/${embedTarget.agentId}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  style="border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.12);"\n  allow="microphone"\n></iframe>`;
+              const scriptCode = `<script>\n  (function(){\n    var d=document,s=d.createElement('script');\n    s.src='https://${APP_HOST}/widget.js';\n    s.dataset.agentId='${embedTarget.agentId}';\n    s.dataset.domain='https://${embedTarget.domain}';\n    d.head.appendChild(s);\n  })();\n</script>`;
+              return (
+                <div className="space-y-4">
+                  {agent && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 bg-muted/40 rounded">
+                      <Bot className="w-4 h-4" />
+                      <span>Chatbot: <strong>{agent.name}</strong></span>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Iframe Embed</p>
+                    <div className="relative">
+                      <pre className="bg-muted/50 rounded p-3 text-xs overflow-x-auto font-mono whitespace-pre-wrap">{iframeCode}</pre>
+                      <button
+                        className="absolute top-2 right-2 text-primary hover:text-primary/80"
+                        onClick={() => { navigator.clipboard.writeText(iframeCode); toast({ title: "Kode iframe disalin!" }); }}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Widget Script (Floating Chatbot)</p>
+                    <div className="relative">
+                      <pre className="bg-muted/50 rounded p-3 text-xs overflow-x-auto font-mono whitespace-pre-wrap">{scriptCode}</pre>
+                      <button
+                        className="absolute top-2 right-2 text-primary hover:text-primary/80"
+                        onClick={() => { navigator.clipboard.writeText(scriptCode); toast({ title: "Kode script disalin!" }); }}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmbedTarget(null)}>Tutup</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
