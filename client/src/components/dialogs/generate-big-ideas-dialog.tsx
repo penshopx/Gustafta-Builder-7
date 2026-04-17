@@ -186,6 +186,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!e.dataTransfer.types.includes("Files")) return;
     dragCounter.current += 1;
     setIsDragOver(true);
   };
