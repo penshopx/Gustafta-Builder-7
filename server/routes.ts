@@ -2358,7 +2358,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   });
 
   // Get analytics summary for an agent
-  app.get("/api/analytics/:agentId/summary", async (req, res) => {
+  app.get("/api/analytics/:agentId/summary", isAuthenticated, async (req, res) => {
     try {
       const summary = await storage.getAnalyticsSummary(req.params.agentId as string);
       res.json(summary);

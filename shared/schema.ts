@@ -1391,7 +1391,7 @@ export const conversations = pgTable("conversations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const messages = pgTable("voice_messages", {
+export const voiceMessages = pgTable("voice_messages", {
   id: serial("id").primaryKey(),
   conversationId: integer("conversation_id").notNull(),
   role: text("role").notNull(),

@@ -36,6 +36,14 @@ A key feature is "Project Brain," providing contextual data for chatbots, enabli
 
 Core features include a RAG toggle for controlling knowledge base lookups, "Project Context" for personalizing conversations via user-provided information, and a "User Memory System" allowing chatbots to recall facts across sessions. Monetization is handled via per-Modul bundle pricing and per-Chatbot individual pricing, with guest message limits, trial periods, registered user quotas, and a voucher system protected by server-side enforcement. A "Conversion Layer" transforms chatbots into revenue engines through lead capture, scoring, and smart CTA triggers.
 
+### Audit Struktural (Apr 2026)
+Audit menyeluruh seluruh fitur dilakukan. Temuan & perbaikan:
+1. **`voice_messages` table** — Export schema sebelumnya bernama `messages` (konflik nama). Diubah menjadi `voiceMessages` dan semua file yang mengimportnya (`server/replit_integrations/chat/storage.ts`) diperbarui.
+2. **User Memory Management UI** — `MemoryManager` component ditambahkan ke `agentic-ai-panel.tsx`. Memungkinkan builder melihat, menghapus satu per satu, atau menghapus semua memori AI per chatbot. Routes sudah ada (`GET/DELETE /api/memories/:agentId`).
+3. **Analytics endpoint auth** — `GET /api/analytics/:agentId/summary` ditambah `isAuthenticated` middleware agar data analitik tidak terbuka untuk publik.
+4. **Semua fitur lain dinyatakan fungsional**: Core hierarchy, Chat/RAG, Project Brain, Tender Wizard, Notion, Broadcast WA, Conversion/Leads, Affiliates, Vouchers, Widget embed, Analytics, Mini Apps, Mayar payment, WhatsApp/Telegram via Fonnte.
+5. Dua subscription tables bersifat **berbeda dan keduanya dibutuhkan**: `subscriptions_new` untuk builder (chatbot limit), `client_subscriptions` untuk end-user (per-agent access).
+
 ### Feature Synchronization (Agentic Integration Layer)
 All major features are synchronized into a unified agentic intelligence loop:
 - **Chat ↔ Project Brain (bidirectional)**: Chatbot reads Project Brain as context AND can automatically update Project Brain fields during conversation using `[UPDATE_BRAIN:key]value[/UPDATE_BRAIN]` tags. Works in both streaming and non-streaming chat endpoints.

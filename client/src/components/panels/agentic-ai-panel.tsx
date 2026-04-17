@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -36,6 +38,8 @@ import {
   Eye,
   CheckCircle2,
   XCircle,
+  Trash2,
+  DatabaseBackup,
 } from "lucide-react";
 
 type Settings = {
@@ -540,6 +544,119 @@ function SelectRow({
         </SelectContent>
       </Select>
     </div>
+  );
+}
+
+function MemoryManager({ agentId }: { agentId: string }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { data: memories = [], isLoading: memoriesLoading } = useQuery<any[]>({
+    queryKey: ["/api/memories", agentId],
+    queryFn: async () => {
+      const res = await fetch(`/api/memories/${agentId}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch memories");
+      return res.json();
+    },
+    enabled: isOpen && !!agentId,
+  });
+
+  const deleteOneMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/memories/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/memories", agentId] });
+    },
+  });
+
+  const clearAllMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/memories/agent/${agentId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/memories", agentId] });
+      toast({ title: "Memori dihapus", description: "Semua memori AI untuk chatbot ini telah dihapus." });
+    },
+  });
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <DatabaseBackup className="h-4 w-4 text-blue-500" />
+              Memori AI
+            </CardTitle>
+            {memories.length > 0 && (
+              <Badge variant="secondary" className="text-xs">{memories.length}</Badge>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsOpen(!isOpen)}
+            data-testid="button-toggle-memory-panel"
+          >
+            {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </div>
+        <CardDescription>
+          Informasi yang diingat AI dari percakapan sebelumnya dengan pengguna.
+        </CardDescription>
+      </CardHeader>
+      {isOpen && (
+        <CardContent className="space-y-3">
+          {memoriesLoading ? (
+            <p className="text-sm text-muted-foreground">Memuat memori...</p>
+          ) : memories.length === 0 ? (
+            <div className="text-center py-4">
+              <Brain className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-sm text-muted-foreground">Belum ada memori tersimpan.</p>
+              <p className="text-xs text-muted-foreground mt-1">Memori akan terbentuk saat AI belajar dari percakapan pengguna.</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {memories.map((mem: any) => (
+                  <div
+                    key={mem.id}
+                    className="flex items-start gap-2 p-2 bg-muted/40 rounded-lg text-sm"
+                    data-testid={`memory-item-${mem.id}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      {mem.category && (
+                        <Badge variant="outline" className="text-[10px] mb-1 capitalize">{mem.category}</Badge>
+                      )}
+                      <p className="text-xs text-muted-foreground break-words">{mem.content}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => deleteOneMutation.mutate(mem.id)}
+                      disabled={deleteOneMutation.isPending}
+                      data-testid={`button-delete-memory-${mem.id}`}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={() => clearAllMutation.mutate()}
+                disabled={clearAllMutation.isPending}
+                data-testid="button-clear-all-memories"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Hapus Semua Memori
+              </Button>
+            </>
+          )}
+        </CardContent>
+      )}
+    </Card>
   );
 }
 
@@ -1657,6 +1774,9 @@ export function AgenticAIPanel() {
           </Card>
         </>
       )}
+
+      {/* Memory Management Section */}
+      {agent && <MemoryManager agentId={String(agent.id)} />}
 
       {/* Info footer */}
       <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/20">
