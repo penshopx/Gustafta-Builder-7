@@ -71,6 +71,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const [extractingCount, setExtractingCount] = useState(0);
   const [extractError, setExtractError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [pendingFile, setPendingFile] = useState<{ name: string; size: number; charCount: number; text: string } | null>(null);
   const dragCounter = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -127,7 +128,10 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   };
 
   const processFiles = async (fileList: File[]) => {
-    const alreadyNames = new Set(uploadedFiles.map(f => f.name));
+    const alreadyNames = new Set([
+      ...uploadedFiles.map(f => f.name),
+      ...(pendingFile ? [pendingFile.name] : []),
+    ]);
     const newFiles = fileList.filter(f => {
       if (alreadyNames.has(f.name)) {
         toast({
@@ -148,17 +152,22 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
     const results = await Promise.all(newFiles.map(extractSingleFile));
     const successful = results.filter((r): r is UploadedFile => r !== null);
 
-    setUploadedFiles(prev => [...prev, ...successful]);
     setExtractingCount(prev => prev - newFiles.length);
 
-    if (successful.length > 0) {
-      const totalChars = successful.reduce((sum, f) => sum + f.charCount, 0);
-      toast({
-        title: successful.length === 1
-          ? "File berhasil dibaca"
-          : `${successful.length} file berhasil dibaca`,
-        description: `${totalChars.toLocaleString()} karakter diekstrak`,
-      });
+    if (successful.length === 0) return;
+
+    if (successful.length === 1) {
+      setPendingFile(successful[0]);
+    } else {
+      const [first, ...rest] = successful;
+      setPendingFile(first);
+      setUploadedFiles(prev => [...prev, ...rest]);
+      if (rest.length > 0) {
+        toast({
+          title: `${rest.length} file lain berhasil dibaca`,
+          description: `Pratinjau file pertama ditampilkan di bawah.`,
+        });
+      }
     }
   };
 
@@ -197,6 +206,18 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
     const files = Array.from(e.dataTransfer.files || []);
     if (files.length === 0) return;
     await processFiles(files);
+  };
+
+  const handleConfirmPending = () => {
+    if (!pendingFile) return;
+    setUploadedFiles(prev => [...prev, { name: pendingFile.name, size: pendingFile.size, charCount: pendingFile.charCount, text: pendingFile.text }]);
+    setPendingFile(null);
+    toast({ title: "File berhasil ditambahkan", description: `${pendingFile.charCount.toLocaleString()} karakter diekstrak dari ${pendingFile.name}` });
+  };
+
+  const handleCancelPending = () => {
+    setPendingFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleRemoveFile = (index: number) => {
@@ -300,6 +321,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
     setSelected(new Set());
     setUploadedFiles([]);
     setExtractError(null);
+    setPendingFile(null);
     setIsDragOver(false);
     dragCounter.current = 0;
     onOpenChange(false);
@@ -372,34 +394,36 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                 data-testid="input-file-upload"
               />
 
-              <div
-                className={cn(
-                  "border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors",
-                  isDragOver
-                    ? "border-primary bg-primary/10 scale-[1.01]"
-                    : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
-                  isExtracting && "pointer-events-none opacity-60"
-                )}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                data-testid="dropzone-file"
-              >
-                {isExtracting ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Mengekstrak teks dari file...</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className={cn("w-6 h-6", isDragOver ? "text-primary" : "text-muted-foreground")} />
-                    <p className="text-sm font-medium">{isDragOver ? "Lepaskan file di sini" : "Klik atau seret beberapa file ke sini"}</p>
-                    <p className="text-xs text-muted-foreground">PDF, DOCX, atau TXT (maks 5 MB per file)</p>
-                  </div>
-                )}
-              </div>
+              {!pendingFile && (
+                <div
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors",
+                    isDragOver
+                      ? "border-primary bg-primary/10 scale-[1.01]"
+                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
+                    isExtracting && "pointer-events-none opacity-60"
+                  )}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  data-testid="dropzone-file"
+                >
+                  {isExtracting ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      <p className="text-sm text-muted-foreground">Mengekstrak teks dari file...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload className={cn("w-6 h-6", isDragOver ? "text-primary" : "text-muted-foreground")} />
+                      <p className="text-sm font-medium">{isDragOver ? "Lepaskan file di sini" : "Klik atau seret beberapa file ke sini"}</p>
+                      <p className="text-xs text-muted-foreground">PDF, DOCX, atau TXT (maks 5 MB per file)</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {uploadedFiles.length > 0 && (
                 <div className="space-y-2" data-testid="list-uploaded-files">
@@ -427,6 +451,45 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                       </Button>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {pendingFile && (
+                <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 overflow-hidden" data-testid="preview-panel">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-violet-500/20 bg-violet-500/10">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
+                      <span className="text-xs font-medium truncate text-violet-800 dark:text-violet-200">{pendingFile.name}</span>
+                      <span className="text-xs text-violet-600 dark:text-violet-400 shrink-0">· {pendingFile.charCount.toLocaleString()} karakter</span>
+                    </div>
+                  </div>
+                  <div className="px-3 py-2.5">
+                    <p className="text-xs text-muted-foreground mb-1.5 font-medium">Pratinjau konten:</p>
+                    <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap break-words font-mono bg-background/60 rounded p-2 border border-border/50 max-h-28 overflow-y-auto" data-testid="preview-content">
+                      {pendingFile.text.slice(0, 500)}{pendingFile.text.length > 500 ? "…" : ""}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 px-3 pb-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs"
+                      onClick={handleCancelPending}
+                      data-testid="button-cancel-file"
+                    >
+                      <X className="w-3 h-3 mr-1" />
+                      Batalkan
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1 text-xs"
+                      onClick={handleConfirmPending}
+                      data-testid="button-confirm-file"
+                    >
+                      <FileCheck className="w-3 h-3 mr-1" />
+                      Tambahkan
+                    </Button>
+                  </div>
                 </div>
               )}
 
