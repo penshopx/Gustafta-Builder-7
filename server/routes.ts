@@ -22,6 +22,7 @@ import {
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { createRequire } from "module";
 import OpenAI from "openai";
 import { subscriptionPlans, type SubscriptionPlanKey } from "./lib/mayar";
 import { isAuthenticated } from "./replit_integrations/auth";
@@ -43,6 +44,9 @@ import {
   getNotionPageTitle,
   createNotionPage,
 } from "./notion";
+
+const _require = createRequire(import.meta.url);
+const pdfParse: (buffer: Buffer) => Promise<{ text: string }> = _require("pdf-parse");
 
 const guestMessageTracker = new Map<string, { count: number; lastReset: string }>();
 
@@ -5121,7 +5125,7 @@ PENTING:
         rawText = req.file.buffer.toString("utf-8");
       } else {
         // PDF parsing
-        const pdfParse = (await import("pdf-parse")).PDFParse;
+        
         const parsed = await pdfParse(req.file.buffer);
         rawText = parsed.text || "";
       }
@@ -6739,7 +6743,7 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
         const result = await mammoth.extractRawText({ buffer });
         text = result.value;
       } else {
-        const pdfParse = (await import("pdf-parse")).PDFParse;
+        
         const parsed = await pdfParse(buffer);
         text = parsed.text || "";
       }

@@ -110,10 +110,14 @@ All major features are synchronized into a unified agentic intelligence loop:
 - **Frontend**: `client/src/components/dialogs/generate-big-ideas-dialog.tsx` — 2-step dialog: Step 1 input (topic + reference text + URLs), Step 2 review & select suggestions with checkbox + bulk create via `useCreateBigIdea` hook
 - **Dashboard integration**: "✨ Generate dari Referensi" button in Big Idea sidebar section, `generateBigIdeasOpen` state, dialog rendered with `activeSeriesId` prop
 
-#### Bugfix: pdf-parse Dynamic Import
-- `(await import("pdf-parse")).default` mengembalikan `undefined` di runtime tsx karena `pdf-parse` adalah CJS module yang tidak memiliki named export `default`
-- Diperbaiki di dua lokasi: endpoint `/api/ai/tender-extract` (L5124) dan `/api/ai/extract-file-text` (L6742)
-- Solusi: ganti ke `(await import("pdf-parse")).PDFParse` yang merupakan named export yang benar dan terkonfirmasi sebagai function
+#### Bugfix: pdf-parse CJS Module Loading
+- `pdf-parse` adalah CJS module — tidak memiliki named export `default` maupun `PDFParse` yang bisa dipanggil langsung di ESM context
+- Semua pendekatan dynamic import (`(await import(...)).default`, `.PDFParse`) gagal di ESM Node.js
+- **Solusi final**: gunakan `createRequire` dari Node built-in `"module"` untuk load CJS module di ESM context:
+  - `import { createRequire } from "module";` (static import)
+  - `const _require = createRequire(import.meta.url);` (setelah semua import)
+  - `const pdfParse = _require("pdf-parse");` (typed sebagai `(buffer: Buffer) => Promise<{text: string}>`)
+- Diperbaiki di dua endpoint: `POST /api/ai/tender-extract` dan `POST /api/ai/extract-file-text`
 
 #### File Upload di Generate Big Idea (NEW)
 - **Backend**: `POST /api/ai/extract-file-text` — multer memoryStorage, max 5MB, accept PDF/DOCX/TXT. Ekstrak teks via `pdf-parse` (PDF) / `mammoth` (DOCX) / plain buffer (TXT). Returns `{text, filename, charCount}`. Multer error di-wrap ke `{error: ...}` JSON (413 untuk oversize, 400 untuk format invalid, 422 untuk file tak terbaca/terenkripsi).
