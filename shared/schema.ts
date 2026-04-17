@@ -1468,3 +1468,19 @@ export const tenderSessions = pgTable("tender_sessions", {
 export const insertTenderSessionSchema = createInsertSchema(tenderSessions).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertTenderSession = z.infer<typeof insertTenderSessionSchema>;
 export type TenderSession = typeof tenderSessions.$inferSelect;
+
+// ==================== Custom Domain Table ====================
+export const customDomains = pgTable("custom_domains", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  agentId: text("agent_id"),
+  domain: text("domain").notNull(),
+  status: text("status").notNull().default("pending"),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCustomDomainSchema = createInsertSchema(customDomains).omit({ id: true, createdAt: true, updatedAt: true, verifiedAt: true });
+export type InsertCustomDomain = z.infer<typeof insertCustomDomainSchema>;
+export type CustomDomain = typeof customDomains.$inferSelect;

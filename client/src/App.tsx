@@ -21,6 +21,7 @@ import ProductLanding from "@/pages/product-landing";
 import ModulChat from "@/pages/modul-chat";
 import PacksPage from "@/pages/packs";
 import TenderWizard from "@/pages/tender-wizard";
+import DomainsPage from "@/pages/domains";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/modul/:bigIdeaId" component={ModulChat} />
       <Route path="/packs" component={PacksPage} />
       <Route path="/packs/:packId" component={TenderWizard} />
+      <Route path="/domains" component={DomainsPage} />
       <Route component={NotFound} />
     </Switch>
   );

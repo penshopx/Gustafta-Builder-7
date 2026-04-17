@@ -137,7 +137,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const [notionImportLayer, setNotionImportLayer] = useState<"foundational" | "operational" | "case_memory">("operational");
   const [newItem, setNewItem] = useState({
     name: "",
-    type: "text" as "text" | "file" | "url",
+    type: "text" as "text" | "file" | "url" | "youtube" | "cloud_drive" | "video" | "audio",
     content: "",
     description: "",
     fileName: "",
@@ -167,7 +167,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const allowedTypes = [
+    const docTypes = [
       "application/pdf",
       "application/vnd.ms-powerpoint",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -176,16 +176,16 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "text/plain",
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
+      "image/jpeg", "image/png", "image/gif", "image/webp",
     ];
+    const videoTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"];
+    const audioTypes = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/aac", "audio/ogg", "audio/m4a", "audio/mp4", "audio/x-m4a"];
+    const allowedTypes = [...docTypes, ...videoTypes, ...audioTypes];
 
-    if (!allowedTypes.includes(file.type)) {
+    if (!allowedTypes.includes(file.type) && !file.type.startsWith("video/") && !file.type.startsWith("audio/")) {
       toast({
         title: "Error",
-        description: "Format file tidak didukung. Gunakan PDF, PPT, Excel, Word, TXT, atau gambar (JPG, PNG, GIF, WebP).",
+        description: "Format tidak didukung. Gunakan PDF, Word, Excel, PPT, video (MP4, WebM), atau audio (MP3, WAV, M4A).",
         variant: "destructive",
       });
       return;
@@ -1648,20 +1648,24 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="kb-type">Tipe</Label>
+                <Label htmlFor="kb-type">Tipe Sumber</Label>
                 <Select
                   value={newItem.type}
-                  onValueChange={(value: "text" | "file" | "url") =>
+                  onValueChange={(value: "text" | "file" | "url" | "youtube" | "cloud_drive" | "video" | "audio") =>
                     setNewItem({ ...newItem, type: value, content: "", fileName: "", fileSize: 0, fileType: undefined, fileUrl: "" })
                   }
                 >
-                  <SelectTrigger id="kb-type">
+                  <SelectTrigger id="kb-type" data-testid="select-kb-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="text">Teks</SelectItem>
-                    <SelectItem value="file">Upload File</SelectItem>
-                    <SelectItem value="url">URL Website</SelectItem>
+                    <SelectItem value="text">📝 Teks / Copy-Paste</SelectItem>
+                    <SelectItem value="file">📄 Dokumen (PDF, Word, Excel, PPT)</SelectItem>
+                    <SelectItem value="url">🌐 URL Website</SelectItem>
+                    <SelectItem value="youtube">▶️ YouTube (otomatis ambil transkrip)</SelectItem>
+                    <SelectItem value="cloud_drive">☁️ Google Drive / OneDrive / SharePoint</SelectItem>
+                    <SelectItem value="video">🎬 Video (MP4, WebM, MOV — ekstrak audio)</SelectItem>
+                    <SelectItem value="audio">🎵 Audio (MP3, WAV, M4A — transkripsi)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1683,9 +1687,10 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 <p className="text-xs text-muted-foreground">Tentukan di lapisan mana dokumen ini berada dalam hierarki knowledge agen.</p>
               </div>
               
-              {newItem.type === "file" ? (
+              {/* File Upload (Dokumen) */}
+              {newItem.type === "file" && (
                 <div className="space-y-2">
-                  <Label>Upload File</Label>
+                  <Label>Upload Dokumen</Label>
                   <div className="border-2 border-dashed rounded-lg p-6 text-center">
                     {newItem.fileName ? (
                       <div className="space-y-2">
@@ -1694,65 +1699,132 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                         <p className="text-sm text-muted-foreground">
                           {formatFileSize(newItem.fileSize)} - {fileTypeLabels[newItem.fileType || "other"]}
                         </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          Ganti File
-                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>Ganti File</Button>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          Drag & drop atau klik untuk upload
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          PDF, PPT, Excel, Word (Max 50MB)
-                        </p>
-                        <Button
-                          variant="outline"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploadFile.isPending}
-                         
-                        >
-                          {uploadFile.isPending ? "Uploading..." : "Pilih File"}
+                        <p className="text-sm text-muted-foreground">Drag & drop atau klik untuk upload</p>
+                        <p className="text-xs text-muted-foreground">PDF, Word, Excel, PPT, TXT (Max 50MB)</p>
+                        <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploadFile.isPending} data-testid="button-kb-pick-file">
+                          {uploadFile.isPending ? "Uploading..." : "Pilih Dokumen"}
                         </Button>
                       </div>
                     )}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.ppt,.pptx,.xls,.xlsx,.doc,.docx,.txt"
-                      onChange={handleFileChange}
-                     
-                    />
+                    <input ref={fileInputRef} type="file" className="hidden"
+                      accept=".pdf,.ppt,.pptx,.xls,.xlsx,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
+                      onChange={handleFileChange} />
                   </div>
                 </div>
-              ) : newItem.type === "url" ? (
+              )}
+
+              {/* Video Upload */}
+              {(newItem.type === "video" || newItem.type === "audio") && (
                 <div className="space-y-2">
-                  <Label htmlFor="kb-content">URL Website</Label>
+                  <Label>{newItem.type === "video" ? "Upload Video" : "Upload Audio"}</Label>
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                    {newItem.fileName ? (
+                      <div className="space-y-2">
+                        <File className="w-10 h-10 mx-auto text-primary" />
+                        <p className="font-medium">{newItem.fileName}</p>
+                        <p className="text-sm text-muted-foreground">{formatFileSize(newItem.fileSize)}</p>
+                        <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>Ganti File</Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Upload className="w-10 h-10 mx-auto text-muted-foreground" />
+                        {newItem.type === "video" ? (
+                          <>
+                            <p className="text-sm text-muted-foreground">Upload video — AI akan mengekstrak & mentranskrip audio</p>
+                            <p className="text-xs text-muted-foreground">MP4, WebM, MOV (Max 50MB)</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-sm text-muted-foreground">Upload file audio — AI akan mentranskrip ke teks</p>
+                            <p className="text-xs text-muted-foreground">MP3, WAV, M4A, AAC (Max 50MB)</p>
+                          </>
+                        )}
+                        <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploadFile.isPending} data-testid={`button-kb-pick-${newItem.type}`}>
+                          {uploadFile.isPending ? "Uploading..." : `Pilih ${newItem.type === "video" ? "Video" : "Audio"}`}
+                        </Button>
+                      </div>
+                    )}
+                    <input ref={fileInputRef} type="file" className="hidden"
+                      accept={newItem.type === "video" ? "video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" : "audio/mpeg,audio/wav,audio/mp4,audio/ogg,.mp3,.wav,.m4a,.aac,.ogg"}
+                      onChange={handleFileChange} />
+                  </div>
+                  <p className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
+                    {newItem.type === "video"
+                      ? "AI akan mengekstrak audio dari video lalu mentransripnya. Pastikan video memiliki audio yang jelas."
+                      : "AI akan mentranskrip audio menjadi teks menggunakan Speech-to-Text. Pastikan suara jelas dan tidak terlalu berisik."}
+                  </p>
+                </div>
+              )}
+
+              {/* URL Website */}
+              {newItem.type === "url" && (
+                <div className="space-y-2">
+                  <Label htmlFor="kb-content">URL Halaman Web</Label>
                   <Input
                     id="kb-content"
                     value={newItem.content}
                     onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
-                    placeholder="https://..."
-                   
+                    placeholder="https://example.com/halaman-informasi"
+                    data-testid="input-kb-url"
                   />
-                  <p className="text-xs text-muted-foreground">Masukkan URL halaman yang ingin dijadikan sumber knowledge.</p>
+                  <p className="text-xs text-muted-foreground">AI akan scraping isi halaman dan menjadikannya sumber knowledge.</p>
                 </div>
-              ) : (
+              )}
+
+              {/* YouTube URL */}
+              {newItem.type === "youtube" && (
                 <div className="space-y-2">
-                  <Label htmlFor="kb-content">Konten</Label>
+                  <Label htmlFor="kb-content">URL YouTube</Label>
+                  <Input
+                    id="kb-content"
+                    value={newItem.content}
+                    onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
+                    placeholder="https://youtube.com/watch?v=... atau https://youtu.be/..."
+                    data-testid="input-kb-youtube"
+                  />
+                  <p className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
+                    AI akan otomatis mengambil transkrip/subtitle dari video YouTube. Pastikan video memiliki subtitle (CC) yang tersedia.
+                    Mendukung format: <code>youtube.com/watch?v=...</code>, <code>youtu.be/...</code>, <code>youtube.com/shorts/...</code>
+                  </p>
+                </div>
+              )}
+
+              {/* Cloud Drive URL */}
+              {newItem.type === "cloud_drive" && (
+                <div className="space-y-2">
+                  <Label htmlFor="kb-content">Link Google Drive / OneDrive / SharePoint</Label>
+                  <Input
+                    id="kb-content"
+                    value={newItem.content}
+                    onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
+                    placeholder="https://drive.google.com/file/d/... atau https://1drv.ms/..."
+                    data-testid="input-kb-cloud-drive"
+                  />
+                  <div className="text-xs text-muted-foreground bg-muted/40 rounded p-2 space-y-1">
+                    <p>AI akan mengunduh dan memproses file dari cloud storage Anda.</p>
+                    <p><strong>Google Drive:</strong> Pastikan file dishare dengan <em>Anyone with the link</em></p>
+                    <p><strong>OneDrive:</strong> Gunakan link share publik dari "Copy Link"</p>
+                    <p><strong>SharePoint:</strong> Gunakan direct download URL</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Teks biasa */}
+              {newItem.type === "text" && (
+                <div className="space-y-2">
+                  <Label htmlFor="kb-content">Konten Teks</Label>
                   <Textarea
                     id="kb-content"
                     value={newItem.content}
                     onChange={(e) => setNewItem({ ...newItem, content: e.target.value })}
                     placeholder="Tempel informasi, SOP, FAQ, atau panduan di sini..."
                     rows={6}
-                   
+                    data-testid="input-kb-text"
                   />
                   <p className="text-xs text-muted-foreground">Gunakan judul bagian: "Syarat", "Langkah-langkah", "Biaya", "Waktu proses", "Masalah umum".</p>
                 </div>

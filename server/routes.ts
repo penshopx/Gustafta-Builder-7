@@ -1,6 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
+import { customDomains } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 import {
   insertAgentSchema,
   insertKnowledgeBaseSchema,
@@ -6517,6 +6520,103 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
     } catch (error: any) {
       console.error("Notion export error:", error);
       res.status(500).json({ error: "Gagal mengekspor ke Notion: " + (error?.message || "Unknown error") });
+    }
+  });
+
+  // ==================== Custom Domain Routes ====================
+
+  // Get user's custom domains
+  app.get("/api/domains", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const domains = await db.select().from(customDomains).where(eq(customDomains.userId, userId));
+      res.json(domains);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch domains" });
+    }
+  });
+
+  // Add custom domain
+  app.post("/api/domains", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { domain, agentId } = req.body;
+      if (!domain || typeof domain !== "string") {
+        return res.status(400).json({ error: "Domain tidak valid" });
+      }
+      const cleanDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+      const [inserted] = await db.insert(customDomains).values({
+        userId,
+        agentId: agentId || null,
+        domain: cleanDomain,
+        status: "pending",
+      }).returning();
+      res.status(201).json(inserted);
+    } catch (error: any) {
+      if (error?.code === "23505") return res.status(409).json({ error: "Domain sudah terdaftar" });
+      res.status(500).json({ error: "Gagal menambahkan domain" });
+    }
+  });
+
+  // Update domain (ganti agentId)
+  app.patch("/api/domains/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { agentId, status } = req.body;
+      const [updated] = await db.update(customDomains)
+        .set({ agentId: agentId || null, status: status || "pending", updatedAt: new Date() })
+        .where(and(eq(customDomains.id, Number(req.params.id)), eq(customDomains.userId, userId)))
+        .returning();
+      if (!updated) return res.status(404).json({ error: "Domain tidak ditemukan" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Gagal memperbarui domain" });
+    }
+  });
+
+  // Delete domain
+  app.delete("/api/domains/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const deleted = await db.delete(customDomains)
+        .where(and(eq(customDomains.id, Number(req.params.id)), eq(customDomains.userId, userId)))
+        .returning();
+      if (!deleted.length) return res.status(404).json({ error: "Domain tidak ditemukan" });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Gagal menghapus domain" });
+    }
+  });
+
+  // Verify domain DNS (cek CNAME ke app host)
+  app.post("/api/domains/:id/verify", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const [domainRow] = await db.select().from(customDomains)
+        .where(and(eq(customDomains.id, Number(req.params.id)), eq(customDomains.userId, userId)));
+      if (!domainRow) return res.status(404).json({ error: "Domain tidak ditemukan" });
+      // Simulasi verifikasi — di produksi gunakan DNS lookup
+      const appHost = req.get("host") || "";
+      const dns = await import("dns");
+      try {
+        const addresses = await new Promise<string[]>((resolve, reject) => {
+          dns.resolve(domainRow.domain, "CNAME", (err, addrs) => {
+            if (err) reject(err); else resolve(addrs);
+          });
+        });
+        const verified = addresses.some((a) => a.includes(appHost.split(":")[0]));
+        if (verified) {
+          await db.update(customDomains)
+            .set({ status: "active", verifiedAt: new Date(), updatedAt: new Date() })
+            .where(eq(customDomains.id, domainRow.id));
+          return res.json({ verified: true, status: "active" });
+        }
+      } catch {}
+      res.json({ verified: false, status: "pending", message: "CNAME belum mengarah ke server Gustafta. Coba lagi setelah TTL DNS habis (biasanya 5–30 menit)." });
+    } catch (error) {
+      res.status(500).json({ error: "Gagal memverifikasi domain" });
     }
   });
 
