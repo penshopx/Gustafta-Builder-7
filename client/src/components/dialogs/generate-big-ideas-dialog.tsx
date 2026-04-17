@@ -63,6 +63,8 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number; charCount: number } | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractError, setExtractError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dragCounter = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { toast } = useToast();
@@ -72,11 +74,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const removeUrl = (i: number) => setUrls(prev => prev.filter((_, idx) => idx !== i));
   const updateUrl = (i: number, val: string) => setUrls(prev => prev.map((u, idx) => idx === i ? val : u));
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!fileInputRef.current) fileInputRef.current = e.target;
-    if (!file) return;
-
+  const processFile = async (file: File) => {
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       setExtractError(`File terlalu besar (${formatBytes(file.size)}). Maksimal 5 MB.`);
@@ -116,6 +114,42 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
       setIsExtracting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current += 1;
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current -= 1;
+    if (dragCounter.current === 0) setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current = 0;
+    setIsDragOver(false);
+    if (isExtracting) return;
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    await processFile(file);
   };
 
   const handleRemoveFile = () => {
@@ -208,6 +242,8 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
     setSelected(new Set());
     setUploadedFile(null);
     setExtractError(null);
+    setIsDragOver(false);
+    dragCounter.current = 0;
     onOpenChange(false);
   };
 
@@ -278,10 +314,16 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                 <div
                   className={cn(
                     "border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors",
-                    "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
+                    isDragOver
+                      ? "border-primary bg-primary/10 scale-[1.01]"
+                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
                     isExtracting && "pointer-events-none opacity-60"
                   )}
                   onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                   data-testid="dropzone-file"
                 >
                   {isExtracting ? (
@@ -291,8 +333,8 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
-                      <Upload className="w-6 h-6 text-muted-foreground" />
-                      <p className="text-sm font-medium">Klik untuk pilih file</p>
+                      <Upload className={cn("w-6 h-6", isDragOver ? "text-primary" : "text-muted-foreground")} />
+                      <p className="text-sm font-medium">{isDragOver ? "Lepaskan file di sini" : "Klik atau seret file ke sini"}</p>
                       <p className="text-xs text-muted-foreground">PDF, DOCX, atau TXT (maks 5 MB)</p>
                     </div>
                   )}
