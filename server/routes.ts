@@ -6691,6 +6691,61 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
   });
 
   // ─── AI Big Idea Generator ────────────────────────────────────
+  const extractFileUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      const allowed = [
+        "application/pdf",
+        "text/plain",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/msword",
+      ];
+      const ext = file.originalname.toLowerCase();
+      if (allowed.includes(file.mimetype) || ext.endsWith(".pdf") || ext.endsWith(".txt") || ext.endsWith(".docx")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Format tidak didukung. Gunakan PDF, DOCX, atau TXT."));
+      }
+    },
+  });
+
+  app.post("/api/ai/extract-file-text", isAuthenticated, extractFileUpload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "File tidak ditemukan" });
+      }
+      const { originalname, mimetype, buffer } = req.file;
+      let text = "";
+
+      if (mimetype === "text/plain" || originalname.toLowerCase().endsWith(".txt")) {
+        text = buffer.toString("utf-8");
+      } else if (
+        mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        originalname.toLowerCase().endsWith(".docx")
+      ) {
+        const mammoth = (await import("mammoth")).default;
+        const result = await mammoth.extractRawText({ buffer });
+        text = result.value;
+      } else {
+        const pdfParse = (await import("pdf-parse")).default;
+        const parsed = await pdfParse(buffer);
+        text = parsed.text || "";
+      }
+
+      text = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+
+      if (!text || text.length < 20) {
+        return res.status(422).json({ error: "Teks tidak dapat diekstrak. Pastikan file tidak terenkripsi atau kosong." });
+      }
+
+      res.json({ text, filename: originalname, charCount: text.length });
+    } catch (error: any) {
+      console.error("Extract file text error:", error);
+      res.status(500).json({ error: "Gagal mengekstrak teks: " + (error.message || "Unknown error") });
+    }
+  });
+
   app.post("/api/ai/generate-big-ideas", isAuthenticated, async (req, res) => {
     try {
       const { referenceText, urls, topic, count = 6 } = req.body;

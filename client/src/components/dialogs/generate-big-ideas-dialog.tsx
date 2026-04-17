@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -13,8 +13,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateBigIdea } from "@/hooks/use-big-ideas";
 import { apiRequest } from "@/lib/queryClient";
 import {
-  Sparkles, Plus, X, Loader2, Lightbulb, Target, Users, BookOpen,
-  ArrowRight, ArrowLeft, CheckCircle2, Youtube, Link2, FileText,
+  Sparkles, Plus, X, Loader2, Lightbulb, Target, Users,
+  ArrowLeft, CheckCircle2, Youtube, Link2, FileText,
+  Upload, FileCheck, AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,12 @@ const typeConfig: Record<string, { label: string; color: string; icon: any }> = 
   mentoring: { label: "Mentoring", color: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30", icon: Users },
 };
 
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated }: GenerateBigIdeasDialogProps) {
   const [step, setStep] = useState<"input" | "results">("input");
   const [topic, setTopic] = useState("");
@@ -53,6 +60,11 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [isCreating, setIsCreating] = useState(false);
 
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number; charCount: number } | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { toast } = useToast();
   const createBigIdea = useCreateBigIdea();
 
@@ -60,10 +72,62 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
   const removeUrl = (i: number) => setUrls(prev => prev.filter((_, idx) => idx !== i));
   const updateUrl = (i: number, val: string) => setUrls(prev => prev.map((u, idx) => idx === i ? val : u));
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!fileInputRef.current) fileInputRef.current = e.target;
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setExtractError(`File terlalu besar (${formatBytes(file.size)}). Maksimal 5 MB.`);
+      return;
+    }
+
+    const ext = file.name.toLowerCase();
+    if (!ext.endsWith(".pdf") && !ext.endsWith(".docx") && !ext.endsWith(".txt")) {
+      setExtractError("Format tidak didukung. Gunakan PDF, DOCX, atau TXT.");
+      return;
+    }
+
+    setExtractError(null);
+    setIsExtracting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/ai/extract-file-text", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal mengekstrak teks");
+
+      const extracted: string = data.text;
+      setReferenceText(prev => {
+        if (prev.trim()) return prev.trim() + "\n\n--- Dari file: " + file.name + " ---\n" + extracted;
+        return extracted;
+      });
+      setUploadedFile({ name: file.name, size: file.size, charCount: data.charCount });
+      toast({ title: "File berhasil dibaca", description: `${data.charCount.toLocaleString()} karakter diekstrak dari ${file.name}` });
+    } catch (err: any) {
+      setExtractError(err.message || "Gagal membaca file");
+    } finally {
+      setIsExtracting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+    setExtractError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleGenerate = async () => {
     const hasContent = referenceText.trim() || urls.some(u => u.trim()) || topic.trim();
     if (!hasContent) {
-      toast({ title: "Butuh referensi", description: "Isi minimal satu dari: topik, teks referensi, atau URL", variant: "destructive" });
+      toast({ title: "Butuh referensi", description: "Isi minimal satu dari: topik, teks referensi, URL, atau upload file", variant: "destructive" });
       return;
     }
 
@@ -142,6 +206,8 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
     setCount(6);
     setSuggestions([]);
     setSelected(new Set());
+    setUploadedFile(null);
+    setExtractError(null);
     onOpenChange(false);
   };
 
@@ -155,7 +221,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
           </DialogTitle>
           <DialogDescription>
             {step === "input"
-              ? "Masukkan referensi (teks, URL, YouTube, atau topik) — AI akan menyarankan Big Idea chatbot terbaik."
+              ? "Masukkan referensi (upload file, teks, URL, atau topik) — AI akan menyarankan Big Idea chatbot terbaik."
               : "Pilih Big Idea yang ingin langsung dibuat di ekosistem Anda."}
           </DialogDescription>
         </DialogHeader>
@@ -177,9 +243,77 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
 
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
+                <Upload className="w-3.5 h-3.5 text-violet-500" />
+                Upload File Referensi
+                <span className="text-xs text-muted-foreground font-normal">(PDF, DOCX, TXT — maks 5 MB)</span>
+              </Label>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.txt"
+                onChange={handleFileChange}
+                className="hidden"
+                data-testid="input-file-upload"
+              />
+
+              {!uploadedFile ? (
+                <div
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-colors",
+                    "border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5",
+                    isExtracting && "pointer-events-none opacity-60"
+                  )}
+                  onClick={() => fileInputRef.current?.click()}
+                  data-testid="dropzone-file"
+                >
+                  {isExtracting ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      <p className="text-sm text-muted-foreground">Mengekstrak teks dari file...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Upload className="w-6 h-6 text-muted-foreground" />
+                      <p className="text-sm font-medium">Klik untuk pilih file</p>
+                      <p className="text-xs text-muted-foreground">PDF, DOCX, atau TXT (maks 5 MB)</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 p-3 rounded-lg border bg-green-500/5 border-green-500/30">
+                  <FileCheck className="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{uploadedFile.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatBytes(uploadedFile.size)} · {uploadedFile.charCount.toLocaleString()} karakter diekstrak
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 h-7 w-7 text-muted-foreground hover:text-destructive"
+                    onClick={handleRemoveFile}
+                    data-testid="button-remove-file"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
+
+              {extractError && (
+                <div className="flex items-center gap-2 text-destructive text-xs">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  {extractError}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-blue-500" />
                 Teks Referensi
-                <span className="text-xs text-muted-foreground font-normal">(paste isi dokumen, modul, atau catatan)</span>
+                <span className="text-xs text-muted-foreground font-normal">(atau paste manual dari dokumen)</span>
               </Label>
               <Textarea
                 placeholder="Paste teks dari PDF, dokumen Word, modul pelatihan, catatan kuliah, artikel, atau konten apapun yang ingin dijadikan dasar saran..."
@@ -189,7 +323,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
                 className="resize-none"
                 data-testid="textarea-reference"
               />
-              <p className="text-xs text-muted-foreground">AI membaca hingga 8.000 karakter pertama</p>
+              <p className="text-xs text-muted-foreground">AI membaca hingga 8.000 karakter pertama · {referenceText.length.toLocaleString()} karakter saat ini</p>
             </div>
 
             <div className="space-y-1.5">
@@ -247,7 +381,7 @@ export function GenerateBigIdeasDialog({ open, onOpenChange, seriesId, onCreated
             <Button
               className="w-full gap-2"
               onClick={handleGenerate}
-              disabled={isGenerating}
+              disabled={isGenerating || isExtracting}
               data-testid="button-generate"
             >
               {isGenerating ? (
