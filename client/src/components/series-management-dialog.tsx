@@ -129,9 +129,9 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
     onSuccess: () => {
       invalidateAll();
       setCoreForm({ name: "", description: "" });
-      toast({ title: "Core berhasil dibuat" });
+      toast({ title: "Kelompok berhasil dibuat" });
     },
-    onError: () => toast({ title: "Gagal membuat core", variant: "destructive" }),
+    onError: () => toast({ title: "Gagal membuat kelompok", variant: "destructive" }),
   });
 
   const updateCoreMutation = useMutation({
@@ -141,18 +141,18 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
       invalidateAll();
       setCoreForm({ name: "", description: "" });
       setEditingCoreId(null);
-      toast({ title: "Core berhasil diperbarui" });
+      toast({ title: "Kelompok berhasil diperbarui" });
     },
-    onError: () => toast({ title: "Gagal memperbarui core", variant: "destructive" }),
+    onError: () => toast({ title: "Gagal memperbarui kelompok", variant: "destructive" }),
   });
 
   const deleteCoreMutation = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/cores/${id}`),
     onSuccess: () => {
       invalidateAll();
-      toast({ title: "Core berhasil dihapus" });
+      toast({ title: "Kelompok berhasil dihapus" });
     },
-    onError: () => toast({ title: "Gagal menghapus core", variant: "destructive" }),
+    onError: () => toast({ title: "Gagal menghapus kelompok", variant: "destructive" }),
   });
 
   const assignBigIdeaToCoreMutation = useMutation({
@@ -320,7 +320,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                         data-testid={`button-cores-${s.id}`}
                       >
                         <Shield className="w-3.5 h-3.5 mr-1" />
-                        Cores ({getCoresForSeries(String(s.id)).length})
+                        Kelompok ({getCoresForSeries(String(s.id)).length})
                       </Button>
                       <Button
                         variant="outline"
@@ -364,9 +364,9 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
 
                     {coresOpen === String(s.id) && (
                       <div className="border rounded-lg p-3 space-y-3">
-                        <p className="text-xs font-medium text-muted-foreground">Cores dalam Series ini (L2 — pengelompokan tematik):</p>
+                        <p className="text-xs font-medium text-muted-foreground">Kelompok dalam Series ini (pengelompokan opsional):</p>
                         {getCoresForSeries(String(s.id)).length === 0 && (
-                          <p className="text-xs text-muted-foreground">Belum ada Core. Core bersifat opsional - gunakan untuk Series besar yang butuh pengelompokan.</p>
+                          <p className="text-xs text-muted-foreground">Belum ada Kelompok. Kelompok bersifat opsional — gunakan untuk Series besar yang butuh pengelompokan Modul.</p>
                         )}
                         {getCoresForSeries(String(s.id)).map((core: Core) => {
                           const coreBigIdeas = bigIdeas.filter(bi => bi.coreId === core.id);
@@ -396,7 +396,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => {
-                                      if (confirm("Hapus Core ini? Modul terkait akan jadi tanpa Core.")) {
+                                      if (confirm("Hapus Kelompok ini? Modul terkait akan jadi tanpa Kelompok.")) {
                                         deleteCoreMutation.mutate(core.id);
                                       }
                                     }}
@@ -450,11 +450,11 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                         })}
                         {editingCoreId && (
                           <div className="border rounded-md p-2 space-y-2 bg-muted/30">
-                            <p className="text-xs font-medium">Edit Core</p>
+                            <p className="text-xs font-medium">Edit Kelompok</p>
                             <Input
                               value={coreForm.name}
                               onChange={(e) => setCoreForm({ ...coreForm, name: e.target.value })}
-                              placeholder="Nama Core"
+                              placeholder="Nama Kelompok"
                               className="text-sm"
                               data-testid="input-edit-core-name"
                             />
@@ -486,11 +486,11 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                         )}
                         {!editingCoreId && (
                           <div className="border rounded-md p-2 space-y-2 bg-muted/30">
-                            <p className="text-xs font-medium">Tambah Core Baru</p>
+                            <p className="text-xs font-medium">Tambah Kelompok Baru</p>
                             <Input
                               value={coreForm.name}
                               onChange={(e) => setCoreForm({ ...coreForm, name: e.target.value })}
-                              placeholder="Nama Core (contoh: Compliance System)"
+                              placeholder="Nama Kelompok (contoh: Compliance System)"
                               className="text-sm"
                               data-testid="input-new-core-name"
                             />
@@ -508,7 +508,7 @@ export function SeriesManagementDialog({ open, onOpenChange }: { open: boolean; 
                               data-testid="button-create-core"
                             >
                               <Plus className="w-3 h-3 mr-1" />
-                              Buat Core
+                              Buat Kelompok
                             </Button>
                           </div>
                         )}

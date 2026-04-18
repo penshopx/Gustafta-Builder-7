@@ -157,13 +157,13 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
 
           {availableCores.length > 0 && (
             <div className="space-y-2">
-              <Label>Core (opsional - payung strategis)</Label>
+              <Label>Kelompok (opsional)</Label>
               <Select value={selectedCoreId} onValueChange={setSelectedCoreId}>
                 <SelectTrigger data-testid="select-core-edit">
-                  <SelectValue placeholder="Pilih Core" />
+                  <SelectValue placeholder="Pilih Kelompok" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Tanpa Core</SelectItem>
+                  <SelectItem value="none">Tanpa Kelompok</SelectItem>
                   {availableCores.map((c: any) => (
                     <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                   ))}

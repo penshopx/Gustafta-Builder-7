@@ -336,7 +336,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              <span>Baru: Custom Domain · KB YouTube/Video/Audio · Hierarki 5 Level</span>
+              <span>Baru: Custom Domain · KB YouTube/Video/Audio · Hierarki 4 Level</span>
               <Flame className="h-4 w-4 text-orange-500" />
             </div>
             
@@ -683,7 +683,7 @@ export default function Landing() {
                     </div>
                     <div>
                       <Badge className="mb-1 text-xs bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20 border-violet-500/20">Multi-Agent</Badge>
-                      <h3 className="text-xl font-bold">Hierarki 5 Level</h3>
+                      <h3 className="text-xl font-bold">Hierarki 4 Level</h3>
                     </div>
                   </div>
                   <p className="text-muted-foreground text-sm mb-4 leading-relaxed">

@@ -201,15 +201,15 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
               )}
             </div>
             {step === "start" && "Buat Alat Bantu Baru"}
-            {step === "category" && (isOrchestrator ? "Kategori Orchestrator" : "Pilih Kategori")}
+            {step === "category" && (isOrchestrator ? "Kategori Orkestrator" : "Pilih Kategori")}
             {step === "subcategory" && selectedCategory?.label}
-            {step === "details" && (isOrchestrator ? "Detail Orchestrator" : "Detail Alat Bantu")}
+            {step === "details" && (isOrchestrator ? "Detail Orkestrator" : "Detail Alat Bantu")}
           </DialogTitle>
           <DialogDescription>
             {step === "start" && "Pilih cara untuk memulai pembuatan alat bantu"}
-            {step === "category" && (isOrchestrator ? "Pilih kategori untuk orchestrator Anda" : "Pilih kategori untuk alat bantu Anda")}
+            {step === "category" && (isOrchestrator ? "Pilih kategori untuk Orkestrator Anda" : "Pilih kategori untuk alat bantu Anda")}
             {step === "subcategory" && "Pilih peran atau profesi spesifik"}
-            {step === "details" && (isOrchestrator ? "Konfigurasi orchestrator Anda" : "Konfigurasi informasi dasar alat bantu Anda")}
+            {step === "details" && (isOrchestrator ? "Konfigurasi Orkestrator Anda" : "Konfigurasi informasi dasar alat bantu Anda")}
           </DialogDescription>
         </DialogHeader>
 
