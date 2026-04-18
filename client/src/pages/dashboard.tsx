@@ -738,61 +738,82 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="px-3 pt-3 pb-2">
-            {/* Breadcrumb trail */}
-            <div className="flex items-center gap-1 mb-2 flex-wrap">
+            {/* Hierarchy level path */}
+            <div className="mb-2 space-y-0.5">
+              {/* Level 1: Series */}
               <button
                 onClick={() => navigateToLevel('series')}
                 className={cn(
-                  "text-[11px] font-medium uppercase tracking-wider transition-colors",
-                  navLevel === 'series' ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground cursor-pointer"
+                  "w-full flex items-center gap-1.5 rounded px-1.5 py-0.5 transition-colors text-left",
+                  navLevel === 'series'
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-sidebar-foreground"
                 )}
                 data-testid="breadcrumb-series"
               >
-                Series
+                <span className="text-[9px] font-bold uppercase tracking-widest shrink-0 w-10 text-right opacity-60">L1</span>
+                <FolderOpen className="w-3 h-3 shrink-0" />
+                <span className={cn("text-[11px] font-medium truncate", navLevel === 'series' ? "font-semibold" : "")}>
+                  {activeSeries ? activeSeries.name : "Pilih Series"}
+                </span>
               </button>
-              {activeSeriesId && activeSeries && (
-                <>
-                  <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
-                  <button
-                    onClick={() => navigateToLevel('bigIdeas')}
-                    className={cn(
-                      "text-[11px] font-medium truncate max-w-[80px] transition-colors",
-                      navLevel === 'bigIdeas' ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground cursor-pointer"
-                    )}
-                    title={activeSeries.name}
-                    data-testid="breadcrumb-bigideas"
-                  >
-                    {activeSeries.name}
-                  </button>
-                </>
-              )}
-              {activeBigIdea && navLevel !== 'series' && navLevel !== 'bigIdeas' && !isCurrentToolboxHub && (
-                <>
-                  <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
-                  <button
-                    onClick={() => navigateToLevel('toolboxes')}
-                    className={cn(
-                      "text-[11px] font-medium truncate max-w-[70px] transition-colors",
-                      navLevel === 'toolboxes' ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground cursor-pointer"
-                    )}
-                    title={activeBigIdea.name}
-                    data-testid="breadcrumb-toolboxes"
-                  >
-                    {activeBigIdea.name}
-                  </button>
-                </>
-              )}
-              {activeToolbox && navLevel === 'agents' && (
-                <>
-                  <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
-                  <span
-                    className="text-[11px] font-medium text-sidebar-foreground truncate max-w-[70px]"
-                    title={activeToolbox.name}
-                    data-testid="breadcrumb-agents"
-                  >
-                    {activeToolbox.name}
+
+              {/* Level 2: Modul */}
+              {activeSeriesId && (
+                <button
+                  onClick={() => navigateToLevel('bigIdeas')}
+                  className={cn(
+                    "w-full flex items-center gap-1.5 rounded px-1.5 py-0.5 transition-colors text-left pl-3",
+                    navLevel === 'bigIdeas'
+                      ? "bg-blue-500/10 text-blue-500"
+                      : (navLevel === 'series' ? "opacity-40 cursor-not-allowed" : "text-muted-foreground hover:text-sidebar-foreground")
+                  )}
+                  disabled={navLevel === 'series'}
+                  data-testid="breadcrumb-modul"
+                >
+                  <span className="text-[9px] font-bold uppercase tracking-widest shrink-0 w-8 text-right opacity-60">L2</span>
+                  <Lightbulb className="w-3 h-3 shrink-0" />
+                  <span className={cn("text-[11px] font-medium truncate", navLevel === 'bigIdeas' ? "font-semibold" : "")}>
+                    {activeBigIdea ? activeBigIdea.name : "Pilih Modul"}
                   </span>
-                </>
+                </button>
+              )}
+
+              {/* Level 3: Chatbot */}
+              {activeSeriesId && activeBigIdea && (navLevel === 'toolboxes' || navLevel === 'agents') && !isCurrentToolboxHub && (
+                <button
+                  onClick={() => navigateToLevel('toolboxes')}
+                  className={cn(
+                    "w-full flex items-center gap-1.5 rounded px-1.5 py-0.5 transition-colors text-left pl-5",
+                    navLevel === 'toolboxes'
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      : "text-muted-foreground hover:text-sidebar-foreground"
+                  )}
+                  data-testid="breadcrumb-chatbot"
+                >
+                  <span className="text-[9px] font-bold uppercase tracking-widest shrink-0 w-6 text-right opacity-60">L3</span>
+                  <Bot className="w-3 h-3 shrink-0" />
+                  <span className={cn("text-[11px] font-medium truncate", navLevel === 'toolboxes' ? "font-semibold" : "")}>
+                    {currentToolbox ? currentToolbox.name : "Pilih Chatbot"}
+                  </span>
+                </button>
+              )}
+              {/* Level 3: Hub (Series-level Orkestrator) */}
+              {isCurrentToolboxHub && currentToolbox && navLevel === 'agents' && (
+                <div className="flex items-center gap-1.5 rounded px-1.5 py-0.5 pl-5 bg-purple-500/10">
+                  <span className="text-[9px] font-bold uppercase tracking-widest shrink-0 w-6 text-right opacity-60 text-purple-500">L3</span>
+                  <Network className="w-3 h-3 shrink-0 text-purple-500" />
+                  <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 truncate">{currentToolbox.name}</span>
+                </div>
+              )}
+
+              {/* Level 4: Alat Bantu */}
+              {navLevel === 'agents' && (
+                <div className="flex items-center gap-1.5 rounded px-1.5 py-0.5 pl-7 bg-green-500/10">
+                  <span className="text-[9px] font-bold uppercase tracking-widest shrink-0 w-4 text-right opacity-60 text-green-600">L4</span>
+                  <Users className="w-3 h-3 shrink-0 text-green-600 dark:text-green-400" />
+                  <span className="text-[11px] font-semibold text-green-700 dark:text-green-400 truncate">Alat Bantu</span>
+                </div>
               )}
             </div>
 
