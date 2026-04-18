@@ -166,8 +166,10 @@ export default function Dashboard() {
   const [localBigIdeaId, setLocalBigIdeaId] = useState<string | undefined>();
   const [localToolboxId, setLocalToolboxId] = useState<string | undefined>();
 
-  const effectiveBigIdeaId = localBigIdeaId || activeBigIdea?.id;
-  const effectiveBigIdeaObj = (bigIdeas as BigIdea[]).find(bi => String(bi.id) === String(effectiveBigIdeaId)) || activeBigIdea;
+  // Hanya gunakan activeBigIdea jika memang milik series yang sedang aktif
+  const activeBigIdeaInCurrentSeries = activeBigIdea && activeSeriesId && String(activeBigIdea.seriesId) === activeSeriesId ? activeBigIdea : null;
+  const effectiveBigIdeaId = localBigIdeaId || activeBigIdeaInCurrentSeries?.id;
+  const effectiveBigIdeaObj = (bigIdeas as BigIdea[]).find(bi => String(bi.id) === String(effectiveBigIdeaId)) || activeBigIdeaInCurrentSeries;
 
   useEffect(() => {
     if (activeBigIdea?.id && localBigIdeaId && String(activeBigIdea.id) === localBigIdeaId) {
@@ -436,16 +438,16 @@ export default function Dashboard() {
   };
 
   const handleCreateModulOrchestrator = async () => {
-    if (!modulOrchName.trim() || !activeBigIdea) return;
+    if (!modulOrchName.trim() || !activeBigIdeaInCurrentSeries) return;
     let newToolboxId: number | null = null;
     try {
       const newToolbox = await createToolboxMutation.mutateAsync({
-        bigIdeaId: activeBigIdea.id,
+        bigIdeaId: activeBigIdeaInCurrentSeries.id,
         seriesId: activeSeriesId || undefined,
         isOrchestrator: false,
         name: modulOrchName.trim(),
         description: modulOrchDescription.trim(),
-        purpose: "Orkestrator untuk Modul " + activeBigIdea.name,
+        purpose: "Orkestrator untuk Modul " + activeBigIdeaInCurrentSeries.name,
         capabilities: [],
         limitations: [],
         sortOrder: 0,
@@ -453,9 +455,9 @@ export default function Dashboard() {
       newToolboxId = newToolbox.id;
       await apiRequest("POST", "/api/agents", {
         name: modulOrchName.trim(),
-        description: modulOrchDescription.trim() || `Orkestrator untuk ${activeBigIdea.name}`,
+        description: modulOrchDescription.trim() || `Orkestrator untuk ${activeBigIdeaInCurrentSeries.name}`,
         toolboxId: newToolbox.id,
-        bigIdeaId: activeBigIdea.id,
+        bigIdeaId: activeBigIdeaInCurrentSeries.id,
         isOrchestrator: true,
         orchestratorRole: "orchestrator",
         isActive: true,
@@ -721,10 +723,10 @@ export default function Dashboard() {
                     <span className="truncate">Big Idea - {activeSeries.name}</span>
                   </DropdownMenuItem>
                 )}
-                {activeBigIdea && (
+                {activeBigIdeaInCurrentSeries && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('toolboxes'); setSidebarCollapsed(false); }} className="gap-2 pl-8">
                     <Wrench className="w-4 h-4 text-blue-500" />
-                    <span className="truncate">Chatbot - {activeBigIdea.name}</span>
+                    <span className="truncate">Chatbot - {activeBigIdeaInCurrentSeries.name}</span>
                   </DropdownMenuItem>
                 )}
                 {activeToolbox && (
@@ -774,13 +776,13 @@ export default function Dashboard() {
                   <span className="text-[9px] font-bold uppercase tracking-widest shrink-0 w-8 text-right opacity-60">L2</span>
                   <Lightbulb className="w-3 h-3 shrink-0" />
                   <span className={cn("text-[11px] font-medium truncate", navLevel === 'bigIdeas' ? "font-semibold" : "")}>
-                    {activeBigIdea ? activeBigIdea.name : "Pilih Modul"}
+                    {activeBigIdeaInCurrentSeries ? activeBigIdeaInCurrentSeries.name : "Pilih Modul"}
                   </span>
                 </button>
               )}
 
               {/* Level 3: Chatbot */}
-              {activeSeriesId && activeBigIdea && (navLevel === 'toolboxes' || navLevel === 'agents') && !isCurrentToolboxHub && (
+              {activeSeriesId && activeBigIdeaInCurrentSeries && (navLevel === 'toolboxes' || navLevel === 'agents') && !isCurrentToolboxHub && (
                 <button
                   onClick={() => navigateToLevel('toolboxes')}
                   className={cn(
@@ -1815,7 +1817,7 @@ export default function Dashboard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="persp-orch-name">Nama Orkestrator *</Label>
-              <Input id="persp-orch-name" placeholder={`Contoh: Orkestrator ${activeBigIdea?.name || 'Modul'}`} value={modulOrchName} onChange={(e) => setModulOrchName(e.target.value)} data-testid="input-modul-orch-name" />
+              <Input id="persp-orch-name" placeholder={`Contoh: Orkestrator ${activeBigIdeaInCurrentSeries?.name || 'Modul'}`} value={modulOrchName} onChange={(e) => setModulOrchName(e.target.value)} data-testid="input-modul-orch-name" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="persp-orch-desc">Deskripsi</Label>
