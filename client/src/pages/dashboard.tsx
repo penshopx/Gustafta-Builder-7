@@ -758,8 +758,8 @@ export default function Dashboard() {
                 </span>
               </button>
 
-              {/* Level 2: Modul */}
-              {activeSeriesId && (
+              {/* Level 2: Modul — sembunyikan hanya saat di agents level dalam Hub */}
+              {activeSeriesId && !(isCurrentToolboxHub && navLevel === 'agents') && (
                 <button
                   onClick={() => navigateToLevel('bigIdeas')}
                   className={cn(
