@@ -509,8 +509,11 @@ export default function Dashboard() {
     : activeToolboxInContext;
   const isCurrentToolboxHub = currentToolbox?.isOrchestrator === true;
 
+  // Agent hanya valid jika memang milik filteredAgents toolbox aktif saat ini
+  const currentAgent = activeAgent && filteredAgents.some(a => String(a.id) === String(activeAgent.id)) ? activeAgent : null;
+
   const renderPanel = () => {
-    if (!activeAgent) {
+    if (!currentAgent) {
       if (filteredAgents.length > 0 || agentsLoading) {
         return (
           <div className="flex-1 flex items-center justify-center p-4">
@@ -632,43 +635,43 @@ export default function Dashboard() {
 
     switch (activeNav) {
       case "persona":
-        return <PersonaPanel agent={activeAgent} />;
+        return <PersonaPanel agent={currentAgent!} />;
       case "agentic":
         return <AgenticAIPanel />;
       case "knowledge":
-        return <KnowledgeBasePanel agent={activeAgent} />;
+        return <KnowledgeBasePanel agent={currentAgent!} />;
       case "integrations":
-        return <IntegrationsPanel agent={activeAgent} />;
+        return <IntegrationsPanel agent={currentAgent!} />;
       case "widget":
-        return <WidgetPanel agent={activeAgent} bigIdeaId={effectiveBigIdeaId} />;
+        return <WidgetPanel agent={currentAgent!} bigIdeaId={effectiveBigIdeaId} />;
       case "chat":
         return null;
       case "project-brain":
-        return <ProjectBrainPanel agent={activeAgent} />;
+        return <ProjectBrainPanel agent={currentAgent!} />;
       case "mini-apps":
-        return <MiniAppsPanel agent={activeAgent} />;
+        return <MiniAppsPanel agent={currentAgent!} />;
       case "deliverables":
-        return <DeliverablesPanel agent={activeAgent} />;
+        return <DeliverablesPanel agent={currentAgent!} />;
       case "conversion":
-        return <ConversionPanel agent={activeAgent} />;
+        return <ConversionPanel agent={currentAgent!} />;
       case "landing-page":
-        return <LandingPagePanel agent={activeAgent} />;
+        return <LandingPagePanel agent={currentAgent!} />;
       case "marketing":
-        return <MarketingPanel agent={activeAgent} />;
+        return <MarketingPanel agent={currentAgent!} />;
       case "product-settings":
-        return <ProductSettingsPanel agent={activeAgent} />;
+        return <ProductSettingsPanel agent={currentAgent!} />;
       case "revenue":
-        return <RevenuPanel agent={activeAgent} />;
+        return <RevenuPanel agent={currentAgent!} />;
       case "affiliates":
-        return <AffiliatePanel agent={activeAgent} />;
+        return <AffiliatePanel agent={currentAgent!} />;
       case "vouchers":
-        return <VoucherPanel agent={activeAgent} />;
+        return <VoucherPanel agent={currentAgent!} />;
       case "broadcast":
-        return <BroadcastPanel agent={activeAgent} />;
+        return <BroadcastPanel agent={currentAgent!} />;
       case "tenders":
-        return <TenderPanel agent={activeAgent} />;
+        return <TenderPanel agent={currentAgent!} />;
       case "analytics":
-        return <AnalyticsPanel agent={activeAgent} />;
+        return <AnalyticsPanel agent={currentAgent!} />;
       default:
         return null;
     }
@@ -1329,14 +1332,14 @@ export default function Dashboard() {
               setActiveNav(item.id);
               setMobileMenuOpen(false);
             }}
-            disabled={!activeAgent}
+            disabled={!currentAgent}
             className={cn(
               "w-full flex items-center rounded-md text-sm font-medium transition-colors",
               sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
-              activeNav === item.id && activeAgent
+              activeNav === item.id && currentAgent
                 ? "bg-sidebar-accent text-sidebar-accent-foreground"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-              !activeAgent && "opacity-50 cursor-not-allowed"
+              !currentAgent && "opacity-50 cursor-not-allowed"
             )}
            
             title={sidebarCollapsed ? item.label : undefined}
@@ -1461,15 +1464,15 @@ export default function Dashboard() {
                   disabled={agentsLoading}
                  
                 >
-                  {activeAgent ? (
+                  {currentAgent ? (
                     <>
                       <Avatar className="w-5 h-5 md:w-6 md:h-6">
                         <AvatarFallback className="text-[10px] md:text-xs bg-primary/10 text-primary">
-                          {activeAgent.name.substring(0, 2).toUpperCase()}
+                          {currentAgent.name.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-medium text-sm md:text-base truncate">{activeAgent.name}</span>
-                      {activeAgent.orchestratorRole === "orchestrator" && (
+                      <span className="font-medium text-sm md:text-base truncate">{currentAgent.name}</span>
+                      {currentAgent.orchestratorRole === "orchestrator" && (
                         <Badge variant="secondary" className="text-[10px] md:text-xs hidden sm:inline-flex">Orkestrator</Badge>
                       )}
                     </>
@@ -1565,12 +1568,12 @@ export default function Dashboard() {
         </header>
 
         <div className="flex-1 overflow-auto pb-16 md:pb-0">
-          {activeAgent && (
+          {currentAgent && (
             <div style={{ display: activeNav === "chat" ? "block" : "none" }} className="h-full">
-              <ChatConsolePanel key={activeAgent.id} agent={activeAgent} />
+              <ChatConsolePanel key={currentAgent.id} agent={currentAgent} />
             </div>
           )}
-          {activeNav === "chat" ? (activeAgent ? null : renderPanel()) : renderPanel()}
+          {activeNav === "chat" ? (currentAgent ? null : renderPanel()) : renderPanel()}
         </div>
 
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-40">
@@ -1579,13 +1582,13 @@ export default function Dashboard() {
               <button
                 key={item.id}
                 onClick={() => setActiveNav(item.id)}
-                disabled={!activeAgent}
+                disabled={!currentAgent}
                 className={cn(
                   "flex flex-col items-center justify-center gap-0.5 px-2 py-1 min-w-0 flex-1",
-                  activeNav === item.id && activeAgent
+                  activeNav === item.id && currentAgent
                     ? "text-primary"
                     : "text-muted-foreground",
-                  !activeAgent && "opacity-50"
+                  !currentAgent && "opacity-50"
                 )}
                
               >
@@ -1635,7 +1638,7 @@ export default function Dashboard() {
         </nav>
       </div>
 
-      {activeAgent && <ChatPopup agent={activeAgent} />}
+      {currentAgent && <ChatPopup agent={currentAgent} />}
 
       <CreateAgentDialog 
         open={createDialogOpen} 
