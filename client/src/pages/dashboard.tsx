@@ -275,6 +275,8 @@ export default function Dashboard() {
     if (toolboxCreationCooldown.current) return;
     if (localToolboxId) return;
     if (!activeBigIdea || toolboxes.length === 0) return;
+    // Don't auto-switch if user intentionally navigated into the Series-level Hub
+    if (navLevel === 'agents' && activeToolbox?.id && orchestratorHub?.id && String(activeToolbox.id) === String(orchestratorHub.id)) return;
     if (!activeToolbox) {
       activateToolbox.mutate(String(toolboxes[0].id));
     } else {
@@ -283,7 +285,7 @@ export default function Dashboard() {
         activateToolbox.mutate(String(toolboxes[0].id));
       }
     }
-  }, [activeBigIdea?.id, toolboxes, activeToolbox?.id]);
+  }, [activeBigIdea?.id, toolboxes, activeToolbox?.id, orchestratorHub?.id, navLevel]);
 
   useEffect(() => {
     if (!effectiveToolboxId || filteredAgents.length === 0) return;
@@ -764,7 +766,7 @@ export default function Dashboard() {
                   </button>
                 </>
               )}
-              {activeBigIdea && navLevel !== 'series' && navLevel !== 'bigIdeas' && (
+              {activeBigIdea && navLevel !== 'series' && navLevel !== 'bigIdeas' && !isCurrentToolboxHub && (
                 <>
                   <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0" />
                   <button
