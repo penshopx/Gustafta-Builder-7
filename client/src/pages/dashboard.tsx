@@ -1647,6 +1647,8 @@ export default function Dashboard() {
           if (!open) setCreateAsOrchestrator(false);
         }}
         forceOrchestrator={createAsOrchestrator}
+        bigIdea={contextBigIdea ? { id: contextBigIdea.id, name: contextBigIdea.name } : null}
+        toolbox={currentToolbox ? { id: currentToolbox.id, name: currentToolbox.name } : null}
         onCreated={() => {
           agentCreationCooldown.current = true;
           setTimeout(() => { agentCreationCooldown.current = false; }, 3000);

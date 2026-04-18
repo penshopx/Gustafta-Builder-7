@@ -29,15 +29,21 @@ interface CreateAgentDialogProps {
   onOpenChange: (open: boolean) => void;
   forceOrchestrator?: boolean;
   onCreated?: () => void;
+  bigIdea?: { id: number | string; name: string } | null;
+  toolbox?: { id: number | string; name: string } | null;
 }
 
 type Step = "start" | "category" | "subcategory" | "details";
 
-export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCreated }: CreateAgentDialogProps) {
+export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCreated, bigIdea: bigIdeaProp, toolbox: toolboxProp }: CreateAgentDialogProps) {
   const { toast } = useToast();
   const createAgent = useCreateAgent();
-  const { data: activeToolbox } = useActiveToolbox();
-  const { data: activeBigIdea } = useActiveBigIdea();
+  const { data: activeToolboxFromApi } = useActiveToolbox();
+  const { data: activeBigIdeaFromApi } = useActiveBigIdea();
+
+  // Gunakan props dari parent (sudah divalidasi konteks series) jika tersedia
+  const activeToolbox = toolboxProp !== undefined ? toolboxProp : activeToolboxFromApi;
+  const activeBigIdea = bigIdeaProp !== undefined ? bigIdeaProp : activeBigIdeaFromApi;
 
   const [step, setStep] = useState<Step>(forceOrchestrator ? "category" : "start");
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
