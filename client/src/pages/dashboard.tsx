@@ -166,10 +166,19 @@ export default function Dashboard() {
   const [localBigIdeaId, setLocalBigIdeaId] = useState<string | undefined>();
   const [localToolboxId, setLocalToolboxId] = useState<string | undefined>();
 
-  // Hanya gunakan activeBigIdea jika memang milik series yang sedang aktif
-  const activeBigIdeaInCurrentSeries = activeBigIdea && activeSeriesId && String(activeBigIdea.seriesId) === activeSeriesId ? activeBigIdea : null;
-  const effectiveBigIdeaId = localBigIdeaId || activeBigIdeaInCurrentSeries?.id;
-  const effectiveBigIdeaObj = (bigIdeas as BigIdea[]).find(bi => String(bi.id) === String(effectiveBigIdeaId)) || activeBigIdeaInCurrentSeries;
+  // BigIdea yang valid untuk konteks series aktif saat ini (lokal dulu, lalu API)
+  const contextBigIdea = (() => {
+    if (localBigIdeaId) {
+      const local = (bigIdeas as BigIdea[]).find(bi => String(bi.id) === localBigIdeaId);
+      if (local && activeSeriesId && String(local.seriesId) === activeSeriesId) return local;
+    }
+    if (activeBigIdea && activeSeriesId && String(activeBigIdea.seriesId) === activeSeriesId) return activeBigIdea;
+    return null;
+  })();
+  // Alias untuk kompatibilitas kode yang sudah ada
+  const activeBigIdeaInCurrentSeries = contextBigIdea;
+  const effectiveBigIdeaId = contextBigIdea?.id;
+  const effectiveBigIdeaObj = contextBigIdea;
 
   useEffect(() => {
     if (activeBigIdea?.id && localBigIdeaId && String(activeBigIdea.id) === localBigIdeaId) {
@@ -259,7 +268,14 @@ export default function Dashboard() {
   const deleteToolbox = useDeleteToolbox();
   const createToolboxMutation = useCreateToolbox();
 
-  const effectiveToolboxId = localToolboxId || activeToolbox?.id;
+  // Validasi activeToolbox milik series/modul yang aktif
+  const activeToolboxInContext = (() => {
+    if (!activeToolbox || !activeSeriesId) return null;
+    if (activeToolbox.isOrchestrator && String(activeToolbox.seriesId) === activeSeriesId) return activeToolbox;
+    if (effectiveBigIdeaId && String(activeToolbox.bigIdeaId) === String(effectiveBigIdeaId)) return activeToolbox;
+    return null;
+  })();
+  const effectiveToolboxId = localToolboxId || activeToolboxInContext?.id;
   const shouldFetchAgents = !!effectiveToolboxId;
   const { data: agents = [], isLoading: agentsLoading } = useAgents(shouldFetchAgents ? effectiveToolboxId : undefined);
   const filteredAgents = shouldFetchAgents ? agents : [];
@@ -276,18 +292,19 @@ export default function Dashboard() {
     if (bigIdeaCreationCooldown.current) return;
     if (toolboxCreationCooldown.current) return;
     if (localToolboxId) return;
-    if (!activeBigIdea || toolboxes.length === 0) return;
+    // Hanya auto-select jika BigIdea aktif benar-benar milik series saat ini
+    if (!contextBigIdea || toolboxes.length === 0) return;
     // Don't auto-switch if user intentionally navigated into the Series-level Hub
-    if (navLevel === 'agents' && activeToolbox?.id && orchestratorHub?.id && String(activeToolbox.id) === String(orchestratorHub.id)) return;
-    if (!activeToolbox) {
+    if (navLevel === 'agents' && activeToolboxInContext?.id && orchestratorHub?.id && String(activeToolboxInContext.id) === String(orchestratorHub.id)) return;
+    if (!activeToolboxInContext) {
       activateToolbox.mutate(String(toolboxes[0].id));
     } else {
-      const toolboxBelongs = toolboxes.some((tb) => tb.id === activeToolbox.id);
+      const toolboxBelongs = toolboxes.some((tb) => tb.id === activeToolboxInContext.id);
       if (!toolboxBelongs) {
         activateToolbox.mutate(String(toolboxes[0].id));
       }
     }
-  }, [activeBigIdea?.id, toolboxes, activeToolbox?.id, orchestratorHub?.id, navLevel]);
+  }, [contextBigIdea?.id, toolboxes, activeToolboxInContext?.id, orchestratorHub?.id, navLevel]);
 
   useEffect(() => {
     if (!effectiveToolboxId || filteredAgents.length === 0) return;
@@ -328,20 +345,20 @@ export default function Dashboard() {
     if (navInitialized) return;
     if (allSeries.length === 0) return;
     if (!activeSeriesId) return;
-    if (activeBigIdea && activeToolbox && filteredAgents.length > 0) {
+    if (contextBigIdea && activeToolboxInContext && filteredAgents.length > 0) {
       setNavLevel('agents');
       setNavInitialized(true);
-    } else if (activeBigIdea && toolboxes.length > 0) {
+    } else if (contextBigIdea && toolboxes.length > 0) {
       setNavLevel('toolboxes');
       setNavInitialized(true);
-    } else if (activeBigIdea) {
+    } else if (contextBigIdea) {
       setNavLevel('bigIdeas');
       setNavInitialized(true);
     } else {
       setNavLevel('bigIdeas');
       setNavInitialized(true);
     }
-  }, [navInitialized, allSeries.length, activeSeriesId, activeBigIdea?.id, activeToolbox?.id, toolboxes.length, filteredAgents.length]);
+  }, [navInitialized, allSeries.length, activeSeriesId, contextBigIdea?.id, activeToolboxInContext?.id, toolboxes.length, filteredAgents.length]);
 
   if (authLoading) {
     return (
@@ -488,8 +505,8 @@ export default function Dashboard() {
   };
 
   const currentToolbox = localToolboxId
-    ? [...toolboxes, orchestratorHub].find(tb => tb && String(tb.id) === localToolboxId)
-    : activeToolbox;
+    ? ([...toolboxes, orchestratorHub].find(tb => tb && String(tb.id) === localToolboxId) || activeToolboxInContext)
+    : activeToolboxInContext;
   const isCurrentToolboxHub = currentToolbox?.isOrchestrator === true;
 
   const renderPanel = () => {
@@ -729,10 +746,10 @@ export default function Dashboard() {
                     <span className="truncate">Chatbot - {activeBigIdeaInCurrentSeries.name}</span>
                   </DropdownMenuItem>
                 )}
-                {activeToolbox && (
+                {currentToolbox && (
                   <DropdownMenuItem onClick={() => { navigateToLevel('agents'); setSidebarCollapsed(false); }} className="gap-2 pl-10">
                     <Bot className="w-4 h-4 text-primary" />
-                    <span className="truncate">Alat Bantu - {activeToolbox.name}</span>
+                    <span className="truncate">Alat Bantu - {currentToolbox.name}</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -1473,8 +1490,8 @@ export default function Dashboard() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel>Alat Bantu{activeToolbox ? ` - ${activeToolbox.name}` : ""}</DropdownMenuLabel>
-                {!activeToolbox ? (
+                <DropdownMenuLabel>Alat Bantu{currentToolbox ? ` - ${currentToolbox.name}` : ""}</DropdownMenuLabel>
+                {!currentToolbox ? (
                   <div className="px-2 py-3 text-sm text-muted-foreground text-center">
                     Pilih Chatbot terlebih dahulu
                   </div>
