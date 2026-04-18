@@ -443,7 +443,7 @@ export default function Dashboard() {
         isOrchestrator: false,
         name: modulOrchName.trim(),
         description: modulOrchDescription.trim(),
-        purpose: "Orchestrator untuk Modul " + activeBigIdea.name,
+        purpose: "Orkestrator untuk Modul " + activeBigIdea.name,
         capabilities: [],
         limitations: [],
         sortOrder: 0,
@@ -451,7 +451,7 @@ export default function Dashboard() {
       newToolboxId = newToolbox.id;
       await apiRequest("POST", "/api/agents", {
         name: modulOrchName.trim(),
-        description: modulOrchDescription.trim() || `Orchestrator untuk ${activeBigIdea.name}`,
+        description: modulOrchDescription.trim() || `Orkestrator untuk ${activeBigIdea.name}`,
         toolboxId: newToolbox.id,
         bigIdeaId: activeBigIdea.id,
         isOrchestrator: true,
@@ -1427,7 +1427,7 @@ export default function Dashboard() {
                       </Avatar>
                       <span className="font-medium text-sm md:text-base truncate">{activeAgent.name}</span>
                       {activeAgent.orchestratorRole === "orchestrator" && (
-                        <Badge variant="secondary" className="text-[10px] md:text-xs hidden sm:inline-flex">Orchestrator</Badge>
+                        <Badge variant="secondary" className="text-[10px] md:text-xs hidden sm:inline-flex">Orkestrator</Badge>
                       )}
                     </>
                   ) : isCurrentToolboxHub && currentToolbox ? (
@@ -1478,7 +1478,7 @@ export default function Dashboard() {
                       </Avatar>
                       <span className="truncate">{agent.name}</span>
                       {agent.isOrchestrator && (
-                        <Badge className="text-xs bg-purple-500/20 text-purple-600 border-purple-500/30">Orchestrator</Badge>
+                        <Badge className="text-xs bg-purple-500/20 text-purple-600 border-purple-500/30">Orkestrator</Badge>
                       )}
                       {agent.isActive && (
                         <Badge variant="secondary" className="ml-auto text-xs">Aktif</Badge>

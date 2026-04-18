@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 import type { SeriesWithHierarchy } from "@shared/schema";
 
 const roleLabels: Record<string, string> = {
-  orchestrator: "Orchestrator",
+  orchestrator: "Orkestrator",
   specialist: "Spesialis",
   standalone: "Agen",
 };
@@ -528,7 +528,7 @@ export default function Marketplace() {
               <span className="flex items-center gap-1.5">
                 <Badge className={cn("text-[10px] px-1.5 py-0", roleColors.orchestrator)}>
                   <Crown className="h-2.5 w-2.5 mr-0.5" />
-                  Orchestrator
+                  Orkestrator
                 </Badge>
                 Hub pengarah utama
               </span>

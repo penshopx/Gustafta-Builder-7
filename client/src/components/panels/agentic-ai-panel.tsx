@@ -910,7 +910,7 @@ export function AgenticAIPanel() {
             onChange={(v) => save({ agentRole: v })}
             options={[
               "Standalone",
-              "Orchestrator",
+              "Orkestrator",
               "Spesialis: Clarifier",
               "Spesialis: Knowledge Curator",
               "Spesialis: Compliance",

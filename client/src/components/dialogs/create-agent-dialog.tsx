@@ -234,7 +234,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                   {isOrchestrator && (
                     <Badge className="gap-1 bg-purple-500/20 text-purple-600 border-purple-500/30">
                       <Network className="h-3 w-3" />
-                      Orchestrator
+                      Orkestrator
                     </Badge>
                   )}
                 </div>
@@ -258,11 +258,11 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                   <div className="p-2 rounded-lg bg-purple-500/10 w-fit">
                     <Network className="w-5 h-5 text-purple-500" />
                   </div>
-                  <CardTitle className="text-base mt-2">Buat Orchestrator</CardTitle>
+                  <CardTitle className="text-base mt-2">Buat Orkestrator</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CardDescription>
-                    Orchestrator utama untuk Modul "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke chatbot-chatbot lainnya.
+                    Orkestrator utama untuk Modul "{activeBigIdea.name}". Berfungsi sebagai pintu masuk dan pengarah ke chatbot-chatbot lainnya.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -328,7 +328,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
           <ScrollArea className="h-[400px] pr-4">
             {forceOrchestrator && activeBigIdea && (
               <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20 space-y-1 mb-3">
-                <p className="text-xs text-muted-foreground">Orchestrator untuk Modul:</p>
+                <p className="text-xs text-muted-foreground">Orkestrator untuk Modul:</p>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="gap-1">
                     <Lightbulb className="h-3 w-3" />
@@ -336,7 +336,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                   </Badge>
                   <Badge className="gap-1 bg-purple-500/20 text-purple-600 border-purple-500/30">
                     <Network className="h-3 w-3" />
-                    Orchestrator (di atas semua Chatbot)
+                    Orkestrator (di atas semua Chatbot)
                   </Badge>
                 </div>
               </div>
