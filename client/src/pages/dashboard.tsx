@@ -150,6 +150,9 @@ export default function Dashboard() {
   const bigIdeaCreationCooldown = useRef(false);
   const toolboxCreationCooldown = useRef(false);
   const forceOrchestratorSelect = useRef(false);
+  type HierarchyLevel = 'series' | 'bigIdeas' | 'toolboxes' | 'agents';
+  const [navLevel, setNavLevel] = useState<HierarchyLevel>('series');
+  const [navInitialized, setNavInitialized] = useState(false);
   
   const { data: allSeries = [] } = useQuery<any[]>({ queryKey: ["/api/series"] });
   const { data: activeDomains = [] } = useQuery<any[]>({ queryKey: ["/api/domains"], select: (d: any[]) => d.filter((x: any) => x.status === "active") });
@@ -287,6 +290,7 @@ export default function Dashboard() {
     if (agentCreationCooldown.current) return;
     if (toolboxCreationCooldown.current) return;
     if (bigIdeaCreationCooldown.current) return;
+    if (navLevel !== 'agents') return;
 
     if (forceOrchestratorSelect.current) {
       forceOrchestratorSelect.current = false;
@@ -314,11 +318,7 @@ export default function Dashboard() {
         setActiveAgent.mutate(String(pickDefault().id));
       }
     }
-  }, [effectiveToolboxId, filteredAgents, activeAgent?.id]);
-
-  type HierarchyLevel = 'series' | 'bigIdeas' | 'toolboxes' | 'agents';
-  const [navLevel, setNavLevel] = useState<HierarchyLevel>('series');
-  const [navInitialized, setNavInitialized] = useState(false);
+  }, [effectiveToolboxId, filteredAgents, activeAgent?.id, navLevel]);
 
   useEffect(() => {
     if (navInitialized) return;
@@ -660,6 +660,7 @@ export default function Dashboard() {
     }
     if (level === 'toolboxes') {
       setLocalToolboxId(undefined);
+      forceOrchestratorSelect.current = false;
     }
     setNavLevel(level);
   };
@@ -691,7 +692,7 @@ export default function Dashboard() {
     setLocalToolboxId(String(tb.id));
     handleToolboxSelect(tb);
     queryClient.setQueryData(["/api/agents/active"], null);
-    forceOrchestratorSelect.current = true;
+    forceOrchestratorSelect.current = !!(tb as any).isOrchestrator || !!(tb as any).hasOrchestrator;
     setNavLevel('agents');
   };
 
