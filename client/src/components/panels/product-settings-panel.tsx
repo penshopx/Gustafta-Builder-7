@@ -54,7 +54,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
       brandingName: agent.brandingName || "",
       brandingLogo: agent.brandingLogo || "",
     });
-  }, [agent]);
+  }, [agent.id]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: typeof settings) => {

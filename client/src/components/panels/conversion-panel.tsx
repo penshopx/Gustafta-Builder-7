@@ -139,7 +139,7 @@ export function ConversionPanel({ agent }: { agent: any }) {
       ctaTriggerOnScore: agent.ctaTriggerOnScore ?? 0,
       conversionOffers: (agent.conversionOffers as Offer[]) || [],
     });
-  }, [agent]);
+  }, [agent.id]);
 
   const { data: leads = [], isLoading: leadsLoading } = useQuery<Lead[]>({
     queryKey: ["/api/leads", agent.id],

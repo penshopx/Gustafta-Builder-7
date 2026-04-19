@@ -710,7 +710,7 @@ export function AgenticAIPanel() {
         openClawClauseRefRequired: (agent as any).openClawClauseRefRequired ?? false,
       });
     }
-  }, [agent]);
+  }, [agent?.id]);
 
   const save = async (patch: Partial<Settings>) => {
     if (!agent) return;

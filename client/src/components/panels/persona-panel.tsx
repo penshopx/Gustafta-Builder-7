@@ -91,6 +91,8 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Reset form HANYA ketika berpindah ke agent berbeda (agent.id berubah)
+    // Jangan reset saat data agent diperbarui (autoSave) agar field lain tidak hilang
     setFormData({
       name: agent.name,
       description: agent.description,
@@ -122,7 +124,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       qualityBar: (agent as any).qualityBar || "",
       riskCompliance: (agent as any).riskCompliance || "",
     });
-  }, [agent]);
+  }, [agent.id]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

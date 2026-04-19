@@ -74,7 +74,7 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
       widgetWelcomeMessage: agent.widgetWelcomeMessage || "",
       widgetButtonIcon: agent.widgetButtonIcon || "chat",
     });
-  }, [agent]);
+  }, [agent.id]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: typeof settings) => {
