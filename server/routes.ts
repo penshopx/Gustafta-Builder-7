@@ -4742,8 +4742,6 @@ Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapang
       if (!prompt || !docType) {
         return res.status(400).json({ error: "prompt and docType are required" });
       }
-      const openai = new OpenAI();
-
       // === Enrich with agent KB + Project Brain ===
       let docKbContext = "";
       let docBrainContext = "";
@@ -4897,8 +4895,6 @@ Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapang
     try {
       const { packType, companyProfile, tenderProfile, requirements, technicalApproach, complianceAnswers, selectedOutputs, agentId } = req.body;
       if (!packType) return res.status(400).json({ error: "packType wajib diisi" });
-
-      const openai = new OpenAI();
 
       // === INTEGRASI KNOWLEDGE BASE & PROJECT BRAIN ===
       let kbContext = "";
@@ -5145,8 +5141,6 @@ PENTING:
       // Truncate if too long
       const maxChars = 18000;
       const truncated = rawText.length > maxChars ? rawText.slice(0, maxChars) + "\n[... dipotong untuk efisiensi ...]" : rawText;
-
-      const openai = new OpenAI();
 
       const extractPrompt = `Kamu adalah AI spesialis pengadaan konstruksi LPSE Indonesia. 
 Berikut adalah isi teks dokumen tender (KAK/RKS/LDP/LKPBJ):
@@ -6433,8 +6427,6 @@ Return JSON format:
       const { content, action, language = "Bahasa Indonesia", customPrompt } = req.body;
       if (!content || !action) return res.status(400).json({ error: "content dan action wajib diisi" });
 
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
       const actionPrompts: Record<string, string> = {
         improve: `Anda adalah editor profesional. Perbaiki kualitas tulisan berikut: buat lebih jelas, lebih kohesif, lebih profesional, dan lebih mudah dipahami — tanpa mengubah fakta atau makna aslinya. Pertahankan format Markdown yang ada. Kembalikan hanya teks yang sudah diperbaiki, tanpa komentar.`,
         summarize: `Anda adalah asisten ringkasan. Buat ringkasan padat dari konten berikut — tangkap semua poin utama, keputusan kunci, dan informasi penting dalam format yang jauh lebih singkat. Gunakan bullet points jika sesuai. Mulai langsung dengan ringkasan, tanpa pengantar.`,
@@ -6476,8 +6468,6 @@ Return JSON format:
       if (!topic || !documentType || !layer) {
         return res.status(400).json({ error: "topic, documentType, dan layer wajib diisi" });
       }
-
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       // Get agent context if agentId provided
       let agentContext = "";
