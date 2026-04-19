@@ -1097,6 +1097,9 @@ export async function registerRoutes(
   // Update agent
   app.patch("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
+      if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ error: "No update data provided" });
+      }
       const agent = await storage.updateAgent(req.params.id as string, req.body);
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });

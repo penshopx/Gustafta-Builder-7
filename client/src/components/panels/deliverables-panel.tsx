@@ -349,7 +349,7 @@ export function DeliverablesPanel({ agent }: DeliverablesPanelProps) {
 
   const save = (newSelected: DeliverableKey[], newBundle: string) => {
     updateAgent.mutate(
-      { id: agent.id, deliverables: newSelected, deliverableBundle: newBundle },
+      { id: agent.id, data: { deliverables: newSelected as any, deliverableBundle: newBundle } },
       {
         onError: () => toast({ title: "Gagal menyimpan", description: "Coba lagi.", variant: "destructive" }),
       }
