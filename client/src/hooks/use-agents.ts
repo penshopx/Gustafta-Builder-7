@@ -13,6 +13,13 @@ function invalidateHierarchy() {
   queryClient.invalidateQueries({ queryKey: ["/api/context/active"] });
 }
 
+// Invalidasi khusus untuk update properties agent — tidak menyentuh active agent
+// agar tidak memicu race condition ganti agent aktif saat form disimpan
+function invalidateAgentProperties(id: string) {
+  queryClient.invalidateQueries({ queryKey: ["/api/agents", id] });
+  queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+}
+
 export function useAgents(toolboxId?: number | string) {
   const queryKey = toolboxId
     ? ["/api/agents", { toolboxId: String(toolboxId) }]
@@ -62,9 +69,13 @@ export function useUpdateAgent() {
       const response = await apiRequest("PATCH", `/api/agents/${id}`, data);
       return await response.json();
     },
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/agents", id] });
-      invalidateHierarchy();
+    onSuccess: (updatedAgent, { id }) => {
+      // Gunakan hasil PATCH langsung untuk update cache — menghindari re-fetch
+      // yang bisa memicu race condition penggantian active agent
+      if (updatedAgent) {
+        queryClient.setQueryData(["/api/agents", id], updatedAgent);
+      }
+      invalidateAgentProperties(id);
     },
   });
 }

@@ -882,6 +882,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setActiveAgent(id: string): Promise<Agent | undefined> {
+    // Deaktivasi semua agent terlebih dahulu agar tidak ada duplikat isActive=true
+    await db.update(agents).set({ isActive: false }).where(eq(agents.isActive, true));
     const result = await db.update(agents)
       .set({ isActive: true })
       .where(eq(agents.id, parseInt(id)))
