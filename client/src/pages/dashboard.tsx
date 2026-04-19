@@ -165,6 +165,7 @@ export default function Dashboard() {
 
   const [localBigIdeaId, setLocalBigIdeaId] = useState<string | undefined>();
   const [localToolboxId, setLocalToolboxId] = useState<string | undefined>();
+  const [localAgentId, setLocalAgentId] = useState<string | undefined>();
 
   // BigIdea yang valid untuk konteks series aktif saat ini (lokal dulu, lalu API)
   const contextBigIdea = (() => {
@@ -289,6 +290,12 @@ export default function Dashboard() {
   }, [activeToolbox?.id, localToolboxId]);
 
   useEffect(() => {
+    if (activeAgent?.id && localAgentId && String(activeAgent.id) === localAgentId) {
+      setLocalAgentId(undefined);
+    }
+  }, [activeAgent?.id, localAgentId]);
+
+  useEffect(() => {
     if (bigIdeaCreationCooldown.current) return;
     if (toolboxCreationCooldown.current) return;
     if (localToolboxId) return;
@@ -318,6 +325,7 @@ export default function Dashboard() {
       const orchestratorAgent = filteredAgents.find(a => a.isOrchestrator);
       if (orchestratorAgent) {
         if (String(activeAgent?.id) !== String(orchestratorAgent.id)) {
+          setLocalAgentId(String(orchestratorAgent.id));
           setActiveAgent.mutate(String(orchestratorAgent.id));
         }
         return;
@@ -330,20 +338,27 @@ export default function Dashboard() {
       if (orchestratorBelongs) return;
     }
 
+    // Juga skip jika localAgentId sudah diset (menghindari dobel-select)
+    if (localAgentId && filteredAgents.some(a => String(a.id) === localAgentId)) return;
+
     const pickDefault = () => {
       const orchestratorAgent = filteredAgents.find(a => a.isOrchestrator);
       return orchestratorAgent || filteredAgents[0];
     };
 
     if (!activeAgent) {
-      setActiveAgent.mutate(String(pickDefault().id));
+      const def = pickDefault();
+      setLocalAgentId(String(def.id));
+      setActiveAgent.mutate(String(def.id));
     } else {
       const agentBelongs = filteredAgents.some((a) => String(a.id) === String(activeAgent.id));
       if (!agentBelongs) {
-        setActiveAgent.mutate(String(pickDefault().id));
+        const def = pickDefault();
+        setLocalAgentId(String(def.id));
+        setActiveAgent.mutate(String(def.id));
       }
     }
-  }, [effectiveToolboxId, filteredAgents, activeAgent?.id, navLevel]);
+  }, [effectiveToolboxId, filteredAgents, activeAgent?.id, navLevel, localAgentId]);
 
   useEffect(() => {
     if (navInitialized) return;
@@ -382,6 +397,7 @@ export default function Dashboard() {
   }
 
   const handleAgentSelect = (agent: Agent) => {
+    setLocalAgentId(String(agent.id));
     setActiveAgent.mutate(String(agent.id));
   };
 
@@ -514,7 +530,15 @@ export default function Dashboard() {
   const isCurrentToolboxHub = currentToolbox?.isOrchestrator === true;
 
   // Agent hanya valid jika memang milik filteredAgents toolbox aktif saat ini
-  const currentAgent = activeAgent && filteredAgents.some(a => String(a.id) === String(activeAgent.id)) ? activeAgent : null;
+  // localAgentId memberi respons instan seperti localToolboxId
+  const currentAgent = (() => {
+    if (localAgentId) {
+      const local = filteredAgents.find(a => String(a.id) === localAgentId);
+      if (local) return local;
+    }
+    if (activeAgent && filteredAgents.some(a => String(a.id) === String(activeAgent.id))) return activeAgent;
+    return null;
+  })();
 
   const renderPanel = () => {
     if (!currentAgent) {
@@ -704,6 +728,7 @@ export default function Dashboard() {
       if (firstBigIdea) {
         setLocalBigIdeaId(String(firstBigIdea.id));
         setLocalToolboxId(undefined);
+        setLocalAgentId(undefined);
         activateBigIdea.mutate(String(firstBigIdea.id));
       }
     }
@@ -712,12 +737,14 @@ export default function Dashboard() {
   const handleBigIdeaDrillDown = (bi: BigIdea) => {
     setLocalBigIdeaId(String(bi.id));
     setLocalToolboxId(undefined);
+    setLocalAgentId(undefined);
     handleBigIdeaSelect(bi);
     setNavLevel('toolboxes');
   };
 
   const handleToolboxDrillDown = (tb: Toolbox) => {
     setLocalToolboxId(String(tb.id));
+    setLocalAgentId(undefined);
     handleToolboxSelect(tb);
     queryClient.setQueryData(["/api/agents/active"], null);
     forceOrchestratorSelect.current = !!(tb as any).isOrchestrator || !!(tb as any).hasOrchestrator;
