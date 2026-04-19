@@ -324,7 +324,11 @@ export default function Dashboard() {
       }
     }
 
-    if (activeAgent?.isOrchestrator) return;
+    // Hanya skip jika orkestrator aktif memang milik context saat ini
+    if (activeAgent?.isOrchestrator) {
+      const orchestratorBelongs = filteredAgents.some(a => String(a.id) === String(activeAgent.id));
+      if (orchestratorBelongs) return;
+    }
 
     const pickDefault = () => {
       const orchestratorAgent = filteredAgents.find(a => a.isOrchestrator);
