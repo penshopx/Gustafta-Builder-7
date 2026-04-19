@@ -1635,9 +1635,22 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             </DialogContent>
           </Dialog>
 
+          <Button
+            variant="outline"
+            disabled={agent.ragEnabled === false}
+            onClick={() => {
+              setNewItem({ name: "", type: "file", content: "", description: "", fileName: "", fileSize: 0, fileType: undefined, fileUrl: "", knowledgeLayer: "operational" });
+              setDialogOpen(true);
+            }}
+            data-testid="button-kb-upload-doc"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Dokumen
+          </Button>
+
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button disabled={agent.ragEnabled === false}>
+              <Button disabled={agent.ragEnabled === false} data-testid="button-kb-add">
                 <Plus className="w-4 h-4 mr-2" />
                 Tambah Knowledge
               </Button>
