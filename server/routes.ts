@@ -6577,7 +6577,8 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
 
       // Use Gemini REST API directly to avoid SDK version/endpoint issues
       const geminiApiKey = process.env.GEMINI_API_KEY;
-      if (!geminiApiKey) throw new Error("GEMINI_API_KEY not configured");
+      console.log("[KB-generate] CODE_VERSION=v4-direct-fetch, key present:", !!geminiApiKey, "prefix:", geminiApiKey?.substring(0, 8));
+      if (!geminiApiKey) throw new Error("GEMINI_API_KEY not configured — set this secret in Replit");
       const geminiRestUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
       const geminiRestResp = await fetch(geminiRestUrl, {
         method: "POST",
