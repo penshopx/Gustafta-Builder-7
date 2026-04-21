@@ -247,12 +247,15 @@ const openai = new OpenAI({
 });
 
 // Gemini client — used as primary LLM for document generation
-// In dev: uses Replit's modelfarm proxy; in prod: uses real Gemini API via same proxy env vars
-const geminiApiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
-const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
+// In production: uses real GEMINI_API_KEY (direct Google API)
+// In dev: uses Replit's modelfarm proxy (localhost) if no real key present
+const realGeminiKey = process.env.GEMINI_API_KEY;
+const proxyGeminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+const proxyGeminiURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
+const useProxy = !realGeminiKey && proxyGeminiURL && !proxyGeminiURL.includes("localhost");
 const genai = new GoogleGenAI({
-  apiKey: geminiApiKey || "missing-gemini-key",
-  ...(geminiBaseURL ? { httpOptions: { baseUrl: geminiBaseURL, apiVersion: "" } } : {}),
+  apiKey: realGeminiKey || proxyGeminiKey || "missing-gemini-key",
+  ...(useProxy ? { httpOptions: { baseUrl: proxyGeminiURL, apiVersion: "" } } : {}),
 });
 
 // Configure multer for file uploads
