@@ -3486,6 +3486,23 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
   // ==================== Agent Templates API ====================
 
+  // Diagnostic: test Gemini API (no auth required, remove after debugging)
+  app.get("/api/diag/gemini", async (_req, res) => {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) return res.json({ status: "error", message: "GEMINI_API_KEY not set" });
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${key}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: "Say: OK" }] }], generationConfig: { maxOutputTokens: 5 } }),
+      });
+      const body = await r.text();
+      return res.json({ status: r.ok ? "ok" : "error", httpStatus: r.status, keyPrefix: key.substring(0, 8), body: body.substring(0, 500) });
+    } catch (e: any) {
+      return res.json({ status: "exception", message: e.message });
+    }
+  });
+
   // Get all templates
   app.get("/api/templates", async (_req, res) => {
     try {
