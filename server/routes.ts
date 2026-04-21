@@ -221,9 +221,18 @@ const MODE_RISK_RADAR = `Assess and report current project risks based on Projec
 - Provide 2-5 short reasons for each risk rating
 Keep it non-technical and actionable.`;
 
-const openaiApiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+const isProduction = process.env.NODE_ENV === "production";
 const rawBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-const openaiBaseURL = rawBaseURL && rawBaseURL.startsWith("http") ? rawBaseURL : undefined;
+// Replit AI Integrations proxy only runs locally (localhost) in the dev workspace.
+// In production deployments the proxy is unavailable, so fall back to a real API key.
+const isLocalhostProxy = rawBaseURL?.includes("localhost");
+const openaiApiKey = (isProduction || isLocalhostProxy)
+  ? (process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY)
+  : (process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY);
+const openaiBaseURL =
+  !isProduction && !isLocalhostProxy && rawBaseURL && rawBaseURL.startsWith("http")
+    ? rawBaseURL
+    : undefined;
 if (!openaiApiKey) {
   console.warn("[WARNING] No OpenAI API key found - AI chat will not work");
 }
