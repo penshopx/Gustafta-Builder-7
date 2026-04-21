@@ -223,16 +223,20 @@ Keep it non-technical and actionable.`;
 
 const isProduction = process.env.NODE_ENV === "production";
 const rawBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-// Replit AI Integrations proxy only runs locally (localhost) in the dev workspace.
-// In production deployments the proxy is unavailable, so fall back to a real API key.
+// In dev, Replit provides a localhost proxy — use it with its dummy key.
+// In production, the localhost proxy is unavailable — use the real OPENAI_API_KEY.
 const isLocalhostProxy = rawBaseURL?.includes("localhost");
-const openaiApiKey = (isProduction || isLocalhostProxy)
-  ? (process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY)
-  : (process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY);
-const openaiBaseURL =
-  !isProduction && !isLocalhostProxy && rawBaseURL && rawBaseURL.startsWith("http")
-    ? rawBaseURL
-    : undefined;
+let openaiApiKey: string | undefined;
+let openaiBaseURL: string | undefined;
+if (!isProduction && isLocalhostProxy && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+  // Development: use the Replit modelfarm proxy
+  openaiApiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+  openaiBaseURL = rawBaseURL;
+} else {
+  // Production (or dev without proxy): use the real OpenAI key
+  openaiApiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+  openaiBaseURL = undefined;
+}
 if (!openaiApiKey) {
   console.warn("[WARNING] No OpenAI API key found - AI chat will not work");
 }
