@@ -24,6 +24,7 @@ import path from "path";
 import fs from "fs";
 import { createRequire } from "module";
 import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import { subscriptionPlans, type SubscriptionPlanKey } from "./lib/mayar";
 import { isAuthenticated } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
@@ -243,6 +244,15 @@ if (!openaiApiKey) {
 const openai = new OpenAI({
   apiKey: openaiApiKey || "missing-key",
   ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}),
+});
+
+// Gemini client — used as primary LLM for document generation
+// In dev: uses Replit's modelfarm proxy; in prod: uses real Gemini API via same proxy env vars
+const geminiApiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
+const geminiBaseURL = process.env.AI_INTEGRATIONS_GEMINI_BASE_URL;
+const genai = new GoogleGenAI({
+  apiKey: geminiApiKey || "missing-gemini-key",
+  ...(geminiBaseURL ? { httpOptions: { baseUrl: geminiBaseURL, apiVersion: "" } } : {}),
 });
 
 // Configure multer for file uploads
@@ -6541,17 +6551,13 @@ Topik: ${topic}
 
 Buat dokumen KB berkualitas tinggi untuk topik ini.`;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        max_tokens: detail.maxTokens,
-        temperature: 0.35,
+      const geminiResponse = await genai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+        config: { maxOutputTokens: detail.maxTokens, temperature: 0.35 },
       });
 
-      const content = completion.choices[0]?.message?.content || "";
+      const content = geminiResponse.text || "";
 
       // Extract title from first # heading
       const titleMatch = content.match(/^#\s+(.+)/m);
