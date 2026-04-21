@@ -6558,13 +6558,24 @@ Topik: ${topic}
 
 Buat dokumen KB berkualitas tinggi untuk topik ini.`;
 
-      const geminiResponse = await genai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
-        config: { maxOutputTokens: detail.maxTokens, temperature: 0.35 },
+      // Use Gemini REST API directly to avoid SDK version/endpoint issues
+      const geminiApiKey = process.env.GEMINI_API_KEY;
+      if (!geminiApiKey) throw new Error("GEMINI_API_KEY not configured");
+      const geminiRestUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+      const geminiRestResp = await fetch(geminiRestUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+          generationConfig: { maxOutputTokens: detail.maxTokens, temperature: 0.35 },
+        }),
       });
-
-      const content = geminiResponse.text || "";
+      if (!geminiRestResp.ok) {
+        const errText = await geminiRestResp.text();
+        throw new Error(`Gemini API error ${geminiRestResp.status}: ${errText}`);
+      }
+      const geminiJson = await geminiRestResp.json() as any;
+      const content: string = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
       // Extract title from first # heading
       const titleMatch = content.match(/^#\s+(.+)/m);
