@@ -6580,7 +6580,7 @@ Buat dokumen KB berkualitas tinggi untuk topik ini.`;
       console.log("[KB-generate] CODE_VERSION=v7-gemini-direct, key present:", !!geminiKey);
       if (!geminiKey) throw new Error("GEMINI_API_KEY not configured — tambahkan secret di Replit");
       const geminiResp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
