@@ -255,6 +255,14 @@ for (const envVar of requiredEnvVars) {
         log("Catch-up seed error: " + (err as Error).message);
       }
 
+      // Catch-up: Pusat FAQ Peserta (added later, may not exist in older installations)
+      try {
+        const { seedPusatFaqPeserta } = await import("./seed-pusat-faq-peserta");
+        await seedPusatFaqPeserta("49465846");
+      } catch (err) {
+        log("Catch-up Pusat FAQ seed error: " + (err as Error).message);
+      }
+
       startScheduler();
     },
   );
