@@ -215,6 +215,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Siap Uji Kompetensi", module: "./seed-siap-ukom", fn: "seedSiapUkom" },
           { name: "Kompetensi Teknis", module: "./seed-kompetensi-teknis", fn: "seedKompetensiTeknis" },
           { name: "Pembinaan ASPEKINDO", module: "./seed-aspekindo", fn: "seedAspekindo" },
+          { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj" },
         ];
 
         for (const seed of seedTasks) {
@@ -234,6 +235,24 @@ for (const envVar of requiredEnvVars) {
         }
       } else {
         log("Production mode — skipping seed operations (data already in database)");
+      }
+
+      // Catch-up seeds: run any new seeds that are missing, even in production
+      const catchUpSeeds = [
+        { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj", checkName: "SKK AJJ — Asesmen Jarak Jauh" },
+      ];
+      try {
+        const allSeries = await storage.getSeries();
+        for (const seed of catchUpSeeds) {
+          const exists = allSeries.find((s: any) => s.name === seed.checkName);
+          if (!exists) {
+            log(`[CatchUp] Seeding missing data: ${seed.name}`);
+            const mod = await import(seed.module);
+            await mod[seed.fn]("49465846");
+          }
+        }
+      } catch (err) {
+        log("Catch-up seed error: " + (err as Error).message);
       }
 
       startScheduler();
