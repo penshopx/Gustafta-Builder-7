@@ -6575,12 +6575,11 @@ Topik: ${topic}
 
 Buat dokumen KB berkualitas tinggi untuk topik ini.`;
 
-      // Use OpenAI REST API directly
-      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-      console.log("[KB-generate] CODE_VERSION=v5-openai, key present:", !!openaiKey);
-      if (!openaiKey) throw new Error("OPENAI_API_KEY not configured");
-      const openaiBaseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "https://api.openai.com/v1";
-      const openaiResp = await fetch(`${openaiBaseUrl}/chat/completions`, {
+      // Use OpenAI REST API directly — always use real OpenAI endpoint, never proxy
+      const openaiKey = process.env.OPENAI_API_KEY;
+      console.log("[KB-generate] CODE_VERSION=v6-openai-direct, key present:", !!openaiKey);
+      if (!openaiKey) throw new Error("OPENAI_API_KEY not configured — tambahkan secret di Replit");
+      const openaiResp = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
