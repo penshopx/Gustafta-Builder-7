@@ -237,13 +237,18 @@ for (const envVar of requiredEnvVars) {
         log("Production mode — skipping seed operations (data already in database)");
       }
 
-      // Catch-up seeds: run any missing seeds (uses statically-imported functions)
+      // Catch-up seeds: run if SKK AJJ series is missing OR incomplete (<10 toolboxes)
       try {
+        const { seedSkkAjj } = await import("./seed-skk-ajj");
         const allSeries = await storage.getSeries();
-        const hasSkkAjj = allSeries.find((s: any) => s.name === "SKK AJJ — Asesmen Jarak Jauh");
-        if (!hasSkkAjj) {
-          log("[CatchUp] Seeding missing data: SKK AJJ — Asesmen Jarak Jauh");
-          const { seedSkkAjj } = await import("./seed-skk-ajj");
+        const skkSeries = allSeries.find((s: any) => s.name === "SKK AJJ — Asesmen Jarak Jauh");
+        let needsSeed = !skkSeries;
+        if (skkSeries) {
+          const toolboxes = await storage.getToolboxes(undefined, skkSeries.id);
+          if (toolboxes.length < 10) needsSeed = true;
+        }
+        if (needsSeed) {
+          log("[CatchUp] Seeding SKK AJJ — Asesmen Jarak Jauh (missing or incomplete)");
           await seedSkkAjj("49465846");
         }
       } catch (err) {
