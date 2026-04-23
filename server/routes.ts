@@ -6575,25 +6575,33 @@ Topik: ${topic}
 
 Buat dokumen KB berkualitas tinggi untuk topik ini.`;
 
-      // Use Gemini REST API directly to avoid SDK version/endpoint issues
-      const geminiApiKey = process.env.GEMINI_API_KEY;
-      console.log("[KB-generate] CODE_VERSION=v4-direct-fetch, key present:", !!geminiApiKey, "prefix:", geminiApiKey?.substring(0, 8));
-      if (!geminiApiKey) throw new Error("GEMINI_API_KEY not configured — set this secret in Replit");
-      const geminiRestUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
-      const geminiRestResp = await fetch(geminiRestUrl, {
+      // Use OpenAI REST API directly
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      console.log("[KB-generate] CODE_VERSION=v5-openai, key present:", !!openaiKey);
+      if (!openaiKey) throw new Error("OPENAI_API_KEY not configured");
+      const openaiBaseUrl = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "https://api.openai.com/v1";
+      const openaiResp = await fetch(`${openaiBaseUrl}/chat/completions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiKey}`,
+        },
         body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
-          generationConfig: { maxOutputTokens: detail.maxTokens, temperature: 0.35 },
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: detail.maxTokens,
+          temperature: 0.35,
         }),
       });
-      if (!geminiRestResp.ok) {
-        const errText = await geminiRestResp.text();
-        throw new Error(`Gemini API error ${geminiRestResp.status}: ${errText}`);
+      if (!openaiResp.ok) {
+        const errText = await openaiResp.text();
+        throw new Error(`OpenAI API error ${openaiResp.status}: ${errText}`);
       }
-      const geminiJson = await geminiRestResp.json() as any;
-      const content: string = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const openaiJson = await openaiResp.json() as any;
+      const content: string = openaiJson?.choices?.[0]?.message?.content || "";
 
       // Extract title from first # heading
       const titleMatch = content.match(/^#\s+(.+)/m);
