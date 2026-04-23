@@ -237,19 +237,14 @@ for (const envVar of requiredEnvVars) {
         log("Production mode — skipping seed operations (data already in database)");
       }
 
-      // Catch-up seeds: run any new seeds that are missing, even in production
-      const catchUpSeeds = [
-        { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj", checkName: "SKK AJJ — Asesmen Jarak Jauh" },
-      ];
+      // Catch-up seeds: run any missing seeds (uses statically-imported functions)
       try {
         const allSeries = await storage.getSeries();
-        for (const seed of catchUpSeeds) {
-          const exists = allSeries.find((s: any) => s.name === seed.checkName);
-          if (!exists) {
-            log(`[CatchUp] Seeding missing data: ${seed.name}`);
-            const mod = await import(seed.module);
-            await mod[seed.fn]("49465846");
-          }
+        const hasSkkAjj = allSeries.find((s: any) => s.name === "SKK AJJ — Asesmen Jarak Jauh");
+        if (!hasSkkAjj) {
+          log("[CatchUp] Seeding missing data: SKK AJJ — Asesmen Jarak Jauh");
+          const { seedSkkAjj } = await import("./seed-skk-ajj");
+          await seedSkkAjj("49465846");
         }
       } catch (err) {
         log("Catch-up seed error: " + (err as Error).message);
