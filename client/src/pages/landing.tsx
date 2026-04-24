@@ -274,7 +274,7 @@ export default function Landing() {
     },
     {
       question: "Bisa digunakan untuk sektor usaha apa saja?",
-      answer: "Gustafta dirancang untuk 30+ sektor usaha — konstruksi, retail, kesehatan, pendidikan, keuangan, hukum, properti, hospitality, logistik, marketing, dan masih banyak lagi. Setiap chatbot bisa dikustomisasi dengan Knowledge Base 7 tipe, Persona, Custom Domain, dan Conversion Layer sesuai kebutuhan industri."
+      answer: "Gustafta adalah platform AI chatbot terdalam untuk industri Jasa Konstruksi Indonesia — 19 ekosistem (Series) dan 250+ chatbot spesialis siap pakai mencakup Regulasi, Perizinan/SBU/SKK, Tender LPSE, Pasca Tender & Manajemen Kontrak, Pelaksanaan Proyek, Legalitas Konstruksi, Sertifikasi ISO/SMAP, K3, dan Pengembangan Profesi. Selain itu, platform juga fleksibel digunakan untuk 12 sektor usaha lain (kesehatan, pendidikan, keuangan, hukum, retail, properti, hospitality, logistik, marketing, customer service, kreatif) — tinggal kustomisasi Knowledge Base, Persona, dan Conversion Layer sesuai kebutuhan."
     },
   ];
 
@@ -317,9 +317,9 @@ export default function Landing() {
   ];
 
   const stats = [
-    { value: "30+", label: "Sektor Usaha" },
-    { value: "7", label: "Tipe Knowledge Base" },
-    { value: "5", label: "Level Hierarki" },
+    { value: "250+", label: "Chatbot Spesialis Konstruksi" },
+    { value: "19", label: "Ekosistem Series" },
+    { value: "12+", label: "Sektor Usaha Didukung" },
     { value: "24/7", label: "AI Selalu Aktif" },
   ];
 
@@ -1262,15 +1262,15 @@ export default function Landing() {
         <div className="container mx-auto px-4 text-center relative">
           <Badge variant="secondary" className="mb-6 bg-white/20 text-white border-white/30">
             <Bot className="h-3 w-3 mr-1" />
-            AI Chatbot Builder untuk Semua Sektor
+            AI Chatbot Builder Spesialis Konstruksi (Konfigurabel untuk Sektor Lain)
           </Badge>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Siap Membangun Chatbot AI Anda?
           </h2>
           <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto text-lg">
-            Bergabung dengan bisnis dari berbagai sektor yang sudah menggunakan Gustafta. 
-            Setup chatbot AI dan mulai melayani pelanggan hari ini.
+            Bergabung dengan kontraktor, konsultan, dan pelaku jasa konstruksi yang sudah memakai 19 series & 250+ chatbot Gustafta — 
+            dan tetap bisa Anda konfigurasi untuk sektor lain. Setup chatbot AI dan mulai melayani hari ini.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -1280,7 +1280,7 @@ export default function Landing() {
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
-              <span>30+ sektor usaha</span>
+              <span>250+ chatbot konstruksi</span>
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
@@ -1324,7 +1324,7 @@ export default function Landing() {
                 <span className="font-bold text-lg">Gustafta</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                AI Chatbot Builder platform untuk semua sektor usaha Indonesia.
+                AI Chatbot Builder spesialis jasa konstruksi Indonesia — 19 series, 250+ chatbot. Konfigurabel untuk sektor lain.
               </p>
               <div className="flex flex-wrap gap-2">
                 {trustBadges.slice(0, 2).map((badge) => (
