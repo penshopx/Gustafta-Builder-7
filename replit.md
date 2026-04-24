@@ -339,3 +339,8 @@ Pelengkapan lebih lanjut atas semua field teks yang sebelumnya kosong:
   - **Agent (Alat Bantu — Orkestrator & Regular)**: Tombol Pencil (edit cepat nama/deskripsi) + Trash2 muncul saat hover, menggantikan single Trash2 sebelumnya.
   - Mutations: `updateSeriesMutation` (PATCH /api/series/:id), `deleteSeriesMutation` (DELETE /api/series/:id), `updateAgentMutation` (PATCH /api/agents/:id) — semua sudah ada endpoint-nya di backend.
 - **Subscription flow**: Paket berbayar → status "pending" → tampilkan instruksi transfer bank di pricing.tsx (step 2 dialog) dan subscription.tsx. Free trial tetap langsung "active".
+### Test Suite — Kebijakan Agen (Apr 2026, Task #6)
+Folder `tests/` berisi tes regresi ringan untuk memastikan helper `buildFinalSystemPrompt(agent)` di `server/lib/build-final-system-prompt.ts` tidak hilang saat refactor. Project belum pakai vitest/jest; runner pakai `node:test` builtin via tsx.
+- **Cara menjalankan**: `npx tsx tests/run.ts` (exit code non-zero kalau ada test fail)
+- **`tests/build-final-system-prompt.test.ts`** — unit test: section header lengkap saat 7 field terisi, section di-skip saat field kosong/whitespace, instruksi penolakan domain ada saat `domainCharter` diisi, kombinasi reasoning+interaction & risk+executionGate, fallback persona ke nama agen
+- **`tests/routes-helper-usage.test.ts`** — integrasi grep: import helper ada, minimal 3 panggilan `buildFinalSystemPrompt(agent)` di routes.ts, dan handler `POST /api/messages`, `POST /api/messages/stream`, serta fungsi `generateAIResponse` (Telegram/WhatsApp) masing-masing tetap memanggil helper. Kalau ada yang menghapus pemanggilan helper, test akan gagal.
