@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, GripVertical, Trash2, Target, BookOpen, Scale, CheckCircle2 } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Briefcase, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, GripVertical, Trash2, Target, BookOpen, Scale, CheckCircle2, FileText, Copy, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,48 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateAgent } from "@/hooks/use-agents";
 import { getCategoryById, getSubcategoryLabel } from "@/lib/categories";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { Agent } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+
+const PROMPT_SECTION_STYLES: Array<{
+  header: string;
+  label: string;
+  className: string;
+}> = [
+  { header: "=== PERSONA ===", label: "PERSONA", className: "bg-blue-100 text-blue-900 dark:bg-blue-950/60 dark:text-blue-200 border-blue-300 dark:border-blue-800" },
+  { header: "=== PRIMARY OUTCOME (TUJUAN UTAMA) ===", label: "PRIMARY OUTCOME", className: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800" },
+  { header: "=== WIN CONDITIONS (KONDISI MENANG PERCAKAPAN) ===", label: "WIN CONDITIONS", className: "bg-teal-100 text-teal-900 dark:bg-teal-950/60 dark:text-teal-200 border-teal-300 dark:border-teal-800" },
+  { header: "=== BRAND VOICE (WAJIB DIPATUHI) ===", label: "BRAND VOICE", className: "bg-violet-100 text-violet-900 dark:bg-violet-950/60 dark:text-violet-200 border-violet-300 dark:border-violet-800" },
+  { header: "=== INTERACTION RULES ===", label: "INTERACTION RULES", className: "bg-indigo-100 text-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-200 border-indigo-300 dark:border-indigo-800" },
+  { header: "=== DOMAIN BOUNDARIES (BATAS TOPIK) ===", label: "DOMAIN BOUNDARIES", className: "bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200 border-amber-300 dark:border-amber-800" },
+  { header: "=== QUALITY STANDARDS ===", label: "QUALITY STANDARDS", className: "bg-cyan-100 text-cyan-900 dark:bg-cyan-950/60 dark:text-cyan-200 border-cyan-300 dark:border-cyan-800" },
+  { header: "=== COMPLIANCE & RISK ===", label: "COMPLIANCE & RISK", className: "bg-red-100 text-red-900 dark:bg-red-950/60 dark:text-red-200 border-red-300 dark:border-red-800" },
+];
+
+function splitPromptSections(prompt: string): Array<{ label: string; className: string; body: string }> {
+  if (!prompt) return [];
+  const knownHeaders = PROMPT_SECTION_STYLES.map((s) => s.header);
+  const lines = prompt.split("\n");
+  const result: Array<{ label: string; className: string; body: string }> = [];
+  let current: { label: string; className: string; body: string } | null = null;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (knownHeaders.includes(trimmed)) {
+      if (current) result.push(current);
+      const meta = PROMPT_SECTION_STYLES.find((s) => s.header === trimmed)!;
+      current = { label: meta.label, className: meta.className, body: "" };
+    } else if (current) {
+      current.body += (current.body ? "\n" : "") + line;
+    }
+  }
+  if (current) result.push(current);
+  return result.map((s) => ({ ...s, body: s.body.replace(/^\n+|\n+$/g, "") }));
+}
 
 interface PersonaPanelProps {
   agent: Agent;
@@ -89,6 +126,43 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
   const [newContextRequired, setNewContextRequired] = useState(true);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewPrompt, setPreviewPrompt] = useState<string>("");
+  const [previewError, setPreviewError] = useState<string>("");
+  const [copiedPreview, setCopiedPreview] = useState(false);
+
+  const handleOpenPromptPreview = async () => {
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewError("");
+    setPreviewPrompt("");
+    setCopiedPreview(false);
+    try {
+      const res = await apiRequest("GET", `/api/agents/${agent.id}/preview-prompt`);
+      const data = await res.json();
+      setPreviewPrompt(data.prompt || "");
+    } catch (err: any) {
+      setPreviewError(err?.message || "Gagal memuat pratinjau prompt");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleCopyPreview = async () => {
+    if (!previewPrompt) return;
+    try {
+      await navigator.clipboard.writeText(previewPrompt);
+      setCopiedPreview(true);
+      toast({ title: "Tersalin", description: "Prompt akhir disalin ke clipboard." });
+      setTimeout(() => setCopiedPreview(false), 2000);
+    } catch {
+      toast({ title: "Gagal menyalin", description: "Browser tidak mengizinkan akses clipboard.", variant: "destructive" });
+    }
+  };
+
+  const previewSections = splitPromptSections(previewPrompt);
 
   useEffect(() => {
     // Reset form HANYA ketika berpindah ke agent berbeda (agent.id berubah)
@@ -1043,11 +1117,26 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       {/* Kebijakan Agen */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-violet-500" />
-            Kebijakan Agen
-          </CardTitle>
-          <CardDescription>Aturan tetap yang tidak boleh diubah oleh pengguna — suara merek, batas domain, standar kualitas, dan kepatuhan.</CardDescription>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-violet-500" />
+                Kebijakan Agen
+              </CardTitle>
+              <CardDescription>Aturan tetap yang tidak boleh diubah oleh pengguna — suara merek, batas domain, standar kualitas, dan kepatuhan.</CardDescription>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleOpenPromptPreview}
+              className="shrink-0 gap-2"
+              data-testid="button-preview-prompt"
+            >
+              <FileText className="w-4 h-4" />
+              Pratinjau Prompt AI
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -1151,6 +1240,95 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col" data-testid="dialog-preview-prompt">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-violet-500" />
+              Pratinjau Prompt AI Final
+            </DialogTitle>
+            <DialogDescription>
+              Hasil perakitan PERSONA + 7 field Kebijakan Agen yang dikirim ke model. Knowledge Base, Project Brain, dan memori user ditambahkan saat runtime chat.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-center justify-between gap-2 border-b pb-3">
+            <div className="text-xs text-muted-foreground">
+              {previewPrompt ? (
+                <span data-testid="text-preview-length">
+                  {previewPrompt.length.toLocaleString("id-ID")} karakter • {previewSections.length} section
+                </span>
+              ) : (
+                <span>Memuat prompt akhir…</span>
+              )}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCopyPreview}
+              disabled={!previewPrompt || previewLoading}
+              className="gap-2"
+              data-testid="button-copy-preview"
+            >
+              {copiedPreview ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  Tersalin
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  Salin
+                </>
+              )}
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-1 -mr-1">
+            {previewLoading ? (
+              <div className="flex items-center justify-center py-12 text-muted-foreground gap-2" data-testid="status-preview-loading">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Memuat prompt akhir…</span>
+              </div>
+            ) : previewError ? (
+              <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/40 dark:border-red-800 p-4 text-sm text-red-800 dark:text-red-200" data-testid="status-preview-error">
+                <div className="font-medium mb-1 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  Gagal memuat pratinjau
+                </div>
+                <div className="text-xs opacity-90">{previewError}</div>
+              </div>
+            ) : previewSections.length > 0 ? (
+              <div className="space-y-4 py-2">
+                {previewSections.map((section, idx) => (
+                  <div
+                    key={`${section.label}-${idx}`}
+                    className="rounded-md border overflow-hidden"
+                    data-testid={`section-preview-${section.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                  >
+                    <div className={`px-3 py-2 text-xs font-semibold tracking-wide border-b ${section.className}`}>
+                      {section.label}
+                    </div>
+                    <pre className="px-3 py-3 text-xs whitespace-pre-wrap font-mono leading-relaxed bg-muted/30">
+                      {section.body || "(kosong)"}
+                    </pre>
+                  </div>
+                ))}
+              </div>
+            ) : previewPrompt ? (
+              <pre className="text-xs whitespace-pre-wrap font-mono leading-relaxed p-3 bg-muted/30 rounded-md" data-testid="text-preview-raw">
+                {previewPrompt}
+              </pre>
+            ) : (
+              <div className="py-12 text-center text-sm text-muted-foreground" data-testid="status-preview-empty">
+                Belum ada konten untuk ditampilkan.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

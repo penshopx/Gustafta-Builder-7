@@ -1224,6 +1224,34 @@ export async function registerRoutes(
     }
   });
 
+  // Otorisasi pemilik untuk endpoint preview prompt — hanya pemilik agen
+  // atau admin (via ADMIN_USER_IDS) yang boleh melihat hasil perakitan
+  // PERSONA + Kebijakan Agen. Untuk agen legacy yang belum punya userId
+  // (mis. agen sistem yang di-seed sebelum kolom userId wajib), akses
+  // dibatasi HANYA untuk admin agar tidak ada bypass.
+  function assertCanPreviewAgentPrompt(req: any, agent: any): { ok: true } | { ok: false; status: number; error: string } {
+    const user = req.user as any;
+    const userId = user?.claims?.sub;
+    if (!userId) {
+      return { ok: false, status: 401, error: "Unauthorized" };
+    }
+    const adminIds = (process.env.ADMIN_USER_IDS || "")
+      .split(",")
+      .map((id: string) => id.trim())
+      .filter(Boolean);
+    const isAdmin = adminIds.includes(userId);
+    if (isAdmin) return { ok: true };
+    const ownerId = (agent && agent.userId) || "";
+    if (!ownerId) {
+      // Agen tanpa pemilik hanya boleh dibuka oleh admin.
+      return { ok: false, status: 403, error: "Forbidden: agen sistem hanya bisa dipratinjau admin" };
+    }
+    if (ownerId !== userId) {
+      return { ok: false, status: 403, error: "Forbidden: bukan pemilik agen" };
+    }
+    return { ok: true };
+  }
+
   // Preview hasil perakitan PERSONA + 7 field Kebijakan Agen menjadi
   // system prompt FINAL (tanpa Knowledge Base / Project Brain / memori,
   // yang ditambahkan saat runtime chat). Builder pakai untuk memastikan
@@ -1232,11 +1260,32 @@ export async function registerRoutes(
     try {
       const agent = await storage.getAgent(req.params.id as string);
       if (!agent) return res.status(404).json({ error: "Agent not found" });
+      const auth = assertCanPreviewAgentPrompt(req, agent);
+      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
       const prompt = buildFinalSystemPrompt(agent);
       res.json({ prompt, length: prompt.length });
     } catch (error) {
       console.error("policy-preview error:", error);
       res.status(500).json({ error: "Failed to build policy preview" });
+    }
+  });
+
+  // Preview prompt AI FINAL (PERSONA + 7 field Kebijakan Agen) untuk dashboard.
+  // Hanya pemilik agen (atau admin) yang boleh melihat. Ini dipakai oleh tombol
+  // "Pratinjau Prompt AI" di panel Persona/Kebijakan Agen agar builder bisa
+  // mengecek hasil suntikan Brand Voice / Domain Charter / Quality Bar tanpa
+  // harus mengaktifkan env DEBUG_PROMPT di server.
+  app.get("/api/agents/:id/preview-prompt", isAuthenticated, async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id as string);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      const auth = assertCanPreviewAgentPrompt(req, agent);
+      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+      const prompt = buildFinalSystemPrompt(agent);
+      res.json({ prompt, length: prompt.length });
+    } catch (error) {
+      console.error("preview-prompt error:", error);
+      res.status(500).json({ error: "Failed to build preview prompt" });
     }
   });
 
