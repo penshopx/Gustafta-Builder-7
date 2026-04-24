@@ -85,6 +85,11 @@ interface GeminiParsedJson {
 }
 
 async function generateWithGemini(agent: AgentRow): Promise<GeneratedPolicy> {
+  const sysPromptSnippet = (agent.system_prompt ?? "").trim();
+  const sysLine = sysPromptSnippet
+    ? `- System Prompt (kutipan ${Math.min(sysPromptSnippet.length, 400)} karakter): "${sysPromptSnippet.substring(0, 400)}${sysPromptSnippet.length > 400 ? "..." : ""}"`
+    : "- System Prompt: (kosong)";
+
   const prompt = `Anda adalah ahli desain agen AI untuk industri Jasa Konstruksi Indonesia. Saya perlu Anda menghasilkan 4 kebijakan untuk chatbot AI berikut:
 
 INFORMASI CHATBOT:
@@ -94,6 +99,7 @@ INFORMASI CHATBOT:
 - Tagline: ${agent.tagline || "(tidak ada)"}
 - Deskripsi: ${agent.description || "(tidak ada)"}
 - Apakah Hub/Orkestrator: ${agent.is_orchestrator ? "Ya (mengarahkan ke chatbot lain)" : "Tidak (spesialis langsung)"}
+${sysLine}
 
 TUGAS Anda — hasilkan JSON valid dengan 4 field berikut:
 
@@ -179,15 +185,16 @@ async function processAgent(client: PoolClient, agent: AgentRow): Promise<{ ok: 
     const policy = await generateWithGemini(agent);
     const qualityBar = QUALITY_BAR_BASE + (policy.quality_bar_extra ? " " + policy.quality_bar_extra : "");
 
+    // Preserve existing non-empty values; only fill kosong fields.
     await client.query(
       `UPDATE agents SET
-        primary_outcome = $1,
-        conversation_win_conditions = $2,
-        brand_voice_spec = $3,
-        interaction_policy = $4,
-        domain_charter = $5,
-        quality_bar = $6,
-        risk_compliance = $7
+        primary_outcome = COALESCE(NULLIF(primary_outcome, ''), $1),
+        conversation_win_conditions = COALESCE(NULLIF(conversation_win_conditions, ''), $2),
+        brand_voice_spec = COALESCE(NULLIF(brand_voice_spec, ''), $3),
+        interaction_policy = COALESCE(NULLIF(interaction_policy, ''), $4),
+        domain_charter = COALESCE(NULLIF(domain_charter, ''), $5),
+        quality_bar = COALESCE(NULLIF(quality_bar, ''), $6),
+        risk_compliance = COALESCE(NULLIF(risk_compliance, ''), $7)
       WHERE id = $8`,
       [
         policy.primary_outcome,

@@ -49,6 +49,7 @@ interface AgentRow {
   name: string;
   description: string | null;
   tagline: string | null;
+  system_prompt: string | null;
   series: string;
   toolbox: string;
   is_orchestrator: boolean;
@@ -82,6 +83,8 @@ interface GeminiCallResult {
 }
 
 async function callGemini(agent: AgentRow, attempt: number): Promise<GeminiCallResult> {
+  const sysSnippet = (agent.system_prompt ?? "").trim().substring(0, 300);
+  const sysLine = sysSnippet ? `System Prompt (kutipan): "${sysSnippet}${(agent.system_prompt ?? "").length > 300 ? "..." : ""}"` : "System Prompt: (kosong)";
   const prompt = `Anda ahli desain agen AI Jasa Konstruksi Indonesia. Buat 4 kebijakan untuk chatbot ini.
 
 CHATBOT:
@@ -90,6 +93,7 @@ Series: ${agent.series}
 Toolbox: ${agent.toolbox}
 Deskripsi: ${agent.description || "(tidak ada)"}
 Hub/Orkestrator: ${agent.is_orchestrator ? "Ya" : "Tidak"}
+${sysLine}
 
 Hasilkan JSON dengan EXACT field names berikut:
 {
@@ -154,9 +158,17 @@ async function fillOne(client: PoolClient, agent: AgentRow): Promise<boolean> {
       }
 
       const qualityBar = QUALITY_BAR_BASE + (qExtra ? " " + qExtra : "");
+      // Preserve existing non-empty values; only fill kosong fields.
       await client.query(
-        `UPDATE agents SET primary_outcome=$1, conversation_win_conditions=$2, brand_voice_spec=$3,
-          interaction_policy=$4, domain_charter=$5, quality_bar=$6, risk_compliance=$7 WHERE id=$8`,
+        `UPDATE agents SET
+          primary_outcome = COALESCE(NULLIF(primary_outcome, ''), $1),
+          conversation_win_conditions = COALESCE(NULLIF(conversation_win_conditions, ''), $2),
+          brand_voice_spec = COALESCE(NULLIF(brand_voice_spec, ''), $3),
+          interaction_policy = COALESCE(NULLIF(interaction_policy, ''), $4),
+          domain_charter = COALESCE(NULLIF(domain_charter, ''), $5),
+          quality_bar = COALESCE(NULLIF(quality_bar, ''), $6),
+          risk_compliance = COALESCE(NULLIF(risk_compliance, ''), $7)
+         WHERE id=$8`,
         [finalOutcome, winCond, BRAND_VOICE_BY_CAT[cat], INTERACTION_POLICY_BASE,
           charter, qualityBar, RISK_COMPLIANCE_BY_CAT[cat], agent.id]
       );
@@ -176,7 +188,7 @@ async function run(): Promise<void> {
   try {
     // Detect emptiness across ALL 7 policy fields
     const { rows: agents } = await client.query<AgentRow>(`
-      SELECT a.id, a.name, a.description, a.tagline,
+      SELECT a.id, a.name, a.description, a.tagline, a.system_prompt,
         s.name as series, t.name as toolbox, a.is_orchestrator
       FROM agents a
       JOIN toolboxes t ON a.toolbox_id = t.id
