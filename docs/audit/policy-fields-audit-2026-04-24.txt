@@ -24,3 +24,14 @@ Per-series count of agents with empty policy fields (target: all zeros)
 === TOTAL ===
           184 |                     0
 
+
+=== Build artifact verification ===
+$ md5sum dist/index.cjs
+b195f21293954c4f6e3ba85192e24963  dist/index.cjs
+
+$ git show HEAD:dist/index.cjs | md5sum
+b195f21293954c4f6e3ba85192e24963  -
+
+Catatan: hash identik = build deterministik. dist/index.cjs sudah merepresentasikan
+kode runtime terkini (perubahan task ini hanya skrip migrasi data + dokumentasi,
+tidak menyentuh server/, shared/, atau client/ — sehingga bundle byte-for-byte sama).
