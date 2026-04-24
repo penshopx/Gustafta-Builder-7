@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { useKnowledgeBases, useCreateKnowledgeBase, useDeleteKnowledgeBase, useUploadKnowledgeFile, useUpdateKnowledgeBase, useRagStats, useReprocessRag } from "@/hooks/use-knowledge-base";
 import { useUpdateAgent } from "@/hooks/use-agents";
-import type { KnowledgeBase } from "@shared/schema";
+import { useTaxonomy } from "@/hooks/use-taxonomy";
+import type { KnowledgeBase, KnowledgeTaxonomyTreeNode } from "@shared/schema";
 import type { Agent } from "@shared/schema";
 
 interface KnowledgeBasePanelProps {
@@ -158,6 +159,12 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
     fileType: undefined as string | undefined,
     fileUrl: "",
     knowledgeLayer: "operational" as "foundational" | "operational" | "case_memory",
+    // Hierarki + atribusi sumber primer + versioning.
+    taxonomyId: null as number | null,
+    sourceUrl: "",
+    sourceAuthority: "" as "" | "PUPR" | "LKPP" | "DJP" | "BNSP" | "LPJK" | "BSN" | "DJBC" | "Kemnaker" | "BPJS_Ketenagakerjaan" | "JDIH" | "internal" | "lainnya",
+    effectiveDate: "",
+    isShared: false,
   });
   const [editItem, setEditItem] = useState({
     name: "",
@@ -261,7 +268,13 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         processingStatus: "completed" as const,
         extractedText: "",
         knowledgeLayer: newItem.knowledgeLayer,
-      },
+        // Field hierarki & atribusi sumber primer (opsional, semua nullable di backend).
+        taxonomyId: newItem.taxonomyId ?? undefined,
+        sourceUrl: newItem.sourceUrl || undefined,
+        sourceAuthority: newItem.sourceAuthority || undefined,
+        effectiveDate: newItem.effectiveDate || undefined,
+        isShared: newItem.isShared,
+      } as any,
       {
         onSuccess: () => {
           toast({
@@ -279,6 +292,11 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             fileType: undefined,
             fileUrl: "",
             knowledgeLayer: "operational",
+            taxonomyId: null,
+            sourceUrl: "",
+            sourceAuthority: "",
+            effectiveDate: "",
+            isShared: false,
           });
         },
         onError: (error: any) => {
@@ -1639,7 +1657,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
             variant="outline"
             disabled={agent.ragEnabled === false}
             onClick={() => {
-              setNewItem({ name: "", type: "file", content: "", description: "", fileName: "", fileSize: 0, fileType: undefined, fileUrl: "", knowledgeLayer: "operational" });
+              setNewItem({ name: "", type: "file", content: "", description: "", fileName: "", fileSize: 0, fileType: undefined, fileUrl: "", knowledgeLayer: "operational", taxonomyId: null, sourceUrl: "", sourceAuthority: "", effectiveDate: "", isShared: false });
               setDialogOpen(true);
             }}
             data-testid="button-kb-upload-doc"
@@ -1712,7 +1730,10 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                 </Select>
                 <p className="text-xs text-muted-foreground">Tentukan di lapisan mana dokumen ini berada dalam hierarki knowledge agen.</p>
               </div>
-              
+
+              {/* === Klasifikasi Hierarki + Atribusi Sumber Primer (opsional) === */}
+              <TaxonomyAndSourceFields newItem={newItem} setNewItem={setNewItem} />
+
               {/* File Upload (Dokumen) */}
               {newItem.type === "file" && (
                 <div className="space-y-2">
@@ -2155,6 +2176,28 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
                               </Badge>
                             );
                           })()}
+                          {/* Status versioning: aktif/dicabut/draft */}
+                          {(() => {
+                            const status = (item as any).status || "active";
+                            if (status === "active") return null;
+                            const cfg: Record<string, { label: string; className: string }> = {
+                              superseded: { label: "Dicabut", className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800" },
+                              draft: { label: "Draft", className: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950/40 dark:text-slate-300 dark:border-slate-800" },
+                            };
+                            const c = cfg[status];
+                            if (!c) return null;
+                            return (
+                              <Badge variant="outline" className={`shrink-0 text-xs ${c.className}`} data-testid={`badge-status-${item.id}`}>
+                                {c.label}
+                              </Badge>
+                            );
+                          })()}
+                          {/* Atribusi sumber primer (PUPR/LKPP/dst) */}
+                          {(item as any).sourceAuthority && (
+                            <Badge variant="outline" className="shrink-0 text-xs bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800" data-testid={`badge-authority-${item.id}`}>
+                              {String((item as any).sourceAuthority).toUpperCase()}
+                            </Badge>
+                          )}
                           {(() => {
                             const kbStat = ragStats?.chunksByKb?.find(s => s.kbId === item.id);
                             const isProcessing = item.processingStatus === "processing" || kbStat?.processingStatus === "processing";
@@ -2437,6 +2480,164 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// =====================================================================
+// TaxonomyAndSourceFields — sub-komponen untuk metadata KB lanjutan:
+// dropdown sektor → subsektor (cascade), atribusi sumber primer,
+// tanggal berlaku, dan toggle berbagi antar agen.
+// Semua field opsional — KB tetap bisa disimpan tanpa diisi.
+// =====================================================================
+interface TaxonomyAndSourceFieldsProps {
+  newItem: {
+    taxonomyId: number | null;
+    sourceUrl: string;
+    sourceAuthority: "" | "PUPR" | "LKPP" | "DJP" | "BNSP" | "LPJK" | "BSN" | "DJBC" | "Kemnaker" | "BPJS_Ketenagakerjaan" | "JDIH" | "internal" | "lainnya";
+    effectiveDate: string;
+    isShared: boolean;
+    [k: string]: any;
+  };
+  setNewItem: (updater: any) => void;
+}
+
+function TaxonomyAndSourceFields({ newItem, setNewItem }: TaxonomyAndSourceFieldsProps) {
+  const { data: taxonomy = [] } = useTaxonomy();
+
+  // Cari sektor & subsektor terpilih dari pohon taksonomi.
+  const findSelected = (): { sektorId: number | null; subId: number | null } => {
+    if (newItem.taxonomyId == null) return { sektorId: null, subId: null };
+    for (const sektor of taxonomy) {
+      if (sektor.id === newItem.taxonomyId) return { sektorId: sektor.id, subId: null };
+      const sub = sektor.children?.find((c) => c.id === newItem.taxonomyId);
+      if (sub) return { sektorId: sektor.id, subId: sub.id };
+    }
+    return { sektorId: null, subId: null };
+  };
+  const { sektorId, subId } = findSelected();
+  const subsektorOptions: KnowledgeTaxonomyTreeNode[] =
+    taxonomy.find((s) => s.id === sektorId)?.children ?? [];
+
+  return (
+    <div className="space-y-3 p-3 rounded-md border bg-muted/30">
+      <p className="text-xs font-medium text-muted-foreground">Klasifikasi & Sumber Resmi (opsional)</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="kb-sektor" className="text-xs">Sektor</Label>
+          <Select
+            value={sektorId?.toString() ?? "none"}
+            onValueChange={(v) => {
+              const id = v === "none" ? null : parseInt(v);
+              setNewItem({ ...newItem, taxonomyId: id });
+            }}
+          >
+            <SelectTrigger id="kb-sektor" data-testid="select-kb-sektor">
+              <SelectValue placeholder="Pilih sektor" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— Tanpa Taksonomi —</SelectItem>
+              {taxonomy.map((s) => (
+                <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="kb-subsektor" className="text-xs">Subsektor</Label>
+          <Select
+            value={subId?.toString() ?? "none"}
+            onValueChange={(v) => {
+              if (v === "none") {
+                setNewItem({ ...newItem, taxonomyId: sektorId });
+              } else {
+                setNewItem({ ...newItem, taxonomyId: parseInt(v) });
+              }
+            }}
+            disabled={!sektorId || subsektorOptions.length === 0}
+          >
+            <SelectTrigger id="kb-subsektor" data-testid="select-kb-subsektor">
+              <SelectValue placeholder={sektorId ? "Pilih subsektor" : "Pilih sektor dulu"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— Sektor Saja —</SelectItem>
+              {subsektorOptions.map((sub) => (
+                <SelectItem key={sub.id} value={sub.id.toString()}>{sub.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="kb-source-authority" className="text-xs">Sumber Resmi</Label>
+          <Select
+            value={newItem.sourceAuthority || "none"}
+            onValueChange={(v) =>
+              setNewItem({ ...newItem, sourceAuthority: v === "none" ? "" : (v as any) })
+            }
+          >
+            <SelectTrigger id="kb-source-authority" data-testid="select-kb-source-authority">
+              <SelectValue placeholder="Pilih otoritas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— Tidak Ditentukan —</SelectItem>
+              <SelectItem value="PUPR">PUPR — Kementerian PUPR</SelectItem>
+              <SelectItem value="LKPP">LKPP — Pengadaan Pemerintah</SelectItem>
+              <SelectItem value="DJP">DJP — Pajak</SelectItem>
+              <SelectItem value="BNSP">BNSP — Sertifikasi Profesi</SelectItem>
+              <SelectItem value="LPJK">LPJK — Jasa Konstruksi</SelectItem>
+              <SelectItem value="BSN">BSN — Standar Nasional</SelectItem>
+              <SelectItem value="DJBC">DJBC — Bea Cukai</SelectItem>
+              <SelectItem value="Kemnaker">Kemnaker — Ketenagakerjaan</SelectItem>
+              <SelectItem value="BPJS_Ketenagakerjaan">BPJS Ketenagakerjaan</SelectItem>
+              <SelectItem value="JDIH">JDIH — Jaringan Dokumentasi Hukum</SelectItem>
+              <SelectItem value="internal">Internal Perusahaan</SelectItem>
+              <SelectItem value="lainnya">Lainnya</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="kb-effective-date" className="text-xs">Tanggal Berlaku</Label>
+          <Input
+            id="kb-effective-date"
+            type="date"
+            value={newItem.effectiveDate}
+            onChange={(e) => setNewItem({ ...newItem, effectiveDate: e.target.value })}
+            data-testid="input-kb-effective-date"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="kb-source-url" className="text-xs">URL Sumber (Pasal/PerLem/UU asli)</Label>
+        <Input
+          id="kb-source-url"
+          type="url"
+          placeholder="https://jdih.pu.go.id/..."
+          value={newItem.sourceUrl}
+          onChange={(e) => setNewItem({ ...newItem, sourceUrl: e.target.value })}
+          data-testid="input-kb-source-url"
+        />
+        <p className="text-xs text-muted-foreground">Tautan ke sumber primer yg akan disitir agen saat menjawab.</p>
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <Label htmlFor="kb-is-shared" className="text-xs">Bagikan ke agen lain dalam series</Label>
+          <p className="text-[11px] text-muted-foreground">KB ini akan ikut tersedia untuk agen lain bila ditandai shared.</p>
+        </div>
+        <Switch
+          id="kb-is-shared"
+          checked={newItem.isShared}
+          onCheckedChange={(v) => setNewItem({ ...newItem, isShared: v })}
+          data-testid="switch-kb-is-shared"
+        />
+      </div>
     </div>
   );
 }

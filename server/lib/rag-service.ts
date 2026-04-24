@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import type { InsertKnowledgeChunk, KnowledgeChunk } from "@shared/schema";
+import type { InsertKnowledgeChunk, KnowledgeChunk, KnowledgeBase } from "@shared/schema";
 
 let _openai: OpenAI | null = null;
 function getOpenAI(): OpenAI {
@@ -163,17 +163,47 @@ export async function processKnowledgeBaseForRAG(
   return knowledgeChunks;
 }
 
+/**
+ * Format atribusi sumber primer untuk satu KB sebagai header sitir
+ * di dalam context yg dikirim ke LLM. Membantu agen menyitir Pasal/Pasal/PerLem
+ * dengan tepat sesuai sumber resmi (PUPR/LKPP/DJP/BNSP/dst).
+ */
+function formatKBAttribution(kb: KnowledgeBase | undefined): string {
+  if (!kb) return "";
+  const parts: string[] = [];
+  if (kb.sourceAuthority) parts.push(`Sumber Resmi: ${kb.sourceAuthority.toUpperCase()}`);
+  if (kb.effectiveDate) {
+    const d = typeof kb.effectiveDate === "string" ? kb.effectiveDate : new Date(kb.effectiveDate as any).toISOString();
+    parts.push(`Berlaku: ${d.slice(0, 10)}`);
+  }
+  if (kb.sourceUrl) parts.push(`URL: ${kb.sourceUrl}`);
+  if (kb.status && kb.status !== "active") parts.push(`Status: ${kb.status}`);
+  return parts.length > 0 ? `[${parts.join(" | ")}]` : "";
+}
+
 export async function searchKnowledgeBase(
   query: string,
   allChunks: KnowledgeChunk[],
-  topK = RAG_DEFAULTS.topK
+  topK = RAG_DEFAULTS.topK,
+  kbMetadata?: Map<number, KnowledgeBase>
 ): Promise<string> {
   if (allChunks.length === 0) return "";
 
-  const chunksWithEmbeddings = allChunks.filter(c => c.embedding && (c.embedding as number[]).length > 0);
+  // Filter chunks dari KB yg sudah dicabut (status='superseded') jika metadata tersedia.
+  // KB tanpa metadata atau status='active'/'draft' tetap di-include (backward-compat untuk KB lama).
+  const filteredChunks = kbMetadata
+    ? allChunks.filter(c => {
+        const kb = kbMetadata.get(c.knowledgeBaseId);
+        return !kb || kb.status !== "superseded";
+      })
+    : allChunks;
+
+  if (filteredChunks.length === 0) return "";
+
+  const chunksWithEmbeddings = filteredChunks.filter(c => c.embedding && (c.embedding as number[]).length > 0);
 
   if (chunksWithEmbeddings.length === 0) {
-    return allChunks.map(c => c.content).join("\n\n");
+    return filteredChunks.map(c => c.content).join("\n\n");
   }
 
   const queryEmbedding = await createEmbedding(query);
@@ -191,7 +221,12 @@ export async function searchKnowledgeBase(
     .map(r => {
       const meta = r.chunk.metadata as Record<string, any>;
       const source = meta?.sourceName || "Knowledge Base";
-      return `[${source}] (relevance: ${(r.score * 100).toFixed(0)}%):\n${r.chunk.content}`;
+      const kb = kbMetadata?.get(r.chunk.knowledgeBaseId);
+      const attribution = formatKBAttribution(kb);
+      const header = attribution
+        ? `[${source}] ${attribution} (relevance: ${(r.score * 100).toFixed(0)}%):`
+        : `[${source}] (relevance: ${(r.score * 100).toFixed(0)}%):`;
+      return `${header}\n${r.chunk.content}`;
     })
     .join("\n\n---\n\n");
 }

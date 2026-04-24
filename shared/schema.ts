@@ -249,6 +249,21 @@ export const agents = pgTable("agents", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Knowledge Taxonomy Table
+// Hierarki 4-level: Sektor (root) → Subsektor → Topik → Klausul.
+// Self-referencing parent_id; level konsisten dengan jenjang yang dipilih.
+export const knowledgeTaxonomy = pgTable("knowledge_taxonomy", {
+  id: serial("id").primaryKey(),
+  parentId: integer("parent_id"),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  level: text("level").notNull().default("sektor"),
+  description: text("description").default(""),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Knowledge Bases Table
 export const knowledgeBases = pgTable("knowledge_bases", {
   id: serial("id").primaryKey(),
@@ -264,6 +279,15 @@ export const knowledgeBases = pgTable("knowledge_bases", {
   processingStatus: text("processing_status").default("completed"),
   extractedText: text("extracted_text").default(""),
   knowledgeLayer: text("knowledge_layer").default("operational"),
+  // Hierarki & versioning
+  taxonomyId: integer("taxonomy_id"),
+  sourceUrl: text("source_url").default(""),
+  sourceAuthority: text("source_authority").default(""),
+  effectiveDate: timestamp("effective_date"),
+  supersededById: integer("superseded_by_id"),
+  status: text("status").notNull().default("active"),
+  isShared: boolean("is_shared").default(false),
+  sharedScope: text("shared_scope"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -779,6 +803,36 @@ export type Agent = InsertAgent & {
   createdAt: string;
 };
 
+// Knowledge Taxonomy schema (4-level: sektor → subsektor → topik → klausul)
+export const TAXONOMY_LEVELS = ["sektor", "subsektor", "topik", "klausul"] as const;
+export const insertKnowledgeTaxonomySchema = z.object({
+  parentId: z.number().nullable().optional(),
+  name: z.string().min(1, "Name is required"),
+  slug: z.string().min(1, "Slug is required"),
+  level: z.enum(TAXONOMY_LEVELS).default("sektor"),
+  description: z.string().optional().default(""),
+  sortOrder: z.number().optional().default(0),
+  isActive: z.boolean().optional().default(true),
+});
+export type InsertKnowledgeTaxonomy = z.infer<typeof insertKnowledgeTaxonomySchema>;
+export type KnowledgeTaxonomyNode = InsertKnowledgeTaxonomy & {
+  id: number;
+  createdAt: string;
+};
+export type KnowledgeTaxonomyTreeNode = KnowledgeTaxonomyNode & {
+  children: KnowledgeTaxonomyTreeNode[];
+};
+
+// Source authorities resmi yang umum dipakai industri jasa konstruksi Indonesia.
+// Open-ended: nilai lain tetap diizinkan via "lainnya".
+export const KB_SOURCE_AUTHORITIES = [
+  "PUPR", "LKPP", "DJP", "BNSP", "LPJK", "BSN", "DJBC",
+  "Kemnaker", "BPJS_Ketenagakerjaan", "JDIH", "internal", "lainnya",
+] as const;
+
+export const KB_STATUSES = ["active", "superseded", "draft"] as const;
+export const KB_SHARED_SCOPES = ["series", "global"] as const;
+
 // Knowledge Base schema with file upload support
 export const insertKnowledgeBaseSchema = z.object({
   agentId: z.string(),
@@ -795,6 +849,15 @@ export const insertKnowledgeBaseSchema = z.object({
   processingStatus: z.enum(["pending", "processing", "completed", "failed"]).optional().default("completed"),
   extractedText: z.string().optional().default(""),
   knowledgeLayer: z.enum(["foundational", "operational", "case_memory"]).optional().default("operational"),
+  // Hierarki & versioning (semua opsional supaya backward-compat)
+  taxonomyId: z.number().nullable().optional(),
+  sourceUrl: z.string().optional().default(""),
+  sourceAuthority: z.string().optional().default(""),
+  effectiveDate: z.union([z.string(), z.date()]).nullable().optional(),
+  supersededById: z.number().nullable().optional(),
+  status: z.enum(KB_STATUSES).optional().default("active"),
+  isShared: z.boolean().optional().default(false),
+  sharedScope: z.enum(KB_SHARED_SCOPES).nullable().optional(),
 });
 
 export type InsertKnowledgeBase = z.infer<typeof insertKnowledgeBaseSchema>;

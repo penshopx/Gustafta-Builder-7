@@ -8,6 +8,7 @@ import {
   toolboxes,
   knowledgeBases,
   knowledgeChunks,
+  knowledgeTaxonomy,
   integrations,
   agentMessages,
   analyticsTable,
@@ -41,6 +42,9 @@ import type {
   InsertAgent,
   KnowledgeBase,
   InsertKnowledgeBase,
+  KnowledgeTaxonomyNode,
+  KnowledgeTaxonomyTreeNode,
+  InsertKnowledgeTaxonomy,
   Integration,
   InsertIntegration,
   Message,
@@ -1108,21 +1112,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db.select().from(knowledgeBases)
       .where(eq(knowledgeBases.agentId, parseInt(agentId)))
       .orderBy(desc(knowledgeBases.createdAt));
-    return result.map(row => ({
-      id: String(row.id),
-      agentId: String(row.agentId),
-      name: row.name,
-      type: row.type as "text" | "file" | "url",
-      content: row.content,
-      description: row.description || "",
-      fileType: row.fileType as KnowledgeBase["fileType"],
-      fileName: row.fileName || "",
-      fileSize: row.fileSize || 0,
-      fileUrl: row.fileUrl || "",
-      processingStatus: (row.processingStatus || "completed") as KnowledgeBase["processingStatus"],
-      extractedText: row.extractedText || "",
-      createdAt: row.createdAt.toISOString(),
-    }));
+    return result.map(row => this.mapKBRow(row));
   }
 
   async createKnowledgeBase(kb: InsertKnowledgeBase): Promise<KnowledgeBase> {
@@ -1138,23 +1128,19 @@ export class DatabaseStorage implements IStorage {
       fileUrl: kb.fileUrl || "",
       processingStatus: kb.processingStatus || "completed",
       extractedText: kb.extractedText || "",
+      // Kolom baru hierarki + versioning + atribusi sumber.
+      taxonomyId: kb.taxonomyId ?? null,
+      sourceUrl: kb.sourceUrl ?? null,
+      sourceAuthority: kb.sourceAuthority ?? null,
+      effectiveDate: kb.effectiveDate
+        ? (kb.effectiveDate instanceof Date ? kb.effectiveDate : new Date(kb.effectiveDate))
+        : null,
+      supersededById: kb.supersededById ?? null,
+      status: kb.status || "active",
+      isShared: kb.isShared ?? false,
+      sharedScope: kb.sharedScope ?? null,
     }).returning();
-    const row = result[0];
-    return {
-      id: String(row.id),
-      agentId: String(row.agentId),
-      name: row.name,
-      type: row.type as "text" | "file" | "url",
-      content: row.content,
-      description: row.description || "",
-      fileType: row.fileType as KnowledgeBase["fileType"],
-      fileName: row.fileName || "",
-      fileSize: row.fileSize || 0,
-      fileUrl: row.fileUrl || "",
-      processingStatus: (row.processingStatus || "completed") as KnowledgeBase["processingStatus"],
-      extractedText: row.extractedText || "",
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.mapKBRow(result[0]);
   }
 
   async updateKnowledgeBase(id: string, data: Partial<InsertKnowledgeBase>): Promise<KnowledgeBase | undefined> {
@@ -1164,34 +1150,214 @@ export class DatabaseStorage implements IStorage {
         updateData[key] = value;
       }
     });
-    
+
     const result = await db.update(knowledgeBases)
       .set(updateData)
       .where(eq(knowledgeBases.id, parseInt(id)))
       .returning();
     if (result.length === 0) return undefined;
-    const row = result[0];
-    return {
-      id: String(row.id),
-      agentId: String(row.agentId),
-      name: row.name,
-      type: row.type as "text" | "file" | "url",
-      content: row.content,
-      description: row.description || "",
-      fileType: row.fileType as KnowledgeBase["fileType"],
-      fileName: row.fileName || "",
-      fileSize: row.fileSize || 0,
-      fileUrl: row.fileUrl || "",
-      processingStatus: (row.processingStatus || "completed") as KnowledgeBase["processingStatus"],
-      extractedText: row.extractedText || "",
-      createdAt: row.createdAt.toISOString(),
-    };
+    return this.mapKBRow(result[0]);
   }
 
   async deleteKnowledgeBase(id: string): Promise<boolean> {
     await db.delete(knowledgeChunks).where(eq(knowledgeChunks.knowledgeBaseId, parseInt(id)));
     const result = await db.delete(knowledgeBases).where(eq(knowledgeBases.id, parseInt(id))).returning();
     return result.length > 0;
+  }
+
+  // ===== Knowledge Taxonomy =====
+  private mapTaxonomyRow(row: typeof knowledgeTaxonomy.$inferSelect): KnowledgeTaxonomyNode {
+    return {
+      id: row.id,
+      parentId: row.parentId ?? null,
+      name: row.name,
+      slug: row.slug,
+      level: (row.level || "sektor") as KnowledgeTaxonomyNode["level"],
+      description: row.description ?? "",
+      sortOrder: row.sortOrder ?? 0,
+      isActive: row.isActive ?? true,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getTaxonomyTree(): Promise<KnowledgeTaxonomyTreeNode[]> {
+    const rows = await db.select().from(knowledgeTaxonomy)
+      .orderBy(knowledgeTaxonomy.level, knowledgeTaxonomy.sortOrder, knowledgeTaxonomy.name);
+    const all: KnowledgeTaxonomyTreeNode[] = rows.map(r => ({ ...this.mapTaxonomyRow(r), children: [] }));
+    const byId = new Map<number, KnowledgeTaxonomyTreeNode>();
+    all.forEach(n => byId.set(n.id, n));
+    const roots: KnowledgeTaxonomyTreeNode[] = [];
+    for (const node of all) {
+      if (node.parentId == null) {
+        roots.push(node);
+      } else {
+        const parent = byId.get(node.parentId);
+        if (parent) parent.children.push(node);
+        else roots.push(node); // orphan: tampilkan di root agar tidak hilang
+      }
+    }
+    return roots;
+  }
+
+  async getTaxonomyNode(id: number): Promise<KnowledgeTaxonomyNode | undefined> {
+    const result = await db.select().from(knowledgeTaxonomy).where(eq(knowledgeTaxonomy.id, id));
+    if (result.length === 0) return undefined;
+    return this.mapTaxonomyRow(result[0]);
+  }
+
+  async createTaxonomyNode(node: InsertKnowledgeTaxonomy): Promise<KnowledgeTaxonomyNode> {
+    const result = await db.insert(knowledgeTaxonomy).values({
+      parentId: node.parentId ?? null,
+      name: node.name,
+      slug: node.slug,
+      level: node.level || "sektor",
+      description: node.description ?? "",
+      sortOrder: node.sortOrder ?? 0,
+      isActive: node.isActive ?? true,
+    }).returning();
+    return this.mapTaxonomyRow(result[0]);
+  }
+
+  async updateTaxonomyNode(id: number, data: Partial<InsertKnowledgeTaxonomy>): Promise<KnowledgeTaxonomyNode | undefined> {
+    const updates: Record<string, unknown> = {};
+    if (data.parentId !== undefined) updates.parentId = data.parentId;
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.slug !== undefined) updates.slug = data.slug;
+    if (data.level !== undefined) updates.level = data.level;
+    if (data.description !== undefined) updates.description = data.description;
+    if (data.sortOrder !== undefined) updates.sortOrder = data.sortOrder;
+    if (data.isActive !== undefined) updates.isActive = data.isActive;
+    if (Object.keys(updates).length === 0) {
+      return this.getTaxonomyNode(id);
+    }
+    const result = await db.update(knowledgeTaxonomy).set(updates).where(eq(knowledgeTaxonomy.id, id)).returning();
+    if (result.length === 0) return undefined;
+    return this.mapTaxonomyRow(result[0]);
+  }
+
+  async deleteTaxonomyNode(id: number): Promise<boolean> {
+    // Cegah hapus jika punya anak — minta admin pindahkan/hapus anak dulu.
+    const children = await db.select().from(knowledgeTaxonomy).where(eq(knowledgeTaxonomy.parentId, id));
+    if (children.length > 0) {
+      throw new Error(`Tidak bisa menghapus node taxonomy yang masih punya ${children.length} anak. Pindahkan/hapus anak dulu.`);
+    }
+    // Lepaskan referensi taxonomy_id di KB sebelum delete.
+    await db.update(knowledgeBases)
+      .set({ taxonomyId: null })
+      .where(eq(knowledgeBases.taxonomyId, id));
+    const result = await db.delete(knowledgeTaxonomy).where(eq(knowledgeTaxonomy.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // ===== Knowledge Base Versioning =====
+  async getKBVersionHistory(kbId: string): Promise<KnowledgeBase[]> {
+    // Telusuri rantai supersededBy: mulai dari KB ini, ikuti supersededById sampai habis.
+    // Lalu juga telusuri pendahulu: KB yang supersededBy = kbId (rekursif mundur).
+    const numericId = parseInt(kbId);
+    const visited = new Set<number>();
+    const chain: KnowledgeBase[] = [];
+
+    // Mundur: cari semua KB yang superseded_by_id mengarah ke kbId (predecessor chain)
+    const collectPredecessors = async (targetId: number): Promise<void> => {
+      const preds = await db.select().from(knowledgeBases)
+        .where(eq(knowledgeBases.supersededById, targetId));
+      for (const p of preds) {
+        if (visited.has(p.id)) continue;
+        visited.add(p.id);
+        await collectPredecessors(p.id);
+        chain.push(this.mapKBRow(p));
+      }
+    };
+
+    await collectPredecessors(numericId);
+
+    // KB tengah (input)
+    const self = await db.select().from(knowledgeBases).where(eq(knowledgeBases.id, numericId));
+    if (self.length === 0) return chain;
+    if (!visited.has(self[0].id)) {
+      visited.add(self[0].id);
+      chain.push(this.mapKBRow(self[0]));
+    }
+
+    // Maju: ikuti supersededById
+    let current = self[0];
+    while (current.supersededById && !visited.has(current.supersededById)) {
+      const next = await db.select().from(knowledgeBases).where(eq(knowledgeBases.id, current.supersededById));
+      if (next.length === 0) break;
+      visited.add(next[0].id);
+      chain.push(this.mapKBRow(next[0]));
+      current = next[0];
+    }
+
+    return chain;
+  }
+
+  async supersedeKnowledgeBase(oldKbId: string, newKbId: string): Promise<KnowledgeBase | undefined> {
+    const oldId = parseInt(oldKbId);
+    const newId = parseInt(newKbId);
+    if (oldId === newId) {
+      throw new Error("KB lama dan baru tidak boleh sama.");
+    }
+    // Cegah cycle sederhana: pastikan newKbId tidak superseded oleh oldKbId di rantai langsung.
+    const newKb = await db.select().from(knowledgeBases).where(eq(knowledgeBases.id, newId));
+    if (newKb.length === 0) {
+      throw new Error("KB pengganti tidak ditemukan.");
+    }
+    let cursor: number | null = newKb[0].supersededById ?? null;
+    const seen = new Set<number>([newId]);
+    while (cursor != null) {
+      if (cursor === oldId) {
+        throw new Error("Tidak bisa menetapkan supersedence yang membentuk siklus.");
+      }
+      if (seen.has(cursor)) break;
+      seen.add(cursor);
+      const r = await db.select().from(knowledgeBases).where(eq(knowledgeBases.id, cursor));
+      cursor = r[0]?.supersededById ?? null;
+    }
+    const result = await db.update(knowledgeBases)
+      .set({ supersededById: newId, status: "superseded" })
+      .where(eq(knowledgeBases.id, oldId))
+      .returning();
+    if (result.length === 0) return undefined;
+    return this.mapKBRow(result[0]);
+  }
+
+  async getKnowledgeBasesByTaxonomy(taxonomyId: number, includeSuperseded: boolean = false): Promise<KnowledgeBase[]> {
+    const rows = includeSuperseded
+      ? await db.select().from(knowledgeBases).where(eq(knowledgeBases.taxonomyId, taxonomyId))
+      : await db.select().from(knowledgeBases).where(and(
+          eq(knowledgeBases.taxonomyId, taxonomyId),
+          eq(knowledgeBases.status, "active"),
+        ));
+    return rows.map(r => this.mapKBRow(r));
+  }
+
+  // Helper umum untuk map row KB → KnowledgeBase (dipakai versioning method di atas).
+  private mapKBRow(row: typeof knowledgeBases.$inferSelect): KnowledgeBase {
+    return {
+      id: row.id.toString(),
+      agentId: row.agentId.toString(),
+      name: row.name,
+      type: row.type as KnowledgeBase["type"],
+      content: row.content,
+      description: row.description ?? "",
+      fileType: row.fileType as KnowledgeBase["fileType"],
+      fileName: row.fileName ?? "",
+      fileSize: row.fileSize ?? 0,
+      fileUrl: row.fileUrl ?? "",
+      processingStatus: (row.processingStatus || "completed") as KnowledgeBase["processingStatus"],
+      extractedText: row.extractedText ?? "",
+      knowledgeLayer: (row.knowledgeLayer || "operational") as KnowledgeBase["knowledgeLayer"],
+      taxonomyId: row.taxonomyId ?? null,
+      sourceUrl: row.sourceUrl ?? "",
+      sourceAuthority: row.sourceAuthority ?? "",
+      effectiveDate: row.effectiveDate ? row.effectiveDate.toISOString() : null,
+      supersededById: row.supersededById ?? null,
+      status: (row.status || "active") as KnowledgeBase["status"],
+      isShared: row.isShared ?? false,
+      sharedScope: (row.sharedScope ?? null) as KnowledgeBase["sharedScope"],
+      createdAt: row.createdAt.toISOString(),
+    };
   }
 
   // Knowledge Chunks methods (RAG)

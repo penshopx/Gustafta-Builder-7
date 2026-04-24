@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import {
   insertAgentSchema,
   insertKnowledgeBaseSchema,
+  insertKnowledgeTaxonomySchema,
   insertIntegrationSchema,
   insertMessageSchema,
   insertBigIdeaSchema,
@@ -1567,6 +1568,133 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Knowledge Taxonomy Routes ====================
+  // Hierarki 4-level (Sektor → Subsektor → Topik → Klausul) untuk kategorisasi KB.
+
+  app.get("/api/taxonomy", async (_req, res) => {
+    try {
+      const tree = await storage.getTaxonomyTree();
+      res.json(tree);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch taxonomy", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  app.post("/api/taxonomy", isAuthenticated, async (req, res) => {
+    try {
+      const parsed = insertKnowledgeTaxonomySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      const node = await storage.createTaxonomyNode(parsed.data);
+      res.status(201).json(node);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create taxonomy node", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  app.patch("/api/taxonomy/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+      const parsed = insertKnowledgeTaxonomySchema.partial().safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+      const updated = await storage.updateTaxonomyNode(id, parsed.data);
+      if (!updated) return res.status(404).json({ error: "Taxonomy node not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update taxonomy node", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  app.delete("/api/taxonomy/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+      const ok = await storage.deleteTaxonomyNode(id);
+      if (!ok) return res.status(404).json({ error: "Taxonomy node not found" });
+      res.json({ ok: true });
+    } catch (error) {
+      // Error spesifik (mis. masih punya anak) keluar sebagai 409 Conflict.
+      const msg = error instanceof Error ? error.message : String(error);
+      const status = msg.includes("anak") ? 409 : 500;
+      res.status(status).json({ error: "Failed to delete taxonomy node", details: msg });
+    }
+  });
+
+  // Helper: cek ownership KB lewat agent.userId. Return null kalau OK,
+  // atau {status, error} kalau tidak boleh akses.
+  async function assertKBOwnership(kbId: string, req: any): Promise<{ status: number; error: string } | null> {
+    const userId = req.user?.claims?.sub || (req.user as any)?.id;
+    if (!userId) return { status: 401, error: "Unauthorized" };
+    // Trace KB → Agent → owner. Pakai getKBVersionHistory yg sudah meng-include
+    // KB target (predecessor + self + successors). Cukup ambil entry yg id-nya cocok.
+    const all = await storage.getKBVersionHistory(kbId);
+    const target = all.find(k => k.id === kbId);
+    if (!target) return { status: 404, error: "Knowledge base not found" };
+    const agent = await storage.getAgent(target.agentId);
+    if (!agent) return { status: 404, error: "Agent not found" };
+    if ((agent as any).userId && (agent as any).userId !== userId) {
+      return { status: 403, error: "Forbidden — bukan pemilik KB" };
+    }
+    return null;
+  }
+
+  // KB by taxonomy node — auth wajib, hasil DI-FILTER hanya milik user (ownership lewat agent).
+  app.get("/api/taxonomy/:id/knowledge-bases", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+      const userId = (req as any).user?.claims?.sub || (req as any).user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const includeSuperseded = req.query.includeSuperseded === "true";
+      const items = await storage.getKnowledgeBasesByTaxonomy(id, includeSuperseded);
+      // Filter: hanya KB yg agennya milik user, atau KB yg is_shared=true.
+      const filtered: typeof items = [];
+      for (const kb of items) {
+        if ((kb as any).isShared) { filtered.push(kb); continue; }
+        const agent = await storage.getAgent(kb.agentId);
+        if (agent && (agent as any).userId === userId) filtered.push(kb);
+      }
+      res.json(filtered);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch KB by taxonomy", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // ==================== Knowledge Base Versioning Routes ====================
+
+  app.get("/api/knowledge-base/:id/versions", isAuthenticated, async (req, res) => {
+    try {
+      const denial = await assertKBOwnership(req.params.id, req);
+      if (denial) return res.status(denial.status).json({ error: denial.error });
+      const history = await storage.getKBVersionHistory(req.params.id);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch KB versions", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  app.post("/api/knowledge-base/:id/supersede", isAuthenticated, async (req, res) => {
+    try {
+      const oldId = req.params.id;
+      const newId = (req.body?.newKbId ?? "").toString();
+      if (!newId) return res.status(400).json({ error: "newKbId is required" });
+      // Cek ownership baik KB lama maupun KB pengganti — keduanya harus milik user.
+      const denialOld = await assertKBOwnership(oldId, req);
+      if (denialOld) return res.status(denialOld.status).json({ error: denialOld.error });
+      const denialNew = await assertKBOwnership(newId, req);
+      if (denialNew) return res.status(denialNew.status).json({ error: denialNew.error });
+      const updated = await storage.supersedeKnowledgeBase(oldId, newId);
+      if (!updated) return res.status(404).json({ error: "KB not found" });
+      res.json(updated);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      const status = msg.includes("siklus") || msg.includes("sama") || msg.includes("tidak ditemukan") ? 400 : 500;
+      res.status(status).json({ error: "Failed to supersede KB", details: msg });
+    }
+  });
+
   // ==================== User Memory Routes ====================
 
   app.get("/api/memories/:agentId", isAuthenticated, async (req, res) => {
@@ -1770,7 +1898,11 @@ export async function registerRoutes(
       if (agent.ragEnabled !== false) {
         const ragChunks = await storage.getChunksByAgent(parsed.data.agentId);
         if (ragChunks.length > 0) {
-          knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunks, agent.ragTopK ?? 5);
+          // Bangun Map metadata KB sehingga atribusi sumber primer (PUPR/LKPP/dst)
+          // dan filter status='superseded' bekerja di searchKnowledgeBase.
+          const allKbs = await storage.getKnowledgeBases(parsed.data.agentId);
+          const kbMetaMap = new Map(allKbs.map(kb => [parseInt(kb.id), kb]));
+          knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunks, agent.ragTopK ?? 5, kbMetaMap);
         } else {
           const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
           knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
@@ -2220,7 +2352,10 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       if (agent.ragEnabled !== false) {
         const ragChunksStream = await storage.getChunksByAgent(parsed.data.agentId);
         if (ragChunksStream.length > 0) {
-          knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunksStream, agent.ragTopK ?? 5);
+          // Atribusi sumber + filter superseded (lihat handler non-stream).
+          const allKbs = await storage.getKnowledgeBases(parsed.data.agentId);
+          const kbMetaMap = new Map(allKbs.map(kb => [parseInt(kb.id), kb]));
+          knowledgeContext = await searchKnowledgeBase(parsed.data.content, ragChunksStream, agent.ragTopK ?? 5, kbMetaMap);
         } else {
           const knowledgeBases = await storage.getKnowledgeBases(parsed.data.agentId);
           knowledgeContext = knowledgeBases.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");

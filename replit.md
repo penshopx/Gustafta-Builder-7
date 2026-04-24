@@ -88,6 +88,17 @@ All major features are synchronized into a unified agentic intelligence loop:
 - **New route**: `POST /api/knowledge-base/process-url` — on-demand extract for youtube/cloud_drive before saving
 - **UI improvements**: Type-specific icons (Youtube=red, Cloud=sky, Video=purple, Audio=orange), per-type processing badge labels ("Mengambil transkrip...", "Mengunduh file...", etc.), "chunks RAG" badge in emerald green, file upload UI for video/audio with helpful description
 
+#### Knowledge Base Hierarchy + Versioning + Source Attribution (Apr 2026)
+Pondasi infrastruktur untuk perpustakaan klausul kontrak/regulasi (produk "Open Clause") + sumber primer wajib di setiap KB.
+- **Tabel baru `knowledge_taxonomy`** (`shared/schema.ts`): self-referencing tree id/parent_id/name/slug/level (`sektor`/`subsektor`/`topik`/`klausul`)/description/sort_order/is_active. 4 level hierarki untuk klasifikasi KB lintas 8 sektor profesi user (Legalitas, Perijinan, SBU, SKK, Tender, Pelaksanaan, Tata Kelola, Sistem Manajemen).
+- **Extend tabel `knowledge_bases`** dengan kolom: `taxonomy_id` (FK nullable), `source_url`, `source_authority` (PUPR/LKPP/DJP/BNSP/LPJK/BSN/DJBC/Kemnaker/BPJS_Ketenagakerjaan/JDIH/internal/lainnya), `effective_date`, `superseded_by_id` (self-FK utk version chain), `status` (active/superseded/draft default 'active'), `is_shared` (default false), `shared_scope` (series/global). Semua nullable — backward-compat KB existing.
+- **Endpoints baru** (`server/routes.ts`): `GET/POST/PATCH/DELETE /api/taxonomy`, `GET /api/taxonomy/:id/knowledge-bases`, `GET /api/knowledge-base/:id/versions` (predecessor + successor chain), `POST /api/knowledge-base/:id/supersede` (cycle detection di db-storage).
+- **Storage** (`server/db-storage.ts`): impl lengkap di DbStorage dgn helper `mapTaxonomyRow` & `mapKBRow`, predecessor+successor chain di `getKBVersionHistory`, cegah hapus parent yg punya anak. MemStorage diberi stub minimal (fitur ini DB-only).
+- **Seed** (`scripts/seed-knowledge-taxonomy.ts`): 8 sektor + 32 subsektor inti, idempotent by slug per parent. Sudah dijalankan — verified 8 root + 32 children di DB.
+- **UI** (`client/src/components/panels/knowledge-base-panel.tsx`): sub-komponen `TaxonomyAndSourceFields` di dialog tambah KB — dropdown cascade Sektor→Subsektor, select Sumber Resmi, date picker Tanggal Berlaku, input URL Sumber, toggle "Bagikan ke agen lain". Badge baru di list KB: status "Dicabut"/"Draft" (rose/slate) + chip otoritas sumber (amber). Hook baru `client/src/hooks/use-taxonomy.ts`.
+- **RAG injection** (`server/lib/rag-service.ts`): `searchKnowledgeBase` menerima `kbMetadata?: Map<number, KnowledgeBase>` opsional. Saat Map tersedia: (a) chunks dari KB `status='superseded'` di-FILTER sehingga tidak muncul lagi di context — backward compat, KB tanpa metadata tetap di-include; (b) header chunk berisi atribusi `[Sumber Resmi: PUPR | Berlaku: 2024-01-15 | URL: ...]` agar agen menyitir Pasal/PerLem/UU dengan tepat. Diaktifkan di chat handler non-stream (`/api/messages`) & stream (`/api/chat/stream`).
+- **Migration safety**: schema push via `npx drizzle-kit push` SUKSES tanpa data loss; semua kolom baru nullable/default sehingga 1 KB existing (sebelum perubahan) tetap valid dan otomatis status='active'.
+
 ### Feature Sync & Landing Page Update (Apr 2026 — v3)
 
 #### Helpdesk System Prompt v3 (`server/seed-knowledge-base.ts`)

@@ -44,6 +44,9 @@ import type {
   VoucherRedemption,
   KnowledgeChunk,
   InsertKnowledgeChunk,
+  KnowledgeTaxonomyNode,
+  KnowledgeTaxonomyTreeNode,
+  InsertKnowledgeTaxonomy,
   UserMemory,
   InsertUserMemory,
   WaContact,
@@ -126,6 +129,18 @@ export interface IStorage {
   createKnowledgeBase(kb: InsertKnowledgeBase): Promise<KnowledgeBase>;
   updateKnowledgeBase(id: string, data: Partial<InsertKnowledgeBase>): Promise<KnowledgeBase | undefined>;
   deleteKnowledgeBase(id: string): Promise<boolean>;
+
+  // Knowledge Taxonomy methods
+  getTaxonomyTree(): Promise<KnowledgeTaxonomyTreeNode[]>;
+  getTaxonomyNode(id: number): Promise<KnowledgeTaxonomyNode | undefined>;
+  createTaxonomyNode(node: InsertKnowledgeTaxonomy): Promise<KnowledgeTaxonomyNode>;
+  updateTaxonomyNode(id: number, data: Partial<InsertKnowledgeTaxonomy>): Promise<KnowledgeTaxonomyNode | undefined>;
+  deleteTaxonomyNode(id: number): Promise<boolean>;
+
+  // Knowledge Base versioning methods
+  getKBVersionHistory(kbId: string): Promise<KnowledgeBase[]>;
+  supersedeKnowledgeBase(oldKbId: string, newKbId: string): Promise<KnowledgeBase | undefined>;
+  getKnowledgeBasesByTaxonomy(taxonomyId: number, includeSuperseded?: boolean): Promise<KnowledgeBase[]>;
 
   // Knowledge Chunks methods (RAG)
   getChunksByKnowledgeBase(knowledgeBaseId: string): Promise<KnowledgeChunk[]>;
@@ -951,6 +966,18 @@ export class MemStorage implements IStorage {
       processingStatus: insertKb.processingStatus || "completed",
       extractedText: insertKb.extractedText || "",
       createdAt: new Date().toISOString(),
+      // Field hierarki + versioning + atribusi sumber.
+      knowledgeLayer: (insertKb as Partial<KnowledgeBase>).knowledgeLayer ?? "operational",
+      taxonomyId: insertKb.taxonomyId ?? null,
+      sourceUrl: insertKb.sourceUrl ?? null,
+      sourceAuthority: insertKb.sourceAuthority ?? null,
+      effectiveDate: insertKb.effectiveDate
+        ? (insertKb.effectiveDate instanceof Date ? insertKb.effectiveDate.toISOString() : String(insertKb.effectiveDate))
+        : null,
+      supersededById: insertKb.supersededById ?? null,
+      status: insertKb.status || "active",
+      isShared: insertKb.isShared ?? false,
+      sharedScope: insertKb.sharedScope ?? null,
     };
     this.knowledgeBases.set(id, kb);
     return kb;
@@ -974,6 +1001,73 @@ export class MemStorage implements IStorage {
 
   async deleteKnowledgeBase(id: string): Promise<boolean> {
     return this.knowledgeBases.delete(id);
+  }
+
+  // ===== Knowledge Taxonomy (in-memory stub: fitur ini hanya jalan di DB-storage) =====
+  private taxonomyStore: Map<number, KnowledgeTaxonomyNode> = new Map();
+  private taxonomyIdCounter = 1;
+
+  async getTaxonomyTree(): Promise<KnowledgeTaxonomyTreeNode[]> {
+    const all: KnowledgeTaxonomyTreeNode[] = Array.from(this.taxonomyStore.values()).map(n => ({ ...n, children: [] }));
+    const byId = new Map<number, KnowledgeTaxonomyTreeNode>();
+    all.forEach(n => byId.set(n.id, n));
+    const roots: KnowledgeTaxonomyTreeNode[] = [];
+    for (const node of all) {
+      if (node.parentId == null) roots.push(node);
+      else (byId.get(node.parentId)?.children ?? roots).push(node);
+    }
+    return roots;
+  }
+
+  async getTaxonomyNode(id: number): Promise<KnowledgeTaxonomyNode | undefined> {
+    return this.taxonomyStore.get(id);
+  }
+
+  async createTaxonomyNode(node: InsertKnowledgeTaxonomy): Promise<KnowledgeTaxonomyNode> {
+    const id = this.taxonomyIdCounter++;
+    const created: KnowledgeTaxonomyNode = {
+      id,
+      parentId: node.parentId ?? null,
+      name: node.name,
+      slug: node.slug,
+      level: node.level || "sektor",
+      description: node.description ?? "",
+      sortOrder: node.sortOrder ?? 0,
+      isActive: node.isActive ?? true,
+      createdAt: new Date().toISOString(),
+    };
+    this.taxonomyStore.set(id, created);
+    return created;
+  }
+
+  async updateTaxonomyNode(id: number, data: Partial<InsertKnowledgeTaxonomy>): Promise<KnowledgeTaxonomyNode | undefined> {
+    const existing = this.taxonomyStore.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...data } as KnowledgeTaxonomyNode;
+    this.taxonomyStore.set(id, updated);
+    return updated;
+  }
+
+  async deleteTaxonomyNode(id: number): Promise<boolean> {
+    return this.taxonomyStore.delete(id);
+  }
+
+  // ===== Knowledge Base Versioning (in-memory stub) =====
+  async getKBVersionHistory(kbId: string): Promise<KnowledgeBase[]> {
+    const kb = this.knowledgeBases.get(kbId);
+    return kb ? [kb] : [];
+  }
+
+  async supersedeKnowledgeBase(oldKbId: string, _newKbId: string): Promise<KnowledgeBase | undefined> {
+    const kb = this.knowledgeBases.get(oldKbId);
+    if (!kb) return undefined;
+    const updated: KnowledgeBase = { ...kb, status: "superseded" };
+    this.knowledgeBases.set(oldKbId, updated);
+    return updated;
+  }
+
+  async getKnowledgeBasesByTaxonomy(taxonomyId: number, _includeSuperseded?: boolean): Promise<KnowledgeBase[]> {
+    return Array.from(this.knowledgeBases.values()).filter(kb => kb.taxonomyId === taxonomyId);
   }
 
   // Knowledge Chunks methods (RAG)
