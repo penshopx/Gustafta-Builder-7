@@ -295,6 +295,7 @@ Semua **184 chatbot di 15 series** kini memiliki 7 field **Kebijakan Agen** teri
 - **Outcome/win/charter/quality-extra**: di-generate per-agent via Gemini 2.5 Flash dengan structured JSON output (kontekstual: nama, series, toolbox, deskripsi, hub/spesialis)
 - Skrip: `scripts/fill-policies-all-series.ts` (batch concurrency 3, tolerant JSON parsing) + `scripts/fill-policies-stuck.ts` (sequential retry untuk agent susah dengan respons array/inkonsisten)
 - Hasil: outcome bervariasi (lead_capture/user_education/product_trial), domain_charter punya larangan eksplisit per peran chatbot, quality_bar diperluas dengan 1 kalimat khas per agent
+- **Audit verifikasi**: lihat `docs/audit/policy-fields-audit-2026-04-24.txt` — per-series count agen dengan field kosong = **0 di semua 15 series**, total 184 agen, 0 dengan any-empty-field
 
 ### Audit Apr 2026 — Mayar.id Removal + Hierarchy Edit/Delete
 - **Mayar.id dihapus sepenuhnya**: Import `createPaymentLink`/`parseWebhookPayload` dihapus, webhook handler dihapus, field `mayarOrderId`/`mayarPaymentUrl` tidak lagi digunakan. Diganti sistem transfer bank konvensional: backend mengembalikan rekening bank + nomor WA konfirmasi saat berlangganan.
