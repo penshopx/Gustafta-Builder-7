@@ -47,6 +47,8 @@ import type {
   KnowledgeTaxonomyNode,
   KnowledgeTaxonomyTreeNode,
   InsertKnowledgeTaxonomy,
+  TenderDocumentCatalog,
+  InsertTenderDocumentCatalog,
   UserMemory,
   InsertUserMemory,
   WaContact,
@@ -141,6 +143,12 @@ export interface IStorage {
   getKBVersionHistory(kbId: string): Promise<KnowledgeBase[]>;
   supersedeKnowledgeBase(oldKbId: string, newKbId: string): Promise<KnowledgeBase | undefined>;
   getKnowledgeBasesByTaxonomy(taxonomyId: number, includeSuperseded?: boolean): Promise<KnowledgeBase[]>;
+
+  // Tender Document Catalog (Perpres 46/2025)
+  getTenderDocumentCatalog(filters?: { sisi?: string; jenisTender?: string; kelompok?: string; priority?: string }): Promise<TenderDocumentCatalog[]>;
+  getTenderDocumentByCode(code: string): Promise<TenderDocumentCatalog | undefined>;
+  upsertTenderDocumentCatalog(doc: InsertTenderDocumentCatalog): Promise<TenderDocumentCatalog>;
+  deleteTenderDocumentCatalog(code: string): Promise<boolean>;
 
   // Knowledge Chunks methods (RAG)
   getChunksByKnowledgeBase(knowledgeBaseId: string): Promise<KnowledgeChunk[]>;
@@ -1069,6 +1077,12 @@ export class MemStorage implements IStorage {
   async getKnowledgeBasesByTaxonomy(taxonomyId: number, _includeSuperseded?: boolean): Promise<KnowledgeBase[]> {
     return Array.from(this.knowledgeBases.values()).filter(kb => kb.taxonomyId === taxonomyId);
   }
+
+  // Tender Document Catalog stubs (DB-only feature)
+  async getTenderDocumentCatalog(): Promise<any[]> { return []; }
+  async getTenderDocumentByCode(): Promise<any> { return undefined; }
+  async upsertTenderDocumentCatalog(doc: any): Promise<any> { return doc; }
+  async deleteTenderDocumentCatalog(): Promise<boolean> { return false; }
 
   // Knowledge Chunks methods (RAG)
   private knowledgeChunksStore: Map<number, KnowledgeChunk> = new Map();

@@ -1457,6 +1457,35 @@ export const insertTenderSchema = createInsertSchema(tenders).omit({ id: true, c
 export type InsertTender = z.infer<typeof insertTenderSchema>;
 export type Tender = typeof tenders.$inferSelect;
 
+// ==================== TENDER DOCUMENT CATALOG (Perpres 46/2025) ====================
+// Katalog referensi dokumen tender pemerintah. Bukan dokumen real per-user (itu di
+// tenderSessions), melainkan daftar template/jenis dokumen yang harus disiapkan
+// penyedia/Pokja, dipakai sebagai data referensi oleh Agent Tender Document Generator.
+export const tenderDocumentCatalog = pgTable("tender_document_catalog", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),             // PWR-06, ADM-05, KUL-02, dst — UNIQUE
+  name: text("name").notNull(),                      // "Bukti Kinerja Penyedia (SIKaP)"
+  kelompok: text("kelompok").notNull(),              // administrasi | kualifikasi | teknis | personel | pengalaman | peralatan | keuangan | penawaran | penjaminan
+  jenisTender: text("jenis_tender").notNull().default("semua"), // pekerjaan_konstruksi | konsultansi_konstruksi | semua
+  sisi: text("sisi").notNull().default("penyedia"),  // penyedia | pokja | keduanya
+  wajibStatus: text("wajib_status").notNull().default("wajib"), // wajib | opsional | wajib_perpres_46
+  formatOutput: text("format_output").default("PDF"), // PDF | DOCX | XLSX | JSON
+  priority: text("priority").notNull().default("P1"), // P0 | P1 | P2
+  templateStatus: text("template_status").notNull().default("placeholder"), // template_filled | placeholder | draft
+  dasarHukum: text("dasar_hukum").default(""),       // "Perpres 46/2025 Pasal X" / "Permen PU 14/2020"
+  sumberAutoFill: text("source_auto_fill").default(""), // JSON path: "company.nib", "personel[*].cv"
+  openClawAgentRef: text("openclaw_agent_ref").default(""), // slug agent yg generate
+  taxonomyId: integer("taxonomy_id"),                // FK opsional ke knowledge_taxonomy
+  description: text("description").default(""),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTenderDocumentCatalogSchema = createInsertSchema(tenderDocumentCatalog).omit({ id: true, createdAt: true });
+export type InsertTenderDocumentCatalog = z.infer<typeof insertTenderDocumentCatalogSchema>;
+export type TenderDocumentCatalog = typeof tenderDocumentCatalog.$inferSelect;
+
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
   title: text("title").notNull().default("New Chat"),

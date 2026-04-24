@@ -30,10 +30,15 @@ import {
   waBroadcastRuns,
   tenderSources,
   tenders,
+  tenderDocumentCatalog,
   leads,
   scoringResults,
   companyProfiles,
   tenderSessions,
+} from "@shared/schema";
+import type {
+  TenderDocumentCatalog,
+  InsertTenderDocumentCatalog,
 } from "@shared/schema";
 import { applyDefaultPolicies } from "./lib/agent-policies";
 import type { IStorage } from "./storage";
@@ -3164,6 +3169,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTenderSession(id: number): Promise<boolean> {
     const result = await db.delete(tenderSessions).where(eq(tenderSessions.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // ==================== Tender Document Catalog (Perpres 46/2025) ====================
+
+  async getTenderDocumentCatalog(filters?: { sisi?: string; jenisTender?: string; kelompok?: string; priority?: string }): Promise<TenderDocumentCatalog[]> {
+    const conds: any[] = [eq(tenderDocumentCatalog.isActive, true)];
+    if (filters?.sisi && filters.sisi !== "semua") {
+      // sisi penyedia/pokja juga match "keduanya"
+      conds.push(sql`(${tenderDocumentCatalog.sisi} = ${filters.sisi} OR ${tenderDocumentCatalog.sisi} = 'keduanya')`);
+    }
+    if (filters?.jenisTender && filters.jenisTender !== "semua") {
+      conds.push(sql`(${tenderDocumentCatalog.jenisTender} = ${filters.jenisTender} OR ${tenderDocumentCatalog.jenisTender} = 'semua')`);
+    }
+    if (filters?.kelompok) conds.push(eq(tenderDocumentCatalog.kelompok, filters.kelompok));
+    if (filters?.priority) conds.push(eq(tenderDocumentCatalog.priority, filters.priority));
+    const rows = await db.select().from(tenderDocumentCatalog)
+      .where(conds.length > 1 ? and(...conds) : conds[0])
+      .orderBy(tenderDocumentCatalog.kelompok, tenderDocumentCatalog.sortOrder, tenderDocumentCatalog.code);
+    return rows;
+  }
+
+  async getTenderDocumentByCode(code: string): Promise<TenderDocumentCatalog | undefined> {
+    const rows = await db.select().from(tenderDocumentCatalog).where(eq(tenderDocumentCatalog.code, code)).limit(1);
+    return rows[0];
+  }
+
+  async upsertTenderDocumentCatalog(doc: InsertTenderDocumentCatalog): Promise<TenderDocumentCatalog> {
+    // Atomic upsert berbasis unique constraint pada `code` — aman dari race condition
+    // saat seed paralel atau update bersamaan.
+    const rows = await db.insert(tenderDocumentCatalog)
+      .values(doc as any)
+      .onConflictDoUpdate({
+        target: tenderDocumentCatalog.code,
+        set: { ...doc, code: doc.code } as any,
+      })
+      .returning();
+    return rows[0];
+  }
+
+  async deleteTenderDocumentCatalog(code: string): Promise<boolean> {
+    const result = await db.delete(tenderDocumentCatalog).where(eq(tenderDocumentCatalog.code, code));
     return (result.rowCount ?? 0) > 0;
   }
 }

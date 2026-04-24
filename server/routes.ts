@@ -1744,6 +1744,75 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== Tender Document Catalog Routes (Perpres 46/2025) ====================
+  // Katalog ini publik (data referensi), filterable. Mutasi (POST/DELETE) butuh auth.
+
+  app.get("/api/tender-document-catalog", async (req, res) => {
+    try {
+      const filters = {
+        sisi: typeof req.query.sisi === "string" ? req.query.sisi : undefined,
+        jenisTender: typeof req.query.jenisTender === "string" ? req.query.jenisTender : undefined,
+        kelompok: typeof req.query.kelompok === "string" ? req.query.kelompok : undefined,
+        priority: typeof req.query.priority === "string" ? req.query.priority : undefined,
+      };
+      const items = await storage.getTenderDocumentCatalog(filters);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tender document catalog", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  app.get("/api/tender-document-catalog/:code", async (req, res) => {
+    try {
+      const doc = await storage.getTenderDocumentByCode(req.params.code);
+      if (!doc) return res.status(404).json({ error: "Document not found" });
+      res.json(doc);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tender document", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Helper admin-only — katalog ini referensi global (bukan per-user), jadi mutasi
+  // dibatasi ke admin via env ADMIN_USER_IDS. Reuse pola dari assertCanPreviewAgentPrompt.
+  function isAdminRequest(req: any): { ok: true } | { ok: false; status: number; error: string } {
+    const userId = req.user?.claims?.sub || (req.user as any)?.id;
+    if (!userId) return { ok: false, status: 401, error: "Unauthorized" };
+    const adminIds = (process.env.ADMIN_USER_IDS || "")
+      .split(",").map((s: string) => s.trim()).filter(Boolean);
+    if (!adminIds.includes(userId)) {
+      return { ok: false, status: 403, error: "Forbidden: hanya admin yang boleh ubah katalog dokumen tender" };
+    }
+    return { ok: true };
+  }
+
+  app.post("/api/tender-document-catalog", isAuthenticated, async (req, res) => {
+    try {
+      const adminCheck = isAdminRequest(req);
+      if (!adminCheck.ok) return res.status(adminCheck.status).json({ error: adminCheck.error });
+      const { insertTenderDocumentCatalogSchema } = await import("@shared/schema");
+      const parsed = insertTenderDocumentCatalogSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid payload", details: parsed.error.flatten() });
+      }
+      const doc = await storage.upsertTenderDocumentCatalog(parsed.data);
+      res.json(doc);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to upsert tender document", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  app.delete("/api/tender-document-catalog/:code", isAuthenticated, async (req, res) => {
+    try {
+      const adminCheck = isAdminRequest(req);
+      if (!adminCheck.ok) return res.status(adminCheck.status).json({ error: adminCheck.error });
+      const ok = await storage.deleteTenderDocumentCatalog(req.params.code);
+      if (!ok) return res.status(404).json({ error: "Document not found" });
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete tender document", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
   // ==================== User Memory Routes ====================
 
   app.get("/api/memories/:agentId", isAuthenticated, async (req, res) => {
