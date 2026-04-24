@@ -216,6 +216,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Kompetensi Teknis", module: "./seed-kompetensi-teknis", fn: "seedKompetensiTeknis" },
           { name: "Pembinaan ASPEKINDO", module: "./seed-aspekindo", fn: "seedAspekindo" },
           { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj" },
+          { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
         ];
 
         for (const seed of seedTasks) {
@@ -261,6 +262,19 @@ for (const envVar of requiredEnvVars) {
         await seedPusatFaqPeserta("49465846");
       } catch (err) {
         log("Catch-up Pusat FAQ seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
+      try {
+        const { seedKompetensiManajerialBujk } = await import("./seed-kompetensi-manajerial-bujk");
+        const allSeries = await storage.getSeries();
+        const kmSeries = allSeries.find((s: any) => s.slug === "kompetensi-manajerial-bujk");
+        if (!kmSeries) {
+          log("[CatchUp] Seeding Kompetensi Manajerial BUJK (missing)");
+          await seedKompetensiManajerialBujk("49465846");
+        }
+      } catch (err) {
+        log("Catch-up Kompetensi Manajerial seed error: " + (err as Error).message);
       }
 
       startScheduler();
