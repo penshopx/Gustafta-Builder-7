@@ -1,0 +1,15 @@
+=== Kebijakan Agen + Field Lengkap Audit (v2) — Apr 24, 2026 ===
+Verifikasi MENYELURUH: agent text fields + toolbox text fields + 7 policy fields
+
+ total_agents | empty_phil | empty_exp | empty_ot | total_toolboxes | empty_purp | empty_caps | empty_lims 
+--------------+------------+-----------+----------+-----------------+------------+------------+------------
+          205 |          0 |         0 |        0 |             196 |          0 |          0 |          0
+(1 row)
+
+
+=== 7 policy fields across ALL 205 agents (incl 21 orphan) ===
+ agents_with_any_empty_policy 
+------------------------------
+                            0
+(1 row)
+

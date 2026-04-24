@@ -297,6 +297,18 @@ Semua **184 chatbot di 15 series** kini memiliki 7 field **Kebijakan Agen** teri
 - Hasil: outcome bervariasi (lead_capture/user_education/product_trial), domain_charter punya larangan eksplisit per peran chatbot, quality_bar diperluas dengan 1 kalimat khas per agent
 - **Audit verifikasi**: lihat `docs/audit/policy-fields-audit-2026-04-24.txt` — per-series count agen dengan field kosong = **0 di semua 15 series**, total 184 agen, 0 dengan any-empty-field
 
+### Audit Lanjutan Apr 2026 — Field Lengkap Semua Agen & Alat Bantu
+Pelengkapan lebih lanjut atas semua field teks yang sebelumnya kosong:
+- **Agen (205 total termasuk 21 orphan)**: `philosophy`, `off_topic_response`, `expertise` kini terisi penuh.
+  - `off_topic_response`: template per-kategori (regulasi/sertifikasi-bu/sertifikasi-profesi/sistem-manajemen/digitalisasi/umum) — sapaan Bapak/Ibu, mengarahkan kembali ke fokus
+  - `philosophy` & `expertise`: di-generate per-agen via Gemini 2.5 Flash JSON (kontekstual)
+  - 21 agen orphan (tanpa series link) diisi 7 field policy dengan template "umum" + dipertahankan sebagai entitas
+- **Alat Bantu / Toolboxes (196 total)**: `purpose`, `capabilities`, `limitations` kini terisi penuh.
+  - Sebelumnya: 34 purpose kosong, 78 capabilities kosong, 86 limitations kosong
+  - Di-generate per-toolbox via Gemini (3-5 capability + 3-5 limitation per modul, masing-masing 5-12 kata)
+- Skrip: `scripts/fill-remaining-fields.ts` (mendukung STEP=1|2|3, LIMIT, CONCURRENCY env vars untuk batching)
+- **Audit v2**: `docs/audit/policy-fields-audit-2026-04-24-v2.txt` — semua kolom empty_* = 0, total 205 agen + 196 toolboxes, 0 any-empty
+
 ### Audit Apr 2026 — Mayar.id Removal + Hierarchy Edit/Delete
 - **Mayar.id dihapus sepenuhnya**: Import `createPaymentLink`/`parseWebhookPayload` dihapus, webhook handler dihapus, field `mayarOrderId`/`mayarPaymentUrl` tidak lagi digunakan. Diganti sistem transfer bank konvensional: backend mengembalikan rekening bank + nomor WA konfirmasi saat berlangganan.
 - **Hierarchy Edit/Delete UI**:
