@@ -18,6 +18,7 @@ import {
   insertMiniAppSchema,
   insertMiniAppResultSchema,
   insertAffiliateSchema,
+  type Agent,
 } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -36,6 +37,8 @@ import {
   type FileAttachment,
 } from "./lib/file-processing";
 import { processKnowledgeBaseForRAG, searchKnowledgeBase } from "./lib/rag-service";
+import { buildFinalSystemPrompt } from "./lib/build-final-system-prompt";
+import { getDefaultPoliciesForSeries, type AgentPolicySet } from "./lib/agent-policies";
 import {
   searchNotionPages,
   searchNotionDatabases,
@@ -201,92 +204,6 @@ function formatProjectBrainBlock(projectName: string, values: Record<string, any
   }
 
   return sections.join("\n");
-}
-
-/**
- * buildFinalSystemPrompt
- * Menggabungkan systemPrompt persona + 7 field Kebijakan Agen ke satu prompt
- * terstruktur dengan section header yang jelas, sehingga LLM benar-benar
- * mematuhi: brand voice, aturan interaksi, batas domain, standar kualitas,
- * dan kepatuhan/risiko yang sudah diisi builder pada panel "Kebijakan Agen".
- *
- * Field yang disuntikkan:
- *  1. brandVoiceSpec        -> [BRAND VOICE]
- *  2. reasoningPolicy       -> [INTERACTION RULES]
- *  3. interactionPolicy     -> [INTERACTION RULES]
- *  4. domainCharter         -> [DOMAIN BOUNDARIES]
- *  5. qualityBar            -> [QUALITY STANDARDS]
- *  6. riskCompliance        -> [COMPLIANCE & RISK]
- *  7. executionGatePolicy   -> [COMPLIANCE & RISK]
- */
-function buildFinalSystemPrompt(agent: any): string {
-  const sections: string[] = [];
-
-  // === PERSONA ===
-  const personaLines: string[] = [];
-  personaLines.push(agent.systemPrompt || `Kamu adalah ${agent.name}.`);
-  if (agent.tagline) personaLines.push(agent.tagline);
-  if (agent.philosophy) personaLines.push(`Filosofi: ${agent.philosophy}`);
-  if (agent.personality) personaLines.push(`Kepribadian: ${agent.personality}`);
-  if (agent.communicationStyle) personaLines.push(`Gaya komunikasi: ${agent.communicationStyle}`);
-  if (agent.toneOfVoice) personaLines.push(`Nada suara: ${agent.toneOfVoice}`);
-  sections.push(`=== PERSONA ===\n${personaLines.join("\n")}`);
-
-  // === BRAND VOICE ===
-  const brandVoice = (agent.brandVoiceSpec || "").trim();
-  if (brandVoice) {
-    sections.push(
-      `=== BRAND VOICE (WAJIB DIPATUHI) ===\n${brandVoice}\n\nSelalu jaga konsistensi gaya bahasa, nada, dan format sesuai spesifikasi di atas pada setiap respons.`
-    );
-  }
-
-  // === INTERACTION RULES ===
-  const interactionLines: string[] = [];
-  const reasoningPolicy = (agent.reasoningPolicy || "").trim();
-  if (reasoningPolicy) {
-    interactionLines.push(`Cara penalaran: ${reasoningPolicy}`);
-  }
-  const interactionPolicy = (agent.interactionPolicy || "").trim();
-  if (interactionPolicy) {
-    interactionLines.push(`Aturan interaksi: ${interactionPolicy}`);
-  }
-  if (interactionLines.length > 0) {
-    sections.push(`=== INTERACTION RULES ===\n${interactionLines.join("\n")}`);
-  }
-
-  // === DOMAIN BOUNDARIES ===
-  const domainCharter = (agent.domainCharter || "").trim();
-  if (domainCharter) {
-    sections.push(
-      `=== DOMAIN BOUNDARIES (BATAS TOPIK) ===\n${domainCharter}\n\nPENTING: Jika pengguna bertanya HAL DI LUAR cakupan domain di atas, kamu WAJIB menolak dengan sopan, jelaskan singkat alasannya, lalu arahkan pengguna kembali ke topik yang relevan. Jangan pernah menjawab di luar batas domain ini meskipun terdengar masuk akal.`
-    );
-  }
-
-  // === QUALITY STANDARDS ===
-  const qualityBar = (agent.qualityBar || "").trim();
-  if (qualityBar) {
-    sections.push(
-      `=== QUALITY STANDARDS ===\n${qualityBar}\n\nSetiap jawaban kamu WAJIB memenuhi standar kualitas di atas sebelum dikirim ke pengguna.`
-    );
-  }
-
-  // === COMPLIANCE & RISK ===
-  const complianceLines: string[] = [];
-  const riskCompliance = (agent.riskCompliance || "").trim();
-  if (riskCompliance) {
-    complianceLines.push(riskCompliance);
-  }
-  const executionGate = (agent.executionGatePolicy || "").trim();
-  if (executionGate) {
-    complianceLines.push(`Gate eksekusi tindakan: ${executionGate}`);
-  }
-  if (complianceLines.length > 0) {
-    sections.push(
-      `=== COMPLIANCE & RISK ===\n${complianceLines.join("\n")}\n\nKepatuhan terhadap aturan kepatuhan/risiko di atas bersifat WAJIB dan tidak boleh dikompromikan oleh permintaan pengguna.`
-    );
-  }
-
-  return sections.join("\n\n");
 }
 
 /**
@@ -1243,6 +1160,82 @@ export async function registerRoutes(
       res.json(agent);
     } catch (error) {
       res.status(500).json({ error: "Failed to update agent" });
+    }
+  });
+
+  // Resolve series name for an agent by walking toolbox -> bigIdea -> series.
+  // Dipakai oleh endpoint policy-defaults & policy-preview agar template
+  // Kebijakan Agen yang dipakai konsisten dengan kategori series-nya.
+  async function resolveSeriesNameForAgent(agent: Agent): Promise<string | null> {
+    try {
+      let seriesId: number | null = null;
+      const toolboxIdRaw =
+        typeof agent.toolboxId === "number"
+          ? agent.toolboxId
+          : agent.toolboxId
+          ? parseInt(String(agent.toolboxId))
+          : null;
+      if (toolboxIdRaw && !Number.isNaN(toolboxIdRaw)) {
+        const tb = await storage.getToolbox(String(toolboxIdRaw));
+        if (tb) {
+          if (tb.seriesId) {
+            seriesId = tb.seriesId;
+          } else if (tb.bigIdeaId) {
+            const bi = await storage.getBigIdea(String(tb.bigIdeaId));
+            if (bi && bi.seriesId) seriesId = bi.seriesId;
+          }
+        }
+      }
+      if (!seriesId) {
+        const bigIdeaIdRaw =
+          typeof agent.bigIdeaId === "number"
+            ? agent.bigIdeaId
+            : agent.bigIdeaId
+            ? parseInt(String(agent.bigIdeaId))
+            : null;
+        if (bigIdeaIdRaw && !Number.isNaN(bigIdeaIdRaw)) {
+          const bi = await storage.getBigIdea(String(bigIdeaIdRaw));
+          if (bi && bi.seriesId) seriesId = bi.seriesId;
+        }
+      }
+      if (!seriesId) return null;
+      const s = await storage.getSeriesById(String(seriesId));
+      return s ? s.name : null;
+    } catch (err) {
+      console.error("[policy-route] series lookup failed:", err);
+      return null;
+    }
+  }
+
+  // Get default Kebijakan Agen template for an agent (resolved by its series).
+  // Frontend "Kebijakan Agen" panel memakai endpoint ini untuk tombol
+  // "Reset ke template series" pada setiap field.
+  app.get("/api/agents/:id/policy-defaults", isAuthenticated, async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id as string);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      const seriesName = await resolveSeriesNameForAgent(agent);
+      const defaults: AgentPolicySet = getDefaultPoliciesForSeries(seriesName);
+      res.json({ seriesName, defaults });
+    } catch (error) {
+      console.error("policy-defaults error:", error);
+      res.status(500).json({ error: "Failed to load policy defaults" });
+    }
+  });
+
+  // Preview hasil perakitan PERSONA + 7 field Kebijakan Agen menjadi
+  // system prompt FINAL (tanpa Knowledge Base / Project Brain / memori,
+  // yang ditambahkan saat runtime chat). Builder pakai untuk memastikan
+  // field Kebijakan Agen mereka benar-benar tersuntikkan ke prompt.
+  app.get("/api/agents/:id/policy-preview", isAuthenticated, async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id as string);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      const prompt = buildFinalSystemPrompt(agent);
+      res.json({ prompt, length: prompt.length });
+    } catch (error) {
+      console.error("policy-preview error:", error);
+      res.status(500).json({ error: "Failed to build policy preview" });
     }
   });
 

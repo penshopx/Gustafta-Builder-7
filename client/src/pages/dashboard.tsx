@@ -24,6 +24,7 @@ import { ChatConsolePanel } from "@/components/panels/chat-console-panel";
 import { AnalyticsPanel } from "@/components/panels/analytics-panel";
 import { WidgetPanel } from "@/components/panels/widget-panel";
 import { AgenticAIPanel } from "@/components/panels/agentic-ai-panel";
+import { PolicyPanel } from "@/components/panels/policy-panel";
 import { ProjectBrainPanel } from "@/components/panels/project-brain-panel";
 import { MiniAppsPanel } from "@/components/panels/mini-apps-panel";
 import { DeliverablesPanel } from "@/components/panels/deliverables-panel";
@@ -71,10 +72,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "deliverables" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing";
+type NavItem = "persona" | "policy" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "deliverables" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
+  { id: "policy", label: "Kebijakan Agen", shortLabel: "Kebijakan", icon: BookOpen },
   { id: "agentic", label: "Agentic AI", shortLabel: "AI", icon: Sparkles },
   { id: "knowledge", label: "Knowledge Base", shortLabel: "KB", icon: BookOpen },
   { id: "project-brain", label: "Otak Proyek", shortLabel: "Brain", icon: Brain },
@@ -664,6 +666,8 @@ export default function Dashboard() {
     switch (activeNav) {
       case "persona":
         return <PersonaPanel agent={currentAgent!} />;
+      case "policy":
+        return <PolicyPanel agent={currentAgent!} />;
       case "agentic":
         return <AgenticAIPanel />;
       case "knowledge":
