@@ -277,6 +277,14 @@ for (const envVar of requiredEnvVars) {
         log("Catch-up Kompetensi Manajerial seed error: " + (err as Error).message);
       }
 
+      // Patch: Kompetensi Manajerial BUJK — tambah SIKaP, Analisis Keuangan, Compliance Tender
+      try {
+        const { patchKompetensiManajerialBujk } = await import("./seed-kompetensi-manajerial-patch");
+        await patchKompetensiManajerialBujk("49465846");
+      } catch (err) {
+        log("Patch Kompetensi Manajerial error: " + (err as Error).message);
+      }
+
       startScheduler();
     },
   );
