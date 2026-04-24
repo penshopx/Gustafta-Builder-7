@@ -162,8 +162,16 @@ async function fillAgent(client: PoolClient, agent: AgentRow): Promise<{ ok: boo
       expertise = ["Jasa Konstruksi Indonesia", "Bantuan informasi", "Panduan praktis"];
     }
 
+    // Preserve existing non-empty values; only fill kosong fields.
     await client.query(
-      `UPDATE agents SET philosophy=$1, off_topic_response=$2, expertise=$3::jsonb WHERE id=$4`,
+      `UPDATE agents SET
+        philosophy = COALESCE(NULLIF(philosophy, ''), $1),
+        off_topic_response = COALESCE(NULLIF(off_topic_response, ''), $2),
+        expertise = CASE
+          WHEN expertise IS NULL OR jsonb_array_length(expertise) = 0 THEN $3::jsonb
+          ELSE expertise
+        END
+       WHERE id=$4`,
       [philosophy, offTopic, JSON.stringify(expertise), agent.id]
     );
     return { ok: true };
