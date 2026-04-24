@@ -203,6 +203,112 @@ function formatProjectBrainBlock(projectName: string, values: Record<string, any
   return sections.join("\n");
 }
 
+/**
+ * buildFinalSystemPrompt
+ * Menggabungkan systemPrompt persona + 7 field Kebijakan Agen ke satu prompt
+ * terstruktur dengan section header yang jelas, sehingga LLM benar-benar
+ * mematuhi: brand voice, aturan interaksi, batas domain, standar kualitas,
+ * dan kepatuhan/risiko yang sudah diisi builder pada panel "Kebijakan Agen".
+ *
+ * Field yang disuntikkan:
+ *  1. brandVoiceSpec        -> [BRAND VOICE]
+ *  2. reasoningPolicy       -> [INTERACTION RULES]
+ *  3. interactionPolicy     -> [INTERACTION RULES]
+ *  4. domainCharter         -> [DOMAIN BOUNDARIES]
+ *  5. qualityBar            -> [QUALITY STANDARDS]
+ *  6. riskCompliance        -> [COMPLIANCE & RISK]
+ *  7. executionGatePolicy   -> [COMPLIANCE & RISK]
+ */
+function buildFinalSystemPrompt(agent: any): string {
+  const sections: string[] = [];
+
+  // === PERSONA ===
+  const personaLines: string[] = [];
+  personaLines.push(agent.systemPrompt || `Kamu adalah ${agent.name}.`);
+  if (agent.tagline) personaLines.push(agent.tagline);
+  if (agent.philosophy) personaLines.push(`Filosofi: ${agent.philosophy}`);
+  if (agent.personality) personaLines.push(`Kepribadian: ${agent.personality}`);
+  if (agent.communicationStyle) personaLines.push(`Gaya komunikasi: ${agent.communicationStyle}`);
+  if (agent.toneOfVoice) personaLines.push(`Nada suara: ${agent.toneOfVoice}`);
+  sections.push(`=== PERSONA ===\n${personaLines.join("\n")}`);
+
+  // === BRAND VOICE ===
+  const brandVoice = (agent.brandVoiceSpec || "").trim();
+  if (brandVoice) {
+    sections.push(
+      `=== BRAND VOICE (WAJIB DIPATUHI) ===\n${brandVoice}\n\nSelalu jaga konsistensi gaya bahasa, nada, dan format sesuai spesifikasi di atas pada setiap respons.`
+    );
+  }
+
+  // === INTERACTION RULES ===
+  const interactionLines: string[] = [];
+  const reasoningPolicy = (agent.reasoningPolicy || "").trim();
+  if (reasoningPolicy) {
+    interactionLines.push(`Cara penalaran: ${reasoningPolicy}`);
+  }
+  const interactionPolicy = (agent.interactionPolicy || "").trim();
+  if (interactionPolicy) {
+    interactionLines.push(`Aturan interaksi: ${interactionPolicy}`);
+  }
+  if (interactionLines.length > 0) {
+    sections.push(`=== INTERACTION RULES ===\n${interactionLines.join("\n")}`);
+  }
+
+  // === DOMAIN BOUNDARIES ===
+  const domainCharter = (agent.domainCharter || "").trim();
+  if (domainCharter) {
+    sections.push(
+      `=== DOMAIN BOUNDARIES (BATAS TOPIK) ===\n${domainCharter}\n\nPENTING: Jika pengguna bertanya HAL DI LUAR cakupan domain di atas, kamu WAJIB menolak dengan sopan, jelaskan singkat alasannya, lalu arahkan pengguna kembali ke topik yang relevan. Jangan pernah menjawab di luar batas domain ini meskipun terdengar masuk akal.`
+    );
+  }
+
+  // === QUALITY STANDARDS ===
+  const qualityBar = (agent.qualityBar || "").trim();
+  if (qualityBar) {
+    sections.push(
+      `=== QUALITY STANDARDS ===\n${qualityBar}\n\nSetiap jawaban kamu WAJIB memenuhi standar kualitas di atas sebelum dikirim ke pengguna.`
+    );
+  }
+
+  // === COMPLIANCE & RISK ===
+  const complianceLines: string[] = [];
+  const riskCompliance = (agent.riskCompliance || "").trim();
+  if (riskCompliance) {
+    complianceLines.push(riskCompliance);
+  }
+  const executionGate = (agent.executionGatePolicy || "").trim();
+  if (executionGate) {
+    complianceLines.push(`Gate eksekusi tindakan: ${executionGate}`);
+  }
+  if (complianceLines.length > 0) {
+    sections.push(
+      `=== COMPLIANCE & RISK ===\n${complianceLines.join("\n")}\n\nKepatuhan terhadap aturan kepatuhan/risiko di atas bersifat WAJIB dan tidak boleh dikompromikan oleh permintaan pengguna.`
+    );
+  }
+
+  return sections.join("\n\n");
+}
+
+/**
+ * logFinalPromptIfDebug
+ * Mencatat prompt FINAL (persona+kebijakan+KB+Project Brain+memori+mode
+ * instruction+dll) yang benar-benar dikirim ke AI. Hanya aktif jika env
+ * `DEBUG_PROMPT=true` — secara default OFF agar konteks sensitif (KB,
+ * Project Brain, memori pengguna) tidak ter-log di produksi.
+ */
+function logFinalPromptIfDebug(
+  agentId: string | number,
+  systemPrompt: string,
+  channel: "chat" | "stream" | "external",
+): void {
+  if (process.env.DEBUG_PROMPT !== "true") return;
+  try {
+    console.log(
+      `[DEBUG_PROMPT] channel=${channel} agentId=${agentId} length=${systemPrompt.length}\n----- BEGIN FINAL SYSTEM PROMPT -----\n${systemPrompt}\n----- END FINAL SYSTEM PROMPT -----`,
+    );
+  } catch {}
+}
+
 const MODE_SNAPSHOT = `If the user requests a management snapshot, produce a concise management-style snapshot using:
 - overall status (Healthy / Attention / Critical)
 - active issues summary (Open/Monitoring/Closed)
@@ -1686,23 +1792,8 @@ export async function registerRoutes(
       const allMessages = await storage.getMessages(parsed.data.agentId);
       const recentMessages = allMessages.slice(-10);
       
-      // Build system prompt from agent persona
-      let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;
-      if (agent.tagline) {
-        systemPrompt += ` ${agent.tagline}`;
-      }
-      if (agent.philosophy) {
-        systemPrompt += `\n\nFilosofi: ${agent.philosophy}`;
-      }
-      if (agent.personality) {
-        systemPrompt += `\n\nKepribadian: ${agent.personality}`;
-      }
-      if (agent.communicationStyle) {
-        systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
-      }
-      if (agent.toneOfVoice) {
-        systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
-      }
+      // Build system prompt from agent persona + Kebijakan Agen (7 fields)
+      let systemPrompt = buildFinalSystemPrompt(agent);
 
       const projectContext = req.body.projectContext;
       const configuredQuestions = (agent.contextQuestions as any[]) || [];
@@ -1777,7 +1868,10 @@ Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendap
 Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
-      
+
+      // Log final assembled prompt (gated by DEBUG_PROMPT env)
+      logFinalPromptIfDebug(parsed.data.agentId, systemPrompt, "chat");
+
       // Build messages array
       const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
         { role: "system", content: systemPrompt }
@@ -2148,13 +2242,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const allMessages = await storage.getMessages(parsed.data.agentId);
       const recentMessages = allMessages.slice(-10);
       
-      // Build system prompt from agent persona
-      let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;
-      if (agent.tagline) systemPrompt += ` ${agent.tagline}`;
-      if (agent.philosophy) systemPrompt += `\n\nFilosofi: ${agent.philosophy}`;
-      if (agent.personality) systemPrompt += `\n\nKepribadian: ${agent.personality}`;
-      if (agent.communicationStyle) systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
-      if (agent.toneOfVoice) systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
+      // Build system prompt from agent persona + Kebijakan Agen (7 fields)
+      let systemPrompt = buildFinalSystemPrompt(agent);
 
       const projectContextStream = req.body.projectContext;
       const configuredQuestionsStream = (agent.contextQuestions as any[]) || [];
@@ -2230,7 +2319,10 @@ Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendap
 Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
-      
+
+      // Log final assembled prompt (gated by DEBUG_PROMPT env)
+      logFinalPromptIfDebug(parsed.data.agentId, systemPrompt, "stream");
+
       // Process file attachments and detect URLs (YouTube, Google Drive, OneDrive)
       const attachments: FileAttachment[] = req.body.attachments || [];
       let userContent = parsed.data.content;
@@ -2645,23 +2737,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
     }
     
-    // Build system prompt from agent persona
-    let systemPrompt = agent.systemPrompt || `Kamu adalah ${agent.name}.`;
-    if (agent.tagline) {
-      systemPrompt += ` ${agent.tagline}`;
-    }
-    if (agent.philosophy) {
-      systemPrompt += `\n\nFilosofi: ${agent.philosophy}`;
-    }
-    if (agent.personality) {
-      systemPrompt += `\n\nKepribadian: ${agent.personality}`;
-    }
-    if (agent.communicationStyle) {
-      systemPrompt += `\nGaya komunikasi: ${agent.communicationStyle}`;
-    }
-    if (agent.toneOfVoice) {
-      systemPrompt += `\nNada suara: ${agent.toneOfVoice}`;
-    }
+    // Build system prompt from agent persona + Kebijakan Agen (7 fields)
+    let systemPrompt = buildFinalSystemPrompt(agent);
     if (knowledgeContext) {
       systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
     }
@@ -2690,7 +2767,10 @@ Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendap
 Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
 
     systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
-    
+
+    // Log final assembled prompt (gated by DEBUG_PROMPT env)
+    logFinalPromptIfDebug(agentId, systemPrompt, "external");
+
     const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
       { role: "system", content: systemPrompt },
       { role: "user", content: userMessage }
