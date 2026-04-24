@@ -34,6 +34,7 @@ import {
   companyProfiles,
   tenderSessions,
 } from "@shared/schema";
+import { applyDefaultPolicies } from "./lib/agent-policies";
 import type { IStorage } from "./storage";
 import type {
   Agent,
@@ -806,7 +807,12 @@ export class DatabaseStorage implements IStorage {
     
     // Auto-generate access token if not provided
     const accessToken = insertAgent.accessToken || `gus_${randomUUID().replace(/-/g, "")}`;
-    
+
+    // Auto-fill 7 field Kebijakan Agen berdasarkan series chatbot.
+    // Lookup series via toolboxId → (seriesId | bigIdeaId.seriesId).
+    const seriesName = await this.lookupSeriesNameForAgent(insertAgent);
+    const filled = applyDefaultPolicies(insertAgent, seriesName);
+
     const result = await db.insert(agents).values({
       name: insertAgent.name,
       description: insertAgent.description || "",
@@ -856,9 +862,58 @@ export class DatabaseStorage implements IStorage {
       widgetShowBranding: insertAgent.widgetShowBranding ?? true,
       widgetWelcomeMessage: insertAgent.widgetWelcomeMessage || "",
       widgetButtonIcon: insertAgent.widgetButtonIcon || "chat",
+      // Kebijakan Agen — auto-filled by applyDefaultPolicies above based on series.
+      primaryOutcome: filled.primaryOutcome,
+      conversationWinConditions: filled.conversationWinConditions,
+      brandVoiceSpec: filled.brandVoiceSpec,
+      interactionPolicy: filled.interactionPolicy,
+      domainCharter: filled.domainCharter,
+      qualityBar: filled.qualityBar,
+      riskCompliance: filled.riskCompliance,
       isActive: true,
     }).returning();
     return this.mapAgentRow(result[0]);
+  }
+
+  /**
+   * Resolve nama series untuk agen yang akan dibuat — dipakai untuk
+   * memilih template Kebijakan Agen. Lookup chain:
+   *   1. toolboxId → toolboxes.seriesId atau toolboxes.bigIdeaId → bigIdeas.seriesId
+   *   2. bigIdeaId → bigIdeas.seriesId (untuk orchestrator)
+   * Mengembalikan null jika tidak bisa di-resolve (helper akan fallback ke kategori default).
+   */
+  private async lookupSeriesNameForAgent(insertAgent: InsertAgent): Promise<string | null> {
+    try {
+      let seriesId: number | null = null;
+
+      const toolboxIdRaw = insertAgent.toolboxId ? parseInt(insertAgent.toolboxId) : null;
+      if (toolboxIdRaw && !Number.isNaN(toolboxIdRaw)) {
+        const tb = await db.select().from(toolboxes).where(eq(toolboxes.id, toolboxIdRaw)).limit(1);
+        if (tb.length > 0) {
+          if (tb[0].seriesId) {
+            seriesId = tb[0].seriesId;
+          } else if (tb[0].bigIdeaId) {
+            const bi = await db.select().from(bigIdeas).where(eq(bigIdeas.id, tb[0].bigIdeaId)).limit(1);
+            if (bi.length > 0 && bi[0].seriesId) seriesId = bi[0].seriesId;
+          }
+        }
+      }
+
+      if (!seriesId) {
+        const bigIdeaIdRaw = insertAgent.bigIdeaId ? parseInt(insertAgent.bigIdeaId) : null;
+        if (bigIdeaIdRaw && !Number.isNaN(bigIdeaIdRaw)) {
+          const bi = await db.select().from(bigIdeas).where(eq(bigIdeas.id, bigIdeaIdRaw)).limit(1);
+          if (bi.length > 0 && bi[0].seriesId) seriesId = bi[0].seriesId;
+        }
+      }
+
+      if (!seriesId) return null;
+      const s = await db.select().from(series).where(eq(series.id, seriesId)).limit(1);
+      return s.length > 0 ? s[0].name : null;
+    } catch (err) {
+      console.error("[agent-policies] series lookup failed, falling back to default category:", err);
+      return null;
+    }
   }
 
   async updateAgent(id: string, data: Partial<InsertAgent>): Promise<Agent | undefined> {

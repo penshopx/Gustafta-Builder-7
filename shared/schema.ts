@@ -749,6 +749,15 @@ export const insertAgentSchema = z.object({
   openClawRulebookCategory: z.array(z.string()).optional().default([]),
   openClawRulebookStatus: z.string().optional().default("Active"),
   openClawClauseRefRequired: z.boolean().optional().default(false),
+  // Kebijakan Agen — 7 field yang harus selalu konsisten.
+  // Auto-fill di storage.createAgent berdasarkan series jika kosong (lihat server/lib/agent-policies.ts).
+  primaryOutcome: z.string().optional().default(""),
+  conversationWinConditions: z.string().optional().default(""),
+  brandVoiceSpec: z.string().optional().default(""),
+  interactionPolicy: z.string().optional().default(""),
+  domainCharter: z.string().optional().default(""),
+  qualityBar: z.string().optional().default(""),
+  riskCompliance: z.string().optional().default(""),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId

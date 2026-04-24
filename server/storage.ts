@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { applyDefaultPolicies } from "./lib/agent-policies";
 import type {
   Agent,
   InsertAgent,
@@ -706,7 +707,11 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     
     const accessToken = `gus_${randomUUID().replace(/-/g, "")}`;
-    
+
+    // Auto-fill 7 field Kebijakan Agen. MemStorage tidak menyimpan series,
+    // jadi pakai default kategori (helper akan fallback ke "regulasi").
+    const filled = applyDefaultPolicies(insertAgent, null);
+
     const agent: Agent = {
       id,
       name: insertAgent.name,
@@ -790,6 +795,14 @@ export class MemStorage implements IStorage {
       brandingName: insertAgent.brandingName || "",
       brandingLogo: insertAgent.brandingLogo || "",
       userId: insertAgent.userId || "",
+      // Kebijakan Agen — auto-filled by applyDefaultPolicies above.
+      primaryOutcome: filled.primaryOutcome,
+      conversationWinConditions: filled.conversationWinConditions,
+      brandVoiceSpec: filled.brandVoiceSpec,
+      interactionPolicy: filled.interactionPolicy,
+      domainCharter: filled.domainCharter,
+      qualityBar: filled.qualityBar,
+      riskCompliance: filled.riskCompliance,
       isActive: true,
       createdAt: new Date().toISOString(),
     };
