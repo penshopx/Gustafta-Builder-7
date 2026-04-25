@@ -218,6 +218,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
+          { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
         ];
 
         for (const seed of seedTasks) {
@@ -297,6 +298,19 @@ for (const envVar of requiredEnvVars) {
         }
       } catch (err) {
         log("Catch-up IMS & SMK3 seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Personel Manajerial BUJK (added Apr 2026)
+      try {
+        const { seedPersonelManajerialBujk } = await import("./seed-personel-manajerial-bujk");
+        const allSeries = await storage.getSeries();
+        const pmSeries = allSeries.find((s: any) => s.slug === "personel-manajerial-bujk");
+        if (!pmSeries) {
+          log("[CatchUp] Seeding Personel Manajerial BUJK (missing)");
+          await seedPersonelManajerialBujk("49465846");
+        }
+      } catch (err) {
+        log("Catch-up Personel Manajerial BUJK seed error: " + (err as Error).message);
       }
 
       startScheduler();
