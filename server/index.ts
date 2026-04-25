@@ -219,6 +219,10 @@ for (const envVar of requiredEnvVars) {
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
           { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
+          { name: "Tender Konstruksi & PBJP", module: "./seed-tender-konstruksi-pbjp", fn: "seedTenderKonstruksiPbjp" },
+          { name: "Pasca Tender & Manajemen Kontrak", module: "./seed-pasca-tender-manajemen-kontrak", fn: "seedPascaTenderManajemenKontrak" },
+          { name: "Pelaksanaan Proyek Lapangan", module: "./seed-pelaksanaan-proyek-lapangan", fn: "seedPelaksanaanProyekLapangan" },
+          { name: "Legalitas Jasa Konstruksi", module: "./seed-legalitas-jasa-konstruksi", fn: "seedLegalitasJasaKonstruksi" },
         ];
 
         for (const seed of seedTasks) {
@@ -311,6 +315,58 @@ for (const envVar of requiredEnvVars) {
         }
       } catch (err) {
         log("Catch-up Personel Manajerial BUJK seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Tender Konstruksi & PBJP (added Apr 2026)
+      try {
+        const { seedTenderKonstruksiPbjp } = await import("./seed-tender-konstruksi-pbjp");
+        const allSeries = await storage.getSeries();
+        const tenderSeries = allSeries.find((s: any) => s.slug === "tender-konstruksi-pbjp");
+        if (!tenderSeries) {
+          log("[CatchUp] Seeding Tender Konstruksi & PBJP (missing)");
+          await seedTenderKonstruksiPbjp("49465846");
+        }
+      } catch (err) {
+        log("Catch-up Tender Konstruksi & PBJP seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Pasca Tender & Manajemen Kontrak (added Apr 2026)
+      try {
+        const { seedPascaTenderManajemenKontrak } = await import("./seed-pasca-tender-manajemen-kontrak");
+        const allSeries = await storage.getSeries();
+        const pascaSeries = allSeries.find((s: any) => s.slug === "pasca-tender-manajemen-kontrak");
+        if (!pascaSeries) {
+          log("[CatchUp] Seeding Pasca Tender & Manajemen Kontrak (missing)");
+          await seedPascaTenderManajemenKontrak("49465846");
+        }
+      } catch (err) {
+        log("Catch-up Pasca Tender & Manajemen Kontrak seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Pelaksanaan Proyek Lapangan (added Apr 2026)
+      try {
+        const { seedPelaksanaanProyekLapangan } = await import("./seed-pelaksanaan-proyek-lapangan");
+        const allSeries = await storage.getSeries();
+        const pelaksanaanSeries = allSeries.find((s: any) => s.slug === "pelaksanaan-proyek-lapangan");
+        if (!pelaksanaanSeries) {
+          log("[CatchUp] Seeding Pelaksanaan Proyek Lapangan (missing)");
+          await seedPelaksanaanProyekLapangan("49465846");
+        }
+      } catch (err) {
+        log("Catch-up Pelaksanaan Proyek Lapangan seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Legalitas Jasa Konstruksi (added Apr 2026)
+      try {
+        const { seedLegalitasJasaKonstruksi } = await import("./seed-legalitas-jasa-konstruksi");
+        const allSeries = await storage.getSeries();
+        const legalSeries = allSeries.find((s: any) => s.slug === "legalitas-jasa-konstruksi");
+        if (!legalSeries) {
+          log("[CatchUp] Seeding Legalitas Jasa Konstruksi (missing)");
+          await seedLegalitasJasaKonstruksi("49465846");
+        }
+      } catch (err) {
+        log("Catch-up Legalitas Jasa Konstruksi seed error: " + (err as Error).message);
       }
 
       startScheduler();
