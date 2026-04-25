@@ -227,6 +227,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SBU Coach Pekerjaan Konstruksi & Konsultan", module: "./seed-sbu-coach", fn: "seedSbuCoach" },
           { name: "SBU Coach All-in-One — Klasifikasi Terintegrasi", module: "./seed-sbu-master", fn: "seedSbuMaster" },
           { name: "SBU Coach — Pekerjaan Konstruksi Terintegrasi (GT & ST)", module: "./seed-sbu-terintegrasi", fn: "seedSbuTerintegrasi" },
+          { name: "SKK Coach — Manajemen Pelaksanaan", module: "./seed-skk-manajemen-pelaksanaan", fn: "seedSkkManajemenPelaksanaan" },
         ];
 
         for (const seed of seedTasks) {
