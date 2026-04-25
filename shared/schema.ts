@@ -467,6 +467,7 @@ type BigIdeaWithToolboxes = BigIdea & { toolboxes: ToolboxWithAgents[] };
 export type SeriesWithHierarchy = SeriesWithStats & {
   cores: (Core & { bigIdeas: BigIdeaWithToolboxes[] })[];
   bigIdeas: BigIdeaWithToolboxes[];
+  orchestratorToolboxes?: ToolboxWithAgents[];
 };
 
 // Core schema - Optional strategic umbrella under Series

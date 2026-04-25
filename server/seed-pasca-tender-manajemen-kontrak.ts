@@ -127,6 +127,7 @@ export async function seedPascaTenderManajemenKontrak(userId: string) {
       toolboxId: hubMainTb.id,
       userId,
       isActive: true,
+      isPublic: true,
       avatar: "📝",
       systemPrompt: `Kamu adalah Manajemen Kontrak Hub — orchestrator platform AI untuk seluruh siklus pasca-tender dan manajemen kontrak konstruksi.
 ${GOVERNANCE}

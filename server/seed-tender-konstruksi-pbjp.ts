@@ -128,6 +128,7 @@ export async function seedTenderKonstruksiPbjp(userId: string) {
       toolboxId: hubMainTb.id,
       userId,
       isActive: true,
+      isPublic: true,
       avatar: "🎯",
       systemPrompt: `Kamu adalah Tender Strategy Hub — orchestrator platform AI untuk seluruh siklus tender konstruksi dan PBJP.
 ${GOVERNANCE}

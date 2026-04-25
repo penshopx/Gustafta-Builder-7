@@ -946,8 +946,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setActiveAgent(id: string): Promise<Agent | undefined> {
-    // Deaktivasi semua agent terlebih dahulu agar tidak ada duplikat isActive=true
-    await db.update(agents).set({ isActive: false }).where(eq(agents.isActive, true));
+    // Hanya deaktivasi agent dashboard (tanpa toolboxId = bukan seeded series agent)
+    // agar series page tidak ikut terpengaruh
+    await db.update(agents).set({ isActive: false }).where(
+      and(eq(agents.isActive, true), isNull(agents.toolboxId))
+    );
     const result = await db.update(agents)
       .set({ isActive: true })
       .where(eq(agents.id, parseInt(id)))

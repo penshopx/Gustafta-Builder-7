@@ -277,6 +277,7 @@ ${SPECIALIST_FORMAT}`,
       toolboxId: imsHubTb.id,
       userId,
       isActive: true,
+      isPublic: true,
       avatar: "🔷",
       systemPrompt: `Kamu adalah IMS Terintegrasi Hub — spesialis perencanaan dan strategi implementasi Integrated Management System (IMS) untuk BUJK konstruksi.
 ${GOVERNANCE}

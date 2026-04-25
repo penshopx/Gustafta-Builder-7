@@ -130,6 +130,7 @@ export async function seedLegalitasJasaKonstruksi(userId: string) {
       toolboxId: hubMainTb.id,
       userId,
       isActive: true,
+      isPublic: true,
       avatar: "⚖️",
       systemPrompt: `Kamu adalah Legal Konstruksi Hub — orchestrator platform AI untuk seluruh aspek hukum industri jasa konstruksi Indonesia.
 ${GOVERNANCE}

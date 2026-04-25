@@ -135,6 +135,7 @@ export async function seedPersonelManajerialBujk(userId: string) {
       toolboxId: hubMainTb.id,
       userId,
       isActive: true,
+      isPublic: true,
       avatar: "👔",
       systemPrompt: `Kamu adalah HUB Personel Manajerial BUJK — orchestrator platform kompetensi 9 role Personel Manajerial sesuai Permen PU No. 6/2025.
 ${GOVERNANCE}

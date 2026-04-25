@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "wouter";
-import { Bot, BookOpen, Layers, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, MessageCircle, Sparkles, Target, Users, Globe, Share2, Lightbulb } from "lucide-react";
+import { Bot, BookOpen, Layers, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, MessageCircle, Sparkles, Target, Users, Globe, Share2, Lightbulb, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -225,7 +225,56 @@ export default function SeriesDetail() {
           </div>
         </div>
 
-        {s.bigIdeas.length === 0 && (
+        {/* Hub Orchestrator Section — series-level chatbots */}
+        {(s.orchestratorToolboxes ?? []).length > 0 && (
+          <div className="mb-6 space-y-2">
+            {(s.orchestratorToolboxes ?? []).map(tb =>
+              tb.agents.map(agent => {
+                const chatUrl = agent.productSlug ? `/bot/${agent.productSlug}` : `/bot/${agent.id}`;
+                return (
+                  <div
+                    key={agent.id}
+                    className="flex items-center gap-3 p-4 rounded-xl border bg-card"
+                  >
+                    <Avatar className="w-10 h-10 shrink-0" style={{ borderColor: `${agent.widgetColor || color}30` }}>
+                      {agent.avatar ? <AvatarImage src={agent.avatar} alt={agent.name} className="object-cover" /> : null}
+                      <AvatarFallback
+                        className="text-sm font-bold"
+                        style={{ backgroundColor: `${agent.widgetColor || color}20`, color: agent.widgetColor || color }}
+                      >
+                        {agent.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-semibold text-sm">{agent.name}</h4>
+                        <Badge className="text-[10px] bg-purple-500/20 text-purple-600 border-purple-500/30 no-default-hover-elevate no-default-active-elevate">
+                          <Network className="w-3 h-3 mr-0.5" />
+                          Hub
+                        </Badge>
+                      </div>
+                      {agent.tagline && <p className="text-xs text-muted-foreground truncate">{agent.tagline}</p>}
+                    </div>
+                    <div className="shrink-0">
+                      {agent.isPublic ? (
+                        <Link href={chatUrl}>
+                          <Button size="sm" className="text-xs gap-1">
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            Chat
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">Privat</Badge>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {s.bigIdeas.length === 0 && (s.orchestratorToolboxes ?? []).length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
               <BookOpen className="w-8 h-8 text-muted-foreground" />
@@ -363,7 +412,7 @@ export default function SeriesDetail() {
                                       </div>
 
                                       <div className="flex items-center gap-1.5 shrink-0">
-                                        {agent.isPublic && agent.isActive ? (
+                                        {agent.isPublic ? (
                                           <Link href={chatUrl}>
                                             <Button size="sm" className="text-xs gap-1">
                                               <MessageCircle className="w-3.5 h-3.5" />
@@ -372,7 +421,7 @@ export default function SeriesDetail() {
                                           </Link>
                                         ) : (
                                           <Badge variant="secondary" className="text-[10px] no-default-hover-elevate no-default-active-elevate">
-                                            {!agent.isActive ? "Nonaktif" : "Privat"}
+                                            Privat
                                           </Badge>
                                         )}
                                       </div>

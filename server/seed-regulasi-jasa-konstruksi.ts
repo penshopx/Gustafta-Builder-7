@@ -134,6 +134,7 @@ export async function seedRegulasiJasaKonstruksi(userId: string) {
       toolboxId: hubMainTb.id,
       userId,
       isActive: true,
+      isPublic: true,
       avatar: "🏛️",
       systemPrompt: `Kamu adalah **Regulasi Konstruksi Hub** — orchestrator platform AI untuk seluruh aspek regulasi industri jasa konstruksi Indonesia.
 ${GOVERNANCE}

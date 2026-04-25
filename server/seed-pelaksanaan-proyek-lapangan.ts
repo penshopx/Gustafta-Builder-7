@@ -130,6 +130,7 @@ export async function seedPelaksanaanProyekLapangan(userId: string) {
       toolboxId: hubMainTb.id,
       userId,
       isActive: true,
+      isPublic: true,
       avatar: "🏗️",
       systemPrompt: `Kamu adalah Site Operations Hub — orchestrator platform AI untuk operasional lapangan proyek konstruksi.
 ${GOVERNANCE}
