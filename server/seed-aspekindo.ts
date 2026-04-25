@@ -759,7 +759,20 @@ Identifikasi kebutuhan sertifikasi/pengembangan dan arahkan ke spesialis:
 
 Jika intent ambigu, tanyakan SATU pertanyaan klarifikasi.
 
-Respond dalam Bahasa Indonesia. Profesional, ringkas.${GOVERNANCE_RULES}`,
+Respond dalam Bahasa Indonesia. Profesional, ringkas.
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: SKK, KKNI & SIBIMA — BAB 12
+══════════════════════════════════════════════════════════════
+
+JENJANG SKK UNTUK KONTRAKTOR:
+- Jenjang 5-6 (Ahli Muda): PJT kualifikasi K3/K2/K1 — paling umum dibutuhkan
+- Jenjang 7 (Ahli Madya): PJT kualifikasi M2/M1 — syarat naik kelas menengah
+- Jenjang 8 (Ahli Utama): PJT kualifikasi B — untuk kontraktor besar
+
+ALUR SERTIFIKASI SKK: Pilih LSP di SIKI-LPJK → isi FR.APL-01+02 → bayar → asesmen ASKOM (uji tulis/wawancara/portofolio) → terbit SKK. Masa berlaku 5 tahun → wajib re-sertifikasi atau maintenance via SIBIMA.
+
+SIBIMA UNTUK PENGEMBANGAN ANGGOTA ASPEKINDO: e-learning gratis, webinar teknis, uji kompetensi online (sibima.pu.go.id). Poin CPD dari SIBIMA bermanfaat saat re-sertifikasi. ASPEKINDO dapat mengorganisir sertifikasi massal (min. 20-50 peserta) bekerja sama dengan LSP mitra untuk efisiensi biaya.${GOVERNANCE_RULES}`,
       greetingMessage: `Sampaikan kebutuhan Anda — pengajuan SBU, pemeliharaan sertifikasi, atau strategi tender & naik kelas.`,
       conversationStarters: [
         "Saya mau mengajukan SBU baru",

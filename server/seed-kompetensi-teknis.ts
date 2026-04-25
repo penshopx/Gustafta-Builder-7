@@ -915,6 +915,19 @@ FASE 3 ({{bulan}}-{{bulan}}): {{milestone}}
 
 Catatan Strategis: {{rekomendasi tambahan}}
 ══════════════════════════════════════
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: ROADMAP TKK & PEMBINAAN — BAB 8 & 12
+══════════════════════════════════════════════════════════════
+
+PETA JALAN PENGEMBANGAN TKK (Dirjen Bina Konstruksi 2024):
+Entry (SMK/D3/S1) → OJT → First SKK jenjang 5-6 → Naik jenjang + pengalaman → Spesialisasi → Jenjang 8-9 (pakar/instruktur/asesor).
+
+SERTIFIKASI BERSUBSIDI: Program pemerintah gratis/bersubsidi untuk TKK informal (tukang, mandor, operator). Melalui Balai Jasa Konstruksi Wilayah (BJKW) tersebar di 6 wilayah (Sumatera, Jawa-Bali, Kalimantan, Sulawesi, Maluku, Papua).
+
+KONVERSI IJAZAH → KKNI: D1/D2 = jenjang 3-4; D3 = jenjang 5; D4/S1 = jenjang 6; S2 = jenjang 8 (dengan pengalaman); S3 = jenjang 9. Pengalaman kerja bisa naik jenjang via jalur RPL.
+
+TARGET PEMBINAAN 2025: 1 juta TKK bersertifikat baru/tahun; 100% TKK proyek strategis nasional bersertifikat; integrasi penuh SIBIMA + SIKI-LPJK + SIJK real-time.
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Halo! Saya **Roadmap Pengembangan Kontraktor** — membantu Anda merencanakan pengembangan dari level saat ini ke target yang lebih tinggi.
@@ -1265,6 +1278,18 @@ Modal Min.: Rp {{jumlah}}
 Total Tenaga Ahli: {{jumlah}} orang
 Catatan: {{catatan khusus}}
 ══════════════════════════════════════
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: TKK, SKK & KKNI — BAB 12
+══════════════════════════════════════════════════════════════
+
+9 JENJANG KKNI: 1=Pelaksana Pemula; 2=Pelaksana; 3=Teknisi Jr; 4=Teknisi Senior; 5=Teknisi/Analis Utama; 6=Ahli Muda (S1+2thn); 7=Ahli Madya (S1+5thn/S2+2thn); 8=Ahli Utama (S1+10thn/S2+5thn); 9=Pakar (S3/S1+15thn).
+
+PERSYARATAN PJT PER KUALIFIKASI SBU KONTRAKTOR: K3 = jenjang 5-6; K2/K1 = jenjang 6 (Ahli Muda); M2/M1 = jenjang 7 (Ahli Madya); B = jenjang 8 (Ahli Utama). PJK (Penanggung Jawab Kualifikasi) untuk kualifikasi M & B harus direktur dengan SKK minimal sesuai kualifikasi.
+
+TENAGA AHLI TETAP (TAT): TKK terdaftar sebagai karyawan tetap BUJK di SIKI-LPJK. Upload SK pengangkatan + SKK. 1 TKK hanya bisa jadi TAT di 1 BUJK dalam waktu yang sama.
+
+ALUR SKK: SIKI-LPJK → pilih LSP & skema → FR.APL-01+02 → asesmen ASKOM → SKK terbit terintegrasi. Masa berlaku 5 tahun, wajib re-sertifikasi.
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Halo! Saya **Persyaratan Tenaga Ahli Tetap** — membantu Anda memahami kebutuhan tenaga ahli untuk setiap SBU Konsultan.

@@ -402,7 +402,20 @@ PJBU-Kontraktor bertanggung jawab atas:
 
 Jika intent ambigu, tanyakan SATU pertanyaan klarifikasi lalu route segera.
 
-Respond dalam Bahasa Indonesia. Formal edukatif, ringkas.${GOVERNANCE_RULES}`,
+Respond dalam Bahasa Indonesia. Formal edukatif, ringkas.
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: PEMBINAAN JASA KONSTRUKSI — BAB 8
+══════════════════════════════════════════════════════════════
+
+KEWENANGAN PEMBINAAN (PP 22/2020 Pasal 96-100):
+Pusat (Kemen. PUPR): regulasi & standarisasi, lisensi LSBU/LSP nasional, akreditasi LPJK, SIBIMA, pembinaan BUJK kualifikasi M & B.
+Provinsi (Dinas PUPR): pembinaan BUJK K1-K2 lintas kab/kota, database BUJK & TKK provinsi.
+Kab/Kota (Dinas PUPR): pembinaan BUJK K3 lokal, pengawasan TKK proyek daerah.
+
+LPJK PASCA PP 22/2020: 1 LPJK pusat (tidak ada lagi LPJK daerah). Fungsi: registrasi BUJK, TKK, lisensi LSBU/LSP, akreditasi asosiasi. SIKI-LPJK terintegrasi dengan OSS-RBA.
+
+SIBIMA (sibima.pu.go.id): e-learning, webinar, uji kompetensi online. Wajib digunakan TKK untuk maintenance kompetensi. Poin CPD dari SIBIMA bisa jadi nilai tambah saat re-sertifikasi SKK.${GOVERNANCE_RULES}`,
       greetingMessage: `Sampaikan kebutuhan Anda — asesmen level kapasitas, pendaftaran PUB, atau pelaporan LKUT.`,
       conversationStarters: [
         "Saya ingin asesmen level PJBU-Kontraktor",

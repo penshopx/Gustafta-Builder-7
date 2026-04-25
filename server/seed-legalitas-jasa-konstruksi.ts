@@ -280,6 +280,21 @@ RED FLAGS KLAUSUL MERUGIKAN:
 🔴 "Kontraktor wajib menyetor biaya asuransi semua pihak"
 🔴 "Denda keterlambatan tidak ada batas maksimum"
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: KONTRAK KONSTRUKSI — BAB 13
+══════════════════════════════════════════════════════════════
+
+14 KLAUSUL WAJIB PASAL 47 UU No. 2/2017:
+Para pihak; Rumusan pekerjaan (lingkup, volume, spesifikasi teknis); Masa pertanggungan/pemeliharaan; Nilai kontrak + cara pembayaran + penyesuaian harga; Jadwal pelaksanaan (kurva-S); Hak & kewajiban para pihak; Tata cara dokumen kontrak; Ketentuan subkontrak; Keadaan memaksa (force majeure); Kegagalan bangunan; Perlindungan TK (BPJS, K3); Lingkungan hidup (AMDAL/UKL-UPL); Penyelesaian perselisihan; Pemutusan kontrak.
+
+JENIS KONTRAK KONSTRUKSI (Pasal 50-56 UU 2/2017):
+- Lump Sum: harga tetap, risiko volume pada kontraktor (scope harus jelas)
+- Unit Price/Harga Satuan: pembayaran per volume terukur (scope tidak pasti)
+- EPC/Turnkey: desain+bangun+serah jadi, risiko penuh kontraktor
+- Cost Plus Fee: pengguna bayar biaya aktual + fee (darurat/sangat tidak pasti)
+
+PENYESUAIAN HARGA (ESKALASI): Untuk kontrak > 12 bulan wajib ada klausul eskalasi (Pasal 58). Formula: Hn = Ho x (a + b.Bn/Bo + ...) berdasarkan IHPB BPS. Komponen tetap (a) min. 15%.
+
 ${FORMAT}`,
       openingMessage: "Selamat datang di **Kontrak Konstruksi Reviewer**! 📜\n\nSaya membantu mengidentifikasi klausul kritis dan risiko dalam kontrak konstruksi sebelum ditandatangani.\n\nApa yang ingin direview?\n- 📋 Paste klausul spesifik untuk dianalisis\n- 🔍 Checklist klausul kritis yang perlu dicek\n- ⚠️ Klausul tertentu yang membingungkan\n- 🤝 Strategi negosiasi klausul yang merugikan\n\n*Disclaimer: Review ini bersifat edukatif. Untuk kontrak bernilai besar, konsultasikan dengan advokat konstruksi.*",
       conversationStarters: [
@@ -366,6 +381,23 @@ KLAUSUL ESKALASI HARGA:
 - Tidak otomatis ada dalam semua kontrak
 - SBD PUPR: menggunakan rumus eskalasi berdasarkan indeks harga BPS
 - Tanpa klausul: kontraktor menanggung risiko fluktuasi harga sendiri
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: FORCE MAJEURE & RISIKO KONTRAK — BAB 13
+══════════════════════════════════════════════════════════════
+
+DASAR HUKUM: UU 2/2017 Pasal 54 (keadaan memaksa → pemutusan tanpa ganti rugi); KUH Perdata Pasal 1244-1245.
+
+KATEGORI FM DALAM KONSTRUKSI:
+1. FM Mutlak: bencana alam besar (gempa, tsunami, erupsi), perang, pemberontakan → kontrak dapat diputus
+2. FM Relatif: banjir lokal, cuaca ekstrem, pemogokan → kontraktor berhak EOT, tidak otomatis putus
+3. FM Khusus Proyek Pemerintah: perubahan kebijakan/regulasi berlaku retroaktif → change in law clause
+
+PROSEDUR NOTIFIKASI FM: Pemberitahuan tertulis 14-28 hari; Laporan berkala mingguan; Bukti pendukung (surat BPBD, BMKG, Pemda); Notifikasi berakhirnya FM + rencana restart.
+
+ALOKASI RISIKO: Risiko Pengguna = DSC, variation order, eskalasi kebijakan, FM destruksi existing. Risiko Kontraktor = metode kerja, subkontrak, kecelakaan normal, cuaca historis normal.
+
+KLAUSUL KRITIS UNTUK DINEGOSIASI: Cap on delay damages (max 5-10% nilai kontrak); Mutual termination FM > X bulan; Change in law clause (kompensasi jika regulasi berubah); Cuaca "extraordinary" vs "normal" harus didefinisikan dengan acuan BMKG historis.
 
 ${FORMAT}`,
       openingMessage: "Selamat datang di **Force Majeure & Risk Clause Analyzer**! 🌪️\n\nSaya membantu memahami klausul force majeure dan alokasi risiko dalam kontrak konstruksi.\n\nApa yang ingin dianalisis?\n- 🌊 Apakah peristiwa ini termasuk force majeure dalam kontrak kami?\n- 📄 Analisis klausul force majeure di kontrak kami\n- ⚖️ Siapa yang menanggung risiko kondisi lapangan berbeda?\n- 💰 Apakah kenaikan harga material bisa diklaim sebagai force majeure?",
