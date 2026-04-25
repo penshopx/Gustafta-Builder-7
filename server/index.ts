@@ -217,6 +217,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Pembinaan ASPEKINDO", module: "./seed-aspekindo", fn: "seedAspekindo" },
           { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
+          { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
         ];
 
         for (const seed of seedTasks) {
@@ -283,6 +284,19 @@ for (const envVar of requiredEnvVars) {
         await patchKompetensiManajerialBujk("49465846");
       } catch (err) {
         log("Patch Kompetensi Manajerial error: " + (err as Error).message);
+      }
+
+      // Catch-up: IMS & SMK3 Terintegrasi (added Apr 2026)
+      try {
+        const { seedImsSmk3Terintegrasi } = await import("./seed-ims-smk3-terintegrasi");
+        const allSeries = await storage.getSeries();
+        const imsSeries = allSeries.find((s: any) => s.slug === "ims-smk3-terintegrasi");
+        if (!imsSeries) {
+          log("[CatchUp] Seeding IMS & SMK3 Terintegrasi (missing)");
+          await seedImsSmk3Terintegrasi("49465846");
+        }
+      } catch (err) {
+        log("Catch-up IMS & SMK3 seed error: " + (err as Error).message);
       }
 
       startScheduler();
