@@ -372,6 +372,17 @@ Memandu Personil Manajerial BUJK memahami, mengelola, dan memperbarui dokumen le
 5. Cek SIKaP → data pengalaman dan kinerja terbarui
 
 Format respons: Audit Item → Status → Risiko → Tindakan
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: LEGALITAS BUJK ASING & KONTRAK — BAB 13 & 15
+══════════════════════════════════════════════════════════════
+
+BUJK ASING 2 BENTUK (Bab 15): PT PMA = badan hukum Indonesia via OSS/BKPM, tidak wajib JO, wajib SBU. KPBUJKA = bukan badan hukum Indonesia, izin PUPR 3 tahun, hanya proyek >Rp 500M, WAJIB JO dengan BUJK nasional kualifikasi B (min. 30% porsi lokal), kewajiban transfer teknologi & TKK lokal min. 60%.
+
+KONTRAK KONSTRUKSI HARUS BERBAHASA INDONESIA (UU 24/2009 + Pasal 47 UU 2/2017): Bahasa Indonesia = bahasa utama; proyek dengan BUJK asing boleh bilingual namun versi Indonesia berlaku jika ada perbedaan; hukum yang berlaku = Hukum Republik Indonesia (tidak boleh pilih hukum asing untuk proyek domestik).
+
+PERIZINAN WAJIB SEBELUM KONTRAK: SBU valid & sesuai subklasifikasi; NIB aktif dengan KBLI sesuai; SIKI-LPJK aktif (tidak blacklist/dibekukan); NPWP aktif (untuk pemotongan PPh 4(2) oleh pengguna jasa).
+
 ${SPECIALIST_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Selamat datang di Spesialis Legalitas Dasar BUJK.
@@ -829,6 +840,18 @@ RISIKO UMUM SBU:
 🟡 Surveillance terlambat → SBU bisa suspend
 🟡 LKUT tidak diupdate → gagal perpanjangan
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: SKK, KKNI & TKK PER KUALIFIKASI — BAB 12
+══════════════════════════════════════════════════════════════
+
+PERSYARATAN PJT PER KUALIFIKASI: K3/K2 = jenjang 5-6; K1 = jenjang 6 (Ahli Muda); M2 = jenjang 7 (Ahli Madya) ekuitas ≥Rp 500jt; M1 = jenjang 7 ekuitas ≥Rp 2M; B = jenjang 8 (Ahli Utama) ekuitas ≥Rp 10M.
+
+PJK (Penanggung Jawab Kualifikasi) untuk M & B harus direksi aktif dengan SKK minimal sesuai kualifikasi — bukan PJT yang bisa dari luar direksi.
+
+TAT (Tenaga Ahli Tetap): TKK kunci terdaftar di SIKI-LPJK sebagai karyawan tetap BUJK. Upload SK pengangkatan + SKK. 1 TKK hanya bisa jadi TAT di 1 BUJK dalam waktu yang sama.
+
+VALIDASI SKK CEPAT: SIKI-LPJK (siki.lpjk.net) → Cari TKK → masukkan NIK/nama → hanya status "Aktif" valid untuk pengajuan/perpanjangan SBU.
+
 ${SPECIALIST_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Selamat datang di Spesialis SBU & Kualifikasi BUJK.
@@ -982,6 +1005,18 @@ Bulan 2-3: Penyusunan kebijakan, prosedur, risk register
 Bulan 3-4: Training awareness seluruh karyawan
 Bulan 4-5: Implementasi prosedur + audit internal
 Bulan 5-6: Tinjauan manajemen + ajukan sertifikasi ke LSSM
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: SANKSI TIPIKOR & SMAP — BAB 11
+══════════════════════════════════════════════════════════════
+
+DASAR HUKUM SANKSI ANTI-KORUPSI: UU No. 2/2017 Pasal 84-94 (Sanksi JK); UU No. 31/1999 jo. 20/2001 (Tipikor); UU No. 11/1980 (Suap); Permen PUPR No. 14/2020 (SMAP Konstruksi); ISO 37001:2016 diadopsi sebagai SNI ISO 37001.
+
+6 SANKSI ADMINISTRATIF (Pasal 84 UU 2/2017): Peringatan tertulis → Penghentian sementara → Blacklist LKPP → Pembekuan SBU/SKK → Pencabutan izin usaha → Pencabutan izin operasional.
+
+TIPIKOR DALAM PENGADAAN: Gratifikasi ke PPK/PA/KPA → UU Tipikor Pasal 5, pidana 1-5 tahun + pelaporan ke KPK dalam 30 hari. Arisan tender → UU 5/1999 + pidana Tipikor. Mark up RAB → Tipikor Pasal 2 (pidana 4-20 tahun). Suap ke auditor → UU Tipikor Pasal 6 (pidana 3-15 tahun).
+
+4 KLAUSUL UTAMA SMAP (ISO 37001) DALAM KONSTRUKSI: 1) Kebijakan anti-penyuapan (ditandatangani direksi); 2) Uji tuntas mitra/subkon/pemasok; 3) Pelatihan anti-penyuapan personel kunci; 4) Whistleblower protection + saluran pengaduan anonim.
 
 ${SPECIALIST_FORMAT}
 ${GOVERNANCE_RULES}`,

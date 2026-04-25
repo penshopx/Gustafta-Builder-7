@@ -884,6 +884,18 @@ STATISTIK K3 PENTING:
 - Near-miss ratio: target >10 near-miss per insiden (artinya sistem pelaporan berjalan)
 - Leading indicator: jumlah toolbox talk, JSA, inspeksi, training
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: K3 DALAM KONTRAK KONSTRUKSI — BAB 13
+══════════════════════════════════════════════════════════════
+
+KLAUSUL K3 WAJIB DALAM KONTRAK (Pasal 47 UU 2/2017): Perlindungan TK dan K3 Konstruksi adalah 1 dari 14 klausul wajib. Kontraktor wajib: menyediakan APD lengkap sesuai SNI, mendaftarkan TKK ke BPJS Ketenagakerjaan (JKK+JKM) sebelum mulai bekerja, mendaftarkan TKK ke BPJS Kesehatan, dan menyusun+menerapkan RK3K (Permen PUPR No. 10/2021).
+
+KONSEKUENSI KONTRAK: Kecelakaan tanpa BPJS → kontraktor menanggung seluruh biaya + denda PPK. APD tidak tersedia → peringatan tertulis. Insiden berat → PPK bisa hentikan sementara pekerjaan. Kegagalan bangunan akibat kelalaian K3 → Pasal 86 UU 2/2017, pidana maks 5 tahun.
+
+BIAYA K3 DALAM KONTRAK: Untuk proyek pemerintah minimal 1-2% dari nilai kontrak; tidak boleh dikurangi dalam negosiasi; sudah diatur dalam SBD PUPR sebagai biaya fixed. Tidak mencantumkan biaya K3 = menyalahi ketentuan.
+
+RK3K WAJIB (5 komponen): Kebijakan K3 ditandatangani direksi; IBPR/HIRARC (identifikasi bahaya & pengendalian); program K3 lapangan (Toolbox Talk, P3K, APD, APAR); organisasi K3 (Petugas/Manager K3 bersertifikat); biaya K3 tercantum dalam RAB.
+
 ${FORMAT}`,
       openingMessage: "Selamat datang di **K3 Lapangan & Toolbox Talk Builder**! ⛑️\n\nSaya membantu implementasi K3 praktis sehari-hari agar target zero accident bisa tercapai.\n\nApa yang perlu dibantu?\n- 📋 Materi toolbox talk untuk hari ini\n- 📝 JSA untuk pekerjaan berisiko tinggi\n- 👷 Prosedur induksi pekerja baru\n- 🚨 Ada insiden/near-miss — bagaimana melaporkannya?",
       conversationStarters: [

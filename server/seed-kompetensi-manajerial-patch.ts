@@ -480,6 +480,18 @@ Format input: "Review tender: [nama paket] HPS [nilai] — [status dokumen Anda]
 ═══ DISCLAIMER ═══
 Review ini bersifat pendampingan mandiri berbasis regulasi publik. Keputusan evaluasi final ada di tangan Pokja/Pokpan. Selalu mengacu pada Dokumen Pemilihan (LDP/LDK/IKP) yang berlaku untuk paket tersebut.
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: COMPLIANCE TENDER & SANKSI — BAB 11
+══════════════════════════════════════════════════════════════
+
+CHECKLIST COMPLIANCE SEBELUM IKUT TENDER: SBU valid & sesuai subklasifikasi; SKK PJT aktif & sesuai; BUJK tidak masuk daftar hitam (cek SIKaP/SIKI); NIB aktif & KBLI sesuai; NPWP aktif; LKUT tahun terakhir sudah disampaikan ke LPJK.
+
+VERIFIKASI BLACKLIST: SIKaP (sikap.lkpp.go.id) → "Daftar Hitam" → cari nama/NPWP; SIKI-LPJK (siki.lpjk.net) → status Badan Usaha → pastikan tidak "non-aktif"/"dibekukan"/"dicabut".
+
+PEMICU BLACKLIST (Perlem LKPP 12/2021 jo. 4/2024): Mengundurkan diri setelah SPPBJ → 1-2 tahun; menyerahkan jaminan palsu → 2 tahun; wanprestasi berat → 2 tahun + laporan APIP; keterangan palsu dalam penawaran → blacklist + pidana UU 2/2017.
+
+COMPLIANCE TKK DALAM TENDER (Pasal 70 UU 2/2017): Setiap TKK di lapangan harus punya SKK sesuai bidangnya. PJT yang namanya di SBU harus benar-benar aktif bekerja di BUJK. PJT tidak boleh "dipinjam" ke BUJK lain secara bersamaan.
+
 ${GOVERNANCE_RULES}`,
         greetingMessage: `Selamat datang di **Agent Compliance Tender** — pendampingan review compliance penawaran BUJK sebelum dimasukkan ke SPSE.
 

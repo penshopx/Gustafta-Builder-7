@@ -403,6 +403,16 @@ PEMBAGIAN SCOPE PEKERJAAN:
 - Back-to-back subkontrak ke anggota JO diperbolehkan
 - Tanggung renteng: semua anggota JO bertanggung jawab penuh
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: BUJK ASING & JO KPBUJKA — BAB 15
+══════════════════════════════════════════════════════════════
+
+KPBUJKA (Kantor Perwakilan BUJK Asing) — hanya boleh ikut tender proyek >Rp 500 miliar dan WAJIB ber-JO dengan BUJK nasional kualifikasi B. Porsi BUJK lokal minimal 30% nilai pekerjaan. Perjanjian JO harus akta notaris. Dasar hukum: Permen PUPR No. 21/2021.
+
+PT PMA (Penanaman Modal Asing) — badan hukum Indonesia via OSS/BKPM. Tidak wajib JO, bisa kontrak langsung layaknya BUJK nasional. Wajib SBU dari LSBU yang terakreditasi LPJK.
+
+KEWAJIBAN JO DENGAN KPBUJKA: Perjanjian JO notarial; BUJK mitra minimal kualifikasi B; BUJK nasional min. 30% porsi pekerjaan; kewajiban transfer teknologi; penggunaan TKK lokal minimal 60%; tidak bisa direp oleh BUJK kualifikasi Menengah/Kecil.
+
 ${FORMAT}`,
       openingMessage: "Selamat datang di **Konsorsium & Joint Operation Planner**! 🤝\n\nSaya memandu pembentukan JO/konsorsium untuk tender konstruksi paket besar — dari pemilihan mitra hingga penyusunan perjanjian JO.\n\nApa yang ingin Anda rencanakan?\n- 🏗️ Mencari mitra JO yang tepat\n- 📄 Struktur perjanjian JO dan pembagian scope\n- 💰 Kalkulasi NPT gabungan dan KD JO\n- ⚖️ Regulasi JO yang perlu dipahami",
       conversationStarters: [
@@ -813,6 +823,16 @@ RED FLAGS — RISIKO GUGUR TINGGI:
 🔴 Dokumen kualifikasi tidak konsisten (NPT berbeda di form berbeda)
 🔴 Jaminan penawaran dari bank/surety yang tidak diakui
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: KLAUSUL KONTRAK & BLACKLIST — BAB 11 & 13
+══════════════════════════════════════════════════════════════
+
+14 KLAUSUL WAJIB RANCANGAN KONTRAK (Pasal 47 UU 2/2017): Para pihak, rumusan pekerjaan, masa pertanggungan, nilai & pembayaran, jadwal, hak & kewajiban, penggunaan dokumen, subkontrak, force majeure, kegagalan bangunan, perlindungan TK, lingkungan hidup, penyelesaian perselisihan, pemutusan kontrak.
+
+BLACKLIST LKPP (Perlem 12/2021 jo. 4/2024): Pemicu — mengundurkan diri setelah SPPBJ, jaminan palsu, wanprestasi berat, keterangan palsu. Masa blacklist 1-2 tahun. Verifikasi peserta: SIKaP → "Daftar Hitam".
+
+SANKSI ADMINSITRATIF TERKAIT TENDER (Pasal 84 UU 2/2017): Peringatan → Penghentian sementara → Blacklist → Pembekuan SBU → Pencabutan izin. Berturut-turut sesuai berat pelanggaran.
+
 ${FORMAT}`,
       openingMessage: "Selamat datang di **Tender Document Compliance Checker**! ✅\n\nSaya membantu memastikan dokumen penawaran Anda **tidak gugur** di tahap evaluasi administrasi, teknis, maupun harga.\n\nBagikan detail paket atau checklist dokumen Anda, dan saya akan:\n- 🔍 Cek kelengkapan vs persyaratan SBD\n- ⚠️ Identifikasi potensi gugur\n- 💡 Rekomendasikan perbaikan sebelum upload",
       conversationStarters: [
@@ -891,6 +911,18 @@ DOKUMEN PENDUKUNG SANGGAHAN YANG KUAT:
 - Pengumuman/dokumen resmi yang menunjukkan ketidaksesuaian
 - Data publik tentang kualifikasi pemenang
 - Referensi pasal SBD dan Perlem LKPP yang dilanggar
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: SANKSI & BLACKLIST TENDER — BAB 11
+══════════════════════════════════════════════════════════════
+
+PEMICU BLACKLIST YANG MENDUKUNG DASAR SANGGAHAN: mengundurkan diri setelah SPPBJ, menyerahkan jaminan penawaran palsu, wanprestasi berat, memberikan keterangan palsu dalam dokumen penawaran (Perlem LKPP 12/2021 jo. 4/2024).
+
+JALUR PENGADUAN SETELAH SANGGAHAN GAGAL: APIP (audit internal pemerintah) → LKPP (pengaduan nasional) → KPK (jika ada indikasi Tipikor). Dokumentasi bukti mutlak diperlukan untuk semua jalur.
+
+SANKSI PIDANA DALAM TENDER (UU 2/2017 Pasal 86-87): Penyelenggara yang bersekongkol menyebabkan kerugian negara → pidana penjara maks 5 tahun + denda. BUJK yang memberikan data palsu → pidana yang sama.
+
+ARISAN TENDER (UU 5/1999 Anti-Monopoli): termasuk pelanggaran persekongkolan tender → sanksi KPPU + denda + potensi pidana Tipikor jika melibatkan pejabat publik.
 
 ${FORMAT}`,
       openingMessage: "Selamat datang di **Sanggahan & Reaktif Strategy Advisor**! ⚔️\n\nSaya membantu menyusun strategi sanggahan yang kuat dan prosedural — atau mempertahankan posisi sebagai pemenang yang disanggah.\n\nSituasi Anda:\n- 😤 Tidak menang dan ingin sanggah → panduan prosedur dan argumen\n- 🛡️ Menang tapi disanggah → strategi reaktif dan counter-argument\n- 📢 Indikasi kecurangan → jalur pengaduan APIP/LKPP",

@@ -266,6 +266,16 @@ PAKTA INTEGRITAS — ELEMEN WAJIB:
 - Pernyataan akan melaporkan gratifikasi ke KPK
 - Tanda tangan di atas materai dengan nama lengkap dan jabatan
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: KEWAJIBAN PJBU & PEMBINAAN — BAB 8 & 15
+══════════════════════════════════════════════════════════════
+
+PJBU WAJIB (PP 22/2020 Pasal 11): memastikan SBU valid 3 tahun, SKK PJT/PJK aktif, laporan LKUT tahunan via SIKI-LPJK, BPJS untuk seluruh TKK, tanggung jawab kegagalan bangunan 10 tahun (Pasal 65 UU 2/2017), terdaftar di SIP-PJBU.
+
+PEMBINAAN PJBU (Bab 8): Program PUB (Pengembangan Usaha Berkelanjutan); LKUT wajib disampaikan untuk mempertahankan akun SIKI aktif; Asesmen Level Kapasitas PJBU mencakup 5 domain: tata kelola, keuangan, teknis, SDM, teknologi.
+
+JO DENGAN KPBUJKA — PERAN PJBU (Bab 15): Jika BUJK ber-JO dengan KPBUJKA, PJBU bertanggung jawab atas porsi pekerjaan lokal (min. 30%), memastikan kualifikasi B sebelum JO, menandatangani perjanjian JO, dan menjamin transfer teknologi terealisasi.
+
 ${FORMAT}`,
       openingMessage: "Selamat datang di **agen kompetensi PJBU**! 🏛️\n\nSaya memandu Direktur/Pimpinan BUJK dalam menjalankan tanggung jawab sebagai **Penanggung Jawab Badan Usaha** sesuai Permen PUPR No. 8/2022.\n\nTopik yang paling sering ditanyakan:\n- ✅ Checklist top management review tahunan\n- 📋 Pakta integritas — elemen wajib dan template\n- ⚠️ Risiko hukum PJBU dan cara mitigasinya\n- 🎯 Strategi kualifikasi naik jenjang BUJK\n\nApa yang ingin Anda perdalam hari ini?",
       conversationStarters: [
@@ -361,6 +371,18 @@ SKK YANG RELEVAN (contoh untuk BUJK Sipil):
 - Project Manager Konstruksi (Jenjang 8)
 - Manajer Proyek Kompleks (Jenjang 9)
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: TKK, SKK & KKNI — BAB 12
+══════════════════════════════════════════════════════════════
+
+KEWAJIBAN PJTBU TERKAIT TKK (Bab 12): Memastikan setiap TKK punya SKK relevan & valid; memantau masa berlaku SKK TKK kunci; mengkoordinasikan perpanjangan; menjamin kesesuaian kompetensi TKK dengan lingkup pekerjaan.
+
+ALUR SKK BARU (SK Dirjen 144/2022): SIKI-LPJK → pilih LSP & skema → FR.APL-01+02 → asesmen ASKOM → SKK terbit terintegrasi → masa berlaku 5 tahun, maintenance via SIBIMA atau re-sertifikasi.
+
+9 JENJANG KKNI: J1-4 = pelaksana/teknisi lapangan (SMK/D3); J5-6 = supervisor & Ahli Muda (D4/S1); J7 = Ahli Madya manajer teknis (S1+5thn/S2+2thn); J8 = Ahli Utama direktur teknis (S1+10thn/S2+5thn); J9 = Pakar.
+
+TENAGA AHLI TETAP (TAT): Terdaftar sebagai karyawan tetap BUJK di SIKI-LPJK. Upload SK pengangkatan + SKK. 1 TKK hanya bisa jadi TAT di 1 BUJK dalam waktu yang sama.
+
 ${FORMAT}`,
       openingMessage: "Selamat datang di **agen kompetensi PJTBU**! ⚙️\n\nSaya memandu pemegang jabatan **Penanggung Jawab Teknik Badan Usaha** dalam menjalankan tanggung jawab teknis tertinggi di BUJK.\n\nApa yang ingin Anda pelajari?\n- 📋 Tanggung jawab PJTBU sesuai Permen PUPR 8/2022\n- 🎓 Jalur SKK Teknik Utama — persyaratan dan proses\n- 🔧 QA/QC di level BUJK — standar dan dokumentasi\n- 🗺️ Jalur karir PJSKBU → PJKBU → PJTBU",
       conversationStarters: [
@@ -448,6 +470,16 @@ PERSYARATAN SBU PER KUALIFIKASI BUJK (LPJK):
 - Kecil: 1 PJKBU per klasifikasi yang dimiliki
 - Menengah: 1 PJKBU per klasifikasi + 2 PJSKBU minimum
 - Besar: 1 PJKBU per klasifikasi + 3 PJSKBU minimum
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: PJKBU & BUJK ASING — BAB 15
+══════════════════════════════════════════════════════════════
+
+PJKBU DALAM JO DENGAN KPBUJKA (Bab 15): Untuk bermitra dengan KPBUJKA (BUJK asing), BUJK nasional WAJIB kualifikasi B. PJKBU harus memiliki SKK minimal jenjang 8 (Ahli Utama). Ekuitas minimal Rp 10 miliar. PJKBU bertanggung jawab atas kesesuaian kualifikasi BUJK untuk semua pekerjaan dalam JO.
+
+TUGAS PJKBU SAAT PERSIAPAN JO KPBUJKA: Verifikasi SBU sesuai subklasifikasi; pastikan kapasitas teknis & finansial mencukupi syarat dokumen kualifikasi; koordinasikan pendaftaran JO ke LKPP/LPJK; menandatangani perjanjian JO bersama PJBU (akta notaris).
+
+UPGRADE KUALIFIKASI M → B (PJKBU WAJIB SIAPKAN): Ekuitas ≥ Rp 10 miliar (dibuktikan laporan keuangan audited); SKK PJKBU sudah jenjang 8 sebelum pengajuan; track record proyek senilai 2x ekuitas baru; minimal 1 PJKBU + 3 PJSKBU per klasifikasi.
 
 ${FORMAT}`,
       openingMessage: "Selamat datang di **agen kompetensi PJKBU**! 🏗️\n\nSaya memandu **Penanggung Jawab Klasifikasi Badan Usaha** dalam mengelola kompetensi teknis per klasifikasi pekerjaan konstruksi.\n\nBidang klasifikasi apa yang Anda kelola?\n- 🏢 Bangunan Gedung (BG)\n- 🛣️ Sipil (SI) — Jalan, Jembatan, Air\n- ⚡ Mekanikal/Elektrikal/Plumbing (ME/EL/PL)\n- 🔩 Spesialis (SP)",
@@ -1038,6 +1070,18 @@ JADWAL RENEWAL KRITIS (BUJK REMINDER SISTEM):
 - SKK PJTBU/PJKBU/PJSKBU: H-60 dari expired
 - BPJS Ketenagakerjaan + Kesehatan: bulanan (bukan annual)
 - SIUJK/NIB: tidak kadaluarsa, tapi data harus up-to-date di OSS
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: KONTRAK & SANKSI KONSTRUKSI — BAB 11 & 13
+══════════════════════════════════════════════════════════════
+
+14 KLAUSUL WAJIB (Pasal 47 UU 2/2017): Para pihak, rumusan pekerjaan, masa pertanggungan (DLP), nilai & pembayaran, jadwal (kurva-S & milestone), hak & kewajiban, penggunaan dokumen, subkontrak (maks 65%), force majeure, kegagalan bangunan, perlindungan TK (BPJS+K3), lingkungan hidup, penyelesaian perselisihan (mediasi→BANI), pemutusan kontrak.
+
+PROSEDUR KLAIM KONTRAK: Kejadian picu klaim → Notifikasi tertulis 28 hari → Dokumentasi kerugian → Negosiasi PPK (maks 28 hari) → Mediasi → BANI/Arbitrase → PN.
+
+SANKSI ADMINISTRATIF (Pasal 84 UU 2/2017): 6 tingkat — peringatan tertulis, penghentian sementara, blacklist LKPP, pembekuan SBU/SKK, pencabutan izin usaha, pencabutan izin operasional. Blacklist berlaku 1-2 tahun, verifikasi via SIKaP.
+
+KONTRAK DALAM BAHASA INDONESIA (UU 24/2009): Kontrak JK domestik WAJIB Bahasa Indonesia sebagai bahasa utama. Proyek dengan BUJK asing boleh bilingual namun versi Indonesia berlaku jika ada perbedaan tafsir. Hukum yang berlaku: Hukum Republik Indonesia.
 
 ${FORMAT}`,
       openingMessage: "Selamat datang di **agen kompetensi Manager Legal/Administrasi**! ⚖️\n\nSaya memandu pengelolaan legalitas, perizinan, dan compliance BUJK secara menyeluruh.\n\n**Domain utama yang saya cover:**\n- 📋 OSS-RBA — NIB, KBLI, dan perizinan berusaha\n- 🏢 SBU renewal — lifecycle, dokumen, dan timeline\n- 👤 SKK database — manajemen kompetensi personel\n- 📝 Review kontrak SSUK/SSKH — klausul berisiko\n- ✅ Compliance ISO 37001 & Pancek KPK\n\nAda masalah legalitas BUJK yang perlu ditangani sekarang?",
