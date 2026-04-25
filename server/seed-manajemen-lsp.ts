@@ -432,6 +432,26 @@ Membantu LSP mengelola seluruh siklus asesor kompetensi: rekrutmen, pelatihan, h
    - Deklarasi COI wajib sebelum penugasan
    - Asesor tidak boleh melatih dan menilai asesi yang sama
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: ASKOM KONSTRUKSI — BAB 19
+══════════════════════════════════════════════════════════════
+
+KATEGORI ASKOM (RCC): A = berpengalaman >3 tahun (asesmen mandiri, boleh RPL). B = junior 0-3 tahun (harus berpasangan dengan A, TIDAK boleh RPL mandiri).
+
+DASAR HUKUM: Permen Naker 2/2016; SK Dirjen Binalattas 2/511/LP.00.01/VI/2019 (MUK); SK BNSP 1224/2020 (Kode Etik ASKOM); Pedoman BNSP 201-210.
+
+FORMULIR MUK 2023:
+- FR.APL-01: Permohonan SKK (diisi asesi)
+- FR.APL-02: Asesmen Mandiri/Self-Assessment (diisi asesi, dipandu ASKOM)
+- FR.MAPA-01: Rencana Asesmen (diisi ASKOM)
+- FR.MAPA-02: Peta Instrumen Asesmen (mapping UK vs metode bukti)
+- FR.IA-01: Instrumen Asesmen (pertanyaan tertulis/lisan/observasi)
+- FR.AK: Keputusan Asesmen (K/BK)
+
+KODE ETIK ASKOM (SK BNSP 1224/2020):
+- Tidak mengases asesi yang punya hubungan keluarga/konflik kepentingan
+- Kerahasiaan jawaban & hasil asesmen
+- Objektivitas berbasis bukti; melaporkan pelanggaran ke LSP secara tertulis
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Sampaikan kebutuhan manajemen asesor Anda — rekrutmen asesor baru, harmonisasi, penugasan uji kompetensi, atau evaluasi kinerja.`,
@@ -723,6 +743,18 @@ Kekurangan:
 1. {{item 1}}
 2. {{item 2}}
 ══════════════════════════════════
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: FR.APL & VERIFIKASI APL — BAB 19
+══════════════════════════════════════════════════════════════
+
+FR.APL-01 (diisi ASESI): data pribadi (nama, NIK, pendidikan, pekerjaan), skema SKK yang dimohon, daftar dokumen bukti, persetujuan metode asesmen.
+FR.APL-02 (diisi ASESI dipandu ASKOM): self-assessment elemen kompetensi vs SKKNI, kolom Ya/Tidak + bukti pendukung.
+
+CHECKLIST VERIFIKASI BERKAS APL:
+☐ FR.APL-01 + FR.APL-02 terisi & ditandatangani; ☐ KTP valid; ☐ Ijazah (legalisir/asli); ☐ Foto 3x4 formal; ☐ Sertifikat kompetensi lama (jika RPL/naik level); ☐ Surat keterangan pengalaman kerja; ☐ BPJS Ketenagakerjaan; ☐ SKK existing (jika perpanjangan/upgrade)
+
+TENGGAT WAKTU: Verifikasi APL maks 3 hari kerja; Penugasan ASKOM maks 5 hari setelah APL lengkap; Pelaksanaan asesmen maks 30 hari setelah penugasan; SKK terbit setelah lulus maks 14 hari.
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Sampaikan jenis permohonan yang perlu direview — sertifikasi baru, re-sertifikasi, RPL, atau upgrade jenjang. Sebutkan juga skema sertifikasi yang dimohon.`,
@@ -839,6 +871,27 @@ HASIL PER UNIT KOMPETENSI:
 KEPUTUSAN: {{Kompeten / Belum Kompeten}}
 Catatan: {{catatan_asesor}}
 ══════════════════════════════════
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: METODOLOGI ASESMEN ASKOM — BAB 19
+══════════════════════════════════════════════════════════════
+
+4 PRINSIP BUKTI ASESMEN (CAVE): Current (terkini), Authentic (milik asesi), Valid (relevan dengan UK), Enough (cukup semua KUK).
+
+PENGAMBILAN KEPUTUSAN K/BK:
+- Kompeten (K): semua UK + KUK terpenuhi dengan bukti CAVE yang memadai
+- Belum Kompeten (BK): min. 1 UK kritis tidak terpenuhi → feedback tertulis + reassessment gap UK only
+- ASKOM DILARANG memberi K karena "kasihan" atau tekanan; HARUS berbasis bukti objektif
+
+SKENARIO ASESMEN PER JENJANG:
+- Jenjang 3-4 (pelaksana): prioritas observasi/demonstrasi lapangan/bengkel
+- Jenjang 5-6 (pengawas/teknisi): uji tulis + wawancara teknis
+- Jenjang 7-8 (manajer/ahli): studi kasus + portofolio proyek terdokumentasi
+- RPL: wawancara mendalam + portofolio (hanya ASKOM Kategori A)
+
+VRFA (Validasi Rekaman & Fakta Asesmen): ASKOM wajib dokumentasi kronologis setiap tahap; setiap pertanyaan + jawaban tercatat di FR.IA-01; bukti lisan dikonfirmasi ulang & ditandatangani.
+
+PASCA ASESMEN: BK → feedback tertulis (area improvement + jadwal reassessment). Banding: maks 14 hari kerja ke LSP.
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Sampaikan tahapan uji kompetensi yang Anda tangani — persiapan, pelaksanaan asesmen, atau penyusunan keputusan sertifikasi.`,

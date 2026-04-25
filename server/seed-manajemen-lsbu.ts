@@ -418,6 +418,26 @@ Membantu LSBU mengelola seluruh siklus asesor badan usaha: rekrutmen, kualifikas
 3. Berikan panduan terstruktur atau analisis
 4. Tampilkan rekomendasi dengan format standar
 
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: ABU JASA KONSTRUKSI — BAB 17
+══════════════════════════════════════════════════════════════
+
+6 UNIT KOMPETENSI ABU (Kepmenaker 273/2024):
+1. Pemahaman regulasi jasa konstruksi (UU JK, PP, Permen PUPR)
+2. Pemahaman skema sertifikasi BUJK
+3. Penguasaan kriteria SBU (klasifikasi/subklasifikasi/kualifikasi)
+4. Teknik audit verifikasi-validasi dokumen & lapangan
+5. Penanganan ketidaksesuaian & pengambilan keputusan
+6. Manajemen mutu LPK (SNI ISO/IEC 17065)
+
+KODE ETIK ABU:
+- Integritas berbasis bukti objektif; Objektivitas & imparsialitas
+- Kerahasiaan informasi pemohon BUJK
+- Profesionalisme sesuai skema LSBU
+- Deklarasi konflik kepentingan sebelum penugasan
+
+HUBUNGAN KELEMBAGAAN: KAN → LSBU (akreditasi) → LPJK (lisensi) → ABU (personel asesmen)
+ABU vs ASKOM: ABU menilai BUJK (badan usaha) di bawah SNI ISO/IEC 17065; ASKOM menilai perorangan (SKK/TKK) di bawah SNI ISO/IEC 17024.
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Sampaikan kebutuhan manajemen asesor Anda — rekrutmen asesor baru, penugasan asesmen, evaluasi kinerja, atau pengecekan conflict of interest.`,
@@ -818,6 +838,24 @@ TEMUAN:
 
 REKOMENDASI: {{Terbitkan / Tolak / Tunda untuk Perbaikan}}
 ══════════════════════════════════
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: TAHAP KERJA ABU — BAB 17
+══════════════════════════════════════════════════════════════
+
+DOKUMEN WAJIB DIVERIFIKASI ABU:
+- NIB (OSS-RBA sesuai KBLI); NPWP aktif; Akta pendirian+perubahan+SK Kemenkumham
+- SKK PJT sesuai subklasifikasi (cek validitas & kesesuaian)
+- LapKeu: 1 thn (K), 2 thn (M), 3 thn DIAUDIT (B)
+- Daftar proyek pengalaman (nama, nilai kontrak, tahun)
+
+TEKNIK VERIFIKASI ABU:
+1. Desk Review: cek NIB vs KBLI, validasi SKK PJT, hitung ekuitas vs threshold kualifikasi
+2. Wawancara Teknis: konfirmasi peran PJT, validasi pengalaman yang diklaim
+3. Validasi Lapangan (M & B): kunjungan kantor, wawancara PJT di tempat
+
+NC MAYOR → TOLAK: PJT fiktif/SKK tidak valid, dokumen palsu, ekuitas negatif, blacklist LKPP.
+NC MINOR → Perbaikan maks 30 hari: dokumen kurang lengkap.
 ${SPECIALIST_RESPONSE_FORMAT}
 ${GOVERNANCE_RULES}`,
       greetingMessage: `Sampaikan tahapan asesmen yang Anda tangani — persiapan, desk assessment, site visit, atau penyusunan laporan asesmen.`,

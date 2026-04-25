@@ -300,6 +300,24 @@ Rekomendasi: {1 kalimat}
 - TIDAK menggantikan keputusan asesor
 - TIDAK melakukan evaluasi SMAP (arahkan ke SMAP Evaluation Guide)
 - TIDAK menjawab di luar scope evaluasi SBU
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: KRITERIA DOKUMEN ABU — BAB 17
+══════════════════════════════════════════════════════════════
+
+DOKUMEN WAJIB PER KUALIFIKASI SBU:
+Kualifikasi K3/K2/K1 (Kecil): NIB, NPWP, Akta+SK Kemenkumham, SKK PJT min. jenjang 6, LapKeu 1 tahun, pengalaman min. 1 paket.
+Kualifikasi M2/M1 (Menengah): + LapKeu 2 tahun, SKK PJT min. jenjang 7, ekuitas ≥ Rp 500jt (M2) / Rp 2M (M1), pengalaman min. 3 paket 5 tahun.
+Kualifikasi B (Besar): LapKeu 3 tahun DIAUDIT, SKK PJT min. jenjang 8, ekuitas ≥ Rp 10M, pengalaman min. 5 paket.
+
+NC MAYOR (langsung tolak): PJT tidak punya SKK valid, ekuitas negatif, dokumen palsu, BUJK masuk blacklist LKPP.
+NC MINOR (perbaikan max 30 hari): dokumen kurang, ekuitas sedikit di bawah threshold.
+Observasi: catatan improvement tanpa memblokir sertifikasi.
+
+PERTANYAAN WAWANCARA TEKNIS ABU:
+1. "Jelaskan proyek relevan terbesar dalam 5 tahun terakhir dan peran BUJK Anda?"
+2. "Siapa PJT Anda dan apa SKK yang dimilikinya?"
+3. "Bagaimana sistem kontrol mutu internal perusahaan Anda?"
 ${SPECIALIST_RESPONSE_FORMAT}
 Respond selalu dalam Bahasa Indonesia.
 ${GOVERNANCE_RULES}`,
@@ -866,6 +884,24 @@ Tindak Lanjut:
 - TIDAK menggantikan verifikasi fisik dokumen
 - TIDAK melakukan uji kompetensi (arahkan ke Draft Berita Acara UKK)
 - TIDAK melakukan mapping skema (arahkan ke Skema Mapping Tool)
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: EVALUASI PORTOFOLIO ASKOM — BAB 19
+══════════════════════════════════════════════════════════════
+
+JENIS BUKTI PORTOFOLIO SKK KONSTRUKSI:
+Langsung: kontrak kerja+uraian tugas, surat referensi pemberi kerja (peran & tanggung jawab), laporan proyek/as-built drawing, foto lapangan (keterangan proyek, tanggal, peran).
+Tidak Langsung: ijazah+transkrip, SKK/SKA lama, sertifikat pelatihan (K3, BIM, SMKK).
+Penunjang: KTP, daftar riwayat hidup, BPJS Ketenagakerjaan.
+
+4 PRINSIP BUKTI (CAVE): Current (terkini, maks 5-10 thn), Authentic (milik asesi sendiri), Valid (relevan dengan UK), Enough (min. 3 bukti berbeda per KUK kritis).
+
+PROSES EVALUASI PORTOFOLIO OLEH ASKOM:
+1. Terima berkas portofolio + FR.APL-02 (asesmen mandiri)
+2. Mapping: setiap UK → bukti yang diklaim asesi
+3. Identifikasi GAP: UK mana yang belum cukup buktinya
+4. Tentukan metode asesmen lanjutan untuk mengisi GAP
+5. Kesimpulan evaluasi di FR.MAPA-01
 ${SPECIALIST_RESPONSE_FORMAT}
 Respond selalu dalam Bahasa Indonesia.
 ${GOVERNANCE_RULES}`,
@@ -956,6 +992,25 @@ REKOMENDASI_AKHIR:
 - TIDAK menggantikan wawancara/observasi langsung
 - TIDAK mengevaluasi portofolio lengkap (arahkan ke Evaluasi Portofolio)
 - TIDAK melakukan mapping skema umum (arahkan ke Skema Mapping Tool)
+
+══════════════════════════════════════════════════════════════
+PENGETAHUAN TAMBAHAN: RPL & RCC ASKOM — BAB 19
+══════════════════════════════════════════════════════════════
+
+RPL (Recognition of Prior Learning): Penilaian kompetensi melalui pendidikan formal/non-formal/informal dan pengalaman kerja tanpa pelatihan formal terlebih dahulu.
+
+SYARAT ASESI JALUR RPL: minimal 5 tahun pengalaman kerja di bidang yang dimohon, bukti konkret (surat referensi, laporan, foto proyek), FR.APL-02 terisi lengkap.
+
+RCC (Recognition of Current Competency): Verifikasi bahwa pemegang SKK lama masih kompeten — digunakan untuk perpanjangan atau naik jenjang.
+
+KATEGORI ASKOM: Hanya ASKOM Kategori A (>3 tahun pengalaman) yang boleh melakukan asesmen RPL secara mandiri. ASKOM Kategori B TIDAK diperbolehkan.
+
+PROSES RPL OLEH ASKOM:
+1. Terima FR.APL-01+02 dengan klaim RPL
+2. Verifikasi bukti pengalaman: cross-check referensi kerja, keaslian dokumen
+3. Wawancara mendalam: pertanyaan kontekstual sesuai pengalaman
+4. Gap analysis: identifikasi UK yang belum terbukti → asesmen tambahan
+5. Keputusan: K (semua UK terpenuhi) atau BK partial (asesmen tambahan untuk gap UK)
 ${SPECIALIST_RESPONSE_FORMAT}
 Respond selalu dalam Bahasa Indonesia.
 ${GOVERNANCE_RULES}`,
