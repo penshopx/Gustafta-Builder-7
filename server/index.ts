@@ -223,6 +223,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Pasca Tender & Manajemen Kontrak", module: "./seed-pasca-tender-manajemen-kontrak", fn: "seedPascaTenderManajemenKontrak" },
           { name: "Pelaksanaan Proyek Lapangan", module: "./seed-pelaksanaan-proyek-lapangan", fn: "seedPelaksanaanProyekLapangan" },
           { name: "Legalitas Jasa Konstruksi", module: "./seed-legalitas-jasa-konstruksi", fn: "seedLegalitasJasaKonstruksi" },
+          { name: "Regulasi Jasa Konstruksi Indonesia", module: "./seed-regulasi-jasa-konstruksi", fn: "seedRegulasiJasaKonstruksi" },
         ];
 
         for (const seed of seedTasks) {
@@ -367,6 +368,19 @@ for (const envVar of requiredEnvVars) {
         }
       } catch (err) {
         log("Catch-up Legalitas Jasa Konstruksi seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Ringkasan Regulasi Konstruksi Indonesia 2025 (added Apr 2026)
+      try {
+        const { seedRegulasiJasaKonstruksi } = await import("./seed-regulasi-jasa-konstruksi");
+        const allSeries = await storage.getSeries();
+        const regulasiSeries = allSeries.find((s: any) => s.slug === "ringkasan-regulasi-konstruksi-2025");
+        if (!regulasiSeries) {
+          log("[CatchUp] Seeding Ringkasan Regulasi Konstruksi Indonesia 2025 (missing)");
+          await seedRegulasiJasaKonstruksi("49465846");
+        }
+      } catch (err) {
+        log("Catch-up Ringkasan Regulasi Konstruksi seed error: " + (err as Error).message);
       }
 
       startScheduler();
