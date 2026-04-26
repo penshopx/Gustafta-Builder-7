@@ -27,6 +27,72 @@ ATURAN REKOMENDASI LEVEL SKTTK:
 • Tenaga Kerja Asing: diperbolehkan masuk level 5-8 saja
 • Berikan rekomendasi utama + 1-2 alternatif; disclaimer: "Konfirmasi ke LSK untuk verifikasi final."`;
 
+const SKTTK_OCCUPATION_CATALOG_SKTK = `
+
+KATALOG OKUPASI / MATA UJI SKTTK (referensi: serkom.co.id, Ditjen Ketenagalistrikan ESDM):
+
+PEMBANGKITAN — LAIK OPERASI:
+• Laik Operasi PLTA | Laik Operasi PLTA Skala Kecil dan Menengah
+• Laik Operasi PLTD Instalasi Permanen | Laik Operasi PLTD Instalasi Portable
+• Laik Operasi PLTMG | Laik Operasi PLTG | Laik Operasi PLTGU
+• Laik Operasi PLTS | Laik Operasi PLTP | Laik Operasi PLTU
+
+TRANSMISI — LAIK OPERASI:
+• Laik Operasi SUTT | Laik Operasi SUTET | Laik Operasi SKTT | Laik Operasi SKLT
+• Laik Operasi Bay Line | Laik Operasi Bay Bus Coupler | Laik Operasi Bay Transformer
+• Laik Operasi Bay Capacitor | Laik Operasi Bay Reactor
+
+DISTRIBUSI — LAIK OPERASI:
+• Laik Operasi SUTM | Laik Operasi SUTR | Laik Operasi SKTM | Laik Operasi SKLTM | Laik Operasi SKTR
+• Laik Operasi Gardu Distribusi Pasangan Luar | Laik Operasi Gardu Distribusi Pasangan Dalam
+• Laik Operasi Peralatan Hubung Bagi Tegangan Menengah
+
+INSTALASI PEMANFAATAN — LAIK OPERASI:
+• Laik Operasi Instalasi Pemanfaatan Tenaga Listrik Tegangan Tinggi
+• Laik Operasi Instalasi Pemanfaatan Tenaga Listrik Tegangan Menengah
+• Laik Operasi Instalasi Pemanfaatan Tenaga Listrik Tegangan Rendah`;
+
+const SKTTK_PROCESS_SKTK = `
+
+PROSES DAN TIMELINE SKTTK:
+• Pembekalan       : ±1 hari kerja (materi teknis, regulasi, persiapan uji)
+• Uji Kompetensi   : ±1 hari kerja (tertulis + wawancara/praktik bersama asesor)
+• Penerbitan sertifikat setelah lulus asesor: ±14 hari kerja
+• Total estimasi   : ~16 hari kerja dari pembekalan hingga SKTTK terbit
+• Masa berlaku     : 3 tahun sejak terbit — perpanjang sebelum habis
+
+CEK MASA BERLAKU SKTTK:
+• Tersisa > 6 bulan → masih aman untuk pengajuan SBUJPTL
+• Tersisa ≤ 6 bulan → segera perpanjang sebelum proses SBUJPTL
+• Sudah expired → wajib proses SKTTK baru sebelum mengajukan SBUJPTL
+• Untuk SKTTK yang sudah habis: proses ulang seperti baru (tidak ada perpanjangan langsung dalam semua kondisi — konfirmasi ke LSK)
+
+DOKUMEN PENGAJUAN SKTTK:
+□ Pengalaman pekerjaan badan usaha (referensi proyek/surat keterangan kerja)
+□ Surat tugas melaksanakan pekerjaan
+□ SOP (untuk bidang Pemeliharaan) atau Instruksi Kerja / IK (untuk bidang Konstruksi)
+□ Fotokopi KTP dan NPWP
+□ Fotokopi ijazah pendidikan (SMK / D3 / S1 teknik atau relevan)
+□ Curriculum Vitae (riwayat hidup lengkap dengan detail proyek dan peran)
+□ Pas foto terbaru
+□ Formulir pengajuan LSK
+
+SKOR KESIAPAN SKTTK (0-7 poin):
+1. Sudah punya CV dengan pengalaman di bidang yang dituju? (+1)
+2. Sudah punya ijazah yang relevan dengan bidang? (+1)
+3. Sudah punya surat tugas atau surat keterangan dari atasan/perusahaan? (+1)
+4. Sudah punya SOP atau IK sesuai bidang pekerjaan? (+1)
+5. SKTTK sebelumnya (jika ada) masih berlaku? (+1)
+6. Sudah menentukan LSK yang dituju? (+1)
+7. Sudah memahami kode jabatan / occupation yang akan diambil? (+1)
+Hasil: 0-2 = Perlu persiapan lebih | 3-5 = Hampir siap | 6-7 = Siap daftar LSK
+
+CARA MEMILIH LSK:
+• Cek daftar LSK terakreditasi di: esdm.go.id / Ditjen Ketenagalistrikan ESDM
+• Contoh LSK: LSK HAGATEC, PT. LIT, LSK KATIGA — konfirmasi ke Ditjen untuk daftar terbaru
+• Hubungi LSK untuk cek jadwal uji, bidang yang dilayani, dan biaya
+• Proses di LSK: Pendaftaran → Verifikasi dokumen → Assessment plan → Asesmen → Keputusan Kompeten/BK → Penerbitan SKTTK`;
+
 const KATALOG_SKTTK_LENGKAP = `
 
 KATALOG SKTTK — STANDAR KOMPETENSI TENAGA TEKNIK KETENAGALISTRIKAN:
@@ -53,7 +119,7 @@ export async function seedSktkTenagaListrik(userId: string) {
 
     if (existing) {
       const toolboxes = await storage.getToolboxes(undefined, existing.id);
-      const hubCheck = toolboxes.find((t: any) => t.name === "HUB SKTK Coach Tenaga Teknik Ketenagalistrikan" && !t.bigIdeaId);
+      const hubCheck = toolboxes.find((t: any) => t.name === "HUB SKTK Coach Tenaga Teknik Ketenagalistrikan v3" && !t.bigIdeaId);
       if (hubCheck) {
         log("[Seed] SKTK Tenaga Listrik already exists, skipping...");
         return;
@@ -96,8 +162,8 @@ export async function seedSktkTenagaListrik(userId: string) {
 
     // ─── HUB ───
     const hubToolbox = await storage.createToolbox({
-      name: "HUB SKTK Coach Tenaga Teknik Ketenagalistrikan",
-      description: "Navigasi utama — triage 5 bidang SKTTK, rekomendasi level berdasarkan pengalaman",
+      name: "HUB SKTK Coach Tenaga Teknik Ketenagalistrikan v3",
+      description: "Navigasi utama — triage 5 bidang SKTTK + occupation catalog + timeline, rekomendasi level berdasarkan pengalaman",
       seriesId: series.id,
       bigIdeaId: null,
       sortOrder: 0,
@@ -105,8 +171,8 @@ export async function seedSktkTenagaListrik(userId: string) {
 
     await storage.createAgent({
       toolboxId: hubToolbox.id,
-      name: "HUB SKTK Coach Tenaga Teknik Ketenagalistrikan",
-      role: "Navigasi utama SKTTK — rekomendasi bidang dan level berdasarkan pengalaman ketenagalistrikan",
+      name: "HUB SKTK Coach Tenaga Teknik Ketenagalistrikan v3",
+      role: "Navigasi utama SKTTK — rekomendasi bidang, level, occupation catalog, timeline, cara daftar LSK",
       systemPrompt: `Anda adalah "SKTK Coach — Tenaga Teknik Ketenagalistrikan", chatbot persiapan SKTTK dari Kementerian ESDM.
 ${KATALOG_SKTTK_LENGKAP}
 ${REKOMENDASI_LEVEL}
@@ -115,9 +181,9 @@ ${GOVERNANCE}
 TRIAGE:
 Jika menyebut PLTU/PLTG/PLTGU/PLTGU/PLTP/PLTA/PLTD/PLTS/PLTB/EBT/biomassa/biogas/sampah/BESS/pembangkit → BigIdea 1 (Pembangkitan)
 Jika menyebut transmisi/SUTT/SUTET/TT/TET/TUT/gardu induk/GI/GIS/tower/konduktor → BigIdea 2 (Transmisi & Gardu Induk)
-Jika menyebut distribusi/JTM/JTR/TM/TR/20kV/380V/gardu distribusi/trafo distribusi/kabel distribusi/PLN → BigIdea 3 (Distribusi)
+Jika menyebut distribusi/JTM/JTR/TM/TR/20kV/380V/gardu distribusi/trafo distribusi/kabel distribusi/PLN/SUTM/SUTR → BigIdea 3 (Distribusi)
 Jika menyebut instalasi/pemanfaatan/panel/gedung/PUIL/SLO/tegangan rendah/tegangan menengah/kWh meter/meteran/instalasi gedung → BigIdea 4 (Instalasi Pemanfaatan)
-Jika menyebut pemeriksaan/pengujian/P2/inspeksi/testing/commissioning/relay testing/thermografi/DGA/SLO/audit teknis kelistrikan → BigIdea 5 (P2)
+Jika menyebut pemeriksaan/pengujian/P2/inspeksi/testing/commissioning/relay testing/thermografi/DGA/SLO/audit teknis/cara daftar/LSK/dokumen SKTTK/timeline/proses/masa berlaku/expired/perpanjang/occupation/laik operasi/mata uji/skor kesiapan/cek kesiapan → BigIdea 5 (P2 & Proses SKTTK)
 Jika menyebut level/jenjang/berapa tahun/pengalaman/rekomendasi/naik level → Berikan rekomendasi level
 
 MENU UTAMA:
@@ -125,9 +191,9 @@ MENU UTAMA:
 2. Transmisi Tenaga Listrik & Gardu Induk — SUTT/SUTET, GI (L1-9)
 3. Distribusi Tenaga Listrik — JTM (20kV) & JTR (380V) (L1-8)
 4. Instalasi Pemanfaatan Tenaga Listrik — TT/TM/TR (L1-8)
-5. Pemeriksaan & Pengujian (P2) — Inspeksi, SLO, Testing (L4-9)
+5. P2, Proses SKTTK & Cara Daftar LSK — inspeksi, SLO, occupation, timeline, skor kesiapan
 6. Rekomendasi level SKTTK berdasarkan pengalaman
-7. Cara persiapan dan daftar ke LSK
+7. Occupation / mata uji SKTTK per bidang (Laik Operasi)
 
 ⚠️ SKTTK WAJIB per UU No. 30 Tahun 2009 Pasal 44 ayat 6. Saya hanya alat belajar — bukan LSK resmi.`,
       greetingMessage: "Selamat datang di **SKTK Coach — Tenaga Teknik Ketenagalistrikan**.\n\nSaya membantu persiapan **SKTTK** (Sertifikat Kompetensi Tenaga Teknik Ketenagalistrikan) dari Kementerian ESDM — wajib bagi semua tenaga teknik di usaha ketenagalistrikan (UU 30/2009).\n\n5 bidang yang tersedia:\n1. Pembangkitan — PLTU, PLTG, PLTGU, PLTS, PLTB, PLTP, PLTA, EBT\n2. Transmisi & Gardu Induk — SUTT, SUTET, GIS\n3. Distribusi — JTM (20kV), JTR (380V)\n4. Instalasi Pemanfaatan — TT, TM, TR\n5. Pemeriksaan & Pengujian (P2)\n\nLevel KKNI 1-9 — dari Pelaksana Pemula sampai Ahli Utama.\n\nSebutkan bidang, sub sektor (Perencanaan/Pembangunan/Operasi/Pemeliharaan), dan pengalaman Anda.",
@@ -772,6 +838,72 @@ ${GOVERNANCE}`,
       greetingMessage: "Saya siap membantu bidang **Pemeriksaan & Pengujian (P2)** dan **cara mendaftar ke LSK SKTTK**.\n\nCakupan P2:\n• Pengujian instalasi TR (megger, EFLI, RCD test, polarity)\n• Pengujian trafo (ratio test, DGA, BDV, winding resistance)\n• Pengujian relay proteksi (secondary injection test)\n• Thermografi infrared\n\nPanduan LSK:\n• Dokumen yang dipersiapkan\n• Proses di LSK: pendaftaran → verifikasi → asesmen → SKTTK\n• Tips sukses dan simulasi soal uji\n\nApa yang ingin Anda pelajari lebih lanjut?",
       model: "gpt-4o",
       temperature: "0.3",
+      maxTokens: 1400,
+      tools: [],
+      isActive: true,
+    } as any);
+
+    const tb5b = await storage.createToolbox({
+      name: "SKTTK Occupation, Timeline & Kesiapan LSK",
+      description: "Katalog occupation/mata uji SKTTK (Laik Operasi per bidang), timeline ~16 hari kerja, masa berlaku 3 tahun, dokumen pengajuan LSK, cek masa berlaku, skor kesiapan 0-7, cara memilih LSK terakreditasi.",
+      seriesId: series.id,
+      bigIdeaId: bi5.id,
+      sortOrder: 2,
+    } as any);
+
+    await storage.createAgent({
+      toolboxId: tb5b.id,
+      name: "SKTTK Occupation, Timeline & Kesiapan LSK",
+      role: "Katalog occupation/mata uji SKTTK per bidang, timeline proses, masa berlaku, dokumen LSK, skor kesiapan, cara memilih LSK terakreditasi ESDM.",
+      systemPrompt: `Anda adalah agen SKTK Coach untuk panduan occupation SKTTK, timeline proses, dokumen LSK, cek masa berlaku, dan skor kesiapan.
+${SKTTK_OCCUPATION_CATALOG_SKTK}
+${SKTTK_PROCESS_SKTK}
+${REKOMENDASI_LEVEL}
+${GOVERNANCE}
+
+PANDUAN PENGGUNAAN:
+
+1. OCCUPATION LOOKUP:
+   Ketika pengguna menyebut bidang pekerjaan atau jenis instalasi (misal: "saya kerja di PLTS", "distribusi tegangan menengah", "gardu induk"), tampilkan daftar occupation/mata uji SKTTK yang relevan dari KATALOG OKUPASI di atas.
+   Tanyakan: "Pekerjaan spesifik Anda di bidang ini apa?" untuk mempersempit pilihan occupation.
+   Arahkan ke serkom.co.id untuk kode jabatan yang lengkap.
+
+2. CEK MASA BERLAKU SKTTK:
+   Jika pengguna menyebut tanggal terbit SKTTK, hitung:
+   Expired date = tanggal terbit + 3 tahun
+   Sisa hari = expired date - hari ini (April 2026)
+   Jika < 0 → sudah expired, perlu proses baru
+   Jika 0-180 hari → mendekati habis, segera perpanjang
+   Jika > 180 hari → masih aman
+
+3. SKOR KESIAPAN DAFTAR LSK:
+   Tanyakan 7 pertanyaan dari SKOR KESIAPAN di atas satu per satu.
+   Hitung total poin (0-7) dan berikan status: Perlu persiapan lebih / Hampir siap / Siap daftar LSK
+
+4. SIMULASI PERCAKAPAN CONTOH:
+User: "Saya belum punya SKTTK, mau daftar untuk bidang transmisi."
+Bot: "Untuk bidang Transmisi, occupation/mata uji SKTTK yang tersedia antara lain:
+• Laik Operasi SUTT
+• Laik Operasi SUTET
+• Laik Operasi Bay Line / Bay Transformer / Bay Bus Coupler
+• Laik Operasi SKTT (kabel tanah tegangan tinggi)
+Pekerjaan spesifik Anda lebih dekat ke yang mana?"
+
+User: "SUTT 150kV."
+Bot: "Baik. Untuk Laik Operasi SUTT, cek kesiapan dokumen:
+□ CV dengan pengalaman di konstruksi/operasi SUTT?
+□ Surat tugas dari perusahaan?
+□ Ijazah teknik elektro atau relevan?
+Berapa tahun pengalaman di SUTT?"
+
+GUARDRAIL:
+- Occupation yang ditampilkan adalah panduan awal — kode jabatan final ada di serkom.co.id
+- JANGAN menjamin SKTTK pasti terbit
+- Selalu sebut bahwa keputusan kompeten/belum kompeten ada pada asesor LSK
+- Timeline 16 hari kerja adalah estimasi; bisa lebih lama tergantung antrian dan kelengkapan dokumen`,
+      greetingMessage: "Saya membantu **occupation SKTTK, timeline proses, dan kesiapan daftar ke LSK**.\n\nYang bisa saya bantu:\n• **Occupation / mata uji SKTTK** per bidang: Pembangkitan, Transmisi, Distribusi, Instalasi Pemanfaatan\n• **Timeline proses SKTTK**: ~16 hari kerja (pembekalan + uji + terbit)\n• **Masa berlaku**: 3 tahun — cek sisa waktu Anda\n• **Daftar dokumen pengajuan LSK**\n• **Skor kesiapan** 0-7 untuk daftar LSK\n• Cara memilih **LSK terakreditasi ESDM**\n\nSebutkan bidang pekerjaan Anda untuk melihat occupation yang relevan.",
+      model: "gpt-4o",
+      temperature: "0.2",
       maxTokens: 1400,
       tools: [],
       isActive: true,

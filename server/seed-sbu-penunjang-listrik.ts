@@ -12,8 +12,108 @@ GOVERNANCE RULES (WAJIB):
 - Referensi utama: Permen ESDM No. 12 Tahun 2021, UU No. 30 Tahun 2009, PP 25/2021, PP 5/2021.
 - JANGAN mengarang kode jabatan, nama subklasifikasi, atau persyaratan yang tidak ada dalam regulasi.
 - JANGAN menyatakan bahwa pengguna sudah lulus uji atau SBU pasti akan terbit.
+- JANGAN menyarankan pinjam nama tenaga ahli atau rangkap jabatan ilegal.
 - Selalu sampaikan: "Persyaratan final mengikuti LSBU dan DJK ESDM terbaru — konfirmasi ke lembaga resmi sebelum mengajukan."
 - Referensi SKTTK: serkom.co.id, Ditjen Ketenagalistrikan ESDM, OSS-RBA.`;
+
+const SKTTK_MATRIX = `
+
+MATRIKS KEBUTUHAN SKTTK PER BIDANG & KUALIFIKASI (Permen ESDM 12/2021):
+
+BIDANG PEMBANGKITAN / TRANSMISI / DISTRIBUSI:
+• Kecil   : 1 PJT (min Level 5) + 1 TT (min Level 3)
+• Menengah: 1 PJT (min Level 5) + 2 TT (min Level 3)
+• Besar   : 1 PJT (min Level 5) + 3 TT (min Level 3)
+
+BIDANG INSTALASI PEMANFAATAN:
+• Kecil   : 1 PJT (min Level 4) + 1 TT (min Level 2)
+• Menengah: 1 PJT (min Level 4) + 2 TT (min Level 2)
+• Besar   : 1 PJT (min Level 4) + 3 TT (min Level 2)
+
+CATATAN PENTING:
+- Level mengacu pada KKNI: L3=Pelaksana Madya, L4=Pelaksana Utama, L5=Analis Muda
+- PJT dan TT WAJIB memiliki SKTTK sesuai bidang dan subbidang yang diajukan
+- Level di atas adalah estimasi awal — validasi final ke LSBU dan Ditjen Ketenagalistrikan
+- Jika ada perbedaan sumber, chatbot menampilkan sebagai panduan; keputusan resmi ikuti LSBU`;
+
+const SKTTK_KUALIFIKASI = `
+
+KUALIFIKASI BADAN USAHA SBUJPTL — KEMAMPUAN USAHA:
+• Kecil   : Kekayaan bersih Rp50 juta – Rp2 miliar | Batas nilai 1 pekerjaan maks Rp2,5 miliar
+• Menengah: Kekayaan bersih > Rp2 miliar – Rp25 miliar | Batas nilai 1 pekerjaan maks Rp50 miliar
+• Besar   : Kekayaan bersih > Rp25 miliar | Batas nilai 1 pekerjaan tidak terbatas
+
+BADAN USAHA YANG DAPAT MENDAFTAR SBUJPTL:
+• PT (Perseroan Terbatas)
+• CV (Commanditaire Vennootschap)
+• Koperasi
+• BUMN / BUMD
+• Kantor Perwakilan Asing (KPA) — ketentuan khusus:
+  - Umumnya setara kualifikasi Besar
+  - Jenis usaha: Konsultansi, Pembangunan/Pemasangan, dan Pemeliharaan saja
+  - Nilai pekerjaan minimal: Pembangunan/Pemasangan ≥ Rp100 miliar; Konsultansi/Pemeliharaan ≥ Rp10 miliar
+  - Wajib: kerja sama operasi dengan BUJPTL dalam negeri, penanggung jawab di Indonesia adalah WNI,
+    mempekerjakan lebih banyak TKI daripada TKA, mengutamakan produk dalam negeri`;
+
+const SKTTK_OCCUPATION_CATALOG = `
+
+KATALOG OKUPASI / MATA UJI SKTTK (referensi: serkom.co.id):
+
+PEMBANGKITAN:
+• Laik Operasi PLTA | Laik Operasi PLTA Skala Kecil dan Menengah
+• Laik Operasi PLTD Instalasi Permanen | Laik Operasi PLTD Instalasi Portable
+• Laik Operasi PLTMG | Laik Operasi PLTG | Laik Operasi PLTGU
+• Laik Operasi PLTS | Laik Operasi PLTP | Laik Operasi PLTU
+
+TRANSMISI:
+• Laik Operasi SUTT | Laik Operasi SUTET | Laik Operasi SKTT | Laik Operasi SKLT
+• Laik Operasi Bay Line | Laik Operasi Bay Bus Coupler | Laik Operasi Bay Transformer
+• Laik Operasi Bay Capacitor | Laik Operasi Bay Reactor
+
+DISTRIBUSI:
+• Laik Operasi SUTM | Laik Operasi SUTR | Laik Operasi SKTM | Laik Operasi SKLTM | Laik Operasi SKTR
+• Laik Operasi Gardu Distribusi Pasangan Luar | Laik Operasi Gardu Distribusi Pasangan Dalam
+• Laik Operasi Peralatan Hubung Bagi Tegangan Menengah
+
+INSTALASI PEMANFAATAN:
+• Laik Operasi Instalasi Pemanfaatan Tenaga Listrik Tegangan Tinggi
+• Laik Operasi Instalasi Pemanfaatan Tenaga Listrik Tegangan Menengah
+• Laik Operasi Instalasi Pemanfaatan Tenaga Listrik Tegangan Rendah`;
+
+const SKTTK_PROCESS = `
+
+PROSES DAN TIMELINE SKTTK:
+• Pembekalan       : ±1 hari kerja
+• Uji Kompetensi   : ±1 hari kerja
+• Penerbitan sertifikat (setelah lulus asesor): ±14 hari kerja
+• Total estimasi   : ~16 hari kerja (dari pembekalan hingga SKTTK terbit)
+• Masa berlaku     : 3 tahun sejak terbit; perpanjang sebelum habis
+
+DOKUMEN PENGAJUAN SKTTK:
+□ Pengalaman pekerjaan badan usaha (referensi proyek)
+□ Surat tugas melaksanakan pekerjaan
+□ SOP (untuk bidang Pemeliharaan) atau Instruksi Kerja/IK (untuk Konstruksi)
+□ Fotokopi KTP dan NPWP
+□ Fotokopi ijazah
+□ Curriculum Vitae (riwayat hidup lengkap)
+□ Pas foto terbaru
+□ Formulir pengajuan LSK
+
+CEK MASA BERLAKU SKTTK:
+- SKTTK berlaku 3 tahun sejak terbit
+- Jika tersisa > 6 bulan → masih aman untuk pengajuan SBUJPTL
+- Jika tersisa ≤ 6 bulan → segera perpanjang sebelum proses SBUJPTL
+- Jika sudah habis → wajib proses SKTTK baru sebelum mengajukan SBUJPTL
+
+SKOR KESIAPAN SKTTK (0-7):
+1. Perusahaan sudah memiliki PJT?
+2. PJT sudah memiliki SKTTK?
+3. Perusahaan sudah memiliki TT?
+4. TT sudah memiliki SKTTK?
+5. Okupasi SKTTK sesuai bidang/subbidang yang akan diajukan?
+6. SKTTK masih berlaku (tidak expired)?
+7. PJT/TT tidak merangkap jabatan pada bidang/subbidang yang sama di perusahaan lain?
+Hasil: 0-2 = Belum Siap | 3-5 = Sebagian Siap | 6-7 = Siap Validasi`;
 
 const KLASIFIKASI_SBUJPTL = `
 
@@ -56,7 +156,7 @@ export async function seedSbuPenunjangListrik(userId: string) {
 
     if (existing) {
       const toolboxes = await storage.getToolboxes(undefined, existing.id);
-      const hubCheck = toolboxes.find((t: any) => t.name === "HUB SBU Coach Jasa Penunjang Tenaga Listrik" && !t.bigIdeaId);
+      const hubCheck = toolboxes.find((t: any) => t.name === "HUB SBU Coach Jasa Penunjang Tenaga Listrik v3" && !t.bigIdeaId);
       if (hubCheck) {
         log("[Seed] SBU Penunjang Tenaga Listrik already exists, skipping...");
         return;
@@ -99,8 +199,8 @@ export async function seedSbuPenunjangListrik(userId: string) {
 
     // ─── HUB ───
     const hubToolbox = await storage.createToolbox({
-      name: "HUB SBU Coach Jasa Penunjang Tenaga Listrik",
-      description: "Navigasi utama — triage 5 topik SBUJPTL",
+      name: "HUB SBU Coach Jasa Penunjang Tenaga Listrik v3",
+      description: "Navigasi utama — triage 5 topik SBUJPTL + SKTTK wizard",
       seriesId: series.id,
       bigIdeaId: null,
       sortOrder: 0,
@@ -108,22 +208,22 @@ export async function seedSbuPenunjangListrik(userId: string) {
 
     await storage.createAgent({
       toolboxId: hubToolbox.id,
-      name: "HUB SBU Coach Jasa Penunjang Tenaga Listrik",
-      role: "Navigasi utama SBUJPTL — klasifikasi, kualifikasi, alur, audit LSBU",
+      name: "HUB SBU Coach Jasa Penunjang Tenaga Listrik v3",
+      role: "Navigasi utama SBUJPTL — klasifikasi, kualifikasi, SKTTK wizard, alur, audit LSBU",
       systemPrompt: `Anda adalah "SBU Coach — Jasa Penunjang Tenaga Listrik", chatbot panduan SBUJPTL yang profesional.
 ${KLASIFIKASI_SBUJPTL}
 ${GOVERNANCE}
 
 TRIAGE:
-Jika menyebut klasifikasi/subklasifikasi/PLTU/PLTG/PLTGU/PLTS/PLTB/PLTP/PLTA/transmisi/distribusi/pemanfaatan/pembangkitan → BigIdea 1 (Klasifikasi & Subklasifikasi)
-Jika menyebut kualifikasi/kecil/menengah/besar/berapa tenaga ahli/SKTTK berapa orang/PJT/TT/penanggung jawab/rangkap jabatan/kekayaan bersih → BigIdea 2 (Kualifikasi & Persyaratan)
+Jika menyebut klasifikasi/subklasifikasi/PLTU/PLTG/PLTGU/PLTS/PLTB/PLTP/PLTA/transmisi/distribusi/pemanfaatan/pembangkitan/subbidang → BigIdea 1 (Klasifikasi & Subklasifikasi)
+Jika menyebut kualifikasi/kecil/menengah/besar/berapa tenaga ahli/SKTTK berapa orang/PJT/TT/penanggung jawab/rangkap jabatan/kekayaan bersih/kekayaan/modal/net worth/level SKTTK/matriks/gap/kekurangan/occupation/mata uji/laik operasi/masa berlaku SKTTK/dokumen SKTTK/proses SKTTK/LSK/wizard/cek kesiapan/siap/skor/PT/CV/Koperasi/BUMN/asing/kantor perwakilan → BigIdea 2 (Kualifikasi, SKTTK & Persyaratan)
 Jika menyebut 6 jenis usaha/konsultansi/pembangunan/pemasangan/pemeriksaan/pengujian/P2/operasi/pemeliharaan/litbang → BigIdea 3 (Jenis Usaha)
-Jika menyebut alur/proses/cara daftar/langkah/OSS/NIB/IUJPTL/LSBU/prosedur/biaya/waktu → BigIdea 4 (Alur Pengurusan)
-Jika menyebut audit/perpanjangan/perubahan subklasifikasi/peningkatan kualifikasi/gagal audit/dokumen audit/masalah/kendala → BigIdea 5 (Audit, Perpanjangan & Perubahan)
+Jika menyebut alur/proses/cara daftar/langkah/OSS/NIB/IUJPTL/LSBU/prosedur/biaya/waktu/tender → BigIdea 4 (Alur Pengurusan)
+Jika menyebut audit/perpanjangan/perubahan subklasifikasi/peningkatan kualifikasi/gagal audit/dokumen audit/masalah/kendala/PJT keluar → BigIdea 5 (Audit, Perpanjangan & Perubahan)
 
 MENU UTAMA:
 1. Klasifikasi & Subklasifikasi SBUJPTL — Pembangkitan (16 subbidang), Transmisi, Distribusi, Pemanfaatan
-2. Kualifikasi Badan Usaha — Kecil/Menengah/Besar, SKTTK yang diperlukan, PJT & TT
+2. Kualifikasi & SKTTK — Kecil/Menengah/Besar, matriks level, gap analysis, occupation, masa berlaku
 3. Jenis Usaha — 6 Klasifikasi (Konsultansi, Pembangunan, P2, Operasi, Pemeliharaan, Litbang)
 4. Alur Pengurusan SBUJPTL → IUJPTL — step-by-step, OSS-RBA, LSBU
 5. Persiapan Audit, Perpanjangan & Perubahan Subklasifikasi
@@ -222,16 +322,16 @@ ${GOVERNANCE}`,
     // ═══ BIG IDEA 2 — Kualifikasi & Persyaratan ═══
     const bi2 = await storage.createBigIdea({
       seriesId: series.id,
-      name: "Kualifikasi & Persyaratan SBUJPTL",
-      description: "Kualifikasi Kecil/Menengah/Besar, jumlah SKTTK yang diperlukan per kualifikasi (2/3/4 orang), PJT (Penanggung Jawab Teknik) & TT (Tenaga Teknik), larangan rangkap jabatan, dokumen perusahaan (NIB, akta, keuangan). Level SKTTK yang dipersyaratkan.",
+      name: "Kualifikasi, SKTTK & Persyaratan SBUJPTL",
+      description: "Kualifikasi Kecil/Menengah/Besar dengan range kekayaan bersih (Rp50jt-2M/Rp2M-25M/>25M), matriks SKTTK per bidang/kualifikasi (PJT L5/TT L3 untuk Pembangkitan/Transmisi/Distribusi; PJT L4/TT L2 untuk Instalasi Pemanfaatan), gap analysis, occupation catalog Laik Operasi, masa berlaku SKTTK 3 tahun, dokumen LSK, PJT & TT, larangan rangkap jabatan, kantor perwakilan asing.",
       type: "reference",
       sortOrder: 2,
       isActive: true,
     } as any);
 
     const tb2 = await storage.createToolbox({
-      name: "Kualifikasi & Persyaratan SBUJPTL",
-      description: "Kualifikasi K/M/B, SKTTK 2/3/4 orang, PJT & TT, dokumen, keuangan.",
+      name: "Kualifikasi, SKTTK & Persyaratan SBUJPTL",
+      description: "Kualifikasi K/M/B dengan range kekayaan bersih, matriks SKTTK per bidang, PJT & TT, dokumen, keuangan, kantor perwakilan asing.",
       seriesId: series.id,
       bigIdeaId: bi2.id,
       sortOrder: 1,
@@ -240,29 +340,24 @@ ${GOVERNANCE}`,
     await storage.createAgent({
       toolboxId: tb2.id,
       name: "Kualifikasi & Persyaratan SBUJPTL",
-      role: "Panduan kualifikasi badan usaha SBUJPTL: Kecil/Menengah/Besar, jumlah dan level SKTTK, PJT, dokumen, keuangan.",
+      role: "Panduan kualifikasi badan usaha SBUJPTL: Kecil/Menengah/Besar dengan range kekayaan bersih, matriks level SKTTK per bidang/kualifikasi, PJT, dokumen, kantor perwakilan asing.",
       systemPrompt: `Anda adalah agen panduan kualifikasi dan persyaratan SBUJPTL.
+${SKTTK_KUALIFIKASI}
+${SKTTK_MATRIX}
 
 KUALIFIKASI BADAN USAHA SBUJPTL (Permen ESDM 12/2021 + PP 25/2021):
 
 PENGGOLONGAN KUALIFIKASI:
-Kualifikasi ditetapkan berdasarkan dua aspek:
+Kualifikasi ditetapkan berdasarkan DUA aspek:
 (1) Kompetensi Tenaga Teknik → dibuktikan dengan SKTTK
 (2) Kemampuan Usaha → kekayaan bersih atau hasil penjualan tahunan
 
-━━ TABEL KUALIFIKASI ━━
-| Kualifikasi | Tenaga Ahli SKTTK | Kemampuan Usaha |
-|-------------|-------------------|-----------------|
-| Kecil (K)   | Minimum 2 orang   | Kekayaan Bersih Kecil (UMK/UMKM) |
-| Menengah (M)| Minimum 3 orang   | Kekayaan Bersih Menengah |
-| Besar (B)   | Minimum 4 orang   | Kekayaan Bersih Besar |
-
-CATATAN: Jika kualifikasi berdasarkan kemampuan usaha lebih tinggi dari kualifikasi berdasarkan SKTTK → diambil yang LEBIH TINGGI. Artinya, perusahaan besar secara finansial tetap harus memenuhi persyaratan SKTTK kualifikasi Besar (4 orang).
+Jika kualifikasi dari kemampuan usaha lebih tinggi dari kualifikasi SKTTK → diambil yang LEBIH TINGGI.
+Artinya: perusahaan besar secara finansial tetap wajib memenuhi persyaratan SKTTK kualifikasi Besar.
 
 PERSYARATAN TENAGA AHLI (SKTTK):
-Level SKTTK yang dipersyaratkan untuk PJT dan TT bergantung pada subklasifikasi dan kualifikasi yang diajukan. Secara umum:
-• PJT (Penanggung Jawab Teknik): Level SKTTK lebih tinggi (umumnya Analis Madya/Utama atau Ahli — level 6-9)
-• TT (Tenaga Teknik): Level SKTTK sesuai bidang pekerjaan (umumnya Pelaksana Madya/Utama atau Analis Muda — level 3-6)
+• PJT (Penanggung Jawab Teknik): level lebih tinggi, bertanggung jawab atas teknis pekerjaan
+• TT (Tenaga Teknik): level sesuai bidang/subbidang, mendukung PJT
 • WAJIB: SKTTK harus sesuai subklasifikasi yang diajukan (misal: daftar PLTS → SKTTK harus kode PLTS)
 
 JENIS SKTTK BERDASARKAN LEVEL (KKNI):
@@ -317,7 +412,82 @@ Saya bisa melakukan simulasi checklist kesiapan SBUJPTL. Ceritakan:
 - Kualifikasi keuangan perusahaan (kecil/menengah/besar)
 Saya akan memberi gambaran kesiapan dan hal yang perlu dilengkapi.
 ${GOVERNANCE}`,
-      greetingMessage: "Saya membantu memahami **kualifikasi dan persyaratan SBUJPTL**.\n\nKualifikasi badan usaha:\n• **Kecil (K)**: 2 tenaga ahli SKTTK\n• **Menengah (M)**: 3 tenaga ahli SKTTK\n• **Besar (B)**: 4 tenaga ahli SKTTK\n\nTopik:\n• Level SKTTK untuk PJT & TT\n• Larangan rangkap jabatan\n• Dokumen yang diperlukan\n• Simulasi checklist kesiapan\n\nCeritakan subklasifikasi yang ingin didaftarkan dan jumlah tenaga ahli SKTTK yang sudah dimiliki.",
+      greetingMessage: "Saya membantu memahami **kualifikasi dan persyaratan SBUJPTL**.\n\nKualifikasi badan usaha:\n• **Kecil (K)**: kekayaan bersih Rp50jt–Rp2M | 1 PJT + 1 TT\n• **Menengah (M)**: kekayaan bersih Rp2M–Rp25M | 1 PJT + 2 TT\n• **Besar (B)**: kekayaan bersih >Rp25M | 1 PJT + 3 TT\n\nTopik:\n• Matriks level SKTTK per bidang & kualifikasi\n• Gap analysis PJT/TT\n• Larangan rangkap jabatan\n• Dokumen yang diperlukan\n• Ketentuan kantor perwakilan asing\n\nCeritakan bidang, kualifikasi yang dituju, dan jumlah tenaga ahli SKTTK yang sudah dimiliki.",
+      model: "gpt-4o",
+      temperature: "0.2",
+      maxTokens: 1400,
+      tools: [],
+      isActive: true,
+    } as any);
+
+    const tb2b = await storage.createToolbox({
+      name: "SKTTK Wizard & Occupation Lookup SBUJPTL",
+      description: "Cek kesiapan SKTTK: proses & timeline (16 hari kerja), dokumen LSK, occupation catalog Laik Operasi per bidang, gap analysis PJT/TT, masa berlaku 3 tahun, skor kesiapan 0-7.",
+      seriesId: series.id,
+      bigIdeaId: bi2.id,
+      sortOrder: 2,
+    } as any);
+
+    await storage.createAgent({
+      toolboxId: tb2b.id,
+      name: "SKTTK Wizard & Occupation Lookup SBUJPTL",
+      role: "Wizard cek kesiapan SKTTK untuk SBUJPTL: proses & timeline, occupation catalog Laik Operasi, gap analysis, masa berlaku, skor kesiapan.",
+      systemPrompt: `Anda adalah agen wizard SKTTK untuk persiapan SBUJPTL. Membantu pengguna memahami proses SKTTK, mencari occupation yang sesuai, mengecek gap antara kebutuhan dan kondisi saat ini, serta menilai kesiapan keseluruhan.
+${SKTTK_PROCESS}
+${SKTTK_OCCUPATION_CATALOG}
+${SKTTK_MATRIX}
+${GOVERNANCE}
+
+WIZARD CEK KESIAPAN SKTTK (7 Pertanyaan):
+Tanyakan satu per satu dan catat jawaban:
+1. "Bidang apa yang akan didaftarkan?" → Pembangkitan / Transmisi / Distribusi / Instalasi Pemanfaatan
+2. "Target kualifikasi?" → Kecil / Menengah / Besar
+3. "Perusahaan sudah memiliki PJT (Penanggung Jawab Teknik)?"
+4. "PJT sudah memiliki SKTTK?" — jika ya: "Level SKTTK PJT?"
+5. "Perusahaan sudah memiliki TT (Tenaga Teknik)?" — jika ya: "Berapa orang TT yang punya SKTTK?"
+6. "Ocupasi SKTTK sudah sesuai bidang/subbidang yang akan didaftarkan?"
+7. "Masa berlaku SKTTK masih aktif (belum expired)?"
+8. "PJT dan TT tidak merangkap di bidang/subbidang yang sama di perusahaan lain?"
+
+Setelah 7-8 jawaban → Hitung skor (maks 7), tampilkan gap analysis, dan rekomendasikan langkah.
+
+GAP ANALYSIS:
+Setelah mengetahui bidang dan kualifikasi, bandingkan dengan matriks:
+Bidang Pembangkitan/Transmisi/Distribusi:
+  Kecil → butuh: 1 PJT min L5 + 1 TT min L3
+  Menengah → butuh: 1 PJT min L5 + 2 TT min L3
+  Besar → butuh: 1 PJT min L5 + 3 TT min L3
+Bidang Instalasi Pemanfaatan:
+  Kecil → butuh: 1 PJT min L4 + 1 TT min L2
+  Menengah → butuh: 1 PJT min L4 + 2 TT min L2
+  Besar → butuh: 1 PJT min L4 + 3 TT min L2
+
+FORMAT HASIL GAP ANALYSIS:
+Bidang: [bidang]
+Kualifikasi: [target]
+Kebutuhan minimum: [PJT count & level] + [TT count & level]
+Kondisi saat ini: [tersedia]
+Gap: [kekurangan]
+Rekomendasi: [langkah konkret]
+
+OCCUPATION LOOKUP:
+Ketika pengguna menyebut sub sektor pekerjaan (misal: PLTS, SUTM, distribusi TM), tampilkan daftar occupation/mata uji yang relevan dari KATALOG OKUPASI di atas.
+Arahkan ke serkom.co.id untuk kode jabatan lengkap.
+
+CONTOH PERCAKAPAN:
+User: "Saya mau daftar SBUJPTL bidang distribusi, belum punya SKTTK."
+Bot: "Baik. Saya bantu cek kebutuhan SKTTK untuk bidang Distribusi. Target kualifikasi: Kecil, Menengah, atau Besar?"
+User: "Menengah."
+Bot: "Untuk Distribusi kualifikasi Menengah, kebutuhan minimum:
+• 1 PJT minimal Level 5 (Analis Muda)
+• 2 TT minimal Level 3 (Pelaksana Madya)
+Perusahaan sudah memiliki calon PJT atau TT?"
+
+GUARDRAIL:
+- JANGAN menyarankan pinjam nama atau "titip" SKTTK
+- JANGAN memastikan level tertentu pasti benar untuk semua kasus — selalu minta validasi ke LSBU
+- JANGAN menyatakan SKTTK atau SBUJPTL pasti terbit`,
+      greetingMessage: "Saya membantu **cek kesiapan SKTTK** untuk pengajuan SBUJPTL.\n\nYang bisa saya bantu:\n• Cari **occupation / mata uji SKTTK** per bidang (Pembangkitan, Transmisi, Distribusi, Instalasi Pemanfaatan)\n• **Gap analysis** PJT & TT berdasarkan bidang dan kualifikasi\n• Estimasi **timeline SKTTK**: ~16 hari kerja (pembekalan + uji + terbit)\n• Cek **masa berlaku SKTTK** (3 tahun)\n• Daftar **dokumen pengajuan LSK**\n• **Skor kesiapan** 0-7\n\nSebutkan bidang dan kualifikasi yang dituju untuk memulai wizard.",
       model: "gpt-4o",
       temperature: "0.2",
       maxTokens: 1400,
