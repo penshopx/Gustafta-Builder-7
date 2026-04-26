@@ -243,6 +243,8 @@ for (const envVar of requiredEnvVars) {
           { name: "SBU Coach — Jasa Penunjang Tenaga Listrik", module: "./seed-sbu-penunjang-listrik", fn: "seedSbuPenunjangListrik" },
           { name: "SKTK Coach — Tenaga Teknik Ketenagalistrikan", module: "./seed-sktk-tenaga-listrik", fn: "seedSktkTenagaListrik" },
           { name: "SBU Kompetensi — Migas, EBT, dan Pertambangan", module: "./seed-sbu-kompetensi-migas-ebt-tambang", fn: "seedSbuKompetensiMigasEbtTambang" },
+          { name: "DevProperti Pro — Developer Real Estate", module: "./seed-developer-real-estate", fn: "seedDeveloperRealEstate" },
+          { name: "EstateCare Pro — Layanan Real Estate", module: "./seed-layanan-real-estate", fn: "seedLayananRealEstate" },
         ];
 
         for (const seed of seedTasks) {
