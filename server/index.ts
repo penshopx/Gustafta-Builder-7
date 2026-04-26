@@ -237,6 +237,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SKK Coach — Manajemen Proyek Konstruksi", module: "./seed-skk-manajemen-proyek", fn: "seedSkkManajemenProyek" },
           { name: "SKK Coach — Geoteknik & Geodesi", module: "./seed-skk-geoteknik", fn: "seedSkkGeoteknik" },
           { name: "SKK Coach — Pengujian & QC Konstruksi", module: "./seed-skk-pengujian-qc", fn: "seedSkkPengujianQc" },
+          { name: "SKK Coach — Bangunan Gedung & Utilitas", module: "./seed-skk-bangunan-gedung", fn: "seedSkkBangunanGedung" },
         ];
 
         for (const seed of seedTasks) {
