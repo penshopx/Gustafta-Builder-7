@@ -231,6 +231,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SKK Coach — Mekanikal", module: "./seed-skk-mekanikal", fn: "seedSkkMekanikal" },
           { name: "SKK Coach — Sipil", module: "./seed-skk-sipil", fn: "seedSkkSipil" },
           { name: "SKK Coach — Elektrikal", module: "./seed-skk-elektrikal", fn: "seedSkkElektrikal" },
+          { name: "SKK Coach — Arsitektur", module: "./seed-skk-arsitektur", fn: "seedSkkArsitektur" },
         ];
 
         for (const seed of seedTasks) {
