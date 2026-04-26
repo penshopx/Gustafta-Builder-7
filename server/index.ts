@@ -230,6 +230,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SKK Coach — Manajemen Pelaksanaan", module: "./seed-skk-manajemen-pelaksanaan", fn: "seedSkkManajemenPelaksanaan" },
           { name: "SKK Coach — Mekanikal", module: "./seed-skk-mekanikal", fn: "seedSkkMekanikal" },
           { name: "SKK Coach — Sipil", module: "./seed-skk-sipil", fn: "seedSkkSipil" },
+          { name: "SKK Coach — Elektrikal", module: "./seed-skk-elektrikal", fn: "seedSkkElektrikal" },
         ];
 
         for (const seed of seedTasks) {
