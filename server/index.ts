@@ -404,6 +404,279 @@ for (const envVar of requiredEnvVars) {
         log("Catch-up Ringkasan Regulasi Konstruksi seed error: " + (err as Error).message);
       }
 
+      // Catch-up: SBU Coach Pekerjaan Konstruksi & Konsultan (added Apr 2026)
+      try {
+        const { seedSbuCoach } = await import("./seed-sbu-coach");
+        const allSeries = await storage.getSeries();
+        const sbuCoachSeries = allSeries.find((s: any) => s.slug === "sbu-coach-pekerjaan-konstruksi");
+        if (!sbuCoachSeries) {
+          log("[CatchUp] Seeding SBU Coach Pekerjaan Konstruksi (missing)");
+          await seedSbuCoach("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SBU Coach seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SBU Master Coach All-in-One (added Apr 2026)
+      try {
+        const { seedSbuMaster } = await import("./seed-sbu-master");
+        const allSeries = await storage.getSeries();
+        const sbuMasterSeries = allSeries.find((s: any) => s.slug === "sbu-master-coach");
+        if (!sbuMasterSeries) {
+          log("[CatchUp] Seeding SBU Master Coach All-in-One (missing)");
+          await seedSbuMaster("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SBU Master seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SBU Terintegrasi Coach (added Apr 2026)
+      try {
+        const { seedSbuTerintegrasi } = await import("./seed-sbu-terintegrasi");
+        const allSeries = await storage.getSeries();
+        const sbuTerintSeries = allSeries.find((s: any) => s.slug === "sbu-terintegrasi-coach");
+        if (!sbuTerintSeries) {
+          log("[CatchUp] Seeding SBU Terintegrasi Coach (missing)");
+          await seedSbuTerintegrasi("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SBU Terintegrasi seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Manajemen Pelaksanaan (added Apr 2026)
+      try {
+        const { seedSkkManajemenPelaksanaan } = await import("./seed-skk-manajemen-pelaksanaan");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-manajemen-pelaksanaan");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Manajemen Pelaksanaan (missing)");
+          await seedSkkManajemenPelaksanaan("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Manajemen Pelaksanaan seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Mekanikal (added Apr 2026)
+      try {
+        const { seedSkkMekanikal } = await import("./seed-skk-mekanikal");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-mekanikal");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Mekanikal (missing)");
+          await seedSkkMekanikal("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Mekanikal seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Sipil (added Apr 2026)
+      try {
+        const { seedSkkSipil } = await import("./seed-skk-sipil");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-sipil");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Sipil (missing)");
+          await seedSkkSipil("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Sipil seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Elektrikal (added Apr 2026)
+      try {
+        const { seedSkkElektrikal } = await import("./seed-skk-elektrikal");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-elektrikal");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Elektrikal (missing)");
+          await seedSkkElektrikal("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Elektrikal seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Arsitektur (added Apr 2026)
+      try {
+        const { seedSkkArsitektur } = await import("./seed-skk-arsitektur");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-arsitektur");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Arsitektur (missing)");
+          await seedSkkArsitektur("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Arsitektur seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Tata Lingkungan (added Apr 2026)
+      try {
+        const { seedSkkTataLingkungan } = await import("./seed-skk-tata-lingkungan");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-tata-lingkungan");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Tata Lingkungan (missing)");
+          await seedSkkTataLingkungan("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Tata Lingkungan seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach K3 Konstruksi (added Apr 2026)
+      try {
+        const { seedSkkK3Konstruksi } = await import("./seed-skk-k3-konstruksi");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-k3-konstruksi");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach K3 Konstruksi (missing)");
+          await seedSkkK3Konstruksi("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK K3 Konstruksi seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Manajemen Proyek (added Apr 2026)
+      try {
+        const { seedSkkManajemenProyek } = await import("./seed-skk-manajemen-proyek");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-manajemen-proyek");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Manajemen Proyek (missing)");
+          await seedSkkManajemenProyek("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Manajemen Proyek seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Geoteknik & Geodesi (added Apr 2026)
+      try {
+        const { seedSkkGeoteknik } = await import("./seed-skk-geoteknik");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-geoteknik");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Geoteknik & Geodesi (missing)");
+          await seedSkkGeoteknik("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Geoteknik seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Pengujian & QC Konstruksi (added Apr 2026)
+      try {
+        const { seedSkkPengujianQc } = await import("./seed-skk-pengujian-qc");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-pengujian-qc");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Pengujian & QC (missing)");
+          await seedSkkPengujianQc("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Pengujian QC seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Bangunan Gedung & Utilitas (added Apr 2026)
+      try {
+        const { seedSkkBangunanGedung } = await import("./seed-skk-bangunan-gedung");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-bangunan-gedung");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Bangunan Gedung & Utilitas (missing)");
+          await seedSkkBangunanGedung("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Bangunan Gedung seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Konstruksi Khusus (added Apr 2026)
+      try {
+        const { seedSkkKonstruksiKhusus } = await import("./seed-skk-konstruksi-khusus");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-konstruksi-khusus");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Konstruksi Khusus (missing)");
+          await seedSkkKonstruksiKhusus("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Konstruksi Khusus seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Coach Peralatan Konstruksi & Logistik (added Apr 2026)
+      try {
+        const { seedSkkPeralatanLogistik } = await import("./seed-skk-peralatan-logistik");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "skk-peralatan-logistik");
+        if (!s) {
+          log("[CatchUp] Seeding SKK Coach Peralatan Konstruksi & Logistik (missing)");
+          await seedSkkPeralatanLogistik("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKK Peralatan Logistik seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SBU Penunjang Tenaga Listrik (added Apr 2026)
+      try {
+        const { seedSbuPenunjangListrik } = await import("./seed-sbu-penunjang-listrik");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "sbu-penunjang-listrik");
+        if (!s) {
+          log("[CatchUp] Seeding SBU Penunjang Tenaga Listrik (missing)");
+          await seedSbuPenunjangListrik("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SBU Penunjang Listrik seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKTK Tenaga Teknik Ketenagalistrikan (added Apr 2026)
+      try {
+        const { seedSktkTenagaListrik } = await import("./seed-sktk-tenaga-listrik");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "sktk-tenaga-listrik");
+        if (!s) {
+          log("[CatchUp] Seeding SKTK Tenaga Teknik Ketenagalistrikan (missing)");
+          await seedSktkTenagaListrik("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SKTK Tenaga Listrik seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SBU Kompetensi Migas, EBT, dan Pertambangan (added Apr 2026)
+      try {
+        const { seedSbuKompetensiMigasEbtTambang } = await import("./seed-sbu-kompetensi-migas-ebt-tambang");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "sbu-kompetensi-migas-ebt-tambang");
+        if (!s) {
+          log("[CatchUp] Seeding SBU Kompetensi Migas, EBT & Pertambangan (missing)");
+          await seedSbuKompetensiMigasEbtTambang("49465846");
+        }
+      } catch (err) {
+        log("Catch-up SBU Kompetensi Migas seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: DevProperti Pro — Developer Real Estate (added Apr 2026)
+      try {
+        const { seedDeveloperRealEstate } = await import("./seed-developer-real-estate");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "developer-real-estate");
+        if (!s) {
+          log("[CatchUp] Seeding DevProperti Pro — Developer Real Estate (missing)");
+          await seedDeveloperRealEstate("49465846");
+        }
+      } catch (err) {
+        log("Catch-up DevProperti Pro seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: EstateCare Pro — Layanan Real Estate (added Apr 2026)
+      try {
+        const { seedLayananRealEstate } = await import("./seed-layanan-real-estate");
+        const allSeries = await storage.getSeries();
+        const s = allSeries.find((x: any) => x.slug === "layanan-real-estate");
+        if (!s) {
+          log("[CatchUp] Seeding EstateCare Pro — Layanan Real Estate (missing)");
+          await seedLayananRealEstate("49465846");
+        }
+      } catch (err) {
+        log("Catch-up EstateCare Pro seed error: " + (err as Error).message);
+      }
+
       startScheduler();
     },
   );
