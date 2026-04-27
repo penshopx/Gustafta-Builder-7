@@ -223,6 +223,7 @@ for (const envVar of requiredEnvVars) {
           { name: "ASKOM Konstruksi — Asesor Kompetensi Jasa Konstruksi", module: "./seed-askom-konstruksi", fn: "seedAskomKonstruksi" },
           { name: "Lisensi LSP Konstruksi — LPJK & BNSP", module: "./seed-lisensi-lsp", fn: "seedLisensiLsp" },
           { name: "Konsultan Lisensi LSP — Toolkit Pendamping LPJK & BNSP", module: "./seed-konsultan-lisensi-lsp", fn: "seedKonsultanLisensiLsp" },
+          { name: "Akreditasi LSP oleh KAN — SNI ISO/IEC 17024 + KAN K-09", module: "./seed-akreditasi-kan", fn: "seedAkreditasiKan" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
           { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
@@ -353,6 +354,14 @@ for (const envVar of requiredEnvVars) {
         await seedKonsultanLisensiLsp("49465846");
       } catch (err) {
         log("Catch-up Konsultan Lisensi LSP seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Akreditasi LSP oleh KAN (added Apr 2026)
+      try {
+        const { seedAkreditasiKan } = await import("./seed-akreditasi-kan");
+        await seedAkreditasiKan("49465846");
+      } catch (err) {
+        log("Catch-up Akreditasi KAN seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
