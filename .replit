@@ -22,7 +22,7 @@ PORT = "5000"
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["npm", "run", "start"]
+run = ["node", "./dist/index.cjs"]
 build = ["npm", "run", "build"]
 
 [workflows]
@@ -46,11 +46,12 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "NODE_ENV=development node_modules/.bin/tsx server/index.ts"
 waitForPort = 5000
 
 [agent]
 integrations = ["javascript_openai_ai_integrations:2.0.0", "javascript_log_in_with_replit:2.0.0", "javascript_database:1.0.0", "notion:1.0.0", "javascript_gemini_ai_integrations:2.0.0"]
+stack = "FULLSTACK_JS"
 
 [userenv]
 
