@@ -221,6 +221,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SKK Hard Copy — Uji Kompetensi Tatap Muka", module: "./seed-skk-hardcopy", fn: "seedSkkHardcopy" },
           { name: "SKK Hard Copy Extra — Bidang Kompetensi & Skema Tatap Muka", module: "./seed-skk-hardcopy-extra", fn: "seedSkkHardcopyExtra" },
           { name: "ASKOM Konstruksi — Asesor Kompetensi Jasa Konstruksi", module: "./seed-askom-konstruksi", fn: "seedAskomKonstruksi" },
+          { name: "Lisensi LSP Konstruksi — LPJK & BNSP", module: "./seed-lisensi-lsp", fn: "seedLisensiLsp" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
           { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
@@ -335,6 +336,14 @@ for (const envVar of requiredEnvVars) {
         await seedAskomKonstruksi("49465846");
       } catch (err) {
         log("Catch-up ASKOM Konstruksi seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Lisensi LSP Konstruksi — LPJK & BNSP (added Apr 2026)
+      try {
+        const { seedLisensiLsp } = await import("./seed-lisensi-lsp");
+        await seedLisensiLsp("49465846");
+      } catch (err) {
+        log("Catch-up Lisensi LSP seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
