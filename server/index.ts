@@ -216,6 +216,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Kompetensi Teknis", module: "./seed-kompetensi-teknis", fn: "seedKompetensiTeknis" },
           { name: "Pembinaan ASPEKINDO", module: "./seed-aspekindo", fn: "seedAspekindo" },
           { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj" },
+          { name: "AJJ Nirkertas — Tata Kelola LSP & BNSP", module: "./seed-ajj-nirkertas", fn: "seedAjjNirkertas" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
           { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
@@ -290,6 +291,14 @@ for (const envVar of requiredEnvVars) {
         await seedPusatFaqPeserta("49465846");
       } catch (err) {
         log("Catch-up Pusat FAQ seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: AJJ Nirkertas — Tata Kelola LSP & BNSP (added Apr 2026)
+      try {
+        const { seedAjjNirkertas } = await import("./seed-ajj-nirkertas");
+        await seedAjjNirkertas("49465846");
+      } catch (err) {
+        log("Catch-up AJJ Nirkertas seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
