@@ -218,6 +218,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SKK AJJ — Asesmen Jarak Jauh", module: "./seed-skk-ajj", fn: "seedSkkAjj" },
           { name: "AJJ Nirkertas — Tata Kelola LSP & BNSP", module: "./seed-ajj-nirkertas", fn: "seedAjjNirkertas" },
           { name: "AJJ Nirkertas Extra — Bidang Kompetensi & Skema", module: "./seed-ajj-nirkertas-extra", fn: "seedAjjNirkertasExtra" },
+          { name: "SKK Hard Copy — Uji Kompetensi Tatap Muka", module: "./seed-skk-hardcopy", fn: "seedSkkHardcopy" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
           { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
@@ -308,6 +309,14 @@ for (const envVar of requiredEnvVars) {
         await seedAjjNirkertasExtra("49465846");
       } catch (err) {
         log("Catch-up AJJ Nirkertas Extra seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: SKK Hard Copy — Uji Kompetensi Tatap Muka (added Apr 2026)
+      try {
+        const { seedSkkHardcopy } = await import("./seed-skk-hardcopy");
+        await seedSkkHardcopy("49465846");
+      } catch (err) {
+        log("Catch-up SKK Hardcopy seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
