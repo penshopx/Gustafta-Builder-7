@@ -263,6 +263,7 @@ export default function Dashboard() {
   };
   
   const deleteBigIdea = useDeleteBigIdea();
+  const deleteAgent = useDeleteAgent();
   
   const { data: toolboxes = [] } = useToolboxes(effectiveBigIdeaId);
   const { data: orchestratorHub } = useOrchestratorToolbox(activeSeriesId);
@@ -440,8 +441,6 @@ export default function Dashboard() {
       toast({ title: "Error", description: "Gagal menghapus Chatbot", variant: "destructive" });
     }
   };
-
-  const deleteAgent = useDeleteAgent();
 
   const handleDeleteAgent = async (agent: Agent) => {
     try {
