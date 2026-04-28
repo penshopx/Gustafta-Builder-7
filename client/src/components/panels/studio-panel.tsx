@@ -642,7 +642,7 @@ export function StudioPanel({ agent }: { agent: any }) {
                       <Badge className="bg-violet-500 hover:bg-violet-600">Bridge</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Petakan field chatbot ini ke struktur <span className="font-medium text-violet-700 dark:text-violet-400">projectData + GPT Builder</span> di Chaesa AI Studio (smart-ebook-builder).
+                      Petakan field chatbot ini ke <span className="font-medium text-violet-700 dark:text-violet-400">Proyek + Asisten Topik + GPT Builder + Mode Config</span> Chaesa AI Studio. Nilai dropdown sudah disesuaikan opsi resmi Chaesa.
                     </p>
                   </div>
                 </div>
@@ -667,6 +667,11 @@ export function StudioPanel({ agent }: { agent: any }) {
                   >
                     <Download className="w-4 h-4 mr-1.5" /> .json
                   </Button>
+                </div>
+                <div className="rounded-md bg-violet-100/60 dark:bg-violet-950/40 border border-violet-200/60 dark:border-violet-800/40 p-2.5">
+                  <p className="text-[11px] leading-relaxed text-violet-900 dark:text-violet-200">
+                    <span className="font-semibold">⚡ Shortcut Auto-Fill:</span> Download eBook (HTML/Markdown) dari card di atas, lalu unggah di Chaesa → <span className="font-medium">Fondasi Ebook → Import</span>. Semua field otomatis terisi tanpa copy-paste manual.
+                  </p>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                   <ExternalLink className="w-3 h-3" />
@@ -793,6 +798,13 @@ export function StudioPanel({ agent }: { agent: any }) {
 
           {chaesaBundle ? (
             <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+              {chaesaBundle?.meta?.chaesaImportTab && (
+                <div className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 p-3">
+                  <p className="text-xs leading-relaxed text-amber-900 dark:text-amber-200" data-testid="text-chaesa-tip">
+                    💡 {chaesaBundle.meta.chaesaImportTab}
+                  </p>
+                </div>
+              )}
               {/* Group by section */}
               {Array.from(new Set(chaesaBundle.quickFill.map((f: any) => f.section))).map((sectionRaw) => {
                 const section = String(sectionRaw);
