@@ -208,16 +208,16 @@ export function MessageContent({ text, className }: { text: string; className?: 
       elements.push(
         <div
           key={`table-wrap-${elements.length}`}
-          className="my-2 overflow-x-auto rounded-md border border-border"
+          className="my-3 -mx-1 overflow-x-auto rounded-md border-2 border-border shadow-sm bg-background"
         >
           <table className="w-full text-xs border-collapse">
-            <thead className="bg-muted/60">
-              <tr>
+            <thead>
+              <tr className="bg-primary/15 border-b-2 border-border">
                 {padCells(headerCells).map((cell, ci) => (
                   <th
                     key={ci}
                     className={cn(
-                      "border-b border-border px-2 py-1.5 font-semibold align-top",
+                      "border-r border-border last:border-r-0 px-3 py-2 font-bold text-foreground align-top whitespace-normal",
                       alignClass(ci)
                     )}
                   >
@@ -228,12 +228,18 @@ export function MessageContent({ text, className }: { text: string; className?: 
             </thead>
             <tbody>
               {rows.map((r, ri) => (
-                <tr key={ri} className={ri % 2 === 1 ? "bg-muted/20" : ""}>
+                <tr
+                  key={ri}
+                  className={cn(
+                    "border-b border-border/70 last:border-b-0",
+                    ri % 2 === 1 ? "bg-muted/30" : "bg-background"
+                  )}
+                >
                   {padCells(r).map((cell, ci) => (
                     <td
                       key={ci}
                       className={cn(
-                        "border-t border-border/60 px-2 py-1.5 align-top",
+                        "border-r border-border/40 last:border-r-0 px-3 py-2 align-top whitespace-normal leading-snug",
                         alignClass(ci)
                       )}
                     >
