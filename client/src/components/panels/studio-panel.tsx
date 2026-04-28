@@ -237,16 +237,16 @@ export function StudioPanel({ agent }: { agent: any }) {
     if (!chaesaBundle) return;
     const lines: string[] = [];
     for (const f of chaesaBundle.quickFill) {
-      lines.push(`### ${f.label} (${f.field})`);
+      lines.push(`${f.label}:`);
       lines.push(f.value || "(kosong)");
       lines.push("");
     }
-    await copyToClipboard(lines.join("\n"), "all");
-    toast({ title: "Seluruh field disalin", description: "Buka Chaesa AI Studio → tempel ke form." });
+    await copyToClipboard(lines.join("\n").trim(), "all");
+    toast({ title: "Seluruh field disalin", description: "Teks bersih, siap tempel ke Chaesa AI Studio." });
   };
 
   // ============ EBOOK EXPORT ============
-  const downloadEbook = (format: "html" | "md") => {
+  const downloadEbook = (format: "html" | "md" | "txt" | "xlsx" | "csv") => {
     const url = `/api/agents/${agent.id}/export/ebook?format=${format}`;
     if (format === "html") {
       window.open(url, "_blank");
@@ -254,16 +254,24 @@ export function StudioPanel({ agent }: { agent: any }) {
         title: "eBook dibuka di tab baru",
         description: "Klik tombol \"Cetak / Simpan PDF\" di pojok kanan atas untuk menyimpan sebagai PDF.",
       });
-    } else {
-      const a = document.createElement("a");
-      a.href = url;
-      const slug = (agent.name || "ebook").toLowerCase().replace(/\s+/g, "-");
-      a.download = `${slug}-ebook.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      toast({ title: "eBook diunduh (Markdown)", description: "File .md siap diedit/dipublikasikan." });
+      return;
     }
+    const a = document.createElement("a");
+    a.href = url;
+    const slug = (agent.name || "ebook").toLowerCase().replace(/\s+/g, "-");
+    const ext = format === "md" ? "md" : format;
+    a.download = `${slug}-ebook.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    const labels: Record<string, { title: string; desc: string }> = {
+      md: { title: "eBook diunduh (Markdown)", desc: "File .md untuk editor markdown / publikasi." },
+      txt: { title: "eBook diunduh (Teks bersih)", desc: "File .txt tanpa simbol — siap tempel ke Word / Google Docs." },
+      xlsx: { title: "Tabel diunduh (Excel)", desc: "File .xlsx berisi semua field & materi terstruktur dalam beberapa sheet." },
+      csv: { title: "Tabel diunduh (CSV)", desc: "File .csv siap impor ke spreadsheet apa pun." },
+    };
+    const lbl = labels[format];
+    if (lbl) toast({ title: lbl.title, description: lbl.desc });
   };
 
   const downloadConfig = async () => {
@@ -617,15 +625,43 @@ export function StudioPanel({ agent }: { agent: any }) {
                   </Button>
                   <Button
                     variant="outline"
+                    onClick={() => downloadEbook("txt")}
+                    title="Teks bersih tanpa simbol — siap tempel ke Word/Docs"
+                    data-testid="button-download-ebook-txt"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" /> .txt
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => downloadEbook("xlsx")}
+                    className="flex-1"
+                    title="Tabel Excel berisi semua field & materi — banyak sheet"
+                    data-testid="button-download-ebook-xlsx"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" /> Excel (.xlsx)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => downloadEbook("csv")}
+                    title="Format CSV universal untuk semua spreadsheet"
+                    data-testid="button-download-ebook-csv"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" /> .csv
+                  </Button>
+                  <Button
+                    variant="outline"
                     onClick={() => downloadEbook("md")}
+                    title="Markdown asli (dengan simbol formatting)"
                     data-testid="button-download-ebook-md"
                   >
                     <Download className="w-4 h-4 mr-1.5" /> .md
                   </Button>
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  HTML cetak-siap (A4, page-break otomatis). Klik tombol di pojok kanan atas dokumen → Simpan sebagai PDF.
-                </p>
+                <div className="text-[11px] text-muted-foreground space-y-1">
+                  <p><span className="font-semibold text-orange-700 dark:text-orange-400">PDF / TXT</span> → dokumen rapi (Word, Google Docs). <span className="font-semibold text-emerald-700 dark:text-emerald-400">Excel / CSV</span> → tabel field per sheet.</p>
+                </div>
               </CardContent>
             </Card>
 

@@ -41,7 +41,8 @@ import { processKnowledgeBaseForRAG, searchKnowledgeBase } from "./lib/rag-servi
 import { buildFinalSystemPrompt } from "./lib/build-final-system-prompt";
 import { getDefaultPoliciesForSeries, type AgentPolicySet } from "./lib/agent-policies";
 import { importDocumentToProposal, mergeProposalIntoAgent, type ApplyMode } from "./lib/document-importer";
-import { buildEbookMarkdown, buildEbookHtml } from "./lib/ebook-generator";
+import { buildEbookMarkdown, buildEbookHtml, stripMarkdownToPlainText, buildEbookTables } from "./lib/ebook-generator";
+import * as XLSX from "xlsx";
 import { buildChaesaExport } from "./lib/chaesa-exporter";
 import {
   searchNotionPages,
@@ -4170,12 +4171,58 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       const data = { agent, knowledgeBases, miniApps, projectBrainTemplates, series, bigIdea, toolbox };
 
+      const safeName = (agent.name || "ebook").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
       if (format === "md" || format === "markdown") {
-        const { markdown, title } = buildEbookMarkdown(data);
-        const safeName = (agent.name || "ebook").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        const { markdown } = buildEbookMarkdown(data);
         res.setHeader("Content-Type", "text/markdown; charset=utf-8");
         res.setHeader("Content-Disposition", `attachment; filename=\"${safeName}-ebook.md\"`);
         return res.send(markdown);
+      }
+
+      if (format === "txt" || format === "text") {
+        const { markdown } = buildEbookMarkdown(data);
+        const text = stripMarkdownToPlainText(markdown);
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${safeName}-ebook.txt\"`);
+        return res.send(text);
+      }
+
+      if (format === "xlsx" || format === "excel") {
+        const tables = buildEbookTables(data);
+        const wb = XLSX.utils.book_new();
+        for (const t of tables) {
+          const ws = XLSX.utils.aoa_to_sheet(t.rows);
+          // Auto-set kolom width berbasis konten
+          const colWidths = (t.rows[0] || []).map((_, ci) => {
+            let max = 8;
+            for (const r of t.rows) {
+              const v = String(r[ci] ?? "");
+              if (v.length > max) max = Math.min(v.length, 80);
+            }
+            return { wch: max + 2 };
+          });
+          (ws as any)["!cols"] = colWidths;
+          XLSX.utils.book_append_sheet(wb, ws, t.sheetName.slice(0, 31));
+        }
+        const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${safeName}-ebook.xlsx\"`);
+        return res.send(buf);
+      }
+
+      if (format === "csv") {
+        const tables = buildEbookTables(data);
+        const parts: string[] = [];
+        for (const t of tables) {
+          parts.push(`# ${t.sheetName}`);
+          const ws = XLSX.utils.aoa_to_sheet(t.rows);
+          parts.push(XLSX.utils.sheet_to_csv(ws));
+          parts.push("");
+        }
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${safeName}-ebook.csv\"`);
+        return res.send("\uFEFF" + parts.join("\n"));
       }
 
       if (format === "json") {
@@ -4185,7 +4232,6 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       // default: html (print-ready)
       const { html } = buildEbookHtml(data);
-      const safeName = (agent.name || "ebook").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.setHeader("Content-Disposition", `inline; filename=\"${safeName}-ebook.html\"`);
       return res.send(html);

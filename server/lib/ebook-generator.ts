@@ -302,6 +302,213 @@ function markdownToHtml(md: string): string {
   return out.join("\n");
 }
 
+/**
+ * Convert Markdown menjadi plain text yang bersih dari simbol formatting.
+ * Output: paragraf rapi siap di-paste ke Word/Google Docs.
+ *  - # ## ###     → judul UPPERCASE diapit garis kosong
+ *  - **bold**     → teks polos
+ *  - *italic*     → teks polos
+ *  - `code`       → teks polos
+ *  - > quote      → "Catatan: <isi>"
+ *  - ---          → garis pemisah pakai ──────
+ *  - - bullet     → "• " (bullet visual)
+ *  - 1. ordered   → "1) "
+ *  - [txt](url)   → "txt (url)"
+ *  - tabel pipe   → tabel teks rata kolom
+ */
+export function stripMarkdownToPlainText(md: string): string {
+  const lines = md.split(/\r?\n/);
+  const out: string[] = [];
+  let inCode = false;
+
+  for (let raw of lines) {
+    if (raw.startsWith("```")) {
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) {
+      out.push(raw);
+      continue;
+    }
+
+    let line = raw;
+
+    // Heading
+    let m: RegExpMatchArray | null;
+    if ((m = line.match(/^###\s+(.+)$/))) {
+      out.push("");
+      out.push(`▸ ${cleanInline(m[1])}`);
+      continue;
+    }
+    if ((m = line.match(/^##\s+(.+)$/))) {
+      const t = cleanInline(m[1]).toUpperCase();
+      out.push("");
+      out.push(t);
+      out.push("─".repeat(Math.min(t.length, 60)));
+      continue;
+    }
+    if ((m = line.match(/^#\s+(.+)$/))) {
+      const t = cleanInline(m[1]).toUpperCase();
+      out.push("");
+      out.push("═".repeat(Math.min(t.length + 4, 64)));
+      out.push(`  ${t}`);
+      out.push("═".repeat(Math.min(t.length + 4, 64)));
+      out.push("");
+      continue;
+    }
+
+    // Horizontal rule
+    if (/^[-*_]{3,}\s*$/.test(line)) {
+      out.push("");
+      out.push("──────────────────────────────────────────────");
+      out.push("");
+      continue;
+    }
+
+    // Blockquote
+    if ((m = line.match(/^>\s*(.*)$/))) {
+      out.push(`  Catatan: ${cleanInline(m[1])}`);
+      continue;
+    }
+
+    // Ordered list
+    if ((m = line.match(/^(\d+)\.\s+(.+)$/))) {
+      out.push(`  ${m[1]}) ${cleanInline(m[2])}`);
+      continue;
+    }
+
+    // Bullet
+    if ((m = line.match(/^[\-*]\s+(.+)$/))) {
+      out.push(`  • ${cleanInline(m[1])}`);
+      continue;
+    }
+
+    // Default paragraf
+    out.push(cleanInline(line));
+  }
+
+  // Squash multiple blank lines
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
+}
+
+function cleanInline(s: string): string {
+  let out = String(s ?? "");
+  // 1) Unescape DULU sebelum hapus simbol — supaya \# (escape literal) tidak salah dibersihkan.
+  out = out.replace(/\\([\\`*_{}\[\]()#+\-!~|])/g, "$1");
+  // 2) Image: ![alt](url) → alt
+  out = out.replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1");
+  // 3) Link: [text](url) → text (url) — proteksi konten URL agar tidak dirusak step berikutnya.
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  // 4) Inline code (sebelum bold/italic supaya backtick di dalam tidak dipakai untuk emphasis)
+  out = out.replace(/`([^`]+?)`/g, "$1");
+  // 5) Bold/italic — varian asterisk & underscore + strikethrough.
+  out = out.replace(/\*\*\*(.+?)\*\*\*/g, "$1");
+  out = out.replace(/___(.+?)___/g, "$1");
+  out = out.replace(/\*\*(.+?)\*\*/g, "$1");
+  out = out.replace(/__(.+?)__/g, "$1");
+  out = out.replace(/(^|[^\w*])\*([^*\n]+?)\*(?!\w)/g, "$1$2");
+  out = out.replace(/(^|[^\w_])_([^_\n]+?)_(?!\w)/g, "$1$2");
+  out = out.replace(/~~(.+?)~~/g, "$1");
+  // 6) Setext heading underline (===, ---) sisa di awal/akhir baris.
+  out = out.replace(/^=+\s*$|^=+|=+$/g, "");
+  // 7) Marker heading raw "## " kalau ada di tengah teks (jarang) — sapu bersih hash awal kata.
+  out = out.replace(/(^|\s)#{1,6}(\s)/g, "$1$2");
+  return out.trim();
+}
+
+const EXCEL_CELL_LIMIT = 32000;
+const clipCell = (v: any): string | number => {
+  if (typeof v === "number") return v;
+  const s = String(v ?? "");
+  return s.length > EXCEL_CELL_LIMIT ? s.slice(0, EXCEL_CELL_LIMIT - 20) + "\n…[dipotong]" : s;
+};
+
+/**
+ * Bangun semua field chatbot menjadi tabel-tabel terstruktur.
+ * Output untuk XLSX/CSV — siap di-buka di Excel.
+ */
+export interface EbookTable {
+  sheetName: string;
+  rows: (string | number)[][];
+}
+
+export function buildEbookTables(data: AgentEbookData): EbookTable[] {
+  const { agent, knowledgeBases, miniApps = [], projectBrainTemplates = [], series, bigIdea, toolbox } = data;
+
+  const profilRows: (string | number)[][] = [
+    ["Field", "Nilai"],
+    ["Nama", clipCell(agent?.name)],
+    ["Tagline", clipCell(agent?.tagline)],
+    ["Deskripsi", clipCell(agent?.description)],
+    ["Kategori", clipCell(agent?.category)],
+    ["Sub-kategori", clipCell(agent?.subcategory)],
+    ["Bahasa", clipCell(agent?.language || "Bahasa Indonesia")],
+    ["Tone of Voice", clipCell(agent?.toneOfVoice)],
+    ["Filosofi", clipCell(agent?.philosophy)],
+    ["Sapaan Pembuka", clipCell(agent?.greetingMessage)],
+    ["System Prompt", clipCell(agent?.systemPrompt)],
+    ["Big Idea", clipCell(bigIdea?.name)],
+    ["Toolbox", clipCell(toolbox?.name)],
+    ["Series", clipCell(series?.name)],
+  ];
+
+  const expertise: string[] = Array.isArray(agent?.expertise) ? agent.expertise : [];
+  const keyPhrases: string[] = Array.isArray(agent?.keyPhrases) ? agent.keyPhrases : [];
+  const avoid: string[] = Array.isArray(agent?.avoidTopics) ? agent.avoidTopics : [];
+  const starters: string[] = Array.isArray(agent?.conversationStarters) ? agent.conversationStarters : [];
+  const maxLen = Math.max(expertise.length, keyPhrases.length, avoid.length, 1);
+  const ruangLingkupRows: (string | number)[][] = [["No", "Keahlian", "Kata Kunci", "Topik Dihindari"]];
+  for (let i = 0; i < maxLen; i++) {
+    ruangLingkupRows.push([i + 1, clipCell(expertise[i]), clipCell(keyPhrases[i]), clipCell(avoid[i])]);
+  }
+
+  const kbRows: (string | number)[][] = [["No", "Nama", "Deskripsi", "Konten"]];
+  knowledgeBases.forEach((kb: any, i: number) => {
+    kbRows.push([
+      i + 1,
+      clipCell(kb?.name || "Materi"),
+      clipCell(kb?.description),
+      clipCell(kb?.content || kb?.extractedText),
+    ]);
+  });
+
+  const startersRows: (string | number)[][] = [["No", "Pertanyaan Pemicu"]];
+  starters.forEach((s, i) => startersRows.push([i + 1, clipCell(s)]));
+
+  const miniAppsRows: (string | number)[][] = [["No", "Nama", "Tipe", "Deskripsi"]];
+  miniApps.forEach((m: any, i: number) => {
+    miniAppsRows.push([i + 1, clipCell(m?.name), clipCell(m?.type), clipCell(m?.description)]);
+  });
+
+  const templatesRows: (string | number)[][] = [["No", "Template", "Field", "Type", "Wajib", "Label"]];
+  projectBrainTemplates.forEach((tpl: any, idx: number) => {
+    const fields: any[] = Array.isArray(tpl?.fields) ? tpl.fields : [];
+    if (fields.length === 0) {
+      templatesRows.push([idx + 1, clipCell(tpl?.name), "", "", "", ""]);
+    } else {
+      fields.forEach((f: any) => {
+        templatesRows.push([
+          idx + 1,
+          clipCell(tpl?.name),
+          clipCell(f?.key),
+          clipCell(f?.type),
+          f?.required ? "Ya" : "Tidak",
+          clipCell(f?.label),
+        ]);
+      });
+    }
+  });
+
+  return [
+    { sheetName: "Profil Chatbot", rows: profilRows },
+    { sheetName: "Ruang Lingkup", rows: ruangLingkupRows },
+    { sheetName: "Knowledge Base", rows: kbRows },
+    { sheetName: "Pertanyaan Pemicu", rows: startersRows },
+    { sheetName: "Mini Apps", rows: miniAppsRows },
+    { sheetName: "Templates", rows: templatesRows },
+  ];
+}
+
 export function buildEbookHtml(data: AgentEbookData): { html: string; title: string } {
   const { markdown, title } = buildEbookMarkdown(data);
   const body = markdownToHtml(markdown);
