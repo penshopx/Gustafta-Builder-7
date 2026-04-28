@@ -4127,11 +4127,19 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const agentId = req.params.id as string;
       const format = String(req.query.format || "html").toLowerCase();
 
-      const agent = await storage.getAgent(agentId);
-      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      const agentRaw = await storage.getAgent(agentId);
+      if (!agentRaw) return res.status(404).json({ error: "Agent not found" });
 
-      const auth = assertCanPreviewAgentPrompt(req, agent);
-      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+      // Otorisasi eBook export: setiap pengguna login boleh mengunduh,
+      // TAPI bila bukan pemilik/admin maka kolom sensitif (system prompt mentah)
+      // disembunyikan dari hasil unduhan. Ini menjaga agar agen sistem
+      // (tanpa userId) tetap bisa diekspor untuk konsumsi publik tanpa
+      // membocorkan instruksi peran rahasia milik builder.
+      const auth = assertCanPreviewAgentPrompt(req, agentRaw);
+      const isOwnerOrAdmin = auth.ok;
+      const agent = isOwnerOrAdmin
+        ? agentRaw
+        : { ...agentRaw, systemPrompt: "" };
 
       const knowledgeBases = await storage.getKnowledgeBases(agentId);
 
