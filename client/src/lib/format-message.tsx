@@ -117,7 +117,30 @@ export function MessageContent({ text, className }: { text: string; className?: 
     }
   };
 
-  for (const raw of lines) {
+  // Helper: split baris pipe table jadi sel-sel (buang pipe terdepan/terakhir kalau ada)
+  const splitRow = (s: string): string[] => {
+    let t = s.trim();
+    if (t.startsWith("|")) t = t.slice(1);
+    if (t.endsWith("|")) t = t.slice(0, -1);
+    return t.split("|").map((c) => c.trim());
+  };
+
+  // Pola garis pemisah header tabel: |---|:---|---:|:---:| (boleh tanpa pipe luar)
+  const isTableSeparator = (s: string): boolean => {
+    const t = s.trim();
+    if (!/[-:|]/.test(t)) return false;
+    return /^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/.test(t);
+  };
+
+  // Pola baris tabel: minimal punya 1 pipe internal dan diapit/diakhiri |
+  const isTableRow = (s: string): boolean => {
+    const t = s.trim();
+    if (!t.includes("|")) return false;
+    return /^\|.*\|.*$|^.*\|.*\|$/.test(t);
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
     const line = raw.replace(/\r$/, "");
 
     // Code block fence
@@ -147,6 +170,83 @@ export function MessageContent({ text, className }: { text: string; className?: 
     if (/^---+$|^\*\*\*+$|^___+$/.test(trimmed)) {
       flushList();
       elements.push(<hr key={`hr-${elements.length}`} className="my-2 border-border" />);
+      continue;
+    }
+
+    // Tabel pipe markdown: butuh baris header + baris pemisah |---|---|
+    if (
+      isTableRow(trimmed) &&
+      i + 1 < lines.length &&
+      isTableSeparator(lines[i + 1])
+    ) {
+      flushList();
+      const headerCells = splitRow(trimmed);
+      const sepCells = splitRow(lines[i + 1]);
+      // Tentukan alignment per kolom dari pola separator (:--- left, :---: center, ---: right)
+      const aligns: Array<"left" | "center" | "right"> = sepCells.map((c) => {
+        const left = c.startsWith(":");
+        const right = c.endsWith(":");
+        if (left && right) return "center";
+        if (right) return "right";
+        return "left";
+      });
+      const rows: string[][] = [];
+      let j = i + 2;
+      while (j < lines.length && isTableRow(lines[j].trim())) {
+        rows.push(splitRow(lines[j]));
+        j++;
+      }
+      const colCount = Math.max(headerCells.length, ...rows.map((r) => r.length));
+      const padCells = (r: string[]) => {
+        const out = r.slice(0, colCount);
+        while (out.length < colCount) out.push("");
+        return out;
+      };
+      const alignClass = (idx: number) =>
+        aligns[idx] === "center" ? "text-center" : aligns[idx] === "right" ? "text-right" : "text-left";
+
+      elements.push(
+        <div
+          key={`table-wrap-${elements.length}`}
+          className="my-2 overflow-x-auto rounded-md border border-border"
+        >
+          <table className="w-full text-xs border-collapse">
+            <thead className="bg-muted/60">
+              <tr>
+                {padCells(headerCells).map((cell, ci) => (
+                  <th
+                    key={ci}
+                    className={cn(
+                      "border-b border-border px-2 py-1.5 font-semibold align-top",
+                      alignClass(ci)
+                    )}
+                  >
+                    {processInlineText(cell)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, ri) => (
+                <tr key={ri} className={ri % 2 === 1 ? "bg-muted/20" : ""}>
+                  {padCells(r).map((cell, ci) => (
+                    <td
+                      key={ci}
+                      className={cn(
+                        "border-t border-border/60 px-2 py-1.5 align-top",
+                        alignClass(ci)
+                      )}
+                    >
+                      {processInlineText(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+      i = j - 1; // lompat ke baris terakhir tabel; loop akan ++
       continue;
     }
 
