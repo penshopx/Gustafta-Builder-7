@@ -224,6 +224,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Lisensi LSP Konstruksi — LPJK & BNSP", module: "./seed-lisensi-lsp", fn: "seedLisensiLsp" },
           { name: "Konsultan Lisensi LSP — Toolkit Pendamping LPJK & BNSP", module: "./seed-konsultan-lisensi-lsp", fn: "seedKonsultanLisensiLsp" },
           { name: "Akreditasi LSP oleh KAN — SNI ISO/IEC 17024 + KAN K-09", module: "./seed-akreditasi-kan", fn: "seedAkreditasiKan" },
+          { name: "Chatbot SMAP — Sistem Manajemen Anti Penyuapan (SNI ISO 37001:2016)", module: "./seed-smap-iso37001", fn: "seedSmapIso37001" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
           { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
@@ -362,6 +363,14 @@ for (const envVar of requiredEnvVars) {
         await seedAkreditasiKan("49465846");
       } catch (err) {
         log("Catch-up Akreditasi KAN seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Chatbot SMAP — SNI ISO 37001:2016 (added Apr 2026)
+      try {
+        const { seedSmapIso37001 } = await import("./seed-smap-iso37001");
+        await seedSmapIso37001("49465846");
+      } catch (err) {
+        log("Catch-up SMAP ISO37001 seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
