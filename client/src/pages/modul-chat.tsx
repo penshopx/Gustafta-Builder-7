@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
+import { MessageContent } from "@/lib/format-message";
 
 interface ChatbotInfo {
   agentId: string;
@@ -487,15 +488,19 @@ export default function ModulChat() {
             )}
             <div
               className={cn(
-                "rounded-lg px-4 py-2.5 text-sm whitespace-pre-wrap",
+                "rounded-lg px-4 py-2.5 text-sm break-words",
                 msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-primary-foreground whitespace-pre-wrap"
                   : "bg-muted"
               )}
             >
-              {msg.content || (msg.role === "assistant" && isStreaming ? (
+              {msg.role === "user" ? (
+                msg.content
+              ) : msg.content ? (
+                <MessageContent text={msg.content} />
+              ) : isStreaming ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
-              ) : null)}
+              ) : null}
             </div>
           </div>
         ))}

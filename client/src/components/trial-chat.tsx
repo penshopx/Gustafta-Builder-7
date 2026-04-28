@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMessages, useSendMessage } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
+import { MessageContent } from "@/lib/format-message";
 import type { Agent, Message } from "@shared/schema";
 
 interface TrialChatProps {
@@ -168,11 +169,11 @@ function TrialMessageBubble({ message }: { message: Message }) {
       </Avatar>
       <div
         className={cn(
-          "max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs whitespace-pre-wrap break-words",
-          isUser ? "bg-primary text-primary-foreground" : "bg-muted"
+          "max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs break-words",
+          isUser ? "bg-primary text-primary-foreground whitespace-pre-wrap" : "bg-muted"
         )}
       >
-        {message.content}
+        {isUser ? message.content : <MessageContent text={message.content} className="text-xs space-y-1" />}
       </div>
     </div>
   );

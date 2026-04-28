@@ -6,30 +6,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useParams, useSearch } from "wouter";
 import { cn } from "@/lib/utils";
+import { MessageContent } from "@/lib/format-message";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
-}
-
-function cleanMarkdown(text: string): string {
-  return text
-    .replace(/#{1,6}\s*/g, '')
-    .replace(/\*\*([^*]+)\*\*/g, '$1')
-    .replace(/\*([^*]+)\*/g, '$1')
-    .replace(/__([^_]+)__/g, '$1')
-    .replace(/_([^_]+)_/g, '$1')
-    .replace(/~~([^~]+)~~/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/^[-*+]\s+/gm, '')
-    .replace(/^\d+\.\s+/gm, '')
-    .replace(/^>\s*/gm, '')
-    .replace(/---+/g, '')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-    .trim();
 }
 
 export default function EmbedChat() {
@@ -268,7 +251,7 @@ export default function EmbedChat() {
                   )}
                   style={message.role === "user" ? { backgroundColor: color } : {}}
                 >
-                  {message.role === "user" ? message.content : cleanMarkdown(message.content)}
+                  {message.role === "user" ? message.content : <MessageContent text={message.content} />}
                 </div>
               </div>
             </div>

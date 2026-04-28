@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
+import { MessageContent as SharedMessageContent } from "@/lib/format-message";
 
 interface UploadedFile {
   fileName: string;
@@ -99,103 +100,9 @@ function trackMetaEvent(eventName: string, params?: Record<string, any>) {
   }
 }
 
-function processInlineText(text: string): (string | JSX.Element)[] {
-  const parts: (string | JSX.Element)[] = [];
-  const regex = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`)/g;
-  let lastIndex = 0;
-  let match;
-
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
-    }
-    const m = match[0];
-    if (m.startsWith("**") && m.endsWith("**")) {
-      parts.push(<strong key={match.index}>{m.slice(2, -2)}</strong>);
-    } else if (m.startsWith("__") && m.endsWith("__")) {
-      parts.push(<strong key={match.index}>{m.slice(2, -2)}</strong>);
-    } else if (m.startsWith("`") && m.endsWith("`")) {
-      parts.push(<code key={match.index} className="bg-muted px-1 rounded text-xs">{m.slice(1, -1)}</code>);
-    }
-    lastIndex = match.index + m.length;
-  }
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-  return parts.length > 0 ? parts : [text];
-}
-
+// Renderer markdown chat dipindah ke @/lib/format-message (impor di atas).
 function formatMessageContent(text: string) {
-  const lines = text.split("\n");
-  const elements: JSX.Element[] = [];
-  let listItems: string[] = [];
-  let listType: "ul" | "ol" = "ul";
-  let inList = false;
-
-  const flushList = () => {
-    if (listItems.length > 0) {
-      const Tag = listType;
-      elements.push(
-        <Tag key={`list-${elements.length}`} className={cn("space-y-1 text-sm", listType === "ol" ? "list-decimal pl-5" : "list-disc pl-5")}>
-          {listItems.map((item, i) => (
-            <li key={i}>{processInlineText(item)}</li>
-          ))}
-        </Tag>
-      );
-      listItems = [];
-      inList = false;
-    }
-  };
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (!trimmed) {
-      flushList();
-      continue;
-    }
-
-    const headingMatch = trimmed.match(/^#{1,3}\s+(.+)/);
-    if (headingMatch) {
-      flushList();
-      elements.push(
-        <p key={`h-${elements.length}`} className="font-semibold text-sm mt-1">
-          {headingMatch[1]}
-        </p>
-      );
-      continue;
-    }
-
-    const ulMatch = trimmed.match(/^[-*+]\s+(.+)/);
-    if (ulMatch) {
-      if (!inList || listType !== "ul") {
-        flushList();
-        inList = true;
-        listType = "ul";
-      }
-      listItems.push(ulMatch[1]);
-      continue;
-    }
-
-    const olMatch = trimmed.match(/^\d+\.\s+(.+)/);
-    if (olMatch) {
-      if (!inList || listType !== "ol") {
-        flushList();
-        inList = true;
-        listType = "ol";
-      }
-      listItems.push(olMatch[1]);
-      continue;
-    }
-
-    flushList();
-    elements.push(
-      <p key={`p-${elements.length}`} className="text-sm">{processInlineText(trimmed)}</p>
-    );
-  }
-
-  flushList();
-  return <div className="space-y-1.5">{elements}</div>;
+  return <SharedMessageContent text={text} className="text-sm" />;
 }
 
 function AgentAvatar({ config, size = "md", color }: { config: AgentConfig; size?: "sm" | "md" | "lg" | "xl"; color: string }) {

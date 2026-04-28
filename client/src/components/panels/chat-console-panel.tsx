@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMessages, useSendMessage, useClearMessages } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
+import { MessageContent } from "@/lib/format-message";
 import type { Agent, Message } from "@shared/schema";
 
 interface ChatConsolePanelProps {
@@ -455,11 +456,11 @@ function MessageBubble({ message, agentName, agentAvatar }: { message: Message; 
         </div>
         <div
           className={cn(
-            "inline-block max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap break-words",
-            isUser ? "bg-primary text-primary-foreground" : "bg-muted"
+            "inline-block max-w-[85%] rounded-lg px-3 py-2 text-sm break-words text-left",
+            isUser ? "bg-primary text-primary-foreground whitespace-pre-wrap" : "bg-muted"
           )}
         >
-          {message.content}
+          {isUser ? message.content : <MessageContent text={message.content} />}
         </div>
         <div className="text-xs text-muted-foreground mt-1">
           {new Date(message.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
