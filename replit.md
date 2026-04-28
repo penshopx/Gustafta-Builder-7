@@ -79,6 +79,7 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 - **File Upload in Generate Big Idea**: Allows uploading PDF, DOCX, and TXT files for text extraction to inform Big Idea generation.
 - **Tender Document Catalog**: A reference catalog of 37 types of government tender documents used by the Tender Document Generator.
 - **SaaS Pack System**: A system for selling domain-specific AI wizard workflows as add-ons, including a "Tender LPSE Pack" with a 7-step guided wizard for tender document preparation.
+- **Studio Kompetensi (Ekosistem 5-Produk)**: Dual-gate system on every chatbot — IMPORT (PDF/DOCX/XLSX → AI-mapped chatbot fields with confidence score, per-field acceptance, and `fill_empty_only`/`overwrite_all` modes) and EXPORT (chatbot → 5 competency products). eBook export ships first as print-ready HTML (A4, page-break, embedded "Cetak / Simpan PDF" button) plus Markdown; Mini Apps / Document Generator / eCourse are roadmap placeholders. Reuses `extractDocumentContent` (pdf-parse, mammoth, xlsx) for ingestion, OpenAI `gpt-4o-mini` structured JSON for field mapping, and `assertCanPreviewAgentPrompt` ownership checks on apply/export endpoints. Endpoints: `POST /api/agents/import-document`, `POST /api/agents/:id/apply-import`, `GET /api/agents/:id/export/ebook`. UI: Studio Kompetensi tab in dashboard sidebar.
 
 ## External Dependencies
 

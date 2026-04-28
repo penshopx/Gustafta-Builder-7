@@ -1,0 +1,658 @@
+import { useState, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Wand2, Upload, FileText, BookOpen, Download, Loader2, Check, X,
+  AlertCircle, Sparkles, FileCode, FilePlus2, Layers, Calculator, GraduationCap,
+  Info, RefreshCw, FileUp,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useImportAgent } from "@/hooks/use-export-import";
+
+interface ImportProposal {
+  proposal: Record<string, any>;
+  knowledgeChunks: Array<{ name: string; type: string; content: string; description?: string }>;
+  confidence: number;
+  sourceFile: string;
+  rawTextLength: number;
+  truncated: boolean;
+  notes: string[];
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  name: "Nama Chatbot",
+  tagline: "Tagline",
+  description: "Deskripsi",
+  philosophy: "Filosofi",
+  systemPrompt: "Instruksi Peran (System Prompt)",
+  greetingMessage: "Sapaan Pembuka",
+  conversationStarters: "Pertanyaan Pemicu",
+  expertise: "Bidang Keahlian",
+  keyPhrases: "Kata Kunci",
+  avoidTopics: "Topik Dihindari",
+  category: "Kategori",
+  subcategory: "Sub-kategori",
+  language: "Bahasa",
+  toneOfVoice: "Nada Suara",
+  responseFormat: "Format Respons",
+};
+
+export function StudioPanel({ agent }: { agent: any }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // ============ IMPORT STATE ============
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const jsonInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
+  const [proposal, setProposal] = useState<ImportProposal | null>(null);
+  const [overwriteAll, setOverwriteAll] = useState(false);
+  const [editedFields, setEditedFields] = useState<Record<string, any>>({});
+  const [acceptedFields, setAcceptedFields] = useState<Set<string>>(new Set());
+  const [acceptedKbs, setAcceptedKbs] = useState<Set<number>>(new Set());
+
+  const importDocMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/agents/import-document", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Upload gagal (HTTP ${res.status})`);
+      }
+      return (await res.json()) as ImportProposal;
+    },
+    onSuccess: (data) => {
+      setProposal(data);
+      setEditedFields({ ...data.proposal });
+      const fieldKeys = Object.keys(data.proposal).filter((k) => {
+        const v = data.proposal[k];
+        return v !== null && v !== undefined && (Array.isArray(v) ? v.length > 0 : String(v).trim() !== "");
+      });
+      setAcceptedFields(new Set(fieldKeys));
+      setAcceptedKbs(new Set(data.knowledgeChunks.map((_, i) => i)));
+      toast({
+        title: "Dokumen terbaca",
+        description: `${fieldKeys.length} field terdeteksi · ${data.knowledgeChunks.length} potongan materi · keyakinan ${(data.confidence * 100).toFixed(0)}%`,
+      });
+    },
+    onError: (err: any) => {
+      toast({ title: "Gagal membaca dokumen", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const applyMutation = useMutation({
+    mutationFn: async () => {
+      const filteredProposal: Record<string, any> = {};
+      acceptedFields.forEach((k) => {
+        if (editedFields[k] !== undefined) filteredProposal[k] = editedFields[k];
+      });
+      const filteredKbs = (proposal?.knowledgeChunks || []).filter((_, i) => acceptedKbs.has(i));
+      const res = await apiRequest("POST", `/api/agents/${agent.id}/apply-import`, {
+        proposal: filteredProposal,
+        knowledgeChunks: filteredKbs,
+        mode: overwriteAll ? "overwrite_all" : "fill_empty_only",
+      });
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Berhasil diterapkan",
+        description: `${data.fieldsApplied?.length || 0} field diisi · ${data.knowledgeBasesCreated?.length || 0} materi pengetahuan dibuat`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents", agent.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", agent.id] });
+      setProposal(null);
+      setEditedFields({});
+      setAcceptedFields(new Set());
+      setAcceptedKbs(new Set());
+      setUploadedFileName("");
+    },
+    onError: (err: any) => {
+      toast({ title: "Gagal menerapkan", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const importAgentHook = useImportAgent();
+
+  const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedFileName(file.name);
+    setProposal(null);
+    importDocMutation.mutate(file);
+    e.target.value = "";
+  };
+
+  const handleJsonPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const config = JSON.parse(text);
+      const newAgent = await importAgentHook.mutateAsync({
+        config,
+        toolboxId: agent.toolboxId || undefined,
+      });
+      toast({
+        title: "Import konfigurasi berhasil",
+        description: `Chatbot "${newAgent?.name || "baru"}" telah dibuat di toolbox saat ini.`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Import konfigurasi gagal",
+        description: err.message || "Pastikan file JSON konfigurasi valid.",
+        variant: "destructive",
+      });
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const toggleField = (key: string) => {
+    setAcceptedFields((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const toggleKb = (idx: number) => {
+    setAcceptedKbs((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  const updateField = (key: string, value: any) => {
+    setEditedFields((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // ============ EBOOK EXPORT ============
+  const downloadEbook = (format: "html" | "md") => {
+    const url = `/api/agents/${agent.id}/export/ebook?format=${format}`;
+    if (format === "html") {
+      window.open(url, "_blank");
+      toast({
+        title: "eBook dibuka di tab baru",
+        description: "Klik tombol \"Cetak / Simpan PDF\" di pojok kanan atas untuk menyimpan sebagai PDF.",
+      });
+    } else {
+      const a = document.createElement("a");
+      a.href = url;
+      const slug = (agent.name || "ebook").toLowerCase().replace(/\s+/g, "-");
+      a.download = `${slug}-ebook.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast({ title: "eBook diunduh (Markdown)", description: "File .md siap diedit/dipublikasikan." });
+    }
+  };
+
+  const downloadConfig = async () => {
+    try {
+      const res = await fetch(`/api/agents/${agent.id}/export`, { credentials: "include" });
+      if (!res.ok) throw new Error("Gagal export");
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const slug = (agent.name || "chatbot").toLowerCase().replace(/\s+/g, "-");
+      a.download = `${slug}-config.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: "Konfigurasi diunduh", description: "File JSON siap diimpor ke chatbot lain." });
+    } catch (err: any) {
+      toast({ title: "Gagal export konfigurasi", description: err.message, variant: "destructive" });
+    }
+  };
+
+  // ============ RENDER ============
+  return (
+    <div className="space-y-6 p-4 md:p-6 max-w-5xl overflow-y-auto max-h-[calc(100vh-80px)]" data-testid="panel-studio">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+          <Wand2 className="w-5 h-5 text-orange-600" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground" data-testid="text-studio-title">
+            Studio Kompetensi
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Import dokumen jadi konfigurasi chatbot, atau export chatbot menjadi 5 produk kompetensi.
+          </p>
+        </div>
+      </div>
+
+      <Tabs defaultValue="import" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="import" data-testid="tab-import">
+            <FileUp className="w-4 h-4 mr-1.5" /> Import
+          </TabsTrigger>
+          <TabsTrigger value="export" data-testid="tab-export">
+            <Download className="w-4 h-4 mr-1.5" /> Export
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ============ IMPORT TAB ============ */}
+        <TabsContent value="import" className="space-y-4 mt-4">
+          <Tabs defaultValue="document" className="w-full">
+            <TabsList>
+              <TabsTrigger value="document" data-testid="tab-import-document">
+                <FileText className="w-4 h-4 mr-1.5" /> Dari Dokumen (PDF/DOCX/XLSX)
+              </TabsTrigger>
+              <TabsTrigger value="json" data-testid="tab-import-json">
+                <FileCode className="w-4 h-4 mr-1.5" /> Dari Konfigurasi JSON
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="document" className="space-y-4 mt-4">
+              <Card>
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-muted-foreground">
+                      Upload dokumen kompetensi (PDF, DOCX, XLSX, CSV, TXT). AI akan mem-parsing isinya dan
+                      mengusulkan field-field chatbot. Anda tinggal periksa, edit, dan terapkan.
+                    </div>
+                  </div>
+
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-orange-500 transition-colors">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,text/plain"
+                      onChange={handleFilePick}
+                      className="hidden"
+                      data-testid="input-import-document-file"
+                    />
+                    <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm font-medium text-foreground mb-1">
+                      {uploadedFileName || "Pilih file dokumen untuk diimpor"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Maks 50MB · PDF · DOCX · XLSX · CSV · TXT
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={importDocMutation.isPending}
+                      data-testid="button-pick-import-file"
+                    >
+                      {importDocMutation.isPending ? (
+                        <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Memproses…</>
+                      ) : (
+                        <><Upload className="w-4 h-4 mr-1.5" /> Pilih File</>
+                      )}
+                    </Button>
+                  </div>
+
+                  {importDocMutation.isPending && (
+                    <div className="text-center text-sm text-muted-foreground italic">
+                      AI sedang membaca dokumen dan memetakan field… (10-40 detik)
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* PROPOSAL PREVIEW */}
+              {proposal && (
+                <Card className="border-orange-500/40">
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-base font-semibold" data-testid="text-proposal-title">
+                            Usulan dari: {proposal.sourceFile}
+                          </h3>
+                          <Badge variant={proposal.confidence > 0.7 ? "default" : proposal.confidence > 0.4 ? "secondary" : "outline"}>
+                            Keyakinan {(proposal.confidence * 100).toFixed(0)}%
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {Object.keys(proposal.proposal).length} field terdeteksi · {proposal.knowledgeChunks.length} potongan materi · {(proposal.rawTextLength / 1000).toFixed(1)}k karakter dibaca
+                          {proposal.truncated && " (dipotong)"}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setProposal(null); setUploadedFileName(""); }}
+                        data-testid="button-cancel-proposal"
+                      >
+                        <X className="w-4 h-4 mr-1" /> Batal
+                      </Button>
+                    </div>
+
+                    {proposal.notes.length > 0 && (
+                      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-xs space-y-1">
+                        <div className="flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-200">
+                          <AlertCircle className="w-3.5 h-3.5" /> Catatan AI
+                        </div>
+                        <ul className="list-disc ml-5 text-amber-700 dark:text-amber-300">
+                          {proposal.notes.map((n, i) => <li key={i}>{n}</li>)}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium">Field Chatbot ({acceptedFields.size}/{Object.keys(proposal.proposal).length} dipilih)</Label>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Switch
+                            id="overwrite-mode"
+                            checked={overwriteAll}
+                            onCheckedChange={setOverwriteAll}
+                            data-testid="switch-overwrite-all"
+                          />
+                          <Label htmlFor="overwrite-mode" className="cursor-pointer">
+                            Timpa nilai yang sudah ada
+                          </Label>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                        {Object.keys(proposal.proposal).map((key) => {
+                          const val = editedFields[key];
+                          const isAccepted = acceptedFields.has(key);
+                          const isArr = Array.isArray(val);
+                          const display = isArr ? val.join("\n") : (val || "");
+                          if (!val || (Array.isArray(val) && val.length === 0) || (typeof val === "string" && !val.trim())) return null;
+                          return (
+                            <div
+                              key={key}
+                              className={`border rounded-lg p-3 transition-colors ${isAccepted ? "border-orange-400 bg-orange-50/40 dark:bg-orange-950/20" : "border-border bg-muted/30 opacity-60"}`}
+                              data-testid={`row-field-${key}`}
+                            >
+                              <div className="flex items-start gap-2 mb-2">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleField(key)}
+                                  className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-orange-500 border-orange-500" : "border-muted-foreground"}`}
+                                  data-testid={`toggle-field-${key}`}
+                                >
+                                  {isAccepted && <Check className="w-3 h-3 text-white" />}
+                                </button>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <Label className="text-xs font-semibold">{FIELD_LABELS[key] || key}</Label>
+                                    {isArr && <Badge variant="outline" className="text-[10px]">{val.length} item</Badge>}
+                                  </div>
+                                </div>
+                              </div>
+                              {isAccepted && (
+                                isArr ? (
+                                  <Textarea
+                                    value={display}
+                                    onChange={(e) => updateField(key, e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))}
+                                    className="text-xs font-mono min-h-[60px]"
+                                    placeholder="Satu item per baris"
+                                    data-testid={`input-field-${key}`}
+                                  />
+                                ) : (display.length > 80 || display.includes("\n")) ? (
+                                  <Textarea
+                                    value={display}
+                                    onChange={(e) => updateField(key, e.target.value)}
+                                    className="text-xs min-h-[60px]"
+                                    data-testid={`input-field-${key}`}
+                                  />
+                                ) : (
+                                  <Input
+                                    value={display}
+                                    onChange={(e) => updateField(key, e.target.value)}
+                                    className="text-xs"
+                                    data-testid={`input-field-${key}`}
+                                  />
+                                )
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {proposal.knowledgeChunks.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">
+                          Materi Pengetahuan ({acceptedKbs.size}/{proposal.knowledgeChunks.length} dipilih)
+                        </Label>
+                        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                          {proposal.knowledgeChunks.map((kb, i) => {
+                            const isAccepted = acceptedKbs.has(i);
+                            return (
+                              <div
+                                key={i}
+                                className={`border rounded-lg p-3 ${isAccepted ? "border-orange-400 bg-orange-50/40 dark:bg-orange-950/20" : "border-border bg-muted/30 opacity-60"}`}
+                                data-testid={`row-kb-${i}`}
+                              >
+                                <div className="flex items-start gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleKb(i)}
+                                    className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-orange-500 border-orange-500" : "border-muted-foreground"}`}
+                                    data-testid={`toggle-kb-${i}`}
+                                  >
+                                    {isAccepted && <Check className="w-3 h-3 text-white" />}
+                                  </button>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-xs font-semibold mb-0.5">{kb.name}</div>
+                                    {kb.description && <div className="text-[11px] text-muted-foreground mb-1">{kb.description}</div>}
+                                    <div className="text-[11px] text-muted-foreground line-clamp-3">{kb.content.slice(0, 240)}{kb.content.length > 240 && "…"}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                      <div className="text-xs text-muted-foreground mr-auto">
+                        Mode: <strong>{overwriteAll ? "Timpa semua nilai" : "Hanya isi field kosong"}</strong>
+                      </div>
+                      <Button
+                        onClick={() => applyMutation.mutate()}
+                        disabled={applyMutation.isPending || (acceptedFields.size === 0 && acceptedKbs.size === 0)}
+                        data-testid="button-apply-proposal"
+                      >
+                        {applyMutation.isPending ? (
+                          <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Menerapkan…</>
+                        ) : (
+                          <><Check className="w-4 h-4 mr-1.5" /> Terapkan ke Chatbot Ini</>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="json" className="space-y-4 mt-4">
+              <Card>
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-muted-foreground">
+                      Import file <code className="bg-muted px-1 py-0.5 rounded text-xs">config.json</code> hasil
+                      export dari chatbot lain. Akan membuat <strong>chatbot baru</strong> di toolbox saat ini.
+                    </div>
+                  </div>
+                  <input
+                    ref={jsonInputRef}
+                    type="file"
+                    accept=".json,application/json"
+                    onChange={handleJsonPick}
+                    className="hidden"
+                    data-testid="input-import-json-file"
+                  />
+                  <Button
+                    onClick={() => jsonInputRef.current?.click()}
+                    disabled={importAgentHook.isPending}
+                    data-testid="button-pick-import-json"
+                  >
+                    {importAgentHook.isPending ? (
+                      <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Mengimpor…</>
+                    ) : (
+                      <><FileCode className="w-4 h-4 mr-1.5" /> Pilih File config.json</>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        {/* ============ EXPORT TAB ============ */}
+        <TabsContent value="export" className="space-y-4 mt-4">
+          <div className="text-sm text-muted-foreground">
+            Pancarkan chatbot ini ke 5 produk ekosistem kompetensi.
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* eBook */}
+            <Card className="border-orange-500/40 bg-gradient-to-br from-orange-50/40 to-transparent dark:from-orange-950/20">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">eBook Kompetensi</h3>
+                      <Badge className="bg-orange-500 hover:bg-orange-600">Tersedia</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      8 bab terstruktur: Profil, Persona, Kebijakan, Pengetahuan, SOP, Mini Apps, FAQ, Lampiran.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => downloadEbook("html")}
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+                    data-testid="button-download-ebook-html"
+                  >
+                    <BookOpen className="w-4 h-4 mr-1.5" /> Buka & Cetak PDF
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => downloadEbook("md")}
+                    data-testid="button-download-ebook-md"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" /> .md
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  HTML cetak-siap (A4, page-break otomatis). Klik tombol di pojok kanan atas dokumen → Simpan sebagai PDF.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Konfigurasi JSON (utility export) */}
+            <Card>
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <FileCode className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">Konfigurasi (JSON)</h3>
+                      <Badge variant="outline">Utility</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Backup/migrasi seluruh setting chatbot ke chatbot lain via tab "Import → JSON".
+                    </p>
+                  </div>
+                </div>
+                <Button variant="outline" onClick={downloadConfig} className="w-full" data-testid="button-download-config">
+                  <Download className="w-4 h-4 mr-1.5" /> Download config.json
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Coming soon — Mini Apps */}
+            <Card className="opacity-70">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <Calculator className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">Mini App Wizard</h3>
+                      <Badge variant="secondary">Segera</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Field skoring/formula dari chatbot ini → wizard interaktif.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Coming soon — DocGen */}
+            <Card className="opacity-70">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                    <FilePlus2 className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">Generator Dokumen</h3>
+                      <Badge variant="secondary">Segera</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Template DOCX/XLSX terisi otomatis dari konteks chatbot.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Coming soon — eCourse */}
+            <Card className="opacity-70 md:col-span-2">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                    <GraduationCap className="w-5 h-5 text-pink-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">eCourse Modul Belajar</h3>
+                      <Badge variant="secondary">Segera</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      BigIdea → Modul, Toolbox → Sesi, Agent → Aktivitas. Termasuk quiz dari conversation starters.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

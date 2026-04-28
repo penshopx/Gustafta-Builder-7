@@ -40,6 +40,8 @@ import {
 import { processKnowledgeBaseForRAG, searchKnowledgeBase } from "./lib/rag-service";
 import { buildFinalSystemPrompt } from "./lib/build-final-system-prompt";
 import { getDefaultPoliciesForSeries, type AgentPolicySet } from "./lib/agent-policies";
+import { importDocumentToProposal, mergeProposalIntoAgent, type ApplyMode } from "./lib/document-importer";
+import { buildEbookMarkdown, buildEbookHtml } from "./lib/ebook-generator";
 import {
   searchNotionPages,
   searchNotionDatabases,
@@ -3989,6 +3991,206 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       res.status(201).json(agent);
     } catch (error) {
       res.status(500).json({ error: "Failed to import agent" });
+    }
+  });
+
+  // ==================== Smart Document Import (PDF/DOCX/XLSX → Field Proposal) ====================
+
+  app.post(
+    "/api/agents/import-document",
+    isAuthenticated,
+    upload.single("file"),
+    async (req: any, res) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        const allowed = [".pdf", ".docx", ".doc", ".xlsx", ".xls", ".csv", ".txt"];
+        if (!allowed.includes(ext)) {
+          try { fs.unlinkSync(req.file.path); } catch {}
+          return res.status(400).json({
+            error: `Format ${ext} belum didukung. Gunakan PDF, DOCX, XLSX, CSV, atau TXT.`,
+          });
+        }
+
+        // Verifikasi magic bytes / signature minimum untuk PDF/DOCX/XLSX
+        // (DOCX/XLSX = ZIP container, PDF = "%PDF"). Untuk CSV/TXT skip cek.
+        try {
+          const fd = fs.openSync(req.file.path, "r");
+          const head = Buffer.alloc(8);
+          fs.readSync(fd, head, 0, 8, 0);
+          fs.closeSync(fd);
+          let signatureOk = true;
+          if (ext === ".pdf") {
+            signatureOk = head.slice(0, 4).toString("ascii") === "%PDF";
+          } else if (ext === ".docx" || ext === ".xlsx") {
+            // ZIP local file header magic: PK\x03\x04 (DOCX/XLSX = ZIP container)
+            signatureOk = head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04;
+          } else if (ext === ".doc" || ext === ".xls") {
+            // OLE compound file magic
+            signatureOk = head[0] === 0xd0 && head[1] === 0xcf && head[2] === 0x11 && head[3] === 0xe0;
+          }
+          if (!signatureOk) {
+            try { fs.unlinkSync(req.file.path); } catch {}
+            return res.status(400).json({
+              error: `File tidak cocok dengan format ${ext} (signature tidak valid).`,
+            });
+          }
+        } catch (sigErr) {
+          try { fs.unlinkSync(req.file.path); } catch {}
+          return res.status(400).json({ error: "Gagal memverifikasi file." });
+        }
+
+        const proposal = await importDocumentToProposal(req.file.path, req.file.originalname);
+
+        // Hapus file temp setelah selesai supaya tidak menumpuk
+        try { fs.unlinkSync(req.file.path); } catch {}
+
+        return res.json(proposal);
+      } catch (error: any) {
+        console.error("[/api/agents/import-document] error:", error);
+        if (req.file?.path) {
+          try { fs.unlinkSync(req.file.path); } catch {}
+        }
+        return res.status(500).json({
+          error: error?.message || "Gagal memproses dokumen.",
+        });
+      }
+    }
+  );
+
+  // Apply proposal ke agent yang sudah ada (fill_empty_only default)
+  app.post("/api/agents/:id/apply-import", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.params.id as string;
+      const { proposal, knowledgeChunks, mode } = req.body || {};
+      const applyMode: ApplyMode = mode === "overwrite_all" ? "overwrite_all" : "fill_empty_only";
+
+      const existing = await storage.getAgent(agentId);
+      if (!existing) return res.status(404).json({ error: "Agent not found" });
+
+      const auth = assertCanPreviewAgentPrompt(req, existing);
+      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+
+      const patch = mergeProposalIntoAgent(existing, proposal || {}, applyMode);
+      const fieldsApplied = Object.keys(patch);
+
+      let updated = existing;
+      if (fieldsApplied.length > 0) {
+        updated = (await storage.updateAgent(agentId, patch)) || existing;
+      }
+
+      const kbCreated: any[] = [];
+      if (Array.isArray(knowledgeChunks) && knowledgeChunks.length > 0) {
+        for (const kb of knowledgeChunks) {
+          if (!kb?.content || String(kb.content).trim().length < 30) continue;
+          try {
+            const created = await storage.createKnowledgeBase({
+              agentId,
+              name: String(kb.name || "Materi Import"),
+              type: "text",
+              content: String(kb.content),
+              description: kb.description ? String(kb.description) : "",
+              fileName: "",
+              fileSize: 0,
+              fileUrl: "",
+              processingStatus: "completed" as const,
+              extractedText: String(kb.content),
+            });
+            kbCreated.push({ id: created.id, name: created.name });
+          } catch (kbErr: any) {
+            console.error("[/api/agents/:id/apply-import] KB create error:", kbErr?.message);
+          }
+        }
+      }
+
+      return res.json({
+        success: true,
+        agent: updated,
+        fieldsApplied,
+        knowledgeBasesCreated: kbCreated,
+        mode: applyMode,
+      });
+    } catch (error: any) {
+      console.error("[/api/agents/:id/apply-import] error:", error);
+      return res.status(500).json({ error: error?.message || "Gagal menerapkan proposal." });
+    }
+  });
+
+  // ==================== eBook Export ====================
+
+  app.get("/api/agents/:id/export/ebook", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.params.id as string;
+      const format = String(req.query.format || "html").toLowerCase();
+
+      const agent = await storage.getAgent(agentId);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+
+      const auth = assertCanPreviewAgentPrompt(req, agent);
+      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+
+      const knowledgeBases = await storage.getKnowledgeBases(agentId);
+
+      let series: any = undefined;
+      let bigIdea: any = undefined;
+      let toolbox: any = undefined;
+      try {
+        if (agent.toolboxId) {
+          const tb = await storage.getToolbox(String(agent.toolboxId));
+          if (tb) {
+            toolbox = tb;
+            const bi = await storage.getBigIdea(String(tb.bigIdeaId));
+            if (bi) {
+              bigIdea = bi;
+              if (bi.seriesId) {
+                const sr = await storage.getSeriesById(String(bi.seriesId));
+                if (sr) series = sr;
+              }
+            }
+          }
+        }
+      } catch {}
+
+      let miniApps: any[] = [];
+      try {
+        if (typeof (storage as any).getMiniApps === "function") {
+          miniApps = await (storage as any).getMiniApps(agentId);
+        }
+      } catch {}
+
+      let projectBrainTemplates: any[] = [];
+      try {
+        if (typeof (storage as any).getProjectBrainTemplates === "function") {
+          projectBrainTemplates = await (storage as any).getProjectBrainTemplates(agentId);
+        }
+      } catch {}
+
+      const data = { agent, knowledgeBases, miniApps, projectBrainTemplates, series, bigIdea, toolbox };
+
+      if (format === "md" || format === "markdown") {
+        const { markdown, title } = buildEbookMarkdown(data);
+        const safeName = (agent.name || "ebook").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        res.setHeader("Content-Type", "text/markdown; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${safeName}-ebook.md\"`);
+        return res.send(markdown);
+      }
+
+      if (format === "json") {
+        const { markdown, title } = buildEbookMarkdown(data);
+        return res.json({ title, markdown });
+      }
+
+      // default: html (print-ready)
+      const { html } = buildEbookHtml(data);
+      const safeName = (agent.name || "ebook").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Content-Disposition", `inline; filename=\"${safeName}-ebook.html\"`);
+      return res.send(html);
+    } catch (error: any) {
+      console.error("[/api/agents/:id/export/ebook] error:", error);
+      return res.status(500).json({ error: error?.message || "Gagal membuat eBook." });
     }
   });
 

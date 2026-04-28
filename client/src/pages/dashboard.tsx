@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +37,7 @@ import { TenderPanel } from "@/components/panels/tender-panel";
 import { ConversionPanel } from "@/components/panels/conversion-panel";
 import { LandingPagePanel } from "@/components/panels/landing-page-panel";
 import { MarketingPanel } from "@/components/panels/marketing-panel";
+import { StudioPanel } from "@/components/panels/studio-panel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -72,7 +73,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "policy" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "deliverables" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing";
+type NavItem = "persona" | "policy" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "deliverables" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing" | "studio";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
@@ -82,6 +83,7 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "project-brain", label: "Otak Proyek", shortLabel: "Brain", icon: Brain },
   { id: "mini-apps", label: "Mini Apps", shortLabel: "Apps", icon: Blocks },
   { id: "deliverables", label: "Deliverables", shortLabel: "Output", icon: PackageCheck },
+  { id: "studio", label: "Studio Kompetensi", shortLabel: "Studio", icon: Wand2 },
   { id: "integrations", label: "Integrations", shortLabel: "Integ", icon: Plug },
   { id: "widget", label: "Widget", shortLabel: "Widget", icon: Palette },
   { id: "broadcast", label: "Broadcast WA", shortLabel: "Broadcast", icon: Radio },
@@ -689,6 +691,8 @@ export default function Dashboard() {
         return <LandingPagePanel agent={currentAgent!} />;
       case "marketing":
         return <MarketingPanel agent={currentAgent!} />;
+      case "studio":
+        return <StudioPanel agent={currentAgent!} />;
       case "product-settings":
         return <ProductSettingsPanel agent={currentAgent!} />;
       case "revenue":
