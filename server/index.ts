@@ -205,7 +205,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Asesor Sertifikasi", module: "./seed-asesor", fn: "seedAsesorSertifikasi" },
           { name: "SMAP & PANCEK", module: "./seed-smap-pancek", fn: "seedSmapPancek" },
           { name: "Odoo Jasa Konstruksi", module: "./seed-odoo", fn: "seedOdooKonstruksi" },
-          { name: "CSMAS", module: "./seed-csmas", fn: "seedCsmas" },
+          { name: "CSMS OPTIA v2.0", module: "./seed-csms-optia", fn: "seedCsmsOptia" },
           { name: "CIVILPRO", module: "./seed-civilpro", fn: "seedCivilpro" },
           { name: "SIP-PJBU", module: "./seed-sip-pjbu", fn: "seedSipPjbu" },
           { name: "Manajemen LSBU", module: "./seed-manajemen-lsbu", fn: "seedManajemenLsbu" },
@@ -398,6 +398,14 @@ for (const envVar of requiredEnvVars) {
         await seedOdooMigrasi("49465846");
       } catch (err) {
         log("Catch-up Odoo Migrasi seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: CSMS OPTIA v2.0 — 1 Orkestrator + 13 Spesialis (added Apr 2026)
+      try {
+        const { seedCsmsOptia } = await import("./seed-csms-optia");
+        await seedCsmsOptia("49465846");
+      } catch (err) {
+        log("Catch-up CSMS OPTIA seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
