@@ -42,6 +42,7 @@ import { buildFinalSystemPrompt } from "./lib/build-final-system-prompt";
 import { getDefaultPoliciesForSeries, type AgentPolicySet } from "./lib/agent-policies";
 import { importDocumentToProposal, mergeProposalIntoAgent, type ApplyMode } from "./lib/document-importer";
 import { buildEbookMarkdown, buildEbookHtml } from "./lib/ebook-generator";
+import { buildChaesaExport } from "./lib/chaesa-exporter";
 import {
   searchNotionPages,
   searchNotionDatabases,
@@ -4191,6 +4192,77 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     } catch (error: any) {
       console.error("[/api/agents/:id/export/ebook] error:", error);
       return res.status(500).json({ error: error?.message || "Gagal membuat eBook." });
+    }
+  });
+
+  // ==================== Chaesa AI Studio Export ====================
+  // Memetakan chatbot Gustafta menjadi struktur projectData + botBuilder
+  // yang kompatibel dengan https://smart-ebook-builder-7-1.replit.app/
+  app.get("/api/agents/:id/export/chaesa", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.params.id as string;
+      const download = String(req.query.download || "") === "1";
+
+      const agent = await storage.getAgent(agentId);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+
+      const auth = assertCanPreviewAgentPrompt(req, agent);
+      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+
+      const knowledgeBases = await storage.getKnowledgeBases(agentId);
+      let toolbox: any = undefined;
+      let bigIdea: any = undefined;
+      let series: any = undefined;
+      try {
+        if (agent.toolboxId) {
+          const tb = await storage.getToolbox(String(agent.toolboxId));
+          if (tb) {
+            toolbox = tb;
+            const bi = await storage.getBigIdea(String(tb.bigIdeaId));
+            if (bi) {
+              bigIdea = bi;
+              if (bi.seriesId) {
+                const sr = await storage.getSeriesById(String(bi.seriesId));
+                if (sr) series = sr;
+              }
+            }
+          }
+        }
+      } catch {}
+
+      let miniApps: any[] = [];
+      try {
+        if (typeof (storage as any).getMiniApps === "function") {
+          miniApps = await (storage as any).getMiniApps(agentId);
+        }
+      } catch {}
+      let projectBrainTemplates: any[] = [];
+      try {
+        if (typeof (storage as any).getProjectBrainTemplates === "function") {
+          projectBrainTemplates = await (storage as any).getProjectBrainTemplates(agentId);
+        }
+      } catch {}
+
+      const bundle = buildChaesaExport({
+        agent,
+        knowledgeBases,
+        miniApps,
+        projectBrainTemplates,
+        toolbox,
+        bigIdea,
+        series,
+      });
+
+      if (download) {
+        const safeName = (agent.name || "chaesa").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename=\"${safeName}-chaesa-bundle.json\"`);
+        return res.send(JSON.stringify(bundle, null, 2));
+      }
+      return res.json(bundle);
+    } catch (error: any) {
+      console.error("[/api/agents/:id/export/chaesa] error:", error);
+      return res.status(500).json({ error: error?.message || "Gagal membuat bundle Chaesa." });
     }
   });
 

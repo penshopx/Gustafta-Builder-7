@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Wand2, Upload, FileText, BookOpen, Download, Loader2, Check, X,
   AlertCircle, Sparkles, FileCode, FilePlus2, Layers, Calculator, GraduationCap,
-  Info, RefreshCw, FileUp,
+  Info, RefreshCw, FileUp, Copy, ExternalLink, BookMarked,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useImportAgent } from "@/hooks/use-export-import";
@@ -182,6 +185,64 @@ export function StudioPanel({ agent }: { agent: any }) {
 
   const updateField = (key: string, value: any) => {
     setEditedFields((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // ============ CHAESA AI STUDIO EXPORT ============
+  const [chaesaOpen, setChaesaOpen] = useState(false);
+  const [chaesaBundle, setChaesaBundle] = useState<any | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string>("");
+
+  const fetchChaesaMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/agents/${agent.id}/export/chaesa`, { credentials: "include" });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error || "Gagal mengambil bundle Chaesa");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setChaesaBundle(data);
+      setChaesaOpen(true);
+    },
+    onError: (err: any) => {
+      toast({ title: "Gagal", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const downloadChaesaJson = () => {
+    const url = `/api/agents/${agent.id}/export/chaesa?download=1`;
+    const a = document.createElement("a");
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast({
+      title: "Bundle Chaesa diunduh",
+      description: "File JSON siap diimpor ke aplikasi Chaesa AI Studio.",
+    });
+  };
+
+  const copyToClipboard = async (text: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(text || "");
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(""), 1500);
+    } catch {
+      toast({ title: "Gagal menyalin", variant: "destructive" });
+    }
+  };
+
+  const copyAllChaesa = async () => {
+    if (!chaesaBundle) return;
+    const lines: string[] = [];
+    for (const f of chaesaBundle.quickFill) {
+      lines.push(`### ${f.label} (${f.field})`);
+      lines.push(f.value || "(kosong)");
+      lines.push("");
+    }
+    await copyToClipboard(lines.join("\n"), "all");
+    toast({ title: "Seluruh field disalin", description: "Buka Chaesa AI Studio → tempel ke form." });
   };
 
   // ============ EBOOK EXPORT ============
@@ -568,6 +629,60 @@ export function StudioPanel({ agent }: { agent: any }) {
               </CardContent>
             </Card>
 
+            {/* Chaesa AI Studio Bridge */}
+            <Card className="border-violet-500/40 bg-gradient-to-br from-violet-50/40 to-transparent dark:from-violet-950/20">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <BookMarked className="w-5 h-5 text-violet-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-foreground">Chaesa AI Studio</h3>
+                      <Badge className="bg-violet-500 hover:bg-violet-600">Bridge</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Petakan field chatbot ini ke struktur <span className="font-medium text-violet-700 dark:text-violet-400">projectData + GPT Builder</span> di Chaesa AI Studio (smart-ebook-builder).
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => fetchChaesaMutation.mutate()}
+                    disabled={fetchChaesaMutation.isPending}
+                    className="flex-1 bg-violet-600 hover:bg-violet-700 text-white"
+                    data-testid="button-preview-chaesa"
+                  >
+                    {fetchChaesaMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4 mr-1.5" />
+                    )}
+                    Preview Field
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={downloadChaesaJson}
+                    data-testid="button-download-chaesa-json"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" /> .json
+                  </Button>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <ExternalLink className="w-3 h-3" />
+                  <a
+                    href="https://smart-ebook-builder-7-1.replit.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-violet-700 dark:text-violet-400 hover:underline"
+                    data-testid="link-chaesa-studio"
+                  >
+                    Buka Chaesa AI Studio →
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Konfigurasi JSON (utility export) */}
             <Card>
               <CardContent className="p-5 space-y-3">
@@ -653,6 +768,118 @@ export function StudioPanel({ agent }: { agent: any }) {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* ============ CHAESA AI STUDIO PREVIEW DIALOG ============ */}
+      <Dialog open={chaesaOpen} onOpenChange={setChaesaOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookMarked className="w-5 h-5 text-violet-600" />
+              Chaesa AI Studio — Field Map
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Salin per-field ke form di{" "}
+              <a
+                href="https://smart-ebook-builder-7-1.replit.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-600 hover:underline"
+              >
+                smart-ebook-builder-7-1.replit.app
+              </a>
+              {" "}atau download bundle JSON untuk arsip/migrasi.
+            </DialogDescription>
+          </DialogHeader>
+
+          {chaesaBundle ? (
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+              {/* Group by section */}
+              {Array.from(new Set(chaesaBundle.quickFill.map((f: any) => f.section))).map((sectionRaw) => {
+                const section = String(sectionRaw);
+                const items = chaesaBundle.quickFill.filter((f: any) => f.section === section);
+                return (
+                  <div key={section} className="space-y-2">
+                    <h4 className="text-sm font-semibold text-foreground sticky top-0 bg-background py-1 border-b">
+                      {section}
+                    </h4>
+                    <div className="space-y-2">
+                      {items.map((f: any) => (
+                        <div
+                          key={f.field}
+                          className="border border-border rounded-md p-3 bg-muted/30"
+                          data-testid={`chaesa-field-${f.field}`}
+                        >
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-medium text-foreground">{f.label}</div>
+                              <div className="text-[10px] font-mono text-muted-foreground">{f.field}</div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 px-2 shrink-0"
+                              onClick={() => copyToClipboard(f.value, f.field)}
+                              data-testid={`button-copy-${f.field}`}
+                            >
+                              {copiedKey === f.field ? (
+                                <Check className="w-3 h-3 text-green-600" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </Button>
+                          </div>
+                          <div className="text-xs text-foreground whitespace-pre-wrap break-words font-mono bg-background/60 rounded px-2 py-1.5 border border-border max-h-32 overflow-y-auto">
+                            {f.value || <span className="text-muted-foreground italic">(kosong — isi manual di Chaesa)</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {chaesaBundle.knowledgeRefs?.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground sticky top-0 bg-background py-1 border-b">
+                    📂 Referensi Knowledge ({chaesaBundle.knowledgeRefs.length})
+                  </h4>
+                  <p className="text-[11px] text-muted-foreground">
+                    Materi-materi ini sudah ter-rangkum di field <code className="text-violet-600">hasilRiset</code>. Jika butuh, upload manual ke Chaesa.
+                  </p>
+                  <ul className="text-xs space-y-1">
+                    {chaesaBundle.knowledgeRefs.slice(0, 10).map((kb: any, i: number) => (
+                      <li key={i} className="text-foreground">• {kb.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          <DialogFooter className="border-t pt-3 flex-row gap-2 sm:justify-between">
+            <Button variant="outline" onClick={copyAllChaesa} data-testid="button-copy-all-chaesa">
+              {copiedKey === "all" ? <Check className="w-4 h-4 mr-1.5 text-green-600" /> : <Copy className="w-4 h-4 mr-1.5" />}
+              Salin Semua
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={downloadChaesaJson} data-testid="button-dialog-download-chaesa">
+                <Download className="w-4 h-4 mr-1.5" /> Download JSON
+              </Button>
+              <Button
+                onClick={() => window.open("https://smart-ebook-builder-7-1.replit.app/", "_blank")}
+                className="bg-violet-600 hover:bg-violet-700 text-white"
+                data-testid="button-open-chaesa"
+              >
+                <ExternalLink className="w-4 h-4 mr-1.5" /> Buka Chaesa
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
