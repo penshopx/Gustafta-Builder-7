@@ -227,6 +227,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Chatbot SMAP — Sistem Manajemen Anti Penyuapan (SNI ISO 37001:2016)", module: "./seed-smap-iso37001", fn: "seedSmapIso37001" },
           { name: "Chatbot SMAP Nasional & Generator PanCEK KPK (Ver.2 — JAGA.id)", module: "./seed-pancek-kpk", fn: "seedPancekKpk" },
           { name: "Odoo ERP BUJK — Implementasi & Operasional Konstruksi Indonesia", module: "./seed-odoo-bujk", fn: "seedOdooBujk" },
+          { name: "Odoo Migrasi Data Legacy → BUJK — Cutover & Go-Live Konstruksi", module: "./seed-odoo-migrasi", fn: "seedOdooMigrasi" },
           { name: "Kompetensi Manajerial BUJK — ASPEKINDO", module: "./seed-kompetensi-manajerial-bujk", fn: "seedKompetensiManajerialBujk" },
           { name: "IMS & SMK3 Terintegrasi", module: "./seed-ims-smk3-terintegrasi", fn: "seedImsSmk3Terintegrasi" },
           { name: "Personel Manajerial BUJK", module: "./seed-personel-manajerial-bujk", fn: "seedPersonelManajerialBujk" },
@@ -389,6 +390,14 @@ for (const envVar of requiredEnvVars) {
         await seedOdooBujk("49465846");
       } catch (err) {
         log("Catch-up Odoo BUJK seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: Odoo Migrasi Data Legacy → BUJK (added Apr 2026)
+      try {
+        const { seedOdooMigrasi } = await import("./seed-odoo-migrasi");
+        await seedOdooMigrasi("49465846");
+      } catch (err) {
+        log("Catch-up Odoo Migrasi seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)

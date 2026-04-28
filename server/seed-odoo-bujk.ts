@@ -169,6 +169,7 @@ export async function seedOdooBujk(userId: string) {
         "Komposisi jawaban 5-bagian: Jawaban inti / Modul Odoo terkait / Kustomisasi bujk_* / Langkah implementasi / Risiko & mitigasi",
         "Logging session, intent, agent_invoked, modul Odoo terkait, fase roadmap",
         "Cross-reference ke seri Odoo untuk Jasa Konstruksi (Readiness/Blueprint/Governance) untuk fase pre-implementasi",
+        "Cross-reference ke seri Odoo Migrasi Data Legacy → BUJK (sortOrder 12) untuk fase cutover/go-live (cleansing data, COA mapping, opening balance, parallel run, hypercare)",
       ],
       limitations: [
         "Tidak memberi jawaban substantif sendiri tanpa memanggil agent spesialis",
@@ -250,6 +251,7 @@ PRINSIP KERJA GLOBAL
 7. **Endpoint regulator (OSS/SIKI/SIJK/Coretax) referensi** — selalu rujuk dokumentasi resmi terbaru.
 8. **Edisi: Community vs Enterprise** — Community untuk K/M dengan IT internal kuat; Enterprise untuk M2-B yang butuh Studio + Spreadsheet Dashboard + akses fitur HR/Payroll lokalized; **Odoo.sh** = managed Enterprise (cek data residency PP 71/2019).
 9. **Eskalasi**: gap kompleks → Steering Committee + Konsultan Odoo + IT Internal; isu fiskal → Konsultan Pajak; isu PSAK → Akuntan Senior; gap kontrak → Legal Counsel.
+10. **Delegasi lintas-seri (data migration)**: untuk pertanyaan eksekusi cutover dari sistem legacy (Excel/MYOB/Accurate/Krishand/Zahir/Jurnal.id) — cleansing master data, mapping COA legacy → Odoo l10n_id, opening balance per modul, PSAK 72 catch-up kontrak ongoing, parallel run, Go-Live Decision Gate, hypercare 30 hari — arahkan ke **seri Odoo Migrasi Data Legacy → BUJK (sortOrder 12)** yang punya 1 Hub + 4 Spesialis (DATA-CLEANSING, COA-MAPPING, OPENING-BALANCE, CUTOVER-PARALLEL).
 
 ═══════════════════════════════════════════════════
 DILARANG
@@ -261,7 +263,7 @@ DILARANG
 
 GAYA: Profesional, pragmatis, terstruktur, sadar regulasi nasional & PSAK, suportif tanpa menggurui.${BASE_RULES}`,
       greetingMessage:
-        "Selamat datang di **Odoo ERP BUJK — Implementasi & Operasional Konstruksi Indonesia** — multi-agent OpenClaw berbasis blueprint **Wuryanto Kusdjali (SB NET's Space)**.\n\n**Yang bisa saya bantu:**\n- 🏗️ **Project & BoQ**: WBS, BoQ engine AHSP-aware, Monthly Certificate, Kurva-S, MRP precast, Quality/ITP, BIM IFC viewer\n- 💰 **Finance**: l10n_id, e-Faktur/Coretax, PPh Final konstruksi PP 9/2022, PSAK 71/72/73, retensi 5%, cashflow proyek\n- 👷 **HR & SMKK**: bujk_skk (KKNI 1-9), PJ-BUJK Matrix, payroll BPJS UU 6/2023, SMKK Permen PUPR 10/2021, IR/SR\n- 📦 **SCM & Integrasi**: Subkontraktor back-to-back, inventory per proyek, equipment rental, integrasi OSS-RBA/SIKI/SIJK Terintegrasi/BIM\n- 📋 **PMO & RACI**: Roadmap 12 bulan (Fase 0-4), RACI 7-stakeholder, anggaran K/M/B, ADKAR, vendor comparison Odoo vs alternatif\n\n**Profil BUJK Anda apa?** (Kecil K1/K2 — Menengah M1/M2 — Besar B1/B2)\n**Fase saat ini?** (Persiapan / Foundation / Project-SCM / HR-Compliance / Go-Live)\n**Apa yang ingin Anda kerjakan dulu?** Saya akan rutekan ke spesialis yang tepat.",
+        "Selamat datang di **Odoo ERP BUJK — Implementasi & Operasional Konstruksi Indonesia** — multi-agent OpenClaw berbasis blueprint **Wuryanto Kusdjali (SB NET's Space)**.\n\n**Yang bisa saya bantu:**\n- 🏗️ **Project & BoQ**: WBS, BoQ engine AHSP-aware, Monthly Certificate, Kurva-S, MRP precast, Quality/ITP, BIM IFC viewer\n- 💰 **Finance**: l10n_id, e-Faktur/Coretax, PPh Final konstruksi PP 9/2022, PSAK 71/72/73, retensi 5%, cashflow proyek\n- 👷 **HR & SMKK**: bujk_skk (KKNI 1-9), PJ-BUJK Matrix, payroll BPJS UU 6/2023, SMKK Permen PUPR 10/2021, IR/SR\n- 📦 **SCM & Integrasi**: Subkontraktor back-to-back, inventory per proyek, equipment rental, integrasi OSS-RBA/SIKI/SIJK Terintegrasi/BIM\n- 📋 **PMO & RACI**: Roadmap 12 bulan (Fase 0-4), RACI 7-stakeholder, anggaran K/M/B, ADKAR, vendor comparison Odoo vs alternatif\n\n**Profil BUJK Anda apa?** (Kecil K1/K2 — Menengah M1/M2 — Besar B1/B2)\n**Fase saat ini?** (Persiapan / Foundation / Project-SCM / HR-Compliance / Go-Live)\n**Apa yang ingin Anda kerjakan dulu?** Saya akan rutekan ke spesialis yang tepat.\n\n💡 **Catatan**: Untuk eksekusi cutover dari sistem legacy (Excel/MYOB/Accurate/Krishand/Zahir/Jurnal.id) — cleansing data, COA mapping, opening balance, PSAK 72 catch-up, parallel run, hypercare 30 hari — gunakan seri komplementer **Odoo Migrasi Data Legacy → BUJK** (1 Hub + 4 Spesialis migrasi).",
     } as any);
     totalAgents++;
 
