@@ -808,6 +808,463 @@ function StorytellingTab({ agent }: { agent: any }) {
   );
 }
 
+// ─── WA Template Builder ──────────────────────────────────────────────
+const WA_VARIABLES = ["{{nama}}", "{{produk}}", "{{link}}", "{{harga}}", "{{tanggal}}", "{{fitur}}"];
+
+const WA_PRESETS: Record<string, { label: string; template: string }> = {
+  promo: {
+    label: "Promo / Penawaran",
+    template: `Halo {{nama}} 👋
+
+Kabar baik! {{produk}} kini hadir untuk membantu Anda bekerja lebih cepat dan efisien di industri konstruksi.
+
+✅ Hemat waktu hingga 50%
+✅ Tersedia 24/7 tanpa biaya tambahan
+✅ Mudah digunakan — cukup chat
+
+🔗 Coba sekarang: {{link}}
+
+Ada pertanyaan? Balas pesan ini. Kami siap membantu! 🙌`,
+  },
+  followup: {
+    label: "Follow-up Prospek",
+    template: `Halo {{nama}},
+
+Saya ingin menindaklanjuti percakapan kita sebelumnya tentang {{produk}}.
+
+Saya paham Anda mungkin sedang sibuk — namun saya ingin memastikan Anda tidak melewatkan manfaat yang bisa langsung dirasakan oleh tim Anda.
+
+Boleh saya jadwalkan 15 menit untuk demo singkat?
+
+📅 Silakan pilih waktu yang sesuai atau langsung kunjungi: {{link}}
+
+Terima kasih atas waktunya 🙏`,
+  },
+  broadcast: {
+    label: "Broadcast Massal",
+    template: `Halo {{nama}} 👋
+
+*[PENGUMUMAN]* {{produk}} kini resmi tersedia!
+
+Khusus minggu ini, dapatkan akses eksklusif dengan harga spesial {{harga}}.
+
+🚀 Apa yang Anda dapatkan:
+• Asisten AI 24 jam
+• Integrasi mudah
+• Support langsung
+
+⏰ Penawaran berakhir {{tanggal}}.
+
+Daftar sekarang 👉 {{link}}`,
+  },
+  reminder: {
+    label: "Pengingat / Reminder",
+    template: `Halo {{nama}},
+
+Ini adalah pengingat bahwa akses trial {{produk}} Anda akan berakhir pada {{tanggal}}.
+
+Jangan sampai Anda kehilangan semua kemudahan yang sudah Anda rasakan!
+
+Perpanjang sekarang di: {{link}}
+
+Butuh bantuan? Balas pesan ini 💬`,
+  },
+  event: {
+    label: "Undangan Event / Webinar",
+    template: `Halo {{nama}} 👋
+
+Anda diundang ke *webinar eksklusif* kami!
+
+📌 Topik: Cara Menggunakan {{produk}} untuk Efisiensi Kerja Konstruksi
+📅 Tanggal: {{tanggal}}
+🎯 Gratis & terbatas untuk {{nama}} dan rekan
+
+Daftar sekarang sebelum penuh:
+👉 {{link}}
+
+Sampai jumpa! 🙌`,
+  },
+};
+
+function WaEmailTab({ agent }: { agent: any }) {
+  const { toast } = useToast();
+
+  // ── WA Builder state ──
+  const [waTab, setWaTab] = useState<"builder" | "sequence">("builder");
+  const [waPreset, setWaPreset] = useState("promo");
+  const [waText, setWaText] = useState(WA_PRESETS.promo.template);
+  const [waCopied, setWaCopied] = useState(false);
+  const waTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Preview: replace variables with agent data
+  const chatUrl = `${window.location.origin}/bot/${agent.id}`;
+  const waPreview = waText
+    .replace(/\{\{nama\}\}/g, "Pak Budi")
+    .replace(/\{\{produk\}\}/g, agent.name || "AI Chatbot")
+    .replace(/\{\{link\}\}/g, chatUrl)
+    .replace(/\{\{harga\}\}/g, (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bln` : "harga terjangkau")
+    .replace(/\{\{tanggal\}\}/g, "Jumat, 2 Mei 2025")
+    .replace(/\{\{fitur\}\}/g, ((agent as any).productFeatures as string[] || []).slice(0, 2).join(", ") || "AI 24 jam");
+
+  const insertVariable = (v: string) => {
+    const el = waTextareaRef.current;
+    if (!el) { setWaText(t => t + v); return; }
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const newText = waText.substring(0, start) + v + waText.substring(end);
+    setWaText(newText);
+    setTimeout(() => { el.selectionStart = el.selectionEnd = start + v.length; el.focus(); }, 0);
+  };
+
+  const copyWa = () => {
+    navigator.clipboard.writeText(waPreview);
+    setWaCopied(true);
+    setTimeout(() => setWaCopied(false), 2000);
+    toast({ title: "Pesan WA disalin!", description: "Siap paste ke WhatsApp atau Blast Tool" });
+  };
+
+  const downloadWa = () => {
+    const blob = new Blob([waPreview], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `wa-template-${waPreset}-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // ── Email Sequence state ──
+  interface EmailStep { day: string; subject: string; preview: string; body: string; }
+  const defaultSteps: EmailStep[] = [
+    { day: "Hari 1", subject: `Selamat datang di ${agent.name || "Platform Kami"}!`, preview: "Mulai perjalanan Anda hari ini...", body: "" },
+    { day: "Hari 3", subject: `Sudahkah Anda mencoba fitur utama ${agent.name}?`, preview: "Kami ingin memastikan Anda mendapatkan manfaat maksimal...", body: "" },
+    { day: "Hari 7", subject: "Tips Eksklusif untuk Hasil Terbaik", preview: "Rahasia pengguna terbaik kami...", body: "" },
+    { day: "Hari 14", subject: "Studi Kasus: Berhasil Hemat 40% Waktu", preview: "Bagaimana kontraktor di Jakarta mengubah cara kerja mereka...", body: "" },
+    { day: "Hari 30", subject: "Penawaran Spesial — Hanya untuk Anda", preview: "Kami menghargai kesetiaan Anda selama ini...", body: "" },
+  ];
+  const [emailSteps, setEmailSteps] = useState<EmailStep[]>(defaultSteps);
+  const [activeStep, setActiveStep] = useState(0);
+  const [seqGenerating, setSeqGenerating] = useState(false);
+  const [seqType, setSeqType] = useState("nurture");
+
+  const seqTypes = [
+    { id: "nurture", label: "Lead Nurturing" },
+    { id: "onboarding", label: "Onboarding Pengguna Baru" },
+    { id: "reengagement", label: "Re-engagement" },
+    { id: "promo", label: "Promosi / Launch" },
+  ];
+
+  const generateSequenceMutation = useMutation({
+    mutationFn: () =>
+      apiRequest("POST", `/api/agents/${agent.id}/marketing/generate`, {
+        tool: "email-sequence",
+        tone: seqType,
+      }).then(r => r.json()),
+    onSuccess: (data: any) => {
+      const raw: string = data.content || "";
+      // Parse the raw output into steps
+      const updated = emailSteps.map((step, i) => {
+        const markers = ["Email 1", "Email 2", "Email 3"];
+        const idx = raw.indexOf(markers[i] || `Email ${i + 1}`);
+        if (idx === -1) return step;
+        const nextIdx = raw.indexOf(`Email ${i + 2}`, idx + 1);
+        const chunk = nextIdx === -1 ? raw.substring(idx) : raw.substring(idx, nextIdx);
+        const subjectMatch = chunk.match(/Subject Line:\s*(.+)/);
+        const bodyStart = chunk.indexOf("Body");
+        const bodyEnd = chunk.indexOf("CTA:", bodyStart);
+        const body = bodyStart !== -1 ? chunk.substring(bodyStart + 5, bodyEnd !== -1 ? bodyEnd : undefined).trim() : "";
+        return {
+          ...step,
+          subject: subjectMatch ? subjectMatch[1].trim() : step.subject,
+          body: body || chunk.substring(0, 400),
+        };
+      });
+      setEmailSteps(updated.length ? updated : emailSteps);
+      toast({ title: "Sequence email dibuat!", description: "Edit setiap email sesuai kebutuhan" });
+    },
+    onError: () => toast({ title: "Gagal generate sequence", variant: "destructive" }),
+  });
+
+  const updateStep = (i: number, field: keyof EmailStep, val: string) => {
+    setEmailSteps(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: val } : s));
+  };
+
+  const copyAllEmails = () => {
+    const all = emailSteps.map(s =>
+      `═══ ${s.day} ═══\nSubject: ${s.subject}\nPreview: ${s.preview}\n\n${s.body}`
+    ).join("\n\n");
+    navigator.clipboard.writeText(all);
+    toast({ title: "Semua email disalin!", description: `${emailSteps.length} email sequence tersalin` });
+  };
+
+  const copyOneEmail = (i: number) => {
+    const s = emailSteps[i];
+    navigator.clipboard.writeText(`Subject: ${s.subject}\nPreview: ${s.preview}\n\n${s.body}`);
+    toast({ title: `${s.day} disalin!` });
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Sub-tab picker */}
+      <div className="flex gap-2">
+        <Button
+          size="sm" variant={waTab === "builder" ? "default" : "outline"}
+          className="flex-1 h-8 text-xs gap-1.5"
+          onClick={() => setWaTab("builder")}
+          data-testid="button-subtab-wa"
+        >
+          <MessageSquare className="w-3.5 h-3.5" /> WA Template Builder
+        </Button>
+        <Button
+          size="sm" variant={waTab === "sequence" ? "default" : "outline"}
+          className="flex-1 h-8 text-xs gap-1.5"
+          onClick={() => setWaTab("sequence")}
+          data-testid="button-subtab-email"
+        >
+          <Mail className="w-3.5 h-3.5" /> Email Sequence Builder
+        </Button>
+      </div>
+
+      {/* ── WA BUILDER ── */}
+      {waTab === "builder" && (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Buat template pesan WhatsApp dengan variabel dinamis. Preview langsung menampilkan versi final siap kirim.
+          </p>
+
+          {/* Preset selector */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Template Dasar</Label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              {Object.entries(WA_PRESETS).map(([key, preset]) => (
+                <button
+                  key={key}
+                  onClick={() => { setWaPreset(key); setWaText(preset.template); }}
+                  data-testid={`button-wa-preset-${key}`}
+                  className={`text-xs py-1.5 px-2 rounded-lg border transition-all text-left font-medium
+                    ${waPreset === key ? "bg-green-50 dark:bg-green-950/30 border-green-400 text-green-700 dark:text-green-300" : "border-border hover:bg-muted/60"}`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Variable chips */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Sisipkan Variabel (klik untuk insert di kursor)</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {WA_VARIABLES.map(v => (
+                <button
+                  key={v}
+                  onClick={() => insertVariable(v)}
+                  data-testid={`button-wa-var-${v}`}
+                  className="text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 hover:bg-green-200 font-mono transition-colors"
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Editor */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">Template Pesan</Label>
+              <span className="text-xs text-muted-foreground">{waText.length} karakter</span>
+            </div>
+            <Textarea
+              ref={waTextareaRef}
+              value={waText}
+              onChange={e => setWaText(e.target.value)}
+              className="min-h-[180px] text-xs font-mono leading-relaxed resize-y"
+              placeholder="Tulis template pesan WhatsApp di sini..."
+              data-testid="textarea-wa-template"
+            />
+          </div>
+
+          {/* Live Preview */}
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Preview (variabel sudah diisi)</Label>
+            <div className="rounded-xl overflow-hidden border" style={{ background: "#111b21" }}>
+              <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: "#202c33" }}>
+                <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-xs font-bold text-green-400">W</div>
+                <span className="text-xs text-green-400 font-semibold">WhatsApp Preview</span>
+              </div>
+              <div className="p-3">
+                <div
+                  className="rounded-lg p-3 max-w-xs text-xs leading-relaxed whitespace-pre-wrap"
+                  style={{ background: "#005c4b", color: "#e9edef", fontSize: "12px", lineHeight: "1.55" }}
+                  data-testid="text-wa-preview"
+                >
+                  {waPreview}
+                </div>
+                <div className="text-right mt-1" style={{ fontSize: "10px", color: "#8696a0" }}>
+                  {new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} ✓✓
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button size="sm" className="flex-1 h-8 text-xs gap-1.5 bg-green-600 hover:bg-green-700" onClick={copyWa} data-testid="button-copy-wa">
+              {waCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {waCopied ? "Tersalin!" : "Salin Pesan Final"}
+            </Button>
+            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={downloadWa} data-testid="button-download-wa">
+              <Download className="w-3 h-3" /> .txt
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── EMAIL SEQUENCE BUILDER ── */}
+      {waTab === "sequence" && (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Buat email drip sequence multi-langkah. Generate otomatis dengan AI atau tulis manual setiap email.
+          </p>
+
+          {/* Sequence type + Generate */}
+          <div className="flex gap-2">
+            <Select value={seqType} onValueChange={setSeqType}>
+              <SelectTrigger className="h-8 text-xs flex-1" data-testid="select-seq-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {seqTypes.map(t => (
+                  <SelectItem key={t.id} value={t.id} className="text-xs">{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm" className="h-8 text-xs gap-1.5 flex-shrink-0"
+              onClick={() => generateSequenceMutation.mutate()}
+              disabled={generateSequenceMutation.isPending}
+              data-testid="button-generate-sequence"
+            >
+              {generateSequenceMutation.isPending
+                ? <><Loader2 className="w-3 h-3 animate-spin" /> Generating…</>
+                : <><Sparkles className="w-3 h-3" /> Generate AI</>}
+            </Button>
+          </div>
+
+          {/* Step selectors */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {emailSteps.map((step, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveStep(i)}
+                data-testid={`button-email-step-${i}`}
+                className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-lg border font-medium transition-all
+                  ${activeStep === i
+                    ? "bg-primary text-primary-foreground border-transparent"
+                    : step.body ? "bg-muted border-primary/30 text-foreground" : "border-border text-muted-foreground hover:bg-muted/60"}`}
+              >
+                {step.day}
+                {step.body && activeStep !== i && <span className="ml-1 text-green-500">●</span>}
+              </button>
+            ))}
+          </div>
+
+          {/* Active step editor */}
+          <Card>
+            <CardContent className="pt-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs font-bold">{emailSteps[activeStep].day}</Badge>
+                <button
+                  onClick={() => copyOneEmail(activeStep)}
+                  className="ml-auto text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  data-testid={`button-copy-email-${activeStep}`}
+                >
+                  <Copy className="w-3 h-3" /> Salin email ini
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs">Subject Line</Label>
+                <Input
+                  value={emailSteps[activeStep].subject}
+                  onChange={e => updateStep(activeStep, "subject", e.target.value)}
+                  className="h-8 text-xs"
+                  placeholder="Subject email..."
+                  data-testid={`input-email-subject-${activeStep}`}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs">Preview Text (di bawah subject)</Label>
+                <Input
+                  value={emailSteps[activeStep].preview}
+                  onChange={e => updateStep(activeStep, "preview", e.target.value)}
+                  className="h-8 text-xs"
+                  placeholder="Teks preview singkat..."
+                  data-testid={`input-email-preview-${activeStep}`}
+                />
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs">Body Email</Label>
+                <Textarea
+                  value={emailSteps[activeStep].body}
+                  onChange={e => updateStep(activeStep, "body", e.target.value)}
+                  className="min-h-[200px] text-xs leading-relaxed resize-y"
+                  placeholder={generateSequenceMutation.isPending
+                    ? "AI sedang menulis..."
+                    : "Tulis body email di sini, atau klik Generate AI untuk mengisi otomatis..."}
+                  data-testid={`textarea-email-body-${activeStep}`}
+                />
+              </div>
+
+              {/* Navigation */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline" size="sm" className="h-7 text-xs gap-1"
+                  onClick={() => setActiveStep(Math.max(0, activeStep - 1))}
+                  disabled={activeStep === 0}
+                >
+                  ← Email sebelumnya
+                </Button>
+                <Button
+                  variant="outline" size="sm" className="h-7 text-xs gap-1 ml-auto"
+                  onClick={() => setActiveStep(Math.min(emailSteps.length - 1, activeStep + 1))}
+                  disabled={activeStep === emailSteps.length - 1}
+                >
+                  Email berikutnya →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Export all */}
+          <div className="flex gap-2">
+            <Button size="sm" className="flex-1 h-8 text-xs gap-1.5" onClick={copyAllEmails} data-testid="button-copy-all-emails">
+              <Copy className="w-3 h-3" /> Salin Semua Email ({emailSteps.length} step)
+            </Button>
+            <Button
+              size="sm" variant="outline" className="h-8 text-xs gap-1.5"
+              onClick={() => {
+                const all = emailSteps.map(s => `═══ ${s.day} ═══\nSubject: ${s.subject}\nPreview: ${s.preview}\n\n${s.body}`).join("\n\n");
+                const blob = new Blob([all], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `email-sequence-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast({ title: "Email sequence diunduh!" });
+              }}
+              data-testid="button-download-sequence"
+            >
+              <Download className="w-3 h-3" /> .txt
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── QR Code Tool ─────────────────────────────────────────────────────
 function QrCodeTool({ agent }: { agent: any }) {
   const { toast } = useToast();
@@ -1498,7 +1955,7 @@ export function MarketingPanel({ agent }: { agent: any }) {
                 Marketing Suite
               </h2>
               <p className="text-sm text-muted-foreground">
-                25 story + 27 AI tools + 5 alat instan untuk <span className="font-medium text-foreground">{agent.name}</span>
+                25 story · 27 AI tools · WA & Email Builder · 5 alat instan untuk <span className="font-medium text-foreground">{agent.name}</span>
               </p>
             </div>
           </div>
@@ -1512,26 +1969,31 @@ export function MarketingPanel({ agent }: { agent: any }) {
 
       <Tabs defaultValue="ai-tools" className="w-full">
         <div className="px-4 md:px-6 pt-3 border-b sticky top-0 bg-background z-10">
-          <TabsList className="h-9">
-            <TabsTrigger value="ai-tools" className="text-xs gap-1.5" data-testid="tab-ai-tools">
-              <Sparkles className="w-3.5 h-3.5" /> AI Tools
-            </TabsTrigger>
-            <TabsTrigger value="storytelling" className="text-xs gap-1.5" data-testid="tab-storytelling">
-              <Mic className="w-3.5 h-3.5" /> Story
-            </TabsTrigger>
-            <TabsTrigger value="platforms" className="text-xs gap-1.5" data-testid="tab-platforms">
-              <Globe className="w-3.5 h-3.5" /> Platforms
-            </TabsTrigger>
-            <TabsTrigger value="instant" className="text-xs gap-1.5" data-testid="tab-instant">
-              <Zap className="w-3.5 h-3.5" /> Instan
-            </TabsTrigger>
-            <TabsTrigger value="brief" className="text-xs gap-1.5" data-testid="tab-brief">
-              <FileText className="w-3.5 h-3.5" /> Brief
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs gap-1.5" data-testid="tab-settings">
-              <Eye className="w-3.5 h-3.5" /> Pengaturan
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-none -mx-1 px-1">
+            <TabsList className="h-9 min-w-max w-full flex">
+              <TabsTrigger value="ai-tools" className="text-xs gap-1 flex-shrink-0" data-testid="tab-ai-tools">
+                <Sparkles className="w-3 h-3" /> AI Tools
+              </TabsTrigger>
+              <TabsTrigger value="storytelling" className="text-xs gap-1 flex-shrink-0" data-testid="tab-storytelling">
+                <Mic className="w-3 h-3" /> Story
+              </TabsTrigger>
+              <TabsTrigger value="platforms" className="text-xs gap-1 flex-shrink-0" data-testid="tab-platforms">
+                <Globe className="w-3 h-3" /> Platform
+              </TabsTrigger>
+              <TabsTrigger value="wa-email" className="text-xs gap-1 flex-shrink-0" data-testid="tab-wa-email">
+                <MessageSquare className="w-3 h-3" /> WA & Email
+              </TabsTrigger>
+              <TabsTrigger value="instant" className="text-xs gap-1 flex-shrink-0" data-testid="tab-instant">
+                <Zap className="w-3 h-3" /> Instan
+              </TabsTrigger>
+              <TabsTrigger value="brief" className="text-xs gap-1 flex-shrink-0" data-testid="tab-brief">
+                <FileText className="w-3 h-3" /> Brief
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs gap-1 flex-shrink-0" data-testid="tab-settings">
+                <Eye className="w-3 h-3" /> Setting
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
 
         {/* ── AI TOOLS TAB ── */}
@@ -1554,6 +2016,11 @@ export function MarketingPanel({ agent }: { agent: any }) {
         {/* ── PLATFORMS TAB ── */}
         <TabsContent value="platforms" className="m-0 px-4 md:px-6 py-5">
           <PlatformToolsTab agent={agent} />
+        </TabsContent>
+
+        {/* ── WA & EMAIL TAB ── */}
+        <TabsContent value="wa-email" className="m-0 px-4 md:px-6 py-5">
+          <WaEmailTab agent={agent} />
         </TabsContent>
 
         {/* ── ALAT INSTAN TAB ── */}
