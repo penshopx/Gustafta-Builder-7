@@ -698,6 +698,10 @@ export function AgenticAIPanel() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [orchConfig, setOrchConfig] = useState<OrchestratorConfig>(buildDefaultOrchConfig());
   const [expandedSpec, setExpandedSpec] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newSpecName, setNewSpecName] = useState("");
+  const [newSpecIcon, setNewSpecIcon] = useState("🤖");
+  const [newSpecPrompt, setNewSpecPrompt] = useState("");
 
   useEffect(() => {
     if (agent) {
@@ -799,6 +803,42 @@ export function AgenticAIPanel() {
       toast({ title: "Error", description: "Gagal menyimpan specialist", variant: "destructive" });
     }
   };
+
+  const addSpecialist = async () => {
+    if (!newSpecName.trim() || !newSpecPrompt.trim()) {
+      toast({ title: "Lengkapi form", description: "Nama dan prompt wajib diisi.", variant: "destructive" });
+      return;
+    }
+    const key = `custom_${newSpecName.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")}_${Date.now()}`;
+    const next: OrchestratorConfig = {
+      ...orchConfig,
+      specialists: {
+        ...orchConfig.specialists,
+        [key]: { name: newSpecName.trim(), prompt: newSpecPrompt.trim(), enabled: true, icon: newSpecIcon },
+      },
+    };
+    setOrchConfig(next);
+    try {
+      await updateAgent.mutateAsync({ id: agent!.id, data: { orchestratorConfig: next } as any });
+      toast({ title: "Specialist ditambahkan", description: `${newSpecIcon} ${newSpecName} berhasil disimpan.` });
+      setNewSpecName(""); setNewSpecIcon("🤖"); setNewSpecPrompt(""); setShowAddForm(false);
+    } catch {
+      toast({ title: "Error", description: "Gagal menambah specialist", variant: "destructive" });
+    }
+  };
+
+  const deleteSpecialist = async (key: string) => {
+    const { [key]: _removed, ...rest } = orchConfig.specialists;
+    const next: OrchestratorConfig = { ...orchConfig, specialists: rest };
+    setOrchConfig(next);
+    try {
+      await updateAgent.mutateAsync({ id: agent!.id, data: { orchestratorConfig: next } as any });
+    } catch {
+      toast({ title: "Error", description: "Gagal menghapus specialist", variant: "destructive" });
+    }
+  };
+
+  const CUSTOM_ICONS = ["🤖", "🔧", "📊", "🏗️", "💡", "🧮", "📐", "🌐", "💰", "🗂️", "🧑‍💼", "⚡"];
 
   const applyPreset = (preset: string) => {
     if (preset === "Custom") {
@@ -916,9 +956,10 @@ export function AgenticAIPanel() {
             <div className="space-y-2">
               <Label className="text-xs font-medium flex items-center gap-1.5">
                 <Bot className="h-3 w-3 text-muted-foreground" />
-                7 Specialist Agents
+                Specialist Agents ({Object.keys(orchConfig.specialists).length})
               </Label>
               <div className="space-y-2">
+                {/* Built-in specialists */}
                 {SPECIALIST_META.map(({ key, icon, label }) => {
                   const spec = orchConfig.specialists[key] || { name: label, prompt: "", enabled: true };
                   const isExpanded = expandedSpec === key;
@@ -983,6 +1024,150 @@ export function AgenticAIPanel() {
                     </div>
                   );
                 })}
+
+                {/* Custom specialists */}
+                {Object.entries(orchConfig.specialists)
+                  .filter(([key]) => !SPECIALIST_META.some((m) => m.key === key))
+                  .map(([key, spec]) => {
+                    const isExpanded = expandedSpec === key;
+                    const icon = (spec as any).icon || "🤖";
+                    return (
+                      <div
+                        key={key}
+                        className={`rounded-lg border-2 border-dashed transition-colors ${spec.enabled ? "border-violet-300 dark:border-violet-700" : "border-border/40 opacity-60"}`}
+                      >
+                        <div
+                          className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-muted/30"
+                          onClick={() => setExpandedSpec(isExpanded ? null : key)}
+                          data-testid={`specialist-header-${key}`}
+                        >
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <span>{icon}</span>
+                            <span>{spec.name}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 font-semibold">Custom</span>
+                          </div>
+                          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <Switch
+                              checked={spec.enabled}
+                              onCheckedChange={(v) => saveSpecialist(key, { enabled: v })}
+                              data-testid={`toggle-specialist-${key}`}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                              onClick={(e) => { e.stopPropagation(); deleteSpecialist(key); }}
+                              data-testid={`button-delete-specialist-${key}`}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                            <ChevronRight
+                              className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                            />
+                          </div>
+                        </div>
+                        {isExpanded && (
+                          <div className="px-3 pb-3 space-y-2 border-t">
+                            <Label className="text-xs text-muted-foreground mt-2 block">Prompt Specialist</Label>
+                            <Textarea
+                              value={spec.prompt}
+                              onChange={(e) => {
+                                const next: OrchestratorConfig = {
+                                  ...orchConfig,
+                                  specialists: { ...orchConfig.specialists, [key]: { ...spec, prompt: e.target.value } },
+                                };
+                                setOrchConfig(next);
+                              }}
+                              onBlur={() => saveSpecialist(key, { prompt: orchConfig.specialists[key]?.prompt || "" })}
+                              rows={4}
+                              className="text-xs resize-none"
+                              placeholder="Prompt khusus untuk specialist ini..."
+                              data-testid={`textarea-custom-specialist-prompt-${key}`}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                {/* Add Specialist Button / Form */}
+                {!showAddForm ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-dashed text-muted-foreground hover:text-foreground hover:border-violet-400 gap-2"
+                    onClick={() => setShowAddForm(true)}
+                    data-testid="button-add-specialist"
+                  >
+                    <span className="text-base leading-none">+</span>
+                    Tambah Specialist Baru
+                  </Button>
+                ) : (
+                  <div className="rounded-lg border-2 border-dashed border-violet-300 dark:border-violet-700 p-4 space-y-3">
+                    <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">Specialist Baru</p>
+
+                    {/* Icon picker */}
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Pilih Ikon</Label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {CUSTOM_ICONS.map((ico) => (
+                          <button
+                            key={ico}
+                            onClick={() => setNewSpecIcon(ico)}
+                            className={`text-lg p-1 rounded border transition-colors ${newSpecIcon === ico ? "border-violet-400 bg-violet-50 dark:bg-violet-950/40" : "border-transparent hover:border-border"}`}
+                            data-testid={`icon-option-${ico}`}
+                          >
+                            {ico}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Name */}
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Nama Specialist *</Label>
+                      <Input
+                        value={newSpecName}
+                        onChange={(e) => setNewSpecName(e.target.value)}
+                        placeholder="cth: Agen Estimasi Biaya"
+                        className="h-8 text-sm"
+                        data-testid="input-new-specialist-name"
+                      />
+                    </div>
+
+                    {/* Prompt */}
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Prompt Specialist *</Label>
+                      <Textarea
+                        value={newSpecPrompt}
+                        onChange={(e) => setNewSpecPrompt(e.target.value)}
+                        placeholder="Jelaskan peran dan keahlian specialist ini. cth: Kamu adalah spesialis estimasi biaya konstruksi. Fokus menjawab tentang..."
+                        rows={4}
+                        className="text-xs resize-none"
+                        data-testid="textarea-new-specialist-prompt"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-violet-600 hover:bg-violet-700 text-white"
+                        onClick={addSpecialist}
+                        data-testid="button-save-new-specialist"
+                      >
+                        Simpan Specialist
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setShowAddForm(false); setNewSpecName(""); setNewSpecIcon("🤖"); setNewSpecPrompt(""); }}
+                        data-testid="button-cancel-add-specialist"
+                      >
+                        Batal
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
