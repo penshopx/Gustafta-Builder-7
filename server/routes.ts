@@ -44,6 +44,8 @@ import { importDocumentToProposal, mergeProposalIntoAgent, type ApplyMode } from
 import { buildEbookMarkdown, buildEbookHtml, stripMarkdownToPlainText, buildEbookTables } from "./lib/ebook-generator";
 import * as XLSX from "xlsx";
 import { buildChaesaExport } from "./lib/chaesa-exporter";
+import { buildEcourseHtml } from "./lib/ecourse-generator";
+import { buildDocgenHtml } from "./lib/docgen-generator";
 import {
   searchNotionPages,
   searchNotionDatabases,
@@ -4317,6 +4319,74 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     } catch (error: any) {
       console.error("[/api/agents/:id/export/chaesa] error:", error);
       return res.status(500).json({ error: error?.message || "Gagal membuat bundle Chaesa." });
+    }
+  });
+
+  // ==================== eCourse Export ====================
+  app.get("/api/agents/:id/export/ecourse", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.params.id as string;
+      const agent = await storage.getAgent(agentId);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+
+      const auth = assertCanPreviewAgentPrompt(req, agent);
+      const isOwnerOrAdmin = auth.ok;
+      const safeAgent = isOwnerOrAdmin ? agent : { ...agent, systemPrompt: "" };
+
+      const knowledgeBases = await storage.getKnowledgeBases(agentId);
+      let miniApps: any[] = [];
+      try { if (typeof (storage as any).getMiniApps === "function") miniApps = await (storage as any).getMiniApps(agentId); } catch {}
+      let series: any, bigIdea: any, toolbox: any;
+      try {
+        if (safeAgent.toolboxId) {
+          const tb = await storage.getToolbox(String(safeAgent.toolboxId));
+          if (tb) { toolbox = tb; const bi = await storage.getBigIdea(String(tb.bigIdeaId)); if (bi) { bigIdea = bi; if (bi.seriesId) series = await storage.getSeriesById(String(bi.seriesId)); } }
+        }
+      } catch {}
+
+      const html = buildEcourseHtml({ agent: safeAgent, knowledgeBases, miniApps, series, bigIdea, toolbox });
+      const safeName = (agent.name || "ecourse").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const inline = String(req.query.inline || "") !== "1";
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="${safeName}-ecourse.html"`);
+      return res.send(html);
+    } catch (err: any) {
+      console.error("[/api/agents/:id/export/ecourse]", err);
+      return res.status(500).json({ error: err?.message || "Gagal membuat eCourse." });
+    }
+  });
+
+  // ==================== Document Generator Export ====================
+  app.get("/api/agents/:id/export/docgen", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.params.id as string;
+      const agent = await storage.getAgent(agentId);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+
+      const auth = assertCanPreviewAgentPrompt(req, agent);
+      const isOwnerOrAdmin = auth.ok;
+      const safeAgent = isOwnerOrAdmin ? agent : { ...agent, systemPrompt: "" };
+
+      const knowledgeBases = await storage.getKnowledgeBases(agentId);
+      let miniApps: any[] = [];
+      try { if (typeof (storage as any).getMiniApps === "function") miniApps = await (storage as any).getMiniApps(agentId); } catch {}
+      let series: any, bigIdea: any, toolbox: any;
+      try {
+        if (safeAgent.toolboxId) {
+          const tb = await storage.getToolbox(String(safeAgent.toolboxId));
+          if (tb) { toolbox = tb; const bi = await storage.getBigIdea(String(tb.bigIdeaId)); if (bi) { bigIdea = bi; if (bi.seriesId) series = await storage.getSeriesById(String(bi.seriesId)); } }
+        }
+      } catch {}
+
+      const html = buildDocgenHtml({ agent: safeAgent, knowledgeBases, miniApps, series, bigIdea, toolbox });
+      const safeName = (agent.name || "docgen").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const inline = String(req.query.inline || "") !== "1";
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="${safeName}-docgen.html"`);
+      return res.send(html);
+    } catch (err: any) {
+      console.error("[/api/agents/:id/export/docgen]", err);
+      return res.status(500).json({ error: err?.message || "Gagal membuat Generator Dokumen." });
     }
   });
 

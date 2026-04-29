@@ -38,6 +38,7 @@ import { ConversionPanel } from "@/components/panels/conversion-panel";
 import { LandingPagePanel } from "@/components/panels/landing-page-panel";
 import { MarketingPanel } from "@/components/panels/marketing-panel";
 import { StudioPanel } from "@/components/panels/studio-panel";
+import { EkosistemPanel } from "@/components/panels/ekosistem-panel";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,7 +74,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Agent, BigIdea, Toolbox } from "@shared/schema";
 
-type NavItem = "persona" | "policy" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "deliverables" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing" | "studio";
+type NavItem = "persona" | "policy" | "knowledge" | "integrations" | "widget" | "chat" | "analytics" | "agentic" | "project-brain" | "mini-apps" | "deliverables" | "product-settings" | "revenue" | "affiliates" | "vouchers" | "broadcast" | "tenders" | "conversion" | "landing-page" | "marketing" | "studio" | "ekosistem";
 
 const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof Bot }[] = [
   { id: "persona", label: "Persona", shortLabel: "Persona", icon: Bot },
@@ -84,6 +85,7 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "mini-apps", label: "Mini Apps", shortLabel: "Apps", icon: Blocks },
   { id: "deliverables", label: "Deliverables", shortLabel: "Output", icon: PackageCheck },
   { id: "studio", label: "Studio Kompetensi", shortLabel: "Studio", icon: Wand2 },
+  { id: "ekosistem", label: "Ekosistem Kompetensi", shortLabel: "Ekosistem", icon: Network },
   { id: "integrations", label: "Integrations", shortLabel: "Integ", icon: Plug },
   { id: "widget", label: "Widget", shortLabel: "Widget", icon: Palette },
   { id: "broadcast", label: "Broadcast WA", shortLabel: "Broadcast", icon: Radio },
@@ -693,6 +695,8 @@ export default function Dashboard() {
         return <MarketingPanel agent={currentAgent!} />;
       case "studio":
         return <StudioPanel agent={currentAgent!} />;
+      case "ekosistem":
+        return <EkosistemPanel agent={currentAgent!} />;
       case "product-settings":
         return <ProductSettingsPanel agent={currentAgent!} />;
       case "revenue":

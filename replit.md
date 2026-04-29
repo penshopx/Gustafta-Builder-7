@@ -16,6 +16,14 @@ The trio (sortOrder 4 Readiness/Blueprint + sortOrder 11 Implementation + sortOr
 
 A key feature is "Project Brain," providing contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots, decision summaries, and risk assessments. A "Deliverables" panel allows builders to define output types for each agent, with various pre-built bundles and quick-action chat buttons.
 
+**Ekosistem Kompetensi** is the transfer layer that converts any chatbot into 4 digital products:
+1. **eBook Kompetensi** — 8-chapter competency guidebook (HTML/PDF, XLSX, TXT, MD) via `/api/agents/:id/export/ebook`
+2. **eCourse Modul Belajar** — interactive e-learning page with modules from KB categories, sessions per chunk, and quizzes from conversation starters via `/api/agents/:id/export/ecourse`
+3. **Generator Dokumen** — domain-aware document template (SOP, checklist, form, report) auto-inferred from chatbot domain via `/api/agents/:id/export/docgen`
+4. **Chaesa AI Studio Bridge** — JSON bundle export for https://smart-ebook-builder-7-1.replit.app/ via `/api/agents/:id/export/chaesa`
+
+The Ekosistem panel is accessible from the dashboard sidebar under "Ekosistem Kompetensi" (Network icon), and individual export buttons are also available in the Studio Kompetensi tab.
+
 Core features include a RAG toggle for controlling knowledge base lookups, "Project Context" for personalizing conversations, and a "User Memory System" for recalling facts across sessions. Monetization is handled via per-Modul bundle pricing and per-Chatbot individual pricing, with guest message limits, trial periods, and a voucher system. A "Conversion Layer" transforms chatbots into revenue engines through lead capture, scoring, and smart CTA triggers.
 
 ## User Preferences

@@ -747,63 +747,57 @@ export function StudioPanel({ agent }: { agent: any }) {
               </CardContent>
             </Card>
 
-            {/* Coming soon — Mini Apps */}
-            <Card className="opacity-70">
+            {/* eCourse — now available */}
+            <Card className="border-violet-500/40 bg-gradient-to-br from-violet-50/40 to-transparent dark:from-violet-950/20">
               <CardContent className="p-5 space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                    <Calculator className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground">Mini App Wizard</h3>
-                      <Badge variant="secondary">Segera</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Field skoring/formula dari chatbot ini → wizard interaktif.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Coming soon — DocGen */}
-            <Card className="opacity-70">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                    <FilePlus2 className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground">Generator Dokumen</h3>
-                      <Badge variant="secondary">Segera</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Template DOCX/XLSX terisi otomatis dari konteks chatbot.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Coming soon — eCourse */}
-            <Card className="opacity-70 md:col-span-2">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center">
-                    <GraduationCap className="w-5 h-5 text-pink-600" />
+                  <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <GraduationCap className="w-5 h-5 text-violet-600" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-foreground">eCourse Modul Belajar</h3>
-                      <Badge variant="secondary">Segera</Badge>
+                      <Badge className="bg-violet-500 hover:bg-violet-600">Tersedia</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      BigIdea → Modul, Toolbox → Sesi, Agent → Aktivitas. Termasuk quiz dari conversation starters.
+                      Knowledge Base → Modul, sesi per materi, quiz dari conversation starters.
                     </p>
                   </div>
                 </div>
+                <Button
+                  onClick={() => { window.open(`/api/agents/${agent.id}/export/ecourse`, "_blank"); }}
+                  className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+                  data-testid="button-open-ecourse"
+                >
+                  <GraduationCap className="w-4 h-4 mr-1.5" /> Buka eCourse
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* DocGen — now available */}
+            <Card className="border-emerald-500/40 bg-gradient-to-br from-emerald-50/40 to-transparent dark:from-emerald-950/20">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <FilePlus2 className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">Generator Dokumen</h3>
+                      <Badge className="bg-emerald-500 hover:bg-emerald-600">Tersedia</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Template SOP, checklist, formulir, laporan — otomatis dari domain chatbot.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => { window.open(`/api/agents/${agent.id}/export/docgen`, "_blank"); }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                  data-testid="button-open-docgen"
+                >
+                  <FilePlus2 className="w-4 h-4 mr-1.5" /> Buka Generator Dokumen
+                </Button>
               </CardContent>
             </Card>
           </div>
