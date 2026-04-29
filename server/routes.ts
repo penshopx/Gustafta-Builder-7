@@ -4390,6 +4390,191 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
+  // ==================== AI Marketing Tools ====================
+
+  app.post("/api/agents/:id/marketing/generate", isAuthenticated, async (req: any, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ error: "Agent tidak ditemukan" });
+
+      const { tool, platform, tone, duration } = req.body as { tool: string; platform?: string; tone?: string; duration?: string };
+
+      const name = agent.name || "AI Chatbot";
+      const tagline = (agent as any).tagline || "";
+      const description = agent.description || "";
+      const expertise = ((agent as any).expertise as string[] || []).join(", ");
+      const features = ((agent as any).productFeatures as string[] || []).join(", ");
+      const painPoints = ((agent as any).landingPainPoints as string[] || []).join(", ");
+      const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
+      const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "";
+      const whatsapp = (agent as any).whatsappCta || "";
+      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const category = agent.category || "konstruksi";
+
+      const agentCtx = `
+Nama Produk: ${name}
+Tagline: ${tagline}
+Deskripsi: ${description}
+Kategori: ${category}
+Keunggulan: ${expertise}
+Fitur Utama: ${features}
+Pain Points Target: ${painPoints}
+Manfaat: ${benefits}
+Harga: ${price}
+WhatsApp: ${whatsapp}
+Link Chat: ${chatUrl}
+`.trim();
+
+      let systemPrompt = "Kamu adalah copywriter profesional B2B untuk industri konstruksi Indonesia. Bahasa: Indonesia yang profesional, persuasif, dan relevan untuk kontraktor, konsultan, dan perusahaan BUJK.";
+      let userPrompt = "";
+
+      switch (tool) {
+        case "ad-copy": {
+          const plat = platform || "Meta Ads";
+          userPrompt = `Buat ad copy untuk ${plat} untuk produk AI Chatbot berikut:
+${agentCtx}
+Format output:
+Headline 1 (max 30 karakter):
+Headline 2 (max 30 karakter):
+Headline 3 (max 30 karakter):
+Deskripsi 1 (max 90 karakter):
+Deskripsi 2 (max 90 karakter):
+Primary Text (max 125 kata, format paragraph):
+CTA (pilih satu): Pelajari Selengkapnya / Coba Gratis / Daftar Sekarang / Hubungi Kami
+---
+Buat 2 variasi berbeda (Variasi A dan Variasi B).`;
+          break;
+        }
+        case "wa-broadcast": {
+          const tn = tone || "profesional";
+          userPrompt = `Buat script WhatsApp Broadcast untuk mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Tone: ${tn}
+Format: 3 versi broadcast (Versi Singkat ≤60 kata, Versi Medium ≤120 kata, Versi Panjang ≤200 kata)
+Sertakan: sapaan, masalah target, solusi, CTA, dan link chat jika relevan.
+Gunakan emoji seperlunya. Hindari spam-feel.`;
+          break;
+        }
+        case "elevator-pitch": {
+          const dur = duration || "60 detik";
+          userPrompt = `Buat Elevator Pitch verbal untuk produk AI Chatbot berikut:
+${agentCtx}
+Durasi: ${dur} (perkirakan jumlah kata: 30 detik ≈ 70 kata, 60 detik ≈ 130 kata, 2 menit ≈ 260 kata)
+Format: 
+1. Hook (kalimat pembuka yang menarik)
+2. Problem Statement
+3. Solusi yang Ditawarkan
+4. Bukti/Kredensial
+5. CTA / Next Step
+Tulis dalam bahasa percakapan yang natural dan bisa diucapkan langsung.`;
+          break;
+        }
+        case "linkedin-post": {
+          userPrompt = `Buat LinkedIn Post untuk mempromosikan atau mengumumkan produk AI Chatbot berikut:
+${agentCtx}
+Format:
+- Hook (baris pertama yang membuat orang berhenti scroll, max 2 kalimat)
+- Body (kisah/konteks/nilai, 3-5 paragraf pendek)
+- CTA
+- Hashtag (5-8 hashtag relevan industri konstruksi Indonesia)
+Panjang total: 150-250 kata. Gaya: thought leadership, bukan hard sell.`;
+          break;
+        }
+        case "email-sequence": {
+          userPrompt = `Buat Email Sequence 3 email (drip campaign) untuk leads yang tertarik dengan produk AI Chatbot berikut:
+${agentCtx}
+Format untuk setiap email:
+Subject Line:
+Preview Text:
+Body (200-300 kata):
+CTA:
+---
+Email 1 (Hari 1): Perkenalan & nilai utama
+Email 2 (Hari 3): Studi kasus / pain point lebih dalam
+Email 3 (Hari 7): Penawaran khusus / urgensi / last call
+Bahasa: formal tapi hangat, B2B konstruksi Indonesia.`;
+          break;
+        }
+        case "content-calendar": {
+          userPrompt = `Buat Content Calendar 7 hari untuk memasarkan produk AI Chatbot berikut di media sosial:
+${agentCtx}
+Platform fokus: LinkedIn (B2B), Instagram, WhatsApp Story
+Format tabel per hari:
+Hari | Platform | Tipe Konten | Topik/Judul | Hook/Caption Singkat | Format (Carousel/Reel/Post/Story)
+---
+Buat 7 baris (Senin-Minggu). Variasikan tipe konten dan platform. Fokus pada value untuk target di industri konstruksi.`;
+          break;
+        }
+        case "instagram-caption": {
+          userPrompt = `Buat 3 variasi Caption Instagram untuk mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Setiap variasi:
+- Caption utama (100-150 kata, engaging, dengan emoji)
+- CTA yang jelas
+- 15-20 hashtag Indonesia + industri konstruksi
+---
+Variasi 1: Gaya Edukasi (tips/how-to)
+Variasi 2: Gaya Social Proof / Testimoni
+Variasi 3: Gaya Before vs After / Transformasi`;
+          break;
+        }
+        case "proposal-exec": {
+          userPrompt = `Buat Executive Summary 1 halaman untuk Proposal Klien yang menawarkan solusi AI Chatbot berikut:
+${agentCtx}
+Format:
+1. Ringkasan Eksekutif (2-3 kalimat)
+2. Permasalahan yang Dihadapi Klien (3 poin)
+3. Solusi yang Kami Tawarkan (3-4 poin dengan bullet)
+4. Mengapa ${name}? (3 keunggulan kompetitif)
+5. Investment & ROI Estimasi
+6. Next Step
+7. Kontak
+Gaya: formal, profesional, cocok untuk perusahaan BUJK, kontraktor besar, atau konsultan konstruksi Indonesia.`;
+          break;
+        }
+        case "value-proposition": {
+          userPrompt = `Buat Value Proposition Canvas untuk produk AI Chatbot berikut:
+${agentCtx}
+Format:
+## CUSTOMER PROFILE (Target: Profesional Konstruksi Indonesia)
+### Jobs to be Done (3-5 pekerjaan/tugas utama mereka)
+### Pains (3-5 masalah/frustasi utama)
+### Gains (3-5 hasil/keuntungan yang diinginkan)
+
+## VALUE MAP
+### Pain Relievers (bagaimana produk ini mengatasi pain)
+### Gain Creators (bagaimana produk ini menciptakan gains)
+### Products & Services (fitur utama yang relevan)
+
+## FIT STATEMENT
+(1 kalimat yang merangkum product-market fit)`;
+          break;
+        }
+        default:
+          return res.status(400).json({ error: "Tool tidak dikenal" });
+      }
+
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.8,
+        max_tokens: 2000,
+      });
+
+      const content = completion.choices[0]?.message?.content || "";
+      return res.json({ content });
+    } catch (err: any) {
+      console.error("[/api/agents/:id/marketing/generate]", err);
+      return res.status(500).json({ error: err?.message || "Gagal generate konten marketing" });
+    }
+  });
+
   // ==================== Enhanced Analytics ====================
 
   // Get aggregated platform stats (for landing page)
