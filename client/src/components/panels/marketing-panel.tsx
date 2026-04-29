@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Megaphone, Download, ClipboardCopy, Check, Target, MessageSquare,
   Sparkles, Globe, Users, ExternalLink, Link, Eye, Zap, Mail,
   Calendar, Instagram, Linkedin, FileText, BarChart3, Mic,
-  ChevronDown, ChevronUp, Loader2, Copy, RefreshCw
+  ChevronDown, ChevronUp, Loader2, Copy, RefreshCw,
+  Scan, PenLine, Newspaper, Share2, Printer, Bot,
+  Phone, Star, ArrowRight, Shield,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -250,6 +252,496 @@ function AiToolCard({ tool, agent }: { tool: AiTool; agent: any }) {
   );
 }
 
+// ─── QR Code Tool ─────────────────────────────────────────────────────
+function QrCodeTool({ agent }: { agent: any }) {
+  const { toast } = useToast();
+  const [selectedUrl, setSelectedUrl] = useState("chatbot");
+  const urls: Record<string, { label: string; url: string }> = {
+    chatbot: { label: "Chatbot", url: `${window.location.origin}/bot/${agent.id}` },
+    ecourse: { label: "Landing eCourse", url: `${window.location.origin}/product/${agent.id}/ecourse` },
+    ebook: { label: "Landing eBook", url: `${window.location.origin}/product/${agent.id}/ebook` },
+    docgen: { label: "Landing Generator Dokumen", url: `${window.location.origin}/product/${agent.id}/docgen` },
+    miniapps: { label: "Landing Mini Apps", url: `${window.location.origin}/product/${agent.id}/mini-apps` },
+    product: { label: "Landing Chatbot", url: `${window.location.origin}/product/${agent.id}` },
+  };
+  const current = urls[selectedUrl];
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(current.url)}&bgcolor=ffffff&color=1a1a2e&margin=12`;
+
+  const downloadQr = async () => {
+    try {
+      const resp = await fetch(qrSrc);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `qr-${agent.name?.replace(/\s+/g, "-").toLowerCase() || "chatbot"}-${selectedUrl}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "QR Code diunduh!" });
+    } catch {
+      toast({ title: "Gagal mengunduh", description: "Klik kanan gambar → Simpan gambar", variant: "destructive" });
+    }
+  };
+
+  return (
+    <Card>
+      <CardContent className="pt-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Scan className="w-5 h-5 text-primary" />
+          <span className="font-semibold text-sm">QR Code Generator</span>
+          <Badge variant="secondary" className="text-xs ml-auto">Instan</Badge>
+        </div>
+        <p className="text-xs text-muted-foreground">QR code untuk banner, kartu nama, presentasi, dan materi cetak event konstruksi.</p>
+        <Select value={selectedUrl} onValueChange={setSelectedUrl}>
+          <SelectTrigger className="h-8 text-xs" data-testid="select-qr-url">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(urls).map(([key, val]) => (
+              <SelectItem key={key} value={key} className="text-xs">{val.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="flex flex-col items-center gap-3 py-2">
+          <div className="border border-border rounded-xl overflow-hidden shadow-sm">
+            <img src={qrSrc} alt="QR Code" className="w-40 h-40 block" data-testid="img-qr-code" />
+          </div>
+          <p className="text-xs text-muted-foreground text-center max-w-[200px] break-all">{current.url}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" className="flex-1 h-8 text-xs" onClick={downloadQr} data-testid="button-download-qr">
+            <Download className="w-3 h-3 mr-1.5" /> Unduh PNG
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => { navigator.clipboard.writeText(current.url); toast({ title: "Link disalin!" }); }} data-testid="button-copy-qr-url">
+            <Copy className="w-3 h-3 mr-1.5" /> Salin Link
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Email Signature Tool ─────────────────────────────────────────────
+function EmailSignatureTool({ agent }: { agent: any }) {
+  const { toast } = useToast();
+  const [name, setName] = useState(agent.name || "");
+  const [title, setTitle] = useState((agent as any).tagline || "Asisten AI Konstruksi");
+  const [wa, setWa] = useState((agent as any).whatsappCta || "");
+  const [copied, setCopied] = useState(false);
+
+  const chatUrl = `${window.location.origin}/bot/${agent.id}`;
+  const productUrl = `${window.location.origin}/product/${agent.id}`;
+  const initials = (name || "AI").substring(0, 2).toUpperCase();
+
+  const sigHtml = `<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;font-size:13px;color:#333;border-left:4px solid #4361ee;padding-left:16px;margin-top:8px">
+  <tr><td><strong style="font-size:15px;color:#1a1a2e">${name}</strong></td></tr>
+  <tr><td style="color:#4361ee;font-size:12px">${title}</td></tr>
+  <tr><td style="padding-top:6px;font-size:12px">
+    💬 <a href="${chatUrl}" style="color:#4361ee;text-decoration:none">Chat dengan AI</a>
+    ${wa ? `&nbsp;·&nbsp; 📱 <a href="https://wa.me/${wa.replace(/\D/g, '')}" style="color:#25D366;text-decoration:none">WhatsApp</a>` : ""}
+    &nbsp;·&nbsp; 🌐 <a href="${productUrl}" style="color:#4361ee;text-decoration:none">Landing Page</a>
+  </td></tr>
+  <tr><td style="padding-top:4px;font-size:11px;color:#888">Powered by Gustafta AI · Platform Chatbot Konstruksi Indonesia</td></tr>
+</table>`;
+
+  const copy = () => {
+    navigator.clipboard.writeText(sigHtml);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "HTML tanda tangan disalin!", description: "Paste di pengaturan tanda tangan email Anda" });
+  };
+
+  return (
+    <Card>
+      <CardContent className="pt-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <PenLine className="w-5 h-5 text-primary" />
+          <span className="font-semibold text-sm">Email Signature</span>
+          <Badge variant="secondary" className="text-xs ml-auto">Instan</Badge>
+        </div>
+        <p className="text-xs text-muted-foreground">Tanda tangan email HTML profesional dengan link chatbot dan WhatsApp.</p>
+        <div className="grid grid-cols-1 gap-2">
+          <div>
+            <Label className="text-xs mb-1 block">Nama Pengirim</Label>
+            <Input value={name} onChange={e => setName(e.target.value)} className="h-8 text-xs" placeholder="Nama Anda / Chatbot" data-testid="input-sig-name" />
+          </div>
+          <div>
+            <Label className="text-xs mb-1 block">Jabatan / Tagline</Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} className="h-8 text-xs" placeholder="Asisten AI Konstruksi" data-testid="input-sig-title" />
+          </div>
+          <div>
+            <Label className="text-xs mb-1 block">Nomor WhatsApp (opsional)</Label>
+            <Input value={wa} onChange={e => setWa(e.target.value)} className="h-8 text-xs" placeholder="6281234567890" data-testid="input-sig-wa" />
+          </div>
+        </div>
+        {/* Preview */}
+        <div className="bg-muted/40 rounded-lg p-3 border text-xs" style={{ borderLeft: "4px solid #4361ee", paddingLeft: "12px" }}>
+          <div className="font-bold text-sm" style={{ color: "#1a1a2e" }}>{name || "Nama Anda"}</div>
+          <div style={{ color: "#4361ee", fontSize: "11px" }}>{title || "Jabatan"}</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            💬 <span className="text-blue-600 underline">Chat dengan AI</span>
+            {wa && <> · 📱 <span className="text-green-600 underline">WhatsApp</span></>}
+            {" "}· 🌐 <span className="text-blue-600 underline">Landing Page</span>
+          </div>
+          <div className="mt-0.5 text-muted-foreground" style={{ fontSize: "10px" }}>Powered by Gustafta AI</div>
+        </div>
+        <Button size="sm" className="w-full h-8 text-xs" onClick={copy} data-testid="button-copy-sig">
+          {copied ? <Check className="w-3 h-3 mr-1.5" /> : <Copy className="w-3 h-3 mr-1.5" />}
+          {copied ? "Tersalin!" : "Salin HTML Tanda Tangan"}
+        </Button>
+        <p className="text-xs text-muted-foreground text-center">Paste di: Gmail → Pengaturan → Tanda Tangan</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Digital Flyer Tool ───────────────────────────────────────────────
+function FlyerTool({ agent }: { agent: any }) {
+  const { toast } = useToast();
+  const chatUrl = `${window.location.origin}/bot/${agent.id}`;
+  const productUrl = `${window.location.origin}/product/${agent.id}`;
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(chatUrl)}&bgcolor=ffffff&color=1a1a2e&margin=8`;
+  const expertise: string[] = agent.expertise || [];
+  const features: string[] = agent.productFeatures || agent.landingBenefits || [];
+  const points = [...expertise.slice(0, 3), ...features.slice(0, 3)].slice(0, 5);
+  const wa = (agent as any).whatsappCta || "";
+
+  const flyerHtml = `<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8"><title>Flyer — ${agent.name}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#f0f4ff; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
+  .flyer { width:420px; background:linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%); border-radius:20px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+  .top-bar { background:linear-gradient(90deg,#4361ee,#7209b7); padding:10px 24px; font-size:11px; color:white; letter-spacing:2px; font-weight:700; text-transform:uppercase; }
+  .hero { padding:32px 28px 24px; text-align:center; }
+  .badge { display:inline-block; background:rgba(255,255,255,0.1); color:#a0b4ff; border:1px solid rgba(255,255,255,0.15); border-radius:20px; font-size:11px; padding:4px 14px; letter-spacing:1px; margin-bottom:14px; }
+  .title { font-size:26px; font-weight:900; color:white; line-height:1.2; margin-bottom:10px; }
+  .subtitle { font-size:13px; color:#a0b4ff; line-height:1.5; max-width:340px; margin:0 auto; }
+  .divider { height:1px; background:rgba(255,255,255,0.1); margin:0 28px; }
+  .features { padding:20px 28px; }
+  .features-title { font-size:11px; color:#4361ee; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:12px; }
+  .feature { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; }
+  .dot { width:8px; height:8px; background:#4361ee; border-radius:50%; flex-shrink:0; margin-top:4px; }
+  .feature-text { font-size:12.5px; color:#c8d6f0; line-height:1.4; }
+  .cta-section { background:rgba(255,255,255,0.05); margin:0 20px 20px; border-radius:12px; padding:20px; display:flex; gap:16px; align-items:center; }
+  .qr-wrap { flex-shrink:0; background:white; border-radius:10px; padding:6px; }
+  .qr-wrap img { width:90px; height:90px; display:block; }
+  .cta-text h3 { font-size:14px; font-weight:700; color:white; margin-bottom:4px; }
+  .cta-text p { font-size:11px; color:#a0b4ff; line-height:1.4; word-break:break-all; }
+  ${wa ? `.wa { background:#25D366; color:white; border-radius:8px; padding:6px 12px; font-size:11px; font-weight:700; display:inline-block; margin-top:8px; text-decoration:none; }` : ""}
+  .footer { text-align:center; padding:12px; font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:1px; }
+  @media print { body { background:white; padding:0; } .flyer { box-shadow:none; width:100%; border-radius:0; } }
+</style>
+</head>
+<body>
+<div class="flyer">
+  <div class="top-bar">Powered by Gustafta AI · Platform Chatbot Konstruksi Indonesia</div>
+  <div class="hero">
+    <div class="badge">✦ Asisten AI Konstruksi</div>
+    <div class="title">${agent.name || "AI Chatbot"}</div>
+    <div class="subtitle">${(agent.description || agent.tagline || "Asisten AI cerdas untuk industri konstruksi Indonesia.").substring(0, 120)}</div>
+  </div>
+  <div class="divider"></div>
+  ${points.length > 0 ? `<div class="features">
+    <div class="features-title">Keunggulan Utama</div>
+    ${points.map(p => `<div class="feature"><div class="dot"></div><div class="feature-text">${p}</div></div>`).join("")}
+  </div>
+  <div class="divider"></div>` : ""}
+  <div class="cta-section">
+    <div class="qr-wrap"><img src="${qrSrc}" alt="QR Code" /></div>
+    <div class="cta-text">
+      <h3>Scan untuk Mulai Chat</h3>
+      <p>${chatUrl}</p>
+      ${wa ? `<a href="https://wa.me/${wa.replace(/\D/g, '')}" class="wa">📱 WhatsApp</a>` : ""}
+    </div>
+  </div>
+  <div class="footer">GUSTAFTA.AI · CHATBOT AI KONSTRUKSI INDONESIA</div>
+</div>
+<script>window.onload = function() { document.title = "Flyer — ${agent.name}"; }</script>
+</body>
+</html>`;
+
+  const openFlyer = () => {
+    const blob = new Blob([flyerHtml], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    toast({ title: "Flyer terbuka!", description: "Gunakan Ctrl+P / Cmd+P untuk cetak atau simpan PDF" });
+  };
+
+  const downloadFlyer = () => {
+    const blob = new Blob([flyerHtml], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `flyer-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Flyer diunduh!" });
+  };
+
+  return (
+    <Card>
+      <CardContent className="pt-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Newspaper className="w-5 h-5 text-primary" />
+          <span className="font-semibold text-sm">Digital Flyer / Poster</span>
+          <Badge variant="secondary" className="text-xs ml-auto">Instan</Badge>
+        </div>
+        <p className="text-xs text-muted-foreground">Poster promosi digital berisi nama, keunggulan, dan QR code chatbot — siap cetak / bagikan.</p>
+
+        {/* Mini preview */}
+        <div className="rounded-lg overflow-hidden border" style={{ background: "linear-gradient(135deg,#1a1a2e,#0f3460)", padding: "12px" }}>
+          <div className="text-center space-y-1.5">
+            <div className="text-xs font-bold text-blue-400 tracking-widest uppercase">✦ Asisten AI Konstruksi</div>
+            <div className="text-white font-black text-sm leading-tight">{agent.name || "AI Chatbot"}</div>
+            <div className="text-blue-200 text-xs leading-relaxed line-clamp-2">{(agent.description || agent.tagline || "").substring(0, 80)}</div>
+          </div>
+          {points.slice(0, 2).length > 0 && (
+            <div className="mt-3 space-y-1">
+              {points.slice(0, 2).map((p, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs text-blue-100">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                  <span className="line-clamp-1">{p}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="mt-3 flex items-center gap-2">
+            <div className="bg-white rounded p-1 flex-shrink-0">
+              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=${encodeURIComponent(chatUrl)}&margin=2`} className="w-10 h-10 block" alt="QR" />
+            </div>
+            <div className="text-xs text-blue-200 break-all line-clamp-2">{chatUrl}</div>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button size="sm" className="flex-1 h-8 text-xs" onClick={openFlyer} data-testid="button-open-flyer">
+            <Printer className="w-3 h-3 mr-1.5" /> Buka & Cetak
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={downloadFlyer} data-testid="button-download-flyer">
+            <Download className="w-3 h-3 mr-1.5" /> Unduh .html
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">Tekan Ctrl+P / Cmd+P di tab baru untuk cetak atau simpan sebagai PDF</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Social Preview Card Tool ─────────────────────────────────────────
+function SocialPreviewTool({ agent }: { agent: any }) {
+  const { toast } = useToast();
+  const [platform, setPlatform] = useState<"whatsapp" | "linkedin">("whatsapp");
+  const chatUrl = `${window.location.origin}/bot/${agent.id}`;
+  const productUrl = `${window.location.origin}/product/${agent.id}`;
+  const [selectedLink, setSelectedLink] = useState("chatbot");
+  const linkMap: Record<string, string> = {
+    chatbot: chatUrl,
+    product: productUrl,
+    ecourse: `${window.location.origin}/product/${agent.id}/ecourse`,
+    ebook: `${window.location.origin}/product/${agent.id}/ebook`,
+  };
+  const activeLink = linkMap[selectedLink];
+  const domain = window.location.hostname;
+  const initials = (agent.name || "AI").substring(0, 2).toUpperCase();
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(activeLink);
+    toast({ title: "Link disalin!", description: activeLink });
+  };
+
+  return (
+    <Card>
+      <CardContent className="pt-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <Share2 className="w-5 h-5 text-primary" />
+          <span className="font-semibold text-sm">Social Share Preview</span>
+          <Badge variant="secondary" className="text-xs ml-auto">Preview</Badge>
+        </div>
+        <p className="text-xs text-muted-foreground">Preview tampilan link saat dibagikan di WhatsApp atau LinkedIn.</p>
+
+        <div className="flex gap-2">
+          <Button
+            size="sm" variant={platform === "whatsapp" ? "default" : "outline"}
+            className="flex-1 h-8 text-xs gap-1" onClick={() => setPlatform("whatsapp")}
+            data-testid="button-preview-wa"
+          >
+            <MessageSquare className="w-3 h-3" /> WhatsApp
+          </Button>
+          <Button
+            size="sm" variant={platform === "linkedin" ? "default" : "outline"}
+            className="flex-1 h-8 text-xs gap-1" onClick={() => setPlatform("linkedin")}
+            data-testid="button-preview-linkedin"
+          >
+            <Linkedin className="w-3 h-3" /> LinkedIn
+          </Button>
+        </div>
+
+        <Select value={selectedLink} onValueChange={setSelectedLink}>
+          <SelectTrigger className="h-8 text-xs" data-testid="select-preview-link">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="chatbot" className="text-xs">Link Chatbot</SelectItem>
+            <SelectItem value="product" className="text-xs">Landing Chatbot</SelectItem>
+            <SelectItem value="ecourse" className="text-xs">Landing eCourse</SelectItem>
+            <SelectItem value="ebook" className="text-xs">Landing eBook</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* WhatsApp Preview */}
+        {platform === "whatsapp" && (
+          <div className="rounded-xl overflow-hidden border" style={{ background: "#111b21" }}>
+            <div className="px-3 py-2" style={{ background: "#202c33" }}>
+              <div className="text-xs text-green-400 font-semibold mb-0.5">WhatsApp</div>
+            </div>
+            <div className="p-3">
+              <div className="rounded-lg overflow-hidden border border-white/10 max-w-xs" style={{ background: "#1f2c34" }}>
+                <div className="h-24 flex items-center justify-center" style={{ background: "linear-gradient(135deg,#1a1a2e,#4361ee)" }}>
+                  <div className="text-white font-black text-2xl opacity-80">{initials}</div>
+                </div>
+                <div className="p-3 border-l-4 border-green-500">
+                  <div className="text-white font-semibold text-sm leading-tight">{agent.name}</div>
+                  <div className="text-gray-400 text-xs mt-1 line-clamp-2">{agent.description?.substring(0, 80) || agent.tagline || "Asisten AI Konstruksi Indonesia"}</div>
+                  <div className="text-gray-500 text-xs mt-1.5">{domain}</div>
+                </div>
+              </div>
+              <div className="text-gray-500 text-xs mt-1.5 pl-1">{activeLink.substring(0, 45)}…</div>
+            </div>
+          </div>
+        )}
+
+        {/* LinkedIn Preview */}
+        {platform === "linkedin" && (
+          <div className="rounded-xl overflow-hidden border bg-white dark:bg-gray-900 shadow-sm">
+            <div className="h-20 flex items-center justify-center" style={{ background: "linear-gradient(135deg,#1a1a2e,#4361ee)" }}>
+              <div className="text-white font-black text-3xl opacity-80">{initials}</div>
+            </div>
+            <div className="p-3 border border-t-0 rounded-b-xl border-border">
+              <div className="font-semibold text-sm text-foreground leading-tight">{agent.name}</div>
+              <div className="text-muted-foreground text-xs mt-0.5 line-clamp-2">{agent.description?.substring(0, 100) || "Asisten AI Konstruksi Indonesia"}</div>
+              <div className="text-muted-foreground text-xs mt-1.5 uppercase tracking-wide">{domain}</div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <Button size="sm" className="flex-1 h-8 text-xs" onClick={copyLink} data-testid="button-copy-share-link">
+            <Copy className="w-3 h-3 mr-1.5" /> Salin Link
+          </Button>
+          <Button size="sm" variant="outline" className="h-8 text-xs px-3" asChild>
+            <a href={activeLink} target="_blank" rel="noopener noreferrer" data-testid="button-open-share-link">
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">Preview ini menunjukkan bagaimana link akan tampil saat dibagikan</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── ROI Calculator ───────────────────────────────────────────────────
+function RoiCalculatorTool({ agent }: { agent: any }) {
+  const { toast } = useToast();
+  const [staff, setStaff] = useState(3);
+  const [hoursPerDay, setHoursPerDay] = useState(2);
+  const [ratePerHour, setRatePerHour] = useState(50000);
+  const [copied, setCopied] = useState(false);
+
+  const monthlyCostManual = staff * hoursPerDay * 22 * ratePerHour;
+  const chatbotCost = (agent.monthlyPrice || 299000);
+  const moneySaved = monthlyCostManual - chatbotCost;
+  const roiPercent = chatbotCost > 0 ? Math.round((moneySaved / chatbotCost) * 100) : 0;
+  const paybackDays = moneySaved > 0 ? Math.round(chatbotCost / (moneySaved / 30)) : 0;
+
+  const resultText = `ROI Kalkulator — ${agent.name}
+==============================
+Asumsi Input:
+- Staf yang ditangani chatbot: ${staff} orang
+- Waktu per hari: ${hoursPerDay} jam
+- Rate per jam: Rp ${ratePerHour.toLocaleString("id-ID")}
+- Hari kerja per bulan: 22 hari
+
+Hasil Kalkulasi:
+- Biaya manual/bulan: Rp ${monthlyCostManual.toLocaleString("id-ID")}
+- Biaya chatbot/bulan: Rp ${chatbotCost.toLocaleString("id-ID")}
+- Penghematan/bulan: Rp ${moneySaved.toLocaleString("id-ID")}
+- ROI: ${roiPercent}%
+- Payback period: ${paybackDays} hari
+
+Gunakan kalkulator ini sebagai bahan presentasi ke klien/manajemen.
+Generated by Gustafta AI`;
+
+  const copy = () => {
+    navigator.clipboard.writeText(resultText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Hasil disalin!", description: "Gunakan sebagai bahan proposal ke klien" });
+  };
+
+  return (
+    <Card>
+      <CardContent className="pt-5 space-y-4">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-primary" />
+          <span className="font-semibold text-sm">ROI Calculator</span>
+          <Badge variant="secondary" className="text-xs ml-auto">Sales Tool</Badge>
+        </div>
+        <p className="text-xs text-muted-foreground">Hitung penghematan biaya vs proses manual — untuk presentasi ke klien & manajemen.</p>
+
+        <div className="grid grid-cols-1 gap-3">
+          <div>
+            <Label className="text-xs mb-1 block">Staf yang ditangani chatbot</Label>
+            <div className="flex items-center gap-2">
+              <input type="range" min={1} max={20} value={staff} onChange={e => setStaff(Number(e.target.value))} className="flex-1 h-1.5 accent-primary" />
+              <span className="text-xs font-bold w-8 text-right">{staff}</span>
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs mb-1 block">Jam layanan per hari</Label>
+            <div className="flex items-center gap-2">
+              <input type="range" min={0.5} max={8} step={0.5} value={hoursPerDay} onChange={e => setHoursPerDay(Number(e.target.value))} className="flex-1 h-1.5 accent-primary" />
+              <span className="text-xs font-bold w-10 text-right">{hoursPerDay}j</span>
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs mb-1 block">Rate tenaga per jam</Label>
+            <div className="flex items-center gap-2">
+              <input type="range" min={25000} max={200000} step={5000} value={ratePerHour} onChange={e => setRatePerHour(Number(e.target.value))} className="flex-1 h-1.5 accent-primary" />
+              <span className="text-xs font-bold w-24 text-right">Rp {(ratePerHour/1000).toFixed(0)}rb/j</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 p-3 text-center">
+            <div className="text-xs text-muted-foreground mb-1">Biaya Manual/Bln</div>
+            <div className="font-bold text-sm text-red-600">Rp {monthlyCostManual.toLocaleString("id-ID")}</div>
+          </div>
+          <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-3 text-center">
+            <div className="text-xs text-muted-foreground mb-1">Biaya Chatbot/Bln</div>
+            <div className="font-bold text-sm text-green-600">Rp {chatbotCost.toLocaleString("id-ID")}</div>
+          </div>
+          <div className="rounded-lg bg-primary/10 border border-primary/20 p-3 text-center col-span-2">
+            <div className="text-xs text-muted-foreground mb-1">Penghematan per Bulan</div>
+            <div className="font-black text-lg text-primary">Rp {Math.max(moneySaved, 0).toLocaleString("id-ID")}</div>
+            <div className="text-xs text-muted-foreground">ROI {roiPercent}% · Balik modal dalam {paybackDays} hari</div>
+          </div>
+        </div>
+
+        <Button size="sm" className="w-full h-8 text-xs" onClick={copy} data-testid="button-copy-roi">
+          {copied ? <Check className="w-3 h-3 mr-1.5" /> : <Copy className="w-3 h-3 mr-1.5" />}
+          {copied ? "Tersalin!" : "Salin Hasil untuk Proposal"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Marketing Brief helpers (unchanged) ──────────────────────────────
 function buildMarketingBrief(agent: any): string {
   const lines: string[] = [];
@@ -450,7 +942,7 @@ export function MarketingPanel({ agent }: { agent: any }) {
                 Marketing Suite
               </h2>
               <p className="text-sm text-muted-foreground">
-                9 AI tools untuk mempromosikan chatbot <span className="font-medium text-foreground">{agent.name}</span>
+                9 AI tools + 5 alat instan untuk mempromosikan chatbot <span className="font-medium text-foreground">{agent.name}</span>
               </p>
             </div>
           </div>
@@ -468,8 +960,11 @@ export function MarketingPanel({ agent }: { agent: any }) {
             <TabsTrigger value="ai-tools" className="text-xs gap-1.5" data-testid="tab-ai-tools">
               <Sparkles className="w-3.5 h-3.5" /> AI Tools
             </TabsTrigger>
+            <TabsTrigger value="instant" className="text-xs gap-1.5" data-testid="tab-instant">
+              <Zap className="w-3.5 h-3.5" /> Alat Instan
+            </TabsTrigger>
             <TabsTrigger value="brief" className="text-xs gap-1.5" data-testid="tab-brief">
-              <FileText className="w-3.5 h-3.5" /> Brief Marketing
+              <FileText className="w-3.5 h-3.5" /> Brief
             </TabsTrigger>
             <TabsTrigger value="settings" className="text-xs gap-1.5" data-testid="tab-settings">
               <Eye className="w-3.5 h-3.5" /> Pengaturan
@@ -486,6 +981,22 @@ export function MarketingPanel({ agent }: { agent: any }) {
             {AI_TOOLS.map((tool) => (
               <AiToolCard key={tool.id} tool={tool} agent={agent} />
             ))}
+          </div>
+        </TabsContent>
+
+        {/* ── ALAT INSTAN TAB ── */}
+        <TabsContent value="instant" className="m-0 px-4 md:px-6 py-5 space-y-5">
+          <p className="text-sm text-muted-foreground">
+            5 alat marketing yang bekerja <strong>instan tanpa AI</strong> — QR code, tanda tangan email, flyer, social preview, dan kalkulator ROI untuk presentasi ke klien.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <QrCodeTool agent={agent} />
+            <EmailSignatureTool agent={agent} />
+            <FlyerTool agent={agent} />
+            <SocialPreviewTool agent={agent} />
+            <div className="md:col-span-2">
+              <RoiCalculatorTool agent={agent} />
+            </div>
           </div>
         </TabsContent>
 
