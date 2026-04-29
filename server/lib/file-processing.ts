@@ -5,10 +5,17 @@ import OpenAI from "openai";
 import { URL } from "url";
 import net from "net";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+let _openai: OpenAI | null = null;
+function getOpenAI() {
+  if (!_openai) {
+    _openai = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+  }
+  return _openai;
+}
+const openai = new Proxy({} as OpenAI, { get(_t, p) { return (getOpenAI() as any)[p]; } });
 
 const MAX_TEXT_LENGTH = 15000;
 const MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024;
