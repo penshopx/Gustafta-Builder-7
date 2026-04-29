@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookOpen, GraduationCap, FileText, Sparkles, ExternalLink, Download,
-  ArrowRight, Bot, Layers, Zap, BookMarked, ChevronRight, Globe, Brain,
+  ArrowRight, Bot, Layers, Zap, BookMarked, ChevronRight, Globe, Brain, Eye,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,6 +106,11 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
           icon: <Download className="w-4 h-4" />,
           onClick: () => downloadProduct("ebook-txt", "ebook?format=txt", "txt"),
         },
+        {
+          label: "Landing Page",
+          icon: <Eye className="w-4 h-4" />,
+          onClick: () => window.open(`/product/${agent.id}/ebook`, "_blank"),
+        },
       ],
     },
     {
@@ -130,6 +135,11 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
           icon: <Download className="w-4 h-4" />,
           onClick: () => downloadProduct("ecourse", "ecourse", "html"),
         },
+        {
+          label: "Landing Page",
+          icon: <Eye className="w-4 h-4" />,
+          onClick: () => window.open(`/product/${agent.id}/ecourse`, "_blank"),
+        },
       ],
     },
     {
@@ -153,6 +163,11 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
           label: "Download HTML",
           icon: <Download className="w-4 h-4" />,
           onClick: () => downloadProduct("docgen", "docgen", "html"),
+        },
+        {
+          label: "Landing Page",
+          icon: <Eye className="w-4 h-4" />,
+          onClick: () => window.open(`/product/${agent.id}/docgen`, "_blank"),
         },
       ],
     },

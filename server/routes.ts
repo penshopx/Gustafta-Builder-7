@@ -7304,6 +7304,47 @@ Return JSON format:
     }
   });
 
+  // ─── Public Ekosistem Product Data (no auth, no landingPageEnabled gate) ───
+  app.get("/api/public/agent/:agentId", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.agentId as string);
+      if (!agent) return res.status(404).json({ error: "Agent tidak ditemukan" });
+      const kbs: any[] = await storage.getKnowledgeBases(agent.id);
+      const miniApps: any[] = (await storage.getMiniApps(agent.id)).slice(0, 6);
+      const starters: string[] = (agent as any).conversationStarters || [];
+      res.json({
+        id: agent.id,
+        name: agent.name,
+        description: agent.description,
+        avatar: agent.avatar,
+        tagline: (agent as any).tagline || "",
+        category: agent.category || "Konstruksi",
+        philosophy: (agent as any).philosophy || "",
+        expertise: (agent as any).expertise || [],
+        productFeatures: (agent as any).productFeatures || [],
+        landingPainPoints: (agent as any).landingPainPoints || [],
+        landingBenefits: (agent as any).landingBenefits || [],
+        landingTestimonials: (agent as any).landingTestimonials || [],
+        landingFaq: (agent as any).landingFaq || [],
+        conversionOffers: (agent as any).conversionOffers || [],
+        monthlyPrice: (agent as any).monthlyPrice || 0,
+        trialEnabled: (agent as any).trialEnabled || false,
+        trialDays: (agent as any).trialDays || 7,
+        whatsappCta: (agent as any).whatsappCta || "",
+        greetingMessage: (agent as any).greetingMessage || "",
+        conversationStarters: starters,
+        kbCount: kbs.length,
+        kbCategories: [...new Set(kbs.map((k: any) => k.category || k.title).filter(Boolean))].slice(0, 8),
+        miniAppCount: miniApps.length,
+        miniApps: miniApps.map((m: any) => ({ id: m.id, name: m.name, description: m.description, type: m.type })),
+        moduleCount: kbs.length,
+        chapterCount: starters.length + kbs.length,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || "Gagal memuat data" });
+    }
+  });
+
   app.get("/api/landing/:agentId", async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.agentId as string);

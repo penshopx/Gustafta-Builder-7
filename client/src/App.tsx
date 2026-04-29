@@ -18,6 +18,7 @@ import SeriesCatalog from "@/pages/series-catalog";
 import SeriesDetail from "@/pages/series-detail";
 import SectorLanding from "@/pages/sector-landing";
 import ProductLanding from "@/pages/product-landing";
+import EkosistemLanding from "@/pages/ekosistem-landing";
 import ModulChat from "@/pages/modul-chat";
 import PacksPage from "@/pages/packs";
 import TenderWizard from "@/pages/tender-wizard";
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/series" component={SeriesCatalog} />
       <Route path="/series/:slug" component={SeriesDetail} />
       <Route path="/sector/:sectorId" component={SectorLanding} />
+      <Route path="/product/:agentId/:product" component={EkosistemLanding} />
       <Route path="/product/:agentId" component={ProductLanding} />
       <Route path="/modul/:bigIdeaId" component={ModulChat} />
       <Route path="/packs" component={PacksPage} />

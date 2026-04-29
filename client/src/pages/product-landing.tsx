@@ -19,6 +19,9 @@ import {
   MessageSquare,
   Rocket,
   Eye,
+  BookOpen,
+  GraduationCap,
+  FileText,
 } from "lucide-react";
 
 interface DemoItem {
@@ -586,6 +589,35 @@ export default function ProductLanding() {
               <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* Ecosystem Products Strip */}
+      <section className="py-14 bg-gray-950 border-t border-white/10">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <p className="text-center text-xs text-gray-500 uppercase tracking-widest font-semibold mb-6">
+            Ekosistem Kompetensi dari Chatbot Ini
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {[
+              { icon: BookOpen, label: "eBook Kompetensi", path: "ebook", color: "text-amber-400" },
+              { icon: GraduationCap, label: "eCourse Modul", path: "ecourse", color: "text-violet-400" },
+              { icon: FileText, label: "Generator Dokumen", path: "docgen", color: "text-blue-400" },
+              { icon: MessageSquare, label: "Mini Apps", path: "mini-apps", color: "text-emerald-400" },
+            ].map((prod) => {
+              const PIcon = prod.icon;
+              return (
+                <Link key={prod.path} href={`/product/${agentId}/${prod.path}`}>
+                  <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-colors cursor-pointer group">
+                    <PIcon className={`w-6 h-6 ${prod.color} group-hover:scale-110 transition-transform`} />
+                    <span className="text-xs text-gray-400 group-hover:text-white text-center font-medium transition-colors leading-tight">
+                      {prod.label}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 

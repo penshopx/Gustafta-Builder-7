@@ -24,6 +24,15 @@ A key feature is "Project Brain," providing contextual data for chatbots, enabli
 
 The Ekosistem panel is accessible from the dashboard sidebar under "Ekosistem Kompetensi" (Network icon), and individual export buttons are also available in the Studio Kompetensi tab.
 
+**Public Landing Pages** are available for each product at `/product/:agentId/:product`:
+- `/product/:agentId` — existing chatbot landing page (with ecosystem cross-sell strip)
+- `/product/:agentId/ecourse` — eCourse landing (dark violet/purple gradient, microlearning style, stats, module preview, quiz preview)
+- `/product/:agentId/ebook` — eBook landing (amber/orange, 3D book cover mockup, chapters list, download CTAs)
+- `/product/:agentId/mini-apps` — Mini Apps landing (emerald/teal, app grid, 3-step how-to)
+- `/product/:agentId/docgen` — Document Generator landing (blue/cyan, doc type cards, features checklist)
+
+All landing pages: sticky topbar with breadcrumb + open button, testimonials, FAQ, cross-sell strip to other products. Powered by `/api/public/agent/:agentId` endpoint (no auth required).
+
 Core features include a RAG toggle for controlling knowledge base lookups, "Project Context" for personalizing conversations, and a "User Memory System" for recalling facts across sessions. Monetization is handled via per-Modul bundle pricing and per-Chatbot individual pricing, with guest message limits, trial periods, and a voucher system. A "Conversion Layer" transforms chatbots into revenue engines through lead capture, scoring, and smart CTA triggers.
 
 ## User Preferences
