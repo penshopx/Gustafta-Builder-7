@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useActiveAgent, useUpdateAgent } from "@/hooks/use-agents";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Brain,
   Ear,
@@ -40,6 +41,10 @@ import {
   XCircle,
   Trash2,
   DatabaseBackup,
+  GitBranch,
+  Bot,
+  Cpu,
+  ChevronRight,
 } from "lucide-react";
 
 type Settings = {
@@ -660,12 +665,39 @@ function MemoryManager({ agentId }: { agentId: string }) {
   );
 }
 
+type SpecialistConfig = { name: string; prompt: string; enabled: boolean };
+type OrchestratorConfig = {
+  enabled: boolean;
+  routingModel: string;
+  specialists: Record<string, SpecialistConfig>;
+};
+
+const SPECIALIST_META: Array<{ key: string; icon: string; label: string; defaultPrompt: string }> = [
+  { key: "tender", icon: "📋", label: "Agen Tender", defaultPrompt: "Kamu adalah spesialis tender dan pengadaan jasa konstruksi. Fokus menjawab tentang: analisis dokumen tender, persyaratan kualifikasi BUJK, estimasi RAB dan BOQ, strategi penawaran harga, persyaratan teknis proyek, dan evaluasi kontrak tender. Berikan jawaban yang presisi dan berbasis regulasi Perpres 12/2021 dan aturan LKPP." },
+  { key: "skk_sbu", icon: "🏆", label: "Agen SKK/SBU", defaultPrompt: "Kamu adalah spesialis sertifikasi kompetensi konstruksi Indonesia. Fokus menjawab tentang: SKK (Sertifikat Kompetensi Kerja) dari level 3-9, SBU (Sertifikat Badan Usaha), proses registrasi LPJK, persyaratan dokumen, biaya dan jadwal sertifikasi, serta jalur karir di jasa konstruksi sesuai PP 14/2021 dan UU Jasa Konstruksi 2/2017." },
+  { key: "dokumen", icon: "📄", label: "Agen Dokumen", defaultPrompt: "Kamu adalah spesialis pembuatan dokumen teknis konstruksi. Fokus menjawab tentang: pembuatan SOP proyek, template kontrak konstruksi, surat garansi, MOU, dokumen K3, laporan progres, metode kerja (method statement), dan dokumen ISO 9001/14001/45001. Bantu pengguna membuat draft dokumen yang siap pakai." },
+  { key: "hukum", icon: "⚖️", label: "Agen Hukum", defaultPrompt: "Kamu adalah spesialis hukum dan regulasi jasa konstruksi Indonesia. Fokus menjawab tentang: UU Jasa Konstruksi No. 2/2017, PP 22/2020, PP 14/2021, Perpres Pengadaan, perselisihan kontrak konstruksi, arbitrase, Permen PUPR, dan standar SNI. Berikan referensi pasal yang spesifik dalam setiap jawaban." },
+  { key: "k3", icon: "🦺", label: "Agen K3", defaultPrompt: "Kamu adalah spesialis Keselamatan dan Kesehatan Kerja (K3) konstruksi. Fokus menjawab tentang: RK3K, JSA, IBPR, APD, inspeksi proyek, incident report, standar K3 Permenaker, dan sertifikasi K3. Prioritaskan keselamatan dan kepatuhan regulasi." },
+  { key: "marketing", icon: "📈", label: "Agen Marketing", defaultPrompt: "Kamu adalah spesialis marketing dan penjualan untuk industri konstruksi. Fokus menjawab tentang: strategi pemasaran jasa konstruksi, copywriting, proposal klien, strategi media sosial untuk kontraktor, penawaran harga kompetitif, personal branding kontraktor, dan strategi lead generation." },
+  { key: "umum", icon: "💬", label: "Agen Umum", defaultPrompt: "Kamu adalah asisten umum yang membantu dengan pertanyaan seputar industri konstruksi Indonesia, manajemen proyek, material bangunan, teknik sipil dasar, dan topik umum lainnya." },
+];
+
+function buildDefaultOrchConfig(): OrchestratorConfig {
+  const specialists: Record<string, SpecialistConfig> = {};
+  SPECIALIST_META.forEach(({ key, label, defaultPrompt }) => {
+    specialists[key] = { name: label, prompt: defaultPrompt, enabled: true };
+  });
+  return { enabled: false, routingModel: "deepseek-chat", specialists };
+}
+
 export function AgenticAIPanel() {
   const { data: agent, isLoading } = useActiveAgent();
   const updateAgent = useUpdateAgent();
   const { toast } = useToast();
   const [isAdvanced, setIsAdvanced] = useState(false);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [orchConfig, setOrchConfig] = useState<OrchestratorConfig>(buildDefaultOrchConfig());
+  const [expandedSpec, setExpandedSpec] = useState<string | null>(null);
 
   useEffect(() => {
     if (agent) {
@@ -712,6 +744,21 @@ export function AgenticAIPanel() {
     }
   }, [agent?.id]);
 
+  useEffect(() => {
+    if (agent) {
+      const raw = (agent as any).orchestratorConfig;
+      if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+        const defaults = buildDefaultOrchConfig();
+        const merged: OrchestratorConfig = {
+          enabled: raw.enabled ?? false,
+          routingModel: raw.routingModel || "deepseek-chat",
+          specialists: { ...defaults.specialists, ...(raw.specialists || {}) },
+        };
+        setOrchConfig(merged);
+      }
+    }
+  }, [agent?.id]);
+
   const save = async (patch: Partial<Settings>) => {
     if (!agent) return;
     const prev = settings;
@@ -722,6 +769,34 @@ export function AgenticAIPanel() {
     } catch {
       toast({ title: "Error", description: "Gagal menyimpan pengaturan", variant: "destructive" });
       setSettings(prev);
+    }
+  };
+
+  const saveOrch = async (patch: Partial<OrchestratorConfig>) => {
+    if (!agent) return;
+    const next = { ...orchConfig, ...patch };
+    setOrchConfig(next);
+    try {
+      await updateAgent.mutateAsync({ id: agent.id, data: { orchestratorConfig: next } as any });
+    } catch {
+      toast({ title: "Error", description: "Gagal menyimpan konfigurasi orchestrator", variant: "destructive" });
+      setOrchConfig(orchConfig);
+    }
+  };
+
+  const saveSpecialist = async (key: string, patch: Partial<SpecialistConfig>) => {
+    const next: OrchestratorConfig = {
+      ...orchConfig,
+      specialists: {
+        ...orchConfig.specialists,
+        [key]: { ...orchConfig.specialists[key], ...patch },
+      },
+    };
+    setOrchConfig(next);
+    try {
+      await updateAgent.mutateAsync({ id: agent!.id, data: { orchestratorConfig: next } as any });
+    } catch {
+      toast({ title: "Error", description: "Gagal menyimpan specialist", variant: "destructive" });
     }
   };
 
@@ -775,6 +850,144 @@ export function AgenticAIPanel() {
           />
         </div>
       </div>
+
+      {/* ── ORCHESTRATOR MULTI-AGENT ── */}
+      <Card className={orchConfig.enabled ? "border-violet-400 dark:border-violet-600 shadow-sm" : ""}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <GitBranch className="h-4 w-4 text-violet-500" />
+              Orchestrator Multi-Agent
+              {orchConfig.enabled && (
+                <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">
+                  Aktif
+                </span>
+              )}
+            </CardTitle>
+            <Switch
+              checked={orchConfig.enabled}
+              onCheckedChange={(v) => {
+                if (v && !settings.agenticMode) save({ agenticMode: true });
+                saveOrch({ enabled: v });
+              }}
+              data-testid="toggle-orchestrator-enabled"
+            />
+          </div>
+          <CardDescription>
+            Aktifkan agar AI secara otomatis mendeteksi topik query (tender, SKK, dokumen, hukum, K3, marketing)
+            dan mengaktifkan prompt specialist yang tepat — tanpa biaya tinggi.
+          </CardDescription>
+        </CardHeader>
+        {orchConfig.enabled && (
+          <CardContent className="space-y-4">
+            {/* Routing Model */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium flex items-center gap-1.5">
+                <Cpu className="h-3 w-3 text-muted-foreground" />
+                Model Routing (Classifier — Murah &amp; Cepat)
+              </Label>
+              <Select
+                value={orchConfig.routingModel}
+                onValueChange={(v) => saveOrch({ routingModel: v })}
+              >
+                <SelectTrigger className="h-8 text-xs" data-testid="select-routing-model">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="deepseek-chat">DeepSeek Chat (~$0.0001/call) — Direkomendasikan</SelectItem>
+                  <SelectItem value="deepseek-reasoner">DeepSeek Reasoner (lebih akurat)</SelectItem>
+                  <SelectItem value="gpt-4o-mini">GPT-4o Mini (fallback)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">
+                Model ini hanya dipakai untuk klasifikasi topik (~10 token). Jawaban tetap menggunakan model utama chatbot.
+              </p>
+            </div>
+
+            {/* Cost Indicator */}
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-xs text-green-800 dark:text-green-300">
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                <strong>Efisiensi biaya:</strong> Classifier hanya ~$0.0001 per pesan. Jawaban specialist menggunakan model yang sudah dikonfigurasi — tidak ada biaya tambahan signifikan.
+              </span>
+            </div>
+
+            {/* Specialist Agents */}
+            <div className="space-y-2">
+              <Label className="text-xs font-medium flex items-center gap-1.5">
+                <Bot className="h-3 w-3 text-muted-foreground" />
+                7 Specialist Agents
+              </Label>
+              <div className="space-y-2">
+                {SPECIALIST_META.map(({ key, icon, label }) => {
+                  const spec = orchConfig.specialists[key] || { name: label, prompt: "", enabled: true };
+                  const isExpanded = expandedSpec === key;
+                  return (
+                    <div
+                      key={key}
+                      className={`rounded-lg border transition-colors ${spec.enabled ? "border-border" : "border-border/40 opacity-60"}`}
+                    >
+                      <div
+                        className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-muted/30"
+                        onClick={() => setExpandedSpec(isExpanded ? null : key)}
+                        data-testid={`specialist-header-${key}`}
+                      >
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <span>{icon}</span>
+                          <span>{label}</span>
+                        </div>
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Switch
+                            checked={spec.enabled}
+                            onCheckedChange={(v) => saveSpecialist(key, { enabled: v })}
+                            data-testid={`toggle-specialist-${key}`}
+                          />
+                          <ChevronRight
+                            className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                          />
+                        </div>
+                      </div>
+                      {isExpanded && (
+                        <div className="px-3 pb-3 space-y-2 border-t">
+                          <Label className="text-xs text-muted-foreground mt-2 block">Prompt Specialist</Label>
+                          <Textarea
+                            value={spec.prompt}
+                            onChange={(e) => {
+                              const next: OrchestratorConfig = {
+                                ...orchConfig,
+                                specialists: { ...orchConfig.specialists, [key]: { ...spec, prompt: e.target.value } },
+                              };
+                              setOrchConfig(next);
+                            }}
+                            onBlur={() => saveSpecialist(key, { prompt: orchConfig.specialists[key]?.prompt || "" })}
+                            rows={4}
+                            className="text-xs resize-none"
+                            placeholder="Prompt khusus untuk specialist ini..."
+                            data-testid={`textarea-specialist-prompt-${key}`}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs h-7"
+                            onClick={() => {
+                              const meta = SPECIALIST_META.find((m) => m.key === key);
+                              if (meta) saveSpecialist(key, { prompt: meta.defaultPrompt });
+                            }}
+                            data-testid={`button-reset-specialist-${key}`}
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Reset ke Default
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
 
       {/* 1. Preset Perilaku */}
       <Card>

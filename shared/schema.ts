@@ -245,6 +245,7 @@ export const agents = pgTable("agents", {
   riskCompliance: text("risk_compliance").default(""),
   deliverables: jsonb("deliverables").default([]),
   deliverableBundle: text("deliverable_bundle").default(""),
+  orchestratorConfig: jsonb("orchestrator_config").default({}),
   isActive: boolean("is_active").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

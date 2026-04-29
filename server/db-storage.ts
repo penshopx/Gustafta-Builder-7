@@ -879,6 +879,7 @@ export class DatabaseStorage implements IStorage {
       domainCharter: filled.domainCharter,
       qualityBar: filled.qualityBar,
       riskCompliance: filled.riskCompliance,
+      orchestratorConfig: (filled as any).orchestratorConfig ?? {},
       isActive: true,
     }).returning();
     return this.mapAgentRow(result[0]);
@@ -1110,6 +1111,7 @@ export class DatabaseStorage implements IStorage {
       domainCharter: (row as any).domainCharter || "",
       qualityBar: (row as any).qualityBar || "",
       riskCompliance: (row as any).riskCompliance || "",
+      orchestratorConfig: (row as any).orchestratorConfig ?? {},
       isActive: row.isActive || false,
       createdAt: row.createdAt.toISOString(),
     };

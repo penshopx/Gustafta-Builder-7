@@ -2971,6 +2971,90 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   // ==================== Telegram Webhook ====================
   
   // Helper function to generate AI response for external integrations
+  // ── ORCHESTRATOR: Intent Cache & Classifier ──────────────────────────────
+  const intentCache = new Map<string, { domain: string; ts: number }>();
+  const INTENT_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+  const SPECIALIST_DEFAULTS: Record<string, { name: string; icon: string; prompt: string }> = {
+    tender: {
+      name: "Agen Tender",
+      icon: "📋",
+      prompt:
+        "Kamu adalah spesialis tender dan pengadaan jasa konstruksi. Fokus menjawab tentang: analisis dokumen tender, persyaratan kualifikasi BUJK, estimasi RAB dan BOQ, strategi penawaran harga, persyaratan teknis proyek, dan evaluasi kontrak tender. Berikan jawaban yang presisi dan berbasis regulasi Perpres 12/2021 dan aturan LKPP.",
+    },
+    skk_sbu: {
+      name: "Agen SKK/SBU",
+      icon: "🏆",
+      prompt:
+        "Kamu adalah spesialis sertifikasi kompetensi konstruksi Indonesia. Fokus menjawab tentang: SKK (Sertifikat Kompetensi Kerja) dari level 3-9, SBU (Sertifikat Badan Usaha), proses registrasi LPJK, persyaratan dokumen, biaya dan jadwal sertifikasi, serta jalur karir di jasa konstruksi sesuai PP 14/2021 dan UU Jasa Konstruksi 2/2017.",
+    },
+    dokumen: {
+      name: "Agen Dokumen",
+      icon: "📄",
+      prompt:
+        "Kamu adalah spesialis pembuatan dokumen teknis konstruksi. Fokus menjawab tentang: pembuatan SOP proyek, template kontrak konstruksi, surat garansi, MOU, dokumen K3, laporan progres, metode kerja (method statement), dan dokumen ISO 9001/14001/45001. Bantu pengguna membuat draft dokumen yang siap pakai.",
+    },
+    hukum: {
+      name: "Agen Hukum",
+      icon: "⚖️",
+      prompt:
+        "Kamu adalah spesialis hukum dan regulasi jasa konstruksi Indonesia. Fokus menjawab tentang: UU Jasa Konstruksi No. 2/2017, PP 22/2020, PP 14/2021, Perpres Pengadaan, perselisihan kontrak konstruksi, arbitrase, Permen PUPR, dan standar SNI. Berikan referensi pasal yang spesifik dalam setiap jawaban.",
+    },
+    k3: {
+      name: "Agen K3",
+      icon: "🦺",
+      prompt:
+        "Kamu adalah spesialis Keselamatan dan Kesehatan Kerja (K3) konstruksi. Fokus menjawab tentang: RK3K (Rencana K3 Kontrak), JSA (Job Safety Analysis), IBPR (Identifikasi Bahaya dan Penilaian Risiko), APD, inspeksi proyek, incident report, standar K3 Permenaker, dan sertifikasi K3. Prioritaskan keselamatan dan kepatuhan regulasi.",
+    },
+    marketing: {
+      name: "Agen Marketing",
+      icon: "📈",
+      prompt:
+        "Kamu adalah spesialis marketing dan penjualan untuk industri konstruksi. Fokus menjawab tentang: strategi pemasaran jasa konstruksi, copywriting, proposal klien, strategi media sosial untuk kontraktor, penawaran harga kompetitif, personal branding kontraktor, dan strategi lead generation di industri konstruksi.",
+    },
+    umum: {
+      name: "Agen Umum",
+      icon: "💬",
+      prompt:
+        "Kamu adalah asisten umum yang membantu dengan pertanyaan seputar industri konstruksi Indonesia, manajemen proyek, material bangunan, teknik sipil dasar, dan topik umum lainnya.",
+    },
+  };
+
+  async function classifyIntentLite(message: string, routingModel: string): Promise<string> {
+    const cacheKey = message.slice(0, 100).toLowerCase().trim();
+    const cached = intentCache.get(cacheKey);
+    if (cached && Date.now() - cached.ts < INTENT_TTL_MS) return cached.domain;
+
+    const domains = Object.keys(SPECIALIST_DEFAULTS).join(", ");
+    try {
+      const deepseekKey = process.env.DEEPSEEK_API_KEY;
+      const client = deepseekKey
+        ? new OpenAI({ apiKey: deepseekKey, baseURL: "https://api.deepseek.com" })
+        : openai;
+      const model = deepseekKey ? (routingModel || "deepseek-chat") : "gpt-4o-mini";
+
+      const res = await client.chat.completions.create({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: `Classify the construction query into exactly one domain: ${domains}. Reply with just the single keyword, no explanation.`,
+          },
+          { role: "user", content: message.slice(0, 300) },
+        ],
+        max_tokens: 8,
+        temperature: 0,
+      });
+      const raw = (res.choices[0]?.message?.content || "umum").toLowerCase().trim();
+      const domain = Object.keys(SPECIALIST_DEFAULTS).find((d) => raw.includes(d)) || "umum";
+      intentCache.set(cacheKey, { domain, ts: Date.now() });
+      return domain;
+    } catch {
+      return "umum";
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   async function generateAIResponse(agentId: string, userMessage: string): Promise<string> {
     const agent = await storage.getAgent(agentId);
     if (!agent) {
@@ -2991,6 +3075,27 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     
     // Build system prompt from agent persona + Kebijakan Agen (7 fields)
     let systemPrompt = buildFinalSystemPrompt(agent);
+
+    // ── ORCHESTRATOR MULTI-AGENT ROUTING ─────────────────────────────────────
+    const orchConf = (agent as any).orchestratorConfig as Record<string, any> | null | undefined;
+    if (agent.agenticMode && orchConf?.enabled) {
+      const routingModel = orchConf.routingModel || "deepseek-chat";
+      const domain = await classifyIntentLite(userMessage, routingModel);
+      const specialists = (orchConf.specialists as Record<string, any>) || {};
+      const specCfg = specialists[domain] ?? specialists["umum"];
+      const defaults = SPECIALIST_DEFAULTS[domain] ?? SPECIALIST_DEFAULTS["umum"];
+      const isEnabled = specCfg?.enabled !== false;
+      if (isEnabled) {
+        const specPrompt = specCfg?.prompt || defaults.prompt;
+        const specName = specCfg?.name || defaults.name;
+        const specIcon = defaults.icon;
+        systemPrompt =
+          `[SPECIALIST AGENT: ${specIcon} ${specName}]\n${specPrompt}\n\n` + systemPrompt;
+        console.log(`[Orchestrator] Routed to ${specName} (domain: ${domain})`);
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     if (knowledgeContext) {
       systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
     }

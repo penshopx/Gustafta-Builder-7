@@ -122,6 +122,7 @@ export const agents = pgTable("agents", {
   domainCharter: text("domain_charter").default(""),
   qualityBar: text("quality_bar").default(""),
   riskCompliance: text("risk_compliance").default(""),
+  orchestratorConfig: jsonb("orchestrator_config").default({}),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
