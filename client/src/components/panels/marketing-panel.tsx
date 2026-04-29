@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Megaphone, Download, ClipboardCopy, Check, Target, MessageSquare,
   Sparkles, Globe, Users, ExternalLink, Link, Eye, Zap, Mail,
@@ -10,6 +10,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -412,6 +413,397 @@ function PlatformToolsTab({ agent }: { agent: any }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Storytelling Tab ─────────────────────────────────────────────────
+const STORY_PRODUCTS = [
+  { id: "chatbot",   label: "Chatbot AI",       emoji: "🤖", color: "from-violet-500 to-purple-600",   ring: "ring-violet-400/50",  bg: "bg-violet-50 dark:bg-violet-950/30",  text: "text-violet-700 dark:text-violet-300" },
+  { id: "ebook",     label: "eBook",             emoji: "📘", color: "from-amber-500 to-orange-600",    ring: "ring-amber-400/50",   bg: "bg-amber-50 dark:bg-amber-950/30",    text: "text-amber-700 dark:text-amber-300" },
+  { id: "ecourse",   label: "eCourse",           emoji: "🎓", color: "from-indigo-500 to-blue-600",     ring: "ring-indigo-400/50",  bg: "bg-indigo-50 dark:bg-indigo-950/30",  text: "text-indigo-700 dark:text-indigo-300" },
+  { id: "mini-apps", label: "Mini Apps",         emoji: "⚡", color: "from-emerald-500 to-teal-600",   ring: "ring-emerald-400/50", bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-700 dark:text-emerald-300" },
+  { id: "docgen",    label: "Generator Dokumen", emoji: "📄", color: "from-blue-500 to-cyan-600",      ring: "ring-blue-400/50",    bg: "bg-blue-50 dark:bg-blue-950/30",      text: "text-blue-700 dark:text-blue-300" },
+];
+
+const STORY_FRAMEWORKS = [
+  { id: "origin",          label: "Kisah Asal Usul",    desc: "Mengapa produk ini diciptakan — momen aha!, visi founder", emoji: "🌱", color: "text-green-600" },
+  { id: "hero-journey",    label: "Perjalanan Pahlawan", desc: "Pelanggan adalah hero, produk adalah pemandu (StoryBrand)", emoji: "⚔️", color: "text-yellow-600" },
+  { id: "problem-solution",label: "Masalah & Solusi",   desc: "3-act story: dunia sebelumnya → krisis → transformasi",    emoji: "🔄", color: "text-blue-600" },
+  { id: "before-after",    label: "Sebelum & Sesudah",  desc: "Kontras emosional kuat: kehidupan lama vs kehidupan baru", emoji: "✨", color: "text-purple-600" },
+  { id: "social-proof",    label: "Kisah Sukses",       desc: "Testimonial story gaya majalah bisnis — kredibel & nyata",  emoji: "🏆", color: "text-amber-600" },
+];
+
+interface SavedStory {
+  content: string;
+  product: string;
+  framework: string;
+  productLabel: string;
+  frameworkLabel: string;
+  savedAt: string;
+}
+
+function useStoryLibrary(agentId: string | number) {
+  const key = `gustafta-stories-${agentId}`;
+
+  const load = (): Record<string, SavedStory> => {
+    try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch { return {}; }
+  };
+  const save = (storyKey: string, story: SavedStory) => {
+    const lib = load();
+    lib[storyKey] = story;
+    localStorage.setItem(key, JSON.stringify(lib));
+  };
+  const remove = (storyKey: string) => {
+    const lib = load();
+    delete lib[storyKey];
+    localStorage.setItem(key, JSON.stringify(lib));
+  };
+  return { load, save, remove };
+}
+
+function StorytellingTab({ agent }: { agent: any }) {
+  const { toast } = useToast();
+  const [activeProduct, setActiveProduct] = useState("chatbot");
+  const [activeFramework, setActiveFramework] = useState("origin");
+  const [storyText, setStoryText] = useState("");
+  const [library, setLibrary] = useState<Record<string, SavedStory>>({});
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [copiedKey, setCopiedKey] = useState("");
+  const lib = useStoryLibrary(agent.id);
+
+  useEffect(() => { setLibrary(lib.load()); }, []);
+
+  const storyKey = `${activeProduct}-${activeFramework}`;
+  const existingStory = library[storyKey];
+
+  // Load saved story when switching product/framework
+  const handleSelectProduct = (pid: string) => {
+    setActiveProduct(pid);
+    const k = `${pid}-${activeFramework}`;
+    setStoryText(library[k]?.content || "");
+  };
+  const handleSelectFramework = (fid: string) => {
+    setActiveFramework(fid);
+    const k = `${activeProduct}-${fid}`;
+    setStoryText(library[k]?.content || "");
+  };
+
+  const generateMutation = useMutation({
+    mutationFn: () =>
+      apiRequest("POST", `/api/agents/${agent.id}/storytelling/generate`, {
+        product: activeProduct,
+        framework: activeFramework,
+      }).then(r => r.json()),
+    onSuccess: (data: any) => {
+      setStoryText(data.content || "");
+      toast({ title: "Cerita berhasil dibuat!", description: "Simpan ke perpustakaan untuk digunakan kembali" });
+    },
+    onError: () => {
+      toast({ title: "Gagal generate cerita", variant: "destructive" });
+    },
+  });
+
+  const saveStory = () => {
+    if (!storyText.trim()) return;
+    const product = STORY_PRODUCTS.find(p => p.id === activeProduct)!;
+    const framework = STORY_FRAMEWORKS.find(f => f.id === activeFramework)!;
+    const story: SavedStory = {
+      content: storyText,
+      product: activeProduct,
+      framework: activeFramework,
+      productLabel: product.label,
+      frameworkLabel: framework.label,
+      savedAt: new Date().toLocaleString("id-ID"),
+    };
+    lib.save(storyKey, story);
+    setLibrary(lib.load());
+    toast({ title: "✓ Cerita disimpan!", description: `${product.label} · ${framework.label} tersimpan di perpustakaan` });
+  };
+
+  const copyStory = (text: string, key?: string) => {
+    navigator.clipboard.writeText(text);
+    const k = key || "current";
+    setCopiedKey(k);
+    setTimeout(() => setCopiedKey(""), 2000);
+    toast({ title: "Disalin!", description: "Gunakan sebagai basis konten marketing Anda" });
+  };
+
+  const deleteStory = (key: string) => {
+    lib.remove(key);
+    const updated = lib.load();
+    setLibrary(updated);
+    if (key === storyKey) setStoryText("");
+    toast({ title: "Cerita dihapus" });
+  };
+
+  const downloadStory = () => {
+    if (!storyText) return;
+    const product = STORY_PRODUCTS.find(p => p.id === activeProduct)!;
+    const framework = STORY_FRAMEWORKS.find(f => f.id === activeFramework)!;
+    const blob = new Blob([storyText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `story-${product.id}-${framework.id}-${(agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const savedCount = Object.keys(library).length;
+  const currentProduct = STORY_PRODUCTS.find(p => p.id === activeProduct)!;
+  const currentFramework = STORY_FRAMEWORKS.find(f => f.id === activeFramework)!;
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            Generate 25 cerita unik (5 produk × 5 framework) yang menjadi fondasi semua konten marketing Anda.
+          </p>
+        </div>
+        <Button
+          variant="outline" size="sm"
+          onClick={() => { setLibrary(lib.load()); setShowLibrary(v => !v); }}
+          className="gap-1.5 text-xs flex-shrink-0"
+          data-testid="button-toggle-library"
+        >
+          <FileText className="w-3.5 h-3.5" />
+          Perpustakaan {savedCount > 0 && <Badge className="h-4 px-1 text-xs ml-0.5">{savedCount}</Badge>}
+        </Button>
+      </div>
+
+      {/* Story Library Panel */}
+      {showLibrary && (
+        <Card className="border-2 border-primary/20 bg-primary/5">
+          <CardContent className="pt-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+              <span className="font-semibold text-sm">Perpustakaan Story</span>
+              <span className="text-xs text-muted-foreground ml-auto">{savedCount} cerita tersimpan</span>
+            </div>
+            {savedCount === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Belum ada cerita tersimpan. Generate dan simpan cerita untuk mulai membangun perpustakaan.</p>
+            ) : (
+              <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                {Object.entries(library).map(([key, story]) => {
+                  const prod = STORY_PRODUCTS.find(p => p.id === story.product);
+                  const fw = STORY_FRAMEWORKS.find(f => f.id === story.framework);
+                  return (
+                    <div key={key} className="bg-background border rounded-lg p-3 space-y-2" data-testid={`story-card-${key}`}>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm">{prod?.emoji}</span>
+                        <span className="text-xs font-semibold">{story.productLabel}</span>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <span className="text-xs">{fw?.emoji}</span>
+                        <span className="text-xs font-medium">{story.frameworkLabel}</span>
+                        <span className="text-xs text-muted-foreground ml-auto">{story.savedAt}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{story.content.substring(0, 150)}…</p>
+                      <div className="flex gap-1.5">
+                        <Button
+                          size="sm" variant="outline" className="h-7 text-xs gap-1 flex-1"
+                          onClick={() => { setActiveProduct(story.product); setActiveFramework(story.framework); setStoryText(story.content); setShowLibrary(false); }}
+                          data-testid={`button-load-story-${key}`}
+                        >
+                          <ArrowRight className="w-3 h-3" /> Buka & Edit
+                        </Button>
+                        <Button
+                          size="sm" variant="outline" className="h-7 text-xs gap-1 flex-1"
+                          onClick={() => copyStory(story.content, key)}
+                          data-testid={`button-copy-story-${key}`}
+                        >
+                          {copiedKey === key ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copiedKey === key ? "Tersalin" : "Salin"}
+                        </Button>
+                        <Button
+                          size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                          onClick={() => deleteStory(key)}
+                          data-testid={`button-delete-story-${key}`}
+                        >×</Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 1: Product Selector */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold flex-shrink-0">1</span>
+          <span className="text-xs font-semibold text-foreground">Pilih Produk Ekosistem</span>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5">
+          {STORY_PRODUCTS.map(p => {
+            const active = p.id === activeProduct;
+            const hasSaved = Object.keys(library).some(k => k.startsWith(p.id));
+            return (
+              <button
+                key={p.id}
+                onClick={() => handleSelectProduct(p.id)}
+                data-testid={`button-story-product-${p.id}`}
+                className={`relative flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl border text-xs font-semibold transition-all
+                  ${active ? `${p.bg} ring-2 ${p.ring} border-transparent shadow-sm` : "bg-background border-border hover:bg-muted/60"}`}
+              >
+                {hasSaved && (
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-primary rounded-full flex items-center justify-center text-[8px] text-primary-foreground font-bold">
+                    {Object.keys(library).filter(k => k.startsWith(p.id)).length}
+                  </span>
+                )}
+                <span className="text-lg leading-none">{p.emoji}</span>
+                <span className={`text-center leading-tight ${active ? p.text : "text-muted-foreground"}`} style={{ fontSize: "10px" }}>
+                  {p.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Step 2: Framework Selector */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold flex-shrink-0">2</span>
+          <span className="text-xs font-semibold text-foreground">Pilih Framework Cerita</span>
+        </div>
+        <div className="grid grid-cols-1 gap-1.5">
+          {STORY_FRAMEWORKS.map(f => {
+            const active = f.id === activeFramework;
+            const saved = library[`${activeProduct}-${f.id}`];
+            return (
+              <button
+                key={f.id}
+                onClick={() => handleSelectFramework(f.id)}
+                data-testid={`button-story-framework-${f.id}`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-all
+                  ${active ? "bg-primary/10 ring-2 ring-primary/30 border-transparent" : "bg-background border-border hover:bg-muted/50"}`}
+              >
+                <span className="text-base flex-shrink-0">{f.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-xs font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>{f.label}</div>
+                  <div className="text-xs text-muted-foreground leading-tight line-clamp-1">{f.desc}</div>
+                </div>
+                {saved && (
+                  <Badge variant="secondary" className="text-xs flex-shrink-0 gap-0.5">
+                    <Check className="w-2.5 h-2.5" /> Tersimpan
+                  </Badge>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Step 3: Generate + Editor */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold flex-shrink-0">3</span>
+          <span className="text-xs font-semibold text-foreground">Generate & Edit Cerita</span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${currentProduct.bg} ${currentProduct.text}`}>
+              {currentProduct.emoji} {currentProduct.label}
+            </span>
+            <span className="text-xs text-muted-foreground">{currentFramework.emoji} {currentFramework.label}</span>
+          </div>
+        </div>
+
+        <Button
+          onClick={() => generateMutation.mutate()}
+          disabled={generateMutation.isPending}
+          className="w-full gap-2"
+          data-testid="button-generate-story"
+        >
+          {generateMutation.isPending ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Menulis cerita…</>
+          ) : storyText ? (
+            <><RefreshCw className="w-4 h-4" /> Generate Ulang Cerita</>
+          ) : (
+            <><Sparkles className="w-4 h-4" /> Generate Cerita AI</>
+          )}
+        </Button>
+
+        {(storyText || existingStory) && (
+          <div className="space-y-2">
+            <Textarea
+              value={storyText}
+              onChange={e => setStoryText(e.target.value)}
+              className="min-h-[280px] text-sm leading-relaxed resize-y font-normal"
+              placeholder="Cerita akan muncul di sini — Anda bisa mengeditnya sebelum menyimpan…"
+              data-testid="textarea-story"
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <Button
+                onClick={saveStory}
+                disabled={!storyText.trim()}
+                className="h-8 text-xs gap-1.5 col-span-2 sm:col-span-1"
+                data-testid="button-save-story"
+              >
+                <Check className="w-3 h-3" /> Simpan ke Perpustakaan
+              </Button>
+              <Button
+                variant="outline" size="sm"
+                onClick={() => copyStory(storyText, "current")}
+                disabled={!storyText.trim()}
+                className="h-8 text-xs gap-1.5"
+                data-testid="button-copy-current-story"
+              >
+                {copiedKey === "current" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                {copiedKey === "current" ? "Tersalin!" : "Salin"}
+              </Button>
+              <Button
+                variant="outline" size="sm"
+                onClick={downloadStory}
+                disabled={!storyText.trim()}
+                className="h-8 text-xs gap-1.5"
+                data-testid="button-download-story"
+              >
+                <Download className="w-3 h-3" /> Unduh .txt
+              </Button>
+              <Button
+                variant="ghost" size="sm"
+                onClick={() => { setStoryText(""); }}
+                disabled={!storyText.trim()}
+                className="h-8 text-xs text-muted-foreground"
+                data-testid="button-clear-story"
+              >
+                Hapus Teks
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!storyText && !existingStory && (
+          <div className="rounded-lg border-2 border-dashed border-border py-10 text-center space-y-2">
+            <div className="text-3xl">{currentProduct.emoji}</div>
+            <p className="text-sm font-medium text-foreground">{currentProduct.label} · {currentFramework.label}</p>
+            <p className="text-xs text-muted-foreground max-w-xs mx-auto">{currentFramework.desc}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Usage Tips */}
+      <Card className="bg-muted/30">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-start gap-2">
+            <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-xs font-semibold">Cara Menggunakan Story</p>
+              <ul className="text-xs text-muted-foreground space-y-0.5 leading-relaxed">
+                <li>• Salin story → paste sebagai referensi saat generate konten di tab <strong>AI Tools</strong> atau <strong>Platforms</strong></li>
+                <li>• Gunakan <strong>Kisah Asal Usul</strong> untuk About Us, Press Release, profil LinkedIn</li>
+                <li>• Gunakan <strong>Perjalanan Pahlawan</strong> untuk landing page, email sequence, video script</li>
+                <li>• Gunakan <strong>Sebelum & Sesudah</strong> untuk Facebook/Instagram ad, TikTok, testimonial</li>
+                <li>• Gunakan <strong>Kisah Sukses</strong> untuk proposal klien, Google My Business, LinkedIn Company Post</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -1106,7 +1498,7 @@ export function MarketingPanel({ agent }: { agent: any }) {
                 Marketing Suite
               </h2>
               <p className="text-sm text-muted-foreground">
-                27 AI tools (9 umum + 18 platform) + 5 alat instan untuk <span className="font-medium text-foreground">{agent.name}</span>
+                25 story + 27 AI tools + 5 alat instan untuk <span className="font-medium text-foreground">{agent.name}</span>
               </p>
             </div>
           </div>
@@ -1123,6 +1515,9 @@ export function MarketingPanel({ agent }: { agent: any }) {
           <TabsList className="h-9">
             <TabsTrigger value="ai-tools" className="text-xs gap-1.5" data-testid="tab-ai-tools">
               <Sparkles className="w-3.5 h-3.5" /> AI Tools
+            </TabsTrigger>
+            <TabsTrigger value="storytelling" className="text-xs gap-1.5" data-testid="tab-storytelling">
+              <Mic className="w-3.5 h-3.5" /> Story
             </TabsTrigger>
             <TabsTrigger value="platforms" className="text-xs gap-1.5" data-testid="tab-platforms">
               <Globe className="w-3.5 h-3.5" /> Platforms
@@ -1149,6 +1544,11 @@ export function MarketingPanel({ agent }: { agent: any }) {
               <AiToolCard key={tool.id} tool={tool} agent={agent} />
             ))}
           </div>
+        </TabsContent>
+
+        {/* ── STORYTELLING TAB ── */}
+        <TabsContent value="storytelling" className="m-0 px-4 md:px-6 py-5">
+          <StorytellingTab agent={agent} />
         </TabsContent>
 
         {/* ── PLATFORMS TAB ── */}

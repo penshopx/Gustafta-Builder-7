@@ -4918,6 +4918,189 @@ Post 5 — Produk Baru: Judul | Deskripsi produk | Harga | Link
     }
   });
 
+  // ==================== Storytelling ====================
+
+  app.post("/api/agents/:id/storytelling/generate", isAuthenticated, async (req: any, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ error: "Agent tidak ditemukan" });
+
+      const { product, framework } = req.body as { product: string; framework: string };
+
+      const name = agent.name || "AI Chatbot";
+      const tagline = (agent as any).tagline || "";
+      const description = agent.description || "";
+      const expertise = ((agent as any).expertise as string[] || []).join(", ");
+      const features = ((agent as any).productFeatures as string[] || []).join(", ");
+      const painPoints = ((agent as any).landingPainPoints as string[] || []).join(", ");
+      const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
+      const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "";
+      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const category = agent.category || "konstruksi";
+
+      const productLabels: Record<string, string> = {
+        chatbot: "AI Chatbot",
+        ebook: "eBook Kompetensi",
+        ecourse: "eCourse / Modul Belajar",
+        "mini-apps": "Mini Apps Tools",
+        docgen: "Generator Dokumen Proyek",
+      };
+      const productLabel = productLabels[product] || product;
+
+      const productCtx: Record<string, string> = {
+        chatbot: `Produk: ${productLabel} "${name}" — asisten AI percakapan 24/7 untuk industri ${category}. ${description}. Fitur: ${features}. Manfaat: ${benefits}.`,
+        ebook: `Produk: ${productLabel} dari "${name}" — panduan digital komprehensif yang merangkum seluruh pengetahuan domain ${category} dari chatbot AI. Berisi 8 bab, siap unduh format HTML/Markdown/PDF.`,
+        ecourse: `Produk: ${productLabel} dari "${name}" — platform microlearning interaktif dengan modul-modul yang diekstrak dari knowledge base chatbot AI. Setiap modul ada kuis dan sertifikat.`,
+        "mini-apps": `Produk: ${productLabel} dari "${name}" — kumpulan tools/kalkulator/checklist digital yang terintegrasi dengan chatbot AI. Dibuat khusus untuk kebutuhan sehari-hari profesional ${category}.`,
+        docgen: `Produk: ${productLabel} dari "${name}" — generator dokumen otomatis berbasis AI: SOP, checklist, form, laporan proyek, dan dokumen tender. Dibuat dalam hitungan detik.`,
+      };
+
+      const agentCtx = `
+Nama Platform/Chatbot: ${name}
+Tagline: ${tagline}
+Domain: ${category}
+Keahlian: ${expertise}
+Pain Points Target: ${painPoints}
+Harga: ${price}
+Link: ${chatUrl}
+Konteks Produk: ${productCtx[product] || productLabel}
+      `.trim();
+
+      const systemPrompt = `Kamu adalah storyteller profesional B2B untuk industri konstruksi Indonesia. Tugas kamu adalah menulis cerita yang menggugah, autentik, dan persuasif yang membuat pembaca — kontraktor, konsultan, BUJK, dan profesional konstruksi — terhubung secara emosional dengan produk. 
+
+Aturan:
+- Bahasa Indonesia yang hidup, mengalir, dan tidak kaku
+- Hindari jargon berlebihan — cerita harus terasa manusiawi
+- Panjang optimal 250-400 kata kecuali diminta berbeda
+- Boleh gunakan dialog singkat jika relevan
+- Setiap cerita harus ada konflik → resolusi → transformasi`;
+
+      let userPrompt = "";
+
+      switch (framework) {
+        case "origin": {
+          userPrompt = `Tulis KISAH ASAL USUL (Origin Story) untuk produk berikut:
+${agentCtx}
+
+Framework: Mengapa produk ini ada? Ceritakan dari sudut pandang founder/creator — momen "aha!", frustrasi yang mendorong lahirnya solusi, proses menemukan ide, dan visi ke depan.
+
+Struktur:
+1. **Pembuka**: Momen/situasi yang memicu penciptaan (dramatis, spesifik)
+2. **Konflik**: Masalah yang dilihat di industri konstruksi Indonesia yang belum terjawab
+3. **Perjalanan**: Proses menemukan solusi (trial, error, penemuan)
+4. **Lahirnya Produk**: Bagaimana produk ini menjawab masalah tersebut
+5. **Visi**: Apa yang ingin diubah untuk industri konstruksi Indonesia
+
+Akhiri dengan tagline atau kalimat yang menginspirasi.
+Tulis dalam gaya narasi pertama atau ketiga yang hangat.`;
+          break;
+        }
+        case "hero-journey": {
+          userPrompt = `Tulis cerita PERJALANAN PAHLAWAN (Hero's Journey / StoryBrand) untuk produk berikut:
+${agentCtx}
+
+Framework: PELANGGAN adalah sang pahlawan, PRODUK adalah pemandu (guide). Ikuti struktur StoryBrand Donald Miller.
+
+Struktur:
+1. **Karakter (Hero)**: Gambaran vivid profesional konstruksi Indonesia (jabatan, situasi, ambisi)
+2. **Masalah**: 
+   - Masalah eksternal (praktis, konkret)
+   - Masalah internal (frustrasi, rasa tidak yakin)
+   - Masalah filosofis (ketidakadilan yang lebih besar)
+3. **Bertemu Pemandu**: Produk hadir dengan empati + otoritas
+4. **Rencana**: 3 langkah mudah menggunakan produk
+5. **Ajakan Bertindak**: CTA yang jelas
+6. **Sukses**: Gambaran konkret kehidupan setelah pakai produk
+7. **Kegagalan yang Dihindari**: Apa yang terjadi jika tidak bertindak
+
+Tulis sebagai narasi mengalir, bukan bullet list.`;
+          break;
+        }
+        case "problem-solution": {
+          userPrompt = `Tulis cerita MASALAH & SOLUSI (3-Act Story) untuk produk berikut:
+${agentCtx}
+
+Framework: Cerita klasik 3 babak yang sangat kuat untuk B2B.
+
+Act 1 — DUNIA SEBELUMNYA (Status Quo):
+Gambarkan dengan vivid kehidupan profesional konstruksi sebelum ada solusi ini. Apa rutinitas melelahkan yang mereka jalani? Jelaskan dengan detail sensorik — waktu yang terbuang, frustrasi, perasaan ketinggalan.
+
+Act 2 — KRISIS & PENCARIAN:
+Momen titik balik — sesuatu yang membuat mereka sadar harus ada cara yang lebih baik. Proses mencari solusi (gagal beberapa kali, mencoba berbagai cara).
+
+Act 3 — SOLUSI & TRANSFORMASI:
+Pertemuan dengan produk ini. Bagaimana segalanya berubah — konkret dan spesifik. Angka, waktu yang dihemat, kepercayaan diri yang kembali, hasil yang dicapai.
+
+Akhiri dengan refleksi: apa yang mereka rasakan sekarang vs dulu.`;
+          break;
+        }
+        case "before-after": {
+          userPrompt = `Tulis cerita SEBELUM & SESUDAH (Before/After Transformation) untuk produk berikut:
+${agentCtx}
+
+Framework: Kontras yang kuat antara kehidupan sebelum dan sesudah — yang paling efektif untuk konversi.
+
+Format narasi (bukan tabel):
+
+**SEBELUM** — Gambarkan dengan detail emosional:
+Senin pagi di kantor proyek. [Nama karakter] menghadapi [situasi spesifik yang menyakitkan]. Setiap hari [rutinitas melelahkan]. Dia merasa [emosi negatif]. Akibatnya [konsekuensi bisnis nyata].
+
+**TITIK BALIK** — Momen keputusan:
+Ketika [trigger — momen spesifik yang mendorong perubahan]. Dia memutuskan mencoba [produk ini].
+
+**SESUDAH** — Gambarkan kehidupan yang berubah:
+Tiga minggu kemudian. [Kondisi yang sama persis, tapi sekarang berbeda]. [Nama karakter] sekarang [perubahan konkret dan emosional]. Yang paling berubah: [hasil spesifik dengan angka jika memungkinkan].
+
+**PENUTUP** — Quote / Refleksi:
+"[Quote yang bisa terasa diucapkan oleh karakter tersebut]"
+
+Buat pembaca membayangkan diri mereka sebagai karakter tersebut.`;
+          break;
+        }
+        case "social-proof": {
+          userPrompt = `Tulis KISAH SUKSES (Social Proof / Testimonial Story) untuk produk berikut:
+${agentCtx}
+
+Framework: Cerita sukses pelanggan nyata yang ditulis seperti feature story majalah bisnis — lebih kuat dari testimonial biasa.
+
+Struktur:
+1. **Pembuka yang menarik**: Mulai dengan hasil yang sudah dicapai, lalu flashback
+2. **Profil Pelanggan**: Siapa mereka (jabatan, perusahaan, tantangan awal) — bisa fiktif tapi realistis untuk industri konstruksi Indonesia
+3. **Tantangan Spesifik**: Masalah konkret yang mereka hadapi sebelum memakai produk
+4. **Keputusan Memilih Produk**: Mengapa mereka memilih [nama produk] vs alternatif lain
+5. **Proses Implementasi**: Bagaimana mereka mulai menggunakan — mudah atau ada hambatan?
+6. **Hasil Konkret**: Angka, persentase, waktu yang dihemat, keputusan yang lebih baik
+7. **Quote Penutup**: Kalimat yang kuat dari "pelanggan"
+
+Gaya penulisan: hangat, kredibel, seperti profil di majalah Kontan atau SWA.
+Akhiri dengan 2-3 poin key takeaway untuk pembaca lain.`;
+          break;
+        }
+        default:
+          return res.status(400).json({ error: "Framework tidak dikenal" });
+      }
+
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.85,
+        max_tokens: 1500,
+      });
+
+      const content = completion.choices[0]?.message?.content || "";
+      return res.json({ content, product, framework });
+    } catch (err: any) {
+      console.error("[/api/agents/:id/storytelling/generate]", err);
+      return res.status(500).json({ error: err?.message || "Gagal generate cerita" });
+    }
+  });
+
   // ==================== Enhanced Analytics ====================
 
   // Get aggregated platform stats (for landing page)
