@@ -4550,6 +4550,349 @@ Format:
 (1 kalimat yang merangkum product-market fit)`;
           break;
         }
+
+        // ── FACEBOOK ──────────────────────────────────────────────────
+        case "facebook-post": {
+          userPrompt = `Buat 3 variasi Facebook Feed Post untuk mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Variasi 1 — Edukasi: Jelaskan manfaat AI Chatbot untuk industri konstruksi (tips format, 150-200 kata, 2-3 emoji)
+Variasi 2 — Promo: Post penawaran/announcement langsung (hard sell ringan, CTA kuat, 80-120 kata)
+Variasi 3 — Engagement: Post yang mengajak diskusi/pertanyaan (soft sell, ajak komentar, 100-150 kata)
+Setiap variasi sertakan: teks post lengkap, 5-8 hashtag relevan, dan saran format gambar pendamping.`;
+          break;
+        }
+        case "facebook-ad": {
+          userPrompt = `Buat Facebook/Meta Ad Copy lengkap untuk produk AI Chatbot berikut:
+${agentCtx}
+Output:
+## SINGLE IMAGE AD
+Primary Text (125 kata maks): ...
+Headline (40 karakter maks): ...
+Description (30 karakter maks): ...
+CTA Button: [Pelajari Selengkapnya / Daftar Sekarang / Hubungi Kami]
+
+## CAROUSEL AD (3 kartu)
+Kartu 1 — Headline: | Description: | Teks gambar:
+Kartu 2 — Headline: | Description: | Teks gambar:
+Kartu 3 — Headline: | Description: | Teks gambar: (CTA final)
+
+## VIDEO AD SCRIPT (30 detik)
+[0-5 detik] Hook visual + teks:
+[5-20 detik] Problem & Solution:
+[20-30 detik] CTA:
+Target audience: kontraktor, BUJK, konsultan konstruksi Indonesia.`;
+          break;
+        }
+        case "facebook-group": {
+          userPrompt = `Buat 2 variasi Facebook Group Post untuk komunitas profesional konstruksi Indonesia yang mempromosikan produk AI Chatbot berikut secara organik (non-iklan):
+${agentCtx}
+Post A — Story/Pengalaman: Cerita pengalaman nyata memakai AI chatbot untuk efisiensi kerja konstruksi (orang pertama, conversational, 150-200 kata)
+Post B — Diskusi/Pertanyaan: Post yang memancing diskusi tentang tantangan umum di industri konstruksi lalu mengarahkan ke solusi AI (100-150 kata, ajak komentar)
+Setiap post: natural, tidak seperti iklan, terasa autentik dari sesama profesional konstruksi. Sertakan 3-5 hashtag.`;
+          break;
+        }
+
+        // ── INSTAGRAM ─────────────────────────────────────────────────
+        case "instagram-reel": {
+          const dur2 = (req.body as any).duration || "60 detik";
+          userPrompt = `Buat Instagram Reels Script (${dur2}) untuk mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Format:
+## HOOK (0-3 detik)
+Teks on-screen: ...
+Narasi/VO: ...
+
+## BODY (3-45 detik) — bagi per segmen ~5-8 detik
+[Segmen 1] Visual: | Teks: | Narasi:
+[Segmen 2] Visual: | Teks: | Narasi:
+[Segmen 3] Visual: | Teks: | Narasi:
+[Segmen 4] Visual: | Teks: | Narasi:
+
+## CTA (45-60 detik)
+Teks on-screen: ...
+Narasi: ...
+
+## CAPTION REEL
+(150 kata, emoji, 20 hashtag mix Indo + niche konstruksi)
+Saran audio/musik: ...`;
+          break;
+        }
+        case "instagram-story": {
+          userPrompt = `Buat sequence 5 Slide Instagram Story untuk mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Untuk setiap slide berikan:
+Slide [N] — Tipe: [Hook/Problem/Solution/Proof/CTA]
+Teks utama (maks 10 kata, besar):
+Teks pendukung (1-2 kalimat):
+Elemen interaktif: [Poll / Question sticker / Slider / Link sticker / Swipe up]
+Warna latar & visual saran:
+---
+Slide 1: Hook — pertanyaan atau fakta mengejutkan
+Slide 2: Problem — pain point utama target
+Slide 3: Solution — bagaimana chatbot ini menjawabnya
+Slide 4: Social Proof — angka atau testimoni singkat
+Slide 5: CTA — ajakan kuat + link/WA`;
+          break;
+        }
+        case "instagram-bio": {
+          userPrompt = `Optimalkan Instagram Bio untuk akun yang mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Output:
+## BIO UTAMA (maks 150 karakter)
+[Tulis bio yang menarik, jelas, dengan 1-2 emoji]
+
+## USERNAME SARAN
+[2-3 pilihan username yang tersedia dan relevan]
+
+## NAME FIELD (untuk pencarian)
+[Kombinasi nama + keyword: maks 30 karakter]
+
+## HIGHLIGHTS STORY yang disarankan
+[5 highlight dengan nama & isi ringkas]
+
+## LINK IN BIO STRATEGY
+[Saran penggunaan link: langsung chatbot / linktree / landing page]
+
+## CONTENT PILLARS (5 topik konten rutin)
+1. ... 2. ... 3. ... 4. ... 5. ...`;
+          break;
+        }
+
+        // ── TIKTOK ────────────────────────────────────────────────────
+        case "tiktok-script": {
+          userPrompt = `Buat TikTok Video Script untuk mempromosikan produk AI Chatbot berikut (durasi 30-60 detik):
+${agentCtx}
+Format:
+## HOOK (0-3 detik) — harus sangat kuat, membuat orang berhenti scroll
+Teks on-screen: ...
+Yang diucapkan: ...
+
+## MAIN CONTENT (3-45 detik)
+[Bagi per segmen ~5-7 detik, format: Visual | Teks on-screen | Narasi]
+Segmen 1: ...
+Segmen 2: ...
+Segmen 3: ...
+Segmen 4: ...
+
+## CTA (45-60 detik)
+Yang diucapkan: ...
+Teks on-screen: ...
+
+## CAPTION + HASHTAG
+Caption (150 karakter maks): ...
+Hashtag (mix viral + niche): ...
+
+## SARAN
+Musik/sound: ...
+Efek/filter: ...
+Waktu posting terbaik: ...`;
+          break;
+        }
+        case "tiktok-hooks": {
+          userPrompt = `Buat 10 TikTok Hook yang kuat untuk mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Buat 10 hook berbeda — tiap hook max 10 kata, harus bikin orang berhenti scroll. Kategorikan:
+Hook 1-3: Pertanyaan provokatif
+Hook 4-6: Fakta/angka mengejutkan tentang industri konstruksi
+Hook 7-8: "Rahasia" / inside info
+Hook 9-10: Before vs After / Transformasi
+Untuk setiap hook: tulis teks + saran ekspresi/gesture pembuka yang cocok untuk TikTok.`;
+          break;
+        }
+        case "tiktok-caption": {
+          userPrompt = `Buat 3 set TikTok Caption + Hashtag Strategy untuk produk AI Chatbot berikut:
+${agentCtx}
+Setiap set:
+Caption (maks 150 karakter, conversational, 1-2 emoji):
+Hashtag (20-30 hashtag mix: 5 mega >1M views, 10 mid 100K-1M, 10 niche konstruksi Indonesia <100K):
+Best time to post:
+---
+Set 1: Tone edukasi/informasi
+Set 2: Tone hiburan/relatable
+Set 3: Tone testimonial/social proof`;
+          break;
+        }
+
+        // ── YOUTUBE ───────────────────────────────────────────────────
+        case "youtube-script": {
+          const dur3 = (req.body as any).duration || "5 menit";
+          userPrompt = `Buat YouTube Video Script (${dur3}) untuk mempromosikan atau mengedukasi tentang produk AI Chatbot berikut:
+${agentCtx}
+Format:
+## JUDUL VIDEO (5 pilihan, SEO-optimized, max 60 karakter each)
+
+## THUMBNAIL TEXT SARAN (max 3-4 kata besar)
+
+## INTRO (0:00 - 0:30)
+[Hook + preview konten + subscribe CTA]
+Script: ...
+
+## MAIN CONTENT dengan timestamp
+[0:30 - X:XX] Segmen 1 — [Topik]: Script:
+[X:XX - X:XX] Segmen 2 — [Topik]: Script:
+[X:XX - X:XX] Segmen 3 — [Topik]: Script:
+[X:XX - X:XX] Demo/Showcase: Script:
+
+## OUTRO (terakhir 30 detik)
+[CTA subscribe + like + link chatbot]
+Script: ...
+
+## DESKRIPSI VIDEO (SEO)
+[500 kata maks, timestamp, link, hashtag]`;
+          break;
+        }
+        case "youtube-seo": {
+          userPrompt = `Buat paket YouTube SEO lengkap untuk video tentang produk AI Chatbot berikut:
+${agentCtx}
+Output:
+## JUDUL VIDEO (5 variasi, max 60 karakter, sertakan keyword utama)
+Judul 1: ... | Judul 2: ... | Judul 3: ... | Judul 4: ... | Judul 5: ...
+
+## DESKRIPSI VIDEO (500 kata)
+[Paragraf 1: hook & topik]
+[Paragraf 2: isi video / poin bahasan]
+[Paragraf 3: tentang produk + CTA]
+[Timestamp contoh]
+[Link relevan]
+[Hashtag: 5 hashtag]
+
+## TAGS (30 tag, campuran broad + long-tail + niche konstruksi)
+
+## CHAPTER/TIMESTAMP SARAN
+00:00 Intro
+...
+
+## THUMBNAIL TIPS
+[Saran elemen visual + teks overlay + warna]`;
+          break;
+        }
+        case "youtube-shorts": {
+          userPrompt = `Buat YouTube Shorts Script (60 detik) untuk produk AI Chatbot berikut:
+${agentCtx}
+Format:
+## JUDUL SHORTS (3 pilihan, max 60 karakter, keyword-first)
+
+## SCRIPT (per detik)
+[0-5 detik] Hook — Teks: | Narasi:
+[5-20 detik] Problem — Teks: | Narasi:
+[20-45 detik] Solution/Demo — Teks: | Narasi:
+[45-55 detik] Proof — Teks: | Narasi:
+[55-60 detik] CTA — Teks: | Narasi:
+
+## CAPTION SHORTS (maks 100 karakter)
+## HASHTAG (5-8 hashtag)
+## SARAN VISUAL & EDITING
+[Gaya edit: cuts, teks animasi, musik]`;
+          break;
+        }
+
+        // ── LINKEDIN ──────────────────────────────────────────────────
+        case "linkedin-article": {
+          userPrompt = `Buat outline LinkedIn Article (thought leadership) tentang topik relevan dengan produk AI Chatbot berikut untuk audiens profesional konstruksi Indonesia:
+${agentCtx}
+Output:
+## JUDUL ARTIKEL (3 pilihan, clickable, 50-70 karakter)
+
+## OUTLINE LENGKAP
+### Intro (200 kata) — hook, konteks industri, preview artikel
+### Bab 1 — [Topik: masalah/tantangan industri] (200 kata)
+### Bab 2 — [Topik: peran AI/teknologi] (200 kata)
+### Bab 3 — [Topik: studi kasus / contoh nyata] (200 kata)
+### Bab 4 — [Topik: langkah implementasi] (150 kata)
+### Penutup + CTA (100 kata)
+
+## KEY POINTS per bab (3 bullet masing-masing)
+## KEYWORDS SEO LinkedIn
+## HASHTAG (5-10, B2B konstruksi Indonesia)
+## SUGGESTED IMAGE/BANNER`;
+          break;
+        }
+        case "linkedin-dm": {
+          userPrompt = `Buat 3 template LinkedIn DM / InMail Outreach untuk menawarkan produk AI Chatbot berikut kepada calon klien di industri konstruksi Indonesia:
+${agentCtx}
+Target: Decision maker (Direktur, Manajer, Kepala Divisi) di perusahaan kontraktor/konsultan/BUJK.
+Variasi A — Cold DM (belum pernah kontak): singkat, personal, tidak spam, max 80 kata
+Variasi B — After Event / Webinar Follow-up: referensikan event bersama, hangat, max 100 kata  
+Variasi C — After Viewed Profile: singgung mereka lihat profil Anda, curious-hook, max 80 kata
+Setiap template: Subject (untuk InMail), Body, Saran follow-up jika tidak dibalas (3-5 hari kemudian).`;
+          break;
+        }
+        case "linkedin-company": {
+          userPrompt = `Buat 3 variasi LinkedIn Company Page Post untuk akun perusahaan yang mempromosikan produk AI Chatbot berikut:
+${agentCtx}
+Post 1 — Pengumuman Produk/Fitur Baru: formal, informatif, profesional (150-200 kata)
+Post 2 — Edukasi Industri: insight atau data tentang digitalisasi konstruksi Indonesia, soft sell di akhir (200-250 kata)
+Post 3 — Success Story / Case Study: cerita sukses klien (anonimkan nama jika perlu), hasil konkret, quote, CTA (200-250 kata)
+Setiap post: format LinkedIn optimal (paragraf pendek, white space, bullet), CTA yang sesuai, 5-8 hashtag B2B.`;
+          break;
+        }
+
+        // ── GOOGLE ────────────────────────────────────────────────────
+        case "google-search-ad": {
+          userPrompt = `Buat Google Search Ad dalam format RSA (Responsive Search Ad) untuk produk AI Chatbot berikut:
+${agentCtx}
+Output:
+## FINAL URL
+${chatUrl}
+
+## HEADLINES (buat 15, max 30 karakter each, sertakan keyword)
+H1: ... H2: ... H3: ... [dst hingga H15]
+Tandai mana yang harus: [PINNED POSITION 1] [PINNED POSITION 2] [FLEXIBLE]
+
+## DESCRIPTIONS (buat 4, max 90 karakter each)
+D1: ... D2: ... D3: ... D4: ...
+
+## KATA KUNCI SARAN (20 keyword, mix match type)
+[Broad]: ... [Phrase]: "..." [Exact]: [...]
+
+## NEGATIVE KEYWORDS (10)
+## SITELINK EXTENSION (4 sitelink: judul + deskripsi 2 baris)
+## CALLOUT EXTENSION (8 callout, max 25 karakter)
+## STRUCTURED SNIPPET`;
+          break;
+        }
+        case "google-display": {
+          userPrompt = `Buat Google Display Ad Copy (Responsive Display Ad) untuk produk AI Chatbot berikut:
+${agentCtx}
+Output:
+## SHORT HEADLINES (5 pilihan, max 30 karakter)
+## LONG HEADLINES (5 pilihan, max 90 karakter)
+## DESCRIPTIONS (5 pilihan, max 90 karakter)
+## BUSINESS NAME: ${name}
+## CALL TO ACTION (pilih 3): [Pelajari Selengkapnya / Daftar / Hubungi / Coba Gratis / Dapatkan Penawaran]
+
+## SARAN GAMBAR (untuk upload ke Google Ads)
+Gambar landscape (1.91:1): Saran visual + teks overlay
+Gambar square (1:1): Saran visual + teks overlay
+Logo: Saran versi putih & berwarna
+
+## AUDIENCE TARGETING SARAN
+In-market audiences: ...
+Custom intent (keyword): ...
+Remarketing: ...`;
+          break;
+        }
+        case "google-gmb": {
+          userPrompt = `Buat konten Google My Business (Google Business Profile) untuk bisnis yang menjual produk AI Chatbot berikut:
+${agentCtx}
+Output:
+## DESKRIPSI BISNIS GMB (750 karakter maks, keyword-rich)
+
+## 5 POST GMB (pilih mix tipe)
+Post 1 — Penawaran/Promo: Judul | Teks (300 kata maks) | CTA | Tanggal berlaku
+Post 2 — Update Produk: Judul | Teks | CTA
+Post 3 — Event/Webinar: Judul | Teks | Tanggal & Waktu | Link
+Post 4 — Edukasi: Judul | Teks (tips singkat)
+Post 5 — Produk Baru: Judul | Deskripsi produk | Harga | Link
+
+## KATEGORI GMB SARAN (primary + secondary)
+## FAQ GMB (5 Q&A yang sering ditanya)
+## REVIEW RESPONSE TEMPLATE
+[Response untuk review bintang 5]: ...
+[Response untuk review bintang 1-3 / kritik]: ...`;
+          break;
+        }
+
         default:
           return res.status(400).json({ error: "Tool tidak dikenal" });
       }

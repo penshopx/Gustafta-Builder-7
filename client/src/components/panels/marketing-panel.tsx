@@ -252,6 +252,170 @@ function AiToolCard({ tool, agent }: { tool: AiTool; agent: any }) {
   );
 }
 
+// ─── Platform Tools ───────────────────────────────────────────────────
+interface Platform {
+  id: string;
+  label: string;
+  color: string;
+  bgColor: string;
+  ringColor: string;
+  Icon: React.ElementType;
+  tools: AiTool[];
+}
+
+const PLATFORMS: Platform[] = [
+  {
+    id: "facebook",
+    label: "Facebook",
+    color: "text-[#1877F2]",
+    bgColor: "bg-[#1877F2]/10",
+    ringColor: "ring-[#1877F2]/40",
+    Icon: () => (
+      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#1877F2]">
+        <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+      </svg>
+    ),
+    tools: [
+      { id: "facebook-post", label: "Facebook Feed Post", description: "3 variasi post: edukasi, promo, dan engagement untuk algoritma organik Facebook", icon: Globe, color: "text-[#1877F2]", bgColor: "bg-[#1877F2]/10" },
+      { id: "facebook-ad", label: "Facebook Ad Copy", description: "Single image, carousel 3 kartu, dan video ad script 30 detik siap upload ke Ads Manager", icon: Zap, color: "text-[#1877F2]", bgColor: "bg-[#1877F2]/10" },
+      { id: "facebook-group", label: "Facebook Group Post", description: "2 post organik komunitas — story autentik & diskusi — tidak terasa seperti iklan", icon: Users, color: "text-[#1877F2]", bgColor: "bg-[#1877F2]/10" },
+    ],
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    color: "text-[#E1306C]",
+    bgColor: "bg-[#E1306C]/10",
+    ringColor: "ring-[#E1306C]/40",
+    Icon: () => (
+      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#E1306C]">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+    ),
+    tools: [
+      { id: "instagram-reel", label: "Instagram Reels Script", description: "Script lengkap per detik — hook, body, CTA, caption, dan 20 hashtag untuk Reels viral", icon: Mic, color: "text-[#E1306C]", bgColor: "bg-[#E1306C]/10", options: [{ key: "duration", label: "Durasi", choices: ["30 detik", "60 detik", "90 detik"] }] },
+      { id: "instagram-story", label: "Instagram Story Sequence", description: "5 slide story berurutan: hook → problem → solution → proof → CTA dengan elemen interaktif", icon: Globe, color: "text-[#E1306C]", bgColor: "bg-[#E1306C]/10" },
+      { id: "instagram-bio", label: "Instagram Bio Optimizer", description: "Bio 150 karakter, username saran, 5 highlights, content pillars, dan strategi link in bio", icon: Target, color: "text-[#E1306C]", bgColor: "bg-[#E1306C]/10" },
+    ],
+  },
+  {
+    id: "tiktok",
+    label: "TikTok",
+    color: "text-foreground",
+    bgColor: "bg-black/10 dark:bg-white/10",
+    ringColor: "ring-foreground/40",
+    Icon: () => (
+      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
+        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.86a8.17 8.17 0 004.77 1.53V6.93a4.86 4.86 0 01-1-.24z"/>
+      </svg>
+    ),
+    tools: [
+      { id: "tiktok-script", label: "TikTok Video Script", description: "Script per detik — hook kuat, body, CTA, caption, saran audio & efek untuk konten viral", icon: Mic, color: "text-foreground", bgColor: "bg-black/10 dark:bg-white/10" },
+      { id: "tiktok-hooks", label: "10 Hook Generator", description: "10 hook pembuka TikTok yang kuat: pertanyaan provokatif, fakta mengejutkan, rahasia, transformasi", icon: Zap, color: "text-foreground", bgColor: "bg-black/10 dark:bg-white/10" },
+      { id: "tiktok-caption", label: "Caption + Hashtag Kit", description: "3 set caption + 30 hashtag per set (mega + mid + niche konstruksi) dengan waktu posting terbaik", icon: Target, color: "text-foreground", bgColor: "bg-black/10 dark:bg-white/10" },
+    ],
+  },
+  {
+    id: "youtube",
+    label: "YouTube",
+    color: "text-[#FF0000]",
+    bgColor: "bg-[#FF0000]/10",
+    ringColor: "ring-[#FF0000]/40",
+    Icon: () => (
+      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#FF0000]">
+        <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+    ),
+    tools: [
+      { id: "youtube-script", label: "YouTube Video Script", description: "Script lengkap dengan timestamp, intro, segmen isi, demo chatbot, outro, dan deskripsi SEO", icon: Mic, color: "text-[#FF0000]", bgColor: "bg-[#FF0000]/10", options: [{ key: "duration", label: "Durasi", choices: ["3 menit", "5 menit", "10 menit", "15 menit"] }] },
+      { id: "youtube-seo", label: "YouTube SEO Package", description: "5 judul optimized, deskripsi 500 kata, 30 tags, chapter/timestamp, dan tips thumbnail", icon: BarChart3, color: "text-[#FF0000]", bgColor: "bg-[#FF0000]/10" },
+      { id: "youtube-shorts", label: "YouTube Shorts Script", description: "Script 60 detik per detik — hook, problem, solution, proof, CTA — siap rekam & edit", icon: Zap, color: "text-[#FF0000]", bgColor: "bg-[#FF0000]/10" },
+    ],
+  },
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    color: "text-[#0A66C2]",
+    bgColor: "bg-[#0A66C2]/10",
+    ringColor: "ring-[#0A66C2]/40",
+    Icon: () => (
+      <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#0A66C2]">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      </svg>
+    ),
+    tools: [
+      { id: "linkedin-article", label: "LinkedIn Article Outline", description: "Outline thought leadership 5 bab dengan key points, SEO keywords, dan saran banner — langsung tulis di LinkedIn", icon: FileText, color: "text-[#0A66C2]", bgColor: "bg-[#0A66C2]/10" },
+      { id: "linkedin-dm", label: "LinkedIn DM / InMail", description: "3 template outreach (cold, after event, after viewed profile) + saran follow-up timed sequence", icon: Mail, color: "text-[#0A66C2]", bgColor: "bg-[#0A66C2]/10" },
+      { id: "linkedin-company", label: "Company Page Post", description: "3 post perusahaan: announcement produk, edukasi industri, dan success story/case study", icon: Users, color: "text-[#0A66C2]", bgColor: "bg-[#0A66C2]/10" },
+    ],
+  },
+  {
+    id: "google",
+    label: "Google",
+    color: "text-[#4285F4]",
+    bgColor: "bg-[#4285F4]/10",
+    ringColor: "ring-[#4285F4]/40",
+    Icon: () => (
+      <svg viewBox="0 0 24 24" className="w-5 h-5">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+    ),
+    tools: [
+      { id: "google-search-ad", label: "Google Search Ad (RSA)", description: "15 headline + 4 deskripsi format RSA, 20 keyword saran, negative keywords, sitelink & callout extension", icon: Zap, color: "text-[#4285F4]", bgColor: "bg-[#4285F4]/10" },
+      { id: "google-display", label: "Google Display Ad", description: "Responsive display ad: 5 short + 5 long headline, 5 deskripsi, saran gambar, dan audience targeting", icon: Globe, color: "text-[#4285F4]", bgColor: "bg-[#4285F4]/10" },
+      { id: "google-gmb", label: "Google My Business", description: "Deskripsi bisnis GMB, 5 jenis post GMB, FAQ 5 Q&A, dan template respons review bintang 5 & kritik", icon: Star, color: "text-[#4285F4]", bgColor: "bg-[#4285F4]/10" },
+    ],
+  },
+];
+
+function PlatformToolsTab({ agent }: { agent: any }) {
+  const [activePlatform, setActivePlatform] = useState("facebook");
+  const platform = PLATFORMS.find(p => p.id === activePlatform)!;
+  return (
+    <div className="space-y-5">
+      <p className="text-sm text-muted-foreground">
+        Pilih platform lalu generate konten AI yang disesuaikan dengan format dan algoritma masing-masing.
+      </p>
+      {/* Platform picker */}
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        {PLATFORMS.map(p => {
+          const PIcon = p.Icon;
+          const active = p.id === activePlatform;
+          return (
+            <button
+              key={p.id}
+              onClick={() => setActivePlatform(p.id)}
+              data-testid={`button-platform-${p.id}`}
+              className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border text-xs font-semibold transition-all
+                ${active ? `${p.bgColor} ring-2 ${p.ringColor} border-transparent shadow-sm` : "bg-background border-border hover:bg-muted/60"}`}
+            >
+              <PIcon />
+              <span className={active ? p.color : "text-muted-foreground"}>{p.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Platform tools */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <platform.Icon />
+          <span className={`font-semibold text-sm ${platform.color}`}>{platform.label} Tools</span>
+          <Badge variant="secondary" className="text-xs ml-auto">{platform.tools.length} tools</Badge>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {platform.tools.map(tool => (
+            <AiToolCard key={tool.id} tool={tool} agent={agent} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── QR Code Tool ─────────────────────────────────────────────────────
 function QrCodeTool({ agent }: { agent: any }) {
   const { toast } = useToast();
@@ -942,7 +1106,7 @@ export function MarketingPanel({ agent }: { agent: any }) {
                 Marketing Suite
               </h2>
               <p className="text-sm text-muted-foreground">
-                9 AI tools + 5 alat instan untuk mempromosikan chatbot <span className="font-medium text-foreground">{agent.name}</span>
+                27 AI tools (9 umum + 18 platform) + 5 alat instan untuk <span className="font-medium text-foreground">{agent.name}</span>
               </p>
             </div>
           </div>
@@ -960,8 +1124,11 @@ export function MarketingPanel({ agent }: { agent: any }) {
             <TabsTrigger value="ai-tools" className="text-xs gap-1.5" data-testid="tab-ai-tools">
               <Sparkles className="w-3.5 h-3.5" /> AI Tools
             </TabsTrigger>
+            <TabsTrigger value="platforms" className="text-xs gap-1.5" data-testid="tab-platforms">
+              <Globe className="w-3.5 h-3.5" /> Platforms
+            </TabsTrigger>
             <TabsTrigger value="instant" className="text-xs gap-1.5" data-testid="tab-instant">
-              <Zap className="w-3.5 h-3.5" /> Alat Instan
+              <Zap className="w-3.5 h-3.5" /> Instan
             </TabsTrigger>
             <TabsTrigger value="brief" className="text-xs gap-1.5" data-testid="tab-brief">
               <FileText className="w-3.5 h-3.5" /> Brief
@@ -982,6 +1149,11 @@ export function MarketingPanel({ agent }: { agent: any }) {
               <AiToolCard key={tool.id} tool={tool} agent={agent} />
             ))}
           </div>
+        </TabsContent>
+
+        {/* ── PLATFORMS TAB ── */}
+        <TabsContent value="platforms" className="m-0 px-4 md:px-6 py-5">
+          <PlatformToolsTab agent={agent} />
         </TabsContent>
 
         {/* ── ALAT INSTAN TAB ── */}
