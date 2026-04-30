@@ -24,6 +24,7 @@ import PacksPage from "@/pages/packs";
 import TenderWizard from "@/pages/tender-wizard";
 import DomainsPage from "@/pages/domains";
 import AdminPage from "@/pages/admin";
+import AccountPage from "@/pages/account";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/packs/:packId" component={TenderWizard} />
       <Route path="/domains" component={DomainsPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/account" component={AccountPage} />
       <Route component={NotFound} />
     </Switch>
   );

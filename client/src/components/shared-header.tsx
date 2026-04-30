@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown } from "lucide-react";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown, User } from "lucide-react";
 
 interface SharedHeaderProps {
   transparent?: boolean;
@@ -155,15 +155,17 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                   Dashboard
                 </Button>
               </Link>
+              <Link href="/account" title="Akun Saya">
+                <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-primary/40 transition-all" data-testid="avatar-account-link">
+                  <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
+                  <AvatarFallback>{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
+                </Avatar>
+              </Link>
               <a href="/api/logout">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" title="Keluar">
                   <LogOut className="h-4 w-4" />
                 </Button>
               </a>
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
-                <AvatarFallback>{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
-              </Avatar>
             </div>
           ) : (
             <a href="/api/login">
@@ -231,6 +233,12 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                         <Button className="w-full">
                           <LayoutDashboard className="h-4 w-4 mr-2" />
                           Dashboard
+                        </Button>
+                      </Link>
+                      <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full gap-2" data-testid="button-account-mobile">
+                          <User className="h-4 w-4" />
+                          Akun Saya
                         </Button>
                       </Link>
                       <a href="/api/logout">

@@ -8527,6 +8527,30 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     next();
   }
 
+  // ==================== USER: MY ACCOUNT ====================
+  app.get("/api/my/account", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = getSessionUserId(req);
+      const [dbUser] = await db.select().from(users).where(eq(users.id, userId));
+      const subscription = await storage.getActiveSubscription(userId);
+      const agents = await storage.getAgents();
+      res.json({
+        user: dbUser || null,
+        subscription: subscription || null,
+        agentCount: agents.length,
+        agents: agents.slice(0, 6).map((a: any) => ({
+          id: a.id,
+          name: a.name,
+          tagline: a.tagline || null,
+          category: a.category || null,
+        })),
+      });
+    } catch (error: any) {
+      console.error("My account error:", error);
+      res.status(500).json({ error: "Gagal mengambil data akun." });
+    }
+  });
+
   // ==================== PUBLIC: TRIAL REQUEST FORM ====================
   app.post("/api/trial-requests", async (req: any, res: any) => {
     try {
