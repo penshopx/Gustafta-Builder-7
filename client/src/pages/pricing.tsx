@@ -36,28 +36,6 @@ interface PricingTier {
 
 const subscriptionTiers: PricingTier[] = [
   {
-    name: "Free Trial",
-    planKey: "free_trial",
-    description: "Coba gratis selama 14 hari dengan materi awareness",
-    price: "Gratis",
-    priceNote: "14 hari",
-    duration: "14 Hari",
-    icon: Zap,
-    features: [
-      { text: "1 Chatbot", included: true },
-      { text: "500 pesan", included: true },
-      { text: "Materi Awareness", included: true },
-      { text: "Knowledge Base: 3 dokumen", included: true },
-      { text: "Web Widget", included: true },
-      { text: "Multi-channel Integration", included: false },
-      { text: "Agentic AI Features", included: false },
-      { text: "Orchestrator Multi-Agent", included: false },
-      { text: "Analytics Dashboard", included: false },
-    ],
-    cta: "Mulai Trial Gratis",
-    ctaVariant: "outline",
-  },
-  {
     name: "1 Bulan",
     planKey: "monthly_1",
     description: "Berlangganan bulanan untuk 1 chatbot",
@@ -248,10 +226,6 @@ const faqs = [
     answer: "Pembayaran dilakukan melalui payment gateway lokal Indonesia. Anda bisa bayar via transfer bank, e-wallet, kartu kredit/debit, minimarket, atau QRIS.",
   },
   {
-    question: "Apakah ada periode trial?",
-    answer: "Ya! Kami menyediakan free trial 14 hari dengan akses ke materi awareness dan fitur dasar chatbot. Tidak perlu kartu kredit untuk memulai.",
-  },
-  {
     question: "Bagaimana jika pesan melebihi kuota?",
     answer: "Anda akan mendapat notifikasi saat mendekati limit. Anda bisa membeli paket pesan tambahan atau upgrade ke paket chatbot yang lebih besar.",
   },
@@ -261,7 +235,7 @@ const faqs = [
   },
   {
     question: "Apakah Orchestrator Multi-Agent menambah biaya?",
-    answer: "Orchestrator menggunakan DeepSeek sebagai model classifier AI. Biaya routing sangat kecil (~$0.0001 per pesan atau sekitar Rp 1–2/pesan) dan sudah termasuk dalam semua paket berlangganan berbayar. Free Trial tidak mendukung fitur Orchestrator.",
+    answer: "Orchestrator menggunakan DeepSeek sebagai model classifier AI. Biaya routing sangat kecil (~$0.0001 per pesan atau sekitar Rp 1–2/pesan) dan sudah termasuk dalam semua paket berlangganan.",
   },
   {
     question: "Apa perbedaan Orchestrator Multi-Agent dengan Orkestrator (Big Idea) di hierarki?",
@@ -404,25 +378,15 @@ export default function Pricing() {
         name: customerName,
       });
 
-      if (selectedPlan === "free_trial") {
-        toast({
-          title: "Free Trial Aktif!",
-          description: "Selamat! Free trial 14 hari Anda sudah aktif.",
-        });
-        setShowPaymentDialog(false);
-        setPaymentInfo(null);
-        navigate("/dashboard");
-      } else {
-        // Tampilkan instruksi transfer bank
-        setPaymentInfo({
-          invoiceNo: result.invoiceNo,
-          amount: result.amount,
-          planName: result.planName,
-          bankAccounts: result.bankAccounts,
-          whatsapp: result.whatsapp,
-          message: result.message,
-        });
-      }
+      // Tampilkan instruksi transfer bank
+      setPaymentInfo({
+        invoiceNo: result.invoiceNo,
+        amount: result.amount,
+        planName: result.planName,
+        bankAccounts: result.bankAccounts,
+        whatsapp: result.whatsapp,
+        message: result.message,
+      });
     } catch (error) {
       toast({
         title: "Gagal Memproses",
@@ -441,9 +405,7 @@ export default function Pricing() {
               <DialogHeader>
                 <DialogTitle>Konfirmasi Langganan</DialogTitle>
                 <DialogDescription>
-                  {selectedPlan === "free_trial"
-                    ? "Masukkan data Anda untuk memulai free trial 14 hari."
-                    : "Masukkan nama & email, lalu ikuti instruksi transfer bank."}
+                  Masukkan nama & email, lalu ikuti instruksi transfer bank.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -480,7 +442,7 @@ export default function Pricing() {
                 >
                   {createSubscription.isPending ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Memproses...</>
-                  ) : selectedPlan === "free_trial" ? "Mulai Free Trial" : "Lanjutkan"}
+                  ) : "Lanjutkan ke Pembayaran"}
                 </Button>
               </DialogFooter>
             </>
@@ -545,7 +507,7 @@ export default function Pricing() {
           <Badge className="mb-4">Pricing</Badge>
           <h1 className="text-4xl font-bold mb-4">Pilih Paket Berlangganan</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Mulai dengan free trial 14 hari, lalu pilih durasi berlangganan yang sesuai kebutuhan Anda.
+            Pilih durasi berlangganan yang sesuai kebutuhan Anda. Semua paket sudah termasuk Agentic AI dan Orchestrator Multi-Agent.
           </p>
         </div>
 
@@ -663,7 +625,6 @@ export default function Pricing() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-4 font-medium">Fitur</th>
-                    <th className="text-center p-4 font-medium">Free Trial</th>
                     <th className="text-center p-4 font-medium">1 Bulan</th>
                     <th className="text-center p-4 font-medium bg-primary/5">3 Bulan</th>
                     <th className="text-center p-4 font-medium">6 Bulan</th>
@@ -672,24 +633,23 @@ export default function Pricing() {
                 </thead>
                 <tbody>
                   {[
-                    { feature: "Durasi", trial: "14 hari", m1: "30 hari", m3: "90 hari", m6: "180 hari", m12: "365 hari" },
-                    { feature: "Jumlah Chatbot", trial: "1", m1: "1", m3: "1", m6: "1", m12: "1" },
-                    { feature: "Pesan", trial: "500", m1: "5.000/bln", m3: "5.000/bln", m6: "5.000/bln", m12: "5.000/bln" },
-                    { feature: "Knowledge Base", trial: "3 dok", m1: "20 dok", m3: "20 dok", m6: "30 dok", m12: "50 dok" },
-                    { feature: "Materi Awareness", trial: "Ya", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
-                    { feature: "Web Widget", trial: "Ya", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
-                    { feature: "Remove Branding", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Custom" },
-                    { feature: "WhatsApp", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
-                    { feature: "Telegram", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
-                    { feature: "Discord", trial: "-", m1: "-", m3: "-", m6: "Ya", m12: "Ya" },
-                    { feature: "Slack", trial: "-", m1: "-", m3: "-", m6: "-", m12: "Ya" },
-                    { feature: "Agentic AI", trial: "-", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
-                    { feature: "Analytics", trial: "Basic", m1: "Standard", m3: "Standard", m6: "Advanced", m12: "Advanced" },
-                    { feature: "Support", trial: "Email", m1: "Email", m3: "Priority Email", m6: "Priority", m12: "Priority + WA" },
+                    { feature: "Durasi", m1: "30 hari", m3: "90 hari", m6: "180 hari", m12: "365 hari" },
+                    { feature: "Jumlah Chatbot", m1: "1", m3: "1", m6: "1", m12: "1" },
+                    { feature: "Pesan", m1: "5.000/bln", m3: "5.000/bln", m6: "5.000/bln", m12: "5.000/bln" },
+                    { feature: "Knowledge Base", m1: "20 dok", m3: "20 dok", m6: "30 dok", m12: "50 dok" },
+                    { feature: "Web Widget", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Remove Branding", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Custom" },
+                    { feature: "WhatsApp", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Telegram", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Discord", m1: "-", m3: "-", m6: "Ya", m12: "Ya" },
+                    { feature: "Slack", m1: "-", m3: "-", m6: "-", m12: "Ya" },
+                    { feature: "Agentic AI", m1: "Ya", m3: "Ya", m6: "Ya", m12: "Ya" },
+                    { feature: "Orchestrator Multi-Agent", m1: "7 Specialist", m3: "7 Specialist", m6: "7 + Custom", m12: "7 + Custom ∞" },
+                    { feature: "Analytics", m1: "Standard", m3: "Standard", m6: "Advanced", m12: "Advanced" },
+                    { feature: "Support", m1: "Email", m3: "Priority Email", m6: "Priority", m12: "Priority + WA" },
                   ].map((row, index) => (
                     <tr key={index} className="border-b last:border-0">
                       <td className="p-4 font-medium">{row.feature}</td>
-                      <td className="text-center p-4">{row.trial === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.trial}</td>
                       <td className="text-center p-4">{row.m1 === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.m1}</td>
                       <td className="text-center p-4 bg-primary/5">{row.m3 === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.m3}</td>
                       <td className="text-center p-4">{row.m6 === "-" ? <X className="h-4 w-4 mx-auto text-muted-foreground" /> : row.m6}</td>
@@ -722,15 +682,13 @@ export default function Pricing() {
         <section className="text-center py-12 bg-muted/30 rounded-lg">
           <h2 className="text-2xl font-bold mb-2">Siap Memulai?</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Coba gratis selama 14 hari tanpa perlu kartu kredit. Upgrade kapan saja sesuai kebutuhan bisnis Anda.
+            Pilih paket dan mulai bangun ekosistem chatbot AI profesional Anda hari ini. Semua paket sudah termasuk Agentic AI dan Orchestrator Multi-Agent.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/dashboard">
-              <Button size="lg" className="gap-2">
-                <Zap className="h-4 w-4" />
-                Mulai Free Trial
-              </Button>
-            </Link>
+            <Button size="lg" className="gap-2" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+              <Zap className="h-4 w-4" />
+              Lihat Paket
+            </Button>
             <Button size="lg" variant="outline" className="gap-2">
               <Headphones className="h-4 w-4" />
               Hubungi Sales

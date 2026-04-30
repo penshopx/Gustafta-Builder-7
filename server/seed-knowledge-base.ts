@@ -277,13 +277,12 @@ Series: Regulasi Jasa Konstruksi
 
 | Paket | Durasi | Harga | Pesan/Bulan | Orchestrator |
 |-------|--------|-------|-------------|--------------|
-| Free Trial | 14 hari | Gratis | 500 | ❌ |
 | 1 Bulan | 30 hari | Rp 199.000 | 5.000 | ✅ 7 Specialist |
 | 3 Bulan | 90 hari | Rp 499.000 | 5.000 | ✅ 7 Specialist |
 | 6 Bulan | 180 hari | Rp 999.000 | 5.000 | ✅ + Custom |
 | 12 Bulan | 365 hari | Rp 1.999.000 | 5.000 | ✅ + Custom Unlimited |
 
-Free Trial = gratis 14 hari, tidak perlu kartu kredit, akses fitur dasar (tanpa Orchestrator).
+Semua paket berbayar, tidak ada free trial. Semua paket sudah termasuk Agentic AI dan Orchestrator Multi-Agent.
 
 ### Paket Multi-Chatbot:
 
@@ -686,13 +685,16 @@ Orchestrator (DeepSeek Classifier) → ~$0.0001/call
 ═══════════════════════════════════════════════════════════
 
 **Q: Berapa chatbot yang bisa saya buat?**
-A: Tergantung paket. Free Trial: 1 chatbot. Hingga 25 chatbot di paket 12 bulan.
+A: Tergantung paket. Paket 1 chatbot mulai Rp 199.000/bulan. Tersedia juga paket multi-chatbot (5, 10, 20, Unlimited) untuk kebutuhan lebih besar.
 
 **Q: Apakah chatbot bisa menjawab dalam Bahasa Indonesia?**
 A: Ya! Gustafta dioptimalkan untuk Bahasa Indonesia. Bahasa lain juga bisa dengan set bahasa di pengaturan.
 
+**Q: Apakah ada free trial?**
+A: Tidak ada. Semua paket Gustafta berbayar mulai Rp 199.000/bulan. Langsung mendapat akses penuh termasuk Agentic AI dan Orchestrator Multi-Agent.
+
 **Q: Bagaimana cara bayar berlangganan?**
-A: Transfer bank ke rekening PT Gustafta Teknologi (BCA/Mandiri/BRI), lalu konfirmasi ke tim. Aktivasi dalam 1x24 jam kerja.
+A: Transfer bank ke rekening PT Gustafta Teknologi (BCA/Mandiri/BRI), lalu konfirmasi ke tim. Aktivasi dalam 1x24 jam kerja. Tersedia juga pembayaran via e-wallet, kartu kredit, minimarket, dan QRIS.
 
 **Q: Apakah ada batasan jumlah pesan chatbot?**
 A: Tidak ada batasan pesan per chatbot. Yang dibatasi adalah jumlah chatbot sesuai paket.

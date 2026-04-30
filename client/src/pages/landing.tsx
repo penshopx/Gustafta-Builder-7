@@ -280,7 +280,7 @@ export default function Landing() {
     },
     {
       question: "Apakah Orchestrator Multi-Agent menambah biaya?",
-      answer: "Orchestrator menggunakan DeepSeek sebagai model classifier dengan biaya routing ~Rp 1–2 per pesan (sekitar $0.0001/call). Biaya ini sudah termasuk dalam paket berlangganan berbayar. Untuk estimasi: 5.000 pesan/bulan ≈ Rp 5.000–10.000 biaya routing — sangat terjangkau. Free Trial tidak menyertakan fitur Orchestrator."
+      answer: "Orchestrator menggunakan DeepSeek sebagai model classifier dengan biaya routing ~Rp 1–2 per pesan (sekitar $0.0001/call). Biaya ini sudah termasuk dalam semua paket berlangganan. Untuk estimasi: 5.000 pesan/bulan ≈ Rp 5.000–10.000 biaya routing — sangat terjangkau dan tidak ada biaya tambahan."
     },
     {
       question: "Bagaimana dengan keamanan data?",
@@ -401,7 +401,7 @@ export default function Landing() {
                 <a href="/api/login" onClick={handleStartNowClick} className="w-full sm:w-auto">
                   <Button size="lg" className="w-full gap-2 text-lg px-8 py-6" data-testid="button-start">
                     <Rocket className="h-5 w-5" />
-                    Mulai Gratis Sekarang
+                    Mulai Sekarang
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </a>
@@ -416,7 +416,7 @@ export default function Landing() {
             
             <p className="text-sm text-muted-foreground">
               <CheckCircle2 className="h-4 w-4 inline mr-1 text-green-500" />
-              Gratis untuk memulai. Tidak perlu kartu kredit. Setup kurang dari 30 menit.
+              Mulai dari Rp 199.000/bulan. Semua paket termasuk Agentic AI + Orchestrator Multi-Agent. Setup kurang dari 30 menit.
             </p>
           </div>
         </div>
