@@ -1236,6 +1236,7 @@ export const miniApps = pgTable("mini_apps", {
   config: jsonb("config").default({}),
   icon: text("icon").default("app"),
   isActive: boolean("is_active").default(true),
+  publicSlug: text("public_slug").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -1259,12 +1260,14 @@ export const insertMiniAppSchema = z.object({
   type: miniAppTypeSchema,
   config: z.record(z.any()).optional().default({}),
   icon: z.string().optional().default("app"),
+  publicSlug: z.string().optional(),
 });
 
 export type InsertMiniApp = z.infer<typeof insertMiniAppSchema>;
 export type MiniApp = InsertMiniApp & {
   id: string;
   isActive: boolean;
+  publicSlug?: string;
   createdAt: string;
 };
 

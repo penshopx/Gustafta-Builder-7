@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useMiniApps, useCreateMiniApp, useUpdateMiniApp, useDeleteMiniApp, useMiniAppResults, useCreateMiniAppResult, useRunAIMiniApp } from "@/hooks/use-mini-apps";
+import { useMiniApps, useCreateMiniApp, useUpdateMiniApp, useDeleteMiniApp, useMiniAppResults, useCreateMiniAppResult, useRunAIMiniApp, useAutoGenerateMiniApps } from "@/hooks/use-mini-apps";
 import type { Agent, MiniApp, MiniAppType, MiniAppResult } from "@shared/schema";
 
 interface MiniAppsPanelProps {
@@ -478,7 +478,9 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
 
   const createMiniAppResult = useCreateMiniAppResult();
   const runAIMiniApp = useRunAIMiniApp();
+  const autoGenerateMiniApps = useAutoGenerateMiniApps();
 
+  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
   const [aiAnalysisResult, setAiAnalysisResult] = useState<string | null>(null);
   const [resultCopied, setResultCopied] = useState(false);
   const [notionExportOpen, setNotionExportOpen] = useState(false);
@@ -897,10 +899,32 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
             Aplikasi kecil yang memproses data dari Otak Proyek
           </p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Buat Mini App
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                await autoGenerateMiniApps.mutateAsync(agentId);
+                toast({ title: "Mini Apps Dibuat!", description: "AI berhasil membuat mini apps yang relevan untuk chatbot ini." });
+              } catch {
+                toast({ title: "Gagal", description: "Gagal membuat mini apps otomatis.", variant: "destructive" });
+              }
+            }}
+            disabled={autoGenerateMiniApps.isPending}
+            data-testid="button-auto-generate-mini-apps"
+          >
+            {autoGenerateMiniApps.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4 mr-2" />
+            )}
+            Generate Otomatis dari Chatbot
+          </Button>
+          <Button onClick={() => setCreateDialogOpen(true)} data-testid="button-create-mini-app">
+            <Plus className="w-4 h-4 mr-2" />
+            Buat Mini App
+          </Button>
+        </div>
       </div>
 
       {/* OpenClaw Tender Document Hub */}
@@ -988,11 +1012,43 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
+                      {app.publicSlug && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Salin public link"
+                            data-testid={`button-share-mini-app-${app.id}`}
+                            onClick={async () => {
+                              const url = `${window.location.origin}/mini-app/${app.publicSlug}`;
+                              await navigator.clipboard.writeText(url);
+                              setCopiedSlug(app.id);
+                              toast({ title: "Link disalin!", description: url });
+                              setTimeout(() => setCopiedSlug(null), 2000);
+                            }}
+                          >
+                            {copiedSlug === app.id ? (
+                              <CheckCheck className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <Link2 className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Buka public link"
+                            data-testid={`button-open-mini-app-${app.id}`}
+                            onClick={() => window.open(`/mini-app/${app.publicSlug}`, "_blank")}
+                          >
+                            <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        </>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(app)}
-                       
+                        data-testid={`button-edit-mini-app-${app.id}`}
                       >
                         <Pencil className="w-4 h-4 text-muted-foreground" />
                       </Button>
@@ -1000,7 +1056,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(String(app.id))}
-                       
+                        data-testid={`button-delete-mini-app-${app.id}`}
                       >
                         <Trash2 className="w-4 h-4 text-muted-foreground" />
                       </Button>

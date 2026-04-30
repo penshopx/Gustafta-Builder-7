@@ -75,3 +75,39 @@ export function useRunAIMiniApp() {
     },
   });
 }
+
+export function useAutoGenerateMiniApps() {
+  return useMutation({
+    mutationFn: async (agentId: string) => {
+      const response = await apiRequest("POST", `/api/mini-apps/${agentId}/auto-generate`, {});
+      return { data: await response.json(), agentId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/mini-apps", result.agentId] });
+    },
+  });
+}
+
+export function usePublicMiniApp(slug: string) {
+  return useQuery<{ miniApp: MiniApp; agent: { id: string; name: string; avatar: string; tagline: string; description: string } | null }>({
+    queryKey: ["/api/public/mini-app", slug],
+    queryFn: async () => {
+      const res = await fetch(`/api/public/mini-app/${slug}`);
+      if (!res.ok) throw new Error("Mini app not found");
+      return res.json();
+    },
+    enabled: !!slug,
+  });
+}
+
+export function usePublicMiniAppResult(slug: string) {
+  return useQuery<{ result: MiniAppResult | null }>({
+    queryKey: ["/api/public/mini-app-result", slug],
+    queryFn: async () => {
+      const res = await fetch(`/api/public/mini-app/${slug}/result`);
+      if (!res.ok) throw new Error("Failed to fetch result");
+      return res.json();
+    },
+    enabled: !!slug,
+  });
+}

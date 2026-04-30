@@ -20,7 +20,10 @@ import {
   insertMiniAppSchema,
   insertMiniAppResultSchema,
   insertAffiliateSchema,
+  miniAppTypeSchema,
   type Agent,
+  type MiniApp,
+  type MiniAppType,
 } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -5838,6 +5841,148 @@ Akhiri dengan 2-3 poin key takeaway untuk pembaca lain.`;
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete mini app" });
+    }
+  });
+
+  // ==================== Auto-Generate Mini Apps (Protected) ====================
+
+  app.post("/api/mini-apps/:agentId/auto-generate", isAuthenticated, async (req, res) => {
+    try {
+      const agentId = req.params.agentId as string;
+      const agent = await storage.getAgent(agentId);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+
+      const requestingUserId: string | undefined = req.user?.claims?.sub ?? (req.user as Record<string, any>)?.id;
+      if (agent.userId && requestingUserId && agent.userId !== requestingUserId) {
+        return res.status(403).json({ error: "Forbidden: you do not own this agent" });
+      }
+
+      const contextParts: string[] = [];
+      if (agent.name) contextParts.push(`Nama: ${agent.name}`);
+      if (agent.tagline) contextParts.push(`Tagline: ${agent.tagline}`);
+      if (agent.expertise && Array.isArray(agent.expertise) && agent.expertise.length > 0) {
+        contextParts.push(`Expertise: ${(agent.expertise as string[]).join(", ")}`);
+      }
+      if (agent.personality) contextParts.push(`Personality/Persona: ${agent.personality}`);
+      if (agent.description) contextParts.push(`Deskripsi: ${agent.description}`);
+      if (agent.systemPrompt) contextParts.push(`System Prompt (ringkasan): ${String(agent.systemPrompt).substring(0, 400)}`);
+
+      const systemPrompt = `Kamu adalah ahli produk digital. Berdasarkan data chatbot/agent di bawah, rekomendasikan 3-5 mini apps yang paling relevan dan berguna untuk pengguna chatbot ini.
+
+Data agent:
+${contextParts.join("\n")}
+
+Balas HANYA dengan JSON array (tanpa markdown, tanpa penjelasan). Format setiap item:
+{
+  "name": "Nama Mini App",
+  "type": "checklist|calculator|risk_assessment|progress_tracker|document_generator|lead_capture_form|scoring_assessment|gap_analysis|recommendation_engine",
+  "description": "Deskripsi singkat 1-2 kalimat",
+  "config": {}
+}
+
+Pilih tipe yang paling cocok dengan topik agent. Jangan gunakan tipe AI-powered seperti project_snapshot, risk_radar, dll.`;
+
+      const aiResponse = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: systemPrompt }],
+        temperature: 0.7,
+        max_tokens: 1500,
+      });
+
+      const rawContent = aiResponse.choices[0]?.message?.content || "[]";
+      let suggestions: Array<{ name: string; type: string; description: string; config: Record<string, any> }> = [];
+      try {
+        const cleaned = rawContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        suggestions = JSON.parse(cleaned);
+        if (!Array.isArray(suggestions)) suggestions = [];
+      } catch {
+        return res.status(500).json({ error: "Failed to parse AI suggestions" });
+      }
+
+      const validTypes: MiniAppType[] = ["checklist", "calculator", "risk_assessment", "progress_tracker", "document_generator", "custom", "lead_capture_form", "scoring_assessment", "gap_analysis", "recommendation_engine"];
+      const created: MiniApp[] = [];
+      for (const s of suggestions.slice(0, 5)) {
+        if (!s.name || !s.type) continue;
+        const parsed = miniAppTypeSchema.safeParse(s.type);
+        const type: MiniAppType = parsed.success && validTypes.includes(parsed.data) ? parsed.data : "custom";
+        const miniApp = await storage.createMiniApp({
+          agentId,
+          name: s.name,
+          description: s.description || "",
+          type,
+          config: (s.config && typeof s.config === "object") ? s.config : {},
+          icon: "app",
+        });
+        created.push(miniApp);
+      }
+
+      // Ensure at least 3 mini apps are created using deterministic fallbacks if AI output was insufficient
+      if (created.length < 3) {
+        const fallbacks: Array<{ name: string; type: MiniAppType; description: string }> = [
+          { name: "Checklist Persiapan", type: "checklist", description: `Daftar periksa persiapan untuk ${agent.name}` },
+          { name: "Kalkulator Estimasi", type: "calculator", description: `Kalkulator estimasi cepat untuk ${agent.name}` },
+          { name: "Penilaian Risiko", type: "risk_assessment", description: `Penilaian risiko untuk ${agent.name}` },
+          { name: "Formulir Kontak", type: "lead_capture_form", description: `Formulir pengumpulan data untuk ${agent.name}` },
+          { name: "Pelacak Progres", type: "progress_tracker", description: `Lacak progres pekerjaan bersama ${agent.name}` },
+        ];
+        for (const fb of fallbacks) {
+          if (created.length >= 3) break;
+          const alreadyCreated = created.some(c => c.type === fb.type);
+          if (alreadyCreated) continue;
+          const miniApp = await storage.createMiniApp({
+            agentId,
+            name: fb.name,
+            description: fb.description,
+            type: fb.type,
+            config: {},
+            icon: "app",
+          });
+          created.push(miniApp);
+        }
+      }
+
+      res.json({ created, count: created.length });
+    } catch (error) {
+      console.error("Auto-generate mini apps error:", error);
+      res.status(500).json({ error: "Failed to auto-generate mini apps" });
+    }
+  });
+
+  // ==================== Public Mini App Runner (No Auth) ====================
+
+  app.get("/api/public/mini-app/:slug", async (req, res) => {
+    try {
+      const slug = req.params.slug as string;
+      const miniApp = await storage.getMiniAppBySlug(slug);
+      if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
+
+      const agent = await storage.getAgent(miniApp.agentId);
+      res.json({
+        miniApp,
+        agent: agent ? {
+          id: agent.id,
+          name: agent.name,
+          avatar: agent.avatar,
+          tagline: agent.tagline || agent.description || "",
+          description: agent.description || "",
+        } : null,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini app" });
+    }
+  });
+
+  app.get("/api/public/mini-app/:slug/result", async (req, res) => {
+    try {
+      const slug = req.params.slug as string;
+      const miniApp = await storage.getMiniAppBySlug(slug);
+      if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
+
+      const results = await storage.getMiniAppResults(miniApp.id);
+      const latest = results.length > 0 ? results[0] : null;
+      res.json({ result: latest });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini app result" });
     }
   });
 

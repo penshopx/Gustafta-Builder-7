@@ -210,6 +210,7 @@ export interface IStorage {
   // Mini App methods
   getMiniApps(agentId: string): Promise<MiniApp[]>;
   getMiniApp(id: string): Promise<MiniApp | undefined>;
+  getMiniAppBySlug(slug: string): Promise<MiniApp | undefined>;
   createMiniApp(miniApp: InsertMiniApp): Promise<MiniApp>;
   updateMiniApp(id: string, data: Partial<InsertMiniApp>): Promise<MiniApp | undefined>;
   deleteMiniApp(id: string): Promise<boolean>;
@@ -1541,8 +1542,18 @@ export class MemStorage implements IStorage {
     return this.miniApps.get(id);
   }
 
+  async getMiniAppBySlug(slug: string): Promise<MiniApp | undefined> {
+    return Array.from(this.miniApps.values()).find(app => app.publicSlug === slug);
+  }
+
   async createMiniApp(insertMiniApp: InsertMiniApp): Promise<MiniApp> {
     const id = randomUUID();
+    const slug = insertMiniApp.publicSlug || insertMiniApp.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .substring(0, 40) + "-" + id.substring(0, 8);
     const miniApp: MiniApp = {
       id,
       agentId: insertMiniApp.agentId,
@@ -1552,6 +1563,7 @@ export class MemStorage implements IStorage {
       config: insertMiniApp.config || {},
       icon: insertMiniApp.icon || "app",
       isActive: true,
+      publicSlug: slug,
       createdAt: new Date().toISOString(),
     };
     this.miniApps.set(id, miniApp);
@@ -1562,6 +1574,12 @@ export class MemStorage implements IStorage {
     const miniApp = this.miniApps.get(id);
     if (!miniApp) return undefined;
 
+    const resolvedSlug = data.publicSlug !== undefined
+      ? data.publicSlug
+      : miniApp.publicSlug || (
+          miniApp.name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").substring(0, 40)
+          + "-" + id.substring(0, 8)
+        );
     const updated: MiniApp = {
       ...miniApp,
       name: data.name !== undefined ? data.name : miniApp.name,
@@ -1569,6 +1587,7 @@ export class MemStorage implements IStorage {
       type: data.type !== undefined ? data.type : miniApp.type,
       config: data.config !== undefined ? data.config : miniApp.config,
       icon: data.icon !== undefined ? data.icon : miniApp.icon,
+      publicSlug: resolvedSlug,
     };
     this.miniApps.set(id, updated);
     return updated;

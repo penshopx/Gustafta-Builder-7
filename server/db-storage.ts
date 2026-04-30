@@ -1981,28 +1981,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Mini App methods
-  async getMiniApps(agentId: string): Promise<MiniApp[]> {
-    const result = await db.select().from(miniApps)
-      .where(eq(miniApps.agentId, parseInt(agentId)))
-      .orderBy(desc(miniApps.createdAt));
-    return result.map(row => ({
-      id: String(row.id),
-      agentId: String(row.agentId),
-      name: row.name,
-      description: row.description || "",
-      type: row.type as MiniApp["type"],
-      config: (row.config as Record<string, any>) || {},
-      icon: row.icon || "app",
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    }));
-  }
-
-  async getMiniApp(id: string): Promise<MiniApp | undefined> {
-    const result = await db.select().from(miniApps)
-      .where(eq(miniApps.id, parseInt(id))).limit(1);
-    if (result.length === 0) return undefined;
-    const row = result[0];
+  private mapMiniAppRow(row: typeof miniApps.$inferSelect): MiniApp {
     return {
       id: String(row.id),
       agentId: String(row.agentId),
@@ -2012,8 +1991,53 @@ export class DatabaseStorage implements IStorage {
       config: (row.config as Record<string, any>) || {},
       icon: row.icon || "app",
       isActive: row.isActive || false,
+      publicSlug: row.publicSlug || undefined,
       createdAt: row.createdAt.toISOString(),
     };
+  }
+
+  private generateMiniAppSlug(name: string, id?: number): string {
+    const base = name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .substring(0, 40);
+    const suffix = (id ?? Math.floor(Math.random() * 99999)).toString(36);
+    return `${base}-${suffix}`;
+  }
+
+  async getMiniApps(agentId: string): Promise<MiniApp[]> {
+    const result = await db.select().from(miniApps)
+      .where(eq(miniApps.agentId, parseInt(agentId)))
+      .orderBy(desc(miniApps.createdAt));
+    const mapped = result.map(row => this.mapMiniAppRow(row));
+    // Auto-backfill publicSlug for apps that don't have one
+    const needsSlug = mapped.filter(app => !app.publicSlug);
+    for (const app of needsSlug) {
+      const slug = this.generateMiniAppSlug(app.name, parseInt(app.id));
+      try {
+        await db.update(miniApps).set({ publicSlug: slug }).where(eq(miniApps.id, parseInt(app.id)));
+        app.publicSlug = slug;
+      } catch (err) {
+        console.warn(`[MiniApp] Failed to backfill publicSlug for app ${app.id}:`, err);
+      }
+    }
+    return mapped;
+  }
+
+  async getMiniApp(id: string): Promise<MiniApp | undefined> {
+    const result = await db.select().from(miniApps)
+      .where(eq(miniApps.id, parseInt(id))).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapMiniAppRow(result[0]);
+  }
+
+  async getMiniAppBySlug(slug: string): Promise<MiniApp | undefined> {
+    const result = await db.select().from(miniApps)
+      .where(eq(miniApps.publicSlug, slug)).limit(1);
+    if (result.length === 0) return undefined;
+    return this.mapMiniAppRow(result[0]);
   }
 
   async createMiniApp(miniApp: InsertMiniApp): Promise<MiniApp> {
@@ -2025,19 +2049,20 @@ export class DatabaseStorage implements IStorage {
       config: miniApp.config || {},
       icon: miniApp.icon || "app",
       isActive: true,
+      publicSlug: miniApp.publicSlug || null,
     }).returning();
     const row = result[0];
-    return {
-      id: String(row.id),
-      agentId: String(row.agentId),
-      name: row.name,
-      description: row.description || "",
-      type: row.type as MiniApp["type"],
-      config: (row.config as Record<string, any>) || {},
-      icon: row.icon || "app",
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    };
+    if (!row.publicSlug) {
+      const slug = this.generateMiniAppSlug(row.name, row.id);
+      try {
+        await db.update(miniApps).set({ publicSlug: slug }).where(eq(miniApps.id, row.id));
+        return { ...this.mapMiniAppRow(row), publicSlug: slug };
+      } catch (err) {
+        console.warn(`[MiniApp] Failed to assign publicSlug to new mini app ${row.id}:`, err);
+        return this.mapMiniAppRow(row);
+      }
+    }
+    return this.mapMiniAppRow(row);
   }
 
   async updateMiniApp(id: string, data: Partial<InsertMiniApp>): Promise<MiniApp | undefined> {
@@ -2047,6 +2072,7 @@ export class DatabaseStorage implements IStorage {
     if (data.type !== undefined) updateData.type = data.type;
     if (data.config !== undefined) updateData.config = data.config;
     if (data.icon !== undefined) updateData.icon = data.icon;
+    if (data.publicSlug !== undefined) updateData.publicSlug = data.publicSlug;
 
     const result = await db.update(miniApps)
       .set(updateData)
@@ -2054,17 +2080,17 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (result.length === 0) return undefined;
     const row = result[0];
-    return {
-      id: String(row.id),
-      agentId: String(row.agentId),
-      name: row.name,
-      description: row.description || "",
-      type: row.type as MiniApp["type"],
-      config: (row.config as Record<string, any>) || {},
-      icon: row.icon || "app",
-      isActive: row.isActive || false,
-      createdAt: row.createdAt.toISOString(),
-    };
+    if (!row.publicSlug) {
+      const slug = this.generateMiniAppSlug(row.name, row.id);
+      try {
+        await db.update(miniApps).set({ publicSlug: slug }).where(eq(miniApps.id, row.id));
+        return { ...this.mapMiniAppRow(row), publicSlug: slug };
+      } catch (err) {
+        console.warn(`[MiniApp] Failed to assign publicSlug during update of app ${row.id}:`, err);
+        return this.mapMiniAppRow(row);
+      }
+    }
+    return this.mapMiniAppRow(row);
   }
 
   async deleteMiniApp(id: string): Promise<boolean> {
