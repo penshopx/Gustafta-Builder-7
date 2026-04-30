@@ -5965,6 +5965,7 @@ Pilih tipe yang paling cocok dengan topik agent. Jangan gunakan tipe AI-powered 
           avatar: agent.avatar,
           tagline: agent.tagline || agent.description || "",
           description: agent.description || "",
+          color: agent.widgetColor || "#6366f1",
         } : null,
       });
     } catch (error) {

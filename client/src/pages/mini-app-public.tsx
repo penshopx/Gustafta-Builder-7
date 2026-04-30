@@ -130,7 +130,7 @@ function safeEvalFormula(formula: string, scope: Record<string, number>): number
 
 type CalcPreset = { name: string; inputs: string[]; formula: string; unit?: string };
 
-function CalculatorRunner({ config }: { config: Record<string, unknown> }) {
+function CalculatorRunner({ config, agentColor }: { config: Record<string, unknown>; agentColor?: string }) {
   const presets = (config?.presets as CalcPreset[] | undefined) ?? [];
   const [selectedPreset, setSelectedPreset] = useState(0);
   const [inputs, setInputs] = useState<Record<string, string>>({});
@@ -195,7 +195,7 @@ function CalculatorRunner({ config }: { config: Record<string, unknown> }) {
             Hitung
           </Button>
           {result !== null && (
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg text-center">
+            <div className="p-4 rounded-lg text-center border" style={{ backgroundColor: `${agentColor || "#6366f1"}0d`, borderColor: `${agentColor || "#6366f1"}33` }}>
               <p className="text-2xl font-bold">{result.toLocaleString("id-ID")}</p>
               {preset.unit && <p className="text-sm text-muted-foreground mt-1">{preset.unit}</p>}
             </div>
@@ -336,7 +336,7 @@ function SimpleFormRunner({ config, name }: { config: Record<string, unknown>; n
   );
 }
 
-function AIOutputRunner({ miniApp, result, agentId }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string }) {
+function AIOutputRunner({ miniApp, result, agentId, agentColor }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string; agentColor?: string }) {
   const output = result?.output as Record<string, unknown> | null | undefined;
   const hasOutput = output && (output.result || output.output || output.content);
   const outputText = String(output?.result ?? output?.output ?? output?.content ?? "");
@@ -358,12 +358,12 @@ function AIOutputRunner({ miniApp, result, agentId }: { miniApp: MiniApp; result
           <p className="text-sm">Belum ada hasil analisis untuk mini app ini.</p>
         </div>
       )}
-      <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+      <div className="p-3 rounded-lg border" style={{ backgroundColor: `${agentColor || "#6366f1"}0d`, borderColor: `${agentColor || "#6366f1"}33` }}>
         <p className="text-sm font-medium mb-1">Minta Analisis Baru</p>
         <p className="text-xs text-muted-foreground mb-3">
           Untuk mendapatkan analisis terbaru, chat dengan chatbot dan minta analisis {miniApp.name}.
         </p>
-        <Button asChild size="sm" className="w-full" data-testid="button-go-to-chatbot">
+        <Button asChild size="sm" className="w-full" style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }} data-testid="button-go-to-chatbot">
           <a href={`/bot/${agentId}`} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="w-4 h-4 mr-2" />
             Chat dengan Chatbot
@@ -374,12 +374,12 @@ function AIOutputRunner({ miniApp, result, agentId }: { miniApp: MiniApp; result
   );
 }
 
-function AppRunner({ miniApp, result, agentId }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string }) {
+function AppRunner({ miniApp, result, agentId, agentColor }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string; agentColor?: string }) {
   const type = miniApp.type;
   const config = (miniApp.config as Record<string, unknown>) || {};
 
   if (AI_TYPES.includes(type)) {
-    return <AIOutputRunner miniApp={miniApp} result={result} agentId={agentId} />;
+    return <AIOutputRunner miniApp={miniApp} result={result} agentId={agentId} agentColor={agentColor} />;
   }
 
   switch (type) {
@@ -387,7 +387,7 @@ function AppRunner({ miniApp, result, agentId }: { miniApp: MiniApp; result: Min
     case "go_no_go_checklist":
       return <ChecklistRunner config={{ ...config, items: (config.items as string[] | undefined) ?? [] }} name={miniApp.name} />;
     case "calculator":
-      return <CalculatorRunner config={config} />;
+      return <CalculatorRunner config={config} agentColor={agentColor} />;
     case "risk_assessment":
       return <RiskAssessmentRunner config={config} />;
     case "progress_tracker":
@@ -408,7 +408,7 @@ export default function MiniAppPublic() {
   const { data, isLoading, error } = usePublicMiniApp(slug);
   const { data: resultData } = usePublicMiniAppResult(slug);
 
-  const miniAppData = data ? (data as { miniApp: MiniApp; agent: { id: string; name: string; avatar?: string; tagline?: string; description?: string } | null }) : null;
+  const miniAppData = data ? (data as { miniApp: MiniApp; agent: { id: string; name: string; avatar?: string; tagline?: string; description?: string; color?: string } | null }) : null;
 
   useEffect(() => {
     if (!miniAppData) return;
@@ -450,7 +450,8 @@ export default function MiniAppPublic() {
   const TypeIcon = typeIcons[miniApp.type] || Wrench;
   const typeLabel = typeLabels[miniApp.type] || miniApp.type;
 
-  const agentColor = "#6366f1";
+  const rawColor = agent?.color;
+  const agentColor = (rawColor && /^#[0-9a-fA-F]{6}$/.test(rawColor)) ? rawColor : "#6366f1";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/30">
@@ -479,8 +480,8 @@ export default function MiniAppPublic() {
         <Card className="shadow-md">
           <CardHeader className="pb-3">
             <div className="flex items-start gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <TypeIcon className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${agentColor}1a` }}>
+                <TypeIcon className="w-6 h-6" style={{ color: agentColor }} />
               </div>
               <div className="min-w-0 flex-1">
                 <CardTitle className="text-lg leading-tight">{miniApp.name}</CardTitle>
@@ -492,14 +493,14 @@ export default function MiniAppPublic() {
             )}
           </CardHeader>
           <CardContent>
-            <AppRunner miniApp={miniApp} result={(resultData?.result as MiniAppResult | null) ?? null} agentId={miniApp.agentId} />
+            <AppRunner miniApp={miniApp} result={(resultData?.result as MiniAppResult | null) ?? null} agentId={miniApp.agentId} agentColor={agentColor} />
           </CardContent>
         </Card>
 
         {agent && (
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground mb-2">Punya pertanyaan lebih lanjut?</p>
-            <Button asChild variant="outline" data-testid="button-ask-chatbot">
+            <Button asChild variant="outline" style={{ borderColor: agentColor, color: agentColor }} data-testid="button-ask-chatbot">
               <a href={`/bot/${agent.id}`} target="_blank" rel="noopener noreferrer">
                 <ArrowRight className="w-4 h-4 mr-2" />
                 Tanya Lebih Lanjut ke {agent.name}
