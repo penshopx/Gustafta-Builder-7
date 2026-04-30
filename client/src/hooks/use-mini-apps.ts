@@ -111,3 +111,33 @@ export function usePublicMiniAppResult(slug: string) {
     enabled: !!slug,
   });
 }
+
+export function usePublicMiniAppResults(slug: string) {
+  return useQuery<{ results: MiniAppResult[] }>({
+    queryKey: ["/api/public/mini-app-results", slug],
+    queryFn: async () => {
+      const res = await fetch(`/api/public/mini-app/${slug}/results`);
+      if (!res.ok) throw new Error("Failed to fetch results");
+      return res.json();
+    },
+    enabled: !!slug,
+  });
+}
+
+export function usePublicSubmitResult(slug: string) {
+  return useMutation({
+    mutationFn: async (data: { input: Record<string, unknown>; output: Record<string, unknown> }) => {
+      const res = await fetch(`/api/public/mini-app/${slug}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to submit result");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/public/mini-app-results", slug] });
+      queryClient.invalidateQueries({ queryKey: ["/api/public/mini-app-result", slug] });
+    },
+  });
+}

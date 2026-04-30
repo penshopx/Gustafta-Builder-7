@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useLocation } from "wouter";
+import { useParams } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, MessageSquare, ExternalLink, ArrowRight, Sparkles, BarChart2, ClipboardList } from "lucide-react";
-import { usePublicMiniApp, usePublicMiniAppResult } from "@/hooks/use-mini-apps";
+import { Loader2, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, MessageSquare, ExternalLink, ArrowRight, Sparkles, BarChart2, ClipboardList, Save, Copy, Check, ChevronDown, ChevronUp, Clock } from "lucide-react";
+import { usePublicMiniApp, usePublicMiniAppResult, usePublicMiniAppResults, usePublicSubmitResult } from "@/hooks/use-mini-apps";
 import type { MiniAppType, MiniApp, MiniAppResult } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
@@ -45,12 +45,63 @@ const AI_TYPES: MiniAppType[] = [
   "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan",
 ];
 
-function ChecklistRunner({ config, name }: { config: Record<string, unknown>; name: string }) {
+function SaveSuccessBadge({ savedAt }: { savedAt: string }) {
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400" data-testid="save-success-badge">
+      <Check className="w-3.5 h-3.5" />
+      <span>Tersimpan {new Date(savedAt).toLocaleString("id-ID")}</span>
+    </div>
+  );
+}
+
+function ChecklistRunner({ config, name, slug, agentColor }: { config: Record<string, unknown>; name: string; slug: string; agentColor?: string }) {
   const items = ((config?.items ?? config?.checklist_items) as string[] | undefined) ?? [];
-  const [checked, setChecked] = useState<Record<number, boolean>>({});
+  const storageKey = `checklist-${slug}`;
+
+  const [checked, setChecked] = useState<Record<number, boolean>>(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+
+  const submitResult = usePublicSubmitResult(slug);
+
   const total = items.length;
   const done = Object.values(checked).filter(Boolean).length;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  const toggleItem = (idx: number, val: boolean) => {
+    const next = { ...checked, [idx]: val };
+    setChecked(next);
+    try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch {}
+  };
+
+  const handleSave = () => {
+    const checkedItems = items.filter((_, idx) => checked[idx]);
+    const uncheckedItems = items.filter((_, idx) => !checked[idx]);
+    submitResult.mutate(
+      {
+        input: { checklist: items },
+        output: {
+          checked_items: checkedItems,
+          unchecked_items: uncheckedItems,
+          completion_percentage: pct,
+          done,
+          total,
+          summary: `${done}/${total} item selesai (${pct}%)`,
+        },
+      },
+      {
+        onSuccess: () => {
+          setSavedAt(new Date().toISOString());
+        },
+      }
+    );
+  };
 
   if (items.length === 0) {
     return <p className="text-muted-foreground text-sm">Belum ada item dalam checklist ini.</p>;
@@ -70,7 +121,7 @@ function ChecklistRunner({ config, name }: { config: Record<string, unknown>; na
           <label key={idx} className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors" data-testid={`checklist-item-${idx}`}>
             <Checkbox
               checked={!!checked[idx]}
-              onCheckedChange={(v) => setChecked(prev => ({ ...prev, [idx]: !!v }))}
+              onCheckedChange={(v) => toggleItem(idx, !!v)}
               className="mt-0.5"
             />
             <span className={cn("text-sm", checked[idx] && "line-through text-muted-foreground")}>{item}</span>
@@ -82,6 +133,27 @@ function ChecklistRunner({ config, name }: { config: Record<string, unknown>; na
           <p className="text-sm font-medium text-green-700 dark:text-green-400">Semua item selesai! ✓</p>
         </div>
       )}
+      <div className="flex items-center justify-between pt-2 border-t">
+        {savedAt ? (
+          <SaveSuccessBadge savedAt={savedAt} />
+        ) : (
+          <span className="text-xs text-muted-foreground">Progress disimpan otomatis di browser ini</span>
+        )}
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={submitResult.isPending || done === 0}
+          data-testid="button-save-checklist"
+          style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }}
+        >
+          {submitResult.isPending ? (
+            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+          ) : (
+            <Save className="w-3.5 h-3.5 mr-1.5" />
+          )}
+          Simpan Progress
+        </Button>
+      </div>
     </div>
   );
 }
@@ -130,12 +202,15 @@ function safeEvalFormula(formula: string, scope: Record<string, number>): number
 
 type CalcPreset = { name: string; inputs: string[]; formula: string; unit?: string };
 
-function CalculatorRunner({ config, agentColor }: { config: Record<string, unknown>; agentColor?: string }) {
+function CalculatorRunner({ config, agentColor, slug }: { config: Record<string, unknown>; agentColor?: string; slug: string }) {
   const presets = (config?.presets as CalcPreset[] | undefined) ?? [];
   const [selectedPreset, setSelectedPreset] = useState(0);
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [result, setResult] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
 
+  const submitResult = usePublicSubmitResult(slug);
   const preset = presets[selectedPreset];
 
   const calculate = () => {
@@ -150,9 +225,43 @@ function CalculatorRunner({ config, agentColor }: { config: Record<string, unkno
       const rules = config?.rules as { round_result?: number } | undefined;
       const rounded = rules?.round_result ? parseFloat(val.toFixed(rules.round_result)) : val;
       setResult(rounded);
+      setSavedAt(null);
     } catch {
       setResult(null);
     }
+  };
+
+  const handleCopy = async () => {
+    if (result === null || !preset) return;
+    const text = `${preset.name}: ${result.toLocaleString("id-ID")}${preset.unit ? " " + preset.unit : ""}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  const handleSave = () => {
+    if (result === null || !preset) return;
+    const scope: Record<string, number> = {};
+    for (const key of (preset.inputs || [])) {
+      scope[key] = parseFloat(inputs[key] || "0");
+    }
+    submitResult.mutate(
+      {
+        input: { preset: preset.name, values: scope },
+        output: {
+          preset: preset.name,
+          result,
+          unit: preset.unit || "",
+          formula: preset.formula,
+          summary: `${preset.name}: ${result.toLocaleString("id-ID")}${preset.unit ? " " + preset.unit : ""}`,
+        },
+      },
+      {
+        onSuccess: () => setSavedAt(new Date().toISOString()),
+      }
+    );
   };
 
   if (presets.length === 0) {
@@ -168,7 +277,7 @@ function CalculatorRunner({ config, agentColor }: { config: Record<string, unkno
               key={idx}
               variant={selectedPreset === idx ? "default" : "outline"}
               size="sm"
-              onClick={() => { setSelectedPreset(idx); setInputs({}); setResult(null); }}
+              onClick={() => { setSelectedPreset(idx); setInputs({}); setResult(null); setSavedAt(null); }}
               data-testid={`calc-preset-${idx}`}
             >
               {p.name}
@@ -195,9 +304,35 @@ function CalculatorRunner({ config, agentColor }: { config: Record<string, unkno
             Hitung
           </Button>
           {result !== null && (
-            <div className="p-4 rounded-lg text-center border" style={{ backgroundColor: `${agentColor || "#6366f1"}0d`, borderColor: `${agentColor || "#6366f1"}33` }}>
-              <p className="text-2xl font-bold">{result.toLocaleString("id-ID")}</p>
-              {preset.unit && <p className="text-sm text-muted-foreground mt-1">{preset.unit}</p>}
+            <div className="space-y-2">
+              <div className="p-4 rounded-lg text-center border" style={{ backgroundColor: `${agentColor || "#6366f1"}0d`, borderColor: `${agentColor || "#6366f1"}33` }}>
+                <p className="text-2xl font-bold">{result.toLocaleString("id-ID")}</p>
+                {preset.unit && <p className="text-sm text-muted-foreground mt-1">{preset.unit}</p>}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleCopy}
+                  data-testid="button-copy-result"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 mr-1.5" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
+                  {copied ? "Disalin!" : "Salin Hasil"}
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleSave}
+                  disabled={submitResult.isPending}
+                  data-testid="button-save-result"
+                  style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }}
+                >
+                  {submitResult.isPending ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                  Simpan Hasil
+                </Button>
+              </div>
+              {savedAt && <SaveSuccessBadge savedAt={savedAt} />}
             </div>
           )}
         </div>
@@ -206,12 +341,16 @@ function CalculatorRunner({ config, agentColor }: { config: Record<string, unkno
   );
 }
 
-function RiskAssessmentRunner({ config }: { config: Record<string, unknown> }) {
+function RiskAssessmentRunner({ config, slug, agentColor }: { config: Record<string, unknown>; slug: string; agentColor?: string }) {
   const categories = (config?.risk_categories as string[] | undefined) ?? ["Safety", "Quality", "Cost", "Schedule"];
   const [likelihood, setLikelihood] = useState(1);
   const [impact, setImpact] = useState(1);
   const [category, setCategory] = useState(categories[0] || "");
   const [description, setDescription] = useState("");
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const submitResult = usePublicSubmitResult(slug);
 
   const score = likelihood * impact;
   const scoring = config?.scoring as { thresholds?: { low_max: number; medium_max: number; high_min: number } } | undefined;
@@ -220,28 +359,59 @@ function RiskAssessmentRunner({ config }: { config: Record<string, unknown> }) {
   const levelColor = score <= thresholds.low_max ? "text-green-600" : score <= thresholds.medium_max ? "text-yellow-600" : "text-red-600";
   const levelBg = score <= thresholds.low_max ? "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800" : score <= thresholds.medium_max ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-800" : "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800";
 
+  const getSummaryText = () =>
+    `[${category}] ${description || "Tanpa deskripsi"} — Likelihood: ${likelihood}, Impact: ${impact}, Skor: ${score} (${level})`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(getSummaryText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  const handleSave = () => {
+    submitResult.mutate(
+      {
+        input: { category, description, likelihood, impact },
+        output: {
+          score,
+          level,
+          category,
+          description,
+          likelihood,
+          impact,
+          summary: getSummaryText(),
+        },
+      },
+      {
+        onSuccess: () => setSavedAt(new Date().toISOString()),
+      }
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Kategori Risiko</Label>
         <div className="flex flex-wrap gap-2">
           {categories.map((cat: string) => (
-            <Button key={cat} variant={category === cat ? "default" : "outline"} size="sm" onClick={() => setCategory(cat)} data-testid={`risk-cat-${cat}`}>{cat}</Button>
+            <Button key={cat} variant={category === cat ? "default" : "outline"} size="sm" onClick={() => { setCategory(cat); setSavedAt(null); }} data-testid={`risk-cat-${cat}`}>{cat}</Button>
           ))}
         </div>
       </div>
       <div className="space-y-2">
         <Label>Deskripsi Risiko</Label>
-        <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Deskripsi singkat risiko..." data-testid="risk-description" />
+        <Input value={description} onChange={e => { setDescription(e.target.value); setSavedAt(null); }} placeholder="Deskripsi singkat risiko..." data-testid="risk-description" />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Likelihood (1-5)</Label>
-          <Input type="number" min={1} max={5} value={likelihood} onChange={e => setLikelihood(Math.min(5, Math.max(1, parseInt(e.target.value) || 1)))} data-testid="risk-likelihood" />
+          <Input type="number" min={1} max={5} value={likelihood} onChange={e => { setLikelihood(Math.min(5, Math.max(1, parseInt(e.target.value) || 1))); setSavedAt(null); }} data-testid="risk-likelihood" />
         </div>
         <div className="space-y-2">
           <Label>Impact (1-5)</Label>
-          <Input type="number" min={1} max={5} value={impact} onChange={e => setImpact(Math.min(5, Math.max(1, parseInt(e.target.value) || 1)))} data-testid="risk-impact" />
+          <Input type="number" min={1} max={5} value={impact} onChange={e => { setImpact(Math.min(5, Math.max(1, parseInt(e.target.value) || 1))); setSavedAt(null); }} data-testid="risk-impact" />
         </div>
       </div>
       <div className={cn("p-4 rounded-lg border", levelBg)}>
@@ -256,58 +426,127 @@ function RiskAssessmentRunner({ config }: { config: Record<string, unknown> }) {
           </div>
         </div>
       </div>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={handleCopy}
+          data-testid="button-copy-risk"
+        >
+          {copied ? <Check className="w-3.5 h-3.5 mr-1.5" /> : <Copy className="w-3.5 h-3.5 mr-1.5" />}
+          {copied ? "Disalin!" : "Salin Ringkasan"}
+        </Button>
+        <Button
+          size="sm"
+          className="flex-1"
+          onClick={handleSave}
+          disabled={submitResult.isPending}
+          data-testid="button-save-risk"
+          style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }}
+        >
+          {submitResult.isPending ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+          Simpan Penilaian
+        </Button>
+      </div>
+      {savedAt && <SaveSuccessBadge savedAt={savedAt} />}
     </div>
   );
 }
 
 type Milestone = { name?: string };
 
-function ProgressTrackerRunner({ config }: { config: Record<string, unknown> }) {
+function ProgressTrackerRunner({ config, slug, agentColor }: { config: Record<string, unknown>; slug: string; agentColor?: string }) {
   const milestones = (config?.milestones as Milestone[] | undefined) ?? [];
   const [progress, setProgress] = useState<Record<string, number>>({});
+  const [savedAt, setSavedAt] = useState<string | null>(null);
 
-  if (milestones.length === 0) {
-    return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">Masukkan progres paket pekerjaan (0-100%):</p>
-        {["Persiapan", "Pekerjaan Utama", "Finishing", "Serah Terima"].map((item) => (
-          <div key={item} className="space-y-1">
-            <div className="flex justify-between items-center">
-              <Label className="text-sm">{item}</Label>
-              <span className="text-sm font-medium">{progress[item] || 0}%</span>
-            </div>
-            <Input type="range" min={0} max={100} value={progress[item] || 0} onChange={e => setProgress(prev => ({ ...prev, [item]: parseInt(e.target.value) }))} data-testid={`progress-${item}`} />
-          </div>
-        ))}
-        <div className="p-3 bg-muted rounded-lg">
-          <p className="text-sm text-muted-foreground">Rata-rata progres</p>
-          <p className="text-2xl font-bold mt-0.5">
-            {Math.round(Object.values(progress).reduce((a, b) => a + b, 0) / Math.max(1, Object.values(progress).length))}%
-          </p>
-        </div>
-      </div>
+  const submitResult = usePublicSubmitResult(slug);
+
+  const defaultItems = milestones.length > 0
+    ? milestones.map((m, idx) => ({ key: String(idx), label: m.name || `Milestone ${idx + 1}` }))
+    : ["Persiapan", "Pekerjaan Utama", "Finishing", "Serah Terima"].map(label => ({ key: label, label }));
+
+  const average = defaultItems.length > 0
+    ? Math.round(defaultItems.reduce((sum, item) => sum + (progress[item.key] || 0), 0) / defaultItems.length)
+    : 0;
+
+  const handleSave = () => {
+    const progressData: Record<string, number> = {};
+    defaultItems.forEach(item => { progressData[item.label] = progress[item.key] || 0; });
+    submitResult.mutate(
+      {
+        input: { milestones: defaultItems.map(i => i.label) },
+        output: {
+          progress: progressData,
+          average_progress: average,
+          summary: `Rata-rata progres: ${average}%`,
+        },
+      },
+      {
+        onSuccess: () => setSavedAt(new Date().toISOString()),
+      }
     );
-  }
+  };
 
   return (
-    <div className="space-y-3">
-      {milestones.map((m, idx) => (
-        <div key={idx} className="p-3 rounded-lg border">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-medium text-sm">{m.name || `Milestone ${idx + 1}`}</span>
-            <span className="text-sm">{progress[String(idx)] || 0}%</span>
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">Masukkan progres paket pekerjaan (0-100%):</p>
+      {defaultItems.map((item) => (
+        <div key={item.key} className={milestones.length > 0 ? "p-3 rounded-lg border space-y-2" : "space-y-1"}>
+          <div className="flex justify-between items-center">
+            <Label className="text-sm">{item.label}</Label>
+            <span className="text-sm font-medium">{progress[item.key] || 0}%</span>
           </div>
-          <Input type="range" min={0} max={100} value={progress[String(idx)] || 0} onChange={e => setProgress(prev => ({ ...prev, [String(idx)]: parseInt(e.target.value) }))} data-testid={`milestone-${idx}`} />
+          <Input
+            type="range"
+            min={0}
+            max={100}
+            value={progress[item.key] || 0}
+            onChange={e => { setProgress(prev => ({ ...prev, [item.key]: parseInt(e.target.value) })); setSavedAt(null); }}
+            data-testid={`progress-${item.key}`}
+          />
         </div>
       ))}
+      <div className="p-3 bg-muted rounded-lg">
+        <p className="text-sm text-muted-foreground">Rata-rata progres</p>
+        <p className="text-2xl font-bold mt-0.5">{average}%</p>
+      </div>
+      <div className="flex items-center justify-between pt-2 border-t">
+        {savedAt ? <SaveSuccessBadge savedAt={savedAt} /> : <span className="text-xs text-muted-foreground">Simpan snapshot progres saat ini</span>}
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={submitResult.isPending}
+          data-testid="button-save-progress"
+          style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }}
+        >
+          {submitResult.isPending ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+          Simpan Progress
+        </Button>
+      </div>
     </div>
   );
 }
 
-function SimpleFormRunner({ config, name }: { config: Record<string, unknown>; name: string }) {
+function SimpleFormRunner({ config, name, slug, agentColor }: { config: Record<string, unknown>; name: string; slug: string; agentColor?: string }) {
   const fields = (config?.fields as string[] | undefined) ?? ["nama", "email", "pesan"];
   const [values, setValues] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+
+  const submitResult = usePublicSubmitResult(slug);
+
+  const handleSubmit = () => {
+    submitResult.mutate(
+      {
+        input: values,
+        output: { form_name: name, submitted: true, summary: `Form "${name}" berhasil dikirim` },
+      },
+      {
+        onSuccess: () => setSubmitted(true),
+      }
+    );
+  };
 
   if (submitted) {
     return (
@@ -329,17 +568,67 @@ function SimpleFormRunner({ config, name }: { config: Record<string, unknown>; n
           <Input value={values[field] || ""} onChange={e => setValues(prev => ({ ...prev, [field]: e.target.value }))} placeholder={`Masukkan ${field.replace(/_/g, " ")}...`} data-testid={`form-input-${field}`} />
         </div>
       ))}
-      <Button className="w-full" onClick={() => setSubmitted(true)} data-testid="button-submit-form">
+      <Button
+        className="w-full"
+        onClick={handleSubmit}
+        disabled={submitResult.isPending}
+        data-testid="button-submit-form"
+        style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }}
+      >
+        {submitResult.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
         Kirim
       </Button>
     </div>
   );
 }
 
-function AIOutputRunner({ miniApp, result, agentId, agentColor }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string; agentColor?: string }) {
+function ResultHistoryList({ results }: { results: MiniAppResult[] }) {
+  const [expanded, setExpanded] = useState(false);
+  if (results.length === 0) return null;
+
+  const displayResults = expanded ? results : results.slice(0, 3);
+
+  return (
+    <div className="mt-4 space-y-2">
+      <div className="flex items-center gap-2">
+        <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Riwayat Hasil ({results.length})</span>
+      </div>
+      <div className="space-y-2">
+        {displayResults.map((r, idx) => {
+          const out = r.output as Record<string, unknown> | null | undefined;
+          const summary = String(out?.summary || out?.result || out?.output || out?.content || "—");
+          const ts = r.createdAt ? new Date(r.createdAt).toLocaleString("id-ID") : "";
+          return (
+            <div key={r.id || idx} className="p-3 rounded-lg border bg-muted/30 text-sm" data-testid={`result-history-${idx}`}>
+              <p className="text-xs text-muted-foreground mb-1">{ts}</p>
+              <p className="line-clamp-2">{summary}</p>
+            </div>
+          );
+        })}
+      </div>
+      {results.length > 3 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full text-xs"
+          onClick={() => setExpanded(!expanded)}
+          data-testid="button-toggle-history"
+        >
+          {expanded ? <><ChevronUp className="w-3.5 h-3.5 mr-1" />Sembunyikan</> : <><ChevronDown className="w-3.5 h-3.5 mr-1" />Tampilkan semua {results.length} hasil</>}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function AIOutputRunner({ miniApp, result, agentId, agentColor, slug }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string; agentColor?: string; slug: string }) {
   const output = result?.output as Record<string, unknown> | null | undefined;
   const hasOutput = output && (output.result || output.output || output.content);
   const outputText = String(output?.result ?? output?.output ?? output?.content ?? "");
+
+  const { data: resultsData } = usePublicMiniAppResults(slug);
+  const allResults = resultsData?.results ?? [];
 
   return (
     <div className="space-y-4">
@@ -370,41 +659,40 @@ function AIOutputRunner({ miniApp, result, agentId, agentColor }: { miniApp: Min
           </a>
         </Button>
       </div>
+      {allResults.length > 1 && <ResultHistoryList results={allResults} />}
     </div>
   );
 }
 
-function AppRunner({ miniApp, result, agentId, agentColor }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string; agentColor?: string }) {
+function AppRunner({ miniApp, result, agentId, agentColor, slug }: { miniApp: MiniApp; result: MiniAppResult | null; agentId: string; agentColor?: string; slug: string }) {
   const type = miniApp.type;
   const config = (miniApp.config as Record<string, unknown>) || {};
 
   if (AI_TYPES.includes(type)) {
-    return <AIOutputRunner miniApp={miniApp} result={result} agentId={agentId} agentColor={agentColor} />;
+    return <AIOutputRunner miniApp={miniApp} result={result} agentId={agentId} agentColor={agentColor} slug={slug} />;
   }
 
   switch (type) {
     case "checklist":
     case "go_no_go_checklist":
-      return <ChecklistRunner config={{ ...config, items: (config.items as string[] | undefined) ?? [] }} name={miniApp.name} />;
+      return <ChecklistRunner config={{ ...config, items: (config.items as string[] | undefined) ?? [] }} name={miniApp.name} slug={slug} agentColor={agentColor} />;
     case "calculator":
-      return <CalculatorRunner config={config} agentColor={agentColor} />;
+      return <CalculatorRunner config={config} agentColor={agentColor} slug={slug} />;
     case "risk_assessment":
-      return <RiskAssessmentRunner config={config} />;
+      return <RiskAssessmentRunner config={config} slug={slug} agentColor={agentColor} />;
     case "progress_tracker":
-      return <ProgressTrackerRunner config={config} />;
+      return <ProgressTrackerRunner config={config} slug={slug} agentColor={agentColor} />;
     case "lead_capture_form":
     case "document_generator":
     case "custom":
     default:
-      return <SimpleFormRunner config={config} name={miniApp.name} />;
+      return <SimpleFormRunner config={config} name={miniApp.name} slug={slug} agentColor={agentColor} />;
   }
 }
 
 export default function MiniAppPublic() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
-  const [, navigate] = useLocation();
-
   const { data, isLoading, error } = usePublicMiniApp(slug);
   const { data: resultData } = usePublicMiniAppResult(slug);
 
@@ -493,7 +781,7 @@ export default function MiniAppPublic() {
             )}
           </CardHeader>
           <CardContent>
-            <AppRunner miniApp={miniApp} result={(resultData?.result as MiniAppResult | null) ?? null} agentId={miniApp.agentId} agentColor={agentColor} />
+            <AppRunner miniApp={miniApp} result={(resultData?.result as MiniAppResult | null) ?? null} agentId={miniApp.agentId} agentColor={agentColor} slug={slug} />
           </CardContent>
         </Card>
 

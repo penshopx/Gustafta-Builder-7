@@ -5973,17 +5973,88 @@ Pilih tipe yang paling cocok dengan topik agent. Jangan gunakan tipe AI-powered 
     }
   });
 
+  const FORM_TYPES = ["lead_capture_form", "document_generator", "custom"];
+
+  function sanitizePublicResult(result: Record<string, unknown>): Record<string, unknown> {
+    const { input: _input, ...rest } = result;
+    return rest;
+  }
+
   app.get("/api/public/mini-app/:slug/result", async (req, res) => {
     try {
       const slug = req.params.slug as string;
       const miniApp = await storage.getMiniAppBySlug(slug);
       if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
 
+      if (FORM_TYPES.includes(miniApp.type)) {
+        return res.json({ result: null });
+      }
+
       const results = await storage.getMiniAppResults(miniApp.id);
-      const latest = results.length > 0 ? results[0] : null;
+      const latest = results.length > 0 ? sanitizePublicResult(results[0] as unknown as Record<string, unknown>) : null;
       res.json({ result: latest });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch mini app result" });
+    }
+  });
+
+  app.get("/api/public/mini-app/:slug/results", async (req, res) => {
+    try {
+      const slug = req.params.slug as string;
+      const miniApp = await storage.getMiniAppBySlug(slug);
+      if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
+
+      if (FORM_TYPES.includes(miniApp.type)) {
+        return res.json({ results: [] });
+      }
+
+      const results = await storage.getMiniAppResults(miniApp.id);
+      const sanitized = results.map(r => sanitizePublicResult(r as unknown as Record<string, unknown>));
+      res.json({ results: sanitized });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini app results" });
+    }
+  });
+
+  app.post("/api/public/mini-app/:slug/submit", async (req, res) => {
+    try {
+      const slug = req.params.slug as string;
+      const miniApp = await storage.getMiniAppBySlug(slug);
+      if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
+
+      const body = req.body && typeof req.body === "object" ? req.body as Record<string, unknown> : {};
+
+      if (typeof body !== "object" || Array.isArray(body)) {
+        return res.status(400).json({ error: "Invalid request body" });
+      }
+
+      const rawBody = JSON.stringify(body);
+      if (rawBody.length > 50_000) {
+        return res.status(413).json({ error: "Payload too large" });
+      }
+
+      const input = (body.input && typeof body.input === "object" && !Array.isArray(body.input))
+        ? body.input as Record<string, unknown>
+        : {};
+      const output = (body.output && typeof body.output === "object" && !Array.isArray(body.output))
+        ? body.output as Record<string, unknown>
+        : {};
+
+      const MAX_KEYS = 50;
+      if (Object.keys(input).length > MAX_KEYS || Object.keys(output).length > MAX_KEYS) {
+        return res.status(400).json({ error: "Too many fields in payload" });
+      }
+
+      const result = await storage.createMiniAppResult({
+        miniAppId: String(miniApp.id),
+        agentId: String(miniApp.agentId),
+        input,
+        output,
+        status: "completed",
+      });
+      res.status(201).json({ result });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to submit mini app result" });
     }
   });
 
