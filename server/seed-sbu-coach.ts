@@ -36,11 +36,12 @@ export async function seedSbuCoach(userId: string) {
     if (existingS1) {
       const toolboxes = await storage.getToolboxes(undefined, existingS1.id);
       const hubCheck = toolboxes.find((t: any) => t.name === "HUB SBU Coach — Pekerjaan Konstruksi" && !t.bigIdeaId);
-      if (hubCheck) {
-        log("[Seed] SBU Coach Pekerjaan Konstruksi already exists, skipping...");
+      const bigIdeas = await storage.getBigIdeas(existingS1.id);
+      if (hubCheck && bigIdeas.length >= 1) {
+        log("[Seed] SBU Coach Pekerjaan Konstruksi already exists (complete), skipping...");
         skipS1 = true;
       } else {
-        const bigIdeas = await storage.getBigIdeas(existingS1.id);
+        log("[Seed] SBU Coach Pekerjaan Konstruksi incomplete (BI=" + bigIdeas.length + ", hub=" + !!hubCheck + ") — re-seeding to repair");
         for (const bi of bigIdeas) {
           const biTb = await storage.getToolboxes(bi.id);
           for (const tb of biTb) {
@@ -67,11 +68,12 @@ export async function seedSbuCoach(userId: string) {
     if (existingS2) {
       const toolboxes2 = await storage.getToolboxes(undefined, existingS2.id);
       const hubCheck2 = toolboxes2.find((t: any) => t.name === "HUB SBU Konsultan Coach" && !t.bigIdeaId);
-      if (hubCheck2) {
-        log("[Seed] SBU Konsultan Coach already exists, skipping...");
+      const bigIdeas2 = await storage.getBigIdeas(existingS2.id);
+      if (hubCheck2 && bigIdeas2.length >= 1) {
+        log("[Seed] SBU Konsultan Coach already exists (complete), skipping...");
         skipS2 = true;
       } else {
-        const bigIdeas2 = await storage.getBigIdeas(existingS2.id);
+        log("[Seed] SBU Konsultan Coach incomplete (BI=" + bigIdeas2.length + ", hub=" + !!hubCheck2 + ") — re-seeding to repair");
         for (const bi of bigIdeas2) {
           const biTb = await storage.getToolboxes(bi.id);
           for (const tb of biTb) {

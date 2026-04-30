@@ -302,11 +302,17 @@ export async function seedSbuTerintegrasi(userId: string) {
       const hubCheck = toolboxes.find(
         (t: any) => t.name === "HUB SBU Terintegrasi Coach" && !t.bigIdeaId
       );
-      if (hubCheck) {
-        log("[Seed] SBU Terintegrasi Coach already exists, skipping...");
-        return;
-      }
       const bigIdeas = await storage.getBigIdeas(existing.id);
+
+      if (hubCheck && bigIdeas.length >= 1) {
+
+        log("[Seed] SBU Terintegrasi Coach already exists (complete), skipping...");
+
+        return;
+
+      }
+
+      log("[Seed] SBU Terintegrasi Coach incomplete (BI=" + bigIdeas.length + ", hub=" + !!hubCheck + ") — re-seeding to repair");
       for (const bi of bigIdeas) {
         const biTb = await storage.getToolboxes(bi.id);
         for (const tb of biTb) {

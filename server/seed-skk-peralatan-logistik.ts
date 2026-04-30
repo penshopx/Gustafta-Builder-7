@@ -86,11 +86,17 @@ export async function seedSkkPeralatanLogistik(userId: string) {
     if (existing) {
       const toolboxes = await storage.getToolboxes(undefined, existing.id);
       const hubCheck = toolboxes.find((t: any) => t.name === "HUB SKK Coach Peralatan & Logistik" && !t.bigIdeaId);
-      if (hubCheck) {
-        log("[Seed] SKK Peralatan & Logistik already exists, skipping...");
-        return;
-      }
       const bigIdeas = await storage.getBigIdeas(existing.id);
+
+      if (hubCheck && bigIdeas.length >= 1) {
+
+        log("[Seed] SKK Peralatan & Logistik already exists (complete), skipping...");
+
+        return;
+
+      }
+
+      log("[Seed] SKK Peralatan & Logistik incomplete (BI=" + bigIdeas.length + ", hub=" + !!hubCheck + ") — re-seeding to repair");
       for (const bi of bigIdeas) {
         const biTb = await storage.getToolboxes(bi.id);
         for (const tb of biTb) {

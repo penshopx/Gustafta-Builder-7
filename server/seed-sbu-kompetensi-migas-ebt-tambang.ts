@@ -266,11 +266,12 @@ export async function seedSbuKompetensiMigasEbtTambang(userId: string): Promise<
     if (existing) {
       const toolboxes = await storage.getToolboxes(undefined, existing.id);
       const hubCheck = toolboxes.find((t: any) => t.name === "HUB SBU Kompetensi Migas EBT Tambang v1" && !t.bigIdeaId);
-      if (hubCheck) {
-        log("[Seed] SBU Kompetensi Migas EBT Tambang already exists, skipping...");
+      const bigIdeas = await storage.getBigIdeas(existing.id);
+      if (hubCheck && bigIdeas.length >= 1) {
+        log("[Seed] SBU Kompetensi Migas EBT Tambang already exists (complete), skipping...");
         return;
       }
-      log("[Seed] Old SBU Kompetensi Migas EBT Tambang data cleared");
+      log("[Seed] SBU Kompetensi Migas EBT Tambang incomplete (BI=" + bigIdeas.length + ", hub=" + !!hubCheck + ") — re-seeding to repair");
       await storage.deleteSeries(existing.id);
     }
 

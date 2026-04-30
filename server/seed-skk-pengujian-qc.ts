@@ -118,11 +118,17 @@ export async function seedSkkPengujianQc(userId: string) {
     if (existing) {
       const toolboxes = await storage.getToolboxes(undefined, existing.id);
       const hubCheck = toolboxes.find((t: any) => t.name === "HUB SKK Coach Pengujian & QC Konstruksi" && !t.bigIdeaId);
-      if (hubCheck) {
-        log("[Seed] SKK Pengujian & QC already exists, skipping...");
-        return;
-      }
       const bigIdeas = await storage.getBigIdeas(existing.id);
+
+      if (hubCheck && bigIdeas.length >= 1) {
+
+        log("[Seed] SKK Pengujian & QC already exists (complete), skipping...");
+
+        return;
+
+      }
+
+      log("[Seed] SKK Pengujian & QC incomplete (BI=" + bigIdeas.length + ", hub=" + !!hubCheck + ") — re-seeding to repair");
       for (const bi of bigIdeas) {
         const biTb = await storage.getToolboxes(bi.id);
         for (const tb of biTb) {
