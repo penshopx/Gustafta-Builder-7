@@ -222,6 +222,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SKK Hard Copy — Uji Kompetensi Tatap Muka", module: "./seed-skk-hardcopy", fn: "seedSkkHardcopy" },
           { name: "SKK Hard Copy Extra — Bidang Kompetensi & Skema Tatap Muka", module: "./seed-skk-hardcopy-extra", fn: "seedSkkHardcopyExtra" },
           { name: "ASKOM Konstruksi — Asesor Kompetensi Jasa Konstruksi", module: "./seed-askom-konstruksi", fn: "seedAskomKonstruksi" },
+          { name: "ASKOM Konstruksi Extra — BA-UKK, Portofolio, RPL, MUK, Moda Uji, Pelatihan", module: "./seed-askom-konstruksi-extra", fn: "seedAskomKonstruksiExtra" },
           { name: "Lisensi LSP Konstruksi — LPJK & BNSP", module: "./seed-lisensi-lsp", fn: "seedLisensiLsp" },
           { name: "Konsultan Lisensi LSP — Toolkit Pendamping LPJK & BNSP", module: "./seed-konsultan-lisensi-lsp", fn: "seedKonsultanLisensiLsp" },
           { name: "Akreditasi LSP oleh KAN — SNI ISO/IEC 17024 + KAN K-09", module: "./seed-akreditasi-kan", fn: "seedAkreditasiKan" },
@@ -343,6 +344,14 @@ for (const envVar of requiredEnvVars) {
         await seedAskomKonstruksi("49465846");
       } catch (err) {
         log("Catch-up ASKOM Konstruksi seed error: " + (err as Error).message);
+      }
+
+      // Catch-up: ASKOM Konstruksi Extra — BA-UKK, Portofolio, RPL, MUK, Moda Uji, Pelatihan (added Apr 2026)
+      try {
+        const { seedAskomKonstruksiExtra } = await import("./seed-askom-konstruksi-extra");
+        await seedAskomKonstruksiExtra("49465846");
+      } catch (err) {
+        log("Catch-up ASKOM Konstruksi Extra seed error: " + (err as Error).message);
       }
 
       // Catch-up: Lisensi LSP Konstruksi — LPJK & BNSP (added Apr 2026)
