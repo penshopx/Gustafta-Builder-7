@@ -4,7 +4,6 @@ import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -12,11 +11,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   Users, CreditCard, FileText, ToggleLeft, ToggleRight,
-  CheckCircle2, XCircle, Clock, Shield, ArrowLeft, Copy,
-  TrendingUp, UserCheck, AlertCircle, RefreshCw
+  CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
+  UserCheck, AlertCircle, RefreshCw, Crown, UserCog
 } from "lucide-react";
 
 // ---- Types ----
+interface AdminMeData {
+  isAdmin: boolean;
+  isSuperAdmin: boolean;
+  role: string;
+  user: any;
+}
+
 interface AdminStats {
   totalUsers: number;
   activeUsers: number;
@@ -75,11 +81,8 @@ function formatDate(d: string | null) {
 
 function planLabel(plan: string) {
   const map: Record<string, string> = {
-    monthly: "1 Bulan",
-    quarterly: "3 Bulan",
-    semiannual: "6 Bulan",
-    annual: "12 Bulan",
-    voucher: "Voucher",
+    monthly: "1 Bulan", quarterly: "3 Bulan",
+    semiannual: "6 Bulan", annual: "12 Bulan", voucher: "Voucher",
   };
   return map[plan] || plan;
 }
@@ -96,6 +99,12 @@ function statusBadge(status: string) {
   return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${m.className}`}>{m.label}</span>;
 }
 
+function roleBadge(role: string | null) {
+  if (role === "superadmin") return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 flex items-center gap-1 w-fit"><Crown className="h-3 w-3" /> Super Admin</span>;
+  if (role === "admin") return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 flex items-center gap-1 w-fit"><Shield className="h-3 w-3" /> Admin</span>;
+  return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-muted text-muted-foreground">User</span>;
+}
+
 // ---- Main Component ----
 export default function AdminPage() {
   const { toast } = useToast();
@@ -110,29 +119,37 @@ export default function AdminPage() {
   const [newEndDate, setNewEndDate] = useState("");
 
   // ---- Queries ----
-  const { data: meData, isError: meError, isLoading: meLoading } = useQuery<{ isAdmin: boolean; user: any }>({
+  const { data: meData, isError: meError, isLoading: meLoading } = useQuery<AdminMeData>({
     queryKey: ["/api/admin/me"],
     retry: false,
   });
 
+  const isSuperAdmin = meData?.isSuperAdmin === true;
+  const isAdmin = meData?.isAdmin === true;
+
   const { data: stats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
-    enabled: meData?.isAdmin === true,
+    enabled: isAdmin,
   });
 
   const { data: usersList = [], isLoading: usersLoading } = useQuery<AdminUser[]>({
     queryKey: ["/api/admin/users"],
-    enabled: meData?.isAdmin === true && activeTab === "users",
+    enabled: isAdmin && activeTab === "users",
+  });
+
+  const { data: adminsList = [], isLoading: adminsLoading } = useQuery<AdminUser[]>({
+    queryKey: ["/api/admin/admins"],
+    enabled: isSuperAdmin && activeTab === "admins",
   });
 
   const { data: subscriptions = [], isLoading: subsLoading } = useQuery<AdminSubscription[]>({
     queryKey: ["/api/admin/subscriptions"],
-    enabled: meData?.isAdmin === true && activeTab === "subscriptions",
+    enabled: isAdmin && activeTab === "subscriptions",
   });
 
   const { data: trialList = [], isLoading: trialLoading } = useQuery<TrialRequest[]>({
     queryKey: ["/api/admin/trial-requests"],
-    enabled: meData?.isAdmin === true && activeTab === "trials",
+    enabled: isAdmin && activeTab === "trials",
   });
 
   // ---- Mutations ----
@@ -146,11 +163,22 @@ export default function AdminPage() {
     onError: () => toast({ title: "Gagal memperbarui status.", variant: "destructive" }),
   });
 
+  const toggleAdminMutation = useMutation({
+    mutationFn: (userId: string) => apiRequest("PATCH", `/api/admin/admins/${userId}/toggle`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/admins"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      toast({ title: "Status admin diperbarui." });
+    },
+    onError: () => toast({ title: "Gagal memperbarui status admin.", variant: "destructive" }),
+  });
+
   const setRoleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: string }) =>
       apiRequest("PATCH", `/api/admin/users/${userId}/role`, { role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/admins"] });
       toast({ title: "Role pengguna diperbarui." });
     },
     onError: () => toast({ title: "Gagal mengubah role.", variant: "destructive" }),
@@ -197,7 +225,7 @@ export default function AdminPage() {
     onError: () => toast({ title: "Gagal memperbarui langganan.", variant: "destructive" }),
   });
 
-  // ---- Guard: Not Authenticated / Error ----
+  // ---- Guards ----
   if (meError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -213,7 +241,6 @@ export default function AdminPage() {
     );
   }
 
-  // ---- Guard: Not Admin ----
   if (meData && !meData.isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -231,7 +258,6 @@ export default function AdminPage() {
     );
   }
 
-  // ---- Guard: Loading ----
   if (meLoading || !meData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -248,6 +274,8 @@ export default function AdminPage() {
     toast({ title: "Kode voucher disalin!" });
   };
 
+  const tabCount = isSuperAdmin ? 4 : 3;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -260,13 +288,24 @@ export default function AdminPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="font-bold text-lg">Admin Panel</h1>
+              <h1 className="font-bold text-lg flex items-center gap-2">
+                Admin Panel
+                {isSuperAdmin ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 flex items-center gap-1 font-medium">
+                    <Crown className="h-3 w-3" /> Super Admin
+                  </span>
+                ) : (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 flex items-center gap-1 font-medium">
+                    <Shield className="h-3 w-3" /> Admin
+                  </span>
+                )}
+              </h1>
               <p className="text-xs text-muted-foreground">Gustafta Platform Management</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">{meData.user?.email}</span>
+            {isSuperAdmin ? <Crown className="h-4 w-4 text-purple-500" /> : <Shield className="h-4 w-4 text-primary" />}
+            <span className="text-sm font-medium hidden sm:block">{meData.user?.email}</span>
           </div>
         </div>
       </header>
@@ -325,15 +364,20 @@ export default function AdminPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 max-w-lg">
-            <TabsTrigger value="users" className="gap-2" data-testid="tab-users">
-              <Users className="h-4 w-4" /> Pengguna
+          <TabsList className={`grid w-full max-w-2xl`} style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
+            {isSuperAdmin && (
+              <TabsTrigger value="admins" className="gap-1.5 text-xs" data-testid="tab-admins">
+                <UserCog className="h-3.5 w-3.5" /> Admin
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="users" className="gap-1.5 text-xs" data-testid="tab-users">
+              <Users className="h-3.5 w-3.5" /> Pengguna
             </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="gap-2" data-testid="tab-subscriptions">
-              <CreditCard className="h-4 w-4" /> Langganan
+            <TabsTrigger value="subscriptions" className="gap-1.5 text-xs" data-testid="tab-subscriptions">
+              <CreditCard className="h-3.5 w-3.5" /> Langganan
             </TabsTrigger>
-            <TabsTrigger value="trials" className="gap-2" data-testid="tab-trials">
-              <FileText className="h-4 w-4" /> Trial
+            <TabsTrigger value="trials" className="gap-1.5 text-xs" data-testid="tab-trials">
+              <FileText className="h-3.5 w-3.5" /> Trial
               {(stats?.pendingTrialRequests ?? 0) > 0 && (
                 <span className="ml-1 bg-yellow-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                   {stats?.pendingTrialRequests}
@@ -342,12 +386,103 @@ export default function AdminPage() {
             </TabsTrigger>
           </TabsList>
 
+          {/* ========== ADMINS TAB (Super Admin only) ========== */}
+          {isSuperAdmin && (
+            <TabsContent value="admins" className="mt-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <UserCog className="h-4 w-4" /> Manajemen Admin
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Atur akun admin. Untuk membuat admin baru, buka tab Pengguna → ubah role ke "Admin".
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost" size="sm"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/admins"] })}
+                      data-testid="button-refresh-admins"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {adminsLoading ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />)}
+                    </div>
+                  ) : adminsList.length === 0 ? (
+                    <div className="text-center py-10 space-y-2">
+                      <UserCog className="h-10 w-10 text-muted-foreground mx-auto opacity-50" />
+                      <p className="text-muted-foreground">Belum ada akun admin.</p>
+                      <p className="text-xs text-muted-foreground">Buka tab Pengguna → ubah role user menjadi "Admin" untuk menambah admin.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b text-muted-foreground">
+                            <th className="text-left py-2 pr-4 font-medium">Nama</th>
+                            <th className="text-left py-2 pr-4 font-medium">Email</th>
+                            <th className="text-left py-2 pr-4 font-medium">Status</th>
+                            <th className="text-left py-2 pr-4 font-medium">Bergabung</th>
+                            <th className="text-right py-2 font-medium">On/Off</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {adminsList.map((admin) => (
+                            <tr key={admin.id} className="hover:bg-muted/30 transition-colors" data-testid={`row-admin-${admin.id}`}>
+                              <td className="py-3 pr-4 font-medium">
+                                {[admin.firstName, admin.lastName].filter(Boolean).join(" ") || "—"}
+                              </td>
+                              <td className="py-3 pr-4 text-muted-foreground text-xs">{admin.email || "—"}</td>
+                              <td className="py-3 pr-4">
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${admin.isActive !== false ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300" : "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"}`}>
+                                  {admin.isActive !== false ? "Aktif" : "Nonaktif"}
+                                </span>
+                              </td>
+                              <td className="py-3 pr-4 text-muted-foreground text-xs">{formatDate(admin.createdAt)}</td>
+                              <td className="py-3 text-right">
+                                <Button
+                                  variant={admin.isActive !== false ? "outline" : "default"}
+                                  size="sm"
+                                  className={`gap-1 text-xs ${admin.isActive !== false ? "border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" : "bg-green-600 hover:bg-green-700 text-white"}`}
+                                  onClick={() => toggleAdminMutation.mutate(admin.id)}
+                                  disabled={toggleAdminMutation.isPending}
+                                  data-testid={`button-toggle-admin-${admin.id}`}
+                                >
+                                  {admin.isActive !== false ? (
+                                    <><ToggleRight className="h-3.5 w-3.5" /> Nonaktifkan</>
+                                  ) : (
+                                    <><ToggleLeft className="h-3.5 w-3.5" /> Aktifkan</>
+                                  )}
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
           {/* ========== USERS TAB ========== */}
           <TabsContent value="users" className="mt-4">
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">Manajemen Pengguna</CardTitle>
+                  <div>
+                    <CardTitle className="text-base">Manajemen Pengguna</CardTitle>
+                    {!isSuperAdmin && (
+                      <p className="text-xs text-muted-foreground mt-1">Aktifkan/nonaktifkan pengguna berdasarkan status pembayaran atau pelanggaran.</p>
+                    )}
+                  </div>
                   <Button
                     variant="ghost" size="sm"
                     onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] })}
@@ -376,7 +511,7 @@ export default function AdminPage() {
                           <th className="text-left py-2 pr-4 font-medium">Langganan</th>
                           <th className="text-left py-2 pr-4 font-medium">Status</th>
                           <th className="text-left py-2 pr-4 font-medium">Bergabung</th>
-                          <th className="text-right py-2 font-medium">Aksi</th>
+                          <th className="text-right py-2 font-medium">On/Off</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
@@ -389,15 +524,19 @@ export default function AdminPage() {
                               </div>
                             </td>
                             <td className="py-3 pr-4">
-                              <select
-                                value={user.role || "user"}
-                                onChange={(e) => setRoleMutation.mutate({ userId: user.id, role: e.target.value })}
-                                className="text-xs border rounded px-1.5 py-0.5 bg-background"
-                                data-testid={`select-role-${user.id}`}
-                              >
-                                <option value="user">User</option>
-                                <option value="admin">Admin</option>
-                              </select>
+                              {isSuperAdmin && user.role !== "superadmin" ? (
+                                <select
+                                  value={user.role || "user"}
+                                  onChange={(e) => setRoleMutation.mutate({ userId: user.id, role: e.target.value })}
+                                  className="text-xs border rounded px-1.5 py-0.5 bg-background"
+                                  data-testid={`select-role-${user.id}`}
+                                >
+                                  <option value="user">User</option>
+                                  <option value="admin">Admin</option>
+                                </select>
+                              ) : (
+                                roleBadge(user.role)
+                              )}
                             </td>
                             <td className="py-3 pr-4">
                               {user.subscription ? (
@@ -421,20 +560,24 @@ export default function AdminPage() {
                             </td>
                             <td className="py-3 pr-4 text-muted-foreground text-xs">{formatDate(user.createdAt)}</td>
                             <td className="py-3 text-right">
-                              <Button
-                                variant={user.isActive !== false ? "outline" : "default"}
-                                size="sm"
-                                className={`gap-1 text-xs ${user.isActive !== false ? "border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" : "bg-green-600 hover:bg-green-700 text-white"}`}
-                                onClick={() => toggleUserMutation.mutate(user.id)}
-                                disabled={toggleUserMutation.isPending}
-                                data-testid={`button-toggle-user-${user.id}`}
-                              >
-                                {user.isActive !== false ? (
-                                  <><ToggleRight className="h-3.5 w-3.5" /> Nonaktifkan</>
-                                ) : (
-                                  <><ToggleLeft className="h-3.5 w-3.5" /> Aktifkan</>
-                                )}
-                              </Button>
+                              {user.role === "superadmin" ? (
+                                <span className="text-xs text-muted-foreground italic">—</span>
+                              ) : (
+                                <Button
+                                  variant={user.isActive !== false ? "outline" : "default"}
+                                  size="sm"
+                                  className={`gap-1 text-xs ${user.isActive !== false ? "border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" : "bg-green-600 hover:bg-green-700 text-white"}`}
+                                  onClick={() => toggleUserMutation.mutate(user.id)}
+                                  disabled={toggleUserMutation.isPending}
+                                  data-testid={`button-toggle-user-${user.id}`}
+                                >
+                                  {user.isActive !== false ? (
+                                    <><ToggleRight className="h-3.5 w-3.5" /> Nonaktifkan</>
+                                  ) : (
+                                    <><ToggleLeft className="h-3.5 w-3.5" /> Aktifkan</>
+                                  )}
+                                </Button>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -567,9 +710,7 @@ export default function AdminPage() {
                               {req.company && <span>🏢 {req.company}</span>}
                             </div>
                             {req.useCase && (
-                              <p className="text-sm text-muted-foreground italic mt-1">
-                                "{req.useCase}"
-                              </p>
+                              <p className="text-sm text-muted-foreground italic mt-1">"{req.useCase}"</p>
                             )}
                             {req.voucherCode && (
                               <div className="flex items-center gap-2 mt-2">

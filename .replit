@@ -58,6 +58,7 @@ expertMode = true
 
 [userenv.shared]
 ADMIN_USER_IDS = "58349984"
+SUPERADMIN_EMAILS = "penshopx@gmail.com"
 
 [postMerge]
 path = "scripts/post-merge.sh"

@@ -8489,19 +8489,41 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     return req.user?.claims?.sub || req.user?.id || "";
   }
 
-  async function checkIsAdmin(req: any): Promise<boolean> {
+  async function getDbRole(req: any): Promise<string> {
     const userId = getSessionUserId(req);
-    if (!userId) return false;
-    const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
-    if (adminIds.includes(userId)) return true;
-    const [dbUser] = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
-    return dbUser?.role === "admin";
+    if (!userId) return "user";
+    const superadminEmails = (process.env.SUPERADMIN_EMAILS || "")
+      .split(",").map((s: string) => s.trim().toLowerCase()).filter(Boolean);
+    const adminIds = (process.env.ADMIN_USER_IDS || "")
+      .split(",").map((s: string) => s.trim()).filter(Boolean);
+    const [dbUser] = await db.select({ role: users.role, email: users.email }).from(users).where(eq(users.id, userId));
+    if (!dbUser) return adminIds.includes(userId) ? "superadmin" : "user";
+    if (superadminEmails.includes((dbUser.email || "").toLowerCase())) return "superadmin";
+    if (adminIds.includes(userId)) return dbUser.role === "superadmin" ? "superadmin" : "admin";
+    return dbUser.role || "user";
+  }
+
+  async function checkIsAdmin(req: any): Promise<boolean> {
+    const role = await getDbRole(req);
+    return role === "admin" || role === "superadmin";
+  }
+
+  async function checkIsSuperAdmin(req: any): Promise<boolean> {
+    const role = await getDbRole(req);
+    return role === "superadmin";
   }
 
   async function requireAdmin(req: any, res: any, next: any) {
     if (!req.user) return res.status(401).json({ error: "Tidak terautentikasi" });
-    const isAdmin = await checkIsAdmin(req);
-    if (!isAdmin) return res.status(403).json({ error: "Akses ditolak. Anda bukan admin." });
+    const ok = await checkIsAdmin(req);
+    if (!ok) return res.status(403).json({ error: "Akses ditolak. Hanya admin yang dapat mengakses ini." });
+    next();
+  }
+
+  async function requireSuperAdmin(req: any, res: any, next: any) {
+    if (!req.user) return res.status(401).json({ error: "Tidak terautentikasi" });
+    const ok = await checkIsSuperAdmin(req);
+    if (!ok) return res.status(403).json({ error: "Akses ditolak. Hanya Super Admin yang dapat melakukan ini." });
     next();
   }
 
@@ -8531,8 +8553,13 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
   app.get("/api/admin/me", isAuthenticated, async (req: any, res: any) => {
     const userId = getSessionUserId(req);
     const [dbUser] = await db.select().from(users).where(eq(users.id, userId));
-    const isAdmin = await checkIsAdmin(req);
-    res.json({ isAdmin, user: dbUser || null });
+    const role = await getDbRole(req);
+    res.json({
+      isAdmin: role === "admin" || role === "superadmin",
+      isSuperAdmin: role === "superadmin",
+      role,
+      user: dbUser || null,
+    });
   });
 
   // ==================== ADMIN: DASHBOARD STATS ====================
@@ -8589,16 +8616,48 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
-  app.patch("/api/admin/users/:userId/role", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+  app.patch("/api/admin/users/:userId/role", isAuthenticated, requireSuperAdmin, async (req: any, res: any) => {
     try {
       const { userId } = req.params;
       const { role } = req.body;
-      if (!["user", "admin"].includes(role)) return res.status(400).json({ error: "Role tidak valid." });
+      if (!["user", "admin"].includes(role)) return res.status(400).json({ error: "Role tidak valid. Gunakan 'user' atau 'admin'." });
       await db.update(users).set({ role, updatedAt: new Date() }).where(eq(users.id, userId));
+      invalidateUserActiveCache(userId);
       res.json({ success: true, role });
     } catch (error: any) {
       console.error("Admin set role error:", error);
       res.status(500).json({ error: "Gagal mengubah role pengguna." });
+    }
+  });
+
+  // ==================== SUPERADMIN: MANAGE ADMINS ====================
+  app.get("/api/admin/admins", isAuthenticated, requireSuperAdmin, async (req: any, res: any) => {
+    try {
+      const adminList = await db
+        .select()
+        .from(users)
+        .where(eq(users.role, "admin"))
+        .orderBy(users.firstName);
+      res.json(adminList);
+    } catch (error: any) {
+      console.error("SuperAdmin get admins error:", error);
+      res.status(500).json({ error: "Gagal mengambil data admin." });
+    }
+  });
+
+  app.patch("/api/admin/admins/:userId/toggle", isAuthenticated, requireSuperAdmin, async (req: any, res: any) => {
+    try {
+      const { userId } = req.params;
+      const [target] = await db.select().from(users).where(eq(users.id, userId));
+      if (!target) return res.status(404).json({ error: "Admin tidak ditemukan." });
+      if (target.role !== "admin") return res.status(400).json({ error: "Pengguna ini bukan admin." });
+      const newStatus = !target.isActive;
+      await db.update(users).set({ isActive: newStatus, updatedAt: new Date() }).where(eq(users.id, userId));
+      invalidateUserActiveCache(userId);
+      res.json({ success: true, isActive: newStatus, message: newStatus ? "Admin diaktifkan." : "Admin dinonaktifkan." });
+    } catch (error: any) {
+      console.error("SuperAdmin toggle admin error:", error);
+      res.status(500).json({ error: "Gagal mengubah status admin." });
     }
   });
 

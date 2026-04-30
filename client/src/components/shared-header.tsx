@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield } from "lucide-react";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown } from "lucide-react";
 
 interface SharedHeaderProps {
   transparent?: boolean;
@@ -86,7 +86,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
 
-  const { data: adminData } = useQuery<{ isAdmin: boolean }>({
+  const { data: adminData } = useQuery<{ isAdmin: boolean; isSuperAdmin: boolean; role: string }>({
     queryKey: ["/api/admin/me"],
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
@@ -139,8 +139,13 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             <div className="flex items-center gap-2">
               {adminData?.isAdmin && (
                 <Link href="/admin">
-                  <Button variant="outline" size="sm" className="gap-1 border-primary/40 text-primary" data-testid="button-admin-link">
-                    <Shield className="h-3.5 w-3.5" /> Admin
+                  <Button
+                    variant="outline" size="sm"
+                    className={`gap-1 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
+                    data-testid="button-admin-link"
+                  >
+                    {adminData.isSuperAdmin ? <Crown className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
+                    {adminData.isSuperAdmin ? "Super Admin" : "Admin"}
                   </Button>
                 </Link>
               )}
@@ -212,9 +217,13 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                     <div className="space-y-2">
                       {adminData?.isAdmin && (
                         <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                          <Button variant="outline" className="w-full gap-2 border-primary/40 text-primary" data-testid="button-admin-mobile">
-                            <Shield className="h-4 w-4" />
-                            Admin Panel
+                          <Button
+                            variant="outline"
+                            className={`w-full gap-2 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
+                            data-testid="button-admin-mobile"
+                          >
+                            {adminData.isSuperAdmin ? <Crown className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                            {adminData.isSuperAdmin ? "Super Admin Panel" : "Admin Panel"}
                           </Button>
                         </Link>
                       )}
