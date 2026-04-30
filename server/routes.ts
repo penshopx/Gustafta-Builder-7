@@ -5973,7 +5973,7 @@ Pilih tipe yang paling cocok dengan topik agent. Jangan gunakan tipe AI-powered 
     }
   });
 
-  const FORM_TYPES = ["lead_capture_form", "document_generator", "custom"];
+  const FORM_TYPES = ["lead_capture_form", "custom"];
 
   function sanitizePublicResult(result: Record<string, unknown>): Record<string, unknown> {
     const { input: _input, ...rest } = result;
@@ -6055,6 +6055,72 @@ Pilih tipe yang paling cocok dengan topik agent. Jangan gunakan tipe AI-powered 
       res.status(201).json({ result });
     } catch (error) {
       res.status(500).json({ error: "Failed to submit mini app result" });
+    }
+  });
+
+  // ==================== PUBLIC: Document Generator (AI) ====================
+  app.post("/api/public/mini-app/:slug/generate-document", async (req: any, res: any) => {
+    try {
+      const slug = req.params.slug as string;
+      const miniApp = await storage.getMiniAppBySlug(slug);
+      if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
+      if (miniApp.type !== "document_generator") return res.status(400).json({ error: "Bukan tipe Generator Dokumen" });
+
+      const body = req.body && typeof req.body === "object" ? req.body as Record<string, string> : {};
+      const rawBody = JSON.stringify(body);
+      if (rawBody.length > 20_000) return res.status(413).json({ error: "Input terlalu besar" });
+
+      const agent = await storage.getAgent(miniApp.agentId);
+      const agentContext = agent
+        ? `Chatbot: ${agent.name}\nKeahlian: ${agent.description || agent.tagline || "Asisten profesional"}`
+        : "Asisten profesional";
+
+      const miniAppConfig = (miniApp.config as Record<string, unknown>) || {};
+      const miniAppDesc = miniApp.description || miniApp.name;
+
+      // Build user input summary from form fields
+      const userInputLines = Object.entries(body)
+        .filter(([k]) => k !== "_meta")
+        .map(([k, v]) => `- ${k.replace(/_/g, " ")}: ${v}`)
+        .join("\n");
+
+      const systemPrompt = `Kamu adalah asisten profesional yang membantu membuat dokumen kerja berkualitas tinggi dalam Bahasa Indonesia untuk industri konstruksi dan jasa.
+
+${agentContext}
+
+Mini App ini: "${miniApp.name}" — ${miniAppDesc}
+
+Tugas kamu: Buat dokumen profesional yang lengkap, terstruktur, dan siap pakai berdasarkan data yang diberikan user. Gunakan format yang jelas dengan judul, bagian, dan sub-bagian yang relevan. Isi harus substantif, spesifik, dan langsung dapat digunakan.`;
+
+      const userPrompt = `Buat dokumen berdasarkan data berikut:\n\n${userInputLines}\n\nHasilkan dokumen yang lengkap dan profesional. Sertakan semua bagian yang relevan sesuai jenis dokumen yang diminta.`;
+
+      if (!openai) return res.status(503).json({ error: "Layanan AI tidak tersedia" });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 2000,
+        temperature: 0.5,
+      });
+
+      const generated = completion.choices[0]?.message?.content || "";
+      if (!generated) return res.status(500).json({ error: "AI tidak menghasilkan konten" });
+
+      const result = await storage.createMiniAppResult({
+        miniAppId: String(miniApp.id),
+        agentId: String(miniApp.agentId),
+        input: body,
+        output: { content: generated, summary: generated.slice(0, 200) + (generated.length > 200 ? "..." : "") },
+        status: "completed",
+      });
+
+      res.json({ content: generated, result });
+    } catch (error: any) {
+      console.error("Document generate error:", error);
+      res.status(500).json({ error: "Gagal membuat dokumen. Coba lagi." });
     }
   });
 

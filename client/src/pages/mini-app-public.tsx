@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, MessageSquare, ExternalLink, ArrowRight, Sparkles, BarChart2, ClipboardList, Save, Copy, Check, ChevronDown, ChevronUp, Clock } from "lucide-react";
-import { usePublicMiniApp, usePublicMiniAppResult, usePublicMiniAppResults, usePublicSubmitResult } from "@/hooks/use-mini-apps";
+import { Loader2, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, MessageSquare, ExternalLink, ArrowRight, Sparkles, BarChart2, ClipboardList, Save, Copy, Check, ChevronDown, ChevronUp, Clock, Download, RefreshCw } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { usePublicMiniApp, usePublicMiniAppResult, usePublicMiniAppResults, usePublicSubmitResult, usePublicGenerateDocument } from "@/hooks/use-mini-apps";
 import type { MiniAppType, MiniApp, MiniAppResult } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
@@ -529,6 +530,144 @@ function ProgressTrackerRunner({ config, slug, agentColor }: { config: Record<st
   );
 }
 
+function DocumentGeneratorRunner({ config, name, slug, agentColor }: { config: Record<string, unknown>; name: string; slug: string; agentColor?: string }) {
+  const configFields = (config?.fields as string[] | undefined);
+  const defaultFields = ["judul_dokumen", "konteks_proyek", "kebutuhan_spesifik"];
+  const formFields = configFields && configFields.length > 0 ? configFields : defaultFields;
+
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [generatedDoc, setGeneratedDoc] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateMutation = usePublicGenerateDocument(slug);
+
+  const isMultiline = (field: string) =>
+    ["konteks_proyek", "kebutuhan_spesifik", "deskripsi", "isi", "konteks", "detail", "catatan", "requirements"].some(k => field.toLowerCase().includes(k));
+
+  const handleGenerate = () => {
+    setError(null);
+    const isEmpty = formFields.every(f => !values[f]?.trim());
+    if (isEmpty) { setError("Isi minimal satu field sebelum generate."); return; }
+    generateMutation.mutate(values, {
+      onSuccess: (data) => setGeneratedDoc(data.content),
+      onError: (err: any) => setError(err.message || "Terjadi kesalahan"),
+    });
+  };
+
+  const handleCopy = async () => {
+    if (!generatedDoc) return;
+    try {
+      await navigator.clipboard.writeText(generatedDoc);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  const handleDownload = () => {
+    if (!generatedDoc) return;
+    const blob = new Blob([generatedDoc], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name.replace(/\s+/g, "_")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Form fields */}
+      {!generatedDoc && (
+        <>
+          {formFields.map((field: string) => (
+            <div key={field} className="space-y-1.5">
+              <Label className="capitalize text-sm font-medium">{field.replace(/_/g, " ")}</Label>
+              {isMultiline(field) ? (
+                <Textarea
+                  value={values[field] || ""}
+                  onChange={e => setValues(prev => ({ ...prev, [field]: e.target.value }))}
+                  placeholder={`Masukkan ${field.replace(/_/g, " ")}...`}
+                  rows={3}
+                  data-testid={`docgen-input-${field}`}
+                />
+              ) : (
+                <Input
+                  value={values[field] || ""}
+                  onChange={e => setValues(prev => ({ ...prev, [field]: e.target.value }))}
+                  placeholder={`Masukkan ${field.replace(/_/g, " ")}...`}
+                  data-testid={`docgen-input-${field}`}
+                />
+              )}
+            </div>
+          ))}
+          {error && <p className="text-sm text-red-500">{error}</p>}
+          <Button
+            className="w-full gap-2"
+            onClick={handleGenerate}
+            disabled={generateMutation.isPending}
+            data-testid="button-generate-document"
+            style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }}
+          >
+            {generateMutation.isPending
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Sedang membuat dokumen...</>
+              : <><FileOutput className="w-4 h-4" /> Generate Dokumen</>
+            }
+          </Button>
+        </>
+      )}
+
+      {/* Generated document result */}
+      {generatedDoc && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center gap-1.5">
+              <Check className="w-4 h-4" /> Dokumen berhasil dibuat
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setGeneratedDoc(null); setValues({}); }}
+              className="gap-1 text-xs text-muted-foreground"
+              data-testid="button-reset-docgen"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Buat Ulang
+            </Button>
+          </div>
+          <div
+            className="p-4 rounded-lg border text-sm whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto font-mono text-xs"
+            style={{ backgroundColor: `${agentColor || "#6366f1"}08`, borderColor: `${agentColor || "#6366f1"}30` }}
+            data-testid="docgen-result"
+          >
+            {generatedDoc}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 gap-1.5"
+              onClick={handleCopy}
+              data-testid="button-copy-document"
+            >
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? "Disalin!" : "Salin Teks"}
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1 gap-1.5"
+              onClick={handleDownload}
+              data-testid="button-download-document"
+              style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }}
+            >
+              <Download className="w-3.5 h-3.5" /> Download .txt
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SimpleFormRunner({ config, name, slug, agentColor }: { config: Record<string, unknown>; name: string; slug: string; agentColor?: string }) {
   const fields = (config?.fields as string[] | undefined) ?? ["nama", "email", "pesan"];
   const [values, setValues] = useState<Record<string, string>>({});
@@ -682,8 +821,9 @@ function AppRunner({ miniApp, result, agentId, agentColor, slug }: { miniApp: Mi
       return <RiskAssessmentRunner config={config} slug={slug} agentColor={agentColor} />;
     case "progress_tracker":
       return <ProgressTrackerRunner config={config} slug={slug} agentColor={agentColor} />;
-    case "lead_capture_form":
     case "document_generator":
+      return <DocumentGeneratorRunner config={config} name={miniApp.name} slug={slug} agentColor={agentColor} />;
+    case "lead_capture_form":
     case "custom":
     default:
       return <SimpleFormRunner config={config} name={miniApp.name} slug={slug} agentColor={agentColor} />;

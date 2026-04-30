@@ -124,6 +124,27 @@ export function usePublicMiniAppResults(slug: string) {
   });
 }
 
+export function usePublicGenerateDocument(slug: string) {
+  return useMutation({
+    mutationFn: async (data: Record<string, string>) => {
+      const res = await fetch(`/api/public/mini-app/${slug}/generate-document`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as any).error || "Gagal membuat dokumen");
+      }
+      return res.json() as Promise<{ content: string }>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/public/mini-app-results", slug] });
+      queryClient.invalidateQueries({ queryKey: ["/api/public/mini-app-result", slug] });
+    },
+  });
+}
+
 export function usePublicSubmitResult(slug: string) {
   return useMutation({
     mutationFn: async (data: { input: Record<string, unknown>; output: Record<string, unknown> }) => {
