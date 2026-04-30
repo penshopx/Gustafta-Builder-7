@@ -23,6 +23,9 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").default("user"),
   isActive: boolean("is_active").default(true),
+  jabatan: varchar("jabatan"),
+  perusahaan: varchar("perusahaan"),
+  bio: varchar("bio", { length: 500 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

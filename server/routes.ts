@@ -8551,6 +8551,25 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
+  // ==================== USER: UPDATE MY PROFILE ====================
+  app.patch("/api/my/profile", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = getSessionUserId(req);
+      const { firstName, lastName, jabatan, perusahaan, bio } = req.body;
+      const updateData: Record<string, any> = { updatedAt: new Date() };
+      if (firstName !== undefined) updateData.firstName = firstName?.trim() || null;
+      if (lastName !== undefined) updateData.lastName = lastName?.trim() || null;
+      if (jabatan !== undefined) updateData.jabatan = jabatan?.trim() || null;
+      if (perusahaan !== undefined) updateData.perusahaan = perusahaan?.trim() || null;
+      if (bio !== undefined) updateData.bio = bio?.trim()?.slice(0, 500) || null;
+      const [updated] = await db.update(users).set(updateData).where(eq(users.id, userId)).returning();
+      res.json({ success: true, user: updated });
+    } catch (error: any) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ error: "Gagal memperbarui profil." });
+    }
+  });
+
   // ==================== PUBLIC: TRIAL REQUEST FORM ====================
   app.post("/api/trial-requests", async (req: any, res: any) => {
     try {
