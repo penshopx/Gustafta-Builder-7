@@ -145,7 +145,12 @@ export default function Landing() {
     {
       icon: Sparkles,
       title: "Agentic AI + OpenClaw",
-      description: "Metodologi agentic berlapis: listen → detect → plan → execute → follow-up. Multi-agent dengan Orkestrator sebagai hub routing cerdas."
+      description: "Metodologi agentic berlapis: listen → detect → plan → execute → follow-up. Reasoning multi-step, self-correction, dan proactive assistance bawaan."
+    },
+    {
+      icon: Cpu,
+      title: "Orchestrator Multi-Agent",
+      description: "Routing cerdas otomatis ke 7 specialist domain konstruksi (Tender, SKK/SBU, Hukum, K3, Marketing, dll) + tambah specialist custom sendiri."
     },
     {
       icon: BookOpen,
@@ -229,12 +234,13 @@ export default function Landing() {
 
   const comparisonData = [
     { feature: "Hierarki 4 Level: Series → Modul → Chatbot → Alat Bantu", gustafta: true, others: false },
-    { feature: "Multi-Agent Orchestration (Orkestrator sebagai Hub)", gustafta: true, others: false },
+    { feature: "Orchestrator Multi-Agent: Routing ke 7+ Specialist Domain", gustafta: true, others: false },
+    { feature: "Custom Specialist Agent (tambah domain keahlian sendiri)", gustafta: true, others: false },
     { feature: "Custom Domain (bot.perusahaan.com → chatbot)", gustafta: true, others: false },
     { feature: "Knowledge Base 7 Tipe (YouTube, Video, Audio, Cloud Drive)", gustafta: true, others: "Terbatas" },
     { feature: "Otak Proyek / Project Brain + Tender Wizard", gustafta: true, others: false },
     { feature: "Multi-Channel (WhatsApp, Telegram, Widget, API)", gustafta: "4+ channel", others: "1–2 channel" },
-    { feature: "Multi-Model AI (GPT-4o, Claude, Custom API)", gustafta: true, others: "Terbatas" },
+    { feature: "Multi-Model AI (GPT-4o, Claude, DeepSeek, Custom API)", gustafta: true, others: "Terbatas" },
     { feature: "Widget Embed + Embed Code Dialog", gustafta: true, others: "Basic" },
     { feature: "Monetisasi, Voucher & Afiliasi", gustafta: true, others: false },
   ];
@@ -267,6 +273,14 @@ export default function Landing() {
     {
       question: "Channel apa saja yang didukung?",
       answer: "Gustafta mendukung WhatsApp (Fonnte/Kirimi/Multichat/Cloud API), Telegram, Web Widget (iframe & floating), Custom Domain, REST API, dan PWA (bisa install di HP). Discord dan Slack akan hadir segera."
+    },
+    {
+      question: "Apa itu Orchestrator Multi-Agent dan bagaimana cara kerjanya?",
+      answer: "Orchestrator Multi-Agent adalah sistem routing cerdas di dalam satu chatbot. Setiap pesan user dianalisis oleh AI classifier (DeepSeek) yang menentukan specialist mana yang paling tepat menjawab — misalnya pertanyaan tender diarahkan ke Specialist Tender, pertanyaan SKK/SBU ke Specialist Sertifikasi, dan seterusnya. Ada 7 specialist domain konstruksi bawaan, dan Anda bisa tambah specialist custom sendiri sesuai kebutuhan bisnis."
+    },
+    {
+      question: "Apakah Orchestrator Multi-Agent menambah biaya?",
+      answer: "Orchestrator menggunakan DeepSeek sebagai model classifier dengan biaya routing ~Rp 1–2 per pesan (sekitar $0.0001/call). Biaya ini sudah termasuk dalam paket berlangganan berbayar. Untuk estimasi: 5.000 pesan/bulan ≈ Rp 5.000–10.000 biaya routing — sangat terjangkau. Free Trial tidak menyertakan fitur Orchestrator."
     },
     {
       question: "Bagaimana dengan keamanan data?",
@@ -336,7 +350,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              <span>Baru: Custom Domain · KB YouTube/Video/Audio · Hierarki 4 Level</span>
+              <span>Baru: Orchestrator Multi-Agent · Custom Domain · KB YouTube/Video/Audio</span>
               <Flame className="h-4 w-4 text-orange-500" />
             </div>
             
@@ -350,7 +364,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 4 level: <strong>Series → Modul → Chatbot → Alat Bantu</strong>. Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
+              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 4 level: <strong>Series → Modul → Chatbot → Alat Bantu</strong>. Dilengkapi <strong>Orchestrator Multi-Agent</strong> dengan routing cerdas ke 7+ specialist domain konstruksi, Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mb-8">

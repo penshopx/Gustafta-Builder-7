@@ -165,7 +165,8 @@ Gustafta adalah **platform pembuatan chatbot AI multi-tenant berbasis cloud**, d
 
 ### Keunggulan Utama:
 - **No-Code Builder**: Buat chatbot AI canggih tanpa coding sama sekali
-- **Multi-Model AI**: GPT-4o, GPT-4o-mini, GPT-3.5-turbo, Claude (Anthropic), model kustom dengan API key sendiri
+- **Multi-Model AI**: GPT-4o, GPT-4o-mini, GPT-3.5-turbo, Claude (Anthropic), DeepSeek, model kustom dengan API key sendiri
+- **Orchestrator Multi-Agent**: Routing cerdas otomatis ke 7 specialist domain konstruksi + custom specialist sendiri (DeepSeek classifier ~$0.0001/pesan, termasuk di paket berbayar)
 - **Multi-Channel Deploy**: Website widget, WhatsApp (Fonnte/Kirimi/Multichat/Cloud API), Telegram, REST API
 - **Hierarki 5 Level**: Series → Core → Big Idea → Toolbox → Agent (ekosistem multi-chatbot terstruktur)
 - **Knowledge Base Lanjutan**: 7 tipe sumber — Teks, File, URL, YouTube, Cloud Drive, Video, Audio
@@ -272,17 +273,33 @@ Series: Regulasi Jasa Konstruksi
 ## BAGIAN 4: PAKET & PEMBAYARAN
 ═══════════════════════════════════════════════════════════
 
-### Paket Berlangganan:
+### Paket Berlangganan (1 Chatbot):
 
-| Paket | Durasi | Harga | Jumlah Chatbot |
-|-------|--------|-------|----------------|
-| Free Trial | 14 hari | Gratis | 1 chatbot |
-| Paket 1 Bulan | 30 hari | Rp 199.000 | 3 chatbot |
-| Paket 3 Bulan | 90 hari | Rp 499.000 | 5 chatbot |
-| Paket 6 Bulan | 180 hari | Rp 999.000 | 10 chatbot |
-| Paket 12 Bulan | 365 hari | Rp 1.999.000 | 25 chatbot |
+| Paket | Durasi | Harga | Pesan/Bulan | Orchestrator |
+|-------|--------|-------|-------------|--------------|
+| Free Trial | 14 hari | Gratis | 500 | ❌ |
+| 1 Bulan | 30 hari | Rp 199.000 | 5.000 | ✅ 7 Specialist |
+| 3 Bulan | 90 hari | Rp 499.000 | 5.000 | ✅ 7 Specialist |
+| 6 Bulan | 180 hari | Rp 999.000 | 5.000 | ✅ + Custom |
+| 12 Bulan | 365 hari | Rp 1.999.000 | 5.000 | ✅ + Custom Unlimited |
 
-Free Trial = benar-benar gratis, tidak perlu kartu kredit, akses semua fitur dasar.
+Free Trial = gratis 14 hari, tidak perlu kartu kredit, akses fitur dasar (tanpa Orchestrator).
+
+### Paket Multi-Chatbot:
+
+| Paket | Per Bulan | Per 3 Bulan | Per 6 Bulan | Per 12 Bulan |
+|-------|-----------|-------------|-------------|--------------|
+| 5 Chatbot | Rp 899.000 | Rp 2.399.000 | Rp 4.499.000 | Rp 8.999.000 |
+| 10 Chatbot | Rp 1.699.000 | Rp 4.499.000 | Rp 8.499.000 | Rp 16.999.000 |
+| 20 Chatbot | Rp 2.999.000 | Rp 7.999.000 | Rp 14.999.000 | Rp 29.999.000 |
+| Unlimited | Custom | Custom | Custom | Custom |
+
+### Add-On Tambahan:
+- Paket 10.000 pesan tambahan: Rp 99.000
+- Chatbot tambahan: Rp 149.000/chatbot/bulan
+- Knowledge Base 50 dokumen extra: Rp 79.000
+- WhatsApp Business API setup: Rp 299.000
+- Biaya Orchestrator routing: sudah termasuk di paket berbayar (~Rp 1–2/pesan)
 
 ### Cara Berlangganan:
 1. Login ke akun Gustafta
@@ -324,7 +341,8 @@ Template tersedia: Customer Support, Sales Assistant, Educational Tutor, Health 
 - GPT-4o-mini: Cepat & hemat, cocok untuk CS harian
 - GPT-3.5-turbo: Klasik, ekonomis
 - Claude (Anthropic): Alternatif dengan gaya berbeda
-- Custom Model: Masukkan API key sendiri
+- DeepSeek: Model hemat biaya — juga digunakan sebagai AI classifier di Orchestrator Multi-Agent (~$0.0001/call)
+- Custom Model: Masukkan API key dan endpoint sendiri
 
 **Parameter:**
 - Temperature 0.0–0.3: Konsisten (FAQ, data faktual)
@@ -527,7 +545,62 @@ Ubah chatbot dari knowledge bot menjadi **mesin revenue**:
 
 ---
 
-### 5.15 RANGKUMAN & BRIEF MARKETING
+### 5.15 ORCHESTRATOR MULTI-AGENT
+
+Fitur baru Gustafta yang menghadirkan **routing cerdas otomatis** di dalam satu chatbot.
+
+**Cara Kerja:**
+Setiap pesan yang masuk dianalisis oleh AI classifier (DeepSeek) yang menentukan topik percakapan, lalu secara otomatis mengaktifkan "specialist" yang paling relevan untuk menjawab. Prosesnya transparan — user tidak perlu tahu, cukup bertanya dan mendapat jawaban terbaik.
+
+[Kode]
+Pesan user masuk
+       ↓
+Orchestrator (DeepSeek Classifier) → ~$0.0001/call
+       ↓ pilih specialist terbaik
+┌──────┬──────┬──────┬──────┬──────┐
+│Tender│SKK   │Hukum │K3    │Custom│
+│Agent │Agent │Agent │Agent │Agent │
+└──────┴──────┴──────┴──────┴──────┘
+       ↓ satu specialist aktif menjawab
+[/Kode]
+
+**7 Specialist Bawaan (domain konstruksi):**
+1. **Tender & Pengadaan** — LPSE, Perpres 46/2025, dokumen penawaran
+2. **SKK & SBU** — Sertifikasi Kompetensi Kerja & Sertifikat Badan Usaha
+3. **Dokumen Teknis** — RAB, spesifikasi, gambar kerja
+4. **Hukum & Kontrak** — kontrak konstruksi, sengketa, klaim
+5. **K3 & SMKK** — Keselamatan & Kesehatan Kerja konstruksi
+6. **Marketing** — promosi jasa konstruksi, storytelling
+7. **Umum** — fallback untuk pertanyaan umum
+
+**Custom Specialist:**
+- Pengguna bisa tambah specialist dengan domain keahlian sendiri
+- Pilih ikon (12 pilihan emoji), isi nama dan prompt khusus
+- Specialist custom muncul dengan badge "Custom" dan bisa dihapus kapan saja
+- Konfigurasi tersimpan per chatbot (independen antar chatbot)
+
+**Cara Aktifkan:**
+1. Buka Agent/Chatbot di dashboard
+2. Pilih tab "Agentic AI" di sidebar
+3. Temukan card "Orchestrator Multi-Agent" (paling atas)
+4. Toggle "Aktifkan Orchestrator"
+5. Pilih routing model (default: deepseek-chat)
+6. On/off specialist sesuai kebutuhan, edit prompt jika perlu
+7. Klik "+ Tambah Specialist Baru" untuk specialist custom
+
+**On/Off Logic:**
+- Orchestrator OFF → chatbot jalan normal tanpa routing
+- Orchestrator ON + Specialist A OFF → Specialist A dilewati
+- Orchestrator ON + semua specialist ON → routing penuh aktif
+
+**Biaya:**
+- ~$0.0001 per pesan (DeepSeek classifier) = ~Rp 1–2/pesan
+- Termasuk dalam semua paket berbayar
+- Tidak tersedia di Free Trial
+
+---
+
+### 5.16 RANGKUMAN & BRIEF MARKETING
 
 **Rangkuman Chatbot**: Auto-generate ringkasan lengkap chatbot (identitas, persona, KB, monetisasi) untuk referensi landing page. Export ke Clipboard, Markdown, atau HTML.
 
@@ -535,7 +608,7 @@ Ubah chatbot dari knowledge bot menjadi **mesin revenue**:
 
 ---
 
-### 5.16 FITUR PROTEKSI & MONETISASI PENGGUNA
+### 5.17 FITUR PROTEKSI & MONETISASI PENGGUNA
 
 - **Batas Tamu**: Pengunjung tanpa akun dibatasi pesan (default 10); setelah itu muncul "upgrade wall"
 - **Free Trial per Chatbot**: Durasi dan kuota bisa dikonfigurasi
@@ -634,6 +707,18 @@ A:
 
 **Q: Kapan perlu Orkestrator (Big Idea)?**
 A: Ketika kamu punya 3+ Toolbox. Orkestrator membuat sistem terasa terpadu — user tidak perlu tahu chatbot mana yang menangani; cukup tanya di Big Idea dan akan diarahkan otomatis.
+
+**Q: Apa itu Orchestrator Multi-Agent?**
+A: Fitur routing cerdas di dalam satu chatbot. Setiap pesan user dianalisis AI classifier (DeepSeek) yang memilih specialist terbaik dari 7 domain konstruksi bawaan (Tender, SKK/SBU, Hukum, K3, Marketing, dll) + custom specialist yang Anda tambahkan sendiri. Hasilnya: chatbot satu bisa menjawab semua domain seperti tim spesialis, tanpa perpindahan chatbot.
+
+**Q: Bagaimana cara aktifkan Orchestrator?**
+A: Buka Agent → tab "Agentic AI" → temukan card "Orchestrator Multi-Agent" → toggle ON → pilih routing model (DeepSeek direkomendasikan) → on/off specialist sesuai kebutuhan → bisa tambah Custom Specialist via "+ Tambah Specialist Baru".
+
+**Q: Berapa biaya Orchestrator Multi-Agent?**
+A: ~$0.0001 per pesan (≈ Rp 1–2/pesan). Termasuk dalam semua paket berlangganan berbayar. Free Trial tidak mendukung fitur ini.
+
+**Q: Apa perbedaan Orchestrator Multi-Agent dengan Big Idea (Orkestrator Hierarki)?**
+A: Dua hal berbeda: Big Idea = chatbot Level 3 yang menerima user lalu routing ke Toolbox lain melalui percakapan lintas chatbot. Orchestrator Multi-Agent = routing otomatis di DALAM satu chatbot — user tidak berpindah chatbot, specialist yang berganti secara transparan di backend.
 
 **Q: Apa itu OpenClaw?**
 A: OpenClaw adalah metodologi penalaran agentic berlapis yang diterapkan Gustafta: ambil konteks (KB, Project Brain, Memory) → analisis multi-layer → invoke tool/fitur → sintesis → loop iterasi. Hasilnya: respons chatbot yang jauh lebih relevan dan kontekstual.

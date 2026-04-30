@@ -51,6 +51,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Web Widget", included: true },
       { text: "Multi-channel Integration", included: false },
       { text: "Agentic AI Features", included: false },
+      { text: "Orchestrator Multi-Agent", included: false },
       { text: "Analytics Dashboard", included: false },
     ],
     cta: "Mulai Trial Gratis",
@@ -71,6 +72,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp & Telegram", included: true },
       { text: "Agentic AI Features", included: true },
+      { text: "Orchestrator Multi-Agent (7 Specialist)", included: true },
       { text: "Analytics Dashboard", included: true },
       { text: "Email Support", included: true },
     ],
@@ -94,6 +96,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp & Telegram", included: true },
       { text: "Agentic AI Features", included: true },
+      { text: "Orchestrator Multi-Agent (7 Specialist)", included: true },
       { text: "Analytics Dashboard", included: true },
       { text: "Priority Email Support", included: true },
     ],
@@ -116,6 +119,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp, Telegram, Discord", included: true },
       { text: "Agentic AI Features", included: true },
+      { text: "Orchestrator Multi-Agent + Custom Specialist", included: true },
       { text: "Advanced Analytics", included: true },
       { text: "Priority Support", included: true },
     ],
@@ -138,6 +142,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Web Widget (Custom Branding)", included: true },
       { text: "Semua Multi-channel", included: true },
       { text: "Agentic AI Features", included: true },
+      { text: "Orchestrator Multi-Agent + Custom Specialist Unlimited", included: true },
       { text: "Advanced Analytics", included: true },
       { text: "Priority Support + WhatsApp", included: true },
     ],
@@ -230,6 +235,11 @@ const addOns = [
     description: "Setup & integrasi",
     price: "Rp 299.000",
   },
+  {
+    name: "Orchestrator Routing",
+    description: "Biaya AI classifier (~Rp 1–2/pesan) sudah termasuk dalam paket berbayar",
+    price: "Termasuk",
+  },
 ];
 
 const faqs = [
@@ -248,6 +258,14 @@ const faqs = [
   {
     question: "Apakah bisa upgrade atau downgrade paket?",
     answer: "Ya, Anda bisa upgrade kapan saja. Untuk downgrade, perubahan akan berlaku di periode billing berikutnya.",
+  },
+  {
+    question: "Apakah Orchestrator Multi-Agent menambah biaya?",
+    answer: "Orchestrator menggunakan DeepSeek sebagai model classifier AI. Biaya routing sangat kecil (~$0.0001 per pesan atau sekitar Rp 1–2/pesan) dan sudah termasuk dalam semua paket berlangganan berbayar. Free Trial tidak mendukung fitur Orchestrator.",
+  },
+  {
+    question: "Apa perbedaan Orchestrator Multi-Agent dengan Orkestrator (Big Idea) di hierarki?",
+    answer: "Dua hal berbeda: (1) Orkestrator/Big Idea di hierarki = chatbot hub level 3 yang mengarahkan user ke chatbot spesialis lain melalui percakapan. (2) Orchestrator Multi-Agent = sistem routing otomatis di DALAM satu chatbot yang mendeteksi topik pesan dan memilih specialist agent yang tepat untuk menjawab — semuanya transparan dan mulus tanpa perpindahan chatbot.",
   },
   {
     question: "Bagaimana dengan keamanan data?",

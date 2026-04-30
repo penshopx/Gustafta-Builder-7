@@ -35,6 +35,8 @@ All landing pages: sticky topbar with breadcrumb + open button, testimonials, FA
 
 Core features include a RAG toggle for controlling knowledge base lookups, "Project Context" for personalizing conversations, and a "User Memory System" for recalling facts across sessions. Monetization is handled via per-Modul bundle pricing and per-Chatbot individual pricing, with guest message limits, trial periods, and a voucher system. A "Conversion Layer" transforms chatbots into revenue engines through lead capture, scoring, and smart CTA triggers.
 
+**Orchestrator Multi-Agent** is a built-in specialist routing system within each chatbot. When enabled (via Agentic AI panel), each user message is classified by DeepSeek (~$0.0001/call, 5-min in-memory cache) and routed to the most relevant specialist agent. 7 built-in specialists: Tender & Pengadaan, SKK/SBU, Dokumen Teknis, Hukum & Kontrak, K3 & SMKK, Marketing, Umum. Users can add unlimited custom specialists (stored in `orchestratorConfig` JSONB per agent). The routing model defaults to `deepseek-chat`. Orchestrator is included in all paid subscription tiers; not available on Free Trial. Config: `orchestratorConfig: { enabled, routingModel, specialists: Record<string, {name, prompt, enabled, icon?}> }` stored in both `server/db/schema.ts` and `shared/schema.ts` agents table. Routing logic lives in `server/routes.ts` (`classifyIntentLite()` + `SPECIALIST_DEFAULTS` + `intentCache` Map). UI in `client/src/components/panels/agentic-ai-panel.tsx`.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
