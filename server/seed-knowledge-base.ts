@@ -619,7 +619,7 @@ Orchestrator (DeepSeek Classifier) → ~$0.0001/call
 
 ### 5.18 ADMIN PANEL (untuk Pemilik Platform)
 
-**Admin Panel** dapat diakses di `/admin` — hanya untuk administrator Gustafta yang ditetapkan.
+**Admin Panel** dapat diakses di \`/admin\` — hanya untuk administrator Gustafta yang ditetapkan.
 
 **Fitur Admin Panel:**
 

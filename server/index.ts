@@ -20,6 +20,140 @@ import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerAudioRoutes } from "./replit_integrations/audio";
 import { storage } from "./storage";
 
+import * as M_knowledgeBase from "./seed-knowledge-base";
+import * as M_regulasi from "./seed-regulasi";
+import * as M_asesor from "./seed-asesor";
+import * as M_asesorLspExtra from "./seed-asesor-lsp-extra";
+import * as M_smapPancek from "./seed-smap-pancek";
+import * as M_odoo from "./seed-odoo";
+import * as M_csmsOptia from "./seed-csms-optia";
+import * as M_civilpro from "./seed-civilpro";
+import * as M_sipPjbu from "./seed-sip-pjbu";
+import * as M_manajemenLsbu from "./seed-manajemen-lsbu";
+import * as M_manajemenLsp from "./seed-manajemen-lsp";
+import * as M_iso14001 from "./seed-iso14001";
+import * as M_iso9001 from "./seed-iso9001";
+import * as M_siapUkom from "./seed-siap-ukom";
+import * as M_kompetensiTeknis from "./seed-kompetensi-teknis";
+import * as M_aspekindo from "./seed-aspekindo";
+import * as M_skkAjj from "./seed-skk-ajj";
+import * as M_ajjNirkertas from "./seed-ajj-nirkertas";
+import * as M_ajjNirkertasExtra from "./seed-ajj-nirkertas-extra";
+import * as M_skkHardcopy from "./seed-skk-hardcopy";
+import * as M_skkHardcopyExtra from "./seed-skk-hardcopy-extra";
+import * as M_askomKonstruksi from "./seed-askom-konstruksi";
+import * as M_askomKonstruksiExtra from "./seed-askom-konstruksi-extra";
+import * as M_lisensiLsp from "./seed-lisensi-lsp";
+import * as M_lisensiLspExtra from "./seed-lisensi-lsp-extra";
+import * as M_konsultanLisensiLsp from "./seed-konsultan-lisensi-lsp";
+import * as M_akreditasiKan from "./seed-akreditasi-kan";
+import * as M_akreditasiKanExtra from "./seed-akreditasi-kan-extra";
+import * as M_smapIso37001 from "./seed-smap-iso37001";
+import * as M_pancekKpk from "./seed-pancek-kpk";
+import * as M_odooBujk from "./seed-odoo-bujk";
+import * as M_odooMigrasi from "./seed-odoo-migrasi";
+import * as M_kompetensiManajerialBujk from "./seed-kompetensi-manajerial-bujk";
+import * as M_kompetensiManajerialPatch from "./seed-kompetensi-manajerial-patch";
+import * as M_imsSmk3Terintegrasi from "./seed-ims-smk3-terintegrasi";
+import * as M_personelManajerialBujk from "./seed-personel-manajerial-bujk";
+import * as M_tenderKonstruksiPbjp from "./seed-tender-konstruksi-pbjp";
+import * as M_pascaTenderManajemenKontrak from "./seed-pasca-tender-manajemen-kontrak";
+import * as M_pelaksanaanProyekLapangan from "./seed-pelaksanaan-proyek-lapangan";
+import * as M_legalitasJasaKonstruksi from "./seed-legalitas-jasa-konstruksi";
+import * as M_regulasiJasaKonstruksi from "./seed-regulasi-jasa-konstruksi";
+import * as M_sbuCoach from "./seed-sbu-coach";
+import * as M_sbuMaster from "./seed-sbu-master";
+import * as M_sbuTerintegrasi from "./seed-sbu-terintegrasi";
+import * as M_skkManajemenPelaksanaan from "./seed-skk-manajemen-pelaksanaan";
+import * as M_skkMekanikal from "./seed-skk-mekanikal";
+import * as M_skkSipil from "./seed-skk-sipil";
+import * as M_skkElektrikal from "./seed-skk-elektrikal";
+import * as M_skkArsitektur from "./seed-skk-arsitektur";
+import * as M_skkTataLingkungan from "./seed-skk-tata-lingkungan";
+import * as M_skkK3Konstruksi from "./seed-skk-k3-konstruksi";
+import * as M_skkManajemenProyek from "./seed-skk-manajemen-proyek";
+import * as M_skkGeoteknik from "./seed-skk-geoteknik";
+import * as M_skkPengujianQc from "./seed-skk-pengujian-qc";
+import * as M_skkBangunanGedung from "./seed-skk-bangunan-gedung";
+import * as M_skkKonstruksiKhusus from "./seed-skk-konstruksi-khusus";
+import * as M_skkPeralatanLogistik from "./seed-skk-peralatan-logistik";
+import * as M_sbuPenunjangListrik from "./seed-sbu-penunjang-listrik";
+import * as M_sktkTenagaListrik from "./seed-sktk-tenaga-listrik";
+import * as M_sbuKompetensiMigasEbtTambang from "./seed-sbu-kompetensi-migas-ebt-tambang";
+import * as M_developerRealEstate from "./seed-developer-real-estate";
+import * as M_layananRealEstate from "./seed-layanan-real-estate";
+import * as M_pusatFaqPeserta from "./seed-pusat-faq-peserta";
+import * as M_fixOrchestrators from "./fix-orchestrators";
+import * as M_inaprocScraper from "./lib/inaproc-scraper";
+
+const seedModuleRegistry: Record<string, any> = {
+  "./seed-knowledge-base": M_knowledgeBase,
+  "./seed-regulasi": M_regulasi,
+  "./seed-asesor": M_asesor,
+  "./seed-asesor-lsp-extra": M_asesorLspExtra,
+  "./seed-smap-pancek": M_smapPancek,
+  "./seed-odoo": M_odoo,
+  "./seed-csms-optia": M_csmsOptia,
+  "./seed-civilpro": M_civilpro,
+  "./seed-sip-pjbu": M_sipPjbu,
+  "./seed-manajemen-lsbu": M_manajemenLsbu,
+  "./seed-manajemen-lsp": M_manajemenLsp,
+  "./seed-iso14001": M_iso14001,
+  "./seed-iso9001": M_iso9001,
+  "./seed-siap-ukom": M_siapUkom,
+  "./seed-kompetensi-teknis": M_kompetensiTeknis,
+  "./seed-aspekindo": M_aspekindo,
+  "./seed-skk-ajj": M_skkAjj,
+  "./seed-ajj-nirkertas": M_ajjNirkertas,
+  "./seed-ajj-nirkertas-extra": M_ajjNirkertasExtra,
+  "./seed-skk-hardcopy": M_skkHardcopy,
+  "./seed-skk-hardcopy-extra": M_skkHardcopyExtra,
+  "./seed-askom-konstruksi": M_askomKonstruksi,
+  "./seed-askom-konstruksi-extra": M_askomKonstruksiExtra,
+  "./seed-lisensi-lsp": M_lisensiLsp,
+  "./seed-lisensi-lsp-extra": M_lisensiLspExtra,
+  "./seed-konsultan-lisensi-lsp": M_konsultanLisensiLsp,
+  "./seed-akreditasi-kan": M_akreditasiKan,
+  "./seed-akreditasi-kan-extra": M_akreditasiKanExtra,
+  "./seed-smap-iso37001": M_smapIso37001,
+  "./seed-pancek-kpk": M_pancekKpk,
+  "./seed-odoo-bujk": M_odooBujk,
+  "./seed-odoo-migrasi": M_odooMigrasi,
+  "./seed-kompetensi-manajerial-bujk": M_kompetensiManajerialBujk,
+  "./seed-kompetensi-manajerial-patch": M_kompetensiManajerialPatch,
+  "./seed-ims-smk3-terintegrasi": M_imsSmk3Terintegrasi,
+  "./seed-personel-manajerial-bujk": M_personelManajerialBujk,
+  "./seed-tender-konstruksi-pbjp": M_tenderKonstruksiPbjp,
+  "./seed-pasca-tender-manajemen-kontrak": M_pascaTenderManajemenKontrak,
+  "./seed-pelaksanaan-proyek-lapangan": M_pelaksanaanProyekLapangan,
+  "./seed-legalitas-jasa-konstruksi": M_legalitasJasaKonstruksi,
+  "./seed-regulasi-jasa-konstruksi": M_regulasiJasaKonstruksi,
+  "./seed-sbu-coach": M_sbuCoach,
+  "./seed-sbu-master": M_sbuMaster,
+  "./seed-sbu-terintegrasi": M_sbuTerintegrasi,
+  "./seed-skk-manajemen-pelaksanaan": M_skkManajemenPelaksanaan,
+  "./seed-skk-mekanikal": M_skkMekanikal,
+  "./seed-skk-sipil": M_skkSipil,
+  "./seed-skk-elektrikal": M_skkElektrikal,
+  "./seed-skk-arsitektur": M_skkArsitektur,
+  "./seed-skk-tata-lingkungan": M_skkTataLingkungan,
+  "./seed-skk-k3-konstruksi": M_skkK3Konstruksi,
+  "./seed-skk-manajemen-proyek": M_skkManajemenProyek,
+  "./seed-skk-geoteknik": M_skkGeoteknik,
+  "./seed-skk-pengujian-qc": M_skkPengujianQc,
+  "./seed-skk-bangunan-gedung": M_skkBangunanGedung,
+  "./seed-skk-konstruksi-khusus": M_skkKonstruksiKhusus,
+  "./seed-skk-peralatan-logistik": M_skkPeralatanLogistik,
+  "./seed-sbu-penunjang-listrik": M_sbuPenunjangListrik,
+  "./seed-sktk-tenaga-listrik": M_sktkTenagaListrik,
+  "./seed-sbu-kompetensi-migas-ebt-tambang": M_sbuKompetensiMigasEbtTambang,
+  "./seed-developer-real-estate": M_developerRealEstate,
+  "./seed-layanan-real-estate": M_layananRealEstate,
+  "./seed-pusat-faq-peserta": M_pusatFaqPeserta,
+  "./fix-orchestrators": M_fixOrchestrators,
+  "./lib/inaproc-scraper": M_inaprocScraper,
+};
+
 // Push DB schema on startup in production (build time has no DB access)
 if (process.env.NODE_ENV === "production") {
   try {
@@ -181,7 +315,7 @@ for (const envVar of requiredEnvVars) {
       // Legalitas) hanya menyentuh data seri-nya sendiri — tidak menghapus chatbot user.
       {
         try {
-          const { gustaftaKnowledgeBaseAgent, dokumentenderAgent } = await import("./seed-knowledge-base");
+          const { gustaftaKnowledgeBaseAgent, dokumentenderAgent } = M_knowledgeBase;
           const existingAgents = await storage.getAgents();
           
           const helpdeskExists = existingAgents.some(
@@ -298,7 +432,8 @@ for (const envVar of requiredEnvVars) {
 
         for (const seed of seedTasks) {
           try {
-            const mod = await import(seed.module);
+            const mod = seedModuleRegistry[seed.module];
+            if (!mod) throw new Error(`Module ${seed.module} not registered in seedModuleRegistry`);
             await mod[seed.fn]("49465846");
           } catch (err) {
             log(`Failed to seed ${seed.name} ecosystem: ` + (err as Error).message);
@@ -306,7 +441,7 @@ for (const envVar of requiredEnvVars) {
         }
 
         try {
-          const { fixOrphanedOrchestrators } = await import("./fix-orchestrators");
+          const { fixOrphanedOrchestrators } = M_fixOrchestrators;
           await fixOrphanedOrchestrators();
         } catch (err) {
           log("Failed to fix orphaned orchestrators: " + (err as Error).message);
@@ -322,7 +457,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Pusat FAQ Peserta (TIDAK ada di seedTasks — TAHAN)
       try {
-        const { seedPusatFaqPeserta } = await import("./seed-pusat-faq-peserta");
+        const { seedPusatFaqPeserta } = M_pusatFaqPeserta;
         await seedPusatFaqPeserta("49465846");
       } catch (err) {
         log("Catch-up Pusat FAQ seed error: " + (err as Error).message);
@@ -330,7 +465,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)
       try {
-        const { seedKompetensiManajerialBujk } = await import("./seed-kompetensi-manajerial-bujk");
+        const { seedKompetensiManajerialBujk } = M_kompetensiManajerialBujk;
         const allSeries = await storage.getSeries();
         const kmSeries = allSeries.find((s: any) => s.slug === "kompetensi-manajerial-bujk");
         if (!kmSeries) {
@@ -343,7 +478,7 @@ for (const envVar of requiredEnvVars) {
 
       // Patch: Kompetensi Manajerial BUJK — tambah SIKaP, Analisis Keuangan, Compliance Tender
       try {
-        const { patchKompetensiManajerialBujk } = await import("./seed-kompetensi-manajerial-patch");
+        const { patchKompetensiManajerialBujk } = M_kompetensiManajerialPatch;
         await patchKompetensiManajerialBujk("49465846");
       } catch (err) {
         log("Patch Kompetensi Manajerial error: " + (err as Error).message);
@@ -351,7 +486,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: IMS & SMK3 Terintegrasi (added Apr 2026)
       try {
-        const { seedImsSmk3Terintegrasi } = await import("./seed-ims-smk3-terintegrasi");
+        const { seedImsSmk3Terintegrasi } = M_imsSmk3Terintegrasi;
         const allSeries = await storage.getSeries();
         const imsSeries = allSeries.find((s: any) => s.slug === "ims-smk3-terintegrasi");
         if (!imsSeries) {
@@ -364,7 +499,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Personel Manajerial BUJK (added Apr 2026)
       try {
-        const { seedPersonelManajerialBujk } = await import("./seed-personel-manajerial-bujk");
+        const { seedPersonelManajerialBujk } = M_personelManajerialBujk;
         const allSeries = await storage.getSeries();
         const pmSeries = allSeries.find((s: any) => s.slug === "personel-manajerial-bujk");
         if (!pmSeries) {
@@ -377,7 +512,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Tender Konstruksi & PBJP (added Apr 2026)
       try {
-        const { seedTenderKonstruksiPbjp } = await import("./seed-tender-konstruksi-pbjp");
+        const { seedTenderKonstruksiPbjp } = M_tenderKonstruksiPbjp;
         const allSeries = await storage.getSeries();
         const tenderSeries = allSeries.find((s: any) => s.slug === "tender-konstruksi-pbjp");
         if (!tenderSeries) {
@@ -390,7 +525,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Pasca Tender & Manajemen Kontrak (added Apr 2026)
       try {
-        const { seedPascaTenderManajemenKontrak } = await import("./seed-pasca-tender-manajemen-kontrak");
+        const { seedPascaTenderManajemenKontrak } = M_pascaTenderManajemenKontrak;
         const allSeries = await storage.getSeries();
         const pascaSeries = allSeries.find((s: any) => s.slug === "pasca-tender-manajemen-kontrak");
         if (!pascaSeries) {
@@ -403,7 +538,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Pelaksanaan Proyek Lapangan (added Apr 2026)
       try {
-        const { seedPelaksanaanProyekLapangan } = await import("./seed-pelaksanaan-proyek-lapangan");
+        const { seedPelaksanaanProyekLapangan } = M_pelaksanaanProyekLapangan;
         const allSeries = await storage.getSeries();
         const pelaksanaanSeries = allSeries.find((s: any) => s.slug === "pelaksanaan-proyek-lapangan");
         if (!pelaksanaanSeries) {
@@ -416,7 +551,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Legalitas Jasa Konstruksi (added Apr 2026)
       try {
-        const { seedLegalitasJasaKonstruksi } = await import("./seed-legalitas-jasa-konstruksi");
+        const { seedLegalitasJasaKonstruksi } = M_legalitasJasaKonstruksi;
         const allSeries = await storage.getSeries();
         const legalSeries = allSeries.find((s: any) => s.slug === "legalitas-jasa-konstruksi");
         if (!legalSeries) {
@@ -429,7 +564,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: Ringkasan Regulasi Konstruksi Indonesia 2025 (added Apr 2026)
       try {
-        const { seedRegulasiJasaKonstruksi } = await import("./seed-regulasi-jasa-konstruksi");
+        const { seedRegulasiJasaKonstruksi } = M_regulasiJasaKonstruksi;
         const allSeries = await storage.getSeries();
         const regulasiSeries = allSeries.find((s: any) => s.slug === "ringkasan-regulasi-konstruksi-2025");
         if (!regulasiSeries) {
@@ -442,7 +577,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SBU Coach Pekerjaan Konstruksi & Konsultan (added Apr 2026)
       try {
-        const { seedSbuCoach } = await import("./seed-sbu-coach");
+        const { seedSbuCoach } = M_sbuCoach;
         const allSeries = await storage.getSeries();
         const sbuCoachSeries = allSeries.find((s: any) => s.slug === "sbu-coach-pekerjaan-konstruksi");
         if (!sbuCoachSeries) {
@@ -455,7 +590,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SBU Master Coach All-in-One (added Apr 2026)
       try {
-        const { seedSbuMaster } = await import("./seed-sbu-master");
+        const { seedSbuMaster } = M_sbuMaster;
         const allSeries = await storage.getSeries();
         const sbuMasterSeries = allSeries.find((s: any) => s.slug === "sbu-master-coach");
         if (!sbuMasterSeries) {
@@ -468,7 +603,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SBU Terintegrasi Coach (added Apr 2026)
       try {
-        const { seedSbuTerintegrasi } = await import("./seed-sbu-terintegrasi");
+        const { seedSbuTerintegrasi } = M_sbuTerintegrasi;
         const allSeries = await storage.getSeries();
         const sbuTerintSeries = allSeries.find((s: any) => s.slug === "sbu-terintegrasi-coach");
         if (!sbuTerintSeries) {
@@ -481,7 +616,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Manajemen Pelaksanaan (added Apr 2026)
       try {
-        const { seedSkkManajemenPelaksanaan } = await import("./seed-skk-manajemen-pelaksanaan");
+        const { seedSkkManajemenPelaksanaan } = M_skkManajemenPelaksanaan;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-manajemen-pelaksanaan");
         if (!s) {
@@ -494,7 +629,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Mekanikal (added Apr 2026)
       try {
-        const { seedSkkMekanikal } = await import("./seed-skk-mekanikal");
+        const { seedSkkMekanikal } = M_skkMekanikal;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-mekanikal");
         if (!s) {
@@ -507,7 +642,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Sipil (added Apr 2026)
       try {
-        const { seedSkkSipil } = await import("./seed-skk-sipil");
+        const { seedSkkSipil } = M_skkSipil;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-sipil");
         if (!s) {
@@ -520,7 +655,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Elektrikal (added Apr 2026)
       try {
-        const { seedSkkElektrikal } = await import("./seed-skk-elektrikal");
+        const { seedSkkElektrikal } = M_skkElektrikal;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-elektrikal");
         if (!s) {
@@ -533,7 +668,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Arsitektur (added Apr 2026)
       try {
-        const { seedSkkArsitektur } = await import("./seed-skk-arsitektur");
+        const { seedSkkArsitektur } = M_skkArsitektur;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-arsitektur");
         if (!s) {
@@ -546,7 +681,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Tata Lingkungan (added Apr 2026)
       try {
-        const { seedSkkTataLingkungan } = await import("./seed-skk-tata-lingkungan");
+        const { seedSkkTataLingkungan } = M_skkTataLingkungan;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-tata-lingkungan");
         if (!s) {
@@ -559,7 +694,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach K3 Konstruksi (added Apr 2026)
       try {
-        const { seedSkkK3Konstruksi } = await import("./seed-skk-k3-konstruksi");
+        const { seedSkkK3Konstruksi } = M_skkK3Konstruksi;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-k3-konstruksi");
         if (!s) {
@@ -572,7 +707,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Manajemen Proyek (added Apr 2026)
       try {
-        const { seedSkkManajemenProyek } = await import("./seed-skk-manajemen-proyek");
+        const { seedSkkManajemenProyek } = M_skkManajemenProyek;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-manajemen-proyek");
         if (!s) {
@@ -585,7 +720,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Geoteknik & Geodesi (added Apr 2026)
       try {
-        const { seedSkkGeoteknik } = await import("./seed-skk-geoteknik");
+        const { seedSkkGeoteknik } = M_skkGeoteknik;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-geoteknik");
         if (!s) {
@@ -598,7 +733,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Pengujian & QC Konstruksi (added Apr 2026)
       try {
-        const { seedSkkPengujianQc } = await import("./seed-skk-pengujian-qc");
+        const { seedSkkPengujianQc } = M_skkPengujianQc;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-pengujian-qc");
         if (!s) {
@@ -611,7 +746,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Bangunan Gedung & Utilitas (added Apr 2026)
       try {
-        const { seedSkkBangunanGedung } = await import("./seed-skk-bangunan-gedung");
+        const { seedSkkBangunanGedung } = M_skkBangunanGedung;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-bangunan-gedung");
         if (!s) {
@@ -624,7 +759,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Konstruksi Khusus (added Apr 2026)
       try {
-        const { seedSkkKonstruksiKhusus } = await import("./seed-skk-konstruksi-khusus");
+        const { seedSkkKonstruksiKhusus } = M_skkKonstruksiKhusus;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-konstruksi-khusus");
         if (!s) {
@@ -637,7 +772,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKK Coach Peralatan Konstruksi & Logistik (added Apr 2026)
       try {
-        const { seedSkkPeralatanLogistik } = await import("./seed-skk-peralatan-logistik");
+        const { seedSkkPeralatanLogistik } = M_skkPeralatanLogistik;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "skk-peralatan-logistik");
         if (!s) {
@@ -650,7 +785,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SBU Penunjang Tenaga Listrik (added Apr 2026)
       try {
-        const { seedSbuPenunjangListrik } = await import("./seed-sbu-penunjang-listrik");
+        const { seedSbuPenunjangListrik } = M_sbuPenunjangListrik;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "sbu-penunjang-listrik");
         if (!s) {
@@ -663,7 +798,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SKTK Tenaga Teknik Ketenagalistrikan (added Apr 2026)
       try {
-        const { seedSktkTenagaListrik } = await import("./seed-sktk-tenaga-listrik");
+        const { seedSktkTenagaListrik } = M_sktkTenagaListrik;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "sktk-tenaga-listrik");
         if (!s) {
@@ -676,7 +811,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: SBU Kompetensi Migas, EBT, dan Pertambangan (added Apr 2026)
       try {
-        const { seedSbuKompetensiMigasEbtTambang } = await import("./seed-sbu-kompetensi-migas-ebt-tambang");
+        const { seedSbuKompetensiMigasEbtTambang } = M_sbuKompetensiMigasEbtTambang;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "sbu-kompetensi-migas-ebt-tambang");
         if (!s) {
@@ -689,7 +824,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: DevProperti Pro — Developer Real Estate (added Apr 2026)
       try {
-        const { seedDeveloperRealEstate } = await import("./seed-developer-real-estate");
+        const { seedDeveloperRealEstate } = M_developerRealEstate;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "developer-real-estate");
         if (!s) {
@@ -702,7 +837,7 @@ for (const envVar of requiredEnvVars) {
 
       // Catch-up: EstateCare Pro — Layanan Real Estate (added Apr 2026)
       try {
-        const { seedLayananRealEstate } = await import("./seed-layanan-real-estate");
+        const { seedLayananRealEstate } = M_layananRealEstate;
         const allSeries = await storage.getSeries();
         const s = allSeries.find((x: any) => x.slug === "layanan-real-estate");
         if (!s) {
@@ -806,7 +941,7 @@ function startScheduler() {
 
   setInterval(async () => {
     try {
-      const { runDailyTenderScrape } = await import("./lib/inaproc-scraper");
+      const { runDailyTenderScrape } = M_inaprocScraper;
       await runDailyTenderScrape(storage);
     } catch (err) {
       log(`[Scheduler] Tender scrape error: ${(err as Error).message}`);
