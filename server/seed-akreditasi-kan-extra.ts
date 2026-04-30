@@ -98,7 +98,7 @@ export async function seedAkreditasiKanExtra(userId: string) {
 LSP siap mengajukan akreditasi KAN bila:
 - Sistem mutu (Manual + 9 SOP P-01..P-09) sudah terdokumentasi dan diimplementasikan minimal **3-6 bulan** (ada bukti rekaman: audit internal, tinjauan manajemen, sertifikasi nyata).
 - Telah menjalankan **minimal 1 siklus sertifikasi** untuk setiap skema yang akan diakreditasi (ada peserta riil, ada keputusan kompeten/belum kompeten, ada rekaman lengkap).
-- Telah melakukan **audit internal lengkap** (semua klausul ISO/IEC 17024:2012 (seluruh klausul persyaratan)) dan **tinjauan manajemen** dengan tindak lanjut.
+- Telah melakukan **audit internal lengkap** (seluruh klausul persyaratan ISO/IEC 17024:2012) dan **tinjauan manajemen** dengan tindak lanjut.
 - Memiliki bukti **kebijakan ketidakberpihakan** (impartiality) yang dijalankan: register risiko, deklarasi COI, analisis risiko ketidakberpihakan oleh Komite Ketidakberpihakan.
 - (Opsional tapi sangat dianjurkan) Pre-assessment / mock audit oleh konsultan eksternal yang memahami KAN.
 
@@ -581,7 +581,7 @@ GAYA: Strategis & antisipatif; tegaskan disiplin tepat waktu; gunakan tabel time
 ═══════════════════════════════════════════════════
 Sebelum mengajukan extension untuk skema baru, LSP **harus** punya:
 1. **Komite Skema** yang sudah membahas & menetapkan skema baru (rapat formal, notulensi, SK).
-2. **Dokumen Skema Sertifikasi** lengkap (sesuai ISO/IEC 17024:2012 (klausul skema sertifikasi)): unit kompetensi acuan, persyaratan sertifikasi, metode asesmen, kriteria keputusan, durasi sertifikat, persyaratan resertifikasi.
+2. **Dokumen Skema Sertifikasi** lengkap — sesuai ISO/IEC 17024:2012 klausul skema sertifikasi: unit kompetensi acuan, persyaratan sertifikasi, metode asesmen, kriteria keputusan, durasi sertifikat, persyaratan resertifikasi.
 3. **Asesor terlatih** untuk skema baru — minimal sesuai jumlah yang ditetapkan SOP LSP (tipikal min 3, sertifikat MA/MAK valid, kompetensi teknis terverifikasi).
 4. **MUK (Materi Uji Kompetensi)** valid: portofolio + tertulis + observasi/wawancara — tervalidasi.
 5. **TUK siap** untuk skema baru (sarana, peralatan, bahan habis pakai bila perlu).
@@ -772,7 +772,7 @@ Pihak ketiga (asesi, klien LSP, masyarakat, pesaing) dapat mengajukan pengaduan 
 
 **Alur pengaduan**:
 1. KAN menerima pengaduan via portal/email resmi.
-2. KAN meneruskan ke LSP untuk **klarifikasi & investigasi internal** (LSP punya prosedur penanganan pengaduan tersendiri sesuai ISO/IEC 17024:2012 (klausul penanganan keluhan)).
+2. KAN meneruskan ke LSP untuk **klarifikasi & investigasi internal** (LSP punya prosedur penanganan pengaduan tersendiri sesuai ISO/IEC 17024:2012 — klausul penanganan keluhan).
 3. Bila pengaduan **kredibel & substansial**, KAN dapat melakukan **Special Assessment** (asesmen ad-hoc fokus area pengaduan).
 4. Bila terbukti, picu temuan → CAP → potensi sanksi.
 
