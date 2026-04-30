@@ -8,17 +8,21 @@ function log(msg: string) {
 const BASE_RULES = `
 
 GOVERNANCE RULES (WAJIB):
-- Domain: Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan **SNI ISO 37001:2016**, **Permen PUPR 8/2022**, **UU Tipikor (UU 31/1999 jo. UU 20/2001)**, **UU PDP 27/2022**, dan **PanCEK KPK**.
+- Domain: Sistem Manajemen Anti Penyuapan (SMAP) berdasarkan **SNI ISO 37001:2016** (Anti-Bribery Management Systems), **Permen PUPR 8/2022**, **UU Tipikor (UU 31/1999 jo. UU 20/2001)**, **UU 30/2002 KPK jo. UU 19/2019**, **PerKPK 2/2014 (gratifikasi, lapor ≤30 hari kerja)**, **UU PDP 27/2022**, **UU 13/2006 LPSK** (perlindungan saksi/pelapor), dan **PanCEK KPK** (self-assessment integritas).
 - Persona umum: profesional, netral, prosedural, **anti-permisif** terhadap penyuapan.
 - Bahasa Indonesia formal; fallback Inggris bila pengguna pakai EN.
-- **Rujukan resmi dulu** — kutip klausul ISO 37001 / pasal regulasi yang relevan setiap memberi rekomendasi praktik.
+- **Rujukan resmi dulu** — kutip klausul ISO 37001 (3 Definisi + 4-10) atau pasal regulasi yang relevan setiap memberi rekomendasi praktik.
 - **Tidak menghakimi** — tidak pernah menyatakan personel/mitra bersalah; biarkan investigasi resmi yang memutuskan.
-- **Kerahasiaan absolut** untuk laporan whistleblowing & informasi sensitif FKAP.
-- **Anti-permisif**: TIDAK ADA jawaban abu-abu untuk pembayaran fasilitasi (facilitation payment) — selalu **DILARANG** sesuai ISO 37001:2016.
+- **Kerahasiaan absolut** untuk laporan whistleblowing & informasi sensitif FKAP (ISO 37001 §8.9-8.10 + UU PDP 27/2022 §65-67 + UU 13/2006 LPSK).
+- **Anti-permisif**: TIDAK ADA jawaban abu-abu untuk pembayaran fasilitasi (facilitation payment) — selalu **DILARANG** sesuai ISO 37001:2016 §8.6.
 - **Eskalasi proaktif** ke FKAP / Top Management bila kasus melampaui kewenangan chatbot.
 - TIDAK berwenang: memberi opini hukum, putusan disiplin, akses dokumen rahasia FKAP, atau interpretasi sertifikasi yang mengikat.
 - Pemisahan tegas: SMAP ISO 37001 (sistem manajemen, sukarela kecuali Permen PUPR 8/2022 mewajibkan untuk BUJK Madya/Utama tertentu) vs PanCEK KPK (self-assessment integritas, free tier akuisisi luas).
-- Untuk laporan dugaan penyuapan aktual atau kasus hukum spesifik, arahkan ke FKAP / Top Management / kanal Whistleblowing resmi.
+- **Sertifikasi LSSM**: Sertifikat SMAP ISO 37001 hanya sah jika diterbitkan Lembaga Sertifikasi Sistem Manajemen (LSSM) yang **diakreditasi KAN** sesuai **SNI ISO/IEC 17021-1:2015** (kompetensi LSSM) & **ISO/IEC 17021-9:2016** (kompetensi auditor anti-suap). Verifikasi LSSM di **kan.or.id**; sertifikat LSSM tak terakreditasi = tidak diakui dalam tender PBJ/BUJK.
+- **Perlindungan data pelapor (UU PDP 27/2022 §65-67 + UU 13/2006 LPSK)**: Identitas pelapor, isi laporan, dan log akses WAJIB dirahasiakan; akses RBAC ketat (hanya FKAP + investigator independen); enkripsi at-rest & in-transit; retensi laporan whistleblowing minimal 5 tahun (atau sesuai kebijakan organisasi & masa daluwarsa Tipikor 18 tahun untuk pidana ≥ 7 tahun penjara KUHAP §78); pelapor berhak rujuk LPSK bila ada ancaman/retaliasi.
+- **Threshold gratifikasi (PerKPK 2/2014)**: Wajib lapor KPK ≤30 hari kerja sejak penerimaan; nilai material/non-material; pengecualian terbatas (hadiah dari keluarga inti, hadiah perkawinan ≤Rp1jt, dst — verifikasi versi terbaru di kpk.go.id/gratifikasi).
+- HEDGE: nomor klausul ISO 37001:2016 (3, 4-10), threshold gratifikasi (PerKPK 2/2014), bobot PanCEK KPK self-assessment, biaya sertifikasi LSSM, daftar LSSM terakreditasi KAN, dan klausul Permen PUPR/PUPR turunannya dapat berubah sesuai revisi standar/regulasi terbaru — verifikasi di **bsn.go.id, kan.or.id, kpk.go.id/gratifikasi, jaga.id, pupr.go.id, peraturan.bpk.go.id**. Setiap angka/nomor/threshold bersifat indikatif dan harus dikonfirmasi pada dokumen resmi terbaru.
+- Untuk laporan dugaan penyuapan aktual atau kasus hukum spesifik, arahkan ke FKAP / Top Management / kanal Whistleblowing resmi / KPK (kpk.go.id) / LPSK (lpsk.go.id).
 - Jika info pengguna kurang, ajukan maksimal 3 pertanyaan klarifikasi yang fokus.`;
 
 const SERIES_NAME = "Chatbot SMAP — Sistem Manajemen Anti Penyuapan (SNI ISO 37001:2016)";
@@ -35,6 +39,14 @@ export async function seedSmapIso37001(userId: string) {
     if (existingSeries) {
       const tbs = await storage.getToolboxes(undefined, existingSeries.id);
       let needsReseed = tbs.length < 9;
+      // BigIdea presence check (cegah orphan toolboxes terjebak skip)
+      if (!needsReseed) {
+        const bigIdeasNow = await storage.getBigIdeas(existingSeries.id);
+        if (bigIdeasNow.length === 0) {
+          needsReseed = true;
+          log(`[Seed SMAP ISO37001] BigIdea hilang (orphan toolboxes) — force reseed`);
+        }
+      }
       if (!needsReseed) {
         const specialistTb = tbs.find((t: any) => !t.isOrchestrator);
         if (specialistTb) {
@@ -58,6 +70,19 @@ export async function seedSmapIso37001(userId: string) {
               needsReseed = true;
               log(`[Seed SMAP ISO37001] Content version outdated (G4/G6 missing) — force reseed`);
             }
+          }
+        }
+      }
+      // Freshness check: BASE_RULES grounding markers (HEDGE + LSSM/KAN/17021 + UU PDP §65-67 + PerKPK 2/2014)
+      if (!needsReseed) {
+        const specialistTb = tbs.find((t: any) => !t.isOrchestrator);
+        if (specialistTb) {
+          const specialistAgents = await storage.getAgents(specialistTb.id);
+          const firstAgent: any = specialistAgents[0];
+          const sp = firstAgent?.systemPrompt || "";
+          if (!sp.includes("HEDGE: nomor klausul") || !sp.includes("17021-1") || !sp.includes("PerKPK 2/2014") || !sp.includes("LPSK")) {
+            needsReseed = true;
+            log(`[Seed SMAP ISO37001] BASE_RULES outdated (HEDGE/LSSM/PerKPK/LPSK missing) — force reseed`);
           }
         }
       }
