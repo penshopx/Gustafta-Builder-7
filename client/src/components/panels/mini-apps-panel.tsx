@@ -609,6 +609,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<MiniApp | null>(null);
   const [viewingApp, setViewingApp] = useState<MiniApp | null>(null);
+  const [detailUrlCopied, setDetailUrlCopied] = useState(false);
   const [runInput, setRunInput] = useState<Record<string, any>>({});
 
   const [newApp, setNewApp] = useState({
@@ -705,6 +706,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
     setViewingApp(app);
     setRunInput({});
     setAiAnalysisResult(null);
+    setDetailUrlCopied(false);
     setDetailDialogOpen(true);
   };
 
@@ -1212,6 +1214,44 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
               {miniAppTypeLabels[viewingApp?.type as MiniAppType] || viewingApp?.type}
             </DialogDescription>
           </DialogHeader>
+          {viewingApp?.publicSlug && (
+            <div className="flex items-center gap-2 border rounded-md px-3 py-2 bg-muted/30">
+              <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
+              <Input
+                readOnly
+                value={`${window.location.origin}/mini-app/${viewingApp.publicSlug}`}
+                className="border-0 bg-transparent p-0 h-auto text-xs text-muted-foreground focus-visible:ring-0 cursor-text"
+                data-testid="input-detail-public-url"
+                onFocus={(e) => e.target.select()}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 shrink-0"
+                data-testid="button-copy-detail-public-url"
+                aria-label="Salin tautan publik"
+                title="Salin tautan publik"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/mini-app/${viewingApp.publicSlug}`);
+                  setDetailUrlCopied(true);
+                  setTimeout(() => setDetailUrlCopied(false), 2000);
+                }}
+              >
+                {detailUrlCopied ? <CheckCheck className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 shrink-0"
+                data-testid="button-open-public-page"
+                aria-label="Buka halaman publik"
+                title="Buka halaman publik"
+                onClick={() => window.open(`/mini-app/${viewingApp.publicSlug}`, "_blank")}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          )}
           {viewingApp && (
             <Tabs defaultValue="run">
               <TabsList className="w-full grid grid-cols-2">
