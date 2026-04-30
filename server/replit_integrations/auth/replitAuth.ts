@@ -176,6 +176,26 @@ async function performTokenRefresh(user: any, req: any): Promise<boolean> {
   return refreshPromise;
 }
 
+// Cache for isActive status to avoid DB calls on every request
+const activeStatusCache = new Map<string, { isActive: boolean; expiresAt: number }>();
+
+export function invalidateUserActiveCache(userId: string) {
+  activeStatusCache.delete(userId);
+}
+
+async function checkUserIsActive(userId: string): Promise<boolean> {
+  // Super-admins from env var can never be deactivated
+  const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (adminIds.includes(userId)) return true;
+
+  const cached = activeStatusCache.get(userId);
+  if (cached && cached.expiresAt > Date.now()) return cached.isActive;
+  const user = await authStorage.getUser(userId);
+  const isActive = user?.isActive !== false && user?.role !== "blocked";
+  activeStatusCache.set(userId, { isActive, expiresAt: Date.now() + 2 * 60 * 1000 });
+  return isActive;
+}
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
@@ -184,6 +204,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   if (!user.expires_at) {
+    // Check isActive even without token expiry
+    const userId = user.claims?.sub;
+    if (userId) {
+      const active = await checkUserIsActive(userId);
+      if (!active) return res.status(403).json({ message: "Akun Anda telah dinonaktifkan. Hubungi admin Gustafta." });
+    }
     return next();
   }
 
@@ -193,11 +219,23 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     if (now > user.expires_at - 60) {
       performTokenRefresh(user, req).catch(() => {});
     }
+    // Check isActive
+    const userId = user.claims?.sub;
+    if (userId) {
+      const active = await checkUserIsActive(userId);
+      if (!active) return res.status(403).json({ message: "Akun Anda telah dinonaktifkan. Hubungi admin Gustafta." });
+    }
     return next();
   }
 
   const refreshed = await performTokenRefresh(user, req);
   if (refreshed) {
+    // Check isActive after refresh
+    const userId = user.claims?.sub;
+    if (userId) {
+      const active = await checkUserIsActive(userId);
+      if (!active) return res.status(403).json({ message: "Akun Anda telah dinonaktifkan. Hubungi admin Gustafta." });
+    }
     return next();
   }
 

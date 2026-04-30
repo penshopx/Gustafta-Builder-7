@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
 import { useTemplates } from "@/hooks/use-templates";
@@ -28,7 +33,20 @@ export default function Landing() {
   const { user, isLoading, isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
   const { data: templatesData } = useTemplates();
+  const { toast } = useToast();
   const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha">("belajar");
+  const [trialForm, setTrialForm] = useState({ name: "", phone: "", email: "", company: "", useCase: "" });
+  const [trialSubmitted, setTrialSubmitted] = useState(false);
+
+  const trialMutation = useMutation({
+    mutationFn: (data: typeof trialForm) => apiRequest("POST", "/api/trial-requests", data),
+    onSuccess: () => {
+      setTrialSubmitted(true);
+      setTrialForm({ name: "", phone: "", email: "", company: "", useCase: "" });
+      toast({ title: "Permintaan trial terkirim!", description: "Tim kami akan menghubungi Anda segera via WA/Email." });
+    },
+    onError: () => toast({ title: "Gagal mengirim permintaan.", description: "Silakan coba lagi.", variant: "destructive" }),
+  });
 
   useEffect(() => {
     trackViewContent({ content_name: 'Landing Page', content_category: 'Homepage' });
@@ -412,6 +430,12 @@ export default function Landing() {
                   Lihat Paket Domain
                 </Button>
               </Link>
+              <a href="#trial" className="w-full sm:w-auto">
+                <Button size="lg" variant="ghost" className="w-full gap-2 text-lg px-8 py-6 text-muted-foreground hover:text-foreground" data-testid="button-request-trial">
+                  <FileText className="h-5 w-5" />
+                  Request Trial Gratis
+                </Button>
+              </a>
             </div>
             
             <p className="text-sm text-muted-foreground">
@@ -1004,6 +1028,111 @@ export default function Landing() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========== TRIAL REQUEST SECTION ========== */}
+      <section className="py-16 md:py-24" id="trial">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Coba Gratis</Badge>
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                Request Voucher Trial Gustafta
+              </h2>
+              <p className="text-muted-foreground">
+                Belum siap berlangganan? Ajukan permintaan trial — tim kami akan mengirimkan voucher akses gratis 14 hari via WA/Email Anda.
+              </p>
+            </div>
+
+            {trialSubmitted ? (
+              <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+                <CardContent className="pt-8 pb-8 text-center space-y-3">
+                  <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto" />
+                  <h3 className="text-xl font-bold text-green-700 dark:text-green-300">Permintaan Terkirim!</h3>
+                  <p className="text-green-600 dark:text-green-400">
+                    Tim Gustafta akan menghubungi Anda via WA/Email dalam 1x24 jam kerja dengan voucher trial Anda.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => setTrialSubmitted(false)}
+                    data-testid="button-trial-again"
+                  >
+                    Ajukan Lagi
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-primary/20 shadow-lg">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Nama Lengkap <span className="text-red-500">*</span></label>
+                      <Input
+                        placeholder="Budi Santoso"
+                        value={trialForm.name}
+                        onChange={(e) => setTrialForm(f => ({ ...f, name: e.target.value }))}
+                        data-testid="input-trial-name"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">No. HP / WhatsApp <span className="text-red-500">*</span></label>
+                      <Input
+                        placeholder="08123456789"
+                        value={trialForm.phone}
+                        onChange={(e) => setTrialForm(f => ({ ...f, phone: e.target.value }))}
+                        data-testid="input-trial-phone"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Email <span className="text-red-500">*</span></label>
+                      <Input
+                        type="email"
+                        placeholder="budi@perusahaan.com"
+                        value={trialForm.email}
+                        onChange={(e) => setTrialForm(f => ({ ...f, email: e.target.value }))}
+                        data-testid="input-trial-email"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Nama Perusahaan</label>
+                      <Input
+                        placeholder="PT Maju Konstruksi (opsional)"
+                        value={trialForm.company}
+                        onChange={(e) => setTrialForm(f => ({ ...f, company: e.target.value }))}
+                        data-testid="input-trial-company"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Kebutuhan / Use Case</label>
+                    <Textarea
+                      placeholder="Contoh: Ingin membuat chatbot untuk menjawab pertanyaan pelanggan tentang harga material bangunan..."
+                      value={trialForm.useCase}
+                      onChange={(e) => setTrialForm(f => ({ ...f, useCase: e.target.value }))}
+                      rows={3}
+                      data-testid="input-trial-usecase"
+                    />
+                  </div>
+                  <Button
+                    className="w-full gap-2 py-5 text-base"
+                    disabled={trialMutation.isPending || !trialForm.name || !trialForm.phone || !trialForm.email}
+                    onClick={() => trialMutation.mutate(trialForm)}
+                    data-testid="button-submit-trial"
+                  >
+                    <FileText className="h-4 w-4" />
+                    {trialMutation.isPending ? "Mengirim permintaan..." : "Kirim Permintaan Trial"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Voucher trial berlaku 14 hari • Akses penuh semua fitur termasuk Agentic AI & Orchestrator
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </section>

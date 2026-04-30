@@ -23,6 +23,7 @@ import ModulChat from "@/pages/modul-chat";
 import PacksPage from "@/pages/packs";
 import TenderWizard from "@/pages/tender-wizard";
 import DomainsPage from "@/pages/domains";
+import AdminPage from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/packs" component={PacksPage} />
       <Route path="/packs/:packId" component={TenderWizard} />
       <Route path="/domains" component={DomainsPage} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -2,8 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { customDomains } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { customDomains, trialRequests, subscriptionsTable, vouchers } from "@shared/schema";
+import { users } from "@shared/models/auth";
+import { eq, and, desc, sql as sqlExpr } from "drizzle-orm";
 import {
   insertAgentSchema,
   insertKnowledgeBaseSchema,
@@ -28,7 +29,7 @@ import { createRequire } from "module";
 import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
 import { subscriptionPlans, type SubscriptionPlanKey } from "./lib/mayar";
-import { isAuthenticated } from "./replit_integrations/auth";
+import { isAuthenticated, invalidateUserActiveCache } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import {
   processAttachmentsAndUrls,
@@ -8480,6 +8481,223 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     } catch (error: any) {
       console.error("Generate big ideas error:", error);
       res.status(500).json({ error: "Gagal generate saran Big Idea: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ==================== ADMIN HELPER ====================
+  function getSessionUserId(req: any): string {
+    return req.user?.claims?.sub || req.user?.id || "";
+  }
+
+  async function checkIsAdmin(req: any): Promise<boolean> {
+    const userId = getSessionUserId(req);
+    if (!userId) return false;
+    const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+    if (adminIds.includes(userId)) return true;
+    const [dbUser] = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
+    return dbUser?.role === "admin";
+  }
+
+  async function requireAdmin(req: any, res: any, next: any) {
+    if (!req.user) return res.status(401).json({ error: "Tidak terautentikasi" });
+    const isAdmin = await checkIsAdmin(req);
+    if (!isAdmin) return res.status(403).json({ error: "Akses ditolak. Anda bukan admin." });
+    next();
+  }
+
+  // ==================== PUBLIC: TRIAL REQUEST FORM ====================
+  app.post("/api/trial-requests", async (req: any, res: any) => {
+    try {
+      const { name, phone, email, company, useCase } = req.body;
+      if (!name || !phone || !email) {
+        return res.status(400).json({ error: "Nama, nomor HP, dan email/WA wajib diisi." });
+      }
+      const [request] = await db.insert(trialRequests).values({
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        company: company?.trim() || null,
+        useCase: useCase?.trim() || null,
+        status: "pending",
+      }).returning();
+      res.json({ success: true, message: "Permintaan trial berhasil dikirim! Tim kami akan menghubungi Anda segera.", id: request.id });
+    } catch (error: any) {
+      console.error("Trial request error:", error);
+      res.status(500).json({ error: "Gagal mengirim permintaan trial." });
+    }
+  });
+
+  // ==================== ADMIN: CHECK STATUS ====================
+  app.get("/api/admin/me", isAuthenticated, async (req: any, res: any) => {
+    const userId = getSessionUserId(req);
+    const [dbUser] = await db.select().from(users).where(eq(users.id, userId));
+    const isAdmin = await checkIsAdmin(req);
+    res.json({ isAdmin, user: dbUser || null });
+  });
+
+  // ==================== ADMIN: DASHBOARD STATS ====================
+  app.get("/api/admin/stats", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const [totalUsersRow] = await db.select({ count: sqlExpr<number>`count(*)::int` }).from(users);
+      const [activeUsersRow] = await db.select({ count: sqlExpr<number>`count(*)::int` }).from(users).where(eq(users.isActive, true));
+      const [pendingTrialRow] = await db.select({ count: sqlExpr<number>`count(*)::int` }).from(trialRequests).where(eq(trialRequests.status, "pending"));
+      const [activeSubRow] = await db.select({ count: sqlExpr<number>`count(*)::int` }).from(subscriptionsTable).where(eq(subscriptionsTable.status, "active"));
+      res.json({
+        totalUsers: totalUsersRow.count,
+        activeUsers: activeUsersRow.count,
+        pendingTrialRequests: pendingTrialRow.count,
+        activeSubscriptions: activeSubRow.count,
+      });
+    } catch (error: any) {
+      console.error("Admin stats error:", error);
+      res.status(500).json({ error: "Gagal mengambil statistik admin." });
+    }
+  });
+
+  // ==================== ADMIN: USER MANAGEMENT ====================
+  app.get("/api/admin/users", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+      const allSubs = await db.select().from(subscriptionsTable).orderBy(desc(subscriptionsTable.createdAt));
+      const subsByUserId: Record<string, any> = {};
+      for (const sub of allSubs) {
+        if (!subsByUserId[sub.userId]) subsByUserId[sub.userId] = sub;
+      }
+      const result = allUsers.map(u => ({
+        ...u,
+        subscription: subsByUserId[u.id] || null,
+      }));
+      res.json(result);
+    } catch (error: any) {
+      console.error("Admin users error:", error);
+      res.status(500).json({ error: "Gagal mengambil data pengguna." });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId/toggle", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { userId } = req.params;
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) return res.status(404).json({ error: "Pengguna tidak ditemukan." });
+      const newStatus = !user.isActive;
+      await db.update(users).set({ isActive: newStatus, updatedAt: new Date() }).where(eq(users.id, userId));
+      invalidateUserActiveCache(userId);
+      res.json({ success: true, isActive: newStatus, message: newStatus ? "Pengguna diaktifkan." : "Pengguna dinonaktifkan." });
+    } catch (error: any) {
+      console.error("Admin toggle user error:", error);
+      res.status(500).json({ error: "Gagal mengubah status pengguna." });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId/role", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { userId } = req.params;
+      const { role } = req.body;
+      if (!["user", "admin"].includes(role)) return res.status(400).json({ error: "Role tidak valid." });
+      await db.update(users).set({ role, updatedAt: new Date() }).where(eq(users.id, userId));
+      res.json({ success: true, role });
+    } catch (error: any) {
+      console.error("Admin set role error:", error);
+      res.status(500).json({ error: "Gagal mengubah role pengguna." });
+    }
+  });
+
+  // ==================== ADMIN: SUBSCRIPTIONS ====================
+  app.get("/api/admin/subscriptions", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const subs = await db.select().from(subscriptionsTable).orderBy(desc(subscriptionsTable.createdAt));
+      const allUsers = await db.select({ id: users.id, email: users.email, firstName: users.firstName, lastName: users.lastName }).from(users);
+      const userMap: Record<string, any> = {};
+      for (const u of allUsers) userMap[u.id] = u;
+      const result = subs.map(s => ({ ...s, user: userMap[s.userId] || null }));
+      res.json(result);
+    } catch (error: any) {
+      console.error("Admin subscriptions error:", error);
+      res.status(500).json({ error: "Gagal mengambil data langganan." });
+    }
+  });
+
+  // ==================== ADMIN: TRIAL REQUESTS ====================
+  app.get("/api/admin/trial-requests", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const requests = await db.select().from(trialRequests).orderBy(desc(trialRequests.createdAt));
+      res.json(requests);
+    } catch (error: any) {
+      console.error("Admin trial requests error:", error);
+      res.status(500).json({ error: "Gagal mengambil data permintaan trial." });
+    }
+  });
+
+  app.post("/api/admin/trial-requests/:id/approve", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const { durationDays = 14, notes } = req.body;
+      const [trialReq] = await db.select().from(trialRequests).where(eq(trialRequests.id, parseInt(id)));
+      if (!trialReq) return res.status(404).json({ error: "Permintaan tidak ditemukan." });
+      if (trialReq.status !== "pending") return res.status(400).json({ error: "Permintaan ini sudah diproses." });
+
+      // Generate voucher code
+      const code = "TRIAL-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days to redeem
+
+      // Create voucher in vouchers table
+      const [newVoucher] = await db.insert(vouchers).values({
+        code,
+        name: `Trial untuk ${trialReq.name}`,
+        type: "unlimited",
+        durationDays,
+        maxRedemptions: 1,
+        totalRedeemed: 0,
+        isActive: true,
+        expiresAt,
+      }).returning();
+
+      // Update trial request
+      await db.update(trialRequests).set({
+        status: "approved",
+        voucherCode: code,
+        voucherId: newVoucher.id,
+        notes: notes || null,
+        updatedAt: new Date(),
+      }).where(eq(trialRequests.id, parseInt(id)));
+
+      res.json({ success: true, voucherCode: code, durationDays, message: `Trial disetujui. Kode voucher: ${code}` });
+    } catch (error: any) {
+      console.error("Admin approve trial error:", error);
+      res.status(500).json({ error: "Gagal menyetujui permintaan trial: " + error.message });
+    }
+  });
+
+  app.post("/api/admin/trial-requests/:id/reject", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const { notes } = req.body;
+      const [trialReq] = await db.select().from(trialRequests).where(eq(trialRequests.id, parseInt(id)));
+      if (!trialReq) return res.status(404).json({ error: "Permintaan tidak ditemukan." });
+      await db.update(trialRequests).set({
+        status: "rejected",
+        notes: notes || null,
+        updatedAt: new Date(),
+      }).where(eq(trialRequests.id, parseInt(id)));
+      res.json({ success: true, message: "Permintaan trial ditolak." });
+    } catch (error: any) {
+      console.error("Admin reject trial error:", error);
+      res.status(500).json({ error: "Gagal menolak permintaan trial." });
+    }
+  });
+
+  app.patch("/api/admin/subscriptions/:id", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const { status, endDate } = req.body;
+      const updates: any = { updatedAt: new Date() };
+      if (status) updates.status = status;
+      if (endDate) updates.endDate = new Date(endDate);
+      await db.update(subscriptionsTable).set(updates).where(eq(subscriptionsTable.id, parseInt(id)));
+      res.json({ success: true, message: "Langganan berhasil diperbarui." });
+    } catch (error: any) {
+      console.error("Admin update subscription error:", error);
+      res.status(500).json({ error: "Gagal memperbarui langganan." });
     }
   });
 

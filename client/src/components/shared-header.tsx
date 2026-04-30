@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package } from "lucide-react";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield } from "lucide-react";
 
 interface SharedHeaderProps {
   transparent?: boolean;
@@ -85,6 +86,12 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
 
+  const { data: adminData } = useQuery<{ isAdmin: boolean }>({
+    queryKey: ["/api/admin/me"],
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const navItems = [
     { href: "/packs", label: "Paket Domain", icon: Package },
     { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
@@ -130,6 +137,13 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             <Button disabled>Loading...</Button>
           ) : isAuthenticated ? (
             <div className="flex items-center gap-2">
+              {adminData?.isAdmin && (
+                <Link href="/admin">
+                  <Button variant="outline" size="sm" className="gap-1 border-primary/40 text-primary" data-testid="button-admin-link">
+                    <Shield className="h-3.5 w-3.5" /> Admin
+                  </Button>
+                </Link>
+              )}
               <Link href="/dashboard">
                 <Button>
                   <LayoutDashboard className="h-4 w-4 mr-2" />
@@ -196,6 +210,14 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                 <div className="border-t pt-4 mt-2">
                   {isAuthenticated ? (
                     <div className="space-y-2">
+                      {adminData?.isAdmin && (
+                        <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                          <Button variant="outline" className="w-full gap-2 border-primary/40 text-primary" data-testid="button-admin-mobile">
+                            <Shield className="h-4 w-4" />
+                            Admin Panel
+                          </Button>
+                        </Link>
+                      )}
                       <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                         <Button className="w-full">
                           <LayoutDashboard className="h-4 w-4 mr-2" />

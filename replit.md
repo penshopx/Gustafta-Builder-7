@@ -140,3 +140,42 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 - `ffmpeg` (for video audio extraction)
 - `pdf-parse` (for PDF text extraction)
 - `mammoth` (for DOCX text extraction)
+
+## Admin Panel & User Management
+
+### Admin Dashboard (`/admin`)
+- Protected page — only accessible to users with `role = 'admin'` in DB or ID in `ADMIN_USER_IDS` env var
+- **Stats cards**: Total users, active users, active subscriptions, pending trial requests
+- **Tabs**: Users | Subscriptions | Trial Requests
+- **Admin button** in navbar — only visible to admin users (checked via `/api/admin/me`)
+
+### User Management
+- `users` table extended with `role` (varchar, default 'user') and `isActive` (boolean, default true) in `shared/models/auth.ts`
+- Admin can toggle user on/off (actif/inactive) — instant effect with 2-min cache TTL
+- Admin can promote users to admin role
+- Inactive users get 403 on all `isAuthenticated` routes
+- `ADMIN_USER_IDS` env var: comma-separated user IDs that bypass isActive check (fail-safe)
+
+### Trial Request System
+- Public form on landing page (section `#trial`): name, phone, email, company, use case
+- Submitted to `trial_requests` table with status `pending`
+- Admin approves → generates voucher code (TRIAL-XXXXXX) in `vouchers` table → admin shares via WA/Email manually
+- Admin rejects → stores rejection notes
+- API routes: `POST /api/trial-requests` (public), `GET/POST /api/admin/trial-requests` (admin)
+
+### Admin API Routes
+- `GET /api/admin/me` — check if current user is admin
+- `GET /api/admin/stats` — dashboard statistics
+- `GET /api/admin/users` — all users with subscription data
+- `PATCH /api/admin/users/:id/toggle` — toggle isActive
+- `PATCH /api/admin/users/:id/role` — set role (user/admin)
+- `GET /api/admin/subscriptions` — all subscriptions with user info
+- `PATCH /api/admin/subscriptions/:id` — edit subscription status/end date
+- `GET /api/admin/trial-requests` — all trial requests
+- `POST /api/admin/trial-requests/:id/approve` — approve + generate voucher
+- `POST /api/admin/trial-requests/:id/reject` — reject with notes
+
+### isActive Cache
+- In-memory cache per userId with 2-min TTL in `server/replit_integrations/auth/replitAuth.ts`
+- `invalidateUserActiveCache(userId)` exported for immediate invalidation after toggle
+- Super-admin IDs (ADMIN_USER_IDS) always bypass isActive check

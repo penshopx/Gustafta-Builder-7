@@ -610,11 +610,44 @@ Orchestrator (DeepSeek Classifier) → ~$0.0001/call
 ### 5.17 FITUR PROTEKSI & MONETISASI PENGGUNA
 
 - **Batas Tamu**: Pengunjung tanpa akun dibatasi pesan (default 10); setelah itu muncul "upgrade wall"
-- **Free Trial per Chatbot**: Durasi dan kuota bisa dikonfigurasi
 - **Kuota Pengguna**: Batas pesan harian/bulanan, reset otomatis
 - **Voucher System**: Buat kode voucher (unlimited/kuota tambahan), batas waktu & pemakaian
 - **Afiliasi & Referral**: Program referral dengan tracking komisi
 - **Client Subscriptions**: End-user bisa berlangganan chatbot kamu sendiri
+
+---
+
+### 5.18 ADMIN PANEL (untuk Pemilik Platform)
+
+**Admin Panel** dapat diakses di `/admin` — hanya untuk administrator Gustafta yang ditetapkan.
+
+**Fitur Admin Panel:**
+
+1. **Dashboard Statistik**: Total pengguna, pengguna aktif, langganan aktif, permintaan trial pending
+2. **Manajemen Pengguna**:
+   - Lihat semua pengguna yang terdaftar
+   - Lihat status langganan per pengguna
+   - **Aktifkan/Nonaktifkan** akun pengguna (berguna untuk yang sudah bayar vs yang belum)
+   - Set role: User atau Admin
+3. **Manajemen Langganan**: Lihat semua langganan, edit status dan tanggal berakhir
+4. **Manajemen Permintaan Trial**:
+   - Lihat semua permintaan trial dari formulir landing page
+   - **Setujui**: Generate kode voucher otomatis (misal: TRIAL-ABC123), kirim ke pengguna via WA/Email
+   - **Tolak**: Dengan catatan alasan
+
+**Cara Akses Admin Panel:**
+1. Login ke Gustafta
+2. Klik tombol "Admin" di navbar (hanya muncul jika akun Anda adalah admin)
+3. Atau langsung akses URL: gustafta.com/admin
+
+**Cara Menjadi Admin:**
+- Ditetapkan oleh sistem melalui variabel ADMIN_USER_IDS (ID user terpercaya)
+- Atau di-assign role "admin" oleh admin lain melalui panel
+
+**Sistem On/Off Pengguna:**
+- **ON (Aktif)**: Pengguna bisa login dan menggunakan semua fitur sesuai paket
+- **OFF (Nonaktif)**: Pengguna tidak bisa mengakses fitur platform (terblokir di level API)
+- Admin bisa toggle kapan saja — efektif dalam 2 menit (setelah cache expired)
 
 ═══════════════════════════════════════════════════════════
 ## BAGIAN 6: PANDUAN STEP-BY-STEP
@@ -733,6 +766,18 @@ A: Paste link YouTube → Gustafta otomatis ambil transkrip video → konten dij
 
 **Q: Bagaimana jika chatbot menjawab tidak akurat?**
 A: Perbaiki system prompt → tambahkan KB yang relevan → turunkan temperature → test ulang. Kualitas output = kualitas input (prompt + KB).
+
+**Q: Bagaimana cara request trial Gustafta?**
+A: Kunjungi halaman utama Gustafta → scroll ke bagian "Request Voucher Trial" → isi formulir (nama, nomor WA/HP, email, perusahaan, kebutuhan) → submit. Tim Gustafta akan mengirimkan kode voucher trial 14 hari via WA/Email Anda dalam 1x24 jam kerja.
+
+**Q: Apa yang bisa dilakukan dengan voucher trial?**
+A: Voucher trial memberikan akses penuh ke semua fitur Gustafta termasuk Agentic AI, Orchestrator Multi-Agent, Knowledge Base RAG, semua integrasi, dan fitur monetisasi selama durasi trial (default 14 hari). Berlaku untuk 1 pengguna.
+
+**Q: Bagaimana cara admin mengaktifkan/menonaktifkan pengguna?**
+A: Masuk ke Admin Panel (/admin) → tab "Pengguna" → klik tombol "Aktifkan" atau "Nonaktifkan" di baris pengguna yang dimaksud. Perubahan status efektif langsung (maksimal 2 menit untuk cache expired).
+
+**Q: Bagaimana cara mengetahui siapa admin Gustafta?**
+A: Admin ditetapkan melalui konfigurasi sistem (ADMIN_USER_IDS) atau di-assign role "admin" oleh admin lain. Tombol "Admin" di navbar hanya muncul jika akun Anda memiliki hak admin.
 
 **Q: Apakah data saya aman?**
 A: Ya. Data dienkripsi, session aman, autentikasi via OAuth Replit Identity. Tidak ada pihak ketiga yang bisa akses data kamu.

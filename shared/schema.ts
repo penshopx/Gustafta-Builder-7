@@ -1587,3 +1587,23 @@ export const customDomains = pgTable("custom_domains", {
 export const insertCustomDomainSchema = createInsertSchema(customDomains).omit({ id: true, createdAt: true, updatedAt: true, verifiedAt: true });
 export type InsertCustomDomain = z.infer<typeof insertCustomDomainSchema>;
 export type CustomDomain = typeof customDomains.$inferSelect;
+
+// ==================== Trial Requests Table ====================
+export const trialRequests = pgTable("trial_requests", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  company: text("company"),
+  useCase: text("use_case"),
+  status: text("status").notNull().default("pending"),
+  voucherCode: text("voucher_code"),
+  voucherId: integer("voucher_id"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertTrialRequestSchema = createInsertSchema(trialRequests).omit({ id: true, createdAt: true, updatedAt: true, status: true, voucherCode: true, voucherId: true, notes: true });
+export type InsertTrialRequest = z.infer<typeof insertTrialRequestSchema>;
+export type TrialRequest = typeof trialRequests.$inferSelect;
