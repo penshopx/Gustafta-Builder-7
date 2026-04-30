@@ -203,6 +203,7 @@ for (const envVar of requiredEnvVars) {
         const seedTasks = [
           { name: "Regulasi Jasa Konstruksi", module: "./seed-regulasi", fn: "seedRegulasiJasaKonstruksi" },
           { name: "Asesor Sertifikasi", module: "./seed-asesor", fn: "seedAsesorSertifikasi" },
+          { name: "Asesor LSP Extra — Etika/CoI, Regulasi, Integrasi, RCC", module: "./seed-asesor-lsp-extra", fn: "seedAsesorLspExtra" },
           { name: "SMAP & PANCEK", module: "./seed-smap-pancek", fn: "seedSmapPancek" },
           { name: "Odoo Jasa Konstruksi", module: "./seed-odoo", fn: "seedOdooKonstruksi" },
           { name: "CSMS OPTIA v2.0", module: "./seed-csms-optia", fn: "seedCsmsOptia" },
