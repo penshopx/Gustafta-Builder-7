@@ -227,6 +227,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Lisensi LSP Extra — Lisensi Baru, Surveilans, Perpanjangan, Perubahan, Sanksi", module: "./seed-lisensi-lsp-extra", fn: "seedLisensiLspExtra" },
           { name: "Konsultan Lisensi LSP — Toolkit Pendamping LPJK & BNSP", module: "./seed-konsultan-lisensi-lsp", fn: "seedKonsultanLisensiLsp" },
           { name: "Akreditasi LSP oleh KAN — SNI ISO/IEC 17024 + KAN K-09", module: "./seed-akreditasi-kan", fn: "seedAkreditasiKan" },
+          { name: "Akreditasi KAN Extra — Asesmen Awal, Surveilans, Re-Akreditasi, Extension Scope, Banding & Sanksi", module: "./seed-akreditasi-kan-extra", fn: "seedAkreditasiKanExtra" },
           { name: "Chatbot SMAP — Sistem Manajemen Anti Penyuapan (SNI ISO 37001:2016)", module: "./seed-smap-iso37001", fn: "seedSmapIso37001" },
           { name: "Chatbot SMAP Nasional & Generator PanCEK KPK (Ver.2 — JAGA.id)", module: "./seed-pancek-kpk", fn: "seedPancekKpk" },
           { name: "Odoo ERP BUJK — Implementasi & Operasional Konstruksi Indonesia", module: "./seed-odoo-bujk", fn: "seedOdooBujk" },
