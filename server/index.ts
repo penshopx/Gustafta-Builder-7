@@ -146,6 +146,33 @@ for (const envVar of requiredEnvVars) {
     async () => {
       log(`serving on port ${port}`);
       
+      // ── ORPHAN CLEANUP — hapus toolboxes/agents yang induknya sudah hilang ──
+      // Berlaku di dev & prod sebagai defense-in-depth. Idempoten: hanya menghapus baris yang
+      // big_idea_id/series_id-nya tidak lagi punya induk valid; aman dijalankan tiap boot.
+      try {
+        const { db: rawDb } = await import("./db");
+        const { sql: rawSql } = await import("drizzle-orm");
+        const orphanAgentsRes: any = await rawDb.execute(rawSql`
+          DELETE FROM agents
+          WHERE toolbox_id IS NOT NULL
+            AND toolbox_id NOT IN (SELECT id FROM toolboxes)
+          RETURNING id
+        `);
+        const orphanToolboxesRes: any = await rawDb.execute(rawSql`
+          DELETE FROM toolboxes
+          WHERE (big_idea_id IS NOT NULL AND big_idea_id NOT IN (SELECT id FROM big_ideas))
+             OR (series_id   IS NOT NULL AND series_id   NOT IN (SELECT id FROM series))
+          RETURNING id
+        `);
+        const aRows = (orphanAgentsRes?.rowCount ?? orphanAgentsRes?.rows?.length ?? 0);
+        const tRows = (orphanToolboxesRes?.rowCount ?? orphanToolboxesRes?.rows?.length ?? 0);
+        if (aRows || tRows) {
+          log(`[OrphanCleanup] removed ${tRows} orphan toolbox(es) & ${aRows} orphan agent(s)`);
+        }
+      } catch (err) {
+        log("[OrphanCleanup] error: " + (err as Error).message);
+      }
+
       if (process.env.NODE_ENV !== "production") {
         try {
           const { gustaftaKnowledgeBaseAgent, dokumentenderAgent } = await import("./seed-knowledge-base");
@@ -282,142 +309,19 @@ for (const envVar of requiredEnvVars) {
         log("Production mode — skipping seed operations (data already in database)");
       }
 
-      // Catch-up seeds: run if SKK AJJ series is missing OR incomplete (<10 toolboxes)
-      try {
-        const { seedSkkAjj } = await import("./seed-skk-ajj");
-        const allSeries = await storage.getSeries();
-        const skkSeries = allSeries.find((s: any) => s.name === "SKK AJJ — Asesmen Jarak Jauh");
-        let needsSeed = !skkSeries;
-        if (skkSeries) {
-          const toolboxes = await storage.getToolboxes(undefined, skkSeries.id);
-          if (toolboxes.length < 10) needsSeed = true;
-        }
-        if (needsSeed) {
-          log("[CatchUp] Seeding SKK AJJ — Asesmen Jarak Jauh (missing or incomplete)");
-          await seedSkkAjj("49465846");
-        }
-      } catch (err) {
-        log("Catch-up seed error: " + (err as Error).message);
-      }
+      // ── DEDUP: catch-up Apr 2026 dihapus karena DUPLIKAT seedTasks utama ──
+      // Akar masalah lama: blok catch-up unconditional menjalankan seed yang sama
+      // dua kali per restart → kadang menghapus BigIdea yang baru saja dibuat.
+      // Sejak iter 9, semua seed Apr 2026 sudah di seedTasks (loop di atas) dan
+      // memiliki idempotency (skip jika sudah grounded). Catch-up unconditional
+      // dihapus. Hanya yang BENAR-BENAR belum ada di seedTasks yang ditahan.
 
-      // Catch-up: Pusat FAQ Peserta (added later, may not exist in older installations)
+      // Catch-up: Pusat FAQ Peserta (TIDAK ada di seedTasks — TAHAN)
       try {
         const { seedPusatFaqPeserta } = await import("./seed-pusat-faq-peserta");
         await seedPusatFaqPeserta("49465846");
       } catch (err) {
         log("Catch-up Pusat FAQ seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: AJJ Nirkertas — Tata Kelola LSP & BNSP (added Apr 2026)
-      try {
-        const { seedAjjNirkertas } = await import("./seed-ajj-nirkertas");
-        await seedAjjNirkertas("49465846");
-      } catch (err) {
-        log("Catch-up AJJ Nirkertas seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: AJJ Nirkertas Extra — Bidang Kompetensi & Skema (added Apr 2026)
-      try {
-        const { seedAjjNirkertasExtra } = await import("./seed-ajj-nirkertas-extra");
-        await seedAjjNirkertasExtra("49465846");
-      } catch (err) {
-        log("Catch-up AJJ Nirkertas Extra seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: SKK Hard Copy — Uji Kompetensi Tatap Muka (added Apr 2026)
-      try {
-        const { seedSkkHardcopy } = await import("./seed-skk-hardcopy");
-        await seedSkkHardcopy("49465846");
-      } catch (err) {
-        log("Catch-up SKK Hardcopy seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: SKK Hard Copy Extra — Bidang Kompetensi & Skema Tatap Muka (added Apr 2026)
-      try {
-        const { seedSkkHardcopyExtra } = await import("./seed-skk-hardcopy-extra");
-        await seedSkkHardcopyExtra("49465846");
-      } catch (err) {
-        log("Catch-up SKK Hardcopy Extra seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: ASKOM Konstruksi — Asesor Kompetensi Jasa Konstruksi (added Apr 2026)
-      try {
-        const { seedAskomKonstruksi } = await import("./seed-askom-konstruksi");
-        await seedAskomKonstruksi("49465846");
-      } catch (err) {
-        log("Catch-up ASKOM Konstruksi seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: ASKOM Konstruksi Extra — BA-UKK, Portofolio, RPL, MUK, Moda Uji, Pelatihan (added Apr 2026)
-      try {
-        const { seedAskomKonstruksiExtra } = await import("./seed-askom-konstruksi-extra");
-        await seedAskomKonstruksiExtra("49465846");
-      } catch (err) {
-        log("Catch-up ASKOM Konstruksi Extra seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: Lisensi LSP Konstruksi — LPJK & BNSP (added Apr 2026)
-      try {
-        const { seedLisensiLsp } = await import("./seed-lisensi-lsp");
-        await seedLisensiLsp("49465846");
-      } catch (err) {
-        log("Catch-up Lisensi LSP seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: Konsultan Lisensi LSP (added Apr 2026)
-      try {
-        const { seedKonsultanLisensiLsp } = await import("./seed-konsultan-lisensi-lsp");
-        await seedKonsultanLisensiLsp("49465846");
-      } catch (err) {
-        log("Catch-up Konsultan Lisensi LSP seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: Akreditasi LSP oleh KAN (added Apr 2026)
-      try {
-        const { seedAkreditasiKan } = await import("./seed-akreditasi-kan");
-        await seedAkreditasiKan("49465846");
-      } catch (err) {
-        log("Catch-up Akreditasi KAN seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: Chatbot SMAP — SNI ISO 37001:2016 (added Apr 2026)
-      try {
-        const { seedSmapIso37001 } = await import("./seed-smap-iso37001");
-        await seedSmapIso37001("49465846");
-      } catch (err) {
-        log("Catch-up SMAP ISO37001 seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: Chatbot SMAP Nasional & Generator PanCEK KPK (added Apr 2026)
-      try {
-        const { seedPancekKpk } = await import("./seed-pancek-kpk");
-        await seedPancekKpk("49465846");
-      } catch (err) {
-        log("Catch-up PanCEK KPK seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: Odoo ERP BUJK — Implementasi & Operasional (added Apr 2026)
-      try {
-        const { seedOdooBujk } = await import("./seed-odoo-bujk");
-        await seedOdooBujk("49465846");
-      } catch (err) {
-        log("Catch-up Odoo BUJK seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: Odoo Migrasi Data Legacy → BUJK (added Apr 2026)
-      try {
-        const { seedOdooMigrasi } = await import("./seed-odoo-migrasi");
-        await seedOdooMigrasi("49465846");
-      } catch (err) {
-        log("Catch-up Odoo Migrasi seed error: " + (err as Error).message);
-      }
-
-      // Catch-up: CSMS OPTIA v2.0 — 1 Orkestrator + 13 Spesialis (added Apr 2026)
-      try {
-        const { seedCsmsOptia } = await import("./seed-csms-optia");
-        await seedCsmsOptia("49465846");
-      } catch (err) {
-        log("Catch-up CSMS OPTIA seed error: " + (err as Error).message);
       }
 
       // Catch-up: Kompetensi Manajerial BUJK (added Apr 2026)

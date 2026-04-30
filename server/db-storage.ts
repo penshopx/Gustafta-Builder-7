@@ -449,7 +449,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteSeries(id: string): Promise<boolean> {
-    const result = await db.delete(series).where(eq(series.id, parseInt(id))).returning();
+    // Cascade: hapus semua bigIdeas (yang akan cascade ke toolboxes & agents),
+    // lalu toolboxes yang langsung tertaut ke series (orchestrator level series).
+    const sid = parseInt(id);
+    const childBigIdeas = await db.select().from(bigIdeas).where(eq(bigIdeas.seriesId, sid));
+    for (const bi of childBigIdeas) {
+      await this.deleteBigIdea(String(bi.id));
+    }
+    const directToolboxes = await db.select().from(toolboxes).where(eq(toolboxes.seriesId, sid));
+    for (const tb of directToolboxes) {
+      await this.deleteToolbox(String(tb.id));
+    }
+    const result = await db.delete(series).where(eq(series.id, sid)).returning();
     return result.length > 0;
   }
 
@@ -529,8 +540,11 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getBigIdeas(): Promise<BigIdea[]> {
-    const result = await db.select().from(bigIdeas).orderBy(desc(bigIdeas.createdAt));
+  async getBigIdeas(seriesId?: string): Promise<BigIdea[]> {
+    const query = seriesId
+      ? db.select().from(bigIdeas).where(eq(bigIdeas.seriesId, parseInt(seriesId))).orderBy(desc(bigIdeas.createdAt))
+      : db.select().from(bigIdeas).orderBy(desc(bigIdeas.createdAt));
+    const result = await query;
     return result.map(row => this.mapBigIdeaRow(row));
   }
 
@@ -600,7 +614,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteBigIdea(id: string): Promise<boolean> {
-    const result = await db.delete(bigIdeas).where(eq(bigIdeas.id, parseInt(id))).returning();
+    // Cascade: hapus semua toolboxes anak (yang akan cascade ke agents).
+    const bid = parseInt(id);
+    const childToolboxes = await db.select().from(toolboxes).where(eq(toolboxes.bigIdeaId, bid));
+    for (const tb of childToolboxes) {
+      await this.deleteToolbox(String(tb.id));
+    }
+    const result = await db.delete(bigIdeas).where(eq(bigIdeas.id, bid)).returning();
     return result.length > 0;
   }
 
@@ -787,7 +807,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteToolbox(id: string): Promise<boolean> {
-    const result = await db.delete(toolboxes).where(eq(toolboxes.id, parseInt(id))).returning();
+    // Cascade: hapus semua agents anak.
+    const tid = parseInt(id);
+    const childAgents = await db.select().from(agents).where(eq(agents.toolboxId, tid));
+    for (const ag of childAgents) {
+      await this.deleteAgent(String(ag.id));
+    }
+    const result = await db.delete(toolboxes).where(eq(toolboxes.id, tid)).returning();
     return result.length > 0;
   }
 

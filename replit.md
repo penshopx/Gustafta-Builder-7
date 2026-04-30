@@ -78,6 +78,12 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 -   **Studio Kompetensi (Ekosistem 5-Produk)**: A dual-gate system for importing documents and exporting chatbot configurations into five competency products (eBook in HTML, TXT, XLSX, CSV, MD; Mini Apps, Document Generator, eCourse are planned).
 -   **Chaesa AI Studio Bridge**: An adapter that maps Gustafta chatbot configurations to the schema used by Chaesa AI Studio, including precise enum values for various fields like industry, topic, AI character, tone, and writing style.
 
+### Seed System Data Integrity (April 2026)
+-   **Storage Layer Filter Discipline**: `dbStorage.getBigIdeas(seriesId?)` now honors the optional `seriesId` filter. Previously it ignored the parameter and returned all bigIdeas globally — causing seed cleanup loops (`for (bi of getBigIdeas(seriesId)) deleteBigIdea(bi.id)`) to wipe data across unrelated series.
+-   **Cascade Deletes in Storage**: `deleteSeries`, `deleteBigIdea`, and `deleteToolbox` now manually cascade to children (since `shared/schema.ts` has no FK `onDelete` clauses). This prevents orphan toolboxes and orphan agents accumulating across restarts.
+-   **Startup OrphanCleanup**: `server/index.ts` runs a one-shot raw-SQL DELETE on boot to remove any toolboxes/agents whose parents no longer exist, providing defense-in-depth.
+-   **Seed Idempotency Markers**: Each grounded seed (PanCEK KPK, SMAP ISO 37001, KAN, Lisensi LSP, ASKOM, AJJ Nirkertas, SKK Hardcopy) writes verifiable freshness markers (HEDGE, UU PDP 27/2022, LPSK, LSSM ter-akreditasi KAN, etc.) into agent system prompts. Catch-up logic only re-seeds when these markers are missing.
+
 ### Admin Panel & Role Hierarchy
 -   **Role Hierarchy**: `superadmin` (Wuryanto, auto-assigned), `admin` (assigned by superadmin), and `user` (default).
 -   **Admin Dashboard**: Provides different views and capabilities based on role, including user management, subscription management, and trial request handling.
