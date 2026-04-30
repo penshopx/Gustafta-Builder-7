@@ -8,13 +8,18 @@ function log(msg: string) {
 const BASE_RULES = `
 
 GOVERNANCE RULES (WAJIB):
-- Domain: SKK AJJ Nirkertas — pendalaman bidang kompetensi 4 aktor (Asesi, TUK, Asesor, Manajemen LSP), klasifikasi SKK Konstruksi, formulir asesmen FR-Series, persyaratan jenjang KKNI, dan ekosistem AAJI untuk skema asuransi jiwa.
+- Domain: SKK AJJ Nirkertas Konstruksi — pendalaman bidang kompetensi 4 aktor (Asesi, TUK, Asesor ASKOM, Manajemen LSP Konstruksi), klasifikasi SKK Konstruksi, formulir asesmen FR-Series, dan persyaratan jenjang KKNI.
 - Bahasa Indonesia profesional, jelas, suportif, dan terstruktur.
-- Sebutkan referensi regulasi/SOP saat memberi panduan prosedural (UU 2/2017, UU 6/2023, PP 14/2021, Permen PUPR 9/2020 jo. 8/2022, Permen PU 6/2025, SK Dirjen 144/KPTS/Dk/2022, SK Dirjen 37/KPTS/Dk/2025, SKKNI terkait, Pedoman BNSP 201/210/301/302/305, SNI ISO/IEC 17024, SE BNSP SE.007/2023, untuk AAJI: Pedoman OJK & POJK terkait).
-- TIDAK berwenang menerbitkan SKK, SBU, lisensi keagenan, menyatakan asesi K/BK, atau memberi izin pelaksanaan AJJ.
+- Sebutkan referensi regulasi/SOP saat memberi panduan prosedural (UU 2/2017, UU 6/2023, PP 14/2021, Permen PUPR 9/2020 jo. 8/2022, Permen PU 6/2025, SK Dirjen 144/KPTS/Dk/2022, SK Dirjen 37/KPTS/Dk/2025, SKKNI terkait, Pedoman BNSP seri 201/210/301/302/305 (versi 2014/2017 atau revisi terbaru — verifikasi di bnsp.go.id), SNI ISO/IEC 17024:2012 (§4.3 ketidakberpihakan, §7.4 keamanan informasi), SE BNSP No. SE.007/BNSP/V/2023 (AJJ & Nirkertas), KAN K-09 (Persyaratan Khusus LSP), UU 27/2022 tentang Perlindungan Data Pribadi (PDP)).
+- TIDAK berwenang menerbitkan SKK/SBU, menyatakan asesi K/BK, atau memberi izin pelaksanaan AJJ.
+- Prinsip bukti WAJIB: VRFA (Valid-Reliabel-Fleksibel-Adil) + CASR/VATM (Cukup-Asli-Saat ini-Relevan / Valid-Authentic-Terkini-Memadai).
+- Keamanan informasi (ISO 17024 §7.4): rekaman audio/video, screen capture, MUK & berkas asesi disimpan terenkripsi (at-rest & in-transit), akses RBAC, jejak audit, retensi sesuai kebijakan LSP/BNSP yang berlaku.
+- Perlindungan data pribadi (UU PDP 27/2022): consent tertulis asesi WAJIB sebelum rekaman; tidak share PII (KTP, foto, rekaman) ke pihak ketiga tanpa basis hukum.
+- Ketidakberpihakan (ISO 17024 §4.3): asesor dilarang mengases asesi yang dilatih sendiri ≤2 tahun terakhir, atasan/bawahan langsung, atau anggota keluarga; deklarasi konflik kepentingan WAJIB di awal sesi.
+- HEDGE: angka spesifik (jumlah PJ minimum BUJK, persyaratan ABU, retensi rekaman, frekuensi surveilans, CPD/SKP, daftar formulir FR.IA/FR.AK) dapat berubah sesuai SK Dirjen Bina Konstruksi/SK BNSP/lampiran skema versi terbaru — verifikasi di lpjk.pu.go.id, bnsp.go.id, atau SOP LSP/LSBU yang berlaku. Setiap klaim numerik bersifat indikatif dan harus dikonfirmasi pada dokumen resmi terbaru sebelum digunakan untuk keputusan operasional.
 - Bila pertanyaan di luar domain, arahkan ke Hub AJJ Nirkertas atau modul yang sesuai.
 - Jika informasi pengguna kurang, ajukan maksimal 3 pertanyaan klarifikasi yang fokus.
-- Untuk keputusan resmi, arahkan ke BNSP, LSP/LSBU, LPJK, OJK/AAJI, atau pejabat berwenang.`;
+- Untuk keputusan resmi, arahkan ke BNSP, LSP/LSBU, LPJK, atau pejabat berwenang.`;
 
 const NIRKERTAS_BIGIDEA_NAME = "AJJ Nirkertas — Tata Kelola LSP & BNSP";
 
@@ -40,11 +45,16 @@ export async function seedAjjNirkertasExtra(userId: string) {
     }
 
     const existingBigIdeas = await storage.getBigIdeas(skkSeries.id);
-    const bigIdea = existingBigIdeas.find((b: any) => b.name === NIRKERTAS_BIGIDEA_NAME);
-    if (!bigIdea) {
+    const allMatching = existingBigIdeas.filter((b: any) => b.name === NIRKERTAS_BIGIDEA_NAME);
+    if (allMatching.length === 0) {
       log("[Seed AJJ Nirkertas Extra] BigIdea utama belum ada — jalankan seed-ajj-nirkertas dulu");
       return;
     }
+    if (allMatching.length > 1) {
+      log(`[Seed AJJ Nirkertas Extra] WARNING: ${allMatching.length} BigIdea duplikat ditemukan — abort. Jalankan seed-ajj-nirkertas dulu untuk cleanup.`);
+      return;
+    }
+    const bigIdea = allMatching[0];
 
     let existingToolboxes = await storage.getToolboxes(bigIdea.id);
 
@@ -665,7 +675,7 @@ GAYA: Sistematis, gunakan struktur klasifikasi → subklasifikasi → jabatan �
         greetingMessage: cb.greeting,
         conversationStarters: cb.starters,
         personality:
-          "Profesional, faktual, sistematis, suportif. Spesialis tata kelola SKK Konstruksi & AAJI berbasis BNSP/KAN/ISO 17024.",
+          "Profesional, faktual, sistematis, suportif. Spesialis tata kelola SKK Konstruksi berbasis BNSP/KAN/ISO 17024.",
       } as any);
       added++;
     }

@@ -8,10 +8,14 @@ function log(msg: string) {
 const BASE_RULES = `
 
 GOVERNANCE RULES (WAJIB):
-- Domain: SKK AJJ Nirkertas (Asesmen Jarak Jauh + Paperless) berbasis SE BNSP No. SE.007/BNSP/V/2023, KAN K-09, dan ISO/IEC 17024.
+- Domain: SKK AJJ Nirkertas (Asesmen Jarak Jauh + Paperless) berbasis SE BNSP No. SE.007/BNSP/V/2023 (versi yang berlaku — verifikasi di bnsp.go.id), KAN K-09 (Persyaratan Khusus LSP), Pedoman BNSP seri 201/210/301/302/305 (versi 2014/2017 atau revisi terbaru), SNI ISO/IEC 17024:2012 (khususnya §4.3 ketidakberpihakan, §7.4 keamanan informasi), dan UU 27/2022 tentang Perlindungan Data Pribadi (PDP).
 - Bahasa Indonesia profesional, jelas, dan suportif.
 - Sebutkan referensi regulasi/SOP saat memberi panduan prosedural.
 - TIDAK berwenang menerbitkan sertifikat resmi, menyatakan asesi kompeten/belum, atau memberi izin pelaksanaan AJJ.
+- Prinsip bukti AJJ WAJIB: VRFA (Valid-Reliabel-Fleksibel-Adil) untuk metode + CASR/VATM (Cukup-Asli-Saat ini-Relevan / Valid-Authentic-Terkini-Memadai) untuk bukti — sama dengan asesmen tatap muka, hanya medium berbeda.
+- Keamanan informasi (ISO 17024 §7.4): rekaman audio/video, screen capture, MUK & berkas asesi WAJIB disimpan terenkripsi (at-rest & in-transit), akses terkontrol RBAC, jejak audit aktif, retensi sesuai kebijakan LSP & BNSP.
+- Perlindungan data pribadi (UU PDP 27/2022): consent tertulis asesi WAJIB sebelum rekaman; tidak share PII (KTP, foto, rekaman) ke pihak ketiga tanpa basis hukum; hak asesi: akses, koreksi, hapus pasca-retensi.
+- Ketidakberpihakan (ISO 17024 §4.3): asesor dilarang mengases asesi yang dilatih sendiri ≤2 tahun terakhir, atasan/bawahan langsung, atau anggota keluarga; deklarasi konflik kepentingan WAJIB di awal sesi AJJ.
 - Bila pertanyaan di luar domain, arahkan ke Hub AJJ Nirkertas atau modul yang sesuai.
 - Jika informasi pengguna kurang, ajukan maksimal 3 pertanyaan klarifikasi yang fokus.
 - Untuk keputusan resmi, arahkan ke BNSP, Manajemen LSP, atau pejabat berwenang.`;
@@ -28,22 +32,33 @@ export async function seedAjjNirkertas(userId: string) {
       return;
     }
 
-    // Idempotency check
+    // Idempotency check — handle multiple BigIdea duplicates from past restarts
     const existingBigIdeas = await storage.getBigIdeas(skkSeries.id);
-    const existingNirkertas = existingBigIdeas.find((b: any) => b.name === NIRKERTAS_BIGIDEA_NAME);
-    if (existingNirkertas) {
-      const tbs = await storage.getToolboxes(existingNirkertas.id);
-      if (tbs.length >= 12) {
-        log(`[Seed AJJ Nirkertas] Sudah ada (${tbs.length} toolboxes), skip.`);
+    const allMatching = existingBigIdeas.filter((b: any) => b.name === NIRKERTAS_BIGIDEA_NAME);
+
+    if (allMatching.length > 0) {
+      // Find the first complete one (≥12 toolboxes); delete the rest
+      let keepBi: any = null;
+      for (const bi of allMatching) {
+        const tbs = await storage.getToolboxes(bi.id);
+        if (!keepBi && tbs.length >= 12) {
+          keepBi = bi;
+          continue;
+        }
+        log(`[Seed AJJ Nirkertas] Cleanup duplicate BigIdea ${bi.id} (${tbs.length} toolboxes)`);
+        for (const tb of tbs) {
+          const ags = await storage.getAgents(tb.id);
+          for (const a of ags) await storage.deleteAgent(a.id);
+          await storage.deleteToolbox(tb.id);
+        }
+        await storage.deleteBigIdea(bi.id);
+      }
+
+      if (keepBi) {
+        log(`[Seed AJJ Nirkertas] Sudah ada (BigIdea ${keepBi.id}), skip.`);
         return;
       }
-      log(`[Seed AJJ Nirkertas] Modul ada tapi tidak lengkap (${tbs.length}/13) — bersihkan & seed ulang`);
-      for (const tb of tbs) {
-        const ags = await storage.getAgents(tb.id);
-        for (const a of ags) await storage.deleteAgent(a.id);
-        await storage.deleteToolbox(tb.id);
-      }
-      await storage.deleteBigIdea(existingNirkertas.id);
+      log(`[Seed AJJ Nirkertas] Tidak ada BigIdea lengkap — seed ulang`);
     }
 
     log("[Seed AJJ Nirkertas] Membuat modul AJJ Nirkertas — Tata Kelola LSP & BNSP...");
@@ -1153,13 +1168,12 @@ ISO/IEC 17024:2012 — General requirements for bodies operating certification o
 
 **Klausul-klausul utama yang relevan untuk AJJ:**
 
-### Klausul 4 — General Requirements
+### Klausul 4 — General Requirements (rujukan SNI ISO/IEC 17024:2012)
 - 4.1 Legal & contractual matters
-- 4.2 Management of impartiality (komite ketidakberpihakan)
-- 4.3 Liability & financing
-- 4.4 Non-discriminatory conditions
-- 4.5 Confidentiality
-- 4.6 Public information
+- 4.2 Responsibility for the certification decision
+- 4.3 Management of impartiality (komite ketidakberpihakan) — **kunci ketidakberpihakan asesor**
+- 4.4 Finance & liability
+- 4.5 Non-discriminatory conditions / Confidentiality (per versi SNI yang berlaku — verifikasi ke salinan resmi BSN/ISO)
 
 ### Klausul 5 — Structural Requirements
 - 5.1 Management & organizational structure
@@ -1201,6 +1215,8 @@ ISO/IEC 17024:2012 — General requirements for bodies operating certification o
 - 10.7 Corrective actions
 - 10.8 Preventive actions
 
+> **Catatan klausul**: penomoran sub-klausul mengikuti SNI ISO/IEC 17024:2012; untuk klaim formal/dokumen resmi LSP, verifikasi ke salinan SNI ISO/IEC 17024 dari BSN. Klausul keamanan informasi dapat dirujuk sebagai §4.5 (Confidentiality) atau §7.4 (Information security) bergantung pada versi/mapping yang dipakai LSP.
+
 KESELARASAN AJJ NIRKERTAS DENGAN ISO 17024:
 
 | Persyaratan ISO 17024 | Implementasi AJJ Nirkertas |
@@ -1227,7 +1243,7 @@ CHECKLIST KESELARASAN (high-level):
 ☐ Kompetensi asesor terdokumentasi (klausul 6.2)
 ☐ Skema dikembangkan & direview (klausul 8)
 ☐ Audit internal 6-bulanan (klausul 10.6 + SE BNSP)
-☐ Komite ketidakberpihakan aktif (klausul 4.2)
+☐ Komite ketidakberpihakan aktif (klausul 4.3)
 ☐ Komite banding (klausul 9.7)
 ☐ Retensi records (klausul 7.1 + SE BNSP)
 ☐ Keamanan platform (klausul 4.5 + 6.4)
