@@ -6051,6 +6051,7 @@ Pilih tipe yang paling cocok dengan topik agent. Jangan gunakan tipe AI-powered 
         input,
         output,
         status: "completed",
+        source: "public",
       });
       res.status(201).json({ result });
     } catch (error) {
@@ -6115,6 +6116,7 @@ Tugas kamu: Buat dokumen profesional yang lengkap, terstruktur, dan siap pakai b
         input: body,
         output: { content: generated, summary: generated.slice(0, 200) + (generated.length > 200 ? "..." : "") },
         status: "completed",
+        source: "public",
       });
 
       res.json({ content: generated, result });
@@ -6599,6 +6601,7 @@ Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapang
         input: { projectBrain: activeInstance.name, mode: appType },
         output: { analysis: aiOutput, generatedAt: new Date().toISOString() },
         status: "completed",
+        source: "owner",
       });
 
       res.json({ result, analysis: aiOutput });
@@ -7064,7 +7067,17 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
 
   app.get("/api/mini-app-results/:miniAppId", isAuthenticated, async (req, res) => {
     try {
-      const results = await storage.getMiniAppResults(req.params.miniAppId as string);
+      const miniAppId = req.params.miniAppId as string;
+      const miniApp = await storage.getMiniApp(miniAppId);
+      if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
+
+      const requestingUserId: string | undefined = req.user?.claims?.sub ?? (req.user as Record<string, any>)?.id;
+      const agent = await storage.getAgent(String(miniApp.agentId));
+      if (agent && agent.userId && requestingUserId && agent.userId !== requestingUserId) {
+        return res.status(403).json({ error: "Forbidden: you do not own this mini app" });
+      }
+
+      const results = await storage.getMiniAppResults(miniAppId);
       res.json(results);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch mini app results" });
@@ -7073,6 +7086,16 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
 
   app.post("/api/mini-app-results/:miniAppId", isAuthenticated, async (req, res) => {
     try {
+      const miniAppId = req.params.miniAppId as string;
+      const miniApp = await storage.getMiniApp(miniAppId);
+      if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
+
+      const requestingUserId: string | undefined = req.user?.claims?.sub ?? (req.user as Record<string, any>)?.id;
+      const agent = await storage.getAgent(String(miniApp.agentId));
+      if (agent && agent.userId && requestingUserId && agent.userId !== requestingUserId) {
+        return res.status(403).json({ error: "Forbidden: you do not own this mini app" });
+      }
+
       const parsed = insertMiniAppResultSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });

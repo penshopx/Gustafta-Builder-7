@@ -812,7 +812,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
     }
 
     createMiniAppResult.mutate(
-      { miniAppId: String(viewingApp.id), agentId, input: runInput, output, status: "completed" as const },
+      { miniAppId: String(viewingApp.id), agentId, input: runInput, output, status: "completed" as const, source: "owner" as const },
       {
         onSuccess: () => {
           toast({ title: "Berhasil", description: "Mini App berhasil dijalankan." });
@@ -1615,6 +1615,14 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
 
 function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType: MiniAppType }) {
   const { data: results = [], isLoading } = useMiniAppResults(miniAppId);
+  const [sourceFilter, setSourceFilter] = useState<"all" | "owner" | "public">("all");
+
+  const publicCount = results.filter((r) => r.source === "public").length;
+  const filteredResults = results.filter((r) => {
+    if (sourceFilter === "all") return true;
+    const src = r.source || "owner";
+    return src === sourceFilter;
+  });
 
   if (isLoading) {
     return (
@@ -1628,41 +1636,104 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
     );
   }
 
-  if (results.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-sm text-muted-foreground">Belum ada riwayat eksekusi.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-3 py-2">
-      {results.map((result) => {
+      {results.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setSourceFilter("all")}
+            data-testid="filter-results-all"
+            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
+          >
+            Semua ({results.length})
+          </button>
+          <button
+            onClick={() => setSourceFilter("owner")}
+            data-testid="filter-results-owner"
+            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "owner" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
+          >
+            Milik Saya ({results.length - publicCount})
+          </button>
+          <button
+            onClick={() => setSourceFilter("public")}
+            data-testid="filter-results-public"
+            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "public" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
+          >
+            Publik ({publicCount})
+          </button>
+        </div>
+      )}
+
+      {filteredResults.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">
+            {results.length === 0
+              ? "Belum ada riwayat eksekusi."
+              : sourceFilter === "public"
+              ? "Belum ada respons dari pengguna publik."
+              : "Belum ada eksekusi dari pemilik."}
+          </p>
+        </div>
+      )}
+
+      {filteredResults.map((result) => {
         const output = typeof result.output === "object" && result.output ? (result.output as Record<string, any>) : {};
+        const input = typeof result.input === "object" && result.input ? (result.input as Record<string, any>) : {};
+        const isPublic = result.source === "public";
         return (
-          <Card key={result.id}>
+          <Card key={result.id} data-testid={`card-result-${result.id}`}>
             <CardContent className="p-3 space-y-2">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <Badge variant="secondary" className="text-xs">
-                  {result.status === "completed" ? "Selesai" : result.status}
-                </Badge>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">
+                    {result.status === "completed" ? "Selesai" : result.status}
+                  </Badge>
+                  {isPublic ? (
+                    <Badge variant="outline" className="text-xs border-blue-300 text-blue-600 dark:border-blue-700 dark:text-blue-400">
+                      Pengguna Publik
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs border-muted-foreground/40 text-muted-foreground">
+                      Pemilik
+                    </Badge>
+                  )}
+                </div>
                 <span className="text-xs text-muted-foreground">
                   {new Date(result.createdAt).toLocaleString("id-ID")}
                 </span>
               </div>
-              {appType === "checklist" && output.percentage !== undefined && (
+              {isPublic && Object.keys(input).length > 0 && (
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Progres</span>
-                    <span className="font-medium">{output.completed}/{output.total} ({output.percentage}%)</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div
-                      className="bg-primary h-2 rounded-full transition-all"
-                      style={{ width: `${output.percentage}%` }}
-                    />
-                  </div>
+                  <p className="text-xs font-medium text-muted-foreground">Input pengguna:</p>
+                  <pre className="text-xs bg-muted/50 p-2 rounded-md overflow-auto max-h-20">
+                    {JSON.stringify(input, null, 2)}
+                  </pre>
+                </div>
+              )}
+              {appType === "checklist" && (output.percentage !== undefined || output.completion_percentage !== undefined) && (
+                <div className="space-y-1">
+                  {(() => {
+                    const pct = output.percentage ?? output.completion_percentage ?? 0;
+                    const completed = output.completed ?? output.done ?? 0;
+                    const total = output.total ?? 0;
+                    return (
+                      <>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Progres</span>
+                          <span className="font-medium">{completed}/{total} ({pct}%)</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        {output.summary && (
+                          <p className="text-xs text-muted-foreground">{output.summary}</p>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
               {AI_MINI_APP_TYPES.includes(appType) && output.analysis && (
@@ -1670,7 +1741,7 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
                   {output.analysis}
                 </div>
               )}
-              {appType !== "checklist" && !AI_MINI_APP_TYPES.includes(appType) && (
+              {appType !== "checklist" && !AI_MINI_APP_TYPES.includes(appType) && Object.keys(output).length > 0 && (
                 <pre className="text-xs bg-muted p-2 rounded-md overflow-auto max-h-24">
                   {JSON.stringify(output, null, 2)}
                 </pre>

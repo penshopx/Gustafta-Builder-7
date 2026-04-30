@@ -8,6 +8,13 @@
       "when": 1777531137805,
       "tag": "0000_cooing_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1746000000000,
+      "tag": "0001_mini_app_results_source",
+      "breakpoints": true
     }
   ]
 }

@@ -2112,6 +2112,7 @@ export class DatabaseStorage implements IStorage {
       input: (row.input as Record<string, any>) || {},
       output: (row.output as Record<string, any>) || {},
       status: (row.status || "completed") as "pending" | "completed" | "error",
+      source: ((row.source || "owner") as "owner" | "public"),
       createdAt: row.createdAt.toISOString(),
     }));
   }
@@ -2124,6 +2125,7 @@ export class DatabaseStorage implements IStorage {
       input: resultData.input || {},
       output: resultData.output || {},
       status: resultData.status || "completed",
+      source: resultData.source || "owner",
     }).returning();
     const row = result[0];
     return {
@@ -2134,6 +2136,7 @@ export class DatabaseStorage implements IStorage {
       input: (row.input as Record<string, any>) || {},
       output: (row.output as Record<string, any>) || {},
       status: (row.status || "completed") as "pending" | "completed" | "error",
+      source: ((row.source || "owner") as "owner" | "public"),
       createdAt: row.createdAt.toISOString(),
     };
   }

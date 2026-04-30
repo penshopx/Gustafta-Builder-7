@@ -1614,6 +1614,7 @@ export class MemStorage implements IStorage {
       input: insertResult.input || {},
       output: insertResult.output || {},
       status: insertResult.status || "completed",
+      source: insertResult.source || "owner",
       createdAt: new Date().toISOString(),
     };
     this.miniAppResults.set(id, result);

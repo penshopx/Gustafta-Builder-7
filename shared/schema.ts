@@ -1249,6 +1249,7 @@ export const miniAppResults = pgTable("mini_app_results", {
   input: jsonb("input").default({}),
   output: jsonb("output").default({}),
   status: text("status").default("completed"),
+  source: text("source").default("owner"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -1279,11 +1280,13 @@ export const insertMiniAppResultSchema = z.object({
   input: z.record(z.any()).optional().default({}),
   output: z.record(z.any()).optional().default({}),
   status: z.enum(["pending", "completed", "error"]).optional().default("completed"),
+  source: z.enum(["owner", "public"]).optional().default("owner"),
 });
 
 export type InsertMiniAppResult = z.infer<typeof insertMiniAppResultSchema>;
 export type MiniAppResult = InsertMiniAppResult & {
   id: string;
+  source: "owner" | "public";
   createdAt: string;
 };
 
