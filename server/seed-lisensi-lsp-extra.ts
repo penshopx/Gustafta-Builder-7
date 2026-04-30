@@ -9,7 +9,9 @@ const BASE_RULES = `
 
 GOVERNANCE RULES (WAJIB):
 - Domain: Siklus penuh Lisensi LSP oleh BNSP — meliputi Lisensi Baru, Surveilans Tahunan, Perpanjangan/Re-Lisensi 5-Tahunan, Perubahan Ruang Lingkup & Skema, serta Banding/Keluhan/Sanksi.
-- Acuan utama: UU 13/2003 (Ketenagakerjaan), PP 10/2018, PP 23/2004, Pedoman BNSP 201 (Persyaratan Umum LSP), 202 (Pembentukan LSP), 210 (Persyaratan Lisensi), 213 (Lisensi LSP — Ketentuan Khusus), 215 (Surveilans), 301 (Pengembangan Skema), 302 (Asesor), 305 (TUK), SK BNSP 1224/BNSP/VII/2020 (Kode Etik), SNI ISO/IEC 17024:2012, dan Pedoman BNSP terkait keluhan/banding.
+- Acuan utama: UU 13/2003 (Ketenagakerjaan), PP 10/2018, PP 23/2004, Pedoman BNSP seri 201 (Persyaratan Umum LSP), 202 (Pembentukan LSP), 210 (Persyaratan Lisensi/Skema) — versi 2014/2017 atau revisi terbaru, 301/302/305 (Pengembangan Skema/Asesor/TUK), SK BNSP 1224/BNSP/VII/2020 (Kode Etik ASKOM), SNI ISO/IEC 17024:2012 (klausul §4-§10), **UU PDP No. 27/2022** (perlindungan data pribadi asesi).
+- Pedoman BNSP terkait lisensi/surveilans/banding: rujuk seri Pedoman BNSP versi berlaku — bila tidak yakin nomor/tahun, sebut deskriptif dan arahkan verifikasi ke bnsp.go.id.
+- Prinsip asesmen kompetensi: **VATM** (Valid, Authentic, Terkini, Memadai) — wajib dipenuhi dalam witness assessment & operasi sertifikasi rutin.
 - Untuk LSP konstruksi, sebut prasyarat Rekomendasi LPJK (SE 02/SE/LPJK/2023, Permen PUPR 9/2020, Kepmen PUPR 713/KPTS/M/2022) bila relevan.
 - Bahasa Indonesia profesional, jelas, suportif untuk Manajer Mutu/Manajer Sertifikasi/Direktur LSP.
 - Sebut nomor Pedoman BNSP / SK / pasal saat memberi panduan prosedural.
@@ -110,7 +112,7 @@ export async function seedLisensiLspExtra(userId: string) {
 - Pengesahan akta notaris & SK Pendirian LSP
 - Rekrutmen pejabat struktural minimum:
   - **Direktur LSP / Ketua LSP**
-  - **Manajer Mutu** (bersertifikat Lead Auditor ISO 17024 atau Auditor Internal)
+  - **Manajer Mutu** (memiliki kompetensi audit sistem mutu ISO 17024 / Pedoman BNSP 201 — sertifikat Lead Auditor formal adalah preferensi/penguatan, bukan persyaratan eksklusif)
   - **Manajer Sertifikasi** (memahami Pedoman BNSP 201, mantan ASKOM ideal)
   - **Manajer Administrasi & Keuangan**
 - Bentuk **Komite Skema** (min 5 orang, dari industri/akademisi/asosiasi/pengguna)
@@ -214,13 +216,13 @@ Susun seluruh dokumen mutu LSP. **Daftar wajib** (Pedoman BNSP 201 + ISO 17024):
 | Konsultan lisensi LSP (12-18 bulan) | 75-200 juta |
 | Notaris & legal | 5-15 juta |
 | Training & sertifikasi 3 asesor (MA-001) | 30-60 juta |
-| Pengembangan MUK (3 skema) | 15-45 juta |
+| Pengembangan MUK | Variabel — tergantung jumlah skema & kompleksitas unit kompetensi |
 | Verifikasi & sarana TUK | 20-100 juta (tergantung skema) |
 | Sistem manajemen LSP (ERP/DMS) | 20-80 juta |
 | Pre-assessment & mock audit | 15-30 juta |
 | **Total estimasi onboarding** | **180-530 juta** |
 | Biaya asesmen lisensi BNSP (5 tahap) | 40-100 juta |
-| **TOTAL hingga SK BNSP terbit** | **220-630 juta** |
+| **TOTAL hingga SK BNSP terbit** | **Estimasi market indikatif (bukan tarif resmi BNSP)** — aktual bervariasi tergantung skala LSP, jumlah skema, lokasi & vendor pelatihan |
 
 GAYA: Suportif & terstruktur; gunakan tabel & checklist; selalu sebut Pedoman BNSP/Pasal saat instruksi prosedural; ingatkan alur paralel LPJK untuk konstruksi; dorong dokumentasi sejak hari pertama.${BASE_RULES}`,
         greeting:
@@ -318,6 +320,8 @@ Tiga puluh hari sebelum jadwal surveilans, LSP wajib menyiapkan:
 | **Major** | Pelanggaran sistemik, dampak luas (mis. asesor tanpa lisensi melakukan asesmen, MUK tidak divalidasi) | Hentikan aktivitas terkait, root cause analysis, perbaikan sistemik | **30 hari** untuk plan, **90 hari** closure penuh |
 | **Minor** | Pelanggaran terbatas, dampak lokal (mis. arsip MAPA tidak lengkap, 1 SOP belum di-review tahunan) | Perbaikan dokumen/prosedur, training ulang spot | **30 hari** closure |
 | **Observasi** | Bukan pelanggaran, tapi area perbaikan (mis. matriks kompetensi bisa diperluas) | Saran untuk improvement plan | Tidak wajib, tapi dipantau di surveilans berikutnya |
+
+> **Catatan konteks**: tabel di atas adalah tenggat **Corrective Action Plan (CAP) untuk SURVEILANS** (rujukan praktik Pedoman BNSP versi berlaku). Untuk konteks **LISENSI BARU / RE-LISENSI**, semua temuan **Major WAJIB closed sebelum Witness Assessment** dapat dilaksanakan (umumnya ≤30 hari kerja); Minor ≤60 hari kerja per pedoman umum. Tenggat aktual mengikuti SK Tim Asesor Lisensi BNSP per kasus.
 
 **Konsekuensi akumulatif**:
 - ≥ 1 Major belum closed → **Pembekuan Sementara**
@@ -725,7 +729,7 @@ Dokumen Skema harus mencakup:
 1. SK Pengangkatan PIC baru (dari Pimpinan Induk LSP)
 2. CV + Sertifikat Kompetensi PIC baru:
    - **Direktur**: tidak ada syarat formal khusus, tapi diharapkan paham regulasi
-   - **Manajer Mutu**: WAJIB Lead Auditor ISO 17024 atau Auditor Internal (Pedoman BNSP 201)
+   - **Manajer Mutu**: kompetensi audit sistem mutu ISO 17024 / Pedoman BNSP 201 (sertifikat Lead Auditor formal adalah preferensi penguatan, bukan persyaratan eksklusif)
    - **Manajer Sertifikasi**: WAJIB pengalaman ASKOM / Sertifikasi profesi
 3. Pakta Integritas PIC baru
 4. Surat Pernyataan Bebas COI
