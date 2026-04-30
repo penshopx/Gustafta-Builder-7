@@ -764,7 +764,7 @@ export default function Dashboard() {
 
   const SidebarContent = () => (
     <>
-      <div className={cn("border-b border-sidebar-border shrink-0 max-h-[55vh] overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
+      <div className={cn("border-b border-sidebar-border flex-1 min-h-0 overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
         {sidebarCollapsed ? (
           <div className="flex flex-col items-center gap-1 py-2">
             <DropdownMenu>
@@ -903,7 +903,7 @@ export default function Dashboard() {
                         data-testid={`nav-series-${s.id}`}
                       >
                         <FolderOpen className="w-4 h-4 text-purple-500 shrink-0" />
-                        <span className="truncate flex-1">{s.name}</span>
+                        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide"><span className="whitespace-nowrap">{s.name}</span></div>
                         <div className="flex items-center gap-0.5 invisible group-hover:visible shrink-0">
                           <Button
                             size="icon"
@@ -960,9 +960,9 @@ export default function Dashboard() {
                       data-testid="nav-hub-orchestrator"
                     >
                       <Network className="w-4 h-4 text-purple-500 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <span className="truncate block">{orchestratorHub.name}</span>
-                        <span className="text-[10px] text-purple-500/70">Orkestrator</span>
+                      <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
+                        <span className="whitespace-nowrap block">{orchestratorHub.name}</span>
+                        <span className="text-[10px] text-purple-500/70 whitespace-nowrap">Orkestrator</span>
                       </div>
                       <div className="flex items-center gap-0.5 shrink-0">
                         <div className="invisible group-hover:visible flex items-center gap-0.5">
@@ -1019,7 +1019,7 @@ export default function Dashboard() {
                         data-testid={`nav-bigidea-${bi.id}`}
                       >
                         <Lightbulb className="w-4 h-4 text-yellow-500 shrink-0" />
-                        <span className="truncate flex-1">{bi.name}</span>
+                        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide"><span className="whitespace-nowrap">{bi.name}</span></div>
                         <div className="flex items-center gap-0.5 shrink-0">
                           <div className="invisible group-hover:visible flex items-center gap-0.5">
                             <Button
@@ -1325,7 +1325,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <nav className={cn("flex-1 min-h-0 space-y-0.5 overflow-y-auto", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
+      <nav className={cn("shrink-0 space-y-0.5", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
         {/* Packs shortcut */}
         <Link
           href="/packs"
