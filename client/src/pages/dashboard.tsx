@@ -763,8 +763,8 @@ export default function Dashboard() {
   };
 
   const SidebarContent = () => (
-    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-      <div className={cn("border-b border-sidebar-border flex-1 min-h-0 overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
+    <>
+      <div className={cn("border-b border-sidebar-border shrink-0 max-h-[55vh] overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
         {sidebarCollapsed ? (
           <div className="flex flex-col items-center gap-1 py-2">
             <DropdownMenu>
@@ -1090,9 +1090,9 @@ export default function Dashboard() {
                             data-testid={`nav-modul-orchestrator-${orchTb.id}`}
                           >
                             <Network className="w-4 h-4 text-purple-500 shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <span className="truncate block">{orchTb.name}</span>
-                              <span className="text-[10px] text-purple-500/70">Orkestrator Modul</span>
+                            <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
+                              <span className="whitespace-nowrap block">{orchTb.name}</span>
+                              <span className="text-[10px] text-purple-500/70 whitespace-nowrap">Orkestrator Modul</span>
                             </div>
                             <div className="flex items-center gap-0.5 shrink-0">
                               <div className="invisible group-hover:visible flex items-center gap-0.5">
@@ -1139,7 +1139,7 @@ export default function Dashboard() {
                         data-testid={`nav-toolbox-${tb.id}`}
                       >
                         <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                        <span className="truncate flex-1">{tb.name}</span>
+                        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide"><span className="whitespace-nowrap">{tb.name}</span></div>
                         <div className="flex items-center gap-0.5 shrink-0">
                           <div className="invisible group-hover:visible flex items-center gap-0.5">
                             <Button
@@ -1219,9 +1219,9 @@ export default function Dashboard() {
                                 <Network className="w-3 h-3" />
                               </AvatarFallback>
                             </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <span className="truncate block">{agent.name}</span>
-                              <span className="text-[10px] text-purple-500/70">Orkestrator</span>
+                            <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
+                              <span className="whitespace-nowrap block">{agent.name}</span>
+                              <span className="text-[10px] text-purple-500/70 whitespace-nowrap">Orkestrator</span>
                             </div>
                             <div className="flex gap-0.5 invisible group-hover:visible shrink-0">
                               <Button
@@ -1283,7 +1283,7 @@ export default function Dashboard() {
                                   {agent.name.substring(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="truncate flex-1">{agent.name}</span>
+                              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide"><span className="whitespace-nowrap">{agent.name}</span></div>
                               <div className="flex gap-0.5 invisible group-hover:visible shrink-0">
                                 <Button
                                   size="icon"
@@ -1325,7 +1325,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <nav className={cn("shrink-0 space-y-0.5 overflow-y-auto", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
+      <nav className={cn("flex-1 min-h-0 space-y-0.5 overflow-y-auto", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
         {/* Packs shortcut */}
         <Link
           href="/packs"
@@ -1446,7 +1446,7 @@ export default function Dashboard() {
           )}
         </button>
       </div>
-    </div>
+    </>
   );
 
   return (

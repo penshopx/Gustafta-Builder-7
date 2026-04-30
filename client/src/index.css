@@ -279,3 +279,11 @@
 .safe-area-bottom {
   padding-bottom: max(0.625rem, env(safe-area-inset-bottom));
 }
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
