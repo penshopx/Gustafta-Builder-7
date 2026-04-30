@@ -173,7 +173,13 @@ for (const envVar of requiredEnvVars) {
         log("[OrphanCleanup] error: " + (err as Error).message);
       }
 
-      if (process.env.NODE_ENV !== "production") {
+      // ── SEED BLOCK: berlaku di DEV & PROD ──
+      // Sebelumnya di-gate hanya non-production → menyebabkan production tertinggal
+      // (mis. 5 chatbot ekstra Lisensi LSP tidak ikut). Semua seed sudah idempotent
+      // (cek existence per BigIdea/toolbox, lalu skip), jadi aman dijalankan di prod.
+      // Yang clear-and-reseed (IMS, Personel Manajerial, Tender, Pasca Tender, Pelaksanaan,
+      // Legalitas) hanya menyentuh data seri-nya sendiri — tidak menghapus chatbot user.
+      {
         try {
           const { gustaftaKnowledgeBaseAgent, dokumentenderAgent } = await import("./seed-knowledge-base");
           const existingAgents = await storage.getAgents();
@@ -305,8 +311,6 @@ for (const envVar of requiredEnvVars) {
         } catch (err) {
           log("Failed to fix orphaned orchestrators: " + (err as Error).message);
         }
-      } else {
-        log("Production mode — skipping seed operations (data already in database)");
       }
 
       // ── DEDUP: catch-up Apr 2026 dihapus karena DUPLIKAT seedTasks utama ──

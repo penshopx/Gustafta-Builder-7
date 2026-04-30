@@ -83,6 +83,7 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 -   **Cascade Deletes in Storage**: `deleteSeries`, `deleteBigIdea`, and `deleteToolbox` now manually cascade to children (since `shared/schema.ts` has no FK `onDelete` clauses). This prevents orphan toolboxes and orphan agents accumulating across restarts.
 -   **Startup OrphanCleanup**: `server/index.ts` runs a one-shot raw-SQL DELETE on boot to remove any toolboxes/agents whose parents no longer exist, providing defense-in-depth.
 -   **Seed Idempotency Markers**: Each grounded seed (PanCEK KPK, SMAP ISO 37001, KAN, Lisensi LSP, ASKOM, AJJ Nirkertas, SKK Hardcopy) writes verifiable freshness markers (HEDGE, UU PDP 27/2022, LPSK, LSSM ter-akreditasi KAN, etc.) into agent system prompts. Catch-up logic only re-seeds when these markers are missing.
+-   **Seeds Run in Both Dev & Prod**: The seed block is no longer gated by `NODE_ENV`. Production deployments use a separate database from development, so gating seeds caused prod to lag behind dev (e.g. missing 5 Lisensi LSP Extra chatbots). All seeds are idempotent (skip if already exist), so running them in prod safely brings the deployed database up to parity on each restart/redeploy.
 
 ### Admin Panel & Role Hierarchy
 -   **Role Hierarchy**: `superadmin` (Wuryanto, auto-assigned), `admin` (assigned by superadmin), and `user` (default).
