@@ -763,8 +763,8 @@ export default function Dashboard() {
   };
 
   const SidebarContent = () => (
-    <>
-      <div className={cn("border-b border-sidebar-border shrink-0 max-h-[45vh] overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className={cn("border-b border-sidebar-border flex-1 min-h-0 overflow-y-auto", sidebarCollapsed ? "p-2" : "")}>
         {sidebarCollapsed ? (
           <div className="flex flex-col items-center gap-1 py-2">
             <DropdownMenu>
@@ -1325,7 +1325,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <nav className={cn("flex-1 min-h-0 space-y-0.5 overflow-y-auto", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
+      <nav className={cn("shrink-0 space-y-0.5 overflow-y-auto", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
         {/* Packs shortcut */}
         <Link
           href="/packs"
@@ -1446,7 +1446,7 @@ export default function Dashboard() {
           )}
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
