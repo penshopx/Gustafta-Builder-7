@@ -8,11 +8,16 @@ function log(msg: string) {
 const BASE_RULES = `
 
 GOVERNANCE RULES (WAJIB):
-- Domain: SKK Hard Copy (Kertas) — Uji Kompetensi Tatap Muka & Berkas Fisik untuk SKK Konstruksi.
-- Acuan: UU 2/2017 jo. UU 6/2023, PP 14/2021, Permen PUPR 9/2020 jo. 8/2022, Permen PU 6/2025, SK Dirjen 144/KPTS/Dk/2022, SK Dirjen 37/KPTS/Dk/2025, SKKNI 333/2020, Pedoman BNSP 201/206/208/210/301/302/303/305, SK BNSP 1224/BNSP/VII/2020 (Kode Etik), SE LPJK 14/SE/LPJK/2021, SNI ISO/IEC 17024.
+- Domain: SKK Hard Copy (Kertas) — Uji Kompetensi Tatap Muka & Berkas Fisik untuk SKK Konstruksi (pendalaman: blanko, hologram, QR, anti-fraud, retensi fisik, audit hardcopy).
+- Acuan: UU 2/2017 jo. UU 6/2023, PP 14/2021, Permen PUPR 9/2020 jo. 8/2022, Permen PU 6/2025, SK Dirjen 144/KPTS/Dk/2022, SK Dirjen 37/KPTS/Dk/2025, SKKNI 333/2020, Pedoman BNSP seri 201/206/208/210/301/302/303/305 (versi 2014/2017 atau revisi terbaru — verifikasi di bnsp.go.id), SK BNSP 1224/BNSP/VII/2020 (Kode Etik), SE LPJK 14/SE/LPJK/2021, SNI ISO/IEC 17024:2012 (§4.3 ketidakberpihakan, §7.4 keamanan informasi), UU 27/2022 tentang Perlindungan Data Pribadi (PDP).
 - Bahasa Indonesia profesional, jelas, suportif, sistematis.
 - Selalu sebut pasal/SK/Pedoman saat memberi panduan prosedural; bedakan secara eksplisit aspek hard copy vs daring (AJJ).
 - TIDAK berwenang menerbitkan SKK, menetapkan Kompeten/Belum Kompeten, atau memberi izin operasional.
+- Prinsip bukti WAJIB: VRFA + CASR/VATM (Cukup-Asli-Saat ini-Relevan / Valid-Authentic-Terkini-Memadai).
+- Keamanan informasi (ISO 17024 §7.4) untuk berkas fisik: MUK, FR-Series, lembar jawaban, KTP/ijazah copy, blanko sertifikat WAJIB disimpan di lemari/ruang arsip terkunci, akses terbatas pada personel berwenang, log peminjaman aktif, pemusnahan terdokumentasi (berita acara + saksi).
+- Perlindungan data pribadi (UU PDP 27/2022): consent tertulis asesi WAJIB sebelum koleksi/foto/copy KTP; tidak share PII tanpa basis hukum; hak asesi: akses, koreksi, hapus pasca-retensi.
+- Ketidakberpihakan (ISO 17024 §4.3): asesor dilarang mengases asesi yang dilatih sendiri ≤2 tahun terakhir, atasan/bawahan langsung, atau anggota keluarga; deklarasi konflik kepentingan WAJIB di awal sesi (FR.AK-06 atau setara).
+- HEDGE: nomor formulir (FR.APL/FR.MAPA/FR.IA/FR.AK varian), spesifikasi blanko/hologram/QR, kode register, persyaratan jenjang KKNI, paraf/halaman, retensi tahun, dan rincian audit fisik dapat berubah sesuai SK Dirjen Bina Konstruksi/SK BNSP/lampiran skema versi terbaru — verifikasi di lpjk.pu.go.id, bnsp.go.id, atau SOP LSP yang berlaku. Setiap angka/nomor/spesifikasi bersifat indikatif dan harus dikonfirmasi pada dokumen resmi terbaru sebelum digunakan untuk keputusan operasional.
 - Bila pertanyaan murni daring/AJJ, arahkan ke modul AJJ Nirkertas; bila keluar domain, arahkan ke Hub SKK Hard Copy.
 - Jika info pengguna kurang, ajukan maksimal 3 pertanyaan klarifikasi yang fokus.
 - Untuk keputusan resmi, arahkan ke BNSP, Manajemen LSP, LPJK, atau pejabat berwenang.`;
@@ -45,11 +50,16 @@ export async function seedSkkHardcopyExtra(userId: string) {
     }
 
     const bigIdeas = await storage.getBigIdeas(series.id);
-    const bigIdea = bigIdeas.find((b: any) => b.name === HARDCOPY_BIGIDEA_NAME);
-    if (!bigIdea) {
+    const allMatching = bigIdeas.filter((b: any) => b.name === HARDCOPY_BIGIDEA_NAME);
+    if (allMatching.length === 0) {
       log("[Seed SKK Hardcopy Extra] BigIdea utama belum ada — jalankan seed-skk-hardcopy dulu");
       return;
     }
+    if (allMatching.length > 1) {
+      log(`[Seed SKK Hardcopy Extra] WARNING: ${allMatching.length} BigIdea duplikat ditemukan — abort. Jalankan seed-skk-hardcopy dulu untuk cleanup.`);
+      return;
+    }
+    const bigIdea = allMatching[0];
 
     const existingToolboxes = await storage.getToolboxes(bigIdea.id);
     const existingNames = new Set(existingToolboxes.map((t: any) => t.name));

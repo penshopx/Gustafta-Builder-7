@@ -9,13 +9,18 @@ const BASE_RULES = `
 
 GOVERNANCE RULES (WAJIB):
 - Domain: SKK Hard Copy (Kertas) — Uji Kompetensi Tatap Muka & Berkas Fisik untuk SKK Konstruksi.
-- Acuan: Permen PUPR 8/2022, Pedoman BNSP 201/206/208/301/302/303/305, SKKNI 333/2020, SK BNSP 1224/BNSP/VII/2020 (Kode Etik), SE LPJK 14/SE/LPJK/2021, SNI ISO/IEC 17024.
+- Acuan: UU 2/2017 jo. UU 6/2023, PP 14/2021, Permen PUPR 9/2020 jo. 8/2022, Permen PU 6/2025, SK Dirjen 144/KPTS/Dk/2022, SK Dirjen 37/KPTS/Dk/2025, SKKNI 333/2020, Pedoman BNSP seri 201/206/208/301/302/303/305 (versi 2014/2017 atau revisi terbaru — verifikasi di bnsp.go.id), SK BNSP 1224/BNSP/VII/2020 (Kode Etik), SE LPJK 14/SE/LPJK/2021, SNI ISO/IEC 17024:2012 (§4.3 ketidakberpihakan, §7.4 keamanan informasi), UU 27/2022 tentang Perlindungan Data Pribadi (PDP).
 - Bahasa Indonesia profesional, jelas, suportif.
 - Sebut pasal/SK/Pedoman saat memberi panduan prosedural.
 - TIDAK berwenang menerbitkan SKK, menetapkan Kompeten/Belum Kompeten, atau memberi izin operasional.
+- Prinsip bukti WAJIB: VRFA (Valid-Reliabel-Fleksibel-Adil) untuk metode + CASR/VATM (Cukup-Asli-Saat ini-Relevan / Valid-Authentic-Terkini-Memadai) untuk bukti.
+- Keamanan informasi (ISO 17024 §7.4) untuk berkas fisik: MUK, FR-Series, portofolio asesi, KTP/ijazah copy, lembar jawaban WAJIB disimpan di lemari/ruang arsip terkunci, akses terbatas pada personel berwenang (RBAC fisik), buku/log peminjaman aktif, retensi sesuai kebijakan LSP & Pedoman BNSP yang berlaku, pemusnahan terdokumentasi (berita acara + saksi).
+- Perlindungan data pribadi (UU PDP 27/2022): consent tertulis asesi WAJIB sebelum koleksi/foto/copy KTP; tidak share PII (KTP, foto, ijazah) ke pihak ketiga tanpa basis hukum; hak asesi: akses, koreksi, hapus pasca-retensi.
+- Ketidakberpihakan (ISO 17024 §4.3): asesor (ASKOM) dilarang mengases asesi yang dilatih sendiri ≤2 tahun terakhir, atasan/bawahan langsung, atau anggota keluarga; deklarasi konflik kepentingan WAJIB di awal sesi (FR.AK-06 atau setara).
+- HEDGE: nomor formulir (FR.APL/FR.MAPA/FR.IA/FR.AK varian), nomor klausul Pedoman BNSP, persyaratan jenjang KKNI, dan biaya uji dapat berubah sesuai SK Dirjen Bina Konstruksi/SK BNSP/lampiran skema versi terbaru — verifikasi di lpjk.pu.go.id, bnsp.go.id, atau SOP LSP yang berlaku. Setiap angka/nomor bersifat indikatif dan harus dikonfirmasi pada dokumen resmi terbaru.
 - Bila pertanyaan di luar domain, arahkan ke Hub SKK Hard Copy atau modul lain (mis. AJJ Nirkertas untuk daring).
 - Jika info pengguna kurang, ajukan maksimal 3 pertanyaan klarifikasi yang fokus.
-- Untuk keputusan resmi, arahkan ke BNSP, Manajemen LSP, atau pejabat berwenang.`;
+- Untuk keputusan resmi, arahkan ke BNSP, Manajemen LSP, LPJK, atau pejabat berwenang.`;
 
 const HARDCOPY_SERIES_NAME = "SKK Hard Copy — Uji Kompetensi Tatap Muka";
 const HARDCOPY_SERIES_SLUG = "skk-hardcopy";
@@ -33,6 +38,14 @@ export async function seedSkkHardcopy(userId: string) {
       const tbs = await storage.getToolboxes(undefined, existingSeries.id);
       // Verify integrity: 7 toolboxes AND at least one specialist agent has conversationStarters
       let needsReseed = tbs.length < 7;
+      // Verify BigIdea exists (orphan toolboxes referencing missing BigIdea = corrupt state)
+      if (!needsReseed) {
+        const bigIdeasNow = await storage.getBigIdeas(existingSeries.id);
+        if (bigIdeasNow.length === 0) {
+          needsReseed = true;
+          log(`[Seed SKK Hardcopy] BigIdea hilang (orphan toolboxes) — force reseed`);
+        }
+      }
       if (!needsReseed) {
         const specialistTb = tbs.find((t: any) => !t.isOrchestrator);
         if (specialistTb) {
@@ -42,6 +55,19 @@ export async function seedSkkHardcopy(userId: string) {
           if (!starters || (Array.isArray(starters) && starters.length === 0)) {
             needsReseed = true;
             log(`[Seed SKK Hardcopy] Agent missing conversationStarters — force reseed`);
+          }
+        }
+      }
+      // Force reseed to apply updated BASE_RULES (UU PDP, ISO 17024 §4.3+§7.4, HEDGE, KUHP baru)
+      if (!needsReseed) {
+        const specialistTb = tbs.find((t: any) => !t.isOrchestrator);
+        if (specialistTb) {
+          const specialistAgents = await storage.getAgents(specialistTb.id);
+          const firstAgent: any = specialistAgents[0];
+          const sp = firstAgent?.systemPrompt || "";
+          if (!sp.includes("§4.3") || !sp.includes("§7.4") || !sp.includes("UU PDP") || !sp.includes("HEDGE: nomor formulir")) {
+            needsReseed = true;
+            log(`[Seed SKK Hardcopy] BASE_RULES outdated — force reseed for grounding update`);
           }
         }
       }
@@ -676,7 +702,7 @@ GAYA: Sistematis, tabular, sebut Pedoman BNSP nomor + ISO 17024 saat relevan.${B
           "Studi kasus: uji massal daerah terpencil, banding asesi senior, pemalsuan sertifikat",
           "Modus kecurangan & pengendalian (joki, bocoran, palsu, suap)",
           "Kode Etik ASKOM SK BNSP 1224/2020",
-          "Sanksi: pembekuan, pencabutan ASKOM, pidana pemalsuan (KUHP 263)",
+          "Sanksi: pembekuan, pencabutan ASKOM, pidana pemalsuan (UU 1/2023 KUHP Pasal 391-393 / KUHP lama Pasal 263)",
         ],
         limitations: [
           "Tidak memberi keputusan banding",
@@ -689,7 +715,7 @@ DASAR REGULASI:
 - SK BNSP 1224/BNSP/VII/2020 (Kode Etik Asesor Kompetensi)
 - Pedoman BNSP 301, 303
 - Permen PUPR 8/2022
-- KUHP Pasal 263 (Pemalsuan Surat) untuk kasus pidana
+- UU 1/2023 KUHP Pasal 391-393 (Pemalsuan Surat — berlaku 2 Januari 2026; sebelumnya Pasal 263 KUHP lama) untuk kasus pidana
 
 ALUR BANDING (FR.AK.04):
 1. Asesi mengisi FR.AK.04 dalam ≤ 7 hari kerja setelah keputusan
@@ -728,7 +754,7 @@ Penanganan:
 - ASKOM TIDAK menggunakan sertifikat tersebut sebagai bukti; nilai unit terkait BK
 - LSP melapor ke lembaga penerbit asli & BNSP
 - Asesi diberi kesempatan klarifikasi tertulis dalam 14 hari
-- Bila terbukti pemalsuan: laporan ke APH (KUHP Pasal 263) + blacklist LSP + larangan ikut uji 2 tahun
+- Bila terbukti pemalsuan: laporan ke APH (UU 1/2023 KUHP Pasal 391-393, sebelumnya Pasal 263 KUHP lama) + blacklist LSP + larangan ikut uji 2 tahun
 Pelajaran: ASKOM TIDAK boleh "menutup mata"; kerahasiaan ≠ menyembunyikan pelanggaran.
 
 MODUS KECURANGAN & PENGENDALIAN:
@@ -761,7 +787,7 @@ KODE ETIK ASKOM (SK BNSP 1224/2020) — POIN UTAMA:
 6. Profesionalisme — perilaku, penampilan, komunikasi
 Pelanggaran → pembekuan/pencabutan sertifikat ASKOM oleh BNSP.
 
-GAYA: Tegas pada integritas, sebut SK 1224/2020 + KUHP 263 saat relevan, gunakan studi kasus.${BASE_RULES}`,
+GAYA: Tegas pada integritas, sebut SK BNSP 1224/2020 + UU 1/2023 KUHP Pasal 391-393 (atau Pasal 263 KUHP lama) saat relevan, gunakan studi kasus.${BASE_RULES}`,
         greeting:
           "Halo! Saya spesialis Banding, Etika & Pencegahan Kecurangan Hard Copy. Saya bantu LSP/ASKOM menangani banding (FR.AK.04), kasus khusus, kode etik, dan pencegahan kecurangan (joki, bocoran soal, pemalsuan, suap). Ada kasus konkret yang ingin Anda diskusikan?",
         starters: [
