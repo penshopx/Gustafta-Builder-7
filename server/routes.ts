@@ -2694,23 +2694,122 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
       
       try {
-        const stream = await streamClient.chat.completions.create({
-          model: modelName,
-          messages: chatMessages,
-          max_tokens: maxTokens,
-          temperature: temperature,
-          stream: true,
+        const fallbackAttempts: Array<{ name: string; createStream: () => Promise<AsyncIterable<{ content: string }>> }> = [];
+
+        fallbackAttempts.push({
+          name: `primary(${modelName})`,
+          createStream: async () => {
+            const stream = await streamClient.chat.completions.create({
+              model: modelName,
+              messages: chatMessages,
+              max_tokens: maxTokens,
+              temperature: temperature,
+              stream: true,
+            });
+            return (async function* () {
+              for await (const chunk of stream) {
+                const content = chunk.choices[0]?.delta?.content || "";
+                if (content) yield { content };
+              }
+            })();
+          },
         });
-        
-        for await (const chunk of stream) {
+
+        const isPrimaryDeepseek = modelName.startsWith("deepseek");
+        if (!isPrimaryDeepseek && process.env.DEEPSEEK_API_KEY) {
+          fallbackAttempts.push({
+            name: "fallback(deepseek)",
+            createStream: async () => {
+              const ds = new OpenAI({
+                apiKey: process.env.DEEPSEEK_API_KEY!,
+                baseURL: "https://api.deepseek.com",
+              });
+              const stream = await ds.chat.completions.create({
+                model: "deepseek-chat",
+                messages: chatMessages as any,
+                max_tokens: maxTokens,
+                temperature: temperature,
+                stream: true,
+              });
+              return (async function* () {
+                for await (const chunk of stream) {
+                  const content = chunk.choices[0]?.delta?.content || "";
+                  if (content) yield { content };
+                }
+              })();
+            },
+          });
+        }
+
+        if (process.env.GEMINI_API_KEY) {
+          fallbackAttempts.push({
+            name: "fallback(gemini)",
+            createStream: async () => {
+              const sysParts: string[] = [];
+              const geminiContents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+              for (const m of chatMessages as any[]) {
+                const text = typeof m.content === "string"
+                  ? m.content
+                  : Array.isArray(m.content)
+                  ? m.content.map((p: any) => (typeof p === "string" ? p : p?.text || "")).filter(Boolean).join("\n")
+                  : "";
+                if (!text) continue;
+                if (m.role === "system") {
+                  sysParts.push(text);
+                } else {
+                  geminiContents.push({
+                    role: m.role === "assistant" ? "model" : "user",
+                    parts: [{ text }],
+                  });
+                }
+              }
+              const stream = await genai.models.generateContentStream({
+                model: "gemini-2.5-flash",
+                contents: geminiContents as any,
+                config: {
+                  ...(sysParts.length ? { systemInstruction: sysParts.join("\n\n") } : {}),
+                  temperature,
+                  maxOutputTokens: maxTokens,
+                },
+              });
+              return (async function* () {
+                for await (const chunk of stream) {
+                  const content = (chunk as any).text || "";
+                  if (content) yield { content };
+                }
+              })();
+            },
+          });
+        }
+
+        let aiStream: AsyncIterable<{ content: string }> | null = null;
+        let chosenProvider = "";
+        let lastAttemptError: any;
+        for (const attempt of fallbackAttempts) {
+          try {
+            aiStream = await attempt.createStream();
+            chosenProvider = attempt.name;
+            if (attempt !== fallbackAttempts[0]) {
+              console.warn(`[Chat fallback] using ${attempt.name} after primary failure:`, lastAttemptError?.message || lastAttemptError);
+            }
+            break;
+          } catch (err: any) {
+            lastAttemptError = err;
+            console.error(`[Chat fallback] ${attempt.name} stream creation failed:`, err?.message || err);
+          }
+        }
+        if (!aiStream) {
+          throw lastAttemptError || new Error("All AI providers failed to create stream");
+        }
+
+        for await (const chunk of aiStream) {
           if (!isClientConnected) {
             cleanup();
             return;
           }
-          const content = chunk.choices[0]?.delta?.content || "";
-          if (content) {
-            fullContent += content;
-            res.write(`data: ${JSON.stringify({ type: "chunk", content })}\n\n`);
+          if (chunk.content) {
+            fullContent += chunk.content;
+            res.write(`data: ${JSON.stringify({ type: "chunk", content: chunk.content })}\n\n`);
           }
         }
         
