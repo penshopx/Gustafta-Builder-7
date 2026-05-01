@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import PDFDocument from "pdfkit";
 import OpenAI from "openai";
 import { db } from "./db";
 import { legalChatSessions, legalChatMessages } from "@shared/schema";
@@ -355,6 +356,114 @@ export function registerLegalRoutes(app: Express) {
     })));
   });
 
+  app.post("/api/legal/export-pdf", (req: any, res: any) => {
+    try {
+      const { content, agentName, agentId } = req.body;
+      if (!content || typeof content !== "string") {
+        return res.status(400).json({ error: "Content is required" });
+      }
+      if (content.length > 50000) {
+        return res.status(413).json({ error: "Content too large for PDF export (max 50,000 characters)" });
+      }
+
+      const today = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      const safeAgentName = String(agentName || "LexCom AI").replace(/[^\w\s\-.,()]/g, "");
+
+      const filename = `LexCom-${(agentId || "legal").replace(/[^a-z0-9]/gi, "-")}-${Date.now()}.pdf`;
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+      const doc = new PDFDocument({
+        size: "A4",
+        margins: { top: 60, bottom: 60, left: 72, right: 72 },
+        info: {
+          Title: `LexCom Legal Document - ${safeAgentName}`,
+          Author: "LexCom AI Legal Research Platform",
+          Subject: "Legal Analysis Document",
+          Creator: "LexCom AI",
+        },
+      });
+
+      doc.pipe(res);
+
+      const PX = 72;
+      const pageWidth = doc.page.width - 144;
+
+      doc.rect(PX, 48, pageWidth, 2).fill("#4f46e5");
+      doc.fillColor("#1e1b4b").fontSize(18).font("Helvetica-Bold")
+        .text("LexCom AI Legal Research Platform", PX, 58, { width: pageWidth });
+      doc.fillColor("#6b7280").fontSize(9).font("Helvetica")
+        .text(`Agen: ${safeAgentName}  |  Tanggal: ${today}  |  Bersifat edukatif — bukan pendapat hukum mengikat`, PX, 80, { width: pageWidth });
+      doc.rect(PX, 96, pageWidth, 1).fill("#e5e7eb");
+      doc.moveDown(2);
+
+      const lines = content.split("\n");
+
+      for (const rawLine of lines) {
+        const line = rawLine;
+        const y = doc.y;
+
+        if (y > doc.page.height - 100) {
+          doc.addPage();
+        }
+
+        if (/^#{3}\s+/.test(line)) {
+          const text = line.replace(/^###\s+/, "").replace(/\*\*/g, "").trim();
+          doc.fillColor("#4338ca").fontSize(11).font("Helvetica-Bold").text(text, PX, undefined, { width: pageWidth });
+          doc.moveDown(0.3);
+        } else if (/^#{2}\s+/.test(line)) {
+          const text = line.replace(/^##\s+/, "").replace(/\*\*/g, "").trim();
+          doc.moveDown(0.4);
+          doc.fillColor("#312e81").fontSize(13).font("Helvetica-Bold").text(text, PX, undefined, { width: pageWidth });
+          doc.moveDown(0.3);
+        } else if (/^#{1}\s+/.test(line)) {
+          const text = line.replace(/^#\s+/, "").replace(/\*\*/g, "").trim();
+          doc.moveDown(0.6);
+          doc.fillColor("#1e1b4b").fontSize(14).font("Helvetica-Bold").text(text.toUpperCase(), PX, undefined, { width: pageWidth });
+          doc.rect(PX, doc.y, pageWidth, 0.5).fill("#e5e7eb");
+          doc.moveDown(0.4);
+        } else if (/^---+$/.test(line.trim())) {
+          doc.moveDown(0.3);
+          doc.rect(PX, doc.y, pageWidth, 0.5).fill("#d1d5db");
+          doc.moveDown(0.5);
+        } else if (/^\d+\.\s+/.test(line)) {
+          const text = line.replace(/^\d+\.\s+/, "").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").trim();
+          const num = line.match(/^(\d+)\./)?.[1] || "•";
+          doc.fillColor("#1a1a1a").fontSize(10).font("Helvetica")
+            .text(`${num}.  ${text}`, PX + 8, undefined, { width: pageWidth - 8 });
+          doc.moveDown(0.2);
+        } else if (/^[-*]\s+/.test(line)) {
+          const text = line.replace(/^[-*]\s+/, "").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").trim();
+          doc.fillColor("#1a1a1a").fontSize(10).font("Helvetica")
+            .text(`\u2022  ${text}`, PX + 8, undefined, { width: pageWidth - 8 });
+          doc.moveDown(0.2);
+        } else if (line.trim() === "") {
+          doc.moveDown(0.5);
+        } else {
+          const plainText = line.replace(/\*\*\*(.+?)\*\*\*/g, "$1").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").trim();
+          if (plainText) {
+            doc.fillColor("#1a1a1a").fontSize(10).font("Helvetica")
+              .text(plainText, PX, undefined, { width: pageWidth, align: "justify" });
+            doc.moveDown(0.25);
+          }
+        }
+      }
+
+      doc.moveDown(1.5);
+      doc.rect(PX, doc.y, pageWidth, 1).fill("#e5e7eb");
+      doc.moveDown(0.5);
+      doc.fillColor("#9ca3af").fontSize(8).font("Helvetica-Oblique")
+        .text("⚠ Dokumen ini dihasilkan oleh LexCom AI dan bersifat edukatif semata. Bukan merupakan pendapat hukum profesional yang mengikat secara hukum. Untuk keputusan hukum konkret, konsultasikan dengan advokat atau konsultan hukum berlisensi PERADI/KAI.", PX, undefined, { width: pageWidth, align: "center" });
+
+      doc.end();
+    } catch (error) {
+      console.error("[Legal Export PDF] Error:", error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Failed to generate PDF" });
+      }
+    }
+  });
+
   app.get("/api/legal/guest-status", (req: any, res: any) => {
     if (!isGuest(req)) {
       return res.json({ isGuest: false, messagesUsed: 0, limit: GUEST_MESSAGE_LIMIT });
@@ -362,5 +471,131 @@ export function registerLegalRoutes(app: Express) {
     const guestKey = getGuestKey(req);
     const count = getGuestCount(guestKey);
     res.json({ isGuest: true, messagesUsed: count, limit: GUEST_MESSAGE_LIMIT, limitReached: count >= GUEST_MESSAGE_LIMIT });
+  });
+
+  app.post("/api/legal/legal-opinion", async (req: any, res: any) => {
+    try {
+      const userId = getUserId(req);
+      const guest = !userId;
+
+      if (guest) {
+        const guestKey = getGuestKey(req);
+        const count = getGuestCount(guestKey);
+        if (count >= GUEST_MESSAGE_LIMIT) {
+          return res.status(429).json({
+            error: "Batas pesan tamu tercapai",
+            limitReached: true,
+            message: `Mode tamu dibatasi ${GUEST_MESSAGE_LIMIT} pesan per hari. Silakan login untuk akses penuh.`
+          });
+        }
+        incrementGuestCount(guestKey);
+      }
+
+      const { clientName, facts, legalIssues, requestedBy } = req.body;
+      if (!facts || typeof facts !== "string" || facts.trim().length === 0) {
+        return res.status(400).json({ error: "Facts are required" });
+      }
+
+      const today = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      const docNumber = `LO-${Date.now().toString(36).toUpperCase()}`;
+
+      const systemPrompt = `${LEGAL_AGENTS.find(a => a.id === "drafter")!.systemPrompt}`;
+
+      const userPrompt = `Buat LEGAL OPINION (Pendapat Hukum) formal dengan struktur lengkap sesuai standar PERADI/HKLI.
+
+Data yang tersedia:
+- Nomor Dokumen: ${docNumber}
+- Tanggal: ${today}
+- Klien / Pemohon: ${clientName || "[Nama Klien]"}
+- Dibuat oleh: ${requestedBy || "LexCom AI Legal Research Platform"}
+- Fakta & Kronologi: ${facts.trim()}
+- Permasalahan Hukum yang Diminta: ${legalIssues || "Sesuai fakta yang disampaikan"}
+
+Gunakan struktur berikut secara lengkap:
+1. **KETERANGAN DOKUMEN** (Nomor, Tanggal, Kepada, Perihal, Dasar Penugasan)
+2. **FAKTA-FAKTA KLIEN** (Kronologi berdasarkan input, jangan mengarang)
+3. **PERMASALAHAN HUKUM** (Daftar bernomor isu yang dianalisis)
+4. **DASAR HUKUM** (Peraturan perundang-undangan & yurisprudensi relevan dengan citation lengkap)
+5. **ANALISIS HUKUM** (IRAC per isu: Issue → Rule → Application → Conclusion)
+6. **KESIMPULAN** (Ringkasan pendapat hukum yang tegas dan terukur)
+7. **REKOMENDASI** (Langkah konkret yang disarankan)
+8. **DISCLAIMER** (Batasan formal pendapat hukum ini)
+
+Sertakan header: "DRAFT — UNTUK REVIEW ADVOKAT" di awal dokumen.`;
+
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.setHeader("X-Agent-Selected", "drafter");
+
+      let fullResponse = "";
+      try {
+        const stream = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          stream: true,
+          max_tokens: 3000,
+          temperature: 0.2,
+        });
+
+        for await (const chunk of stream) {
+          const text = chunk.choices[0]?.delta?.content || "";
+          if (text) {
+            fullResponse += text;
+            res.write(`data: ${JSON.stringify({ text, agentId: "drafter" })}\n\n`);
+          }
+        }
+
+        if (!fullResponse.includes("⚠️")) {
+          const disclaimer = "\n\n---\n⚠️ *Draft ini bersifat referensi edukatif. Setiap dokumen hukum resmi harus direvisi dan ditandatangani di hadapan advokat berlisensi.*";
+          fullResponse += disclaimer;
+          res.write(`data: ${JSON.stringify({ text: disclaimer, agentId: "drafter" })}\n\n`);
+        }
+      } catch (err: any) {
+        const errMsg = "Maaf, terjadi kesalahan saat membuat legal opinion. Silakan coba lagi.";
+        fullResponse = errMsg;
+        res.write(`data: ${JSON.stringify({ text: errMsg, agentId: "drafter" })}\n\n`);
+      }
+
+      if (userId) {
+        try {
+          const title = `Legal Opinion — ${clientName || "Klien"} (${today})`;
+          const [newSession] = await db.insert(legalChatSessions).values({
+            userId,
+            agentType: "drafter",
+            title: title.slice(0, 60),
+            messageCount: 0,
+          }).returning();
+
+          const sessionPrompt = `[Legal Opinion] Klien: ${clientName || "N/A"} | Fakta: ${facts.trim().slice(0, 200)}`;
+          await db.insert(legalChatMessages).values([
+            { sessionId: newSession.id, userId, role: "user", content: sessionPrompt, agentType: "drafter" },
+            { sessionId: newSession.id, userId, role: "assistant", content: fullResponse, agentType: "drafter", agentSelected: "drafter" },
+          ]);
+          await db.update(legalChatSessions)
+            .set({ messageCount: 2, updatedAt: new Date() })
+            .where(eq(legalChatSessions.id, newSession.id));
+
+          res.write(`data: ${JSON.stringify({ done: true, sessionId: newSession.id, agentId: "drafter" })}\n\n`);
+        } catch {
+          res.write(`data: ${JSON.stringify({ done: true, agentId: "drafter" })}\n\n`);
+        }
+      } else {
+        res.write(`data: ${JSON.stringify({ done: true, agentId: "drafter" })}\n\n`);
+      }
+
+      res.end();
+    } catch (error: any) {
+      console.error("[Legal Opinion] Unhandled error:", error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Internal server error" });
+      } else {
+        res.write(`data: ${JSON.stringify({ error: "Server error", done: true })}\n\n`);
+        res.end();
+      }
+    }
   });
 }

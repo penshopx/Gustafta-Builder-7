@@ -4,7 +4,9 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight, Copy, Check, Menu, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight, Copy, Check, Menu, X, FileDown, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageContent } from "@/lib/format-message";
@@ -52,6 +54,33 @@ const ORCHESTRATOR_AGENT: LegalAgent = {
   ],
 };
 
+async function exportMessageToPdf(content: string, agentName: string, agentId?: string, onError?: (msg: string) => void) {
+  try {
+    const res = await fetch("/api/legal/export-pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content, agentName, agentId }),
+    });
+    if (res.status === 413) {
+      onError?.("Konten terlalu panjang untuk diekspor sebagai PDF.");
+      return;
+    }
+    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `LexCom-${(agentId || "legal").replace(/[^a-z0-9]/gi, "-")}-${Date.now()}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("[LexCom] PDF export failed", err);
+    onError?.("Gagal mengekspor PDF. Silakan coba lagi.");
+  }
+}
+
 export default function LegalChat() {
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split("?")[1] || "");
@@ -68,6 +97,11 @@ export default function LegalChat() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [guestLimitReached, setGuestLimitReached] = useState(false);
+
+  const [showLegalOpinionForm, setShowLegalOpinionForm] = useState(false);
+  const [legalOpinionForm, setLegalOpinionForm] = useState({ clientName: "", facts: "", legalIssues: "", requestedBy: "" });
+  const [isGeneratingOpinion, setIsGeneratingOpinion] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -128,6 +162,7 @@ export default function LegalChat() {
     setMessages([]);
     setCurrentSessionId(null);
     setSidebarOpen(false);
+    setShowLegalOpinionForm(false);
   };
 
   const copyToClipboard = async (text: string, id: string) => {
@@ -242,6 +277,85 @@ export default function LegalChat() {
     }
   }, [input, isStreaming, selectedAgentId, currentSessionId, refetchSessions, guestLimitReached, isAuthenticated]);
 
+  const generateLegalOpinion = async () => {
+    if (!legalOpinionForm.facts.trim() || isGeneratingOpinion) return;
+
+    setShowLegalOpinionForm(false);
+    setIsGeneratingOpinion(true);
+    setSelectedAgentId("drafter");
+
+    const userContent = `[Permintaan Legal Opinion]\nKlien: ${legalOpinionForm.clientName || "N/A"}\nFakta: ${legalOpinionForm.facts}\nIsu Hukum: ${legalOpinionForm.legalIssues || "Sesuai fakta"}`;
+    const userMsg: ChatMessage = {
+      id: `u-${Date.now()}`,
+      role: "user",
+      content: userContent,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMsg]);
+
+    const assistantId = `a-${Date.now()}`;
+    let assistantContent = "";
+
+    const streamMsg: ChatMessage = {
+      id: assistantId,
+      role: "assistant",
+      content: "",
+      agentId: "drafter",
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, streamMsg]);
+
+    try {
+      const res = await fetch("/api/legal/legal-opinion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(legalOpinionForm),
+      });
+
+      if (res.status === 429) {
+        const data = await res.json().catch(() => ({}));
+        setGuestLimitReached(true);
+        const limitMsg = data.message || "Mode tamu dibatasi. Silakan login untuk akses penuh.";
+        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: limitMsg } : m));
+        return;
+      }
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) throw new Error("No stream");
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const raw = decoder.decode(value);
+        const lines = raw.split("\n");
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.text) {
+              assistantContent += data.text;
+              setMessages(prev =>
+                prev.map(m => m.id === assistantId ? { ...m, content: assistantContent, agentId: "drafter" } : m)
+              );
+            }
+            if (data.done && data.sessionId) {
+              setCurrentSessionId(data.sessionId);
+              refetchSessions();
+            }
+          } catch {}
+        }
+      }
+    } catch {
+      setMessages(prev =>
+        prev.map(m => m.id === assistantId ? { ...m, content: "Maaf, terjadi kesalahan saat membuat legal opinion. Silakan coba lagi." } : m)
+      );
+    } finally {
+      setIsGeneratingOpinion(false);
+      setLegalOpinionForm({ clientName: "", facts: "", legalIssues: "", requestedBy: "" });
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -325,6 +439,7 @@ export default function LegalChat() {
                 onClick={() => {
                   setSelectedAgentId(agent.id);
                   setSidebarOpen(false);
+                  setShowLegalOpinionForm(false);
                 }}
                 className={cn(
                   "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all mb-1",
@@ -397,13 +512,106 @@ export default function LegalChat() {
               <div className="text-white/50 text-xs truncate">{selectedAgent.tagline}</div>
             </div>
           </div>
-          {isStreaming && (
-            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-              Memproses...
-            </Badge>
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {selectedAgentId === "drafter" && (
+              <Button
+                onClick={() => setShowLegalOpinionForm(prev => !prev)}
+                size="sm"
+                variant="ghost"
+                className="gap-1.5 text-pink-300 border border-pink-500/30 bg-pink-500/10 hover:bg-pink-500/20 hover:text-pink-200 text-xs px-3"
+                data-testid="button-toggle-legal-opinion"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Legal Opinion
+                {showLegalOpinionForm ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </Button>
+            )}
+            {isStreaming && (
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                Memproses...
+              </Badge>
+            )}
+          </div>
         </header>
+
+        {selectedAgentId === "drafter" && showLegalOpinionForm && (
+          <div className="border-b border-white/10 p-4" style={{ background: "#0d1225" }}>
+            <div className="max-w-4xl mx-auto">
+              <div className="rounded-xl border border-pink-500/30 bg-pink-500/5 p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="w-4 h-4 text-pink-300" />
+                  <h3 className="text-pink-200 font-semibold text-sm">Generate Legal Opinion</h3>
+                  <span className="text-white/40 text-xs ml-1">— Struktur formal PERADI/HKLI</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <Label className="text-white/60 text-xs mb-1.5 block">Nama Klien / Perusahaan</Label>
+                    <Input
+                      value={legalOpinionForm.clientName}
+                      onChange={e => setLegalOpinionForm(prev => ({ ...prev, clientName: e.target.value }))}
+                      placeholder="PT. Contoh Maju Tbk"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/30 text-sm h-9"
+                      data-testid="input-opinion-client-name"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-white/60 text-xs mb-1.5 block">Diminta oleh (opsional)</Label>
+                    <Input
+                      value={legalOpinionForm.requestedBy}
+                      onChange={e => setLegalOpinionForm(prev => ({ ...prev, requestedBy: e.target.value }))}
+                      placeholder="Nama pengacara / tim legal"
+                      className="bg-white/5 border-white/20 text-white placeholder:text-white/30 text-sm h-9"
+                      data-testid="input-opinion-requested-by"
+                    />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <Label className="text-white/60 text-xs mb-1.5 block">Fakta & Kronologi <span className="text-pink-400">*</span></Label>
+                  <Textarea
+                    value={legalOpinionForm.facts}
+                    onChange={e => setLegalOpinionForm(prev => ({ ...prev, facts: e.target.value }))}
+                    placeholder="Jelaskan fakta-fakta yang relevan secara kronologis. Misalnya: tanggal kejadian, para pihak yang terlibat, peristiwa hukum, dokumen yang ada..."
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/30 text-sm min-h-[80px] resize-none"
+                    data-testid="input-opinion-facts"
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label className="text-white/60 text-xs mb-1.5 block">Permasalahan Hukum yang Diminta (opsional)</Label>
+                  <Input
+                    value={legalOpinionForm.legalIssues}
+                    onChange={e => setLegalOpinionForm(prev => ({ ...prev, legalIssues: e.target.value }))}
+                    placeholder="Mis: Apakah PHK sah? Apakah klausa kontrak mengikat?"
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/30 text-sm h-9"
+                    data-testid="input-opinion-legal-issues"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={generateLegalOpinion}
+                    disabled={!legalOpinionForm.facts.trim() || isGeneratingOpinion}
+                    className="gap-2 text-white border-0 text-sm"
+                    style={{ background: "linear-gradient(135deg, #be185d, #9333ea)" }}
+                    data-testid="button-generate-legal-opinion"
+                  >
+                    {isGeneratingOpinion ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Membuat Opinion...</>
+                    ) : (
+                      <><FileText className="w-4 h-4" /> Generate Legal Opinion</>
+                    )}
+                  </Button>
+                  <button
+                    onClick={() => setShowLegalOpinionForm(false)}
+                    className="text-white/40 hover:text-white/70 text-xs transition-colors"
+                    data-testid="button-close-legal-opinion-form"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
           {messages.length === 0 && (
@@ -416,6 +624,18 @@ export default function LegalChat() {
                 </div>
               ) : (
                 <p className="text-white/50 text-sm max-w-md mb-8">{selectedAgent.tagline}</p>
+              )}
+              {selectedAgentId === "drafter" && (
+                <div className="mb-4">
+                  <button
+                    onClick={() => setShowLegalOpinionForm(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 hover:text-pink-200 transition-all text-sm font-medium mb-4"
+                    data-testid="button-drafter-legal-opinion-shortcut"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Generate Legal Opinion Formal
+                  </button>
+                </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
                 {selectedAgent.starters.map((starter, i) => (
@@ -478,17 +698,34 @@ export default function LegalChat() {
                   )}
                 </div>
                 {msg.role === "assistant" && msg.content && (
-                  <button
-                    onClick={() => copyToClipboard(msg.content, msg.id)}
-                    className="opacity-0 group-hover:opacity-100 ml-1 text-white/40 hover:text-white/70 transition-all"
-                    data-testid={`button-copy-${msg.id}`}
-                  >
-                    {copiedId === msg.id ? (
-                      <Check className="w-3.5 h-3.5 text-green-400" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
+                  <div className="flex items-center gap-1 ml-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      onClick={() => copyToClipboard(msg.content, msg.id)}
+                      className="text-white/40 hover:text-white/70 transition-colors p-1 rounded"
+                      title="Salin teks"
+                      data-testid={`button-copy-${msg.id}`}
+                    >
+                      {copiedId === msg.id ? (
+                        <Check className="w-3.5 h-3.5 text-green-400" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setExportError(null);
+                        exportMessageToPdf(msg.content, allAgents.find(a => a.id === msg.agentId)?.name || "LexCom AI", msg.agentId, (err) => {
+                          setExportError(err);
+                          setTimeout(() => setExportError(null), 5000);
+                        });
+                      }}
+                      className="text-white/40 hover:text-purple-400 transition-colors p-1 rounded"
+                      title="Export sebagai PDF"
+                      data-testid={`button-export-pdf-${msg.id}`}
+                    >
+                      <FileDown className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 )}
               </div>
               {msg.role === "user" && (
@@ -502,6 +739,14 @@ export default function LegalChat() {
 
         <div className="p-4 border-t border-white/10" style={{ background: "#080d1a" }}>
           <div className="max-w-4xl mx-auto">
+            {exportError && (
+              <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-red-500/40 bg-red-500/10 mb-3 text-sm">
+                <span className="text-red-300">{exportError}</span>
+                <button onClick={() => setExportError(null)} className="text-red-400 hover:text-red-200 flex-shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
             {guestLimitReached && !isAuthenticated ? (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl border border-purple-500/40 bg-purple-500/10 mb-3">
                 <div>
