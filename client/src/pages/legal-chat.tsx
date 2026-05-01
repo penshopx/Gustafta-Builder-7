@@ -45,10 +45,10 @@ const ORCHESTRATOR_AGENT: LegalAgent = {
   tagline: "Routing otomatis ke 12 spesialis hukum — pidana, perdata, korporasi & lebih.",
   greetingMessage: "Selamat datang di **LexCom**. Saya **Lex**, asisten konsultasi hukum Anda. Saya akan menghubungkan Anda dengan agen spesialis yang tepat — pidana, perdata, korporasi, ketenagakerjaan, pertanahan, pajak, yurisprudensi, drafter, litigasi, atau kepailitan.\n\nSebelum mulai, boleh saya tahu: Anda bertanya sebagai **(a) individu/masyarakat**, **(b) perwakilan perusahaan**, atau **(c) profesional hukum**? Dan domain hukum apa yang ingin dibahas?",
   starters: [
-    "Saya individu — karyawan saya mogok kerja massal, apa langkah saya?",
-    "Saya perusahaan — mitra bisnis ingkar janji kontrak senilai Rp 2 M.",
-    "Direktur kami tersangka korupsi — apa yang harus dilakukan perusahaan?",
-    "Saya awam — rumah saya disengketakan orang lain dengan sertifikat palsu.",
+    "Saya kena somasi atas wanprestasi kontrak — apa langkah saya?",
+    "Bantu saya analisis risiko hukum sebelum tanda tangan MoU dengan vendor.",
+    "Tolong cari yurisprudensi MA tentang PMH terkait kebocoran data pribadi.",
+    "Saya butuh draft gugatan perdata wanprestasi senilai Rp 500 juta.",
   ],
 };
 
