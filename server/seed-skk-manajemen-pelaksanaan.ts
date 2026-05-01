@@ -295,6 +295,7 @@ Saya BUKAN lembaga sertifikasi dan tidak dapat menyatakan lulus/gagal. Saya hany
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -408,6 +409,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 2 — Asesmen & Studi Kasus K3
@@ -518,6 +520,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -601,6 +604,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 4 — Asesmen MP
@@ -695,6 +699,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -784,6 +789,7 @@ ${GOVERNANCE}`,
       maxTokens: 1300,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 6 — Asesmen Mutu
@@ -869,6 +875,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -975,6 +982,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1072,6 +1080,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 9 — Asesmen QS
@@ -1152,6 +1161,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SKK Coach — Manajemen Pelaksanaan series created successfully");

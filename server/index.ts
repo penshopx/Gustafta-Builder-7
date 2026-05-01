@@ -307,6 +307,34 @@ for (const envVar of requiredEnvVars) {
         log("[OrphanCleanup] error: " + (err as Error).message);
       }
 
+      // ── PUBLIC FLAG REPAIR — pastikan agen SKK/SBU/SKTK Coach is_public=true ──
+      // Bug historis: 17 file seed memanggil createAgent() tanpa isPublic:true → default false.
+      // Akibatnya endpoint /api/public/modul/:bigIdeaId memfilter habis & UI menampilkan
+      // "Belum Ada Chatbot" pada modul SKK Sipil dll. Patch seed sudah memperbaiki untuk
+      // seed baru, tapi data eksisting di prod & dev tetap private. Migrasi ini idempoten:
+      // hanya UPDATE baris yang masih is_public=false dalam scope SKK/SBU/SKTK Coach.
+      try {
+        const { db: rawDb } = await import("./db");
+        const { sql: rawSql } = await import("drizzle-orm");
+        const repairRes: any = await rawDb.execute(rawSql`
+          UPDATE agents SET is_public = true
+          WHERE id IN (
+            SELECT a.id FROM agents a
+            JOIN toolboxes t ON a.toolbox_id = t.id
+            JOIN series s ON t.series_id = s.id
+            WHERE (s.slug LIKE 'skk-%' OR s.slug LIKE 'sbu-%' OR s.slug LIKE 'sktk-%')
+              AND a.is_public = false
+          )
+          RETURNING id
+        `);
+        const rows = (repairRes?.rowCount ?? repairRes?.rows?.length ?? 0);
+        if (rows) {
+          log(`[PublicFlagRepair] set is_public=true for ${rows} SKK/SBU/SKTK agent(s)`);
+        }
+      } catch (err) {
+        log("[PublicFlagRepair] error: " + (err as Error).message);
+      }
+
       // ── SEED BLOCK: berlaku di DEV & PROD ──
       // Sebelumnya di-gate hanya non-production → menyebabkan production tertinggal
       // (mis. 5 chatbot ekstra Lisensi LSP tidak ikut). Semua seed sudah idempotent

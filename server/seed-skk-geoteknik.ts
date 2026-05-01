@@ -216,6 +216,7 @@ Saya membantu persiapan SKK di bidang geoteknik dan geodesi: dari Operator Sondi
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -329,6 +330,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb2 = await storage.createToolbox({
@@ -413,6 +415,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -539,6 +542,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -665,6 +669,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -781,6 +786,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -923,6 +929,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SKK Coach — Geoteknik & Geodesi series created successfully");

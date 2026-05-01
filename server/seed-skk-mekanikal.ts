@@ -269,6 +269,7 @@ Saya BUKAN lembaga sertifikasi — hasil asesmen hanya untuk persiapan belajar.`
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -376,6 +377,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb2 = await storage.createToolbox({
@@ -483,6 +485,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -569,6 +572,7 @@ ${GOVERNANCE}`,
       maxTokens: 1300,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb4 = await storage.createToolbox({
@@ -655,6 +659,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -738,6 +743,7 @@ ${GOVERNANCE}`,
       maxTokens: 1300,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb6 = await storage.createToolbox({
@@ -814,6 +820,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -924,6 +931,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb8 = await storage.createToolbox({
@@ -1012,6 +1020,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1116,6 +1125,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb10 = await storage.createToolbox({
@@ -1203,6 +1213,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SKK Coach — Mekanikal series created successfully");

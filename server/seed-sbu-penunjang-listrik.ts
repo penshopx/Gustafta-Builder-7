@@ -241,6 +241,7 @@ MENU UTAMA:
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 1 — Klasifikasi & Subklasifikasi ═══
@@ -323,6 +324,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 2 — Kualifikasi & Persyaratan ═══
@@ -424,6 +426,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb2b = await storage.createToolbox({
@@ -499,6 +502,7 @@ GUARDRAIL:
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 3 — Jenis Usaha ═══
@@ -599,6 +603,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 4 — Alur Pengurusan ═══
@@ -695,6 +700,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 5 — Audit, Perpanjangan & Perubahan ═══
@@ -803,6 +809,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SBU Coach — Jasa Penunjang Tenaga Listrik series created successfully");

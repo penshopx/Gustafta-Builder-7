@@ -274,6 +274,7 @@ Silakan ketik kode SBU, nomor KBLI, atau jenis pekerjaan/jasa yang Anda butuhkan
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -360,6 +361,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 2 — Triage
@@ -426,6 +428,7 @@ ${GOVERNANCE}`,
       maxTokens: 1200,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -505,6 +508,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 4 — Pra-Verifikasi Terintegrasi
@@ -575,6 +579,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -690,6 +695,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -787,6 +793,7 @@ ${GOVERNANCE}`,
       maxTokens: 1200,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -892,6 +899,7 @@ ${GOVERNANCE}`,
       maxTokens: 1600,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 8 — Ringkasan
@@ -981,6 +989,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SBU Coach All-in-One — Klasifikasi Terintegrasi series created successfully");

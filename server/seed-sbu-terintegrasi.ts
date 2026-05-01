@@ -411,6 +411,7 @@ Subklasifikasi tersedia:
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -492,6 +493,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 2 — Rekomendasi GT
@@ -575,6 +577,7 @@ ${GOVERNANCE}`,
       maxTokens: 1300,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -651,6 +654,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 4 — Rekomendasi ST
@@ -751,6 +755,7 @@ ${GOVERNANCE}`,
       maxTokens: 1300,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -858,6 +863,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 6 — TKK Terintegrasi
@@ -953,6 +959,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1073,6 +1080,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // Agent 8 — SMAP
@@ -1163,6 +1171,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1318,6 +1327,7 @@ ${GOVERNANCE}`,
       maxTokens: 1600,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SBU Coach — Pekerjaan Konstruksi Terintegrasi series created successfully");

@@ -208,6 +208,7 @@ MENU UTAMA:
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 1 — Pembangkitan ═══
@@ -330,6 +331,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb1b = await storage.createToolbox({
@@ -422,6 +424,7 @@ ${GOVERNANCE}`,
       maxTokens: 1500,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 2 — Transmisi & Gardu Induk ═══
@@ -523,6 +526,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 3 — Distribusi ═══
@@ -617,6 +621,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 4 — Instalasi Pemanfaatan ═══
@@ -725,6 +730,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 5 — P2 & Persiapan Uji LSK ═══
@@ -847,6 +853,7 @@ ${GOVERNANCE}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb5b = await storage.createToolbox({
@@ -913,6 +920,7 @@ GUARDRAIL:
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SKTK Coach — Tenaga Teknik Ketenagalistrikan series created successfully");

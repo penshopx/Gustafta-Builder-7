@@ -327,6 +327,7 @@ Sebutkan sektor yang ingin dipelajari atau pertanyaan spesifik.
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 1 — Migas ═══
@@ -390,6 +391,7 @@ GUARDRAIL: Jangan sebut nama vendor atau lembaga sertifikasi tertentu sebagai "t
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb1b = await storage.createToolbox({
@@ -454,6 +456,7 @@ ${SCORING_RUBRIK}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 2 — EBT ═══
@@ -533,6 +536,7 @@ ${SCORING_RUBRIK}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb2b = await storage.createToolbox({
@@ -607,6 +611,7 @@ ${SCORING_RUBRIK}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 3 — Pertambangan ═══
@@ -691,6 +696,7 @@ ${SCORING_RUBRIK}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb3b = await storage.createToolbox({
@@ -766,6 +772,7 @@ ${SCORING_RUBRIK}`,
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 4 — Asesmen Mandiri & Studi Kasus ═══
@@ -860,6 +867,7 @@ JANGAN menyimpulkan bahwa skor tinggi = pasti lulus ujian resmi.`,
       maxTokens: 1600,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb4b = await storage.createToolbox({
@@ -931,6 +939,7 @@ Jawaban: Tunggu 30 menit minimum setelah peledakan terakhir. Hanya Juru Ledak de
       maxTokens: 1600,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     // ═══ BIG IDEA 5 — Checklist Bukti & Glossary ═══
@@ -1024,6 +1033,7 @@ A: Ya. Semua PLTS yang akan dioperasikan dan/atau paralel ke jaringan PLN wajib 
       maxTokens: 1400,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     const tb5b = await storage.createToolbox({
@@ -1088,6 +1098,7 @@ GUARDRAIL KAMUS:
       maxTokens: 1200,
       tools: [],
       isActive: true,
+      isPublic: true,
     } as any);
 
     log("[Seed] ✅ SBU Kompetensi — Migas, EBT, dan Pertambangan series created successfully");
