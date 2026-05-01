@@ -49,8 +49,8 @@ interface ChatbotSpec {
   capabilities: string[];
   limitations: string[];
   systemPrompt: string;
-  greeting: string;
-  starters: string[];
+  greetingMessage: string;
+  conversationStarters: string[];
 }
 
 export async function seedManajemenLspExtra(userId: string) {
@@ -165,9 +165,9 @@ export async function seedManajemenLspExtra(userId: string) {
 - **Wajib lapor ke BNSP** → PBNSP 211 (format laporan) + 508 (input via SI).
 - **Pemegang sertifikat butuh surveilan** → PBNSP 208.
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Register PBNSP & Peta Regulasi LSP**. Saya membantu Anda menavigasi 11 PBNSP utama (201, 202, 203, 206, 207, 208, 210, 211, 214, 301, 508), SNI ISO/IEC 17024:2012, dan dokumen internal LSP yang harus disiapkan. Tanyakan: 'PBNSP mana yang relevan untuk pengembangan skema baru?', atau 'Dokumen apa yang harus saya buat sesuai PBNSP 206?'",
-        starters: [
+        conversationStarters: [
           "Buatkan ringkasan 11 PBNSP utama dalam tabel.",
           "PBNSP mana yang harus saya pelajari dulu kalau saya mau dirikan LSP baru?",
           "Petakan PBNSP 201 ke klausul ISO/IEC 17024:2012.",
@@ -262,9 +262,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - Form FR-Banding-01 + register banding.
 - Mekanisme banding ke BNSP sebagai eskalasi terakhir.
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Matriks Klausul PBNSP 201 → SOP**. Saya membantu Anda memetakan setiap klausul ISO/IEC 17024:2012 ke SOP standar LSP (P-01..P-09) dan mengidentifikasi gap untuk perbaikan. Tanyakan: 'Apa saja gap kritis sistem mutu LSP saya?', atau 'Buatkan CAPA untuk klausul 6.3 Outsourcing'.",
-        starters: [
+        conversationStarters: [
           "Tampilkan matriks 22 klausul ISO 17024 lengkap dengan status Compliant/Partial/Gap.",
           "Jelaskan dua gap kritis: Outsourcing 6.3 dan Banding 9.7.",
           "Buatkan CAPA prioritas untuk klausul yang berstatus Partial.",
@@ -371,9 +371,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - Sarana tidak lagi memenuhi syarat & tidak diperbaiki dalam batas waktu.
 - Permintaan sukarela dari pemilik TUK.
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Playbook Manajemen TUK**. Saya membantu Anda dalam siklus verifikasi awal TUK, verifikasi ulang, dan manajemen register TUK sesuai PBNSP 206 & 214. Tanyakan: 'Apa saja syarat verifikasi TUK Mandiri?', atau 'Buatkan checklist verifikasi on-site TUK'.",
-        starters: [
+        conversationStarters: [
           "Jelaskan perbedaan TUK Mandiri, TUK Sewaktu, dan TUK Tempat Kerja.",
           "Apa saja syarat sarana yang harus dipenuhi calon TUK?",
           "Buatkan checklist verifikasi on-site TUK lengkap.",
@@ -476,9 +476,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - **FR-Asesmen** (formulir rekam asesmen).
 - **Kunci jawaban** (untuk soal tertulis) — dokumen rahasia.
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Playbook Pengembangan & Pemeliharaan Skema**. Saya membantu Anda dalam siklus skema sertifikasi: dari analisis kebutuhan, drafting, validasi Komite Skema, pendaftaran BNSP, hingga pemeliharaan periodik. Tanyakan: 'Bagaimana cara mengembangkan skema sertifikasi baru?', atau 'Apa komponen wajib dokumen skema?'",
-        starters: [
+        conversationStarters: [
           "Jelaskan 9 tahap pengembangan skema sertifikasi baru.",
           "Apa saja komponen wajib dokumen skema sesuai ISO 17024 §8.3?",
           "Bagaimana komposisi ideal Komite Skema?",
@@ -581,9 +581,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - Maksimal jumlah ulang per peserta sesuai kebijakan LSP (mis. 3 kali).
 - Setelah maks tercapai, peserta wajib mengikuti pelatihan/refresh sebelum asesmen ulang berikutnya.
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Playbook Pelaksanaan Asesmen**. Saya membantu Asesor & Penyelia TUK dalam pelaksanaan asesmen sesuai PBNSP 301: dari APL-01, APL-02, asesmen lanjut, hingga pleno asesor & rekomendasi. Tanyakan: 'Apa prinsip VRCAA & VATM?', atau 'Bagaimana memilih metode asesmen yang tepat?'",
-        starters: [
+        conversationStarters: [
           "Jelaskan alur asesmen lengkap dari APL-01 sampai rekomendasi.",
           "Apa perbedaan prinsip VRCAA dan aturan bukti VATM?",
           "Buatkan checklist konsultasi pra-asesmen.",
@@ -695,9 +695,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - [ ] Submit via SISKOMNAS sebelum batas waktu
 - [ ] Konfirmasi tanda terima dari sistem
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Playbook Pelaporan ke BNSP & SI Sertifikasi**. Saya membantu Anda menyusun laporan triwulanan & tahunan, menggunakan SISKOMNAS, dan memastikan data internal sinkron dengan SI BNSP. Tanyakan: 'Apa saja konten wajib laporan triwulanan?', atau 'Bagaimana checklist sebelum submit ke SISKOMNAS?'",
-        starters: [
+        conversationStarters: [
           "Jelaskan struktur lengkap laporan triwulanan PBNSP 211.",
           "Apa beda laporan triwulanan dan tahunan?",
           "Buatkan checklist kesiapan pelaporan ke BNSP.",
@@ -812,9 +812,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - [ ] Komite Skema, Sertifikasi, Banding rapat minimum 1x setahun
 - [ ] Laporan Tahunan siap submit Februari
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Kalender Kepatuhan Tahunan LSP**. Saya membantu Anda merencanakan 12 bulan kepatuhan: rapat komite, audit internal, tinjauan manajemen, surveilan, verifikasi TUK, dan pelaporan ke BNSP. Tanyakan: 'Apa saja event kepatuhan di Q1?', atau 'Buatkan checklist kesiapan akhir tahun untuk LSP'.",
-        starters: [
+        conversationStarters: [
           "Tampilkan kalender kepatuhan kuartal saat ini.",
           "Apa saja event kritis yang tidak boleh slip?",
           "Buatkan struktur reminder T-30 / T-7 / T-1 per event.",
@@ -959,9 +959,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - Tinjauan efektivitas (3-6 bulan kemudian)
 - Status closure + sign-off Manajer Mutu
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Register CAPA + Form Templates LSP**. Saya membantu Anda mengelola CAPA (Tindakan Korektif & Pencegahan) dan menyediakan template form standar (FR-TUK, COI, Witness, CAPA). Tanyakan: 'Tampilkan 14 baris CAPA seed dari matriks PBNSP 201', atau 'Buatkan template FR-TUK-02 lengkap'.",
-        starters: [
+        conversationStarters: [
           "Tampilkan 14 baris CAPA seed (2 Gap + 12 Partial).",
           "Jelaskan alur 7 tahap CAPA dari identifikasi hingga closure.",
           "Buatkan template FR-COI yang lengkap.",
@@ -1137,9 +1137,9 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
 - Nama lengkap + jabatan
 - Cap LSP
 ${BASE_RULES}${RESPONSE_FORMAT}`,
-        greeting:
+        greetingMessage:
           "Selamat datang di **Draft SK Direktur LSP**. Saya menyediakan draft SK siap pakai untuk Tim Pusat (Manajer Mutu + Manajer Sertifikasi) dan 4 Komite: Skema, Sertifikasi, Banding (independen), Ketidakberpihakan (independen). Tanyakan: 'Buatkan draft SK Komite Banding lengkap', atau 'Apa komposisi ideal Komite Ketidakberpihakan?'",
-        starters: [
+        conversationStarters: [
           "Buatkan draft SK Komite Banding yang independen.",
           "Apa beda Komite Sertifikasi vs Komite Banding vs Komite Ketidakberpihakan?",
           "Tampilkan struktur organisasi minimal LSP.",
@@ -1149,13 +1149,26 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
     ];
 
     let added = 0;
-    let skipped = 0;
+    let updated = 0;
     for (let i = 0; i < chatbots.length; i++) {
       const spec = chatbots[i];
-      if (existingNames.has(spec.name)) {
-        log(`[Seed Manajemen LSP Extra] Sudah ada: ${spec.name}`);
-        skipped++;
-        continue;
+      const existingTb = existingToolboxes.find((t: any) => t.name === spec.name);
+      if (existingTb) {
+        const tbAgents = await storage.getAgents(existingTb.id);
+        const existingAgent = tbAgents.find((a: any) => a.name === spec.name);
+        if (existingAgent) {
+          await storage.updateAgent(String(existingAgent.id), {
+            description: spec.description,
+            tagline: spec.tagline,
+            systemPrompt: spec.systemPrompt,
+            greetingMessage: spec.greetingMessage,
+            conversationStarters: spec.conversationStarters,
+            isPublic: true,
+            isActive: true,
+          } as any);
+          updated++;
+          continue;
+        }
       }
       const toolbox = await storage.createToolbox({
         name: spec.name,
@@ -1175,8 +1188,8 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
         description: spec.description,
         tagline: spec.tagline,
         systemPrompt: spec.systemPrompt,
-        greeting: spec.greeting,
-        starters: spec.starters,
+        greetingMessage: spec.greetingMessage,
+        conversationStarters: spec.conversationStarters,
         toolboxId: toolbox.id,
         aiModel: "gpt-4o-mini",
         temperature: 0.4,
@@ -1187,7 +1200,7 @@ ${BASE_RULES}${RESPONSE_FORMAT}`,
       } as any, userId);
       added++;
     }
-    log(`[Seed Manajemen LSP Extra] SELESAI — Added: ${added}, Skipped: ${skipped}, Total: ${chatbots.length}`);
+    log(`[Seed Manajemen LSP Extra] SELESAI — Added: ${added}, Updated: ${updated}, Total: ${chatbots.length}`);
   } catch (err) {
     log(`[Seed Manajemen LSP Extra] ERROR: ${(err as any)?.message || err}`);
   }
