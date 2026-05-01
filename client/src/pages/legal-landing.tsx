@@ -1,8 +1,9 @@
-import { Link } from "wouter";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Scale, BookOpen, Users, Shield, Zap, Star, ChevronRight } from "lucide-react";
+import { ArrowRight, Scale, BookOpen, Users, Shield, Zap, Star, ChevronRight, MessageSquare, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 const AGENT_PREVIEWS = [
@@ -52,6 +53,8 @@ const STATS = [
 
 export default function LegalLanding() {
   const { isAuthenticated } = useAuth();
+  const [, navigate] = useLocation();
+  const [widgetOpen, setWidgetOpen] = useState(false);
 
   const { data: agents } = useQuery<any[]>({
     queryKey: ["/api/legal/agents"],
@@ -246,6 +249,70 @@ export default function LegalLanding() {
           <p>LexCom · AI Hukum Indonesia · {new Date().getFullYear()}</p>
           <p className="mt-1">⚠️ Seluruh konten bersifat edukatif, bukan pendapat hukum mengikat.</p>
         </footer>
+      </div>
+
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        {widgetOpen && (
+          <div
+            className="w-72 rounded-2xl border border-purple-500/30 shadow-2xl overflow-hidden"
+            style={{ background: "#080d1a" }}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10" style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}>
+              <div className="flex items-center gap-2">
+                <Scale className="w-4 h-4 text-white" />
+                <span className="text-white font-semibold text-sm">LexCom AI</span>
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              </div>
+              <button onClick={() => setWidgetOpen(false)} className="text-white/70 hover:text-white" data-testid="button-lexwidget-close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-white/70 text-sm mb-1">Halo! Saya <strong className="text-white">Lex</strong>, asisten hukum AI Anda.</p>
+              <p className="text-white/50 text-xs mb-4">Tanyakan apa saja tentang hukum Indonesia — saya akan hubungkan ke spesialis yang tepat.</p>
+              <div className="flex flex-col gap-2 mb-4">
+                {[
+                  "Saya kena somasi, apa langkah saya?",
+                  "Bantu analisis risiko MoU saya.",
+                  "Cari yurisprudensi MA tentang PMH.",
+                ].map(q => (
+                  <button
+                    key={q}
+                    onClick={() => navigate(`/legal/chat`)}
+                    className="text-left text-xs px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-purple-500/20 hover:border-purple-500/40 text-white/70 hover:text-white transition-all"
+                    data-testid="button-lexwidget-starter"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+              <Link href="/legal/chat">
+                <Button
+                  size="sm"
+                  className="w-full text-white border-0 gap-2"
+                  style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}
+                  data-testid="button-lexwidget-open-chat"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Buka LexCom Chat
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={() => setWidgetOpen(prev => !prev)}
+          className="w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95 relative"
+          style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}
+          data-testid="button-lexwidget-toggle"
+          title="Chat dengan Lex"
+        >
+          {widgetOpen ? <X className="w-6 h-6" /> : <Scale className="w-6 h-6" />}
+          {!widgetOpen && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-[#080d1a] animate-pulse" />
+          )}
+        </button>
       </div>
     </div>
   );
