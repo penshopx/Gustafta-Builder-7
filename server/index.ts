@@ -907,6 +907,19 @@ for (const envVar of requiredEnvVars) {
         log("Legal cases seed error: " + (err as Error).message);
       }
 
+      // Catch-up: LexCom — AI Hukum Indonesia (added May 2026)
+      try {
+        const { seedLexCom } = await import("./seed-lexcom");
+        const allSeries = await storage.getSeries();
+        const lexcomSeries = allSeries.find((x: any) => x.slug === "lexcom-ai-hukum-indonesia");
+        if (!lexcomSeries) {
+          log("[CatchUp] Seeding LexCom — AI Hukum Indonesia (missing)");
+          await seedLexCom("49465846");
+        }
+      } catch (err) {
+        log("Catch-up LexCom seed error: " + (err as Error).message);
+      }
+
       startScheduler();
     },
   );
