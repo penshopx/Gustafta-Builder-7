@@ -1675,6 +1675,7 @@ export const legalChatSessions = pgTable("legal_chat_sessions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 255 }).notNull(),
   agentType: text("agent_type").notNull().default("auto"),
+  sessionType: text("session_type").notNull().default("chat"),
   title: text("title").notNull().default("New Chat"),
   messageCount: integer("message_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),

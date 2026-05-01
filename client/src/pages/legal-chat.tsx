@@ -62,6 +62,7 @@ interface ChatMessage {
 interface Session {
   id: number;
   agentType: string;
+  sessionType: string;
   title: string;
   messageCount: number;
   updatedAt: string;
@@ -664,7 +665,18 @@ export default function LegalChat() {
                 >
                   <span className="text-sm">{agentEmoji(session.agentType)}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-white/70 text-xs truncate">{session.title}</div>
+                    <div className="flex items-center gap-1.5">
+                      {session.sessionType === "legal_opinion" && (
+                        <span
+                          className="inline-flex items-center gap-0.5 px-1 py-0 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0"
+                          title="Legal Opinion"
+                          data-testid={`badge-legal-opinion-${session.id}`}
+                        >
+                          📄 LO
+                        </span>
+                      )}
+                      <div className="text-white/70 text-xs truncate">{session.title}</div>
+                    </div>
                     <div className="text-white/30 text-xs">{session.messageCount} pesan</div>
                   </div>
                   <button

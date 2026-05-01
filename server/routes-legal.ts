@@ -946,6 +946,7 @@ Sertakan header: "DRAFT — UNTUK REVIEW ADVOKAT" di awal dokumen.`;
           const [newSession] = await db.insert(legalChatSessions).values({
             userId,
             agentType: "drafter",
+            sessionType: "legal_opinion",
             title: title.slice(0, 60),
             messageCount: 0,
           }).returning();
