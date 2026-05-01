@@ -60,7 +60,7 @@ import {
   createNotionPage,
 } from "./notion";
 import { registerLegalRoutes } from "./routes-legal";
-import { seedLexCom } from "./seed-lexcom";
+import { seedLexCom, seedLexComInSeries } from "./seed-lexcom";
 
 const _require = createRequire(import.meta.url);
 const { PDFParse: _PDFParse, VerbosityLevel: _VerbosityLevel } = _require("pdf-parse") as {
@@ -9272,6 +9272,49 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     } catch (error: any) {
       console.error("Admin update subscription error:", error);
       res.status(500).json({ error: "Gagal memperbarui langganan." });
+    }
+  });
+
+  // ── User: Seed LexCom ecosystem into an existing Series ────────────────────
+  app.post("/api/lexcom/seed", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthenticated" });
+
+      const { seriesId } = req.body;
+      if (!seriesId) {
+        return res.status(400).json({ error: "seriesId diperlukan." });
+      }
+
+      const series = await storage.getSeriesById(String(seriesId));
+      if (!series) {
+        return res.status(404).json({ error: "Series tidak ditemukan." });
+      }
+      if (String(series.userId) !== String(userId)) {
+        const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((id: string) => id.trim());
+        if (!adminIds.includes(String(userId))) {
+          return res.status(403).json({ error: "Tidak memiliki akses ke series ini." });
+        }
+      }
+
+      // Always seed as the series owner so agents are assigned to the correct user
+      const ownerUserId = series.userId || String(userId);
+      const result = await seedLexComInSeries(String(ownerUserId), String(seriesId));
+      if (result.skipped) {
+        return res.json({
+          success: true,
+          message: "Ekosistem LexCom sudah ada di series ini.",
+          skipped: true,
+        });
+      }
+      res.json({
+        success: true,
+        message: `Ekosistem LexCom berhasil ditambahkan! 13 agen hukum (1 Orchestrator + 12 Spesialis) siap digunakan.`,
+        created: result.created,
+      });
+    } catch (error: any) {
+      console.error("[LexCom seed] Error:", error);
+      res.status(500).json({ error: "Gagal membuat ekosistem LexCom: " + error.message });
     }
   });
 

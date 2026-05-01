@@ -33,6 +33,180 @@ const BIGIDEAS = [
   },
 ];
 
+export async function seedLexComInSeries(userId: string, seriesId: string): Promise<{ created: number; skipped: boolean }> {
+  const allBigIdeas = await storage.getBigIdeas();
+  const existingInSeries = allBigIdeas.filter((bi: any) => String(bi.seriesId) === String(seriesId));
+  const alreadySeeded = existingInSeries.some((bi: any) => bi.name === "LEX-ORCHESTRATOR — Hub 12 Spesialis Hukum");
+  if (alreadySeeded) {
+    log("[Seed LexCom] Ekosistem LexCom sudah ada di series ini, skip.");
+    return { created: 0, skipped: true };
+  }
+
+  log("[Seed LexCom] Membuat ekosistem LexCom di series yang dipilih...");
+
+  let totalCreated = 0;
+
+  // ── HUB: LEX-ORCHESTRATOR BigIdea + Toolbox + Agent ────────────────────────
+  const hubBigIdea = await storage.createBigIdea({
+    seriesId: parseInt(seriesId),
+    name: "LEX-ORCHESTRATOR — Hub 12 Spesialis Hukum",
+    type: "solution",
+    description:
+      "Hub utama LexCom. LEX-ORCHESTRATOR (persona: Lex) menerima pertanyaan hukum, mendeteksi domain, merutekan ke agen spesialis yang tepat, dan mengkomposisi respons terstruktur format IRAC+ dengan sitasi pasal.",
+    goals: [
+      "Routing otomatis ke 12 agen spesialis berdasarkan domain pertanyaan",
+      "Deteksi user tier (T1 awam / T2 korporat / T3 profesional) dan sesuaikan kedalaman jawaban",
+      "Menjamin format IRAC+ konsisten di seluruh respons",
+      "Sitasi pasal eksplisit [UU No.X/Tahun, Pasal Y] di setiap analisis",
+    ],
+    targetAudience: "Individu, profesional hukum, korporat, dan instansi yang membutuhkan riset hukum Indonesia",
+    expectedOutcome: "Pengguna mendapat analisis hukum terstruktur dengan sitasi regulasi yang tepat, dalam bahasa yang sesuai level keahlian mereka",
+    sortOrder: 0,
+    isActive: true,
+  } as any);
+
+  const hubToolbox = await storage.createToolbox({
+    bigIdeaId: hubBigIdea.id,
+    seriesId: parseInt(seriesId),
+    name: "LEX-ORCHESTRATOR — Pintu Masuk LexCom",
+    description: "Orchestrator utama LexCom. Mendeteksi domain hukum, merutekan ke 12 spesialis, menjaga konteks percakapan, dan menjamin format IRAC+ di setiap respons.",
+    isOrchestrator: true,
+    isActive: true,
+    sortOrder: 0,
+    purpose: "Routing intent hukum & manajemen konteks percakapan multi-agent",
+    capabilities: [
+      "Klasifikasi domain dari 12 cabang hukum Indonesia",
+      "Deteksi user tier T1/T2/T3 untuk kedalaman jawaban adaptif",
+      "Routing ke agen spesialis dengan weighted scoring",
+      "Komposisi respons format IRAC+ dengan sitasi pasal",
+      "Disclaimer otomatis di setiap respons",
+    ],
+    limitations: [
+      "Tidak menggantikan saran advokat berlisensi untuk kasus konkret",
+      "Tidak mewakili klien di pengadilan",
+    ],
+  } as any);
+  totalCreated++;
+
+  await storage.createAgent({
+    userId,
+    toolboxId: parseInt(hubToolbox.id),
+    name: "LEX-ORCHESTRATOR",
+    description: "Lex — orchestrator 12 spesialis hukum Indonesia. Routing otomatis, format IRAC+, tier-adaptive.",
+    tagline: "Routing otomatis ke 12 spesialis hukum — pidana, perdata, korporasi & lebih.",
+    category: "legal",
+    subcategory: "orchestrator",
+    isPublic: true,
+    isOrchestrator: true,
+    aiModel: "gpt-4o",
+    temperature: 0.2,
+    maxTokens: 3500,
+    systemPrompt: LEX_ORCHESTRATOR_PROMPT,
+    greetingMessage: LEX_ORCHESTRATOR_GREETING,
+    conversationStarters: [
+      "Saya kena somasi atas wanprestasi kontrak — apa langkah saya?",
+      "Bantu saya analisis risiko hukum sebelum tanda tangan MoU dengan vendor.",
+      "Tolong cari yurisprudensi MA tentang PMH terkait kebocoran data pribadi.",
+      "Saya butuh draft gugatan perdata wanprestasi senilai Rp 500 juta.",
+    ],
+    personality: "Profesional, akurat, terstruktur, adaptif terhadap level keahlian pengguna",
+    communicationStyle: "formal",
+    toneOfVoice: "professional",
+    language: "id",
+    widgetColor: "#7c3aed",
+    widgetPosition: "bottom-right",
+    widgetSize: "large",
+    widgetBorderRadius: "rounded",
+    widgetShowBranding: true,
+    widgetWelcomeMessage: "Selamat datang di LexCom! Tanyakan tentang hukum Indonesia.",
+    widgetButtonIcon: "scale",
+    isActive: true,
+    requireRegistration: false,
+  } as any);
+  totalCreated++;
+
+  // ── 3 BIG IDEAS + 12 SPECIALIST AGENTS ─────────────────────────────────────
+  for (const biDef of BIGIDEAS) {
+    const bigIdea = await storage.createBigIdea({
+      seriesId: parseInt(seriesId),
+      name: biDef.name,
+      type: biDef.type,
+      description: biDef.description,
+      goals: [
+        "Memberikan analisis hukum mendalam berbasis regulasi Indonesia terkini",
+        "Sitasi pasal eksplisit [UU No.X/Tahun, Pasal Y] di setiap respons",
+        "Format IRAC+ (Issue, Rule, Analysis, Conclusion) + rekomendasi langkah",
+      ],
+      targetAudience: "Individu, profesional hukum, perusahaan, dan instansi",
+      expectedOutcome: "Pemahaman hukum terstruktur dan actionable untuk pengambilan keputusan",
+      sortOrder: biDef.sortOrder,
+      isActive: true,
+    } as any);
+
+    const agentsInGroup = LEGAL_AGENTS.filter(a => biDef.agentIds.includes(a.id));
+    for (let i = 0; i < agentsInGroup.length; i++) {
+      const agent = agentsInGroup[i];
+
+      const toolbox = await storage.createToolbox({
+        bigIdeaId: bigIdea.id,
+        seriesId: parseInt(seriesId),
+        name: `${agent.emoji} ${agent.name} — ${agent.domain}`,
+        description: agent.tagline,
+        isOrchestrator: false,
+        isActive: true,
+        sortOrder: i + 1,
+        purpose: `Spesialis ${agent.domain} berbasis hukum positif Indonesia`,
+        capabilities: [
+          `Analisis mendalam ${agent.domain}`,
+          "Format IRAC+ dengan sitasi pasal",
+          "Adaptif untuk T1 (awam), T2 (korporat), T3 (profesional hukum)",
+        ],
+        limitations: [
+          "Tidak menggantikan konsultasi advokat untuk kasus konkret",
+        ],
+      } as any);
+      totalCreated++;
+
+      await storage.createAgent({
+        userId,
+        toolboxId: parseInt(toolbox.id),
+        name: agent.name,
+        description: agent.tagline,
+        tagline: agent.tagline,
+        category: "legal",
+        subcategory: agent.id,
+        isPublic: true,
+        isOrchestrator: false,
+        aiModel: "gpt-4o",
+        temperature: 0.2,
+        maxTokens: 3500,
+        systemPrompt: agent.systemPrompt,
+        greetingMessage: agent.greetingMessage,
+        conversationStarters: agent.starters,
+        personality: `${agent.personaName} — ${agent.domain} specialist`,
+        communicationStyle: "formal",
+        toneOfVoice: "professional",
+        language: "id",
+        widgetColor: "#7c3aed",
+        widgetPosition: "bottom-right",
+        widgetSize: "large",
+        widgetBorderRadius: "rounded",
+        widgetShowBranding: true,
+        widgetWelcomeMessage: agent.greetingMessage.slice(0, 120),
+        widgetButtonIcon: "scale",
+        isActive: true,
+        requireRegistration: true,
+      } as any);
+      totalCreated++;
+
+      log(`[Seed LexCom InSeries] ✅ ${agent.name} (${agent.domain}) seeded`);
+    }
+  }
+
+  log(`[Seed LexCom InSeries] SELESAI — ${totalCreated} items created in series ${seriesId}`);
+  return { created: totalCreated, skipped: false };
+}
+
 export async function seedLexCom(userId: string): Promise<{ created: number; skipped: boolean }> {
   const allSeries = await storage.getSeries();
   const existing = allSeries.find((s: any) => s.slug === SERIES_SLUG || s.name === SERIES_NAME);

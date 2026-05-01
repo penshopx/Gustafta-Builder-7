@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network, Scale } from "lucide-react";
+import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network, Scale, Loader2, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,8 @@ import { useActiveBigIdea } from "@/hooks/use-big-ideas";
 import { categories, getCategoryById } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { TemplateDialog } from "./template-dialog";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { InsertAgent } from "@shared/schema";
 
 interface CreateAgentDialogProps {
@@ -31,11 +33,12 @@ interface CreateAgentDialogProps {
   onCreated?: () => void;
   bigIdea?: { id: number | string; name: string } | null;
   toolbox?: { id: number | string; name: string } | null;
+  series?: { id: number | string; name: string } | null;
 }
 
 type Step = "start" | "category" | "subcategory" | "details";
 
-export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCreated, bigIdea: bigIdeaProp, toolbox: toolboxProp }: CreateAgentDialogProps) {
+export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCreated, bigIdea: bigIdeaProp, toolbox: toolboxProp, series: seriesProp }: CreateAgentDialogProps) {
   const { toast } = useToast();
   const createAgent = useCreateAgent();
   const { data: activeToolboxFromApi } = useActiveToolbox();
@@ -46,6 +49,33 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
   const activeBigIdea = bigIdeaProp !== undefined ? bigIdeaProp : activeBigIdeaFromApi;
 
   const [step, setStep] = useState<Step>(forceOrchestrator ? "category" : "start");
+  const [lexcomSeedDone, setLexcomSeedDone] = useState(false);
+
+  const seedLexComMutation = useMutation({
+    mutationFn: async (seriesId: string | number) => {
+      const res = await apiRequest("POST", "/api/lexcom/seed", { seriesId });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setLexcomSeedDone(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/big-ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/toolboxes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      if (data.skipped) {
+        toast({ title: "Sudah Ada", description: "Ekosistem LexCom sudah ada di series ini." });
+      } else {
+        toast({
+          title: "LexCom Berhasil Ditambahkan! ⚖️",
+          description: data.message || "13 agen hukum siap digunakan.",
+        });
+      }
+      onCreated?.();
+    },
+    onError: (error: any) => {
+      const msg = error?.message || "Gagal membuat ekosistem LexCom.";
+      toast({ title: "Error", description: msg, variant: "destructive" });
+    },
+  });
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [templateInitialCategory, setTemplateInitialCategory] = useState<string | undefined>(undefined);
   const [isOrchestrator, setIsOrchestrator] = useState(forceOrchestrator || false);
@@ -188,6 +218,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
       setStep("start");
       setIsOrchestrator(false);
       setFormData({ name: "", description: "", tagline: "", category: "", subcategory: "" });
+      setLexcomSeedDone(false);
     }
     onOpenChange(isOpen);
   };
@@ -349,6 +380,57 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 </CardDescription>
               </CardContent>
             </Card>
+
+            {seriesProp && (
+              <Card
+                className={cn(
+                  "transition-all border-2",
+                  lexcomSeedDone
+                    ? "border-green-500 bg-green-500/5 cursor-default"
+                    : seedLexComMutation.isPending
+                    ? "border-purple-400 bg-purple-500/5 cursor-default opacity-80"
+                    : "cursor-pointer hover-elevate border-purple-200 dark:border-purple-800/40 hover:border-purple-500"
+                )}
+                onClick={() => {
+                  if (!lexcomSeedDone && !seedLexComMutation.isPending) {
+                    seedLexComMutation.mutate(seriesProp.id);
+                  }
+                }}
+                data-testid="card-setup-lexcom-ecosystem"
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 w-fit">
+                      {lexcomSeedDone ? (
+                        <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      ) : seedLexComMutation.isPending ? (
+                        <Loader2 className="w-5 h-5 text-purple-600 dark:text-purple-400 animate-spin" />
+                      ) : (
+                        <Network className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      )}
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">
+                        {lexcomSeedDone
+                          ? "✅ Ekosistem LexCom Ditambahkan"
+                          : seedLexComMutation.isPending
+                          ? "Menyiapkan ekosistem..."
+                          : "🚀 Setup Ekosistem LexCom Lengkap"}
+                      </CardTitle>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    {lexcomSeedDone
+                      ? `Ekosistem LexCom berhasil ditambahkan ke series "${seriesProp.name}". 1 Orchestrator + 12 agen spesialis hukum siap digunakan.`
+                      : seedLexComMutation.isPending
+                      ? "Sedang membuat LEX-ORCHESTRATOR dan 12 agen spesialis hukum..."
+                      : `Tambahkan LEX-ORCHESTRATOR + 12 agen spesialis hukum sekaligus ke series "${seriesProp.name}". Satu klik, siap pakai.`}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
