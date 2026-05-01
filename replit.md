@@ -9,6 +9,20 @@ A key feature is "Project Brain," which provides contextual data for chatbots, e
 
 Gustafta converts any chatbot into four digital products: eBook Kompetensi, eCourse Modul Belajar, Generator Dokumen, and Chaesa AI Studio Bridge for external AI prompt generation. Monetization is supported through flexible pricing models, guest message limits, trial periods, and a voucher system. A "Conversion Layer" handles lead capture, scoring, and smart call-to-action triggers. Chatbots can include an "Orchestrator Multi-Agent" system for routing messages to specialist agents based on intent.
 
+## LexCom Integration in Agent Builder (Task #3)
+
+The 12 LexCom legal specialist agents are now fully integrated into the Gustafta agent builder:
+
+- **12 LexCom Templates** added to the template picker (category: "LexCom Spesialis Hukum"):
+  - Lex Kriminal (Hukum Pidana), Lex Civil (Hukum Perdata), Lex Corp (Hukum Korporasi)
+  - Lex Labor (Hukum Ketenagakerjaan), Lex Agraria (Hukum Pertanahan), Lex Fiscus (Hukum Pajak)
+  - Lex Praesidium (Yurisprudensi), Lex Scriptor (Legal Drafting), Lex Advocatus (Litigasi)
+  - Lex Insolventia (Kepailitan & PKPU), Lex Nexus (Lintas Bidang), Lex Futura (Hukum Emerging)
+- **Category filter tabs** added to the template dialog for easy browsing
+- **LexCom quick-start card** in the "Create Agent" dialog that opens directly to LexCom templates
+- **"Template LexCom" button** in the Persona panel's system prompt section for applying LexCom templates to existing agents
+- Templates work with the existing agent infrastructure; users can attach legal documents via the KB panel to extend each specialist agent with RAG-based retrieval
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

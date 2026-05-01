@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2 } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale } from "lucide-react";
+import { TemplateDialog } from "@/components/dialogs/template-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateAgent } from "@/hooks/use-agents";
 import { getCategoryById, getSubcategoryLabel } from "@/lib/categories";
+import type { InsertAgent } from "@shared/schema";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { Agent } from "@shared/schema";
 
@@ -72,6 +74,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
   const [newStarter, setNewStarter] = useState("");
   const [newDomain, setNewDomain] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [lexcomTemplateOpen, setLexcomTemplateOpen] = useState(false);
   const [newContextLabel, setNewContextLabel] = useState("");
   const [newContextType, setNewContextType] = useState<"text" | "select">("select");
   const [newContextOptions, setNewContextOptions] = useState("");
@@ -243,6 +246,23 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         description: "Access token copied to clipboard.",
       });
     }
+  };
+
+  const handleApplyLexcomTemplate = (template: Partial<InsertAgent>) => {
+    const updated = {
+      ...formData,
+      ...(template.systemPrompt ? { systemPrompt: template.systemPrompt } : {}),
+      ...(template.greetingMessage ? { greetingMessage: template.greetingMessage } : {}),
+      ...(template.conversationStarters ? { conversationStarters: Array.isArray(template.conversationStarters) ? template.conversationStarters : [] } : {}),
+      ...(template.name ? { name: template.name } : {}),
+      ...(template.tagline ? { tagline: template.tagline } : {}),
+      ...(template.description ? { description: template.description } : {}),
+    };
+    setFormData(updated);
+    toast({
+      title: "Template LexCom Diterapkan",
+      description: "System prompt, greeting, dan conversation starters telah diperbarui. Klik Save untuk menyimpan.",
+    });
   };
 
   return (
@@ -636,7 +656,20 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="systemPrompt">System Prompt</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="systemPrompt">System Prompt</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setLexcomTemplateOpen(true)}
+                className="text-xs h-7 gap-1.5 border-amber-400/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                data-testid="button-apply-lexcom-template"
+              >
+                <Scale className="w-3.5 h-3.5" />
+                Template LexCom
+              </Button>
+            </div>
             <Textarea
               id="systemPrompt"
               value={formData.systemPrompt}
@@ -647,7 +680,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
              
             />
             <p className="text-xs text-muted-foreground">
-              The system prompt defines the core behavior and context for your chatbot
+              The system prompt defines the core behavior and context for your chatbot. Gunakan tombol "Template LexCom" untuk menerapkan sistem prompt spesialis hukum Indonesia.
             </p>
           </div>
         </CardContent>
@@ -944,6 +977,13 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           </div>
         </CardContent>
       </Card>
+
+      <TemplateDialog
+        open={lexcomTemplateOpen}
+        onOpenChange={setLexcomTemplateOpen}
+        onSelectTemplate={handleApplyLexcomTemplate}
+        initialCategory="LexCom Spesialis Hukum"
+      />
 
     </div>
   );

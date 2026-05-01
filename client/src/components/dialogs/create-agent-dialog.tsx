@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network } from "lucide-react";
+import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network, Scale } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +47,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
 
   const [step, setStep] = useState<Step>(forceOrchestrator ? "category" : "start");
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [templateInitialCategory, setTemplateInitialCategory] = useState<string | undefined>(undefined);
   const [isOrchestrator, setIsOrchestrator] = useState(forceOrchestrator || false);
 
   useEffect(() => {
@@ -279,9 +280,10 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 className="cursor-pointer transition-all hover-elevate"
                 onClick={() => {
                   setIsOrchestrator(false);
+                  setTemplateInitialCategory(undefined);
                   setTemplateDialogOpen(true);
                 }}
-               
+                data-testid="card-use-template"
               >
                 <CardHeader className="pb-2">
                   <div className="p-2 rounded-lg bg-primary/10 w-fit">
@@ -304,7 +306,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                   setIsOrchestrator(false);
                   setStep("category");
                 }}
-               
+                data-testid="card-start-from-scratch"
               >
                 <CardHeader className="pb-2">
                   <div className="p-2 rounded-lg bg-muted w-fit">
@@ -321,6 +323,32 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 </CardContent>
               </Card>
             </div>
+
+            <Card
+              className="cursor-pointer transition-all hover-elevate border-amber-200 dark:border-amber-800/40 hover:border-amber-400"
+              onClick={() => {
+                setIsOrchestrator(false);
+                setTemplateInitialCategory("LexCom Spesialis Hukum");
+                setTemplateDialogOpen(true);
+              }}
+              data-testid="card-lexcom-specialist"
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 w-fit">
+                    <Scale className="w-5 h-5 text-amber-700 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">⚖️ LexCom — Spesialis Hukum Indonesia</CardTitle>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Tambahkan agen spesialis hukum dari sistem LexCom: Hukum Pidana, Perdata, Korporasi, Pajak, Pertanahan, Ketenagakerjaan, Litigasi, Kepailitan, dan lainnya. Tersedia 12 template siap pakai dengan sistem prompt lengkap berbasis hukum Indonesia.
+                </CardDescription>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -328,6 +356,7 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
           open={templateDialogOpen}
           onOpenChange={setTemplateDialogOpen}
           onSelectTemplate={handleTemplateSelect}
+          initialCategory={templateInitialCategory}
         />
 
         {step === "category" && (
