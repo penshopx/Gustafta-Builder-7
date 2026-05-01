@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -1419,11 +1419,24 @@ export default function Dashboard() {
               "w-full flex items-center rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
               sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
             )}
-           
             title={sidebarCollapsed ? "Beranda" : undefined}
           >
             <Home className="w-4 h-4 shrink-0" />
             {!sidebarCollapsed && "Beranda"}
+          </button>
+        </Link>
+
+        <Link href="/legal/chat">
+          <button
+            className={cn(
+              "w-full flex items-center rounded-md text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 hover:text-purple-700 dark:hover:text-purple-300 transition-colors",
+              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
+            )}
+            title={sidebarCollapsed ? "LexCom AI Hukum" : undefined}
+            data-testid="nav-lexcom"
+          >
+            <Scale className="w-4 h-4 shrink-0" />
+            {!sidebarCollapsed && <span className="truncate">LexCom AI Hukum</span>}
           </button>
         </Link>
         
@@ -1672,6 +1685,12 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2">
                     <Home className="w-4 h-4" />
                     Beranda
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/legal/chat">
+                  <DropdownMenuItem className="gap-2 text-purple-600 dark:text-purple-400">
+                    <Scale className="w-4 h-4" />
+                    LexCom AI Hukum
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>
