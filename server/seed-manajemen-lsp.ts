@@ -38,11 +38,14 @@ export async function seedManajemenLsp(userId: string) {
     if (existing) {
       const toolboxes = await storage.getToolboxes(undefined, existing.id);
       const hubUtama = toolboxes.find((t: any) => t.name === "HUB Manajemen LSP" && t.seriesId === existing.id && !t.bigIdeaId);
-      if (hubUtama) {
-        log("[Seed] Manajemen LSP already exists, skipping...");
+      const bigIdeas = await storage.getBigIdeas(existing.id);
+      const hasModulLisensi = bigIdeas.some((b: any) => b.name === "Lisensi & Tata Kelola LSP");
+      const hasModulSertifikasi = bigIdeas.some((b: any) => b.name === "Proses Sertifikasi SKK");
+      if (hubUtama && hasModulLisensi && hasModulSertifikasi) {
+        log("[Seed] Manajemen LSP already exists (Hub + 2 modul utama), skipping...");
         return;
       }
-      const bigIdeas = await storage.getBigIdeas(existing.id);
+      log("[Seed] Manajemen LSP inkonsisten — Hub:" + !!hubUtama + " Lisensi:" + hasModulLisensi + " Sertifikasi:" + hasModulSertifikasi + " — reset & recreate");
       for (const bi of bigIdeas) {
         const biToolboxes = await storage.getToolboxes(bi.id);
         for (const tb of biToolboxes) {
