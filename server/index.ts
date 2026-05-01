@@ -89,6 +89,7 @@ import * as M_sbuKompetensiMigasEbtTambang from "./seed-sbu-kompetensi-migas-ebt
 import * as M_developerRealEstate from "./seed-developer-real-estate";
 import * as M_layananRealEstate from "./seed-layanan-real-estate";
 import * as M_pusatFaqPeserta from "./seed-pusat-faq-peserta";
+import * as M_itLspPaperlessAjj from "./seed-it-lsp-paperless-ajj";
 import * as M_fixOrchestrators from "./fix-orchestrators";
 import * as M_inaprocScraper from "./lib/inaproc-scraper";
 
@@ -162,6 +163,7 @@ const seedModuleRegistry: Record<string, any> = {
   "./seed-developer-real-estate": M_developerRealEstate,
   "./seed-layanan-real-estate": M_layananRealEstate,
   "./seed-pusat-faq-peserta": M_pusatFaqPeserta,
+  "./seed-it-lsp-paperless-ajj": M_itLspPaperlessAjj,
   "./fix-orchestrators": M_fixOrchestrators,
   "./lib/inaproc-scraper": M_inaprocScraper,
 };
@@ -474,6 +476,7 @@ for (const envVar of requiredEnvVars) {
           { name: "SBU Kompetensi — Migas, EBT, dan Pertambangan", module: "./seed-sbu-kompetensi-migas-ebt-tambang", fn: "seedSbuKompetensiMigasEbtTambang" },
           { name: "DevProperti Pro — Developer Real Estate", module: "./seed-developer-real-estate", fn: "seedDeveloperRealEstate" },
           { name: "EstateCare Pro — Layanan Real Estate", module: "./seed-layanan-real-estate", fn: "seedLayananRealEstate" },
+          { name: "IT LSP — Paperless (Nir Kertas) & AJJ", module: "./seed-it-lsp-paperless-ajj", fn: "seedItLspPaperlessAjj" },
         ];
 
         for (const seed of seedTasks) {
