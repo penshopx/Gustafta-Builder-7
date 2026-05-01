@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight, Copy, Check, Menu, X, FileDown, FileText, ChevronDown, ChevronUp, Search, BookOpen, ShieldCheck, ExternalLink, Database } from "lucide-react";
+import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight, Copy, Check, Menu, X, FileDown, FileText, ChevronDown, ChevronUp, Search, BookOpen, ShieldCheck, ExternalLink, Database, FileCode2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageContent } from "@/lib/format-message";
@@ -83,6 +83,12 @@ const ORCHESTRATOR_AGENT: LegalAgent = {
   ],
 };
 
+function buildDescriptiveFilename(agentId: string | undefined, ext: string): string {
+  const date = new Date().toISOString().slice(0, 10);
+  const label = agentId ? agentId.replace(/[^a-z0-9]/gi, "-") : "LegalOpinion";
+  return `LexCom-${label}-${date}.${ext}`;
+}
+
 async function exportMessageToPdf(content: string, agentName: string, agentId?: string, onError?: (msg: string) => void) {
   try {
     const res = await fetch("/api/legal/export-pdf", {
@@ -99,7 +105,7 @@ async function exportMessageToPdf(content: string, agentName: string, agentId?: 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `LexCom-${(agentId || "legal").replace(/[^a-z0-9]/gi, "-")}-${Date.now()}.pdf`;
+    a.download = buildDescriptiveFilename(agentId, "pdf");
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -108,6 +114,55 @@ async function exportMessageToPdf(content: string, agentName: string, agentId?: 
     console.error("[LexCom] PDF export failed", err);
     onError?.("Gagal mengekspor PDF. Silakan coba lagi.");
   }
+}
+
+function exportMessageToHtml(content: string, agentName: string, agentId?: string) {
+  const date = new Date().toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" });
+  const htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LexCom — ${agentName} — ${date}</title>
+  <style>
+    body { font-family: Georgia, 'Times New Roman', serif; max-width: 800px; margin: 40px auto; padding: 0 24px; color: #1a1a2e; background: #fff; line-height: 1.8; }
+    header { border-bottom: 2px solid #7c3aed; padding-bottom: 16px; margin-bottom: 32px; }
+    header h1 { font-size: 1.4rem; color: #7c3aed; margin: 0 0 4px; }
+    header p { font-size: 0.85rem; color: #555; margin: 0; }
+    h1, h2, h3, h4 { color: #1a1a2e; margin-top: 1.5em; }
+    pre { background: #f5f5f5; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 0.875rem; }
+    code { background: #f0eeff; padding: 2px 6px; border-radius: 4px; font-size: 0.875em; color: #5b21b6; }
+    pre code { background: none; padding: 0; color: inherit; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+    th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+    th { background: #f0eeff; font-weight: 600; }
+    blockquote { border-left: 4px solid #7c3aed; margin: 0; padding: 8px 16px; color: #444; }
+    ul, ol { padding-left: 1.5em; }
+    li { margin-bottom: 0.25em; }
+    footer { margin-top: 48px; border-top: 1px solid #e0e0e0; padding-top: 12px; font-size: 0.75rem; color: #888; }
+    @media print { body { margin: 20mm; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>LexCom — ${agentName}</h1>
+    <p>Dokumen diekspor pada ${date}</p>
+  </header>
+  <div class="content">
+    <pre style="white-space:pre-wrap;font-family:inherit;background:none;padding:0;">${content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+  </div>
+  <footer>Dokumen ini dibuat oleh LexCom AI Legal Assistant. Bukan merupakan nasihat hukum resmi.</footer>
+</body>
+</html>`;
+  const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = buildDescriptiveFilename(agentId, "html");
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 export default function LegalChat() {
@@ -131,6 +186,7 @@ export default function LegalChat() {
   const [legalOpinionForm, setLegalOpinionForm] = useState({ clientName: "", facts: "", legalIssues: "", requestedBy: "" });
   const [isGeneratingOpinion, setIsGeneratingOpinion] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [exportDropdownMsgId, setExportDropdownMsgId] = useState<string | null>(null);
 
   const [showCaseSearch, setShowCaseSearch] = useState(false);
   const [caseQuery, setCaseQuery] = useState("");
@@ -182,6 +238,13 @@ export default function LegalChat() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (!exportDropdownMsgId) return;
+    const handler = () => setExportDropdownMsgId(null);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [exportDropdownMsgId]);
 
   const loadSession = async (session: Session) => {
     try {
@@ -1082,20 +1145,50 @@ export default function LegalChat() {
                         <Copy className="w-3.5 h-3.5" />
                       )}
                     </button>
-                    <button
-                      onClick={() => {
-                        setExportError(null);
-                        exportMessageToPdf(msg.content, allAgents.find(a => a.id === msg.agentId)?.name || "LexCom AI", msg.agentId, (err) => {
-                          setExportError(err);
-                          setTimeout(() => setExportError(null), 5000);
-                        });
-                      }}
-                      className="text-white/40 hover:text-purple-400 transition-colors p-1 rounded"
-                      title="Export sebagai PDF"
-                      data-testid={`button-export-pdf-${msg.id}`}
-                    >
-                      <FileDown className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setExportDropdownMsgId(exportDropdownMsgId === msg.id ? null : msg.id); }}
+                        className="text-white/40 hover:text-purple-400 transition-colors p-1 rounded"
+                        title="Export dokumen"
+                        data-testid={`button-export-menu-${msg.id}`}
+                      >
+                        <FileDown className="w-3.5 h-3.5" />
+                      </button>
+                      {exportDropdownMsgId === msg.id && (
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute right-0 bottom-full mb-1 z-50 flex flex-col overflow-hidden rounded-lg border border-white/10 shadow-xl"
+                          style={{ background: "#131929", minWidth: "170px" }}
+                        >
+                          <button
+                            onClick={() => {
+                              setExportDropdownMsgId(null);
+                              setExportError(null);
+                              exportMessageToPdf(msg.content, allAgents.find(a => a.id === msg.agentId)?.name || "LexCom AI", msg.agentId, (err) => {
+                                setExportError(err);
+                                setTimeout(() => setExportError(null), 5000);
+                              });
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-purple-500/20 hover:text-purple-300 transition-colors text-left w-full"
+                            data-testid={`button-export-pdf-${msg.id}`}
+                          >
+                            <FileDown className="w-3.5 h-3.5 flex-shrink-0" />
+                            Print / PDF
+                          </button>
+                          <button
+                            onClick={() => {
+                              setExportDropdownMsgId(null);
+                              exportMessageToHtml(msg.content, allAgents.find(a => a.id === msg.agentId)?.name || "LexCom AI", msg.agentId);
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-white/70 hover:bg-purple-500/20 hover:text-purple-300 transition-colors text-left w-full border-t border-white/10"
+                            data-testid={`button-export-html-${msg.id}`}
+                          >
+                            <FileCode2 className="w-3.5 h-3.5 flex-shrink-0" />
+                            Download HTML
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
