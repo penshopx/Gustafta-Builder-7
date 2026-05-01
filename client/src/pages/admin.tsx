@@ -789,7 +789,7 @@ export default function AdminPage() {
                     <CardTitle className="text-base">LexCom — AI Hukum Indonesia</CardTitle>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Seed Series LexCom ke workspace Anda — 1 Orchestrator (Lex) + 12 Agen Spesialis Hukum, siap dipublikasikan dan dimonetisasi.
+                    Seed Series LexCom ke workspace Anda — 1 Orchestrator (Lex) + 17 Agen Spesialis Hukum, siap dipublikasikan dan dimonetisasi.
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-4">

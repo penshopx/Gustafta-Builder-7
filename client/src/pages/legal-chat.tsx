@@ -73,8 +73,8 @@ const ORCHESTRATOR_AGENT: LegalAgent = {
   personaName: "Lex",
   emoji: "⚖️",
   domain: "Semua Domain Hukum",
-  tagline: "Routing otomatis ke 12 spesialis hukum — pidana, perdata, korporasi & lebih.",
-  greetingMessage: "Selamat datang di **LexCom**. Saya **Lex**, asisten konsultasi hukum Anda. Saya akan menghubungkan Anda dengan agen spesialis yang tepat — pidana, perdata, korporasi, ketenagakerjaan, pertanahan, pajak, yurisprudensi, drafter, litigasi, atau kepailitan.\n\nSebelum mulai, boleh saya tahu: Anda bertanya sebagai **(a) individu/masyarakat**, **(b) perwakilan perusahaan**, atau **(c) profesional hukum**? Dan domain hukum apa yang ingin dibahas?",
+  tagline: "Routing otomatis ke 17 spesialis hukum — pidana, perdata, korporasi, HKI, keluarga, imigrasi & lebih.",
+  greetingMessage: "Selamat datang di **LexCom**. Saya **Lex**, asisten konsultasi hukum Anda. Saya akan menghubungkan Anda dengan agen spesialis yang tepat dari 17 bidang hukum — pidana, perdata, litigasi, HAM, korporasi, pasar modal, ketenagakerjaan, pertanahan, pajak, kepailitan, yurisprudensi, drafter, hukum digital, keluarga & waris, HKI, serta imigrasi.\n\nSebelum mulai, boleh saya tahu: Anda bertanya sebagai **(a) individu/masyarakat**, **(b) perwakilan perusahaan**, atau **(c) profesional hukum**? Dan domain hukum apa yang ingin dibahas?",
   starters: [
     "Saya kena somasi atas wanprestasi kontrak — apa langkah saya?",
     "Bantu saya analisis risiko hukum sebelum tanda tangan MoU dengan vendor.",
@@ -1122,7 +1122,7 @@ export default function LegalChat() {
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-xl border border-purple-500/40 bg-purple-500/10 mb-3">
                 <div>
                   <p className="text-purple-200 font-semibold text-sm">Batas pesan tamu tercapai</p>
-                  <p className="text-purple-300/70 text-xs mt-0.5">Login untuk lanjut berkonsultasi tanpa batas dengan 12 agen hukum spesialis</p>
+                  <p className="text-purple-300/70 text-xs mt-0.5">Login untuk lanjut berkonsultasi tanpa batas dengan 17 agen hukum spesialis</p>
                 </div>
                 <Link href="/api/login">
                   <Button

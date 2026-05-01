@@ -423,10 +423,10 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
                 <CardContent>
                   <CardDescription>
                     {lexcomSeedDone
-                      ? `Ekosistem LexCom berhasil ditambahkan ke series "${seriesProp.name}". 1 Orchestrator + 12 agen spesialis hukum siap digunakan.`
+                      ? `Ekosistem LexCom berhasil ditambahkan ke series "${seriesProp.name}". 1 Orchestrator + 17 agen spesialis hukum siap digunakan.`
                       : seedLexComMutation.isPending
-                      ? "Sedang membuat LEX-ORCHESTRATOR dan 12 agen spesialis hukum..."
-                      : `Tambahkan LEX-ORCHESTRATOR + 12 agen spesialis hukum sekaligus ke series "${seriesProp.name}". Satu klik, siap pakai.`}
+                      ? "Sedang membuat LEX-ORCHESTRATOR dan 17 agen spesialis hukum..."
+                      : `Tambahkan LEX-ORCHESTRATOR + 17 agen spesialis hukum sekaligus ke series "${seriesProp.name}". Satu klik, siap pakai.`}
                   </CardDescription>
                 </CardContent>
               </Card>

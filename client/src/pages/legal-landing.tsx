@@ -150,7 +150,7 @@ export default function LegalLanding() {
                 className="border-white/20 text-white/80 hover:bg-white/10 text-lg px-8 py-6 gap-2 hover:text-white"
                 onClick={() => document.getElementById("agents-section")?.scrollIntoView({ behavior: "smooth" })}
               >
-                Lihat 12 Agen
+                Lihat 17 Agen
                 <ChevronRight className="w-5 h-5" />
               </Button>
             </div>
@@ -169,7 +169,7 @@ export default function LegalLanding() {
         <section id="agents-section" className="py-16 px-4">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">12 Agen Spesialis Hukum</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">17 Agen Spesialis Hukum</h2>
               <p className="text-white/50">Setiap agen dilengkapi sistem prompt mendalam berbasis hukum positif Indonesia</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
