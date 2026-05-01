@@ -1614,6 +1614,61 @@ export const insertTrialRequestSchema = createInsertSchema(trialRequests).omit({
 export type InsertTrialRequest = z.infer<typeof insertTrialRequestSchema>;
 export type TrialRequest = typeof trialRequests.$inferSelect;
 
+// ==================== LexCom Legal Knowledge Base & Case Registry ====================
+
+export const legalKnowledgeBases = pgTable("legal_knowledge_bases", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull().default("regulasi"),
+  sourceAuthority: text("source_authority").default(""),
+  sourceUrl: text("source_url").default(""),
+  effectiveDate: text("effective_date").default(""),
+  status: text("status").notNull().default("active"),
+  contentSummary: text("content_summary").default(""),
+  chunkCount: integer("chunk_count").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertLegalKnowledgeBaseSchema = createInsertSchema(legalKnowledgeBases).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLegalKnowledgeBase = z.infer<typeof insertLegalKnowledgeBaseSchema>;
+export type LegalKnowledgeBase = typeof legalKnowledgeBases.$inferSelect;
+
+export const legalKnowledgeChunks = pgTable("legal_knowledge_chunks", {
+  id: serial("id").primaryKey(),
+  legalKbId: integer("legal_kb_id").notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+  content: text("content").notNull(),
+  tokenCount: integer("token_count").default(0),
+  embedding: jsonb("embedding").default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLegalKnowledgeChunkSchema = createInsertSchema(legalKnowledgeChunks).omit({ id: true, createdAt: true });
+export type InsertLegalKnowledgeChunk = z.infer<typeof insertLegalKnowledgeChunkSchema>;
+export type LegalKnowledgeChunk = typeof legalKnowledgeChunks.$inferSelect;
+
+export const legalCases = pgTable("legal_cases", {
+  id: serial("id").primaryKey(),
+  caseNumber: text("case_number").notNull(),
+  court: text("court").notNull(),
+  year: integer("year"),
+  domain: text("domain").notNull().default("perdata"),
+  parties: text("parties").default(""),
+  legalIssue: text("legal_issue").default(""),
+  ratioDecidendi: text("ratio_decidendi").notNull(),
+  conclusion: text("conclusion").default(""),
+  keywords: text("keywords").array().default([]),
+  sourceUrl: text("source_url").default(""),
+  embedding: jsonb("embedding").default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLegalCaseSchema = createInsertSchema(legalCases).omit({ id: true, createdAt: true });
+export type InsertLegalCase = z.infer<typeof insertLegalCaseSchema>;
+export type LegalCase = typeof legalCases.$inferSelect;
+
 // ==================== LexCom Legal Chat Tables ====================
 
 export const legalChatSessions = pgTable("legal_chat_sessions", {

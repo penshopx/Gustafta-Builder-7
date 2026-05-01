@@ -15,6 +15,13 @@
       "when": 1746000000000,
       "tag": "0001_mini_app_results_source",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777650841412,
+      "tag": "0002_dry_hairball",
+      "breakpoints": true
     }
   ]
 }

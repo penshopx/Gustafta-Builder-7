@@ -900,6 +900,13 @@ for (const envVar of requiredEnvVars) {
         log("Catch-up EstateCare Pro seed error: " + (err as Error).message);
       }
 
+      try {
+        const { seedLegalCases } = await import("./seed-legal-cases");
+        await seedLegalCases();
+      } catch (err) {
+        log("Legal cases seed error: " + (err as Error).message);
+      }
+
       startScheduler();
     },
   );

@@ -2,9 +2,10 @@ import type { Express } from "express";
 import PDFDocument from "pdfkit";
 import OpenAI from "openai";
 import { db } from "./db";
-import { legalChatSessions, legalChatMessages } from "@shared/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { legalChatSessions, legalChatMessages, legalKnowledgeBases, legalKnowledgeChunks, legalCases } from "@shared/schema";
+import { eq, desc, and, sql, ilike, or } from "drizzle-orm";
 import { LEGAL_AGENTS, LEX_ORCHESTRATOR_PROMPT, LEX_ORCHESTRATOR_GREETING, selectAgent, buildOrchestrationPrompt } from "./lib/legal-agents";
+import { chunkText, createEmbedding, createEmbeddings, retrieveRelevantChunks } from "./lib/rag-service";
 
 const isProduction = process.env.NODE_ENV === "production";
 const rawBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
@@ -25,6 +26,138 @@ const openai = new OpenAI({
 });
 
 const DISCLAIMER = "\n\n---\n⚠️ *Informasi ini bersifat edukatif dan bukan pendapat hukum yang mengikat. Untuk kasus hukum konkret, konsultasikan dengan advokat atau konsultan hukum berpengalaman.*";
+
+const LEGAL_ADMIN_KEY = process.env.LEGAL_ADMIN_KEY;
+
+function isLegalAdmin(req: any): boolean {
+  if (!LEGAL_ADMIN_KEY) return false;
+  const key = req.headers["x-legal-admin-key"] || req.body?.adminKey;
+  return typeof key === "string" && key.length > 0 && key === LEGAL_ADMIN_KEY;
+}
+
+async function searchLegalCasesRAG(query: string, topK = 5): Promise<string> {
+  try {
+    const allCases = await db.select().from(legalCases).limit(500);
+    if (allCases.length === 0) return "";
+
+    const queryEmbedding = await createEmbedding(query);
+
+    if (queryEmbedding.length > 0) {
+      const casesWithEmbeddings = allCases.filter(c => c.embedding && (c.embedding as number[]).length > 0);
+      if (casesWithEmbeddings.length > 0) {
+        const fakeChunks = casesWithEmbeddings.map(c => ({
+          id: c.id,
+          knowledgeBaseId: 0,
+          agentId: 0,
+          chunkIndex: 0,
+          content: `${c.caseNumber} — ${c.court}: ${c.legalIssue}\n${c.ratioDecidendi}`,
+          tokenCount: 0,
+          embedding: c.embedding as number[],
+          metadata: {},
+          createdAt: c.createdAt,
+        }));
+        const relevant = retrieveRelevantChunks(queryEmbedding, fakeChunks, topK, 0.25);
+        if (relevant.length > 0) {
+          const caseMap = new Map(allCases.map(c => [c.id, c]));
+          return relevant.map(r => {
+            const c = caseMap.get(r.chunk.id)!;
+            return formatCaseCitation(c, r.score);
+          }).join("\n\n---\n\n");
+        }
+      }
+    }
+
+    const keywordCases = allCases
+      .filter(c => {
+        const q = query.toLowerCase();
+        return (
+          c.caseNumber.toLowerCase().includes(q) ||
+          (c.legalIssue || "").toLowerCase().includes(q) ||
+          (c.parties || "").toLowerCase().includes(q) ||
+          (c.keywords || []).some(k => k.toLowerCase().includes(q))
+        );
+      })
+      .slice(0, topK);
+
+    if (keywordCases.length === 0) return "";
+    return keywordCases.map(c => formatCaseCitation(c, null)).join("\n\n---\n\n");
+  } catch (err) {
+    console.error("[Legal RAG] Case search error:", err);
+    return "";
+  }
+}
+
+function buildFormattedCitation(caseNumber: string, court: string): string {
+  const suffix = court === "MA" ? "/MARI" : court === "MK" ? "/MKRI" : "";
+  const hasSuffix = suffix && !caseNumber.includes(suffix.slice(1));
+  return `Putusan ${court} No. ${caseNumber}${hasSuffix ? suffix : ""}`;
+}
+
+function formatCaseCitation(c: any, score: number | null): string {
+  const citation = buildFormattedCitation(c.caseNumber, c.court);
+  const lines: string[] = [];
+  lines.push(`**${citation}** (${c.year || "N/A"})`);
+  if (c.parties) lines.push(`Para Pihak: ${c.parties}`);
+  if (c.domain) lines.push(`Domain: ${c.domain}`);
+  if (c.legalIssue) lines.push(`Isu Hukum: ${c.legalIssue}`);
+  lines.push(`Ratio Decidendi: ${c.ratioDecidendi}`);
+  if (c.conclusion) lines.push(`Kesimpulan: ${c.conclusion}`);
+  if (c.sourceUrl) lines.push(`Sumber: ${c.sourceUrl}`);
+  if (score !== null) lines.push(`[Relevansi: ${(score * 100).toFixed(0)}%]`);
+  return lines.join("\n");
+}
+
+async function searchLegalKBChunks(query: string, topK = 5): Promise<string> {
+  try {
+    const allChunks = await db.select({
+      id: legalKnowledgeChunks.id,
+      legalKbId: legalKnowledgeChunks.legalKbId,
+      chunkIndex: legalKnowledgeChunks.chunkIndex,
+      content: legalKnowledgeChunks.content,
+      tokenCount: legalKnowledgeChunks.tokenCount,
+      embedding: legalKnowledgeChunks.embedding,
+      metadata: legalKnowledgeChunks.metadata,
+      createdAt: legalKnowledgeChunks.createdAt,
+      kbName: legalKnowledgeBases.name,
+      kbSourceAuthority: legalKnowledgeBases.sourceAuthority,
+    })
+      .from(legalKnowledgeChunks)
+      .innerJoin(legalKnowledgeBases, eq(legalKnowledgeChunks.legalKbId, legalKnowledgeBases.id))
+      .where(eq(legalKnowledgeBases.status, "active"))
+      .limit(2000);
+
+    if (allChunks.length === 0) return "";
+
+    const queryEmbedding = await createEmbedding(query);
+    if (queryEmbedding.length === 0) return allChunks.slice(0, 3).map(c => c.content).join("\n\n");
+
+    const fakeChunks = allChunks.map(c => ({
+      id: c.id,
+      knowledgeBaseId: c.legalKbId,
+      agentId: 0,
+      chunkIndex: c.chunkIndex,
+      content: c.content,
+      tokenCount: c.tokenCount,
+      embedding: c.embedding as number[],
+      metadata: { sourceName: c.kbName, sourceAuthority: c.kbSourceAuthority },
+      createdAt: c.createdAt,
+    }));
+
+    const relevant = retrieveRelevantChunks(queryEmbedding, fakeChunks, topK, 0.3);
+    if (relevant.length === 0) return allChunks.slice(0, 3).map(c => c.content).join("\n\n");
+
+    const chunkMap = new Map(allChunks.map(c => [c.id, c]));
+    return relevant.map(r => {
+      const orig = chunkMap.get(r.chunk.id);
+      const source = orig?.kbName || "Legal KB";
+      const authority = orig?.kbSourceAuthority ? ` [${orig.kbSourceAuthority}]` : "";
+      return `[${source}${authority}] (relevansi: ${(r.score * 100).toFixed(0)}%):\n${r.chunk.content}`;
+    }).join("\n\n---\n\n");
+  } catch (err) {
+    console.error("[Legal RAG] KB chunk search error:", err);
+    return "";
+  }
+}
 
 function detectTier(message: string): string {
   const T3_SIGNALS = /\b(eksepsi|ratio decidendi|kasasi|pk |peninjauan kembali|legal opinion|due diligence|dakwaan|pledoi|requisitor|in dubio pro reo|lex specialis|pasal \d+|putusan no|yurisprudensi|actio pauliana|concursus|homologasi|boedel|debt to equity)\b/i;
@@ -133,6 +266,19 @@ export function registerLegalRoutes(app: Express) {
 
       const tierHint = detectTier(message);
       systemPrompt = `${systemPrompt}\n\nUSER TIER (detected): ${tierHint}. Sesuaikan kedalaman jawaban.`;
+
+      const [caseContext, kbContext] = await Promise.all([
+        searchLegalCasesRAG(message, 4).catch(() => ""),
+        searchLegalKBChunks(message, 4).catch(() => ""),
+      ]);
+
+      if (caseContext) {
+        systemPrompt += `\n\n=== YURISPRUDENSI RELEVAN (dari database putusan MA/MK) ===\nGunakan putusan berikut untuk mendukung analisis Anda. Format sitasi: "Putusan MA No. XXX/Pid/YYYY/MARI".\n\n${caseContext}\n\nPENTING: Selalu tambahkan "⚠️ Verifikasi nomor putusan di sipp.mahkamahagung.go.id sebelum digunakan dalam dokumen formal." setelah menyitir putusan.`;
+      }
+
+      if (kbContext) {
+        systemPrompt += `\n\n=== REGULASI RELEVAN (dari knowledge base hukum) ===\nGunakan referensi peraturan berikut untuk mendukung analisis Anda dengan sitasi pasal yang akurat:\n\n${kbContext}`;
+      }
 
       let dbSessionId: number | null = null;
       let history: { role: "user" | "assistant"; content: string }[] = [];
@@ -471,6 +617,227 @@ export function registerLegalRoutes(app: Express) {
     const guestKey = getGuestKey(req);
     const count = getGuestCount(guestKey);
     res.json({ isGuest: true, messagesUsed: count, limit: GUEST_MESSAGE_LIMIT, limitReached: count >= GUEST_MESSAGE_LIMIT });
+  });
+
+  app.get("/api/legal/cases/search", async (req: any, res: any) => {
+    try {
+      const q = (req.query.q as string || "").trim();
+      if (!q) return res.json([]);
+
+      const allCases = await db.select().from(legalCases).limit(500);
+      if (allCases.length === 0) return res.json([]);
+
+      const queryEmbedding = await createEmbedding(q).catch(() => []);
+      let results: any[] = [];
+
+      if (queryEmbedding.length > 0) {
+        const casesWithEmb = allCases.filter(c => c.embedding && (c.embedding as number[]).length > 0);
+        if (casesWithEmb.length > 0) {
+          const fakeChunks = casesWithEmb.map(c => ({
+            id: c.id,
+            knowledgeBaseId: 0,
+            agentId: 0,
+            chunkIndex: 0,
+            content: `${c.caseNumber} ${c.court} ${c.legalIssue} ${c.ratioDecidendi}`,
+            tokenCount: 0,
+            embedding: c.embedding as number[],
+            metadata: {},
+            createdAt: c.createdAt,
+          }));
+          const relevant = retrieveRelevantChunks(queryEmbedding, fakeChunks, 10, 0.2);
+          if (relevant.length > 0) {
+            const caseMap = new Map(allCases.map(c => [c.id, c]));
+            results = relevant.map(r => ({ ...caseMap.get(r.chunk.id), relevanceScore: r.score }));
+          }
+        }
+      }
+
+      if (results.length === 0) {
+        const ql = q.toLowerCase();
+        results = allCases
+          .filter(c =>
+            c.caseNumber.toLowerCase().includes(ql) ||
+            (c.legalIssue || "").toLowerCase().includes(ql) ||
+            (c.parties || "").toLowerCase().includes(ql) ||
+            (c.ratioDecidendi || "").toLowerCase().includes(ql) ||
+            (c.keywords || []).some(k => k.toLowerCase().includes(ql))
+          )
+          .slice(0, 10)
+          .map(c => ({ ...c, relevanceScore: null }));
+      }
+
+      res.json(results.map(c => ({
+        id: c.id,
+        caseNumber: c.caseNumber,
+        court: c.court,
+        year: c.year,
+        domain: c.domain,
+        parties: c.parties,
+        legalIssue: c.legalIssue,
+        ratioDecidendi: c.ratioDecidendi,
+        conclusion: c.conclusion,
+        keywords: c.keywords,
+        sourceUrl: c.sourceUrl,
+        relevanceScore: c.relevanceScore,
+        formattedCitation: buildFormattedCitation(c.caseNumber, c.court),
+      })));
+    } catch (err) {
+      console.error("[Legal Cases Search] Error:", err);
+      res.status(500).json({ error: "Failed to search cases" });
+    }
+  });
+
+  app.get("/api/legal/cases", async (_req: any, res: any) => {
+    try {
+      const cases = await db.select({
+        id: legalCases.id,
+        caseNumber: legalCases.caseNumber,
+        court: legalCases.court,
+        year: legalCases.year,
+        domain: legalCases.domain,
+        parties: legalCases.parties,
+        legalIssue: legalCases.legalIssue,
+        conclusion: legalCases.conclusion,
+        keywords: legalCases.keywords,
+        sourceUrl: legalCases.sourceUrl,
+        createdAt: legalCases.createdAt,
+      }).from(legalCases).orderBy(desc(legalCases.createdAt)).limit(200);
+      res.json(cases);
+    } catch (err) {
+      console.error("[Legal Cases] Error:", err);
+      res.status(500).json({ error: "Failed to fetch cases" });
+    }
+  });
+
+  app.post("/api/legal/cases", async (req: any, res: any) => {
+    try {
+      if (!isLegalAdmin(req)) return res.status(403).json({ error: "Forbidden" });
+      const { caseNumber, court, year, domain, parties, legalIssue, ratioDecidendi, conclusion, keywords, sourceUrl } = req.body;
+      if (!caseNumber || !court || !ratioDecidendi) {
+        return res.status(400).json({ error: "caseNumber, court, ratioDecidendi are required" });
+      }
+      const textForEmbedding = `${caseNumber} ${court} ${domain || ""} ${legalIssue || ""} ${ratioDecidendi}`;
+      const embedding = await createEmbedding(textForEmbedding).catch(() => []);
+      const [newCase] = await db.insert(legalCases).values({
+        caseNumber: caseNumber.trim(),
+        court: court.trim(),
+        year: year ? Number(year) : null,
+        domain: domain || "umum",
+        parties: parties || "",
+        legalIssue: legalIssue || "",
+        ratioDecidendi: ratioDecidendi.trim(),
+        conclusion: conclusion || "",
+        keywords: Array.isArray(keywords) ? keywords : [],
+        sourceUrl: sourceUrl || "",
+        embedding,
+      }).returning();
+      res.json(newCase);
+    } catch (err) {
+      console.error("[Legal Cases Add] Error:", err);
+      res.status(500).json({ error: "Failed to add case" });
+    }
+  });
+
+  app.delete("/api/legal/cases/:id", async (req: any, res: any) => {
+    try {
+      if (!isLegalAdmin(req)) return res.status(403).json({ error: "Forbidden" });
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+      await db.delete(legalCases).where(eq(legalCases.id, id));
+      res.json({ success: true });
+    } catch (err) {
+      console.error("[Legal Cases Delete] Error:", err);
+      res.status(500).json({ error: "Failed to delete case" });
+    }
+  });
+
+  app.get("/api/legal/kb", async (req: any, res: any) => {
+    try {
+      if (!isLegalAdmin(req)) return res.status(403).json({ error: "Forbidden" });
+      const kbs = await db.select({
+        id: legalKnowledgeBases.id,
+        name: legalKnowledgeBases.name,
+        category: legalKnowledgeBases.category,
+        sourceAuthority: legalKnowledgeBases.sourceAuthority,
+        sourceUrl: legalKnowledgeBases.sourceUrl,
+        effectiveDate: legalKnowledgeBases.effectiveDate,
+        status: legalKnowledgeBases.status,
+        contentSummary: legalKnowledgeBases.contentSummary,
+        chunkCount: legalKnowledgeBases.chunkCount,
+        createdAt: legalKnowledgeBases.createdAt,
+        updatedAt: legalKnowledgeBases.updatedAt,
+      }).from(legalKnowledgeBases).orderBy(desc(legalKnowledgeBases.createdAt));
+      res.json(kbs);
+    } catch (err) {
+      console.error("[Legal KB] Error:", err);
+      res.status(500).json({ error: "Failed to fetch knowledge bases" });
+    }
+  });
+
+  app.post("/api/legal/kb", async (req: any, res: any) => {
+    try {
+      if (!isLegalAdmin(req)) return res.status(403).json({ error: "Forbidden" });
+      const { name, category, sourceAuthority, sourceUrl, effectiveDate, content, contentSummary } = req.body;
+      if (!name || !content || typeof content !== "string") {
+        return res.status(400).json({ error: "name and content are required" });
+      }
+      if (content.length > 500000) {
+        return res.status(413).json({ error: "Content too large (max 500,000 chars)" });
+      }
+
+      const [newKB] = await db.insert(legalKnowledgeBases).values({
+        name: name.trim(),
+        category: category || "regulasi",
+        sourceAuthority: sourceAuthority || "",
+        sourceUrl: sourceUrl || "",
+        effectiveDate: effectiveDate || "",
+        status: "active",
+        contentSummary: contentSummary || content.slice(0, 300),
+        chunkCount: 0,
+      }).returning();
+
+      const chunks = chunkText(content, 800, 200);
+      if (chunks.length > 0) {
+        const embeddings = await createEmbeddings(chunks);
+        const chunkRows = chunks.map((chunkContent, idx) => ({
+          legalKbId: newKB.id,
+          chunkIndex: idx,
+          content: chunkContent,
+          tokenCount: Math.ceil(chunkContent.length / 4),
+          embedding: embeddings[idx] || [],
+          metadata: { sourceName: name, sourceAuthority: sourceAuthority || "", totalChunks: chunks.length },
+        }));
+
+        const batchSize = 50;
+        for (let i = 0; i < chunkRows.length; i += batchSize) {
+          await db.insert(legalKnowledgeChunks).values(chunkRows.slice(i, i + batchSize));
+        }
+
+        await db.update(legalKnowledgeBases)
+          .set({ chunkCount: chunks.length, updatedAt: new Date() })
+          .where(eq(legalKnowledgeBases.id, newKB.id));
+        newKB.chunkCount = chunks.length;
+      }
+
+      res.json({ ...newKB, chunksCreated: chunks.length });
+    } catch (err) {
+      console.error("[Legal KB Upload] Error:", err);
+      res.status(500).json({ error: "Failed to upload knowledge base" });
+    }
+  });
+
+  app.delete("/api/legal/kb/:id", async (req: any, res: any) => {
+    try {
+      if (!isLegalAdmin(req)) return res.status(403).json({ error: "Forbidden" });
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ error: "Invalid ID" });
+      await db.delete(legalKnowledgeChunks).where(eq(legalKnowledgeChunks.legalKbId, id));
+      await db.delete(legalKnowledgeBases).where(eq(legalKnowledgeBases.id, id));
+      res.json({ success: true });
+    } catch (err) {
+      console.error("[Legal KB Delete] Error:", err);
+      res.status(500).json({ error: "Failed to delete knowledge base" });
+    }
   });
 
   app.post("/api/legal/legal-opinion", async (req: any, res: any) => {

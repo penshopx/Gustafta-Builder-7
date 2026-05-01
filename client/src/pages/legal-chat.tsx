@@ -6,10 +6,39 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight, Copy, Check, Menu, X, FileDown, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight, Copy, Check, Menu, X, FileDown, FileText, ChevronDown, ChevronUp, Search, BookOpen, ShieldCheck, ExternalLink, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageContent } from "@/lib/format-message";
+
+interface LegalCase {
+  id: number;
+  caseNumber: string;
+  court: string;
+  year: number | null;
+  domain: string;
+  parties: string;
+  legalIssue: string;
+  ratioDecidendi: string;
+  conclusion: string;
+  keywords: string[];
+  sourceUrl: string;
+  relevanceScore: number | null;
+  formattedCitation: string;
+}
+
+interface LegalKB {
+  id: number;
+  name: string;
+  category: string;
+  sourceAuthority: string;
+  sourceUrl: string;
+  effectiveDate: string;
+  status: string;
+  contentSummary: string;
+  chunkCount: number;
+  createdAt: string;
+}
 
 interface LegalAgent {
   id: string;
@@ -103,6 +132,21 @@ export default function LegalChat() {
   const [isGeneratingOpinion, setIsGeneratingOpinion] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
+  const [showCaseSearch, setShowCaseSearch] = useState(false);
+  const [caseQuery, setCaseQuery] = useState("");
+  const [caseResults, setCaseResults] = useState<LegalCase[]>([]);
+  const [isCaseSearching, setIsCaseSearching] = useState(false);
+  const [expandedCaseId, setExpandedCaseId] = useState<number | null>(null);
+
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [adminKey, setAdminKey] = useState("");
+  const [adminKeyInput, setAdminKeyInput] = useState("");
+  const [kbList, setKbList] = useState<LegalKB[]>([]);
+  const [kbForm, setKbForm] = useState({ name: "", category: "regulasi", sourceAuthority: "", sourceUrl: "", effectiveDate: "", content: "", contentSummary: "" });
+  const [isUploadingKb, setIsUploadingKb] = useState(false);
+  const [kbMessage, setKbMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isDeletingKbId, setIsDeletingKbId] = useState<number | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -163,6 +207,90 @@ export default function LegalChat() {
     setCurrentSessionId(null);
     setSidebarOpen(false);
     setShowLegalOpinionForm(false);
+  };
+
+  const searchCases = async (q?: string) => {
+    const query = (q ?? caseQuery).trim();
+    if (!query) return;
+    setIsCaseSearching(true);
+    setCaseResults([]);
+    try {
+      const res = await fetch(`/api/legal/cases/search?q=${encodeURIComponent(query)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCaseResults(data);
+      }
+    } catch {}
+    setIsCaseSearching(false);
+  };
+
+  const insertCitationToChat = (c: LegalCase) => {
+    const citation = `Terkait dengan "${c.legalIssue || c.caseNumber}", tolong analisis berdasarkan Putusan ${c.court} No. ${c.caseNumber}${c.year ? ` tahun ${c.year}` : ""}: ${c.ratioDecidendi.slice(0, 200)}...`;
+    setInput(citation);
+    setShowCaseSearch(false);
+    textareaRef.current?.focus();
+  };
+
+  const loadKbList = async (key: string) => {
+    try {
+      const res = await fetch("/api/legal/kb", { headers: { "x-legal-admin-key": key } });
+      if (res.ok) setKbList(await res.json());
+    } catch {}
+  };
+
+  const handleAdminKeySubmit = async () => {
+    if (!adminKeyInput.trim()) return;
+    try {
+      const res = await fetch("/api/legal/kb", {
+        headers: { "x-legal-admin-key": adminKeyInput.trim() },
+      });
+      if (res.status === 403) {
+        setKbMessage({ type: "error", text: "Admin key salah atau tidak dikonfigurasi di server." });
+        return;
+      }
+      if (res.ok) setKbList(await res.json());
+      setAdminKey(adminKeyInput.trim());
+      setShowAdminPanel(true);
+      setKbMessage(null);
+    } catch {
+      setKbMessage({ type: "error", text: "Gagal menghubungi server." });
+    }
+  };
+
+  const handleKbUpload = async () => {
+    if (!kbForm.name || !kbForm.content) {
+      setKbMessage({ type: "error", text: "Nama dan konten wajib diisi." });
+      return;
+    }
+    setIsUploadingKb(true);
+    setKbMessage(null);
+    try {
+      const res = await fetch("/api/legal/kb", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-legal-admin-key": adminKey },
+        body: JSON.stringify(kbForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setKbMessage({ type: "success", text: `KB "${data.name}" berhasil diupload (${data.chunksCreated} chunk).` });
+        setKbForm({ name: "", category: "regulasi", sourceAuthority: "", sourceUrl: "", effectiveDate: "", content: "", contentSummary: "" });
+        await loadKbList(adminKey);
+      } else {
+        setKbMessage({ type: "error", text: data.error || "Gagal upload KB." });
+      }
+    } catch {
+      setKbMessage({ type: "error", text: "Gagal upload KB." });
+    }
+    setIsUploadingKb(false);
+  };
+
+  const handleKbDelete = async (id: number) => {
+    setIsDeletingKbId(id);
+    try {
+      await fetch(`/api/legal/kb/${id}`, { method: "DELETE", headers: { "x-legal-admin-key": adminKey } });
+      await loadKbList(adminKey);
+    } catch {}
+    setIsDeletingKbId(null);
   };
 
   const copyToClipboard = async (text: string, id: string) => {
@@ -490,9 +618,120 @@ export default function LegalChat() {
         </div>
 
         <div className="p-3 border-t border-white/10">
-          <p className="text-white/25 text-xs text-center leading-relaxed">
-            ⚠️ Bersifat edukatif, bukan pendapat hukum mengikat
-          </p>
+          {!showAdminPanel ? (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  type="password"
+                  value={adminKeyInput}
+                  onChange={e => setAdminKeyInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleAdminKeySubmit()}
+                  placeholder="Admin key (opsional)"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/20 text-xs h-7 flex-1"
+                  data-testid="input-admin-key"
+                />
+                <button
+                  onClick={handleAdminKeySubmit}
+                  className="text-white/40 hover:text-white/70 transition-colors px-2"
+                  title="Masuk sebagai admin"
+                  data-testid="button-submit-admin-key"
+                >
+                  <Database className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <p className="text-white/25 text-xs text-center leading-relaxed">
+                ⚠️ Bersifat edukatif, bukan pendapat hukum mengikat
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-green-400" />
+                  <span className="text-green-300 text-xs font-medium">Admin Panel</span>
+                </div>
+                <button onClick={() => setShowAdminPanel(false)} className="text-white/30 hover:text-white/60">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/5 p-2.5 space-y-2">
+                <p className="text-white/50 text-[10px] font-medium uppercase tracking-wide">Upload Regulasi / KB Hukum</p>
+                <Input
+                  value={kbForm.name}
+                  onChange={e => setKbForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="Nama (mis: KUHP 2023 — UU 1/2023)"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/20 text-xs h-7"
+                  data-testid="input-kb-name"
+                />
+                <div className="grid grid-cols-2 gap-1.5">
+                  <Input
+                    value={kbForm.category}
+                    onChange={e => setKbForm(p => ({ ...p, category: e.target.value }))}
+                    placeholder="Kategori"
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/20 text-xs h-7"
+                    data-testid="input-kb-category"
+                  />
+                  <Input
+                    value={kbForm.sourceAuthority}
+                    onChange={e => setKbForm(p => ({ ...p, sourceAuthority: e.target.value }))}
+                    placeholder="Otoritas"
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/20 text-xs h-7"
+                    data-testid="input-kb-authority"
+                  />
+                </div>
+                <Input
+                  value={kbForm.sourceUrl}
+                  onChange={e => setKbForm(p => ({ ...p, sourceUrl: e.target.value }))}
+                  placeholder="URL sumber (opsional)"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/20 text-xs h-7"
+                  data-testid="input-kb-source-url"
+                />
+                <Textarea
+                  value={kbForm.content}
+                  onChange={e => setKbForm(p => ({ ...p, content: e.target.value }))}
+                  placeholder="Paste konten teks regulasi/UU di sini..."
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/20 text-xs min-h-[70px] resize-none"
+                  data-testid="input-kb-content"
+                />
+                {kbMessage && (
+                  <div className={`text-xs p-1.5 rounded ${kbMessage.type === "success" ? "text-green-300 bg-green-500/10" : "text-red-300 bg-red-500/10"}`}>
+                    {kbMessage.text}
+                  </div>
+                )}
+                <Button
+                  onClick={handleKbUpload}
+                  disabled={isUploadingKb || !kbForm.name || !kbForm.content}
+                  size="sm"
+                  className="w-full h-7 text-xs text-white border-0"
+                  style={{ background: "linear-gradient(135deg, #059669, #047857)" }}
+                  data-testid="button-upload-kb"
+                >
+                  {isUploadingKb ? <><Loader2 className="w-3 h-3 animate-spin mr-1" />Memproses...</> : "Upload & Proses Embedding"}
+                </Button>
+              </div>
+              {kbList.length > 0 && (
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  <p className="text-white/40 text-[10px] font-medium uppercase tracking-wide">KB Aktif ({kbList.length})</p>
+                  {kbList.map(kb => (
+                    <div key={kb.id} className="flex items-center gap-1.5 py-1 px-1.5 rounded hover:bg-white/5" data-testid={`kb-item-${kb.id}`}>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-white/70 text-[10px] truncate">{kb.name}</div>
+                        <div className="text-white/30 text-[10px]">{kb.chunkCount} chunk · {kb.category}</div>
+                      </div>
+                      <button
+                        onClick={() => handleKbDelete(kb.id)}
+                        disabled={isDeletingKbId === kb.id}
+                        className="text-red-400/60 hover:text-red-400 transition-colors flex-shrink-0"
+                        data-testid={`button-delete-kb-${kb.id}`}
+                      >
+                        {isDeletingKbId === kb.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </aside>
 
@@ -526,6 +765,17 @@ export default function LegalChat() {
                 {showLegalOpinionForm ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               </Button>
             )}
+            <Button
+              onClick={() => setShowCaseSearch(prev => !prev)}
+              size="sm"
+              variant="ghost"
+              className="gap-1.5 text-cyan-300 border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 hover:text-cyan-200 text-xs px-3"
+              data-testid="button-toggle-case-search"
+            >
+              <Search className="w-3.5 h-3.5" />
+              Cari Putusan
+              {showCaseSearch ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </Button>
             {isStreaming && (
               <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
                 <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -608,6 +858,127 @@ export default function LegalChat() {
                     Batal
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showCaseSearch && (
+          <div className="border-b border-white/10 p-4" style={{ background: "#0a1220" }}>
+            <div className="max-w-4xl mx-auto">
+              <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-cyan-300" />
+                    <h3 className="text-cyan-200 font-semibold text-sm">Pencarian Putusan MA / MK</h3>
+                    <span className="text-white/40 text-xs ml-1">— Sitasi yurisprudensi</span>
+                  </div>
+                  <button onClick={() => setShowCaseSearch(false)} className="text-white/30 hover:text-white/60" data-testid="button-close-case-search">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <Input
+                    value={caseQuery}
+                    onChange={e => setCaseQuery(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && searchCases()}
+                    placeholder="Cari berdasarkan nomor perkara, isu hukum, kata kunci... (mis: wanprestasi, PHK efisiensi)"
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/30 text-sm h-9 flex-1"
+                    data-testid="input-case-search"
+                  />
+                  <Button
+                    onClick={() => searchCases()}
+                    disabled={isCaseSearching || !caseQuery.trim()}
+                    size="sm"
+                    className="gap-1.5 text-white border-0 px-4 h-9"
+                    style={{ background: "linear-gradient(135deg, #0891b2, #0e7490)" }}
+                    data-testid="button-search-cases"
+                  >
+                    {isCaseSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                    Cari
+                  </Button>
+                </div>
+                {isCaseSearching && (
+                  <div className="flex items-center gap-2 text-cyan-300/70 text-xs py-2">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Mencari putusan relevan...</span>
+                  </div>
+                )}
+                {!isCaseSearching && caseResults.length === 0 && caseQuery && (
+                  <p className="text-white/40 text-xs py-2">Tidak ada putusan ditemukan. Coba kata kunci lain atau nomor perkara.</p>
+                )}
+                {caseResults.length > 0 && (
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                    {caseResults.map(c => (
+                      <div
+                        key={c.id}
+                        className="rounded-lg border border-white/10 bg-white/5 p-3 cursor-pointer hover:bg-white/10 transition-colors"
+                        data-testid={`case-result-${c.id}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className="text-cyan-300 font-semibold text-xs">{c.formattedCitation}</span>
+                              <Badge className="text-[10px] bg-white/10 text-white/60 border-white/20 px-1.5 py-0">{c.domain}</Badge>
+                              {c.relevanceScore !== null && (
+                                <span className="text-white/40 text-[10px]">relevansi {Math.round(c.relevanceScore * 100)}%</span>
+                              )}
+                            </div>
+                            {c.parties && <p className="text-white/50 text-xs mb-1 truncate">Para Pihak: {c.parties}</p>}
+                            {c.legalIssue && <p className="text-white/70 text-xs mb-1">{c.legalIssue}</p>}
+                            <button
+                              className="text-white/40 hover:text-cyan-300 text-xs flex items-center gap-1 transition-colors mt-1"
+                              onClick={() => setExpandedCaseId(expandedCaseId === c.id ? null : c.id)}
+                              data-testid={`button-expand-case-${c.id}`}
+                            >
+                              {expandedCaseId === c.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                              {expandedCaseId === c.id ? "Sembunyikan" : "Lihat ratio decidendi"}
+                            </button>
+                            {expandedCaseId === c.id && (
+                              <div className="mt-2 p-2.5 rounded-lg bg-black/30 border border-white/10">
+                                <p className="text-white/80 text-xs leading-relaxed">{c.ratioDecidendi}</p>
+                                {c.conclusion && <p className="text-cyan-200/70 text-xs mt-1.5 font-medium">Kesimpulan: {c.conclusion}</p>}
+                                {c.keywords && c.keywords.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1.5">
+                                    {c.keywords.map(k => (
+                                      <span key={k} className="text-[10px] bg-cyan-500/10 text-cyan-300/70 border border-cyan-500/20 rounded px-1.5 py-0.5">{k}</span>
+                                    ))}
+                                  </div>
+                                )}
+                                <p className="text-white/25 text-[10px] mt-2">⚠️ Verifikasi di sipp.mahkamahagung.go.id sebelum digunakan dalam dokumen formal.</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col gap-1.5 flex-shrink-0 ml-2">
+                            <button
+                              onClick={() => insertCitationToChat(c)}
+                              className="text-[10px] text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/20 px-2 py-1 rounded transition-colors whitespace-nowrap"
+                              data-testid={`button-cite-case-${c.id}`}
+                              title="Gunakan sebagai referensi di chat"
+                            >
+                              Kutip
+                            </button>
+                            {c.sourceUrl && (
+                              <a
+                                href={c.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-white/40 hover:text-white/70 flex items-center gap-0.5 transition-colors"
+                                data-testid={`link-case-source-${c.id}`}
+                              >
+                                <ExternalLink className="w-2.5 h-2.5" />
+                                Sumber
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-white/25 text-[10px] mt-3">
+                  ⚠️ Data yurisprudensi bersifat referensi. Selalu verifikasi nomor putusan di <a href="https://sipp.mahkamahagung.go.id" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50">SIPP MA</a> atau <a href="https://mkri.id" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/50">mkri.id</a>.
+                </p>
               </div>
             </div>
           </div>

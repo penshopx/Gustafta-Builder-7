@@ -141,14 +141,27 @@ LexCom is an integrated multi-agent legal AI system added to the Gustafta platfo
 
 ### Key Files
 - `server/lib/legal-agents.ts` — All 13 agent configs (orchestrator + 12 specialists) with system prompts
-- `server/routes-legal.ts` — API routes: POST /api/legal/chat (SSE streaming), GET/DELETE /api/legal/sessions
+- `server/lib/rag-service.ts` — RAG embedding/retrieval functions used for legal KB and case search
+- `server/routes-legal.ts` — API routes: chat, sessions, KB management, case search
+- `server/seed-legal-cases.ts` — Seeds 12 landmark putusan MA/MK with embeddings on first startup
 - `client/src/pages/legal-landing.tsx` — Legal landing page
-- `client/src/pages/legal-chat.tsx` — Chat interface
+- `client/src/pages/legal-chat.tsx` — Chat interface with case search panel and admin KB panel
 - `client/src/components/chaesa-widget.tsx` — Floating Chaesa Lexbot widget
 
 ### Database Tables
 - `legal_chat_sessions` — Stores chat sessions per user
 - `legal_chat_messages` — Stores chat messages linked to sessions
+- `legal_knowledge_bases` — Admin-uploadable regulation documents (KUHP 2023, KUHPerdata, etc.)
+- `legal_knowledge_chunks` — RAG chunks with vector embeddings for regulation documents
+- `legal_cases` — Pre-indexed putusan MA/MK with embeddings for semantic and keyword search
+
+### Case Search & Regulation RAG (Task #4)
+- **Putusan database**: 12 seed cases spanning pidana, perdata, TUN, ketenagakerjaan, ketatanegaraan
+- **Semantic search**: Embedding-based retrieval via `GET /api/legal/cases/search?q=...`
+- **Admin KB upload**: `POST /api/legal/kb` (auth via `x-legal-admin-key` header) — chunks and embeds regulation text
+- **RAG in chat**: All chat messages search the KB and case database; relevant chunks are injected into the system prompt
+- **Citation format**: "Putusan MA No. XXX/Pid/YYYY/MARI" — consistent across all agents
+- **UI**: "Cari Putusan" button in chat header opens a search panel; admin panel in sidebar for KB management
 
 ### Disclaimer
 All legal chatbot responses include the mandatory disclaimer: "⚠️ Informasi ini bersifat edukatif dan bukan pendapat hukum yang mengikat."
