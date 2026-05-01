@@ -2741,6 +2741,31 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           });
         }
 
+        if (process.env.QWEN_API_KEY) {
+          fallbackAttempts.push({
+            name: "fallback(qwen)",
+            createStream: async () => {
+              const qwen = new OpenAI({
+                apiKey: process.env.QWEN_API_KEY!,
+                baseURL: process.env.QWEN_BASE_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+              });
+              const stream = await qwen.chat.completions.create({
+                model: process.env.QWEN_MODEL || "qwen-plus",
+                messages: chatMessages as any,
+                max_tokens: maxTokens,
+                temperature: temperature,
+                stream: true,
+              });
+              return (async function* () {
+                for await (const chunk of stream) {
+                  const content = chunk.choices[0]?.delta?.content || "";
+                  if (content) yield { content };
+                }
+              })();
+            },
+          });
+        }
+
         if (process.env.GEMINI_API_KEY) {
           fallbackAttempts.push({
             name: "fallback(gemini)",
