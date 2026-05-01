@@ -90,6 +90,7 @@ import * as M_developerRealEstate from "./seed-developer-real-estate";
 import * as M_layananRealEstate from "./seed-layanan-real-estate";
 import * as M_pusatFaqPeserta from "./seed-pusat-faq-peserta";
 import * as M_itLspPaperlessAjj from "./seed-it-lsp-paperless-ajj";
+import * as M_itLspPaperlessAjjExtra from "./seed-it-lsp-paperless-ajj-extra";
 import * as M_fixOrchestrators from "./fix-orchestrators";
 import * as M_inaprocScraper from "./lib/inaproc-scraper";
 
@@ -164,6 +165,7 @@ const seedModuleRegistry: Record<string, any> = {
   "./seed-layanan-real-estate": M_layananRealEstate,
   "./seed-pusat-faq-peserta": M_pusatFaqPeserta,
   "./seed-it-lsp-paperless-ajj": M_itLspPaperlessAjj,
+  "./seed-it-lsp-paperless-ajj-extra": M_itLspPaperlessAjjExtra,
   "./fix-orchestrators": M_fixOrchestrators,
   "./lib/inaproc-scraper": M_inaprocScraper,
 };
@@ -477,6 +479,7 @@ for (const envVar of requiredEnvVars) {
           { name: "DevProperti Pro — Developer Real Estate", module: "./seed-developer-real-estate", fn: "seedDeveloperRealEstate" },
           { name: "EstateCare Pro — Layanan Real Estate", module: "./seed-layanan-real-estate", fn: "seedLayananRealEstate" },
           { name: "IT LSP — Paperless (Nir Kertas) & AJJ", module: "./seed-it-lsp-paperless-ajj", fn: "seedItLspPaperlessAjj" },
+          { name: "IT LSP Extra — Panduan Asesi & Asesor Digital", module: "./seed-it-lsp-paperless-ajj-extra", fn: "seedItLspPaperlessAjjExtra" },
         ];
 
         for (const seed of seedTasks) {
