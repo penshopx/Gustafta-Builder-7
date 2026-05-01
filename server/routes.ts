@@ -603,6 +603,46 @@ export async function registerRoutes(
     }
   });
 
+  // Authenticated: Install a public series to user's own workspace
+  app.post("/api/series/:slug/install", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthenticated" });
+      const { slug } = req.params;
+
+      // Only LexCom is installable for now
+      if (slug !== "lexcom-ai-hukum-indonesia") {
+        return res.status(400).json({ error: "Series ini belum tersedia untuk instalasi mandiri." });
+      }
+
+      // Check user has active Gustafta subscription (or is admin)
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((id: string) => id.trim());
+      const isAdmin = adminIds.includes(String(userId));
+      if (!isAdmin) {
+        const subscription = await storage.getActiveSubscription(String(userId));
+        if (!subscription || subscription.status !== "active") {
+          return res.status(403).json({
+            error: "Diperlukan langganan Gustafta aktif untuk menginstall series ini.",
+            reason: "no_active_subscription",
+          });
+        }
+      }
+
+      const result = await seedLexCom(String(userId));
+      if (result.skipped) {
+        return res.json({ success: true, message: "LexCom sudah ada di workspace Anda.", skipped: true });
+      }
+      res.json({
+        success: true,
+        message: "LexCom berhasil ditambahkan ke workspace Anda! 13 agen hukum siap digunakan.",
+        created: result.created,
+      });
+    } catch (error: any) {
+      console.error("[Series install] Error:", error);
+      res.status(500).json({ error: "Gagal menginstall series: " + error.message });
+    }
+  });
+
   // Admin: Get all series
   app.get("/api/series", isAuthenticated, async (_req, res) => {
     try {

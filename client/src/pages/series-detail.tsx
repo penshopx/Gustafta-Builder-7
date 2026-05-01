@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "wouter";
-import { Bot, BookOpen, Layers, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, MessageCircle, Sparkles, Target, Users, Globe, Share2, Lightbulb, Network } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useParams, useLocation } from "wouter";
+import { Bot, BookOpen, Layers, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, MessageCircle, Sparkles, Target, Users, Globe, Share2, Lightbulb, Network, Download, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { SeriesWithHierarchy } from "@shared/schema";
 
 const typeIcons: Record<string, any> = {
@@ -25,12 +27,46 @@ const typeLabels: Record<string, string> = {
 
 export default function SeriesDetail() {
   const params = useParams<{ slug: string }>();
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const qc = useQueryClient();
   const [expandedBigIdeas, setExpandedBigIdeas] = useState<Set<string>>(new Set());
   const [expandedToolboxes, setExpandedToolboxes] = useState<Set<string>>(new Set());
+  const [installed, setInstalled] = useState(false);
 
   const { data: seriesData, isLoading, error } = useQuery<SeriesWithHierarchy>({
     queryKey: ["/api/series/public", params.slug],
   });
+
+  const { data: authUser } = useQuery<{ id: string; role: string } | null>({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
+
+  const installMutation = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/series/${params.slug}/install`, {}),
+    onSuccess: async (res: any) => {
+      const data = await res.json().catch(() => ({}));
+      if (data.skipped) {
+        toast({ title: "Sudah terpasang", description: "LexCom sudah ada di workspace Anda." });
+      } else {
+        toast({ title: "Berhasil!", description: data.message });
+        setInstalled(true);
+        qc.invalidateQueries({ queryKey: ["/api/series"] });
+      }
+    },
+    onError: async (err: any) => {
+      const data = await err.response?.json().catch(() => ({}));
+      if (data?.reason === "no_active_subscription") {
+        toast({ title: "Langganan diperlukan", description: "Aktifkan langganan Gustafta untuk menginstall series ini.", variant: "destructive" });
+        navigate("/pricing");
+      } else {
+        toast({ title: "Gagal install", description: data?.error || "Terjadi kesalahan.", variant: "destructive" });
+      }
+    },
+  });
+
+  const isInstallable = seriesData?.slug === "lexcom-ai-hukum-indonesia";
 
   const toggleBigIdea = (id: string) => {
     setExpandedBigIdeas(prev => {
@@ -173,6 +209,43 @@ export default function SeriesDetail() {
             )}
             {s.description && (
               <p className="text-white/70 text-sm sm:text-base max-w-2xl mb-6">{s.description}</p>
+            )}
+
+            {/* Install CTA */}
+            {isInstallable && (
+              <div className="mb-5">
+                {installed ? (
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                      <CheckCircle className="w-4 h-4" />
+                      Terpasang di Workspace
+                    </div>
+                    <Link href="/dashboard">
+                      <Button size="sm" variant="ghost" className="text-white border border-white/30 hover:bg-white/10" data-testid="button-go-to-workspace">
+                        Buka Workspace
+                        <ArrowRight className="w-3 h-3 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                ) : !authUser ? (
+                  <a href="/api/login">
+                    <Button className="gap-2 bg-white text-violet-700 hover:bg-white/90 font-semibold shadow-lg" data-testid="button-login-to-install">
+                      <Download className="w-4 h-4" />
+                      Masuk & Tambah ke Workspace
+                    </Button>
+                  </a>
+                ) : (
+                  <Button
+                    onClick={() => installMutation.mutate()}
+                    disabled={installMutation.isPending}
+                    className="gap-2 bg-white text-violet-700 hover:bg-white/90 font-semibold shadow-lg"
+                    data-testid="button-install-series"
+                  >
+                    <Download className="w-4 h-4" />
+                    {installMutation.isPending ? "Menginstall LexCom..." : "Tambah ke Workspace"}
+                  </Button>
+                )}
+              </div>
             )}
 
             <div className="flex flex-wrap gap-4">
