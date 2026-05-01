@@ -33,6 +33,7 @@ import * as M_manajemenLsbu from "./seed-manajemen-lsbu";
 import * as M_manajemenLsp from "./seed-manajemen-lsp";
 import * as M_manajemenLspExtra from "./seed-manajemen-lsp-extra";
 import * as M_skkSipilWave1 from "./seed-skk-sipil-wave1";
+import * as M_skkSipilWave2 from "./seed-skk-sipil-wave2";
 import * as M_iso14001 from "./seed-iso14001";
 import * as M_iso9001 from "./seed-iso9001";
 import * as M_siapUkom from "./seed-siap-ukom";
@@ -102,6 +103,7 @@ const seedModuleRegistry: Record<string, any> = {
   "./seed-manajemen-lsp": M_manajemenLsp,
   "./seed-manajemen-lsp-extra": M_manajemenLspExtra,
   "./seed-skk-sipil-wave1": M_skkSipilWave1,
+  "./seed-skk-sipil-wave2": M_skkSipilWave2,
   "./seed-iso14001": M_iso14001,
   "./seed-iso9001": M_iso9001,
   "./seed-siap-ukom": M_siapUkom,
@@ -412,6 +414,7 @@ for (const envVar of requiredEnvVars) {
           { name: "Manajemen LSP", module: "./seed-manajemen-lsp", fn: "seedManajemenLsp" },
           { name: "Manajemen LSP Extra", module: "./seed-manajemen-lsp-extra", fn: "seedManajemenLspExtra" },
           { name: "SKK Sipil Wave1", module: "./seed-skk-sipil-wave1", fn: "seedSkkSipilWave1" },
+          { name: "SKK Sipil Wave2", module: "./seed-skk-sipil-wave2", fn: "seedSkkSipilWave2" },
           { name: "ISO 14001", module: "./seed-iso14001", fn: "seedIso14001" },
           { name: "ISO 9001", module: "./seed-iso9001", fn: "seedIso9001" },
           { name: "Siap Uji Kompetensi", module: "./seed-siap-ukom", fn: "seedSiapUkom" },
