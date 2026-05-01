@@ -31,7 +31,7 @@ import LegalChat from "@/pages/legal-chat";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 
-const WIDGET_EXCLUDED_PATHS = ["/legal/chat", "/embed/"];
+const WIDGET_EXCLUDED_PATHS = ["/legal", "/embed/"];
 
 function Router() {
   return (
