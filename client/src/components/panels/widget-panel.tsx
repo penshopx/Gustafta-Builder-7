@@ -101,7 +101,19 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
     updateMutation.mutate(settings);
   };
 
-  const getBaseUrl = () => window.location.origin;
+  const getBaseUrl = () => {
+    const origin = window.location.origin;
+    const host = window.location.hostname;
+    if (
+      host.endsWith(".replit.dev") ||
+      host.endsWith(".worf.replit.dev") ||
+      host === "localhost" ||
+      host === "127.0.0.1"
+    ) {
+      return "https://gustafta-builder-8.replit.app";
+    }
+    return origin;
+  };
 
   // Dynamic embed code - just a loader script that fetches config from backend
   const generateDynamicEmbedCode = () => {
