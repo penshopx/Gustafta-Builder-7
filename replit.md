@@ -5,6 +5,8 @@ Gustafta is an AI chatbot builder platform for creating, configuring, and deploy
 
 The platform employs a 5-level modular hierarchical structure (Series → Core → Big Idea/Orkestrator → Toolbox → Agent) to manage numerous chatbot agents across various specialized series. For example, specific series are designed for Indonesian construction companies, covering the full Odoo ERP lifecycle (Readiness, Implementation, and Data Migration) and Contractor Safety Management System (CSMS) compliance.
 
+The "Manajemen LSP — Lembaga Sertifikasi Profesi" series includes a third BigIdea "Playbook BNSP — Tata Kelola Operasional LSP" (seeded by `server/seed-manajemen-lsp-extra.ts`) with 9 chatbots covering: Register PBNSP, Matriks Klausul 201→SOP, Manajemen TUK (PBNSP 206/214), Pengembangan Skema (PBNSP 210), Pelaksanaan Asesmen (PBNSP 301), Pelaporan & SI (PBNSP 211/508), Kalender Kepatuhan, Register CAPA + Form Templates, dan Draft SK Tim Pusat & 4 Komite.
+
 A core feature is "Project Brain," providing contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots and risk assessments. A "Deliverables" panel allows defining output types for each agent, with pre-built bundles and quick-action chat buttons.
 
 Gustafta also converts any chatbot into four digital products:
@@ -123,8 +125,10 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 -   PostCSS
 
 ### Integrations
--   OpenAI (GPT-4o, GPT-3.5)
--   DeepSeek
+-   OpenAI (GPT-4o, GPT-3.5) — primary chat provider
+-   DeepSeek — fallback layer 1 (deepseek-chat via OpenAI-compat)
+-   Qwen — fallback layer 2 (qwen-plus via DashScope OpenAI-compat)
+-   Gemini — fallback layer 3 (gemini-2.5-flash via @google/genai)
 -   Claude
 -   Fonnte (WhatsApp)
 -   Transfer Bank Manual (BCA/Mandiri/BRI)
