@@ -1,3 +1,9 @@
+export interface KBSourceRecommendation {
+  title: string;
+  description: string;
+  category: "uu" | "pp" | "peraturan" | "putusan" | "internal";
+}
+
 export interface LegalAgentConfig {
   id: string;
   name: string;
@@ -8,6 +14,7 @@ export interface LegalAgentConfig {
   systemPrompt: string;
   greetingMessage: string;
   starters: string[];
+  recommendedKBSources: KBSourceRecommendation[];
 }
 
 export const LEGAL_AGENTS: LegalAgentConfig[] = [
@@ -77,6 +84,13 @@ Selalu sertakan: "⚠️ *Informasi ini bersifat edukatif dan bukan pendapat huk
       "Apa beda penggelapan, penipuan, dan korupsi pada kasus jabatan?",
       "Bagaimana mekanisme diversi untuk anak yang berkonflik dengan hukum?",
     ],
+    recommendedKBSources: [
+      { title: "UU 1/2023 (KUHP Baru)", description: "Kitab Undang-Undang Hukum Pidana baru, efektif 2 Januari 2026", category: "uu" },
+      { title: "UU 8/1981 (KUHAP)", description: "Hukum Acara Pidana — prosedur penyelidikan, penyidikan, penuntutan", category: "uu" },
+      { title: "UU 31/1999 jo. UU 20/2001 (Tipikor)", description: "Pemberantasan Tindak Pidana Korupsi", category: "uu" },
+      { title: "UU 11/2008 jo. UU 19/2016 jo. UU 1/2024 (ITE)", description: "Informasi dan Transaksi Elektronik", category: "uu" },
+      { title: "Dokumen Kasus Internal", description: "BAP, surat dakwaan, pledoi, eksepsi, atau putusan pengadilan klien", category: "internal" },
+    ],
   },
   {
     id: "perdata",
@@ -133,6 +147,13 @@ Selalu sertakan: "⚠️ *Informasi ini bersifat edukatif dan bukan pendapat huk
       "Klausul apa wajib ada di kontrak kerjasama bisnis?",
       "Apakah perjanjian lisan bisa dituntut di pengadilan?",
     ],
+    recommendedKBSources: [
+      { title: "KUHPerdata (BW)", description: "Buku I–IV: Orang, Benda, Perikatan, Pembuktian & Daluwarsa", category: "uu" },
+      { title: "UU 1/1974 jo. UU 16/2019 (Perkawinan)", description: "Hukum perkawinan dan perceraian", category: "uu" },
+      { title: "UU 4/1996 (Hak Tanggungan)", description: "Hak tanggungan atas tanah beserta benda-benda yang berkaitan", category: "uu" },
+      { title: "PERMA 2/2015 jo. 4/2019 (Gugatan Sederhana)", description: "Prosedur gugatan sederhana di pengadilan", category: "peraturan" },
+      { title: "Kontrak & Dokumen Klien", description: "Perjanjian, MOU, surat perjanjian, atau korespondensi bisnis yang relevan", category: "internal" },
+    ],
   },
   {
     id: "korporasi",
@@ -188,6 +209,13 @@ Selalu sertakan: "⚠️ *Informasi ini bersifat edukatif dan bukan pendapat huk
       "Bagaimana fiduciary duty direksi dan business judgment rule?",
       "Risiko hukum jika anggaran dasar tidak diperbarui sesuai UU CK?",
     ],
+    recommendedKBSources: [
+      { title: "UU 40/2007 (Perseroan Terbatas)", description: "Undang-undang PT — RUPS, direksi, komisaris, M&A", category: "uu" },
+      { title: "UU 6/2023 (Cipta Kerja) — kluster korporasi", description: "Perubahan UU PT dalam UU Cipta Kerja", category: "uu" },
+      { title: "UU 8/1995 jo. UU 4/2023 (Pasar Modal & P2SK)", description: "Regulasi emiten, OJK, dan sektor keuangan", category: "uu" },
+      { title: "Anggaran Dasar & Perubahan PT", description: "Akta pendirian, anggaran dasar, dan perubahan anggaran dasar perusahaan klien", category: "internal" },
+      { title: "Akta RUPS & Keputusan Pemegang Saham", description: "Risalah RUPS, keputusan sirkuler, atau keputusan pemegang saham lainnya", category: "internal" },
+    ],
   },
   {
     id: "ketenagakerjaan",
@@ -240,6 +268,13 @@ Selalu sertakan: "⚠️ *Informasi ini bersifat edukatif dan bukan pendapat huk
       "Apakah PKWT bisa diperpanjang lebih dari 5 tahun?",
       "Alur perselisihan PHK dari bipartit ke PHI — berapa lama?",
       "Hak cuti tahunan dan haid menurut aturan terbaru?",
+    ],
+    recommendedKBSources: [
+      { title: "UU 13/2003 (Ketenagakerjaan)", description: "Undang-undang ketenagakerjaan — hak pekerja, PHK, pesangon", category: "uu" },
+      { title: "PP 35/2021 (PKWT, Alih Daya, Waktu Kerja, PHK)", description: "Peraturan Pemerintah pelaksana UU Cipta Kerja — ketenagakerjaan", category: "pp" },
+      { title: "PP 36/2021 (Pengupahan)", description: "Struktur upah minimum, THR, dan skala upah", category: "pp" },
+      { title: "UU 2/2004 (PPHI)", description: "Penyelesaian perselisihan hubungan industrial — mediasi, PHI", category: "uu" },
+      { title: "Perjanjian Kerja & Peraturan Perusahaan", description: "PKWT, PKWTT, PKB, peraturan perusahaan, atau SK PHK klien", category: "internal" },
     ],
   },
   {
@@ -294,6 +329,13 @@ Selalu sertakan: "⚠️ *Informasi ini bersifat edukatif dan bukan pendapat huk
       "Bagaimana proses ganti rugi tanah untuk proyek tol?",
       "Konversi tanah girik jadi sertifikat HM — syarat dan biayanya?",
     ],
+    recommendedKBSources: [
+      { title: "UU 5/1960 (UUPA)", description: "Undang-Undang Pokok Agraria — dasar hukum pertanahan Indonesia", category: "uu" },
+      { title: "PP 18/2021 (Hak Pengelolaan & Pendaftaran Tanah)", description: "Hak atas tanah, satuan rumah susun, pendaftaran tanah terbaru", category: "pp" },
+      { title: "UU 2/2012 & PP 19/2021 (Pengadaan Tanah)", description: "Pengadaan tanah untuk kepentingan umum dan ganti rugi", category: "uu" },
+      { title: "UU 4/1996 (Hak Tanggungan — UUHT)", description: "Hak tanggungan atas tanah dan benda yang berkaitan", category: "uu" },
+      { title: "Sertifikat, Akta, & Dokumen Tanah Klien", description: "Sertifikat HM/HGB/HGU, AJB, girik, letter C, atau putusan sengketa tanah", category: "internal" },
+    ],
   },
   {
     id: "pajak",
@@ -344,6 +386,13 @@ Selalu sertakan: "⚠️ *Informasi ini bersifat edukatif dan bukan saran perpaj
       "Bagaimana skema PPN restitusi yang sah?",
       "Tax treaty Indonesia–Singapura untuk royalti — berapa tarifnya?",
     ],
+    recommendedKBSources: [
+      { title: "UU 7/2021 (HPP — Harmonisasi Peraturan Perpajakan)", description: "UU HPP: PPh, PPN, cukai, program pengungkapan sukarela", category: "uu" },
+      { title: "UU 6/1983 jo. perubahan (KUP)", description: "Ketentuan Umum dan Tata Cara Perpajakan", category: "uu" },
+      { title: "UU 36/2008 jo. UU 7/2021 (PPh)", description: "Pajak Penghasilan — tarif, objek, pengecualian", category: "uu" },
+      { title: "UU 8/1983 jo. UU 7/2021 (PPN)", description: "Pajak Pertambahan Nilai dan PPnBM", category: "uu" },
+      { title: "SKP, Keputusan Keberatan, & Putusan Banding Klien", description: "Surat ketetapan pajak, keputusan keberatan DJP, atau putusan Pengadilan Pajak", category: "internal" },
+    ],
   },
   {
     id: "yurisprudensi",
@@ -393,6 +442,12 @@ Selalu sertakan: "⚠️ *Yurisprudensi yang disebutkan perlu diverifikasi dari 
       "Yurisprudensi tetap MA tentang itikad baik dalam jual beli tanah.",
       "Putusan MK terkait pengujian Pasal UU ITE soal pencemaran nama baik.",
       "Tren putusan PHI tentang PHK karena efisiensi pasca UU CK.",
+    ],
+    recommendedKBSources: [
+      { title: "Putusan Mahkamah Agung (Direktori Putusan)", description: "Putusan kasasi dan PK MA yang relevan dengan bidang hukum Anda", category: "putusan" },
+      { title: "Putusan Mahkamah Konstitusi", description: "Putusan uji materiil MK yang mengubah atau menafsirkan undang-undang", category: "putusan" },
+      { title: "Putusan Pengadilan Tinggi & Negeri", description: "Putusan banding dan pengadilan pertama yang relevan sebagai referensi", category: "putusan" },
+      { title: "Putusan Klien & Lawan", description: "Putusan pengadilan yang langsung berkaitan dengan perkara klien", category: "internal" },
     ],
   },
   {
@@ -466,6 +521,12 @@ Selalu sertakan: "⚠️ *Draft ini bersifat referensi edukatif. Setiap dokumen 
       "Drafting somasi untuk debitur yang menunggak 90 hari.",
       "Buat surat kuasa khusus untuk mewakili saya di sidang PHI.",
     ],
+    recommendedKBSources: [
+      { title: "Template Dokumen Hukum Internal", description: "Template kontrak, MoU, perjanjian, atau surat hukum yang sudah digunakan kantor Anda", category: "internal" },
+      { title: "Kontrak & Dokumen Existing Klien", description: "Dokumen perjanjian, akta, atau surat yang perlu direvisi atau dijadikan referensi", category: "internal" },
+      { title: "Panduan Drafting MA (PERMA terkait)", description: "PERMA tentang format gugatan, jawaban, dan dokumen persidangan", category: "peraturan" },
+      { title: "Peraturan Jabatan Notaris (UU 2/2014)", description: "UU Jabatan Notaris untuk akta autentik dan syarat formalnya", category: "uu" },
+    ],
   },
   {
     id: "litigasi",
@@ -516,6 +577,12 @@ Selalu sertakan: "⚠️ *Informasi prosedural ini bersifat edukatif. Untuk bera
       "Susunkan eksepsi kompetensi absolut untuk perkara warisan ke PN.",
       "Bagaimana eksekusi putusan jika tergugat menolak bayar?",
       "Persiapan pembuktian: dokumen vs saksi vs ahli — prioritasnya?",
+    ],
+    recommendedKBSources: [
+      { title: "HIR / RBg (Hukum Acara Perdata)", description: "Het Inlandsch Reglement (HIR) dan Rbg — prosedur acara perdata di PN", category: "peraturan" },
+      { title: "UU 30/1999 (Arbitrase & Alternatif Penyelesaian Sengketa)", description: "Arbitrase BANI, SIAC, ICC — klausul dan eksekusi putusan", category: "uu" },
+      { title: "PERMA-PERMA Acara Terbaru", description: "PERMA e-court, mediasi, gugatan sederhana, dan eksekusi riil", category: "peraturan" },
+      { title: "Berkas Perkara Klien", description: "Gugatan/jawaban, replik/duplik, bukti persidangan, atau putusan sementara", category: "internal" },
     ],
   },
   {
@@ -568,6 +635,12 @@ Selalu sertakan: "⚠️ *Informasi ini bersifat edukatif. Proses kepailitan dan
       "Apakah piutang saya bisa diverifikasi sebagai kreditur preferen?",
       "Bedakan PKPU sementara dan PKPU tetap — timeline sampai homologasi?",
       "Strategi restrukturisasi utang di luar pengadilan vs PKPU — mana lebih efektif?",
+    ],
+    recommendedKBSources: [
+      { title: "UU 37/2004 (Kepailitan & PKPU)", description: "Undang-Undang Kepailitan dan Penundaan Kewajiban Pembayaran Utang", category: "uu" },
+      { title: "PP 87/2021 (Kurator & Pengurus)", description: "Syarat dan tata cara kurator dan pengurus PKPU berlisensi", category: "pp" },
+      { title: "Perjanjian Utang & Restrukturisasi Klien", description: "Loan agreement, perjanjian kredit sindikasi, atau rencana perdamaian PKPU", category: "internal" },
+      { title: "Putusan Pengadilan Niaga", description: "Putusan pailit, PKPU, atau homologasi yang relevan sebagai referensi", category: "putusan" },
     ],
   },
   {
@@ -646,6 +719,11 @@ Selalu sertakan: "⚠️ *Analisis lintas-domain ini bersifat edukatif. Kasus ya
       "Tanah saya dirampas oknum dengan dokumen palsu — pidana atau gugatan PMH dulu?",
       "Data pelanggan kami bocor karena karyawan internal — siapa bertanggung jawab dari sisi PDP, pidana ITE, dan perdata?",
     ],
+    recommendedKBSources: [
+      { title: "UU 27/2022 (Perlindungan Data Pribadi)", description: "UU PDP — kewajiban pengendali data, hak subjek, sanksi", category: "uu" },
+      { title: "UU 1/2023 (KUHP), KUHPerdata, UU 13/2003", description: "Tiga undang-undang inti untuk analisis lintas-domain pidana, perdata, dan ketenagakerjaan", category: "uu" },
+      { title: "Dokumen Multi-Aspek Klien", description: "Kontrak, BAP, akta, atau surat yang memerlukan analisis dari beberapa bidang hukum sekaligus", category: "internal" },
+    ],
   },
   {
     id: "openclaw",
@@ -712,6 +790,12 @@ Selalu sertakan: "⚠️ *Hukum di bidang emerging technology berkembang sangat 
       "Tanggung jawab hukum atas konten deepfake AI — siapa pencipta, platform, atau pengguna?",
       "ESG disclosure wajib di Indonesia (POJK 51/2017) — bandingkan dengan EU CSRD.",
       "Bagaimana arah regulasi AI di Indonesia dibanding EU AI Act dan US Executive Order?",
+    ],
+    recommendedKBSources: [
+      { title: "UU 27/2022 (Perlindungan Data Pribadi)", description: "UU PDP — regulasi data di era digital", category: "uu" },
+      { title: "Peraturan Bappebti tentang Aset Kripto", description: "Regulasi OJK/Bappebti untuk aset kripto, exchange, dan token digital", category: "peraturan" },
+      { title: "POJK 51/2017 (ESG & Keuangan Berkelanjutan)", description: "Kewajiban disclosure ESG untuk emiten dan lembaga keuangan", category: "peraturan" },
+      { title: "Dokumen Proyek Teknologi Klien", description: "Whitepaper, term sheet, atau kebijakan privasi produk digital yang memerlukan analisis hukum", category: "internal" },
     ],
   },
 ];

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info } from "lucide-react";
 import { TemplateDialog } from "@/components/dialogs/template-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,35 @@ import { getCategoryById, getSubcategoryLabel } from "@/lib/categories";
 import type { InsertAgent } from "@shared/schema";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import type { Agent } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
+
+interface KBSourceRecommendation {
+  title: string;
+  description: string;
+  category: "uu" | "pp" | "peraturan" | "putusan" | "internal";
+}
+
+interface LegalAgentInfo {
+  id: string;
+  personaName: string;
+  domain: string;
+  recommendedKBSources: KBSourceRecommendation[];
+}
+
+const LEXCOM_TEMPLATE_NAME_TO_AGENT_ID: Record<string, string> = {
+  "Lex Kriminal": "pidana",
+  "Lex Civil": "perdata",
+  "Lex Corp": "korporasi",
+  "Lex Labor": "ketenagakerjaan",
+  "Lex Agraria": "pertanahan",
+  "Lex Fiscus": "pajak",
+  "Lex Praesidium": "yurisprudensi",
+  "Lex Scriptor": "drafter",
+  "Lex Advocatus": "litigasi",
+  "Lex Insolventia": "kepailitan",
+  "Lex Nexus": "multiclaw",
+  "Lex Futura": "openclaw",
+};
 
 interface PersonaPanelProps {
   agent: Agent;
@@ -75,6 +104,13 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
   const [newDomain, setNewDomain] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [lexcomTemplateOpen, setLexcomTemplateOpen] = useState(false);
+  const [lexcomApplied, setLexcomApplied] = useState(false);
+  const [appliedAgentSources, setAppliedAgentSources] = useState<KBSourceRecommendation[]>([]);
+  const [appliedAgentDomain, setAppliedAgentDomain] = useState<string>("");
+
+  const { data: legalAgents } = useQuery<LegalAgentInfo[]>({
+    queryKey: ["/api/legal-agents"],
+  });
   const [newContextLabel, setNewContextLabel] = useState("");
   const [newContextType, setNewContextType] = useState<"text" | "select">("select");
   const [newContextOptions, setNewContextOptions] = useState("");
@@ -107,6 +143,9 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       allowedDomains: agent.allowedDomains || [],
       contextQuestions: (agent as any).contextQuestions || [],
     });
+    setLexcomApplied(false);
+    setAppliedAgentSources([]);
+    setAppliedAgentDomain("");
   }, [agent.id]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,6 +298,18 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       ...(template.description ? { description: template.description } : {}),
     };
     setFormData(updated);
+
+    const agentId = template.name ? LEXCOM_TEMPLATE_NAME_TO_AGENT_ID[template.name] : undefined;
+    const matchedAgent = agentId ? legalAgents?.find((a) => a.id === agentId) : undefined;
+    if (matchedAgent) {
+      setAppliedAgentSources(matchedAgent.recommendedKBSources);
+      setAppliedAgentDomain(matchedAgent.domain);
+    } else {
+      setAppliedAgentSources([]);
+      setAppliedAgentDomain("");
+    }
+    setLexcomApplied(true);
+
     toast({
       title: "Template LexCom Diterapkan",
       description: "System prompt, greeting, dan conversation starters telah diperbarui. Klik Save untuk menyimpan.",
@@ -682,6 +733,64 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             <p className="text-xs text-muted-foreground">
               The system prompt defines the core behavior and context for your chatbot. Gunakan tombol "Template LexCom" untuk menerapkan sistem prompt spesialis hukum Indonesia.
             </p>
+
+            {lexcomApplied && (
+              <div className="mt-3 rounded-lg border border-amber-300/60 bg-amber-50/60 dark:bg-amber-950/20 dark:border-amber-700/40 p-4 space-y-3" data-testid="callout-lexcom-kb-guidance">
+                <div className="flex items-start gap-2">
+                  <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                      Tambahkan Dokumen Hukum ke Knowledge Base
+                    </p>
+                    <p className="text-xs text-amber-700/80 dark:text-amber-400/70">
+                      {appliedAgentDomain
+                        ? `Untuk agen ${appliedAgentDomain}, upload dokumen referensi berikut ke tab KB agar agen dapat menjawab berdasarkan materi spesifik Anda.`
+                        : "Upload dokumen hukum relevan ke tab KB agar agen LexCom dapat menjawab berdasarkan materi spesifik Anda."}
+                    </p>
+                  </div>
+                </div>
+
+                {appliedAgentSources.length > 0 && (
+                  <div className="space-y-1.5 pl-6">
+                    {appliedAgentSources.map((src, idx) => {
+                      const icons: Record<string, React.ReactNode> = {
+                        uu: <FileText className="w-3 h-3 text-blue-500 shrink-0" />,
+                        pp: <FileCheck className="w-3 h-3 text-green-500 shrink-0" />,
+                        peraturan: <FileCheck className="w-3 h-3 text-emerald-500 shrink-0" />,
+                        putusan: <Gavel className="w-3 h-3 text-purple-500 shrink-0" />,
+                        internal: <Upload className="w-3 h-3 text-amber-600 shrink-0" />,
+                      };
+                      const categoryLabels: Record<string, string> = {
+                        uu: "UU",
+                        pp: "PP",
+                        peraturan: "Peraturan",
+                        putusan: "Putusan",
+                        internal: "Dokumen Internal",
+                      };
+                      return (
+                        <div key={idx} className="flex items-start gap-1.5" data-testid={`kb-source-item-${idx}`}>
+                          {icons[src.category] ?? <Info className="w-3 h-3 shrink-0" />}
+                          <div className="min-w-0">
+                            <span className="text-xs font-medium text-foreground/80">{src.title}</span>
+                            <span className="ml-1 text-xs text-muted-foreground">— {src.description}</span>
+                            <Badge variant="outline" className="ml-1 text-[10px] px-1 py-0 h-4 border-current opacity-60">
+                              {categoryLabels[src.category] ?? src.category}
+                            </Badge>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="pl-6">
+                  <p className="text-xs text-amber-700/70 dark:text-amber-400/60 flex items-center gap-1">
+                    <Info className="w-3 h-3 shrink-0" />
+                    Buka tab <strong className="mx-0.5">KB</strong> di panel navigasi untuk upload file PDF atau DOCX.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

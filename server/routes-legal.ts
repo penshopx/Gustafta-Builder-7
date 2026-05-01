@@ -217,6 +217,19 @@ function isGuest(req: any): boolean {
 
 export function registerLegalRoutes(app: Express) {
 
+  app.get("/api/legal-agents", (_req: any, res: any) => {
+    const agents = LEGAL_AGENTS.map(({ id, name, personaName, emoji, domain, tagline, recommendedKBSources }) => ({
+      id,
+      name,
+      personaName,
+      emoji,
+      domain,
+      tagline,
+      recommendedKBSources,
+    }));
+    res.json(agents);
+  });
+
   app.post("/api/legal/chat", async (req: any, res: any) => {
     try {
       const { sessionId, message } = req.body;
