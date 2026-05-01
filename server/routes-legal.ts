@@ -556,27 +556,119 @@ export function registerLegalRoutes(app: Express) {
       doc.rect(PX, 96, pageWidth, 1).fill("#e5e7eb");
       doc.moveDown(2);
 
-      const lines = content.split("\n");
+      const stripInline = (s: string) =>
+        s.replace(/\*\*\*(.+?)\*\*\*/g, "$1").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").replace(/`(.+?)`/g, "$1").trim();
 
-      for (const rawLine of lines) {
-        const line = rawLine;
-        const y = doc.y;
+      const isTableRow = (l: string) => /^\|.+\|/.test(l.trim());
+      const isSeparatorRow = (l: string) => /^\|[\s|:\-]+\|$/.test(l.trim());
 
-        if (y > doc.page.height - 100) {
+      type Block =
+        | { type: "line"; content: string }
+        | { type: "table"; rows: string[][] };
+
+      const rawLines = content.split("\n");
+      const blocks: Block[] = [];
+      let idx = 0;
+      while (idx < rawLines.length) {
+        if (isTableRow(rawLines[idx])) {
+          const tableLines: string[] = [];
+          while (idx < rawLines.length && isTableRow(rawLines[idx])) {
+            tableLines.push(rawLines[idx]);
+            idx++;
+          }
+          const tableRows = tableLines
+            .filter(l => !isSeparatorRow(l))
+            .map(l =>
+              l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(c => stripInline(c))
+            );
+          if (tableRows.length > 0) {
+            blocks.push({ type: "table", rows: tableRows });
+          }
+        } else {
+          blocks.push({ type: "line", content: rawLines[idx] });
+          idx++;
+        }
+      }
+
+      for (const block of blocks) {
+        if (doc.y > doc.page.height - 120) {
           doc.addPage();
         }
 
+        if (block.type === "table") {
+          const rows = block.rows;
+          if (rows.length === 0) continue;
+          const colCount = rows[0].length;
+          if (colCount === 0) continue;
+
+          doc.moveDown(0.4);
+          const colWidth = pageWidth / colCount;
+          const cellPadX = 4;
+          const cellPadY = 4;
+          const fontSize = 9;
+          doc.fontSize(fontSize);
+
+          const rowHeights: number[] = rows.map((row, ri) => {
+            let maxH = 0;
+            for (const cell of row) {
+              const textH = doc.heightOfString(cell, { width: colWidth - cellPadX * 2 });
+              if (textH + cellPadY * 2 > maxH) maxH = textH + cellPadY * 2;
+            }
+            return Math.max(maxH, ri === 0 ? 20 : 18);
+          });
+
+          let tableY = doc.y;
+          for (let ri = 0; ri < rows.length; ri++) {
+            if (tableY + rowHeights[ri] > doc.page.height - 60) {
+              doc.addPage();
+              tableY = doc.y;
+            }
+            const isHeader = ri === 0;
+            if (isHeader) {
+              doc.rect(PX, tableY, pageWidth, rowHeights[ri]).fill("#ede9fe");
+            } else if (ri % 2 === 0) {
+              doc.rect(PX, tableY, pageWidth, rowHeights[ri]).fill("#f9f8ff");
+            } else {
+              doc.rect(PX, tableY, pageWidth, rowHeights[ri]).fill("#ffffff");
+            }
+            doc.rect(PX, tableY, pageWidth, rowHeights[ri]).stroke("#c4b5fd");
+
+            for (let ci = 0; ci < colCount; ci++) {
+              const cellX = PX + ci * colWidth;
+              if (ci > 0) {
+                doc.moveTo(cellX, tableY).lineTo(cellX, tableY + rowHeights[ri]).stroke("#c4b5fd");
+              }
+              const cellText = rows[ri][ci] || "";
+              doc
+                .fillColor(isHeader ? "#312e81" : "#1a1a1a")
+                .font(isHeader ? "Helvetica-Bold" : "Helvetica")
+                .fontSize(fontSize)
+                .text(cellText, cellX + cellPadX, tableY + cellPadY, {
+                  width: colWidth - cellPadX * 2,
+                  lineBreak: true,
+                  ellipsis: false,
+                });
+            }
+            tableY += rowHeights[ri];
+          }
+          doc.y = tableY;
+          doc.moveDown(0.5);
+          continue;
+        }
+
+        const line = block.content;
+
         if (/^#{3}\s+/.test(line)) {
-          const text = line.replace(/^###\s+/, "").replace(/\*\*/g, "").trim();
+          const text = stripInline(line.replace(/^###\s+/, ""));
           doc.fillColor("#4338ca").fontSize(11).font("Helvetica-Bold").text(text, PX, undefined, { width: pageWidth });
           doc.moveDown(0.3);
         } else if (/^#{2}\s+/.test(line)) {
-          const text = line.replace(/^##\s+/, "").replace(/\*\*/g, "").trim();
+          const text = stripInline(line.replace(/^##\s+/, ""));
           doc.moveDown(0.4);
           doc.fillColor("#312e81").fontSize(13).font("Helvetica-Bold").text(text, PX, undefined, { width: pageWidth });
           doc.moveDown(0.3);
         } else if (/^#{1}\s+/.test(line)) {
-          const text = line.replace(/^#\s+/, "").replace(/\*\*/g, "").trim();
+          const text = stripInline(line.replace(/^#\s+/, ""));
           doc.moveDown(0.6);
           doc.fillColor("#1e1b4b").fontSize(14).font("Helvetica-Bold").text(text.toUpperCase(), PX, undefined, { width: pageWidth });
           doc.rect(PX, doc.y, pageWidth, 0.5).fill("#e5e7eb");
@@ -586,20 +678,20 @@ export function registerLegalRoutes(app: Express) {
           doc.rect(PX, doc.y, pageWidth, 0.5).fill("#d1d5db");
           doc.moveDown(0.5);
         } else if (/^\d+\.\s+/.test(line)) {
-          const text = line.replace(/^\d+\.\s+/, "").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").trim();
+          const text = stripInline(line.replace(/^\d+\.\s+/, ""));
           const num = line.match(/^(\d+)\./)?.[1] || "•";
           doc.fillColor("#1a1a1a").fontSize(10).font("Helvetica")
             .text(`${num}.  ${text}`, PX + 8, undefined, { width: pageWidth - 8 });
           doc.moveDown(0.2);
         } else if (/^[-*]\s+/.test(line)) {
-          const text = line.replace(/^[-*]\s+/, "").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").trim();
+          const text = stripInline(line.replace(/^[-*]\s+/, ""));
           doc.fillColor("#1a1a1a").fontSize(10).font("Helvetica")
             .text(`\u2022  ${text}`, PX + 8, undefined, { width: pageWidth - 8 });
           doc.moveDown(0.2);
         } else if (line.trim() === "") {
           doc.moveDown(0.5);
         } else {
-          const plainText = line.replace(/\*\*\*(.+?)\*\*\*/g, "$1").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").trim();
+          const plainText = stripInline(line);
           if (plainText) {
             doc.fillColor("#1a1a1a").fontSize(10).font("Helvetica")
               .text(plainText, PX, undefined, { width: pageWidth, align: "justify" });

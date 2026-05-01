@@ -10,6 +10,8 @@ import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight,
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageContent } from "@/lib/format-message";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 interface LegalCase {
   id: number;
@@ -150,7 +152,7 @@ function exportMessageToHtml(content: string, agentName: string, agentId?: strin
     <p>Dokumen diekspor pada ${date}</p>
   </header>
   <div class="content">
-    <pre style="white-space:pre-wrap;font-family:inherit;background:none;padding:0;">${content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+    ${DOMPurify.sanitize(marked.parse(content) as string)}
   </div>
   <footer>Dokumen ini dibuat oleh LexCom AI Legal Assistant. Bukan merupakan nasihat hukum resmi.</footer>
 </body>
