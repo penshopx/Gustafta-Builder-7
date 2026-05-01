@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   Users, CreditCard, FileText, ToggleLeft, ToggleRight,
   CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
-  UserCheck, AlertCircle, RefreshCw, Crown, UserCog
+  UserCheck, AlertCircle, RefreshCw, Crown, UserCog, Wrench, Scale, Database
 } from "lucide-react";
 
 // ---- Types ----
@@ -225,6 +225,21 @@ export default function AdminPage() {
     onError: () => toast({ title: "Gagal memperbarui langganan.", variant: "destructive" }),
   });
 
+  const seedLexComMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/seed-lexcom", {}),
+    onSuccess: async (res: any) => {
+      const data = await res.json().catch(() => ({}));
+      if (data.skipped) {
+        toast({ title: "LexCom sudah ada", description: "Series LexCom sudah tersedia di workspace Anda." });
+      } else {
+        toast({ title: "LexCom berhasil di-seed!", description: data.message });
+        queryClient.invalidateQueries({ queryKey: ["/api/series"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      }
+    },
+    onError: () => toast({ title: "Gagal seed LexCom", description: "Coba lagi atau cek log server.", variant: "destructive" }),
+  });
+
   // ---- Guards ----
   if (meError) {
     return (
@@ -274,7 +289,7 @@ export default function AdminPage() {
     toast({ title: "Kode voucher disalin!" });
   };
 
-  const tabCount = isSuperAdmin ? 4 : 3;
+  const tabCount = isSuperAdmin ? 5 : 4;
 
   return (
     <div className="min-h-screen bg-background">
@@ -383,6 +398,9 @@ export default function AdminPage() {
                   {stats?.pendingTrialRequests}
                 </span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="tools" className="gap-1.5 text-xs" data-testid="tab-tools">
+              <Wrench className="h-3.5 w-3.5" /> Tools
             </TabsTrigger>
           </TabsList>
 
@@ -759,6 +777,69 @@ export default function AdminPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ========== TOOLS TAB ========== */}
+          <TabsContent value="tools" className="mt-4">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Scale className="h-5 w-5 text-violet-600" />
+                    <CardTitle className="text-base">LexCom — AI Hukum Indonesia</CardTitle>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Seed Series LexCom ke workspace Anda — 1 Orchestrator (Lex) + 12 Agen Spesialis Hukum, siap dipublikasikan dan dimonetisasi.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="rounded-lg border bg-muted/40 p-3">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Structure</div>
+                      <ul className="text-sm space-y-1 text-foreground/80">
+                        <li>• 1 Series "LexCom"</li>
+                        <li>• 3 BigIdeas (domain grup)</li>
+                        <li>• 13 Toolboxes (Hub + 12 Spesialis)</li>
+                        <li>• 13 Agents (Lex + 12 Spesialis)</li>
+                      </ul>
+                    </div>
+                    <div className="rounded-lg border bg-muted/40 p-3">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">12 Spesialis</div>
+                      <ul className="text-sm space-y-0.5 text-foreground/80">
+                        <li>🚨 Pidana · ⚖️ Perdata · 🏛️ Litigasi</li>
+                        <li>🏢 Korporasi · 👷 Tenaga Kerja</li>
+                        <li>🏠 Pertanahan · 💰 Pajak · 💼 Kepailitan</li>
+                        <li>📚 Yurisprudensi · ✍️ Drafter</li>
+                        <li>🌐 MultiClaw · 💻 OpenClaw</li>
+                      </ul>
+                    </div>
+                    <div className="rounded-lg border bg-muted/40 p-3">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Monetisasi</div>
+                      <ul className="text-sm space-y-1 text-foreground/80">
+                        <li>✅ Hub (Lex): gratis/publik</li>
+                        <li>🔒 12 Spesialis: butuh login</li>
+                        <li>💳 PDF Export: premium</li>
+                        <li>📄 Legal Opinion: premium</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 pt-2">
+                    <Button
+                      onClick={() => seedLexComMutation.mutate()}
+                      disabled={seedLexComMutation.isPending}
+                      className="gap-2 bg-violet-600 hover:bg-violet-700"
+                      data-testid="button-seed-lexcom"
+                    >
+                      <Database className="h-4 w-4" />
+                      {seedLexComMutation.isPending ? "Sedang seeding LexCom..." : "Seed LexCom ke Workspace"}
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Idempotent — aman dijalankan ulang, tidak duplikat jika Series sudah ada.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

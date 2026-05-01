@@ -60,6 +60,7 @@ import {
   createNotionPage,
 } from "./notion";
 import { registerLegalRoutes } from "./routes-legal";
+import { seedLexCom } from "./seed-lexcom";
 
 const _require = createRequire(import.meta.url);
 const { PDFParse: _PDFParse, VerbosityLevel: _VerbosityLevel } = _require("pdf-parse") as {
@@ -9231,6 +9232,26 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     } catch (error: any) {
       console.error("Admin update subscription error:", error);
       res.status(500).json({ error: "Gagal memperbarui langganan." });
+    }
+  });
+
+  // ── ADMIN: Seed LexCom Series ke workspace ─────────────────────────────────
+  app.post("/api/admin/seed-lexcom", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthenticated" });
+      const result = await seedLexCom(String(userId));
+      if (result.skipped) {
+        return res.json({ success: true, message: "LexCom Series sudah ada di workspace Anda — skip.", skipped: true });
+      }
+      res.json({
+        success: true,
+        message: `LexCom berhasil di-seed: ${result.created} items (Series + BigIdeas + Toolboxes + Agents).`,
+        created: result.created,
+      });
+    } catch (error: any) {
+      console.error("[Admin seed-lexcom] Error:", error);
+      res.status(500).json({ error: "Gagal seed LexCom: " + error.message });
     }
   });
 
