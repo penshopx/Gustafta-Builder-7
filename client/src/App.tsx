@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,7 +26,12 @@ import DomainsPage from "@/pages/domains";
 import AdminPage from "@/pages/admin";
 import AccountPage from "@/pages/account";
 import MiniAppPublic from "@/pages/mini-app-public";
+import LegalLanding from "@/pages/legal-landing";
+import LegalChat from "@/pages/legal-chat";
 import NotFound from "@/pages/not-found";
+import { ChaesaWidget } from "@/components/chaesa-widget";
+
+const WIDGET_EXCLUDED_PATHS = ["/legal/chat", "/embed/"];
 
 function Router() {
   return (
@@ -53,20 +58,34 @@ function Router() {
       <Route path="/admin" component={AdminPage} />
       <Route path="/account" component={AccountPage} />
       <Route path="/mini-app/:slug" component={MiniAppPublic} />
+      <Route path="/legal" component={LegalLanding} />
+      <Route path="/legal/chat" component={LegalChat} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-function App() {
+function AppContent() {
+  const [location] = useLocation();
+  const showWidget = !WIDGET_EXCLUDED_PATHS.some(p => location.startsWith(p));
+
   useMetaPixel();
-  
+
+  return (
+    <>
+      <Router />
+      {showWidget && <ChaesaWidget />}
+      <Toaster />
+    </>
+  );
+}
+
+function App() {
   return (
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <AppContent />
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

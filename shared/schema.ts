@@ -1613,3 +1613,34 @@ export const trialRequests = pgTable("trial_requests", {
 export const insertTrialRequestSchema = createInsertSchema(trialRequests).omit({ id: true, createdAt: true, updatedAt: true, status: true, voucherCode: true, voucherId: true, notes: true });
 export type InsertTrialRequest = z.infer<typeof insertTrialRequestSchema>;
 export type TrialRequest = typeof trialRequests.$inferSelect;
+
+// ==================== LexCom Legal Chat Tables ====================
+
+export const legalChatSessions = pgTable("legal_chat_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  agentType: text("agent_type").notNull().default("auto"),
+  title: text("title").notNull().default("New Chat"),
+  messageCount: integer("message_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertLegalChatSessionSchema = createInsertSchema(legalChatSessions).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLegalChatSession = z.infer<typeof insertLegalChatSessionSchema>;
+export type LegalChatSession = typeof legalChatSessions.$inferSelect;
+
+export const legalChatMessages = pgTable("legal_chat_messages", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").notNull(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  agentType: text("agent_type").notNull().default("auto"),
+  agentSelected: text("agent_selected"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLegalChatMessageSchema = createInsertSchema(legalChatMessages).omit({ id: true, createdAt: true });
+export type InsertLegalChatMessage = z.infer<typeof insertLegalChatMessageSchema>;
+export type LegalChatMessage = typeof legalChatMessages.$inferSelect;

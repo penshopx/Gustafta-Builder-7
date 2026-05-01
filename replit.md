@@ -1,7 +1,7 @@
-# Gustafta - AI Chatbot Builder
+# Gustafta - AI Chatbot Builder + LexCom Legal AI
 
 ## Overview
-Gustafta is an AI chatbot builder platform designed for creating, configuring, and deploying intelligent conversational assistants. It features a two-panel dashboard, multi-channel integrations, and supports various AI models. The platform enables users to manage multiple chatbot agents with custom personas and knowledge bases, integrate with popular messaging platforms, embed web widgets, and access analytics. Gustafta aims to provide a comprehensive ecosystem for building and monetizing AI-powered conversational experiences.
+Gustafta is an AI chatbot builder platform designed for creating, configuring, and deploying intelligent conversational assistants. It now includes **LexCom**, an integrated Indonesian Legal AI Chatbot system featuring a LEX-ORCHESTRATOR with 12 specialized legal agents and a floating "Chaesa Lexbot" widget. It features a two-panel dashboard, multi-channel integrations, and supports various AI models. The platform enables users to manage multiple chatbot agents with custom personas and knowledge bases, integrate with popular messaging platforms, embed web widgets, and access analytics. Gustafta aims to provide a comprehensive ecosystem for building and monetizing AI-powered conversational experiences.
 
 The platform utilizes a 5-level modular hierarchical structure (Series → Core → Big Idea/Orkestrator → Toolbox → Agent) to organize chatbot agents across specialized series. This structure supports applications like managing Indonesian construction company needs (Odoo ERP lifecycle, CSMS compliance) and professional certification body operations.
 
@@ -111,3 +111,30 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 -   `ffmpeg`
 -   `pdf-parse`
 -   `mammoth`
+## LexCom - Indonesian Legal AI Chatbot System
+
+### Overview
+LexCom is an integrated multi-agent legal AI system added to the Gustafta platform. It provides Indonesian legal research, drafting, and consultation via 12 specialized AI agents.
+
+### Routes
+- `/legal` — Dark-themed legal landing page with hero, agent badge grid, and feature cards
+- `/legal/chat` — Full two-panel chat interface with agent switcher and session history
+
+### Architecture
+- **LEX-ORCHESTRATOR**: Routes queries to the most appropriate specialist agent automatically
+- **12 Specialist Agents**: PIDANA, PERDATA, KORPORASI, KETENAGAKERJAAN, PERTANAHAN, PAJAK, YURISPRUDENSI, DRAFTER, LITIGASI, KEPAILITAN, MULTICLAW, OPENCLAW
+- **Chaesa Lexbot Widget**: Floating bottom-right widget on all pages except `/legal/chat` and `/embed/*`
+
+### Key Files
+- `server/lib/legal-agents.ts` — All 13 agent configs (orchestrator + 12 specialists) with system prompts
+- `server/routes-legal.ts` — API routes: POST /api/legal/chat (SSE streaming), GET/DELETE /api/legal/sessions
+- `client/src/pages/legal-landing.tsx` — Legal landing page
+- `client/src/pages/legal-chat.tsx` — Chat interface
+- `client/src/components/chaesa-widget.tsx` — Floating Chaesa Lexbot widget
+
+### Database Tables
+- `legal_chat_sessions` — Stores chat sessions per user
+- `legal_chat_messages` — Stores chat messages linked to sessions
+
+### Disclaimer
+All legal chatbot responses include the mandatory disclaimer: "⚠️ Informasi ini bersifat edukatif dan bukan pendapat hukum yang mengikat."

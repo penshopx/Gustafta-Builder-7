@@ -59,6 +59,7 @@ import {
   getNotionPageTitle,
   createNotionPage,
 } from "./notion";
+import { registerLegalRoutes } from "./routes-legal";
 
 const _require = createRequire(import.meta.url);
 const { PDFParse: _PDFParse, VerbosityLevel: _VerbosityLevel } = _require("pdf-parse") as {
@@ -9232,6 +9233,8 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
       res.status(500).json({ error: "Gagal memperbarui langganan." });
     }
   });
+
+  registerLegalRoutes(app);
 
   return httpServer;
 }
