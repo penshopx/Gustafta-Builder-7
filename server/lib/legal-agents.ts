@@ -756,28 +756,138 @@ LANGUAGE
 - Sesuaikan kedalaman: T1 sederhana, T2 bisnis-legal, T3 teknis penuh.
 - Hormati privasi: anonimkan PII jika user belum eksplisit setuju membagikan.`;
 
-const DOMAIN_PATTERNS: [string, RegExp][] = [
-  ["pidana", /(pidana|kriminal|kejahatan|penipuan|pencurian|korupsi|narkoba|pembunuhan|penggelapan|pemalsuan|kuhp|kuhap|penyidikan|dakwaan|tuntutan|jaksa|polisi|tersangka|terdakwa)/i],
-  ["perdata", /(wanprestasi|ganti rugi|kuhperdata|\bbw\b|sewa menyewa|jual beli|hukum waris|hibah|perceraian|perkawinan|harta bersama|pmh|perbuatan melawan hukum|pasal 1365)/i],
-  ["korporasi", /(\bpt\b|perseroan|saham|direksi|komisaris|rups|pasar modal|ipo|\btbk\b|merger|akuisisi|kppu|persaingan usaha|penanaman modal|\bpma\b)/i],
-  ["ketenagakerjaan", /(phk|pkwt|pkwtt|pesangon|upah minimum|umk|bpjs ketenagakerjaan|phi|serikat pekerja|hubungan industrial|tenaga kerja|buruh|thr|outsourcing)/i],
-  ["pertanahan", /(sertifikat tanah|shm|shgb|hak milik tanah|hgu|hgb|\bbpn\b|ppat|\bajb\b|agraria|uupa|lahan|pertanahan|kavling)/i],
-  ["pajak", /(pajak|\bpph\b|\bppn\b|bphtb|npwp|\bspt\b|\bdrp\b|\bdjp\b|\bkpp\b|transfer pricing|p3b|restitusi pajak|keberatan pajak|pengadilan pajak)/i],
-  ["yurisprudensi", /(yurisprudensi|mahkamah agung|mahkamah konstitusi|kasasi|peninjauan kembali|doktrin hukum|ratio decidendi|\bsema\b|\bperma\b)/i],
-  ["drafter", /(draft kontrak|drafting|klausul kontrak|legal opinion|due diligence|anggaran dasar|akta notaris|\bnda\b|\bsha\b|\bmou\b|surat kuasa)/i],
-  ["litigasi", /(gugatan|beracara|hukum acara|litigasi|mediasi|arbitrase|eksekusi putusan|sita jaminan|e-court|kuasa hukum)/i],
-  ["kepailitan", /(pailit|kepailitan|\bpkpu\b|kurator|kreditur separatis|boedel|insolvensi|restrukturisasi utang|pengadilan niaga|actio pauliana)/i],
-  ["openclaw", /(uu pdp|data pribadi|kripto|fintech|kecerdasan buatan|esg|hak cipta|merek dagang|paten|platform digital|e-commerce|telemedicine)/i],
+const DOMAIN_TERM_SETS: [string, string[]][] = [
+  ["pidana", [
+    "pidana", "kriminal", "kejahatan", "penipuan", "pencurian", "korupsi", "narkoba",
+    "pembunuhan", "penggelapan", "pemalsuan", "kuhp", "kuhap", "penyidikan", "dakwaan",
+    "tuntutan", "jaksa", "polisi", "tersangka", "terdakwa", "delik", "tipikor", "tppu",
+    "ditangkap", "ditahan", "pidana badan", "pasal kuhp", "vonis", "hukuman penjara",
+    "restitutif", "restorative justice", "diversi", "penuntutan", "lapor polisi",
+  ]],
+  ["perdata", [
+    "wanprestasi", "ganti rugi", "kuhperdata", "sewa", "kontrak", "perjanjian", "jual beli",
+    "waris", "hibah", "perceraian", "perkawinan", "harta bersama", "pmh", "cidera janji",
+    "onrechtmatige", "pasal 1365", "pasal 1320", "pasal 1243", "overmacht", "ingkar janji",
+    "ganti kerugian", "somasi wanprestasi", "tuntutan perdata", "hak kebendaan",
+  ]],
+  ["korporasi", [
+    "perseroan", "saham", "direksi", "komisaris", "rups", "pasar modal", "ipo", "tbk",
+    "merger", "akuisisi", "kppu", "penanaman modal", "pma", "anggaran dasar", "gcg",
+    "corporate", "uupt", "pendirian pt", "due diligence perusahaan", "m&a", "konsolidasi",
+    "sha", "jv agreement", "pojk", "insider trading", "disclosure",
+  ]],
+  ["ketenagakerjaan", [
+    "phk", "pkwt", "pkwtt", "pesangon", "upah minimum", "umk", "bpjs ketenagakerjaan",
+    "phi", "serikat pekerja", "karyawan", "tenaga kerja", "buruh", "thr", "outsourcing",
+    "mogok kerja", "pekerja", "hubungan industrial", "uang pesangon", "upmk", "uph",
+    "bipartit", "tripartit", "mediator", "cuti tahunan", "lembur", "pkb", "pp perusahaan",
+  ]],
+  ["pertanahan", [
+    "sertifikat tanah", "shm", "shgb", "hak milik", "hgu", "hgb", "bpn", "ppat", "ajb",
+    "agraria", "uupa", "tanah", "lahan", "kavling", "girik", "letter c", "pertanahan",
+    "atrbpn", "ptsl", "pendaftaran tanah", "sengketa tanah", "sertifikat", "hak guna",
+  ]],
+  ["pajak", [
+    "pajak", "pph", "ppn", "bphtb", "npwp", "spt", "djp", "transfer pricing", "p3b",
+    "restitusi pajak", "keberatan pajak", "skp", "banding pajak", "fiskal", "wp badan",
+    "pengadilan pajak", "pmk pajak", "tarif pajak", "kredit pajak", "ppnbm", "cukai",
+    "tax", "withholding", "uph pajak", "kup", "hpp pajak",
+  ]],
+  ["yurisprudensi", [
+    "yurisprudensi", "mahkamah agung", "mahkamah konstitusi", "kasasi", "peninjauan kembali",
+    "doktrin hukum", "ratio decidendi", "sema", "perma", "putusan ma", "putusan mk",
+    "anotasi putusan", "landmark", "obiter dictum", "putusan niaga", "cari putusan",
+    "direktori putusan", "sipp ma", "nomor putusan",
+  ]],
+  ["drafter", [
+    "buat draft", "susun draft", "drafting", "buat kontrak", "buat surat", "buat gugatan",
+    "buat mou", "buat nda", "surat kuasa", "klausul", "legal opinion", "due diligence",
+    "akta notaris", "akta pendirian", "draft dokumen", "draft perjanjian", "template kontrak",
+    "format gugatan", "permohonan pkpu", "format surat",
+  ]],
+  ["litigasi", [
+    "gugatan", "beracara", "hukum acara", "litigasi", "mediasi pengadilan", "arbitrase",
+    "eksekusi putusan", "sita jaminan", "e-court", "eksepsi", "replik", "duplik",
+    "strategi gugatan", "pilihan forum", "aanmaning", "PN atau arbitrase", "banding",
+    "upaya hukum", "pembuktian", "saksi ahli", "putusan sela",
+  ]],
+  ["kepailitan", [
+    "pailit", "kepailitan", "pkpu", "kurator", "kreditur", "boedel", "insolvensi",
+    "restrukturisasi utang", "pengadilan niaga", "actio pauliana", "debitur gagal bayar",
+    "penundaan kewajiban", "verifikasi piutang", "homologasi", "rencana perdamaian",
+    "haircut utang", "debt to equity",
+  ]],
+  ["openclaw", [
+    "pdp", "data pribadi", "kripto", "fintech", "kecerdasan buatan", "artificial intelligence",
+    "esg", "hak cipta", "merek dagang", "paten", "platform digital", "e-commerce",
+    "telemedicine", "blockchain", "nft", "gdpr", "eu ai act", "smart contract",
+    "deepfake", "kebocoran data", "right to be forgotten", "greenwashing", "climate",
+  ]],
 ];
 
+const DRAFTING_INTENT = /\b(buat|susun|tulis|draft|drafting|buatkan|susunkan|tuliskan|template|format)\b/i;
+const YURI_INTENT = /\b(cari|temukan|carikan|cek|verifikasi)\b.*\b(putusan|yurisprudensi|kasus|preseden)\b|\b(putusan|yurisprudensi)\b.*\b(tentang|terkait|mengenai)\b/i;
+const LITIGASI_INTENT = /\b(strategi|gugat di|arbitrase atau|beracara|eksekusi)\b/i;
+
 export function selectAgent(query: string): string {
-  const matched: string[] = [];
-  for (const [domain, pattern] of DOMAIN_PATTERNS) {
-    if (pattern.test(query)) {
-      matched.push(domain);
+  const q = query.toLowerCase();
+
+  const scores: Record<string, number> = {};
+  for (const [domain, terms] of DOMAIN_TERM_SETS) {
+    let score = 0;
+    for (const term of terms) {
+      if (q.includes(term.toLowerCase())) score++;
     }
+    if (score > 0) scores[domain] = score;
   }
-  if (matched.length === 0) return "multiclaw";
-  if (matched.length === 1) return matched[0];
+
+  if (Object.keys(scores).length === 0) return "multiclaw";
+
+  if (YURI_INTENT.test(query) && !scores["yurisprudensi"]) scores["yurisprudensi"] = 2;
+  if (DRAFTING_INTENT.test(query)) {
+    scores["drafter"] = (scores["drafter"] || 0) + 3;
+  }
+  if (LITIGASI_INTENT.test(query)) {
+    scores["litigasi"] = (scores["litigasi"] || 0) + 2;
+  }
+
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+  if (sorted.length === 1) return sorted[0][0];
+
+  const topScore = sorted[0][1];
+  const runners = sorted.filter(([, s]) => s === topScore);
+  if (runners.length === 1) return runners[0][0];
+
+  const domainPriority = ["pidana","kepailitan","pajak","ketenagakerjaan","pertanahan","korporasi","perdata","litigasi","drafter","yurisprudensi","openclaw"];
+  for (const d of domainPriority) {
+    if (runners.find(([id]) => id === d)) return d;
+  }
+
   return "multiclaw";
+}
+
+export function buildOrchestrationPrompt(query: string): { systemPrompt: string; agentId: string } {
+  const agentId = selectAgent(query);
+  const specialist = LEGAL_AGENTS.find(a => a.id === agentId);
+
+  if (!specialist) {
+    return { systemPrompt: LEX_ORCHESTRATOR_PROMPT, agentId: "multiclaw" };
+  }
+
+  const combinedPrompt = `${LEX_ORCHESTRATOR_PROMPT}
+
+---
+ACTIVE SPECIALIST: ${specialist.name} (${specialist.personaName})
+Domain: ${specialist.domain}
+
+${specialist.systemPrompt}
+
+---
+INSTRUKSI GABUNGAN:
+Anda bertindak sebagai Lex (orchestrator) yang memiliki keahlian penuh ${specialist.personaName} (${specialist.domain}).
+Mulai respons dengan menyebut: "[${specialist.personaName} — ${specialist.domain}]"
+Gunakan format IRAC+, citation wajib [UU No.X/Tahun, Pasal Y], akhiri dengan disclaimer.`;
+
+  return { systemPrompt: combinedPrompt, agentId };
 }

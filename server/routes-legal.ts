@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { db } from "./db";
 import { legalChatSessions, legalChatMessages } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
-import { LEGAL_AGENTS, LEX_ORCHESTRATOR_PROMPT, LEX_ORCHESTRATOR_GREETING, selectAgent } from "./lib/legal-agents";
+import { LEGAL_AGENTS, LEX_ORCHESTRATOR_PROMPT, LEX_ORCHESTRATOR_GREETING, selectAgent, buildOrchestrationPrompt } from "./lib/legal-agents";
 
 const isProduction = process.env.NODE_ENV === "production";
 const rawBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
@@ -24,6 +24,14 @@ const openai = new OpenAI({
 });
 
 const DISCLAIMER = "\n\n---\n⚠️ *Informasi ini bersifat edukatif dan bukan pendapat hukum yang mengikat. Untuk kasus hukum konkret, konsultasikan dengan advokat atau konsultan hukum berpengalaman.*";
+
+function detectTier(message: string): string {
+  const T3_SIGNALS = /\b(eksepsi|ratio decidendi|kasasi|pk |peninjauan kembali|legal opinion|due diligence|dakwaan|pledoi|requisitor|in dubio pro reo|lex specialis|pasal \d+|putusan no|yurisprudensi|actio pauliana|concursus|homologasi|boedel|debt to equity)\b/i;
+  const T2_SIGNALS = /\b(perusahaan|direksi|karyawan|kontrak komersial|risiko bisnis|due diligence|perjanjian kerja|mou|nda|sha|compliance|gcg|in-house|merger|akuisisi)\b/i;
+  if (T3_SIGNALS.test(message)) return "T3 (Advokat/Profesional) — gunakan bahasa hukum teknis penuh, sitasi pasal lengkap, format IRAC+.";
+  if (T2_SIGNALS.test(message)) return "T2 (Korporat) — bahasa bisnis-legal, focus pada risiko dan opsi, risk matrix jika relevan.";
+  return "T1 (Awam) — gunakan bahasa sederhana, hindari jargon berlebihan, jelaskan istilah teknis.";
+}
 
 const GUEST_MESSAGE_LIMIT = 5;
 const guestLegalTracker = new Map<string, { count: number; lastReset: string }>();
@@ -77,7 +85,8 @@ export function registerLegalRoutes(app: Express) {
 
   app.post("/api/legal/chat", async (req: any, res: any) => {
     try {
-      const { sessionId, agentType = "auto", message } = req.body;
+      const { sessionId, message } = req.body;
+      let agentType: string = req.body.agentType || "auto";
       if (!message || typeof message !== "string" || message.trim().length === 0) {
         return res.status(400).json({ error: "Message is required" });
       }
@@ -101,19 +110,28 @@ export function registerLegalRoutes(app: Express) {
         incrementGuestCount(guestKey);
       }
 
-      let selectedAgentId = agentType === "auto" ? selectAgent(message) : agentType;
       const validAgentIds = ["auto", ...LEGAL_AGENTS.map(a => a.id)];
-      if (!validAgentIds.includes(selectedAgentId)) {
-        selectedAgentId = "auto";
+      if (!validAgentIds.includes(agentType)) {
+        agentType = "auto";
       }
 
-      const agentConfig = LEGAL_AGENTS.find(a => a.id === selectedAgentId);
+      let selectedAgentId: string;
       let systemPrompt: string;
-      if (!agentConfig) {
-        systemPrompt = LEX_ORCHESTRATOR_PROMPT;
+
+      if (agentType === "auto") {
+        const orchestrated = buildOrchestrationPrompt(message);
+        selectedAgentId = orchestrated.agentId;
+        systemPrompt = orchestrated.systemPrompt;
       } else {
-        systemPrompt = agentConfig.systemPrompt;
+        selectedAgentId = agentType;
+        const agentConfig = LEGAL_AGENTS.find(a => a.id === selectedAgentId);
+        systemPrompt = agentConfig
+          ? agentConfig.systemPrompt
+          : LEX_ORCHESTRATOR_PROMPT;
       }
+
+      const tierHint = detectTier(message);
+      systemPrompt = `${systemPrompt}\n\nUSER TIER (detected): ${tierHint}. Sesuaikan kedalaman jawaban.`;
 
       let dbSessionId: number | null = null;
       let history: { role: "user" | "assistant"; content: string }[] = [];
@@ -137,7 +155,7 @@ export function registerLegalRoutes(app: Express) {
                 .from(legalChatMessages)
                 .where(eq(legalChatMessages.sessionId, dbSessionId))
                 .orderBy(legalChatMessages.createdAt)
-                .limit(20);
+                .limit(24);
               history = msgs.map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
             }
           } catch (err) {
@@ -168,18 +186,18 @@ export function registerLegalRoutes(app: Express) {
 
       const messages: { role: "user" | "assistant" | "system"; content: string }[] = [
         { role: "system", content: systemPrompt },
-        ...history.slice(-10),
+        ...history.slice(-16),
         { role: "user", content: message.trim() },
       ];
 
       let fullResponse = "";
       try {
         const stream = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          model: "gpt-4o",
           messages,
           stream: true,
-          max_tokens: 2000,
-          temperature: 0.3,
+          max_tokens: 3500,
+          temperature: 0.2,
         });
 
         for await (const chunk of stream) {
