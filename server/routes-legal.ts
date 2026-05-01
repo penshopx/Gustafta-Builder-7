@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { db } from "./db";
 import { legalChatSessions, legalChatMessages } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
-import { LEGAL_AGENTS, LEX_ORCHESTRATOR_PROMPT, selectAgent } from "./lib/legal-agents";
+import { LEGAL_AGENTS, LEX_ORCHESTRATOR_PROMPT, LEX_ORCHESTRATOR_GREETING, selectAgent } from "./lib/legal-agents";
 
 const isProduction = process.env.NODE_ENV === "production";
 const rawBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
@@ -332,6 +332,7 @@ export function registerLegalRoutes(app: Express) {
       emoji: a.emoji,
       domain: a.domain,
       tagline: a.tagline,
+      greetingMessage: a.greetingMessage ?? null,
       starters: a.starters,
     })));
   });

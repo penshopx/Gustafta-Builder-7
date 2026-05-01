@@ -16,6 +16,7 @@ interface LegalAgent {
   emoji: string;
   domain: string;
   tagline: string;
+  greetingMessage?: string | null;
   starters: string[];
 }
 
@@ -37,16 +38,17 @@ interface Session {
 
 const ORCHESTRATOR_AGENT: LegalAgent = {
   id: "auto",
-  name: "LEX-AUTO",
-  personaName: "LEX-ORCHESTRATOR",
-  emoji: "🤖",
+  name: "LEX-ORCHESTRATOR",
+  personaName: "Lex",
+  emoji: "⚖️",
   domain: "Semua Domain Hukum",
-  tagline: "Pilih agen terbaik secara otomatis berdasarkan pertanyaanmu",
+  tagline: "Routing otomatis ke 12 spesialis hukum — pidana, perdata, korporasi & lebih.",
+  greetingMessage: "Selamat datang di **LexCom**. Saya **Lex**, asisten konsultasi hukum Anda. Saya akan menghubungkan Anda dengan agen spesialis yang tepat — pidana, perdata, korporasi, ketenagakerjaan, pertanahan, pajak, yurisprudensi, drafter, litigasi, atau kepailitan.\n\nSebelum mulai, boleh saya tahu: Anda bertanya sebagai **(a) individu/masyarakat**, **(b) perwakilan perusahaan**, atau **(c) profesional hukum**? Dan domain hukum apa yang ingin dibahas?",
   starters: [
-    "Apa perbedaan antara PKWT dan PKWTT menurut UU Cipta Kerja?",
-    "Jelaskan syarat sah suatu perjanjian menurut KUHPerdata",
-    "Bagaimana proses PHK yang sah secara hukum di Indonesia?",
-    "Apa hak tersangka yang wajib dipenuhi saat penangkapan?",
+    "Saya individu — karyawan saya mogok kerja massal, apa langkah saya?",
+    "Saya perusahaan — mitra bisnis ingkar janji kontrak senilai Rp 2 M.",
+    "Direktur kami tersangka korupsi — apa yang harus dilakukan perusahaan?",
+    "Saya awam — rumah saya disengketakan orang lain dengan sertifikat palsu.",
   ],
 };
 
@@ -408,7 +410,13 @@ export default function LegalChat() {
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <div className="text-6xl mb-4">{selectedAgent.emoji}</div>
               <h2 className="text-xl font-bold text-white mb-2">{selectedAgent.personaName}</h2>
-              <p className="text-white/50 text-sm max-w-md mb-8">{selectedAgent.tagline}</p>
+              {selectedAgent.greetingMessage ? (
+                <div className="max-w-xl mb-8 text-left rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-white/80 leading-relaxed">
+                  <MessageContent text={selectedAgent.greetingMessage} />
+                </div>
+              ) : (
+                <p className="text-white/50 text-sm max-w-md mb-8">{selectedAgent.tagline}</p>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
                 {selectedAgent.starters.map((starter, i) => (
                   <button
