@@ -29,7 +29,7 @@ const FEATURES = [
   },
   {
     icon: BookOpen,
-    title: "12 Agen Spesialis Hukum",
+    title: "17 Agen Spesialis Hukum",
     desc: "Dari pidana, perdata, korporasi, hingga hukum digital — setiap domain memiliki agen dengan sistem prompt yang mendalam dan terstruktur.",
   },
   {
@@ -45,7 +45,7 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: "12", label: "Agen Spesialis" },
+  { value: "17", label: "Agen Spesialis" },
   { value: "1", label: "LEX-Orchestrator" },
   { value: "50+", label: "Topik Hukum" },
   { value: "24/7", label: "Selalu Aktif" },
@@ -113,7 +113,7 @@ export default function LegalLanding() {
           <div className="container mx-auto text-center max-w-5xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-sm mb-8">
               <Zap className="w-4 h-4" />
-              <span>LEX-ORCHESTRATOR · 12 Agen Spesialis · Hukum Indonesia Terkini</span>
+              <span>LEX-ORCHESTRATOR · 17 Agen Spesialis · Hukum Indonesia Terkini</span>
               <Star className="w-4 h-4 text-yellow-400" />
             </div>
 
@@ -129,7 +129,7 @@ export default function LegalLanding() {
             </h1>
 
             <p className="text-lg md:text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
-              Platform riset hukum bertenaga AI dengan <strong className="text-white/80">12 agen spesialis</strong> yang mencakup seluruh cabang hukum Indonesia — dari KUHP 2023, UU Cipta Kerja, hingga hukum digital dan yurisprudensi MA/MK. Dipandu oleh LEX-ORCHESTRATOR yang memilih agen terbaik secara otomatis.
+              Platform riset hukum bertenaga AI dengan <strong className="text-white/80">17 agen spesialis</strong> yang mencakup seluruh cabang hukum Indonesia — dari KUHP 2023, UU Cipta Kerja, hingga hukum digital, HKI, keluarga, imigrasi, dan yurisprudensi MA/MK. Dipandu oleh LEX-ORCHESTRATOR yang memilih agen terbaik secara otomatis.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
