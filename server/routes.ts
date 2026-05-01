@@ -5429,7 +5429,7 @@ Akhiri dengan 2-3 poin key takeaway untuk pembaca lain.`;
       }
 
       const allToolboxes = await storage.getToolboxes(req.params.bigIdeaId);
-      const activeToolboxes = allToolboxes.filter(t => t.isActive && !t.isOrchestrator);
+      const activeToolboxes = allToolboxes.filter(t => t.isActive);
 
       const chatbots: any[] = [];
       for (const toolbox of activeToolboxes) {
