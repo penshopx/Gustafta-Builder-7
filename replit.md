@@ -18,16 +18,12 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
 
 **Knowledge Base (May 2026 — FULLY POPULATED):**
 - knowledge_taxonomy: 8 sektor + 32 subsektor = 40 nodes (script: scripts/seed-knowledge-taxonomy.ts)
-- knowledge_bases: 3,018 entries untuk 897 agen aktif (script: scripts/seed-knowledge-bases-all.ts)
-  - Foundational (regulasi & standar): 1,102 entries
-  - Operational (SOP & prosedur): 897 entries
-  - Compliance (guardrails & batas domain): 897 entries
-  - Tactical (routing multi-agent, HUBs only): 122 entries
-  - URL references (sumber resmi web): 205 entries
-- RAG enabled: 897/897 agen (rag_enabled=true, chunk_size=512, overlap=64, top_k=5)
-- knowledge_chunks: 3,018 chunks untuk 897 agen (avg 291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
-- Domain taxonomy coverage: SKK (949 KB), Regulasi Induk (603 KB), SBU (177 KB), Kontrak (111 KB), Tender (99 KB), K3/SMAP (201 KB), Pelaksanaan (134 KB), dll.
-- Field completeness: ALL 896 agen aktif → 100% pada seluruh 12 field kunci (system_prompt, tagline, greeting, personality, starters, expertise, charter, quality_bar, product_summary, features, deliverables, rag_enabled)
+- knowledge_bases: 3,113 entries untuk 927 agen aktif
+  - Batch 1-2 original: 3,018 entries (script: scripts/seed-knowledge-bases-all.ts)
+  - Batch 3 (#920-949): 95 entries (script: scripts/seed-kb-batch3.ts)
+- RAG enabled: 927/927 agen (rag_enabled=true, chunk_size=512, overlap=64, top_k=5)
+- knowledge_chunks: 3,113 chunks (avg ~291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
+- Domain taxonomy coverage: SKK, Regulasi Induk, SBU, Kontrak, Tender, K3/SMAP, Pelaksanaan, Engineering, Mutu, Lingkungan, Peralatan
 
 **Key Structural Fixes (May 2026 Session):**
 - 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
