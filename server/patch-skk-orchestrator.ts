@@ -5,7 +5,6 @@ function log(msg: string) {
   console.log(`${now} [express] ${msg}`);
 }
 
-// Orchestrator config per SKK Coach variant (domain → specialist prompt snippet)
 const SKK_ORCHESTRATOR_CONFIG = {
   enabled: true,
   routingModel: "deepseek-chat",
@@ -23,7 +22,6 @@ const SKK_ORCHESTRATOR_CONFIG = {
   },
 };
 
-// HUB system prompt appendix untuk memperkuat kemampuan routing
 const ORCHESTRATOR_ROUTING_APPENDIX = `
 
 ═══════════════════════════════════════
@@ -47,27 +45,47 @@ GOVERNANCE ORCHESTRATOR:
 - Selalu konfirmasi bidang + jenjang KKNI target sebelum memberikan detail
 - Jika pengguna sudah jelas: langsung berikan rekomendasi tanpa tanya berlebihan`;
 
-export async function patchSkkOrchestratorHub(): Promise<{ updated: number; skipped: number }> {
-  let updated = 0;
+export async function patchSkkOrchestratorHub(): Promise<{ updatedAgents: number; updatedToolboxes: number; skipped: number }> {
+  let updatedAgents = 0;
+  let updatedToolboxes = 0;
   let skipped = 0;
 
   try {
-    const allAgents = await storage.getAgents();
+    // ─── STEP 1: Patch HUB Toolboxes (isOrchestrator = true) ───
+    // The sidebar reads isOrchestrator from Toolbox, not Agent.
+    // HUB toolboxes have name starting with "HUB SKK Coach" and bigIdeaId = null/empty.
+    const allToolboxes = await storage.getToolboxes();
+    for (const toolbox of allToolboxes) {
+      if (!toolbox.name.startsWith("HUB SKK Coach")) continue;
 
-    for (const agent of allAgents) {
-      if (!agent.name.startsWith("HUB SKK Coach")) {
-        continue;
-      }
-
-      // Already patched
-      if (agent.isOrchestrator && agent.agenticMode) {
+      if (toolbox.isOrchestrator) {
         skipped++;
         continue;
       }
 
-      const enrichedSystemPrompt = agent.systemPrompt
-        ? agent.systemPrompt + ORCHESTRATOR_ROUTING_APPENDIX
-        : ORCHESTRATOR_ROUTING_APPENDIX;
+      await storage.updateToolbox(toolbox.id, {
+        isOrchestrator: true,
+      } as any);
+
+      log(`[Patch SKK Orchestrator] 🗂️  Toolbox: ${toolbox.name} → isOrchestrator=true`);
+      updatedToolboxes++;
+    }
+
+    // ─── STEP 2: Patch HUB Agents (isOrchestrator + orchestratorConfig) ───
+    // The Agentic AI Panel reads orchestratorConfig from the active Agent.
+    const allAgents = await storage.getAgents();
+    for (const agent of allAgents) {
+      if (!agent.name.startsWith("HUB SKK Coach")) continue;
+
+      if (agent.isOrchestrator && agent.agenticMode && (agent as any).orchestratorConfig?.enabled) {
+        skipped++;
+        continue;
+      }
+
+      const enrichedSystemPrompt =
+        agent.systemPrompt && agent.systemPrompt.includes("ORCHESTRATOR ROUTING PROTOCOL")
+          ? agent.systemPrompt
+          : (agent.systemPrompt || "") + ORCHESTRATOR_ROUTING_APPENDIX;
 
       await storage.updateAgent(agent.id, {
         isOrchestrator: true,
@@ -75,20 +93,23 @@ export async function patchSkkOrchestratorHub(): Promise<{ updated: number; skip
         agenticMode: true,
         orchestratorConfig: SKK_ORCHESTRATOR_CONFIG as any,
         systemPrompt: enrichedSystemPrompt,
-        domainCharter: "Navigator utama SKK Coach — melakukan triage bidang/pengalaman, routing ke modul subklasifikasi yang tepat, dan memandu persiapan SKK/SKKNI dari KKNI 1 hingga 9." as any,
+        domainCharter:
+          "Navigator utama SKK Coach — melakukan triage bidang/pengalaman, routing ke modul subklasifikasi yang tepat, dan memandu persiapan SKK/SKKNI dari KKNI 1 hingga 9." as any,
         multiStepReasoning: true,
         proactiveAssistance: true,
         attentiveListening: true,
       } as any);
 
-      log(`[Patch SKK Orchestrator] ✅ ${agent.name} → isOrchestrator=true, agenticMode=true`);
-      updated++;
+      log(`[Patch SKK Orchestrator] 🤖 Agent: ${agent.name} → isOrchestrator=true, orchestratorConfig.enabled=true`);
+      updatedAgents++;
     }
 
-    log(`[Patch SKK Orchestrator] SELESAI — Updated: ${updated}, Skipped (sudah ada): ${skipped}`);
+    log(
+      `[Patch SKK Orchestrator] SELESAI — Toolboxes: ${updatedToolboxes}, Agents: ${updatedAgents}, Skipped: ${skipped}`
+    );
   } catch (err) {
     log(`[Patch SKK Orchestrator] ERROR: ${(err as Error).message}`);
   }
 
-  return { updated, skipped };
+  return { updatedAgents, updatedToolboxes, skipped };
 }
