@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   BookOpen, GraduationCap, FileText, Sparkles, ExternalLink, Download,
   ArrowRight, Bot, Layers, Zap, BookMarked, ChevronRight, Globe, Brain, Eye,
+  Network, Loader2, CheckCircle2, GitBranch, ListOrdered,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface EkosistemPanelProps {
   agent: any;
@@ -29,6 +32,30 @@ interface ProductCard {
 export function EkosistemPanel({ agent }: EkosistemPanelProps) {
   const { toast } = useToast();
   const [openingId, setOpeningId] = useState<string | null>(null);
+  const [mcOpen, setMcOpen] = useState(false);
+  const [mcResult, setMcResult] = useState<any>(null);
+  const [mcRevealedStages, setMcRevealedStages] = useState(0);
+  const [mcTab, setMcTab] = useState("ebook-agent");
+
+  const mcMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/ai/ekosistem-multiclaw", { agentId: agent?.id });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setMcResult(data);
+      setMcTab("ebook-agent");
+      let count = 0;
+      const iv = setInterval(() => {
+        count++;
+        setMcRevealedStages(count);
+        if (count >= 4) clearInterval(iv);
+      }, 600);
+    },
+    onError: () => {
+      toast({ title: "MultiClaw Gagal", description: "Gagal menjalankan Ekosistem MultiClaw", variant: "destructive" });
+    },
+  });
 
   const { data: kbs = [] } = useQuery<any[]>({
     queryKey: [`/api/knowledge-base/${agent?.id}`],
@@ -233,6 +260,7 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
   };
 
   return (
+    <>
     <div className="space-y-6 pb-8">
 
       {/* Header */}
@@ -251,6 +279,27 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
           <p className="text-sm opacity-85 max-w-md mb-4">
             Chatbot adalah fondasi. Transfer kompetensi {agent.name} menjadi ebook, e-course, generator dokumen, dan lebih banyak produk digital yang bekerja 24 jam.
           </p>
+
+          {/* MultiClaw button */}
+          <div className="flex items-center gap-2 mb-3">
+            <Button
+              onClick={() => {
+                setMcResult(null);
+                setMcRevealedStages(0);
+                setMcOpen(true);
+                mcMutation.mutate();
+              }}
+              disabled={mcMutation.isPending}
+              className="gap-2 bg-white/20 hover:bg-white/30 text-white border border-white/30 text-sm"
+              data-testid="button-ekosistem-multiclaw"
+            >
+              {mcMutation.isPending ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Menjalankan 4 Agent...</>
+              ) : (
+                <><Network className="w-4 h-4" /> Generate Semua Produk (MultiClaw)</>
+              )}
+            </Button>
+          </div>
 
           {/* Foundation pill */}
           <div className="inline-flex items-center gap-3 bg-white/15 border border-white/25 rounded-xl px-4 py-2.5">
@@ -392,5 +441,146 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
         </div>
       </div>
     </div>
+
+      {/* ── Ekosistem MultiClaw Dialog ── */}
+      <Dialog open={mcOpen} onOpenChange={(o) => { if (!mcMutation.isPending) setMcOpen(o); }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Network className="h-5 w-5 text-indigo-600" />
+            Generate Semua Produk (MultiClaw)
+            <Badge className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 text-xs font-semibold">4 Agent Paralel</Badge>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* 4 parallel agent cards */}
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: "ebook-agent", name: "eBook Agent", icon: <BookOpen className="w-4 h-4" />, color: "orange" },
+              { id: "ecourse-agent", name: "eCourse Agent", icon: <GraduationCap className="w-4 h-4" />, color: "violet" },
+              { id: "docgen-agent", name: "DocGen Agent", icon: <FileText className="w-4 h-4" />, color: "emerald" },
+              { id: "chaesa-agent", name: "Chaesa Bridge Agent", icon: <BookMarked className="w-4 h-4" />, color: "blue" },
+            ].map((ag, i) => {
+              const isRevealed = mcRevealedStages > i;
+              const isRunning = mcMutation.isPending;
+              const colorMap: any = {
+                orange: "border-orange-300 bg-orange-50/60 dark:border-orange-700 dark:bg-orange-950/20",
+                violet: "border-violet-300 bg-violet-50/60 dark:border-violet-700 dark:bg-violet-950/20",
+                emerald: "border-emerald-300 bg-emerald-50/60 dark:border-emerald-700 dark:bg-emerald-950/20",
+                blue: "border-blue-300 bg-blue-50/60 dark:border-blue-700 dark:bg-blue-950/20",
+              };
+              const iconMap: any = {
+                orange: "bg-orange-100 text-orange-600",
+                violet: "bg-violet-100 text-violet-600",
+                emerald: "bg-emerald-100 text-emerald-600",
+                blue: "bg-blue-100 text-blue-600",
+              };
+              return (
+                <button
+                  key={ag.id}
+                  onClick={() => isRevealed && setMcTab(ag.id)}
+                  disabled={!isRevealed}
+                  className={`flex items-center gap-2 p-3 rounded-lg border text-left transition-all ${
+                    isRevealed ? `${colorMap[ag.color]} ${mcTab === ag.id ? "ring-2 ring-offset-1" : "hover:opacity-90"}` : "border-border bg-muted/30 opacity-50 cursor-default"
+                  }`}
+                  data-testid={`ekosistem-stage-${ag.id}`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isRevealed ? iconMap[ag.color] : "bg-muted text-muted-foreground"}`}>
+                    {isRunning && !isRevealed ? <Loader2 className="w-4 h-4 animate-spin" /> : isRevealed ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : ag.icon}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold">{ag.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{isRevealed ? "Selesai ✓" : isRunning ? "Generating…" : "Menunggu"}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {!mcResult && (
+            <p className="text-xs text-center text-muted-foreground">
+              {mcMutation.isPending ? "4 agent berjalan paralel, mohon tunggu…" : "Klik tombol di header untuk memulai MultiClaw."}
+            </p>
+          )}
+
+          {/* Result Tabs */}
+          {mcResult && (
+            <Tabs value={mcTab} onValueChange={setMcTab}>
+              <TabsList className="grid grid-cols-4 h-8">
+                <TabsTrigger value="ebook-agent" className="text-[10px]">eBook</TabsTrigger>
+                <TabsTrigger value="ecourse-agent" className="text-[10px]">eCourse</TabsTrigger>
+                <TabsTrigger value="docgen-agent" className="text-[10px]">DocGen</TabsTrigger>
+                <TabsTrigger value="chaesa-agent" className="text-[10px]">Chaesa</TabsTrigger>
+              </TabsList>
+
+              {mcResult.stages?.map((stage: any) => (
+                <TabsContent key={stage.id} value={stage.id} className="space-y-3 mt-3">
+                  {stage.id === "ebook-agent" && stage.result && (
+                    <div className="space-y-3">
+                      <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200">
+                        <p className="font-bold text-sm text-orange-900 dark:text-orange-200">{stage.result.title}</p>
+                        <p className="text-xs text-orange-700 dark:text-orange-300">{stage.result.subtitle} · {stage.result.targetReader}</p>
+                      </div>
+                      {stage.result.chapters?.map((ch: any) => (
+                        <div key={ch.number} className="p-2.5 rounded-lg border text-xs">
+                          <p className="font-semibold mb-1">Bab {ch.number}: {ch.title}</p>
+                          <p className="text-muted-foreground mb-1">{ch.description}</p>
+                          <ul className="space-y-0.5">{ch.keyPoints?.map((kp: string, j: number) => <li key={j} className="flex gap-1.5"><span className="text-orange-500 shrink-0">•</span>{kp}</li>)}</ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {stage.id === "ecourse-agent" && stage.result && (
+                    <div className="space-y-3">
+                      <div className="p-3 rounded-lg bg-violet-50 dark:bg-violet-950/20 border border-violet-200">
+                        <p className="font-bold text-sm text-violet-900 dark:text-violet-200">{stage.result.courseTitle}</p>
+                        <p className="text-xs text-violet-700 dark:text-violet-300">{stage.result.duration} · {stage.result.targetLearner}</p>
+                      </div>
+                      {stage.result.modules?.map((m: any) => (
+                        <div key={m.number} className="p-2.5 rounded-lg border text-xs">
+                          <p className="font-semibold mb-1">Modul {m.number}: {m.title}</p>
+                          <p className="text-muted-foreground text-[10px] mb-1">Outcome: {m.learningOutcome}</p>
+                          <ul className="space-y-0.5">{m.sessions?.map((s: string, j: number) => <li key={j} className="flex gap-1.5"><span className="text-violet-500 shrink-0">•</span>{s}</li>)}</ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {stage.id === "docgen-agent" && stage.result && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground">Dokumen Utama: {stage.result.primaryDoc}</p>
+                      {stage.result.templates?.map((t: any, i: number) => (
+                        <div key={i} className="p-2.5 rounded-lg border text-xs">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-semibold">{t.name}</p>
+                            <Badge variant="outline" className="text-[10px]">{t.type}</Badge>
+                          </div>
+                          <p className="text-muted-foreground">{t.purpose}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {stage.id === "chaesa-agent" && stage.result && (
+                    <div className="space-y-3">
+                      <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 text-xs">
+                        <p className="font-bold text-blue-800 dark:text-blue-200 mb-1">Kategori: {stage.result.industryCategory}</p>
+                        <p className="text-blue-700 dark:text-blue-300">{stage.result.bridgeRationale}</p>
+                      </div>
+                      {stage.result.contentPillars?.length > 0 && (
+                        <div className="p-2.5 rounded-lg border text-xs">
+                          <p className="font-semibold mb-1">Pilar Konten</p>
+                          <ul className="space-y-1">{stage.result.contentPillars.map((p: string, i: number) => <li key={i} className="flex gap-1.5"><span className="text-blue-500">•</span>{p}</li>)}</ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
+        </div>
+      </DialogContent>
+      </Dialog>
+    </>
   );
 }

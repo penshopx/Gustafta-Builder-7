@@ -9746,6 +9746,254 @@ KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan
     }
   });
 
+  // ── INFO TENDER — MultiClaw 4-Agent Pipeline ──────────────────────────────
+  app.post("/api/ai/tender-multiclaw", isAuthenticated, async (req, res) => {
+    try {
+      const { packType = "pelaksana_konstruksi", tenderData = {}, agentId } = req.body;
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+      const ai = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+      const isPelaksana = packType === "pelaksana_konstruksi";
+      const packLabel = isPelaksana ? "Pelaksana Konstruksi" : "Konsultansi MK";
+      const tenderStr = `Nama Paket: ${tenderData.name || "(tidak diketahui)"}\nInstansi: ${tenderData.agency || "-"}\nHPS/Anggaran: ${tenderData.budget || "-"}\nJenis: ${tenderData.type || "-"}\nLokasi: ${tenderData.location || "-"}\nStatus: ${tenderData.status || "-"}\nURL: ${tenderData.url || "-"}`;
+
+      let kbCtx = "";
+      if (agentId) {
+        try {
+          const chunks = await storage.getChunksByAgent(String(agentId));
+          if (chunks.length > 0) kbCtx = await searchKnowledgeBase(tenderData.name || "", chunks, 5);
+        } catch {}
+      }
+
+      // Stage 1: LPSE Analyst
+      const s1Res = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah LPSE-ANALYST agent. Analisis data tender pengadaan pemerintah Indonesia. Hasilkan JSON: { "tenderType": "jenis/sub-bidang pekerjaan spesifik", "estimatedScale": "skala dan kualifikasi usaha", "keyRequirements": ["persyaratan kunci 1","2","3","4","5"], "urgencyLevel": "Tinggi/Sedang/Rendah", "regulatoryFramework": ["regulasi utama"], "winProbabilityFactors": ["faktor penentu menang"], "summary": "ringkasan konteks tender 2 kalimat" }` },
+          { role: "user", content: `DATA TENDER:\n${tenderStr}\n\nPack type: ${packLabel}${kbCtx ? `\n\nKonteks KB: ${kbCtx.slice(0, 500)}` : ""}` },
+        ],
+        temperature: 0.3, max_tokens: 600, response_format: { type: "json_object" },
+      });
+      let s1: any = {};
+      try { s1 = JSON.parse(s1Res.choices[0]?.message?.content || "{}"); } catch {}
+
+      // Stage 2: Compliance Checker
+      const s2Res = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah COMPLIANCE-CHECKER agent. Buat checklist kelengkapan dokumen tender sesuai Perpres 46/2025 dan Permen PUPR 10/2021. Hasilkan JSON: { "overallScore": 0-100, "sections": [{ "code": "A", "name": "nama seksi", "items": [{ "code": "A1", "item": "nama item", "status": "Ada/Perlu Persiapan/Belum", "note": "catatan" }] }], "criticalItems": ["item kritis"], "complianceSummary": "ringkasan status" }` },
+          { role: "user", content: `DATA TENDER:\n${tenderStr}\n\nPack: ${packLabel}\nHasil LPSE Analyst:\n${JSON.stringify(s1)}` },
+        ],
+        temperature: 0.2, max_tokens: 1200, response_format: { type: "json_object" },
+      });
+      let s2: any = {};
+      try { s2 = JSON.parse(s2Res.choices[0]?.message?.content || "{}"); } catch {}
+
+      // Stage 3: Gap Analyst
+      const s3Res = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah GAP-ANALYST agent. Identifikasi gap, risiko, dan peluang dari data tender. Hasilkan JSON: { "redFlags": [{ "finding": "temuan", "impact": "dampak", "recommendation": "rekomendasi" }], "yellowFlags": [{ "finding": "temuan", "impact": "dampak", "recommendation": "rekomendasi" }], "opportunities": ["peluang keunggulan kompetitif"], "preparationTimeline": "estimasi waktu persiapan", "strategicRecommendation": "rekomendasi strategis 2-3 kalimat" }` },
+          { role: "user", content: `DATA TENDER:\n${tenderStr}\n\nPack: ${packLabel}\nCompliance Score: ${s2.overallScore || "?"}\nKritis: ${JSON.stringify(s2.criticalItems || [])}\nLPSE: ${JSON.stringify(s1)}` },
+        ],
+        temperature: 0.4, max_tokens: 800, response_format: { type: "json_object" },
+      });
+      let s3: any = {};
+      try { s3 = JSON.parse(s3Res.choices[0]?.message?.content || "{}"); } catch {}
+
+      // Stage 4: Document Drafter
+      const s4Res = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah DOCUMENT-DRAFTER agent. Buat draft 2 dokumen kunci. Hasilkan JSON: { "surat_penawaran": "draft surat penawaran lengkap (min 300 kata, format formal)", "pernyataan_kepatuhan": "draft pernyataan kepatuhan Perpres 46/2025 (min 200 kata, format formal)" }` },
+          { role: "user", content: `DATA TENDER:\n${tenderStr}\n\nPack: ${packLabel}\nJenis: ${s1.tenderType || "-"}\nRegulasi: ${JSON.stringify(s1.regulatoryFramework || [])}\nGap Kritis: ${JSON.stringify(s3.redFlags?.slice(0, 2) || [])}` },
+        ],
+        temperature: 0.5, max_tokens: 1500, response_format: { type: "json_object" },
+      });
+      let s4: any = {};
+      try { s4 = JSON.parse(s4Res.choices[0]?.message?.content || "{}"); } catch {}
+
+      res.json({
+        stages: [
+          { id: "lpse-analyst", name: "LPSE Analyst", result: s1 },
+          { id: "compliance-checker", name: "Compliance Checker", result: s2 },
+          { id: "gap-analyst", name: "Gap Analyst", result: s3 },
+          { id: "doc-drafter", name: "Document Drafter", result: s4 },
+        ],
+        overallScore: s2.overallScore || 0,
+        recommendation: s3.strategicRecommendation || "",
+        packType,
+        tenderName: tenderData.name || "Tender",
+      });
+    } catch (error: any) {
+      console.error("[AI tender-multiclaw] Error:", error);
+      res.status(500).json({ error: "Gagal menjalankan MultiClaw Tender: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ── STUDIO KOMPETENSI — MultiClaw 3-Stage Enhancement Pipeline ────────────
+  app.post("/api/ai/studio-multiclaw", isAuthenticated, async (req, res) => {
+    try {
+      const { proposal = {}, knowledgeChunks = [] } = req.body;
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+      const ai = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+      const proposalStr = JSON.stringify(proposal, null, 2).slice(0, 3000);
+      const kbSummary = (knowledgeChunks as any[]).slice(0, 5).map((k: any) => `[${k.name}]: ${k.content?.slice(0, 200)}`).join("\n");
+
+      // Stage 1: Proposal Analyzer
+      const s1Res = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah PROPOSAL-ANALYZER agent. Evaluasi kualitas konfigurasi chatbot. Hasilkan JSON: { "overallQuality": 0-100, "weakFields": ["field yang lemah/kosong"], "strongFields": ["field yang sudah baik"], "domainCoherence": 0-100, "analysis": "analisis 2-3 kalimat", "improvementPriority": ["field prioritas tingkatkan"] }` },
+          { role: "user", content: `Proposal konfigurasi:\n${proposalStr}\n\nKnowledge Chunks:\n${kbSummary || "(belum ada)"}` },
+        ],
+        temperature: 0.2, max_tokens: 500, response_format: { type: "json_object" },
+      });
+      let s1: any = {};
+      try { s1 = JSON.parse(s1Res.choices[0]?.message?.content || "{}"); } catch {}
+
+      // Stage 2: Config Enhancer
+      const s2Res = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah CONFIG-ENHANCER agent. Perkuat field-field lemah dalam konfigurasi chatbot. Hasilkan JSON berisi HANYA field yang ditingkatkan. Format: { "namaField": "nilai baru yang lebih baik" }. Field yang bisa ditingkatkan: name, tagline, description, systemPrompt, greetingMessage, philosophy, expertise, conversationStarters, keyPhrases, avoidTopics.` },
+          { role: "user", content: `Proposal saat ini:\n${proposalStr}\n\nField yang perlu ditingkatkan: ${JSON.stringify(s1.weakFields || [])}\nAnalisis: ${s1.analysis || ""}\n\nPerkuat field agar lebih spesifik ke domain chatbot ini.` },
+        ],
+        temperature: 0.6, max_tokens: 1200, response_format: { type: "json_object" },
+      });
+      let s2: any = {};
+      try { s2 = JSON.parse(s2Res.choices[0]?.message?.content || "{}"); } catch {}
+
+      // Stage 3: KB Enricher
+      const s3Res = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah KB-ENRICHER agent. Buat 3-5 potongan knowledge base TAMBAHAN. Hasilkan JSON: { "additionalChunks": [{ "name": "judul (maks 60 karakter)", "type": "reference/sop/faq/regulation/example", "content": "konten (min 150 kata)", "description": "deskripsi 1 kalimat" }] }` },
+          { role: "user", content: `Nama chatbot: ${(proposal as any).name || "chatbot"}\nDomain: ${Array.isArray((proposal as any).expertise) ? ((proposal as any).expertise as string[]).join(", ") : ((proposal as any).expertise || "umum")}\n\nKB yang sudah ada:\n${kbSummary || "(belum ada)"}\n\nBuat KB tambahan yang melengkapi, bukan menduplikasi.` },
+        ],
+        temperature: 0.5, max_tokens: 1500, response_format: { type: "json_object" },
+      });
+      let s3: any = {};
+      try { s3 = JSON.parse(s3Res.choices[0]?.message?.content || "{}"); } catch {}
+
+      const enhancedProposal = { ...proposal, ...s2 };
+      res.json({
+        stages: [
+          { id: "proposal-analyzer", name: "Proposal Analyzer", result: s1 },
+          { id: "config-enhancer", name: "Config Enhancer", result: s2 },
+          { id: "kb-enricher", name: "KB Enricher", result: { additionalChunks: s3.additionalChunks || [] } },
+        ],
+        enhancedProposal,
+        additionalChunks: s3.additionalChunks || [],
+        analysis: s1,
+        qualityBefore: s1.overallQuality || 0,
+        qualityAfter: Math.min(100, (s1.overallQuality || 0) + 20),
+      });
+    } catch (error: any) {
+      console.error("[AI studio-multiclaw] Error:", error);
+      res.status(500).json({ error: "Gagal menjalankan Studio MultiClaw: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ── EKOSISTEM KOMPETENSI — MultiClaw Parallel Product Factory ─────────────
+  app.post("/api/ai/ekosistem-multiclaw", isAuthenticated, async (req, res) => {
+    try {
+      const { agentId } = req.body;
+      if (!agentId) return res.status(400).json({ error: "agentId wajib diisi" });
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+      const ai = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+
+      const agentData = await storage.getAgent(String(agentId));
+      if (!agentData) return res.status(404).json({ error: "Agen tidak ditemukan" });
+      const kbs = await storage.getKnowledgeBases(String(agentId));
+      const kbSummary = kbs.slice(0, 5).map(k => `[${k.name}]: ${k.content?.slice(0, 200)}`).join("\n");
+      const agentCtx = `Nama: ${agentData.name}\nTagline: ${agentData.tagline || ""}\nDeskripsi: ${agentData.description || ""}\nKeahlian: ${Array.isArray(agentData.expertise) ? (agentData.expertise as string[]).join(", ") : (agentData.expertise || "")}\nKB: ${kbSummary || "belum ada"}`;
+
+      const [ebookRes, ecourseRes, docgenRes, chaesaRes] = await Promise.all([
+        ai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: `Anda adalah EBOOK-AGENT. Buat outline eBook kompetensi 8 bab. Hasilkan JSON: { "title": "judul ebook", "subtitle": "subtitle", "targetReader": "target pembaca", "chapters": [{ "number": 1, "title": "judul bab", "description": "deskripsi 2-3 kalimat", "keyPoints": ["poin 1","2","3"] }], "uniqueValue": "proposisi nilai unik ebook" }` },
+            { role: "user", content: agentCtx },
+          ],
+          temperature: 0.6, max_tokens: 900, response_format: { type: "json_object" },
+        }),
+        ai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: `Anda adalah ECOURSE-AGENT. Buat kurikulum e-course. Hasilkan JSON: { "courseTitle": "judul kursus", "duration": "estimasi durasi", "targetLearner": "target peserta", "modules": [{ "number": 1, "title": "judul modul", "sessions": ["sesi 1","2"], "learningOutcome": "outcome" }], "practiceQuestions": ["soal latihan 1","2","3"] }` },
+            { role: "user", content: agentCtx },
+          ],
+          temperature: 0.6, max_tokens: 700, response_format: { type: "json_object" },
+        }),
+        ai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: `Anda adalah DOCGEN-AGENT. Rekomendasikan template dokumen kerja. Hasilkan JSON: { "templates": [{ "name": "nama template", "type": "SOP/checklist/formulir/laporan/rencana kerja", "purpose": "tujuan dokumen", "keySections": ["seksi 1","2","3"] }], "primaryDoc": "dokumen paling penting" }` },
+            { role: "user", content: agentCtx },
+          ],
+          temperature: 0.6, max_tokens: 600, response_format: { type: "json_object" },
+        }),
+        ai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: `Anda adalah CHAESA-BRIDGE-AGENT. Buat brief transfer ke Chaesa AI Studio. Hasilkan JSON: { "industryCategory": "kategori industri", "contentPillars": ["pilar konten 1","2","3"], "contentTypes": ["tipe konten yang direkomendasikan"], "keyPromptThemes": ["tema prompt AI relevan"], "bridgeRationale": "alasan transfer ke Chaesa 2 kalimat" }` },
+            { role: "user", content: agentCtx },
+          ],
+          temperature: 0.6, max_tokens: 500, response_format: { type: "json_object" },
+        }),
+      ]);
+
+      const pj = (r: any) => { try { return JSON.parse(r.choices[0]?.message?.content || "{}"); } catch { return {}; } };
+      res.json({
+        stages: [
+          { id: "ebook-agent", name: "eBook Agent", color: "orange", result: pj(ebookRes) },
+          { id: "ecourse-agent", name: "eCourse Agent", color: "violet", result: pj(ecourseRes) },
+          { id: "docgen-agent", name: "DocGen Agent", color: "emerald", result: pj(docgenRes) },
+          { id: "chaesa-agent", name: "Chaesa Bridge Agent", color: "blue", result: pj(chaesaRes) },
+        ],
+        agentName: agentData.name,
+      });
+    } catch (error: any) {
+      console.error("[AI ekosistem-multiclaw] Error:", error);
+      res.status(500).json({ error: "Gagal menjalankan Ekosistem MultiClaw: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ── BROADCAST WA — AI Personalization Agent ────────────────────────────────
+  app.post("/api/ai/broadcast-personalize", isAuthenticated, async (req, res) => {
+    try {
+      const { template, contacts = [], agentContext = {} } = req.body;
+      if (!template) return res.status(400).json({ error: "template wajib diisi" });
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+      const ai = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+      const contactList = (contacts as any[]).slice(0, 10);
+      const agentName = agentContext.name || "Chatbot";
+
+      const result = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah BROADCAST-PERSONALIZE agent. Personalisasi template pesan WhatsApp untuk setiap kontak. Hasilkan JSON: { "personalizedMessages": [{ "phone": "nomor", "name": "nama", "message": "pesan dipersonalisasi (alami untuk WA)" }], "generalizedVersion": "versi pesan yang sedikit dipersonalisasi, gunakan {{name}} sebagai placeholder nama", "tips": ["tip meningkatkan engagement pesan ini"] }` },
+          { role: "user", content: `Brand/Chatbot: ${agentName}\n\nTemplate pesan:\n${template}\n\nDaftar kontak:\n${contactList.map((c: any) => `- ${c.phone}: ${c.name || "tanpa nama"}`).join("\n") || "Tidak ada kontak spesifik"}` },
+        ],
+        temperature: 0.7, max_tokens: 1200, response_format: { type: "json_object" },
+      });
+      let data: any = {};
+      try { data = JSON.parse(result.choices[0]?.message?.content || "{}"); } catch {}
+      res.json(data);
+    } catch (error: any) {
+      console.error("[AI broadcast-personalize] Error:", error);
+      res.status(500).json({ error: "Gagal personalisasi pesan: " + (error.message || "Unknown error") });
+    }
+  });
+
   registerLegalRoutes(app);
 
   return httpServer;

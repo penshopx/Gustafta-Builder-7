@@ -192,6 +192,42 @@ export function StudioPanel({ agent }: { agent: any }) {
   const [chaesaBundle, setChaesaBundle] = useState<any | null>(null);
   const [copiedKey, setCopiedKey] = useState<string>("");
 
+  const [mcStudioOpen, setMcStudioOpen] = useState(false);
+  const [mcStudioResult, setMcStudioResult] = useState<any>(null);
+  const [mcStudioRevealedStages, setMcStudioRevealedStages] = useState(0);
+
+  const studioMcMutation = useMutation({
+    mutationFn: async () => {
+      if (!proposal) throw new Error("Proposal belum ada");
+      const res = await apiRequest("POST", "/api/ai/studio-multiclaw", {
+        proposal: proposal.proposal,
+        knowledgeChunks: proposal.knowledgeChunks,
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setMcStudioResult(data);
+      let count = 0;
+      const iv = setInterval(() => {
+        count++;
+        setMcStudioRevealedStages(count);
+        if (count >= 3) clearInterval(iv);
+      }, 600);
+      if (data.enhancedProposal) {
+        setEditedFields((prev: any) => ({ ...prev, ...data.enhancedProposal }));
+      }
+      if (data.additionalChunks?.length > 0) {
+        setProposal((prev: any) => prev ? {
+          ...prev,
+          knowledgeChunks: [...(prev.knowledgeChunks || []), ...data.additionalChunks],
+        } : prev);
+      }
+    },
+    onError: (err: any) => {
+      toast({ title: "MultiClaw Gagal", description: err.message, variant: "destructive" });
+    },
+  });
+
   const fetchChaesaMutation = useMutation({
     mutationFn: async () => {
       const res = await fetch(`/api/agents/${agent.id}/export/chaesa`, { credentials: "include" });
@@ -402,14 +438,35 @@ export function StudioPanel({ agent }: { agent: any }) {
                           {proposal.truncated && " (dipotong)"}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => { setProposal(null); setUploadedFileName(""); }}
-                        data-testid="button-cancel-proposal"
-                      >
-                        <X className="w-4 h-4 mr-1" /> Batal
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-xs border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400"
+                          onClick={() => {
+                            setMcStudioResult(null);
+                            setMcStudioRevealedStages(0);
+                            setMcStudioOpen(true);
+                            studioMcMutation.mutate();
+                          }}
+                          disabled={studioMcMutation.isPending}
+                          data-testid="button-studio-multiclaw"
+                        >
+                          {studioMcMutation.isPending ? (
+                            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Memperkaya…</>
+                          ) : (
+                            <><Sparkles className="w-3.5 h-3.5" /> Perkaya dengan MultiClaw</>
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => { setProposal(null); setUploadedFileName(""); }}
+                          data-testid="button-cancel-proposal"
+                        >
+                          <X className="w-4 h-4 mr-1" /> Batal
+                        </Button>
+                      </div>
                     </div>
 
                     {proposal.notes.length > 0 && (
@@ -920,6 +977,116 @@ export function StudioPanel({ agent }: { agent: any }) {
               </Button>
             </div>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Studio MultiClaw Dialog ── */}
+      <Dialog open={mcStudioOpen} onOpenChange={(o) => { if (!studioMcMutation.isPending) setMcStudioOpen(o); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-600" />
+              Perkaya dengan Studio MultiClaw
+              <Badge variant="outline" className="text-xs border-violet-300 text-violet-600">3 Agent Pipeline</Badge>
+            </DialogTitle>
+            <DialogDescription>
+              3 agen AI bekerja berurutan untuk meningkatkan kualitas proposal dan menambah knowledge chunks.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Stage cards */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { name: "Proposal Analyzer", icon: <AlertCircle className="w-4 h-4" /> },
+                { name: "Config Enhancer", icon: <Sparkles className="w-4 h-4" /> },
+                { name: "KB Enricher", icon: <FileText className="w-4 h-4" /> },
+              ].map((ag, i) => {
+                const isRevealed = mcStudioRevealedStages > i;
+                const isRunning = studioMcMutation.isPending && !isRevealed;
+                return (
+                  <div
+                    key={ag.name}
+                    className={`flex flex-col items-center gap-2 p-3 rounded-lg border text-center transition-all ${
+                      isRevealed ? "border-violet-300 bg-violet-50/60 dark:border-violet-700 dark:bg-violet-950/20" : "border-border bg-muted/30 opacity-50"
+                    }`}
+                  >
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${isRevealed ? "bg-violet-100 text-violet-600" : "bg-muted text-muted-foreground"}`}>
+                      {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : isRevealed ? <Check className="w-4 h-4 text-violet-600" /> : ag.icon}
+                    </div>
+                    <p className="text-xs font-semibold leading-tight">{ag.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{isRevealed ? "Selesai ✓" : isRunning ? "Memproses…" : "Menunggu"}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {studioMcMutation.isPending && (
+              <p className="text-xs text-center text-muted-foreground italic animate-pulse">
+                AI sedang menganalisis dan memperkaya proposal… (20-40 detik)
+              </p>
+            )}
+
+            {mcStudioResult && (
+              <div className="space-y-3">
+                {/* Quality score */}
+                <div className="flex items-center gap-4 p-3 rounded-lg bg-gradient-to-r from-violet-50 to-transparent border border-violet-200 dark:from-violet-950/30 dark:border-violet-800">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-muted-foreground line-through">{mcStudioResult.qualityBefore}</div>
+                    <div className="text-[10px] text-muted-foreground">Sebelum</div>
+                  </div>
+                  <div className="text-violet-500">→</div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-violet-600">{mcStudioResult.qualityAfter}</div>
+                    <div className="text-[10px] text-muted-foreground">Setelah</div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold">Kualitas Proposal Ditingkatkan</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{mcStudioResult.analysis?.analysis}</p>
+                  </div>
+                </div>
+
+                {/* Enhanced fields */}
+                {mcStudioResult.stages?.[1]?.result && Object.keys(mcStudioResult.stages[1].result).length > 0 && (
+                  <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground">Field yang ditingkatkan</p>
+                    <div className="flex flex-wrap gap-1">
+                      {Object.keys(mcStudioResult.stages[1].result).map((k) => (
+                        <Badge key={k} variant="outline" className="text-[10px] border-violet-300 text-violet-700">{k}</Badge>
+                      ))}
+                    </div>
+                    <p className="text-xs text-green-700 dark:text-green-400">✅ Perubahan telah otomatis diterapkan ke proposal Anda</p>
+                  </div>
+                )}
+
+                {/* Additional KB chunks */}
+                {mcStudioResult.additionalChunks?.length > 0 && (
+                  <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground">{mcStudioResult.additionalChunks.length} Knowledge Chunk Baru Ditambahkan</p>
+                    <div className="space-y-1">
+                      {mcStudioResult.additionalChunks.map((ch: any, i: number) => (
+                        <div key={i} className="flex items-center gap-2 text-xs">
+                          <Check className="w-3 h-3 text-green-600 shrink-0" />
+                          <span className="font-medium">{ch.name}</span>
+                          <Badge variant="outline" className="text-[10px]">{ch.type}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!mcStudioResult && !studioMcMutation.isPending && (
+              <Button
+                onClick={() => { setMcStudioResult(null); setMcStudioRevealedStages(0); studioMcMutation.mutate(); }}
+                className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+                data-testid="button-run-studio-multiclaw"
+              >
+                <Sparkles className="w-4 h-4 mr-2" /> Jalankan Studio MultiClaw
+              </Button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

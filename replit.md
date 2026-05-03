@@ -9,6 +9,31 @@ A key feature is "Project Brain," which provides contextual data for chatbots, e
 
 Gustafta converts any chatbot into four digital products: eBook Kompetensi, eCourse Modul Belajar, Generator Dokumen, and Chaesa AI Studio Bridge for external AI prompt generation. Monetization is supported through flexible pricing models, guest message limits, trial periods, and a voucher system. A "Conversion Layer" handles lead capture, scoring, and smart call-to-action triggers. Chatbots can include an "Orchestrator Multi-Agent" system for routing messages to specialist agents based on intent.
 
+## MultiClaw / OpenClaw Multi-Agent Feature Upgrades
+
+Gustafta now features **OpenClaw/MultiClaw** — a suite of multi-agent AI pipelines embedded across 4 key panels:
+
+### 1. Info Tender — MultiClaw 4-Agent Pipeline
+- **Endpoint**: `POST /api/ai/tender-multiclaw`
+- **Agents**: LPSE Analyst → Compliance Checker → Gap Analyst → Document Drafter
+- **UI**: "MultiClaw" button on each tender card opens a dialog with animated stage reveal, compliance score, and tabbed results (LPSE | Checklist | Gap | Draft Dokumen)
+
+### 2. Studio Kompetensi — MultiClaw 3-Stage Enhancement
+- **Endpoint**: `POST /api/ai/studio-multiclaw`
+- **Agents**: Proposal Analyzer → Config Enhancer → KB Enricher
+- **UI**: "Perkaya dengan MultiClaw" button appears after document import; auto-applies enhanced fields to proposal and adds KB chunks
+
+### 3. Ekosistem Kompetensi — MultiClaw Parallel Product Factory
+- **Endpoint**: `POST /api/ai/ekosistem-multiclaw`
+- **Agents**: eBook Agent + eCourse Agent + DocGen Agent + Chaesa Bridge Agent (all parallel)
+- **UI**: "Generate Semua Produk (MultiClaw)" button in header; dialog with 4 colored agent cards and tabbed product outlines
+
+### 4. Broadcast WA — OpenClaw Gate + Personalization Agent
+- **Endpoint**: `POST /api/ai/broadcast-personalize`
+- **OpenClaw Gate**: "Kirim Sekarang" now requires confirmation dialog (shows recipient count, message preview, irreversibility warning)
+- **Personalization Agent**: "Personalisasi AI" button near template textarea; generates per-contact personalized messages and an improved general version
+- **UI**: Two dialogs — gate confirmation + personalization results with apply-to-template action
+
 ## LexCom Integration in Agent Builder (Task #3)
 
 The 12 LexCom legal specialist agents are now fully integrated into the Gustafta agent builder:

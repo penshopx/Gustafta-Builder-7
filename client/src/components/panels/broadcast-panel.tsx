@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { Send, Plus, Trash2, Phone, Users, Radio, Clock, ToggleLeft, ToggleRight } from "lucide-react";
+import { Send, Plus, Trash2, Phone, Users, Radio, Clock, ToggleLeft, ToggleRight, Shield, Wand2, Loader2, Sparkles, AlertTriangle, CheckCircle2, Copy, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -39,6 +40,30 @@ export function BroadcastPanel({ agent }: { agent: any }) {
     scheduleTime: "08:00",
     dataSource: "",
     isEnabled: false,
+  });
+
+  const [gateOpen, setGateOpen] = useState(false);
+  const [gateBroadcast, setGateBroadcast] = useState<any>(null);
+  const [personOpen, setPersonOpen] = useState(false);
+  const [personResult, setPersonResult] = useState<any>(null);
+  const [personCopied, setPersonCopied] = useState<string>("");
+
+  const personalizeMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/ai/broadcast-personalize", {
+        template: broadcastForm.messageTemplate,
+        contacts: (contacts as any[]).slice(0, 10).map((c: any) => ({ phone: c.phone, name: c.name })),
+        agentContext: { name: agent.name },
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setPersonResult(data);
+      setPersonOpen(true);
+    },
+    onError: () => {
+      toast({ title: "Gagal", description: "Gagal personalisasi pesan", variant: "destructive" });
+    },
   });
 
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
@@ -170,6 +195,7 @@ export function BroadcastPanel({ agent }: { agent: any }) {
   };
 
   return (
+    <>
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
@@ -392,7 +418,24 @@ export function BroadcastPanel({ agent }: { agent: any }) {
                   </Select>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="broadcast-message">Template Pesan</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="broadcast-message">Template Pesan</Label>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-xs h-7 border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400"
+                      disabled={!broadcastForm.messageTemplate.trim() || personalizeMutation.isPending}
+                      onClick={() => personalizeMutation.mutate()}
+                      data-testid="button-personalize-broadcast"
+                    >
+                      {personalizeMutation.isPending ? (
+                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> AI Memproses…</>
+                      ) : (
+                        <><Wand2 className="w-3.5 h-3.5" /> Personalisasi AI</>
+                      )}
+                    </Button>
+                  </div>
                   <Textarea
                     id="broadcast-message"
                     value={broadcastForm.messageTemplate}
@@ -492,11 +535,14 @@ export function BroadcastPanel({ agent }: { agent: any }) {
                         <Button
                           size="sm"
                           variant="default"
-                          onClick={() => sendNowMutation.mutate(broadcast.id)}
+                          onClick={() => {
+                            setGateBroadcast(broadcast);
+                            setGateOpen(true);
+                          }}
                           disabled={sendNowMutation.isPending}
                           data-testid={`button-send-now-${broadcast.id}`}
                         >
-                          <Send className="w-4 h-4 mr-1" />
+                          <Shield className="w-4 h-4 mr-1" />
                           Kirim Sekarang
                         </Button>
                         <Button
@@ -535,6 +581,118 @@ export function BroadcastPanel({ agent }: { agent: any }) {
           </div>
         </TabsContent>
       </Tabs>
+
     </div>
+
+    {/* ── OpenClaw Gate Dialog — Konfirmasi Kirim Sekarang ── */}
+    <Dialog open={gateOpen} onOpenChange={setGateOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+            <Shield className="w-5 h-5" />
+            Konfirmasi Kirim Broadcast
+          </DialogTitle>
+          <DialogDescription>
+            Tindakan ini akan mengirim pesan ke seluruh kontak aktif. Proses ini tidak bisa dibatalkan setelah dimulai.
+          </DialogDescription>
+        </DialogHeader>
+        {gateBroadcast && (
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 space-y-2">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">{gateBroadcast.name}</p>
+                <Badge variant="outline" className="text-xs">{gateBroadcast.scheduleType === "daily" ? "Harian" : "Sekali"}</Badge>
+              </div>
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Jadwal: {gateBroadcast.scheduleTime} · Penerima: semua kontak aktif (opt-in)
+              </p>
+            </div>
+            <div className="p-3 rounded-lg border bg-muted/30">
+              <p className="text-xs text-muted-foreground mb-1">Preview Pesan</p>
+              <p className="text-sm line-clamp-3 italic">{gateBroadcast.messageTemplate}</p>
+            </div>
+          </div>
+        )}
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => setGateOpen(false)} data-testid="button-gate-cancel">
+            <X className="w-4 h-4 mr-1" /> Batal
+          </Button>
+          <Button
+            variant="default"
+            className="bg-amber-600 hover:bg-amber-700 text-white"
+            disabled={sendNowMutation.isPending}
+            onClick={() => {
+              if (gateBroadcast) {
+                sendNowMutation.mutate(gateBroadcast.id);
+                setGateOpen(false);
+              }
+            }}
+            data-testid="button-gate-confirm-send"
+          >
+            {sendNowMutation.isPending ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Mengirim…</> : <><Send className="w-4 h-4 mr-1" /> Ya, Kirim Sekarang</>}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    {/* ── Broadcast Personalization Dialog ── */}
+    <Dialog open={personOpen} onOpenChange={setPersonOpen}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-violet-600" />
+            Personalisasi AI Pesan Broadcast
+            <Badge className="bg-violet-100 text-violet-700 text-xs">Broadcast Agent</Badge>
+          </DialogTitle>
+          <DialogDescription>Pesan dipersonalisasi per kontak menggunakan Broadcast Personalize Agent.</DialogDescription>
+        </DialogHeader>
+        {personResult && (
+          <div className="space-y-4">
+            {personResult.generalizedVersion && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-foreground">Versi Umum (Template Baru)</p>
+                  <Button
+                    size="sm" variant="outline" className="h-7 text-xs gap-1"
+                    onClick={() => {
+                      setBroadcastForm({ ...broadcastForm, messageTemplate: personResult.generalizedVersion });
+                      setPersonOpen(false);
+                    }}
+                    data-testid="button-apply-general-version"
+                  >
+                    <CheckCircle2 className="w-3 h-3" /> Terapkan ke Template
+                  </Button>
+                </div>
+                <div className="p-3 rounded-lg border bg-violet-50 dark:bg-violet-950/20 text-sm whitespace-pre-wrap">{personResult.generalizedVersion}</div>
+              </div>
+            )}
+            {personResult.tips?.length > 0 && (
+              <div className="p-3 rounded-lg border bg-muted/30">
+                <p className="text-xs font-semibold mb-2 text-muted-foreground">Tips Meningkatkan Engagement</p>
+                <ul className="space-y-1">{personResult.tips.map((t: string, i: number) => <li key={i} className="text-xs flex gap-2"><Sparkles className="w-3 h-3 text-violet-500 shrink-0 mt-0.5" />{t}</li>)}</ul>
+              </div>
+            )}
+            {personResult.personalizedMessages?.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground">Preview Pesan per Kontak ({personResult.personalizedMessages.length})</p>
+                {personResult.personalizedMessages.map((msg: any, i: number) => (
+                  <div key={i} className="p-3 rounded-lg border text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{msg.name || msg.phone}</span>
+                      <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] gap-1" onClick={() => { navigator.clipboard.writeText(msg.message); setPersonCopied(String(i)); setTimeout(() => setPersonCopied(""), 1500); }}>
+                        {personCopied === String(i) ? <CheckCircle2 className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+                      </Button>
+                    </div>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{msg.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

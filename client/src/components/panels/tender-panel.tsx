@@ -1,5 +1,5 @@
 import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
-import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle, Upload } from "lucide-react";
+import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle, Upload, Loader2, Sparkles, Network, Shield, AlertTriangle, CheckCircle2, XCircle, AlertCircle, Copy, X, GitBranch } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +23,14 @@ export function TenderPanel({ agent }: { agent: any }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [csvUploading, setCsvUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [mcOpen, setMcOpen] = useState(false);
+  const [mcTender, setMcTender] = useState<any>(null);
+  const [mcResult, setMcResult] = useState<any>(null);
+  const [mcPackType, setMcPackType] = useState<"pelaksana_konstruksi" | "konsultansi_mk">("pelaksana_konstruksi");
+  const [mcRevealedStages, setMcRevealedStages] = useState(0);
+  const [mcTab, setMcTab] = useState("lpse");
+  const [mcCopied, setMcCopied] = useState<string>("");
 
   const [sourceForm, setSourceForm] = useState({
     name: "",
@@ -131,6 +142,31 @@ export function TenderPanel({ agent }: { agent: any }) {
     },
     onError: () => {
       toast({ title: "Gagal", description: "Gagal menghapus data tender", variant: "destructive" });
+    },
+  });
+
+  const mcMutation = useMutation({
+    mutationFn: async ({ tender, packType }: { tender: any; packType: string }) => {
+      const res = await apiRequest("POST", "/api/ai/tender-multiclaw", {
+        packType,
+        tenderData: {
+          name: tender.name, agency: tender.agency, budget: tender.budget,
+          type: tender.type, location: tender.location, status: tender.status, url: tender.url,
+        },
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setMcResult(data);
+      let count = 0;
+      const iv = setInterval(() => {
+        count++;
+        setMcRevealedStages(count);
+        if (count >= 4) clearInterval(iv);
+      }, 450);
+    },
+    onError: () => {
+      toast({ title: "MultiClaw Gagal", description: "Gagal menjalankan analisis multi-agent", variant: "destructive" });
     },
   });
 
@@ -611,6 +647,22 @@ export function TenderPanel({ agent }: { agent: any }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 text-xs border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400 h-8 px-2"
+                        onClick={() => {
+                          setMcTender(tender);
+                          setMcResult(null);
+                          setMcRevealedStages(0);
+                          setMcTab("lpse");
+                          setMcOpen(true);
+                        }}
+                        data-testid={`button-multiclaw-tender-${tender.id}`}
+                      >
+                        <Network className="w-3.5 h-3.5" />
+                        MultiClaw
+                      </Button>
                       {tender.url && (
                         <a
                           href={tender.url}
@@ -644,6 +696,220 @@ export function TenderPanel({ agent }: { agent: any }) {
           )}
         </TabsContent>
       </Tabs>
+
+    {/* ── MultiClaw Tender Analysis Dialog ── */}
+    <Dialog open={mcOpen} onOpenChange={(o) => { if (!mcMutation.isPending) setMcOpen(o); }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Network className="h-5 w-5 text-violet-600" />
+            MultiClaw Analisis Tender
+            <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-900/40 text-xs font-semibold">4 Agent Pipeline</Badge>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {mcTender && (
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border">
+              <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium line-clamp-1">{mcTender.name}</p>
+                <p className="text-xs text-muted-foreground">{mcTender.agency || "-"} · {mcTender.budget || "-"}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Jenis Pengadaan</Label>
+            <Select value={mcPackType} onValueChange={(v: any) => setMcPackType(v)} disabled={mcMutation.isPending}>
+              <SelectTrigger className="h-8 text-sm" data-testid="select-mc-packtype">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pelaksana_konstruksi">Pelaksana Konstruksi</SelectItem>
+                <SelectItem value="konsultansi_mk">Konsultansi MK</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 4 Agent stage cards */}
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { name: "LPSE Analyst", icon: <Database className="w-3.5 h-3.5" />, tab: "lpse", color: "blue" },
+              { name: "Compliance Checker", icon: <Shield className="w-3.5 h-3.5" />, tab: "compliance", color: "green" },
+              { name: "Gap Analyst", icon: <AlertTriangle className="w-3.5 h-3.5" />, tab: "gap", color: "orange" },
+              { name: "Document Drafter", icon: <FileText className="w-3.5 h-3.5" />, tab: "drafts", color: "purple" },
+            ].map((ag, i) => {
+              const isRevealed = mcRevealedStages > i;
+              const isRunning = mcMutation.isPending && !isRevealed;
+              return (
+                <button
+                  key={ag.name}
+                  onClick={() => isRevealed && setMcTab(ag.tab)}
+                  disabled={!isRevealed}
+                  className={`flex items-center gap-2 p-3 rounded-lg border text-left transition-all ${
+                    isRevealed
+                      ? `border-violet-300 bg-violet-50/60 dark:border-violet-700 dark:bg-violet-950/20 ${mcTab === ag.tab ? "ring-2 ring-violet-400" : "hover:border-violet-400"}`
+                      : "border-border bg-muted/30 opacity-50 cursor-default"
+                  }`}
+                  data-testid={`stage-card-${ag.tab}`}
+                >
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isRevealed ? "bg-violet-100 text-violet-600 dark:bg-violet-900/40" : "bg-muted text-muted-foreground"}`}>
+                    {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : isRevealed ? <CheckCircle2 className="w-3.5 h-3.5 text-violet-600" /> : ag.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold leading-tight">{ag.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{isRevealed ? "Selesai ✓" : isRunning ? "Menganalisis…" : "Menunggu"}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Action / Score */}
+          {!mcResult ? (
+            <Button
+              onClick={() => { if (mcTender) { setMcRevealedStages(0); mcMutation.mutate({ tender: mcTender, packType: mcPackType }); } }}
+              disabled={mcMutation.isPending}
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+              data-testid="button-run-multiclaw"
+            >
+              {mcMutation.isPending
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Menjalankan 4 Agent MultiClaw…</>
+                : <><Network className="w-4 h-4 mr-2" /> Jalankan MultiClaw Analisis</>}
+            </Button>
+          ) : (
+            <div className="flex items-center gap-4 p-3 rounded-lg bg-gradient-to-r from-violet-50 to-transparent border border-violet-200 dark:from-violet-950/30 dark:border-violet-800">
+              <div className="text-center">
+                <div className={`text-3xl font-bold ${mcResult.overallScore >= 80 ? "text-green-600" : mcResult.overallScore >= 60 ? "text-yellow-600" : "text-red-600"}`}>{mcResult.overallScore}</div>
+                <div className="text-[10px] text-muted-foreground">/ 100</div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold">{mcResult.overallScore >= 80 ? "✅ Siap" : mcResult.overallScore >= 60 ? "⚠️ Perlu Persiapan" : "❌ Risiko Tinggi"}</div>
+                <div className="text-xs text-muted-foreground line-clamp-2">{mcResult.recommendation}</div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => { setMcResult(null); setMcRevealedStages(0); }}>Ulang</Button>
+            </div>
+          )}
+
+          {/* Result Tabs */}
+          {mcResult && (
+            <>
+              <Separator />
+              <Tabs value={mcTab} onValueChange={setMcTab}>
+                <TabsList className="grid grid-cols-4 h-8">
+                  <TabsTrigger value="lpse" className="text-xs">LPSE</TabsTrigger>
+                  <TabsTrigger value="compliance" className="text-xs">Checklist</TabsTrigger>
+                  <TabsTrigger value="gap" className="text-xs">Gap</TabsTrigger>
+                  <TabsTrigger value="drafts" className="text-xs">Draft</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="lpse" className="space-y-3 mt-3">
+                  {(() => { const r = mcResult.stages?.[0]?.result || {}; return (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-2.5 rounded-lg border bg-muted/30 text-xs"><p className="text-muted-foreground mb-0.5">Jenis Pekerjaan</p><p className="font-semibold">{r.tenderType || "-"}</p></div>
+                        <div className="p-2.5 rounded-lg border bg-muted/30 text-xs"><p className="text-muted-foreground mb-0.5">Urgensi</p><p className="font-semibold">{r.urgencyLevel || "-"}</p></div>
+                      </div>
+                      {r.keyRequirements?.length > 0 && (
+                        <div className="p-3 rounded-lg border bg-muted/30">
+                          <p className="text-xs font-semibold text-muted-foreground mb-2">Persyaratan Kunci</p>
+                          <ul className="space-y-1">{r.keyRequirements.map((req: string, idx: number) => <li key={idx} className="text-xs flex gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-violet-500 shrink-0 mt-0.5" />{req}</li>)}</ul>
+                        </div>
+                      )}
+                      {r.summary && <div className="p-3 rounded-lg bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800 text-xs text-violet-900 dark:text-violet-200">{r.summary}</div>}
+                    </div>
+                  ); })()}
+                </TabsContent>
+
+                <TabsContent value="compliance" className="space-y-3 mt-3">
+                  {(() => { const r = mcResult.stages?.[1]?.result || {}; return (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
+                        <div className={`text-2xl font-bold ${r.overallScore >= 80 ? "text-green-600" : r.overallScore >= 60 ? "text-yellow-600" : "text-red-600"}`}>{r.overallScore}</div>
+                        <div><p className="text-xs text-muted-foreground">Skor Kepatuhan</p><p className="text-sm font-semibold">{r.complianceSummary}</p></div>
+                      </div>
+                      {r.sections?.map((sec: any) => (
+                        <div key={sec.code}>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{sec.code}. {sec.name}</p>
+                          <div className="rounded-lg border overflow-hidden">
+                            {sec.items?.map((item: any, idx: number) => (
+                              <div key={idx} className={`flex items-start gap-2 p-2 text-xs ${idx % 2 === 0 ? "bg-muted/20" : ""}`}>
+                                <span className="text-muted-foreground font-mono w-6 shrink-0">{item.code}</span>
+                                <span className="flex-1">{item.item}</span>
+                                <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${item.status === "Ada" ? "bg-green-100 text-green-700" : item.status === "Perlu Persiapan" ? "bg-yellow-100 text-yellow-700" : "bg-muted text-muted-foreground"}`}>{item.status}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ); })()}
+                </TabsContent>
+
+                <TabsContent value="gap" className="space-y-3 mt-3">
+                  {(() => { const r = mcResult.stages?.[2]?.result || {}; return (
+                    <div className="space-y-3">
+                      {r.redFlags?.map((f: any, i: number) => (
+                        <div key={i} className="border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20 p-3 rounded-r-lg">
+                          <div className="flex items-center gap-1.5 mb-1"><XCircle className="w-3.5 h-3.5 text-red-600" /><span className="text-xs font-bold text-red-700">Red Flag</span></div>
+                          <p className="text-sm font-medium mb-1">{f.finding}</p>
+                          <p className="text-xs text-muted-foreground mb-1"><strong>Dampak:</strong> {f.impact}</p>
+                          <p className="text-xs text-muted-foreground"><strong>Rekomendasi:</strong> {f.recommendation}</p>
+                        </div>
+                      ))}
+                      {r.yellowFlags?.map((f: any, i: number) => (
+                        <div key={i} className="border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-r-lg">
+                          <div className="flex items-center gap-1.5 mb-1"><AlertCircle className="w-3.5 h-3.5 text-yellow-600" /><span className="text-xs font-bold text-yellow-700">Yellow Flag</span></div>
+                          <p className="text-sm font-medium mb-1">{f.finding}</p>
+                          <p className="text-xs text-muted-foreground"><strong>Rekomendasi:</strong> {f.recommendation}</p>
+                        </div>
+                      ))}
+                      {r.opportunities?.length > 0 && (
+                        <div className="p-3 rounded-lg border bg-green-50 dark:bg-green-950/20 border-green-200">
+                          <p className="text-xs font-bold text-green-700 mb-2">Peluang Kompetitif</p>
+                          <ul className="space-y-1">{r.opportunities.map((o: string, i: number) => <li key={i} className="text-xs flex gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-green-600 shrink-0 mt-0.5" />{o}</li>)}</ul>
+                        </div>
+                      )}
+                      {r.preparationTimeline && <div className="p-2.5 rounded-lg border bg-muted/30 text-xs"><strong>Estimasi Persiapan: </strong>{r.preparationTimeline}</div>}
+                    </div>
+                  ); })()}
+                </TabsContent>
+
+                <TabsContent value="drafts" className="space-y-3 mt-3">
+                  {(() => { const r = mcResult.stages?.[3]?.result || {}; return (
+                    <div className="space-y-4">
+                      {r.surat_penawaran && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold">Surat Penawaran</p>
+                            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => { navigator.clipboard.writeText(r.surat_penawaran); setMcCopied("sp"); setTimeout(() => setMcCopied(""), 1500); }}>
+                              {mcCopied === "sp" ? <CheckCircle2 className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />} Salin
+                            </Button>
+                          </div>
+                          <div className="rounded-lg border bg-muted/30 p-3 text-xs whitespace-pre-wrap max-h-52 overflow-y-auto">{r.surat_penawaran}</div>
+                        </div>
+                      )}
+                      {r.pernyataan_kepatuhan && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-semibold">Pernyataan Kepatuhan Perpres 46/2025</p>
+                            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => { navigator.clipboard.writeText(r.pernyataan_kepatuhan); setMcCopied("pk"); setTimeout(() => setMcCopied(""), 1500); }}>
+                              {mcCopied === "pk" ? <CheckCircle2 className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />} Salin
+                            </Button>
+                          </div>
+                          <div className="rounded-lg border bg-muted/30 p-3 text-xs whitespace-pre-wrap max-h-52 overflow-y-auto">{r.pernyataan_kepatuhan}</div>
+                        </div>
+                      )}
+                    </div>
+                  ); })()}
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
     </div>
   );
 }
