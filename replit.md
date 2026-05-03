@@ -28,8 +28,14 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
     - Kalkulator EOT (TIA/SCL): #861 AGENT-FIDIC, #864 AGENT-KLAIM, #894 AGENT-SCHEDULE
     - Kalkulator OEE (TPM/ISO55000): #944 AGENT-EQUIPRA, #946 AGENT-OEE
     - Kalkulator PPh Final 4(2) PP 9/2022: #841 AGENT-PPH, #906 AB-04 Tax
-- knowledge_chunks: 3,138 chunks (avg ~291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
-- Domain taxonomy coverage: SKK, Regulasi Induk, SBU, Kontrak, Tender, K3/SMAP, Pelaksanaan, Engineering, Mutu, Lingkungan, Peralatan, Perpajakan
+  - KB Batch 4 (+39 entries, script: scripts/seed-kb-batch4.ts):
+    - PROXIMA sub-agen #892-901: Charter, WBS, Risk, Quality, Procure, Change, Comm, Close-out
+    - Manajer Keuangan sub-agen #903-904, #907-909: RAB, Cash Flow, Klaim, Laporan, SKK
+    - MRP-A sub-agen #876-882: Vendor Scoring, Material QC, Equipment Fitness, Supply Chain Risk, SOP Subkon, LKUT, Inventory
+    - KPBU sub-agen #884-890: OBC/FBC, Model Keuangan, Risk Allocation, Pengadaan, VGF, Konsesi
+    - Risk Register Bot sub-agen #850-853: Risiko Teknis, K3, Legal, Keuangan
+- knowledge_chunks: 3,181 chunks (avg ~291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
+- Domain taxonomy coverage: SKK, Regulasi Induk, SBU, Kontrak, Tender, K3/SMAP, Pelaksanaan, Engineering, Mutu, Lingkungan, Peralatan, Perpajakan, KPBU/PPP
 
 **Key Structural Fixes (May 2026 Session):**
 - 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
