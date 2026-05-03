@@ -3,7 +3,16 @@
 ## Overview
 Gustafta is an AI chatbot builder platform designed for creating, configuring, and deploying intelligent conversational assistants. It now includes **LexCom**, an integrated Indonesian Legal AI Chatbot system featuring a LEX-ORCHESTRATOR with 12 specialized legal agents and a floating "Chaesa Lexbot" widget. It features a two-panel dashboard, multi-channel integrations, and supports various AI models. The platform enables users to manage multiple chatbot agents with custom personas and knowledge bases, integrate with popular messaging platforms, embed web widgets, and access analytics. Gustafta aims to provide a comprehensive ecosystem for building and monetizing AI-powered conversational experiences.
 
-The platform utilizes a 5-level modular hierarchical structure (Series → Core → Big Idea/Orkestrator → Toolbox → Agent) to organize chatbot agents across specialized series. This structure supports applications like managing Indonesian construction company needs (Odoo ERP lifecycle, CSMS compliance) and professional certification body operations.
+The platform utilizes a 5-level modular hierarchical structure (Master → Series HUB → Sub-HUB → Specialist → Deep Specialist) to organize 748 chatbot agents across 57 specialized series. This structure supports applications like managing Indonesian construction company needs (Odoo ERP lifecycle, CSMS compliance) and professional certification body operations.
+
+**Agent Hierarchy (Post-Audit Fix — May 2026):**
+- Level 1 (1 agent): #768 GUSTAFTA MASTER — Router Utama Platform (new master orchestrator)
+- Level 2 (49 agents): Series HUBs (Regulasi, CSMS, CIVILPRO, Tender, Legal, SBU Coach, SKK Coach, LexCom, etc.)
+- Level 3 (505 agents): Sub-HUBs and specialist agents
+- Level 4 (185 agents): Deep specialist agents
+- Level 5 (8 agents): Leaf-level specialist agents
+- Total orchestrators: 107 (all with orchestrator_config filled)
+- All 748 agents have parent_agent_id set (true 5-level hierarchy, zero orphans)
 
 A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots and risk assessments. A "Deliverables" panel allows defining output types for each agent, with pre-built bundles and quick-action chat buttons.
 
