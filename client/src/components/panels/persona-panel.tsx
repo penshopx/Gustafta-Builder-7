@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info } from "lucide-react";
+import { AiConfigFill } from "@/components/ai-config-fill";
 import { TemplateDialog } from "@/components/dialogs/template-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -339,6 +340,25 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           <span className="hidden md:inline">{updateAgent.isPending ? "Saving..." : "Save Changes"}</span>
         </Button>
       </div>
+
+      {/* AI Auto-Fill */}
+      <AiConfigFill
+        level="agent-persona"
+        parentContext={{ agentName: agent.name }}
+        defaultTopic={agent.description || agent.name}
+        onFill={(result) => {
+          const updated = { ...formData };
+          if (result.name) updated.name = result.name;
+          if (result.tagline) updated.tagline = result.tagline;
+          if (result.description) updated.description = result.description;
+          if (result.greetingMessage) updated.greetingMessage = result.greetingMessage;
+          if (Array.isArray(result.conversationStarters) && result.conversationStarters.length > 0) {
+            updated.conversationStarters = result.conversationStarters.slice(0, 5);
+          }
+          if (result.systemPrompt) updated.systemPrompt = result.systemPrompt;
+          setFormData(updated);
+        }}
+      />
 
       {/* Basic Identity */}
       <Card>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { AiConfigFill } from "@/components/ai-config-fill";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -230,6 +231,29 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
           Pratinjau System Prompt
         </Button>
       </div>
+
+      {/* AI Auto-Fill Kebijakan */}
+      <AiConfigFill
+        level="agent-policy"
+        parentContext={{ agentName: agent.name }}
+        defaultTopic={agent.description || agent.name}
+        onFill={async (result) => {
+          const fields: Partial<typeof form> = {};
+          if (result.primaryOutcome) fields.primaryOutcome = result.primaryOutcome;
+          if (result.conversationWinConditions) fields.conversationWinConditions = result.conversationWinConditions;
+          if (result.brandVoiceSpec) fields.brandVoiceSpec = result.brandVoiceSpec;
+          if (result.interactionPolicy) fields.interactionPolicy = result.interactionPolicy;
+          if (result.domainCharter) fields.domainCharter = result.domainCharter;
+          if (result.qualityBar) fields.qualityBar = result.qualityBar;
+          if (result.riskCompliance) fields.riskCompliance = result.riskCompliance;
+          setForm((prev) => ({ ...prev, ...fields }));
+          try {
+            await updateAgent.mutateAsync({ id: String(agent.id), data: fields });
+          } catch {
+            /* toast already handled by saveField */
+          }
+        }}
+      />
 
       {/* 1. Tujuan & KPI */}
       <Card>

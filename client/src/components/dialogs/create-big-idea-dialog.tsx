@@ -16,6 +16,7 @@ import { useCreateBigIdea } from "@/hooks/use-big-ideas";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Lightbulb, AlertTriangle, Sparkles, Plus, X, GraduationCap, DollarSign } from "lucide-react";
+import { AiConfigFill } from "@/components/ai-config-fill";
 
 interface CreateBigIdeaDialogProps {
   open: boolean;
@@ -150,6 +151,8 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
     mentoring: "Mentoring - Edukasi dan pendampingan",
   };
 
+  const selectedSeriesData = allSeries.find((s: any) => String(s.id) === selectedSeriesId);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -161,6 +164,19 @@ export function CreateBigIdeaDialog({ open, onOpenChange, seriesId, onCreated }:
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          <AiConfigFill
+            level="bigidea"
+            parentContext={{ seriesName: selectedSeriesData?.name || "" }}
+            onFill={(result) => {
+              if (result.name) setName(result.name);
+              if (result.type) setType(result.type);
+              if (result.description) setDescription(result.description);
+              if (Array.isArray(result.goals) && result.goals.length > 0) setGoals(result.goals);
+              if (result.targetAudience) setTargetAudience(result.targetAudience);
+              if (result.expectedOutcome) setExpectedOutcome(result.expectedOutcome);
+            }}
+          />
+
           {allSeries.length > 0 && (
             <div className="space-y-2">
               <Label>Series (L1)</Label>

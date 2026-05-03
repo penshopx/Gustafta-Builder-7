@@ -9338,6 +9338,161 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
+  // ── AI CONFIG GENERATOR — OpenClaw/MultiClaw Multi-Agent Orchestrator ──────
+  app.post("/api/ai/generate-config", isAuthenticated, async (req, res) => {
+    try {
+      const { level, topic, parentContext = {} } = req.body;
+      if (!level || !topic?.trim()) {
+        return res.status(400).json({ error: "level dan topic wajib diisi" });
+      }
+
+      const validLevels = ["bigidea", "toolbox", "agent-persona", "agent-policy"];
+      if (!validLevels.includes(level)) {
+        return res.status(400).json({ error: "level tidak valid" });
+      }
+
+      const { seriesName = "", bigIdeaName = "", toolboxName = "", agentName = "" } = parentContext;
+
+      const hierarchyContext = [
+        seriesName && `Series: ${seriesName}`,
+        bigIdeaName && `Modul (BigIdea): ${bigIdeaName}`,
+        toolboxName && `Chatbot (Toolbox): ${toolboxName}`,
+        agentName && `Agen: ${agentName}`,
+      ].filter(Boolean).join(" → ");
+
+      const orchestratorSystem = `Anda adalah CONFIG-ORCHESTRATOR dalam ekosistem platform chatbot AI Gustafta (Indonesia).
+Anda menggunakan metodologi dua lapis:
+
+🔍 OPENCLAW (Pemetaan Domain):
+- Identifikasi bidang-bidang domain yang dicakup topik ini
+- Petakan konteks, audiens, dan tujuan strategis
+- Kenali apakah topik bersifat lintas-domain atau domain tunggal
+
+🔗 MULTICLAW (Sintesis Lintas-Domain):
+- Jika topik menyentuh beberapa domain, sintesiskan secara kohesif
+- Hasilkan konten yang terintegrasi dan konsisten di seluruh field
+- Pertahankan koherensi dengan konteks hierarki induk
+
+KONTEKS HIERARKI: ${hierarchyContext || "Mandiri (tanpa induk)"}
+TOPIK/DOMAIN: ${topic}
+
+Selalu hasilkan JSON valid yang kaya, spesifik, dan actionable — BUKAN generik.
+Gunakan Bahasa Indonesia yang profesional.`;
+
+      let userPrompt = "";
+      let schemaExample = "";
+
+      if (level === "bigidea") {
+        schemaExample = `{
+  "name": "Nama Modul yang spesifik (max 70 karakter)",
+  "type": "problem|idea|inspiration|mentoring",
+  "description": "Deskripsi 2-3 kalimat: apa yang dilakukan, masalah apa yang diselesaikan, nilai utamanya",
+  "goals": ["Goal spesifik 1", "Goal spesifik 2", "Goal spesifik 3", "Goal spesifik 4"],
+  "targetAudience": "Target audiens yang spesifik dan terukur",
+  "expectedOutcome": "Hasil konkret yang didapat pengguna setelah menggunakan modul ini (2-3 kalimat)"
+}`;
+        userPrompt = `Hasilkan konfigurasi lengkap untuk sebuah MODUL (BigIdea/L3) dalam hirarki chatbot Gustafta.
+Gunakan OpenClaw untuk pemetaan domain, lalu MultiClaw untuk sintesis field yang kohesif.
+
+Return HANYA JSON (tanpa komentar):
+${schemaExample}`;
+
+      } else if (level === "toolbox") {
+        schemaExample = `{
+  "name": "Nama Chatbot yang spesifik (max 60 karakter)",
+  "description": "Deskripsi 2-3 kalimat tentang chatbot ini",
+  "purpose": "Tujuan utama dalam 1-2 kalimat yang tajam",
+  "capabilities": [
+    "Kapabilitas spesifik 1",
+    "Kapabilitas spesifik 2",
+    "Kapabilitas spesifik 3",
+    "Kapabilitas spesifik 4",
+    "Kapabilitas spesifik 5"
+  ],
+  "limitations": [
+    "Batasan yang jelas dan jujur 1",
+    "Batasan yang jelas dan jujur 2",
+    "Batasan yang jelas dan jujur 3"
+  ]
+}`;
+        userPrompt = `Hasilkan konfigurasi lengkap untuk sebuah CHATBOT (Toolbox/L4) dalam hirarki chatbot Gustafta.
+Gunakan OpenClaw untuk memetakan kemampuan domain, lalu MultiClaw untuk kapabilitas yang kohesif.
+
+Return HANYA JSON (tanpa komentar):
+${schemaExample}`;
+
+      } else if (level === "agent-persona") {
+        schemaExample = `{
+  "name": "Nama agen dengan persona kuat (max 50 karakter)",
+  "tagline": "Tagline yang catchy dan menggambarkan keahlian (max 100 karakter)",
+  "description": "Deskripsi agen: latar belakang, keahlian, pendekatan (2-3 kalimat)",
+  "greetingMessage": "Pesan sambutan pertama yang hangat, personal, dan mengundang pengguna untuk bertanya (2-3 kalimat)",
+  "conversationStarters": [
+    "Pertanyaan pemancing 1 yang sangat relevan dengan domain?",
+    "Pertanyaan pemancing 2 yang sering ditanyakan pengguna?",
+    "Pertanyaan pemancing 3 yang menunjukkan keahlian agen?",
+    "Pertanyaan pemancing 4 yang bernilai tinggi?",
+    "Pertanyaan pemancing 5 yang mendorong eksplorasi?"
+  ],
+  "systemPrompt": "System prompt lengkap yang mendefinisikan identitas, keahlian domain, cara merespons, batasan, dan standar kualitas agen ini. Minimal 200 kata, profesional, mencakup: role, expertise, cara berkomunikasi, protokol jawaban, dan disclaimer."
+}`;
+        userPrompt = `Hasilkan konfigurasi PERSONA lengkap untuk sebuah AGEN AI (L5) dalam hirarki chatbot Gustafta.
+Gunakan metodologi OpenClaw untuk eksplorasi domain, MultiClaw untuk sintesis persona yang komprehensif.
+
+Return HANYA JSON (tanpa komentar):
+${schemaExample}`;
+
+      } else if (level === "agent-policy") {
+        schemaExample = `{
+  "primaryOutcome": "Mendidik pengguna|Menyelesaikan tiket|Menghasilkan dokumen|Menutup penjualan|Mengumpulkan data|Audit & compliance",
+  "conversationWinConditions": "Kondisi spesifik kapan percakapan dianggap berhasil. Contoh: pengguna mendapat jawaban definitif tentang [domain] dan mengetahui langkah konkret berikutnya.",
+  "brandVoiceSpec": "Spesifikasi suara brand: nada, gaya bahasa, tingkat formalitas, persona, kata-kata yang dihindari, kata-kata yang dianjurkan.",
+  "interactionPolicy": "Kebijakan interaksi: bagaimana agen harus merespons pertanyaan ambigu, menangani pengguna frustrasi, eskalasi, dan topik sensitif.",
+  "domainCharter": "Piagam domain: topik apa yang boleh dan tidak boleh dibahas. Batasan ekspplisit sesuai domain chatbot ini.",
+  "qualityBar": "Standar kualitas jawaban: panjang ideal, format output, level detail, standar akurasi, cara verifikasi fakta.",
+  "riskCompliance": "Manajemen risiko dan kepatuhan: disclaimer wajib, topik yang harus dirujuk ke ahli, batasan legal, perlindungan data pengguna."
+}`;
+        userPrompt = `Hasilkan konfigurasi KEBIJAKAN (Policy) lengkap untuk sebuah AGEN AI (L5) dalam hirarki chatbot Gustafta.
+Gunakan MultiClaw untuk sintesis kebijakan yang komprehensif dan terpadu lintas dimensi.
+
+Return HANYA JSON (tanpa komentar):
+${schemaExample}`;
+      }
+
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+
+      if (!openaiKey) {
+        return res.status(503).json({ error: "AI API key tidak tersedia. Silakan konfigurasi OPENAI_API_KEY." });
+      }
+
+      const aiClient = new OpenAI({
+        apiKey: openaiKey,
+        ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}),
+      });
+
+      const response = await aiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: orchestratorSystem },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.75,
+        max_tokens: level === "agent-persona" ? 2500 : 1500,
+        response_format: { type: "json_object" },
+      });
+
+      const raw = response.choices[0]?.message?.content || "{}";
+      let parsed: any = {};
+      try { parsed = JSON.parse(raw); } catch { parsed = {}; }
+
+      res.json({ result: parsed, level });
+    } catch (error: any) {
+      console.error("[AI generate-config] Error:", error);
+      res.status(500).json({ error: "Gagal generate konfigurasi: " + (error.message || "Unknown error") });
+    }
+  });
+
   registerLegalRoutes(app);
 
   return httpServer;

@@ -13,6 +13,7 @@ import { useUpdateToolbox } from "@/hooks/use-toolboxes";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Plus, X } from "lucide-react";
 import type { Toolbox } from "@shared/schema";
+import { AiConfigFill } from "@/components/ai-config-fill";
 
 interface EditToolboxDialogProps {
   open: boolean;
@@ -115,6 +116,19 @@ export function EditToolboxDialog({ open, onOpenChange, toolbox }: EditToolboxDi
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          <AiConfigFill
+            level="toolbox"
+            parentContext={{}}
+            defaultTopic={toolbox.name}
+            onFill={(result) => {
+              if (result.name) setName(result.name);
+              if (result.description) setDescription(result.description);
+              if (result.purpose) setPurpose(result.purpose);
+              if (Array.isArray(result.capabilities) && result.capabilities.length > 0) setCapabilities(result.capabilities);
+              if (Array.isArray(result.limitations) && result.limitations.length > 0) setLimitations(result.limitations);
+            }}
+          />
+
           <div className="space-y-2">
             <Label htmlFor="edit-tb-name">Nama Chatbot *</Label>
             <Input
