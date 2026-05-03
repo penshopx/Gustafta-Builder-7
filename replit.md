@@ -34,8 +34,20 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
     - MRP-A sub-agen #876-882: Vendor Scoring, Material QC, Equipment Fitness, Supply Chain Risk, SOP Subkon, LKUT, Inventory
     - KPBU sub-agen #884-890: OBC/FBC, Model Keuangan, Risk Allocation, Pengadaan, VGF, Konsesi
     - Risk Register Bot sub-agen #850-853: Risiko Teknis, K3, Legal, Keuangan
-- knowledge_chunks: 3,181 chunks (avg ~291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
-- Domain taxonomy coverage: SKK, Regulasi Induk, SBU, Kontrak, Tender, K3/SMAP, Pelaksanaan, Engineering, Mutu, Lingkungan, Peralatan, Perpajakan, KPBU/PPP
+  - KB Batch 5 (+48 entries, script: scripts/seed-kb-batch5.ts) — SEMUA 47 agen tersisa SELESAI:
+    - ARCONA sub-agen #821-828: PBG (OSS/SIMBG), SLF, Struktur+SNI, MEP, Kebakaran, Aksesibilitas+GBC, RTBL/KDB/KLB, Audit Kelaikan
+    - SKK Bot sub-agen #830-833: KKNI Skema, Jadwal+Biaya Uji, Dokumen+Portofolio Tips, SKK Digital+AJJ+SIKI
+    - HPS Validator sub-agen #835-838: AHSP+Koefisien SNI, Survei Harga Pasar, Red Flag KKN, Overhead+Profit+K3
+    - CoreTax Pajak sub-agen #840,842,843: CoreTax Onboarding, PPN e-Faktur+Kredit, SPT Tahunan+Rekonsiliasi Fiskal
+    - Cash Flow Bot sub-agen #845-848: Termin+Administrasi, Modal Kerja+Sumber, Invoice+Piutang Aging, Forecast+Sensitivitas
+    - AsesorBot LSP sub-agen #855-859: 4 Metode Asesmen, APL-01/02, Portofolio VAKF, Decision Matrix+BAPS, Etika Asesor
+    - KontrakBot sub-agen #862-863: SSUK/SSKK Perpres 12/2021, Addendum+Dokumen
+    - OSS-RBA sub-agen #866-869: KBLI+Risiko Usaha, NIB Flow, Perizinan Sektoral, Audit Kepatuhan+LKPM
+    - PDP Compliance sub-agen #871-874: Audit Gap UU PDP, DPO Peran, Breach Response 14jam, Klausul Kontrak Data
+    - KONSTRA-orch sub-agen #911-919: PROXIMA/PMBOK7, TEKNIK/Eng, KONTRAK, SAFIRA/K3, MUTU/ISO9001, ENVIRA/ISO14001, EQUIPRA, LOGIS, FINTAX
+- knowledge_chunks: 3,229 chunks (avg ~291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
+- Domain taxonomy coverage: SKK, Regulasi Induk, SBU, Kontrak, Tender, K3/SMAP, Pelaksanaan, Engineering, Mutu, Lingkungan, Peralatan, Perpajakan, KPBU/PPP, PDP/Privacy, OSS/Perizinan, Bangunan Gedung
+- STATUS: Seluruh 47 agen Batch 1 & 2 yang sebelumnya hanya 3 KB dasar kini SELESAI diperkaya (total 3,220 KB entries platform)
 
 **Key Structural Fixes (May 2026 Session):**
 - 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
