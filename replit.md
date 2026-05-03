@@ -25,7 +25,9 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
   - Tactical (routing multi-agent, HUBs only): 122 entries
   - URL references (sumber resmi web): 205 entries
 - RAG enabled: 897/897 agen (rag_enabled=true, chunk_size=512, overlap=64, top_k=5)
+- knowledge_chunks: 3,018 chunks untuk 897 agen (avg 291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
 - Domain taxonomy coverage: SKK (949 KB), Regulasi Induk (603 KB), SBU (177 KB), Kontrak (111 KB), Tender (99 KB), K3/SMAP (201 KB), Pelaksanaan (134 KB), dll.
+- Field completeness: ALL 896 agen aktif → 100% pada seluruh 12 field kunci (system_prompt, tagline, greeting, personality, starters, expertise, charter, quality_bar, product_summary, features, deliverables, rag_enabled)
 
 **Key Structural Fixes (May 2026 Session):**
 - 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
