@@ -235,6 +235,25 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 -   TypeScript
 -   PostCSS
 
+## Performance Optimizations (May 2026)
+
+### Database Indexes (16 indexes added via scripts/add-performance-indexes.ts)
+All queries previously used full table scans (Seq Scan). After optimization:
+- **agents table**: idx_agents_is_active, idx_agents_toolbox_id, idx_agents_parent_agent_id, idx_agents_behavior_preset, idx_agents_access_token, idx_agents_product_slug, idx_agents_big_idea_id, idx_agents_is_active_toolbox (composite)
+- **knowledge_bases table**: idx_kb_agent_id, idx_kb_status, idx_kb_taxonomy_id, idx_kb_agent_status (composite), idx_kb_is_shared
+- **knowledge_chunks table**: idx_chunks_agent_id, idx_chunks_kb_id, idx_chunks_agent_index (composite)
+- Result: queries on `parent_agent_id`, `toolbox_id`, `kb.agent_id`, `chunks.agent_id` now use Index Scan (cost drops from ~468 to ~4-7)
+- ANALYZE run on all three tables to refresh query planner statistics
+
+### In-Memory TTL Cache Layer (server/db-storage.ts)
+Added `TtlCache<T>` class with automatic expiry:
+- **agentCache** (5 min TTL) — individual agent by id, by slug, and `__active__` key
+- **agentListCache** (2 min TTL) — full agent list per toolboxId
+- **kbCache** (3 min TTL) — knowledge bases per agentId
+- **chunkCache** (3 min TTL) — knowledge chunks per agentId
+- Cache population: `getAgents()` also populates individual `agentCache` entries (zero extra DB hits for subsequent `getAgent()` calls)
+- Cache invalidation: all write methods (create/update/delete) properly invalidate relevant cache keys
+
 ### Integrations
 -   OpenAI (GPT-4o, GPT-3.5)
 -   DeepSeek

@@ -118,6 +118,41 @@ const pool = new Pool({
 
 const db = drizzle(pool);
 
+// ─── Simple TTL In-Memory Cache ───────────────────────────────────────────────
+class TtlCache<T> {
+  private store = new Map<string, { value: T; expiresAt: number }>();
+  constructor(private ttlMs: number) {}
+
+  get(key: string): T | undefined {
+    const entry = this.store.get(key);
+    if (!entry) return undefined;
+    if (Date.now() > entry.expiresAt) { this.store.delete(key); return undefined; }
+    return entry.value;
+  }
+
+  set(key: string, value: T): void {
+    this.store.set(key, { value, expiresAt: Date.now() + this.ttlMs });
+  }
+
+  delete(key: string): void { this.store.delete(key); }
+
+  deletePrefix(prefix: string): void {
+    for (const k of this.store.keys()) {
+      if (k.startsWith(prefix)) this.store.delete(k);
+    }
+  }
+
+  clear(): void { this.store.clear(); }
+
+  size(): number { return this.store.size; }
+}
+
+// Cache instances — 5 menit TTL untuk agen, 3 menit untuk KB & chunks
+const agentCache = new TtlCache<import("./storage").Agent>(5 * 60 * 1000);
+const agentListCache = new TtlCache<import("./storage").Agent[]>(2 * 60 * 1000);
+const kbCache = new TtlCache<import("./storage").KnowledgeBase[]>(3 * 60 * 1000);
+const chunkCache = new TtlCache<KnowledgeChunk[]>(3 * 60 * 1000);
+
 export class DatabaseStorage implements IStorage {
   
   // User methods (placeholder - using Replit Auth)
@@ -819,23 +854,41 @@ export class DatabaseStorage implements IStorage {
 
   // Agent methods
   async getAgents(toolboxId?: string): Promise<Agent[]> {
+    const cacheKey = `list:${toolboxId ?? "all"}`;
+    const cached = agentListCache.get(cacheKey);
+    if (cached) return cached;
+
     const query = toolboxId 
       ? db.select().from(agents).where(eq(agents.toolboxId, parseInt(toolboxId))).orderBy(desc(agents.createdAt))
       : db.select().from(agents).orderBy(desc(agents.createdAt));
     const result = await query;
-    return result.map(row => this.mapAgentRow(row));
+    const mapped = result.map(row => this.mapAgentRow(row));
+    agentListCache.set(cacheKey, mapped);
+    // Populate individual cache entries while we have the data
+    for (const a of mapped) agentCache.set(String(a.id), a);
+    return mapped;
   }
 
   async getAgent(id: string): Promise<Agent | undefined> {
+    const cached = agentCache.get(id);
+    if (cached) return cached;
+
     const result = await db.select().from(agents).where(eq(agents.id, parseInt(id))).limit(1);
     if (result.length === 0) return undefined;
-    return this.mapAgentRow(result[0]);
+    const mapped = this.mapAgentRow(result[0]);
+    agentCache.set(id, mapped);
+    return mapped;
   }
 
   async getActiveAgent(): Promise<Agent | null> {
+    const cached = agentCache.get("__active__");
+    if (cached) return cached;
+
     const result = await db.select().from(agents).where(eq(agents.isActive, true)).limit(1);
     if (result.length === 0) return null;
-    return this.mapAgentRow(result[0]);
+    const mapped = this.mapAgentRow(result[0]);
+    agentCache.set("__active__", mapped);
+    return mapped;
   }
 
   async createAgent(insertAgent: InsertAgent): Promise<Agent> {
@@ -908,7 +961,11 @@ export class DatabaseStorage implements IStorage {
       orchestratorConfig: (filled as any).orchestratorConfig ?? {},
       isActive: true,
     }).returning();
-    return this.mapAgentRow(result[0]);
+    const mapped = this.mapAgentRow(result[0]);
+    // Populate cache & invalidate list cache
+    agentCache.set(String(mapped.id), mapped);
+    agentListCache.clear();
+    return mapped;
   }
 
   /**
@@ -969,7 +1026,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(agents.id, parseInt(id)))
       .returning();
     if (result.length === 0) return undefined;
-    return this.mapAgentRow(result[0]);
+    // Invalidate stale cache entries
+    agentCache.delete(id);
+    agentCache.delete("__active__");
+    agentListCache.clear();
+    const mapped = this.mapAgentRow(result[0]);
+    agentCache.set(id, mapped);
+    return mapped;
   }
 
   async setActiveAgent(id: string): Promise<Agent | undefined> {
@@ -983,11 +1046,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(agents.id, parseInt(id)))
       .returning();
     if (result.length === 0) return undefined;
+    agentCache.delete("__active__");
+    agentListCache.clear();
     return this.mapAgentRow(result[0]);
   }
 
   async deleteAgent(id: string): Promise<boolean> {
     const result = await db.delete(agents).where(eq(agents.id, parseInt(id))).returning();
+    agentCache.delete(id);
+    agentCache.delete("__active__");
+    agentListCache.clear();
     return result.length > 0;
   }
 
@@ -1145,10 +1213,15 @@ export class DatabaseStorage implements IStorage {
 
   // Knowledge Base methods
   async getKnowledgeBases(agentId: string): Promise<KnowledgeBase[]> {
+    const cached = kbCache.get(agentId);
+    if (cached) return cached;
+
     const result = await db.select().from(knowledgeBases)
       .where(eq(knowledgeBases.agentId, parseInt(agentId)))
       .orderBy(desc(knowledgeBases.createdAt));
-    return result.map(row => this.mapKBRow(row));
+    const mapped = result.map(row => this.mapKBRow(row));
+    kbCache.set(agentId, mapped);
+    return mapped;
   }
 
   async createKnowledgeBase(kb: InsertKnowledgeBase): Promise<KnowledgeBase> {
@@ -1176,7 +1249,10 @@ export class DatabaseStorage implements IStorage {
       isShared: kb.isShared ?? false,
       sharedScope: kb.sharedScope ?? null,
     }).returning();
-    return this.mapKBRow(result[0]);
+    const mapped = this.mapKBRow(result[0]);
+    // Invalidate KB cache for this agent
+    kbCache.delete(String(mapped.agentId));
+    return mapped;
   }
 
   async updateKnowledgeBase(id: string, data: Partial<InsertKnowledgeBase>): Promise<KnowledgeBase | undefined> {
@@ -1192,12 +1268,21 @@ export class DatabaseStorage implements IStorage {
       .where(eq(knowledgeBases.id, parseInt(id)))
       .returning();
     if (result.length === 0) return undefined;
-    return this.mapKBRow(result[0]);
+    const mapped = this.mapKBRow(result[0]);
+    kbCache.delete(String(mapped.agentId));
+    return mapped;
   }
 
   async deleteKnowledgeBase(id: string): Promise<boolean> {
+    // Fetch agentId before deletion for cache invalidation
+    const existing = await db.select({ agentId: knowledgeBases.agentId })
+      .from(knowledgeBases).where(eq(knowledgeBases.id, parseInt(id))).limit(1);
     await db.delete(knowledgeChunks).where(eq(knowledgeChunks.knowledgeBaseId, parseInt(id)));
     const result = await db.delete(knowledgeBases).where(eq(knowledgeBases.id, parseInt(id))).returning();
+    if (existing.length > 0) {
+      kbCache.delete(String(existing[0].agentId));
+      chunkCache.delete(String(existing[0].agentId));
+    }
     return result.length > 0;
   }
 
@@ -1415,10 +1500,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChunksByAgent(agentId: string): Promise<KnowledgeChunk[]> {
+    const cached = chunkCache.get(agentId);
+    if (cached) return cached;
+
     const result = await db.select().from(knowledgeChunks)
       .where(eq(knowledgeChunks.agentId, parseInt(agentId)))
       .orderBy(knowledgeChunks.chunkIndex);
-    return result.map(row => ({
+    const mapped = result.map(row => ({
       id: row.id as unknown as number,
       knowledgeBaseId: row.knowledgeBaseId as unknown as number,
       agentId: row.agentId as unknown as number,
@@ -1429,6 +1517,8 @@ export class DatabaseStorage implements IStorage {
       metadata: (row.metadata as Record<string, any>) || {},
       createdAt: row.createdAt.toISOString(),
     }));
+    chunkCache.set(agentId, mapped);
+    return mapped;
   }
 
   async createChunks(chunks: InsertKnowledgeChunk[]): Promise<KnowledgeChunk[]> {
@@ -1458,16 +1548,24 @@ export class DatabaseStorage implements IStorage {
         });
       }
     }
+    // Invalidate chunk cache for the agent(s) that were created
+    const agentIds = new Set(chunks.map(c => String(c.agentId)));
+    agentIds.forEach(aid => chunkCache.delete(aid));
     return created;
   }
 
   async deleteChunksByKnowledgeBase(knowledgeBaseId: string): Promise<boolean> {
+    // Fetch agentId before deletion for cache invalidation
+    const existing = await db.select({ agentId: knowledgeChunks.agentId })
+      .from(knowledgeChunks).where(eq(knowledgeChunks.knowledgeBaseId, parseInt(knowledgeBaseId))).limit(1);
     await db.delete(knowledgeChunks).where(eq(knowledgeChunks.knowledgeBaseId, parseInt(knowledgeBaseId)));
+    if (existing.length > 0) chunkCache.delete(String(existing[0].agentId));
     return true;
   }
 
   async deleteChunksByAgent(agentId: string): Promise<boolean> {
     await db.delete(knowledgeChunks).where(eq(knowledgeChunks.agentId, parseInt(agentId)));
+    chunkCache.delete(agentId);
     return true;
   }
 
@@ -2615,10 +2713,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAgentBySlug(slug: string): Promise<Agent | undefined> {
+    const cacheKey = `slug:${slug}`;
+    const cached = agentCache.get(cacheKey);
+    if (cached) return cached;
+
     const result = await db.select().from(agents)
       .where(eq(agents.productSlug, slug)).limit(1);
     if (result.length === 0) return undefined;
-    return this.mapAgentRow(result[0]);
+    const mapped = this.mapAgentRow(result[0]);
+    agentCache.set(cacheKey, mapped);
+    agentCache.set(String(mapped.id), mapped);
+    return mapped;
   }
 
   private mapVoucherRow(row: any): Voucher {
