@@ -21,6 +21,8 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
 - 36 new specialists added for 9 SKK Bidang sub-HUBs (#150 Sipil, #151 Arsitektur, #152 Energi, #153 Sains Rekayasa, #154 Mekanikal, #155 Manajemen Pelaksanaan, #156 PWK, #157 Lanskap/Interior/Iluminasi, #158 Tata Lingkungan) — 4 specialists each
 - 15 new specialists added to thin HUBs: #302 LKUT (+3), #308 IMS (+3), #311 SMK3 (+3), #317 Pancek & Integritas (+2), #320 KCI Dashboard (+4)
 - ALL HUBs now have at least 1 child agent (zero empty orchestrators)
+- big_idea_id linked: 798/799 agents linked to 232/233 Big Ideas (only Master #768 root is NULL by design)
+- Linking strategy: exact name match vs toolboxes (647), manual series-based mapping (92), parent propagation (59)
 
 A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots and risk assessments. A "Deliverables" panel allows defining output types for each agent, with pre-built bundles and quick-action chat buttons.
 
