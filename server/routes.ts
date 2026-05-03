@@ -9994,6 +9994,66 @@ KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan
     }
   });
 
+  // ── MultiClaw Cross-Panel Synthesis ──────────────────────────────────────
+  app.post("/api/ai/multiclaw-synthesis", isAuthenticated, async (req, res) => {
+    try {
+      const { tenderCtx, studioCtx, ekosistemCtx } = req.body;
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+      const ai = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+
+      const contextParts: string[] = [];
+      if (tenderCtx) contextParts.push(`TENDER ANALYSIS:\n- Tender: ${tenderCtx.tenderName} (${tenderCtx.tenderAgency})\n- Skor Kecocokan: ${tenderCtx.overallScore}/100\n- Rekomendasi: ${tenderCtx.recommendation}\n- Gap Utama: ${(tenderCtx.keyGaps || []).join(", ")}`);
+      if (studioCtx) contextParts.push(`STUDIO ENRICHMENT:\n- Chatbot: ${studioCtx.proposalName}\n- Kualitas: ${studioCtx.qualityBefore} → ${studioCtx.qualityAfter}\n- Field ditingkatkan: ${(studioCtx.enhancedFields || []).join(", ")}\n- Chunks tambahan: ${studioCtx.additionalChunks}`);
+      if (ekosistemCtx) contextParts.push(`EKOSISTEM GENERATION:\n- Agent: ${ekosistemCtx.agentName}\n- eBook: ${ekosistemCtx.ebookTitle}\n- eCourse: ${ekosistemCtx.ecourseTitle}\n- Dokumen: ${ekosistemCtx.docgenCount} template`);
+
+      const result = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah MULTICLAW SYNTHESIS ORCHESTRATOR — agen integrasi tertinggi Gustafta yang menganalisis hasil kerja semua agen panel (Tender, Studio, Ekosistem, Broadcast) dan mensintesis mereka menjadi satu laporan strategis terpadu. Hasilkan JSON: { "integrationScore": number (0-100 seberapa terintegrasi data), "synopsisKalimat": "ringkasan 2-3 kalimat eksekutif", "flowAnalysis": { "tender_to_studio": "insight koneksi tender ke studio", "studio_to_ekosistem": "insight koneksi studio ke ekosistem", "ekosistem_to_broadcast": "insight koneksi ekosistem ke broadcast" }, "priorityActions": [{ "panel": "nama panel", "action": "aksi spesifik", "impact": "dampak bisnis" }], "winningStrategy": "strategi pemenangan keseluruhan dalam 1 paragraf", "broadcastRecommendation": "rekomendasi pesan broadcast berdasarkan semua data", "strengthMap": [{ "area": "area kekuatan", "score": number, "description": "deskripsi" }] }` },
+          { role: "user", content: `Data lintas panel:\n\n${contextParts.join("\n\n") || "Belum ada data panel yang terakumulasi"}` },
+        ],
+        temperature: 0.6, max_tokens: 1500, response_format: { type: "json_object" },
+      });
+
+      let data: any = {};
+      try { data = JSON.parse(result.choices[0]?.message?.content || "{}"); } catch {}
+      res.json(data);
+    } catch (error: any) {
+      console.error("[AI multiclaw-synthesis] Error:", error);
+      res.status(500).json({ error: "Gagal sintesis: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ── A/B Broadcast Variant Testing ────────────────────────────────────────
+  app.post("/api/ai/broadcast-ab-test", isAuthenticated, async (req, res) => {
+    try {
+      const { template, agentContext = {} } = req.body;
+      if (!template) return res.status(400).json({ error: "template wajib diisi" });
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+      const ai = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+
+      const result = await ai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: `Anda adalah A/B TEST AGENT untuk WhatsApp broadcast. Dari satu template, buat 2 varian A/B yang berbeda secara signifikan (nada, struktur, CTA) namun sama tujuannya. Hasilkan JSON: { "variantA": { "name": "Variant A — [nama pendekatan]", "message": "teks pesan WA", "approach": "pendekatan psikologi", "expectedCTR": "estimasi CTR %", "bestFor": "segmen terbaik" }, "variantB": { "name": "Variant B — [nama pendekatan]", "message": "teks pesan WA", "approach": "pendekatan psikologi", "expectedCTR": "estimasi CTR %", "bestFor": "segmen terbaik" }, "recommendation": "rekomendasi varian terbaik dan alasannya" }` },
+          { role: "user", content: `Brand: ${agentContext.name || "Chatbot"}\n\nTemplate asli:\n${template}` },
+        ],
+        temperature: 0.8, max_tokens: 1000, response_format: { type: "json_object" },
+      });
+
+      let data: any = {};
+      try { data = JSON.parse(result.choices[0]?.message?.content || "{}"); } catch {}
+      res.json(data);
+    } catch (error: any) {
+      console.error("[AI broadcast-ab-test] Error:", error);
+      res.status(500).json({ error: "Gagal A/B test: " + (error.message || "Unknown error") });
+    }
+  });
+
   registerLegalRoutes(app);
 
   return httpServer;

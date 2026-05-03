@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMultiClaw } from "@/contexts/multiclaw-context";
 import {
   Wand2, Upload, FileText, BookOpen, Download, Loader2, Check, X,
   AlertCircle, Sparkles, FileCode, FilePlus2, Layers, Calculator, GraduationCap,
-  Info, RefreshCw, FileUp, Copy, ExternalLink, BookMarked,
+  Info, RefreshCw, FileUp, Copy, ExternalLink, BookMarked, GitBranch, ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ const FIELD_LABELS: Record<string, string> = {
 export function StudioPanel({ agent }: { agent: any }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { tenderCtx, setStudioCtx } = useMultiClaw();
 
   // ============ IMPORT STATE ============
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -222,6 +224,15 @@ export function StudioPanel({ agent }: { agent: any }) {
           knowledgeChunks: [...(prev.knowledgeChunks || []), ...data.additionalChunks],
         } : prev);
       }
+      // Save to cross-panel context
+      setStudioCtx({
+        proposalName: proposal?.proposal?.name || agent?.name || "Chatbot",
+        qualityBefore: data.qualityBefore || 0,
+        qualityAfter: data.qualityAfter || 0,
+        enhancedFields: Object.keys(data.stages?.[1]?.result || {}),
+        additionalChunks: data.additionalChunks?.length || 0,
+        savedAt: new Date().toISOString(),
+      });
     },
     onError: (err: any) => {
       toast({ title: "MultiClaw Gagal", description: err.message, variant: "destructive" });
@@ -347,6 +358,24 @@ export function StudioPanel({ agent }: { agent: any }) {
           </p>
         </div>
       </div>
+
+      {/* ── Cross-panel Banner: Tender → Studio ── */}
+      {tenderCtx && (
+        <div className="flex items-start gap-3 p-3 rounded-lg border border-violet-200 bg-violet-50 dark:bg-violet-950/20 dark:border-violet-800" data-testid="banner-tender-context">
+          <GitBranch className="w-4 h-4 text-violet-600 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-violet-800 dark:text-violet-200">
+              MultiClaw Context tersedia dari Info Tender
+            </p>
+            <p className="text-[10px] text-violet-600 dark:text-violet-400 mt-0.5 line-clamp-2">
+              <strong>{tenderCtx.tenderName}</strong> · Skor: {tenderCtx.overallScore}/100 · {tenderCtx.keyGaps.length} gap teridentifikasi
+            </p>
+          </div>
+          <Badge variant="outline" className="text-[10px] border-violet-300 text-violet-700 whitespace-nowrap shrink-0">
+            {tenderCtx.overallScore >= 80 ? "✅ Siap" : tenderCtx.overallScore >= 60 ? "⚠️ Persiapkan" : "⛔ Risiko"}
+          </Badge>
+        </div>
+      )}
 
       <Tabs defaultValue="import" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -1085,6 +1114,17 @@ export function StudioPanel({ agent }: { agent: any }) {
               >
                 <Sparkles className="w-4 h-4 mr-2" /> Jalankan Studio MultiClaw
               </Button>
+            )}
+
+            {mcStudioResult && (
+              <div className="flex items-center gap-2 p-3 rounded-lg border border-indigo-200 bg-gradient-to-r from-indigo-50 to-transparent dark:from-indigo-950/20 dark:border-indigo-800">
+                <ArrowRight className="w-4 h-4 text-indigo-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-indigo-800 dark:text-indigo-200">Lanjut ke Ekosistem Kompetensi</p>
+                  <p className="text-[10px] text-indigo-600 dark:text-indigo-400">Proposal yang sudah diperkaya siap menjadi 4 produk digital</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-indigo-400 shrink-0" />
+              </div>
             )}
           </div>
         </DialogContent>

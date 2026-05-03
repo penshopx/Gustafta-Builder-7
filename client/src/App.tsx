@@ -30,6 +30,7 @@ import LegalLanding from "@/pages/legal-landing";
 import LegalChat from "@/pages/legal-chat";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
+import { MultiClawProvider } from "@/contexts/multiclaw-context";
 
 const WIDGET_EXCLUDED_PATHS = ["/legal", "/embed/"];
 
@@ -85,7 +86,9 @@ function App() {
     <ThemeProvider defaultTheme="dark">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <AppContent />
+          <MultiClawProvider>
+            <AppContent />
+          </MultiClawProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

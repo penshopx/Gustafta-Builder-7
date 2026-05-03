@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMultiClaw } from "@/contexts/multiclaw-context";
 import {
   BookOpen, GraduationCap, FileText, Sparkles, ExternalLink, Download,
   ArrowRight, Bot, Layers, Zap, BookMarked, ChevronRight, Globe, Brain, Eye,
@@ -31,6 +32,7 @@ interface ProductCard {
 
 export function EkosistemPanel({ agent }: EkosistemPanelProps) {
   const { toast } = useToast();
+  const { studioCtx, setEkosistemCtx } = useMultiClaw();
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [mcOpen, setMcOpen] = useState(false);
   const [mcResult, setMcResult] = useState<any>(null);
@@ -51,6 +53,17 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
         setMcRevealedStages(count);
         if (count >= 4) clearInterval(iv);
       }, 600);
+      // Save to cross-panel context
+      const ebook = data.stages?.find((s: any) => s.id === "ebook-agent")?.result;
+      const ecourse = data.stages?.find((s: any) => s.id === "ecourse-agent")?.result;
+      const docgen = data.stages?.find((s: any) => s.id === "docgen-agent")?.result;
+      setEkosistemCtx({
+        agentName: agent?.name || "Chatbot",
+        ebookTitle: ebook?.title || "",
+        ecourseTitle: ecourse?.courseTitle || "",
+        docgenCount: docgen?.templates?.length || 0,
+        savedAt: new Date().toISOString(),
+      });
     },
     onError: () => {
       toast({ title: "MultiClaw Gagal", description: "Gagal menjalankan Ekosistem MultiClaw", variant: "destructive" });
@@ -262,6 +275,20 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
   return (
     <>
     <div className="space-y-6 pb-8">
+
+      {/* ── Cross-panel Banner: Studio → Ekosistem ── */}
+      {studioCtx && (
+        <div className="flex items-start gap-3 p-3 mx-0 rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800" data-testid="banner-studio-context">
+          <GitBranch className="w-4 h-4 text-orange-600 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-orange-800 dark:text-orange-200">MultiClaw Context dari Studio Kompetensi</p>
+            <p className="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">
+              <strong>{studioCtx.proposalName}</strong> · Kualitas {studioCtx.qualityBefore}→{studioCtx.qualityAfter} · +{studioCtx.additionalChunks} KB chunk
+            </p>
+          </div>
+          <Badge variant="outline" className="text-[10px] border-orange-300 text-orange-700 whitespace-nowrap shrink-0">Studio ✓</Badge>
+        </div>
+      )}
 
       {/* Header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 p-6 text-white">
@@ -577,6 +604,18 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
                 </TabsContent>
               ))}
             </Tabs>
+          )}
+
+          {/* Cross-panel bridge — Ekosistem → Broadcast */}
+          {mcResult && (
+            <div className="flex items-center gap-2 p-3 rounded-lg border border-emerald-200 bg-gradient-to-r from-emerald-50 to-transparent dark:from-emerald-950/20 dark:border-emerald-800">
+              <ArrowRight className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">Produk tersimpan di MultiClaw Context</p>
+                <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Buka WA Broadcast → buat kampanye dari produk ekosistem ini</p>
+              </div>
+              <GitBranch className="w-4 h-4 text-emerald-500 shrink-0" />
+            </div>
           )}
         </div>
       </DialogContent>

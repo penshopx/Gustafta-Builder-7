@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { Send, Plus, Trash2, Phone, Users, Radio, Clock, ToggleLeft, ToggleRight, Shield, Wand2, Loader2, Sparkles, AlertTriangle, CheckCircle2, Copy, X } from "lucide-react";
+import { Send, Plus, Trash2, Phone, Users, Radio, Clock, ToggleLeft, ToggleRight, Shield, Wand2, Loader2, Sparkles, AlertTriangle, CheckCircle2, Copy, X, GitBranch, Zap } from "lucide-react";
+import { useMultiClaw } from "@/contexts/multiclaw-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 export function BroadcastPanel({ agent }: { agent: any }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { tenderCtx, ekosistemCtx } = useMultiClaw();
 
   const [contactForm, setContactForm] = useState({
     phone: "",
@@ -182,6 +184,21 @@ export function BroadcastPanel({ agent }: { agent: any }) {
     },
   });
 
+  // ── A/B Test ──────────────────────────────────────────────────────────────
+  const [abOpen, setAbOpen] = useState(false);
+  const [abResult, setAbResult] = useState<any>(null);
+  const abTestMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/ai/broadcast-ab-test", {
+        template: broadcastForm.messageTemplate,
+        agentContext: { name: agent?.name },
+      });
+      return res.json();
+    },
+    onSuccess: (data) => { setAbResult(data); setAbOpen(true); },
+    onError: () => toast({ title: "Gagal", description: "Gagal membuat A/B test variant", variant: "destructive" }),
+  });
+
   const handleAddContact = (e: FormEvent) => {
     e.preventDefault();
     if (!contactForm.phone.trim()) return;
@@ -208,6 +225,50 @@ export function BroadcastPanel({ agent }: { agent: any }) {
           <p className="text-muted-foreground">Kelola kontak dan kirim broadcast WhatsApp</p>
         </div>
       </div>
+
+      {/* ── Cross-panel Banners ── */}
+      {(tenderCtx || ekosistemCtx) && (
+        <div className="space-y-2">
+          {tenderCtx && (
+            <div className="flex items-start gap-3 p-3 rounded-lg border border-violet-200 bg-violet-50 dark:bg-violet-950/20 dark:border-violet-800" data-testid="banner-tender-broadcast">
+              <GitBranch className="w-4 h-4 text-violet-600 mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-violet-800 dark:text-violet-200">Data Tender tersedia dari MultiClaw Context</p>
+                <p className="text-[10px] text-violet-600 dark:text-violet-400 mt-0.5">
+                  <strong>{tenderCtx.tenderName}</strong> · Skor {tenderCtx.overallScore}/100 · {tenderCtx.keyGaps.length} gap
+                </p>
+              </div>
+              <Button
+                size="sm" variant="outline"
+                className="h-7 text-[10px] border-violet-300 text-violet-700 hover:bg-violet-100 shrink-0"
+                onClick={() => setBroadcastForm({ ...broadcastForm, messageTemplate: `Halo {{name}},\n\nKami memiliki informasi tender penting:\n📋 ${tenderCtx.tenderName}\n🏛️ ${tenderCtx.tenderAgency}\n⭐ Skor Kecocokan: ${tenderCtx.overallScore}/100\n\nHubungi kami untuk persiapan dokumen tender Anda!\n\n[Chatbot AI Kami]` })}
+                data-testid="button-import-tender-context"
+              >
+                <Zap className="w-3 h-3 mr-1" /> Import ke Template
+              </Button>
+            </div>
+          )}
+          {ekosistemCtx && (
+            <div className="flex items-start gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800" data-testid="banner-ekosistem-broadcast">
+              <GitBranch className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">Produk Ekosistem tersedia dari MultiClaw Context</p>
+                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  eBook: <strong>{ekosistemCtx.ebookTitle}</strong> · {ekosistemCtx.docgenCount} template dokumen
+                </p>
+              </div>
+              <Button
+                size="sm" variant="outline"
+                className="h-7 text-[10px] border-emerald-300 text-emerald-700 hover:bg-emerald-100 shrink-0"
+                onClick={() => setBroadcastForm({ ...broadcastForm, messageTemplate: `Halo {{name}},\n\nProduk kompetensi digital kami siap untuk Anda:\n📚 eBook: ${ekosistemCtx.ebookTitle}\n🎓 eCourse: ${ekosistemCtx.ecourseTitle}\n📄 ${ekosistemCtx.docgenCount} Template Dokumen\n\nDapatkan akses sekarang!\n\n[${ekosistemCtx.agentName}]` })}
+                data-testid="button-import-ekosistem-context"
+              >
+                <Zap className="w-3 h-3 mr-1" /> Import ke Template
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       <Tabs defaultValue="contacts" data-testid="tabs-broadcast">
         <TabsList data-testid="tabs-list-broadcast">
@@ -418,23 +479,28 @@ export function BroadcastPanel({ agent }: { agent: any }) {
                   </Select>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <Label htmlFor="broadcast-message">Template Pesan</Label>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5 text-xs h-7 border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400"
-                      disabled={!broadcastForm.messageTemplate.trim() || personalizeMutation.isPending}
-                      onClick={() => personalizeMutation.mutate()}
-                      data-testid="button-personalize-broadcast"
-                    >
-                      {personalizeMutation.isPending ? (
-                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> AI Memproses…</>
-                      ) : (
-                        <><Wand2 className="w-3.5 h-3.5" /> Personalisasi AI</>
-                      )}
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button" size="sm" variant="outline"
+                        className="gap-1.5 text-xs h-7 border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
+                        disabled={!broadcastForm.messageTemplate.trim() || abTestMutation.isPending}
+                        onClick={() => abTestMutation.mutate()}
+                        data-testid="button-ab-test-broadcast"
+                      >
+                        {abTestMutation.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> A/B…</> : <><Zap className="w-3.5 h-3.5" /> A/B Test</>}
+                      </Button>
+                      <Button
+                        type="button" size="sm" variant="outline"
+                        className="gap-1.5 text-xs h-7 border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:text-violet-400"
+                        disabled={!broadcastForm.messageTemplate.trim() || personalizeMutation.isPending}
+                        onClick={() => personalizeMutation.mutate()}
+                        data-testid="button-personalize-broadcast"
+                      >
+                        {personalizeMutation.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> AI…</> : <><Wand2 className="w-3.5 h-3.5" /> Personalisasi</>}
+                      </Button>
+                    </div>
                   </div>
                   <Textarea
                     id="broadcast-message"
@@ -689,6 +755,50 @@ export function BroadcastPanel({ agent }: { agent: any }) {
                 ))}
               </div>
             )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+
+    {/* ── A/B Test Dialog ── */}
+    <Dialog open={abOpen} onOpenChange={setAbOpen}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-blue-600" />
+            A/B Test Pesan Broadcast
+            <Badge className="bg-blue-100 text-blue-700 text-xs">2 Varian AI</Badge>
+          </DialogTitle>
+          <DialogDescription>Bandingkan dua pendekatan pesan sebelum broadcast ke semua kontak.</DialogDescription>
+        </DialogHeader>
+        {abResult && (
+          <div className="space-y-4">
+            {abResult.recommendation && (
+              <div className="p-3 rounded-lg border bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-200">
+                <span className="font-semibold">Rekomendasi AI: </span>{abResult.recommendation}
+              </div>
+            )}
+            {[abResult.variantA, abResult.variantB].filter(Boolean).map((v: any, i: number) => (
+              <div key={i} className={`space-y-2 p-4 rounded-xl border-2 ${i === 0 ? "border-blue-300 dark:border-blue-700" : "border-emerald-300 dark:border-emerald-700"}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold">{v.name}</p>
+                    <p className="text-xs text-muted-foreground">{v.approach} · Est. CTR: {v.expectedCTR}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant="outline" className="text-[10px]">{v.bestFor}</Badge>
+                    <Button
+                      size="sm" variant="outline" className="h-7 text-xs"
+                      onClick={() => { setBroadcastForm({ ...broadcastForm, messageTemplate: v.message }); setAbOpen(false); }}
+                      data-testid={`button-apply-variant-${i}`}
+                    >
+                      <CheckCircle2 className="w-3 h-3 mr-1" /> Pakai Ini
+                    </Button>
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-muted/30 p-3 text-sm whitespace-pre-wrap">{v.message}</div>
+              </div>
+            ))}
           </div>
         )}
       </DialogContent>

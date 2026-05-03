@@ -1,5 +1,6 @@
 import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
-import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle, Upload, Loader2, Sparkles, Network, Shield, AlertTriangle, CheckCircle2, XCircle, AlertCircle, Copy, X, GitBranch } from "lucide-react";
+import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle, Upload, Loader2, Sparkles, Network, Shield, AlertTriangle, CheckCircle2, XCircle, AlertCircle, Copy, X, GitBranch, ArrowRight, Wand2 } from "lucide-react";
+import { useMultiClaw } from "@/contexts/multiclaw-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import Papa from "papaparse";
 export function TenderPanel({ agent }: { agent: any }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { setTenderCtx } = useMultiClaw();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [csvUploading, setCsvUploading] = useState(false);
@@ -164,6 +166,22 @@ export function TenderPanel({ agent }: { agent: any }) {
         setMcRevealedStages(count);
         if (count >= 4) clearInterval(iv);
       }, 450);
+      // Save to cross-panel context
+      if (mcTender) {
+        const gapStage = data.stages?.[2]?.result;
+        setTenderCtx({
+          tenderName: mcTender.name,
+          tenderAgency: mcTender.agency || "",
+          overallScore: data.overallScore || 0,
+          recommendation: data.recommendation || "",
+          keyGaps: [
+            ...(gapStage?.redFlags?.map((f: any) => f.finding) || []),
+            ...(gapStage?.yellowFlags?.map((f: any) => f.finding) || []),
+          ].slice(0, 5),
+          packType: mcPackType,
+          savedAt: new Date().toISOString(),
+        });
+      }
     },
     onError: () => {
       toast({ title: "MultiClaw Gagal", description: "Gagal menjalankan analisis multi-agent", variant: "destructive" });
@@ -779,17 +797,28 @@ export function TenderPanel({ agent }: { agent: any }) {
                 : <><Network className="w-4 h-4 mr-2" /> Jalankan MultiClaw Analisis</>}
             </Button>
           ) : (
-            <div className="flex items-center gap-4 p-3 rounded-lg bg-gradient-to-r from-violet-50 to-transparent border border-violet-200 dark:from-violet-950/30 dark:border-violet-800">
-              <div className="text-center">
-                <div className={`text-3xl font-bold ${mcResult.overallScore >= 80 ? "text-green-600" : mcResult.overallScore >= 60 ? "text-yellow-600" : "text-red-600"}`}>{mcResult.overallScore}</div>
-                <div className="text-[10px] text-muted-foreground">/ 100</div>
+            <>
+              <div className="flex items-center gap-4 p-3 rounded-lg bg-gradient-to-r from-violet-50 to-transparent border border-violet-200 dark:from-violet-950/30 dark:border-violet-800">
+                <div className="text-center">
+                  <div className={`text-3xl font-bold ${mcResult.overallScore >= 80 ? "text-green-600" : mcResult.overallScore >= 60 ? "text-yellow-600" : "text-red-600"}`}>{mcResult.overallScore}</div>
+                  <div className="text-[10px] text-muted-foreground">/ 100</div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold">{mcResult.overallScore >= 80 ? "✅ Siap" : mcResult.overallScore >= 60 ? "⚠️ Perlu Persiapan" : "❌ Risiko Tinggi"}</div>
+                  <div className="text-xs text-muted-foreground line-clamp-2">{mcResult.recommendation}</div>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => { setMcResult(null); setMcRevealedStages(0); }}>Ulang</Button>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold">{mcResult.overallScore >= 80 ? "✅ Siap" : mcResult.overallScore >= 60 ? "⚠️ Perlu Persiapan" : "❌ Risiko Tinggi"}</div>
-                <div className="text-xs text-muted-foreground line-clamp-2">{mcResult.recommendation}</div>
+              {/* Cross-panel bridge — Tender → Studio */}
+              <div className="flex items-center gap-2 p-3 rounded-lg border border-violet-200 bg-gradient-to-r from-violet-50 to-transparent dark:from-violet-950/20 dark:border-violet-800">
+                <GitBranch className="w-4 h-4 text-violet-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-violet-800 dark:text-violet-200">Analisis tersimpan di MultiClaw Context</p>
+                  <p className="text-[10px] text-violet-600 dark:text-violet-400">Buka Studio Kompetensi → proposal otomatis dibuat dari gap tender ini</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-violet-500 shrink-0" />
               </div>
-              <Button size="sm" variant="outline" onClick={() => { setMcResult(null); setMcRevealedStages(0); }}>Ulang</Button>
-            </div>
+            </>
           )}
 
           {/* Result Tabs */}
