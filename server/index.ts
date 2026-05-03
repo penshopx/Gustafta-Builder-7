@@ -916,6 +916,14 @@ for (const envVar of requiredEnvVars) {
         log("Catch-up LexCom seed error: " + (err as Error).message);
       }
 
+      // Patch: SKK Coach HUB — set isOrchestrator=true + orchestratorConfig (always runs)
+      try {
+        const { patchSkkOrchestratorHub } = await import("./patch-skk-orchestrator");
+        await patchSkkOrchestratorHub();
+      } catch (err) {
+        log("Patch SKK Orchestrator error: " + (err as Error).message);
+      }
+
       startScheduler();
     },
   );
