@@ -238,19 +238,20 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
         parentContext={{ agentName: agent.name }}
         defaultTopic={agent.description || agent.name}
         onFill={async (result) => {
-          const fields: Partial<typeof form> = {};
-          if (result.primaryOutcome) fields.primaryOutcome = result.primaryOutcome;
-          if (result.conversationWinConditions) fields.conversationWinConditions = result.conversationWinConditions;
-          if (result.brandVoiceSpec) fields.brandVoiceSpec = result.brandVoiceSpec;
-          if (result.interactionPolicy) fields.interactionPolicy = result.interactionPolicy;
-          if (result.domainCharter) fields.domainCharter = result.domainCharter;
-          if (result.qualityBar) fields.qualityBar = result.qualityBar;
-          if (result.riskCompliance) fields.riskCompliance = result.riskCompliance;
-          setForm((prev) => ({ ...prev, ...fields }));
+          const fields: PolicyForm = {
+            primaryOutcome: result.primaryOutcome || form.primaryOutcome || "",
+            conversationWinConditions: result.conversationWinConditions || form.conversationWinConditions || "",
+            brandVoiceSpec: result.brandVoiceSpec || form.brandVoiceSpec || "",
+            interactionPolicy: result.interactionPolicy || form.interactionPolicy || "",
+            domainCharter: result.domainCharter || form.domainCharter || "",
+            qualityBar: result.qualityBar || form.qualityBar || "",
+            riskCompliance: result.riskCompliance || form.riskCompliance || "",
+          };
+          setForm(fields);
           try {
             await updateAgent.mutateAsync({ id: String(agent.id), data: fields });
           } catch {
-            /* toast already handled by saveField */
+            /* errors handled by mutation */
           }
         }}
       />

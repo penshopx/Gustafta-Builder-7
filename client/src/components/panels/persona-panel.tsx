@@ -356,7 +356,11 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             updated.conversationStarters = result.conversationStarters.slice(0, 5);
           }
           if (result.systemPrompt) updated.systemPrompt = result.systemPrompt;
+          if (result.philosophy) updated.philosophy = result.philosophy;
+          if (result.offTopicHandling) updated.offTopicHandling = result.offTopicHandling;
+          if (result.offTopicResponse) updated.offTopicResponse = result.offTopicResponse;
           setFormData(updated);
+          updateAgent.mutate({ id: agent.id, data: updated });
         }}
       />
 

@@ -9338,7 +9338,7 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
-  // ── AI CONFIG GENERATOR — OpenClaw/MultiClaw Multi-Agent Orchestrator ──────
+  // ── AI CONFIG GENERATOR — True 2-Stage OpenClaw/MultiClaw Multi-Agent ──────
   app.post("/api/ai/generate-config", isAuthenticated, async (req, res) => {
     try {
       const { level, topic, parentContext = {} } = req.body;
@@ -9351,117 +9351,8 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
         return res.status(400).json({ error: "level tidak valid" });
       }
 
-      const { seriesName = "", bigIdeaName = "", toolboxName = "", agentName = "" } = parentContext;
-
-      const hierarchyContext = [
-        seriesName && `Series: ${seriesName}`,
-        bigIdeaName && `Modul (BigIdea): ${bigIdeaName}`,
-        toolboxName && `Chatbot (Toolbox): ${toolboxName}`,
-        agentName && `Agen: ${agentName}`,
-      ].filter(Boolean).join(" → ");
-
-      const orchestratorSystem = `Anda adalah CONFIG-ORCHESTRATOR dalam ekosistem platform chatbot AI Gustafta (Indonesia).
-Anda menggunakan metodologi dua lapis:
-
-🔍 OPENCLAW (Pemetaan Domain):
-- Identifikasi bidang-bidang domain yang dicakup topik ini
-- Petakan konteks, audiens, dan tujuan strategis
-- Kenali apakah topik bersifat lintas-domain atau domain tunggal
-
-🔗 MULTICLAW (Sintesis Lintas-Domain):
-- Jika topik menyentuh beberapa domain, sintesiskan secara kohesif
-- Hasilkan konten yang terintegrasi dan konsisten di seluruh field
-- Pertahankan koherensi dengan konteks hierarki induk
-
-KONTEKS HIERARKI: ${hierarchyContext || "Mandiri (tanpa induk)"}
-TOPIK/DOMAIN: ${topic}
-
-Selalu hasilkan JSON valid yang kaya, spesifik, dan actionable — BUKAN generik.
-Gunakan Bahasa Indonesia yang profesional.`;
-
-      let userPrompt = "";
-      let schemaExample = "";
-
-      if (level === "bigidea") {
-        schemaExample = `{
-  "name": "Nama Modul yang spesifik (max 70 karakter)",
-  "type": "problem|idea|inspiration|mentoring",
-  "description": "Deskripsi 2-3 kalimat: apa yang dilakukan, masalah apa yang diselesaikan, nilai utamanya",
-  "goals": ["Goal spesifik 1", "Goal spesifik 2", "Goal spesifik 3", "Goal spesifik 4"],
-  "targetAudience": "Target audiens yang spesifik dan terukur",
-  "expectedOutcome": "Hasil konkret yang didapat pengguna setelah menggunakan modul ini (2-3 kalimat)"
-}`;
-        userPrompt = `Hasilkan konfigurasi lengkap untuk sebuah MODUL (BigIdea/L3) dalam hirarki chatbot Gustafta.
-Gunakan OpenClaw untuk pemetaan domain, lalu MultiClaw untuk sintesis field yang kohesif.
-
-Return HANYA JSON (tanpa komentar):
-${schemaExample}`;
-
-      } else if (level === "toolbox") {
-        schemaExample = `{
-  "name": "Nama Chatbot yang spesifik (max 60 karakter)",
-  "description": "Deskripsi 2-3 kalimat tentang chatbot ini",
-  "purpose": "Tujuan utama dalam 1-2 kalimat yang tajam",
-  "capabilities": [
-    "Kapabilitas spesifik 1",
-    "Kapabilitas spesifik 2",
-    "Kapabilitas spesifik 3",
-    "Kapabilitas spesifik 4",
-    "Kapabilitas spesifik 5"
-  ],
-  "limitations": [
-    "Batasan yang jelas dan jujur 1",
-    "Batasan yang jelas dan jujur 2",
-    "Batasan yang jelas dan jujur 3"
-  ]
-}`;
-        userPrompt = `Hasilkan konfigurasi lengkap untuk sebuah CHATBOT (Toolbox/L4) dalam hirarki chatbot Gustafta.
-Gunakan OpenClaw untuk memetakan kemampuan domain, lalu MultiClaw untuk kapabilitas yang kohesif.
-
-Return HANYA JSON (tanpa komentar):
-${schemaExample}`;
-
-      } else if (level === "agent-persona") {
-        schemaExample = `{
-  "name": "Nama agen dengan persona kuat (max 50 karakter)",
-  "tagline": "Tagline yang catchy dan menggambarkan keahlian (max 100 karakter)",
-  "description": "Deskripsi agen: latar belakang, keahlian, pendekatan (2-3 kalimat)",
-  "greetingMessage": "Pesan sambutan pertama yang hangat, personal, dan mengundang pengguna untuk bertanya (2-3 kalimat)",
-  "conversationStarters": [
-    "Pertanyaan pemancing 1 yang sangat relevan dengan domain?",
-    "Pertanyaan pemancing 2 yang sering ditanyakan pengguna?",
-    "Pertanyaan pemancing 3 yang menunjukkan keahlian agen?",
-    "Pertanyaan pemancing 4 yang bernilai tinggi?",
-    "Pertanyaan pemancing 5 yang mendorong eksplorasi?"
-  ],
-  "systemPrompt": "System prompt lengkap yang mendefinisikan identitas, keahlian domain, cara merespons, batasan, dan standar kualitas agen ini. Minimal 200 kata, profesional, mencakup: role, expertise, cara berkomunikasi, protokol jawaban, dan disclaimer."
-}`;
-        userPrompt = `Hasilkan konfigurasi PERSONA lengkap untuk sebuah AGEN AI (L5) dalam hirarki chatbot Gustafta.
-Gunakan metodologi OpenClaw untuk eksplorasi domain, MultiClaw untuk sintesis persona yang komprehensif.
-
-Return HANYA JSON (tanpa komentar):
-${schemaExample}`;
-
-      } else if (level === "agent-policy") {
-        schemaExample = `{
-  "primaryOutcome": "Mendidik pengguna|Menyelesaikan tiket|Menghasilkan dokumen|Menutup penjualan|Mengumpulkan data|Audit & compliance",
-  "conversationWinConditions": "Kondisi spesifik kapan percakapan dianggap berhasil. Contoh: pengguna mendapat jawaban definitif tentang [domain] dan mengetahui langkah konkret berikutnya.",
-  "brandVoiceSpec": "Spesifikasi suara brand: nada, gaya bahasa, tingkat formalitas, persona, kata-kata yang dihindari, kata-kata yang dianjurkan.",
-  "interactionPolicy": "Kebijakan interaksi: bagaimana agen harus merespons pertanyaan ambigu, menangani pengguna frustrasi, eskalasi, dan topik sensitif.",
-  "domainCharter": "Piagam domain: topik apa yang boleh dan tidak boleh dibahas. Batasan ekspplisit sesuai domain chatbot ini.",
-  "qualityBar": "Standar kualitas jawaban: panjang ideal, format output, level detail, standar akurasi, cara verifikasi fakta.",
-  "riskCompliance": "Manajemen risiko dan kepatuhan: disclaimer wajib, topik yang harus dirujuk ke ahli, batasan legal, perlindungan data pengguna."
-}`;
-        userPrompt = `Hasilkan konfigurasi KEBIJAKAN (Policy) lengkap untuk sebuah AGEN AI (L5) dalam hirarki chatbot Gustafta.
-Gunakan MultiClaw untuk sintesis kebijakan yang komprehensif dan terpadu lintas dimensi.
-
-Return HANYA JSON (tanpa komentar):
-${schemaExample}`;
-      }
-
       const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
       const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-
       if (!openaiKey) {
         return res.status(503).json({ error: "AI API key tidak tersedia. Silakan konfigurasi OPENAI_API_KEY." });
       }
@@ -9471,22 +9362,217 @@ ${schemaExample}`;
         ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}),
       });
 
-      const response = await aiClient.chat.completions.create({
+      const { seriesName = "", bigIdeaName = "", toolboxName = "", agentName = "" } = parentContext;
+      const hierarchyContext = [
+        seriesName && `Series: "${seriesName}"`,
+        bigIdeaName && `Modul: "${bigIdeaName}"`,
+        toolboxName && `Chatbot: "${toolboxName}"`,
+        agentName && `Agen: "${agentName}"`,
+      ].filter(Boolean).join(" → ");
+
+      // ─── TAHAP 1: OPENCLAW — Domain Analysis Agent ─────────────────────────
+      // Agen ini memetakan domain secara mendalam sebelum sintesis dilakukan
+      const openclawResponse = await aiClient.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: orchestratorSystem },
-          { role: "user", content: userPrompt },
+          {
+            role: "system",
+            content: `Anda adalah OPENCLAW — agen pemetaan domain dalam ekosistem Gustafta AI.
+Tugas Anda: lakukan analisis domain secara mendalam dan terstruktur terhadap topik yang diberikan.
+Hasilkan JSON dengan field berikut (semua dalam Bahasa Indonesia, spesifik dan konkret):
+{
+  "domainLabel": "Label singkat domain ini (maks 60 karakter)",
+  "coreSubdomains": ["subdomain utama 1", "subdomain 2", "subdomain 3"],
+  "primaryStakeholders": ["stakeholder/pengguna utama 1", "stakeholder 2", "stakeholder 3"],
+  "keyPainPoints": ["masalah krusial 1 yang dialami stakeholder", "masalah 2", "masalah 3"],
+  "regulatoryContext": "Konteks regulasi/standar yang relevan dengan domain ini (1-2 kalimat)",
+  "useCaseExamples": ["use case konkret 1", "use case 2", "use case 3", "use case 4"],
+  "successMetrics": ["metrik keberhasilan 1 yang terukur", "metrik 2", "metrik 3"],
+  "domainComplexity": "low|medium|high",
+  "isMultiDomain": true|false,
+  "crossDomainLinks": ["domain lain yang terhubung jika multi-domain, atau kosong array jika single-domain"]
+}`,
+          },
+          {
+            role: "user",
+            content: `Analisis domain berikut secara mendalam:
+TOPIK: ${topic.trim()}
+KONTEKS HIERARKI: ${hierarchyContext || "Mandiri"}
+LEVEL TARGET: ${level}
+
+Hasilkan peta domain yang akurat dan spesifik. Jangan generik.`,
+          },
         ],
-        temperature: 0.75,
-        max_tokens: level === "agent-persona" ? 2500 : 1500,
+        temperature: 0.4,
+        max_tokens: 800,
         response_format: { type: "json_object" },
       });
 
-      const raw = response.choices[0]?.message?.content || "{}";
+      let domainAnalysis: any = {};
+      try {
+        domainAnalysis = JSON.parse(openclawResponse.choices[0]?.message?.content || "{}");
+      } catch {
+        domainAnalysis = { domainLabel: topic, coreSubdomains: [], primaryStakeholders: [], keyPainPoints: [], useCaseExamples: [], successMetrics: [] };
+      }
+
+      // ─── TAHAP 2: MULTICLAW — Synthesis Agent ──────────────────────────────
+      // Agen ini menggunakan hasil OpenClaw untuk mengisi SEMUA field secara kohesif
+      const domainContext = `
+=== HASIL ANALISIS OPENCLAW ===
+Domain: ${domainAnalysis.domainLabel || topic}
+Sub-domain: ${(domainAnalysis.coreSubdomains || []).join(", ")}
+Stakeholder utama: ${(domainAnalysis.primaryStakeholders || []).join(", ")}
+Pain points krusial: ${(domainAnalysis.keyPainPoints || []).join("; ")}
+Regulasi/standar: ${domainAnalysis.regulatoryContext || "-"}
+Use case konkret: ${(domainAnalysis.useCaseExamples || []).join("; ")}
+Metrik sukses: ${(domainAnalysis.successMetrics || []).join(", ")}
+Kompleksitas: ${domainAnalysis.domainComplexity || "medium"}
+Multi-domain: ${domainAnalysis.isMultiDomain ? "Ya — " + (domainAnalysis.crossDomainLinks || []).join(", ") : "Tidak"}
+==============================`;
+
+      let multiclawPrompt = "";
+
+      if (level === "bigidea") {
+        multiclawPrompt = `Anda adalah MULTICLAW — agen sintesis Gustafta. Gunakan analisis domain di bawah untuk mengisi SEMUA field MODUL (L3) dengan konten yang kaya, spesifik, dan konsisten.
+
+TOPIK: ${topic.trim()}
+KONTEKS HIERARKI: ${hierarchyContext || "Mandiri"}
+${domainContext}
+
+Hasilkan JSON dengan field berikut (isi SEMUA field, jangan kosongkan satupun):
+{
+  "name": "Nama modul yang tajam dan deskriptif, mencerminkan domain. Contoh: 'Kepatuhan SBU & Klasifikasi Jasa Konstruksi', bukan sekadar topik. Maks 70 karakter.",
+  "type": "Pilih SATU dari: problem (jika modul mengatasi masalah nyata), idea (jika menawarkan solusi inovatif), inspiration (jika memotivasi/menginspirasi), mentoring (jika mendidik/melatih). Nilai harus lowercase.",
+  "description": "2-3 kalimat yang menjelaskan APA yang dilakukan modul ini, MASALAH apa yang diatasi, dan NILAI utama bagi pengguna. Spesifik ke domain, tidak generik.",
+  "goals": [
+    "Goal terukur 1 yang langsung terkait domain dan pain points",
+    "Goal terukur 2 yang menjawab kebutuhan stakeholder utama",
+    "Goal terukur 3 yang menghasilkan manfaat konkret",
+    "Goal terukur 4 yang mendukung sukses jangka panjang"
+  ],
+  "targetAudience": "Deskripsi spesifik siapa yang akan menggunakan modul ini: profesi, level pengalaman, konteks kerja, dan kebutuhan utama mereka.",
+  "expectedOutcome": "2-3 kalimat tentang hasil konkret dan terukur yang diperoleh pengguna setelah menggunakan modul. Hubungkan dengan metrik sukses dan pain points yang sudah diidentifikasi."
+}
+
+PENTING: Gunakan informasi dari analisis OpenClaw untuk membuat konten yang sangat spesifik ke domain ini.`;
+
+      } else if (level === "toolbox") {
+        multiclawPrompt = `Anda adalah MULTICLAW — agen sintesis Gustafta. Gunakan analisis domain untuk mengisi SEMUA field CHATBOT (L4) dengan konten yang kaya dan operasional.
+
+TOPIK: ${topic.trim()}
+KONTEKS HIERARKI: ${hierarchyContext || "Mandiri"}
+${domainContext}
+
+Hasilkan JSON dengan field berikut (isi SEMUA field tanpa kecuali):
+{
+  "name": "Nama chatbot yang menggambarkan fungsi spesifiknya dalam domain. Contoh: 'Asisten SKK Tenaga Ahli Konstruksi'. Maks 60 karakter.",
+  "description": "2-3 kalimat: apa yang chatbot ini lakukan, siapa penggunanya, dan mengapa ia berharga. Gunakan bahasa aktif dan konkret sesuai domain.",
+  "purpose": "1-2 kalimat tujuan utama yang tajam. Mulai dengan kata kerja. Contoh: 'Membantu kontraktor memahami persyaratan SKK dan mempersiapkan dokumen yang diperlukan untuk sertifikasi.'",
+  "capabilities": [
+    "Kapabilitas 1: kemampuan spesifik yang relevan dengan use case pertama",
+    "Kapabilitas 2: kemampuan yang menjawab pain point utama stakeholder",
+    "Kapabilitas 3: kemampuan yang memanfaatkan konteks regulasi domain ini",
+    "Kapabilitas 4: kemampuan yang menghasilkan output nyata (dokumen, panduan, dll)",
+    "Kapabilitas 5: kemampuan yang mendukung metrik sukses yang teridentifikasi"
+  ],
+  "limitations": [
+    "Batasan 1: hal spesifik yang TIDAK bisa dilakukan chatbot ini (batas tanggung jawab)",
+    "Batasan 2: kondisi di mana chatbot harus merujuk ke ahli atau otoritas terkait",
+    "Batasan 3: jenis informasi yang tidak dapat dikonfirmasi karena sifat domain"
+  ]
+}
+
+PENTING: Setiap kapabilitas harus bisa langsung dipahami oleh stakeholder yang teridentifikasi.`;
+
+      } else if (level === "agent-persona") {
+        multiclawPrompt = `Anda adalah MULTICLAW — agen sintesis Gustafta. Ciptakan PERSONA AGEN AI (L5) yang kuat dan komprehensif menggunakan analisis domain ini.
+
+TOPIK/DOMAIN AGEN: ${topic.trim()}
+KONTEKS HIERARKI: ${hierarchyContext || "Mandiri"}
+${domainContext}
+
+Hasilkan JSON dengan field berikut (isi SEMUA field dengan konten yang kaya dan spesifik):
+{
+  "name": "Nama persona yang berkarakter kuat. Bisa menggunakan nama metafor profesional (mis: 'Arjuna SKK', 'Konsul SBU Pro', 'BNSP Navigator') atau nama yang menggambarkan keahlian. Maks 50 karakter.",
+  "tagline": "Tagline 1 kalimat yang menangkap esensi keahlian dan proposisi nilai agen. Contoh: 'Panduan cerdas navigasi persyaratan SKK & sertifikasi tenaga ahli konstruksi Indonesia'. Maks 100 karakter.",
+  "description": "2-3 kalimat memperkenalkan agen: latar belakang keahlian, bidang spesialisasi spesifik, dan pendekatan unik dalam membantu pengguna. Tulis seperti profil profesional.",
+  "greetingMessage": "Pesan sambutan yang hangat, personal, dan mengundang percakapan. Sebutkan keahlian domain secara spesifik. Ajukan pertanyaan pembuka atau tawaran bantuan konkret. 2-3 kalimat.",
+  "conversationStarters": [
+    "Pertanyaan yang paling sering ditanyakan stakeholder tentang pain point utama?",
+    "Pertanyaan yang mendorong eksplorasi use case paling bernilai?",
+    "Pertanyaan tentang regulasi atau prosedur yang paling membingungkan?",
+    "Pertanyaan yang menghasilkan panduan langkah-demi-langkah?",
+    "Pertanyaan yang membantu stakeholder menilai posisi mereka saat ini?"
+  ],
+  "philosophy": "Filosofi komunikasi agen: prinsip-prinsip panduan dalam berinteraksi dengan pengguna. Mencakup: nada (formal/semi-formal/conversational), pendekatan (Socratic/direktif/kolaboratif), nilai-nilai utama (akurasi, empati, kejelasan), dan komitmen terhadap kualitas jawaban.",
+  "offTopicHandling": "Pilih SATU nilai ini persis: politely_redirect (untuk domain sensitif yang perlu fokus), acknowledge_and_decline (untuk domain hukum/medis/keuangan), attempt_to_help (untuk domain umum yang fleksibel), strict_boundaries (untuk domain regulasi yang ketat). Sesuaikan dengan kompleksitas domain.",
+  "offTopicResponse": "Pesan kustom yang akan disampaikan agen ketika pertanyaan di luar cakupan. Harus terdengar profesional dan mengarahkan pengguna ke sumber yang tepat. 1-2 kalimat.",
+  "systemPrompt": "System prompt LENGKAP (min 250 kata) yang mendefinisikan identitas agen secara komprehensif. Harus mencakup: (1) Identitas dan peran spesifik, (2) Domain keahlian dengan detail teknis, (3) Cara berkomunikasi dan nada bahasa, (4) Protokol menjawab pertanyaan (format, panjang, referensi sumber), (5) Batasan dan hal yang harus dirujuk ke ahli, (6) Disclaimer wajib sesuai domain, (7) Cara menangani ketidakpastian atau informasi yang berubah. Tulis dalam Bahasa Indonesia profesional."
+}
+
+KRITIS: systemPrompt harus benar-benar komprehensif dan langsung bisa digunakan. Jangan buat template generik — isi dengan konten domain yang spesifik dari analisis OpenClaw.`;
+
+      } else if (level === "agent-policy") {
+        multiclawPrompt = `Anda adalah MULTICLAW — agen sintesis Gustafta. Hasilkan KEBIJAKAN AGEN (Policy L5) yang komprehensif, operasional, dan terpadu untuk domain ini.
+
+TOPIK/DOMAIN AGEN: ${topic.trim()}
+KONTEKS HIERARKI: ${hierarchyContext || "Mandiri"}
+${domainContext}
+
+Hasilkan JSON dengan field berikut (isi SEMUA field dengan kebijakan yang konkret dan actionable):
+{
+  "primaryOutcome": "Pilih SATU nilai persis dari daftar ini (salin persis): user_education, Menyelesaikan tiket, Menghasilkan dokumen, Menutup penjualan, Mendidik pengguna, Mengumpulkan data, Audit & compliance. Pilih yang paling sesuai dengan tujuan agen di domain ini.",
+  "conversationWinConditions": "Definisi konkret kapan sebuah percakapan dianggap berhasil. Cantumkan: (1) kondisi minimal yang harus terpenuhi, (2) kondisi ideal/optimal, (3) metrik/sinyal keberhasilan. Spesifik ke domain. Min 3 kalimat.",
+  "brandVoiceSpec": "Spesifikasi suara brand yang lengkap: (1) Nada: formal/profesional/hangat/teknis, (2) Sapaan dan bahasa: bahasa baku/campuran/sesuai konteks, (3) Kata-kata kunci yang HARUS digunakan saat relevan, (4) Kata/frasa yang HARUS dihindari, (5) Panjang jawaban ideal, (6) Penggunaan bullet/numbering/paragraf. Spesifik ke identitas brand domain ini.",
+  "interactionPolicy": "Kebijakan interaksi lengkap mencakup: (1) Cara menangani pertanyaan ambigu (minta klarifikasi atau asumsikan konteks terdekat), (2) Cara merespons pengguna yang frustrasi atau konflik, (3) Kapan dan bagaimana melakukan eskalasi ke manusia, (4) Cara merespons pertanyaan multi-bagian, (5) Batas jumlah tindak lanjut sebelum menutup topik. Min 4 kalimat.",
+  "domainCharter": "Piagam domain yang jelas: (1) DAFTAR topik yang BOLEH dibahas (setidaknya 5 topik spesifik dari domain ini), (2) DAFTAR topik yang TIDAK BOLEH dibahas atau harus dirujuk ke ahli lain (setidaknya 3 topik), (3) Area abu-abu yang memerlukan disclaimer. Format sebagai narasi yang jelas.",
+  "qualityBar": "Standar kualitas jawaban yang terukur: (1) Panjang ideal per jenis pertanyaan (singkat/sedang/komprehensif), (2) Format output yang disukai (bullet, numbered, tabel, prosa), (3) Standar akurasi dan cara mengindikasikan tingkat kepastian, (4) Cara mengutip sumber atau regulasi yang relevan, (5) Standar untuk menyertakan contoh konkret. Min 4 kalimat.",
+  "riskCompliance": "Manajemen risiko dan kepatuhan yang komprehensif: (1) Disclaimer wajib yang harus disertakan untuk topik sensitif, (2) Topik spesifik yang HARUS selalu dirujuk ke profesional/otoritas terkait, (3) Batasan legal atau etis yang tidak boleh dilanggar, (4) Cara menangani informasi yang berpotensi kadaluarsa/berubah, (5) Protokol perlindungan data pengguna dan privasi. Min 5 kalimat."
+}
+
+KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan template generik. Gunakan informasi dari analisis OpenClaw untuk membuat kebijakan yang relevan.`;
+      }
+
+      const multiclawResponse = await aiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `Anda adalah MULTICLAW — agen sintesis lintas-domain dalam platform Gustafta. Anda menerima hasil analisis dari agen OPENCLAW dan menggunakannya untuk menghasilkan konfigurasi yang komprehensif, kohesif, dan sangat spesifik ke domain. Selalu hasilkan JSON yang valid dengan SEMUA field terisi penuh. Jangan pernah mengosongkan field atau menggunakan placeholder. Gunakan Bahasa Indonesia profesional.`,
+          },
+          {
+            role: "user",
+            content: multiclawPrompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: level === "agent-persona" ? 3500 : level === "agent-policy" ? 3000 : 2000,
+        response_format: { type: "json_object" },
+      });
+
+      const raw = multiclawResponse.choices[0]?.message?.content || "{}";
       let parsed: any = {};
       try { parsed = JSON.parse(raw); } catch { parsed = {}; }
 
-      res.json({ result: parsed, level });
+      // Post-process: normalize offTopicHandling to valid enum value
+      if (level === "agent-persona" && parsed.offTopicHandling) {
+        const validOTH = ["politely_redirect", "acknowledge_and_decline", "attempt_to_help", "strict_boundaries"];
+        const raw = String(parsed.offTopicHandling).toLowerCase().trim();
+        const matched = validOTH.find(v => raw.includes(v) || raw.includes(v.replace("_", " ")));
+        parsed.offTopicHandling = matched || (
+          domainAnalysis.domainComplexity === "high" ? "acknowledge_and_decline" : "politely_redirect"
+        );
+      }
+
+      // Post-process: normalize primaryOutcome to valid select value
+      if (level === "agent-policy" && parsed.primaryOutcome) {
+        const validPO = ["user_education", "Menyelesaikan tiket", "Menghasilkan dokumen", "Menutup penjualan", "Mendidik pengguna", "Mengumpulkan data", "Audit & compliance", "Lainnya"];
+        const rawPO = String(parsed.primaryOutcome).toLowerCase().trim();
+        const matched = validPO.find(v => rawPO.includes(v.toLowerCase()) || v.toLowerCase().includes(rawPO));
+        parsed.primaryOutcome = matched || "user_education";
+      }
+
+      res.json({ result: parsed, level, domainAnalysis });
     } catch (error: any) {
       console.error("[AI generate-config] Error:", error);
       res.status(500).json({ error: "Gagal generate konfigurasi: " + (error.message || "Unknown error") });
