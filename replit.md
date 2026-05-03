@@ -3,16 +3,24 @@
 ## Overview
 Gustafta is an AI chatbot builder platform designed for creating, configuring, and deploying intelligent conversational assistants. It now includes **LexCom**, an integrated Indonesian Legal AI Chatbot system featuring a LEX-ORCHESTRATOR with 12 specialized legal agents and a floating "Chaesa Lexbot" widget. It features a two-panel dashboard, multi-channel integrations, and supports various AI models. The platform enables users to manage multiple chatbot agents with custom personas and knowledge bases, integrate with popular messaging platforms, embed web widgets, and access analytics. Gustafta aims to provide a comprehensive ecosystem for building and monetizing AI-powered conversational experiences.
 
-The platform utilizes a 5-level modular hierarchical structure (Master → Series HUB → Sub-HUB → Specialist → Deep Specialist) to organize 748 chatbot agents across 57 specialized series. This structure supports applications like managing Indonesian construction company needs (Odoo ERP lifecycle, CSMS compliance) and professional certification body operations.
+The platform utilizes a 5-level modular hierarchical structure (Master → Series HUB → Sub-HUB → Specialist → Deep Specialist) to organize 799 chatbot agents across 57 specialized series. This structure supports applications like managing Indonesian construction company needs (Odoo ERP lifecycle, CSMS compliance) and professional certification body operations.
 
-**Agent Hierarchy (Post-Audit Fix — May 2026):**
-- Level 1 (1 agent): #768 GUSTAFTA MASTER — Router Utama Platform (new master orchestrator)
+**Agent Hierarchy (Post-Enrichment — May 2026):**
+- Level 1 (1 agent): #768 GUSTAFTA MASTER — Router Utama Platform
 - Level 2 (49 agents): Series HUBs (Regulasi, CSMS, CIVILPRO, Tender, Legal, SBU Coach, SKK Coach, LexCom, etc.)
-- Level 3 (505 agents): Sub-HUBs and specialist agents
-- Level 4 (185 agents): Deep specialist agents
-- Level 5 (8 agents): Leaf-level specialist agents
-- Total orchestrators: 107 (all with orchestrator_config filled)
-- All 748 agents have parent_agent_id set (true 5-level hierarchy, zero orphans)
+- Level 3 (461 agents): Sub-HUBs and specialist agents
+- Level 4 (268 agents): Deep specialist agents
+- Level 5 (20 agents): Leaf-level specialist agents
+- Total orchestrators: 107 (all with orchestrator_config synced to actual DB children)
+- Total specialists: 692 (100% field aligned: agent_role, work_mode, behavior_preset, primary_outcome)
+- ALL 799 agents: system_prompt ✅, context_questions ✅, deliverables ✅, category ✅
+- Zero orphan agents — full 5-level hierarchy from Master #768
+
+**Key Structural Fixes (May 2026 Session):**
+- 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
+- 36 new specialists added for 9 SKK Bidang sub-HUBs (#150 Sipil, #151 Arsitektur, #152 Energi, #153 Sains Rekayasa, #154 Mekanikal, #155 Manajemen Pelaksanaan, #156 PWK, #157 Lanskap/Interior/Iluminasi, #158 Tata Lingkungan) — 4 specialists each
+- 15 new specialists added to thin HUBs: #302 LKUT (+3), #308 IMS (+3), #311 SMK3 (+3), #317 Pancek & Integritas (+2), #320 KCI Dashboard (+4)
+- ALL HUBs now have at least 1 child agent (zero empty orchestrators)
 
 A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots and risk assessments. A "Deliverables" panel allows defining output types for each agent, with pre-built bundles and quick-action chat buttons.
 
