@@ -24,6 +24,19 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
 - big_idea_id linked: 798/799 agents linked to 232/233 Big Ideas (only Master #768 root is NULL by design)
 - Linking strategy: exact name match vs toolboxes (647), manual series-based mapping (92), parent propagation (59)
 
+**Chatbot Prospektif 2026 (Added May 2026):**
+- 10 new HUBs + 45 specialists = 55 new agents (IDs 820-874)
+- ARCONA — Bangunan Gedung Hub (#820, 8 specialists): PBG, SLF, Struktur, MEP, Kebakaran, Aksesibilitas, RTBL, Audit Kelaikan
+- LSP-FAQ Peserta Hub (#829, 4 specialists): Skema, Jadwal, Dokumen, AJJ Digital
+- HPS Validator Bot (#834, 4 specialists): AHSP, Market Benchmark, Red Flag, Overhead
+- Pajak Konstruksi CoreTax Bot (#839, 4 specialists): CoreTax Nav, PPh 4(2), PPN, SPT
+- Cash Flow Project Bot (#844, 4 specialists): Termin, Modal Kerja, Invoice, Forecast
+- Risk Register Bot (#849, 4 specialists): Teknis, K3, Legal, Finansial
+- AsesorBot LSP SDMKI (#854, 5 specialists): MMA, APL, Portfolio, Decision, Etika
+- KontrakBot Konstruksi (#860, 4 specialists): FIDIC, PUPR, Amandemen, Klaim/Dispute
+- OSS-RBA Bot (#865, 4 specialists): KBLI, NIB Flow, Perizinan Sektoral, Audit
+- PDP Compliance Bot (#870, 4 specialists): PDP Audit, PPD/DPO, Breach Response, Klausul Data
+
 A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots and risk assessments. A "Deliverables" panel allows defining output types for each agent, with pre-built bundles and quick-action chat buttons.
 
 Gustafta converts any chatbot into four digital products: eBook Kompetensi, eCourse Modul Belajar, Generator Dokumen, and Chaesa AI Studio Bridge for external AI prompt generation. Monetization is supported through flexible pricing models, guest message limits, trial periods, and a voucher system. A "Conversion Layer" handles lead capture, scoring, and smart call-to-action triggers. Chatbots can include an "Orchestrator Multi-Agent" system for routing messages to specialist agents based on intent.
