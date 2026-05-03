@@ -11,10 +11,10 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
 - Level 3 (461 agents): Sub-HUBs and specialist agents
 - Level 4 (268 agents): Deep specialist agents
 - Level 5 (20 agents): Leaf-level specialist agents
-- Total orchestrators: 107 (all with orchestrator_config synced to actual DB children)
-- Total specialists: 692 (100% field aligned: agent_role, work_mode, behavior_preset, primary_outcome)
-- ALL 799 agents: system_prompt ✅, context_questions ✅, deliverables ✅, category ✅
-- Zero orphan agents — full 5-level hierarchy from Master #768
+- Total orchestrators: 122 (all with orchestrator_config synced to actual DB children)
+- Total specialists: 777 (100% field aligned: agent_role, work_mode, behavior_preset, primary_outcome)
+- ALL 899 agents: system_prompt ✅, context_questions ✅, deliverables ✅
+- Zero orphan agents — full hierarchy from Master #768
 
 **Key Structural Fixes (May 2026 Session):**
 - 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
@@ -24,7 +24,7 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
 - big_idea_id linked: 798/799 agents linked to 232/233 Big Ideas (only Master #768 root is NULL by design)
 - Linking strategy: exact name match vs toolboxes (647), manual series-based mapping (92), parent propagation (59)
 
-**Chatbot Prospektif 2026 (Added May 2026):**
+**Chatbot Prospektif 2026 — Batch 1 (Added May 2026):**
 - 10 new HUBs + 45 specialists = 55 new agents (IDs 820-874)
 - ARCONA — Bangunan Gedung Hub (#820, 8 specialists): PBG, SLF, Struktur, MEP, Kebakaran, Aksesibilitas, RTBL, Audit Kelaikan
 - LSP-FAQ Peserta Hub (#829, 4 specialists): Skema, Jadwal, Dokumen, AJJ Digital
@@ -36,6 +36,16 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
 - KontrakBot Konstruksi (#860, 4 specialists): FIDIC, PUPR, Amandemen, Klaim/Dispute
 - OSS-RBA Bot (#865, 4 specialists): KBLI, NIB Flow, Perizinan Sektoral, Audit
 - PDP Compliance Bot (#870, 4 specialists): PDP Audit, PPD/DPO, Breach Response, Klausul Data
+
+**Chatbot Prospektif 2026 — Batch 2 (Added May 2026):**
+- 5 new HUBs + 40 specialists = 45 new agents (IDs 875-919)
+- All agents: system_prompt ✅, description ✅, tagline ✅, greeting ✅, personality ✅, conversation_starters ✅, expertise ✅, context_questions ✅, deliverables ✅, domain_charter ✅, quality_bar ✅, product_summary ✅, product_features ✅, orchestrator_config ✅
+- All HUBs: landing_page fields ✅ (headline, subheadline, CTA, pain_points, solution, benefits)
+- MRP-A — Manajer Rantai Pasok Konstruksi (#875, S3, big_idea_id=174): 7 specialists (#876-882) — Vendor Scoring, Material QC Inspector, Equipment Fitness Tracker, Supply Chain Risk Register, SOP & Contract Generator, LKUT Evidence Builder, Inventory Simulator
+- Manajer Proyek KPBU (#883, S8, big_idea_id=77): 7 specialists (#884-890) — Project Identifier, OBC/FBC Builder, Financial Model & VfM Analyst, Risk Allocation Matrix, Procurement & Tender Advisor, Government Support & Guarantee Calculator, Contract & Lifecycle Manager
+- PROXIMA — Manajer Proyek Konstruksi (#891, big_idea_id=147): 10 specialists (#892-901) — AGENT-CHARTER (Carter), AGENT-WBS (Webe), AGENT-SCHEDULE (Skedu), AGENT-COST (Kosta), AGENT-RISK (Rizko), AGENT-QUALITY (Kualit), AGENT-PROCURE (Prokur), AGENT-CHANGE (Chang), AGENT-COMM (Komun), AGENT-CLOSEOUT (Kloz)
+- Manajer Keuangan Konstruksi (#902, S7, big_idea_id=145): 7 specialists (#903-909) — RAB & Cost Estimator, Cash Flow & Termin Planner, Cost Control & EVM Analyst, Tax & Compliance Advisor, Claim & Variation Calculator, Financial Report & Audit Helper, SKK Finance Exam Simulator
+- KONSTRA-ORCHESTRATOR (#910, big_idea_id=59): 9 specialists (#911-919) — AGENT-PROXIMA, AGENT-TEKNIK, AGENT-KONTRAK, AGENT-SAFIRA, AGENT-MUTU, AGENT-ENVIRA, AGENT-EQUIPRA, AGENT-LOGIS, AGENT-FINTAX
 
 A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots and risk assessments. A "Deliverables" panel allows defining output types for each agent, with pre-built bundles and quick-action chat buttons.
 
