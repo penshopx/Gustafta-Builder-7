@@ -16,6 +16,17 @@ The platform utilizes a 5-level modular hierarchical structure (Master → Serie
 - ALL 899 agents: system_prompt ✅, context_questions ✅, deliverables ✅
 - Zero orphan agents — full hierarchy from Master #768
 
+**Knowledge Base (May 2026 — FULLY POPULATED):**
+- knowledge_taxonomy: 8 sektor + 32 subsektor = 40 nodes (script: scripts/seed-knowledge-taxonomy.ts)
+- knowledge_bases: 3,018 entries untuk 897 agen aktif (script: scripts/seed-knowledge-bases-all.ts)
+  - Foundational (regulasi & standar): 1,102 entries
+  - Operational (SOP & prosedur): 897 entries
+  - Compliance (guardrails & batas domain): 897 entries
+  - Tactical (routing multi-agent, HUBs only): 122 entries
+  - URL references (sumber resmi web): 205 entries
+- RAG enabled: 897/897 agen (rag_enabled=true, chunk_size=512, overlap=64, top_k=5)
+- Domain taxonomy coverage: SKK (949 KB), Regulasi Induk (603 KB), SBU (177 KB), Kontrak (111 KB), Tender (99 KB), K3/SMAP (201 KB), Pelaksanaan (134 KB), dll.
+
 **Key Structural Fixes (May 2026 Session):**
 - 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
 - 36 new specialists added for 9 SKK Bidang sub-HUBs (#150 Sipil, #151 Arsitektur, #152 Energi, #153 Sains Rekayasa, #154 Mekanikal, #155 Manajemen Pelaksanaan, #156 PWK, #157 Lanskap/Interior/Iluminasi, #158 Tata Lingkungan) — 4 specialists each
