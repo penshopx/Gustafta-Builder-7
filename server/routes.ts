@@ -9579,6 +9579,173 @@ KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan
     }
   });
 
+  // ── AI SINGLE FIELD REGEN ─────────────────────────────────────────────────
+  app.post("/api/ai/regen-field", isAuthenticated, async (req, res) => {
+    try {
+      const { fieldName, fieldLabel, fieldType, agentContext = {}, currentValue = "", level = "agent-persona" } = req.body;
+      if (!fieldName) return res.status(400).json({ error: "fieldName wajib diisi" });
+
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+
+      const aiClient = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+
+      const contextStr = [
+        agentContext.agentName && `Nama Agen: ${agentContext.agentName}`,
+        agentContext.agentDescription && `Deskripsi Agen: ${agentContext.agentDescription}`,
+        agentContext.systemPromptSnippet && `Sistem Prompt (ringkasan): ${agentContext.systemPromptSnippet?.slice(0, 200)}...`,
+        agentContext.toolboxName && `Chatbot Induk: ${agentContext.toolboxName}`,
+        agentContext.bigIdeaName && `Modul Induk: ${agentContext.bigIdeaName}`,
+      ].filter(Boolean).join("\n");
+
+      const currentNote = currentValue?.trim()
+        ? `\nNilai saat ini (perbaiki jika lemah, atau buat baru yang lebih baik):\n"${currentValue.slice(0, 300)}"`
+        : "\nField ini masih kosong — hasilkan konten yang komprehensif.";
+
+      const fieldInstructions: Record<string, string> = {
+        name: "Hasilkan nama agen yang kuat dan berkarakter. Maks 50 karakter. Bisa nama metafor profesional atau nama yang menggambarkan keahlian domain.",
+        tagline: "Hasilkan tagline 1 kalimat yang menangkap esensi keahlian dan proposisi nilai agen. Maks 100 karakter.",
+        description: "Hasilkan deskripsi 2-3 kalimat yang memperkenalkan agen: latar belakang keahlian, bidang spesialisasi spesifik, dan pendekatan unik dalam membantu pengguna.",
+        greetingMessage: "Hasilkan pesan sambutan yang hangat, personal, dan mengundang percakapan. Sebutkan keahlian domain secara spesifik. Ajukan pertanyaan pembuka atau tawaran bantuan konkret. 2-3 kalimat.",
+        philosophy: "Hasilkan filosofi komunikasi: prinsip panduan dalam berinteraksi — nada, pendekatan (Socratic/direktif/kolaboratif), nilai utama (akurasi, empati, kejelasan). 3-4 kalimat.",
+        systemPrompt: "Hasilkan system prompt LENGKAP (min 250 kata) yang mencakup: identitas & peran, domain keahlian teknis, cara berkomunikasi, protokol menjawab, batasan & hal yang dirujuk ke ahli, disclaimer wajib, cara menangani ketidakpastian.",
+        offTopicResponse: "Hasilkan pesan sopan dan profesional yang disampaikan agen ketika menerima pertanyaan di luar cakupan. Arahkan ke sumber yang tepat. 1-2 kalimat.",
+        conversationWinConditions: "Hasilkan definisi konkret kapan percakapan berhasil: kondisi minimal, kondisi ideal, dan sinyal keberhasilan. Min 3 kalimat.",
+        brandVoiceSpec: "Hasilkan spesifikasi brand voice: nada, formalitas, sapaan, kata yang dianjurkan/dihindari, panjang jawaban ideal, format output. Min 4 kalimat.",
+        interactionPolicy: "Hasilkan kebijakan interaksi: cara menangani pertanyaan ambigu, pengguna frustrasi, eskalasi, multi-bagian, batas follow-up. Min 4 kalimat.",
+        domainCharter: "Hasilkan piagam domain: 5+ topik yang BOLEH dibahas (spesifik), 3+ topik yang TIDAK BOLEH dibahas, area abu-abu dengan disclaimer. Format narasi jelas.",
+        qualityBar: "Hasilkan standar kualitas: panjang ideal per jenis pertanyaan, format output, standar akurasi, cara kutip sumber/regulasi, kapan sertakan contoh. Min 4 kalimat.",
+        riskCompliance: "Hasilkan manajemen risiko: disclaimer wajib, topik yang harus dirujuk ke profesional, batasan legal/etis, cara tangani info kadaluarsa, protokol privasi. Min 5 kalimat.",
+      };
+
+      const instruction = fieldInstructions[fieldName] || `Hasilkan konten berkualitas tinggi untuk field "${fieldLabel || fieldName}". Spesifik ke domain agen ini.`;
+
+      const response = await aiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `Anda adalah FIELD-REGEN agent dalam ekosistem Gustafta AI. Tugas Anda: regenerasi satu field konfigurasi chatbot dengan kualitas tinggi, spesifik ke domain agen yang diberikan. Hasilkan JSON: { "value": "isi field yang dihasilkan", "rationale": "alasan singkat mengapa konten ini tepat untuk domain ini (1 kalimat)" }. Gunakan Bahasa Indonesia profesional.`,
+          },
+          {
+            role: "user",
+            content: `KONTEKS AGEN:\n${contextStr || "Agen mandiri tanpa konteks tambahan"}\n\nFIELD YANG DIRE-GENERATE: ${fieldLabel || fieldName}\nTARGET LEVEL: ${level}\n${currentNote}\n\nINSTRUKSI:\n${instruction}\n\nReturn JSON dengan "value" dan "rationale".`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: fieldName === "systemPrompt" ? 2000 : 600,
+        response_format: { type: "json_object" },
+      });
+
+      const raw = response.choices[0]?.message?.content || "{}";
+      let parsed: any = {};
+      try { parsed = JSON.parse(raw); } catch { parsed = { value: raw, rationale: "" }; }
+
+      res.json({ value: parsed.value || "", rationale: parsed.rationale || "", fieldName });
+    } catch (error: any) {
+      console.error("[AI regen-field] Error:", error);
+      res.status(500).json({ error: "Gagal regenerasi field: " + (error.message || "Unknown error") });
+    }
+  });
+
+  // ── AI ORCHESTRATION PLAN — Multi-Agent Routing & Handoff Designer ─────
+  app.post("/api/ai/orchestration-plan", isAuthenticated, async (req, res) => {
+    try {
+      const { toolboxId, toolboxName, bigIdeaName } = req.body;
+      if (!toolboxId) return res.status(400).json({ error: "toolboxId wajib diisi" });
+
+      const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+      const openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+      if (!openaiKey) return res.status(503).json({ error: "AI API key tidak tersedia" });
+
+      const agents = await storage.getAgents(toolboxId);
+      if (!agents || agents.length === 0) {
+        return res.status(404).json({ error: "Tidak ada agen dalam chatbot ini" });
+      }
+
+      const aiClient = new OpenAI({ apiKey: openaiKey, ...(openaiBaseURL ? { baseURL: openaiBaseURL } : {}) });
+
+      const agentSummaries = agents.map((a: any, idx: number) => ({
+        index: idx + 1,
+        id: a.id,
+        name: a.name,
+        tagline: a.tagline || "",
+        description: a.description || "",
+        isOrchestrator: a.isOrchestrator || false,
+        role: (a as any).agentRole || "Standalone",
+        systemPromptSnippet: a.systemPrompt ? a.systemPrompt.slice(0, 300) + "..." : "(belum ada system prompt)",
+        domainCharter: (a as any).domainCharter ? (a as any).domainCharter.slice(0, 200) : "(belum ada domain charter)",
+      }));
+
+      const orchestrators = agentSummaries.filter(a => a.isOrchestrator);
+      const specialists = agentSummaries.filter(a => !a.isOrchestrator);
+
+      const agentList = agentSummaries.map(a =>
+        `[${a.index}] ${a.isOrchestrator ? "🎯 ORCHESTRATOR" : "🤖 SPECIALIST"} — ${a.name}
+   Tagline: ${a.tagline}
+   Deskripsi: ${a.description}
+   Domain Charter: ${a.domainCharter}
+   System Prompt: ${a.systemPromptSnippet}`
+      ).join("\n\n");
+
+      // Stage 1: Domain analysis of each agent
+      const domainAnalysisRes = await aiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `Anda adalah OPENCLAW orchestration analyst. Analisis domain coverage setiap agen dalam chatbot multi-agen. Hasilkan JSON: { "agentDomains": [{ "agentId": "id", "agentName": "nama", "primaryDomain": "domain utama", "keywords": ["keyword1", "keyword2", "keyword3"], "strength": "kekuatan unik agen ini" }] }`,
+          },
+          {
+            role: "user",
+            content: `Chatbot: "${toolboxName || "Chatbot Multi-Agen"}"\nModul: "${bigIdeaName || ""}"\n\nDaftar agen:\n\n${agentList}\n\nAnalisis domain utama, kata kunci routing, dan kekuatan unik setiap agen.`,
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 1200,
+        response_format: { type: "json_object" },
+      });
+
+      let domainData: any = {};
+      try { domainData = JSON.parse(domainAnalysisRes.choices[0]?.message?.content || "{}"); } catch {}
+
+      // Stage 2: Generate full orchestration plan
+      const planRes = await aiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `Anda adalah MULTICLAW orchestration designer. Rancang orchestration plan lengkap untuk sistem multi-agen. Hasilkan JSON dengan struktur:
+{
+  "executiveSummary": "ringkasan arsitektur multi-agen ini dalam 2-3 kalimat",
+  "routingRules": [{ "condition": "kondisi/jenis pertanyaan yang memicu", "routeTo": "nama agen tujuan", "reason": "mengapa agen ini paling tepat" }],
+  "handoffProtocols": [{ "from": "nama agen asal", "to": "nama agen tujuan", "trigger": "kapan handoff terjadi", "dataToPass": "informasi apa yang diteruskan" }],
+  "gapAnalysis": { "coveredDomains": ["domain yang sudah dicakup"], "gaps": ["area yang belum dicakup oleh agen manapun"], "overlaps": ["area yang mungkin ditangani lebih dari 1 agen — perlu disambiguasi"] },
+  "orchestratorSystemPromptAddition": "bagian tambahan yang HARUS ditambahkan ke system prompt orchestrator agar ia dapat melakukan routing dengan benar. Sertakan routing rules dan kondisi handoff secara eksplisit dalam teks. Min 200 kata.",
+  "agentRoleRecommendations": [{ "agentName": "nama agen", "currentRole": "Standalone/Specialist", "recommendedRole": "Standalone/Specialist/Lead", "reason": "alasan perubahan jika diperlukan" }]
+}`,
+          },
+          {
+            role: "user",
+            content: `Chatbot: "${toolboxName || "Chatbot Multi-Agen"}"\nModul: "${bigIdeaName || ""}"\n\nDaftar agen:\n${agentList}\n\nHasil analisis domain:\n${JSON.stringify(domainData, null, 2)}\n\nOrchestrators: ${orchestrators.map(o => o.name).join(", ") || "Belum ada"}\nSpecialists: ${specialists.map(s => s.name).join(", ")}\n\nRancang orchestration plan yang komprehensif dan actionable.`,
+          },
+        ],
+        temperature: 0.6,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+
+      let plan: any = {};
+      try { plan = JSON.parse(planRes.choices[0]?.message?.content || "{}"); } catch {}
+
+      res.json({ plan, domainAnalysis: domainData, agentCount: agents.length, agents: agentSummaries.map(a => ({ id: a.id, name: a.name, isOrchestrator: a.isOrchestrator })) });
+    } catch (error: any) {
+      console.error("[AI orchestration-plan] Error:", error);
+      res.status(500).json({ error: "Gagal membuat orchestration plan: " + (error.message || "Unknown error") });
+    }
+  });
+
   registerLegalRoutes(app);
 
   return httpServer;

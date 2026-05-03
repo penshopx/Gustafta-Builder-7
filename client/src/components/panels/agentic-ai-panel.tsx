@@ -702,6 +702,9 @@ export function AgenticAIPanel() {
   const [newSpecName, setNewSpecName] = useState("");
   const [newSpecIcon, setNewSpecIcon] = useState("🤖");
   const [newSpecPrompt, setNewSpecPrompt] = useState("");
+  const [isPlanning, setIsPlanning] = useState(false);
+  const [orchPlan, setOrchPlan] = useState<any>(null);
+  const [planExpanded, setPlanExpanded] = useState(false);
 
   useEffect(() => {
     if (agent) {
@@ -1358,6 +1361,225 @@ export function AgenticAIPanel() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ── MULTICLAW ORCHESTRATION PLANNER ── */}
+      {(agent as any).toolboxId && (
+        <Card className="border-2 border-cyan-300/60 dark:border-cyan-700/40 bg-cyan-50/30 dark:bg-cyan-950/10">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center w-7 h-7 rounded-md bg-cyan-500/15">
+                  <Network className="h-4 w-4 text-cyan-500" />
+                </div>
+                <CardTitle className="text-base">MultiClaw Orchestration Planner</CardTitle>
+                <Badge variant="outline" className="text-[10px] font-semibold px-1.5 py-0 border-cyan-400 text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/30">
+                  AI
+                </Badge>
+              </div>
+              <span className="text-[10px] font-mono text-muted-foreground tracking-widest">MULTI-AGENT</span>
+            </div>
+            <CardDescription className="text-xs mt-1">
+              AI menganalisis semua agen dalam chatbot ini dan merancang routing rules, handoff protocol, gap analysis, serta saran orchestrator system prompt secara otomatis.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2 border-cyan-400/60 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-950/30"
+              disabled={isPlanning}
+              data-testid="button-generate-orchestration-plan"
+              onClick={async () => {
+                setIsPlanning(true);
+                setOrchPlan(null);
+                try {
+                  const res = await apiRequest("POST", "/api/ai/orchestration-plan", {
+                    toolboxId: (agent as any).toolboxId,
+                    toolboxName: (agent as any).toolboxName || "",
+                    bigIdeaName: (agent as any).bigIdeaName || "",
+                  });
+                  setOrchPlan(res);
+                  setPlanExpanded(true);
+                  toast({ title: `Orchestration Plan Selesai ✓`, description: `${res.agentCount} agen dianalisis. Routing rules & handoff protocol siap.` });
+                } catch (err: any) {
+                  toast({ title: "Gagal membuat plan", description: err?.message || "Coba lagi.", variant: "destructive" });
+                } finally {
+                  setIsPlanning(false);
+                }
+              }}
+            >
+              {isPlanning ? (
+                <>
+                  <RefreshCcw className="h-4 w-4 animate-spin" />
+                  Menganalisis agen & merancang plan...
+                </>
+              ) : (
+                <>
+                  <Network className="h-4 w-4" />
+                  {orchPlan ? "Regenerasi Orchestration Plan" : "Generate Orchestration Plan"}
+                </>
+              )}
+            </Button>
+
+            {orchPlan && (
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between text-sm font-medium text-cyan-700 dark:text-cyan-300 hover:text-cyan-800"
+                  onClick={() => setPlanExpanded(!planExpanded)}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <GitBranch className="h-3.5 w-3.5" />
+                    Hasil Plan ({orchPlan.agentCount} agen)
+                  </span>
+                  {planExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+
+                {planExpanded && (
+                  <div className="space-y-4 text-sm">
+                    {/* Executive Summary */}
+                    {orchPlan.plan?.executiveSummary && (
+                      <div className="rounded-lg bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800 p-3">
+                        <p className="text-xs font-semibold text-cyan-700 dark:text-cyan-300 mb-1 flex items-center gap-1">
+                          <Brain className="h-3 w-3" /> Ringkasan Arsitektur
+                        </p>
+                        <p className="text-xs text-foreground leading-relaxed">{orchPlan.plan.executiveSummary}</p>
+                      </div>
+                    )}
+
+                    {/* Agent roster */}
+                    {orchPlan.agents?.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                          <Bot className="h-3 w-3" /> Agen dalam Chatbot ini
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {orchPlan.agents.map((a: any) => (
+                            <span key={a.id} className={`inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border font-medium ${a.isOrchestrator ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-700" : "bg-muted text-muted-foreground border-border"}`}>
+                              {a.isOrchestrator ? "🎯" : "🤖"} {a.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Routing Rules */}
+                    {orchPlan.plan?.routingRules?.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                          <Layers className="h-3 w-3" /> Routing Rules
+                        </p>
+                        <div className="space-y-1.5">
+                          {orchPlan.plan.routingRules.map((rule: any, i: number) => (
+                            <div key={i} className="rounded-md border border-border bg-muted/30 p-2 space-y-0.5">
+                              <div className="flex items-start gap-1.5">
+                                <ChevronRight className="h-3 w-3 text-cyan-500 shrink-0 mt-0.5" />
+                                <div className="min-w-0">
+                                  <span className="text-[11px] font-medium text-foreground">Jika: </span>
+                                  <span className="text-[11px] text-muted-foreground">{rule.condition}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-start gap-1.5 pl-4">
+                                <span className="text-[11px]">→ Rute ke <span className="font-medium text-cyan-600 dark:text-cyan-400">{rule.routeTo}</span></span>
+                              </div>
+                              {rule.reason && <p className="text-[10px] text-muted-foreground pl-4 italic">{rule.reason}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Handoff Protocols */}
+                    {orchPlan.plan?.handoffProtocols?.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                          <Activity className="h-3 w-3" /> Handoff Protocol
+                        </p>
+                        <div className="space-y-1.5">
+                          {orchPlan.plan.handoffProtocols.map((h: any, i: number) => (
+                            <div key={i} className="rounded-md border border-border bg-muted/30 p-2 text-[11px] space-y-0.5">
+                              <div className="font-medium">{h.from} → {h.to}</div>
+                              <div className="text-muted-foreground">Trigger: {h.trigger}</div>
+                              {h.dataToPass && <div className="text-muted-foreground">Data: {h.dataToPass}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Gap Analysis */}
+                    {orchPlan.plan?.gapAnalysis && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                          <AlertTriangle className="h-3 w-3" /> Gap & Overlap Analysis
+                        </p>
+                        <div className="rounded-md border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 p-2.5 space-y-2 text-[11px]">
+                          {orchPlan.plan.gapAnalysis.gaps?.length > 0 && (
+                            <div>
+                              <span className="font-semibold text-amber-700 dark:text-amber-400">Gap (tidak dicakup): </span>
+                              <span className="text-muted-foreground">{orchPlan.plan.gapAnalysis.gaps.join(", ")}</span>
+                            </div>
+                          )}
+                          {orchPlan.plan.gapAnalysis.overlaps?.length > 0 && (
+                            <div>
+                              <span className="font-semibold text-amber-700 dark:text-amber-400">Overlap: </span>
+                              <span className="text-muted-foreground">{orchPlan.plan.gapAnalysis.overlaps.join(", ")}</span>
+                            </div>
+                          )}
+                          {orchPlan.plan.gapAnalysis.coveredDomains?.length > 0 && (
+                            <div>
+                              <span className="font-semibold text-emerald-700 dark:text-emerald-400">Tercakup: </span>
+                              <span className="text-muted-foreground">{orchPlan.plan.gapAnalysis.coveredDomains.join(", ")}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Orchestrator System Prompt Addition */}
+                    {orchPlan.plan?.orchestratorSystemPromptAddition && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                          <Cpu className="h-3 w-3" /> Tambahan System Prompt Orchestrator
+                        </p>
+                        <div className="rounded-md border border-border bg-muted/30 p-2.5 max-h-40 overflow-y-auto">
+                          <pre className="text-[11px] whitespace-pre-wrap text-foreground leading-relaxed font-sans">{orchPlan.plan.orchestratorSystemPromptAddition}</pre>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full h-7 text-xs gap-1.5 border-violet-400/60 text-violet-700 dark:text-violet-400"
+                          onClick={async () => {
+                            if (!agent) return;
+                            const currentPrompt = (agent as any).systemPrompt || "";
+                            const addition = orchPlan.plan.orchestratorSystemPromptAddition;
+                            const separator = "\n\n---\n## ORCHESTRATION ROUTING RULES\n";
+                            const updated = currentPrompt
+                              ? currentPrompt.includes("ORCHESTRATION ROUTING RULES")
+                                ? currentPrompt
+                                : currentPrompt + separator + addition
+                              : addition;
+                            try {
+                              await updateAgent.mutateAsync({ id: agent.id, data: { systemPrompt: updated } as any });
+                              toast({ title: "System Prompt Diperbarui ✓", description: "Routing rules berhasil ditambahkan ke system prompt orchestrator." });
+                            } catch {
+                              toast({ title: "Gagal memperbarui", variant: "destructive" });
+                            }
+                          }}
+                        >
+                          <CheckCircle2 className="h-3 w-3" />
+                          Tambahkan ke System Prompt Agen Ini
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* OpenClaw Execution Engine Card */}
       <Card className={`border-2 transition-colors ${settings.agenticMode ? "border-orange-400/60 dark:border-orange-600/40" : "border-border opacity-60"}`}>

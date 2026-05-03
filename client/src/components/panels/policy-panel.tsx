@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { AiConfigFill } from "@/components/ai-config-fill";
+import { AiFieldRegen } from "@/components/ai-field-regen";
+import { ConfigHealth } from "@/components/config-health";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -232,6 +234,20 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
         </Button>
       </div>
 
+      {/* Config Health */}
+      <ConfigHealth
+        label="Kelengkapan Kebijakan Agen"
+        fields={[
+          { field: "conversationWinConditions", label: "Win Conditions", value: form.conversationWinConditions, minLength: 30, weight: 2 },
+          { field: "brandVoiceSpec", label: "Brand Voice", value: form.brandVoiceSpec, minLength: 30, weight: 2 },
+          { field: "interactionPolicy", label: "Interaction Policy", value: form.interactionPolicy, minLength: 30, weight: 2 },
+          { field: "domainCharter", label: "Domain Charter", value: form.domainCharter, minLength: 40, weight: 3 },
+          { field: "qualityBar", label: "Quality Bar", value: form.qualityBar, minLength: 30, weight: 2 },
+          { field: "riskCompliance", label: "Risk & Compliance", value: form.riskCompliance, minLength: 30, weight: 2 },
+          { field: "primaryOutcome", label: "Primary Outcome", value: form.primaryOutcome, minLength: 2 },
+        ]}
+      />
+
       {/* AI Auto-Fill Kebijakan */}
       <AiConfigFill
         level="agent-policy"
@@ -308,7 +324,10 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
               <Label className="text-sm font-medium">Conversation Win Conditions</Label>
-              {renderResetButton("conversationWinConditions")}
+              <div className="flex items-center gap-1">
+                <AiFieldRegen fieldName="conversationWinConditions" fieldLabel="Conversation Win Conditions" currentValue={form.conversationWinConditions} agentContext={{ agentName: agent.name, agentDescription: agent.description || "" }} level="agent-policy" onApply={(v) => { setField("conversationWinConditions", v); saveField("conversationWinConditions", v); }} />
+                {renderResetButton("conversationWinConditions")}
+              </div>
             </div>
             <p className="text-xs text-muted-foreground">
               Kapan percakapan dianggap berhasil. Contoh: "Pengguna memahami pasal yang
@@ -340,6 +359,7 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-end gap-2">
+            <AiFieldRegen fieldName="brandVoiceSpec" fieldLabel="Brand Voice" currentValue={form.brandVoiceSpec} agentContext={{ agentName: agent.name, agentDescription: agent.description || "" }} level="agent-policy" onApply={(v) => { setField("brandVoiceSpec", v); saveField("brandVoiceSpec", v); }} />
             {renderResetButton("brandVoiceSpec")}
           </div>
           <Textarea
@@ -367,6 +387,7 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-end gap-2">
+            <AiFieldRegen fieldName="interactionPolicy" fieldLabel="Interaction Policy" currentValue={form.interactionPolicy} agentContext={{ agentName: agent.name, agentDescription: agent.description || "" }} level="agent-policy" onApply={(v) => { setField("interactionPolicy", v); saveField("interactionPolicy", v); }} />
             {renderResetButton("interactionPolicy")}
           </div>
           <Textarea
@@ -394,6 +415,7 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-end gap-2">
+            <AiFieldRegen fieldName="domainCharter" fieldLabel="Domain Charter" currentValue={form.domainCharter} agentContext={{ agentName: agent.name, agentDescription: agent.description || "" }} level="agent-policy" onApply={(v) => { setField("domainCharter", v); saveField("domainCharter", v); }} />
             {renderResetButton("domainCharter")}
           </div>
           <Textarea
@@ -420,6 +442,7 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-end gap-2">
+            <AiFieldRegen fieldName="qualityBar" fieldLabel="Quality Bar" currentValue={form.qualityBar} agentContext={{ agentName: agent.name, agentDescription: agent.description || "" }} level="agent-policy" onApply={(v) => { setField("qualityBar", v); saveField("qualityBar", v); }} />
             {renderResetButton("qualityBar")}
           </div>
           <Textarea
@@ -447,6 +470,7 @@ export function PolicyPanel({ agent }: PolicyPanelProps) {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-end gap-2">
+            <AiFieldRegen fieldName="riskCompliance" fieldLabel="Risk & Compliance" currentValue={form.riskCompliance} agentContext={{ agentName: agent.name, agentDescription: agent.description || "" }} level="agent-policy" onApply={(v) => { setField("riskCompliance", v); saveField("riskCompliance", v); }} />
             {renderResetButton("riskCompliance")}
           </div>
           <Textarea

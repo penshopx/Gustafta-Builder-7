@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info } from "lucide-react";
 import { AiConfigFill } from "@/components/ai-config-fill";
+import { AiFieldRegen } from "@/components/ai-field-regen";
+import { ConfigHealth } from "@/components/config-health";
 import { TemplateDialog } from "@/components/dialogs/template-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -341,6 +343,20 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         </Button>
       </div>
 
+      {/* Config Health */}
+      <ConfigHealth
+        label="Kelengkapan Persona"
+        fields={[
+          { field: "name", label: "Nama", value: formData.name, minLength: 2 },
+          { field: "tagline", label: "Tagline", value: formData.tagline, minLength: 5 },
+          { field: "description", label: "Deskripsi", value: formData.description, minLength: 20 },
+          { field: "greetingMessage", label: "Pesan Sambutan", value: formData.greetingMessage, minLength: 20 },
+          { field: "philosophy", label: "Filosofi Komunikasi", value: formData.philosophy, minLength: 30, weight: 2 },
+          { field: "systemPrompt", label: "System Prompt", value: formData.systemPrompt, minLength: 100, weight: 3 },
+          { field: "offTopicResponse", label: "Respons Off-Topic", value: formData.offTopicResponse, minLength: 20 },
+        ]}
+      />
+
       {/* AI Auto-Fill */}
       <AiConfigFill
         level="agent-persona"
@@ -428,7 +444,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm">Chatbot Name</Label>
+              <div className="flex items-center justify-between gap-1">
+                <Label htmlFor="name" className="text-sm">Chatbot Name</Label>
+                <AiFieldRegen fieldName="name" fieldLabel="Chatbot Name" currentValue={formData.name} agentContext={{ agentName: formData.name, agentDescription: formData.description }} onApply={(v) => setFormData({ ...formData, name: v })} />
+              </div>
               <Input
                 id="name"
                 value={formData.name}
@@ -438,7 +457,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tagline" className="text-sm">Tagline</Label>
+              <div className="flex items-center justify-between gap-1">
+                <Label htmlFor="tagline" className="text-sm">Tagline</Label>
+                <AiFieldRegen fieldName="tagline" fieldLabel="Tagline" currentValue={formData.tagline} agentContext={{ agentName: formData.name, agentDescription: formData.description }} onApply={(v) => setFormData({ ...formData, tagline: v })} />
+              </div>
               <Input
                 id="tagline"
                 value={formData.tagline}
@@ -449,7 +471,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <div className="flex items-center justify-between gap-1">
+              <Label htmlFor="description">Description</Label>
+              <AiFieldRegen fieldName="description" fieldLabel="Description" currentValue={formData.description} agentContext={{ agentName: formData.name, agentDescription: formData.description }} onApply={(v) => setFormData({ ...formData, description: v })} />
+            </div>
             <Textarea
               id="description"
               value={formData.description}
@@ -517,7 +542,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="greetingMessage">Greeting Message</Label>
+            <div className="flex items-center justify-between gap-1">
+              <Label htmlFor="greetingMessage">Greeting Message</Label>
+              <AiFieldRegen fieldName="greetingMessage" fieldLabel="Greeting Message" currentValue={formData.greetingMessage} agentContext={{ agentName: formData.name, agentDescription: formData.description, systemPromptSnippet: formData.systemPrompt }} onApply={(v) => setFormData({ ...formData, greetingMessage: v })} />
+            </div>
             <Textarea
               id="greetingMessage"
               value={formData.greetingMessage}
@@ -720,7 +748,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="philosophy">Communication Philosophy</Label>
+            <div className="flex items-center justify-between gap-1">
+              <Label htmlFor="philosophy">Communication Philosophy</Label>
+              <AiFieldRegen fieldName="philosophy" fieldLabel="Communication Philosophy" currentValue={formData.philosophy} agentContext={{ agentName: formData.name, agentDescription: formData.description, systemPromptSnippet: formData.systemPrompt }} onApply={(v) => setFormData({ ...formData, philosophy: v })} />
+            </div>
             <Textarea
               id="philosophy"
               value={formData.philosophy}
@@ -733,17 +764,20 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="systemPrompt">System Prompt</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setLexcomTemplateOpen(true)}
-                className="text-xs h-7 gap-1.5 border-amber-400/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
-                data-testid="button-apply-lexcom-template"
-              >
-                <Scale className="w-3.5 h-3.5" />
-                Template LexCom
-              </Button>
+              <div className="flex items-center gap-1">
+                <AiFieldRegen fieldName="systemPrompt" fieldLabel="System Prompt" currentValue={formData.systemPrompt} agentContext={{ agentName: formData.name, agentDescription: formData.description }} onApply={(v) => setFormData({ ...formData, systemPrompt: v })} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLexcomTemplateOpen(true)}
+                  className="text-xs h-7 gap-1.5 border-amber-400/60 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                  data-testid="button-apply-lexcom-template"
+                >
+                  <Scale className="w-3.5 h-3.5" />
+                  Template LexCom
+                </Button>
+              </div>
             </div>
             <Textarea
               id="systemPrompt"
@@ -850,7 +884,10 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="offTopicResponse">Respons Kustom (Opsional)</Label>
+            <div className="flex items-center justify-between gap-1">
+              <Label htmlFor="offTopicResponse">Respons Kustom (Opsional)</Label>
+              <AiFieldRegen fieldName="offTopicResponse" fieldLabel="Respons Off-Topic" currentValue={formData.offTopicResponse} agentContext={{ agentName: formData.name, agentDescription: formData.description, systemPromptSnippet: formData.systemPrompt }} onApply={(v) => setFormData({ ...formData, offTopicResponse: v })} />
+            </div>
             <Textarea
               id="offTopicResponse"
               value={formData.offTopicResponse}

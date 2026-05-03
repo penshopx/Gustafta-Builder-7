@@ -85,6 +85,30 @@ The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolbox
 -   **Multi-Provider Chat Fallback**: Implements a fallback chain for LLM calls (OpenAI → DeepSeek → Qwen → Gemini) if the primary stream creation fails.
 -   **Admin Panel & Role Hierarchy**: Supports `superadmin`, `admin`, and `user` roles with differentiated access to user management, subscription management, and trial request handling.
 
+## Multi-Agent Strengthening Features (Latest)
+
+### 1. AI Field Regen (`client/src/components/ai-field-regen.tsx`)
+- Small 🪄 Wand icon button placed next to each individual field label in Persona and Policy panels
+- Calls `POST /api/ai/regen-field` with field name, current value, and agent context
+- Shows a popover with AI-generated suggestion + Rationale, with "Terapkan" / "Ulangi" / "Abaikan" actions
+- Applied to 7 Persona fields: name, tagline, description, greetingMessage, philosophy, systemPrompt, offTopicResponse
+- Applied to 6 Policy fields: conversationWinConditions, brandVoiceSpec, interactionPolicy, domainCharter, qualityBar, riskCompliance
+
+### 2. Config Health Widget (`client/src/components/config-health.tsx`)
+- Client-side completeness score for agent configuration
+- Weighted scoring: each field checked for minimum character threshold
+- Color-coded: red (<40%), amber (40-75%), green (≥75%)
+- Shows filled/missing field badges and guidance message
+- Integrated into top of Persona panel and Policy panel
+
+### 3. MultiClaw Orchestration Planner (in `agentic-ai-panel.tsx`)
+- 2-stage AI endpoint `POST /api/ai/orchestration-plan`:
+  - Stage 1: Domain analysis per agent (keywords, primary domain, strengths)
+  - Stage 2: Full plan (routing rules, handoff protocols, gap/overlap analysis, orchestrator system prompt addition)
+- UI card shows: executive summary, agent roster, routing rules (condition → agent), handoff protocols, gap analysis, orchestrator prompt update suggestion
+- "Tambahkan ke System Prompt" button injects routing rules into the current agent's system prompt
+- Only shown when agent has a toolboxId (i.e., is in a multi-agent toolbox)
+
 ## External Dependencies
 
 ### UI Libraries
