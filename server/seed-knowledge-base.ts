@@ -173,7 +173,8 @@ Gustafta adalah **platform pembuatan chatbot AI multi-tenant berbasis cloud**, d
 - **Custom Domain**: Pasang domain kustom (misal: bot.perusahaan.com) langsung ke chatbot manapun
 - **Project Brain & Mini Apps**: Konteks data terstruktur untuk chatbot; output spesialis (Snapshot, Decision, Risk Radar)
 - **Tender Wizard**: Analisis dan pembuatan dokumen tender otomatis berbasis AI
-- **Broadcast WA**: Kirim pesan WhatsApp terjadwal ke banyak kontak; integrasi data tender harian
+- **MultiClaw 4-Panel**: Sistem integrasi lintas panel dengan shared context otomatis — Info Tender → Studio Kompetensi → Ekosistem Produk → Broadcast WA. Setiap panel membaca data panel sebelumnya via "AI Intelligence Banner" dan bridge button
+- **Broadcast WA**: Kirim pesan WhatsApp terjadwal ke banyak kontak; A/B test AI 2 varian pesan; personalisasi AI per kontak; integrasi data tender & ekosistem via MultiClaw Context
 - **Conversion Layer**: Lead capture, scoring, CTA otomatis, paket penawaran
 - **Analytics**: Pantau percakapan, sesi, kepuasan, tren
 

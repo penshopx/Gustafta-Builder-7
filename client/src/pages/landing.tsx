@@ -166,6 +166,11 @@ export default function Landing() {
       description: "Metodologi agentic berlapis: listen → detect → plan → execute → follow-up. Reasoning multi-step, self-correction, dan proactive assistance bawaan."
     },
     {
+      icon: Blocks,
+      title: "MultiClaw 4-Panel",
+      description: "Info Tender → Studio Kompetensi → Ekosistem Produk → WA Broadcast: empat panel terintegrasi dengan shared context lintas panel, bridge button, AI Intelligence Banner, dan A/B test pesan broadcast otomatis."
+    },
+    {
       icon: Cpu,
       title: "Orchestrator Multi-Agent",
       description: "Routing cerdas otomatis ke 7 specialist domain konstruksi (Tender, SKK/SBU, Hukum, K3, Marketing, dll) + tambah specialist custom sendiri."
@@ -251,7 +256,8 @@ export default function Landing() {
   ];
 
   const comparisonData = [
-    { feature: "Hierarki 4 Level: Series → Modul → Chatbot → Alat Bantu", gustafta: true, others: false },
+    { feature: "Hierarki 5 Level: Series → Core → Big Idea → Toolbox → Agent", gustafta: true, others: false },
+    { feature: "MultiClaw 4-Panel: Info Tender → Studio → Ekosistem → Broadcast WA + Cross-Panel Context", gustafta: true, others: false },
     { feature: "Orchestrator Multi-Agent: Routing ke 7+ Specialist Domain", gustafta: true, others: false },
     { feature: "Custom Specialist Agent (tambah domain keahlian sendiri)", gustafta: true, others: false },
     { feature: "Custom Domain (bot.perusahaan.com → chatbot)", gustafta: true, others: false },
@@ -259,18 +265,22 @@ export default function Landing() {
     { feature: "Otak Proyek / Project Brain + Tender Wizard", gustafta: true, others: false },
     { feature: "Multi-Channel (WhatsApp, Telegram, Widget, API)", gustafta: "4+ channel", others: "1–2 channel" },
     { feature: "Multi-Model AI (GPT-4o, Claude, DeepSeek, Custom API)", gustafta: true, others: "Terbatas" },
-    { feature: "Widget Embed + Embed Code Dialog", gustafta: true, others: "Basic" },
+    { feature: "A/B Test Pesan Broadcast + Personalisasi AI per Kontak", gustafta: true, others: false },
     { feature: "Monetisasi, Voucher & Afiliasi", gustafta: true, others: false },
   ];
 
   const faqItems = [
     {
       question: "Apa itu Gustafta?",
-      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 4 level (Series → Modul → Chatbot → Alat Bantu). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding."
+      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding. Fitur terbaru: MultiClaw 4-Panel untuk integrasi lintas panel Info Tender, Studio Kompetensi, Ekosistem Produk, dan WA Broadcast."
     },
     {
-      question: "Apa itu hierarki Series → Modul → Chatbot → Alat Bantu?",
-      answer: "Ini adalah arsitektur multi-agent Gustafta: Series (L1) = payung ekosistem, Modul (L2) = fokus tematik dalam Series, Chatbot (L3) = unit chatbot spesialis per area (dengan tipe Orkestrator sebagai hub routing cerdas), Alat Bantu (L4) = sub-agen mikro eksekutor di dalam Chatbot. Dengan hierarki ini Anda bisa bangun ekosistem chatbot skalabel yang terkoordinasi cerdas."
+      question: "Apa itu hierarki 5 Level Gustafta?",
+      answer: "Arsitektur multi-agent Gustafta terdiri dari 5 level: Series (L1) = payung ekosistem strategis, Core (L2) = sudut pandang tematik dalam Series, Big Idea (L3) = Orkestrator sebagai dispatcher cerdas lintas Core, Toolbox (L4) = chatbot spesialis per area operasional, Agent (L5) = unit tugas mikro eksekutor di dalam Toolbox. Dengan hierarki ini Anda bisa bangun ekosistem chatbot skalabel yang terkoordinasi cerdas."
+    },
+    {
+      question: "Apa itu MultiClaw 4-Panel dan bagaimana cara kerjanya?",
+      answer: "MultiClaw adalah sistem 4 panel terintegrasi yang berbagi context data secara otomatis lintas panel: (1) Info Tender — analisis kesiapan tender LPSE, skor, gap analysis; (2) Studio Kompetensi — rancang program pelatihan SKK/SKKNI berbasis gap tender; (3) Ekosistem Kompetensi — buat produk digital (eBook, eCourse, template dokumen) dari program kompetensi; (4) Broadcast WA — kirim kampanye WhatsApp dengan konten dari tender & produk ekosistem, dilengkapi A/B test AI dan personalisasi per kontak. Setiap panel menampilkan 'AI Intelligence Banner' yang otomatis membaca data panel sebelumnya."
     },
     {
       question: "Apa itu Custom Domain dan bagaimana cara pakainya?",
@@ -351,7 +361,7 @@ export default function Landing() {
   const stats = [
     { value: "250+", label: "Chatbot Spesialis Konstruksi" },
     { value: "19", label: "Ekosistem Series" },
-    { value: "12+", label: "Sektor Usaha Didukung" },
+    { value: "4", label: "Panel MultiClaw Terintegrasi" },
     { value: "24/7", label: "AI Selalu Aktif" },
   ];
 
@@ -368,7 +378,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              <span>Baru: Orchestrator Multi-Agent · Custom Domain · KB YouTube/Video/Audio</span>
+              <span>Baru: MultiClaw 4-Panel · Orchestrator Multi-Agent · Custom Domain · KB YouTube/Video/Audio</span>
               <Flame className="h-4 w-4 text-orange-500" />
             </div>
             
@@ -382,7 +392,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 4 level: <strong>Series → Modul → Chatbot → Alat Bantu</strong>. Dilengkapi <strong>Orchestrator Multi-Agent</strong> dengan routing cerdas ke 7+ specialist domain konstruksi, Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
+              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Dilengkapi <strong>MultiClaw 4-Panel</strong> (Tender→Kompetensi→Ekosistem→Broadcast), <strong>Orchestrator Multi-Agent</strong>, Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -721,7 +731,7 @@ export default function Landing() {
                     </div>
                     <div>
                       <Badge className="mb-1 text-xs bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20 border-violet-500/20">Multi-Agent</Badge>
-                      <h3 className="text-xl font-bold">Hierarki 4 Level</h3>
+                      <h3 className="text-xl font-bold">Hierarki 5 Level</h3>
                     </div>
                   </div>
                   <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
@@ -730,9 +740,10 @@ export default function Landing() {
                   <div className="space-y-2 mb-4">
                     {[
                       { level: "L1", name: "Series", desc: "Payung ekosistem strategis" },
-                      { level: "L2", name: "Modul", desc: "Fokus tematik dalam Series" },
-                      { level: "L3", name: "Chatbot", desc: "Chatbot spesialis (+ Orkestrator hub)" },
-                      { level: "L4", name: "Alat Bantu", desc: "Sub-agen mikro eksekutor" },
+                      { level: "L2", name: "Core", desc: "Sudut pandang tematik dalam Series" },
+                      { level: "L3", name: "Big Idea", desc: "Orkestrator — dispatcher cerdas lintas Core" },
+                      { level: "L4", name: "Toolbox", desc: "Chatbot spesialis per area operasional" },
+                      { level: "L5", name: "Agent", desc: "Unit tugas mikro eksekutor" },
                     ].map(item => (
                       <div key={item.level} className="flex items-center gap-3 text-sm">
                         <span className="h-6 w-8 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold flex items-center justify-center shrink-0">{item.level}</span>
@@ -849,6 +860,108 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION: MultiClaw 4-Panel ── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-violet-500/5 via-background to-emerald-500/5" id="multiclaw">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <Badge className="mb-4 gap-2 bg-violet-600 text-white hover:bg-violet-700">
+                <Blocks className="h-3 w-3" /> Fitur Terbaru — MultiClaw 4-Panel
+              </Badge>
+              <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                Empat Panel, Satu Alur Terintegrasi
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Data mengalir otomatis dari analisis tender → program kompetensi → produk digital → kampanye WhatsApp. Satu klik, semua panel terhubung melalui <strong>MultiClaw Context</strong>.
+              </p>
+            </div>
+
+            {/* Flow diagram */}
+            <div className="flex flex-col md:flex-row items-stretch gap-3 mb-10">
+              {[
+                {
+                  num: "01", color: "violet", icon: ClipboardCheck,
+                  title: "Info Tender", badge: "LPSE Analyzer",
+                  desc: "Analisis kesiapan tender: checklist 30+ item, skor 0–100, gap analysis, dan executive summary berbasis Perpres 46/2025.",
+                  outputs: ["Skor Kecocokan", "Key Gaps", "Rekomendasi Strategis"],
+                },
+                {
+                  num: "02", color: "blue", icon: GraduationCap,
+                  title: "Studio Kompetensi", badge: "SKK Planner",
+                  desc: "Rancang program pelatihan SKK/SKKNI dari gap tender. AI menyusun kurikulum, modul, dan rencana sertifikasi.",
+                  outputs: ["Program SKK", "Roadmap Pelatihan", "Estimasi Biaya"],
+                },
+                {
+                  num: "03", color: "orange", icon: BookOpen,
+                  title: "Ekosistem Produk", badge: "Content Creator",
+                  desc: "Buat eBook, eCourse, dan template dokumen dari program kompetensi. Monetisasi keahlian dalam produk digital.",
+                  outputs: ["eBook AI", "eCourse Online", "Template Dokumen"],
+                },
+                {
+                  num: "04", color: "emerald", icon: MessageSquare,
+                  title: "Broadcast WA", badge: "Campaign Manager",
+                  desc: "Kirim kampanye WhatsApp dengan konten dari tender & produk. A/B test AI untuk optimasi pesan sebelum broadcast.",
+                  outputs: ["A/B Test Varian", "Personalisasi AI", "Broadcast Terjadwal"],
+                },
+              ].map((panel, i) => {
+                const Icon = panel.icon;
+                const colorMap: Record<string, { bg: string; border: string; text: string; badge: string; num: string }> = {
+                  violet: { bg: "bg-violet-50 dark:bg-violet-950/20", border: "border-violet-200 dark:border-violet-800", text: "text-violet-700 dark:text-violet-300", badge: "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300", num: "bg-violet-600" },
+                  blue:   { bg: "bg-blue-50 dark:bg-blue-950/20",   border: "border-blue-200 dark:border-blue-800",   text: "text-blue-700 dark:text-blue-300",   badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",   num: "bg-blue-600" },
+                  orange: { bg: "bg-orange-50 dark:bg-orange-950/20", border: "border-orange-200 dark:border-orange-800", text: "text-orange-700 dark:text-orange-300", badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300", num: "bg-orange-600" },
+                  emerald:{ bg: "bg-emerald-50 dark:bg-emerald-950/20", border: "border-emerald-200 dark:border-emerald-800", text: "text-emerald-700 dark:text-emerald-300", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300", num: "bg-emerald-600" },
+                };
+                const c = colorMap[panel.color];
+                return (
+                  <div key={i} className="flex-1 flex flex-col">
+                    <div className={`flex-1 rounded-xl border-2 ${c.border} ${c.bg} p-5 flex flex-col`} data-testid={`card-multiclaw-${i}`}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className={`w-7 h-7 rounded-full ${c.num} text-white text-xs font-bold flex items-center justify-center shrink-0`}>{panel.num}</span>
+                        <Icon className={`h-5 w-5 ${c.text}`} />
+                        <div>
+                          <p className={`text-sm font-bold ${c.text}`}>{panel.title}</p>
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 ${c.badge} border-0`}>{panel.badge}</Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">{panel.desc}</p>
+                      <div className="space-y-1">
+                        {panel.outputs.map(o => (
+                          <div key={o} className={`flex items-center gap-1.5 text-xs ${c.text}`}>
+                            <CheckCircle2 className="h-3 w-3 shrink-0" /> {o}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {i < 3 && (
+                      <div className="flex justify-center items-center py-2 md:hidden">
+                        <ArrowRight className="h-4 w-4 text-muted-foreground rotate-90" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Cross-panel context highlight */}
+            <div className="rounded-xl border bg-gradient-to-r from-violet-500/10 via-blue-500/5 to-emerald-500/10 p-6 flex flex-col sm:flex-row items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Blocks className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="font-bold mb-1">MultiClaw Context — Data Mengalir Otomatis Lintas Panel</p>
+                <p className="text-sm text-muted-foreground">Setiap panel membaca dan menulis ke shared context yang tersimpan di browser. "AI Intelligence Banner" muncul otomatis di panel berikutnya, menampilkan ringkasan data sebelumnya — siap diimport dengan satu klik.</p>
+              </div>
+              <Link href="/dashboard">
+                <Button className="gap-2 shrink-0" data-testid="button-try-multiclaw">
+                  <Blocks className="h-4 w-4" />
+                  Coba MultiClaw
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -1486,6 +1599,7 @@ export default function Landing() {
                 <li><Link href="/packs" className="hover:text-foreground">Paket Domain</Link></li>
                 <li><Link href="/domains" className="hover:text-foreground">Domain Kustom (URL)</Link></li>
                 <li><Link href="/pricing" className="hover:text-foreground">Harga</Link></li>
+                <li><Link href="/#multiclaw" className="hover:text-foreground">MultiClaw 4-Panel</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Template</Link></li>
                 <li><Link href="/documentation" className="hover:text-foreground">Integrasi</Link></li>
               </ul>
