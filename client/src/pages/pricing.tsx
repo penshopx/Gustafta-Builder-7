@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreateSubscription, usePaymentStatus } from "@/hooks/use-subscription";
@@ -333,18 +331,30 @@ export default function Pricing() {
   const createSubscription = useCreateSubscription();
   const { data: paymentStatus } = usePaymentStatus();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
-  
-  const [selectedPlan, setSelectedPlan] = useState<string>("");
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [paymentInfo, setPaymentInfo] = useState<{
-    invoiceNo?: string; amount?: number; planName?: string;
-    bankAccounts?: { bank: string; noRek: string; atas: string }[];
-    whatsapp?: string; message?: string;
-  } | null>(null);
+  const queryClient = useQueryClient();
 
-  const handleSelectPlan = (planKey: string) => {
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentResult, setPaymentResult] = useState<"success" | "pending" | "error" | null>(null);
+
+  // Muat Midtrans Snap JS kalau belum ada
+  const loadSnapScript = (clientKey: string) => {
+    const isSandbox = clientKey.startsWith("SB-");
+    const snapUrl = isSandbox
+      ? "https://app.sandbox.midtrans.com/snap/snap.js"
+      : "https://app.midtrans.com/snap/snap.js";
+    if (document.querySelector(`script[src="${snapUrl}"]`)) return Promise.resolve();
+    return new Promise<void>((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = snapUrl;
+      script.setAttribute("data-client-key", clientKey);
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap"));
+      document.head.appendChild(script);
+    });
+  };
+
+  const handleSelectPlan = async (planKey: string) => {
     if (!isAuthenticated) {
       toast({
         title: "Login Diperlukan",
@@ -354,151 +364,78 @@ export default function Pricing() {
       window.location.href = "/api/login";
       return;
     }
-    
-    setSelectedPlan(planKey);
-    setCustomerEmail(user?.email || "");
-    setCustomerName(user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "");
-    setShowPaymentDialog(true);
-  };
 
-  const handleConfirmPayment = async () => {
-    if (!customerEmail || !customerName) {
-      toast({
-        title: "Data Tidak Lengkap",
-        description: "Silakan lengkapi nama dan email Anda.",
-        variant: "destructive",
-      });
-      return;
-    }
+    setSelectedPlan(planKey);
+    setPaymentLoading(true);
 
     try {
-      const result = await createSubscription.mutateAsync({
-        plan: selectedPlan,
-        email: customerEmail,
-        name: customerName,
-      });
+      const result = await createSubscription.mutateAsync({ plan: planKey });
 
-      // Tampilkan instruksi transfer bank
-      setPaymentInfo({
-        invoiceNo: result.invoiceNo,
-        amount: result.amount,
-        planName: result.planName,
-        bankAccounts: result.bankAccounts,
-        whatsapp: result.whatsapp,
-        message: result.message,
+      // Free trial — langsung aktif
+      if (!result.snapToken) {
+        queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
+        toast({ title: "Free Trial Aktif!", description: "Selamat menikmati Gustafta selama 14 hari gratis." });
+        navigate("/");
+        return;
+      }
+
+      // Paket berbayar — buka Midtrans Snap popup
+      const clientKey = (paymentStatus as any)?.clientKey || "";
+      await loadSnapScript(clientKey);
+
+      const snap = (window as any).snap;
+      if (!snap) throw new Error("Midtrans Snap tidak tersedia");
+
+      snap.pay(result.snapToken, {
+        onSuccess: () => {
+          setPaymentResult("success");
+          queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
+          toast({ title: "Pembayaran Berhasil!", description: "Langganan Anda sudah aktif." });
+        },
+        onPending: () => {
+          setPaymentResult("pending");
+          toast({
+            title: "Menunggu Pembayaran",
+            description: "Selesaikan pembayaran sesuai instruksi. Akun akan aktif otomatis.",
+          });
+        },
+        onError: () => {
+          setPaymentResult("error");
+          toast({ title: "Pembayaran Gagal", description: "Silakan coba lagi.", variant: "destructive" });
+        },
+        onClose: () => {
+          if (!paymentResult) {
+            toast({ title: "Pembayaran Dibatalkan", description: "Anda menutup jendela pembayaran." });
+          }
+        },
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Gagal Memproses",
-        description: "Terjadi kesalahan saat memproses. Silakan coba lagi.",
+        description: error?.message || "Terjadi kesalahan. Silakan coba lagi.",
         variant: "destructive",
       });
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Dialog open={showPaymentDialog} onOpenChange={(open) => { setShowPaymentDialog(open); if (!open) setPaymentInfo(null); }}>
-        <DialogContent className="max-w-md">
-          {!paymentInfo ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>Konfirmasi Langganan</DialogTitle>
-                <DialogDescription>
-                  Masukkan nama & email, lalu ikuti instruksi transfer bank.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="customer-name">Nama Lengkap</Label>
-                  <Input
-                    id="customer-name"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Masukkan nama lengkap"
-                    data-testid="input-customer-name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="customer-email">Email</Label>
-                  <Input
-                    id="customer-email"
-                    type="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="email@example.com"
-                    data-testid="input-customer-email"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
-                  Batal
-                </Button>
-                <Button
-                  onClick={handleConfirmPayment}
-                  disabled={createSubscription.isPending}
-                  data-testid="button-confirm-payment"
-                >
-                  {createSubscription.isPending ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Memproses...</>
-                  ) : "Lanjutkan ke Pembayaran"}
-                </Button>
-              </DialogFooter>
-            </>
-          ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle>Instruksi Pembayaran</DialogTitle>
-                <DialogDescription>
-                  Transfer ke salah satu rekening berikut, lalu konfirmasi via WhatsApp.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-2">
-                {paymentInfo.invoiceNo && (
-                  <div className="text-sm font-medium text-muted-foreground">
-                    No. Invoice: <span className="text-foreground font-bold">{paymentInfo.invoiceNo}</span>
-                  </div>
-                )}
-                {paymentInfo.amount && (
-                  <div className="text-lg font-bold text-primary">
-                    Total: Rp {paymentInfo.amount.toLocaleString("id-ID")}
-                    <span className="text-sm text-muted-foreground font-normal ml-1">({paymentInfo.planName})</span>
-                  </div>
-                )}
-                <div className="space-y-2">
-                  {paymentInfo.bankAccounts?.map((b) => (
-                    <div key={b.bank} className="p-3 rounded-lg border bg-muted/40 text-sm">
-                      <p className="font-semibold">{b.bank}</p>
-                      <p className="text-foreground">{b.noRek}</p>
-                      <p className="text-muted-foreground">a/n {b.atas}</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Setelah transfer, konfirmasi via WhatsApp dengan sertakan bukti transfer dan No. Invoice.
-                </p>
-              </div>
-              <DialogFooter className="flex flex-col sm:flex-row gap-2">
-                <Button variant="outline" onClick={() => { setShowPaymentDialog(false); setPaymentInfo(null); }}>
-                  Tutup
-                </Button>
-                {paymentInfo.whatsapp && (
-                  <a
-                    href={`https://wa.me/${paymentInfo.whatsapp}?text=Konfirmasi%20pembayaran%20${paymentInfo.invoiceNo}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button data-testid="button-wa-confirm">
-                      Konfirmasi via WhatsApp
-                    </Button>
-                  </a>
-                )}
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {paymentResult === "success" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-background rounded-xl p-8 max-w-sm text-center shadow-2xl space-y-4">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
+              <Check className="w-8 h-8 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold">Pembayaran Berhasil!</h2>
+            <p className="text-muted-foreground text-sm">Langganan Anda sudah aktif. Selamat menggunakan Gustafta!</p>
+            <Button className="w-full" onClick={() => { setPaymentResult(null); navigate("/"); }} data-testid="button-go-dashboard">
+              Ke Dashboard <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <SharedHeader />
 

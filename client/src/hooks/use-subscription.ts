@@ -40,11 +40,11 @@ export interface PaymentStatus {
 export interface CreateSubscriptionResponse {
   success: boolean;
   subscription: Subscription;
-  invoiceNo?: string;
+  snapToken?: string;
+  redirectUrl?: string;
+  orderId?: string;
   amount?: number;
   planName?: string;
-  bankAccounts?: BankAccount[];
-  whatsapp?: string;
   message?: string;
 }
 
@@ -80,7 +80,7 @@ export function useUserSubscription(userId: string | undefined) {
 
 export function useCreateSubscription() {
   return useMutation({
-    mutationFn: async (data: { plan: string; email: string; name: string }) => {
+    mutationFn: async (data: { plan: string }) => {
       const response = await apiRequest("POST", "/api/subscriptions/create", data);
       return await response.json() as CreateSubscriptionResponse;
     },

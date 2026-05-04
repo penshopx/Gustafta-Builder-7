@@ -380,5 +380,30 @@ All legal chatbot responses include the mandatory disclaimer: "⚠️ Informasi 
 - GET /api/user/onboarding-status — check user starter status
 - POST /api/user/check-onboarding — trigger starter agent creation check
 
+## Midtrans Payment Gateway (May 2026)
+
+### Setup
+- `server/lib/midtrans.ts` — Midtrans library (Snap token creation, webhook verification, status check)
+- Secrets: `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY` (production keys configured)
+- Auto-detect sandbox vs production based on key prefix (`SB-` = sandbox)
+
+### Flow
+1. User klik "Berlangganan" di `/pricing` → POST `/api/subscriptions/create` (auth required)
+2. Backend buat Midtrans Snap token + simpan subscription pending (mayarOrderId = orderId)
+3. Frontend load `snap.js` dari Midtrans CDN → `snap.pay(token)` buka popup pembayaran
+4. User bayar via VA/QRIS/GoPay/kartu kredit — Midtrans handle semua
+5. Webhook `POST /api/subscriptions/midtrans-notify` → verifikasi status → aktifkan subscription
+6. Frontend polling `GET /api/subscriptions/check/:orderId` untuk cek status realtime
+
+### Routes
+- `GET /api/subscriptions/status` — provider info + clientKey (untuk load snap.js)
+- `POST /api/subscriptions/create` — buat Snap token (auth required)
+- `POST /api/subscriptions/midtrans-notify` — webhook dari Midtrans (aktifkan/cancel)
+- `GET /api/subscriptions/check/:orderId` — cek status pembayaran (auth required)
+- `POST /api/subscriptions/activate/:id` — admin manual activate
+
+### Metode Pembayaran (via Midtrans)
+VA BCA/BNI/BRI/Mandiri, QRIS, GoPay, OVO, ShopeePay, kartu kredit/debit Visa/MC
+
 ### Seeded Templates (10)
 Customer Support Pro (Bisnis★), Sales Assistant AI (Bisnis★), HR & Rekrutmen Bot (Bisnis), Guru Privat AI (Pendidikan★), Konsultan K3 Konstruksi (Konstruksi★), Tender & Pengadaan Advisor (Konstruksi), Asisten Hukum Bisnis (Hukum), Financial Planner AI (Keuangan), Tech Support Bot (Teknologi), Asisten Mutu ISO 9001 (Konstruksi)
