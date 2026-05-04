@@ -3298,7 +3298,6 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       const conditions: any[] = [
         eq(agentsTable.isActive, true),
-        eq(agentsTable.isListed, true),
       ];
       if (category && category !== "Semua") conditions.push(eq(agentsTable.category, category));
       if (search) {
@@ -3363,7 +3362,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const rows = await db.select({
         category: agentsTable.category,
         count: sqlE<number>`count(*)::int`,
-      }).from(agentsTable).where(and(eq(agentsTable.isActive, true), eq(agentsTable.isListed, true))).groupBy(agentsTable.category).orderBy(sqlE`count(*) desc`);
+      }).from(agentsTable).where(eq(agentsTable.isActive, true)).groupBy(agentsTable.category).orderBy(sqlE`count(*) desc`);
       res.json(rows.filter(r => r.category));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch categories" });

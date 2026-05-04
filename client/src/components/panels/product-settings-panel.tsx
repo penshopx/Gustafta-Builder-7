@@ -153,20 +153,13 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="space-y-0.5">
-                  <Label className="flex items-center gap-1.5">
-                    <ShoppingBag className="w-3.5 h-3.5" />
-                    Listing di Gustafta Store
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {settings.isListed
-                      ? "✅ Chatbot tampil di store publik — calon pembeli bisa menemukannya"
-                      : "⛔ Tidak tampil di store — hanya bisa diakses dari dashboard"}
-                  </p>
+                  <Label>Tampilkan di Marketplace</Label>
+                  <p className="text-xs text-muted-foreground">Chatbot akan muncul di katalog publik</p>
                 </div>
                 <Switch
                   checked={settings.isListed}
                   onCheckedChange={(checked) => setSettings({ ...settings, isListed: checked })}
-                  data-testid="toggle-is-listed"
+                 
                 />
               </div>
 
