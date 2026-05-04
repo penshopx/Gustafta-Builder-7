@@ -5448,6 +5448,208 @@ Akhiri dengan 2-3 poin key takeaway untuk pembaca lain.`;
     }
   });
 
+  // ==================== Landing Page AI Generator ====================
+
+  app.post("/api/agents/:id/landing-page/generate", isAuthenticated, async (req: any, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ error: "Agent tidak ditemukan" });
+
+      const { style = "modern", colorScheme = "blue", language = "id" } = req.body as { style?: string; colorScheme?: string; language?: string };
+
+      const name = agent.name || "AI Chatbot";
+      const tagline = (agent as any).tagline || "";
+      const description = agent.description || "";
+      const expertise = ((agent as any).expertise as string[] || []).join(", ");
+      const features = ((agent as any).productFeatures as string[] || []).join(", ");
+      const painPoints = ((agent as any).landingPainPoints as string[] || []).join(", ");
+      const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
+      const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "";
+      const whatsapp = (agent as any).whatsappCta || "";
+      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const category = agent.category || "konstruksi";
+      const personality = agent.personality || "";
+      const toneOfVoice = (agent as any).toneOfVoice || "";
+      const greetingMessage = agent.greetingMessage || "";
+      const starters = (agent.conversationStarters || []).slice(0, 4).join(", ");
+      const keyPhrases = ((agent as any).keyPhrases as string[] || []).slice(0, 6).join(", ");
+
+      const colorMap: Record<string, string> = {
+        blue: "#2563eb", green: "#16a34a", purple: "#7c3aed", orange: "#ea580c", red: "#dc2626", teal: "#0d9488"
+      };
+      const accentColor = colorMap[colorScheme] || "#2563eb";
+
+      const systemPrompt = `Kamu adalah expert web developer dan copywriter B2B Indonesia. Tugas kamu: buat landing page HTML yang profesional, modern, dan siap publish untuk produk AI Chatbot di industri konstruksi Indonesia. Output HANYA berupa HTML lengkap (DOCTYPE hingga </html>) tanpa penjelasan tambahan.`;
+
+      const userPrompt = `Buat landing page HTML lengkap untuk produk AI Chatbot berikut:
+
+Nama: ${name}
+Tagline: ${tagline}
+Deskripsi: ${description}
+Kategori: ${category}
+Kepribadian: ${personality}
+Tone: ${toneOfVoice}
+Keahlian: ${expertise}
+Fitur: ${features}
+Pain Points Target: ${painPoints}
+Manfaat: ${benefits}
+Harga: ${price || "Hubungi kami"}
+WhatsApp: ${whatsapp}
+Link Chat: ${chatUrl}
+Conversation Starters: ${starters}
+Key Phrases: ${keyPhrases}
+Sapaan: ${greetingMessage}
+
+Style: ${style} | Warna Aksen: ${accentColor}
+
+Persyaratan HTML:
+1. Struktur lengkap: <!DOCTYPE html> sampai </html>
+2. Semua CSS di dalam <style> tag (inline, tidak perlu CDN)
+3. Font: system-ui atau Google Fonts (pakai @import jika Google Fonts)
+4. Warna aksen utama: ${accentColor}
+5. Responsive untuk mobile dan desktop
+6. Section yang WAJIB ada (urut):
+   a) HERO — headline kuat, subheadline, CTA button ke "${chatUrl}", visual placeholder
+   b) PAIN POINTS — 3 masalah nyata yang dihadapi target
+   c) SOLUSI — bagaimana chatbot ini menyelesaikan masalah
+   d) FITUR UTAMA — 4-6 feature cards dengan icon emoji
+   e) CARA KERJA — 3 langkah mudah (Step 1, 2, 3)
+   f) DEMO PREVIEW — mockup chat UI sederhana dengan ${starters ? `starter "${starters.split(",")[0]?.trim()}"` : "percakapan contoh"}
+   g) TESTIMONI — 3 testimonial fiksi tapi realistik dari profesional konstruksi
+   h) HARGA — ${price ? `paket dengan harga ${price}` : "hubungi untuk harga"}
+   i) FAQ — 5 pertanyaan umum dengan jawaban
+   j) CTA FINAL — tombol besar ke "${chatUrl}" dan WhatsApp ${whatsapp}
+   k) FOOTER — nama produk, link, copyright
+
+7. Teks dalam Bahasa Indonesia yang persuasif dan profesional
+8. Gunakan emoji secukupnya untuk visual appeal
+9. Hover effects dan subtle animations (CSS only)
+10. Chat button floating di kanan bawah yang link ke: ${chatUrl}
+
+Output: HANYA kode HTML, mulai dari <!DOCTYPE html>, tanpa markdown fence atau penjelasan apapun.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 4000,
+        temperature: 0.7,
+      });
+
+      const html = completion.choices[0]?.message?.content || "";
+      return res.json({ html, agentName: name, chatUrl });
+    } catch (err: any) {
+      console.error("[/api/agents/:id/landing-page/generate]", err);
+      return res.status(500).json({ error: err?.message || "Gagal generate landing page" });
+    }
+  });
+
+  // ==================== Marketing Kit Bundle ====================
+
+  app.post("/api/agents/:id/marketing-kit/generate", isAuthenticated, async (req: any, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id);
+      if (!agent) return res.status(404).json({ error: "Agent tidak ditemukan" });
+
+      const name = agent.name || "AI Chatbot";
+      const tagline = (agent as any).tagline || "";
+      const description = agent.description || "";
+      const expertise = ((agent as any).expertise as string[] || []).join(", ");
+      const features = ((agent as any).productFeatures as string[] || []).join(", ");
+      const painPoints = ((agent as any).landingPainPoints as string[] || []).join(", ");
+      const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
+      const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "Hubungi kami";
+      const whatsapp = (agent as any).whatsappCta || "";
+      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const category = agent.category || "konstruksi";
+
+      const agentCtx = `Nama: ${name} | Tagline: ${tagline} | Deskripsi: ${description} | Kategori: ${category} | Keunggulan: ${expertise} | Fitur: ${features} | Pain Points: ${painPoints} | Manfaat: ${benefits} | Harga: ${price} | WA: ${whatsapp} | Link: ${chatUrl}`;
+
+      const systemPrompt = "Kamu adalah copywriter B2B Indonesia profesional untuk industri konstruksi. Buat marketing kit lengkap dalam JSON. PENTING: Balas HANYA dengan JSON valid tanpa markdown.";
+
+      const userPrompt = `Buat Marketing Kit lengkap untuk produk AI Chatbot ini:
+${agentCtx}
+
+Balas dengan JSON dengan struktur PERSIS ini:
+{
+  "taglines": ["tagline 1", "tagline 2", "tagline 3", "tagline 4", "tagline 5"],
+  "elevator_pitch": {
+    "30s": "teks pitch 30 detik",
+    "60s": "teks pitch 60 detik",
+    "2min": "teks pitch 2 menit"
+  },
+  "wa_broadcasts": {
+    "short": "teks WA singkat ≤60 kata",
+    "medium": "teks WA medium ≤120 kata",
+    "long": "teks WA panjang ≤200 kata"
+  },
+  "social_posts": {
+    "linkedin": "post LinkedIn thought leadership 150-200 kata + 5 hashtag",
+    "instagram": "caption Instagram dengan emoji + 15 hashtag",
+    "facebook": "post Facebook 100-150 kata"
+  },
+  "ad_copies": {
+    "google": { "headline1": "max 30 char", "headline2": "max 30 char", "headline3": "max 30 char", "desc1": "max 90 char", "desc2": "max 90 char" },
+    "meta": { "primary_text": "125 kata maks", "headline": "max 40 char", "description": "max 30 char" }
+  },
+  "email_sequence": [
+    { "day": 1, "subject": "...", "preview": "...", "body": "200-250 kata", "cta": "..." },
+    { "day": 3, "subject": "...", "preview": "...", "body": "200-250 kata", "cta": "..." },
+    { "day": 7, "subject": "...", "preview": "...", "body": "200-250 kata", "cta": "..." }
+  ],
+  "value_proposition": {
+    "statement": "1 kalimat fit statement",
+    "jobs": ["job 1", "job 2", "job 3"],
+    "pains": ["pain 1", "pain 2", "pain 3"],
+    "gains": ["gain 1", "gain 2", "gain 3"],
+    "pain_relievers": ["reliever 1", "reliever 2", "reliever 3"],
+    "gain_creators": ["creator 1", "creator 2", "creator 3"]
+  },
+  "faq": [
+    { "q": "pertanyaan 1", "a": "jawaban 1" },
+    { "q": "pertanyaan 2", "a": "jawaban 2" },
+    { "q": "pertanyaan 3", "a": "jawaban 3" },
+    { "q": "pertanyaan 4", "a": "jawaban 4" },
+    { "q": "pertanyaan 5", "a": "jawaban 5" }
+  ],
+  "content_calendar": [
+    { "day": "Senin", "platform": "LinkedIn", "type": "Artikel", "topic": "...", "hook": "..." },
+    { "day": "Selasa", "platform": "Instagram", "type": "Carousel", "topic": "...", "hook": "..." },
+    { "day": "Rabu", "platform": "WhatsApp", "type": "Broadcast", "topic": "...", "hook": "..." },
+    { "day": "Kamis", "platform": "Facebook", "type": "Post", "topic": "...", "hook": "..." },
+    { "day": "Jumat", "platform": "LinkedIn", "type": "Video", "topic": "...", "hook": "..." },
+    { "day": "Sabtu", "platform": "Instagram", "type": "Story", "topic": "...", "hook": "..." },
+    { "day": "Minggu", "platform": "All", "type": "Rekap", "topic": "...", "hook": "..." }
+  ],
+  "testimonials": [
+    { "name": "Ir. Budi Santoso", "role": "Project Manager", "company": "PT Konstruksi Nusantara", "text": "..." },
+    { "name": "Drs. Siti Rahayu", "role": "Direktur Teknis", "company": "CV Bangun Jaya", "text": "..." },
+    { "name": "Ahmad Fauzi, ST", "role": "Site Engineer", "company": "PT Karya Mandiri", "text": "..." }
+  ]
+}`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 3500,
+        temperature: 0.7,
+        response_format: { type: "json_object" },
+      });
+
+      const raw = completion.choices[0]?.message?.content || "{}";
+      const kit = JSON.parse(raw);
+      return res.json({ kit, agentName: name, chatUrl });
+    } catch (err: any) {
+      console.error("[/api/agents/:id/marketing-kit/generate]", err);
+      return res.status(500).json({ error: err?.message || "Gagal generate marketing kit" });
+    }
+  });
+
   // ==================== Enhanced Analytics ====================
 
   // Get aggregated platform stats (for landing page)

@@ -1,21 +1,68 @@
 import { useState } from "react";
-import { FileText, Download, ClipboardCopy, Check, Bot, Target, MessageSquare, Zap, Globe, BookOpen, Shield, Users, ExternalLink, Link } from "lucide-react";
+import {
+  FileText, Download, ClipboardCopy, Check, Bot, Globe, ExternalLink, Link,
+  Sparkles, Loader2, Eye, Code2, Palette, RefreshCw, Package, ChevronDown, ChevronUp,
+  Zap, MessageSquare, Mic, Mail, Calendar, BarChart3, Star, Users, Copy
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
-const escHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+const escHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+function CopyButton({ text, label = "Salin" }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Disalin!" });
+  };
+  return (
+    <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleCopy} data-testid="button-copy-text">
+      {copied ? <Check className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+      {copied ? "Tersalin" : label}
+    </Button>
+  );
+}
+
+function CollapsibleSection({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <button
+        className="w-full flex items-center justify-between px-4 py-3 bg-muted/40 hover:bg-muted/70 transition-colors text-sm font-medium text-left"
+        onClick={() => setOpen(!open)}
+      >
+        <span>{title}</span>
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </button>
+      {open && <div className="p-4 space-y-3">{children}</div>}
+    </div>
+  );
+}
 
 export function LandingPagePanel({ agent }: { agent: any }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [copied, setCopied] = useState(false);
   const [landingPageUrl, setLandingPageUrl] = useState(agent.landingPageUrl || "");
+  const [copied, setCopied] = useState(false);
+
+  const [lpStyle, setLpStyle] = useState("modern");
+  const [lpColor, setLpColor] = useState("blue");
+  const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
+  const [previewMode, setPreviewMode] = useState<"preview" | "code">("preview");
+
+  const [kitData, setKitData] = useState<any | null>(null);
 
   const { data: knowledgeBases = [] } = useQuery<any[]>({
     queryKey: [`/api/knowledge-base/${agent.id}`],
@@ -29,301 +76,595 @@ export function LandingPagePanel({ agent }: { agent: any }) {
     },
   });
 
-  const handleSaveUrl = () => {
-    updateMutation.mutate({ landingPageUrl: landingPageUrl.trim() });
+  const generateLpMutation = useMutation({
+    mutationFn: () =>
+      apiRequest("POST", `/api/agents/${agent.id}/landing-page/generate`, {
+        style: lpStyle, colorScheme: lpColor,
+      }).then((r) => r.json()),
+    onSuccess: (data: any) => {
+      setGeneratedHtml(data.html || "");
+      setPreviewMode("preview");
+      toast({ title: "Landing page berhasil dibuat!", description: "Preview sudah tersedia di bawah." });
+    },
+    onError: () => toast({ title: "Gagal generate", description: "Coba beberapa saat lagi", variant: "destructive" }),
+  });
+
+  const generateKitMutation = useMutation({
+    mutationFn: () =>
+      apiRequest("POST", `/api/agents/${agent.id}/marketing-kit/generate`, {}).then((r) => r.json()),
+    onSuccess: (data: any) => {
+      setKitData(data.kit || null);
+      toast({ title: "Marketing Kit siap!", description: "Semua konten marketing sudah terbuat." });
+    },
+    onError: () => toast({ title: "Gagal generate Marketing Kit", variant: "destructive" }),
+  });
+
+  const downloadHtmlFile = () => {
+    if (!generatedHtml) return;
+    const blob = new Blob([generatedHtml], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const slug = (agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase();
+    a.download = `landing-page-${slug}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "File HTML diunduh!" });
+  };
+
+  const downloadKitJson = () => {
+    if (!kitData) return;
+    const blob = new Blob([JSON.stringify(kitData, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const slug = (agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase();
+    a.download = `marketing-kit-${slug}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Marketing Kit JSON diunduh!" });
   };
 
   const buildSummary = () => {
     const lines: string[] = [];
-    lines.push(`# Rangkuman Chatbot: ${agent.name || "(Tanpa Nama)"}`);
-    lines.push("");
-    lines.push("---");
-    lines.push("");
-
-    lines.push("## 1. IDENTITAS");
-    lines.push("");
+    lines.push(`# Rangkuman Chatbot: ${agent.name || "(Tanpa Nama)"}\n---\n`);
+    lines.push("## 1. IDENTITAS\n");
     if (agent.name) lines.push(`- **Nama:** ${agent.name}`);
     if (agent.tagline) lines.push(`- **Tagline:** ${agent.tagline}`);
     if (agent.description) lines.push(`- **Deskripsi:** ${agent.description}`);
     if (agent.category) lines.push(`- **Kategori:** ${agent.category}`);
-    if (agent.subcategory) lines.push(`- **Subkategori:** ${agent.subcategory}`);
-    if (agent.language) lines.push(`- **Bahasa:** ${agent.language === "id" ? "Indonesia" : agent.language === "en" ? "English" : agent.language}`);
-    if (agent.brandingName) lines.push(`- **Branding:** ${agent.brandingName}`);
+    if (agent.language) lines.push(`- **Bahasa:** ${agent.language === "id" ? "Indonesia" : agent.language}`);
     lines.push(`- **URL Chat:** ${window.location.origin}/bot/${agent.id}`);
     lines.push("");
-
-    if (agent.personality || agent.communicationStyle || agent.toneOfVoice || agent.philosophy) {
-      lines.push("## 2. PERSONA & KARAKTER");
-      lines.push("");
+    if (agent.personality || agent.philosophy) {
+      lines.push("## 2. PERSONA & KARAKTER\n");
       if (agent.personality) lines.push(`- **Personality:** ${agent.personality}`);
       if (agent.communicationStyle) lines.push(`- **Gaya Komunikasi:** ${agent.communicationStyle}`);
-      if (agent.toneOfVoice) lines.push(`- **Tone of Voice:** ${agent.toneOfVoice}`);
-      if (agent.responseFormat) lines.push(`- **Format Respon:** ${agent.responseFormat}`);
+      if (agent.toneOfVoice) lines.push(`- **Tone:** ${agent.toneOfVoice}`);
       if (agent.philosophy) lines.push(`- **Filosofi:** ${agent.philosophy}`);
       lines.push("");
     }
-
     const expertise = agent.expertise || [];
     if (expertise.length > 0) {
-      lines.push("## 3. KEAHLIAN / EXPERTISE");
-      lines.push("");
+      lines.push("## 3. KEAHLIAN\n");
       expertise.forEach((e: string) => lines.push(`- ${e}`));
       lines.push("");
     }
-
-    if (agent.greetingMessage || (agent.conversationStarters || []).length > 0) {
-      lines.push("## 4. SAPAAN & CONVERSATION STARTERS");
-      lines.push("");
-      if (agent.greetingMessage) lines.push(`**Pesan Sapaan:** ${agent.greetingMessage}`);
-      const starters = agent.conversationStarters || [];
-      if (starters.length > 0) {
-        lines.push("");
-        lines.push("**Conversation Starters:**");
-        starters.forEach((s: string) => lines.push(`- ${s}`));
-      }
-      lines.push("");
-    }
-
-    const features = agent.productFeatures || [];
-    if (features.length > 0 || agent.productSummary) {
-      lines.push("## 5. FITUR PRODUK");
-      lines.push("");
-      if (agent.productSummary) lines.push(agent.productSummary);
-      if (features.length > 0) {
-        lines.push("");
-        features.forEach((f: string) => lines.push(`- ${f}`));
-      }
-      lines.push("");
-    }
-
-    const keyPhrases = agent.keyPhrases || [];
-    if (keyPhrases.length > 0) {
-      lines.push("## 6. KEY PHRASES / KATA KUNCI");
-      lines.push("");
-      keyPhrases.forEach((p: string) => lines.push(`- ${p}`));
-      lines.push("");
-    }
-
     if (knowledgeBases.length > 0) {
-      lines.push("## 7. KNOWLEDGE BASE");
-      lines.push("");
-      knowledgeBases.forEach((kb: any) => {
-        lines.push(`- **${kb.name}** (${kb.type})${kb.description ? `: ${kb.description}` : ""}`);
-      });
+      lines.push("## 4. KNOWLEDGE BASE\n");
+      knowledgeBases.forEach((kb: any) => lines.push(`- **${kb.name}** (${kb.type})`));
       lines.push("");
     }
-
-    const contextQuestions = agent.contextQuestions || [];
-    if (contextQuestions.length > 0) {
-      lines.push("## 8. KONTEKS PROYEK (Pertanyaan Awal)");
-      lines.push("");
-      contextQuestions.forEach((q: any) => {
-        lines.push(`- **${q.label}** (${q.type})${q.required ? " *wajib*" : ""}`);
-        if (q.options && q.options.length > 0) {
-          lines.push(`  Opsi: ${q.options.join(", ")}`);
-        }
-      });
-      lines.push("");
-    }
-
-    lines.push("## 9. PENGATURAN TEKNIS");
-    lines.push("");
-    lines.push(`- **Model AI:** ${agent.aiModel || "gpt-4o-mini"}`);
-    lines.push(`- **Temperature:** ${agent.temperature ?? 0.7}`);
-    lines.push(`- **Max Tokens:** ${agent.maxTokens ?? 1024}`);
-    if (agent.isOrchestrator) lines.push(`- **Peran:** Orchestrator (${agent.orchestratorRole})`);
-    if (agent.agenticMode) lines.push("- **Mode Agentik:** Aktif");
-    if (agent.emotionalIntelligence) lines.push("- **Kecerdasan Emosional:** Aktif");
-    if (agent.multiStepReasoning) lines.push("- **Multi-Step Reasoning:** Aktif");
-    lines.push("");
-
-    if (agent.monthlyPrice || agent.guestMessageLimit || agent.trialEnabled) {
-      lines.push("## 10. MONETISASI");
-      lines.push("");
-      if (agent.monthlyPrice) lines.push(`- **Harga Bulanan:** Rp ${agent.monthlyPrice.toLocaleString("id-ID")}`);
-      if (agent.guestMessageLimit) lines.push(`- **Limit Pesan Tamu:** ${agent.guestMessageLimit} pesan`);
-      if (agent.messageQuotaDaily) lines.push(`- **Kuota Harian:** ${agent.messageQuotaDaily} pesan`);
-      if (agent.messageQuotaMonthly) lines.push(`- **Kuota Bulanan:** ${agent.messageQuotaMonthly} pesan`);
+    if (agent.monthlyPrice) {
+      lines.push("## 5. MONETISASI\n");
+      lines.push(`- **Harga:** Rp ${agent.monthlyPrice.toLocaleString("id-ID")}/bulan`);
       if (agent.trialEnabled) lines.push(`- **Trial:** ${agent.trialDays || 7} hari`);
       lines.push("");
     }
-
-    const avoidTopics = agent.avoidTopics || [];
-    if (avoidTopics.length > 0) {
-      lines.push("## 11. TOPIK YANG DIHINDARI");
-      lines.push("");
-      avoidTopics.forEach((t: string) => lines.push(`- ${t}`));
-      lines.push("");
-    }
-
     lines.push("---");
-    lines.push(`*Rangkuman ini di-generate otomatis oleh Gustafta AI dari data chatbot "${agent.name || ""}"*`);
-    lines.push(`*Gunakan sebagai referensi untuk membuat landing page, marketing material, atau proposal di platform lain.*`);
+    lines.push(`*Auto-generated oleh Gustafta AI*`);
     return lines.join("\n");
-  };
-
-  const mdToHtml = (md: string) => {
-    const lines = md.split("\n");
-    const result: string[] = [];
-    let inList = false;
-
-    const closePendingList = () => {
-      if (inList) { result.push("</ul>"); inList = false; }
-    };
-    const fmt = (t: string) => escHtml(t).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>");
-
-    for (const line of lines) {
-      if (line.startsWith("- ")) {
-        if (!inList) { result.push("<ul>"); inList = true; }
-        result.push(`<li>${fmt(line.slice(2))}</li>`);
-        continue;
-      }
-      closePendingList();
-      if (line.startsWith("# ")) { result.push(`<h1>${fmt(line.slice(2))}</h1>`); continue; }
-      if (line.startsWith("## ")) { result.push(`<h2>${fmt(line.slice(3))}</h2>`); continue; }
-      if (line.startsWith("### ")) { result.push(`<h3>${fmt(line.slice(4))}</h3>`); continue; }
-      if (line === "---") { result.push("<hr>"); continue; }
-      if (line === "") continue;
-      result.push(`<p>${fmt(line)}</p>`);
-    }
-    closePendingList();
-    return result.join("\n");
-  };
-
-  const downloadFile = (content: string, filename: string, mimeType: string) => {
-    const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const slug = (agent.name || "chatbot").replace(/\s+/g, "-").toLowerCase();
 
-  const downloadMarkdown = () => {
-    downloadFile(buildSummary(), `rangkuman-${slug}.md`, "text/markdown");
-    toast({ title: "Berhasil", description: "File Markdown berhasil diunduh" });
+  const downloadSummaryMd = () => {
+    const blob = new Blob([buildSummary()], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rangkuman-${slug}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "File Markdown diunduh!" });
   };
 
-  const downloadHtml = () => {
-    const body = mdToHtml(buildSummary());
-    const html = `<!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Rangkuman Chatbot - ${agent.name || "Chatbot"}</title>
-<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.7;color:#333}
-h1{color:#1a1a2e;border-bottom:3px solid #4361ee;padding-bottom:.5rem}
-h2{color:#3a0ca3;margin-top:2rem}h3{color:#4361ee}
-ul{margin:.5rem 0;padding-left:1.5rem}li{margin:.3rem 0}hr{border:none;border-top:2px solid #eee;margin:2rem 0}
-strong{color:#1a1a2e}em{color:#666}</style></head>
-<body>${body}</body></html>`;
-    downloadFile(html, `rangkuman-${slug}.html`, "text/html");
-    toast({ title: "Berhasil", description: "File HTML berhasil diunduh" });
-  };
-
-  const copyAll = () => {
-    navigator.clipboard.writeText(buildSummary());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Disalin!", description: "Rangkuman chatbot berhasil disalin ke clipboard" });
-  };
-
-  const summary = buildSummary();
-  const sectionCount = (summary.match(/^## /gm) || []).length;
+  const colorOptions = [
+    { value: "blue", label: "Biru", hex: "#2563eb" },
+    { value: "green", label: "Hijau", hex: "#16a34a" },
+    { value: "purple", label: "Ungu", hex: "#7c3aed" },
+    { value: "orange", label: "Oranye", hex: "#ea580c" },
+    { value: "teal", label: "Teal", hex: "#0d9488" },
+  ];
 
   return (
-    <div className="space-y-6 p-4 md:p-6 max-w-4xl overflow-y-auto max-h-[calc(100vh-80px)]">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <FileText className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-foreground" data-testid="text-summary-title">Rangkuman Chatbot</h2>
-            <p className="text-sm text-muted-foreground">Data lengkap chatbot untuk bahan landing page & marketing</p>
-          </div>
+    <div className="space-y-6 p-4 md:p-6 max-w-5xl overflow-y-auto max-h-[calc(100vh-80px)]">
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-primary/10">
+          <Globe className="w-5 h-5 text-primary" />
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" onClick={copyAll} data-testid="button-copy-all-summary">
-            {copied ? <Check className="w-4 h-4 mr-1.5" /> : <ClipboardCopy className="w-4 h-4 mr-1.5" />}
-            {copied ? "Tersalin" : "Salin Semua"}
-          </Button>
-          <Button variant="outline" onClick={downloadMarkdown} data-testid="button-download-md-summary">
-            <Download className="w-4 h-4 mr-1.5" />
-            .md
-          </Button>
-          <Button variant="outline" onClick={downloadHtml} data-testid="button-download-html-summary">
-            <Download className="w-4 h-4 mr-1.5" />
-            .html
-          </Button>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Landing Page & Marketing Kit</h2>
+          <p className="text-sm text-muted-foreground">Generate landing page AI dan semua konten marketing dari konfigurasi chatbot</p>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6 space-y-3">
-          <div className="flex items-center gap-2">
-            <Link className="w-4 h-4 text-primary" />
-            <Label className="text-base font-semibold">Link Landing Page Eksternal</Label>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Jika Anda sudah membuat landing page di platform lain (Carrd, Notion, Google Sites, dll), masukkan URL-nya di sini sebagai referensi
-          </p>
-          <div className="flex gap-2">
-            <Input
-              value={landingPageUrl}
-              onChange={(e) => setLandingPageUrl(e.target.value)}
-              placeholder="https://contoh.carrd.co atau https://site.google.com/..."
-              data-testid="input-landing-page-url"
-            />
-            <Button onClick={handleSaveUrl} disabled={updateMutation.isPending} data-testid="button-save-landing-url">
-              {updateMutation.isPending ? "..." : "Simpan"}
-            </Button>
-            {landingPageUrl && (
-              <Button variant="outline" size="icon" asChild>
-                <a href={landingPageUrl} target="_blank" rel="noopener noreferrer" data-testid="button-open-landing-url">
-                  <ExternalLink className="w-4 h-4" />
-                </a>
+      <Tabs defaultValue="generator">
+        <TabsList className="w-full grid grid-cols-3">
+          <TabsTrigger value="generator" data-testid="tab-landing-generator">
+            <Sparkles className="w-3.5 h-3.5 mr-1.5" />AI Generator
+          </TabsTrigger>
+          <TabsTrigger value="marketing-kit" data-testid="tab-marketing-kit">
+            <Package className="w-3.5 h-3.5 mr-1.5" />Marketing Kit
+          </TabsTrigger>
+          <TabsTrigger value="rangkuman" data-testid="tab-rangkuman">
+            <FileText className="w-3.5 h-3.5 mr-1.5" />Rangkuman
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ─── TAB 1: AI LANDING PAGE GENERATOR ─── */}
+        <TabsContent value="generator" className="space-y-4 mt-4">
+          <Card>
+            <CardContent className="pt-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="font-semibold">Generate Landing Page dengan AI</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                AI akan membaca seluruh konfigurasi chatbot ini — persona, fitur, harga, expertise — dan membuat landing page HTML siap publish lengkap dengan hero, fitur, demo chat, testimoni, dan FAQ.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Gaya Desain</Label>
+                  <Select value={lpStyle} onValueChange={setLpStyle}>
+                    <SelectTrigger className="h-8 text-xs" data-testid="select-lp-style">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="modern">Modern & Clean</SelectItem>
+                      <SelectItem value="professional">Professional & Corporate</SelectItem>
+                      <SelectItem value="bold">Bold & Impactful</SelectItem>
+                      <SelectItem value="minimal">Minimal & Elegant</SelectItem>
+                      <SelectItem value="tech">Tech & Futuristic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Warna Aksen</Label>
+                  <Select value={lpColor} onValueChange={setLpColor}>
+                    <SelectTrigger className="h-8 text-xs" data-testid="select-lp-color">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colorOptions.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: c.hex }} />
+                            {c.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={() => generateLpMutation.mutate()}
+                disabled={generateLpMutation.isPending}
+                data-testid="button-generate-landing-page"
+              >
+                {generateLpMutation.isPending ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sedang Generate Landing Page (~30 detik)...</>
+                ) : (
+                  <><Sparkles className="w-4 h-4 mr-2" />Generate Landing Page dengan AI</>
+                )}
               </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Bot className="w-4 h-4 text-primary" />
-              <span className="font-semibold">Preview Rangkuman</span>
+          {generatedHtml && (
+            <Card>
+              <CardContent className="pt-5 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-primary" />
+                    <span className="font-semibold">Hasil Landing Page</span>
+                    <Badge variant="secondary" className="text-[10px]">Siap Download</Badge>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPreviewMode(previewMode === "preview" ? "code" : "preview")}
+                      data-testid="button-toggle-preview-mode"
+                    >
+                      {previewMode === "preview" ? <><Code2 className="w-3.5 h-3.5 mr-1.5" />Lihat Kode</> : <><Eye className="w-3.5 h-3.5 mr-1.5" />Preview</>}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateLpMutation.mutate()}
+                      disabled={generateLpMutation.isPending}
+                      data-testid="button-regenerate-lp"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 mr-1.5" />Regenerate
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={downloadHtmlFile}
+                      data-testid="button-download-landing-html"
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1.5" />Download HTML
+                    </Button>
+                  </div>
+                </div>
+
+                {previewMode === "preview" ? (
+                  <div className="border rounded-lg overflow-hidden bg-white" style={{ height: "600px" }}>
+                    <iframe
+                      srcDoc={generatedHtml}
+                      className="w-full h-full"
+                      title="Landing Page Preview"
+                      sandbox="allow-same-origin"
+                      data-testid="iframe-landing-preview"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div className="absolute top-2 right-2 z-10">
+                      <CopyButton text={generatedHtml} label="Salin Kode" />
+                    </div>
+                    <pre className="bg-muted/50 rounded-lg p-4 text-xs font-mono overflow-auto max-h-[500px] whitespace-pre-wrap text-foreground">
+                      {generatedHtml}
+                    </pre>
+                  </div>
+                )}
+
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                  <p className="font-medium">Cara Deploy Landing Page:</p>
+                  <p>1. Download file HTML → upload ke hosting (Netlify, Vercel, GitHub Pages — semua gratis)</p>
+                  <p>2. Atau buka file di browser → Ctrl+A, Ctrl+C → paste ke platform website (Webflow, Wix, dll)</p>
+                  <p>3. Simpan URL landing page di tab "Rangkuman" untuk referensi</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardContent className="pt-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Link className="w-4 h-4 text-primary" />
+                <Label className="text-base font-semibold">Simpan URL Landing Page</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Setelah deploy, simpan URL landing page Anda di sini sebagai referensi
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={landingPageUrl}
+                  onChange={(e) => setLandingPageUrl(e.target.value)}
+                  placeholder="https://chatbot-anda.netlify.app atau https://carrd.co/..."
+                  data-testid="input-landing-page-url"
+                />
+                <Button onClick={() => updateMutation.mutate({ landingPageUrl: landingPageUrl.trim() })} disabled={updateMutation.isPending} data-testid="button-save-landing-url">
+                  {updateMutation.isPending ? "..." : "Simpan"}
+                </Button>
+                {landingPageUrl && (
+                  <Button variant="outline" size="icon" asChild>
+                    <a href={landingPageUrl} target="_blank" rel="noopener noreferrer" data-testid="button-open-landing-url">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ─── TAB 2: MARKETING KIT ─── */}
+        <TabsContent value="marketing-kit" className="space-y-4 mt-4">
+          <Card>
+            <CardContent className="pt-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-primary" />
+                <span className="font-semibold">Generate Marketing Kit Lengkap</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                AI akan generate semua konten marketing sekaligus: tagline, elevator pitch, WA broadcast, social posts, ad copy, email sequence, value proposition canvas, FAQ, content calendar, dan testimoni — semuanya disesuaikan dengan chatbot ini.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { icon: Mic, label: "Elevator Pitch" },
+                  { icon: MessageSquare, label: "WA Broadcast" },
+                  { icon: Zap, label: "Ad Copy" },
+                  { icon: Mail, label: "Email Sequence" },
+                  { icon: Calendar, label: "Content Calendar" },
+                  { icon: BarChart3, label: "Value Proposition" },
+                  { icon: Star, label: "Testimoni" },
+                  { icon: Users, label: "FAQ" },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 rounded px-2 py-1.5">
+                    <Icon className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
+              <Button
+                className="w-full"
+                onClick={() => generateKitMutation.mutate()}
+                disabled={generateKitMutation.isPending}
+                data-testid="button-generate-marketing-kit"
+              >
+                {generateKitMutation.isPending ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sedang Generate Marketing Kit (~20 detik)...</>
+                ) : (
+                  <><Package className="w-4 h-4 mr-2" />{kitData ? "Regenerate" : "Generate"} Marketing Kit Lengkap</>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {kitData && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge className="text-xs">Marketing Kit Siap</Badge>
+                  <span className="text-xs text-muted-foreground">Klik bagian untuk expand</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={downloadKitJson} data-testid="button-download-kit-json">
+                  <Download className="w-3.5 h-3.5 mr-1.5" />Download JSON
+                </Button>
+              </div>
+
+              <CollapsibleSection title="🎯 Tagline (5 Variasi)" defaultOpen>
+                <div className="space-y-2">
+                  {(kitData.taglines || []).map((t: string, i: number) => (
+                    <div key={i} className="flex items-center justify-between gap-2 p-2 bg-muted/40 rounded text-sm">
+                      <span className="font-medium">{t}</span>
+                      <CopyButton text={t} />
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="🎤 Elevator Pitch (3 Durasi)" defaultOpen>
+                <div className="space-y-3">
+                  {Object.entries(kitData.elevator_pitch || {}).map(([dur, text]) => (
+                    <div key={dur} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{dur === "30s" ? "30 Detik" : dur === "60s" ? "60 Detik" : "2 Menit"}</span>
+                        <CopyButton text={text as string} />
+                      </div>
+                      <p className="text-sm bg-muted/30 rounded p-3">{text as string}</p>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="💬 WA Broadcast (3 Versi)">
+                <div className="space-y-3">
+                  {Object.entries(kitData.wa_broadcasts || {}).map(([ver, text]) => (
+                    <div key={ver} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{ver === "short" ? "Singkat" : ver === "medium" ? "Medium" : "Panjang"}</span>
+                        <CopyButton text={text as string} />
+                      </div>
+                      <p className="text-sm bg-muted/30 rounded p-3 whitespace-pre-wrap">{text as string}</p>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="📱 Social Media Posts">
+                <div className="space-y-3">
+                  {Object.entries(kitData.social_posts || {}).map(([platform, text]) => (
+                    <div key={platform} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{platform === "linkedin" ? "LinkedIn" : platform === "instagram" ? "Instagram" : "Facebook"}</span>
+                        <CopyButton text={text as string} />
+                      </div>
+                      <p className="text-sm bg-muted/30 rounded p-3 whitespace-pre-wrap">{text as string}</p>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="⚡ Ad Copy (Google & Meta)">
+                <div className="space-y-4">
+                  {Object.entries(kitData.ad_copies || {}).map(([platform, copy]: [string, any]) => (
+                    <div key={platform} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold">{platform === "google" ? "Google Ads" : "Meta Ads"}</span>
+                        <CopyButton text={Object.entries(copy).map(([k, v]) => `${k}: ${v}`).join("\n")} />
+                      </div>
+                      <div className="bg-muted/30 rounded p-3 space-y-1.5">
+                        {Object.entries(copy).map(([k, v]) => (
+                          <div key={k} className="flex gap-2 text-xs">
+                            <span className="text-muted-foreground capitalize min-w-[90px]">{k.replace(/_/g, " ")}:</span>
+                            <span className="text-foreground">{v as string}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="📧 Email Sequence (3 Email)">
+                <div className="space-y-4">
+                  {(kitData.email_sequence || []).map((email: any, i: number) => (
+                    <div key={i} className="border rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="text-xs">Email {i + 1} — Hari {email.day}</Badge>
+                        <CopyButton text={`Subject: ${email.subject}\n\n${email.body}\n\nCTA: ${email.cta}`} />
+                      </div>
+                      <p className="text-sm font-medium">{email.subject}</p>
+                      <p className="text-xs text-muted-foreground italic">{email.preview}</p>
+                      <p className="text-sm text-muted-foreground">{email.body}</p>
+                      <p className="text-xs font-medium text-primary">CTA: {email.cta}</p>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="🎯 Value Proposition Canvas">
+                <div className="space-y-3">
+                  <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                    <p className="text-sm font-semibold text-primary">{kitData.value_proposition?.statement}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { key: "jobs", label: "Jobs to be Done" },
+                      { key: "pains", label: "Pains" },
+                      { key: "gains", label: "Gains" },
+                      { key: "pain_relievers", label: "Pain Relievers" },
+                      { key: "gain_creators", label: "Gain Creators" },
+                    ].map(({ key, label }) => (
+                      <div key={key} className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground uppercase">{label}</p>
+                        <ul className="space-y-1">
+                          {(kitData.value_proposition?.[key] || []).map((item: string, i: number) => (
+                            <li key={i} className="text-xs bg-muted/40 rounded px-2 py-1">{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="📅 Content Calendar (7 Hari)">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 pr-3 text-muted-foreground font-medium">Hari</th>
+                        <th className="text-left py-2 pr-3 text-muted-foreground font-medium">Platform</th>
+                        <th className="text-left py-2 pr-3 text-muted-foreground font-medium">Tipe</th>
+                        <th className="text-left py-2 pr-3 text-muted-foreground font-medium">Topik & Hook</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {(kitData.content_calendar || []).map((item: any, i: number) => (
+                        <tr key={i}>
+                          <td className="py-2 pr-3 font-medium">{item.day}</td>
+                          <td className="py-2 pr-3 text-muted-foreground">{item.platform}</td>
+                          <td className="py-2 pr-3"><Badge variant="secondary" className="text-[10px]">{item.type}</Badge></td>
+                          <td className="py-2"><span className="font-medium">{item.topic}</span><span className="text-muted-foreground"> — {item.hook}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="⭐ Testimoni">
+                <div className="space-y-3">
+                  {(kitData.testimonials || []).map((t: any, i: number) => (
+                    <div key={i} className="border rounded-lg p-3 space-y-1.5">
+                      <p className="text-sm italic text-foreground">"{t.text}"</p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-semibold">{t.name}</p>
+                          <p className="text-xs text-muted-foreground">{t.role}, {t.company}</p>
+                        </div>
+                        <CopyButton text={`"${t.text}" — ${t.name}, ${t.role}, ${t.company}`} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
+
+              <CollapsibleSection title="❓ FAQ">
+                <div className="space-y-2">
+                  {(kitData.faq || []).map((item: any, i: number) => (
+                    <div key={i} className="border rounded-lg p-3 space-y-1">
+                      <p className="text-sm font-medium">{item.q}</p>
+                      <p className="text-sm text-muted-foreground">{item.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleSection>
             </div>
-            <Badge variant="secondary">{sectionCount} bagian</Badge>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Rangkuman ini otomatis diambil dari konfigurasi chatbot Anda. Edit data chatbot di panel lain untuk memperbarui rangkuman ini.
-          </p>
-          <div className="bg-muted/50 rounded-md p-4 max-h-[500px] overflow-y-auto">
-            <pre className="whitespace-pre-wrap text-sm font-mono text-foreground leading-relaxed" data-testid="text-summary-preview">
-              {summary}
-            </pre>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </TabsContent>
 
-      <Card>
-        <CardContent className="pt-6 space-y-3">
-          <div className="flex items-center gap-2">
-            <Globe className="w-4 h-4 text-primary" />
-            <span className="font-semibold">Cara Pakai</span>
+        {/* ─── TAB 3: RANGKUMAN ─── */}
+        <TabsContent value="rangkuman" className="space-y-4 mt-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+              <span className="font-semibold">Rangkuman Konfigurasi Chatbot</span>
+              <Badge variant="secondary" className="text-[10px]">Auto-generated</Badge>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => {
+                navigator.clipboard.writeText(buildSummary());
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+                toast({ title: "Disalin!" });
+              }} data-testid="button-copy-summary">
+                {copied ? <Check className="w-3.5 h-3.5 mr-1.5" /> : <ClipboardCopy className="w-3.5 h-3.5 mr-1.5" />}
+                {copied ? "Tersalin" : "Salin"}
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadSummaryMd} data-testid="button-download-summary-md">
+                <Download className="w-3.5 h-3.5 mr-1.5" />.md
+              </Button>
+            </div>
           </div>
-          <div className="text-sm text-muted-foreground space-y-2">
-            <p>1. Klik "Salin Semua" atau download file (.md / .html)</p>
-            <p>2. Paste ke platform landing page pilihan Anda (Carrd, Notion, Google Sites, WordPress, dll.)</p>
-            <p>3. Sesuaikan desain dan tambahkan visual sesuai kebutuhan</p>
-            <p>4. Simpan URL landing page di field di atas sebagai referensi</p>
-          </div>
-        </CardContent>
-      </Card>
+
+          <Card>
+            <CardContent className="pt-5">
+              <div className="bg-muted/50 rounded-md p-4 max-h-[500px] overflow-y-auto">
+                <pre className="whitespace-pre-wrap text-sm font-mono text-foreground leading-relaxed" data-testid="text-summary-preview">
+                  {buildSummary()}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Link className="w-4 h-4 text-primary" />
+                <Label className="text-base font-semibold">Link Landing Page Eksternal</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">Simpan URL landing page eksternal (Carrd, Notion, dll)</p>
+              <div className="flex gap-2">
+                <Input
+                  value={landingPageUrl}
+                  onChange={(e) => setLandingPageUrl(e.target.value)}
+                  placeholder="https://..."
+                  data-testid="input-landing-page-url-rangkuman"
+                />
+                <Button onClick={() => updateMutation.mutate({ landingPageUrl: landingPageUrl.trim() })} disabled={updateMutation.isPending} data-testid="button-save-landing-url-rangkuman">
+                  {updateMutation.isPending ? "..." : "Simpan"}
+                </Button>
+                {landingPageUrl && (
+                  <Button variant="outline" size="icon" asChild>
+                    <a href={landingPageUrl} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -308,3 +308,44 @@ LexCom is an integrated multi-agent legal AI system added to the Gustafta platfo
 
 ### Disclaimer
 All legal chatbot responses include the mandatory disclaimer: "⚠️ Informasi ini bersifat edukatif dan bukan pendapat hukum yang mengikat."
+
+## Chatbot Management Features (May 2026)
+
+### 1. On/Off Toggle per Chatbot
+- DB column `is_enabled boolean NOT NULL DEFAULT true` added to agents table
+- `PATCH /api/agents/:id/toggle-enabled` — toggles isEnabled status
+- Switch UI visible on hover in sidebar agent cards (orkestrator & regular)
+- Badge "OFF" visible permanently when disabled
+- `/api/chat/config/:agentId` and `/api/widget/config/:agentId` return 503 if isEnabled=false
+
+### 2. Folder/Grouping System
+- DB column `folder_name text DEFAULT NULL` added to agents table
+- `PATCH /api/agents/:id/folder` — set/clear folder name
+- `GET /api/agents/folders` — list distinct folder names
+- Folder dialog in sidebar (FolderPlus icon on hover)
+- Folder name shown below agent name with folder icon
+
+### 3. Export/Import JSON
+- `GET /api/agents/:id/export?download=true` — v2.0 export with 60+ fields as downloadable JSON file
+- `POST /api/agents/import` — import agent config as new agent
+- Download button (hover in sidebar), Import button at bottom of agent list
+- Import dialog with file upload UI
+
+## Landing Page & Marketing Kit (May 2026)
+
+### Landing Page AI Generator
+- `POST /api/agents/:id/landing-page/generate` — generates full HTML landing page from chatbot config
+- Options: style (modern/professional/bold/minimal/tech) + color scheme (blue/green/purple/orange/teal)
+- Sections: Hero, Pain Points, Solusi, Fitur, Cara Kerja, Demo Chat mockup, Testimoni, Harga, FAQ, CTA, Footer
+- Preview via iframe sandbox + code view + download as .html
+- Panel: `client/src/components/panels/landing-page-panel.tsx` (tab "AI Generator")
+
+### Marketing Kit Bundle
+- `POST /api/agents/:id/marketing-kit/generate` — generates all marketing content at once as JSON
+- Includes: 5 taglines, elevator pitch (3 durations), WA broadcast (3 versions), social posts (LinkedIn/Instagram/Facebook), ad copies (Google/Meta), email sequence (3 emails), value proposition canvas, FAQ (5 items), content calendar (7 days), 3 testimonials
+- Collapsible sections per category, copy buttons, download JSON
+- Panel: tab "Marketing Kit" in landing-page-panel.tsx
+
+### Summary/Rangkuman (existing, upgraded)
+- Tab "Rangkuman" — auto-generated from chatbot config
+- Download .md, copy to clipboard, save external landing page URL
