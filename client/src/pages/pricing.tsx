@@ -626,10 +626,12 @@ export default function Pricing() {
               <Zap className="h-4 w-4" />
               Lihat Paket
             </Button>
-            <Button size="lg" variant="outline" className="gap-2">
-              <Headphones className="h-4 w-4" />
-              Hubungi Sales
-            </Button>
+            <a href="https://wa.me/6281287941900?text=Halo%2C%20saya%20ingin%20tanya%20tentang%20paket%20Gustafta" target="_blank" rel="noopener noreferrer">
+              <Button size="lg" variant="outline" className="gap-2" data-testid="button-hubungi-sales">
+                <Headphones className="h-4 w-4" />
+                Hubungi Sales
+              </Button>
+            </a>
           </div>
         </section>
       </main>
@@ -641,9 +643,14 @@ export default function Pricing() {
               <Bot className="h-6 w-6 text-primary" />
               <span className="font-bold">Gustafta</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2026 Gustafta. AI Project Intelligence Platform.
-            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-muted-foreground">
+              <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-foreground transition-colors" data-testid="link-whatsapp-footer">
+                <Smartphone className="h-3.5 w-3.5" />
+                081287941900
+              </a>
+              <span className="hidden sm:inline">·</span>
+              <span>© 2026 Gustafta. AI Project Intelligence Platform.</span>
+            </div>
           </div>
         </div>
       </footer>

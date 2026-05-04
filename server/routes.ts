@@ -3115,6 +3115,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             first_name: firstName,
             last_name: lastName,
             email,
+            phone: "081287941900",
           },
           item_details: [
             {
