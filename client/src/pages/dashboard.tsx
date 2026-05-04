@@ -3,8 +3,10 @@ import { Link, useLocation } from "wouter";
 import { 
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
-  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale
+  ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
+  Download, Upload, Folder, FolderPlus, Power, PowerOff
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -132,6 +134,12 @@ export default function Dashboard() {
   const [editAgentTarget, setEditAgentTarget] = useState<Agent | null>(null);
   const [editAgentName, setEditAgentName] = useState("");
   const [editAgentDesc, setEditAgentDesc] = useState("");
+  const [folderDialogAgent, setFolderDialogAgent] = useState<Agent | null>(null);
+  const [folderDialogName, setFolderDialogName] = useState("");
+  const [exportingAgentId, setExportingAgentId] = useState<string | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importLoading, setImportLoading] = useState(false);
   
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -247,6 +255,71 @@ export default function Dashboard() {
     },
     onError: () => toast({ title: "Gagal memperbarui", variant: "destructive" }),
   });
+
+  const toggleAgentEnabledMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("PATCH", `/api/agents/${id}/toggle-enabled`, {});
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      toast({ title: data.isEnabled ? "Chatbot diaktifkan" : "Chatbot dinonaktifkan" });
+    },
+    onError: () => toast({ title: "Gagal mengubah status chatbot", variant: "destructive" }),
+  });
+
+  const setFolderMutation = useMutation({
+    mutationFn: async ({ id, folderName }: { id: string; folderName: string | null }) => {
+      const res = await apiRequest("PATCH", `/api/agents/${id}/folder`, { folderName });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      setFolderDialogAgent(null);
+      toast({ title: "Folder berhasil diperbarui" });
+    },
+    onError: () => toast({ title: "Gagal memperbarui folder", variant: "destructive" }),
+  });
+
+  const handleExportAgent = async (agentId: string, agentName: string) => {
+    try {
+      setExportingAgentId(agentId);
+      const res = await fetch(`/api/agents/${agentId}/export?download=true`);
+      if (!res.ok) throw new Error("Export gagal");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const safeAgentName = agentName.replace(/[^a-zA-Z0-9_-]/g, "_").substring(0, 40);
+      a.download = `gustafta_agent_${safeAgentName}_${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Konfigurasi berhasil diexport" });
+    } catch {
+      toast({ title: "Gagal mengexport konfigurasi", variant: "destructive" });
+    } finally {
+      setExportingAgentId(null);
+    }
+  };
+
+  const handleImportAgent = async () => {
+    if (!importFile) return;
+    try {
+      setImportLoading(true);
+      const text = await importFile.text();
+      const config = JSON.parse(text);
+      const res = await apiRequest("POST", "/api/agents/import", { config, toolboxId: effectiveToolboxId });
+      if (!res.ok) throw new Error("Import gagal");
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      setImportDialogOpen(false);
+      setImportFile(null);
+      toast({ title: "Konfigurasi berhasil diimport" });
+    } catch {
+      toast({ title: "Gagal mengimport konfigurasi. Pastikan file JSON valid.", variant: "destructive" });
+    } finally {
+      setImportLoading(false);
+    }
+  };
 
   const handleSeriesSelect = (seriesId: string | null) => {
     if (bigIdeaCreationCooldown.current) return;
@@ -1223,7 +1296,35 @@ export default function Dashboard() {
                               <span className="whitespace-nowrap block">{agent.name}</span>
                               <span className="text-[10px] text-purple-500/70 whitespace-nowrap">Orkestrator</span>
                             </div>
-                            <div className="flex gap-0.5 invisible group-hover:visible shrink-0">
+                            <div className="flex items-center gap-0.5 invisible group-hover:visible shrink-0">
+                              <Switch
+                                checked={(agent as any).isEnabled !== false}
+                                onCheckedChange={() => { toggleAgentEnabledMutation.mutate(String(agent.id)); }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="scale-[0.65] origin-right"
+                                data-testid={`toggle-agent-enabled-${agent.id}`}
+                              />
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="w-6 h-6"
+                                title="Atur Folder"
+                                onClick={(e) => { e.stopPropagation(); setFolderDialogAgent(agent as Agent); setFolderDialogName((agent as any).folderName || ""); }}
+                                data-testid={`button-folder-agent-${agent.id}`}
+                              >
+                                <FolderPlus className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="w-6 h-6"
+                                title="Export JSON"
+                                onClick={(e) => { e.stopPropagation(); handleExportAgent(String(agent.id), agent.name); }}
+                                disabled={exportingAgentId === String(agent.id)}
+                                data-testid={`button-export-agent-${agent.id}`}
+                              >
+                                {exportingAgentId === String(agent.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                              </Button>
                               <Button
                                 size="icon"
                                 variant="ghost"
@@ -1283,8 +1384,46 @@ export default function Dashboard() {
                                   {agent.name.substring(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide"><span className="whitespace-nowrap">{agent.name}</span></div>
-                              <div className="flex gap-0.5 invisible group-hover:visible shrink-0">
+                              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
+                                <span className="whitespace-nowrap block">{agent.name}</span>
+                                {(agent as any).folderName && (
+                                  <span className="text-[10px] text-muted-foreground whitespace-nowrap flex items-center gap-0.5">
+                                    <Folder className="w-2.5 h-2.5" />{(agent as any).folderName}
+                                  </span>
+                                )}
+                              </div>
+                              {(agent as any).isEnabled === false && (
+                                <span className="text-[9px] bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 rounded px-1 py-0.5 shrink-0">OFF</span>
+                              )}
+                              <div className="flex items-center gap-0.5 invisible group-hover:visible shrink-0">
+                                <Switch
+                                  checked={(agent as any).isEnabled !== false}
+                                  onCheckedChange={() => { toggleAgentEnabledMutation.mutate(String(agent.id)); }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="scale-[0.65] origin-right"
+                                  data-testid={`toggle-agent-enabled-${agent.id}`}
+                                />
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="w-6 h-6"
+                                  title="Atur Folder"
+                                  onClick={(e) => { e.stopPropagation(); setFolderDialogAgent(agent as Agent); setFolderDialogName((agent as any).folderName || ""); }}
+                                  data-testid={`button-folder-agent-${agent.id}`}
+                                >
+                                  <FolderPlus className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="w-6 h-6"
+                                  title="Export JSON"
+                                  onClick={(e) => { e.stopPropagation(); handleExportAgent(String(agent.id), agent.name); }}
+                                  disabled={exportingAgentId === String(agent.id)}
+                                  data-testid={`button-export-agent-${agent.id}`}
+                                >
+                                  {exportingAgentId === String(agent.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                                </Button>
                                 <Button
                                   size="icon"
                                   variant="ghost"
@@ -1317,6 +1456,14 @@ export default function Dashboard() {
                   >
                     <Plus className="w-4 h-4" />
                     <span>Buat Alat Bantu Baru</span>
+                  </button>
+                  <button
+                    onClick={() => setImportDialogOpen(true)}
+                    className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    data-testid="button-import-agent-sidebar"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Import dari JSON</span>
                   </button>
                 </>
               )}
@@ -2004,6 +2151,107 @@ export default function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Folder Management Dialog */}
+      <Dialog open={!!folderDialogAgent} onOpenChange={(open) => { if (!open) { setFolderDialogAgent(null); setFolderDialogName(""); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderPlus className="h-5 w-5 text-primary" />
+              Atur Folder
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Masukkan nama folder untuk <span className="font-medium text-foreground">{folderDialogAgent?.name}</span>. Kosongkan untuk menghapus dari folder.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="folder-name-input">Nama Folder</Label>
+              <Input
+                id="folder-name-input"
+                placeholder="Contoh: Konstruksi, Marketing, HR..."
+                value={folderDialogName}
+                onChange={(e) => setFolderDialogName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { setFolderMutation.mutate({ id: String(folderDialogAgent!.id), folderName: folderDialogName.trim() || null }); } }}
+                data-testid="input-folder-name"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setFolderDialogAgent(null); setFolderDialogName(""); }}>Batal</Button>
+              {(folderDialogAgent as any)?.folderName && (
+                <Button variant="ghost" className="text-destructive" onClick={() => setFolderMutation.mutate({ id: String(folderDialogAgent!.id), folderName: null })} disabled={setFolderMutation.isPending} data-testid="button-remove-folder">
+                  Hapus Folder
+                </Button>
+              )}
+              <Button
+                onClick={() => setFolderMutation.mutate({ id: String(folderDialogAgent!.id), folderName: folderDialogName.trim() || null })}
+                disabled={setFolderMutation.isPending}
+                data-testid="button-save-folder"
+              >
+                {setFolderMutation.isPending ? "Menyimpan..." : "Simpan"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Agent Dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={(open) => { setImportDialogOpen(open); if (!open) setImportFile(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5 text-primary" />
+              Import Konfigurasi Chatbot
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Upload file JSON hasil export dari Gustafta. Konfigurasi akan diimport sebagai Alat Bantu baru ke dalam chatbot yang sedang aktif.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="import-file-input">File JSON</Label>
+              <div
+                className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                onClick={() => document.getElementById("import-file-input")?.click()}
+                data-testid="dropzone-import-file"
+              >
+                {importFile ? (
+                  <div className="space-y-1">
+                    <Download className="w-8 h-8 text-primary mx-auto" />
+                    <p className="text-sm font-medium text-foreground">{importFile.name}</p>
+                    <p className="text-xs text-muted-foreground">{(importFile.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
+                    <p className="text-sm text-muted-foreground">Klik untuk pilih file JSON</p>
+                  </div>
+                )}
+                <input
+                  id="import-file-input"
+                  type="file"
+                  accept=".json,application/json"
+                  className="hidden"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  data-testid="input-import-file"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setImportDialogOpen(false); setImportFile(null); }}>Batal</Button>
+              <Button
+                onClick={handleImportAgent}
+                disabled={!importFile || importLoading}
+                data-testid="button-confirm-import"
+              >
+                {importLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Mengimport...</> : <><Upload className="w-4 h-4 mr-2" />Import</>}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

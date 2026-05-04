@@ -1207,6 +1207,8 @@ export class DatabaseStorage implements IStorage {
       riskCompliance: (row as any).riskCompliance || "",
       orchestratorConfig: (row as any).orchestratorConfig ?? {},
       isActive: row.isActive || false,
+      isEnabled: (row as any).isEnabled !== false,
+      folderName: (row as any).folderName ?? null,
       createdAt: row.createdAt.toISOString(),
     };
   }

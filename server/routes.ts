@@ -1354,6 +1354,43 @@ export async function registerRoutes(
     }
   });
 
+  // Toggle chatbot enabled/disabled (independent on/off per agent)
+  app.patch("/api/agents/:id/toggle-enabled", isAuthenticated, async (req, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id as string);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+      const newEnabled = !(agent.isEnabled !== false);
+      const updated = await storage.updateAgent(req.params.id as string, { isEnabled: newEnabled } as any);
+      res.json({ isEnabled: newEnabled, agent: updated });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to toggle agent status" });
+    }
+  });
+
+  // Set folder for agent
+  app.patch("/api/agents/:id/folder", isAuthenticated, async (req, res) => {
+    try {
+      const { folderName } = req.body;
+      const updated = await storage.updateAgent(req.params.id as string, { folderName: folderName || null } as any);
+      if (!updated) return res.status(404).json({ error: "Agent not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update folder" });
+    }
+  });
+
+  // Get all folders (distinct folder names for user's agents)
+  app.get("/api/agents/folders", isAuthenticated, async (req, res) => {
+    try {
+      const allAgents = await storage.getAgents();
+      const folderSet = new Set(allAgents.map((a: any) => a.folderName).filter(Boolean));
+      const folders = Array.from(folderSet).sort();
+      res.json(folders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get folders" });
+    }
+  });
+
   // Delete agent
   app.delete("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
@@ -4169,18 +4206,18 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         return res.status(404).json({ error: "Agent not found" });
       }
 
-      // Get knowledge bases for this agent
       const knowledgeBases = await storage.getKnowledgeBases(req.params.id as string);
       const integrations = await storage.getIntegrations(req.params.id as string);
 
-      // Create export object (exclude sensitive data)
       const exportData = {
-        version: "1.0",
+        version: "2.0",
         exportedAt: new Date().toISOString(),
+        platform: "Gustafta",
         agent: {
           name: agent.name,
           description: agent.description,
           tagline: agent.tagline,
+          avatar: agent.avatar,
           philosophy: agent.philosophy,
           systemPrompt: agent.systemPrompt,
           personality: agent.personality,
@@ -4201,9 +4238,22 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           emotionalIntelligence: agent.emotionalIntelligence,
           multiStepReasoning: agent.multiStepReasoning,
           selfCorrection: agent.selfCorrection,
+          proactiveAssistance: agent.proactiveAssistance,
+          learningEnabled: agent.learningEnabled,
+          behaviorPreset: agent.behaviorPreset,
+          autonomyLevel: agent.autonomyLevel,
+          responseDepth: agent.responseDepth,
+          outputFormat: agent.outputFormat,
           expertise: agent.expertise,
           avoidTopics: agent.avoidTopics,
           keyPhrases: agent.keyPhrases,
+          offTopicHandling: agent.offTopicHandling,
+          offTopicResponse: agent.offTopicResponse,
+          contextQuestions: agent.contextQuestions,
+          ragEnabled: agent.ragEnabled,
+          ragChunkSize: agent.ragChunkSize,
+          ragChunkOverlap: agent.ragChunkOverlap,
+          ragTopK: agent.ragTopK,
           widgetColor: agent.widgetColor,
           widgetPosition: agent.widgetPosition,
           widgetSize: agent.widgetSize,
@@ -4211,12 +4261,24 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           widgetShowBranding: agent.widgetShowBranding,
           widgetWelcomeMessage: agent.widgetWelcomeMessage,
           widgetButtonIcon: agent.widgetButtonIcon,
+          agentRole: (agent as any).agentRole,
+          workMode: (agent as any).workMode,
+          primaryOutcome: (agent as any).primaryOutcome,
+          domainCharter: (agent as any).domainCharter,
+          qualityBar: (agent as any).qualityBar,
+          riskCompliance: (agent as any).riskCompliance,
+          deliverables: agent.deliverables,
+          deliverableBundle: agent.deliverableBundle,
+          folderName: (agent as any).folderName || null,
         },
         knowledgeBases: knowledgeBases.map(kb => ({
           name: kb.name,
           type: kb.type,
           content: kb.content,
           description: kb.description,
+          knowledgeLayer: kb.knowledgeLayer,
+          sourceAuthority: kb.sourceAuthority,
+          status: kb.status,
         })),
         integrations: integrations.map(int => ({
           type: int.type,
@@ -4224,6 +4286,16 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           isEnabled: int.isEnabled,
         })),
       };
+
+      // If download=true query param, send as downloadable file
+      if (req.query.download === "true") {
+        const safeAgentName = agent.name.replace(/[^a-zA-Z0-9_-]/g, "_").substring(0, 40);
+        const timestamp = new Date().toISOString().split("T")[0];
+        const filename = `gustafta_agent_${safeAgentName}_${timestamp}.json`;
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.setHeader("Content-Type", "application/json");
+        return res.send(JSON.stringify(exportData, null, 2));
+      }
 
       res.json(exportData);
     } catch (error) {
@@ -5491,6 +5563,10 @@ Akhiri dengan 2-3 poin key takeaway untuk pembaca lain.`;
         return res.status(404).json({ error: "Agent is not public", disabled: true });
       }
 
+      if ((agent as any).isEnabled === false) {
+        return res.status(503).json({ error: "Chatbot sedang tidak aktif. Silakan coba lagi nanti.", disabled: true });
+      }
+
       const agentId = agent.id.toString();
       const integrations = await storage.getIntegrations(agentId);
       const enabledChannels = integrations
@@ -5637,6 +5713,10 @@ Akhiri dengan 2-3 poin key takeaway untuk pembaca lain.`;
       
       if (!agent.isPublic) {
         return res.status(403).json({ error: "Widget is not public", private: true });
+      }
+
+      if ((agent as any).isEnabled === false) {
+        return res.status(503).json({ error: "Chatbot sedang tidak aktif.", disabled: true });
       }
       
       const integrations = await storage.getIntegrations(agentId);

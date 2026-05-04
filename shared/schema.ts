@@ -247,6 +247,8 @@ export const agents = pgTable("agents", {
   deliverableBundle: text("deliverable_bundle").default(""),
   orchestratorConfig: jsonb("orchestrator_config").default({}),
   isActive: boolean("is_active").default(false),
+  isEnabled: boolean("is_enabled").default(true).notNull(),
+  folderName: text("folder_name"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -802,6 +804,8 @@ export type InsertAgent = z.infer<typeof insertAgentSchema>;
 export type Agent = InsertAgent & {
   id: string;
   isActive: boolean;
+  isEnabled: boolean;
+  folderName: string | null;
   createdAt: string;
 };
 
