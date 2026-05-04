@@ -1736,3 +1736,42 @@ export const userOnboarding = pgTable("user_onboarding", {
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// ==================== STORE (MARKETPLACE PRODUK CHATBOT) ====================
+
+export const storeProducts = pgTable("store_products", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description").default(""),
+  category: text("category").default("Konstruksi"),
+  price: integer("price").notNull().default(0),
+  agentId: integer("agent_id"),
+  features: jsonb("features").default([]),
+  emoji: text("emoji").default("🤖"),
+  color: text("color").default("#6366f1"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertStoreProductSchema = createInsertSchema(storeProducts).omit({ id: true, createdAt: true });
+export type InsertStoreProduct = z.infer<typeof insertStoreProductSchema>;
+export type StoreProduct = typeof storeProducts.$inferSelect;
+
+export const storeOrders = pgTable("store_orders", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").default(""),
+  amount: integer("amount").notNull(),
+  midtransOrderId: text("midtrans_order_id").notNull().unique(),
+  accessToken: text("access_token").notNull().unique(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertStoreOrderSchema = createInsertSchema(storeOrders).omit({ id: true, createdAt: true });
+export type InsertStoreOrder = z.infer<typeof insertStoreOrderSchema>;
+export type StoreOrder = typeof storeOrders.$inferSelect;

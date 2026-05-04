@@ -70,6 +70,10 @@ import type {
   InsertTenderSession,
   ChatbotTemplate,
   InsertChatbotTemplate,
+  StoreProduct,
+  InsertStoreProduct,
+  StoreOrder,
+  InsertStoreOrder,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -335,6 +339,22 @@ export interface IStorage {
   // User Onboarding methods
   getUserOnboarding(userId: string): Promise<{ starterCreated: boolean } | undefined>;
   markStarterCreated(userId: string): Promise<void>;
+
+  // Store Product methods
+  getStoreProducts(): Promise<StoreProduct[]>;
+  getStoreProduct(id: number): Promise<StoreProduct | undefined>;
+  getStoreProductBySlug(slug: string): Promise<StoreProduct | undefined>;
+  createStoreProduct(data: InsertStoreProduct): Promise<StoreProduct>;
+  updateStoreProduct(id: number, data: Partial<InsertStoreProduct>): Promise<StoreProduct | undefined>;
+  deleteStoreProduct(id: number): Promise<boolean>;
+
+  // Store Order methods
+  getStoreOrders(): Promise<StoreOrder[]>;
+  getStoreOrder(id: number): Promise<StoreOrder | undefined>;
+  getStoreOrderByMidtransId(orderId: string): Promise<StoreOrder | undefined>;
+  getStoreOrderByAccessToken(token: string): Promise<StoreOrder | undefined>;
+  createStoreOrder(data: InsertStoreOrder): Promise<StoreOrder>;
+  updateStoreOrderStatus(id: number, status: string): Promise<StoreOrder | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -2052,6 +2072,26 @@ export class MemStorage implements IStorage {
   // User Onboarding stubs (MemStorage)
   async getUserOnboarding(_userId: string): Promise<{ starterCreated: boolean } | undefined> { return undefined; }
   async markStarterCreated(_userId: string): Promise<void> {}
+
+  // Store Product stubs (MemStorage)
+  async getStoreProducts(): Promise<StoreProduct[]> { return []; }
+  async getStoreProduct(_id: number): Promise<StoreProduct | undefined> { return undefined; }
+  async getStoreProductBySlug(_slug: string): Promise<StoreProduct | undefined> { return undefined; }
+  async createStoreProduct(data: InsertStoreProduct): Promise<StoreProduct> {
+    return { id: 1, ...data, isActive: data.isActive ?? true, sortOrder: data.sortOrder ?? 0, createdAt: new Date() } as StoreProduct;
+  }
+  async updateStoreProduct(_id: number, _data: Partial<InsertStoreProduct>): Promise<StoreProduct | undefined> { return undefined; }
+  async deleteStoreProduct(_id: number): Promise<boolean> { return false; }
+
+  // Store Order stubs (MemStorage)
+  async getStoreOrders(): Promise<StoreOrder[]> { return []; }
+  async getStoreOrder(_id: number): Promise<StoreOrder | undefined> { return undefined; }
+  async getStoreOrderByMidtransId(_orderId: string): Promise<StoreOrder | undefined> { return undefined; }
+  async getStoreOrderByAccessToken(_token: string): Promise<StoreOrder | undefined> { return undefined; }
+  async createStoreOrder(data: InsertStoreOrder): Promise<StoreOrder> {
+    return { id: 1, ...data, createdAt: new Date() } as StoreOrder;
+  }
+  async updateStoreOrderStatus(_id: number, _status: string): Promise<StoreOrder | undefined> { return undefined; }
 }
 
 import { dbStorage } from "./db-storage";

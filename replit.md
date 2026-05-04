@@ -407,3 +407,40 @@ VA BCA/BNI/BRI/Mandiri, QRIS, GoPay, OVO, ShopeePay, kartu kredit/debit Visa/MC
 
 ### Seeded Templates (10)
 Customer Support Pro (Bisnis★), Sales Assistant AI (Bisnis★), HR & Rekrutmen Bot (Bisnis), Guru Privat AI (Pendidikan★), Konsultan K3 Konstruksi (Konstruksi★), Tender & Pengadaan Advisor (Konstruksi), Asisten Hukum Bisnis (Hukum), Financial Planner AI (Keuangan), Tech Support Bot (Teknologi), Asisten Mutu ISO 9001 (Konstruksi)
+
+## Gustafta Store — Public Chatbot Marketplace (May 2026)
+
+Storefront publik terpisah dari platform utama. Pelanggan eksternal bisa beli chatbot tanpa login Gustafta.
+
+### URL
+- `/store` — public storefront (dark theme, standalone design)
+- `/store/access/:token` — halaman akses setelah pembayaran berhasil
+
+### DB Tables
+- `store_products` — produk chatbot yang dijual (linked ke agent_id, harga, fitur, emoji)
+- `store_orders` — riwayat pembelian (customer info, Midtrans order ID, access_token UUID)
+
+### Flow Pembelian
+1. Customer browse `/store` → klik "Beli Sekarang"
+2. Isi nama + email + no HP → POST `/api/store/order` → Midtrans Snap token
+3. `snap.pay(token)` buka popup → bayar via VA/QRIS/GoPay/dll
+4. Midtrans webhook → `POST /api/store/notify` → update status order → "paid"
+5. Customer redirect ke `/store/access/:token` → tampil chat URL + embed code
+
+### Routes (Public)
+- `GET /api/store/products` — daftar produk aktif (publik, no auth)
+- `GET /api/store/products/:slug` — detail produk
+- `POST /api/store/order` — buat order + Snap token (publik)
+- `POST /api/store/notify` — Midtrans webhook
+- `GET /api/store/access/:token` — verifikasi token + info chatbot
+
+### Routes (Admin, auth required)
+- `GET/POST /api/store/admin/products` — kelola produk
+- `PATCH/DELETE /api/store/admin/products/:id` — edit/hapus produk
+- `GET /api/store/admin/orders` — lihat semua order
+
+### Seeded Products (6)
+HUB Regulasi Jasa Konstruksi (Rp 499.000, agent_id=3), Konsultan K3 Konstruksi (Rp 399.000), PROXIMA Manajemen Proyek (Rp 699.000, agent_id=891), Manajer Keuangan Konstruksi (Rp 599.000, agent_id=902), MRP-A Rantai Pasok (Rp 549.000, agent_id=875), Manajer Proyek KPBU (Rp 799.000, agent_id=883)
+
+### Nomor Kontak
+Phone 081287941900 (WA): di Midtrans customer details, tombol "Hubungi Sales" pricing.tsx, footer pricing.tsx, header & footer store.tsx

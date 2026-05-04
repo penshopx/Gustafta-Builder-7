@@ -29,6 +29,8 @@ import MiniAppPublic from "@/pages/mini-app-public";
 import LegalLanding from "@/pages/legal-landing";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
+import StorePage from "@/pages/store";
+import StoreAccess from "@/pages/store-access";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
@@ -63,6 +65,8 @@ function Router() {
       <Route path="/legal" component={LegalLanding} />
       <Route path="/legal/chat" component={LegalChat} />
       <Route path="/templates" component={TemplatesPage} />
+      <Route path="/store" component={StorePage} />
+      <Route path="/store/access/:token" component={StoreAccess} />
       <Route component={NotFound} />
     </Switch>
   );

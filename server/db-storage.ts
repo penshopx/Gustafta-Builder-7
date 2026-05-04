@@ -37,12 +37,18 @@ import {
   tenderSessions,
   chatbotTemplates,
   userOnboarding,
+  storeProducts,
+  storeOrders,
 } from "@shared/schema";
 import type {
   TenderDocumentCatalog,
   InsertTenderDocumentCatalog,
   ChatbotTemplate,
   InsertChatbotTemplate,
+  StoreProduct,
+  InsertStoreProduct,
+  StoreOrder,
+  InsertStoreOrder,
 } from "@shared/schema";
 import { applyDefaultPolicies } from "./lib/agent-policies";
 import type { IStorage } from "./storage";
@@ -3434,6 +3440,68 @@ export class DatabaseStorage implements IStorage {
         target: userOnboarding.userId,
         set: { starterCreated: true, onboardingCompletedAt: new Date() },
       });
+  }
+
+  // ─── Store Products ──────────────────────────────────────────────────────────
+
+  async getStoreProducts(): Promise<StoreProduct[]> {
+    return db.select().from(storeProducts).where(eq(storeProducts.isActive, true)).orderBy(storeProducts.sortOrder, storeProducts.id);
+  }
+
+  async getStoreProduct(id: number): Promise<StoreProduct | undefined> {
+    const rows = await db.select().from(storeProducts).where(eq(storeProducts.id, id)).limit(1);
+    return rows[0];
+  }
+
+  async getStoreProductBySlug(slug: string): Promise<StoreProduct | undefined> {
+    const rows = await db.select().from(storeProducts).where(eq(storeProducts.slug, slug)).limit(1);
+    return rows[0];
+  }
+
+  async createStoreProduct(data: InsertStoreProduct): Promise<StoreProduct> {
+    const rows = await db.insert(storeProducts).values(data as any).returning();
+    return rows[0];
+  }
+
+  async updateStoreProduct(id: number, data: Partial<InsertStoreProduct>): Promise<StoreProduct | undefined> {
+    const rows = await db.update(storeProducts).set(data as any).where(eq(storeProducts.id, id)).returning();
+    return rows[0];
+  }
+
+  async deleteStoreProduct(id: number): Promise<boolean> {
+    const result = await db.delete(storeProducts).where(eq(storeProducts.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // ─── Store Orders ────────────────────────────────────────────────────────────
+
+  async getStoreOrders(): Promise<StoreOrder[]> {
+    return db.select().from(storeOrders).orderBy(desc(storeOrders.createdAt));
+  }
+
+  async getStoreOrder(id: number): Promise<StoreOrder | undefined> {
+    const rows = await db.select().from(storeOrders).where(eq(storeOrders.id, id)).limit(1);
+    return rows[0];
+  }
+
+  async getStoreOrderByMidtransId(orderId: string): Promise<StoreOrder | undefined> {
+    const rows = await db.select().from(storeOrders).where(eq(storeOrders.midtransOrderId, orderId)).limit(1);
+    return rows[0];
+  }
+
+  async getStoreOrderByAccessToken(token: string): Promise<StoreOrder | undefined> {
+    const rows = await db.select().from(storeOrders).where(eq(storeOrders.accessToken, token)).limit(1);
+    return rows[0];
+  }
+
+  async createStoreOrder(data: InsertStoreOrder): Promise<StoreOrder> {
+    const rows = await db.insert(storeOrders).values(data as any).returning();
+    return rows[0];
+  }
+
+  async updateStoreOrderStatus(id: number, status: string): Promise<StoreOrder | undefined> {
+    const rows = await db.update(storeOrders).set({ status }).where(eq(storeOrders.id, id)).returning();
+    return rows[0];
   }
 }
 

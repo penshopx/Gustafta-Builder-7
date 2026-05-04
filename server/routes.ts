@@ -3282,6 +3282,231 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   })();
 
+  // ==================== STORE (MARKETPLACE PRODUK CHATBOT) ====================
+
+  // GET /api/store/products — public product listing
+  app.get("/api/store/products", async (_req, res) => {
+    try {
+      const products = await storage.getStoreProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Store products error:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
+  // GET /api/store/products/:slug — public product detail
+  app.get("/api/store/products/:slug", async (req, res) => {
+    try {
+      const product = await storage.getStoreProductBySlug(req.params.slug);
+      if (!product) return res.status(404).json({ error: "Product not found" });
+      res.json(product);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch product" });
+    }
+  });
+
+  // POST /api/store/order — create order + Midtrans Snap token (no auth needed)
+  app.post("/api/store/order", async (req, res) => {
+    try {
+      const { productId, name, email, phone } = req.body;
+      if (!productId || !name || !email) {
+        return res.status(400).json({ error: "productId, name, dan email wajib diisi" });
+      }
+
+      const product = await storage.getStoreProduct(Number(productId));
+      if (!product || !product.isActive) {
+        return res.status(404).json({ error: "Produk tidak ditemukan" });
+      }
+
+      const { randomUUID } = await import("crypto");
+      const orderId = `STORE-${Date.now()}-${randomUUID().split("-")[0].toUpperCase()}`;
+      const accessToken = randomUUID();
+
+      const snapData = await midtrans.createSnapToken({
+        transaction_details: {
+          order_id: orderId,
+          gross_amount: product.price,
+        },
+        customer_details: {
+          first_name: name.split(" ")[0],
+          last_name: name.split(" ").slice(1).join(" ") || "",
+          email,
+          phone: phone || "081287941900",
+        },
+        item_details: [
+          {
+            id: `product-${product.id}`,
+            price: product.price,
+            quantity: 1,
+            name: product.name,
+          },
+        ],
+        callbacks: {
+          finish: `${req.protocol}://${req.get("host")}/store/access/${accessToken}`,
+          pending: `${req.protocol}://${req.get("host")}/store/access/${accessToken}`,
+          error: `${req.protocol}://${req.get("host")}/store`,
+        },
+      });
+
+      await storage.createStoreOrder({
+        productId: product.id,
+        customerName: name,
+        customerEmail: email,
+        customerPhone: phone || "",
+        amount: product.price,
+        midtransOrderId: orderId,
+        accessToken,
+        status: "pending",
+      });
+
+      res.json({ token: snapData.token, orderId, accessToken });
+    } catch (error) {
+      console.error("Store order error:", error);
+      res.status(500).json({ error: "Gagal membuat pesanan" });
+    }
+  });
+
+  // POST /api/store/notify — Midtrans webhook for store orders
+  app.post("/api/store/notify", async (req, res) => {
+    try {
+      const notification = req.body as midtrans.MidtransNotification;
+      const { order_id } = notification;
+
+      if (!order_id?.startsWith("STORE-")) {
+        return res.status(400).json({ error: "Invalid store order" });
+      }
+
+      const order = await storage.getStoreOrderByMidtransId(order_id);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+
+      let newStatus = order.status;
+      if (midtrans.isPaymentSuccess(notification)) newStatus = "paid";
+      else if (midtrans.isPaymentFailed(notification)) newStatus = "failed";
+      else if (midtrans.isPaymentPending(notification)) newStatus = "pending";
+
+      if (newStatus !== order.status) {
+        await storage.updateStoreOrderStatus(order.id, newStatus);
+        console.log(`[Store] Order ${order_id} status → ${newStatus}`);
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Store notify error:", error);
+      res.status(500).json({ error: "Webhook error" });
+    }
+  });
+
+  // GET /api/store/access/:token — verify access token & return chatbot info
+  app.get("/api/store/access/:token", async (req, res) => {
+    try {
+      const order = await storage.getStoreOrderByAccessToken(req.params.token);
+      if (!order) return res.status(404).json({ error: "Access token tidak valid" });
+
+      const product = await storage.getStoreProduct(order.productId);
+      if (!product) return res.status(404).json({ error: "Produk tidak ditemukan" });
+
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const chatUrl = product.agentId ? `${baseUrl}/chat/${product.agentId}` : null;
+      const embedCode = product.agentId
+        ? `<iframe src="${baseUrl}/embed/${product.agentId}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
+        : null;
+
+      res.json({
+        order: {
+          id: order.id,
+          customerName: order.customerName,
+          status: order.status,
+          amount: order.amount,
+        },
+        product: {
+          id: product.id,
+          name: product.name,
+          emoji: product.emoji,
+          color: product.color,
+          description: product.description,
+          agentId: product.agentId,
+        },
+        chatUrl,
+        embedCode,
+      });
+    } catch (error) {
+      console.error("Store access error:", error);
+      res.status(500).json({ error: "Gagal memverifikasi akses" });
+    }
+  });
+
+  // POST /api/store/check/:orderId — re-check Midtrans status for store order
+  app.post("/api/store/check/:orderId", async (req, res) => {
+    try {
+      const order = await storage.getStoreOrderByMidtransId(req.params.orderId);
+      if (!order) return res.status(404).json({ error: "Order not found" });
+
+      const txStatus = await midtrans.getTransactionStatus(req.params.orderId);
+      let newStatus = order.status;
+      if (midtrans.isPaymentSuccess(txStatus)) newStatus = "paid";
+      else if (midtrans.isPaymentFailed(txStatus)) newStatus = "failed";
+      else if (midtrans.isPaymentPending(txStatus)) newStatus = "pending";
+
+      if (newStatus !== order.status) {
+        await storage.updateStoreOrderStatus(order.id, newStatus);
+      }
+
+      res.json({ status: newStatus, accessToken: order.accessToken });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to check status" });
+    }
+  });
+
+  // ── Admin: manage store products (authenticated) ──────────────────────────
+
+  app.get("/api/store/admin/products", isAuthenticated, async (_req, res) => {
+    try {
+      const products = await storage.getStoreProducts();
+      res.json(products);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
+  app.post("/api/store/admin/products", isAuthenticated, async (req, res) => {
+    try {
+      const product = await storage.createStoreProduct(req.body);
+      res.json(product);
+    } catch (error) {
+      console.error("Create store product error:", error);
+      res.status(500).json({ error: "Failed to create product" });
+    }
+  });
+
+  app.patch("/api/store/admin/products/:id", isAuthenticated, async (req, res) => {
+    try {
+      const product = await storage.updateStoreProduct(Number(req.params.id), req.body);
+      if (!product) return res.status(404).json({ error: "Product not found" });
+      res.json(product);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/store/admin/products/:id", isAuthenticated, async (req, res) => {
+    try {
+      const ok = await storage.deleteStoreProduct(Number(req.params.id));
+      res.json({ success: ok });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete product" });
+    }
+  });
+
+  app.get("/api/store/admin/orders", isAuthenticated, async (_req, res) => {
+    try {
+      const orders = await storage.getStoreOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
   // ==================== Telegram Webhook ====================
   
   // Helper function to generate AI response for external integrations
