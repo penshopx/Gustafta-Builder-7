@@ -3284,6 +3284,89 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
   // ==================== STORE (MARKETPLACE PRODUK CHATBOT) ====================
 
+  // GET /api/store/catalog — all agents as purchasable products (paginated)
+  app.get("/api/store/catalog", async (req, res) => {
+    try {
+      const page = Math.max(1, parseInt(String(req.query.page || "1")));
+      const limit = Math.min(48, Math.max(12, parseInt(String(req.query.limit || "24"))));
+      const search = String(req.query.search || "").trim().toLowerCase();
+      const category = String(req.query.category || "").trim();
+
+      const { db } = await import("./db");
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { and, eq, or, ilike, sql: sqlE } = await import("drizzle-orm");
+
+      const conditions: any[] = [eq(agentsTable.isActive, true)];
+      if (category && category !== "Semua") conditions.push(eq(agentsTable.category, category));
+      if (search) {
+        conditions.push(or(
+          ilike(agentsTable.name, `%${search}%`),
+          ilike(agentsTable.tagline, `%${search}%`),
+          ilike(agentsTable.description, `%${search}%`),
+        )!);
+      }
+
+      const where = conditions.length > 1 ? and(...conditions) : conditions[0];
+      const offset = (page - 1) * limit;
+
+      const [countResult, rows] = await Promise.all([
+        db.select({ total: sqlE<number>`count(*)::int` }).from(agentsTable).where(where),
+        db.select({
+          id: agentsTable.id,
+          name: agentsTable.name,
+          category: agentsTable.category,
+          tagline: agentsTable.tagline,
+          description: agentsTable.description,
+          avatar: agentsTable.avatar,
+          widgetColor: agentsTable.widgetColor,
+          isOrchestrator: agentsTable.isOrchestrator,
+        }).from(agentsTable).where(where).orderBy(agentsTable.isOrchestrator, agentsTable.id).limit(limit).offset(offset),
+      ]);
+
+      const DEFAULT_PRICE = 299000;
+      const agentProducts = rows.map((a) => ({
+        id: a.id,
+        name: a.name,
+        category: a.category || "engineering",
+        tagline: a.tagline || "",
+        description: a.description || "",
+        emoji: a.avatar && a.avatar.length <= 4 ? a.avatar : "🤖",
+        color: a.widgetColor || "#6366f1",
+        isOrchestrator: a.isOrchestrator,
+        price: DEFAULT_PRICE,
+        agentId: a.id,
+        type: "agent",
+      }));
+
+      res.json({
+        items: agentProducts,
+        total: countResult[0]?.total || 0,
+        page,
+        limit,
+        pages: Math.ceil((countResult[0]?.total || 0) / limit),
+      });
+    } catch (error) {
+      console.error("Store catalog error:", error);
+      res.status(500).json({ error: "Failed to fetch catalog" });
+    }
+  });
+
+  // GET /api/store/catalog/categories — distinct categories with counts
+  app.get("/api/store/catalog/categories", async (_req, res) => {
+    try {
+      const { db } = await import("./db");
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { eq, sql: sqlE } = await import("drizzle-orm");
+      const rows = await db.select({
+        category: agentsTable.category,
+        count: sqlE<number>`count(*)::int`,
+      }).from(agentsTable).where(eq(agentsTable.isActive, true)).groupBy(agentsTable.category).orderBy(sqlE`count(*) desc`);
+      res.json(rows.filter(r => r.category));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
   // GET /api/store/products — public product listing
   app.get("/api/store/products", async (_req, res) => {
     try {
@@ -3306,17 +3389,41 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
-  // POST /api/store/order — create order + Midtrans Snap token (no auth needed)
+  // POST /api/store/order — create order + Midtrans Snap token (supports agentId or productId)
   app.post("/api/store/order", async (req, res) => {
     try {
-      const { productId, name, email, phone } = req.body;
-      if (!productId || !name || !email) {
-        return res.status(400).json({ error: "productId, name, dan email wajib diisi" });
+      const { agentId, productId, name, email, phone } = req.body;
+      if (!name || !email) {
+        return res.status(400).json({ error: "Nama dan email wajib diisi" });
+      }
+      if (!agentId && !productId) {
+        return res.status(400).json({ error: "agentId atau productId wajib diisi" });
       }
 
-      const product = await storage.getStoreProduct(Number(productId));
-      if (!product || !product.isActive) {
-        return res.status(404).json({ error: "Produk tidak ditemukan" });
+      const DEFAULT_PRICE = 299000;
+      let itemName = "";
+      let itemPrice = DEFAULT_PRICE;
+      let resolvedAgentId: number | null = null;
+      let resolvedProductId: number = 0;
+
+      if (agentId) {
+        const { db } = await import("./db");
+        const { agents: agentsTable } = await import("@shared/schema");
+        const { eq } = await import("drizzle-orm");
+        const rows = await db.select({ id: agentsTable.id, name: agentsTable.name, isActive: agentsTable.isActive })
+          .from(agentsTable).where(eq(agentsTable.id, Number(agentId))).limit(1);
+        const agent = rows[0];
+        if (!agent || !agent.isActive) return res.status(404).json({ error: "Agen tidak ditemukan" });
+        itemName = agent.name;
+        itemPrice = DEFAULT_PRICE;
+        resolvedAgentId = agent.id;
+      } else {
+        const product = await storage.getStoreProduct(Number(productId));
+        if (!product || !product.isActive) return res.status(404).json({ error: "Produk tidak ditemukan" });
+        itemName = product.name;
+        itemPrice = product.price;
+        resolvedAgentId = product.agentId ?? null;
+        resolvedProductId = product.id;
       }
 
       const { randomUUID } = await import("crypto");
@@ -3324,24 +3431,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const accessToken = randomUUID();
 
       const snapData = await midtrans.createSnapToken({
-        transaction_details: {
-          order_id: orderId,
-          gross_amount: product.price,
-        },
+        transaction_details: { order_id: orderId, gross_amount: itemPrice },
         customer_details: {
           first_name: name.split(" ")[0],
           last_name: name.split(" ").slice(1).join(" ") || "",
           email,
           phone: phone || "081287941900",
         },
-        item_details: [
-          {
-            id: `product-${product.id}`,
-            price: product.price,
-            quantity: 1,
-            name: product.name,
-          },
-        ],
+        item_details: [{ id: `agent-${resolvedAgentId || resolvedProductId}`, price: itemPrice, quantity: 1, name: itemName }],
         callbacks: {
           finish: `${req.protocol}://${req.get("host")}/store/access/${accessToken}`,
           pending: `${req.protocol}://${req.get("host")}/store/access/${accessToken}`,
@@ -3349,16 +3446,24 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         },
       });
 
-      await storage.createStoreOrder({
-        productId: product.id,
+      const order = await storage.createStoreOrder({
+        productId: resolvedProductId,
         customerName: name,
         customerEmail: email,
         customerPhone: phone || "",
-        amount: product.price,
+        amount: itemPrice,
         midtransOrderId: orderId,
         accessToken,
         status: "pending",
       });
+
+      // Save agentId to store_orders if purchasing by agent
+      if (resolvedAgentId) {
+        const { db } = await import("./db");
+        const { storeOrders } = await import("@shared/schema");
+        const { eq } = await import("drizzle-orm");
+        await db.update(storeOrders).set({ agentId: resolvedAgentId } as any).where(eq(storeOrders.id, order.id));
+      }
 
       res.json({ token: snapData.token, orderId, accessToken });
     } catch (error) {
@@ -3403,30 +3508,45 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const order = await storage.getStoreOrderByAccessToken(req.params.token);
       if (!order) return res.status(404).json({ error: "Access token tidak valid" });
 
-      const product = await storage.getStoreProduct(order.productId);
-      if (!product) return res.status(404).json({ error: "Produk tidak ditemukan" });
-
       const baseUrl = `${req.protocol}://${req.get("host")}`;
-      const chatUrl = product.agentId ? `${baseUrl}/chat/${product.agentId}` : null;
-      const embedCode = product.agentId
-        ? `<iframe src="${baseUrl}/embed/${product.agentId}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
+      const orderAny = order as any;
+
+      // Resolve agent: from order.agentId (direct agent purchase) or product.agentId
+      let resolvedAgentId: number | null = orderAny.agentId || null;
+      let productInfo: { name: string; emoji: string; color: string; description: string } = {
+        name: "Chatbot AI", emoji: "🤖", color: "#6366f1", description: ""
+      };
+
+      if (resolvedAgentId) {
+        const { db } = await import("./db");
+        const { agents: agentsTable } = await import("@shared/schema");
+        const { eq } = await import("drizzle-orm");
+        const rows = await db.select({ id: agentsTable.id, name: agentsTable.name, avatar: agentsTable.avatar, widgetColor: agentsTable.widgetColor, description: agentsTable.description })
+          .from(agentsTable).where(eq(agentsTable.id, resolvedAgentId)).limit(1);
+        if (rows[0]) {
+          productInfo = {
+            name: rows[0].name,
+            emoji: rows[0].avatar && rows[0].avatar.length <= 4 ? rows[0].avatar : "🤖",
+            color: rows[0].widgetColor || "#6366f1",
+            description: rows[0].description || "",
+          };
+        }
+      } else if (order.productId) {
+        const product = await storage.getStoreProduct(order.productId);
+        if (product) {
+          resolvedAgentId = product.agentId ?? null;
+          productInfo = { name: product.name, emoji: product.emoji || "🤖", color: product.color || "#6366f1", description: product.description || "" };
+        }
+      }
+
+      const chatUrl = resolvedAgentId ? `${baseUrl}/chat/${resolvedAgentId}` : null;
+      const embedCode = resolvedAgentId
+        ? `<iframe src="${baseUrl}/embed/${resolvedAgentId}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
         : null;
 
       res.json({
-        order: {
-          id: order.id,
-          customerName: order.customerName,
-          status: order.status,
-          amount: order.amount,
-        },
-        product: {
-          id: product.id,
-          name: product.name,
-          emoji: product.emoji,
-          color: product.color,
-          description: product.description,
-          agentId: product.agentId,
-        },
+        order: { id: order.id, customerName: order.customerName, status: order.status, amount: order.amount },
+        product: { id: resolvedAgentId || order.productId, agentId: resolvedAgentId, ...productInfo },
         chatUrl,
         embedCode,
       });
