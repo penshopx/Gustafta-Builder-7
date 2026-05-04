@@ -3296,7 +3296,10 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const { agents: agentsTable } = await import("@shared/schema");
       const { and, eq, or, ilike, sql: sqlE } = await import("drizzle-orm");
 
-      const conditions: any[] = [eq(agentsTable.isActive, true)];
+      const conditions: any[] = [
+        eq(agentsTable.isActive, true),
+        eq(agentsTable.isListed, true),
+      ];
       if (category && category !== "Semua") conditions.push(eq(agentsTable.category, category));
       if (search) {
         conditions.push(or(
@@ -3356,11 +3359,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     try {
       const { db } = await import("./db");
       const { agents: agentsTable } = await import("@shared/schema");
-      const { eq, sql: sqlE } = await import("drizzle-orm");
+      const { eq, and, sql: sqlE } = await import("drizzle-orm");
       const rows = await db.select({
         category: agentsTable.category,
         count: sqlE<number>`count(*)::int`,
-      }).from(agentsTable).where(eq(agentsTable.isActive, true)).groupBy(agentsTable.category).orderBy(sqlE`count(*) desc`);
+      }).from(agentsTable).where(and(eq(agentsTable.isActive, true), eq(agentsTable.isListed, true))).groupBy(agentsTable.category).orderBy(sqlE`count(*) desc`);
       res.json(rows.filter(r => r.category));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch categories" });

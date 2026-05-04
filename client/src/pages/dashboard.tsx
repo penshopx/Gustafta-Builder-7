@@ -1395,6 +1395,9 @@ export default function Dashboard() {
                               {(agent as any).isEnabled === false && (
                                 <span className="text-[9px] bg-orange-100 dark:bg-orange-950 text-orange-600 dark:text-orange-400 rounded px-1 py-0.5 shrink-0">OFF</span>
                               )}
+                              {(agent as any).isListed && (
+                                <span className="text-[9px] bg-violet-100 dark:bg-violet-950 text-violet-600 dark:text-violet-400 rounded px-1 py-0.5 shrink-0 font-medium" title="Tampil di Gustafta Store">Store</span>
+                              )}
                               <div className="flex items-center gap-0.5 invisible group-hover:visible shrink-0">
                                 <Switch
                                   checked={(agent as any).isEnabled !== false}
