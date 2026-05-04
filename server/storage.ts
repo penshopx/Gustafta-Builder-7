@@ -68,6 +68,8 @@ import type {
   InsertCompanyProfile,
   TenderSession,
   InsertTenderSession,
+  ChatbotTemplate,
+  InsertChatbotTemplate,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -322,6 +324,17 @@ export interface IStorage {
   createTenderSession(data: InsertTenderSession): Promise<TenderSession>;
   updateTenderSession(id: number, data: Partial<InsertTenderSession>): Promise<TenderSession | undefined>;
   deleteTenderSession(id: number): Promise<boolean>;
+
+  // Chatbot Template methods
+  getChatbotTemplates(category?: string): Promise<ChatbotTemplate[]>;
+  getChatbotTemplate(id: number): Promise<ChatbotTemplate | undefined>;
+  createChatbotTemplate(data: InsertChatbotTemplate): Promise<ChatbotTemplate>;
+  deleteChatbotTemplate(id: number): Promise<boolean>;
+  incrementTemplateUsage(id: number): Promise<void>;
+
+  // User Onboarding methods
+  getUserOnboarding(userId: string): Promise<{ starterCreated: boolean } | undefined>;
+  markStarterCreated(userId: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -2026,6 +2039,19 @@ export class MemStorage implements IStorage {
   }
   async updateTenderSession(_id: number, _data: Partial<InsertTenderSession>): Promise<TenderSession | undefined> { return undefined; }
   async deleteTenderSession(_id: number): Promise<boolean> { return false; }
+
+  // Chatbot Template stubs (MemStorage)
+  async getChatbotTemplates(_category?: string): Promise<ChatbotTemplate[]> { return []; }
+  async getChatbotTemplate(_id: number): Promise<ChatbotTemplate | undefined> { return undefined; }
+  async createChatbotTemplate(data: InsertChatbotTemplate): Promise<ChatbotTemplate> {
+    return { id: 1, ...data, usageCount: 0, createdAt: new Date() } as ChatbotTemplate;
+  }
+  async deleteChatbotTemplate(_id: number): Promise<boolean> { return false; }
+  async incrementTemplateUsage(_id: number): Promise<void> {}
+
+  // User Onboarding stubs (MemStorage)
+  async getUserOnboarding(_userId: string): Promise<{ starterCreated: boolean } | undefined> { return undefined; }
+  async markStarterCreated(_userId: string): Promise<void> {}
 }
 
 import { dbStorage } from "./db-storage";

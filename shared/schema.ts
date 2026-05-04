@@ -1704,3 +1704,35 @@ export const legalChatMessages = pgTable("legal_chat_messages", {
 export const insertLegalChatMessageSchema = createInsertSchema(legalChatMessages).omit({ id: true, createdAt: true });
 export type InsertLegalChatMessage = z.infer<typeof insertLegalChatMessageSchema>;
 export type LegalChatMessage = typeof legalChatMessages.$inferSelect;
+
+// ==================== CHATBOT TEMPLATES ====================
+
+export const chatbotTemplates = pgTable("chatbot_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").default(""),
+  category: text("category").default("Umum"),
+  tags: jsonb("tags").default([]),
+  agentConfig: jsonb("agent_config").notNull(),
+  thumbnailColor: text("thumbnail_color").default("#6366f1"),
+  isFeatured: boolean("is_featured").default(false),
+  isPublic: boolean("is_public").default(true),
+  usageCount: integer("usage_count").default(0),
+  createdByUserId: varchar("created_by_user_id", { length: 255 }),
+  createdByName: text("created_by_name").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertChatbotTemplateSchema = createInsertSchema(chatbotTemplates).omit({ id: true, createdAt: true, usageCount: true });
+export type InsertChatbotTemplate = z.infer<typeof insertChatbotTemplateSchema>;
+export type ChatbotTemplate = typeof chatbotTemplates.$inferSelect;
+
+// ==================== USER ONBOARDING FLAGS ====================
+
+export const userOnboarding = pgTable("user_onboarding", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().unique(),
+  starterCreated: boolean("starter_created").default(false),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

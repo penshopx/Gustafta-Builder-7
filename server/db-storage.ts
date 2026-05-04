@@ -35,10 +35,14 @@ import {
   scoringResults,
   companyProfiles,
   tenderSessions,
+  chatbotTemplates,
+  userOnboarding,
 } from "@shared/schema";
 import type {
   TenderDocumentCatalog,
   InsertTenderDocumentCatalog,
+  ChatbotTemplate,
+  InsertChatbotTemplate,
 } from "@shared/schema";
 import { applyDefaultPolicies } from "./lib/agent-policies";
 import type { IStorage } from "./storage";
@@ -3379,6 +3383,57 @@ export class DatabaseStorage implements IStorage {
   async deleteTenderDocumentCatalog(code: string): Promise<boolean> {
     const result = await db.delete(tenderDocumentCatalog).where(eq(tenderDocumentCatalog.code, code));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // ─── Chatbot Templates ──────────────────────────────────────────────────────
+
+  async getChatbotTemplates(category?: string): Promise<ChatbotTemplate[]> {
+    if (category && category !== "Semua") {
+      return db.select().from(chatbotTemplates)
+        .where(and(eq(chatbotTemplates.isPublic, true), eq(chatbotTemplates.category, category)))
+        .orderBy(desc(chatbotTemplates.isFeatured), desc(chatbotTemplates.usageCount));
+    }
+    return db.select().from(chatbotTemplates)
+      .where(eq(chatbotTemplates.isPublic, true))
+      .orderBy(desc(chatbotTemplates.isFeatured), desc(chatbotTemplates.usageCount));
+  }
+
+  async getChatbotTemplate(id: number): Promise<ChatbotTemplate | undefined> {
+    const rows = await db.select().from(chatbotTemplates).where(eq(chatbotTemplates.id, id)).limit(1);
+    return rows[0];
+  }
+
+  async createChatbotTemplate(data: InsertChatbotTemplate): Promise<ChatbotTemplate> {
+    const rows = await db.insert(chatbotTemplates).values(data as any).returning();
+    return rows[0];
+  }
+
+  async deleteChatbotTemplate(id: number): Promise<boolean> {
+    const result = await db.delete(chatbotTemplates).where(eq(chatbotTemplates.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async incrementTemplateUsage(id: number): Promise<void> {
+    await db.update(chatbotTemplates)
+      .set({ usageCount: sql`${chatbotTemplates.usageCount} + 1` })
+      .where(eq(chatbotTemplates.id, id));
+  }
+
+  // ─── User Onboarding ────────────────────────────────────────────────────────
+
+  async getUserOnboarding(userId: string): Promise<{ starterCreated: boolean } | undefined> {
+    const rows = await db.select().from(userOnboarding).where(eq(userOnboarding.userId, userId)).limit(1);
+    if (!rows[0]) return undefined;
+    return { starterCreated: rows[0].starterCreated ?? false };
+  }
+
+  async markStarterCreated(userId: string): Promise<void> {
+    await db.insert(userOnboarding)
+      .values({ userId, starterCreated: true, onboardingCompletedAt: new Date() })
+      .onConflictDoUpdate({
+        target: userOnboarding.userId,
+        set: { starterCreated: true, onboardingCompletedAt: new Date() },
+      });
   }
 }
 

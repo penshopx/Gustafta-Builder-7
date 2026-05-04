@@ -349,3 +349,36 @@ All legal chatbot responses include the mandatory disclaimer: "⚠️ Informasi 
 ### Summary/Rangkuman (existing, upgraded)
 - Tab "Rangkuman" — auto-generated from chatbot config
 - Download .md, copy to clipboard, save external landing page URL
+
+## Template System (May 2026)
+
+### DB Tables
+- `chatbot_templates` — id, name, description, category, tags (jsonb), agent_config (jsonb), thumbnail_color, is_featured, is_public, usage_count, created_by_user_id, created_by_name, created_at
+- `user_onboarding` — id, user_id (unique), starter_created, onboarding_completed_at, created_at
+
+### Template Gallery Page (`/templates`)
+- Browse 10 starter templates (4 featured: Guru Privat AI, Konsultan K3, Sales Assistant, Customer Support)
+- Categories: Konstruksi, Bisnis, Pendidikan, Hukum, Teknologi, Kesehatan, Keuangan, Perjalanan, Umum
+- Real-time search by name/description/tag
+- Filter per category (pills + select dropdown)
+- "Template Unggulan" section (is_featured=true) + "Semua Template"
+- "Pakai" button → name customization dialog → create agent from template (POST /api/chatbot-templates/:id/use)
+- Increments usage_count each time template is used
+
+### Publish as Template (from Landing Page panel)
+- "Bagikan ke Komunitas" banner in landing-page-panel.tsx
+- Dialog: description, category, card color → POST /api/agents/:id/publish-template
+- Copies: name, persona, expertise, system_prompt, knowledge bases (no conversation data)
+- After publish, user redirected to template gallery
+
+### Backend Routes
+- GET /api/chatbot-templates — list all public templates (filter by ?category=)
+- GET /api/chatbot-templates/:id — single template
+- POST /api/agents/:id/publish-template — publish chatbot to gallery (auth required)
+- POST /api/chatbot-templates/:id/use — create agent from template (auth required, increments usage_count)
+- DELETE /api/chatbot-templates/:id — delete (owner or admin)
+- GET /api/user/onboarding-status — check user starter status
+- POST /api/user/check-onboarding — trigger starter agent creation check
+
+### Seeded Templates (10)
+Customer Support Pro (Bisnis★), Sales Assistant AI (Bisnis★), HR & Rekrutmen Bot (Bisnis), Guru Privat AI (Pendidikan★), Konsultan K3 Konstruksi (Konstruksi★), Tender & Pengadaan Advisor (Konstruksi), Asisten Hukum Bisnis (Hukum), Financial Planner AI (Keuangan), Tech Support Bot (Teknologi), Asisten Mutu ISO 9001 (Konstruksi)

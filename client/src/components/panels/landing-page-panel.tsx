@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   FileText, Download, ClipboardCopy, Check, Bot, Globe, ExternalLink, Link,
   Sparkles, Loader2, Eye, Code2, Palette, RefreshCw, Package, ChevronDown, ChevronUp,
-  Zap, MessageSquare, Mic, Mail, Calendar, BarChart3, Star, Users, Copy
+  Zap, MessageSquare, Mic, Mail, Calendar, BarChart3, Star, Users, Copy,
+  Share2, ArrowRight
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -51,7 +55,24 @@ function CollapsibleSection({ title, children, defaultOpen = false }: { title: s
   );
 }
 
+const TEMPLATE_COLORS = [
+  { value: "#6366f1", label: "Indigo" },
+  { value: "#2563eb", label: "Biru" },
+  { value: "#16a34a", label: "Hijau" },
+  { value: "#7c3aed", label: "Ungu" },
+  { value: "#ea580c", label: "Oranye" },
+  { value: "#0d9488", label: "Teal" },
+  { value: "#dc2626", label: "Merah" },
+  { value: "#d97706", label: "Amber" },
+];
+
+const TEMPLATE_CATEGORIES = [
+  "Bisnis", "Konstruksi", "Pendidikan", "Hukum", "Teknologi",
+  "Kesehatan", "Keuangan", "Perjalanan", "Umum",
+];
+
 export function LandingPagePanel({ agent }: { agent: any }) {
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [landingPageUrl, setLandingPageUrl] = useState(agent.landingPageUrl || "");
@@ -63,6 +84,12 @@ export function LandingPagePanel({ agent }: { agent: any }) {
   const [previewMode, setPreviewMode] = useState<"preview" | "code">("preview");
 
   const [kitData, setKitData] = useState<any | null>(null);
+
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [publishCategory, setPublishCategory] = useState(agent.category || "Umum");
+  const [publishColor, setPublishColor] = useState("#6366f1");
+  const [publishDescription, setPublishDescription] = useState(agent.description || "");
+  const [publishSuccess, setPublishSuccess] = useState(false);
 
   const { data: knowledgeBases = [] } = useQuery<any[]>({
     queryKey: [`/api/knowledge-base/${agent.id}`],
@@ -97,6 +124,21 @@ export function LandingPagePanel({ agent }: { agent: any }) {
       toast({ title: "Marketing Kit siap!", description: "Semua konten marketing sudah terbuat." });
     },
     onError: () => toast({ title: "Gagal generate Marketing Kit", variant: "destructive" }),
+  });
+
+  const publishTemplateMutation = useMutation({
+    mutationFn: () =>
+      apiRequest("POST", `/api/agents/${agent.id}/publish-template`, {
+        category: publishCategory,
+        description: publishDescription,
+        thumbnailColor: publishColor,
+      }).then((r) => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chatbot-templates"] });
+      setPublishSuccess(true);
+      toast({ title: "Template berhasil dipublish!", description: "Chatbot Anda kini tersedia di galeri template." });
+    },
+    onError: () => toast({ title: "Gagal publish template", variant: "destructive" }),
   });
 
   const downloadHtmlFile = () => {
@@ -665,6 +707,119 @@ export function LandingPagePanel({ agent }: { agent: any }) {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* ─── PUBLISH TEMPLATE BANNER ─── */}
+      <Card className="border-dashed border-primary/30 bg-primary/5">
+        <CardContent className="pt-4 pb-4 flex items-start gap-3">
+          <div className="p-1.5 bg-primary/10 rounded-lg shrink-0 mt-0.5">
+            <Share2 className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">Bagikan ke Komunitas sebagai Template</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Publish chatbot ini ke galeri template. Pengguna lain bisa pakai sebagai starting point.</p>
+          </div>
+          <div className="flex gap-2 shrink-0 flex-wrap">
+            <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => navigate("/templates")} data-testid="button-view-template-gallery">
+              Lihat Galeri <ArrowRight className="w-3 h-3 ml-1" />
+            </Button>
+            <Button size="sm" className="text-xs h-7" onClick={() => { setShowPublishDialog(true); setPublishSuccess(false); }} data-testid="button-open-publish-template">
+              <Share2 className="w-3 h-3 mr-1" />Publish Template
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ─── PUBLISH DIALOG ─── */}
+      <Dialog open={showPublishDialog} onOpenChange={(o) => { setShowPublishDialog(o); if (!o) setPublishSuccess(false); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{publishSuccess ? "Template Dipublish!" : "Publish sebagai Template Komunitas"}</DialogTitle>
+          </DialogHeader>
+          {publishSuccess ? (
+            <div className="text-center py-6 space-y-4">
+              <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
+                <Check className="w-7 h-7 text-green-600" />
+              </div>
+              <div>
+                <p className="font-semibold">"{agent.name}" sudah tersedia di galeri!</p>
+                <p className="text-sm text-muted-foreground mt-1">Pengguna lain bisa temukan dan gunakan chatbot ini sebagai template.</p>
+              </div>
+              <div className="flex gap-2 justify-center">
+                <Button variant="outline" size="sm" onClick={() => setShowPublishDialog(false)}>Tutup</Button>
+                <Button size="sm" onClick={() => navigate("/templates")}>
+                  Lihat Galeri Template <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4 py-2">
+                <div className="p-3 bg-muted/40 rounded-lg flex items-center gap-3">
+                  <Bot className="w-6 h-6 text-primary" />
+                  <div>
+                    <p className="font-medium text-sm">{agent.name}</p>
+                    <p className="text-xs text-muted-foreground">{agent.category || "Chatbot"}</p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Deskripsi untuk template</Label>
+                  <Textarea
+                    value={publishDescription}
+                    onChange={(e) => setPublishDescription(e.target.value)}
+                    placeholder="Jelaskan apa yang bisa dilakukan chatbot ini..."
+                    rows={3}
+                    className="text-sm resize-none"
+                    data-testid="textarea-publish-description"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Kategori</Label>
+                    <Select value={publishCategory} onValueChange={setPublishCategory}>
+                      <SelectTrigger className="h-8 text-xs" data-testid="select-publish-category">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEMPLATE_CATEGORIES.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Warna kartu</Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TEMPLATE_COLORS.map((c) => (
+                        <button
+                          key={c.value}
+                          onClick={() => setPublishColor(c.value)}
+                          className={`w-6 h-6 rounded-full transition-all ${publishColor === c.value ? "ring-2 ring-offset-1 ring-foreground scale-110" : "opacity-70 hover:opacity-100"}`}
+                          style={{ backgroundColor: c.value }}
+                          title={c.label}
+                          data-testid={`button-color-${c.label.toLowerCase()}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground bg-muted/30 rounded p-2">
+                  Config chatbot (nama, persona, keahlian, system prompt, KB) akan disalin ke template. Data percakapan tidak ikut dipublish.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowPublishDialog(false)}>Batal</Button>
+                <Button onClick={() => publishTemplateMutation.mutate()} disabled={publishTemplateMutation.isPending} data-testid="button-confirm-publish-template">
+                  {publishTemplateMutation.isPending ? (
+                    <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Publishing...</>
+                  ) : (
+                    <><Share2 className="w-3.5 h-3.5 mr-1.5" />Publish ke Galeri</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

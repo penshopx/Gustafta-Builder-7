@@ -10336,6 +10336,189 @@ KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan
     }
   });
 
+  // ==================== CHATBOT TEMPLATE SYSTEM ====================
+
+  // GET /api/chatbot-templates — list all public templates
+  app.get("/api/chatbot-templates", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const templates = await storage.getChatbotTemplates(category);
+      res.json(templates);
+    } catch (err) {
+      console.error("[/api/chatbot-templates GET]", err);
+      res.status(500).json({ error: "Gagal mengambil template" });
+    }
+  });
+
+  // GET /api/chatbot-templates/:id
+  app.get("/api/chatbot-templates/:id", async (req, res) => {
+    try {
+      const template = await storage.getChatbotTemplate(parseInt(req.params.id));
+      if (!template) return res.status(404).json({ error: "Template tidak ditemukan" });
+      res.json(template);
+    } catch (err) {
+      res.status(500).json({ error: "Gagal mengambil template" });
+    }
+  });
+
+  // POST /api/agents/:id/publish-template — publish chatbot as community template
+  app.post("/api/agents/:id/publish-template", isAuthenticated, async (req: any, res) => {
+    try {
+      const agent = await storage.getAgent(req.params.id as string);
+      if (!agent) return res.status(404).json({ error: "Agent tidak ditemukan" });
+      const userId = req.user?.claims?.sub || "";
+      const { category, description, thumbnailColor, tags } = req.body;
+
+      const knowledgeBases = await storage.getKnowledgeBases(agent.id as any);
+      const agentConfig = {
+        agent: {
+          name: agent.name,
+          tagline: agent.tagline,
+          description: agent.description,
+          category: agent.category,
+          language: agent.language,
+          personality: agent.personality,
+          communicationStyle: agent.communicationStyle,
+          toneOfVoice: agent.toneOfVoice,
+          philosophy: agent.philosophy,
+          expertise: agent.expertise,
+          systemPrompt: agent.systemPrompt,
+          contextQuestions: agent.contextQuestions,
+          sampleQuestions: agent.sampleQuestions,
+          primaryOutcome: agent.primaryOutcome,
+          agentRole: agent.agentRole,
+          workMode: agent.workMode,
+          behaviorPreset: agent.behaviorPreset,
+        },
+        knowledgeBases: knowledgeBases.map((kb: any) => ({
+          name: kb.name,
+          type: kb.type,
+          content: kb.content,
+          description: kb.description,
+        })),
+        version: "template-1.0",
+      };
+
+      let creatorName = "Komunitas Gustafta";
+      try {
+        const profile = await storage.getUserProfile(userId);
+        if (profile?.displayName) creatorName = profile.displayName;
+      } catch {}
+
+      const template = await storage.createChatbotTemplate({
+        name: agent.name || "Template Chatbot",
+        description: description || agent.description || "",
+        category: category || agent.category || "Umum",
+        tags: tags || [],
+        agentConfig,
+        thumbnailColor: thumbnailColor || "#6366f1",
+        isFeatured: false,
+        isPublic: true,
+        createdByUserId: userId,
+        createdByName: creatorName,
+      });
+
+      res.status(201).json(template);
+    } catch (err) {
+      console.error("[/api/agents/:id/publish-template]", err);
+      res.status(500).json({ error: "Gagal publish template" });
+    }
+  });
+
+  // POST /api/chatbot-templates/:id/use — create agent from template
+  app.post("/api/chatbot-templates/:id/use", isAuthenticated, async (req: any, res) => {
+    try {
+      const template = await storage.getChatbotTemplate(parseInt(req.params.id));
+      if (!template) return res.status(404).json({ error: "Template tidak ditemukan" });
+
+      const { customName, toolboxId } = req.body;
+      const config = template.agentConfig as any;
+
+      const agentData = {
+        ...(config.agent || {}),
+        name: customName || config.agent?.name || template.name,
+        toolboxId: toolboxId || "",
+      };
+      const agent = await storage.createAgent(agentData);
+
+      if (config.knowledgeBases && Array.isArray(config.knowledgeBases)) {
+        for (const kb of config.knowledgeBases) {
+          await storage.createKnowledgeBase({
+            agentId: agent.id,
+            name: kb.name,
+            type: kb.type,
+            content: kb.content,
+            description: kb.description || "",
+            fileName: "",
+            fileSize: 0,
+            fileUrl: "",
+            processingStatus: "completed" as const,
+            extractedText: "",
+          });
+        }
+      }
+
+      await storage.incrementTemplateUsage(template.id);
+      res.status(201).json(agent);
+    } catch (err) {
+      console.error("[/api/chatbot-templates/:id/use]", err);
+      res.status(500).json({ error: "Gagal membuat agent dari template" });
+    }
+  });
+
+  // DELETE /api/chatbot-templates/:id
+  app.delete("/api/chatbot-templates/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const template = await storage.getChatbotTemplate(parseInt(req.params.id));
+      if (!template) return res.status(404).json({ error: "Template tidak ditemukan" });
+      const userId = req.user?.claims?.sub || "";
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim());
+      if (template.createdByUserId !== userId && !adminIds.includes(userId)) {
+        return res.status(403).json({ error: "Tidak ada akses" });
+      }
+      await storage.deleteChatbotTemplate(template.id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Gagal hapus template" });
+    }
+  });
+
+  // POST /api/user/check-onboarding — check and trigger starter agent creation
+  app.post("/api/user/check-onboarding", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || "";
+      if (!userId) return res.json({ starterCreated: true });
+      const onboarding = await storage.getUserOnboarding(userId);
+      if (onboarding?.starterCreated) return res.json({ starterCreated: true, alreadyDone: true });
+
+      // Check if user already has agents
+      const existingAgents = await storage.getAgents();
+      const userAgents = existingAgents.filter((a: any) => {
+        // For platform-wide agent list we check if less than 5 "real user" agents exist
+        // The system has 900 platform agents, so just create starter regardless
+        return false;
+      });
+
+      // Always create starter for new users who haven't had it yet
+      await storage.markStarterCreated(userId);
+      res.json({ starterCreated: false, shouldShowTemplates: true });
+    } catch (err) {
+      console.error("[check-onboarding]", err);
+      res.json({ starterCreated: true });
+    }
+  });
+
+  // GET /api/user/onboarding-status
+  app.get("/api/user/onboarding-status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || "";
+      const onboarding = await storage.getUserOnboarding(userId);
+      res.json({ starterCreated: onboarding?.starterCreated ?? false });
+    } catch {
+      res.json({ starterCreated: false });
+    }
+  });
+
   registerLegalRoutes(app);
 
   return httpServer;
