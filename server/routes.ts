@@ -3284,7 +3284,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
   // ==================== STORE (MARKETPLACE PRODUK CHATBOT) ====================
 
-  // GET /api/store/catalog — all agents as purchasable products (paginated)
+  // GET /api/store/catalog — listed agents as purchasable products (paginated)
   app.get("/api/store/catalog", async (req, res) => {
     try {
       const page = Math.max(1, parseInt(String(req.query.page || "1")));
@@ -3298,6 +3298,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       const conditions: any[] = [
         eq(agentsTable.isActive, true),
+        eq(agentsTable.isListed, true),
       ];
       if (category && category !== "Semua") conditions.push(eq(agentsTable.category, category));
       if (search) {
@@ -3322,6 +3323,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           avatar: agentsTable.avatar,
           widgetColor: agentsTable.widgetColor,
           isOrchestrator: agentsTable.isOrchestrator,
+          monthlyPrice: agentsTable.monthlyPrice,
         }).from(agentsTable).where(where).orderBy(agentsTable.isOrchestrator, agentsTable.id).limit(limit).offset(offset),
       ]);
 
@@ -3335,7 +3337,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         emoji: a.avatar && a.avatar.length <= 4 ? a.avatar : "🤖",
         color: a.widgetColor || "#6366f1",
         isOrchestrator: a.isOrchestrator,
-        price: DEFAULT_PRICE,
+        price: (a.monthlyPrice && a.monthlyPrice > 0) ? a.monthlyPrice : DEFAULT_PRICE,
         agentId: a.id,
         type: "agent",
       }));
@@ -3353,7 +3355,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
-  // GET /api/store/catalog/categories — distinct categories with counts
+  // GET /api/store/catalog/categories — distinct categories with counts (listed only)
   app.get("/api/store/catalog/categories", async (_req, res) => {
     try {
       const { db } = await import("./db");
@@ -3362,7 +3364,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const rows = await db.select({
         category: agentsTable.category,
         count: sqlE<number>`count(*)::int`,
-      }).from(agentsTable).where(eq(agentsTable.isActive, true)).groupBy(agentsTable.category).orderBy(sqlE`count(*) desc`);
+      }).from(agentsTable).where(and(eq(agentsTable.isActive, true), eq(agentsTable.isListed, true))).groupBy(agentsTable.category).orderBy(sqlE`count(*) desc`);
       res.json(rows.filter(r => r.category));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch categories" });
@@ -3412,12 +3414,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         const { db } = await import("./db");
         const { agents: agentsTable } = await import("@shared/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select({ id: agentsTable.id, name: agentsTable.name, isActive: agentsTable.isActive })
+        const rows = await db.select({ id: agentsTable.id, name: agentsTable.name, isActive: agentsTable.isActive, monthlyPrice: agentsTable.monthlyPrice })
           .from(agentsTable).where(eq(agentsTable.id, Number(agentId))).limit(1);
         const agent = rows[0];
         if (!agent || !agent.isActive) return res.status(404).json({ error: "Agen tidak ditemukan" });
         itemName = agent.name;
-        itemPrice = DEFAULT_PRICE;
+        itemPrice = (agent.monthlyPrice && agent.monthlyPrice > 0) ? agent.monthlyPrice : DEFAULT_PRICE;
         resolvedAgentId = agent.id;
       } else {
         const product = await storage.getStoreProduct(Number(productId));

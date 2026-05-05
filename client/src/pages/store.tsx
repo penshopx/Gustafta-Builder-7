@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -91,6 +91,27 @@ export default function Store() {
   const [buyForm, setBuyForm] = useState<BuyFormData>({ name: "", email: "", phone: "" });
   const [showBuyDialog, setShowBuyDialog] = useState(false);
 
+  const { data: paymentConfig } = useQuery<{ clientKey: string; paymentConfigured: boolean; isSandbox: boolean }>({
+    queryKey: ["/api/subscriptions/status"],
+    queryFn: async () => {
+      const res = await fetch("/api/subscriptions/status");
+      return res.json();
+    },
+  });
+
+  useEffect(() => {
+    const clientKey = paymentConfig?.clientKey;
+    if (!clientKey) return;
+    if (document.querySelector('script[data-midtrans-snap]')) return;
+    const script = document.createElement("script");
+    script.src = paymentConfig?.isSandbox
+      ? "https://app.sandbox.midtrans.com/snap/snap.js"
+      : "https://app.midtrans.com/snap/snap.js";
+    script.setAttribute("data-client-key", clientKey);
+    script.setAttribute("data-midtrans-snap", "1");
+    document.head.appendChild(script);
+  }, [paymentConfig?.clientKey]);
+
   const catalogParams = new URLSearchParams({
     page: String(page),
     limit: String(LIMIT),
@@ -177,12 +198,6 @@ export default function Store() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      {/* Midtrans Snap */}
-      <script
-        type="text/javascript"
-        src="https://app.midtrans.com/snap/snap.js"
-        data-client-key="Mid-client-Mlo7Bzvz0l30Xhzt"
-      />
 
       {/* Header */}
       <header className="border-b border-white/10 bg-gray-950/90 backdrop-blur sticky top-0 z-50">
@@ -212,7 +227,7 @@ export default function Store() {
       {/* Hero */}
       <section className="py-12 px-4 text-center border-b border-white/5">
         <Badge className="mb-3 bg-violet-500/20 text-violet-300 border-violet-500/30 hover:bg-violet-500/20">
-          🏗️ {total.toLocaleString("id-ID")}+ Chatbot AI Konstruksi Indonesia
+          🏗️ {total > 0 ? `${total.toLocaleString("id-ID")}+ Chatbot AI Siap Pakai` : "Gustafta Store — Chatbot AI Konstruksi Indonesia"}
         </Badge>
         <h1 className="text-3xl sm:text-4xl font-bold mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Beli Chatbot AI Siap Pakai
@@ -309,8 +324,35 @@ export default function Store() {
             </div>
           ) : items.length === 0 ? (
             <div className="text-center py-20 text-gray-500">
-              <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p>Tidak ada chatbot yang cocok</p>
+              <Bot className="h-16 w-16 mx-auto mb-4 opacity-20" />
+              {search || selectedCategory ? (
+                <>
+                  <p className="text-lg font-medium text-gray-400 mb-1">Tidak ada chatbot yang cocok</p>
+                  <p className="text-sm">Coba kata kunci atau kategori lain</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 border-white/10 text-gray-400 hover:text-white"
+                    onClick={() => { setSearch(""); setSearchInput(""); setSelectedCategory(""); setPage(1); }}
+                  >
+                    Reset Filter
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-medium text-gray-400 mb-1">Belum ada produk yang tersedia</p>
+                  <p className="text-sm">Produk chatbot akan segera hadir. Hubungi kami untuk info lebih lanjut.</p>
+                  <a
+                    href="https://wa.me/6281287941900"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm transition-colors"
+                  >
+                    <Smartphone className="h-4 w-4" />
+                    Hubungi via WhatsApp
+                  </a>
+                </>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

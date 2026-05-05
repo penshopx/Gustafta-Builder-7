@@ -1,446 +1,71 @@
-# Gustafta - AI Chatbot Builder + LexCom Legal AI
+# Gustafta
+Gustafta is an AI chatbot builder platform that enables users to create, configure, and deploy intelligent conversational assistants, including the integrated LexCom Legal AI system.
 
-## Overview
-Gustafta is an AI chatbot builder platform designed for creating, configuring, and deploying intelligent conversational assistants. It now includes **LexCom**, an integrated Indonesian Legal AI Chatbot system featuring a LEX-ORCHESTRATOR with 12 specialized legal agents and a floating "Chaesa Lexbot" widget. It features a two-panel dashboard, multi-channel integrations, and supports various AI models. The platform enables users to manage multiple chatbot agents with custom personas and knowledge bases, integrate with popular messaging platforms, embed web widgets, and access analytics. Gustafta aims to provide a comprehensive ecosystem for building and monetizing AI-powered conversational experiences.
+## Run & Operate
+- **Run Development Server**: `npm run dev`
+- **Build**: `npm run build`
+- **Typecheck**: `npm run typecheck`
+- **Codegen (Drizzle)**: `npx drizzle-kit generate`
+- **DB Push (Drizzle)**: `npx drizzle-kit push`
+- **Environment Variables**: `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY` (for Midtrans payment integration)
 
-The platform utilizes a 5-level modular hierarchical structure (Master → Series HUB → Sub-HUB → Specialist → Deep Specialist) to organize 799 chatbot agents across 57 specialized series. This structure supports applications like managing Indonesian construction company needs (Odoo ERP lifecycle, CSMS compliance) and professional certification body operations.
+## Stack
+- **Frontend Framework**: React 18 with TypeScript
+- **Backend Framework**: Express 5 with TypeScript
+- **Runtime**: Node.js (`tsx`)
+- **ORM**: Drizzle ORM
+- **Validation**: Zod
+- **Database**: PostgreSQL (with in-memory fallback for development)
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Build Tool**: Vite (frontend), esbuild (backend)
+- **State Management**: TanStack React Query
 
-**Agent Hierarchy (Post-Enrichment — May 2026):**
-- Level 1 (1 agent): #768 GUSTAFTA MASTER — Router Utama Platform
-- Level 2 (49 agents): Series HUBs (Regulasi, CSMS, CIVILPRO, Tender, Legal, SBU Coach, SKK Coach, LexCom, etc.)
-- Level 3 (461 agents): Sub-HUBs and specialist agents
-- Level 4 (268 agents): Deep specialist agents
-- Level 5 (20 agents): Leaf-level specialist agents
-- Total orchestrators: 122 (all with orchestrator_config synced to actual DB children)
-- Total specialists: 777 (100% field aligned: agent_role, work_mode, behavior_preset, primary_outcome)
-- ALL 899 agents: system_prompt ✅, context_questions ✅, deliverables ✅
-- Zero orphan agents — full hierarchy from Master #768
+## Where things live
+- **Database Schema**: `db/schema.ts`
+- **API Routes**: `server/routes/*.ts`
+- **Legal AI Configuration**: `server/lib/legal-agents.ts`
+- **AI Field Regeneration Component**: `client/src/components/ai-field-regen.tsx`
+- **Config Health Widget**: `client/src/components/config-health.tsx`
+- **MultiClaw Orchestration Planner**: `client/src/components/agentic-ai-panel.tsx`
+- **Midtrans Integration**: `server/lib/midtrans.ts`
+- **Legal Landing Page**: `client/src/pages/legal-landing.tsx`
+- **Legal Chat Interface**: `client/src/pages/legal-chat.tsx`
+- **Chaesa Lexbot Widget**: `client/src/components/chaesa-widget.tsx`
+- **Templates**: `server/db/schema.ts` (chatbot_templates table)
+- **Storefront Products**: `server/db/schema.ts` (store_products table)
 
-**Knowledge Base (May 2026 — FULLY POPULATED):**
-- knowledge_taxonomy: 8 sektor + 32 subsektor = 40 nodes (script: scripts/seed-knowledge-taxonomy.ts)
-- knowledge_bases: 3,133 entries untuk 927 agen aktif
-  - Batch 1-2 original: 3,018 entries (script: scripts/seed-knowledge-bases-all.ts)
-  - Batch 3 (#920-949): 95 entries (script: scripts/seed-kb-batch3.ts)
-  - Enrichment dari 5 dokumen KONSTRA: +20 entries (script: scripts/seed-kb-from-docs.ts)
-    - KB-RKK (Permen PUPR 8/2023): #926 SAFIRA, #927 HIRADC, #930 SMKK
-    - KB-FIDIC/KONTRAK: #860 KontrakBot, #861 AGENT-FIDIC, #864 AGENT-KLAIM-DISPUTE
-    - KB-EVM (PMBOK7): #891 PROXIMA, #895 AGENT-COST, #905 AB-03 EVM, #844 Cash Flow Bot
-    - Kalkulator EOT (TIA/SCL): #861 AGENT-FIDIC, #864 AGENT-KLAIM, #894 AGENT-SCHEDULE
-    - Kalkulator OEE (TPM/ISO55000): #944 AGENT-EQUIPRA, #946 AGENT-OEE
-    - Kalkulator PPh Final 4(2) PP 9/2022: #841 AGENT-PPH, #906 AB-04 Tax
-  - KB Batch 4 (+39 entries, script: scripts/seed-kb-batch4.ts):
-    - PROXIMA sub-agen #892-901: Charter, WBS, Risk, Quality, Procure, Change, Comm, Close-out
-    - Manajer Keuangan sub-agen #903-904, #907-909: RAB, Cash Flow, Klaim, Laporan, SKK
-    - MRP-A sub-agen #876-882: Vendor Scoring, Material QC, Equipment Fitness, Supply Chain Risk, SOP Subkon, LKUT, Inventory
-    - KPBU sub-agen #884-890: OBC/FBC, Model Keuangan, Risk Allocation, Pengadaan, VGF, Konsesi
-    - Risk Register Bot sub-agen #850-853: Risiko Teknis, K3, Legal, Keuangan
-  - KB Batch 5 (+48 entries, script: scripts/seed-kb-batch5.ts) — SEMUA 47 agen tersisa SELESAI:
-    - ARCONA sub-agen #821-828: PBG (OSS/SIMBG), SLF, Struktur+SNI, MEP, Kebakaran, Aksesibilitas+GBC, RTBL/KDB/KLB, Audit Kelaikan
-    - SKK Bot sub-agen #830-833: KKNI Skema, Jadwal+Biaya Uji, Dokumen+Portofolio Tips, SKK Digital+AJJ+SIKI
-    - HPS Validator sub-agen #835-838: AHSP+Koefisien SNI, Survei Harga Pasar, Red Flag KKN, Overhead+Profit+K3
-    - CoreTax Pajak sub-agen #840,842,843: CoreTax Onboarding, PPN e-Faktur+Kredit, SPT Tahunan+Rekonsiliasi Fiskal
-    - Cash Flow Bot sub-agen #845-848: Termin+Administrasi, Modal Kerja+Sumber, Invoice+Piutang Aging, Forecast+Sensitivitas
-    - AsesorBot LSP sub-agen #855-859: 4 Metode Asesmen, APL-01/02, Portofolio VAKF, Decision Matrix+BAPS, Etika Asesor
-    - KontrakBot sub-agen #862-863: SSUK/SSKK Perpres 12/2021, Addendum+Dokumen
-    - OSS-RBA sub-agen #866-869: KBLI+Risiko Usaha, NIB Flow, Perizinan Sektoral, Audit Kepatuhan+LKPM
-    - PDP Compliance sub-agen #871-874: Audit Gap UU PDP, DPO Peran, Breach Response 14jam, Klausul Kontrak Data
-    - KONSTRA-orch sub-agen #911-919: PROXIMA/PMBOK7, TEKNIK/Eng, KONTRAK, SAFIRA/K3, MUTU/ISO9001, ENVIRA/ISO14001, EQUIPRA, LOGIS, FINTAX
-- knowledge_chunks: 3,229 chunks (avg ~291 token/chunk, generated on-demand embedding via OpenAI text-embedding-3-small)
-- Domain taxonomy coverage: SKK, Regulasi Induk, SBU, Kontrak, Tender, K3/SMAP, Pelaksanaan, Engineering, Mutu, Lingkungan, Peralatan, Perpajakan, KPBU/PPP, PDP/Privacy, OSS/Perizinan, Bangunan Gedung
-- STATUS: Seluruh 47 agen Batch 1 & 2 yang sebelumnya hanya 3 KB dasar kini SELESAI diperkaya (total 3,220 KB entries platform)
+## Architecture decisions
+- **5-Level Modular Hierarchy**: Agents are organized Master → Series HUB → Sub-HUB → Specialist → Deep Specialist for scalability and detailed categorization.
+- **Two-Panel Dashboard Layout**: Separates global navigation from selected content for improved UX.
+- **Optimistic UI Updates**: Enhances responsiveness by immediately reflecting user actions.
+- **Project Brain & Mini Apps**: Provides contextual data for chatbots, enabling specialized, configuration-driven applications with anti-prompt injection.
+- **Multi-Provider LLM Fallback**: Implements a chain of LLM providers (OpenAI → DeepSeek → Qwen → Gemini) to ensure reliability.
+- **Agentic Integration Layer**: Dynamically builds system prompts based on persona and policies, unifying chat, Project Brain, and external channels.
 
-**Key Structural Fixes (May 2026 Session):**
-- 44 misplaced specialists redistributed to proper sub-HUBs (Perizinan→#4, SBU→#12, SKK→#17, Tender→#23, Asesor BU→#29, Asesor Kompetensi→#34, Odoo Assessment→#58, Odoo Blueprint→#61, Odoo Governance→#65, CIVILPRO Skema→#84, CIVILPRO Mentoring→#87, CIVILPRO Problem→#91)
-- 36 new specialists added for 9 SKK Bidang sub-HUBs (#150 Sipil, #151 Arsitektur, #152 Energi, #153 Sains Rekayasa, #154 Mekanikal, #155 Manajemen Pelaksanaan, #156 PWK, #157 Lanskap/Interior/Iluminasi, #158 Tata Lingkungan) — 4 specialists each
-- 15 new specialists added to thin HUBs: #302 LKUT (+3), #308 IMS (+3), #311 SMK3 (+3), #317 Pancek & Integritas (+2), #320 KCI Dashboard (+4)
-- ALL HUBs now have at least 1 child agent (zero empty orchestrators)
-- big_idea_id linked: 798/799 agents linked to 232/233 Big Ideas (only Master #768 root is NULL by design)
-- Linking strategy: exact name match vs toolboxes (647), manual series-based mapping (92), parent propagation (59)
+## Product
+- **AI Chatbot Builder**: Create, configure, and deploy intelligent conversational agents.
+- **LexCom Legal AI**: Integrated system with 12 specialized legal agents and a floating "Chaesa Lexbot" widget for Indonesian legal assistance.
+- **MultiClaw/OpenClaw Multi-Agent Pipelines**: Advanced AI orchestration for tender analysis, studio enhancement, product generation, and broadcast personalization.
+- **Dynamic Knowledge Base**: Supports hierarchical classification, versioning, source attribution, and various upload types (documents, YouTube, audio/video).
+- **Monetization & Conversion Layer**: Flexible pricing, lead capture, scoring, and smart call-to-action triggers.
+- **Chatbot Templates**: Gallery of pre-built chatbot configurations that users can adapt or publish their own to.
+- **Gustafta Store**: A public marketplace for selling pre-configured chatbots to external customers.
+- **Midtrans Payment Gateway**: Seamless integration for subscription payments and store purchases.
+- **Agent Management**: Features like on/off toggles, folder grouping, and JSON import/export for chatbots.
+- **AI-Powered Marketing Kit**: Generates landing pages, taglines, social posts, and other marketing content from chatbot configurations.
 
-**Chatbot Prospektif 2026 — Batch 1 (Added May 2026):**
-- 10 new HUBs + 45 specialists = 55 new agents (IDs 820-874)
-- ARCONA — Bangunan Gedung Hub (#820, 8 specialists): PBG, SLF, Struktur, MEP, Kebakaran, Aksesibilitas, RTBL, Audit Kelaikan
-- LSP-FAQ Peserta Hub (#829, 4 specialists): Skema, Jadwal, Dokumen, AJJ Digital
-- HPS Validator Bot (#834, 4 specialists): AHSP, Market Benchmark, Red Flag, Overhead
-- Pajak Konstruksi CoreTax Bot (#839, 4 specialists): CoreTax Nav, PPh 4(2), PPN, SPT
-- Cash Flow Project Bot (#844, 4 specialists): Termin, Modal Kerja, Invoice, Forecast
-- Risk Register Bot (#849, 4 specialists): Teknis, K3, Legal, Finansial
-- AsesorBot LSP SDMKI (#854, 5 specialists): MMA, APL, Portfolio, Decision, Etika
-- KontrakBot Konstruksi (#860, 4 specialists): FIDIC, PUPR, Amandemen, Klaim/Dispute
-- OSS-RBA Bot (#865, 4 specialists): KBLI, NIB Flow, Perizinan Sektoral, Audit
-- PDP Compliance Bot (#870, 4 specialists): PDP Audit, PPD/DPO, Breach Response, Klausul Data
-
-**Chatbot Prospektif 2026 — Batch 2 (Added May 2026):**
-- 5 new HUBs + 40 specialists = 45 new agents (IDs 875-919)
-- All agents: system_prompt ✅, description ✅, tagline ✅, greeting ✅, personality ✅, conversation_starters ✅, expertise ✅, context_questions ✅, deliverables ✅, domain_charter ✅, quality_bar ✅, product_summary ✅, product_features ✅, orchestrator_config ✅
-- All HUBs: landing_page fields ✅ (headline, subheadline, CTA, pain_points, solution, benefits)
-- MRP-A — Manajer Rantai Pasok Konstruksi (#875, S3, big_idea_id=174): 7 specialists (#876-882) — Vendor Scoring, Material QC Inspector, Equipment Fitness Tracker, Supply Chain Risk Register, SOP & Contract Generator, LKUT Evidence Builder, Inventory Simulator
-- Manajer Proyek KPBU (#883, S8, big_idea_id=77): 7 specialists (#884-890) — Project Identifier, OBC/FBC Builder, Financial Model & VfM Analyst, Risk Allocation Matrix, Procurement & Tender Advisor, Government Support & Guarantee Calculator, Contract & Lifecycle Manager
-- PROXIMA — Manajer Proyek Konstruksi (#891, big_idea_id=147): 10 specialists (#892-901) — AGENT-CHARTER (Carter), AGENT-WBS (Webe), AGENT-SCHEDULE (Skedu), AGENT-COST (Kosta), AGENT-RISK (Rizko), AGENT-QUALITY (Kualit), AGENT-PROCURE (Prokur), AGENT-CHANGE (Chang), AGENT-COMM (Komun), AGENT-CLOSEOUT (Kloz)
-- Manajer Keuangan Konstruksi (#902, S7, big_idea_id=145): 7 specialists (#903-909) — RAB & Cost Estimator, Cash Flow & Termin Planner, Cost Control & EVM Analyst, Tax & Compliance Advisor, Claim & Variation Calculator, Financial Report & Audit Helper, SKK Finance Exam Simulator
-- KONSTRA-ORCHESTRATOR (#910, big_idea_id=59): 9 specialists (#911-919) — AGENT-PROXIMA, AGENT-TEKNIK, AGENT-KONTRAK, AGENT-SAFIRA, AGENT-MUTU, AGENT-ENVIRA, AGENT-EQUIPRA, AGENT-LOGIS, AGENT-FINTAX
-
-A key feature is "Project Brain," which provides contextual data for chatbots, enabling specialized "Mini Apps" for tasks like project snapshots and risk assessments. A "Deliverables" panel allows defining output types for each agent, with pre-built bundles and quick-action chat buttons.
-
-Gustafta converts any chatbot into four digital products: eBook Kompetensi, eCourse Modul Belajar, Generator Dokumen, and Chaesa AI Studio Bridge for external AI prompt generation. Monetization is supported through flexible pricing models, guest message limits, trial periods, and a voucher system. A "Conversion Layer" handles lead capture, scoring, and smart call-to-action triggers. Chatbots can include an "Orchestrator Multi-Agent" system for routing messages to specialist agents based on intent.
-
-## MultiClaw / OpenClaw Multi-Agent Feature Upgrades
-
-Gustafta now features **OpenClaw/MultiClaw** — a suite of multi-agent AI pipelines embedded across 4 key panels:
-
-### 1. Info Tender — MultiClaw 4-Agent Pipeline
-- **Endpoint**: `POST /api/ai/tender-multiclaw`
-- **Agents**: LPSE Analyst → Compliance Checker → Gap Analyst → Document Drafter
-- **UI**: "MultiClaw" button on each tender card opens a dialog with animated stage reveal, compliance score, and tabbed results (LPSE | Checklist | Gap | Draft Dokumen)
-
-### 2. Studio Kompetensi — MultiClaw 3-Stage Enhancement
-- **Endpoint**: `POST /api/ai/studio-multiclaw`
-- **Agents**: Proposal Analyzer → Config Enhancer → KB Enricher
-- **UI**: "Perkaya dengan MultiClaw" button appears after document import; auto-applies enhanced fields to proposal and adds KB chunks
-
-### 3. Ekosistem Kompetensi — MultiClaw Parallel Product Factory
-- **Endpoint**: `POST /api/ai/ekosistem-multiclaw`
-- **Agents**: eBook Agent + eCourse Agent + DocGen Agent + Chaesa Bridge Agent (all parallel)
-- **UI**: "Generate Semua Produk (MultiClaw)" button in header; dialog with 4 colored agent cards and tabbed product outlines
-
-### 4. Broadcast WA — OpenClaw Gate + Personalization Agent
-- **Endpoint**: `POST /api/ai/broadcast-personalize`
-- **OpenClaw Gate**: "Kirim Sekarang" now requires confirmation dialog (shows recipient count, message preview, irreversibility warning)
-- **Personalization Agent**: "Personalisasi AI" button near template textarea; generates per-contact personalized messages and an improved general version
-- **UI**: Two dialogs — gate confirmation + personalization results with apply-to-template action
-
-## LexCom Integration in Agent Builder (Task #3)
-
-The 12 LexCom legal specialist agents are now fully integrated into the Gustafta agent builder:
-
-- **12 LexCom Templates** added to the template picker (category: "LexCom Spesialis Hukum"):
-  - Lex Kriminal (Hukum Pidana), Lex Civil (Hukum Perdata), Lex Corp (Hukum Korporasi)
-  - Lex Labor (Hukum Ketenagakerjaan), Lex Agraria (Hukum Pertanahan), Lex Fiscus (Hukum Pajak)
-  - Lex Praesidium (Yurisprudensi), Lex Scriptor (Legal Drafting), Lex Advocatus (Litigasi)
-  - Lex Insolventia (Kepailitan & PKPU), Lex Nexus (Lintas Bidang), Lex Futura (Hukum Emerging)
-- **Category filter tabs** added to the template dialog for easy browsing
-- **LexCom quick-start card** in the "Create Agent" dialog that opens directly to LexCom templates
-- **"Template LexCom" button** in the Persona panel's system prompt section for applying LexCom templates to existing agents
-- Templates work with the existing agent infrastructure; users can attach legal documents via the KB panel to extend each specialist agent with RAG-based retrieval
-
-## User Preferences
-
+## User preferences
 Preferred communication style: Simple, everyday language.
 
-## System Architecture
+## Gotchas
+- **Database Indexes**: Queries on `parent_agent_id`, `toolbox_id`, `kb.agent_id`, and `chunks.agent_id` require indexes for optimal performance.
+- **Cache Invalidation**: All write operations (create/update/delete) must properly invalidate relevant cache keys to prevent stale data.
+- **LexCom Admin Key**: Admin-level KB uploads for LexCom require the `x-legal-admin-key` header for authentication.
+- **Disabled Agents**: `/api/chat/config/:agentId` and `/api/widget/config/:agentId` return 503 if an agent is disabled.
 
-### Frontend Architecture
--   **Framework**: React 18 with TypeScript
--   **Routing**: Wouter
--   **State Management**: TanStack React Query
--   **Styling**: Tailwind CSS with CSS variables
--   **UI Components**: shadcn/ui
--   **Build Tool**: Vite
-The frontend uses a feature-based organization, custom React hooks for data fetching, optimistic updates, and supports light/dark mode theming and a mobile-first floating chat widget.
-
-### Backend Architecture
--   **Framework**: Express 5 with TypeScript
--   **Runtime**: Node.js with `tsx`
--   **API Style**: RESTful JSON API
--   **Build**: esbuild
-The server manages CRUD operations for agents, knowledge bases, integrations, message storage, and user authentication. It supports webhook integrations and intelligent file processing, including image analysis, document text extraction, and video/YouTube transcript fetching.
-
-### Data Storage
--   **ORM**: Drizzle ORM with Zod validation
--   **Database**: PostgreSQL (with in-memory fallback for development)
--   **Session Store**: connect-pg-simple
-The schema enforces a hierarchical structure (`series` -> `bigIdeas` -> `toolboxes` -> `agents`) and includes tables for managing various platform entities from agents to client subscriptions and analytics.
-
-### Design Patterns
--   **Two-Panel Layout**: Left navigation for global context, right panel for selected content.
--   **Active Agent Context**: UI content adapts dynamically based on the selected chatbot agent.
--   **Optimistic Updates**: For a responsive user experience.
--   **Theme System**: CSS custom properties for light/dark mode.
--   **Context API**: Manages active `Big Idea` and `Toolbox` context.
--   **Streaming Chat**: Real-time AI responses using Server-Sent Events (SSE).
--   **Project Brain**: Structured template and instance data for contextual chatbot interactions with anti-prompt injection.
--   **Mini Apps**: Configuration-driven, AI-powered applications leveraging Project Brain data.
--   **Chatbot Series**: Groups multiple Big Ideas into structured topic packages.
--   **Conversion Layer**: Revenue-oriented system for lead capture, scoring, and CTA triggers.
--   **Agentic Integration Layer**: Unifies chat, Project Brain, and external channels into an agentic intelligence loop, dynamically building system prompts based on persona and "Kebijakan Agen" fields.
-
-### UI/UX Decisions
--   Two-panel dashboard design.
--   Mobile-first chat widget.
--   Professional templates for various industries.
--   Dynamic widget embed system.
--   Multi-sector landing pages with tailored content.
--   Export features for Chatbot Summary and Marketing Briefs.
-
-### Feature Specifications
--   **Custom Domain Management**: Allows linking custom domains to chatbots with DNS verification and redirection.
--   **Expanded Knowledge Base Upload Types**: Supports `youtube`, `cloud_drive`, `video`, and `audio` content with automatic transcription and text extraction.
--   **Knowledge Base Hierarchy + Versioning + Source Attribution**: Implements a 4-level taxonomy for classification, version chaining, and explicit source attribution for RAG.
--   **AI Big Idea Generator**: Backend service suggesting Big Idea concepts based on user input and reference files.
--   **Tender Document Catalog**: A reference catalog of 37 types of government tender documents.
--   **SaaS Pack System**: Add-on system for domain-specific AI wizard workflows, e.g., "Tender LPSE Pack".
--   **Chat UI Markdown Renderer**: Renders chat assistant messages with a comprehensive set of markdown features.
--   **Studio Kompetensi (Ekosistem 5-Produk)**: A dual-gate system for importing documents and exporting chatbot configurations into five competency products.
--   **Chaesa AI Studio Bridge**: An adapter that maps Gustafta chatbot configurations to the schema used by Chaesa AI Studio.
--   **Multi-Provider Chat Fallback**: Implements a fallback chain for LLM calls (OpenAI → DeepSeek → Qwen → Gemini) if the primary stream creation fails.
--   **Admin Panel & Role Hierarchy**: Supports `superadmin`, `admin`, and `user` roles with differentiated access to user management, subscription management, and trial request handling.
-
-## Multi-Agent Strengthening Features (Latest)
-
-### 1. AI Field Regen (`client/src/components/ai-field-regen.tsx`)
-- Small 🪄 Wand icon button placed next to each individual field label in Persona and Policy panels
-- Calls `POST /api/ai/regen-field` with field name, current value, and agent context
-- Shows a popover with AI-generated suggestion + Rationale, with "Terapkan" / "Ulangi" / "Abaikan" actions
-- Applied to 7 Persona fields: name, tagline, description, greetingMessage, philosophy, systemPrompt, offTopicResponse
-- Applied to 6 Policy fields: conversationWinConditions, brandVoiceSpec, interactionPolicy, domainCharter, qualityBar, riskCompliance
-
-### 2. Config Health Widget (`client/src/components/config-health.tsx`)
-- Client-side completeness score for agent configuration
-- Weighted scoring: each field checked for minimum character threshold
-- Color-coded: red (<40%), amber (40-75%), green (≥75%)
-- Shows filled/missing field badges and guidance message
-- Integrated into top of Persona panel and Policy panel
-
-### 3. MultiClaw Orchestration Planner (in `agentic-ai-panel.tsx`)
-- 2-stage AI endpoint `POST /api/ai/orchestration-plan`:
-  - Stage 1: Domain analysis per agent (keywords, primary domain, strengths)
-  - Stage 2: Full plan (routing rules, handoff protocols, gap/overlap analysis, orchestrator system prompt addition)
-- UI card shows: executive summary, agent roster, routing rules (condition → agent), handoff protocols, gap analysis, orchestrator prompt update suggestion
-- "Tambahkan ke System Prompt" button injects routing rules into the current agent's system prompt
-- Only shown when agent has a toolboxId (i.e., is in a multi-agent toolbox)
-
-## External Dependencies
-
-### UI Libraries
--   Radix UI primitives
--   Lucide React icons
--   React Icons
--   Embla Carousel
--   React Day Picker
--   cmdk
--   Vaul
-
-### Data & Validation
--   Zod
--   drizzle-zod
--   TanStack React Query
-
-### Database
--   PostgreSQL (`pg` driver)
--   Drizzle ORM
--   drizzle-kit
-
-### Development Tools
--   Vite
--   TypeScript
--   PostCSS
-
-## Performance Optimizations (May 2026)
-
-### Database Indexes (16 indexes added via scripts/add-performance-indexes.ts)
-All queries previously used full table scans (Seq Scan). After optimization:
-- **agents table**: idx_agents_is_active, idx_agents_toolbox_id, idx_agents_parent_agent_id, idx_agents_behavior_preset, idx_agents_access_token, idx_agents_product_slug, idx_agents_big_idea_id, idx_agents_is_active_toolbox (composite)
-- **knowledge_bases table**: idx_kb_agent_id, idx_kb_status, idx_kb_taxonomy_id, idx_kb_agent_status (composite), idx_kb_is_shared
-- **knowledge_chunks table**: idx_chunks_agent_id, idx_chunks_kb_id, idx_chunks_agent_index (composite)
-- Result: queries on `parent_agent_id`, `toolbox_id`, `kb.agent_id`, `chunks.agent_id` now use Index Scan (cost drops from ~468 to ~4-7)
-- ANALYZE run on all three tables to refresh query planner statistics
-
-### In-Memory TTL Cache Layer (server/db-storage.ts)
-Added `TtlCache<T>` class with automatic expiry:
-- **agentCache** (5 min TTL) — individual agent by id, by slug, and `__active__` key
-- **agentListCache** (2 min TTL) — full agent list per toolboxId
-- **kbCache** (3 min TTL) — knowledge bases per agentId
-- **chunkCache** (3 min TTL) — knowledge chunks per agentId
-- Cache population: `getAgents()` also populates individual `agentCache` entries (zero extra DB hits for subsequent `getAgent()` calls)
-- Cache invalidation: all write methods (create/update/delete) properly invalidate relevant cache keys
-
-### Integrations
--   OpenAI (GPT-4o, GPT-3.5)
--   DeepSeek
--   Qwen
--   Gemini
--   Claude
--   Fonnte (WhatsApp)
--   Transfer Bank Manual (BCA/Mandiri/BRI)
--   Replit Auth (OAuth/OIDC)
--   Notion
--   `youtube-transcript`
--   `ffmpeg`
--   `pdf-parse`
--   `mammoth`
-## LexCom - Indonesian Legal AI Chatbot System
-
-### Overview
-LexCom is an integrated multi-agent legal AI system added to the Gustafta platform. It provides Indonesian legal research, drafting, and consultation via 12 specialized AI agents.
-
-### Routes
-- `/legal` — Dark-themed legal landing page with hero, agent badge grid, and feature cards
-- `/legal/chat` — Full two-panel chat interface with agent switcher and session history
-
-### Architecture
-- **LEX-ORCHESTRATOR**: Routes queries to the most appropriate specialist agent automatically
-- **12 Specialist Agents**: PIDANA, PERDATA, KORPORASI, KETENAGAKERJAAN, PERTANAHAN, PAJAK, YURISPRUDENSI, DRAFTER, LITIGASI, KEPAILITAN, MULTICLAW, OPENCLAW
-- **Chaesa Lexbot Widget**: Floating bottom-right widget on all pages except `/legal/chat` and `/embed/*`
-
-### Key Files
-- `server/lib/legal-agents.ts` — All 13 agent configs (orchestrator + 12 specialists) with system prompts
-- `server/lib/rag-service.ts` — RAG embedding/retrieval functions used for legal KB and case search
-- `server/routes-legal.ts` — API routes: chat, sessions, KB management, case search
-- `server/seed-legal-cases.ts` — Seeds 12 landmark putusan MA/MK with embeddings on first startup
-- `client/src/pages/legal-landing.tsx` — Legal landing page
-- `client/src/pages/legal-chat.tsx` — Chat interface with case search panel and admin KB panel
-- `client/src/components/chaesa-widget.tsx` — Floating Chaesa Lexbot widget
-
-### Database Tables
-- `legal_chat_sessions` — Stores chat sessions per user
-- `legal_chat_messages` — Stores chat messages linked to sessions
-- `legal_knowledge_bases` — Admin-uploadable regulation documents (KUHP 2023, KUHPerdata, etc.)
-- `legal_knowledge_chunks` — RAG chunks with vector embeddings for regulation documents
-- `legal_cases` — Pre-indexed putusan MA/MK with embeddings for semantic and keyword search
-
-### Case Search & Regulation RAG (Task #4)
-- **Putusan database**: 12 seed cases spanning pidana, perdata, TUN, ketenagakerjaan, ketatanegaraan
-- **Semantic search**: Embedding-based retrieval via `GET /api/legal/cases/search?q=...`
-- **Admin KB upload**: `POST /api/legal/kb` (auth via `x-legal-admin-key` header) — chunks and embeds regulation text
-- **RAG in chat**: All chat messages search the KB and case database; relevant chunks are injected into the system prompt
-- **Citation format**: "Putusan MA No. XXX/Pid/YYYY/MARI" — consistent across all agents
-- **UI**: "Cari Putusan" button in chat header opens a search panel; admin panel in sidebar for KB management
-
-### Disclaimer
-All legal chatbot responses include the mandatory disclaimer: "⚠️ Informasi ini bersifat edukatif dan bukan pendapat hukum yang mengikat."
-
-## Chatbot Management Features (May 2026)
-
-### 1. On/Off Toggle per Chatbot
-- DB column `is_enabled boolean NOT NULL DEFAULT true` added to agents table
-- `PATCH /api/agents/:id/toggle-enabled` — toggles isEnabled status
-- Switch UI visible on hover in sidebar agent cards (orkestrator & regular)
-- Badge "OFF" visible permanently when disabled
-- `/api/chat/config/:agentId` and `/api/widget/config/:agentId` return 503 if isEnabled=false
-
-### 2. Folder/Grouping System
-- DB column `folder_name text DEFAULT NULL` added to agents table
-- `PATCH /api/agents/:id/folder` — set/clear folder name
-- `GET /api/agents/folders` — list distinct folder names
-- Folder dialog in sidebar (FolderPlus icon on hover)
-- Folder name shown below agent name with folder icon
-
-### 3. Export/Import JSON
-- `GET /api/agents/:id/export?download=true` — v2.0 export with 60+ fields as downloadable JSON file
-- `POST /api/agents/import` — import agent config as new agent
-- Download button (hover in sidebar), Import button at bottom of agent list
-- Import dialog with file upload UI
-
-## Landing Page & Marketing Kit (May 2026)
-
-### Landing Page AI Generator
-- `POST /api/agents/:id/landing-page/generate` — generates full HTML landing page from chatbot config
-- Options: style (modern/professional/bold/minimal/tech) + color scheme (blue/green/purple/orange/teal)
-- Sections: Hero, Pain Points, Solusi, Fitur, Cara Kerja, Demo Chat mockup, Testimoni, Harga, FAQ, CTA, Footer
-- Preview via iframe sandbox + code view + download as .html
-- Panel: `client/src/components/panels/landing-page-panel.tsx` (tab "AI Generator")
-
-### Marketing Kit Bundle
-- `POST /api/agents/:id/marketing-kit/generate` — generates all marketing content at once as JSON
-- Includes: 5 taglines, elevator pitch (3 durations), WA broadcast (3 versions), social posts (LinkedIn/Instagram/Facebook), ad copies (Google/Meta), email sequence (3 emails), value proposition canvas, FAQ (5 items), content calendar (7 days), 3 testimonials
-- Collapsible sections per category, copy buttons, download JSON
-- Panel: tab "Marketing Kit" in landing-page-panel.tsx
-
-### Summary/Rangkuman (existing, upgraded)
-- Tab "Rangkuman" — auto-generated from chatbot config
-- Download .md, copy to clipboard, save external landing page URL
-
-## Template System (May 2026)
-
-### DB Tables
-- `chatbot_templates` — id, name, description, category, tags (jsonb), agent_config (jsonb), thumbnail_color, is_featured, is_public, usage_count, created_by_user_id, created_by_name, created_at
-- `user_onboarding` — id, user_id (unique), starter_created, onboarding_completed_at, created_at
-
-### Template Gallery Page (`/templates`)
-- Browse 10 starter templates (4 featured: Guru Privat AI, Konsultan K3, Sales Assistant, Customer Support)
-- Categories: Konstruksi, Bisnis, Pendidikan, Hukum, Teknologi, Kesehatan, Keuangan, Perjalanan, Umum
-- Real-time search by name/description/tag
-- Filter per category (pills + select dropdown)
-- "Template Unggulan" section (is_featured=true) + "Semua Template"
-- "Pakai" button → name customization dialog → create agent from template (POST /api/chatbot-templates/:id/use)
-- Increments usage_count each time template is used
-
-### Publish as Template (from Landing Page panel)
-- "Bagikan ke Komunitas" banner in landing-page-panel.tsx
-- Dialog: description, category, card color → POST /api/agents/:id/publish-template
-- Copies: name, persona, expertise, system_prompt, knowledge bases (no conversation data)
-- After publish, user redirected to template gallery
-
-### Backend Routes
-- GET /api/chatbot-templates — list all public templates (filter by ?category=)
-- GET /api/chatbot-templates/:id — single template
-- POST /api/agents/:id/publish-template — publish chatbot to gallery (auth required)
-- POST /api/chatbot-templates/:id/use — create agent from template (auth required, increments usage_count)
-- DELETE /api/chatbot-templates/:id — delete (owner or admin)
-- GET /api/user/onboarding-status — check user starter status
-- POST /api/user/check-onboarding — trigger starter agent creation check
-
-## Midtrans Payment Gateway (May 2026)
-
-### Setup
-- `server/lib/midtrans.ts` — Midtrans library (Snap token creation, webhook verification, status check)
-- Secrets: `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY` (production keys configured)
-- Auto-detect sandbox vs production based on key prefix (`SB-` = sandbox)
-
-### Flow
-1. User klik "Berlangganan" di `/pricing` → POST `/api/subscriptions/create` (auth required)
-2. Backend buat Midtrans Snap token + simpan subscription pending (mayarOrderId = orderId)
-3. Frontend load `snap.js` dari Midtrans CDN → `snap.pay(token)` buka popup pembayaran
-4. User bayar via VA/QRIS/GoPay/kartu kredit — Midtrans handle semua
-5. Webhook `POST /api/subscriptions/midtrans-notify` → verifikasi status → aktifkan subscription
-6. Frontend polling `GET /api/subscriptions/check/:orderId` untuk cek status realtime
-
-### Routes
-- `GET /api/subscriptions/status` — provider info + clientKey (untuk load snap.js)
-- `POST /api/subscriptions/create` — buat Snap token (auth required)
-- `POST /api/subscriptions/midtrans-notify` — webhook dari Midtrans (aktifkan/cancel)
-- `GET /api/subscriptions/check/:orderId` — cek status pembayaran (auth required)
-- `POST /api/subscriptions/activate/:id` — admin manual activate
-
-### Metode Pembayaran (via Midtrans)
-VA BCA/BNI/BRI/Mandiri, QRIS, GoPay, OVO, ShopeePay, kartu kredit/debit Visa/MC
-
-### Seeded Templates (10)
-Customer Support Pro (Bisnis★), Sales Assistant AI (Bisnis★), HR & Rekrutmen Bot (Bisnis), Guru Privat AI (Pendidikan★), Konsultan K3 Konstruksi (Konstruksi★), Tender & Pengadaan Advisor (Konstruksi), Asisten Hukum Bisnis (Hukum), Financial Planner AI (Keuangan), Tech Support Bot (Teknologi), Asisten Mutu ISO 9001 (Konstruksi)
-
-## Gustafta Store — Public Chatbot Marketplace (May 2026)
-
-Storefront publik terpisah dari platform utama. Pelanggan eksternal bisa beli chatbot tanpa login Gustafta.
-
-### URL
-- `/store` — public storefront (dark theme, standalone design)
-- `/store/access/:token` — halaman akses setelah pembayaran berhasil
-
-### DB Tables
-- `store_products` — produk chatbot yang dijual (linked ke agent_id, harga, fitur, emoji)
-- `store_orders` — riwayat pembelian (customer info, Midtrans order ID, access_token UUID)
-
-### Flow Pembelian
-1. Customer browse `/store` → klik "Beli Sekarang"
-2. Isi nama + email + no HP → POST `/api/store/order` → Midtrans Snap token
-3. `snap.pay(token)` buka popup → bayar via VA/QRIS/GoPay/dll
-4. Midtrans webhook → `POST /api/store/notify` → update status order → "paid"
-5. Customer redirect ke `/store/access/:token` → tampil chat URL + embed code
-
-### Routes (Public)
-- `GET /api/store/products` — daftar produk aktif (publik, no auth)
-- `GET /api/store/products/:slug` — detail produk
-- `POST /api/store/order` — buat order + Snap token (publik)
-- `POST /api/store/notify` — Midtrans webhook
-- `GET /api/store/access/:token` — verifikasi token + info chatbot
-
-### Routes (Admin, auth required)
-- `GET/POST /api/store/admin/products` — kelola produk
-- `PATCH/DELETE /api/store/admin/products/:id` — edit/hapus produk
-- `GET /api/store/admin/orders` — lihat semua order
-
-### Seeded Products (6)
-HUB Regulasi Jasa Konstruksi (Rp 499.000, agent_id=3), Konsultan K3 Konstruksi (Rp 399.000), PROXIMA Manajemen Proyek (Rp 699.000, agent_id=891), Manajer Keuangan Konstruksi (Rp 599.000, agent_id=902), MRP-A Rantai Pasok (Rp 549.000, agent_id=875), Manajer Proyek KPBU (Rp 799.000, agent_id=883)
-
-### Nomor Kontak
-Phone 081287941900 (WA): di Midtrans customer details, tombol "Hubungi Sales" pricing.tsx, footer pricing.tsx, header & footer store.tsx
+## Pointers
+- **shadcn/ui Documentation**: _Populate as you build_
+- **Drizzle ORM Documentation**: _Populate as you build_
+- **TanStack React Query Documentation**: _Populate as you build_
+- **Midtrans API Documentation**: _Populate as you build_
+- **OpenAI API Documentation**: _Populate as you build_
