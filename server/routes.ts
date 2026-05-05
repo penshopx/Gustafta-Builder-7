@@ -2,9 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { customDomains, trialRequests, subscriptionsTable, vouchers } from "@shared/schema";
+import { customDomains, trialRequests, subscriptionsTable, vouchers, series as seriesTable, bigIdeas as bigIdeasTable, toolboxes as toolboxesTable, agents as agentsTable, cores as coresTable } from "@shared/schema";
 import { users } from "@shared/models/auth";
-import { eq, and, desc, sql as sqlExpr } from "drizzle-orm";
+import { eq, and, desc, sql as sqlExpr, inArray, isNull, or } from "drizzle-orm";
 import {
   insertAgentSchema,
   insertKnowledgeBaseSchema,
@@ -515,58 +515,130 @@ export async function registerRoutes(
 
   app.get("/api/marketplace/hierarchy", async (_req, res) => {
     try {
-      const allSeries = await storage.getPublicSeries();
-      const result = [];
-      for (const s of allSeries) {
-        const hierarchy = await storage.getSeriesWithHierarchy(String(s.id));
-        if (!hierarchy) continue;
+      // --- Batch fetch everything in 5 queries instead of N+1 ---
+      const allSeries = await db.select().from(seriesTable)
+        .where(and(eq(seriesTable.isPublic, true), eq(seriesTable.isActive, true)))
+        .orderBy(seriesTable.sortOrder);
 
-        const filterAgents = (agents: any[]) =>
-          agents.filter((a: any) => a.isActive);
+      if (allSeries.length === 0) { res.json([]); return; }
 
-        const filterToolboxes = (toolboxes: any[]) =>
-          toolboxes
-            .filter((tb: any) => tb.isActive)
-            .map((tb: any) => ({ ...tb, agents: filterAgents(tb.agents || []) }))
-            .filter((tb: any) => tb.agents.length > 0);
+      const seriesIds = allSeries.map(s => s.id);
 
-        const filterBigIdeas = (bigIdeas: any[]) =>
-          bigIdeas
-            .map((bi: any) => ({ ...bi, toolboxes: filterToolboxes(bi.toolboxes || []) }))
-            .filter((bi: any) => bi.toolboxes.length > 0);
+      const [allCores, allBigIdeas] = await Promise.all([
+        db.select().from(coresTable).where(inArray(coresTable.seriesId, seriesIds)).orderBy(coresTable.sortOrder),
+        db.select().from(bigIdeasTable).where(inArray(bigIdeasTable.seriesId, seriesIds)).orderBy(bigIdeasTable.sortOrder),
+      ]);
 
-        const filteredCores = hierarchy.cores
-          .map((c: any) => ({ ...c, bigIdeas: filterBigIdeas(c.bigIdeas || []) }))
-          .filter((c: any) => c.bigIdeas.length > 0);
+      const bigIdeaIds = allBigIdeas.map(bi => bi.id);
 
-        const filteredBigIdeas = filterBigIdeas(hierarchy.bigIdeas);
+      const allToolboxes = await db.select().from(toolboxesTable).where(
+        or(
+          bigIdeaIds.length > 0 ? inArray(toolboxesTable.bigIdeaId, bigIdeaIds) : undefined,
+          and(inArray(toolboxesTable.seriesId, seriesIds), eq(toolboxesTable.isOrchestrator, true), isNull(toolboxesTable.bigIdeaId))
+        ) as any
+      ).orderBy(toolboxesTable.sortOrder);
 
-        // Count agents in BigIdea-bound toolboxes
-        const agentsFromBigIdeas = [...filteredBigIdeas, ...filteredCores.flatMap((c: any) => c.bigIdeas)]
-          .reduce((sum: number, bi: any) => sum + bi.toolboxes.reduce((s2: number, tb: any) => s2 + tb.agents.length, 0), 0);
+      const activeToolboxes = allToolboxes.filter(tb => tb.isActive);
+      const toolboxIds = activeToolboxes.map(tb => tb.id);
 
-        // === FIX: Also count agents in series-level orchestrator toolboxes ===
-        const filteredOrchestrators = (hierarchy.orchestratorToolboxes || [])
-          .filter((tb: any) => tb.isActive)
-          .map((tb: any) => ({ ...tb, agents: (tb.agents || []).filter((a: any) => a.isActive) }))
-          .filter((tb: any) => tb.agents.length > 0);
-        const agentsFromOrchestrators = filteredOrchestrators
-          .reduce((sum: number, tb: any) => sum + tb.agents.length, 0);
+      const allAgents = toolboxIds.length > 0
+        ? await db.select().from(agentsTable).where(and(inArray(agentsTable.toolboxId, toolboxIds), eq(agentsTable.isActive, true)))
+        : [];
 
-        const totalAgents = agentsFromBigIdeas + agentsFromOrchestrators;
+      // --- Assemble hierarchy in memory ---
+      const agentsByToolbox = new Map<number, any[]>();
+      for (const a of allAgents) {
+        if (!a.toolboxId) continue;
+        if (!agentsByToolbox.has(a.toolboxId)) agentsByToolbox.set(a.toolboxId, []);
+        agentsByToolbox.get(a.toolboxId)!.push({
+          id: String(a.id), name: a.name, description: a.description || "",
+          avatar: a.avatar || "", tagline: a.tagline || "", category: a.category || "",
+          subcategory: a.subcategory || "", isPublic: a.isPublic || false, isActive: a.isActive || false,
+          productSlug: a.productSlug || "", widgetColor: a.widgetColor || "#6366f1",
+          isOrchestrator: a.isOrchestrator || false, orchestratorRole: a.orchestratorRole || "standalone",
+        });
+      }
 
-        if (totalAgents > 0) {
-          result.push({
-            ...hierarchy,
-            cores: filteredCores,
-            bigIdeas: filteredBigIdeas,
-            orchestratorToolboxes: filteredOrchestrators,
-            totalAgents,
-          });
+      const buildToolbox = (tb: any) => {
+        const agents = agentsByToolbox.get(tb.id) || [];
+        return {
+          id: String(tb.id), bigIdeaId: tb.bigIdeaId ? String(tb.bigIdeaId) : undefined,
+          seriesId: tb.seriesId ? String(tb.seriesId) : undefined,
+          isOrchestrator: tb.isOrchestrator || false, name: tb.name,
+          description: tb.description || "", purpose: tb.purpose || "",
+          capabilities: (tb.capabilities as string[]) || [],
+          limitations: (tb.limitations as string[]) || [],
+          sortOrder: tb.sortOrder || 0, isActive: tb.isActive || false,
+          createdAt: tb.createdAt.toISOString(), agents,
+        };
+      };
+
+      const toolboxesByBigIdea = new Map<number, any[]>();
+      const toolboxesBySeries = new Map<number, any[]>();
+      for (const tb of activeToolboxes) {
+        if (tb.bigIdeaId) {
+          if (!toolboxesByBigIdea.has(tb.bigIdeaId)) toolboxesByBigIdea.set(tb.bigIdeaId, []);
+          toolboxesByBigIdea.get(tb.bigIdeaId)!.push(buildToolbox(tb));
+        } else if (tb.isOrchestrator && tb.seriesId) {
+          if (!toolboxesBySeries.has(tb.seriesId)) toolboxesBySeries.set(tb.seriesId, []);
+          toolboxesBySeries.get(tb.seriesId)!.push(buildToolbox(tb));
         }
       }
+
+      const bigIdeasBySeriesAndCore = new Map<string, any[]>();
+      for (const bi of allBigIdeas) {
+        const key = `${bi.seriesId}-${bi.coreId ?? "none"}`;
+        if (!bigIdeasBySeriesAndCore.has(key)) bigIdeasBySeriesAndCore.set(key, []);
+        const tbs = (toolboxesByBigIdea.get(bi.id) || []).filter(tb => (agentsByToolbox.get(Number(tb.id)) || []).length > 0);
+        if (tbs.length === 0) continue;
+        bigIdeasBySeriesAndCore.get(key)!.push({
+          id: String(bi.id), seriesId: String(bi.seriesId), coreId: bi.coreId ? String(bi.coreId) : undefined,
+          name: bi.name, description: bi.description || "", type: bi.type || "",
+          sortOrder: bi.sortOrder || 0, toolboxes: tbs,
+        });
+      }
+
+      const coresBySeries = new Map<number, any[]>();
+      for (const c of allCores) {
+        if (!coresBySeries.has(c.seriesId)) coresBySeries.set(c.seriesId, []);
+        const coreBigIdeas = bigIdeasBySeriesAndCore.get(`${c.seriesId}-${c.id}`) || [];
+        if (coreBigIdeas.length === 0) continue;
+        coresBySeries.get(c.seriesId)!.push({
+          id: String(c.id), seriesId: String(c.seriesId), name: c.name,
+          description: c.description || "", sortOrder: c.sortOrder || 0, bigIdeas: coreBigIdeas,
+        });
+      }
+
+      const result = [];
+      for (const s of allSeries) {
+        const ungroupedBigIdeas = bigIdeasBySeriesAndCore.get(`${s.id}-none`) || [];
+        const cores = coresBySeries.get(s.id) || [];
+        const orchestratorToolboxes = (toolboxesBySeries.get(s.id) || []).filter(tb => (agentsByToolbox.get(Number(tb.id)) || []).length > 0);
+        const totalAgents = [
+          ...ungroupedBigIdeas.flatMap((bi: any) => bi.toolboxes.flatMap((tb: any) => tb.agents)),
+          ...cores.flatMap((c: any) => c.bigIdeas.flatMap((bi: any) => bi.toolboxes.flatMap((tb: any) => tb.agents))),
+          ...orchestratorToolboxes.flatMap((tb: any) => tb.agents),
+        ].length;
+
+        if (totalAgents === 0) continue;
+
+        result.push({
+          id: String(s.id), name: s.name, slug: s.slug, description: s.description || "",
+          tagline: s.tagline || "", category: s.category || "", color: s.color || "#6366f1",
+          isPublic: s.isPublic || false, isActive: s.isActive || false,
+          sortOrder: s.sortOrder || 0, totalAgents,
+          totalBigIdeas: allBigIdeas.filter(bi => bi.seriesId === s.id).length,
+          totalToolboxes: activeToolboxes.filter(tb => tb.seriesId === s.id || allBigIdeas.find(bi => bi.seriesId === s.id && bi.id === tb.bigIdeaId)).length,
+          totalCores: allCores.filter(c => c.seriesId === s.id).length,
+          bigIdeas: ungroupedBigIdeas,
+          cores,
+          orchestratorToolboxes,
+        });
+      }
+
       res.json(result);
     } catch (error) {
+      console.error("Marketplace hierarchy error:", error);
       res.status(500).json({ error: "Failed to fetch marketplace data" });
     }
   });
