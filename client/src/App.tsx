@@ -44,7 +44,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/documentation" component={Documentation} />
       <Route path="/pricing" component={Pricing} />
-      <Route path="/marketplace" component={Marketplace} />
+      <Route path="/marketplace">{() => <Redirect to="/store" />}</Route>
       <Route path="/marketplace/:slug">{(params) => <Redirect to={`/bot/${params.slug}`} />}</Route>
       <Route path="/subscription" component={Subscription} />
       <Route path="/payment-success" component={PaymentSuccess} />

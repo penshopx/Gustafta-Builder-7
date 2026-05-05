@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingBag, Globe, DollarSign, Shield, Tag, Copy, ExternalLink, Check, Plus, Trash2 } from "lucide-react";
+import { ShoppingBag, Globe, DollarSign, Shield, Tag, Copy, ExternalLink, Check, Plus, Trash2, Target, Lightbulb } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,9 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
     productSlug: agent.productSlug || "",
     productSummary: agent.productSummary || "",
     productFeatures: (agent.productFeatures as string[]) || [],
+    productUseCases: agent.productUseCases || "",
+    productTargetUser: agent.productTargetUser || "",
+    productProblem: agent.productProblem || "",
     monthlyPrice: agent.monthlyPrice ?? 0,
     trialEnabled: agent.trialEnabled ?? true,
     trialDays: agent.trialDays ?? 7,
@@ -34,6 +37,8 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
     brandingLogo: agent.brandingLogo || "",
   });
 
+  const set = (key: string, val: any) => setSettings(s => ({ ...s, [key]: val }));
+
   const [newFeature, setNewFeature] = useState("");
   const [copiedMarketplace, setCopiedMarketplace] = useState(false);
   const [copiedChat, setCopiedChat] = useState(false);
@@ -44,6 +49,9 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
       productSlug: agent.productSlug || "",
       productSummary: agent.productSummary || "",
       productFeatures: (agent.productFeatures as string[]) || [],
+      productUseCases: agent.productUseCases || "",
+      productTargetUser: agent.productTargetUser || "",
+      productProblem: agent.productProblem || "",
       monthlyPrice: agent.monthlyPrice ?? 0,
       trialEnabled: agent.trialEnabled ?? true,
       trialDays: agent.trialDays ?? 7,
@@ -183,6 +191,41 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   rows={3}
                  
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><Target className="w-3.5 h-3.5 text-primary" />Masalah yang Diselesaikan</Label>
+                <Textarea
+                  value={settings.productProblem}
+                  onChange={(e) => set("productProblem", e.target.value)}
+                  placeholder="Contoh: Banyak kontraktor kesulitan memahami persyaratan dokumen tender yang kompleks..."
+                  rows={2}
+                  data-testid="textarea-product-problem"
+                />
+                <p className="text-xs text-muted-foreground">Masalah utama yang diselesaikan chatbot ini</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><Lightbulb className="w-3.5 h-3.5 text-primary" />Contoh Use Case</Label>
+                <Textarea
+                  value={settings.productUseCases}
+                  onChange={(e) => set("productUseCases", e.target.value)}
+                  placeholder="Contoh: Analisis dokumen RKS, cek kelengkapan berkas, hitung estimasi biaya tender..."
+                  rows={2}
+                  data-testid="textarea-product-use-cases"
+                />
+                <p className="text-xs text-muted-foreground">Skenario penggunaan nyata chatbot ini</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Target Pengguna</Label>
+                <Input
+                  value={settings.productTargetUser}
+                  onChange={(e) => set("productTargetUser", e.target.value)}
+                  placeholder="Contoh: Kontraktor, konsultan pengadaan, staf procurement BUMN"
+                  data-testid="input-product-target-user"
+                />
+                <p className="text-xs text-muted-foreground">Siapa yang paling cocok menggunakan chatbot ini</p>
               </div>
 
               <div className="space-y-2">

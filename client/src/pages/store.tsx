@@ -6,11 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Bot, ShoppingCart, Check, Smartphone, Search,
-  ChevronLeft, ChevronRight, Crown, Layers,
+  Loader2, Bot, ShoppingCart, Smartphone, Search,
+  ChevronLeft, ChevronRight, Layers, CheckCircle2, Info, X,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -26,8 +25,6 @@ declare global {
     };
   }
 }
-
-const DEFAULT_PRICE = 299000;
 
 const CATEGORY_LABELS: Record<string, string> = {
   engineering: "Teknik & Engineering",
@@ -53,6 +50,13 @@ interface AgentProduct {
   name: string;
   category: string;
   tagline: string;
+  description: string;
+  productSummary: string;
+  productFeatures: string[];
+  productSlug: string;
+  productUseCases: string;
+  productTargetUser: string;
+  productProblem: string;
   emoji: string;
   color: string;
   isOrchestrator: boolean;
@@ -79,7 +83,7 @@ interface BuyFormData {
   phone: string;
 }
 
-const LIMIT = 24;
+const LIMIT = 18;
 
 export default function Store() {
   const { toast } = useToast();
@@ -90,13 +94,11 @@ export default function Store() {
   const [selectedAgent, setSelectedAgent] = useState<AgentProduct | null>(null);
   const [buyForm, setBuyForm] = useState<BuyFormData>({ name: "", email: "", phone: "" });
   const [showBuyDialog, setShowBuyDialog] = useState(false);
+  const [detailAgent, setDetailAgent] = useState<AgentProduct | null>(null);
 
   const { data: paymentConfig } = useQuery<{ clientKey: string; paymentConfigured: boolean; isSandbox: boolean }>({
     queryKey: ["/api/subscriptions/status"],
-    queryFn: async () => {
-      const res = await fetch("/api/subscriptions/status");
-      return res.json();
-    },
+    queryFn: async () => { const res = await fetch("/api/subscriptions/status"); return res.json(); },
   });
 
   useEffect(() => {
@@ -113,26 +115,19 @@ export default function Store() {
   }, [paymentConfig?.clientKey]);
 
   const catalogParams = new URLSearchParams({
-    page: String(page),
-    limit: String(LIMIT),
+    page: String(page), limit: String(LIMIT),
     ...(search ? { search } : {}),
     ...(selectedCategory ? { category: selectedCategory } : {}),
-  });
+  }).toString();
 
   const { data: catalog, isLoading } = useQuery<CatalogResponse>({
     queryKey: ["/api/store/catalog", page, search, selectedCategory],
-    queryFn: async () => {
-      const res = await fetch(`/api/store/catalog?${catalogParams}`);
-      return res.json();
-    },
+    queryFn: async () => { const res = await fetch(`/api/store/catalog?${catalogParams}`); return res.json(); },
   });
 
   const { data: categories = [] } = useQuery<CategoryCount[]>({
     queryKey: ["/api/store/catalog/categories"],
-    queryFn: async () => {
-      const res = await fetch("/api/store/catalog/categories");
-      return res.json();
-    },
+    queryFn: async () => { const res = await fetch("/api/store/catalog/categories"); return res.json(); },
   });
 
   const createOrderMutation = useMutation({
@@ -148,17 +143,9 @@ export default function Store() {
         return;
       }
       window.snap.pay(token, {
-        onSuccess: () => {
-          setShowBuyDialog(false);
-          toast({ title: "Pembayaran berhasil!", description: "Cek email Anda untuk link akses chatbot." });
-        },
-        onPending: () => {
-          setShowBuyDialog(false);
-          toast({ title: "Menunggu pembayaran", description: "Selesaikan pembayaran dan link akses akan dikirim via email." });
-        },
-        onError: () => {
-          toast({ title: "Pembayaran gagal", description: "Silakan coba lagi.", variant: "destructive" });
-        },
+        onSuccess: () => { setShowBuyDialog(false); toast({ title: "Pembayaran berhasil!", description: "Cek email Anda untuk link akses chatbot." }); },
+        onPending: () => { setShowBuyDialog(false); toast({ title: "Menunggu pembayaran", description: "Selesaikan pembayaran dan link akses akan dikirim via email." }); },
+        onError: () => { toast({ title: "Pembayaran gagal", description: "Silakan coba lagi.", variant: "destructive" }); },
         onClose: () => {},
       });
     },
@@ -167,32 +154,22 @@ export default function Store() {
     },
   });
 
-  const handleSearch = useCallback(() => {
-    setSearch(searchInput);
-    setPage(1);
-  }, [searchInput]);
-
-  const handleCategoryChange = (cat: string) => {
-    setSelectedCategory(cat);
-    setPage(1);
-  };
+  const handleSearch = useCallback(() => { setSearch(searchInput); setPage(1); }, [searchInput]);
+  const handleCategoryChange = (cat: string) => { setSelectedCategory(cat); setPage(1); };
 
   const handleBuy = (agent: AgentProduct) => {
     setSelectedAgent(agent);
     setBuyForm({ name: "", email: "", phone: "" });
     setShowBuyDialog(true);
+    setDetailAgent(null);
   };
+
+  const handleDetail = (agent: AgentProduct) => setDetailAgent(agent);
 
   const handleSubmitOrder = () => {
     if (!selectedAgent) return;
-    if (!buyForm.name.trim()) {
-      toast({ title: "Lengkapi data", description: "Nama lengkap wajib diisi.", variant: "destructive" });
-      return;
-    }
-    if (!buyForm.email.trim()) {
-      toast({ title: "Lengkapi data", description: "Email wajib diisi.", variant: "destructive" });
-      return;
-    }
+    if (!buyForm.name.trim()) { toast({ title: "Lengkapi data", description: "Nama lengkap wajib diisi.", variant: "destructive" }); return; }
+    if (!buyForm.email.trim()) { toast({ title: "Lengkapi data", description: "Email wajib diisi.", variant: "destructive" }); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(buyForm.email.trim())) {
       toast({ title: "Format email salah", description: "Masukkan alamat email yang valid, contoh: nama@email.com", variant: "destructive" });
@@ -207,7 +184,6 @@ export default function Store() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-
       {/* Header */}
       <header className="border-b border-white/10 bg-gray-950/90 backdrop-blur sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -220,13 +196,8 @@ export default function Store() {
               <span className="ml-2 text-xs text-violet-400 font-medium">STORE</span>
             </div>
           </div>
-          <a
-            href="https://wa.me/6281287941900"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-            data-testid="link-wa-header"
-          >
+          <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors" data-testid="link-wa-header">
             <Smartphone className="h-4 w-4" />
             <span className="hidden sm:inline">081287941900</span>
           </a>
@@ -234,58 +205,44 @@ export default function Store() {
       </header>
 
       {/* Hero */}
-      <section className="py-12 px-4 text-center border-b border-white/5">
+      <section className="py-10 px-4 text-center border-b border-white/5">
         <Badge className="mb-3 bg-violet-500/20 text-violet-300 border-violet-500/30 hover:bg-violet-500/20">
-          🏗️ {total > 0 ? `${total.toLocaleString("id-ID")}+ Chatbot AI Siap Pakai` : "Gustafta Store — Chatbot AI Konstruksi Indonesia"}
+          🏗️ {total > 0 ? `${total.toLocaleString("id-ID")} Chatbot AI Tersedia` : "Gustafta Store — Chatbot AI Konstruksi Indonesia"}
         </Badge>
         <h1 className="text-3xl sm:text-4xl font-bold mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Beli Chatbot AI Siap Pakai
         </h1>
         <p className="text-gray-400 max-w-lg mx-auto mb-6">
-          Pilih chatbot yang Anda butuhkan. Bayar sekali, langsung bisa pakai — tanpa perlu registrasi platform.
+          Pilih chatbot yang Anda butuhkan. Bayar sekali, langsung bisa pakai — tanpa perlu coding.
         </p>
         <div className="flex gap-2 max-w-lg mx-auto">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              placeholder="Cari chatbot..."
-              value={searchInput}
+            <Input placeholder="Cari chatbot..." value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-violet-500"
-              data-testid="input-search-store"
-            />
+              data-testid="input-search-store" />
           </div>
-          <Button onClick={handleSearch} className="bg-violet-600 hover:bg-violet-700" data-testid="button-search">
-            Cari
-          </Button>
+          <Button onClick={handleSearch} className="bg-violet-600 hover:bg-violet-700" data-testid="button-search">Cari</Button>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
-        {/* Sidebar: Category Filter */}
+        {/* Sidebar kategori */}
         <aside className="hidden lg:block w-56 flex-shrink-0">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Kategori</p>
           <div className="space-y-1">
-            <button
-              onClick={() => handleCategoryChange("")}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
-                selectedCategory === "" ? "bg-violet-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"
-              }`}
-              data-testid="filter-all"
-            >
+            <button onClick={() => handleCategoryChange("")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${selectedCategory === "" ? "bg-violet-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+              data-testid="filter-all">
               <span>Semua</span>
               <span className="text-xs opacity-60">{total.toLocaleString("id-ID")}</span>
             </button>
             {categories.map((cat) => (
-              <button
-                key={cat.category}
-                onClick={() => handleCategoryChange(cat.category)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${
-                  selectedCategory === cat.category ? "bg-violet-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"
-                }`}
-                data-testid={`filter-cat-${cat.category}`}
-              >
+              <button key={cat.category} onClick={() => handleCategoryChange(cat.category)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between ${selectedCategory === cat.category ? "bg-violet-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+                data-testid={`filter-cat-${cat.category}`}>
                 <span className="truncate">{CATEGORY_LABELS[cat.category] || cat.category}</span>
                 <span className="text-xs opacity-60 ml-1 flex-shrink-0">{cat.count.toLocaleString("id-ID")}</span>
               </button>
@@ -296,39 +253,34 @@ export default function Store() {
         {/* Mobile category pills */}
         <div className="lg:hidden w-full">
           <div className="flex gap-2 flex-wrap mb-4">
-            <button
-              onClick={() => handleCategoryChange("")}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === "" ? "bg-violet-600 text-white" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
-            >
+            <button onClick={() => handleCategoryChange("")}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === "" ? "bg-violet-600 text-white" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}>
               Semua
             </button>
             {categories.map((cat) => (
-              <button
-                key={cat.category}
-                onClick={() => handleCategoryChange(cat.category)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === cat.category ? "bg-violet-600 text-white" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
-              >
+              <button key={cat.category} onClick={() => handleCategoryChange(cat.category)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === cat.category ? "bg-violet-600 text-white" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}>
                 {CATEGORY_LABELS[cat.category] || cat.category} ({cat.count})
               </button>
             ))}
           </div>
         </div>
 
-        {/* Main grid */}
+        {/* Grid utama */}
         <main className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-500">
-              {isLoading ? "Memuat..." : `${total.toLocaleString("id-ID")} chatbot ditemukan`}
+              {isLoading ? "Memuat..." : `${total.toLocaleString("id-ID")} chatbot`}
               {selectedCategory ? ` · ${CATEGORY_LABELS[selectedCategory] || selectedCategory}` : ""}
               {search ? ` · "${search}"` : ""}
             </p>
-            <p className="text-xs text-gray-600">Halaman {page} / {pages}</p>
+            <p className="text-xs text-gray-600">Hal. {page} / {pages}</p>
           </div>
 
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {Array.from({ length: LIMIT }).map((_, i) => (
-                <div key={i} className="h-52 bg-white/5 rounded-2xl animate-pulse" />
+                <div key={i} className="h-64 bg-white/5 rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : items.length === 0 ? (
@@ -338,27 +290,18 @@ export default function Store() {
                 <>
                   <p className="text-lg font-medium text-gray-400 mb-1">Tidak ada chatbot yang cocok</p>
                   <p className="text-sm">Coba kata kunci atau kategori lain</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-4 border-white/10 text-gray-400 hover:text-white"
-                    onClick={() => { setSearch(""); setSearchInput(""); setSelectedCategory(""); setPage(1); }}
-                  >
+                  <Button variant="outline" size="sm" className="mt-4 border-white/10 text-gray-400 hover:text-white"
+                    onClick={() => { setSearch(""); setSearchInput(""); setSelectedCategory(""); setPage(1); }}>
                     Reset Filter
                   </Button>
                 </>
               ) : (
                 <>
                   <p className="text-lg font-medium text-gray-400 mb-1">Belum ada produk yang tersedia</p>
-                  <p className="text-sm">Produk chatbot akan segera hadir. Hubungi kami untuk info lebih lanjut.</p>
-                  <a
-                    href="https://wa.me/6281287941900"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm transition-colors"
-                  >
-                    <Smartphone className="h-4 w-4" />
-                    Hubungi via WhatsApp
+                  <p className="text-sm">Produk chatbot akan segera hadir.</p>
+                  <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm transition-colors">
+                    <Smartphone className="h-4 w-4" />Hubungi via WhatsApp
                   </a>
                 </>
               )}
@@ -366,22 +309,15 @@ export default function Store() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {items.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} onBuy={handleBuy} />
+                <AgentCard key={agent.id} agent={agent} onBuy={handleBuy} onDetail={handleDetail} />
               ))}
             </div>
           )}
 
-          {/* Pagination */}
           {pages > 1 && (
             <div className="flex items-center justify-center gap-3 mt-8">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="border-white/20 text-white hover:bg-white/10 disabled:opacity-30"
-                data-testid="button-prev-page"
-              >
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="border-white/20 text-white hover:bg-white/10 disabled:opacity-30" data-testid="button-prev-page">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="flex gap-1">
@@ -393,25 +329,14 @@ export default function Store() {
                     else p = page - 2 + i;
                   }
                   return (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
+                    <button key={p} onClick={() => setPage(p)}
                       className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${p === page ? "bg-violet-600 text-white" : "text-gray-400 hover:bg-white/10"}`}
-                      data-testid={`button-page-${p}`}
-                    >
-                      {p}
-                    </button>
+                      data-testid={`button-page-${p}`}>{p}</button>
                   );
                 })}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= pages}
-                onClick={() => setPage((p) => Math.min(pages, p + 1))}
-                className="border-white/20 text-white hover:bg-white/10 disabled:opacity-30"
-                data-testid="button-next-page"
-              >
+              <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((p) => Math.min(pages, p + 1))}
+                className="border-white/20 text-white hover:bg-white/10 disabled:opacity-30" data-testid="button-next-page">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -422,13 +347,119 @@ export default function Store() {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8 text-center text-sm text-gray-600 mt-4">
         <div className="flex items-center justify-center gap-4 mb-2">
-          <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-gray-500 hover:text-white transition-colors" data-testid="link-wa-footer">
-            <Smartphone className="h-3.5 w-3.5" />
-            081287941900
+          <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-gray-500 hover:text-white transition-colors" data-testid="link-wa-footer">
+            <Smartphone className="h-3.5 w-3.5" />081287941900
           </a>
         </div>
         <p>© 2026 Gustafta. AI Platform Konstruksi Indonesia.</p>
       </footer>
+
+      {/* Detail Dialog */}
+      <Dialog open={!!detailAgent} onOpenChange={(o) => !o && setDetailAgent(null)}>
+        <DialogContent className="bg-gray-900 border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto">
+          {detailAgent && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start gap-3">
+                  <div className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0"
+                    style={{ background: `${detailAgent.color}18`, border: `1px solid ${detailAgent.color}35` }}>
+                    {detailAgent.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <DialogTitle className="text-base font-bold leading-snug mb-1">{detailAgent.name}</DialogTitle>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className="bg-white/8 text-gray-400 border-0 text-xs px-2 py-0">
+                        {CATEGORY_LABELS[detailAgent.category] || detailAgent.category}
+                      </Badge>
+                      {detailAgent.isOrchestrator && (
+                        <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/20 text-xs px-2 py-0 flex items-center gap-1">
+                          <Layers className="h-2.5 w-2.5" />Multi-Agent
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <DialogDescription className="text-gray-400 text-sm mt-2">
+                  {detailAgent.tagline}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 mt-2">
+                {/* Deskripsi / Use Case */}
+                {(detailAgent.productSummary || detailAgent.description) && (
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Info className="h-3.5 w-3.5" />Tentang Chatbot Ini
+                    </p>
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      {detailAgent.productSummary || detailAgent.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Problem yang diselesaikan */}
+                {detailAgent.productProblem && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      🎯 Masalah yang Diselesaikan
+                    </p>
+                    <p className="text-sm text-gray-300 leading-relaxed">{detailAgent.productProblem}</p>
+                  </div>
+                )}
+
+                {/* Use Cases */}
+                {detailAgent.productUseCases && (
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      💡 Contoh Penggunaan
+                    </p>
+                    <p className="text-sm text-gray-300 leading-relaxed">{detailAgent.productUseCases}</p>
+                  </div>
+                )}
+
+                {/* Target Pengguna */}
+                {detailAgent.productTargetUser && (
+                  <div className="flex items-start gap-2 text-sm text-gray-400">
+                    <span className="flex-shrink-0 text-base">👥</span>
+                    <span><span className="text-gray-500 font-medium">Cocok untuk:</span> {detailAgent.productTargetUser}</span>
+                  </div>
+                )}
+
+                {/* Fitur */}
+                {(detailAgent.productFeatures ?? []).length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5" />Yang Bisa Dilakukan
+                    </p>
+                    <div className="space-y-2">
+                      {(detailAgent.productFeatures ?? []).map((f, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <CheckCircle2 className="h-4 w-4 text-violet-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-300">{f}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Harga & CTA */}
+                <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-400 mb-0.5">Harga</p>
+                    <p className="text-2xl font-bold text-white">{formatPrice(detailAgent.price)}</p>
+                  </div>
+                  <Button onClick={() => handleBuy(detailAgent)}
+                    className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-6"
+                    data-testid={`button-buy-detail-${detailAgent.id}`}>
+                    <ShoppingCart className="h-4 w-4 mr-2" />Beli Sekarang
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Buy Dialog */}
       <Dialog open={showBuyDialog} onOpenChange={setShowBuyDialog}>
@@ -453,50 +484,38 @@ export default function Store() {
               <div className="space-y-3">
                 <div>
                   <Label htmlFor="buy-name" className="text-gray-300 text-sm">Nama Lengkap *</Label>
-                  <Input
-                    id="buy-name"
-                    value={buyForm.name}
+                  <Input id="buy-name" value={buyForm.name}
                     onChange={(e) => setBuyForm((f) => ({ ...f, name: e.target.value }))}
                     placeholder="Nama Anda"
                     className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-600"
-                    data-testid="input-buy-name"
-                  />
+                    data-testid="input-buy-name" />
                 </div>
                 <div>
                   <Label htmlFor="buy-email" className="text-gray-300 text-sm">Email *</Label>
-                  <Input
-                    id="buy-email"
-                    type="email"
-                    value={buyForm.email}
+                  <Input id="buy-email" type="email" value={buyForm.email}
                     onChange={(e) => setBuyForm((f) => ({ ...f, email: e.target.value }))}
                     placeholder="email@anda.com"
                     className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-600"
-                    data-testid="input-buy-email"
-                  />
+                    data-testid="input-buy-email" />
+                  <p className="text-xs text-gray-500 mt-1">Link akses chatbot akan dikirim ke email ini</p>
                 </div>
                 <div>
                   <Label htmlFor="buy-phone" className="text-gray-300 text-sm">No. HP / WhatsApp</Label>
-                  <Input
-                    id="buy-phone"
-                    value={buyForm.phone}
+                  <Input id="buy-phone" value={buyForm.phone}
                     onChange={(e) => setBuyForm((f) => ({ ...f, phone: e.target.value }))}
                     placeholder="08xxx"
                     className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-gray-600"
-                    data-testid="input-buy-phone"
-                  />
+                    data-testid="input-buy-phone" />
                 </div>
               </div>
 
-              <Button
-                onClick={handleSubmitOrder}
-                disabled={createOrderMutation.isPending}
+              <Button onClick={handleSubmitOrder} disabled={createOrderMutation.isPending}
                 className="w-full bg-violet-600 hover:bg-violet-700 text-white h-12 text-base font-semibold"
-                data-testid="button-confirm-purchase"
-              >
+                data-testid="button-confirm-purchase">
                 {createOrderMutation.isPending ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Memproses...</>
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Memproses...</>
                 ) : (
-                  <><ShoppingCart className="h-4 w-4 mr-2" /> Bayar {formatPrice(selectedAgent.price)}</>
+                  <><ShoppingCart className="h-4 w-4 mr-2" />Bayar {formatPrice(selectedAgent.price)}</>
                 )}
               </Button>
 
@@ -511,20 +530,17 @@ export default function Store() {
   );
 }
 
-function AgentCard({ agent, onBuy }: { agent: AgentProduct; onBuy: (a: AgentProduct) => void }) {
+function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a: AgentProduct) => void; onDetail: (a: AgentProduct) => void }) {
   const categoryLabel = CATEGORY_LABELS[agent.category] || agent.category;
+  const hasDetail = !!(agent.productSummary || agent.description || (agent.productFeatures ?? []).length > 0);
 
   return (
-    <Card
-      className="bg-white/5 border-white/10 hover:border-violet-500/40 hover:bg-white/[0.07] transition-all group"
-      data-testid={`card-agent-${agent.id}`}
-    >
+    <Card className="bg-white/5 border-white/10 hover:border-violet-500/40 hover:bg-white/[0.07] transition-all group flex flex-col"
+      data-testid={`card-agent-${agent.id}`}>
       <CardContent className="p-5 flex flex-col h-full">
         <div className="flex items-start justify-between mb-3">
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-            style={{ background: `${agent.color}18`, border: `1px solid ${agent.color}35` }}
-          >
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+            style={{ background: `${agent.color}18`, border: `1px solid ${agent.color}35` }}>
             {agent.emoji}
           </div>
           <div className="flex flex-col items-end gap-1">
@@ -541,20 +557,40 @@ function AgentCard({ agent, onBuy }: { agent: AgentProduct; onBuy: (a: AgentProd
           {agent.name}
         </h3>
         {agent.tagline && (
-          <p className="text-gray-500 text-xs leading-relaxed mb-3 line-clamp-2 flex-1">{agent.tagline}</p>
+          <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-2">{agent.tagline}</p>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-2">
+        {/* Fitur snippet */}
+        {(agent.productFeatures ?? []).length > 0 && (
+          <div className="space-y-1 mb-3 flex-1">
+            {(agent.productFeatures ?? []).slice(0, 3).map((f, i) => (
+              <div key={i} className="flex items-start gap-1.5">
+                <CheckCircle2 className="h-3 w-3 text-violet-400 flex-shrink-0 mt-0.5" />
+                <span className="text-xs text-gray-400 line-clamp-1">{f}</span>
+              </div>
+            ))}
+            {(agent.productFeatures ?? []).length > 3 && (
+              <p className="text-xs text-gray-600 pl-4">+{(agent.productFeatures ?? []).length - 3} lainnya</p>
+            )}
+          </div>
+        )}
+
+        <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between gap-2">
           <span className="font-bold text-white text-base">{formatPrice(agent.price)}</span>
-          <Button
-            size="sm"
-            onClick={() => onBuy(agent)}
-            className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3 flex-shrink-0"
-            data-testid={`button-buy-${agent.id}`}
-          >
-            <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-            Beli
-          </Button>
+          <div className="flex gap-1.5">
+            {hasDetail && (
+              <Button size="sm" variant="ghost" onClick={() => onDetail(agent)}
+                className="text-gray-400 hover:text-white hover:bg-white/10 text-xs h-8 px-2.5"
+                data-testid={`button-detail-${agent.id}`}>
+                Detail
+              </Button>
+            )}
+            <Button size="sm" onClick={() => onBuy(agent)}
+              className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3 flex-shrink-0"
+              data-testid={`button-buy-${agent.id}`}>
+              <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Beli
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

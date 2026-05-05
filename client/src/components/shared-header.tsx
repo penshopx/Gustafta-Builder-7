@@ -94,8 +94,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
 
   const navItems = [
     { href: "/packs", label: "Paket Domain", icon: Package },
-    { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
-    { href: "/store", label: "Store", icon: Store },
+    { href: "/store", label: "Store", icon: ShoppingBag },
     { href: "/documentation", label: "Dokumentasi", icon: BookOpen },
     { href: "/pricing", label: "Harga", icon: BarChart3 },
   ];
