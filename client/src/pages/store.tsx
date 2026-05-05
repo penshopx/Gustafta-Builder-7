@@ -185,8 +185,17 @@ export default function Store() {
 
   const handleSubmitOrder = () => {
     if (!selectedAgent) return;
-    if (!buyForm.name.trim() || !buyForm.email.trim()) {
-      toast({ title: "Lengkapi data", description: "Nama dan email wajib diisi.", variant: "destructive" });
+    if (!buyForm.name.trim()) {
+      toast({ title: "Lengkapi data", description: "Nama lengkap wajib diisi.", variant: "destructive" });
+      return;
+    }
+    if (!buyForm.email.trim()) {
+      toast({ title: "Lengkapi data", description: "Email wajib diisi.", variant: "destructive" });
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(buyForm.email.trim())) {
+      toast({ title: "Format email salah", description: "Masukkan alamat email yang valid, contoh: nama@email.com", variant: "destructive" });
       return;
     }
     createOrderMutation.mutate({ agentId: selectedAgent.agentId, ...buyForm });
