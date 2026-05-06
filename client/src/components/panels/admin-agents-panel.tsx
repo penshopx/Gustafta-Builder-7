@@ -112,7 +112,8 @@ export function AdminAgentsPanel() {
   const { data: jobs, refetch } = useQuery<AgentJobs>({
     queryKey: ["/api/admin/agents/status"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/agents/status");
+      const res = await fetch("/api/admin/agents/status", { credentials: "include" });
+      if (!res.ok) throw new Error(`${res.status}`);
       return res.json();
     },
     refetchInterval: pollingActive ? 2000 : false,
