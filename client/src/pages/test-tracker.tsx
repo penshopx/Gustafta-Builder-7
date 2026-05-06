@@ -126,7 +126,28 @@ const FED_BOTS = [
   { id: 331,  name: "Tender Strategy Hub",              role: "TenderHub",    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 9 },
   { id: 352,  name: "Site Operations Hub",              role: "SiteOps",      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",          subs: 12 },
   { id: 376,  name: "Regulasi Konstruksi Hub",          role: "RegulasiHub",  color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 27 },
-  // Batch 15 — SKK Coach Hubs (438-543) — upgraded to true Inter-Agent v2
+  // Batch 15 — IMS/SMK3/CSMS/Pancek cluster
+  { id: 307,  name: "HUB IMS & SMK3 Terintegrasi",     role: "IMS-SMK3",     color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",          subs: 4 },
+  { id: 308,  name: "IMS Terintegrasi Hub",             role: "IMS",          color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",  subs: 2 },
+  { id: 311,  name: "SMK3 Hub",                         role: "SMK3",         color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",              subs: 2 },
+  { id: 314,  name: "CSMS Hub",                         role: "CSMS",         color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 2 },
+  { id: 317,  name: "Pancek & Integritas Hub",          role: "Pancek",       color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",                  subs: 2 },
+  // Batch 16 — Persona hubs upgraded (28/46/57/83/95/149)
+  { id: 28,   name: "HUB Asesor Sertifikasi Konstruksi",role: "ASKOM-Coach",  color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",      subs: 4 },
+  { id: 46,   name: "HUB SMAP & PANCEK",                role: "SMAP-PANCEK",  color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",      subs: 4 },
+  { id: 57,   name: "HUB Odoo Jasa Konstruksi",         role: "Odoo-JK",      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 4 },
+  { id: 83,   name: "HUB CIVILPRO",                     role: "CIVILPRO",     color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",                  subs: 4 },
+  { id: 95,   name: "HUB SIP-PJBU",                     role: "SIP-PJBU",     color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",              subs: 4 },
+  { id: 149,  name: "HUB Siap Uji Kompetensi SKK",      role: "UjiSKK",       color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",              subs: 4 },
+  // Batch 17 — Management hubs upgraded (104/113/131/140/168/177/298)
+  { id: 104,  name: "HUB Manajemen LSBU",               role: "LSBU-MGT",     color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",      subs: 4 },
+  { id: 113,  name: "HUB Manajemen LSP",                role: "LSP-MGT",      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",      subs: 4 },
+  { id: 131,  name: "HUB ISO 14001 Jasa Konstruksi",    role: "ISO14-JK",     color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",          subs: 4 },
+  { id: 140,  name: "HUB ISO 9001 Jasa Konstruksi",     role: "ISO9-JK",      color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",  subs: 4 },
+  { id: 168,  name: "HUB Pembinaan ASPEKINDO",          role: "ASPEKINDO",    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 4 },
+  { id: 177,  name: "HUB SKK AJJ",                      role: "SKK-AJJ",      color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",              subs: 4 },
+  { id: 298,  name: "HUB Kompetensi Manajerial BUJK",   role: "BUJK-MGR",     color: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-300",  subs: 4 },
+  // Batch 18 — SKK Coach Hubs (438-543) — upgraded to true Inter-Agent v2
   { id: 438,  name: "SKK Coach Manajemen Pelaksanaan",  role: "SKK-MP",       color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 4 },
   { id: 448,  name: "SKK Coach Mekanikal",              role: "SKK-MEK",      color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 4 },
   { id: 459,  name: "SKK Coach Sipil",                  role: "SKK-SIP",      color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300",          subs: 4 },

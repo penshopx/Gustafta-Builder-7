@@ -47,11 +47,11 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 ## Product
 - **AI Chatbot Builder**: Create, configure, and deploy intelligent conversational agents.
 - **LexCom Legal AI**: Integrated system with 12 specialized legal agents and a floating "Chaesa Lexbot" widget.
-- **Federation Layer (102 hubs)**: 102 hub orchestrators with `agenticSubAgents` configured — parallel multi-agent synthesis. Includes: Tender, SKK, SBU, Perizinan, ASKOM, CSMS, SMAP, PANCEK, Odoo, AJJ, KAN, Lisensi LSP, IT LSP, ISO 14001/9001, PJBU, Kontraktor/Konsultan, Perizinan & Legalitas, Sertifikasi, Admin BUJK, Competency Mentoring, Problem Solver, Skema Navigator, LKUT, 9 Discipline Hubs, Hub Kompetensi Teknis, Manajemen Kontrak Hub, Legal Konstruksi Hub, RG Orchestrator (SKKNI 106), 6 SKKNI Jabatan (PKBG-ARS/MPBG/PKFS/PBH/MPK/MK-CM), LEX-ORCHESTRATOR (17 legal specialists), 8 SKKNI Jabatan Kerja (QS/QE/K3K/JLN/JBT/REL/TWG/PJJ), 8 Project Management, 4 LexCom Wings, 3 Standalone Hubs, 13 SKK Coach Hubs (MP/MEK/SIP/ELK/ARS/TLK/K3/MPK/GEO/QC/BGU/KSS/PL).
+- **Federation Layer (120 hubs)**: 120 hub orchestrators with `agenticSubAgents` configured — parallel multi-agent synthesis. Includes: Tender, SKK, SBU, Perizinan, ASKOM, CSMS, SMAP, PANCEK, Odoo, AJJ, KAN, Lisensi LSP, IT LSP, ISO 14001/9001, PJBU, Kontraktor/Konsultan, Perizinan & Legalitas, Sertifikasi, Admin BUJK, Competency Mentoring, Problem Solver, Skema Navigator, LKUT, 9 Discipline Hubs, Hub Kompetensi Teknis, Manajemen Kontrak Hub, Legal Konstruksi Hub, RG Orchestrator (SKKNI 106), 6 SKKNI Jabatan (PKBG-ARS/MPBG/PKFS/PBH/MPK/MK-CM), LEX-ORCHESTRATOR (17 legal specialists), 8 SKKNI Jabatan Kerja (QS/QE/K3K/JLN/JBT/REL/TWG/PJJ), 8 Project Management, 4 LexCom Wings, 3 Standalone Hubs, 13 SKK Coach Hubs (MP/MEK/SIP/ELK/ARS/TLK/K3/MPK/GEO/QC/BGU/KSS/PL), IMS/SMK3/CSMS/Pancek cluster (307/308/311/314/317), 13 Persona-upgraded hubs (Asesor/SMAP/Odoo/CIVILPRO/SIP-PJBU/UjiSKK/LSBU/LSP/ISO14/ISO9/ASPEKINDO/SKK-AJJ/BUJK-Manajerial).
 - **Dynamic Knowledge Base**: Hierarchical classification, versioning, source attribution, multiple upload types.
 - **Monetization & Conversion Layer**: Pricing, lead capture, scoring, smart CTA triggers.
 - **Chatbot Templates & Gustafta Store**: Public marketplace with Midtrans payment integration.
-- **Test Tracker**: Dual-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (510 sel, 102 hub × 5 F-test). Route: `/test-tracker`.
+- **Test Tracker**: Dual-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (600 sel, 120 hub × 5 F-test). Route: `/test-tracker`.
 
 ## User preferences
 Preferred communication style: Simple, everyday language.
