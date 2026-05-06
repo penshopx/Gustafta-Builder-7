@@ -100,7 +100,6 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "revenue", label: "Revenue & Klien", shortLabel: "Revenue", icon: TrendingUp },
   { id: "affiliates", label: "Afiliasi", shortLabel: "Afiliasi", icon: Users2 },
   { id: "vouchers", label: "Voucher", shortLabel: "Voucher", icon: Ticket },
-  { id: "admin-agents", label: "Sistem Agen AI", shortLabel: "Agen Sistem", icon: Cpu },
   { id: "chat", label: "Chat Console", shortLabel: "Chat", icon: MessageSquare },
   { id: "analytics", label: "Analytics", shortLabel: "Stats", icon: BarChart3 },
 ];
@@ -1547,6 +1546,20 @@ export default function Dashboard() {
       </nav>
 
       <div className={cn("border-t border-sidebar-border space-y-0.5 shrink-0", sidebarCollapsed ? "p-2" : "px-3 py-2")}>
+        <button
+          onClick={() => setActiveNav("admin-agents")}
+          className={cn(
+            "w-full flex items-center rounded-md text-sm font-medium transition-colors",
+            sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2",
+            activeNav === "admin-agents"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+          )}
+          title={sidebarCollapsed ? "Sistem Agen AI" : undefined}
+        >
+          <Cpu className="w-4 h-4 shrink-0" />
+          {!sidebarCollapsed && <span className="flex-1 text-left">Sistem Agen AI</span>}
+        </button>
         <button
           onClick={() => setProfileDialogOpen(true)}
           className={cn(
