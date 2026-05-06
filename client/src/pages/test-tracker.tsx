@@ -23,11 +23,55 @@ const TENDER_BOTS = [
 // ─── Federation Hub Orchestrators ────────────────────────────────────────────
 
 const FED_BOTS = [
-  { id: 23, name: "Tender Hub",             role: "Tender",    color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300", subs: 4 },
-  { id: 17, name: "SKK Hub",                role: "SKK",       color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",         subs: 5 },
-  { id: 12, name: "SBU Hub",                role: "SBU",       color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300", subs: 4 },
-  { id: 4,  name: "Perizinan Usaha Hub",    role: "Perizinan", color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",         subs: 4 },
-  { id: 34, name: "Asesor Kompetensi Hub",  role: "ASKOM",     color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",     subs: 4 },
+  // Inti — 6 hub awal
+  { id: 23,  name: "Tender Hub",                      role: "Tender",     color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",  subs: 4 },
+  { id: 17,  name: "SKK Hub",                         role: "SKK",        color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",           subs: 5 },
+  { id: 12,  name: "SBU Hub",                         role: "SBU",        color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",   subs: 4 },
+  { id: 4,   name: "Perizinan Usaha Hub",              role: "Perizinan",  color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",           subs: 4 },
+  { id: 34,  name: "Asesor Kompetensi Hub",            role: "ASKOM",      color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",       subs: 4 },
+  { id: 69,  name: "CSMS Hub",                         role: "CSMS",       color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",               subs: 3 },
+  // Batch 2 — AJJ, Digital, Hard Copy, ASKOM Konstruksi, KAN, Lisensi LSP
+  { id: 197, name: "Hub AJJ Nirkertas",                role: "AJJ",        color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",               subs: 4 },
+  { id: 187, name: "Pusat Sumber Daya Digital",        role: "Digital",    color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",   subs: 4 },
+  { id: 216, name: "Hub SKK Hard Copy",                role: "Hard Copy",  color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",           subs: 4 },
+  { id: 230, name: "Hub ASKOM Konstruksi",             role: "ASKOM-K",    color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",           subs: 4 },
+  { id: 260, name: "Hub Akreditasi LSP-KAN",           role: "KAN",        color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 4 },
+  { id: 242, name: "Hub Lisensi LSP Konstruksi",       role: "Lisensi",    color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",       subs: 4 },
+  // Batch 3 — SMAP, PANCEK, Asesor BU, Odoo Assessment
+  { id: 47,  name: "SMAP Hub",                         role: "SMAP",       color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",   subs: 4 },
+  { id: 52,  name: "PANCEK Hub",                       role: "PANCEK",     color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",   subs: 4 },
+  { id: 29,  name: "Asesor Badan Usaha Hub",           role: "ABU",        color: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",           subs: 4 },
+  { id: 58,  name: "Odoo Assessment Hub",              role: "Odoo",       color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",           subs: 2 },
+  // Batch 4 — Advanced Orchestrators
+  { id: 272, name: "SMAP-ORCHESTRATOR",                role: "SMAP-ORC",   color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",   subs: 4 },
+  { id: 281, name: "PANCEK-ORCHESTRATOR",              role: "PANCEK-ORC", color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",   subs: 4 },
+  { id: 287, name: "Odoo BUJK Orchestrator",           role: "Odoo-BUJK",  color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",           subs: 4 },
+  { id: 293, name: "Odoo Migrasi Orchestrator",        role: "Odoo-MGR",   color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",   subs: 4 },
+  { id: 597, name: "Hub IT LSP",                       role: "IT-LSP",     color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",           subs: 4 },
+  { id: 603, name: "Hub Panduan Asesi Digital",        role: "Asesi-DIG",  color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",           subs: 4 },
+  // Batch 5 — AJJ, LSP Specialist, ISO, Odoo, Contractor/Consultant
+  { id: 178, name: "SKK AJJ Hub",                      role: "AJJ",        color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",               subs: 4 },
+  { id: 253, name: "Hub Konsultan Lisensi LSP",        role: "Konsultan",  color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",   subs: 4 },
+  { id: 609, name: "Hub Asesor & Manajer Digital",     role: "Asesor-DIG", color: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-300", subs: 4 },
+  { id: 87,  name: "Competency Mentoring Hub",         role: "Mentoring",  color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",   subs: 3 },
+  { id: 91,  name: "Problem Solver Hub",               role: "Solver",     color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",           subs: 3 },
+  { id: 132, name: "ISO 14001 Readiness Hub",          role: "ISO14-R",    color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",       subs: 3 },
+  { id: 136, name: "ISO 14001 Audit Hub",              role: "ISO14-A",    color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 3 },
+  { id: 141, name: "ISO 9001 Readiness Hub",           role: "ISO9-R",     color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",           subs: 3 },
+  { id: 145, name: "ISO 9001 Audit Hub",               role: "ISO9-A",     color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",       subs: 3 },
+  { id: 61,  name: "Odoo Blueprint Hub",               role: "Odoo-BP",    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",           subs: 3 },
+  { id: 65,  name: "Odoo Governance Hub",              role: "Odoo-GV",    color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",   subs: 3 },
+  { id: 96,  name: "PJBU-Kontraktor Hub",              role: "PJBU-K",     color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",           subs: 3 },
+  { id: 100, name: "PJBU-Konsultan Hub",               role: "PJBU-C",     color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",           subs: 3 },
+  { id: 109, name: "Proses Sertifikasi SBU Hub",       role: "SBU-PROC",   color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",   subs: 3 },
+  { id: 118, name: "Proses Sertifikasi SKK Hub",       role: "SKK-PROC",   color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",               subs: 3 },
+  { id: 105, name: "Akreditasi & Tata Kelola Hub",     role: "LSBU-TK",    color: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",           subs: 3 },
+  { id: 114, name: "Lisensi & Tata Kelola Hub",        role: "LSP-TK",     color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",           subs: 3 },
+  { id: 160, name: "Kontraktor Hub",                   role: "Kontraktor",  color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",   subs: 3 },
+  { id: 164, name: "Konsultan Hub",                    role: "Konsultan",   color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",       subs: 3 },
+  { id: 169, name: "Perizinan & Legalitas Hub",        role: "Perizinan",   color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",           subs: 3 },
+  { id: 173, name: "Sertifikasi & Pengembangan Hub",   role: "Sertifikasi", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",       subs: 3 },
+  { id: 299, name: "Admin & Legal BUJK Hub",           role: "Admin",       color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 3 },
 ];
 
 // ─── Test Scenarios ───────────────────────────────────────────────────────────
@@ -436,7 +480,7 @@ export default function TestTrackerPage() {
             <div>
               <h1 className="font-semibold text-sm leading-tight">Test Tracker — Gustafta</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {activeTab === "tender" ? "5 Tender bot × 7 skenario · 35 sel" : "5 Hub Orchestrator × 5 Federation test · 25 sel"}
+                {activeTab === "tender" ? "5 Tender bot × 7 skenario · 35 sel" : `${FED_BOTS.length} Hub Orchestrator × 5 Federation test · ${FED_BOTS.length * 5} sel`}
               </p>
             </div>
           </div>
@@ -465,7 +509,7 @@ export default function TestTrackerPage() {
               }`}
             >
               <Zap className="w-3 h-3 text-violet-500" />
-              Federation (25)
+              Fed ({FED_BOTS.length * 5})
             </button>
           </div>
 
@@ -499,18 +543,34 @@ export default function TestTrackerPage() {
               <div>
                 <p className="text-sm font-medium text-violet-800 dark:text-violet-300">Federation Layer — Inter-Agent API v2</p>
                 <p className="text-xs text-violet-600 dark:text-violet-400 mt-0.5">
-                  6 hub orchestrator dikonfigurasi dengan <code className="font-mono bg-violet-100 dark:bg-violet-900/40 px-1 rounded">agenticSubAgents</code>.
+                  44 hub orchestrator aktif dengan <code className="font-mono bg-violet-100 dark:bg-violet-900/40 px-1 rounded">agenticSubAgents</code>.
                   Saat user kirim pesan ke hub, sistem memanggil sub-agents secara paralel lalu mensintesis hasilnya.
                   Uji F1–F5 untuk validasi pipeline orchestration end-to-end.
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {[
-                    { id: 23, name: "Tender Hub", subs: 4 },
-                    { id: 17, name: "SKK Hub", subs: 5 },
-                    { id: 12, name: "SBU Hub", subs: 4 },
-                    { id: 4,  name: "Perizinan Hub", subs: 4 },
-                    { id: 34, name: "Asesor Hub", subs: 4 },
-                    { id: 69, name: "CSMS Hub", subs: 3 },
+                    { id: 23,  name: "Tender Hub",        subs: 4 },
+                    { id: 17,  name: "SKK Hub",            subs: 5 },
+                    { id: 12,  name: "SBU Hub",            subs: 4 },
+                    { id: 4,   name: "Perizinan Hub",      subs: 4 },
+                    { id: 34,  name: "Asesor Hub",         subs: 4 },
+                    { id: 69,  name: "CSMS Hub",           subs: 3 },
+                    { id: 197, name: "AJJ Nirkertas",      subs: 4 },
+                    { id: 187, name: "Sumber Daya Digital",subs: 4 },
+                    { id: 216, name: "SKK Hard Copy",      subs: 4 },
+                    { id: 230, name: "ASKOM Konstruksi",   subs: 4 },
+                    { id: 260, name: "Akreditasi KAN",     subs: 4 },
+                    { id: 242, name: "Lisensi LSP",        subs: 4 },
+                    { id: 47,  name: "SMAP Hub",           subs: 4 },
+                    { id: 52,  name: "PANCEK Hub",         subs: 4 },
+                    { id: 29,  name: "Asesor BU Hub",      subs: 4 },
+                    { id: 58,  name: "Odoo Assessment",    subs: 2 },
+                    { id: 272, name: "SMAP-ORC",           subs: 4 },
+                    { id: 281, name: "PANCEK-ORC",         subs: 4 },
+                    { id: 287, name: "Odoo BUJK-ORC",      subs: 4 },
+                    { id: 293, name: "Odoo Migrasi-ORC",   subs: 4 },
+                    { id: 597, name: "Hub IT LSP",         subs: 4 },
+                    { id: 603, name: "Asesi Digital",      subs: 4 },
                   ].map(h => (
                     <a key={h.id} href={`/bot/${h.id}`} target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-900 border border-violet-200 dark:border-violet-800 rounded-lg text-[10px] font-medium text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/50 transition-colors"

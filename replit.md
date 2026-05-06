@@ -23,50 +23,50 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 ## Where things live
 - **Database Schema**: `shared/schema.ts` (source of truth; `db/schema.ts` is symlinked)
 - **API Routes**: `server/routes/*.ts`
+- **Inter-Agent API v2**: `server/routes.ts` ~line 2806 (orchestration block), ~line 3926 (`callAgentInternal` v2)
 - **Legal AI Configuration**: `server/lib/legal-agents.ts`
 - **AI Field Regeneration Component**: `client/src/components/ai-field-regen.tsx`
-- **Config Health Widget**: `client/src/components/config-health.tsx`
 - **MultiClaw Orchestration Planner**: `client/src/components/agentic-ai-panel.tsx`
 - **Midtrans Integration**: `server/lib/midtrans.ts`
 - **Legal Landing Page**: `client/src/pages/legal-landing.tsx`
 - **Legal Chat Interface**: `client/src/pages/legal-chat.tsx`
 - **Chaesa Lexbot Widget**: `client/src/components/chaesa-widget.tsx`
+- **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — dual-tab: Tender 35 sel + Federation 220 sel (44 hub × 5 F-test)
 - **Templates**: `server/db/schema.ts` (chatbot_templates table)
 - **Storefront Products**: `server/db/schema.ts` (store_products table)
 
 ## Architecture decisions
-- **5-Level Modular Hierarchy**: Agents are organized Master → Series HUB → Sub-HUB → Specialist → Deep Specialist for scalability and detailed categorization.
-- **Two-Panel Dashboard Layout**: Separates global navigation from selected content for improved UX.
-- **Optimistic UI Updates**: Enhances responsiveness by immediately reflecting user actions.
-- **Project Brain & Mini Apps**: Provides contextual data for chatbots, enabling specialized, configuration-driven applications with anti-prompt injection.
-- **Multi-Provider LLM Fallback**: Implements a chain of LLM providers (OpenAI → DeepSeek → Qwen → Gemini) to ensure reliability.
-- **Agentic Integration Layer**: Dynamically builds system prompts based on persona and policies, unifying chat, Project Brain, and external channels.
-- **Inter-Agent API (L2.5)**: Orchestrator agents call sub-agents in parallel via `callAgentInternal()` (no HTTP overhead); results injected into orchestrator context before streaming final synthesis. SSE events: `orchestrating_start`, `sub_agent_start`, `sub_agent_done`, `aggregating`. Config via `agenticSubAgents` jsonb on agents table.
+- **5-Level Modular Hierarchy**: Agents organized Master → Series HUB → Sub-HUB → Specialist → Deep Specialist.
+- **Two-Panel Dashboard Layout**: Separates global navigation from selected content.
+- **Optimistic UI Updates**: Immediately reflects user actions for responsiveness.
+- **Project Brain & Mini Apps**: Contextual data for chatbots with anti-prompt injection.
+- **Multi-Provider LLM Fallback**: Chain: OpenAI → DeepSeek → Qwen → Gemini.
+- **Inter-Agent API v2 (L2.5)**: Orchestrator agents call sub-agents in parallel via `callAgentInternal()` (25s AbortController timeout, min 1500 maxTokens, conversation history passed). Results injected as `LAPORAN SUB-AGEN` block before orchestrator synthesizes. SSE events: `orchestrating_start`, `sub_agent_start`, `sub_agent_done`, `aggregating`. Config via `agenticSubAgents` jsonb on agents table.
+- **FEDERATION_MODE v2 Guard**: Seed checks for `FEDERATION_MODE v2` marker in prompts to avoid overwriting upgraded orchestrator prompts.
 
 ## Product
 - **AI Chatbot Builder**: Create, configure, and deploy intelligent conversational agents.
-- **LexCom Legal AI**: Integrated system with 12 specialized legal agents and a floating "Chaesa Lexbot" widget for Indonesian legal assistance.
-- **MultiClaw/OpenClaw Multi-Agent Pipelines**: Advanced AI orchestration for tender analysis, studio enhancement, product generation, and broadcast personalization.
-- **Dynamic Knowledge Base**: Supports hierarchical classification, versioning, source attribution, and various upload types (documents, YouTube, audio/video).
-- **Monetization & Conversion Layer**: Flexible pricing, lead capture, scoring, and smart call-to-action triggers.
-- **Chatbot Templates**: Gallery of pre-built chatbot configurations that users can adapt or publish their own to.
-- **Gustafta Store**: A public marketplace for selling pre-configured chatbots to external customers.
-- **Midtrans Payment Gateway**: Seamless integration for subscription payments and store purchases.
-- **Agent Management**: Features like on/off toggles, folder grouping, and JSON import/export for chatbots.
-- **AI-Powered Marketing Kit**: Generates landing pages, taglines, social posts, and other marketing content from chatbot configurations.
+- **LexCom Legal AI**: Integrated system with 12 specialized legal agents and a floating "Chaesa Lexbot" widget.
+- **Federation Layer (44 hubs)**: 44 hub orchestrators with `agenticSubAgents` configured — parallel multi-agent synthesis covering Tender, SKK, SBU, Perizinan, ASKOM, CSMS, SMAP, PANCEK, Odoo, AJJ, KAN, Lisensi LSP, IT LSP, ISO 14001/9001, PJBU, Kontraktor/Konsultan, Perizinan & Legalitas, Sertifikasi, Admin BUJK, Competency Mentoring, Problem Solver, and more.
+- **Dynamic Knowledge Base**: Hierarchical classification, versioning, source attribution, multiple upload types.
+- **Monetization & Conversion Layer**: Pricing, lead capture, scoring, smart CTA triggers.
+- **Chatbot Templates & Gustafta Store**: Public marketplace with Midtrans payment integration.
+- **Test Tracker**: Dual-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (220 sel, 44 hub × 5 F-test). Route: `/test-tracker`.
 
 ## User preferences
 Preferred communication style: Simple, everyday language.
 
 ## Gotchas
-- **Database Indexes**: Queries on `parent_agent_id`, `toolbox_id`, `kb.agent_id`, and `chunks.agent_id` require indexes for optimal performance.
-- **Cache Invalidation**: All write operations (create/update/delete) must properly invalidate relevant cache keys to prevent stale data.
-- **LexCom Admin Key**: Admin-level KB uploads for LexCom require the `x-legal-admin-key` header for authentication.
-- **Disabled Agents**: `/api/chat/config/:agentId` and `/api/widget/config/:agentId` return 503 if an agent is disabled.
+- **FEDERATION_MODE v2 marker**: Embedded in DB prompts for upgraded orchestrators (e.g., agents 24, 27). Seed checks this and skips overwriting. NEVER remove this marker.
+- **Agent Cache 5 min TTL**: Restart server after bulk SQL prompt/agenticSubAgents updates to clear cache.
+- **Database Indexes**: Queries on `parent_agent_id`, `toolbox_id`, `kb.agent_id`, `chunks.agent_id` need indexes.
+- **Cache Invalidation**: All write operations must properly invalidate relevant cache keys.
+- **LexCom Admin Key**: Admin KB uploads require `x-legal-admin-key` header.
+- **Disabled Agents**: `/api/chat/config/:agentId` and `/api/widget/config/:agentId` return 503 if agent is disabled.
+- **callAgentInternal signature**: `(agentId, userMessage, conversationHistory?, timeoutMs=25000)` — v2. Batch endpoint still uses old 2-arg call (fine for batch).
+- **Sub-agent maxTokens**: `Math.max(1500, Math.min(3000, subAgent.maxTokens ?? 1500))` — minimum guaranteed 1500.
+- **FALLBACK template**: `[ASUMSI: {nilai} | basis: {regulasi/heuristik} | verifikasi-ke: {pihak}]`
 
 ## Pointers
-- **shadcn/ui Documentation**: _Populate as you build_
-- **Drizzle ORM Documentation**: _Populate as you build_
-- **TanStack React Query Documentation**: _Populate as you build_
-- **Midtrans API Documentation**: _Populate as you build_
-- **OpenAI API Documentation**: _Populate as you build_
+- **Inter-Agent API**: `server/routes.ts` orchestration block ~line 2806
+- **Test Tracker Storage**: `gustafta_test_tracker_v1` (Tender), `gustafta_fed_tracker_v1` (Federation) — localStorage
