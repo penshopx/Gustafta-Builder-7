@@ -21,7 +21,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **State Management**: TanStack React Query
 
 ## Where things live
-- **Database Schema**: `db/schema.ts`
+- **Database Schema**: `shared/schema.ts` (source of truth; `db/schema.ts` is symlinked)
 - **API Routes**: `server/routes/*.ts`
 - **Legal AI Configuration**: `server/lib/legal-agents.ts`
 - **AI Field Regeneration Component**: `client/src/components/ai-field-regen.tsx`
@@ -41,6 +41,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Project Brain & Mini Apps**: Provides contextual data for chatbots, enabling specialized, configuration-driven applications with anti-prompt injection.
 - **Multi-Provider LLM Fallback**: Implements a chain of LLM providers (OpenAI → DeepSeek → Qwen → Gemini) to ensure reliability.
 - **Agentic Integration Layer**: Dynamically builds system prompts based on persona and policies, unifying chat, Project Brain, and external channels.
+- **Inter-Agent API (L2.5)**: Orchestrator agents call sub-agents in parallel via `callAgentInternal()` (no HTTP overhead); results injected into orchestrator context before streaming final synthesis. SSE events: `orchestrating_start`, `sub_agent_start`, `sub_agent_done`, `aggregating`. Config via `agenticSubAgents` jsonb on agents table.
 
 ## Product
 - **AI Chatbot Builder**: Create, configure, and deploy intelligent conversational agents.

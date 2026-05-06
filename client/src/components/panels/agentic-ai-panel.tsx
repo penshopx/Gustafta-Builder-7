@@ -552,6 +552,180 @@ function SelectRow({
   );
 }
 
+// ── InterAgentPanel: sub-agent selector for orchestrators ────────────────────
+function InterAgentPanel({ agent, updateAgent, toast }: {
+  agent: any;
+  updateAgent: any;
+  toast: any;
+}) {
+  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
+  const [subAgents, setSubAgents] = useState<Array<{ agentId: number; role: string; description: string }>>([]);
+  const [newRole, setNewRole] = useState("");
+
+  // Load sub-agents from agent config on mount
+  useEffect(() => {
+    if (agent) {
+      const raw = (agent as any).agenticSubAgents;
+      if (Array.isArray(raw)) setSubAgents(raw);
+    }
+  }, [agent?.id]);
+
+  // Fetch candidate agents from same big-idea or toolbox
+  const bigIdeaId = agent?.bigIdeaId;
+  const toolboxId = agent?.toolboxId;
+  const { data: candidateAgents = [] } = useQuery<Array<{ id: number; name: string; description: string; orchestratorRole: string }>>({
+    queryKey: ["/api/internal/agents-for-bigidea", bigIdeaId],
+    queryFn: async () => {
+      const url = bigIdeaId
+        ? `/api/internal/agents-for-bigidea/${bigIdeaId}`
+        : toolboxId
+        ? `/api/internal/agents-for-toolbox/${toolboxId}`
+        : null;
+      if (!url) return [];
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!agent && (!!bigIdeaId || !!toolboxId),
+  });
+
+  const save = async (next: typeof subAgents) => {
+    try {
+      await updateAgent.mutateAsync({ id: agent.id, data: { agenticSubAgents: next } as any });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      toast({ title: "Disimpan", description: "Konfigurasi sub-agen berhasil disimpan." });
+    } catch {
+      toast({ title: "Error", description: "Gagal menyimpan sub-agen", variant: "destructive" });
+    }
+  };
+
+  const addSubAgent = async (candidateId: number, candidateName: string) => {
+    if (subAgents.some(s => s.agentId === candidateId)) {
+      toast({ description: "Agen ini sudah ditambahkan", variant: "destructive" });
+      return;
+    }
+    const next = [...subAgents, { agentId: candidateId, role: newRole || candidateName, description: "" }];
+    setSubAgents(next);
+    setNewRole("");
+    await save(next);
+  };
+
+  const removeSubAgent = async (agentId: number) => {
+    const next = subAgents.filter(s => s.agentId !== agentId);
+    setSubAgents(next);
+    await save(next);
+  };
+
+  if (!agent) return null;
+
+  const addableAgents = candidateAgents.filter(c => Number(c.id) !== Number(agent.id) && !subAgents.some(s => s.agentId === Number(c.id)));
+
+  return (
+    <Card className="border-2 border-blue-200 dark:border-blue-800">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Network className="h-4 w-4 text-blue-500" />
+            Inter-Agent API
+            {subAgents.length > 0 && (
+              <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                {subAgents.length} sub-agen
+              </span>
+            )}
+          </CardTitle>
+          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setIsOpen(!isOpen)} data-testid="toggle-inter-agent-panel">
+            {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </Button>
+        </div>
+        <CardDescription>
+          Konfigurasikan sub-agen yang dipanggil secara paralel setiap kali chatbot ini menerima pesan. Hasilnya digabung menjadi satu respons oleh orchestrator.
+        </CardDescription>
+      </CardHeader>
+
+      {isOpen && (
+        <CardContent className="space-y-4">
+          {/* Current sub-agents */}
+          {subAgents.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sub-agen aktif</Label>
+              {subAgents.map(sa => {
+                const meta = candidateAgents.find(c => Number(c.id) === sa.agentId);
+                return (
+                  <div key={sa.agentId} className="flex items-center justify-between gap-2 p-2.5 rounded-lg border bg-muted/30" data-testid={`row-sub-agent-${sa.agentId}`}>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium truncate">{sa.role}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{meta?.name || `Agent #${sa.agentId}`}</p>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-destructive hover:text-destructive shrink-0"
+                      onClick={() => removeSubAgent(sa.agentId)}
+                      data-testid={`button-remove-sub-agent-${sa.agentId}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Add sub-agent */}
+          {addableAgents.length > 0 ? (
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Tambah sub-agen</Label>
+              <Input
+                value={newRole}
+                onChange={e => setNewRole(e.target.value)}
+                placeholder="Label peran (opsional, misal: Spesialis Hukum)"
+                className="h-8 text-xs"
+                data-testid="input-sub-agent-role"
+              />
+              <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                {addableAgents.map(c => (
+                  <div key={c.id} className="flex items-center justify-between gap-2 p-2 rounded-md border bg-background hover:bg-muted/50 transition-colors">
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium truncate">{c.name}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{c.description?.substring(0, 60) || ""}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs shrink-0"
+                      onClick={() => addSubAgent(Number(c.id), c.name)}
+                      data-testid={`button-add-sub-agent-${c.id}`}
+                    >
+                      + Tambah
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : candidateAgents.length === 0 ? (
+            <div className="text-[11px] text-muted-foreground bg-muted/30 rounded-md p-3">
+              Tidak ada agen lain yang ditemukan dalam BigIdea/Toolbox yang sama. Pastikan agen ini memiliki BigIdea atau Toolbox yang berisi agen lain.
+            </div>
+          ) : (
+            <div className="text-[11px] text-muted-foreground bg-muted/30 rounded-md p-3">
+              Semua agen dalam BigIdea/Toolbox sudah ditambahkan sebagai sub-agen.
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="flex items-start gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-[11px] text-blue-700 dark:text-blue-300">
+            <Zap className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <span>
+              <strong>Cara kerja:</strong> Setiap pesan pengguna dikirim ke semua sub-agen secara paralel. Hasilnya diinjeksi ke konteks orchestrator, yang kemudian menyintesis satu respons terpadu. Ini mengupgrade platform ke level L2.5 (true multi-agent).
+            </span>
+          </div>
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
 function MemoryManager({ agentId }: { agentId: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -2394,6 +2568,9 @@ export function AgenticAIPanel() {
           </Card>
         </>
       )}
+
+      {/* ── INTER-AGENT API ── */}
+      <InterAgentPanel agent={agent} updateAgent={updateAgent} toast={toast} />
 
       {/* Memory Management Section */}
       {agent && <MemoryManager agentId={String(agent.id)} />}

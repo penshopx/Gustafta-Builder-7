@@ -277,6 +277,11 @@ export default function AgentChat() {
   const [guestMessageCount, setGuestMessageCount] = useState(0);
   const [showUpgradeWall, setShowUpgradeWall] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
+  const [orchestrationState, setOrchestrationState] = useState<{
+    active: boolean;
+    phase: "dispatching" | "aggregating" | "done";
+    subAgents: { agentId: number; role: string; status: "pending" | "done" }[];
+  } | null>(null);
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [voucherMessage, setVoucherMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -837,7 +842,29 @@ export default function AgentChat() {
                 });
                 break;
               }
+              if (parsed.type === "orchestrating_start") {
+                setOrchestrationState({
+                  active: true,
+                  phase: "dispatching",
+                  subAgents: (parsed.subAgents || []).map((s: any) => ({ agentId: s.agentId, role: s.role, status: "pending" })),
+                });
+              } else if (parsed.type === "sub_agent_start") {
+                setOrchestrationState(prev => prev ? {
+                  ...prev,
+                  subAgents: prev.subAgents.map(s => s.agentId === parsed.agentId ? { ...s, status: "pending" } : s),
+                } : prev);
+              } else if (parsed.type === "sub_agent_done") {
+                setOrchestrationState(prev => prev ? {
+                  ...prev,
+                  subAgents: prev.subAgents.map(s => s.agentId === parsed.agentId ? { ...s, status: "done" } : s),
+                } : prev);
+              } else if (parsed.type === "aggregating") {
+                setOrchestrationState(prev => prev ? { ...prev, phase: "aggregating" } : prev);
+              } else if (parsed.type === "complete") {
+                setOrchestrationState(null);
+              }
               if (parsed.content) {
+                if (orchestrationState) setOrchestrationState(prev => prev ? { ...prev, active: false } : prev);
                 assistantContent += parsed.content;
                 const displayContent = assistantContent
                   .replace(/\[SAVE_MEMORY:(memory|note)\][\s\S]*?\[\/SAVE_MEMORY\]/g, "")
@@ -2051,7 +2078,36 @@ export default function AgentChat() {
 
               <SmartCtaCard />
 
-              {isTyping && (
+              {/* Orchestration Indicator */}
+              {orchestrationState && orchestrationState.active && (
+                <div className="flex gap-2 sm:gap-3" data-testid="orchestration-indicator">
+                  <AgentAvatar config={config} size="sm" color={color} />
+                  <div className="rounded-2xl rounded-tl-sm px-3 sm:px-4 py-2.5 sm:py-3 border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 space-y-2 max-w-xs">
+                    <div className="flex gap-1.5 items-center">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-violet-500" />
+                      <span className="text-xs font-medium text-violet-700 dark:text-violet-300">
+                        {orchestrationState.phase === "aggregating" ? "Menyintesis laporan sub-agen..." : "Memanggil sub-agen secara paralel..."}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {orchestrationState.subAgents.map((sa) => (
+                        <div key={sa.agentId} className="flex items-center gap-2 text-[11px]">
+                          {sa.status === "done" ? (
+                            <span className="w-3.5 h-3.5 rounded-full bg-green-500 flex items-center justify-center text-white text-[8px] shrink-0">✓</span>
+                          ) : (
+                            <span className="w-3.5 h-3.5 rounded-full border-2 border-violet-400 border-t-transparent animate-spin shrink-0" />
+                          )}
+                          <span className={sa.status === "done" ? "text-muted-foreground line-through" : "text-violet-700 dark:text-violet-300"}>
+                            {sa.role || `Agen #${sa.agentId}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isTyping && !orchestrationState?.active && (
                 <div className="flex gap-2 sm:gap-3">
                   <AgentAvatar config={config} size="sm" color={color} />
                   <div className="bg-muted rounded-2xl rounded-tl-sm px-3 sm:px-4 py-2.5 sm:py-3">

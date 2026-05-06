@@ -2799,7 +2799,52 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       
       // Send user message first
       res.write(`data: ${JSON.stringify({ type: "user_message", message: userMessage })}\n\n`);
-      
+
+      // ── INTER-AGENT API: Parallel Sub-Agent Orchestration ────────────────────
+      const subAgentsConfig = (agent as any).agenticSubAgents as Array<{ agentId: number; role: string; description: string }> | null | undefined;
+      if (Array.isArray(subAgentsConfig) && subAgentsConfig.length > 0) {
+        try {
+          // Notify client that orchestration is starting
+          const subAgentMeta = subAgentsConfig.map(s => ({ agentId: s.agentId, role: s.role, description: s.description }));
+          res.write(`data: ${JSON.stringify({ type: "orchestrating_start", subAgents: subAgentMeta })}\n\n`);
+
+          // Phase 2: Call all sub-agents in parallel
+          const subAgentResults = await Promise.allSettled(
+            subAgentsConfig.map(async (subCfg) => {
+              const subAgentIdStr = String(subCfg.agentId);
+              res.write(`data: ${JSON.stringify({ type: "sub_agent_start", agentId: subCfg.agentId, role: subCfg.role })}\n\n`);
+              const result = await callAgentInternal(subAgentIdStr, userContent);
+              res.write(`data: ${JSON.stringify({ type: "sub_agent_done", agentId: subCfg.agentId, role: subCfg.role, result: result.substring(0, 500) })}\n\n`);
+              return { agentId: subCfg.agentId, role: subCfg.role, result };
+            })
+          );
+
+          // Phase 3: Inject sub-agent results into the orchestrator's context
+          const successfulResults = subAgentResults
+            .filter((r): r is PromiseFulfilledResult<{ agentId: number; role: string; result: string }> => r.status === "fulfilled")
+            .map(r => r.value);
+
+          if (successfulResults.length > 0) {
+            const subAgentContext = successfulResults
+              .map(r => `[Sub-Agent: ${r.role || `Agent #${r.agentId}`}]\n${r.result}`)
+              .join("\n\n---\n\n");
+            // Inject into system prompt (first message in chatMessages)
+            if (chatMessages.length > 0 && chatMessages[0].role === "system") {
+              const existingSystemPrompt = typeof chatMessages[0].content === "string" ? chatMessages[0].content : "";
+              chatMessages[0] = {
+                role: "system",
+                content: existingSystemPrompt + `\n\n═══ LAPORAN SUB-AGEN (hasil paralel) ═══\nBerikut adalah output dari sub-agen yang telah dipanggil secara paralel. Gunakan laporan ini sebagai konteks utama untuk menyusun respons akhir yang terintegrasi dan komprehensif.\n\n${subAgentContext}\n\n═══ INSTRUKSI SINTESIS ═══\nSintesiskan seluruh laporan sub-agen di atas menjadi satu respons yang kohesif, terstruktur, dan langsung menjawab pertanyaan pengguna. Jangan ulangi laporan mentah — olah menjadi jawaban terpadu.`,
+              };
+            }
+            res.write(`data: ${JSON.stringify({ type: "aggregating", count: successfulResults.length })}\n\n`);
+          }
+        } catch (orchErr) {
+          console.error("[Inter-agent API] Orchestration error:", orchErr);
+          // Continue with normal response even if sub-agents fail
+        }
+      }
+      // ─────────────────────────────────────────────────────────────────────────
+
       let agentModel = agent.aiModel || "gpt-4o-mini";
       if (hasVisionContent && !agentModel.startsWith("gpt-4o")) {
         agentModel = "gpt-4o-mini";
@@ -3068,6 +3113,79 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     } catch (error) {
       console.error("Failed to process streaming message:", error);
       res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  // ==================== Inter-Agent API — Batch Endpoint ====================
+
+  // POST /api/internal/agent-batch
+  // Panggil beberapa sub-agen secara paralel dan kembalikan semua hasilnya.
+  // Diautentikasi — hanya bisa dipanggil oleh owner atau server-side orchestration.
+  app.post("/api/internal/agent-batch", isAuthenticated, async (req: any, res) => {
+    try {
+      const { calls } = req.body as {
+        calls: Array<{ agentId: number | string; message: string; role?: string }>;
+      };
+      if (!Array.isArray(calls) || calls.length === 0) {
+        return res.status(400).json({ error: "calls harus berupa array tidak kosong" });
+      }
+      if (calls.length > 10) {
+        return res.status(400).json({ error: "Maksimum 10 sub-agen per batch" });
+      }
+
+      const startTime = Date.now();
+      const results = await Promise.allSettled(
+        calls.map(async (c) => {
+          const agentIdStr = String(c.agentId);
+          const agentRecord = await storage.getAgent(agentIdStr);
+          if (!agentRecord) return { agentId: c.agentId, role: c.role, error: "Agent tidak ditemukan", result: null };
+          // Ownership check
+          const userId = req.user?.claims?.sub || "";
+          if (agentRecord.userId && agentRecord.userId !== userId && !agentRecord.isPublic) {
+            return { agentId: c.agentId, role: c.role, error: "Akses ditolak", result: null };
+          }
+          const t0 = Date.now();
+          const result = await callAgentInternal(agentIdStr, c.message);
+          return { agentId: c.agentId, role: c.role || agentRecord.name, result, duration: Date.now() - t0 };
+        })
+      );
+
+      const output = results.map(r =>
+        r.status === "fulfilled"
+          ? r.value
+          : { error: r.reason?.message || "Unknown error", result: null }
+      );
+
+      return res.json({ results: output, totalDuration: Date.now() - startTime, count: output.length });
+    } catch (err) {
+      console.error("[/api/internal/agent-batch] Error:", err);
+      return res.status(500).json({ error: "Gagal menjalankan batch agent call" });
+    }
+  });
+
+  // GET /api/internal/agents-for-toolbox/:toolboxId
+  // Ambil semua agen dalam toolbox tertentu (untuk sub-agent selector UI)
+  app.get("/api/internal/agents-for-toolbox/:toolboxId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { toolboxId } = req.params;
+      const allAgents = await storage.getAgents(req.user?.claims?.sub || "");
+      const filtered = allAgents.filter(a => String(a.toolboxId) === String(toolboxId));
+      return res.json(filtered.map(a => ({ id: a.id, name: a.name, description: a.description, avatar: a.avatar, orchestratorRole: a.orchestratorRole })));
+    } catch (err) {
+      return res.status(500).json({ error: "Gagal mengambil agen" });
+    }
+  });
+
+  // GET /api/internal/agents-for-bigidea/:bigIdeaId
+  // Ambil semua agen dalam BigIdea tertentu (untuk orchestrator sub-agent selector)
+  app.get("/api/internal/agents-for-bigidea/:bigIdeaId", isAuthenticated, async (req: any, res) => {
+    try {
+      const { bigIdeaId } = req.params;
+      const allAgents = await storage.getAgents(req.user?.claims?.sub || "");
+      const filtered = allAgents.filter(a => String(a.bigIdeaId) === String(bigIdeaId));
+      return res.json(filtered.map(a => ({ id: a.id, name: a.name, description: a.description, avatar: a.avatar, orchestratorRole: a.orchestratorRole, toolboxId: a.toolboxId })));
+    } catch (err) {
+      return res.status(500).json({ error: "Gagal mengambil agen" });
     }
   });
 
@@ -3798,6 +3916,71 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       return domain;
     } catch {
       return "umum";
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // ── callAgentInternal: call a sub-agent's AI without HTTP overhead ────────
+  async function callAgentInternal(agentId: string, userMessage: string): Promise<string> {
+    const subAgent = await storage.getAgent(agentId);
+    if (!subAgent) return `[Sub-agent ${agentId} tidak ditemukan]`;
+    if (subAgent.isEnabled === false) return `[Sub-agent ${subAgent.name} dinonaktifkan]`;
+
+    let knowledgeContext = "";
+    if (subAgent.ragEnabled !== false) {
+      const ragChunks = await storage.getChunksByAgent(agentId);
+      if (ragChunks.length > 0) {
+        knowledgeContext = await searchKnowledgeBase(userMessage, ragChunks, subAgent.ragTopK ?? 5);
+      } else {
+        const kbs = await storage.getKnowledgeBases(agentId);
+        knowledgeContext = kbs.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
+      }
+    }
+
+    let systemPrompt = buildFinalSystemPrompt(subAgent);
+    if (knowledgeContext) systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
+
+    try {
+      const extBrain = await storage.getActiveProjectBrainInstance(agentId);
+      if (extBrain?.values && Object.keys(extBrain.values).length > 0) {
+        systemPrompt += `\n\n${formatProjectBrainBlock(extBrain.name, extBrain.values as Record<string, any>)}`;
+      }
+    } catch {}
+
+    const agentModel = subAgent.aiModel || "gpt-4o-mini";
+    const temperature = Math.max(0, Math.min(2, subAgent.temperature ?? 0.7));
+    const maxTokens = Math.max(100, Math.min(2048, subAgent.maxTokens ?? 512));
+
+    const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userMessage },
+    ];
+
+    try {
+      let client: OpenAI;
+      let modelName = agentModel;
+      if (agentModel === "custom" && subAgent.customApiKey && subAgent.customBaseUrl) {
+        client = new OpenAI({ apiKey: subAgent.customApiKey, baseURL: subAgent.customBaseUrl });
+        modelName = subAgent.customModelName || "gpt-4";
+      } else if (agentModel.startsWith("deepseek-")) {
+        const dsKey = process.env.DEEPSEEK_API_KEY || subAgent.customApiKey;
+        if (!dsKey) return "[DeepSeek API key tidak dikonfigurasi untuk sub-agen ini]";
+        client = new OpenAI({ apiKey: dsKey, baseURL: "https://api.deepseek.com" });
+      } else {
+        if (!openaiApiKey) return "[AI service tidak dikonfigurasi]";
+        client = openai;
+      }
+
+      const completion = await client.chat.completions.create({
+        model: modelName,
+        messages: chatMessages,
+        max_tokens: maxTokens,
+        temperature,
+      });
+      return completion.choices[0]?.message?.content || "[Tidak ada respons dari sub-agen]";
+    } catch (err) {
+      console.error(`[callAgentInternal] Error calling agent ${agentId}:`, err);
+      return `[Gagal mendapatkan respons dari sub-agen ${subAgent.name}]`;
     }
   }
   // ─────────────────────────────────────────────────────────────────────────

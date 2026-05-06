@@ -7,13 +7,43 @@ interface StreamingChatOptions {
   onChunk?: (chunk: string) => void;
   onComplete?: (message: Message) => void;
   onError?: (error: string) => void;
+  onOrchestrating?: (subAgents: SubAgentMeta[]) => void;
+  onSubAgentStart?: (agentId: number, role: string) => void;
+  onSubAgentDone?: (agentId: number, role: string, result: string) => void;
+  onAggregating?: (count: number) => void;
+}
+
+export interface SubAgentMeta {
+  agentId: number;
+  role: string;
+  description?: string;
+}
+
+export interface SubAgentResult {
+  agentId: number;
+  role: string;
+  result?: string;
+  status: "pending" | "done" | "error";
+}
+
+export interface OrchestrationState {
+  active: boolean;
+  phase: "idle" | "dispatching" | "aggregating" | "done";
+  subAgents: SubAgentResult[];
 }
 
 interface StreamingChatState {
   isStreaming: boolean;
   streamingContent: string;
   error: string | null;
+  orchestration: OrchestrationState;
 }
+
+const INITIAL_ORCHESTRATION: OrchestrationState = {
+  active: false,
+  phase: "idle",
+  subAgents: [],
+};
 
 export function useStreamingChat() {
   const queryClient = useQueryClient();
@@ -21,6 +51,7 @@ export function useStreamingChat() {
     isStreaming: false,
     streamingContent: "",
     error: null,
+    orchestration: INITIAL_ORCHESTRATION,
   });
   const abortControllerRef = useRef<AbortController | null>(null);
   const bufferRef = useRef<string>("");
@@ -69,9 +100,9 @@ export function useStreamingChat() {
     content: string,
     options: StreamingChatOptions
   ): Promise<Message | null> => {
-    const { agentId, onChunk, onComplete, onError } = options;
+    const { agentId, onChunk, onComplete, onError, onOrchestrating, onSubAgentStart, onSubAgentDone, onAggregating } = options;
 
-    setState({ isStreaming: true, streamingContent: "", error: null });
+    setState({ isStreaming: true, streamingContent: "", error: null, orchestration: INITIAL_ORCHESTRATION });
     bufferRef.current = "";
     abortControllerRef.current = new AbortController();
 
@@ -147,6 +178,53 @@ export function useStreamingChat() {
         for (const data of events) {
           if (data.type === "user_message") {
             queryClient.invalidateQueries({ queryKey: ["/api/messages", agentId] });
+
+          } else if (data.type === "orchestrating_start") {
+            const subAgents: SubAgentMeta[] = data.subAgents || [];
+            onOrchestrating?.(subAgents);
+            setState(prev => ({
+              ...prev,
+              orchestration: {
+                active: true,
+                phase: "dispatching",
+                subAgents: subAgents.map(s => ({ agentId: s.agentId, role: s.role, status: "pending" })),
+              },
+            }));
+
+          } else if (data.type === "sub_agent_start") {
+            onSubAgentStart?.(data.agentId, data.role);
+            setState(prev => ({
+              ...prev,
+              orchestration: {
+                ...prev.orchestration,
+                subAgents: prev.orchestration.subAgents.map(s =>
+                  s.agentId === data.agentId ? { ...s, status: "pending" } : s
+                ),
+              },
+            }));
+
+          } else if (data.type === "sub_agent_done") {
+            onSubAgentDone?.(data.agentId, data.role, data.result);
+            setState(prev => ({
+              ...prev,
+              orchestration: {
+                ...prev.orchestration,
+                subAgents: prev.orchestration.subAgents.map(s =>
+                  s.agentId === data.agentId ? { ...s, status: "done", result: data.result } : s
+                ),
+              },
+            }));
+
+          } else if (data.type === "aggregating") {
+            onAggregating?.(data.count);
+            setState(prev => ({
+              ...prev,
+              orchestration: {
+                ...prev.orchestration,
+                phase: "aggregating",
+              },
+            }));
+
           } else if (data.type === "chunk") {
             fullContent += data.content;
             const displayContent = fullContent
@@ -158,20 +236,26 @@ export function useStreamingChat() {
             setState(prev => ({
               ...prev,
               streamingContent: displayContent,
+              orchestration: { ...prev.orchestration, phase: "done" },
             }));
             onChunk?.(data.content);
+
           } else if (data.type === "complete") {
             aiMessage = data.message;
             setState(prev => ({
               ...prev,
               isStreaming: false,
               streamingContent: "",
+              orchestration: { ...prev.orchestration, active: false, phase: "done" },
             }));
             queryClient.invalidateQueries({ queryKey: ["/api/messages", agentId] });
             onComplete?.(data.message);
+
           } else if (data.type === "error") {
             throw new Error(data.error);
+
           } else if (data.type === "ping") {
+            // keepalive
           }
         }
       }
@@ -188,6 +272,7 @@ export function useStreamingChat() {
           ...prev,
           isStreaming: false,
           error: null,
+          orchestration: INITIAL_ORCHESTRATION,
         }));
         return null;
       }
@@ -197,6 +282,7 @@ export function useStreamingChat() {
         ...prev,
         isStreaming: false,
         error: errorMessage,
+        orchestration: INITIAL_ORCHESTRATION,
       }));
       onError?.(errorMessage);
       return null;
@@ -210,6 +296,7 @@ export function useStreamingChat() {
       setState(prev => ({
         ...prev,
         isStreaming: false,
+        orchestration: INITIAL_ORCHESTRATION,
       }));
     }
   }, []);

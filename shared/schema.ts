@@ -249,6 +249,7 @@ export const agents = pgTable("agents", {
   deliverables: jsonb("deliverables").default([]),
   deliverableBundle: text("deliverable_bundle").default(""),
   orchestratorConfig: jsonb("orchestrator_config").default({}),
+  agenticSubAgents: jsonb("agentic_sub_agents").default([]),
   isActive: boolean("is_active").default(false),
   isEnabled: boolean("is_enabled").default(true).notNull(),
   folderName: text("folder_name"),
@@ -792,6 +793,12 @@ export const insertAgentSchema = z.object({
   domainCharter: z.string().optional().default(""),
   qualityBar: z.string().optional().default(""),
   riskCompliance: z.string().optional().default(""),
+  // Inter-agent API — sub-agents that this orchestrator can call in parallel
+  agenticSubAgents: z.array(z.object({
+    agentId: z.number(),
+    role: z.string().default(""),
+    description: z.string().default(""),
+  })).optional().default([]),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId
