@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info } from "lucide-react";
+import { AgentPresentationExport } from "@/components/agent-presentation-export";
 import { AiConfigFill } from "@/components/ai-config-fill";
 import { AiFieldRegen } from "@/components/ai-field-regen";
 import { ConfigHealth } from "@/components/config-health";
@@ -331,16 +332,18 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             Define your chatbot's personality and behavior
           </p>
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={updateAgent.isPending}
-          size="sm"
-         
-          className="shrink-0"
-        >
-          <Save className="w-4 h-4 md:mr-2" />
-          <span className="hidden md:inline">{updateAgent.isPending ? "Saving..." : "Save Changes"}</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <AgentPresentationExport agent={agent} formData={formData} />
+          <Button
+            onClick={handleSave}
+            disabled={updateAgent.isPending}
+            size="sm"
+            className="shrink-0"
+          >
+            <Save className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">{updateAgent.isPending ? "Saving..." : "Save Changes"}</span>
+          </Button>
+        </div>
       </div>
 
       {/* Config Health */}
