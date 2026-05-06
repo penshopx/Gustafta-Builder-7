@@ -11061,5 +11061,375 @@ KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan
 
   registerLegalRoutes(app);
 
+  // ── Admin Agent System Endpoints ──────────────────────────────────────────
+
+  // In-memory job state (resets on server restart, sufficient for admin use)
+  const agentJobs: Record<string, {
+    status: "idle" | "running" | "done" | "error";
+    progress: number;
+    total: number;
+    log: string[];
+    startedAt?: string;
+    finishedAt?: string;
+    result?: any;
+  }> = {
+    "kb-research": { status: "idle", progress: 0, total: 0, log: [] },
+    "field-audit":  { status: "idle", progress: 0, total: 0, log: [] },
+  };
+
+  // GET /api/admin/agents/status — get status of both jobs
+  app.get("/api/admin/agents/status", isAuthenticated, async (_req, res) => {
+    res.json(agentJobs);
+  });
+
+  // POST /api/admin/agents/kb-research/run — start KB Research Agent
+  app.post("/api/admin/agents/kb-research/run", isAuthenticated, async (req: any, res) => {
+    const job = agentJobs["kb-research"];
+    if (job.status === "running") {
+      return res.status(409).json({ error: "Job sudah berjalan" });
+    }
+
+    job.status = "running";
+    job.progress = 0;
+    job.total = 0;
+    job.log = ["🔬 KB Research Agent dimulai..."];
+    job.startedAt = new Date().toISOString();
+    job.finishedAt = undefined;
+    job.result = undefined;
+
+    res.json({ message: "KB Research Agent dimulai" });
+
+    // Run in background
+    (async () => {
+      try {
+        const { db } = await import("./db");
+        const { agents: agentsTable, knowledgeBases, knowledgeChunks } = await import("@shared/schema");
+        const { eq, and, notExists, sql: sqlE } = await import("drizzle-orm");
+        const OpenAI = (await import("openai")).default;
+        const pLimit = (await import("p-limit")).default;
+
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const limit = pLimit(4);
+
+        // Only agents without any KB
+        const allAgents = await db.execute(sqlE`
+          SELECT a.id, a.name, a.is_orchestrator, a.description, a.tagline,
+                 a.category, a.subcategory, a.personality, a.philosophy,
+                 a.expertise, a.primary_outcome, a.domain_charter, a.risk_compliance
+          FROM agents a
+          WHERE a.is_active = true
+            AND NOT EXISTS (SELECT 1 FROM knowledge_bases kb WHERE kb.agent_id = a.id)
+          ORDER BY a.is_orchestrator DESC, a.id ASC
+        `);
+
+        const agents = allAgents.rows as any[];
+        job.total = agents.length;
+        job.log.push(`📊 Ditemukan ${agents.length} agen tanpa KB`);
+
+        if (agents.length === 0) {
+          job.status = "done";
+          job.log.push("✅ Semua agen sudah punya Knowledge Base!");
+          job.finishedAt = new Date().toISOString();
+          return;
+        }
+
+        let done = 0, failed = 0, totalKb = 0;
+
+        const tasks = agents.map((agent: any) =>
+          limit(async () => {
+            try {
+              const role = agent.is_orchestrator ? "HUB/Orchestrator" : "Specialist Agent";
+              const expertiseStr = Array.isArray(agent.expertise)
+                ? agent.expertise.slice(0, 6).join(", ")
+                : "";
+
+              const prompt = `Kamu adalah Knowledge Base Engineer untuk platform Gustafta — AI chatbot konstruksi, sertifikasi & hukum Indonesia.
+
+DATA AGEN:
+Nama: ${agent.name}
+Peran: ${role}
+Tagline: ${agent.tagline || "-"}
+Deskripsi: ${(agent.description || "").substring(0, 500)}
+Domain: ${agent.category || "-"} / ${agent.subcategory || "-"}
+Keahlian: ${expertiseStr || "-"}
+Primary Outcome: ${agent.primary_outcome || "-"}
+Kepribadian: ${agent.personality || "-"}
+Domain Charter: ${(agent.domain_charter || "").substring(0, 300)}
+Risk Compliance: ${(agent.risk_compliance || "").substring(0, 300)}
+
+Buat 3 entri Knowledge Base dalam format JSON. Setiap entri harus kaya informasi, spesifik terhadap domain agen, dan dalam Bahasa Indonesia (kecuali istilah teknis baku).
+
+1. FOUNDATIONAL (min 400 kata) — Siapa agen ini, apa domainnya, pengetahuan inti: regulasi, standar, definisi yang harus dikuasai.
+2. OPERATIONAL (min 400 kata) — Bagaimana agen bekerja: proses, alur, contoh skenario pertanyaan & jawaban konkret.
+3. COMPLIANCE (min 250 kata) — Batasan, hal yang tidak boleh dilakukan, referensi hukum/regulasi, catatan keamanan.
+
+Format output JSON HARUS:
+{
+  "foundational": { "name": "...", "content": "...", "description": "...", "source_authority": "..." },
+  "operational":  { "name": "...", "content": "...", "description": "...", "source_authority": "..." },
+  "compliance":   { "name": "...", "content": "...", "description": "...", "source_authority": "..." }
+}`;
+
+              let parsed: any = null;
+              try {
+                const resp = await openai.chat.completions.create({
+                  model: "gpt-4o-mini",
+                  messages: [{ role: "user", content: prompt }],
+                  temperature: 0.5,
+                  max_tokens: 2500,
+                  response_format: { type: "json_object" },
+                });
+                parsed = JSON.parse(resp.choices[0]?.message?.content ?? "{}");
+              } catch {
+                // Fallback DeepSeek
+                const ds = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY, baseURL: "https://api.deepseek.com" });
+                const resp2 = await ds.chat.completions.create({
+                  model: "deepseek-chat",
+                  messages: [{ role: "user", content: prompt }],
+                  temperature: 0.5,
+                  max_tokens: 2500,
+                  response_format: { type: "json_object" },
+                });
+                parsed = JSON.parse(resp2.choices[0]?.message?.content ?? "{}");
+              }
+
+              let kbCount = 0;
+              for (const layer of ["foundational", "operational", "compliance"] as const) {
+                const e = parsed?.[layer];
+                if (!e?.content) continue;
+
+                const [kbRow] = await db.insert(knowledgeBases).values({
+                  agentId: agent.id,
+                  name: String(e.name || `${layer} — ${agent.name}`).substring(0, 200),
+                  type: layer,
+                  content: String(e.content).substring(0, 8000),
+                  description: String(e.description || "").substring(0, 300),
+                  knowledgeLayer: layer,
+                  sourceAuthority: String(e.source_authority || "GUSTAFTA").substring(0, 100),
+                  processingStatus: "completed",
+                  status: "active",
+                }).returning({ id: knowledgeBases.id });
+
+                // Create chunks
+                const text = String(e.content);
+                const words = text.split(/\s+/);
+                const chunkSize = 400;
+                const overlapSize = 60;
+                const chunks: string[] = [];
+                let start = 0;
+                while (start < words.length) {
+                  const end = Math.min(start + chunkSize, words.length);
+                  chunks.push(words.slice(start, end).join(" "));
+                  if (end === words.length) break;
+                  start += chunkSize - overlapSize;
+                }
+
+                for (let i = 0; i < chunks.length; i++) {
+                  await db.insert(knowledgeChunks).values({
+                    knowledgeBaseId: kbRow.id,
+                    agentId: agent.id,
+                    chunkIndex: i,
+                    content: chunks[i],
+                    tokenCount: Math.ceil(chunks[i].length / 4),
+                  });
+                }
+                kbCount++;
+              }
+
+              totalKb += kbCount;
+              done++;
+              job.progress = done + failed;
+              if (kbCount > 0) {
+                job.log.push(`✅ #${agent.id} ${agent.name.substring(0, 40)} → ${kbCount} KB`);
+              }
+            } catch (err: any) {
+              failed++;
+              job.progress = done + failed;
+              job.log.push(`❌ #${agent.id} ${agent.name.substring(0, 30)} → ${err?.message?.substring(0, 60) || "error"}`);
+            }
+          })
+        );
+
+        await Promise.all(tasks);
+
+        job.status = "done";
+        job.result = { done, failed, totalKb };
+        job.finishedAt = new Date().toISOString();
+        job.log.push(`\n✅ Selesai: ${done} agen | ❌ Gagal: ${failed} | 📚 Total KB: ${totalKb}`);
+      } catch (err: any) {
+        agentJobs["kb-research"].status = "error";
+        agentJobs["kb-research"].log.push(`💥 Fatal: ${err?.message}`);
+        agentJobs["kb-research"].finishedAt = new Date().toISOString();
+      }
+    })();
+  });
+
+  // POST /api/admin/agents/field-audit/run — start Field Audit Agent
+  app.post("/api/admin/agents/field-audit/run", isAuthenticated, async (req: any, res) => {
+    const job = agentJobs["field-audit"];
+    if (job.status === "running") {
+      return res.status(409).json({ error: "Job sudah berjalan" });
+    }
+    const { autoFill = false } = req.body || {};
+
+    job.status = "running";
+    job.progress = 0;
+    job.total = 0;
+    job.log = ["🔍 Field Audit Agent dimulai..."];
+    job.startedAt = new Date().toISOString();
+    job.finishedAt = undefined;
+    job.result = undefined;
+
+    res.json({ message: "Field Audit Agent dimulai" });
+
+    (async () => {
+      try {
+        const { db } = await import("./db");
+        const { sql: sqlE } = await import("drizzle-orm");
+        const OpenAI = (await import("openai")).default;
+        const pLimit = (await import("p-limit")).default;
+
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const limit = pLimit(8);
+
+        const CRITICAL = ["name", "tagline", "description", "personality", "expertise", "primary_outcome"];
+        const TEXT_FIELDS = [
+          "name", "tagline", "description", "category", "personality", "philosophy",
+          "greeting_message", "tone_of_voice", "communication_style", "off_topic_response",
+          "primary_outcome", "domain_charter", "reasoning_policy", "interaction_policy",
+          "quality_bar", "risk_compliance", "product_summary",
+        ];
+        const JSON_FIELDS = ["expertise", "conversation_starters", "key_phrases", "product_features"];
+
+        const pg = await import("pg");
+        const pool = new pg.default.Pool({ connectionString: process.env.DATABASE_URL });
+        const allCols = [...TEXT_FIELDS, ...JSON_FIELDS].join(", ");
+        const { rows: agents } = await pool.query(
+          `SELECT id, name, is_orchestrator, category, ${allCols},
+                  (SELECT COUNT(*)::int FROM knowledge_bases kb WHERE kb.agent_id = agents.id) as kb_count
+           FROM agents WHERE is_active = true
+           ORDER BY is_orchestrator DESC, id ASC`
+        );
+        await pool.end();
+
+        job.total = (agents as any[]).length;
+        job.log.push(`📊 Total agen aktif: ${job.total}`);
+
+        let perfect = 0, withKb = 0, fillCount = 0;
+        const audits: any[] = [];
+        const fieldMissingCount: Record<string, number> = {};
+
+        const tasks = (agents as any[]).map((agent: any) =>
+          limit(async () => {
+            const missing: string[] = [];
+            const filled: Record<string, boolean> = {};
+
+            for (const col of TEXT_FIELDS) {
+              const val = agent[col];
+              const ok = val && String(val).trim() !== "" && String(val) !== "You are a helpful assistant.";
+              filled[col] = !!ok;
+              if (!ok) { missing.push(col); fieldMissingCount[col] = (fieldMissingCount[col] || 0) + 1; }
+            }
+            for (const col of JSON_FIELDS) {
+              const val = agent[col];
+              let ok = false;
+              if (Array.isArray(val)) ok = val.length > 0;
+              else if (typeof val === "string") {
+                try { const p = JSON.parse(val); ok = Array.isArray(p) ? p.length > 0 : Object.keys(p).length > 0; } catch { ok = false; }
+              }
+              filled[col] = ok;
+              if (!ok) { missing.push(col); fieldMissingCount[col] = (fieldMissingCount[col] || 0) + 1; }
+            }
+
+            const totalW = TEXT_FIELDS.length * 2 + JSON_FIELDS.length * 2;
+            const filledW = Object.values(filled).filter(Boolean).length * 2;
+            const score = Math.round((filledW / totalW) * 100);
+            const emptyCritical = missing.filter(c => CRITICAL.includes(c));
+            const hasKb = agent.kb_count > 0;
+
+            if (score === 100) perfect++;
+            if (hasKb) withKb++;
+
+            audits.push({ id: agent.id, name: agent.name, score, missing, empty_critical: emptyCritical, has_kb: hasKb, kb_count: agent.kb_count });
+            job.progress++;
+
+            // Auto-fill if requested
+            if (autoFill && missing.length > 0) {
+              try {
+                const fillable = missing.filter(c => c !== "name" && c !== "category");
+                if (fillable.length === 0) return;
+                const expertStr = Array.isArray(agent.expertise) ? agent.expertise.slice(0, 5).join(", ") : "";
+                const resp = await openai.chat.completions.create({
+                  model: "gpt-4o-mini",
+                  messages: [{
+                    role: "user",
+                    content: `Isi field kosong untuk chatbot AI konstruksi Indonesia.\nNama: ${agent.name}\nDeskripsi: ${(agent.description || "").substring(0, 300)}\nDomain: ${agent.category || "-"}\nKeahlian: ${expertStr || "-"}\n\nField yang perlu diisi: ${fillable.join(", ")}\n\nHasilkan JSON dengan field tersebut. Spesifik terhadap domain agen, Bahasa Indonesia.`,
+                  }],
+                  temperature: 0.5,
+                  max_tokens: 800,
+                  response_format: { type: "json_object" },
+                });
+                const parsed = JSON.parse(resp.choices[0]?.message?.content ?? "{}");
+                const setClauses: string[] = [];
+                const vals: any[] = [];
+                let i = 1;
+                for (const col of fillable) {
+                  if (!(col in parsed)) continue;
+                  const val = parsed[col];
+                  if (val === undefined || val === null) continue;
+                  setClauses.push(`${col} = $${i++}`);
+                  vals.push(JSON_FIELDS.includes(col) ? JSON.stringify(val) : String(val).substring(0, 2000));
+                }
+                if (setClauses.length > 0) {
+                  vals.push(agent.id);
+                  const pgFill = await import("pg");
+                  const fillPool = new pgFill.default.Pool({ connectionString: process.env.DATABASE_URL });
+                  await fillPool.query(`UPDATE agents SET ${setClauses.join(", ")} WHERE id = $${i}`, vals);
+                  await fillPool.end();
+                  fillCount++;
+                  job.log.push(`🤖 Auto-fill #${agent.id} ${agent.name.substring(0, 35)} → ${setClauses.length} field`);
+                }
+              } catch { /* skip fill errors */ }
+            }
+          })
+        );
+
+        await Promise.all(tasks);
+
+        audits.sort((a, b) => a.score - b.score);
+        const avgScore = audits.length ? Math.round(audits.reduce((s, a) => s + a.score, 0) / audits.length) : 0;
+        const noKb = audits.filter(a => !a.has_kb).length;
+
+        const topMissing = Object.entries(fieldMissingCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(([col, cnt]) => ({ col, missing: cnt, pct: Math.round((cnt / audits.length) * 100) }));
+
+        job.result = {
+          total: audits.length,
+          avg_score: avgScore,
+          perfect_count: perfect,
+          no_kb_count: noKb,
+          fill_count: fillCount,
+          worst: audits.slice(0, 50).map(a => ({
+            id: a.id, name: a.name, score: a.score,
+            has_kb: a.has_kb, kb_count: a.kb_count,
+            empty_critical: a.empty_critical, missing_count: a.missing.length,
+          })),
+          field_stats: topMissing,
+        };
+
+        job.status = "done";
+        job.finishedAt = new Date().toISOString();
+        job.log.push(`✅ Audit selesai: rata-rata ${avgScore}% | Lengkap: ${perfect} | Tanpa KB: ${noKb}`);
+        if (autoFill) job.log.push(`🤖 Auto-fill: ${fillCount} agen diisi`);
+      } catch (err: any) {
+        agentJobs["field-audit"].status = "error";
+        agentJobs["field-audit"].log.push(`💥 Fatal: ${err?.message}`);
+        agentJobs["field-audit"].finishedAt = new Date().toISOString();
+      }
+    })();
+  });
+
   return httpServer;
 }

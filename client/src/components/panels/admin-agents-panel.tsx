@@ -1,0 +1,411 @@
+import { useState, useEffect, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import {
+  BookOpen, ClipboardList, Play, RefreshCw, CheckCircle2,
+  XCircle, Loader2, AlertTriangle, Database, BarChart3,
+  ChevronDown, ChevronUp, Cpu,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface JobState {
+  status: "idle" | "running" | "done" | "error";
+  progress: number;
+  total: number;
+  log: string[];
+  startedAt?: string;
+  finishedAt?: string;
+  result?: any;
+}
+
+interface AgentJobs {
+  "kb-research": JobState;
+  "field-audit": JobState;
+}
+
+function StatusBadge({ status }: { status: JobState["status"] }) {
+  if (status === "idle")    return <Badge variant="secondary">Idle</Badge>;
+  if (status === "running") return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">⏳ Berjalan</Badge>;
+  if (status === "done")    return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">✅ Selesai</Badge>;
+  if (status === "error")   return <Badge variant="destructive">❌ Error</Badge>;
+  return null;
+}
+
+function LogBox({ logs }: { logs: string[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const logRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (logRef.current && expanded) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [logs, expanded]);
+
+  if (logs.length === 0) return null;
+
+  const recent = logs.slice(-5);
+
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => setExpanded(e => !e)}
+        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+      >
+        {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        {expanded ? "Sembunyikan log" : `Lihat log (${logs.length} entri)`}
+      </button>
+
+      <div
+        ref={logRef}
+        className={`mt-2 bg-black/40 rounded-lg p-3 font-mono text-xs text-gray-400 space-y-0.5 overflow-y-auto transition-all ${
+          expanded ? "max-h-64" : "max-h-24"
+        }`}
+      >
+        {(expanded ? logs : recent).map((line, i) => (
+          <div key={i} className={
+            line.startsWith("✅") ? "text-green-400" :
+            line.startsWith("❌") || line.startsWith("💥") ? "text-red-400" :
+            line.startsWith("🤖") ? "text-violet-400" :
+            line.startsWith("📊") || line.startsWith("🔬") || line.startsWith("🔍") ? "text-blue-400" :
+            "text-gray-400"
+          }>{line}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FieldStatBar({ label, pct, count, isCritical }: { label: string; pct: number; count: number; isCritical?: boolean }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs">
+        <span className={`flex items-center gap-1 ${isCritical ? "text-red-400" : "text-gray-400"}`}>
+          {isCritical && <AlertTriangle className="h-3 w-3" />}
+          {label}
+        </span>
+        <span className="text-gray-500">{count} agen ({pct}%)</span>
+      </div>
+      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${
+            pct > 70 ? "bg-red-500" : pct > 40 ? "bg-amber-500" : "bg-green-500"
+          }`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function AdminAgentsPanel() {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [autoFill, setAutoFill] = useState(false);
+  const [pollingActive, setPollingActive] = useState(false);
+
+  const { data: jobs, refetch } = useQuery<AgentJobs>({
+    queryKey: ["/api/admin/agents/status"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/agents/status");
+      return res.json();
+    },
+    refetchInterval: pollingActive ? 2000 : false,
+  });
+
+  // Enable polling when any job is running
+  useEffect(() => {
+    const anyRunning = jobs?.["kb-research"]?.status === "running" || jobs?.["field-audit"]?.status === "running";
+    setPollingActive(anyRunning);
+  }, [jobs]);
+
+  const runKbMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/agents/kb-research/run").then(r => r.json()),
+    onSuccess: () => {
+      toast({ title: "KB Research Agent dimulai", description: "Memproses semua agen tanpa Knowledge Base..." });
+      setPollingActive(true);
+      setTimeout(() => refetch(), 500);
+    },
+    onError: (e: any) => toast({ title: "Gagal", description: e.message, variant: "destructive" }),
+  });
+
+  const runAuditMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/agents/field-audit/run", { autoFill }).then(r => r.json()),
+    onSuccess: () => {
+      toast({ title: "Field Audit Agent dimulai", description: "Memeriksa kelengkapan field semua chatbot..." });
+      setPollingActive(true);
+      setTimeout(() => refetch(), 500);
+    },
+    onError: (e: any) => toast({ title: "Gagal", description: e.message, variant: "destructive" }),
+  });
+
+  const kbJob = jobs?.["kb-research"];
+  const auditJob = jobs?.["field-audit"];
+
+  const kbPct = kbJob?.total ? Math.round((kbJob.progress / kbJob.total) * 100) : 0;
+  const auditPct = auditJob?.total ? Math.round((auditJob.progress / auditJob.total) * 100) : 0;
+
+  const CRITICAL_COLS = ["name", "tagline", "description", "personality", "expertise", "primary_outcome"];
+
+  return (
+    <div className="space-y-6 p-4 md:p-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-violet-500/10">
+          <Cpu className="w-5 h-5 text-violet-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold">Sistem Agen AI</h2>
+          <p className="text-muted-foreground text-sm">Agen khusus untuk riset & audit seluruh chatbot secara otomatis</p>
+        </div>
+        <Button variant="ghost" size="icon" className="ml-auto" onClick={() => refetch()} data-testid="button-refresh-agents">
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+
+        {/* ── KB Research Agent ──────────────────────────────────────── */}
+        <Card className="border-blue-500/20 bg-blue-500/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-blue-500/10">
+                  <BookOpen className="h-4 w-4 text-blue-400" />
+                </div>
+                <span className="text-base">KB Research Agent</span>
+              </div>
+              <StatusBadge status={kbJob?.status ?? "idle"} />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-400">
+              Secara otomatis menghasilkan <span className="text-blue-300 font-medium">3 Knowledge Base</span> per agen
+              (Foundational, Operational, Compliance) menggunakan AI. Hanya memproses agen yang belum memiliki KB.
+            </p>
+
+            {/* Stats */}
+            {kbJob?.result && (
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Agen Diproses", val: kbJob.result.done, icon: CheckCircle2, color: "text-green-400" },
+                  { label: "Total KB Dibuat", val: kbJob.result.totalKb, icon: Database, color: "text-blue-400" },
+                  { label: "Gagal", val: kbJob.result.failed, icon: XCircle, color: "text-red-400" },
+                ].map(s => (
+                  <div key={s.label} className="bg-white/5 rounded-xl p-3 text-center">
+                    <s.icon className={`h-4 w-4 ${s.color} mx-auto mb-1`} />
+                    <div className={`text-2xl font-bold ${s.color}`}>{s.val ?? 0}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Progress */}
+            {kbJob?.status === "running" && (
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>Progress</span>
+                  <span>{kbJob.progress} / {kbJob.total} agen ({kbPct}%)</span>
+                </div>
+                <Progress value={kbPct} className="h-2" />
+              </div>
+            )}
+
+            {kbJob?.startedAt && (
+              <div className="text-xs text-gray-600 flex gap-3">
+                <span>Mulai: {new Date(kbJob.startedAt).toLocaleTimeString("id-ID")}</span>
+                {kbJob.finishedAt && <span>Selesai: {new Date(kbJob.finishedAt).toLocaleTimeString("id-ID")}</span>}
+              </div>
+            )}
+
+            <LogBox logs={kbJob?.log ?? []} />
+
+            <Button
+              onClick={() => runKbMutation.mutate()}
+              disabled={kbJob?.status === "running" || runKbMutation.isPending}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              data-testid="button-run-kb-research"
+            >
+              {kbJob?.status === "running" ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sedang Berjalan...</>
+              ) : (
+                <><Play className="h-4 w-4 mr-2" />Jalankan KB Research Agent</>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* ── Field Audit Agent ──────────────────────────────────────── */}
+        <Card className="border-amber-500/20 bg-amber-500/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-amber-500/10">
+                  <ClipboardList className="h-4 w-4 text-amber-400" />
+                </div>
+                <span className="text-base">Field Audit Agent</span>
+              </div>
+              <StatusBadge status={auditJob?.status ?? "idle"} />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-400">
+              Memeriksa kelengkapan <span className="text-amber-300 font-medium">semua field penting</span> setiap chatbot
+              (persona, keahlian, otak proyek, produk) dan menghasilkan laporan skor per agen.
+            </p>
+
+            {/* Auto-fill toggle */}
+            <div className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+              <Switch
+                checked={autoFill}
+                onCheckedChange={setAutoFill}
+                disabled={auditJob?.status === "running"}
+                data-testid="switch-auto-fill"
+              />
+              <div>
+                <Label className="text-sm cursor-pointer" onClick={() => setAutoFill(v => !v)}>
+                  Auto-Fill dengan AI
+                </Label>
+                <p className="text-xs text-gray-500">Otomatis isi field yang kosong menggunakan AI setelah audit</p>
+              </div>
+            </div>
+
+            {/* Summary stats */}
+            {auditJob?.result && (
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Rata-rata Skor", val: `${auditJob.result.avg_score}%`, color: auditJob.result.avg_score > 70 ? "text-green-400" : "text-amber-400" },
+                  { label: "Lengkap (100%)", val: auditJob.result.perfect_count, color: "text-green-400" },
+                  { label: "Tanpa KB", val: auditJob.result.no_kb_count, color: "text-red-400" },
+                  { label: "Auto-fill", val: auditJob.result.fill_count || 0, color: "text-violet-400" },
+                ].map(s => (
+                  <div key={s.label} className="bg-white/5 rounded-xl p-3">
+                    <div className={`text-xl font-bold ${s.color}`}>{s.val}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Field stats (top missing) */}
+            {auditJob?.result?.field_stats && auditJob.result.field_stats.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <BarChart3 className="h-3.5 w-3.5" />Field Paling Sering Kosong
+                </p>
+                <div className="space-y-2.5">
+                  {auditJob.result.field_stats.slice(0, 6).map((s: any) => (
+                    <FieldStatBar
+                      key={s.col}
+                      label={s.col}
+                      pct={s.pct}
+                      count={s.missing}
+                      isCritical={CRITICAL_COLS.includes(s.col)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Worst agents */}
+            {auditJob?.result?.worst && auditJob.result.worst.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Agen Perlu Perhatian (Skor Terendah)
+                </p>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                  {auditJob.result.worst.slice(0, 20).map((a: any) => (
+                    <div key={a.id} className="flex items-center gap-2.5 text-xs">
+                      <span className={`font-mono font-bold w-10 text-right flex-shrink-0 ${
+                        a.score < 40 ? "text-red-400" : a.score < 70 ? "text-amber-400" : "text-green-400"
+                      }`}>{a.score}%</span>
+                      <span className={`flex-shrink-0 ${a.has_kb ? "text-green-400" : "text-red-400"}`}>
+                        {a.has_kb ? "●" : "○"}
+                      </span>
+                      <span className="text-gray-300 truncate" title={a.name}>{a.name}</span>
+                      {a.empty_critical.length > 0 && (
+                        <AlertTriangle className="h-3 w-3 text-red-400 flex-shrink-0" title={`Kritis: ${a.empty_critical.join(", ")}`} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-600">● = punya KB  ○ = tanpa KB  ⚠ = field kritis kosong</p>
+              </div>
+            )}
+
+            {/* Progress */}
+            {auditJob?.status === "running" && (
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>Progress</span>
+                  <span>{auditJob.progress} / {auditJob.total} agen ({auditPct}%)</span>
+                </div>
+                <Progress value={auditPct} className="h-2" />
+              </div>
+            )}
+
+            {auditJob?.startedAt && (
+              <div className="text-xs text-gray-600 flex gap-3">
+                <span>Mulai: {new Date(auditJob.startedAt).toLocaleTimeString("id-ID")}</span>
+                {auditJob.finishedAt && <span>Selesai: {new Date(auditJob.finishedAt).toLocaleTimeString("id-ID")}</span>}
+              </div>
+            )}
+
+            <LogBox logs={auditJob?.log ?? []} />
+
+            <Button
+              onClick={() => runAuditMutation.mutate()}
+              disabled={auditJob?.status === "running" || runAuditMutation.isPending}
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+              data-testid="button-run-field-audit"
+            >
+              {auditJob?.status === "running" ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sedang Berjalan...</>
+              ) : (
+                <><Play className="h-4 w-4 mr-2" />Jalankan Field Audit Agent</>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Info box */}
+      <Card className="border-white/10 bg-white/[0.02]">
+        <CardContent className="p-4">
+          <div className="grid sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="font-semibold text-gray-300 mb-2 flex items-center gap-1.5">
+                <BookOpen className="h-4 w-4 text-blue-400" />KB Research Agent
+              </p>
+              <ul className="space-y-1 text-gray-500 text-xs list-disc list-inside">
+                <li>Generate 3 KB per agen: Foundational, Operational, Compliance</li>
+                <li>Setiap KB otomatis dipecah menjadi knowledge chunks untuk RAG</li>
+                <li>Idempotent — skip agen yang sudah punya KB</li>
+                <li>Fallback ke DeepSeek jika OpenAI gagal</li>
+                <li>Proses 4 agen paralel untuk efisiensi</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-300 mb-2 flex items-center gap-1.5">
+                <ClipboardList className="h-4 w-4 text-amber-400" />Field Audit Agent
+              </p>
+              <ul className="space-y-1 text-gray-500 text-xs list-disc list-inside">
+                <li>Periksa 21 field penting per chatbot dengan skor 0-100%</li>
+                <li>Field kritis: nama, tagline, deskripsi, kepribadian, keahlian, outcome</li>
+                <li>Mode Auto-Fill: isi field kosong secara otomatis dengan AI</li>
+                <li>Laporan: distribusi skor, field paling sering kosong</li>
+                <li>Proses 8 agen paralel untuk kecepatan</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
