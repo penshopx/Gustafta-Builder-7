@@ -11075,6 +11075,7 @@ KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan
   }> = {
     "kb-research": { status: "idle", progress: 0, total: 0, log: [] },
     "field-audit":  { status: "idle", progress: 0, total: 0, log: [] },
+    "bulk-fill":    { status: "idle", progress: 0, total: 0, log: [] },
   };
 
   // GET /api/admin/agents/status — get status of both jobs
@@ -11427,6 +11428,176 @@ Format output JSON HARUS:
         agentJobs["field-audit"].status = "error";
         agentJobs["field-audit"].log.push(`💥 Fatal: ${err?.message}`);
         agentJobs["field-audit"].finishedAt = new Date().toISOString();
+      }
+    })();
+  });
+
+  // POST /api/admin/agents/bulk-fill/run — isi semua field kosong dengan AI
+  app.post("/api/admin/agents/bulk-fill/run", isAuthenticated, async (req: any, res) => {
+    const job = agentJobs["bulk-fill"];
+    if (job.status === "running") {
+      return res.status(409).json({ error: "Job sudah berjalan" });
+    }
+
+    job.status = "running";
+    job.progress = 0;
+    job.total = 0;
+    job.log = ["🤖 Bulk Fill Agent dimulai..."];
+    job.startedAt = new Date().toISOString();
+    job.finishedAt = undefined;
+    job.result = undefined;
+
+    res.json({ message: "Bulk Fill Agent dimulai" });
+
+    (async () => {
+      try {
+        const { db } = await import("./db");
+        const OpenAI = (await import("openai")).default;
+        const pLimit = (await import("p-limit")).default;
+
+        const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+        const openai = new OpenAI({ apiKey: openaiKey });
+        const limit = pLimit(4);
+
+        // Columns to check and fill
+        const TEXT_COLS = [
+          "tagline", "description", "personality", "philosophy",
+          "greeting_message", "tone_of_voice", "communication_style",
+          "off_topic_response", "primary_outcome", "domain_charter",
+          "reasoning_policy", "interaction_policy", "quality_bar",
+          "risk_compliance", "product_summary",
+        ];
+        const JSON_COLS = ["expertise", "conversation_starters", "key_phrases"];
+
+        // Fetch all active agents
+        const pg = await import("pg");
+        const pool = new pg.default.Pool({ connectionString: process.env.DATABASE_URL });
+        const colList = ["id", "name", "description", "category", ...TEXT_COLS, ...JSON_COLS].join(", ");
+        const { rows: allAgents } = await pool.query(
+          `SELECT ${colList} FROM agents WHERE is_active = true ORDER BY id ASC`
+        );
+        await pool.end();
+
+        // Filter only agents with at least one empty critical or text field
+        const needsFill = allAgents.filter((a: any) => {
+          for (const col of TEXT_COLS) {
+            const v = a[col];
+            if (!v || String(v).trim() === "" || String(v) === "You are a helpful assistant.") return true;
+          }
+          for (const col of JSON_COLS) {
+            const v = a[col];
+            if (!v) return true;
+            if (Array.isArray(v) && v.length === 0) return true;
+            if (typeof v === "string") { try { const p = JSON.parse(v); if (Array.isArray(p) && p.length === 0) return true; } catch { return true; } }
+          }
+          return false;
+        });
+
+        job.total = needsFill.length;
+        job.log.push(`📊 Agen perlu diisi: ${needsFill.length} dari ${allAgents.length} total`);
+
+        let filled = 0, skipped = 0, errored = 0;
+
+        const tasks = needsFill.map((agent: any) =>
+          limit(async () => {
+            try {
+              // Find which fields are missing
+              const missingText = TEXT_COLS.filter(col => {
+                const v = agent[col];
+                return !v || String(v).trim() === "" || String(v) === "You are a helpful assistant.";
+              });
+              const missingJson = JSON_COLS.filter(col => {
+                const v = agent[col];
+                if (!v) return true;
+                if (Array.isArray(v) && v.length === 0) return true;
+                if (typeof v === "string") { try { const p = JSON.parse(v); return Array.isArray(p) && p.length === 0; } catch { return true; } }
+                return false;
+              });
+              const allMissing = [...missingText, ...missingJson];
+              if (allMissing.length === 0) { job.progress++; skipped++; return; }
+
+              const descSnippet = (agent.description || "").substring(0, 400);
+              const prompt = `Kamu adalah asisten konfigurasi chatbot AI untuk platform konstruksi Indonesia.
+Agen: "${agent.name}"
+Kategori: ${agent.category || "konstruksi"}
+Deskripsi (ada): ${descSnippet || "(kosong)"}
+
+Isi field berikut yang masih kosong dalam JSON. Semua dalam Bahasa Indonesia, spesifik ke domain agen ini:
+${allMissing.map(f => {
+  if (f === "tagline") return `"tagline": "Tagline 1 kalimat, maks 100 karakter, menggambarkan keahlian agen"`;
+  if (f === "description") return `"description": "2-3 kalimat profesional: apa yang dilakukan agen, siapa penggunanya, nilai utamanya"`;
+  if (f === "personality") return `"personality": "Deskripsi kepribadian agen: nada, gaya komunikasi, karakter unik"`;
+  if (f === "philosophy") return `"philosophy": "Filosofi komunikasi agen dalam membantu pengguna"`;
+  if (f === "greeting_message") return `"greeting_message": "Pesan sambutan yang hangat dan mengundang, 2-3 kalimat"`;
+  if (f === "tone_of_voice") return `"tone_of_voice": "Pilih: professional, conversational, formal, friendly, technical"`;
+  if (f === "communication_style") return `"communication_style": "Pilih: direct, consultative, educational, collaborative"`;
+  if (f === "off_topic_response") return `"off_topic_response": "Pesan ketika pertanyaan di luar topik, 1-2 kalimat"`;
+  if (f === "primary_outcome") return `"primary_outcome": "Pilih SATU persis: user_education, Menyelesaikan tiket, Menghasilkan dokumen, Menutup penjualan, Mendidik pengguna, Mengumpulkan data, Audit & compliance"`;
+  if (f === "domain_charter") return `"domain_charter": "Topik yang boleh dan tidak boleh dibahas agen ini, 3-4 kalimat"`;
+  if (f === "reasoning_policy") return `"reasoning_policy": "Bagaimana agen berpikir dan menganalisis masalah sebelum menjawab"`;
+  if (f === "interaction_policy") return `"interaction_policy": "Kebijakan interaksi: cara menangani pertanyaan ambigu, eskalasi, multi-bagian"`;
+  if (f === "quality_bar") return `"quality_bar": "Standar kualitas jawaban: panjang, format, akurasi, referensi sumber"`;
+  if (f === "risk_compliance") return `"risk_compliance": "Disclaimer dan batasan legal/etis yang berlaku untuk domain ini"`;
+  if (f === "product_summary") return `"product_summary": "Ringkasan produk/layanan yang ditawarkan chatbot ini, 2-3 kalimat"`;
+  if (f === "expertise") return `"expertise": ["keahlian spesifik 1", "keahlian 2", "keahlian 3", "keahlian 4", "keahlian 5"]`;
+  if (f === "conversation_starters") return `"conversation_starters": ["Pertanyaan pembuka 1?", "Pertanyaan 2?", "Pertanyaan 3?", "Pertanyaan 4?"]`;
+  if (f === "key_phrases") return `"key_phrases": ["frasa kunci 1", "frasa 2", "frasa 3", "frasa 4", "frasa 5"]`;
+  return `"${f}": "isi yang sesuai"`;
+}).join(",\n")}
+
+Hasilkan JSON valid dengan SEMUA field di atas terisi penuh. Jangan kosongkan satupun.`;
+
+              const resp = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.6,
+                max_tokens: 1200,
+                response_format: { type: "json_object" },
+              });
+
+              const parsed = JSON.parse(resp.choices[0]?.message?.content ?? "{}");
+
+              // Build UPDATE
+              const setClauses: string[] = [];
+              const vals: any[] = [];
+              let i = 1;
+              for (const col of allMissing) {
+                if (!(col in parsed)) continue;
+                const val = parsed[col];
+                if (val === undefined || val === null) continue;
+                setClauses.push(`${col} = $${i++}`);
+                vals.push(JSON_COLS.includes(col) ? JSON.stringify(val) : String(val).substring(0, 2000));
+              }
+
+              if (setClauses.length > 0) {
+                vals.push(agent.id);
+                const pgUp = await import("pg");
+                const upPool = new pgUp.default.Pool({ connectionString: process.env.DATABASE_URL });
+                await upPool.query(`UPDATE agents SET ${setClauses.join(", ")} WHERE id = $${i}`, vals);
+                await upPool.end();
+                filled++;
+                job.log.push(`✅ #${agent.id} ${agent.name.substring(0, 40)} → ${setClauses.length} field diisi`);
+              } else {
+                skipped++;
+              }
+            } catch (err: any) {
+              errored++;
+              job.log.push(`❌ #${agent.id} ${(agent.name || "").substring(0, 30)}: ${err?.message?.substring(0, 60)}`);
+            }
+            job.progress++;
+          })
+        );
+
+        await Promise.all(tasks);
+
+        job.result = { filled, skipped, errored, total: needsFill.length };
+        job.status = "done";
+        job.finishedAt = new Date().toISOString();
+        job.log.push(`✅ Selesai: ${filled} agen diisi, ${skipped} skip, ${errored} error`);
+      } catch (err: any) {
+        agentJobs["bulk-fill"].status = "error";
+        agentJobs["bulk-fill"].log.push(`💥 Fatal: ${err?.message}`);
+        agentJobs["bulk-fill"].finishedAt = new Date().toISOString();
       }
     })();
   });

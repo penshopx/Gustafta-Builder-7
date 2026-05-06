@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   BookOpen, ClipboardList, Play, RefreshCw, CheckCircle2,
   XCircle, Loader2, AlertTriangle, Database, BarChart3,
-  ChevronDown, ChevronUp, Cpu,
+  ChevronDown, ChevronUp, Cpu, Wand2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,6 +27,7 @@ interface JobState {
 interface AgentJobs {
   "kb-research": JobState;
   "field-audit": JobState;
+  "bulk-fill": JobState;
 }
 
 function StatusBadge({ status }: { status: JobState["status"] }) {
@@ -121,7 +122,7 @@ export function AdminAgentsPanel() {
 
   // Enable polling when any job is running
   useEffect(() => {
-    const anyRunning = jobs?.["kb-research"]?.status === "running" || jobs?.["field-audit"]?.status === "running";
+    const anyRunning = jobs?.["kb-research"]?.status === "running" || jobs?.["field-audit"]?.status === "running" || jobs?.["bulk-fill"]?.status === "running";
     setPollingActive(anyRunning);
   }, [jobs]);
 
@@ -164,11 +165,32 @@ export function AdminAgentsPanel() {
     onError: (e: any) => toast({ title: "Gagal memulai Audit", description: e.message, variant: "destructive" }),
   });
 
+  const runBulkFillMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/agents/bulk-fill/run", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+      try { return JSON.parse(text); } catch { return {}; }
+    },
+    onSuccess: () => {
+      toast({ title: "Bulk Fill Agent dimulai", description: "Mengisi field kosong semua chatbot dengan AI..." });
+      setPollingActive(true);
+      setTimeout(() => refetch(), 500);
+    },
+    onError: (e: any) => toast({ title: "Gagal memulai Bulk Fill", description: e.message, variant: "destructive" }),
+  });
+
   const kbJob = jobs?.["kb-research"];
   const auditJob = jobs?.["field-audit"];
+  const bulkFillJob = jobs?.["bulk-fill"];
 
   const kbPct = kbJob?.total ? Math.round((kbJob.progress / kbJob.total) * 100) : 0;
   const auditPct = auditJob?.total ? Math.round((auditJob.progress / auditJob.total) * 100) : 0;
+  const bulkPct = bulkFillJob?.total ? Math.round((bulkFillJob.progress / bulkFillJob.total) * 100) : 0;
 
   const CRITICAL_COLS = ["name", "tagline", "description", "personality", "expertise", "primary_outcome"];
 
@@ -187,6 +209,82 @@ export function AdminAgentsPanel() {
           <RefreshCw className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* ── Bulk Fill Agent — full width, most important ─────────── */}
+      <Card className="border-violet-500/30 bg-violet-500/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-violet-500/10">
+                <Wand2 className="h-4 w-4 text-violet-400" />
+              </div>
+              <div>
+                <span className="text-base">Bulk Field Fill Agent</span>
+                <p className="text-xs font-normal text-gray-400 mt-0.5">
+                  Isi otomatis semua field kosong (tagline, deskripsi, kepribadian, dll) untuk seluruh chatbot sekaligus
+                </p>
+              </div>
+            </div>
+            <StatusBadge status={bulkFillJob?.status ?? "idle"} />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Stats */}
+          {bulkFillJob?.result && (
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Berhasil Diisi", val: bulkFillJob.result.filled, icon: CheckCircle2, color: "text-green-400" },
+                { label: "Total Diproses", val: bulkFillJob.result.total, icon: Database, color: "text-violet-400" },
+                { label: "Error", val: bulkFillJob.result.errored, icon: XCircle, color: "text-red-400" },
+              ].map(s => (
+                <div key={s.label} className="bg-white/5 rounded-xl p-3 text-center">
+                  <s.icon className={`h-4 w-4 ${s.color} mx-auto mb-1`} />
+                  <div className={`text-2xl font-bold ${s.color}`}>{s.val ?? 0}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Progress */}
+          {bulkFillJob?.status === "running" && (
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>Progress</span>
+                <span>{bulkFillJob.progress} / {bulkFillJob.total} agen ({bulkPct}%)</span>
+              </div>
+              <Progress value={bulkPct} className="h-2" />
+            </div>
+          )}
+
+          {bulkFillJob?.startedAt && (
+            <div className="text-xs text-gray-600 flex gap-3">
+              <span>Mulai: {new Date(bulkFillJob.startedAt).toLocaleTimeString("id-ID")}</span>
+              {bulkFillJob.finishedAt && <span>Selesai: {new Date(bulkFillJob.finishedAt).toLocaleTimeString("id-ID")}</span>}
+            </div>
+          )}
+
+          <LogBox logs={bulkFillJob?.log ?? []} />
+
+          <div className="bg-violet-500/10 rounded-lg p-3 text-xs text-violet-300 space-y-1">
+            <p className="font-semibold">Field yang akan diisi otomatis:</p>
+            <p className="text-violet-400/80">Tagline · Deskripsi · Kepribadian · Filosofi · Pesan Sambutan · Nada Bicara · Gaya Komunikasi · Respons Off-Topic · Primary Outcome · Domain Charter · Reasoning Policy · Interaction Policy · Quality Bar · Risk Compliance · Product Summary · Keahlian · Conversation Starters · Key Phrases</p>
+          </div>
+
+          <Button
+            onClick={() => runBulkFillMutation.mutate()}
+            disabled={bulkFillJob?.status === "running" || runBulkFillMutation.isPending}
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+            data-testid="button-run-bulk-fill"
+          >
+            {bulkFillJob?.status === "running" ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sedang Mengisi Field...</>
+            ) : (
+              <><Wand2 className="h-4 w-4 mr-2" />Jalankan Bulk Fill Agent</>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
 
