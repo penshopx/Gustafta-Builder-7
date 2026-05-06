@@ -76,15 +76,29 @@ const FED_BOTS = [
   { id: 84,  name: "Skema Navigator Hub",              role: "Skema",       color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",                 subs: 2 },
   { id: 302, name: "LKUT Hub",                         role: "LKUT",        color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",     subs: 2 },
   // Batch 7 — Discipline Hubs (SKK per Bidang)
-  { id: 150, name: "Hub Sipil",                        role: "Sipil",       color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",             subs: 4 },
-  { id: 151, name: "Hub Arsitektur",                   role: "Arsitek",     color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",     subs: 4 },
-  { id: 152, name: "Hub Energi & Ketenagalistrikan",   role: "Energi",      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",     subs: 4 },
-  { id: 153, name: "Hub Sains & Rekayasa",             role: "Sains",       color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",         subs: 4 },
-  { id: 154, name: "Hub Mekanikal",                    role: "Mekanikal",   color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",     subs: 4 },
-  { id: 155, name: "Hub Manajemen Pelaksanaan",        role: "MP",          color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",                 subs: 4 },
-  { id: 156, name: "Hub Pengembangan Wilayah",         role: "PWK",         color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 4 },
-  { id: 157, name: "Hub Arsitek Lanskap & Interior",   role: "Lanskap",     color: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",             subs: 4 },
-  { id: 158, name: "Hub Tata Lingkungan",              role: "Lingkungan",  color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",             subs: 4 },
+  { id: 150,  name: "Hub Sipil",                        role: "Sipil",        color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 4 },
+  { id: 151,  name: "Hub Arsitektur",                   role: "Arsitek",      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",      subs: 4 },
+  { id: 152,  name: "Hub Energi & Ketenagalistrikan",   role: "Energi",       color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",      subs: 4 },
+  { id: 153,  name: "Hub Sains & Rekayasa",             role: "Sains",        color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",          subs: 4 },
+  { id: 154,  name: "Hub Mekanikal",                    role: "Mekanikal",    color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 4 },
+  { id: 155,  name: "Hub Manajemen Pelaksanaan",        role: "MP",           color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",                  subs: 4 },
+  { id: 156,  name: "Hub Pengembangan Wilayah",         role: "PWK",          color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",  subs: 4 },
+  { id: 157,  name: "Hub Arsitek Lanskap & Interior",   role: "Lanskap",      color: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",              subs: 4 },
+  { id: 158,  name: "Hub Tata Lingkungan",              role: "Lingkungan",   color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",              subs: 4 },
+  // Batch 8 — Kompetensi Teknis & Kontrak Hubs
+  { id: 159,  name: "Hub Kompetensi Teknis Kontraktor", role: "KomTeknis",    color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300",          subs: 4 },
+  { id: 341,  name: "Manajemen Kontrak Hub",            role: "MnKontrak",    color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",      subs: 10 },
+  { id: 365,  name: "Legal Konstruksi Hub",             role: "LegalKons",    color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",              subs: 5 },
+  // Batch 9 — SKKNI per Jabatan Kerja
+  { id: 643,  name: "RG Orchestrator (SKKNI 106)",      role: "RG-Gedung",    color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",              subs: 8 },
+  { id: 1044, name: "PKBG-ARS Orchestrator (113)",      role: "PKBG-ARS",     color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",      subs: 4 },
+  { id: 1045, name: "MPBG Orchestrator (115)",          role: "MPBG",         color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 4 },
+  { id: 1046, name: "PKFS Orchestrator (193)",          role: "PKFS",         color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",              subs: 4 },
+  { id: 1047, name: "PBH Orchestrator (SKKNI 2)",       role: "PBH",          color: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-300",  subs: 4 },
+  { id: 1048, name: "MPK Orchestrator (PM)",            role: "MPK",          color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",                  subs: 4 },
+  { id: 1049, name: "MK-CM Orchestrator",               role: "MK-CM",        color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 4 },
+  // Batch 10 — LexCom Legal AI
+  { id: 625,  name: "LEX-ORCHESTRATOR (LexCom)",        role: "LexOrch",      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",      subs: 17 },
 ];
 
 // ─── Test Scenarios ───────────────────────────────────────────────────────────
