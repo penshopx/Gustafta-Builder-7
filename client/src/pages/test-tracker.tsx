@@ -126,6 +126,20 @@ const FED_BOTS = [
   { id: 331,  name: "Tender Strategy Hub",              role: "TenderHub",    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 9 },
   { id: 352,  name: "Site Operations Hub",              role: "SiteOps",      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",          subs: 12 },
   { id: 376,  name: "Regulasi Konstruksi Hub",          role: "RegulasiHub",  color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 27 },
+  // Batch 15 — SKK Coach Hubs (438-543) — upgraded to true Inter-Agent v2
+  { id: 438,  name: "SKK Coach Manajemen Pelaksanaan",  role: "SKK-MP",       color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 4 },
+  { id: 448,  name: "SKK Coach Mekanikal",              role: "SKK-MEK",      color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 4 },
+  { id: 459,  name: "SKK Coach Sipil",                  role: "SKK-SIP",      color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300",          subs: 4 },
+  { id: 470,  name: "SKK Coach Elektrikal",             role: "SKK-ELK",      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",      subs: 4 },
+  { id: 481,  name: "SKK Coach Arsitektur",             role: "SKK-ARS",      color: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",              subs: 4 },
+  { id: 492,  name: "SKK Coach Tata Lingkungan",        role: "SKK-TLK",      color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",              subs: 4 },
+  { id: 501,  name: "SKK Coach K3 Konstruksi",          role: "SKK-K3",       color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",                  subs: 4 },
+  { id: 508,  name: "SKK Coach Manajemen Proyek",       role: "SKK-MPK",      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",      subs: 4 },
+  { id: 515,  name: "SKK Coach Geoteknik & Geodesi",    role: "SKK-GEO",      color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",  subs: 4 },
+  { id: 522,  name: "SKK Coach Pengujian & QC",         role: "SKK-QC",       color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",              subs: 4 },
+  { id: 529,  name: "SKK Coach Bangunan Gedung & Utilitas", role: "SKK-BGU",  color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",              subs: 4 },
+  { id: 536,  name: "SKK Coach Konstruksi Khusus",      role: "SKK-KSS",      color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",      subs: 4 },
+  { id: 543,  name: "SKK Coach Peralatan & Logistik",   role: "SKK-PL",       color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 4 },
 ];
 
 // ─── Test Scenarios ───────────────────────────────────────────────────────────
