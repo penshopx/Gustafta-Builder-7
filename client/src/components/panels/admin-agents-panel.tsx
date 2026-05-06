@@ -312,14 +312,17 @@ export function AdminAgentsPanel() {
           </div>
 
           {/* Retry banner when there are errored agents */}
-          {bulkFillJob?.result?.erroredIds?.length > 0 && bulkFillJob.status !== "running" && (
+          {(bulkFillJob?.result?.errored > 0) && bulkFillJob.status !== "running" && (
             <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
               <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-red-300 font-medium">
-                  {bulkFillJob.result.erroredIds.length} agen gagal diisi field-nya
+                  {bulkFillJob.result.errored} agen gagal diisi field-nya
                 </p>
-                <p className="text-xs text-red-400/60">ID: {bulkFillJob.result.erroredIds.slice(0, 8).join(", ")}{bulkFillJob.result.erroredIds.length > 8 ? ` +${bulkFillJob.result.erroredIds.length - 8} lainnya` : ""}</p>
+                {bulkFillJob.result.erroredIds?.length > 0
+                  ? <p className="text-xs text-red-400/60">ID: {bulkFillJob.result.erroredIds.slice(0, 8).join(", ")}{bulkFillJob.result.erroredIds.length > 8 ? ` +${bulkFillJob.result.erroredIds.length - 8} lainnya` : ""}</p>
+                  : <p className="text-xs text-red-400/60">Klik Ulangi untuk proses ulang agen yang error</p>
+                }
               </div>
               <Button
                 size="sm"
@@ -328,7 +331,7 @@ export function AdminAgentsPanel() {
                 className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 flex-shrink-0"
                 data-testid="button-retry-bulk-fill"
               >
-                {retryBulkFillMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {bulkFillJob.result.erroredIds.length} Error</>}
+                {retryBulkFillMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {bulkFillJob.result.errored} Error</>}
               </Button>
             </div>
           )}
@@ -407,14 +410,17 @@ export function AdminAgentsPanel() {
             <LogBox logs={kbJob?.log ?? []} />
 
             {/* Retry banner when there are failed agents */}
-            {kbJob?.result?.failedIds?.length > 0 && kbJob.status !== "running" && (
+            {(kbJob?.result?.failed > 0) && kbJob.status !== "running" && (
               <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
                 <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-red-300 font-medium">
-                    {kbJob.result.failedIds.length} agen gagal dibuat KB-nya
+                    {kbJob.result.failed} agen gagal dibuat KB-nya
                   </p>
-                  <p className="text-xs text-red-400/60">ID: {kbJob.result.failedIds.slice(0, 8).join(", ")}{kbJob.result.failedIds.length > 8 ? ` +${kbJob.result.failedIds.length - 8} lainnya` : ""}</p>
+                  {kbJob.result.failedIds?.length > 0
+                    ? <p className="text-xs text-red-400/60">ID: {kbJob.result.failedIds.slice(0, 8).join(", ")}{kbJob.result.failedIds.length > 8 ? ` +${kbJob.result.failedIds.length - 8} lainnya` : ""}</p>
+                    : <p className="text-xs text-red-400/60">Klik Ulangi untuk proses ulang agen yang gagal</p>
+                  }
                 </div>
                 <Button
                   size="sm"
@@ -423,7 +429,7 @@ export function AdminAgentsPanel() {
                   className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 flex-shrink-0"
                   data-testid="button-retry-kb-research"
                 >
-                  {retryKbMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {kbJob.result.failedIds.length} Gagal</>}
+                  {retryKbMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {kbJob.result.failed} Gagal</>}
                 </Button>
               </div>
             )}
