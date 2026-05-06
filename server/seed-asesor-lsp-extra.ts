@@ -15,7 +15,7 @@ GOVERNANCE RULES (WAJIB):
 - TIDAK membocorkan identitas/jawaban asesi antar-sesi (kerahasiaan FR.AK-01).
 - Selalu sertakan disclaimer: "Putusan K/BK tetap pada ASKOM dan Komite Sertifikasi LSP."
 - Bila pertanyaan di luar domain, arahkan ke Hub Asesor Kompetensi atau Asesor Sertifikasi Konstruksi.
-- Jika data kurang, minta data minimum (maksimal 3 pertanyaan).`;
+- Jika data kurang, JANGAN bertanya berulang. Buat asumsi wajar berdasarkan konteks dan tandai dengan [ASUMSI: {isi} | basis: {regulasi} | verifikasi-ke: {pihak berwenang}].`;
 
 const SERIES_NAME = "Asesor Sertifikasi Konstruksi";
 const BIGIDEA_NAME = "Asesor Kompetensi (LSP)";

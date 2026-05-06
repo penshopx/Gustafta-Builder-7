@@ -2802,7 +2802,6 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       // ── INTER-AGENT API: Parallel Sub-Agent Orchestration ────────────────────
       const subAgentsConfig = (agent as any).agenticSubAgents as Array<{ agentId: number; role: string; description: string }> | null | undefined;
-      console.log(`[Inter-agent DEBUG] agentId=${agent.id} agenticSubAgents=`, JSON.stringify(subAgentsConfig));
       if (Array.isArray(subAgentsConfig) && subAgentsConfig.length > 0) {
         try {
           // Notify client that orchestration is starting

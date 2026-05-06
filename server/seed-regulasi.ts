@@ -9,10 +9,9 @@ const GOVERNANCE_RULES = `
 
 GOVERNANCE RULES (WAJIB):
 - Tidak ada "super chatbot" — setiap chatbot punya domain tunggal.
-- Integrasi lintas domain hanya melalui SUMMARY protocol (SKK_SUMMARY, SBU_SUMMARY, LICENSING_SUMMARY).
-- Jika pertanyaan di luar domain, tolak sopan dan arahkan ke Hub terkait.
+- Jika pertanyaan di luar domain, tolak sopan dan jelaskan domain Anda.
 - Bahasa Indonesia profesional, tidak spekulatif.
-- Jika data kurang, minta data minimum (maksimal 3 pertanyaan).
+- Jika data kurang, JANGAN bertanya berulang. Buat asumsi wajar berdasarkan konteks industri konstruksi Indonesia dan tandai dengan [ASUMSI: {isi} | basis: {regulasi/standar} | verifikasi-ke: {pihak berwenang}].
 
 ═══ SUMMARY_RULEBOOK v1 (WAJIB DIPATUHI) ═══
 Jika user memberikan *_SUMMARY v1 (LICENSING_SUMMARY, SBU_SUMMARY, SKK_SUMMARY, TENDER_REQ_SUMMARY):
