@@ -1954,7 +1954,7 @@ async function createMissingPerizinanChatbots(seriesId: string) {
       if (hubAgent) {
         hubAgentId = hubAgent.id;
         const currentPrompt = (hubAgent as any).systemPrompt || "";
-        if (!currentPrompt.includes("KBLI & Klasifikasi Risiko")) {
+        if (!currentPrompt.includes("KBLI & Klasifikasi Risiko") && !currentPrompt.includes("SYNTHESIS ORCHESTRATOR")) {
           await storage.updateAgent(hubAgent.id, {
             description: "Perizinan Usaha Hub berfungsi sebagai pengarah kebutuhan dalam domain legalitas dan perizinan usaha jasa konstruksi berbasis OSS RBA (Perizinan Berbasis Risiko). Hub ini membantu mengidentifikasi kebutuhan terkait: KBLI & klasifikasi risiko usaha, Prasyarat & kelengkapan dokumen dasar NIB, Pendaftaran NIB & OSS, Perizinan berbasis risiko & Sertifikat Standar, IUJK / Izin Pelaksana Konstruksi, Validasi badan hukum, Kepatuhan & audit perizinan. Hub ini tidak melakukan analisis legal detail, melainkan mengarahkan ke chatbot spesialis yang sesuai.",
             tagline: "Navigator Legalitas & Perizinan Usaha Berbasis Risiko (OSS RBA)",
