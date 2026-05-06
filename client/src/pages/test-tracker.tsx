@@ -99,6 +99,33 @@ const FED_BOTS = [
   { id: 1049, name: "MK-CM Orchestrator",               role: "MK-CM",        color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 4 },
   // Batch 10 — LexCom Legal AI
   { id: 625,  name: "LEX-ORCHESTRATOR (LexCom)",        role: "LexOrch",      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",      subs: 17 },
+  // Batch 11 — SKKNI Jabatan Kerja Orchestrators (216-223)
+  { id: 1064, name: "QS Orchestrator (SKKNI 71-2015)",  role: "QS",           color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 4 },
+  { id: 1065, name: "QE Orchestrator",                  role: "QE",           color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",          subs: 4 },
+  { id: 1066, name: "K3K Orchestrator (HSE)",           role: "K3K",          color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 4 },
+  { id: 1067, name: "JLN Orchestrator (Ahli Jalan)",    role: "JLN",          color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",      subs: 4 },
+  { id: 1068, name: "JBT Orchestrator (Ahli Jembatan)", role: "JBT",          color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",              subs: 4 },
+  { id: 1069, name: "REL Orchestrator (Jalan Rel)",     role: "REL",          color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",      subs: 4 },
+  { id: 1070, name: "TWG Orchestrator (Terowongan)",    role: "TWG",          color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",      subs: 4 },
+  { id: 1071, name: "PJJ Orchestrator (Pemeliharaan)",  role: "PJJ",          color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",              subs: 4 },
+  // Batch 12 — Project Management Orchestrators
+  { id: 1072, name: "Strategi Tender Orchestrator",     role: "StrTender",    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 4 },
+  { id: 1073, name: "Dok Penawaran Orchestrator",       role: "DokPenaw",     color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",              subs: 5 },
+  { id: 1074, name: "Eksekusi Kontrak Orchestrator",    role: "EksKontrak",   color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",  subs: 4 },
+  { id: 1075, name: "Perencanaan Eksekusi Orchestrator",role: "PrcEksekusi",  color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",                  subs: 4 },
+  { id: 1076, name: "Operasional Lapangan Orchestrator",role: "OprLapangan",  color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",              subs: 4 },
+  { id: 1077, name: "Pengendalian Proyek Orchestrator", role: "PgdProyek",    color: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",              subs: 4 },
+  { id: 1078, name: "Hukum Operasional Orchestrator",   role: "HkmOpr",       color: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-300",  subs: 4 },
+  { id: 1079, name: "Playbook BNSP Orchestrator",       role: "BNSP-PB",      color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300",          subs: 9 },
+  // Batch 13 — LexCom Wing Orchestrators (205-208)
+  { id: 1080, name: "LEX-PIDANA-PERDATA Orchestrator",  role: "LexPidana",    color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",                  subs: 4 },
+  { id: 1081, name: "LEX-BISNIS Orchestrator",          role: "LexBisnis",    color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",      subs: 6 },
+  { id: 1082, name: "LEX-RISET Orchestrator",           role: "LexRiset",     color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",      subs: 4 },
+  { id: 1083, name: "LEX-KELUARGA Orchestrator",        role: "LexKeluarga",  color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",      subs: 3 },
+  // Batch 14 — Standalone Hub Orchestrators
+  { id: 331,  name: "Tender Strategy Hub",              role: "TenderHub",    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 9 },
+  { id: 352,  name: "Site Operations Hub",              role: "SiteOps",      color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",          subs: 12 },
+  { id: 376,  name: "Regulasi Konstruksi Hub",          role: "RegulasiHub",  color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 27 },
 ];
 
 // ─── Test Scenarios ───────────────────────────────────────────────────────────
@@ -765,7 +792,7 @@ export default function TestTrackerPage() {
             <DialogTitle>Reset hasil test {activeTab === "tender" ? "Tender" : "Federation"}?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Semua status dan catatan di tab {activeTab === "tender" ? "Tender (35 sel)" : "Federation (25 sel)"} akan dihapus.
+            Semua status dan catatan di tab {activeTab === "tender" ? "Tender (35 sel)" : `Federation (${FED_BOTS.length * 5} sel)`} akan dihapus.
           </p>
           <div className="flex gap-3 mt-2">
             <Button variant="outline" onClick={() => setShowReset(false)} className="flex-1">Batal</Button>
