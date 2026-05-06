@@ -7,12 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   CheckCircle2, XCircle, Clock, ArrowLeft, RotateCcw,
   ChevronDown, ChevronUp, ExternalLink, ClipboardCheck,
-  BarChart3, Bot, Info
+  BarChart3, Bot, Info, Layers, Zap
 } from "lucide-react";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// ─── Tender Bots ─────────────────────────────────────────────────────────────
 
-const BOTS = [
+const TENDER_BOTS = [
   { id: 23,  name: "Tender Hub",                      role: "Orchestrator",  color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
   { id: 24,  name: "Tender Readiness Checker",         role: "Readiness",     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
   { id: 25,  name: "Document Checklist Generator",     role: "Documents",     color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300" },
@@ -20,75 +20,114 @@ const BOTS = [
   { id: 339, name: "Document Compliance Checker",      role: "Compliance",    color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" },
 ];
 
+// ─── Federation Hub Orchestrators ────────────────────────────────────────────
+
+const FED_BOTS = [
+  { id: 23, name: "Tender Hub",             role: "Tender",    color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300", subs: 4 },
+  { id: 17, name: "SKK Hub",                role: "SKK",       color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",         subs: 5 },
+  { id: 12, name: "SBU Hub",                role: "SBU",       color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300", subs: 4 },
+  { id: 4,  name: "Perizinan Usaha Hub",    role: "Perizinan", color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",         subs: 4 },
+  { id: 34, name: "Asesor Kompetensi Hub",  role: "ASKOM",     color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",     subs: 4 },
+];
+
+// ─── Test Scenarios ───────────────────────────────────────────────────────────
+
 const TESTS = [
   {
-    id: "T1",
-    label: "T1 — ELICIT",
+    id: "T1", label: "T1 — ELICIT", badge: "bg-blue-50 text-blue-700 border-blue-200",
     title: "ELICIT State: Pertanyaan ≤3 field",
-    description: "Berikan query ambigu tanpa detail (misal: 'saya mau ikut tender'). Bot harus tanya MAKSIMAL 3 field dalam 1 putaran, lalu lanjutkan analisis.",
+    description: "Berikan query ambigu tanpa detail. Bot harus tanya MAKSIMAL 3 field dalam 1 putaran, lalu lanjutkan analisis.",
     prompt: "Saya mau ikut tender proyek gedung pemerintah.",
-    criteria: ["Bot tanya ≤ 3 field dalam satu respons", "Tidak meminta upload dokumen atau data yang tidak relevan", "Bot lanjutkan analisis setelah mendapat jawaban", "Tidak bertanya di putaran berikutnya tanpa analisis"],
-    badge: "bg-blue-50 text-blue-700 border-blue-200",
+    criteria: ["Bot tanya ≤ 3 field dalam satu respons", "Tidak meminta upload dokumen atau data tidak relevan", "Bot lanjutkan analisis setelah mendapat jawaban", "Tidak bertanya di putaran berikutnya tanpa analisis"],
   },
   {
-    id: "T2",
-    label: "T2 — ANALYZE+REPORT",
-    title: "ANALYZE & REPORT: Output 4-persona terstruktur",
-    description: "Berikan skenario lengkap. Bot harus output dengan header ▶[XX] per persona (atau ringkasan terstruktur untuk bot non-hub), plus Ringkasan Eksekutif.",
+    id: "T2", label: "T2 — ANALYZE+REPORT", badge: "bg-purple-50 text-purple-700 border-purple-200",
+    title: "ANALYZE & REPORT: Output terstruktur",
+    description: "Berikan skenario lengkap. Bot harus output terstruktur, analisis per aspek, dan Ringkasan Eksekutif.",
     prompt: "BUJK saya PT Maju Jaya, kualifikasi M2 sub-bidang bangunan gedung. Ingin ikut tender APBN Rp 15 miliar proyek renovasi gedung kantor kementerian. Tenaga ahli: 2 SKK Jenjang 7, 1 SKK Jenjang 6. Pengalaman proyek serupa Rp 12 miliar.",
-    criteria: ["Output terstruktur dengan section/header yang jelas", "Setiap aspek dianalisis (kualifikasi, dokumen, risiko, dll)", "Ada Ringkasan Eksekutif atau summary di akhir", "Tidak ada paragraf pendek tanpa substansi"],
-    badge: "bg-purple-50 text-purple-700 border-purple-200",
+    criteria: ["Output terstruktur dengan section/header yang jelas", "Setiap aspek dianalisis", "Ada Ringkasan Eksekutif atau summary di akhir", "Tidak ada paragraf pendek tanpa substansi"],
   },
   {
-    id: "T3",
-    label: "T3 — FALLBACK",
+    id: "T3", label: "T3 — FALLBACK", badge: "bg-yellow-50 text-yellow-700 border-yellow-200",
     title: "FALLBACK Mode: Asumsi bertanda",
-    description: "Berikan query dengan data sangat minim. Bot harus tetap menganalisis dengan asumsi bertanda [ASUMSI: nilai | basis: regulasi | verifikasi-ke: pihak].",
+    description: "Berikan query dengan data sangat minim. Bot harus tetap menganalisis dengan asumsi bertanda [ASUMSI: ...].",
     prompt: "Mau ikut tender. Kualifikasi saya kecil. Bantu saya.",
-    criteria: ["Bot tidak menolak atau meminta lebih banyak data sebelum mulai", "Ada tag [ASUMSI: ...] atau minimal (asumsi: ...) dalam output", "Analisis tetap diberikan meski data sangat minim", "Bot tanya ≤ 3 field SETELAH memberikan analisis awal"],
-    badge: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    criteria: ["Bot tidak menolak atau meminta lebih banyak data sebelum mulai", "Ada tag [ASUMSI: ...] atau (asumsi: ...) dalam output", "Analisis tetap diberikan meski data sangat minim", "Bot tanya ≤ 3 field SETELAH memberikan analisis awal"],
   },
   {
-    id: "T4",
-    label: "T4 — CLARIFY+REFINE",
+    id: "T4", label: "T4 — CLARIFY+REFINE", badge: "bg-teal-50 text-teal-700 border-teal-200",
     title: "CLARIFY & REFINE: Update analisis setelah data baru",
-    description: "Setelah respons awal, berikan data tambahan. Bot harus memperbarui analisis dan menandai perubahan (✏️ atau kalimat perubahan).",
-    prompt: "Lanjutan dari T2 — setelah analisis awal, informasikan: 'Ternyata nilai pengalaman kami hanya Rp 8 miliar, bukan Rp 12 miliar. Dan kami belum punya ISO 9001.'",
-    criteria: ["Bot memperbarui analisis berdasarkan data baru", "Perubahan ditandai (✏️, 'diperbarui', atau kalimat eksplisit)", "Bot tidak mengulang seluruh analisis dari awal tanpa konteks", "Implikasi perubahan dijelaskan"],
-    badge: "bg-teal-50 text-teal-700 border-teal-200",
+    description: "Setelah respons awal, berikan data tambahan. Bot harus memperbarui analisis dan menandai perubahan.",
+    prompt: "Lanjutan dari T2 — 'Ternyata nilai pengalaman kami hanya Rp 8 miliar, bukan Rp 12 miliar. Dan kami belum punya ISO 9001.'",
+    criteria: ["Bot memperbarui analisis berdasarkan data baru", "Perubahan ditandai (✏️, 'diperbarui', atau kalimat eksplisit)", "Bot tidak mengulang seluruh analisis dari awal", "Implikasi perubahan dijelaskan"],
   },
   {
-    id: "T5",
-    label: "T5 — HANDOVER",
+    id: "T5", label: "T5 — HANDOVER", badge: "bg-gray-50 text-gray-700 border-gray-200",
     title: "HANDOVER: Topik di luar domain",
-    description: "Tanya sesuatu yang jelas di luar domain Tender/Pengadaan. Bot harus akui batas domain dan arahkan ke sumber yang tepat tanpa mengada-ada.",
+    description: "Tanya sesuatu yang jelas di luar domain. Bot harus akui batas domain dan arahkan ke sumber tepat.",
     prompt: "Bagaimana cara mengurus perceraian? Dan juga, apa strategi investasi saham yang bagus untuk tahun ini?",
-    criteria: ["Bot mengakui topik di luar domain-nya", "Bot menyebutkan domain yang tepat untuk konsultasi (bukan nama chatbot lain)", "Tidak mengada-ada jawaban di luar domain", "Respons tetap sopan dan profesional"],
-    badge: "bg-gray-50 text-gray-700 border-gray-200",
+    criteria: ["Bot mengakui topik di luar domain-nya", "Bot menyebutkan domain yang tepat untuk konsultasi", "Tidak mengada-ada jawaban di luar domain", "Respons tetap sopan dan profesional"],
   },
   {
-    id: "T6",
-    label: "T6 — CLOSE",
+    id: "T6", label: "T6 — CLOSE", badge: "bg-indigo-50 text-indigo-700 border-indigo-200",
     title: "CLOSE State: Ringkasan + tindak lanjut",
-    description: "Minta bot untuk menutup sesi atau merangkum diskusi. Bot harus memberikan 3 bullet ringkasan + 1 langkah tindak lanjut konkret.",
+    description: "Minta bot menutup sesi atau merangkum diskusi. Bot harus memberikan 3 bullet ringkasan + 1 langkah konkret.",
     prompt: "Tolong rangkum semua yang kita diskusikan dan berikan satu langkah yang harus saya ambil sekarang.",
     criteria: ["Ada minimal 3 bullet point ringkasan", "Ada 1 langkah tindak lanjut yang konkret dan spesifik", "Ringkasan mencakup poin-poin utama diskusi", "Format rapi dan mudah dibaca"],
-    badge: "bg-indigo-50 text-indigo-700 border-indigo-200",
   },
   {
-    id: "T7",
-    label: "T7 — ANTI-PATTERN",
+    id: "T7", label: "T7 — ANTI-PATTERN", badge: "bg-red-50 text-red-700 border-red-200",
     title: "Anti-Pattern Check: Tidak ada pola terlarang",
-    description: "Cek bahwa bot tidak menggunakan pola terlarang. Berikan query umum dan amati respons apakah mengandung anti-pattern.",
-    prompt: "Ceritakan apa yang bisa kamu bantu untuk persiapan tender saya secara lengkap.",
+    description: "Cek bahwa bot tidak menggunakan pola terlarang. Berikan query umum dan amati respons.",
+    prompt: "Ceritakan apa yang bisa kamu bantu untuk persiapan saya secara lengkap.",
     criteria: ["❌ Tidak ada 'minta data minimum' atau 'minimal berikan data'", "❌ Tidak ada instruksi untuk paste data dari chatbot lain", "❌ Tidak ada 'arahkan ke Hub terkait' tanpa alternatif mandiri", "✓ Bot langsung menjelaskan kemampuan dan menawarkan bantuan konkret"],
-    badge: "bg-red-50 text-red-700 border-red-200",
+  },
+];
+
+// ─── Federation-specific test scenarios ──────────────────────────────────────
+
+const FED_TESTS = [
+  {
+    id: "F1", label: "F1 — ORCHESTRATE", badge: "bg-violet-50 text-violet-700 border-violet-200",
+    title: "Orchestration: Sub-agents terpanggil paralel",
+    description: "Kirim 1 pesan ke hub orchestrator. Pastikan semua sub-agents dipanggil secara paralel (lihat panel ungu 'Paralel sub-agen' di UI chat).",
+    prompt: "Saya PT Karya Bangun, kualifikasi Menengah, mau cek kesiapan bisnis kami secara menyeluruh.",
+    criteria: ["Panel orchestrasi muncul di UI chat (lingkaran spinner per sub-agent)", "Semua sub-agents terpanggil (counter N/N di panel)", "Response final mencakup sintesis dari semua sub-agent", "Tidak ada error timeout atau sub-agent gagal"],
+  },
+  {
+    id: "F2", label: "F2 — SYNTHESIS", badge: "bg-purple-50 text-purple-700 border-purple-200",
+    title: "Synthesis: Output terintegrasi berkualitas",
+    description: "Setelah orchestration, periksa kualitas sintesis. Orchestrator harus menyatukan laporan sub-agents menjadi satu respons kohesif.",
+    prompt: "Berikan analisis komprehensif kesiapan kami untuk tender konstruksi gedung Rp 10 miliar. Perusahaan kami PT Graha Sejahtera, SBU BG004 kualifikasi Kecil, SKK: 2 ahli jenjang 6.",
+    criteria: ["Response bukan copy-paste laporan sub-agent mentah", "Ada header atau struktur sintesis yang jelas", "Semua aspek dari sub-agents tercakup dalam satu respons", "Ada rekomendasi atau tindakan prioritas di akhir"],
+  },
+  {
+    id: "F3", label: "F3 — FALLBACK-ORC", badge: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    title: "Fallback Orchestration: Data minim + asumsi",
+    description: "Kirim data minim ke hub. Sub-agents harus beroperasi dengan FALLBACK MODE dan menghasilkan [ASUMSI:...] yang masuk ke sintesis.",
+    prompt: "Mau konsultasi soal perusahaan konstruksi saya. Masih kecil.",
+    criteria: ["Orchestrator tetap menghasilkan respons meski data minim", "Ada tanda [ASUMSI: ...] dari sub-agents dalam sintesis", "Tidak ada error atau pesan 'tidak cukup data'", "Response tetap actionable dan terstruktur"],
+  },
+  {
+    id: "F4", label: "F4 — TIMING", badge: "bg-orange-50 text-orange-700 border-orange-200",
+    title: "Timing: Respons dalam batas wajar",
+    description: "Ukur waktu respons orchestrator dengan 4+ sub-agents paralel. Target: total < 30 detik, masing-masing sub-agent < 25 detik.",
+    prompt: "Analisis lengkap kesiapan tender kami: PT Maju Konstruksi, SBU BG002 Menengah, SKK 5 orang jenjang 7-8, pengalaman 15M, ingin tender 20M.",
+    criteria: ["Panel orchestrasi menampilkan waktu per sub-agent (misalnya 3.2s)", "Tidak ada sub-agent yang timeout (>25 detik)", "Total waktu paralel wajar (< 25 detik untuk 4 sub-agents)", "Sintesis muncul setelah semua sub-agents selesai"],
+  },
+  {
+    id: "F5", label: "F5 — ANTI-PAT-ORC", badge: "bg-red-50 text-red-700 border-red-200",
+    title: "Anti-Pattern Orchestrator: Tidak ada delegasi ke user",
+    description: "Pastikan orchestrator tidak meminta user untuk 'minta hasil dari sub-agent lain' atau menjadi kurir antar bot.",
+    prompt: "Bantu saya evaluasi apakah perusahaan saya siap untuk tender APBN bulan depan.",
+    criteria: ["❌ Tidak ada instruksi untuk copy-paste hasil dari chatbot lain", "❌ Tidak ada variabel SKK_SUMMARY/SBU_SUMMARY yang diarahkan ke user", "✓ Orchestrator memproses sendiri melalui sub-agents internal", "✓ User tidak perlu berpindah chatbot untuk mendapat analisis"],
   },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type TestStatus = "pending" | "pass" | "fail" | "skip";
+type TabType = "tender" | "federation";
 
 interface CellResult {
   status: TestStatus;
@@ -99,31 +138,32 @@ interface CellResult {
 type GridState = Record<string, CellResult>;
 
 const STORAGE_KEY = "gustafta_test_tracker_v1";
+const FED_STORAGE_KEY = "gustafta_fed_tracker_v1";
 
 function cellKey(botId: number, testId: string) {
   return `${botId}_${testId}`;
 }
 
-function defaultGrid(): GridState {
+function defaultGrid(bots: typeof TENDER_BOTS, tests: typeof TESTS): GridState {
   const g: GridState = {};
-  for (const bot of BOTS) {
-    for (const test of TESTS) {
+  for (const bot of bots) {
+    for (const test of tests) {
       g[cellKey(bot.id, test.id)] = { status: "pending", notes: "" };
     }
   }
   return g;
 }
 
-function loadGrid(): GridState {
+function loadGrid(key: string, bots: typeof TENDER_BOTS, tests: typeof TESTS): GridState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return { ...defaultGrid(), ...JSON.parse(raw) };
+    const raw = localStorage.getItem(key);
+    if (raw) return { ...defaultGrid(bots, tests), ...JSON.parse(raw) };
   } catch {}
-  return defaultGrid();
+  return defaultGrid(bots, tests);
 }
 
-function saveGrid(g: GridState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(g));
+function saveGrid(key: string, g: GridState) {
+  localStorage.setItem(key, JSON.stringify(g));
 }
 
 // ─── Cell Status helpers ──────────────────────────────────────────────────────
@@ -135,7 +175,7 @@ const STATUS_CONFIG = {
   skip:    { icon: ChevronDown,  label: "Skip",    cls: "text-gray-400",                      bg: "bg-gray-50 dark:bg-gray-800/30",     border: "border-dashed border-gray-300 dark:border-gray-600" },
 };
 
-// ─── Components ───────────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function StatusCycle({ status, onChange }: { status: TestStatus; onChange: (s: TestStatus) => void }) {
   const cycle: TestStatus[] = ["pending", "pass", "fail", "skip"];
@@ -171,62 +211,216 @@ function ProgressBar({ pass, fail, total }: { pass: number; fail: number; total:
   );
 }
 
+function TestGrid({
+  bots, tests, grid, updateCell, selected, setSelected,
+}: {
+  bots: { id: number; name: string; role: string; color: string; subs?: number }[];
+  tests: typeof TESTS;
+  grid: GridState;
+  updateCell: (botId: number, testId: string, patch: Partial<CellResult>) => void;
+  selected: { botId: number; testId: string } | null;
+  setSelected: (s: { botId: number; testId: string } | null) => void;
+}) {
+  const allCells = bots.flatMap(b => tests.map(t => grid[cellKey(b.id, t.id)]));
+  const passCount = allCells.filter(c => c?.status === "pass").length;
+  const failCount = allCells.filter(c => c?.status === "fail").length;
+  const total = bots.length * tests.length;
+
+  const botStats = bots.map(bot => {
+    const cells = tests.map(t => grid[cellKey(bot.id, t.id)]);
+    return { bot, pass: cells.filter(c => c?.status === "pass").length, fail: cells.filter(c => c?.status === "fail").length };
+  });
+
+  const testStats = tests.map(test => {
+    const cells = bots.map(b => grid[cellKey(b.id, test.id)]);
+    return { test, pass: cells.filter(c => c?.status === "pass").length, fail: cells.filter(c => c?.status === "fail").length };
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Total Sel",   value: total,       cls: "text-gray-700 dark:text-gray-200",   sub: `${bots.length} bot × ${tests.length} test` },
+          { label: "Selesai",     value: allCells.filter(c => c?.status !== "pending").length, cls: "text-blue-600 dark:text-blue-400", sub: `${total - allCells.filter(c => c?.status !== "pending").length} pending` },
+          { label: "Pass",        value: passCount,   cls: "text-green-600 dark:text-green-400", sub: `${Math.round(passCount / total * 100)}%` },
+          { label: "Fail",        value: failCount,   cls: "text-red-500 dark:text-red-400",     sub: failCount === 0 ? "Bersih ✓" : "Perlu perbaikan" },
+        ].map(card => (
+          <div key={card.label} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{card.label}</p>
+            <p className={`text-2xl font-bold ${card.cls}`}>{card.value}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{card.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Progress */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <BarChart3 className="w-4 h-4 text-gray-500" />
+          <span className="text-sm font-medium">Progress Keseluruhan</span>
+        </div>
+        <ProgressBar pass={passCount} fail={failCount} total={total} />
+        {passCount === total && (
+          <p className="mt-2 text-sm text-green-600 dark:text-green-400 font-medium">
+            🎉 Semua {total} sel PASS — sistem siap!
+          </p>
+        )}
+      </div>
+
+      {/* Grid */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
+          <Bot className="w-4 h-4 text-gray-500" />
+          <span className="text-sm font-medium">Matriks {total} Sel — Klik sel untuk detail & catatan</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 dark:border-gray-800">
+                <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400 text-xs min-w-[180px]">Bot</th>
+                {tests.map(t => (
+                  <th key={t.id} className="px-2 py-3 text-center font-mono text-xs text-gray-500 dark:text-gray-400 min-w-[70px]">
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs border ${t.badge}`}>{t.id}</span>
+                  </th>
+                ))}
+                <th className="px-3 py-3 text-center font-medium text-gray-500 dark:text-gray-400 text-xs min-w-[90px]">Progress</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+              {bots.map((bot, bi) => {
+                const bs = botStats[bi];
+                return (
+                  <tr key={bot.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <a href={`/bot/${bot.id}`} target="_blank" rel="noopener noreferrer"
+                          className="text-gray-400 hover:text-blue-500 transition-colors" title={`Buka ${bot.name}`}
+                          data-testid={`link-bot-${bot.id}`}>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <div>
+                          <p className="font-medium text-xs text-gray-800 dark:text-gray-200 leading-tight">{bot.name}</p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Badge className={`text-[10px] px-1.5 py-0 ${bot.color}`}>{bot.role}</Badge>
+                            {bot.subs !== undefined && (
+                              <span className="text-[10px] text-violet-500 font-mono">{bot.subs}✦</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    {tests.map(test => {
+                      const k = cellKey(bot.id, test.id);
+                      const cell = grid[k] ?? { status: "pending" as TestStatus, notes: "" };
+                      const cfg = STATUS_CONFIG[cell.status];
+                      const isSelected = selected?.botId === bot.id && selected?.testId === test.id;
+                      return (
+                        <td key={test.id} className="px-2 py-2 text-center">
+                          <div
+                            className={`relative inline-flex flex-col items-center justify-center w-14 h-14 rounded-xl border cursor-pointer transition-all hover:scale-105 active:scale-95 ${cfg.bg} ${cfg.border} ${isSelected ? "ring-2 ring-blue-400 ring-offset-1" : ""}`}
+                            onClick={() => setSelected(isSelected ? null : { botId: bot.id, testId: test.id })}
+                            data-testid={`cell-${bot.id}-${test.id}`}
+                          >
+                            <StatusCycle status={cell.status} onChange={s => updateCell(bot.id, test.id, { status: s })} />
+                            {cell.notes && <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-400 rounded-full" title="Ada catatan" />}
+                          </div>
+                        </td>
+                      );
+                    })}
+                    <td className="px-3 py-3">
+                      <div className="space-y-1 min-w-[80px]">
+                        <ProgressBar pass={bs.pass} fail={bs.fail} total={tests.length} />
+                        <p className="text-[10px] text-gray-400 text-center">{bs.pass}/{tests.length} Pass</p>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/20">
+              <tr>
+                <td className="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Per Skenario</td>
+                {testStats.map(ts => (
+                  <td key={ts.test.id} className="px-2 py-2 text-center">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">{ts.pass}/{bots.length}</span>
+                      {ts.fail > 0 && <span className="text-xs text-red-500">{ts.fail}✗</span>}
+                    </div>
+                  </td>
+                ))}
+                <td className="px-3 py-2 text-center">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{passCount}/{total}</span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400">
+        {Object.entries(STATUS_CONFIG).map(([s, cfg]) => {
+          const Icon = cfg.icon;
+          return (
+            <div key={s} className="flex items-center gap-1.5">
+              <Icon className={`w-3.5 h-3.5 ${cfg.cls}`} />
+              <span>{cfg.label}</span>
+            </div>
+          );
+        })}
+        <span className="ml-2">· Klik ikon untuk siklus status · Klik sel untuk tambah catatan</span>
+        {bots[0]?.subs !== undefined && <span>· ✦ = jumlah sub-agents paralel</span>}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function TestTrackerPage() {
-  const [grid, setGrid] = useState<GridState>(loadGrid);
+  const [activeTab, setActiveTab] = useState<TabType>("tender");
+  const [grid, setGrid] = useState<GridState>(() => loadGrid(STORAGE_KEY, TENDER_BOTS, TESTS));
+  const [fedGrid, setFedGrid] = useState<GridState>(() => loadGrid(FED_STORAGE_KEY, FED_BOTS, FED_TESTS));
   const [selected, setSelected] = useState<{ botId: number; testId: string } | null>(null);
   const [expandedTest, setExpandedTest] = useState<string | null>(null);
   const [showReset, setShowReset] = useState(false);
 
-  useEffect(() => { saveGrid(grid); }, [grid]);
+  useEffect(() => { saveGrid(STORAGE_KEY, grid); }, [grid]);
+  useEffect(() => { saveGrid(FED_STORAGE_KEY, fedGrid); }, [fedGrid]);
+  useEffect(() => { setSelected(null); }, [activeTab]);
 
   const updateCell = useCallback((botId: number, testId: string, patch: Partial<CellResult>) => {
-    setGrid(prev => {
+    const updater = (prev: GridState) => {
       const k = cellKey(botId, testId);
-      const updated = { ...prev, [k]: { ...prev[k], ...patch, timestamp: new Date().toISOString() } };
-      return updated;
-    });
-  }, []);
+      return { ...prev, [k]: { ...prev[k], ...patch, timestamp: new Date().toISOString() } };
+    };
+    if (activeTab === "tender") setGrid(updater);
+    else setFedGrid(updater);
+  }, [activeTab]);
 
   const resetAll = () => {
-    setGrid(defaultGrid());
+    if (activeTab === "tender") setGrid(defaultGrid(TENDER_BOTS, TESTS));
+    else setFedGrid(defaultGrid(FED_BOTS, FED_TESTS));
     setShowReset(false);
   };
 
-  // ── Stats ──
-  const allCells = BOTS.flatMap(b => TESTS.map(t => grid[cellKey(b.id, t.id)]));
-  const passCount = allCells.filter(c => c.status === "pass").length;
-  const failCount = allCells.filter(c => c.status === "fail").length;
-  const doneCount = allCells.filter(c => c.status !== "pending").length;
-  const total = BOTS.length * TESTS.length;
+  const currentBots = activeTab === "tender" ? TENDER_BOTS : FED_BOTS;
+  const currentTests = activeTab === "tender" ? TESTS : FED_TESTS;
+  const currentGrid = activeTab === "tender" ? grid : fedGrid;
 
-  const botStats = BOTS.map(bot => {
-    const cells = TESTS.map(t => grid[cellKey(bot.id, t.id)]);
-    return {
-      bot,
-      pass: cells.filter(c => c.status === "pass").length,
-      fail: cells.filter(c => c.status === "fail").length,
-      done: cells.filter(c => c.status !== "pending").length,
-    };
-  });
+  const allCells = currentBots.flatMap(b => currentTests.map(t => currentGrid[cellKey(b.id, t.id)]));
+  const passCount = allCells.filter(c => c?.status === "pass").length;
+  const failCount = allCells.filter(c => c?.status === "fail").length;
+  const total = currentBots.length * currentTests.length;
 
-  const testStats = TESTS.map(test => {
-    const cells = BOTS.map(b => grid[cellKey(b.id, test.id)]);
-    return {
-      test,
-      pass: cells.filter(c => c.status === "pass").length,
-      fail: cells.filter(c => c.status === "fail").length,
-    };
-  });
-
-  // ── Selected cell data ──
-  const selCell = selected ? grid[cellKey(selected.botId, selected.testId)] : null;
-  const selBot = selected ? BOTS.find(b => b.id === selected.botId) : null;
-  const selTest = selected ? TESTS.find(t => t.id === selected.testId) : null;
+  const selCell = selected ? currentGrid[cellKey(selected.botId, selected.testId)] : null;
+  const selBot = selected ? currentBots.find(b => b.id === selected.botId) : null;
+  const selTest = selected ? currentTests.find(t => t.id === selected.testId) : null;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+
       {/* ── Header ── */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
@@ -240,10 +434,41 @@ export default function TestTrackerPage() {
               <ClipboardCheck className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h1 className="font-semibold text-sm leading-tight">Test Tracker — Modul Tender</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">5 bot × 7 skenario · 35 sel evaluasi</p>
+              <h1 className="font-semibold text-sm leading-tight">Test Tracker — Gustafta</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {activeTab === "tender" ? "5 Tender bot × 7 skenario · 35 sel" : "5 Hub Orchestrator × 5 Federation test · 25 sel"}
+              </p>
             </div>
           </div>
+
+          {/* Tabs */}
+          <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-1 ml-2">
+            <button
+              onClick={() => setActiveTab("tender")}
+              data-testid="tab-tender"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                activeTab === "tender"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              <Layers className="w-3 h-3" />
+              Tender (35)
+            </button>
+            <button
+              onClick={() => setActiveTab("federation")}
+              data-testid="tab-federation"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                activeTab === "federation"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              <Zap className="w-3 h-3 text-violet-500" />
+              Federation (25)
+            </button>
+          </div>
+
           <div className="ml-auto flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 text-sm">
               <span className="text-green-600 dark:text-green-400 font-semibold">{passCount}</span>
@@ -251,19 +476,12 @@ export default function TestTrackerPage() {
               <span className="text-gray-600 dark:text-gray-300">{total}</span>
               <span className="text-gray-400 text-xs ml-1">Pass</span>
             </div>
-            {failCount > 0 && (
-              <Badge variant="destructive" className="text-xs">{failCount} Fail</Badge>
+            {failCount > 0 && <Badge variant="destructive" className="text-xs">{failCount} Fail</Badge>}
+            {passCount === total && passCount > 0 && (
+              <Badge className="bg-green-600 text-white text-xs">✓ {total}/{total} PASS</Badge>
             )}
-            {passCount === total && (
-              <Badge className="bg-green-600 text-white text-xs">✓ 35/35 PASS</Badge>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowReset(true)}
-              data-testid="btn-reset"
-              className="text-gray-500 hover:text-red-600"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setShowReset(true)} data-testid="btn-reset"
+              className="text-gray-500 hover:text-red-600">
               <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
               Reset
             </Button>
@@ -273,44 +491,50 @@ export default function TestTrackerPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-        {/* ── Summary Cards ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Total Sel",   value: total,       cls: "text-gray-700 dark:text-gray-200",       sub: "5 bot × 7 test" },
-            { label: "Selesai",     value: doneCount,   cls: "text-blue-600 dark:text-blue-400",       sub: `${total - doneCount} pending` },
-            { label: "Pass",        value: passCount,   cls: "text-green-600 dark:text-green-400",     sub: `${Math.round(passCount / total * 100)}%` },
-            { label: "Fail",        value: failCount,   cls: "text-red-500 dark:text-red-400",         sub: failCount === 0 ? "Bersih ✓" : "Perlu perbaikan" },
-          ].map(card => (
-            <div key={card.label} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{card.label}</p>
-              <p className={`text-2xl font-bold ${card.cls}`}>{card.value}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{card.sub}</p>
+        {/* ── Federation info banner ── */}
+        {activeTab === "federation" && (
+          <div className="bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <Zap className="w-4 h-4 text-violet-600 dark:text-violet-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-violet-800 dark:text-violet-300">Federation Layer — Inter-Agent API v2</p>
+                <p className="text-xs text-violet-600 dark:text-violet-400 mt-0.5">
+                  6 hub orchestrator dikonfigurasi dengan <code className="font-mono bg-violet-100 dark:bg-violet-900/40 px-1 rounded">agenticSubAgents</code>.
+                  Saat user kirim pesan ke hub, sistem memanggil sub-agents secara paralel lalu mensintesis hasilnya.
+                  Uji F1–F5 untuk validasi pipeline orchestration end-to-end.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {[
+                    { id: 23, name: "Tender Hub", subs: 4 },
+                    { id: 17, name: "SKK Hub", subs: 5 },
+                    { id: 12, name: "SBU Hub", subs: 4 },
+                    { id: 4,  name: "Perizinan Hub", subs: 4 },
+                    { id: 34, name: "Asesor Hub", subs: 4 },
+                    { id: 69, name: "CSMS Hub", subs: 3 },
+                  ].map(h => (
+                    <a key={h.id} href={`/bot/${h.id}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-900 border border-violet-200 dark:border-violet-800 rounded-lg text-[10px] font-medium text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/50 transition-colors"
+                      data-testid={`fed-hub-link-${h.id}`}>
+                      <Zap className="w-2.5 h-2.5" />
+                      {h.name} ({h.subs}✦)
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-
-        {/* ── Overall Progress ── */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <BarChart3 className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium">Progress Keseluruhan</span>
           </div>
-          <ProgressBar pass={passCount} fail={failCount} total={total} />
-          {passCount === total && (
-            <p className="mt-2 text-sm text-green-600 dark:text-green-400 font-medium">
-              🎉 Semua 35 sel PASS — sistem siap untuk Fase 3!
-            </p>
-          )}
-        </div>
+        )}
 
         {/* ── Test Skenario Reference ── */}
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
             <Info className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium">Skenario Test (T1–T7)</span>
+            <span className="text-sm font-medium">
+              {activeTab === "tender" ? "Skenario Test (T1–T7)" : "Skenario Federation (F1–F5)"}
+            </span>
           </div>
           <div className="divide-y divide-gray-50 dark:divide-gray-800">
-            {TESTS.map(test => (
+            {currentTests.map(test => (
               <div key={test.id} className="px-4">
                 <button
                   className="w-full flex items-center gap-3 py-3 text-left"
@@ -319,18 +543,9 @@ export default function TestTrackerPage() {
                 >
                   <Badge variant="outline" className={`text-xs font-mono shrink-0 ${test.badge}`}>{test.label}</Badge>
                   <span className="text-sm font-medium flex-1">{test.title}</span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {(() => {
-                      const ts = testStats.find(s => s.test.id === test.id)!;
-                      return (
-                        <>
-                          <span className="text-xs text-green-600 dark:text-green-400">{ts.pass}✓</span>
-                          {ts.fail > 0 && <span className="text-xs text-red-500">{ts.fail}✗</span>}
-                        </>
-                      );
-                    })()}
-                    {expandedTest === test.id ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
-                  </div>
+                  {expandedTest === test.id
+                    ? <ChevronUp className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    : <ChevronDown className="w-3.5 h-3.5 text-gray-400 shrink-0" />}
                 </button>
                 {expandedTest === test.id && (
                   <div className="pb-4 space-y-3">
@@ -355,116 +570,15 @@ export default function TestTrackerPage() {
           </div>
         </div>
 
-        {/* ── 35-Cell Grid ── */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
-            <Bot className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium">Matriks 35 Sel — Klik sel untuk detail & catatan</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <th className="px-4 py-3 text-left font-medium text-gray-500 dark:text-gray-400 text-xs min-w-[180px]">Bot</th>
-                  {TESTS.map(t => (
-                    <th key={t.id} className="px-2 py-3 text-center font-mono text-xs text-gray-500 dark:text-gray-400 min-w-[70px]">
-                      <span className={`inline-block px-2 py-0.5 rounded text-xs border ${t.badge}`}>{t.id}</span>
-                    </th>
-                  ))}
-                  <th className="px-3 py-3 text-center font-medium text-gray-500 dark:text-gray-400 text-xs min-w-[90px]">Progress</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                {BOTS.map((bot, bi) => {
-                  const bs = botStats[bi];
-                  return (
-                    <tr key={bot.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <a
-                            href={`/bot/${bot.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-blue-500 transition-colors"
-                            title={`Buka ${bot.name}`}
-                            data-testid={`link-bot-${bot.id}`}
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                          <div>
-                            <p className="font-medium text-xs text-gray-800 dark:text-gray-200 leading-tight">{bot.name}</p>
-                            <Badge className={`text-[10px] px-1.5 py-0 mt-0.5 ${bot.color}`}>{bot.role}</Badge>
-                          </div>
-                        </div>
-                      </td>
-                      {TESTS.map(test => {
-                        const k = cellKey(bot.id, test.id);
-                        const cell = grid[k];
-                        const cfg = STATUS_CONFIG[cell.status];
-                        const isSelected = selected?.botId === bot.id && selected?.testId === test.id;
-                        return (
-                          <td key={test.id} className="px-2 py-2 text-center">
-                            <div
-                              className={`relative inline-flex flex-col items-center justify-center w-14 h-14 rounded-xl border cursor-pointer transition-all hover:scale-105 active:scale-95 ${cfg.bg} ${cfg.border} ${isSelected ? "ring-2 ring-blue-400 ring-offset-1" : ""}`}
-                              onClick={() => setSelected(isSelected ? null : { botId: bot.id, testId: test.id })}
-                              data-testid={`cell-${bot.id}-${test.id}`}
-                            >
-                              <StatusCycle
-                                status={cell.status}
-                                onChange={s => updateCell(bot.id, test.id, { status: s })}
-                              />
-                              {cell.notes && (
-                                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-400 rounded-full" title="Ada catatan" />
-                              )}
-                            </div>
-                          </td>
-                        );
-                      })}
-                      <td className="px-3 py-3">
-                        <div className="space-y-1 min-w-[80px]">
-                          <ProgressBar pass={bs.pass} fail={bs.fail} total={TESTS.length} />
-                          <p className="text-[10px] text-gray-400 text-center">
-                            {bs.pass}/{TESTS.length} Pass
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot className="border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/20">
-                <tr>
-                  <td className="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Per Skenario</td>
-                  {testStats.map(ts => (
-                    <td key={ts.test.id} className="px-2 py-2 text-center">
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span className="text-xs text-green-600 dark:text-green-400 font-medium">{ts.pass}/5</span>
-                        {ts.fail > 0 && <span className="text-xs text-red-500">{ts.fail}✗</span>}
-                      </div>
-                    </td>
-                  ))}
-                  <td className="px-3 py-2 text-center">
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{passCount}/{total}</span>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        {/* ── Legend ── */}
-        <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400">
-          {Object.entries(STATUS_CONFIG).map(([s, cfg]) => {
-            const Icon = cfg.icon;
-            return (
-              <div key={s} className="flex items-center gap-1.5">
-                <Icon className={`w-3.5 h-3.5 ${cfg.cls}`} />
-                <span>{cfg.label}</span>
-              </div>
-            );
-          })}
-          <span className="ml-2">· Klik ikon untuk siklus status · Klik sel untuk tambah catatan</span>
-        </div>
+        {/* ── Grid ── */}
+        <TestGrid
+          bots={currentBots}
+          tests={currentTests}
+          grid={currentGrid}
+          updateCell={updateCell}
+          selected={selected}
+          setSelected={setSelected}
+        />
       </div>
 
       {/* ── Detail Panel (cell selected) ── */}
@@ -481,13 +595,12 @@ export default function TestTrackerPage() {
                   <p className="text-xs text-gray-500 dark:text-gray-400">{selTest.title}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
                 {(["pending","pass","fail","skip"] as TestStatus[]).map(s => {
                   const cfg = STATUS_CONFIG[s];
                   const Icon = cfg.icon;
                   return (
-                    <button
-                      key={s}
+                    <button key={s}
                       onClick={() => updateCell(selected.botId, selected.testId, { status: s })}
                       data-testid={`set-status-${s}`}
                       className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all
@@ -496,16 +609,13 @@ export default function TestTrackerPage() {
                           : "border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300 dark:hover:border-gray-600"
                         }`}
                     >
-                      <Icon className="w-3.5 h-3.5" />
-                      {cfg.label}
+                      <Icon className="w-3.5 h-3.5" />{cfg.label}
                     </button>
                   );
                 })}
-                <button
-                  onClick={() => setSelected(null)}
+                <button onClick={() => setSelected(null)}
                   className="ml-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400"
-                  data-testid="btn-close-panel"
-                >
+                  data-testid="btn-close-panel">
                   <ChevronDown className="w-4 h-4" />
                 </button>
               </div>
@@ -537,22 +647,23 @@ export default function TestTrackerPage() {
                   className="h-28 text-sm resize-none"
                 />
                 {selCell.timestamp && (
-                  <p className="text-[10px] text-gray-400">
-                    Terakhir diupdate: {new Date(selCell.timestamp).toLocaleString("id-ID")}
-                  </p>
+                  <p className="text-[10px] text-gray-400">Terakhir diupdate: {new Date(selCell.timestamp).toLocaleString("id-ID")}</p>
                 )}
                 <div className="flex gap-2 mt-2">
-                  <a
-                    href={`/bot/${selected.botId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="btn-open-bot"
-                  >
+                  <a href={`/bot/${selected.botId}`} target="_blank" rel="noopener noreferrer" data-testid="btn-open-bot">
                     <Button size="sm" variant="outline" className="text-xs gap-1.5">
                       <ExternalLink className="w-3 h-3" />
                       Buka Bot
                     </Button>
                   </a>
+                  {activeTab === "federation" && (
+                    <a href={`/chat/${selected.botId}`} target="_blank" rel="noopener noreferrer" data-testid="btn-open-chat">
+                      <Button size="sm" variant="outline" className="text-xs gap-1.5 border-violet-300 text-violet-700">
+                        <Zap className="w-3 h-3" />
+                        Uji Orchestration
+                      </Button>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -564,16 +675,16 @@ export default function TestTrackerPage() {
       <Dialog open={showReset} onOpenChange={setShowReset}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset semua hasil test?</DialogTitle>
+            <DialogTitle>Reset hasil test {activeTab === "tender" ? "Tender" : "Federation"}?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Semua status dan catatan di 35 sel akan dihapus. Tindakan ini tidak bisa dibatalkan.
+            Semua status dan catatan di tab {activeTab === "tender" ? "Tender (35 sel)" : "Federation (25 sel)"} akan dihapus.
           </p>
           <div className="flex gap-3 mt-2">
             <Button variant="outline" onClick={() => setShowReset(false)} className="flex-1">Batal</Button>
             <Button variant="destructive" onClick={resetAll} className="flex-1" data-testid="btn-confirm-reset">
               <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-              Reset Semua
+              Reset Tab Ini
             </Button>
           </div>
         </DialogContent>
