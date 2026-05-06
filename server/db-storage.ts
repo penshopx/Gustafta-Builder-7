@@ -1219,6 +1219,7 @@ export class DatabaseStorage implements IStorage {
       isActive: row.isActive || false,
       isEnabled: (row as any).isEnabled !== false,
       folderName: (row as any).folderName ?? null,
+      agenticSubAgents: (row.agenticSubAgents as Array<{ agentId: number; role: string; description: string }>) || [],
       createdAt: row.createdAt.toISOString(),
     };
   }
