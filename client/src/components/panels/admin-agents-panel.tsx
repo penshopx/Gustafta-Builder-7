@@ -184,6 +184,46 @@ export function AdminAgentsPanel() {
     onError: (e: any) => toast({ title: "Gagal memulai Bulk Fill", description: e.message, variant: "destructive" }),
   });
 
+  const retryKbMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/agents/kb-research/retry", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+      try { return JSON.parse(text); } catch { return {}; }
+    },
+    onSuccess: () => {
+      const n = kbJob?.result?.failedIds?.length ?? 0;
+      toast({ title: "Retry KB Research dimulai", description: `Memproses ulang ${n} agen yang gagal...` });
+      setPollingActive(true);
+      setTimeout(() => refetch(), 500);
+    },
+    onError: (e: any) => toast({ title: "Gagal retry KB", description: e.message, variant: "destructive" }),
+  });
+
+  const retryBulkFillMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/agents/bulk-fill/retry", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+      try { return JSON.parse(text); } catch { return {}; }
+    },
+    onSuccess: () => {
+      const n = bulkFillJob?.result?.erroredIds?.length ?? 0;
+      toast({ title: "Retry Bulk Fill dimulai", description: `Memproses ulang ${n} agen yang error...` });
+      setPollingActive(true);
+      setTimeout(() => refetch(), 500);
+    },
+    onError: (e: any) => toast({ title: "Gagal retry Bulk Fill", description: e.message, variant: "destructive" }),
+  });
+
   const kbJob = jobs?.["kb-research"];
   const auditJob = jobs?.["field-audit"];
   const bulkFillJob = jobs?.["bulk-fill"];
@@ -271,6 +311,28 @@ export function AdminAgentsPanel() {
             <p className="text-violet-400/80">Tagline · Deskripsi · Kepribadian · Filosofi · Pesan Sambutan · Nada Bicara · Gaya Komunikasi · Respons Off-Topic · Primary Outcome · Domain Charter · Reasoning Policy · Interaction Policy · Quality Bar · Risk Compliance · Product Summary · Keahlian · Conversation Starters · Key Phrases</p>
           </div>
 
+          {/* Retry banner when there are errored agents */}
+          {bulkFillJob?.result?.erroredIds?.length > 0 && bulkFillJob.status !== "running" && (
+            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+              <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-red-300 font-medium">
+                  {bulkFillJob.result.erroredIds.length} agen gagal diisi field-nya
+                </p>
+                <p className="text-xs text-red-400/60">ID: {bulkFillJob.result.erroredIds.slice(0, 8).join(", ")}{bulkFillJob.result.erroredIds.length > 8 ? ` +${bulkFillJob.result.erroredIds.length - 8} lainnya` : ""}</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => retryBulkFillMutation.mutate()}
+                disabled={retryBulkFillMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 flex-shrink-0"
+                data-testid="button-retry-bulk-fill"
+              >
+                {retryBulkFillMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {bulkFillJob.result.erroredIds.length} Error</>}
+              </Button>
+            </div>
+          )}
+
           <Button
             onClick={() => runBulkFillMutation.mutate()}
             disabled={bulkFillJob?.status === "running" || runBulkFillMutation.isPending}
@@ -343,6 +405,28 @@ export function AdminAgentsPanel() {
             )}
 
             <LogBox logs={kbJob?.log ?? []} />
+
+            {/* Retry banner when there are failed agents */}
+            {kbJob?.result?.failedIds?.length > 0 && kbJob.status !== "running" && (
+              <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-red-300 font-medium">
+                    {kbJob.result.failedIds.length} agen gagal dibuat KB-nya
+                  </p>
+                  <p className="text-xs text-red-400/60">ID: {kbJob.result.failedIds.slice(0, 8).join(", ")}{kbJob.result.failedIds.length > 8 ? ` +${kbJob.result.failedIds.length - 8} lainnya` : ""}</p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => retryKbMutation.mutate()}
+                  disabled={retryKbMutation.isPending}
+                  className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 flex-shrink-0"
+                  data-testid="button-retry-kb-research"
+                >
+                  {retryKbMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {kbJob.result.failedIds.length} Gagal</>}
+                </Button>
+              </div>
+            )}
 
             <Button
               onClick={() => runKbMutation.mutate()}
