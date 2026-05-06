@@ -31,6 +31,7 @@ import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
 import StorePage from "@/pages/store";
 import StoreAccess from "@/pages/store-access";
+import TestTracker from "@/pages/test-tracker";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
@@ -68,6 +69,7 @@ function Router() {
       <Route path="/templates" component={TemplatesPage} />
       <Route path="/store" component={StorePage} />
       <Route path="/store/access/:token" component={StoreAccess} />
+      <Route path="/test-tracker" component={TestTracker} />
       <Route component={NotFound} />
     </Switch>
   );
