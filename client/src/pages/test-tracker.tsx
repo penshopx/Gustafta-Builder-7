@@ -147,7 +147,19 @@ const FED_BOTS = [
   { id: 168,  name: "HUB Pembinaan ASPEKINDO",          role: "ASPEKINDO",    color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",          subs: 4 },
   { id: 177,  name: "HUB SKK AJJ",                      role: "SKK-AJJ",      color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",              subs: 4 },
   { id: 298,  name: "HUB Kompetensi Manajerial BUJK",   role: "BUJK-MGR",     color: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-300",  subs: 4 },
-  // Batch 18 — SKK Coach Hubs (438-543) — upgraded to true Inter-Agent v2
+  // Batch 18 — Remaining upgraded hubs (Batch B/C/D)
+  { id: 404,  name: "HUB SBU Pekerjaan Konstruksi",           role: "SBU-PK",      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",            subs: 4 },
+  { id: 413,  name: "HUB SBU Konsultan Coach",                role: "SBU-KK",      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300",    subs: 4 },
+  { id: 419,  name: "HUB SBU Coach All-in-One",               role: "SBU-AIO",     color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",    subs: 4 },
+  { id: 428,  name: "HUB SBU Terintegrasi Coach",             role: "SBU-TEK",     color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",    subs: 4 },
+  { id: 549,  name: "HUB SBU Jasa Penunjang Tenaga Listrik",  role: "SBUJPTL",     color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",        subs: 4 },
+  { id: 556,  name: "HUB SKTK Coach Tenaga Teknik Ketenagalistrikan", role: "SKTK-TTK", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300", subs: 4 },
+  { id: 564,  name: "HUB SBU Kompetensi Migas EBT Tambang",  role: "MIGAS-EBT",   color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",    subs: 4 },
+  { id: 575,  name: "HUB DevProperti Pro",                    role: "DEV-PROP",    color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",            subs: 4 },
+  { id: 586,  name: "HUB EstateCare Pro",                     role: "ESTATE-CARE", color: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",            subs: 4 },
+  { id: 1218, name: "HUB Personel Manajerial BUJK",           role: "PERS-MGR",    color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",            subs: 4 },
+  { id: 3,    name: "HUB Regulasi Jasa Konstruksi",           role: "REG-JK",      color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 4 },
+  // Batch 19 — SKK Coach Hubs (438-543) — upgraded to true Inter-Agent v2
   { id: 438,  name: "SKK Coach Manajemen Pelaksanaan",  role: "SKK-MP",       color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",              subs: 4 },
   { id: 448,  name: "SKK Coach Mekanikal",              role: "SKK-MEK",      color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",      subs: 4 },
   { id: 459,  name: "SKK Coach Sipil",                  role: "SKK-SIP",      color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300",          subs: 4 },
