@@ -126,23 +126,42 @@ export function AdminAgentsPanel() {
   }, [jobs]);
 
   const runKbMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/admin/agents/kb-research/run").then(r => r.json()),
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/agents/kb-research/run", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+      try { return JSON.parse(text); } catch { return {}; }
+    },
     onSuccess: () => {
       toast({ title: "KB Research Agent dimulai", description: "Memproses semua agen tanpa Knowledge Base..." });
       setPollingActive(true);
       setTimeout(() => refetch(), 500);
     },
-    onError: (e: any) => toast({ title: "Gagal", description: e.message, variant: "destructive" }),
+    onError: (e: any) => toast({ title: "Gagal memulai KB Agent", description: e.message, variant: "destructive" }),
   });
 
   const runAuditMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/admin/agents/field-audit/run", { autoFill }).then(r => r.json()),
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/agents/field-audit/run", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ autoFill }),
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+      try { return JSON.parse(text); } catch { return {}; }
+    },
     onSuccess: () => {
       toast({ title: "Field Audit Agent dimulai", description: "Memeriksa kelengkapan field semua chatbot..." });
       setPollingActive(true);
       setTimeout(() => refetch(), 500);
     },
-    onError: (e: any) => toast({ title: "Gagal", description: e.message, variant: "destructive" }),
+    onError: (e: any) => toast({ title: "Gagal memulai Audit", description: e.message, variant: "destructive" }),
   });
 
   const kbJob = jobs?.["kb-research"];
