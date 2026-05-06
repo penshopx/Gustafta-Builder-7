@@ -2267,46 +2267,48 @@ async function updateTenderToolboxAgents(seriesId: string) {
       const ecsg = agents.find((a: any) => a.name === "Executive Compliance Summary Generator");
 
       if (trc) {
-        const ecsgLink = ecsg ? `/bot/${ecsg.id}` : "#";
-        const trcPromptWithLink = TENDER_READINESS_SYSTEM_PROMPT.replace("{{ECSG_LINK}}", ecsgLink);
-
-        if (trc.systemPrompt?.includes("OUTPUT PROTOCOL v1")) {
-          const currentEcsgLink = trc.systemPrompt?.match(/Buka ECSG: (\/bot\/\d+|#)/)?.[1];
-          const needsRiskAggregation = !trc.systemPrompt?.includes("RISK_AGGREGATION_RULE v1");
-          const needsSummaryRulebook = !trc.systemPrompt?.includes("SUMMARY_RULEBOOK v1");
-
-          if (needsRiskAggregation || needsSummaryRulebook) {
-            await storage.updateAgent(trc.id, {
-              systemPrompt: trcPromptWithLink,
-            } as any);
-            log(`[Seed] Tender Readiness Checker patched with${needsRiskAggregation ? ' RISK_AGGREGATION_RULE v1' : ''}${needsSummaryRulebook ? ' SUMMARY_RULEBOOK v1' : ''}`);
-          } else if (currentEcsgLink && currentEcsgLink !== ecsgLink) {
-            await storage.updateAgent(trc.id, {
-              systemPrompt: trcPromptWithLink,
-            } as any);
-            log(`[Seed] Tender Readiness Checker ECSG link refreshed: ${currentEcsgLink} → ${ecsgLink}`);
-          } else {
-            log("[Seed] Tender Readiness Checker already has all patches, skipping update");
-          }
+        // FEDERATION_MODE v2: prompt dikelola oleh Inter-Agent API, skip seed overwrite
+        if (trc.systemPrompt?.includes("FEDERATION_MODE v2")) {
+          log("[Seed] Tender Readiness Checker already has FEDERATION_MODE v2, skipping update");
         } else {
-          await storage.updateAgent(trc.id, {
-            systemPrompt: trcPromptWithLink,
-            greetingMessage: TENDER_READINESS_GREETING,
-            starters: TENDER_READINESS_STARTERS,
-          } as any);
-          log("[Seed] Tender Readiness Checker updated with Protocol v1 + ECSG link");
+          const ecsgLink = ecsg ? `/bot/${ecsg.id}` : "#";
+          const trcPromptWithLink = TENDER_READINESS_SYSTEM_PROMPT.replace("{{ECSG_LINK}}", ecsgLink);
+
+          if (trc.systemPrompt?.includes("OUTPUT PROTOCOL v1")) {
+            const currentEcsgLink = trc.systemPrompt?.match(/Buka ECSG: (\/bot\/\d+|#)/)?.[1];
+            const needsRiskAggregation = !trc.systemPrompt?.includes("RISK_AGGREGATION_RULE v1");
+            const needsSummaryRulebook = !trc.systemPrompt?.includes("SUMMARY_RULEBOOK v1");
+
+            if (needsRiskAggregation || needsSummaryRulebook) {
+              await storage.updateAgent(trc.id, { systemPrompt: trcPromptWithLink } as any);
+              log(`[Seed] Tender Readiness Checker patched with${needsRiskAggregation ? ' RISK_AGGREGATION_RULE v1' : ''}${needsSummaryRulebook ? ' SUMMARY_RULEBOOK v1' : ''}`);
+            } else if (currentEcsgLink && currentEcsgLink !== ecsgLink) {
+              await storage.updateAgent(trc.id, { systemPrompt: trcPromptWithLink } as any);
+              log(`[Seed] Tender Readiness Checker ECSG link refreshed: ${currentEcsgLink} → ${ecsgLink}`);
+            } else {
+              log("[Seed] Tender Readiness Checker already has all patches, skipping update");
+            }
+          } else {
+            await storage.updateAgent(trc.id, {
+              systemPrompt: trcPromptWithLink,
+              greetingMessage: TENDER_READINESS_GREETING,
+              starters: TENDER_READINESS_STARTERS,
+            } as any);
+            log("[Seed] Tender Readiness Checker updated with Protocol v1 + ECSG link");
+          }
         }
       }
 
       if (ecsg) {
-        if (ecsg.systemPrompt?.includes("INPUT_PACKET dari Tender Readiness Checker")) {
+        // FEDERATION_MODE v2: prompt dikelola oleh Inter-Agent API, skip seed overwrite
+        if (ecsg.systemPrompt?.includes("FEDERATION_MODE v2")) {
+          log("[Seed] Executive Compliance Summary Generator already has FEDERATION_MODE v2, skipping update");
+        } else if (ecsg.systemPrompt?.includes("INPUT_PACKET dari Tender Readiness Checker")) {
           const needsRiskAggregation = !ecsg.systemPrompt?.includes("RISK_AGGREGATION_RULE v1");
           const needsSummaryRulebook = !ecsg.systemPrompt?.includes("SUMMARY_RULEBOOK v1");
 
           if (needsRiskAggregation || needsSummaryRulebook) {
-            await storage.updateAgent(ecsg.id, {
-              systemPrompt: ECSG_SYSTEM_PROMPT,
-            } as any);
+            await storage.updateAgent(ecsg.id, { systemPrompt: ECSG_SYSTEM_PROMPT } as any);
             log(`[Seed] Executive Compliance Summary Generator patched with${needsRiskAggregation ? ' RISK_AGGREGATION_RULE v1' : ''}${needsSummaryRulebook ? ' SUMMARY_RULEBOOK v1' : ''}`);
           } else {
             log("[Seed] Executive Compliance Summary Generator already has all patches, skipping update");

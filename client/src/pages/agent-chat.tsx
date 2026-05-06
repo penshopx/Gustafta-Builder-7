@@ -280,7 +280,9 @@ export default function AgentChat() {
   const [orchestrationState, setOrchestrationState] = useState<{
     active: boolean;
     phase: "dispatching" | "aggregating" | "done";
-    subAgents: { agentId: number; role: string; status: "pending" | "done" }[];
+    total: number;
+    subAgents: { agentId: number; role: string; status: "pending" | "done"; elapsed?: number; chars?: number }[];
+    totalMs?: number;
   } | null>(null);
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherLoading, setVoucherLoading] = useState(false);
@@ -846,6 +848,7 @@ export default function AgentChat() {
                 setOrchestrationState({
                   active: true,
                   phase: "dispatching",
+                  total: parsed.total || (parsed.subAgents || []).length,
                   subAgents: (parsed.subAgents || []).map((s: any) => ({ agentId: s.agentId, role: s.role, status: "pending" })),
                 });
               } else if (parsed.type === "sub_agent_start") {
@@ -856,10 +859,12 @@ export default function AgentChat() {
               } else if (parsed.type === "sub_agent_done") {
                 setOrchestrationState(prev => prev ? {
                   ...prev,
-                  subAgents: prev.subAgents.map(s => s.agentId === parsed.agentId ? { ...s, status: "done" } : s),
+                  subAgents: prev.subAgents.map(s => s.agentId === parsed.agentId
+                    ? { ...s, status: "done", elapsed: parsed.elapsed, chars: parsed.chars }
+                    : s),
                 } : prev);
               } else if (parsed.type === "aggregating") {
-                setOrchestrationState(prev => prev ? { ...prev, phase: "aggregating" } : prev);
+                setOrchestrationState(prev => prev ? { ...prev, phase: "aggregating", totalMs: parsed.totalMs } : prev);
               } else if (parsed.type === "complete") {
                 setOrchestrationState(null);
               }
@@ -2082,14 +2087,19 @@ export default function AgentChat() {
               {orchestrationState && orchestrationState.active && (
                 <div className="flex gap-2 sm:gap-3" data-testid="orchestration-indicator">
                   <AgentAvatar config={config} size="sm" color={color} />
-                  <div className="rounded-2xl rounded-tl-sm px-3 sm:px-4 py-2.5 sm:py-3 border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 space-y-2 max-w-xs">
-                    <div className="flex gap-1.5 items-center">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-violet-500" />
-                      <span className="text-xs font-medium text-violet-700 dark:text-violet-300">
-                        {orchestrationState.phase === "aggregating" ? "Menyintesis laporan sub-agen..." : "Memanggil sub-agen secara paralel..."}
+                  <div className="rounded-2xl rounded-tl-sm px-3 sm:px-4 py-2.5 sm:py-3 border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 space-y-2 min-w-[220px] max-w-xs">
+                    <div className="flex gap-1.5 items-center justify-between">
+                      <div className="flex gap-1.5 items-center">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-violet-500" />
+                        <span className="text-xs font-medium text-violet-700 dark:text-violet-300">
+                          {orchestrationState.phase === "aggregating" ? "Menyintesis laporan..." : "Paralel sub-agen..."}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-violet-500 font-mono">
+                        {orchestrationState.subAgents.filter(s => s.status === "done").length}/{orchestrationState.total || orchestrationState.subAgents.length}
                       </span>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {orchestrationState.subAgents.map((sa) => (
                         <div key={sa.agentId} className="flex items-center gap-2 text-[11px]">
                           {sa.status === "done" ? (
@@ -2097,12 +2107,22 @@ export default function AgentChat() {
                           ) : (
                             <span className="w-3.5 h-3.5 rounded-full border-2 border-violet-400 border-t-transparent animate-spin shrink-0" />
                           )}
-                          <span className={sa.status === "done" ? "text-muted-foreground line-through" : "text-violet-700 dark:text-violet-300"}>
+                          <span className={`flex-1 truncate ${sa.status === "done" ? "text-muted-foreground" : "text-violet-700 dark:text-violet-300"}`}>
                             {sa.role || `Agen #${sa.agentId}`}
                           </span>
+                          {sa.status === "done" && sa.elapsed && (
+                            <span className="text-[10px] text-green-600 dark:text-green-400 font-mono shrink-0">
+                              {sa.elapsed < 1000 ? `${sa.elapsed}ms` : `${(sa.elapsed/1000).toFixed(1)}s`}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>
+                    {orchestrationState.phase === "aggregating" && orchestrationState.totalMs && (
+                      <div className="text-[10px] text-violet-500 border-t border-violet-200 dark:border-violet-800 pt-1 font-mono">
+                        Selesai paralel: {(orchestrationState.totalMs/1000).toFixed(1)}s → sintesis...
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

@@ -2800,47 +2800,58 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       // Send user message first
       res.write(`data: ${JSON.stringify({ type: "user_message", message: userMessage })}\n\n`);
 
-      // ── INTER-AGENT API: Parallel Sub-Agent Orchestration ────────────────────
+      // ── INTER-AGENT API: Parallel Sub-Agent Orchestration v2 ────────────────
       const subAgentsConfig = (agent as any).agenticSubAgents as Array<{ agentId: number; role: string; description: string }> | null | undefined;
       if (Array.isArray(subAgentsConfig) && subAgentsConfig.length > 0) {
         try {
-          // Notify client that orchestration is starting
+          const orchStart = Date.now();
           const subAgentMeta = subAgentsConfig.map(s => ({ agentId: s.agentId, role: s.role, description: s.description }));
-          res.write(`data: ${JSON.stringify({ type: "orchestrating_start", subAgents: subAgentMeta })}\n\n`);
+          res.write(`data: ${JSON.stringify({ type: "orchestrating_start", subAgents: subAgentMeta, total: subAgentsConfig.length })}\n\n`);
 
-          // Phase 2: Call all sub-agents in parallel
+          // Extract conversation history (user+assistant turns) for context passing
+          const convHistory = chatMessages
+            .filter(m => m.role === "user" || m.role === "assistant")
+            .slice(-6) as Array<{ role: "user" | "assistant"; content: string }>;
+
+          // Phase 2: Call all sub-agents in parallel with conversation context + 25s timeout
           const subAgentResults = await Promise.allSettled(
             subAgentsConfig.map(async (subCfg) => {
               const subAgentIdStr = String(subCfg.agentId);
               res.write(`data: ${JSON.stringify({ type: "sub_agent_start", agentId: subCfg.agentId, role: subCfg.role })}\n\n`);
-              const result = await callAgentInternal(subAgentIdStr, userContent);
-              res.write(`data: ${JSON.stringify({ type: "sub_agent_done", agentId: subCfg.agentId, role: subCfg.role, result: result.substring(0, 500) })}\n\n`);
+              const t0 = Date.now();
+              const result = await callAgentInternal(subAgentIdStr, userContent, convHistory, 25000);
+              const elapsed = Date.now() - t0;
+              res.write(`data: ${JSON.stringify({ type: "sub_agent_done", agentId: subCfg.agentId, role: subCfg.role, elapsed, chars: result.length, preview: result.substring(0, 300) })}\n\n`);
               return { agentId: subCfg.agentId, role: subCfg.role, result };
             })
           );
 
-          // Phase 3: Inject sub-agent results into the orchestrator's context
+          // Phase 3: Separate successful vs failed results
           const successfulResults = subAgentResults
             .filter((r): r is PromiseFulfilledResult<{ agentId: number; role: string; result: string }> => r.status === "fulfilled")
             .map(r => r.value);
+          const failedResults = subAgentResults
+            .filter(r => r.status === "rejected")
+            .length;
 
           if (successfulResults.length > 0) {
             const subAgentContext = successfulResults
-              .map(r => `[Sub-Agent: ${r.role || `Agent #${r.agentId}`}]\n${r.result}`)
-              .join("\n\n---\n\n");
+              .map(r => `╔══ ${r.role || `Agent #${r.agentId}`} ══╗\n${r.result}\n╚═══════════════════════════════╝`)
+              .join("\n\n");
             // Inject into system prompt (first message in chatMessages)
             if (chatMessages.length > 0 && chatMessages[0].role === "system") {
               const existingSystemPrompt = typeof chatMessages[0].content === "string" ? chatMessages[0].content : "";
               chatMessages[0] = {
                 role: "system",
-                content: existingSystemPrompt + `\n\n═══ LAPORAN SUB-AGEN (hasil paralel) ═══\nBerikut adalah output dari sub-agen yang telah dipanggil secara paralel. Gunakan laporan ini sebagai konteks utama untuk menyusun respons akhir yang terintegrasi dan komprehensif.\n\n${subAgentContext}\n\n═══ INSTRUKSI SINTESIS ═══\nSintesiskan seluruh laporan sub-agen di atas menjadi satu respons yang kohesif, terstruktur, dan langsung menjawab pertanyaan pengguna. Jangan ulangi laporan mentah — olah menjadi jawaban terpadu.`,
+                content: existingSystemPrompt + `\n\n═══════════════════════════════════════════════\nLAPORAN PARALEL SUB-AGEN (${successfulResults.length}/${subAgentsConfig.length} berhasil, ${failedResults} gagal, ${Date.now() - orchStart}ms)\n═══════════════════════════════════════════════\n\n${subAgentContext}\n\n═══ INSTRUKSI SINTESIS WAJIB ═══\nGunakan SELURUH laporan sub-agen di atas sebagai input utama. Sintesiskan menjadi 1 respons terpadu yang:\n1. Dimulai dengan STATUS KESELURUHAN (siap/bersyarat/belum siap)\n2. Merangkum temuan kritis dari setiap sub-agen\n3. Memberikan PRIORITAS TINDAKAN yang konkret dan terurut\n4. Menggunakan bahasa bisnis yang jelas\nJANGAN ulangi laporan mentah — olah menjadi sintesis eksekutif.`,
               };
             }
-            res.write(`data: ${JSON.stringify({ type: "aggregating", count: successfulResults.length })}\n\n`);
+            res.write(`data: ${JSON.stringify({ type: "aggregating", count: successfulResults.length, failed: failedResults, totalMs: Date.now() - orchStart })}\n\n`);
           }
         } catch (orchErr) {
           console.error("[Inter-agent API] Orchestration error:", orchErr);
-          // Continue with normal response even if sub-agents fail
+          res.write(`data: ${JSON.stringify({ type: "orchestration_error", error: String(orchErr) })}\n\n`);
+          // Continue with normal orchestrator response even if sub-agents fail
         }
       }
       // ─────────────────────────────────────────────────────────────────────────
@@ -3921,7 +3932,13 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   // ─────────────────────────────────────────────────────────────────────────
 
   // ── callAgentInternal: call a sub-agent's AI without HTTP overhead ────────
-  async function callAgentInternal(agentId: string, userMessage: string): Promise<string> {
+  // v2: timeout protection, increased maxTokens, conversation history, """ strip
+  async function callAgentInternal(
+    agentId: string,
+    userMessage: string,
+    conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>,
+    timeoutMs: number = 25000,
+  ): Promise<string> {
     const subAgent = await storage.getAgent(agentId);
     if (!subAgent) return `[Sub-agent ${agentId} tidak ditemukan]`;
     if (subAgent.isEnabled === false) return `[Sub-agent ${subAgent.name} dinonaktifkan]`;
@@ -3938,6 +3955,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
 
     let systemPrompt = buildFinalSystemPrompt(subAgent);
+    // Defensive: strip leading """ corruption from legacy prompts
+    if (systemPrompt.startsWith('"""')) systemPrompt = systemPrompt.slice(3).trimStart();
     if (knowledgeContext) systemPrompt += `\n\nKnowledge Base:\n${knowledgeContext}`;
 
     try {
@@ -3949,10 +3968,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
     const agentModel = subAgent.aiModel || "gpt-4o-mini";
     const temperature = Math.max(0, Math.min(2, subAgent.temperature ?? 0.7));
-    const maxTokens = Math.max(100, Math.min(2048, subAgent.maxTokens ?? 512));
+    // Minimum 1500 tokens for sub-agents to produce meaningful specialist output
+    const maxTokens = Math.max(1500, Math.min(3000, subAgent.maxTokens ?? 1500));
 
+    // Build message array: system + optional conversation history (last 4 turns) + current user message
+    const historySlice = conversationHistory ? conversationHistory.slice(-4) : [];
     const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
       { role: "system", content: systemPrompt },
+      ...historySlice,
       { role: "user", content: userMessage },
     ];
 
@@ -3971,16 +3994,26 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         client = openai;
       }
 
-      const completion = await client.chat.completions.create({
-        model: modelName,
-        messages: chatMessages,
-        max_tokens: maxTokens,
-        temperature,
-      });
-      return completion.choices[0]?.message?.content || "[Tidak ada respons dari sub-agen]";
-    } catch (err) {
+      // Timeout wrapper: abort if sub-agent takes too long
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const completion = await client.chat.completions.create(
+          { model: modelName, messages: chatMessages, max_tokens: maxTokens, temperature },
+          { signal: controller.signal as any },
+        );
+        clearTimeout(timer);
+        return completion.choices[0]?.message?.content || "[Tidak ada respons dari sub-agen]";
+      } finally {
+        clearTimeout(timer);
+      }
+    } catch (err: any) {
+      if (err?.name === "AbortError" || err?.message?.includes("aborted")) {
+        console.warn(`[callAgentInternal] Timeout after ${timeoutMs}ms for agent ${agentId}`);
+        return `[Sub-agent ${subAgent.name} timeout setelah ${timeoutMs / 1000}s — melanjutkan dengan data tersedia]`;
+      }
       console.error(`[callAgentInternal] Error calling agent ${agentId}:`, err);
-      return `[Gagal mendapatkan respons dari sub-agen ${subAgent.name}]`;
+      return `[Gagal mendapatkan respons dari sub-agen ${subAgent.name}: ${err?.message || "unknown error"}]`;
     }
   }
   // ─────────────────────────────────────────────────────────────────────────
