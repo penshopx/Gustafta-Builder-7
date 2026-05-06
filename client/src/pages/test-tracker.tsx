@@ -72,6 +72,9 @@ const FED_BOTS = [
   { id: 169, name: "Perizinan & Legalitas Hub",        role: "Perizinan",   color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",           subs: 3 },
   { id: 173, name: "Sertifikasi & Pengembangan Hub",   role: "Sertifikasi", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",       subs: 3 },
   { id: 299, name: "Admin & Legal BUJK Hub",           role: "Admin",       color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 3 },
+  // Batch 6 — Skema & LKUT
+  { id: 84,  name: "Skema Navigator Hub",              role: "Skema",       color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",                 subs: 2 },
+  { id: 302, name: "LKUT Hub",                         role: "LKUT",        color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",     subs: 2 },
 ];
 
 // ─── Test Scenarios ───────────────────────────────────────────────────────────

@@ -31,7 +31,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Legal Landing Page**: `client/src/pages/legal-landing.tsx`
 - **Legal Chat Interface**: `client/src/pages/legal-chat.tsx`
 - **Chaesa Lexbot Widget**: `client/src/components/chaesa-widget.tsx`
-- **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — dual-tab: Tender 35 sel + Federation 220 sel (44 hub × 5 F-test)
+- **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — dual-tab: Tender 35 sel + Federation 230 sel (46 hub × 5 F-test)
 - **Templates**: `server/db/schema.ts` (chatbot_templates table)
 - **Storefront Products**: `server/db/schema.ts` (store_products table)
 
@@ -47,11 +47,11 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 ## Product
 - **AI Chatbot Builder**: Create, configure, and deploy intelligent conversational agents.
 - **LexCom Legal AI**: Integrated system with 12 specialized legal agents and a floating "Chaesa Lexbot" widget.
-- **Federation Layer (44 hubs)**: 44 hub orchestrators with `agenticSubAgents` configured — parallel multi-agent synthesis covering Tender, SKK, SBU, Perizinan, ASKOM, CSMS, SMAP, PANCEK, Odoo, AJJ, KAN, Lisensi LSP, IT LSP, ISO 14001/9001, PJBU, Kontraktor/Konsultan, Perizinan & Legalitas, Sertifikasi, Admin BUJK, Competency Mentoring, Problem Solver, and more.
+- **Federation Layer (46 hubs)**: 46 hub orchestrators with `agenticSubAgents` configured — parallel multi-agent synthesis covering Tender, SKK, SBU, Perizinan, ASKOM, CSMS, SMAP, PANCEK, Odoo, AJJ, KAN, Lisensi LSP, IT LSP, ISO 14001/9001, PJBU, Kontraktor/Konsultan, Perizinan & Legalitas, Sertifikasi, Admin BUJK, Competency Mentoring, Problem Solver, Skema Navigator, LKUT, and more.
 - **Dynamic Knowledge Base**: Hierarchical classification, versioning, source attribution, multiple upload types.
 - **Monetization & Conversion Layer**: Pricing, lead capture, scoring, smart CTA triggers.
 - **Chatbot Templates & Gustafta Store**: Public marketplace with Midtrans payment integration.
-- **Test Tracker**: Dual-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (220 sel, 44 hub × 5 F-test). Route: `/test-tracker`.
+- **Test Tracker**: Dual-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (230 sel, 46 hub × 5 F-test). Route: `/test-tracker`.
 
 ## User preferences
 Preferred communication style: Simple, everyday language.
