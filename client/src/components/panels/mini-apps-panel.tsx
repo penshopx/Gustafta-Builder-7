@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap, PenLine, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,9 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   work_mode_selector: "4 Work Modes Selector",
   // MultiAgen Agentic AI Completion
   mentoring_plan: "Mentoring Plan Generator",
+  // Master Standar Gustafta v1.0 — Final Completion
+  brief_intake: "Brief / Intake Builder",
+  studio_kompetensi: "Studio Kompetensi",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -88,6 +91,9 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   work_mode_selector: Layers,
   // MultiAgen Agentic AI Completion
   mentoring_plan: GraduationCap,
+  // Master Standar Gustafta v1.0 — Final Completion
+  brief_intake: PenLine,
+  studio_kompetensi: Trophy,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -124,9 +130,12 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   work_mode_selector: "Selector 4 Work Modes: Quick Help / Build / Review / Coach — panduan mode kerja untuk memulai sesi produktif",
   // MultiAgen Agentic AI Completion
   mentoring_plan: "Buat Rencana Mentoring personal terstruktur: jadwal mingguan, milestone kompetensi, metode belajar, dan progress check (AI-powered)",
+  // Master Standar Gustafta v1.0 — Final Completion
+  brief_intake: "Bangun Brief/Intake terstruktur: 10 pertanyaan inti, output format, konteks, asumsi, dan draft brief siap pakai (AI-powered)",
+  studio_kompetensi: "Asesmen kompetensi Level 1–4 dengan Rubrik 0–3: scope, langkah kerja, output quality, compliance, risk control, format (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi"];
 const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 const TENDER_DOC_TYPES: MiniAppType[] = ["compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 
@@ -537,6 +546,51 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
           prompt_template: "MODE: Coach. Saya ingin belajar/meningkatkan kemampuan di bidang: [topik]. Level saya saat ini: [pemula/menengah/mahir]. Buat rencana mentoring terstruktur dengan milestone mingguan.",
         },
       ],
+    },
+  },
+  brief_intake: {
+    name: "Brief / Intake Builder",
+    description: "Bangun Brief/Intake proyek terstruktur dari data Otak Proyek — siap digunakan sebagai brief kerja.",
+    config: {
+      mode: "brief_intake",
+      intake_questions: [
+        "Tujuan utama proyek/pekerjaan ini?",
+        "Output yang dibutuhkan (checklist/template/dokumen/rencana)?",
+        "Deadline atau jadwal target?",
+        "Konteks proyek atau organisasi yang relevan?",
+        "Aturan atau regulasi kepatuhan wajib?",
+        "Audiens atau approver utama?",
+        "Data atau dokumen yang sudah tersedia?",
+        "Risiko atau kendala terbesar yang diantisipasi?",
+        "Format output yang diinginkan (ringkas atau detail)?",
+        "Ada kebutuhan khusus lain yang perlu dipertimbangkan?",
+      ],
+      output_sections: ["ringkasan_tujuan", "konteks_proyek", "output_yang_dibutuhkan", "asumsi_kerja", "batasan_scope", "risiko_utama", "draft_brief_eksekutif"],
+      guardrails: { no_hallucination: true, flag_missing_data: true, actionable: true },
+    },
+  },
+  studio_kompetensi: {
+    name: "Studio Kompetensi",
+    description: "Asesmen kompetensi Level 1–4 dengan Rubrik 0–3 per 6 dimensi — hasilkan profil kompetensi dan rekomendasi pengembangan.",
+    config: {
+      mode: "studio_kompetensi",
+      levels: [
+        { level: 1, label: "Dasar", description: "Memahami konsep, dapat mengerjakan dengan bimbingan penuh" },
+        { level: 2, label: "Mandiri", description: "Dapat mengerjakan sendiri pada situasi standar" },
+        { level: 3, label: "Mahir", description: "Mengerjakan situasi kompleks, membimbing orang lain" },
+        { level: 4, label: "Ahli", description: "Merancang sistem, memimpin inovasi, standar referensi" },
+      ],
+      rubric_dimensions: [
+        { id: "scope", label: "Scope & Pemahaman Domain", max: 3 },
+        { id: "steps", label: "Langkah Kerja & Metodologi", max: 3 },
+        { id: "output_quality", label: "Kualitas Output", max: 3 },
+        { id: "compliance", label: "Kepatuhan Regulasi & Standar", max: 3 },
+        { id: "risk_control", label: "Pengendalian Risiko", max: 3 },
+        { id: "format", label: "Format & Komunikasi", max: 3 },
+      ],
+      level_thresholds: { level1_max: 6, level2_max: 10, level3_max: 14, level4_min: 15 },
+      output_sections: ["profil_kompetensi", "skor_per_dimensi", "level_keseluruhan", "gap_pengembangan", "rekomendasi_aksi"],
+      guardrails: { evidence_based: true, no_hallucination: true, cite_basis: true },
     },
   },
   mentoring_plan: {

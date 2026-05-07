@@ -7340,7 +7340,7 @@ Tugas kamu: Buat dokumen profesional yang lengkap, terstruktur, dan siap pakai b
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
       const extraParams = req.body && typeof req.body === "object" ? req.body as Record<string, any> : {};
@@ -7812,6 +7812,120 @@ REKOMENDASI PERBAIKAN (urut prioritas)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Review ini dibuat berdasarkan data Otak Proyek. Validasi reviewer domain tetap diperlukan.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "brief_intake") {
+        modePrompt = `Kamu adalah AI asisten perencanaan kerja. Bangun BRIEF/INTAKE terstruktur berdasarkan data Otak Proyek di bawah.
+Tujuan: menghasilkan brief kerja yang langsung dapat digunakan sebagai panduan eksekusi — ringkas, actionable, dan bebas asumsi tersembunyi.
+
+ATURAN KETAT:
+- Ekstrak semua informasi yang relevan dari data Otak Proyek.
+- Jika ada data yang tidak tersedia, tandai dengan: [DATA TIDAK ADA — perlu dikonfirmasi]
+- Brief harus SPESIFIK untuk konteks proyek ini, bukan template generik.
+- Setiap asumsi yang dibuat WAJIB ditandai dengan: [ASUMSI: {nilai} | perlu verifikasi]
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BRIEF / INTAKE PROYEK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RINGKASAN TUJUAN
+[1-2 kalimat: apa yang ingin dicapai dan mengapa penting]
+
+KONTEKS PROYEK
+Organisasi/Tim : [dari data]
+Fase Proyek    : [dari data]
+Pemangku Kepentingan Utama: [audiens, approver, stakeholder]
+
+OUTPUT YANG DIBUTUHKAN
+• [Output 1] — format: [checklist/dokumen/template/laporan]
+• [Output 2 — jika ada]
+• [Output 3 — jika ada]
+
+SCOPE & BATASAN
+Dalam scope  : [apa yang dikerjakan]
+Luar scope   : [apa yang TIDAK dikerjakan — penting untuk cegah scope creep]
+
+DATA & RESOURCE YANG TERSEDIA
+• [Data/dokumen yang sudah ada dan relevan]
+• [Data yang masih perlu dikumpulkan — tandai ⚠️]
+
+ASUMSI KERJA
+• [ASUMSI: {nilai} | perlu verifikasi ke: {pihak}]
+• [Asumsi lain jika ada]
+
+RISIKO UTAMA
+┌─────────────────────────────────────────────┐
+│ Risiko             │ Dampak │ Mitigasi Awal │
+│ [Risiko 1]         │ T/M/R  │ [tindakan]    │
+│ [Risiko 2]         │ T/M/R  │ [tindakan]    │
+└─────────────────────────────────────────────┘
+
+DRAFT BRIEF EKSEKUTIF (siap pakai)
+"[1 paragraf ringkas: tujuan + konteks + output + timeline + kondisi sukses]"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Brief ini dibuat dari data Otak Proyek. Validasi dengan tim sebelum eksekusi.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "studio_kompetensi") {
+        const rubricDims = (miniApp.config as any)?.rubric_dimensions as Array<{ label: string }> | undefined;
+        const dimList = rubricDims?.map(d => d.label).join(", ") || "Scope, Langkah Kerja, Kualitas Output, Compliance, Risk Control, Format";
+
+        modePrompt = `Kamu adalah AI asesor kompetensi profesional. Lakukan ASESMEN STUDIO KOMPETENSI Level 1–4 berdasarkan data Otak Proyek di bawah.
+Gunakan Rubrik 0–3 per 6 dimensi: ${dimList}.
+Total skor maks: 18. Level: 1 (0-6) | 2 (7-10) | 3 (11-14) | 4 (15-18).
+
+RUBRIK SCORING (0–3):
+0 = Tidak ada bukti / belum menunjukkan kompetensi
+1 = Bukti minimal / perlu bimbingan penuh
+2 = Bukti cukup / dapat mandiri pada situasi standar
+3 = Bukti kuat / mahir + dapat membimbing orang lain
+
+ATURAN KETAT:
+- Nilai HANYA berdasarkan bukti nyata dari data Otak Proyek. Jangan mengarang bukti.
+- Jika dimensi tidak dapat dinilai karena data tidak cukup, beri skor 0 dan tulis: "Data tidak cukup untuk menilai dimensi ini"
+- Setiap skor WAJIB disertai bukti spesifik dari data + alasan pemberian skor
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STUDIO KOMPETENSI — PROFIL ASESMEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROFIL KOMPETENSI
+Domain Pekerjaan : [dari data Otak Proyek]
+Tanggal Asesmen  : [hari ini]
+Asesee           : [dari data atau "Pengguna Chatbot"]
+
+SKOR PER DIMENSI (Rubrik 0–3)
+Untuk setiap dimensi:
+┌─────────────────────────────────────────────────────────────────┐
+│ Dimensi: [nama] │ Skor: [0-3] / 3 │ Level Kontribusi: [%]      │
+│ Bukti      : [bukti spesifik dari data]                         │
+│ Alasan Skor: [mengapa skor ini, bukan lebih tinggi/rendah]      │
+└─────────────────────────────────────────────────────────────────┘
+
+TOTAL SKOR & LEVEL
+Total Skor     : [X] / 18
+Level Kompetensi: [1-Dasar / 2-Mandiri / 3-Mahir / 4-Ahli]
+Deskripsi Level : [apa artinya di konteks pekerjaan ini]
+
+GAP PENGEMBANGAN (dimensi dengan skor < 2)
+• [Dimensi X — skor Y]: [apa yang perlu ditingkatkan + cara konkret]
+• [Dimensi Y — jika ada]
+
+REKOMENDASI AKSI (urut prioritas)
+1. [SEGERA] [tindakan spesifik] — target: [milestone terukur]
+2. [JANGKA MENENGAH] [tindakan] — target: [milestone]
+3. [JANGKA PANJANG] [tindakan] — target: [milestone]
+
+JALUR PENGEMBANGAN KE LEVEL BERIKUTNYA
+[Jika saat ini Level X → untuk naik ke Level X+1, perlu:]
+• [Syarat/bukti kompetensi yang harus ditunjukkan]
+• [Pengalaman atau sertifikasi yang direkomendasikan]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Asesmen ini berbasis data Otak Proyek. Validasi dengan asesor domain untuk keperluan sertifikasi formal.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       } else if (appType === "mentoring_plan") {
         const level = (miniApp.config as any)?.level || "menengah";
         const durationWeeks = (miniApp.config as any)?.duration_weeks || 8;
@@ -7933,7 +8047,7 @@ Risk Register ini dibuat berdasarkan data Otak Proyek. Validasi dengan tim lapan
       const agent = await storage.getAgent(agentId);
       const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
 
-      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan"].includes(appType);
+      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi"].includes(appType);
       const userPromptById: Record<string, string> = {
         nib_status_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`,
         whatsapp_status_update: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat pesan WhatsApp status proyek untuk klien sesuai format dan aturan di atas.`,
@@ -7941,6 +8055,8 @@ Risk Register ini dibuat berdasarkan data Otak Proyek. Validasi dengan tim lapan
         rubric_scoring: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nLakukan Review & Rubric Scoring sesuai format dan aturan di atas.`,
         risk_register: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBangun Risk Register lengkap sesuai format dan aturan di atas.`,
         mentoring_plan: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Rencana Mentoring Personal lengkap sesuai format dan aturan di atas. Sesuaikan topik dan domain kompetensi berdasarkan konteks proyek di atas.`,
+        brief_intake: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBangun Brief/Intake Proyek terstruktur sesuai format dan aturan di atas. Ekstrak semua informasi relevan dari data di atas dan tandai yang tidak tersedia.`,
+        studio_kompetensi: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nLakukan Asesmen Studio Kompetensi Level 1–4 sesuai format dan aturan di atas. Nilai HANYA berdasarkan bukti yang ada di data Otak Proyek.`,
       };
 
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [

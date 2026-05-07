@@ -1243,7 +1243,9 @@ export const miniAppTypeSchema = z.enum([
   // Claude Opus Master Document Additions
   "rubric_scoring", "risk_register", "work_mode_selector",
   // MultiAgen Agentic AI Completion
-  "mentoring_plan"
+  "mentoring_plan",
+  // Master Standar Gustafta v1.0 — Final Completion
+  "brief_intake", "studio_kompetensi"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 
