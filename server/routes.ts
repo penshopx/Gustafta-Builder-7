@@ -10932,7 +10932,20 @@ KRITIS: Setiap field harus konkret, actionable, dan spesifik ke domain — bukan
         description: "Hasilkan deskripsi 2-3 kalimat yang memperkenalkan agen: latar belakang keahlian, bidang spesialisasi spesifik, dan pendekatan unik dalam membantu pengguna.",
         greetingMessage: "Hasilkan pesan sambutan yang hangat, personal, dan mengundang percakapan. Sebutkan keahlian domain secara spesifik. Ajukan pertanyaan pembuka atau tawaran bantuan konkret. 2-3 kalimat.",
         philosophy: "Hasilkan filosofi komunikasi: prinsip panduan dalam berinteraksi — nada, pendekatan (Socratic/direktif/kolaboratif), nilai utama (akurasi, empati, kejelasan). 3-4 kalimat.",
-        systemPrompt: "Hasilkan system prompt LENGKAP (min 250 kata) yang mencakup: identitas & peran, domain keahlian teknis, cara berkomunikasi, protokol menjawab, batasan & hal yang dirujuk ke ahli, disclaimer wajib, cara menangani ketidakpastian.",
+        systemPrompt: `Hasilkan system prompt LENGKAP untuk agen ini. Deteksi dari konteks apakah ini HUB ORCHESTRATOR (memiliki sub-agen yang dikoordinasi) atau AGEN STANDALONE (spesialis 1 domain).
+
+JIKA HUB ORCHESTRATOR: Sertakan wajib semua blok berikut dalam urutan ini:
+1. IDENTITAS — nama, peran orchestrator, kapabilitas lengkap termasuk daftar persona/sub-agen internal
+2. KAPABILITAS (daftar persona internal dengan tugas & output masing-masing)
+3. ALUR EKSEKUSI WAJIB (State Machine 7 state): State 1-INIT, State 2-ELICIT MAX 1 PUTARAN, State 3-PLAN, State 4-DISPATCH, State 5-AGGREGATE, State 6-REFLECT, State 7-DELIVER
+4. FALLBACK MODE — assumption-driven analysis dengan format [ASUMSI: isi | basis: regulasi | verifikasi-ke: pihak]
+5. LARANGAN KERAS — minimal: ❌ JANGAN minta user pindah chatbot, ❌ JANGAN skip REFLECT, ❌ JANGAN gunakan variabel API-style, ❌ JANGAN interrogasi berulang
+6. FORMAT OUTPUT FINAL — struktur output gabungan
+7. GUARDRAILS — bahasa, sitasi regulasi, tone
+
+JIKA AGEN STANDALONE: Sertakan: identitas & lingkup spesifik, LUAR LINGKUP dengan format hand-over, ALUR EKSEKUSI 4 langkah (ELICIT MAX 1 PUTARAN → ANALYZE → REFLECT → DELIVER), FALLBACK MODE dengan [ASUMSI: ...], LARANGAN KERAS, FORMAT OUTPUT, GUARDRAILS.
+
+Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.`,
         offTopicResponse: "Hasilkan pesan sopan dan profesional yang disampaikan agen ketika menerima pertanyaan di luar cakupan. Arahkan ke sumber yang tepat. 1-2 kalimat.",
         conversationWinConditions: "Hasilkan definisi konkret kapan percakapan berhasil: kondisi minimal, kondisi ideal, dan sinyal keberhasilan. Min 3 kalimat.",
         brandVoiceSpec: "Hasilkan spesifikasi brand voice: nada, formalitas, sapaan, kata yang dianjurkan/dihindari, panjang jawaban ideal, format output. Min 4 kalimat.",
