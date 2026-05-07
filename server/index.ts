@@ -351,6 +351,35 @@ for (const envVar of requiredEnvVars) {
         log("[PublicFlagRepair] error: " + (err as Error).message);
       }
 
+      // ── FREE-MODUL REGISTRATION REPAIR — agent di modul gratis tidak boleh require_registration ──
+      // Bug: Agent 24 (Tender Readiness Checker) punya require_registration=true padahal
+      // bigIdea 4 (Tender & Pengadaan) gratis (monthly_price=0). Akibatnya chat di /modul/4
+      // selalu 403 Forbidden. Patch ini idempoten: hanya update agent yang:
+      //   1. Ada di toolbox yang terhubung ke bigIdea dengan monthly_price=0, DAN
+      //   2. Masih require_registration=true
+      try {
+        const { db: rawDb } = await import("./db");
+        const { sql: rawSql } = await import("drizzle-orm");
+        const freeModulRepairRes: any = await rawDb.execute(rawSql`
+          UPDATE agents SET require_registration = false
+          WHERE require_registration = true
+            AND toolbox_id IN (
+              SELECT t.id FROM toolboxes t
+              JOIN big_ideas bi ON t.big_idea_id = bi.id
+              WHERE (bi.monthly_price IS NULL OR bi.monthly_price = 0)
+                AND bi.require_registration = false
+            )
+          RETURNING id, name
+        `);
+        const freeRows = (freeModulRepairRes?.rowCount ?? freeModulRepairRes?.rows?.length ?? 0);
+        if (freeRows) {
+          const names = (freeModulRepairRes?.rows ?? []).map((r: any) => `${r.id}:${r.name}`).join(", ");
+          log(`[FreeModulRepair] cleared require_registration for ${freeRows} agent(s): ${names}`);
+        }
+      } catch (err) {
+        log("[FreeModulRepair] error: " + (err as Error).message);
+      }
+
       // ── SEED BLOCK: berlaku di DEV & PROD ──
       // Sebelumnya di-gate hanya non-production → menyebabkan production tertinggal
       // (mis. 5 chatbot ekstra Lisensi LSP tidak ikut). Semua seed sudah idempotent
