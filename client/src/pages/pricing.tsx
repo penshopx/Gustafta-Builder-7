@@ -47,7 +47,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Knowledge Base: 20 dokumen", included: true },
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp & Telegram", included: true },
-      { text: "Agentic AI Features", included: true },
+      { text: "Agentic AI Features + Mini Apps (33 Tipe)", included: true },
       { text: "Orchestrator Multi-Agent (7 Specialist)", included: true },
       { text: "Analytics Dashboard", included: true },
       { text: "Email Support", included: true },
@@ -71,7 +71,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Knowledge Base: 20 dokumen", included: true },
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp & Telegram", included: true },
-      { text: "Agentic AI Features", included: true },
+      { text: "Agentic AI Features + Mini Apps (33 Tipe)", included: true },
       { text: "Orchestrator Multi-Agent (7 Specialist)", included: true },
       { text: "Analytics Dashboard", included: true },
       { text: "Priority Email Support", included: true },
@@ -94,8 +94,9 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Knowledge Base: 30 dokumen", included: true },
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp, Telegram, Discord", included: true },
-      { text: "Agentic AI Features", included: true },
+      { text: "Agentic AI + Mini Apps (33 Tipe) + Master Standar v2.0", included: true },
       { text: "Orchestrator Multi-Agent + Custom Specialist", included: true },
+      { text: "SCORECARD + Win Probability (131 Hub)", included: true },
       { text: "Advanced Analytics", included: true },
       { text: "Priority Support", included: true },
     ],
@@ -117,8 +118,9 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Knowledge Base: 50 dokumen", included: true },
       { text: "Web Widget (Custom Branding)", included: true },
       { text: "Semua Multi-channel", included: true },
-      { text: "Agentic AI Features", included: true },
+      { text: "Agentic AI + Mini Apps + Master Standar v2.0", included: true },
       { text: "Orchestrator Multi-Agent + Custom Specialist Unlimited", included: true },
+      { text: "SCORECARD + Win Probability + Export ke Aspekindo LLM", included: true },
       { text: "Advanced Analytics", included: true },
       { text: "Priority Support + WhatsApp", included: true },
     ],
@@ -216,6 +218,16 @@ const addOns = [
     description: "Biaya AI classifier (~Rp 1–2/pesan) sudah termasuk dalam paket berbayar",
     price: "Termasuk",
   },
+  {
+    name: "Export ke Aspekindo LLM",
+    description: "Transfer agent ke chat.aspekindo-pub.com via import JSON",
+    price: "Termasuk",
+  },
+  {
+    name: "Mini Apps Custom",
+    description: "Pengembangan tipe Mini App sesuai kebutuhan spesifik",
+    price: "Konsultasi",
+  },
 ];
 
 const faqs = [
@@ -238,6 +250,14 @@ const faqs = [
   {
     question: "Apa perbedaan Orchestrator Multi-Agent dengan Orkestrator (Big Idea) di hierarki?",
     answer: "Dua hal berbeda: (1) Orkestrator/Big Idea di hierarki = chatbot hub level 3 yang mengarahkan user ke chatbot spesialis lain melalui percakapan. (2) Orchestrator Multi-Agent = sistem routing otomatis di DALAM satu chatbot yang mendeteksi topik pesan dan memilih specialist agent yang tepat untuk menjawab — semuanya transparan dan mulus tanpa perpindahan chatbot.",
+  },
+  {
+    question: "Apa itu Mini Apps 33 tipe?",
+    answer: "Mini Apps adalah tools interaktif yang bisa dipasang di dalam chatbot — misalnya rubrik penilaian, risk register, work mode selector, brief intake, studio kompetensi (Level 1–4 dengan rubrik 0–3), docgen, dan e-course. Semua 33 tipe sudah tersedia dan bisa diaktifkan tanpa coding.",
+  },
+  {
+    question: "Apa itu Master Standar v2.0?",
+    answer: "Master Standar v2.0 adalah protokol kerja orchestrator — mencakup State Machine 7-langkah (INIT→ELICIT→PLAN→DISPATCH→AGGREGATE→REFLECT→DELIVER), ANTI-INTERROGATION MODE (maks 1 putaran tanya balik), REFLECT sebelum deliver, dan FALLBACK mandiri saat sub-agent tidak tersedia. Semua 129 hub orchestrator sudah di-upgrade ke standar ini.",
   },
   {
     question: "Bagaimana dengan keamanan data?",
@@ -444,7 +464,7 @@ export default function Pricing() {
           <Badge className="mb-4">Pricing</Badge>
           <h1 className="text-4xl font-bold mb-4">Pilih Paket Berlangganan</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Pilih durasi berlangganan yang sesuai kebutuhan Anda. Semua paket sudah termasuk Agentic AI dan Orchestrator Multi-Agent.
+            Pilih durasi berlangganan yang sesuai kebutuhan Anda. Semua paket sudah termasuk Agentic AI, Mini Apps (33 Tipe), dan Orchestrator Multi-Agent.
           </p>
         </div>
 
@@ -619,7 +639,7 @@ export default function Pricing() {
         <section className="text-center py-12 bg-muted/30 rounded-lg">
           <h2 className="text-2xl font-bold mb-2">Siap Memulai?</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Pilih paket dan mulai bangun ekosistem chatbot AI profesional Anda hari ini. Semua paket sudah termasuk Agentic AI dan Orchestrator Multi-Agent.
+            Pilih paket dan mulai bangun ekosistem chatbot AI profesional Anda hari ini. Semua paket sudah termasuk Agentic AI, Mini Apps (33 Tipe), dan Orchestrator Multi-Agent.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="gap-2" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>

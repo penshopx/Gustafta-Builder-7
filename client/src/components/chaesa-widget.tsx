@@ -117,8 +117,10 @@ export function ChaesaWidget() {
   };
 
   const QUICK_PROMPTS = [
-    "Bagaimana cara membuat chatbot baru?",
-    "Apa itu hierarki 5-level Gustafta?",
+    "Bagaimana cara membuat chatbot baru di Gustafta?",
+    "Apa itu Mini Apps 33 tipe dan cara menggunakannya?",
+    "Apa itu Master Standar v2.0 dan State Machine 7-langkah?",
+    "Bagaimana cara kerja Orchestrator Multi-Agent?",
     "Bagaimana sistem harga dan paket Gustafta?",
   ];
 

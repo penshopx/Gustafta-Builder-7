@@ -152,8 +152,8 @@ export default function Landing() {
     },
     {
       icon: Layers,
-      title: "Hierarki 4 Level",
-      description: "Bangun ekosistem multi-agent terstruktur: Series → Modul → Chatbot → Alat Bantu. Skala bebas, koordinasi cerdas."
+      title: "Hierarki 5 Level",
+      description: "Bangun ekosistem multi-agent terstruktur: Series → Core → Big Idea → Toolbox → Agent. Skala bebas, koordinasi cerdas."
     },
     {
       icon: Globe,
@@ -185,13 +185,23 @@ export default function Landing() {
       title: "Multi-Channel",
       description: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget, REST API, dan Custom Domain. Satu chatbot, semua channel terhubung."
     },
+    {
+      icon: Package,
+      title: "Mini Apps 33 Tipe",
+      description: "Rubrik penilaian, risk register, work mode selector, brief intake, studio kompetensi, docgen, e-course — 33 tipe Mini App siap pakai langsung di dalam chatbot."
+    },
+    {
+      icon: ShieldCheck,
+      title: "Master Standar v2.0",
+      description: "State Machine 7-langkah (INIT→ELICIT→PLAN→DISPATCH→AGGREGATE→REFLECT→DELIVER), ANTI-INTERROGATION MODE, dan FALLBACK mandiri saat sub-agent tidak tersedia."
+    },
   ];
 
   const advancedFeatures = [
     {
       icon: Camera,
       title: "Project Snapshot AI",
-      description: "Ringkasan kondisi bisnis atau proyek otomatis - status, isu, risiko, dan keputusan terakhir dalam satu laporan"
+      description: "Ringkasan kondisi bisnis atau proyek otomatis — status, isu, risiko, dan keputusan terakhir dalam satu laporan"
     },
     {
       icon: BarChart3,
@@ -201,7 +211,7 @@ export default function Landing() {
     {
       icon: Cpu,
       title: "Multi-Model AI",
-      description: "GPT-4o, GPT-4o-mini, Claude, atau model custom dengan API endpoint sendiri sesuai kebutuhan dan budget"
+      description: "GPT-4o, GPT-4o-mini, DeepSeek, Qwen, Gemini — fallback otomatis antar provider, tidak ada single point of failure"
     },
     {
       icon: Palette,
@@ -217,6 +227,16 @@ export default function Landing() {
       icon: Code,
       title: "API & Integrasi Kustom",
       description: "REST API lengkap, webhook, dan Broadcast WA. Integrasi dengan CRM, ERP, LPSE tender scraper, atau tools lainnya"
+    },
+    {
+      icon: Scale,
+      title: "SCORECARD + Win Probability",
+      description: "Semua 131 hub orchestrator dilengkapi tabel 4-dimensi + persentase probabilitas keputusan dan rekomendasi LANJUT/TUNDA/GUGUR"
+    },
+    {
+      icon: ExternalLink,
+      title: "Export ke Aspekindo LLM",
+      description: "Export agent ke format LibreChat JSON — import langsung ke chat.aspekindo-pub.com tanpa perlu copy-paste satu per satu"
     },
   ];
 
@@ -272,7 +292,7 @@ export default function Landing() {
   const faqItems = [
     {
       question: "Apa itu Gustafta?",
-      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding. Fitur terbaru: MultiClaw 4-Panel untuk integrasi lintas panel Info Tender, Studio Kompetensi, Ekosistem Produk, dan WA Broadcast."
+      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding. Platform ini memiliki 971+ agent AI spesialis, 131 hub orchestrator dengan Master Standar v2.0 (State Machine 7-langkah), 33 tipe Mini App bawaan, SCORECARD + Win Probability, dan fitur Export ke Aspekindo LLM."
     },
     {
       question: "Apa itu hierarki 5 Level Gustafta?",
@@ -316,7 +336,7 @@ export default function Landing() {
     },
     {
       question: "Bisa digunakan untuk sektor usaha apa saja?",
-      answer: "Gustafta adalah platform AI chatbot terdalam untuk industri Jasa Konstruksi Indonesia — 19 ekosistem (Series) dan 250+ chatbot spesialis siap pakai mencakup Regulasi, Perizinan/SBU/SKK, Tender LPSE, Pasca Tender & Manajemen Kontrak, Pelaksanaan Proyek, Legalitas Konstruksi, Sertifikasi ISO/SMAP, K3, dan Pengembangan Profesi. Selain itu, platform juga fleksibel digunakan untuk 12 sektor usaha lain (kesehatan, pendidikan, keuangan, hukum, retail, properti, hospitality, logistik, marketing, customer service, kreatif) — tinggal kustomisasi Knowledge Base, Persona, dan Conversion Layer sesuai kebutuhan."
+      answer: "Gustafta adalah platform AI chatbot terdalam untuk industri Jasa Konstruksi Indonesia — 971+ agent AI spesialis dalam 131 hub orchestrator siap pakai mencakup Regulasi, Perizinan/SBU/SKK, Tender LPSE, Pasca Tender & Manajemen Kontrak, Pelaksanaan Proyek, Legalitas Konstruksi, Sertifikasi ISO/SMAP, K3, dan Pengembangan Profesi. Semua hub dilengkapi SCORECARD Win Probability, Master Standar v2.0, T5-HANDOVER domain, dan F3-FALLBACK mandiri. Selain itu, platform fleksibel untuk 12 sektor usaha lain — tinggal kustomisasi Knowledge Base, Mini Apps (33 tipe), Persona, dan Conversion Layer sesuai kebutuhan."
     },
   ];
 
@@ -359,9 +379,9 @@ export default function Landing() {
   ];
 
   const stats = [
-    { value: "250+", label: "Chatbot Spesialis Konstruksi" },
-    { value: "19", label: "Ekosistem Series" },
-    { value: "4", label: "Panel MultiClaw Terintegrasi" },
+    { value: "971+", label: "Agent AI Spesialis" },
+    { value: "131", label: "Hub Orchestrator Multi-Agent" },
+    { value: "33", label: "Tipe Mini App Bawaan" },
     { value: "24/7", label: "AI Selalu Aktif" },
   ];
 
@@ -378,7 +398,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Sparkles className="h-4 w-4" />
-              <span>Baru: MultiClaw 4-Panel · Orchestrator Multi-Agent · Custom Domain · KB YouTube/Video/Audio</span>
+              <span>Baru: Master Standar v2.0 · Mini Apps 33 Tipe · 131 Hub Orchestrator · Export ke Aspekindo LLM</span>
               <Flame className="h-4 w-4 text-orange-500" />
             </div>
             
@@ -392,7 +412,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Dilengkapi <strong>MultiClaw 4-Panel</strong> (Tender→Kompetensi→Ekosistem→Broadcast), <strong>Orchestrator Multi-Agent</strong>, Knowledge Base 7 tipe, Custom Domain, Tender Wizard, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
+              Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Dilengkapi <strong>131 Hub Orchestrator</strong> dengan Master Standar v2.0, <strong>Mini Apps 33 tipe</strong>, SCORECARD Win Probability, MultiClaw 4-Panel, Knowledge Base 7 tipe, Custom Domain, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -1525,7 +1545,7 @@ export default function Landing() {
             Siap Membangun Chatbot AI Anda?
           </h2>
           <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto text-lg">
-            Bergabung dengan kontraktor, konsultan, dan pelaku jasa konstruksi yang sudah memakai 19 series & 250+ chatbot Gustafta — 
+            Bergabung dengan kontraktor, konsultan, dan pelaku jasa konstruksi yang sudah memakai 131 hub orchestrator & 971+ agent Gustafta — 
             dan tetap bisa Anda konfigurasi untuk sektor lain. Setup chatbot AI dan mulai melayani hari ini.
           </p>
           
@@ -1536,7 +1556,7 @@ export default function Landing() {
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
-              <span>250+ chatbot konstruksi</span>
+              <span>971+ agent AI konstruksi</span>
             </div>
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <CheckCircle2 className="h-5 w-5" />
@@ -1580,7 +1600,7 @@ export default function Landing() {
                 <span className="font-bold text-lg">Gustafta</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                AI Chatbot Builder spesialis jasa konstruksi Indonesia — 19 series, 250+ chatbot. Konfigurabel untuk sektor lain.
+                AI Chatbot Builder spesialis jasa konstruksi Indonesia — 131 hub orchestrator, 971+ agent AI. Konfigurabel untuk sektor lain.
               </p>
               <div className="flex flex-wrap gap-2">
                 {trustBadges.slice(0, 2).map((badge) => (
