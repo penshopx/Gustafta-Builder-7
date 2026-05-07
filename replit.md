@@ -52,7 +52,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Monetization & Conversion Layer**: Pricing, lead capture, scoring, smart CTA triggers.
 - **Chatbot Templates & Gustafta Store**: Public marketplace with Midtrans payment integration.
 - **Test Tracker**: 3-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (655 sel, 131 hub × 5 F-test) + **Pilot (42 sel, 6 bot × 7 T-test, target ≥90% pass)**. Route: `/test-tracker`. (DB: 131 hubs, 961 agents, 558 sub-links)
-- **SCORECARD/WIN PROBABILITY (33 hubs)**: Tender (23,26,331), SBU PK (12,404,428), SBU KK (164,413), SKK (17,459), SKK Coach 12-hub, SKK Proses 4-hub, ASKOM+LSP+IMS (28,113,307), SBUJPTL+SKTKTK (549,556), Odoo (287).
+- **SCORECARD/WIN PROBABILITY (129/129 hubs — COMPLETE)**: All 129 Federation orchestrators upgraded with 4-dimension `┌──...┐` table scorecard + `PROBABILITAS X %` + `KEPUTUSAN:` line. Rumus weights vary by hub type. Covers: Tender, SBU, SKK, ISO 9001/14001, SMAP, PANCEK, Odoo, LSBU, LSP, ASKOM, AJJ, Legal Konstruksi, LexCom Wings, SKKNI Jabatan Kerja (PKBG-ARS/MPBG/PKFS/PBH/MPK/MK-CM/QS/QE/K3K/JLN/JBT/REL/TWG/PJJ), Project Management (StrategiTender/DokPenawaran/EksekusiKontrak/Perencanaan/Operasional/Pengendalian/Hukum/PlaybookBNSP), Personel Manajerial BUJK, dan seluruh discipline hubs.
 - **Mini Apps (Claude Opus additions)**: 3 new types from Master Document — `rubric_scoring` (Review & Rubric Scoring, AI-powered), `risk_register` (Risk Register Builder, AI-powered), `work_mode_selector` (4 Work Modes: Quick Help/Build/Review/Coach, interactive). Total mini app types: 30.
 
 ## User preferences
