@@ -46,6 +46,10 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   hse_plan: "HSE Plan / Rencana K3",
   executive_summary_penawaran: "Executive Summary Penawaran",
   metode_pelaksanaan: "Metode Pelaksanaan (Versi Tender)",
+  // Master Document Additions
+  rubric_scoring: "Review & Rubric Scoring",
+  risk_register: "Risk Register Builder",
+  work_mode_selector: "4 Work Modes Selector",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -76,6 +80,10 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   hse_plan: HardHat,
   executive_summary_penawaran: FileText,
   metode_pelaksanaan: LayoutList,
+  // Master Document Additions
+  rubric_scoring: BookOpen,
+  risk_register: Shield,
+  work_mode_selector: Layers,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -106,9 +114,13 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   hse_plan: "Draft Rencana K3 / HSE Plan untuk tender komersial: bahaya, risiko, pengendalian, dan prosedur darurat (AI-powered)",
   executive_summary_penawaran: "Executive summary singkat dan terstruktur untuk lampiran penawaran komersial (AI-powered)",
   metode_pelaksanaan: "Draft metode pelaksanaan terstruktur untuk versi tender: sequence kerja, sumber daya, dan jadwal ringkas (AI-powered)",
+  // Master Document Additions
+  rubric_scoring: "Review dokumen/output dengan rubrik terstruktur — skor per dimensi, gap kritis, dan rekomendasi perbaikan (AI-powered)",
+  risk_register: "Bangun Risk Register lengkap: identifikasi risiko, penilaian likelihood × impact, mitigasi, PIC, dan status (AI-powered)",
+  work_mode_selector: "Selector 4 Work Modes: Quick Help / Build / Review / Coach — panduan mode kerja untuk memulai sesi produktif",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register"];
 const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 const TENDER_DOC_TYPES: MiniAppType[] = ["compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 
@@ -449,6 +461,76 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
         "Pengendalian K3 & Lingkungan",
       ],
       guardrails: { no_hallucination: true, use_local_standard: true },
+    },
+  },
+  rubric_scoring: {
+    name: "Review & Rubric Scoring",
+    description: "Review dokumen/output dengan rubrik terstruktur — skor per dimensi, gap kritis, dan rekomendasi perbaikan.",
+    config: {
+      mode: "rubric_scoring",
+      rubric_dimensions: [
+        { name: "Kelengkapan Konten", weight: 0.30, max: 100 },
+        { name: "Kepatuhan Regulasi/Standar", weight: 0.25, max: 100 },
+        { name: "Ketepatan Teknis", weight: 0.25, max: 100 },
+        { name: "Format & Presentasi", weight: 0.20, max: 100 },
+      ],
+      thresholds: { excellent: 85, good: 70, needs_improvement: 50 },
+      output_sections: ["skor_per_dimensi", "gap_kritis", "kekuatan", "rekomendasi_perbaikan"],
+      guardrails: { no_hallucination: true, mark_missing_as: "Tidak dapat dinilai — data tidak tersedia", cite_basis: true },
+    },
+  },
+  risk_register: {
+    name: "Risk Register Builder",
+    description: "Bangun Risk Register lengkap: identifikasi risiko, penilaian likelihood × impact, mitigasi, PIC, dan status.",
+    config: {
+      mode: "risk_register",
+      risk_categories: ["Teknis", "Hukum/Regulasi", "Sumber Daya", "Jadwal", "Biaya", "Eksternal", "Keselamatan"],
+      scoring: {
+        likelihood_scale: [1, 2, 3, 4, 5],
+        impact_scale: [1, 2, 3, 4, 5],
+        method: "likelihood_x_impact",
+        thresholds: { low_max: 6, medium_max: 14, high_min: 15 },
+      },
+      columns: ["id_risiko", "kategori", "deskripsi_risiko", "likelihood", "impact", "skor_risiko", "level", "mitigasi", "pic", "status", "target_selesai"],
+      status_values: ["Open", "In Mitigation", "Monitoring", "Closed"],
+      guardrails: { no_hallucination: true, minimum_risks: 5, require_mitigation_for_high: true },
+    },
+  },
+  work_mode_selector: {
+    name: "4 Work Modes Selector",
+    description: "Pilih mode kerja yang tepat — Quick Help, Build, Review, atau Coach — untuk memulai sesi yang produktif.",
+    config: {
+      mode: "work_mode_selector",
+      modes: [
+        {
+          id: "quick_help",
+          label: "Quick Help",
+          emoji: "⚡",
+          description: "Jawaban cepat, checklist ringkas, atau penjelasan singkat",
+          prompt_template: "MODE: Quick Help. Saya butuh jawaban cepat tentang: [topik]. Berikan respons ringkas dan langsung ke inti.",
+        },
+        {
+          id: "build",
+          label: "Build",
+          emoji: "🔨",
+          description: "Buat template, draft dokumen, atau output v1 dari awal",
+          prompt_template: "MODE: Build. Tolong buatkan [jenis dokumen/template] untuk: [konteks/kebutuhan]. Buat versi draft yang siap digunakan.",
+        },
+        {
+          id: "review",
+          label: "Review",
+          emoji: "🔍",
+          description: "Review dokumen/output dengan rubrik dan feedback terarah",
+          prompt_template: "MODE: Review. Tolong review [dokumen/output berikut] menggunakan rubrik yang relevan. Berikan: skor per dimensi, gap kritis, dan rekomendasi perbaikan spesifik.",
+        },
+        {
+          id: "coach",
+          label: "Coach",
+          emoji: "🎯",
+          description: "Rencana pembelajaran/mentoring personal dengan milestone",
+          prompt_template: "MODE: Coach. Saya ingin belajar/meningkatkan kemampuan di bidang: [topik]. Level saya saat ini: [pemula/menengah/mahir]. Buat rencana mentoring terstruktur dengan milestone mingguan.",
+        },
+      ],
     },
   },
 };

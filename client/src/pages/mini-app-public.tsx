@@ -24,6 +24,9 @@ const typeIcons: Partial<Record<MiniAppType, typeof CheckSquare>> = {
   scoring_assessment: BarChart2,
   gap_analysis: ClipboardList,
   recommendation_engine: Sparkles,
+  rubric_scoring: BarChart2,
+  risk_register: AlertTriangle,
+  work_mode_selector: Sparkles,
 };
 
 const typeLabels: Partial<Record<MiniAppType, string>> = {
@@ -36,6 +39,9 @@ const typeLabels: Partial<Record<MiniAppType, string>> = {
   scoring_assessment: "Penilaian & Scoring",
   gap_analysis: "Gap Analysis",
   recommendation_engine: "Rekomendasi",
+  rubric_scoring: "Review & Rubric Scoring",
+  risk_register: "Risk Register",
+  work_mode_selector: "4 Work Modes",
 };
 
 const AI_TYPES: MiniAppType[] = [
@@ -44,6 +50,7 @@ const AI_TYPES: MiniAppType[] = [
   "nib_status_report", "whatsapp_status_update", "internal_project_report",
   "compliance_matrix", "tender_audit_report", "go_no_go_checklist",
   "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan",
+  "rubric_scoring", "risk_register",
 ];
 
 function SaveSuccessBadge({ savedAt }: { savedAt: string }) {
@@ -721,6 +728,68 @@ function SimpleFormRunner({ config, name, slug, agentColor }: { config: Record<s
   );
 }
 
+function WorkModeRunner({ config, agentId, agentColor }: { config: Record<string, unknown>; agentId: string; agentColor?: string }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const modes = (config?.modes as Array<{ id: string; label: string; emoji: string; description: string; prompt_template: string }>) ?? [];
+
+  const handleCopy = (modeId: string, promptTemplate: string) => {
+    navigator.clipboard.writeText(promptTemplate).then(() => {
+      setCopied(modeId);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  };
+
+  const colorMap: Record<string, string> = {
+    quick_help: "#f59e0b",
+    build: "#3b82f6",
+    review: "#8b5cf6",
+    coach: "#10b981",
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground text-center mb-4">Pilih mode kerja — klik untuk menyalin prompt ke chatbot</p>
+      {modes.map((mode) => {
+        const modeColor = colorMap[mode.id] || agentColor || "#6366f1";
+        const isCopied = copied === mode.id;
+        return (
+          <button
+            key={mode.id}
+            className="w-full text-left rounded-xl border-2 p-4 transition-all hover:shadow-md active:scale-[0.99]"
+            style={{ borderColor: `${modeColor}33`, backgroundColor: `${modeColor}0a` }}
+            onClick={() => handleCopy(mode.id, mode.prompt_template)}
+            data-testid={`button-work-mode-${mode.id}`}
+          >
+            <div className="flex items-start gap-3">
+              <span className="text-2xl leading-none mt-0.5">{mode.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-sm" style={{ color: modeColor }}>{mode.label}</span>
+                  {isCopied ? (
+                    <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3 h-3" />Tersalin!</span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1"><Copy className="w-3 h-3" />Salin prompt</span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">{mode.description}</p>
+              </div>
+            </div>
+          </button>
+        );
+      })}
+      <div className="mt-4 p-3 rounded-lg bg-muted/40 border text-center">
+        <p className="text-xs text-muted-foreground mb-2">Setelah menyalin prompt, tempel ke chatbot</p>
+        <Button asChild size="sm" className="text-xs" style={{ backgroundColor: agentColor || "#6366f1", color: "#fff" }} data-testid="button-open-chatbot-modes">
+          <a href={`/bot/${agentId}`} target="_blank" rel="noopener noreferrer">
+            <ArrowRight className="w-3.5 h-3.5 mr-1.5" />
+            Buka Chatbot
+          </a>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function ResultHistoryList({ results }: { results: MiniAppResult[] }) {
   const [expanded, setExpanded] = useState(false);
   if (results.length === 0) return null;
@@ -823,6 +892,8 @@ function AppRunner({ miniApp, result, agentId, agentColor, slug }: { miniApp: Mi
       return <ProgressTrackerRunner config={config} slug={slug} agentColor={agentColor} />;
     case "document_generator":
       return <DocumentGeneratorRunner config={config} name={miniApp.name} slug={slug} agentColor={agentColor} />;
+    case "work_mode_selector":
+      return <WorkModeRunner config={config} agentId={agentId} agentColor={agentColor} />;
     case "lead_capture_form":
     case "custom":
     default:

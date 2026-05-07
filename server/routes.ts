@@ -7340,7 +7340,7 @@ Tugas kamu: Buat dokumen profesional yang lengkap, terstruktur, dan siap pakai b
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
       const extraParams = req.body && typeof req.body === "object" ? req.body as Record<string, any> : {};
@@ -7762,16 +7762,119 @@ Timeline      : [timeline_summary — ringkas jika panjang, maks 3 poin]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Laporan ini dibuat otomatis berdasarkan data Otak Proyek. Verifikasi data lapangan tetap diperlukan.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "rubric_scoring") {
+        const docContext = extraParams.document_context || "";
+        const contextBlock = docContext ? `\n\nDokumen/Output yang Direview:\n${docContext}` : "";
+
+        modePrompt = `Kamu adalah AI asisten quality review dan assessment. Lakukan REVIEW & RUBRIC SCORING terhadap dokumen/output berdasarkan data Otak Proyek di bawah.
+Jika tersedia konfigurasi rubrik (rubric_dimensions + bobot), gunakan dimensi tersebut. Jika tidak, gunakan dimensi default: Kelengkapan Konten (30%), Kepatuhan Regulasi/Standar (25%), Ketepatan Teknis (25%), Format & Presentasi (20%).${contextBlock}
+
+ATURAN KETAT:
+- Hanya nilai berdasarkan data yang tersedia. Jangan mengarang fakta.
+- Jika dimensi tidak dapat dinilai karena data kurang, tulis: "Tidak dapat dinilai — data tidak tersedia"
+- Setiap skor HARUS disertai alasan singkat dan dasar penilaian
+- Untuk level: Sangat Baik = ≥85 | Baik = 70–84 | Cukup = 50–69 | Perlu Peningkatan = <50
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REVIEW & RUBRIC SCORING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RINGKASAN EKSEKUTIF
+Skor Keseluruhan: [skor tertimbang] / 100
+Level: [Sangat Baik / Baik / Cukup / Perlu Peningkatan]
+Rekomendasi Utama: [1 kalimat actionable]
+
+SKOR PER DIMENSI
+Untuk setiap dimensi rubrik:
+┌─────────────────────────────────────────────────────────────┐
+│ Dimensi: [nama] | Bobot: [%] | Skor: [X] / 100 | Level: [] │
+│ Alasan: [2-3 kalimat penjelasan skor]                       │
+│ Dasar Penilaian: [data/regulasi yang digunakan]             │
+└─────────────────────────────────────────────────────────────┘
+
+GAP KRITIS (jika ada)
+[Item yang mendapat skor <70 dan perlu segera diperbaiki]
+• [Gap 1]: [penjelasan + dampak jika tidak diperbaiki]
+• [Gap 2 — jika ada]
+
+KEKUATAN YANG DITEMUKAN
+• [Aspek positif 1]
+• [Aspek positif 2]
+• [Aspek positif 3]
+
+REKOMENDASI PERBAIKAN (urut prioritas)
+1. [Prioritas Tinggi] [tindakan spesifik] — target: [kapan/siapa]
+2. [Prioritas Sedang] [tindakan spesifik] — target: [kapan/siapa]
+3. [Prioritas Rendah] [tindakan spesifik] — target: [kapan/siapa]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Review ini dibuat berdasarkan data Otak Proyek. Validasi reviewer domain tetap diperlukan.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "risk_register") {
+        modePrompt = `Kamu adalah AI asisten manajemen risiko. Bangun RISK REGISTER lengkap berdasarkan data Otak Proyek di bawah.
+Identifikasi semua risiko yang dapat ditemukan dari data (isu aktif, keputusan berisiko, kendala, faktor eksternal). Minimum 5 risiko.
+Jika konfigurasi mini app menyertakan risk_categories, gunakan kategori tersebut sebagai panduan klasifikasi.
+
+ATURAN KETAT:
+- Hanya identifikasi risiko yang memiliki dasar dari data Otak Proyek. Jangan mengarang risiko.
+- Setiap risiko WAJIB memiliki mitigasi yang spesifik dan actionable.
+- Risiko HIGH (skor ≥15) WAJIB ada mitigasi + PIC + target selesai.
+- Gunakan skala 1-5 untuk Likelihood dan Impact. Skor = Likelihood × Impact.
+- Level: Low (1-6) | Medium (7-14) | High (15-25)
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RISK REGISTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+RINGKASAN RISIKO
+Total Risiko    : [X]
+High (≥15)      : [X] risiko — [warna merah konseptual: perlu perhatian segera]
+Medium (7-14)   : [X] risiko
+Low (1-6)       : [X] risiko
+Kategori Paling Berisiko: [kategori dengan total skor tertinggi]
+
+DAFTAR RISIKO
+
+Untuk setiap risiko (urutkan dari High → Medium → Low):
+
+[ID: RSK-001]
+Kategori     : [Teknis / Hukum / Sumber Daya / Jadwal / Biaya / Eksternal / Keselamatan]
+Deskripsi    : [penjelasan risiko spesifik]
+Likelihood   : [1-5] — [alasan singkat]
+Impact       : [1-5] — [alasan singkat]
+Skor Risiko  : [L×I] | Level: [Low / Medium / High]
+Mitigasi     : [tindakan konkret untuk mengurangi likelihood atau impact]
+PIC          : [peran/jabatan yang bertanggung jawab]
+Status       : [Open / In Mitigation / Monitoring / Closed]
+Target Selesai: [estimasi waktu atau kondisi penutupan]
+
+[ID: RSK-002]
+[lanjutkan untuk semua risiko yang teridentifikasi]
+
+PRIORITAS TINDAKAN
+1. [RSK dengan skor tertinggi] — [tindakan segera yang paling kritis]
+2. [RSK berikutnya]
+3. [RSK berikutnya]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Risk Register ini dibuat berdasarkan data Otak Proyek. Validasi dengan tim lapangan diperlukan untuk akurasi penuh.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       }
 
       const agent = await storage.getAgent(agentId);
       const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
 
-      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report"].includes(appType);
+      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register"].includes(appType);
       const userPromptById: Record<string, string> = {
         nib_status_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`,
         whatsapp_status_update: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat pesan WhatsApp status proyek untuk klien sesuai format dan aturan di atas.`,
         internal_project_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Laporan Internal Snapshot Proyek sesuai format dan aturan di atas.`,
+        rubric_scoring: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nLakukan Review & Rubric Scoring sesuai format dan aturan di atas.`,
+        risk_register: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBangun Risk Register lengkap sesuai format dan aturan di atas.`,
       };
 
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [
