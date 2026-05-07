@@ -31,7 +31,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Legal Landing Page**: `client/src/pages/legal-landing.tsx`
 - **Legal Chat Interface**: `client/src/pages/legal-chat.tsx`
 - **Chaesa Lexbot Widget**: `client/src/components/chaesa-widget.tsx`
-- **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — dual-tab: Tender 35 sel + Federation 330 sel (66 hub × 5 F-test)
+- **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — 3-tab: Tender 35 sel + Federation 655 sel + Pilot 42 sel (6 bot × 7 T-test)
 - **Templates**: `server/db/schema.ts` (chatbot_templates table)
 - **Storefront Products**: `server/db/schema.ts` (store_products table)
 
@@ -51,7 +51,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Dynamic Knowledge Base**: Hierarchical classification, versioning, source attribution, multiple upload types.
 - **Monetization & Conversion Layer**: Pricing, lead capture, scoring, smart CTA triggers.
 - **Chatbot Templates & Gustafta Store**: Public marketplace with Midtrans payment integration.
-- **Test Tracker**: Dual-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (655 sel, 131 hub × 5 F-test). Route: `/test-tracker`. (DB: 131 hubs, 961 agents, 558 sub-links)
+- **Test Tracker**: 3-tab evaluation tool — Tender (35 sel, 5 bot × 7 test) + Federation (655 sel, 131 hub × 5 F-test) + **Pilot (42 sel, 6 bot × 7 T-test, target ≥90% pass)**. Route: `/test-tracker`. (DB: 131 hubs, 961 agents, 558 sub-links)
 
 ## User preferences
 Preferred communication style: Simple, everyday language.
@@ -69,4 +69,4 @@ Preferred communication style: Simple, everyday language.
 
 ## Pointers
 - **Inter-Agent API**: `server/routes.ts` orchestration block ~line 2806
-- **Test Tracker Storage**: `gustafta_test_tracker_v1` (Tender), `gustafta_fed_tracker_v1` (Federation) — localStorage
+- **Test Tracker Storage**: `gustafta_test_tracker_v1` (Tender), `gustafta_fed_tracker_v1` (Federation), `gustafta_pilot_tracker_v1` (Pilot) — localStorage

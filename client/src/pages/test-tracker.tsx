@@ -271,8 +271,19 @@ const FED_TESTS = [
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+// ─── Pilot Bots (6 bot pilot × T1–T7) ───────────────────────────────────────
+
+const PILOT_BOTS = [
+  { id: 404,  name: "HUB SBU Pekerjaan Konstruksi", role: "SBU-PK",    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",         subs: 4 },
+  { id: 459,  name: "SKK Coach Sipil",               role: "SKK-SIP",   color: "bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-300",      subs: 4 },
+  { id: 113,  name: "HUB Manajemen LSP",             role: "LSP-MGT",   color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",  subs: 4 },
+  { id: 307,  name: "HUB IMS & SMK3 Terintegrasi",  role: "IMS-SMK3",  color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",      subs: 4 },
+  { id: 28,   name: "HUB Asesor Sertifikasi Konstruksi", role: "ASKOM", color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",  subs: 4 },
+  { id: 287,  name: "Odoo BUJK Orchestrator",        role: "Odoo-BUJK", color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",          subs: 4 },
+];
+
 type TestStatus = "pending" | "pass" | "fail" | "skip";
-type TabType = "tender" | "federation";
+type TabType = "tender" | "federation" | "pilot";
 
 interface CellResult {
   status: TestStatus;
@@ -284,6 +295,7 @@ type GridState = Record<string, CellResult>;
 
 const STORAGE_KEY = "gustafta_test_tracker_v1";
 const FED_STORAGE_KEY = "gustafta_fed_tracker_v1";
+const PILOT_STORAGE_KEY = "gustafta_pilot_tracker_v1";
 
 function cellKey(botId: number, testId: string) {
   return `${botId}_${testId}`;
@@ -527,12 +539,14 @@ export default function TestTrackerPage() {
   const [activeTab, setActiveTab] = useState<TabType>("tender");
   const [grid, setGrid] = useState<GridState>(() => loadGrid(STORAGE_KEY, TENDER_BOTS, TESTS));
   const [fedGrid, setFedGrid] = useState<GridState>(() => loadGrid(FED_STORAGE_KEY, FED_BOTS, FED_TESTS));
+  const [pilotGrid, setPilotGrid] = useState<GridState>(() => loadGrid(PILOT_STORAGE_KEY, PILOT_BOTS, TESTS));
   const [selected, setSelected] = useState<{ botId: number; testId: string } | null>(null);
   const [expandedTest, setExpandedTest] = useState<string | null>(null);
   const [showReset, setShowReset] = useState(false);
 
   useEffect(() => { saveGrid(STORAGE_KEY, grid); }, [grid]);
   useEffect(() => { saveGrid(FED_STORAGE_KEY, fedGrid); }, [fedGrid]);
+  useEffect(() => { saveGrid(PILOT_STORAGE_KEY, pilotGrid); }, [pilotGrid]);
   useEffect(() => { setSelected(null); }, [activeTab]);
 
   const updateCell = useCallback((botId: number, testId: string, patch: Partial<CellResult>) => {
@@ -541,18 +555,20 @@ export default function TestTrackerPage() {
       return { ...prev, [k]: { ...prev[k], ...patch, timestamp: new Date().toISOString() } };
     };
     if (activeTab === "tender") setGrid(updater);
-    else setFedGrid(updater);
+    else if (activeTab === "federation") setFedGrid(updater);
+    else setPilotGrid(updater);
   }, [activeTab]);
 
   const resetAll = () => {
     if (activeTab === "tender") setGrid(defaultGrid(TENDER_BOTS, TESTS));
-    else setFedGrid(defaultGrid(FED_BOTS, FED_TESTS));
+    else if (activeTab === "federation") setFedGrid(defaultGrid(FED_BOTS, FED_TESTS));
+    else setPilotGrid(defaultGrid(PILOT_BOTS, TESTS));
     setShowReset(false);
   };
 
-  const currentBots = activeTab === "tender" ? TENDER_BOTS : FED_BOTS;
-  const currentTests = activeTab === "tender" ? TESTS : FED_TESTS;
-  const currentGrid = activeTab === "tender" ? grid : fedGrid;
+  const currentBots = activeTab === "tender" ? TENDER_BOTS : activeTab === "federation" ? FED_BOTS : PILOT_BOTS;
+  const currentTests = activeTab === "tender" || activeTab === "pilot" ? TESTS : FED_TESTS;
+  const currentGrid = activeTab === "tender" ? grid : activeTab === "federation" ? fedGrid : pilotGrid;
 
   const allCells = currentBots.flatMap(b => currentTests.map(t => currentGrid[cellKey(b.id, t.id)]));
   const passCount = allCells.filter(c => c?.status === "pass").length;
@@ -581,7 +597,11 @@ export default function TestTrackerPage() {
             <div>
               <h1 className="font-semibold text-sm leading-tight">Test Tracker — Gustafta</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {activeTab === "tender" ? "5 Tender bot × 7 skenario · 35 sel" : `${FED_BOTS.length} Hub Orchestrator × 5 Federation test · ${FED_BOTS.length * 5} sel`}
+                {activeTab === "tender"
+                  ? "5 Tender bot × 7 skenario · 35 sel"
+                  : activeTab === "federation"
+                  ? `${FED_BOTS.length} Hub Orchestrator × 5 Federation test · ${FED_BOTS.length * 5} sel`
+                  : "6 Bot Pilot × 7 skenario · 42 sel"}
               </p>
             </div>
           </div>
@@ -612,6 +632,18 @@ export default function TestTrackerPage() {
               <Zap className="w-3 h-3 text-violet-500" />
               Fed ({FED_BOTS.length * 5})
             </button>
+            <button
+              onClick={() => setActiveTab("pilot")}
+              data-testid="tab-pilot"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                activeTab === "pilot"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              <Bot className="w-3 h-3 text-emerald-500" />
+              Pilot (42)
+            </button>
           </div>
 
           <div className="ml-auto flex items-center gap-3">
@@ -635,6 +667,48 @@ export default function TestTrackerPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+        {/* ── Pilot info banner ── */}
+        {activeTab === "pilot" && (
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <Bot className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">6 Bot Pilot — Evaluasi T1–T7 (42 Sel)</p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  Uji 6 bot pilot representatif menggunakan 7 skenario T1–T7 (sama dengan tab Tender).
+                  Target: <strong>≥90% pass</strong> (≥38/42 sel) sebelum replikasi lebih luas ke seluruh 131 hub.
+                  Setiap bot sudah dilengkapi Inter-Agent API v2 dengan 4 sub-agen paralel.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {PILOT_BOTS.map(b => (
+                    <a key={b.id} href={`/bot/${b.id}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-900 border border-emerald-200 dark:border-emerald-800 rounded-lg text-[10px] font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors"
+                      data-testid={`pilot-hub-link-${b.id}`}>
+                      <Bot className="w-2.5 h-2.5" />
+                      {b.name} ({b.subs}✦)
+                    </a>
+                  ))}
+                </div>
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    { label: "SBU Pekerjaan Konstruksi", id: 404, desc: "Kesiapan & Sertifikasi SBU PK" },
+                    { label: "SKK Coach Sipil",          id: 459, desc: "Persiapan SKK Teknik Sipil" },
+                    { label: "Manajemen LSP",            id: 113, desc: "Tata Kelola LSP Konstruksi" },
+                    { label: "IMS & SMK3",               id: 307, desc: "Sistem Manajemen Terintegrasi" },
+                    { label: "ASKOM Konstruksi",         id: 28,  desc: "Asesor Sertifikasi Kompetensi" },
+                    { label: "Odoo BUJK",                id: 287, desc: "ERP Jasa Konstruksi" },
+                  ].map(b => (
+                    <div key={b.id} className="bg-white dark:bg-gray-900 rounded-lg p-2 border border-emerald-100 dark:border-emerald-900">
+                      <p className="text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">{b.label}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{b.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Federation info banner ── */}
         {activeTab === "federation" && (
@@ -691,8 +765,13 @@ export default function TestTrackerPage() {
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
             <Info className="w-4 h-4 text-gray-500" />
             <span className="text-sm font-medium">
-              {activeTab === "tender" ? "Skenario Test (T1–T7)" : "Skenario Federation (F1–F5)"}
+              {activeTab === "federation" ? "Skenario Federation (F1–F5)" : "Skenario Test (T1–T7)"}
             </span>
+            {activeTab === "pilot" && (
+              <span className="ml-auto text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 font-medium">
+                Target ≥90% pass (38/42)
+              </span>
+            )}
           </div>
           <div className="divide-y divide-gray-50 dark:divide-gray-800">
             {currentTests.map(test => (
@@ -836,10 +915,16 @@ export default function TestTrackerPage() {
       <Dialog open={showReset} onOpenChange={setShowReset}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset hasil test {activeTab === "tender" ? "Tender" : "Federation"}?</DialogTitle>
+            <DialogTitle>Reset hasil test {activeTab === "tender" ? "Tender" : activeTab === "federation" ? "Federation" : "Pilot"}?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Semua status dan catatan di tab {activeTab === "tender" ? "Tender (35 sel)" : `Federation (${FED_BOTS.length * 5} sel)`} akan dihapus.
+            Semua status dan catatan di tab{" "}
+            {activeTab === "tender"
+              ? "Tender (35 sel)"
+              : activeTab === "federation"
+              ? `Federation (${FED_BOTS.length * 5} sel)`
+              : "Pilot (42 sel)"}{" "}
+            akan dihapus.
           </p>
           <div className="flex gap-3 mt-2">
             <Button variant="outline" onClick={() => setShowReset(false)} className="flex-1">Batal</Button>
