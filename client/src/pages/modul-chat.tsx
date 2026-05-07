@@ -160,18 +160,44 @@ export default function ModulChat() {
     }]);
 
     try {
+      // Retrieve stored access token for this modul (sent by server via client subscription)
+      const storedToken = localStorage.getItem(`modul_access_${params.bigIdeaId}`) ||
+                          localStorage.getItem(`modul_token_${params.bigIdeaId}`);
+
+      const streamHeaders: Record<string, string> = { "Content-Type": "application/json" };
+      if (storedToken) streamHeaders["x-client-token"] = storedToken;
+
       const res = await fetch("/api/messages/stream", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: streamHeaders,
         body: JSON.stringify({
           agentId: String(selectedBot.agentId),
           content: messageContent,
           role: "user",
           sessionId: sessionIdRef.current,
+          clientToken: storedToken || undefined,
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to send message");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const reason = errData.reason;
+        if (reason === "registration_required" || reason === "no_active_subscription") {
+          setShowUpgradeWall(true);
+          setMessages(prev => prev.filter(m => m.id !== assistantId));
+          setIsStreaming(false);
+          return;
+        }
+        if (reason === "guest_limit_reached") {
+          setMessages(prev => prev.map(m => m.id === assistantId
+            ? { ...m, content: "Batas pesan gratis tercapai. Silakan daftar untuk melanjutkan." }
+            : m
+          ));
+          setIsStreaming(false);
+          return;
+        }
+        throw new Error(errData.error || "Failed to send message");
+      }
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
