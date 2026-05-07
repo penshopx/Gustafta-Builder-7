@@ -7340,7 +7340,7 @@ Tugas kamu: Buat dokumen profesional yang lengkap, terstruktur, dan siap pakai b
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
       const extraParams = req.body && typeof req.body === "object" ? req.body as Record<string, any> : {};
@@ -7812,6 +7812,71 @@ REKOMENDASI PERBAIKAN (urut prioritas)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Review ini dibuat berdasarkan data Otak Proyek. Validasi reviewer domain tetap diperlukan.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "mentoring_plan") {
+        const level = (miniApp.config as any)?.level || "menengah";
+        const durationWeeks = (miniApp.config as any)?.duration_weeks || 8;
+        const domains = ((miniApp.config as any)?.domains as string[] | undefined)?.join(", ") || "Kompetensi Teknis, Regulasi & Standar";
+
+        modePrompt = `Kamu adalah AI asisten mentoring & pengembangan kompetensi. Buat RENCANA MENTORING PERSONAL lengkap dan terstruktur berdasarkan data Otak Proyek di bawah.
+Level peserta: ${level} (pemula/menengah/mahir). Durasi program: ${durationWeeks} minggu. Domain fokus: ${domains}.
+
+ATURAN KETAT:
+- Sesuaikan kedalaman materi dengan level peserta. Jangan terlalu tinggi untuk pemula atau terlalu dasar untuk yang mahir.
+- Milestone harus realistis dan terukur (SMART: Specific, Measurable, Achievable, Relevant, Time-bound).
+- Setiap minggu WAJIB ada: materi belajar, aktivitas praktik, deliverable/output, dan progress check.
+- Rekomendasikan sumber belajar yang spesifik (buku, standar, platform) jika relevan dengan domain.
+- Jangan mengarang kompetensi yang tidak relevan dengan data Otak Proyek.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RENCANA MENTORING PERSONAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROFIL PROGRAM
+Peserta      : [dari data Otak Proyek]
+Level Awal   : ${level}
+Durasi       : ${durationWeeks} minggu
+Domain Fokus : ${domains}
+Tujuan Akhir : [kompetensi utama yang ingin dicapai]
+
+MILESTONE KOMPETENSI
+• Minggu 1-2: [milestone — kompetensi yang harus dikuasai]
+• Minggu 3-4: [milestone]
+• Minggu 5-6: [milestone]
+• Minggu 7-8: [milestone]
+[lanjutkan sesuai durasi]
+
+JADWAL MINGGUAN DETAIL
+Untuk setiap minggu:
+
+MINGGU [X]: [Tema/Topik]
+Materi       : [topik spesifik yang dipelajari]
+Aktivitas    : [latihan/praktik/studi kasus konkret]
+Deliverable  : [output yang harus dihasilkan]
+Sumber       : [buku/standar/platform/mentor]
+Progress Check: [pertanyaan/kriteria evaluasi di akhir minggu]
+
+[lanjutkan untuk setiap minggu]
+
+METODE BELAJAR
+• [Metode 1 — sesuaikan dengan gaya belajar dan domain]
+• [Metode 2]
+• [Metode 3]
+
+INDIKATOR KEBERHASILAN
+┌────────────────────────────────────────────────────┐
+│ Kompetensi          │ Indikator Terukur    │ Target │
+│ [Kompetensi 1]      │ [cara mengukur]      │ [%/lvl]│
+│ [Kompetensi 2]      │ [cara mengukur]      │ [%/lvl]│
+└────────────────────────────────────────────────────┘
+
+REKOMENDASI EVALUASI AKHIR
+[Tes kompetensi / sertifikasi / portofolio / demo yang disarankan]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Rencana ini dibuat berdasarkan data Otak Proyek. Sesuaikan dengan kondisi aktual peserta dan ketersediaan waktu belajar.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       } else if (appType === "risk_register") {
         modePrompt = `Kamu adalah AI asisten manajemen risiko. Bangun RISK REGISTER lengkap berdasarkan data Otak Proyek di bawah.
 Identifikasi semua risiko yang dapat ditemukan dari data (isu aktif, keputusan berisiko, kendala, faktor eksternal). Minimum 5 risiko.
@@ -7868,13 +7933,14 @@ Risk Register ini dibuat berdasarkan data Otak Proyek. Validasi dengan tim lapan
       const agent = await storage.getAgent(agentId);
       const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
 
-      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register"].includes(appType);
+      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan"].includes(appType);
       const userPromptById: Record<string, string> = {
         nib_status_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`,
         whatsapp_status_update: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat pesan WhatsApp status proyek untuk klien sesuai format dan aturan di atas.`,
         internal_project_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Laporan Internal Snapshot Proyek sesuai format dan aturan di atas.`,
         rubric_scoring: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nLakukan Review & Rubric Scoring sesuai format dan aturan di atas.`,
         risk_register: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBangun Risk Register lengkap sesuai format dan aturan di atas.`,
+        mentoring_plan: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Rencana Mentoring Personal lengkap sesuai format dan aturan di atas. Sesuaikan topik dan domain kompetensi berdasarkan konteks proyek di atas.`,
       };
 
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [

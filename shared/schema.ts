@@ -1241,7 +1241,9 @@ export const miniAppTypeSchema = z.enum([
   "compliance_matrix", "tender_audit_report", "go_no_go_checklist",
   "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan",
   // Claude Opus Master Document Additions
-  "rubric_scoring", "risk_register", "work_mode_selector"
+  "rubric_scoring", "risk_register", "work_mode_selector",
+  // MultiAgen Agentic AI Completion
+  "mentoring_plan"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +50,8 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   rubric_scoring: "Review & Rubric Scoring",
   risk_register: "Risk Register Builder",
   work_mode_selector: "4 Work Modes Selector",
+  // MultiAgen Agentic AI Completion
+  mentoring_plan: "Mentoring Plan Generator",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -84,6 +86,8 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   rubric_scoring: BookOpen,
   risk_register: Shield,
   work_mode_selector: Layers,
+  // MultiAgen Agentic AI Completion
+  mentoring_plan: GraduationCap,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -118,9 +122,11 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   rubric_scoring: "Review dokumen/output dengan rubrik terstruktur — skor per dimensi, gap kritis, dan rekomendasi perbaikan (AI-powered)",
   risk_register: "Bangun Risk Register lengkap: identifikasi risiko, penilaian likelihood × impact, mitigasi, PIC, dan status (AI-powered)",
   work_mode_selector: "Selector 4 Work Modes: Quick Help / Build / Review / Coach — panduan mode kerja untuk memulai sesi produktif",
+  // MultiAgen Agentic AI Completion
+  mentoring_plan: "Buat Rencana Mentoring personal terstruktur: jadwal mingguan, milestone kompetensi, metode belajar, dan progress check (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan"];
 const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 const TENDER_DOC_TYPES: MiniAppType[] = ["compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 
@@ -531,6 +537,20 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
           prompt_template: "MODE: Coach. Saya ingin belajar/meningkatkan kemampuan di bidang: [topik]. Level saya saat ini: [pemula/menengah/mahir]. Buat rencana mentoring terstruktur dengan milestone mingguan.",
         },
       ],
+    },
+  },
+  mentoring_plan: {
+    name: "Mentoring Plan Generator",
+    description: "Buat Rencana Mentoring personal terstruktur dengan milestone mingguan dan metode belajar yang tepat.",
+    config: {
+      mode: "mentoring_plan",
+      duration_weeks: 8,
+      level: "menengah",
+      milestones_per_week: 2,
+      domains: ["Kompetensi Teknis", "Regulasi & Standar", "Soft Skills", "Tools & Teknologi"],
+      assessment_cadence: "mingguan",
+      output_sections: ["profil_peserta", "jadwal_mingguan", "milestone_kompetensi", "metode_belajar", "indikator_keberhasilan", "progress_check"],
+      guardrails: { realistic_milestones: true, match_to_domain: true, include_resources: true },
     },
   },
 };
