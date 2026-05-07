@@ -189,6 +189,59 @@ export function StudioPanel({ agent }: { agent: any }) {
     setEditedFields((prev) => ({ ...prev, [key]: value }));
   };
 
+  // ============ ASPEKINDO LLM EXPORT ============
+  const [aspekindoOpen, setAspekindoOpen] = useState(false);
+  const [aspekindoBundle, setAspekindoBundle] = useState<any | null>(null);
+  const [aspekindoCopied, setAspekindoCopied] = useState<string>("");
+
+  const fetchAspekindoMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/agents/${agent.id}/export/aspekindo-llm`, { credentials: "include" });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error || "Gagal mengambil bundle Aspekindo LLM");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => { setAspekindoBundle(data); setAspekindoOpen(true); },
+    onError: (err: any) => { toast({ title: "Gagal", description: err.message, variant: "destructive" }); },
+  });
+
+  const downloadAspekindoJson = () => {
+    const url = `/api/agents/${agent.id}/export/aspekindo-llm?download=1`;
+    const a = document.createElement("a");
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast({ title: "Bundle Aspekindo LLM diunduh", description: "File JSON siap digunakan." });
+  };
+
+  const downloadAspekindoContext = () => {
+    if (!aspekindoBundle?.combined_context) return;
+    const blob = new Blob([aspekindoBundle.combined_context], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const slug = (agent.name || "context").toLowerCase().replace(/\s+/g, "-");
+    a.download = `${slug}-combined-context.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "File konteks diunduh", description: "Upload ke 'Upload Context' di Aspekindo LLM." });
+  };
+
+  const copyAspekindo = async (text: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(text || "");
+      setAspekindoCopied(key);
+      setTimeout(() => setAspekindoCopied(""), 1800);
+    } catch {
+      toast({ title: "Gagal menyalin", variant: "destructive" });
+    }
+  };
+
   // ============ CHAESA AI STUDIO EXPORT ============
   const [chaesaOpen, setChaesaOpen] = useState(false);
   const [chaesaBundle, setChaesaBundle] = useState<any | null>(null);
@@ -810,6 +863,66 @@ export function StudioPanel({ agent }: { agent: any }) {
               </CardContent>
             </Card>
 
+            {/* Aspekindo LLM Bridge */}
+            <Card className="border-sky-500/40 bg-gradient-to-br from-sky-50/40 to-transparent dark:from-sky-950/20">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                    <Layers className="w-5 h-5 text-sky-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-foreground">Aspekindo LLM</h3>
+                      <Badge className="bg-sky-500 hover:bg-sky-600 text-white">Transfer Agent</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Transfer chatbot ini ke <span className="font-medium text-sky-700 dark:text-sky-400">chat.aspekindo-pub.com</span> — petakan Name, Description, Content, Start Messages, dan Context (KB) ke form "Create Agent".
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => fetchAspekindoMutation.mutate()}
+                    disabled={fetchAspekindoMutation.isPending}
+                    className="flex-1 bg-sky-600 hover:bg-sky-700 text-white"
+                    data-testid="button-preview-aspekindo"
+                  >
+                    {fetchAspekindoMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                    ) : (
+                      <Layers className="w-4 h-4 mr-1.5" />
+                    )}
+                    Preview & Salin Field
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={downloadAspekindoJson}
+                    data-testid="button-download-aspekindo-json"
+                    title="Download bundle JSON lengkap"
+                  >
+                    <Download className="w-4 h-4 mr-1.5" /> .json
+                  </Button>
+                </div>
+                <div className="rounded-md bg-sky-100/60 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-800/40 p-2.5">
+                  <p className="text-[11px] leading-relaxed text-sky-900 dark:text-sky-200">
+                    <span className="font-semibold">📋 Cara pakai:</span> Klik "Preview & Salin Field" → salin setiap field ke form Create Agent → download file Context untuk diupload ke kolom "Upload Context".
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <ExternalLink className="w-3 h-3" />
+                  <a
+                    href="https://chat.aspekindo-pub.com/dash/library"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sky-700 dark:text-sky-400 hover:underline"
+                    data-testid="link-aspekindo-llm"
+                  >
+                    Buka Aspekindo LLM →
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Konfigurasi JSON (utility export) */}
             <Card>
               <CardContent className="p-5 space-y-3">
@@ -889,6 +1002,151 @@ export function StudioPanel({ agent }: { agent: any }) {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* ============ ASPEKINDO LLM PREVIEW DIALOG ============ */}
+      <Dialog open={aspekindoOpen} onOpenChange={setAspekindoOpen}>
+        <DialogContent className="max-w-2xl max-h-[88vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layers className="w-5 h-5 text-sky-600" />
+              Aspekindo LLM — Transfer Agent
+            </DialogTitle>
+            <DialogDescription>
+              Salin setiap field ke form "Create Agent" di chat.aspekindo-pub.com
+            </DialogDescription>
+          </DialogHeader>
+
+          {aspekindoBundle && (
+            <div className="overflow-y-auto flex-1 space-y-4 pr-1">
+              {/* Step guide */}
+              <div className="rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/40 p-3 space-y-1">
+                <p className="text-xs font-semibold text-sky-800 dark:text-sky-300">Panduan Pengisian</p>
+                {Object.entries(aspekindoBundle.instructions || {}).map(([k, v]: any) => (
+                  <p key={k} className="text-[11px] text-sky-700 dark:text-sky-400">• {v}</p>
+                ))}
+              </div>
+
+              {/* Name */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-foreground">Name</p>
+                  <Button size="sm" variant="ghost" className="h-6 text-[11px] px-2"
+                    onClick={() => copyAspekindo(aspekindoBundle.fields.name, "name")}
+                    data-testid="button-copy-aspekindo-name"
+                  >
+                    {aspekindoCopied === "name" ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    {aspekindoCopied === "name" ? "Tersalin" : "Salin"}
+                  </Button>
+                </div>
+                <div className="rounded-md border bg-muted/30 px-3 py-2 text-sm font-medium">{aspekindoBundle.fields.name}</div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-foreground">Description</p>
+                  <Button size="sm" variant="ghost" className="h-6 text-[11px] px-2"
+                    onClick={() => copyAspekindo(aspekindoBundle.fields.description, "description")}
+                    data-testid="button-copy-aspekindo-description"
+                  >
+                    {aspekindoCopied === "description" ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    {aspekindoCopied === "description" ? "Tersalin" : "Salin"}
+                  </Button>
+                </div>
+                <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs leading-relaxed line-clamp-4">{aspekindoBundle.fields.description || "(kosong)"}</div>
+              </div>
+
+              {/* Content (system prompt) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-foreground">Content</p>
+                    <Badge variant="outline" className="text-[10px]">System Prompt</Badge>
+                    <span className="text-[10px] text-muted-foreground">{(aspekindoBundle.fields.content || "").split(/\s+/).filter(Boolean).length} kata</span>
+                  </div>
+                  <Button size="sm" variant="ghost" className="h-6 text-[11px] px-2"
+                    onClick={() => copyAspekindo(aspekindoBundle.fields.content, "content")}
+                    data-testid="button-copy-aspekindo-content"
+                  >
+                    {aspekindoCopied === "content" ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                    {aspekindoCopied === "content" ? "Tersalin" : "Salin"}
+                  </Button>
+                </div>
+                <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs font-mono leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">{aspekindoBundle.fields.content || "(kosong)"}</div>
+              </div>
+
+              {/* Start Messages */}
+              {aspekindoBundle.fields.start_messages?.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-foreground">Start Messages</p>
+                    <Badge variant="outline" className="text-[10px]">{aspekindoBundle.fields.start_messages.length} pesan</Badge>
+                  </div>
+                  <div className="space-y-1">
+                    {aspekindoBundle.fields.start_messages.map((msg: string, i: number) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <div className="flex-1 rounded-md border bg-muted/30 px-3 py-1.5 text-xs">{msg}</div>
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0 shrink-0"
+                          onClick={() => copyAspekindo(msg, `msg-${i}`)}
+                          data-testid={`button-copy-aspekindo-msg-${i}`}
+                        >
+                          {aspekindoCopied === `msg-${i}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Context / KB */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-foreground">Context (Upload Context)</p>
+                    <Badge variant="outline" className="text-[10px]">{aspekindoBundle.context_file_count} file KB</Badge>
+                  </div>
+                  {aspekindoBundle.context_file_count > 0 && (
+                    <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1.5 border-sky-300 text-sky-700 hover:bg-sky-50"
+                      onClick={downloadAspekindoContext}
+                      data-testid="button-download-aspekindo-context"
+                    >
+                      <Download className="w-3 h-3" /> Download combined-context.txt
+                    </Button>
+                  )}
+                </div>
+                {aspekindoBundle.context_file_count > 0 ? (
+                  <div className="space-y-1">
+                    {aspekindoBundle.context_files.map((f: any, i: number) => (
+                      <div key={i} className="flex items-center gap-2 text-xs rounded-md border bg-muted/30 px-3 py-1.5">
+                        <span className="font-mono text-sky-700 dark:text-sky-400 shrink-0">{f.filename}</span>
+                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground truncate">{f.label}</span>
+                        <span className="text-muted-foreground shrink-0 ml-auto">{f.wordCount} kata</span>
+                      </div>
+                    ))}
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Centang "Add Context" → "Upload Context" → upload file <span className="font-mono text-sky-700 dark:text-sky-400">combined-context.txt</span> yang diunduh di atas.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Tidak ada Knowledge Base — lewati bagian Context.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="mt-4 pt-3 border-t flex-shrink-0">
+            <Button variant="outline" onClick={() => setAspekindoOpen(false)}>Tutup</Button>
+            <Button
+              className="bg-sky-600 hover:bg-sky-700 text-white"
+              onClick={() => window.open("https://chat.aspekindo-pub.com/dash/library", "_blank")}
+              data-testid="button-open-aspekindo-llm"
+            >
+              <ExternalLink className="w-4 h-4 mr-1.5" /> Buka Aspekindo LLM
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ============ CHAESA AI STUDIO PREVIEW DIALOG ============ */}
       <Dialog open={chaesaOpen} onOpenChange={setChaesaOpen}>

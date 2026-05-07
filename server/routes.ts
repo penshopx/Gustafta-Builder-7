@@ -5425,6 +5425,90 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
+  // ==================== Aspekindo LLM Export ====================
+  app.get("/api/agents/:id/export/aspekindo-llm", isAuthenticated, async (req: any, res) => {
+    try {
+      const agentId = req.params.id as string;
+      const download = String(req.query.download || "") === "1";
+
+      const agent = await storage.getAgent(agentId);
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+
+      const auth = assertCanPreviewAgentPrompt(req, agent);
+      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+
+      const knowledgeBases = await storage.getKnowledgeBases(agentId);
+
+      // Map starter messages
+      const startMessages: string[] = Array.isArray(agent.conversationStarters)
+        ? agent.conversationStarters.filter(Boolean)
+        : [];
+
+      // Build context files from KB
+      const contextFiles = knowledgeBases
+        .filter((kb: any) => kb.content && kb.content.trim().length > 0)
+        .map((kb: any) => ({
+          filename: `${(kb.name || "kb").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.txt`,
+          label: kb.name || "Knowledge Base",
+          type: kb.type || "text",
+          content: kb.content.trim(),
+          wordCount: kb.content.trim().split(/\s+/).length,
+        }));
+
+      // Build combined context text (for single-file upload option)
+      const combinedContext = contextFiles.length > 0
+        ? contextFiles.map((f: any) => `=== ${f.label} ===\n\n${f.content}`).join("\n\n" + "─".repeat(60) + "\n\n")
+        : "";
+
+      const exportBundle = {
+        format: "aspekindo-llm-v1",
+        exported_at: new Date().toISOString(),
+        source_platform: "Gustafta",
+        source_agent_id: agentId,
+
+        // ── Fields to paste into "Create Agent" form ──
+        fields: {
+          name: agent.name || "",
+          description: agent.description || agent.tagline || "",
+          content: agent.systemPrompt || "",
+          start_messages: startMessages,
+        },
+
+        // ── Context files to upload via "Upload Context" ──
+        context_files: contextFiles,
+        combined_context: combinedContext,
+        context_file_count: contextFiles.length,
+        combined_context_words: combinedContext.split(/\s+/).length,
+
+        // ── Panduan penggunaan ──
+        instructions: {
+          step1: "Buka chat.aspekindo-pub.com → Library → Create Agent",
+          step2: "Salin field 'name' ke kolom Name",
+          step3: "Salin field 'description' ke kolom Description",
+          step4: "Salin field 'content' ke kolom Content (ini adalah system prompt lengkap)",
+          step5: "Di bagian 'Add Start Messages', tambahkan setiap item dari 'start_messages'",
+          step6_context: contextFiles.length > 0
+            ? `Centang 'Add Context' → Upload Context → Upload file 'combined-context.txt' yang ada di bundle ini (${contextFiles.length} dokumen KB, ${combinedContext.split(/\s+/).length} kata)`
+            : "Tidak ada Knowledge Base yang perlu diupload untuk agen ini.",
+          step7: "Klik Create",
+          note: "Plugins (Dall-E 3, Web Search, dll) dipilih sesuai kebutuhan domain agen Anda.",
+        },
+      };
+
+      const safeName = (agent.name || "agent").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+      if (download) {
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename="${safeName}-aspekindo-llm.json"`);
+        return res.send(JSON.stringify(exportBundle, null, 2));
+      }
+      return res.json(exportBundle);
+    } catch (error: any) {
+      console.error("[/api/agents/:id/export/aspekindo-llm] error:", error);
+      return res.status(500).json({ error: error?.message || "Gagal membuat bundle Aspekindo LLM." });
+    }
+  });
+
   // ==================== eCourse Export ====================
   app.get("/api/agents/:id/export/ecourse", isAuthenticated, async (req: any, res) => {
     try {
