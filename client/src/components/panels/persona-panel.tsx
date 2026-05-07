@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info, CheckCircle2, TriangleAlert, Zap } from "lucide-react";
 import { AgentPresentationExport } from "@/components/agent-presentation-export";
 import { AiConfigFill } from "@/components/ai-config-fill";
 import { AiFieldRegen } from "@/components/ai-field-regen";
@@ -794,6 +794,64 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             <p className="text-xs text-muted-foreground">
               The system prompt defines the core behavior and context for your chatbot. Gunakan tombol "Template LexCom" untuk menerapkan sistem prompt spesialis hukum Indonesia.
             </p>
+
+            {/* ── Master Standar v2.0 Status Badge (Orchestrator only) ── */}
+            {(agent as any).isOrchestrator && (() => {
+              const prompt = formData.systemPrompt || "";
+              const hasPolaKerja = prompt.includes("POLA KERJA v2.0");
+              const hasStateMachine = prompt.includes("STATE_MACHINE_v2.0") || prompt.includes("STATE MACHINE") || prompt.includes("State Machine");
+              const hasFallback = prompt.includes("FALLBACK MODE") || prompt.includes("FALLBACK");
+              const isV2 = hasPolaKerja && hasStateMachine;
+              const score = [hasPolaKerja, hasStateMachine, hasFallback].filter(Boolean).length;
+
+              return (
+                <div
+                  className={`mt-2 rounded-lg border px-3 py-2.5 flex items-start gap-2.5 ${
+                    isV2
+                      ? "border-emerald-300/60 bg-emerald-50/60 dark:bg-emerald-950/20 dark:border-emerald-700/40"
+                      : "border-orange-300/70 bg-orange-50/70 dark:bg-orange-950/25 dark:border-orange-700/50"
+                  }`}
+                  data-testid="badge-orchestrator-v2-status"
+                >
+                  {isV2 ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+                  ) : (
+                    <TriangleAlert className="w-4 h-4 text-orange-500 dark:text-orange-400 mt-0.5 shrink-0" />
+                  )}
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs font-semibold ${isV2 ? "text-emerald-800 dark:text-emerald-300" : "text-orange-800 dark:text-orange-300"}`}>
+                        {isV2 ? "Master Standar v2.0 — Aktif" : "Perlu Upgrade ke Master Standar v2.0"}
+                      </span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-medium ${
+                        isV2 ? "bg-emerald-200/60 text-emerald-800 dark:bg-emerald-800/30 dark:text-emerald-300" : "bg-orange-200/60 text-orange-800 dark:bg-orange-800/30 dark:text-orange-300"
+                      }`}>
+                        {score}/3 blok
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                      {[
+                        { label: "POLA KERJA v2.0", ok: hasPolaKerja },
+                        { label: "STATE MACHINE", ok: hasStateMachine },
+                        { label: "FALLBACK MODE", ok: hasFallback },
+                      ].map(({ label, ok }) => (
+                        <span key={label} className={`text-[10px] flex items-center gap-1 ${ok ? "text-emerald-700 dark:text-emerald-400" : "text-orange-600 dark:text-orange-400"}`}>
+                          {ok ? "✓" : "✗"} {label}
+                        </span>
+                      ))}
+                    </div>
+                    {!isV2 && (
+                      <p className="text-[10px] text-orange-700/80 dark:text-orange-400/70 mt-1">
+                        Klik ✨ di samping label System Prompt → AI akan generate ulang dengan standar v2.0 lengkap.
+                      </p>
+                    )}
+                  </div>
+                  {isV2 && (
+                    <Zap className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  )}
+                </div>
+              );
+            })()}
 
             {lexcomApplied && (
               <div className="mt-3 rounded-lg border border-amber-300/60 bg-amber-50/60 dark:bg-amber-950/20 dark:border-amber-700/40 p-4 space-y-3" data-testid="callout-lexcom-kb-guidance">
