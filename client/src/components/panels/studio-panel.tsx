@@ -217,6 +217,16 @@ export function StudioPanel({ agent }: { agent: any }) {
     toast({ title: "Bundle Aspekindo LLM diunduh", description: "File JSON siap digunakan." });
   };
 
+  const downloadAspekindoImport = () => {
+    const url = `/api/agents/${agent.id}/export/aspekindo-llm?format=import`;
+    const a = document.createElement("a");
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast({ title: "File Import diunduh", description: "Klik tombol Import di Aspekindo LLM, lalu pilih file ini." });
+  };
+
   const downloadAspekindoContext = () => {
     if (!aspekindoBundle?.combined_context) return;
     const blob = new Blob([aspekindoBundle.combined_context], { type: "text/plain;charset=utf-8" });
@@ -880,32 +890,22 @@ export function StudioPanel({ agent }: { agent: any }) {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => fetchAspekindoMutation.mutate()}
-                    disabled={fetchAspekindoMutation.isPending}
-                    className="flex-1 bg-sky-600 hover:bg-sky-700 text-white"
-                    data-testid="button-preview-aspekindo"
-                  >
-                    {fetchAspekindoMutation.isPending ? (
-                      <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                    ) : (
-                      <Layers className="w-4 h-4 mr-1.5" />
-                    )}
-                    Preview & Salin Field
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={downloadAspekindoJson}
-                    data-testid="button-download-aspekindo-json"
-                    title="Download bundle JSON lengkap"
-                  >
-                    <Download className="w-4 h-4 mr-1.5" /> .json
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => fetchAspekindoMutation.mutate()}
+                  disabled={fetchAspekindoMutation.isPending}
+                  className="w-full bg-sky-600 hover:bg-sky-700 text-white"
+                  data-testid="button-preview-aspekindo"
+                >
+                  {fetchAspekindoMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-1.5" />
+                  )}
+                  Download untuk Import & Preview Field
+                </Button>
                 <div className="rounded-md bg-sky-100/60 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-800/40 p-2.5">
                   <p className="text-[11px] leading-relaxed text-sky-900 dark:text-sky-200">
-                    <span className="font-semibold">📋 Cara pakai:</span> Klik "Preview & Salin Field" → salin setiap field ke form Create Agent → download file Context untuk diupload ke kolom "Upload Context".
+                    <span className="font-semibold">⚡ Cara cepat:</span> Klik tombol di atas → dialog terbuka → klik <strong>"Download untuk Import (.json)"</strong> → Import langsung ke Aspekindo LLM tanpa copy-paste.
                   </p>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -1018,12 +1018,39 @@ export function StudioPanel({ agent }: { agent: any }) {
 
           {aspekindoBundle && (
             <div className="overflow-y-auto flex-1 space-y-4 pr-1">
-              {/* Step guide */}
-              <div className="rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/40 p-3 space-y-1">
-                <p className="text-xs font-semibold text-sky-800 dark:text-sky-300">Panduan Pengisian</p>
-                {Object.entries(aspekindoBundle.instructions || {}).map(([k, v]: any) => (
-                  <p key={k} className="text-[11px] text-sky-700 dark:text-sky-400">• {v}</p>
-                ))}
+              {/* ── Cara Cepat: Import langsung ── */}
+              <div className="rounded-lg border-2 border-sky-400/60 bg-sky-50/80 dark:bg-sky-950/30 dark:border-sky-600/50 p-3.5 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4 text-sky-600 shrink-0" />
+                  <p className="text-xs font-bold text-sky-800 dark:text-sky-200">Cara Cepat — Langsung Import</p>
+                  <Badge className="bg-sky-500 text-white text-[10px]">Direkomendasikan</Badge>
+                </div>
+                <p className="text-[11px] text-sky-700 dark:text-sky-300 leading-relaxed">
+                  Download file di bawah → buka Aspekindo LLM → klik <strong>Import</strong> → pilih file tersebut. Agent langsung masuk otomatis, tanpa perlu copy-paste satu per satu.
+                </p>
+                <Button
+                  className="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold"
+                  onClick={downloadAspekindoImport}
+                  data-testid="button-download-aspekindo-import"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download untuk Import (.json)
+                </Button>
+                {aspekindoBundle.context_file_count > 0 && (
+                  <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-700/40 px-3 py-2">
+                    <Info className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+                    <p className="text-[10px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                      Setelah import berhasil, buka agent → tambahkan Context secara manual (lihat bagian Context di bawah) karena file KB tidak bisa diimport lewat JSON.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-[10px] text-muted-foreground">atau salin manual field per field</span>
+                <div className="flex-1 h-px bg-border" />
               </div>
 
               {/* Name */}

@@ -5460,6 +5460,18 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         ? contextFiles.map((f: any) => `=== ${f.label} ===\n\n${f.content}`).join("\n\n" + "─".repeat(60) + "\n\n")
         : "";
 
+      // ── LibreChat-compatible import format ──
+      // Used when user clicks "Import" button in Aspekindo LLM (LibreChat-based platform)
+      const librechatImport = {
+        name: agent.name || "",
+        description: agent.description || agent.tagline || "",
+        instructions: agent.systemPrompt || "",
+        model: "gpt-4o-mini",
+        tools: [],
+        tool_resources: {},
+        conversation_starters: startMessages,
+      };
+
       const exportBundle = {
         format: "aspekindo-llm-v1",
         exported_at: new Date().toISOString(),
@@ -5474,6 +5486,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           start_messages: startMessages,
         },
 
+        // ── LibreChat Import JSON (langsung Import di Aspekindo LLM) ──
+        librechat_import: librechatImport,
+
         // ── Context files to upload via "Upload Context" ──
         context_files: contextFiles,
         combined_context: combinedContext,
@@ -5482,20 +5497,25 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
         // ── Panduan penggunaan ──
         instructions: {
-          step1: "Buka chat.aspekindo-pub.com → Library → Create Agent",
-          step2: "Salin field 'name' ke kolom Name",
-          step3: "Salin field 'description' ke kolom Description",
-          step4: "Salin field 'content' ke kolom Content (ini adalah system prompt lengkap)",
-          step5: "Di bagian 'Add Start Messages', tambahkan setiap item dari 'start_messages'",
-          step6_context: contextFiles.length > 0
-            ? `Centang 'Add Context' → Upload Context → Upload file 'combined-context.txt' yang ada di bundle ini (${contextFiles.length} dokumen KB, ${combinedContext.split(/\s+/).length} kata)`
+          step1: "Buka chat.aspekindo-pub.com → Library → klik tombol Import",
+          step2: "Upload file '[nama]-import.json' yang didownload dari tombol 'Download untuk Import'",
+          step3: "Agent otomatis masuk dengan Name, Description, Instructions, dan Start Messages",
+          step4_context: contextFiles.length > 0
+            ? `Setelah agent dibuat, buka agennya → Add Context → Upload Context → upload file 'combined-context.txt' (${contextFiles.length} KB, ${combinedContext.split(/\s+/).length} kata)`
             : "Tidak ada Knowledge Base yang perlu diupload untuk agen ini.",
-          step7: "Klik Create",
-          note: "Plugins (Dall-E 3, Web Search, dll) dipilih sesuai kebutuhan domain agen Anda.",
+          note: "Plugins (Web Search, Dall-E 3, dll) ditambahkan manual sesuai kebutuhan.",
         },
       };
 
       const safeName = (agent.name || "agent").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+      // ?format=import → hanya LibreChat import JSON (untuk langsung di-Import)
+      const formatParam = String(req.query.format || "");
+      if (formatParam === "import") {
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.setHeader("Content-Disposition", `attachment; filename="${safeName}-import.json"`);
+        return res.send(JSON.stringify(librechatImport, null, 2));
+      }
 
       if (download) {
         res.setHeader("Content-Type", "application/json; charset=utf-8");
