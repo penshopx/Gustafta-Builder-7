@@ -487,6 +487,29 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
             WHERE id = 24
           `);
           log("[TRCPatch] Agent 24 upgraded to TRC_ORCHESTRATOR_v3.0 with agenticSubAgents + new greeting");
+        } else {
+          // System prompt already upgraded — check if greeting still has the old copy-paste instructions
+          const greetingCheck: any = await rawDb.execute(rawSql`
+            SELECT id FROM agents WHERE id = 24 AND greeting_message LIKE '%SKK_SUMMARY%'
+          `);
+          if ((greetingCheck?.rowCount ?? greetingCheck?.rows?.length ?? 0) > 0) {
+            const trcGreeting = `Halo! Saya **Tender Readiness Checker** — evaluator kesiapan tender terpadu.
+
+⚡ **Cukup beritahu saya:**
+- Nilai HPS / perkiraan nilai paket
+- Jenis pekerjaan (konstruksi gedung, jalan, mekanikal, dll.)
+- Nama atau profil singkat BUJK Anda (boleh perkiraan)
+
+Saya akan langsung menganalisis kesiapan tender Anda — mencakup skor readiness, checklist dokumen kritis, matriks risiko, dan rekomendasi aksi — dalam **satu respons terpadu**.
+
+Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai \`[ASUMSI:]\` agar Anda tahu mana yang perlu diverifikasi.
+
+📝 Contoh: *"Tender kami nilai HPS 2M, pekerjaan gedung kantor, BUJK kami kualifikasi Menengah SBU BG009"*`;
+            await rawDb.execute(rawSql`
+              UPDATE agents SET greeting_message = ${trcGreeting} WHERE id = 24
+            `);
+            log("[TRCPatch] Agent 24 greeting updated to new agentic version");
+          }
         }
       } catch (err) {
         log("[TRCPatch] error: " + (err as Error).message);
