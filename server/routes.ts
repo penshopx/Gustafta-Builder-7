@@ -3853,13 +3853,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         type: "product",
       }));
 
-      // 2. Fetch listed agents (secondary, no duplicate with store_products)
+      // 2. Fetch ALL active agents (secondary, no duplicate with store_products)
       const spAgentIds = new Set(spRows.map(p => p.agentId).filter(Boolean));
-      const agentConditions: any[] = [eq(agentsTable.isActive, true), eq(agentsTable.isListed, true)];
+      const agentConditions: any[] = [eq(agentsTable.isActive, true)];
       if (category && category !== "Semua") agentConditions.push(eq(agentsTable.category, category));
       if (search) {
         agentConditions.push(or(
           ilike(agentsTable.name, `%${search}%`),
+          ilike(agentsTable.tagline, `%${search}%`),
           ilike(agentsTable.description, `%${search}%`),
         )!);
       }
@@ -3908,17 +3909,36 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
-  // GET /api/store/catalog/categories — distinct categories from store_products
+  // GET /api/store/catalog/categories — distinct categories from store_products + all active agents
   app.get("/api/store/catalog/categories", async (_req, res) => {
     try {
       const { db } = await import("./db");
-      const { storeProducts } = await import("@shared/schema");
+      const { storeProducts, agents: agentsTable } = await import("@shared/schema");
       const { eq, sql: sqlE } = await import("drizzle-orm");
-      const rows = await db.select({
+
+      const spRows = await db.select({
         category: storeProducts.category,
         count: sqlE<number>`count(*)::int`,
-      }).from(storeProducts).where(eq(storeProducts.isActive, true)).groupBy(storeProducts.category).orderBy(sqlE`count(*) desc`);
-      res.json(rows.filter(r => r.category));
+      }).from(storeProducts).where(eq(storeProducts.isActive, true)).groupBy(storeProducts.category);
+
+      const agentRows = await db.select({
+        category: agentsTable.category,
+        count: sqlE<number>`count(*)::int`,
+      }).from(agentsTable).where(eq(agentsTable.isActive, true)).groupBy(agentsTable.category);
+
+      const countMap = new Map<string, number>();
+      for (const r of spRows) {
+        if (r.category) countMap.set(r.category, (countMap.get(r.category) ?? 0) + r.count);
+      }
+      for (const r of agentRows) {
+        if (r.category) countMap.set(r.category, (countMap.get(r.category) ?? 0) + r.count);
+      }
+
+      const merged = Array.from(countMap.entries())
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count);
+
+      res.json(merged);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch categories" });
     }
