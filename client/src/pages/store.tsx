@@ -761,11 +761,12 @@ function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a:
           <span className="font-bold text-gray-900 text-base">{formatPrice(agent.price)}</span>
           <div className="flex gap-1.5">
             {hasDetail && (
-              <Button size="sm" variant="ghost" onClick={() => onDetail(agent)}
-                className="text-gray-400 hover:text-gray-700 text-xs h-8 px-2.5"
-                data-testid={`button-detail-${agent.id}`}>
-                Detail
-              </Button>
+              <a href={`/product/${agent.agentId ?? agent.id}`} data-testid={`link-detail-${agent.id}`}>
+                <Button size="sm" variant="ghost"
+                  className="text-gray-400 hover:text-violet-700 text-xs h-8 px-2.5">
+                  Detail
+                </Button>
+              </a>
             )}
             <Button size="sm" onClick={() => onBuy(agent)}
               className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3 flex-shrink-0"

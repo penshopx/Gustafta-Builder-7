@@ -99,7 +99,7 @@ export default function ProductLanding() {
     return <LoadingSkeleton />;
   }
 
-  if (!agent || !agent.landingPageEnabled) {
+  if (!agent) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4 p-8">
@@ -108,15 +108,87 @@ export default function ProductLanding() {
             Halaman tidak ditemukan
           </h1>
           <p className="text-muted-foreground">
-            Halaman produk yang Anda cari tidak tersedia atau belum diaktifkan.
+            Halaman produk yang Anda cari tidak tersedia.
           </p>
-          <Link href="/">
+          <Link href="/store">
             <Button className="gap-2" data-testid="link-back-home">
               <ArrowRight className="h-4 w-4 rotate-180" />
-              Kembali ke Beranda
+              Kembali ke Store
             </Button>
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  if (!agent.landingPageEnabled) {
+    const chatUrl = `/bot/${agentId}`;
+    return (
+      <div className="min-h-screen bg-background">
+        <section className="relative py-20 md:py-32 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/50" />
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-3xl mx-auto text-center">
+              {agent.avatar && (
+                <div className="flex justify-center mb-8">
+                  <Avatar className="h-20 w-20 border-2 border-white/20">
+                    <AvatarImage src={agent.avatar} alt={agent.name} className="object-cover" />
+                    <AvatarFallback className="bg-white/10 text-white text-2xl font-bold">
+                      {agent.name?.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              )}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 leading-tight text-white" data-testid="text-hero-headline">
+                {agent.name}
+              </h1>
+              {agent.description && (
+                <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto" data-testid="text-hero-subheadline">
+                  {agent.description}
+                </p>
+              )}
+              <Link href={chatUrl}>
+                <Button size="lg" className="gap-2 text-lg px-8" data-testid="button-hero-cta">
+                  <MessageSquare className="h-5 w-5" />
+                  Mulai Chat Sekarang
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {(agent.productFeatures ?? []).length > 0 && (
+          <section className="py-16 md:py-20 bg-muted/50">
+            <div className="container mx-auto px-4">
+              <SectionHeader title="Yang Bisa Dilakukan" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+                {(agent.productFeatures ?? []).map((feature: string, index: number) => (
+                  <div key={index} className="flex items-start gap-3" data-testid={`text-feature-${index}`}>
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="py-20 md:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Siap Mulai?</h2>
+            <p className="text-gray-300 mb-10 max-w-xl mx-auto">Gunakan {agent.name} sekarang — tanya apa saja seputar keahliannya.</p>
+            <Link href={chatUrl}>
+              <Button size="lg" className="gap-2 text-lg px-8" data-testid="button-final-cta">
+                <MessageSquare className="h-5 w-5" />
+                Mulai Chat
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </section>
       </div>
     );
   }
