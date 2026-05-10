@@ -3871,9 +3871,19 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         avatar: agentsTable.avatar, widgetColor: agentsTable.widgetColor,
         isOrchestrator: agentsTable.isOrchestrator, monthlyPrice: agentsTable.monthlyPrice,
         productSummary: agentsTable.productSummary, productFeatures: agentsTable.productFeatures,
+        agenticSubAgents: agentsTable.agenticSubAgents,
       }).from(agentsTable).where(agentWhere).orderBy(agentsTable.id);
 
-      const DEFAULT_PRICE = 299000;
+      // Pricing formula: total = 1 (orchestrator/agent) + sub-agent count
+      // <5 total → Rp 49k/agen | 5-10 total → Rp 39k/agen | >10 total → Rp 29k/agen
+      function calcStorePrice(agenticSubAgents: any): number {
+        const subCount = Array.isArray(agenticSubAgents) ? agenticSubAgents.length : 0;
+        const total = 1 + subCount;
+        if (total < 5) return 49000 * total;
+        if (total <= 10) return 39000 * total;
+        return 29000 * total;
+      }
+
       const agentItems = agentRows
         .filter((a) => !spAgentIds.has(a.id))
         .map((a) => ({
@@ -3887,7 +3897,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           productFeatures: (a.productFeatures as string[]) || [],
           emoji: a.avatar && a.avatar.length <= 4 ? a.avatar : "🤖",
           color: a.widgetColor || "#6366f1",
-          price: (a.monthlyPrice && a.monthlyPrice > 0) ? a.monthlyPrice : DEFAULT_PRICE,
+          price: calcStorePrice(a.agenticSubAgents),
+          agentCount: 1 + (Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0),
           type: "agent",
         }));
 
