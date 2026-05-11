@@ -74,6 +74,8 @@ import type {
   InsertStoreProduct,
   StoreOrder,
   InsertStoreOrder,
+  ScalevMapping,
+  InsertScalevMapping,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -354,6 +356,13 @@ export interface IStorage {
   getStoreOrderByAccessToken(token: string): Promise<StoreOrder | undefined>;
   createStoreOrder(data: InsertStoreOrder): Promise<StoreOrder>;
   updateStoreOrderStatus(id: number, status: string): Promise<StoreOrder | undefined>;
+
+  // Scalev Mapping methods
+  getScalevMappings(): Promise<ScalevMapping[]>;
+  getScalevMappingByProductName(name: string): Promise<ScalevMapping | undefined>;
+  createScalevMapping(data: InsertScalevMapping): Promise<ScalevMapping>;
+  updateScalevMapping(id: number, data: Partial<InsertScalevMapping>): Promise<ScalevMapping | undefined>;
+  deleteScalevMapping(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -2087,6 +2096,15 @@ export class MemStorage implements IStorage {
     return { id: 1, ...data, createdAt: new Date() } as StoreOrder;
   }
   async updateStoreOrderStatus(_id: number, _status: string): Promise<StoreOrder | undefined> { return undefined; }
+
+  // Scalev Mapping stubs (MemStorage)
+  async getScalevMappings(): Promise<ScalevMapping[]> { return []; }
+  async getScalevMappingByProductName(_name: string): Promise<ScalevMapping | undefined> { return undefined; }
+  async createScalevMapping(data: InsertScalevMapping): Promise<ScalevMapping> {
+    return { id: 1, ...data, type: data.type ?? "chatbot", agentId: data.agentId ?? null, bigIdeaId: data.bigIdeaId ?? null, label: data.label ?? "", createdAt: new Date() } as ScalevMapping;
+  }
+  async updateScalevMapping(_id: number, _data: Partial<InsertScalevMapping>): Promise<ScalevMapping | undefined> { return undefined; }
+  async deleteScalevMapping(_id: number): Promise<boolean> { return false; }
 }
 
 import { dbStorage } from "./db-storage";

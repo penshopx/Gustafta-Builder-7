@@ -13,7 +13,8 @@ import {
   Users, CreditCard, FileText, ToggleLeft, ToggleRight,
   CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
   UserCheck, AlertCircle, RefreshCw, Crown, UserCog, Wrench, Scale, Database,
-  ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle, Loader2
+  ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle, Loader2,
+  Link2, Zap
 } from "lucide-react";
 
 // ---- Types ----
@@ -253,6 +254,20 @@ export default function AdminPage() {
   const [modulWaDialog, setModulWaDialog] = useState<{ open: boolean; sub: ModulSub | null }>({ open: false, sub: null });
   const [storeWaDialog, setStoreWaDialog] = useState<{ open: boolean; order: StoreOrder | null }>({ open: false, order: null });
 
+  // Scalev state
+  interface ScalevMapping {
+    id: number;
+    scalevProductName: string;
+    type: string;
+    agentId: number | null;
+    bigIdeaId: number | null;
+    label: string;
+    createdAt: string;
+  }
+  const [scalevForm, setScalevForm] = useState({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+  const [showScalevForm, setShowScalevForm] = useState(false);
+  const [scalevEditId, setScalevEditId] = useState<number | null>(null);
+
   const { data: storeOrders = [], isLoading: storeOrdersLoading, refetch: refetchOrders } = useQuery<StoreOrder[]>({
     queryKey: ["/api/store/admin/orders"],
     queryFn: async () => { const res = await fetch("/api/store/admin/orders"); return res.json(); },
@@ -263,6 +278,44 @@ export default function AdminPage() {
     queryKey: ["/api/store/admin/products"],
     queryFn: async () => { const res = await fetch("/api/store/admin/products"); return res.json(); },
     enabled: isAdmin && activeTab === "store",
+  });
+
+  const { data: scalevMappings = [], isLoading: scalevLoading, refetch: refetchScalev } = useQuery<ScalevMapping[]>({
+    queryKey: ["/api/admin/scalev-mappings"],
+    enabled: isAdmin && activeTab === "scalev",
+  });
+
+  const createScalevMutation = useMutation({
+    mutationFn: (data: any) => apiRequest("POST", "/api/admin/scalev-mappings", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/scalev-mappings"] });
+      setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+      setShowScalevForm(false);
+      setScalevEditId(null);
+      toast({ title: "Mapping berhasil disimpan." });
+    },
+    onError: () => toast({ title: "Gagal menyimpan mapping.", variant: "destructive" }),
+  });
+
+  const updateScalevMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => apiRequest("PATCH", `/api/admin/scalev-mappings/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/scalev-mappings"] });
+      setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+      setShowScalevForm(false);
+      setScalevEditId(null);
+      toast({ title: "Mapping diperbarui." });
+    },
+    onError: () => toast({ title: "Gagal memperbarui mapping.", variant: "destructive" }),
+  });
+
+  const deleteScalevMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/scalev-mappings/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/scalev-mappings"] });
+      toast({ title: "Mapping dihapus." });
+    },
+    onError: () => toast({ title: "Gagal menghapus mapping.", variant: "destructive" }),
   });
 
   // ---- Mutations ----
@@ -474,7 +527,7 @@ export default function AdminPage() {
     toast({ title: "Kode voucher disalin!" });
   };
 
-  const tabCount = isSuperAdmin ? 6 : 5;
+  const tabCount = isSuperAdmin ? 7 : 6;
 
   return (
     <div className="min-h-screen bg-background">
@@ -589,6 +642,9 @@ export default function AdminPage() {
             </TabsTrigger>
             <TabsTrigger value="store" className="gap-1.5 text-xs" data-testid="tab-store">
               <ShoppingBag className="h-3.5 w-3.5" /> Store
+            </TabsTrigger>
+            <TabsTrigger value="scalev" className="gap-1.5 text-xs" data-testid="tab-scalev">
+              <Zap className="h-3.5 w-3.5" /> Scalev
             </TabsTrigger>
             <TabsTrigger value="tools" className="gap-1.5 text-xs" data-testid="tab-tools">
               <Wrench className="h-3.5 w-3.5" /> Tools
@@ -1332,6 +1388,260 @@ export default function AdminPage() {
                       ))}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* ========== SCALEV TAB ========== */}
+          <TabsContent value="scalev" className="mt-4">
+            <div className="space-y-4">
+
+              {/* Webhook URL Info */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-orange-500" />
+                    <CardTitle className="text-base">Scalev Payment Integration</CardTitle>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Terima pembayaran dari Scalev secara otomatis. Ketika customer membayar di Scalev, akses chatbot/modul langsung aktif.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold text-orange-500 uppercase tracking-wide">Langkah Setup</p>
+                    <ol className="text-sm space-y-2 text-muted-foreground list-decimal list-inside">
+                      <li>Login ke <a href="https://app.scalev.id" target="_blank" className="text-orange-500 hover:underline">app.scalev.id</a> → Settings → Developers</li>
+                      <li>Salin URL webhook di bawah, paste ke field <strong>Webhook URL</strong></li>
+                      <li>Aktifkan semua events kecuali "Spam Order Created"</li>
+                      <li>Buat produk di Scalev, lalu tambahkan mapping di bawah</li>
+                    </ol>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium mb-1.5 block text-muted-foreground">URL Webhook Gustafta (copy ke Scalev)</label>
+                    <div className="flex gap-2">
+                      <Input
+                        readOnly
+                        value={`${appUrl}/api/webhooks/scalev`}
+                        className="font-mono text-xs bg-muted/50"
+                        data-testid="input-scalev-webhook-url"
+                      />
+                      <Button variant="outline" size="sm" onClick={() => {
+                        navigator.clipboard.writeText(`${appUrl}/api/webhooks/scalev`);
+                        toast({ title: "URL disalin!" });
+                      }} data-testid="button-copy-webhook-url">
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Paste URL ini di: Scalev → Settings → Developers → Webhook URL</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Product Mappings */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Link2 className="h-4 w-4 text-orange-500" />
+                      <CardTitle className="text-base">Mapping Produk Scalev</CardTitle>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => refetchScalev()} data-testid="button-refresh-scalev">
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white gap-1"
+                        onClick={() => {
+                          setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+                          setScalevEditId(null);
+                          setShowScalevForm(!showScalevForm);
+                        }}
+                        data-testid="button-toggle-scalev-form">
+                        <Plus className="h-4 w-4" /> {showScalevForm && !scalevEditId ? "Tutup" : "Tambah Mapping"}
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Hubungkan nama produk Scalev (dari <code>final_variants</code>) ke chatbot atau modul Gustafta.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(showScalevForm || scalevEditId !== null) && (
+                    <div className="border border-orange-500/30 rounded-lg p-4 bg-orange-500/5 space-y-3">
+                      <p className="text-xs font-semibold text-orange-400 uppercase tracking-wide">
+                        {scalevEditId ? "Edit Mapping" : "Mapping Baru"}
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium mb-1 block text-muted-foreground">Nama Produk Scalev *</label>
+                          <Input
+                            value={scalevForm.scalevProductName}
+                            onChange={(e) => setScalevForm(f => ({ ...f, scalevProductName: e.target.value }))}
+                            placeholder="mis. Tender AI Chatbot"
+                            data-testid="input-scalev-product-name"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Harus persis sama dengan nama produk/varian di Scalev</p>
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium mb-1 block text-muted-foreground">Label (tampilan admin)</label>
+                          <Input
+                            value={scalevForm.label}
+                            onChange={(e) => setScalevForm(f => ({ ...f, label: e.target.value }))}
+                            placeholder="mis. Akses Chatbot Tender"
+                            data-testid="input-scalev-label"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium mb-1 block text-muted-foreground">Tipe Akses *</label>
+                          <select
+                            value={scalevForm.type}
+                            onChange={(e) => setScalevForm(f => ({ ...f, type: e.target.value }))}
+                            className="w-full h-9 px-3 text-sm rounded-md border border-input bg-background"
+                            data-testid="select-scalev-type"
+                          >
+                            <option value="chatbot">Chatbot (Store Access)</option>
+                            <option value="modul">Modul (Email Access)</option>
+                          </select>
+                        </div>
+                        {scalevForm.type === "chatbot" ? (
+                          <div>
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Agent ID Chatbot</label>
+                            <Input
+                              type="number"
+                              value={scalevForm.agentId}
+                              onChange={(e) => setScalevForm(f => ({ ...f, agentId: e.target.value }))}
+                              placeholder="mis. 24"
+                              data-testid="input-scalev-agent-id"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">ID agent chatbot yang dibeli customer</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Big Idea ID Modul</label>
+                            <Input
+                              type="number"
+                              value={scalevForm.bigIdeaId}
+                              onChange={(e) => setScalevForm(f => ({ ...f, bigIdeaId: e.target.value }))}
+                              placeholder="mis. 5"
+                              data-testid="input-scalev-big-idea-id"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">ID modul yang diakses customer</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-orange-500 hover:bg-orange-600 text-white"
+                          disabled={createScalevMutation.isPending || updateScalevMutation.isPending}
+                          onClick={() => {
+                            if (scalevEditId !== null) {
+                              updateScalevMutation.mutate({ id: scalevEditId, data: scalevForm });
+                            } else {
+                              createScalevMutation.mutate(scalevForm);
+                            }
+                          }}
+                          data-testid="button-save-scalev-mapping"
+                        >
+                          {(createScalevMutation.isPending || updateScalevMutation.isPending) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan"}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setShowScalevForm(false); setScalevEditId(null); }}>Batal</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {scalevLoading ? (
+                    <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-orange-500" /></div>
+                  ) : scalevMappings.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Link2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">Belum ada mapping produk Scalev.</p>
+                      <p className="text-xs mt-1">Tambah mapping untuk menghubungkan produk Scalev ke chatbot/modul Gustafta.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 px-2 text-xs font-medium text-muted-foreground">Produk Scalev</th>
+                            <th className="text-left py-2 px-2 text-xs font-medium text-muted-foreground">Label</th>
+                            <th className="text-left py-2 px-2 text-xs font-medium text-muted-foreground">Tipe</th>
+                            <th className="text-left py-2 px-2 text-xs font-medium text-muted-foreground">ID Target</th>
+                            <th className="text-right py-2 px-2 text-xs font-medium text-muted-foreground">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {scalevMappings.map((m) => (
+                            <tr key={m.id} className="border-b last:border-0 hover:bg-muted/30" data-testid={`row-scalev-mapping-${m.id}`}>
+                              <td className="py-2 px-2 font-mono text-xs text-orange-600 dark:text-orange-400">{m.scalevProductName}</td>
+                              <td className="py-2 px-2 text-xs">{m.label || "—"}</td>
+                              <td className="py-2 px-2">
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${m.type === "chatbot" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" : "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"}`}>
+                                  {m.type === "chatbot" ? "Chatbot" : "Modul"}
+                                </span>
+                              </td>
+                              <td className="py-2 px-2 text-xs text-muted-foreground">
+                                {m.type === "chatbot" ? `Agent #${m.agentId ?? "—"}` : `Modul #${m.bigIdeaId ?? "—"}`}
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <div className="flex gap-1 justify-end">
+                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => {
+                                    setScalevForm({
+                                      scalevProductName: m.scalevProductName,
+                                      type: m.type,
+                                      agentId: m.agentId ? String(m.agentId) : "",
+                                      bigIdeaId: m.bigIdeaId ? String(m.bigIdeaId) : "",
+                                      label: m.label,
+                                    });
+                                    setScalevEditId(m.id);
+                                    setShowScalevForm(false);
+                                  }} data-testid={`button-edit-scalev-${m.id}`}>
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-700" onClick={() => {
+                                    if (confirm(`Hapus mapping "${m.scalevProductName}"?`)) {
+                                      deleteScalevMutation.mutate(m.id);
+                                    }
+                                  }} data-testid={`button-delete-scalev-${m.id}`}>
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* How it works */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base text-sm">Cara Kerja</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-muted-foreground">
+                    <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                      <p className="font-semibold text-foreground">1. Customer beli di Scalev</p>
+                      <p>Customer checkout produk di landing page Scalev Anda, bayar via QRIS / e-wallet / transfer bank.</p>
+                    </div>
+                    <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                      <p className="font-semibold text-foreground">2. Scalev kirim notifikasi</p>
+                      <p>Setelah lunas, Scalev otomatis POST data order ke URL webhook Gustafta di atas.</p>
+                    </div>
+                    <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                      <p className="font-semibold text-foreground">3. Gustafta proses</p>
+                      <p>Gustafta cocokkan nama produk Scalev dengan mapping, lalu buat akses (token chatbot / email modul).</p>
+                    </div>
+                    <div className="bg-muted/30 rounded-lg p-3 space-y-1">
+                      <p className="font-semibold text-foreground">4. Kirim akses ke customer</p>
+                      <p>Order masuk di tab Store. Gunakan tombol WA untuk kirim link akses ke customer. (Auto-delivery coming soon)</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>

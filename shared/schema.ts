@@ -1800,3 +1800,18 @@ export const storeOrders = pgTable("store_orders", {
 export const insertStoreOrderSchema = createInsertSchema(storeOrders).omit({ id: true, createdAt: true });
 export type InsertStoreOrder = z.infer<typeof insertStoreOrderSchema>;
 export type StoreOrder = typeof storeOrders.$inferSelect;
+
+// ── Scalev Product Mappings ──────────────────────────────────────────────────
+export const scalevMappings = pgTable("scalev_mappings", {
+  id: serial("id").primaryKey(),
+  scalevProductName: text("scalev_product_name").notNull(),
+  type: text("type").notNull().default("chatbot"), // "chatbot" | "modul"
+  agentId: integer("agent_id"),
+  bigIdeaId: integer("big_idea_id"),
+  label: text("label").notNull().default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertScalevMappingSchema = createInsertSchema(scalevMappings).omit({ id: true, createdAt: true });
+export type InsertScalevMapping = z.infer<typeof insertScalevMappingSchema>;
+export type ScalevMapping = typeof scalevMappings.$inferSelect;

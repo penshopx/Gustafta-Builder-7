@@ -39,6 +39,7 @@ import {
   userOnboarding,
   storeProducts,
   storeOrders,
+  scalevMappings,
 } from "@shared/schema";
 import type {
   TenderDocumentCatalog,
@@ -49,6 +50,8 @@ import type {
   InsertStoreProduct,
   StoreOrder,
   InsertStoreOrder,
+  ScalevMapping,
+  InsertScalevMapping,
 } from "@shared/schema";
 import { applyDefaultPolicies } from "./lib/agent-policies";
 import type { IStorage } from "./storage";
@@ -3497,6 +3500,31 @@ export class DatabaseStorage implements IStorage {
   async updateStoreOrderStatus(id: number, status: string): Promise<StoreOrder | undefined> {
     const rows = await db.update(storeOrders).set({ status }).where(eq(storeOrders.id, id)).returning();
     return rows[0];
+  }
+
+  // ── Scalev Mapping methods ─────────────────────────────────────────────────
+  async getScalevMappings(): Promise<ScalevMapping[]> {
+    return await db.select().from(scalevMappings).orderBy(desc(scalevMappings.createdAt));
+  }
+
+  async getScalevMappingByProductName(name: string): Promise<ScalevMapping | undefined> {
+    const rows = await db.select().from(scalevMappings).where(eq(scalevMappings.scalevProductName, name));
+    return rows[0];
+  }
+
+  async createScalevMapping(data: InsertScalevMapping): Promise<ScalevMapping> {
+    const rows = await db.insert(scalevMappings).values(data as any).returning();
+    return rows[0];
+  }
+
+  async updateScalevMapping(id: number, data: Partial<InsertScalevMapping>): Promise<ScalevMapping | undefined> {
+    const rows = await db.update(scalevMappings).set(data as any).where(eq(scalevMappings.id, id)).returning();
+    return rows[0];
+  }
+
+  async deleteScalevMapping(id: number): Promise<boolean> {
+    const rows = await db.delete(scalevMappings).where(eq(scalevMappings.id, id)).returning();
+    return rows.length > 0;
   }
 }
 

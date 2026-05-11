@@ -12055,6 +12055,164 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
+  // ── Scalev Product Mappings (Admin) ────────────────────────────────────────
+  app.get("/api/admin/scalev-mappings", isAuthenticated, requireAdmin, async (_req: any, res: any) => {
+    try {
+      const mappings = await storage.getScalevMappings();
+      res.json(mappings);
+    } catch (err: any) {
+      res.status(500).json({ error: "Gagal mengambil mappings Scalev." });
+    }
+  });
+
+  app.post("/api/admin/scalev-mappings", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { scalevProductName, type, agentId, bigIdeaId, label } = req.body;
+      if (!scalevProductName) return res.status(400).json({ error: "scalevProductName wajib diisi." });
+      const mapping = await storage.createScalevMapping({
+        scalevProductName: scalevProductName.trim(),
+        type: type || "chatbot",
+        agentId: agentId ? parseInt(agentId) : null,
+        bigIdeaId: bigIdeaId ? parseInt(bigIdeaId) : null,
+        label: label || scalevProductName,
+      });
+      res.json(mapping);
+    } catch (err: any) {
+      res.status(500).json({ error: "Gagal membuat mapping." });
+    }
+  });
+
+  app.patch("/api/admin/scalev-mappings/:id", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const { scalevProductName, type, agentId, bigIdeaId, label } = req.body;
+      const updates: any = {};
+      if (scalevProductName !== undefined) updates.scalevProductName = scalevProductName.trim();
+      if (type !== undefined) updates.type = type;
+      if (agentId !== undefined) updates.agentId = agentId ? parseInt(agentId) : null;
+      if (bigIdeaId !== undefined) updates.bigIdeaId = bigIdeaId ? parseInt(bigIdeaId) : null;
+      if (label !== undefined) updates.label = label;
+      const updated = await storage.updateScalevMapping(parseInt(id), updates);
+      if (!updated) return res.status(404).json({ error: "Mapping tidak ditemukan." });
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ error: "Gagal memperbarui mapping." });
+    }
+  });
+
+  app.delete("/api/admin/scalev-mappings/:id", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const ok = await storage.deleteScalevMapping(parseInt(id));
+      if (!ok) return res.status(404).json({ error: "Mapping tidak ditemukan." });
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Gagal menghapus mapping." });
+    }
+  });
+
+  // ── Scalev Webhook (PUBLIC — no auth) ──────────────────────────────────────
+  // Scalev sends POST to this URL when order payment status changes.
+  // Set this URL in app.scalev.id → Settings → Developers → Webhook URL
+  app.post("/api/webhooks/scalev", async (req: any, res: any) => {
+    try {
+      const payload = req.body;
+      console.log("[Scalev Webhook]", JSON.stringify(payload).slice(0, 500));
+
+      // Scalev sends different event types. We handle payment_status_changed + order.created/updated
+      const data = payload.data || payload;
+      const paymentStatus: string = data.payment_status || "";
+      const orderId: string = data.order_id || "";
+      const customer = data.customer || data.destination_address || {};
+      const customerEmail: string = customer.email || "";
+      const customerName: string = customer.name || data.payment_account_holder || "";
+      const customerPhone: string = customer.phone || "";
+      const grossRevenue: number = parseFloat(data.gross_revenue || data.net_revenue || "0");
+      const finalVariants: Record<string, number> = data.final_variants || {};
+
+      if (!orderId) {
+        return res.status(200).json({ received: true, note: "No order_id" });
+      }
+
+      // Only process if payment is paid
+      if (paymentStatus !== "paid") {
+        return res.status(200).json({ received: true, note: `Payment status: ${paymentStatus}` });
+      }
+
+      // Check duplicate (use midtransOrderId field to store scalev orderId)
+      const existing = await storage.getStoreOrderByMidtransId(`scalev_${orderId}`);
+      if (existing) {
+        return res.status(200).json({ received: true, note: "Duplicate, already processed" });
+      }
+
+      // Find matching product mappings by Scalev product variant names
+      const productNames = Object.keys(finalVariants);
+      let matchedMapping = null;
+      for (const pName of productNames) {
+        const m = await storage.getScalevMappingByProductName(pName);
+        if (m) { matchedMapping = m; break; }
+      }
+
+      const { randomUUID: genUUID } = await import("crypto");
+      const baseUrl = getServerBaseUrl(req);
+      const accessToken = genUUID();
+
+      if (matchedMapping) {
+        if (matchedMapping.type === "chatbot" && matchedMapping.agentId) {
+          // Create store order for chatbot access
+          await storage.createStoreOrder({
+            productId: matchedMapping.agentId,
+            customerName: customerName || "Customer",
+            customerEmail: customerEmail,
+            customerPhone: customerPhone,
+            amount: Math.round(grossRevenue),
+            midtransOrderId: `scalev_${orderId}`,
+            accessToken,
+            status: "paid",
+          });
+          const accessUrl = `${baseUrl}/store/access/${accessToken}`;
+          console.log(`[Scalev] Chatbot access created for ${customerEmail}: ${accessUrl}`);
+        } else if (matchedMapping.type === "modul" && matchedMapping.bigIdeaId) {
+          // Create modul subscription
+          const subToken = genUUID();
+          await storage.createClientSubscription({
+            bigIdeaId: matchedMapping.bigIdeaId,
+            customerName: customerName || "Customer",
+            customerEmail: customerEmail,
+            customerPhone: customerPhone,
+            plan: "scalev",
+            status: "active",
+            amount: Math.round(grossRevenue),
+            accessToken: subToken,
+            startDate: new Date(),
+            endDate: (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d; })(),
+          } as any);
+          const accessUrl = `${baseUrl}/modul/${matchedMapping.bigIdeaId}?email=${encodeURIComponent(customerEmail)}`;
+          console.log(`[Scalev] Modul access created for ${customerEmail}: ${accessUrl}`);
+        }
+      } else {
+        // No mapping found — create a generic store order as placeholder (productId=0)
+        await storage.createStoreOrder({
+          productId: 0,
+          customerName: customerName || "Customer",
+          customerEmail: customerEmail,
+          customerPhone: customerPhone,
+          amount: Math.round(grossRevenue),
+          midtransOrderId: `scalev_${orderId}`,
+          accessToken,
+          status: "paid_no_mapping",
+        });
+        console.log(`[Scalev] No mapping found for products: ${productNames.join(", ")}. Order recorded as paid_no_mapping.`);
+      }
+
+      res.status(200).json({ received: true });
+    } catch (err: any) {
+      console.error("[Scalev Webhook] Error:", err?.message);
+      // Always return 200 to Scalev to prevent retries for our processing errors
+      res.status(200).json({ received: true, error: err?.message });
+    }
+  });
+
   // ── User: Seed LexCom ecosystem into an existing Series ────────────────────
   app.post("/api/lexcom/seed", isAuthenticated, async (req: any, res: any) => {
     try {
