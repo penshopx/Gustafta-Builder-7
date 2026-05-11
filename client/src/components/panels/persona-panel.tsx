@@ -102,6 +102,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     isPublic: agent.isPublic || false,
     allowedDomains: agent.allowedDomains || [],
     contextQuestions: (agent as any).contextQuestions || [],
+    responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced",
   });
 
   const [newStarter, setNewStarter] = useState("");
@@ -146,6 +147,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       isPublic: agent.isPublic || false,
       allowedDomains: agent.allowedDomains || [],
       contextQuestions: (agent as any).contextQuestions || [],
+      responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced",
     });
     setLexcomApplied(false);
     setAppliedAgentSources([]);
@@ -1071,6 +1073,99 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Response Style Picker */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            Gaya Respons AI
+          </CardTitle>
+          <CardDescription>Pilih kepribadian dan format output chatbot Anda — seperti ChatGPT yang kreatif atau Claude yang terstruktur</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {([
+              {
+                value: "creative" as const,
+                icon: "✨",
+                title: "Kreatif",
+                subtitle: "Seperti ChatGPT",
+                color: "border-orange-300 bg-orange-50 dark:bg-orange-950/30 dark:border-orange-700",
+                activeColor: "border-orange-500 ring-2 ring-orange-300 dark:ring-orange-700",
+                textColor: "text-orange-800 dark:text-orange-300",
+                badgeColor: "bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300",
+                desc: "Bahasa mengalir natural, eksplorasi ide kreatif, analogi & contoh nyata, engaging & hangat",
+                examples: ["\"Bayangkan seperti ini...\"", "\"Menarik! Karena...\"", "\"Satu cara melihatnya...\""],
+              },
+              {
+                value: "balanced" as const,
+                icon: "⚖️",
+                title: "Seimbang",
+                subtitle: "Default",
+                color: "border-blue-300 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-700",
+                activeColor: "border-blue-500 ring-2 ring-blue-300 dark:ring-blue-700",
+                textColor: "text-blue-800 dark:text-blue-300",
+                badgeColor: "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300",
+                desc: "Gabungan antara gaya percakapan dan format terstruktur sesuai konteks pertanyaan",
+                examples: ["Jawab berdasarkan kebutuhan", "Format fleksibel", "Cocok untuk semua jenis pertanyaan"],
+              },
+              {
+                value: "structured" as const,
+                icon: "📋",
+                title: "Terstruktur",
+                subtitle: "Seperti Claude",
+                color: "border-violet-300 bg-violet-50 dark:bg-violet-950/30 dark:border-violet-700",
+                activeColor: "border-violet-500 ring-2 ring-violet-300 dark:ring-violet-700",
+                textColor: "text-violet-800 dark:text-violet-300",
+                badgeColor: "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300",
+                desc: "Heading & sub-heading, reasoning step-by-step eksplisit, checklist, tabel, kesimpulan jelas",
+                examples: ["\"## Analisis\"", "\"**Langkah 1:**\"", "\"✅ Rekomendasi:\""],
+              },
+            ] as const).map((style) => (
+              <button
+                key={style.value}
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, responseStyle: style.value });
+                  autoSaveField("responseStyle", style.value);
+                }}
+                className={`text-left p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+                  formData.responseStyle === style.value
+                    ? `${style.color} ${style.activeColor}`
+                    : "border-border bg-background hover:border-muted-foreground/30"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{style.icon}</span>
+                  <div>
+                    <div className={`font-semibold text-sm ${formData.responseStyle === style.value ? style.textColor : "text-foreground"}`}>
+                      {style.title}
+                    </div>
+                    <div className={`text-[10px] font-medium px-1.5 py-0.5 rounded inline-block mt-0.5 ${formData.responseStyle === style.value ? style.badgeColor : "bg-muted text-muted-foreground"}`}>
+                      {style.subtitle}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">{style.desc}</p>
+                <div className="space-y-1">
+                  {style.examples.map((ex, i) => (
+                    <div key={i} className="text-[10px] font-mono text-muted-foreground/70 truncate">{ex}</div>
+                  ))}
+                </div>
+                {formData.responseStyle === style.value && (
+                  <div className={`mt-3 text-[10px] font-semibold flex items-center gap-1 ${style.textColor}`}>
+                    <CheckCircle2 className="w-3 h-3" /> Aktif
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-3">
+            Gaya respons disuntikkan ke awal system prompt — chatbot akan mempertahankan gaya ini di semua percakapan. Dapat dikombinasikan dengan System Prompt dan 7 Kebijakan Agen.
+          </p>
         </CardContent>
       </Card>
 

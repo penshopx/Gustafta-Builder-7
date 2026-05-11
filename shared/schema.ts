@@ -153,6 +153,7 @@ export const agents = pgTable("agents", {
   communicationStyle: text("communication_style").default("friendly"),
   toneOfVoice: text("tone_of_voice").default("professional"),
   responseFormat: text("response_format").default("conversational"),
+  responseStyle: text("response_style").default("balanced"),
   avoidTopics: jsonb("avoid_topics").default([]),
   keyPhrases: jsonb("key_phrases").default([]),
   // Widget Customization
@@ -626,6 +627,7 @@ export const insertAgentSchema = z.object({
   communicationStyle: z.string().optional().default("friendly"),
   toneOfVoice: z.string().optional().default("professional"),
   responseFormat: z.string().optional().default("conversational"),
+  responseStyle: z.enum(["creative", "structured", "balanced"]).optional().default("balanced"),
   avoidTopics: z.array(z.string()).optional().default([]),
   keyPhrases: z.array(z.string()).optional().default([]),
   // Widget Customization

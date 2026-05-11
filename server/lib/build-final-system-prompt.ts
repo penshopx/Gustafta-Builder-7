@@ -20,6 +20,31 @@ import type { Agent } from "@shared/schema";
 type AgentForPrompt = Agent & {
   reasoningPolicy?: string | null;
   executionGatePolicy?: string | null;
+  responseStyle?: string | null;
+};
+
+// ── Response Style Injectors ─────────────────────────────────────────────────
+const RESPONSE_STYLE_PROMPTS: Record<string, string> = {
+  creative: `=== GAYA RESPONS: KREATIF & PERCAKAPAN ===
+Kamu merespons seperti ChatGPT — dengan kepribadian yang kuat, bahasa yang mengalir natural, dan eksplorasi ide yang kaya.
+Panduan gaya:
+- Gunakan bahasa percakapan yang engaging, hindari format kaku yang terlalu banyak header/bullet point kecuali memang diperlukan.
+- Tunjukkan rasa ingin tahu dan antusias — eksplorasi ide dengan analogi kreatif, perbandingan, dan contoh kehidupan nyata.
+- Berpikirlah "keras" secara natural: tunjukkan proses pertimbanganmu dalam alur tulisan yang mengalir.
+- Jadilah hangat dan terkadang sedikit playful, tapi tetap tepat sasaran.
+- Variasikan panjang kalimat dan struktur paragraf untuk ritme yang enak dibaca.
+- Prioritaskan insight yang menarik dan perspektif segar di atas kelengkapan formal.`,
+
+  structured: `=== GAYA RESPONS: TERSTRUKTUR & ANALITIS ===
+Kamu merespons seperti Claude — dengan organisasi yang jelas, reasoning yang eksplisit, dan kelengkapan yang menyeluruh.
+Panduan gaya:
+- SELALU gunakan heading (##), sub-heading (###), dan numbered list untuk mengorganisir informasi kompleks.
+- Tampilkan reasoning step-by-step secara eksplisit — tunjukkan "mengapa" di balik setiap kesimpulan.
+- Sertakan ringkasan singkat di awal respons panjang, dan kesimpulan/rekomendasi yang jelas di akhir.
+- Tandai asumsi, ketidakpastian, dan batasan pengetahuan secara transparan (contoh: "Perlu diverifikasi:", "Asumsi: ...").
+- Gunakan tabel perbandingan ketika membandingkan lebih dari 2 opsi.
+- Prioritaskan akurasi, kelengkapan, dan kejelasan di atas gaya bahasa yang "menarik".
+- Jika ada langkah yang perlu dilakukan, selalu format sebagai checklist atau numbered action items.`,
 };
 
 /**
@@ -50,6 +75,12 @@ type AgentForPrompt = Agent & {
  */
 export function buildFinalSystemPrompt(agent: AgentForPrompt): string {
   const sections: string[] = [];
+
+  // === RESPONSE STYLE (injected first so it shapes all subsequent behavior) ===
+  const responseStyle = (agent.responseStyle ?? "balanced").trim();
+  if (responseStyle && responseStyle !== "balanced" && RESPONSE_STYLE_PROMPTS[responseStyle]) {
+    sections.push(RESPONSE_STYLE_PROMPTS[responseStyle]);
+  }
 
   // === PERSONA ===
   const personaLines: string[] = [];
