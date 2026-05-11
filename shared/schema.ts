@@ -1247,7 +1247,10 @@ export const miniAppTypeSchema = z.enum([
   // MultiAgen Agentic AI Completion
   "mentoring_plan",
   // Master Standar Gustafta v1.0 — Final Completion
-  "brief_intake", "studio_kompetensi"
+  "brief_intake", "studio_kompetensi",
+  // Bekerja & Berusaha — Content Creation Hub
+  "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report",
+  "social_media_copy", "sales_script", "cashflow_report", "customer_feedback"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 

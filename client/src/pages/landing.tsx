@@ -192,8 +192,8 @@ export default function Landing() {
     },
     {
       icon: Package,
-      title: "Mini Apps 33 Tipe",
-      description: "Rubrik penilaian, risk register, work mode selector, brief intake, studio kompetensi, docgen, e-course — 33 tipe Mini App siap pakai langsung di dalam chatbot."
+      title: "Mini Apps 41 Tipe",
+      description: "Rubrik penilaian, risk register, notulis rapat, drafter kontrak, RAB, KPI, konten medsos, sales script, cashflow, NPS — 41 tipe Mini App siap pakai langsung di dalam chatbot."
     },
     {
       icon: ShieldCheck,
@@ -297,7 +297,7 @@ export default function Landing() {
   const faqItems = [
     {
       question: "Apa itu Gustafta?",
-      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding. Platform ini memiliki 971+ agent AI spesialis, 131 hub orchestrator dengan Master Standar v2.0 (State Machine 7-langkah), 33 tipe Mini App bawaan, SCORECARD + Win Probability, dan fitur Export ke Aspekindo LLM."
+      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding. Platform ini memiliki 971+ agent AI spesialis, 131 hub orchestrator dengan Master Standar v2.0 (State Machine 7-langkah), 41 tipe Mini App bawaan, SCORECARD + Win Probability, dan fitur Export ke Aspekindo LLM."
     },
     {
       question: "Apa itu hierarki 5 Level Gustafta?",
@@ -341,7 +341,7 @@ export default function Landing() {
     },
     {
       question: "Bisa digunakan untuk sektor usaha apa saja?",
-      answer: "Gustafta adalah platform AI chatbot terdalam untuk industri Jasa Konstruksi Indonesia — 971+ agent AI spesialis dalam 131 hub orchestrator siap pakai mencakup Regulasi, Perizinan/SBU/SKK, Tender LPSE, Pasca Tender & Manajemen Kontrak, Pelaksanaan Proyek, Legalitas Konstruksi, Sertifikasi ISO/SMAP, K3, dan Pengembangan Profesi. Semua hub dilengkapi SCORECARD Win Probability, Master Standar v2.0, T5-HANDOVER domain, dan F3-FALLBACK mandiri. Selain itu, platform fleksibel untuk 12 sektor usaha lain — tinggal kustomisasi Knowledge Base, Mini Apps (33 tipe), Persona, dan Conversion Layer sesuai kebutuhan."
+      answer: "Gustafta adalah platform AI chatbot terdalam untuk industri Jasa Konstruksi Indonesia — 971+ agent AI spesialis dalam 131 hub orchestrator siap pakai mencakup Regulasi, Perizinan/SBU/SKK, Tender LPSE, Pasca Tender & Manajemen Kontrak, Pelaksanaan Proyek, Legalitas Konstruksi, Sertifikasi ISO/SMAP, K3, dan Pengembangan Profesi. Semua hub dilengkapi SCORECARD Win Probability, Master Standar v2.0, T5-HANDOVER domain, dan F3-FALLBACK mandiri. Selain itu, platform fleksibel untuk 12 sektor usaha lain — tinggal kustomisasi Knowledge Base, Mini Apps (41 tipe), Persona, dan Conversion Layer sesuai kebutuhan."
     },
   ];
 
@@ -405,7 +405,7 @@ export default function Landing() {
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
                 <Sparkles className="h-4 w-4" />
-                <span>Baru: Master Standar v2.0 · Mini Apps 33 Tipe · 131 Hub Orchestrator · Export ke Aspekindo LLM</span>
+                <span>Baru: Master Standar v2.0 · Mini Apps 41 Tipe · 131 Hub Orchestrator · Export ke Aspekindo LLM</span>
                 <Flame className="h-4 w-4 text-orange-500" />
               </div>
               
@@ -419,7 +419,7 @@ export default function Landing() {
               </h1>
 
               <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl lg:mx-0 mx-auto">
-                Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Dilengkapi <strong>131 Hub Orchestrator</strong> dengan Master Standar v2.0, <strong>Mini Apps 33 tipe</strong>, SCORECARD Win Probability, MultiClaw 4-Panel, Knowledge Base 7 tipe, Custom Domain, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
+                Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Dilengkapi <strong>131 Hub Orchestrator</strong> dengan Master Standar v2.0, <strong>Mini Apps 41 tipe</strong>, SCORECARD Win Probability, MultiClaw 4-Panel, Knowledge Base 7 tipe, Custom Domain, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
               </p>
 
               <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-8">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap, PenLine, Trophy } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap, PenLine, Trophy, Mic, Megaphone, PieChart, Star, ScrollText, Briefcase, Store, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +55,15 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   // Master Standar Gustafta v1.0 — Final Completion
   brief_intake: "Brief / Intake Builder",
   studio_kompetensi: "Studio Kompetensi",
+  // Bekerja & Berusaha — Content Creation Hub
+  meeting_notes: "AI Notulis & Ringkas Rapat",
+  contract_drafter: "AI Drafter Kontrak & Dokumen Legal",
+  rab_estimator: "RAB & Estimasi Biaya Proyek",
+  kpi_report: "Laporan KPI & Kinerja Tim",
+  social_media_copy: "AI Copywriter Konten Medsos",
+  sales_script: "AI Sales Script & Objection Handling",
+  cashflow_report: "Laporan Cashflow & Keuangan Sederhana",
+  customer_feedback: "Survey Kepuasan & NPS Tracker",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -94,6 +103,15 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   // Master Standar Gustafta v1.0 — Final Completion
   brief_intake: PenLine,
   studio_kompetensi: Trophy,
+  // Bekerja & Berusaha — Content Creation Hub
+  meeting_notes: Mic,
+  contract_drafter: ScrollText,
+  rab_estimator: Calculator,
+  kpi_report: BarChart3,
+  social_media_copy: Megaphone,
+  sales_script: Zap,
+  cashflow_report: PieChart,
+  customer_feedback: Star,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -133,9 +151,20 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   // Master Standar Gustafta v1.0 — Final Completion
   brief_intake: "Bangun Brief/Intake terstruktur: 10 pertanyaan inti, output format, konteks, asumsi, dan draft brief siap pakai (AI-powered)",
   studio_kompetensi: "Asesmen kompetensi Level 1–4 dengan Rubrik 0–3: scope, langkah kerja, output quality, compliance, risk control, format (AI-powered)",
+  // Bekerja & Berusaha — Content Creation Hub
+  meeting_notes: "Hasilkan ringkasan rapat + action items + keputusan dari konteks Otak Proyek — siap kirim ke peserta rapat (AI-powered)",
+  contract_drafter: "Draft kontrak kerja, SPK, NDA, MoU, atau surat resmi berdasarkan konteks proyek — template industri Indonesia (AI-powered)",
+  rab_estimator: "Estimasi RAB dan breakdown biaya proyek berdasarkan data Otak Proyek — dengan komparasi benchmark dan deteksi overbudget (AI-powered)",
+  kpi_report: "Laporan KPI dan kinerja tim dari data proyek — rekap capaian, gap target, dan rekomendasi tindakan (AI-powered)",
+  social_media_copy: "Buat caption Instagram/TikTok, artikel blog, script iklan, dan email marketing dari konteks bisnis Anda (AI-powered)",
+  sales_script: "Script penjualan, objection handling 50+ skenario, follow-up sequence, dan template closing dari data produk/layanan (AI-powered)",
+  cashflow_report: "Laporan cashflow sederhana, analisis pendapatan vs pengeluaran, proyeksi omset, dan alert anomali dari data bisnis (AI-powered)",
+  customer_feedback: "Template survey kepuasan pelanggan, NPS Tracker, dan analisis feedback dari data interaksi chatbot (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback"];
+const BEKERJA_APP_TYPES: MiniAppType[] = ["meeting_notes", "contract_drafter", "rab_estimator", "kpi_report"];
+const BERUSAHA_APP_TYPES: MiniAppType[] = ["social_media_copy", "sales_script", "cashflow_report", "customer_feedback"];
 const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 const TENDER_DOC_TYPES: MiniAppType[] = ["compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 
@@ -605,6 +634,90 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
       assessment_cadence: "mingguan",
       output_sections: ["profil_peserta", "jadwal_mingguan", "milestone_kompetensi", "metode_belajar", "indikator_keberhasilan", "progress_check"],
       guardrails: { realistic_milestones: true, match_to_domain: true, include_resources: true },
+    },
+  },
+  // Bekerja & Berusaha — Content Creation Hub
+  meeting_notes: {
+    name: "AI Notulis & Ringkas Rapat",
+    description: "Ringkasan rapat + action items + keputusan dari data Otak Proyek.",
+    config: {
+      mode: "meeting_notes",
+      output_sections: ["informasi_rapat", "agenda_pembahasan", "keputusan_penting", "isu_diangkat", "action_items", "tindak_lanjut"],
+      guardrails: { no_hallucination: true, mark_missing_as: "PERLU DIKONFIRMASI", require_pic_per_action: true },
+    },
+  },
+  contract_drafter: {
+    name: "AI Drafter Kontrak & Dokumen Legal",
+    description: "Draft kontrak kerja, SPK, NDA, MoU, atau surat resmi berbasis data proyek.",
+    config: {
+      mode: "contract_drafter",
+      default_doc_type: "SPK",
+      standard_pasal: ["para_pihak", "ruang_lingkup", "nilai_dan_pembayaran", "jangka_waktu", "hak_kewajiban", "penyelesaian_sengketa", "pemutusan", "force_majeure"],
+      guardrails: { require_legal_review_disclaimer: true, mark_missing_as: "[___]", no_hallucination: true },
+    },
+  },
+  rab_estimator: {
+    name: "RAB & Estimasi Biaya Proyek",
+    description: "Estimasi RAB + breakdown biaya + potensi risiko biaya dari data proyek.",
+    config: {
+      mode: "rab_estimator",
+      categories: ["Material", "Tenaga Kerja", "Peralatan", "Overhead/Admin", "Kontingensi"],
+      output_sections: ["ringkasan_biaya", "breakdown_per_item", "risiko_biaya", "rekomendasi", "asumsi"],
+      guardrails: { mark_estimates_as: "ESTIMASI — perlu konfirmasi", require_assumption_tags: true, no_hallucination: true },
+    },
+  },
+  kpi_report: {
+    name: "Laporan KPI & Kinerja Tim",
+    description: "Laporan KPI + scorecard + gap target + rekomendasi tindakan dari data proyek.",
+    config: {
+      mode: "kpi_report",
+      scorecard_columns: ["indikator", "target", "capaian", "status", "gap"],
+      status_values: ["On Target ✅", "At Risk ⚠️", "Below Target ❌"],
+      output_sections: ["scorecard_kpi", "analisis_per_area", "pencapaian", "area_perhatian", "rekomendasi"],
+      guardrails: { no_hallucination: true, use_benchmark_if_no_target: true, mark_missing_as: "Data tidak tersedia" },
+    },
+  },
+  social_media_copy: {
+    name: "AI Copywriter Konten Medsos",
+    description: "Caption Instagram/TikTok, artikel blog, script iklan & email dari konteks bisnis.",
+    config: {
+      mode: "social_media_copy",
+      platforms: ["Instagram Feed", "Instagram Reels/TikTok", "LinkedIn", "Email Marketing"],
+      output_format: "siap_publish",
+      guardrails: { include_cta: true, include_hashtags: true, tone: "natural_dan_menarik", max_caption_words: 150 },
+    },
+  },
+  sales_script: {
+    name: "AI Sales Script & Objection Handling",
+    description: "Script penjualan, handling keberatan 8+ skenario, follow-up sequence & closing.",
+    config: {
+      mode: "sales_script",
+      script_sections: ["opening", "discovery_questions", "product_pitch_30s", "objection_handling", "follow_up_sequence", "closing"],
+      min_objections: 8,
+      guardrails: { natural_tone: true, no_aggressive_selling: true, include_followup_timeline: true },
+    },
+  },
+  cashflow_report: {
+    name: "Laporan Cashflow & Keuangan Sederhana",
+    description: "Laporan cashflow + proyeksi 3 bulan + alert anomali dari data bisnis.",
+    config: {
+      mode: "cashflow_report",
+      report_sections: ["ringkasan_eksekutif", "arus_kas", "analisis_keuangan", "proyeksi_3_bulan", "alert_rekomendasi"],
+      projection_months: 3,
+      guardrails: { mark_projections_as: "PROYEKSI", require_disclaimer: true, no_hallucination: true },
+    },
+  },
+  customer_feedback: {
+    name: "Survey Kepuasan & NPS Tracker",
+    description: "Template survey kepuasan 10 pertanyaan + NPS tracker + rencana tindak lanjut.",
+    config: {
+      mode: "customer_feedback",
+      max_questions: 10,
+      nps_required: true,
+      nps_scale: "0-10",
+      categories: { promoter: "9-10", passive: "7-8", detractor: "0-6" },
+      dashboard_metrics: ["nps_score", "csat", "response_rate", "promoter_pct", "detractor_pct"],
+      guardrails: { include_followup_plan: true, segment_by_nps: true, include_benchmark: true },
     },
   },
 };
@@ -1120,6 +1233,102 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                     <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 border-orange-200 text-orange-600 dark:text-orange-400">
                       {trackBadge}
                     </Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bekerja Hub */}
+      <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <Briefcase className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm">Bekerja — Profesional AI Tools</h3>
+              <p className="text-xs text-muted-foreground">Notulis rapat, drafter kontrak, RAB, dan laporan KPI — generate dari Otak Proyek</p>
+            </div>
+            <Badge variant="outline" className="ml-auto text-xs border-emerald-300 text-emerald-700 dark:text-emerald-400 shrink-0">4 Tools</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {BEKERJA_APP_TYPES.map((type) => {
+              const BIcon = miniAppTypeIcons[type] || Briefcase;
+              const cfg = DEFAULT_MINI_APP_CONFIGS[type];
+              return (
+                <div
+                  key={type}
+                  className="flex items-start gap-2.5 p-3 rounded-lg border border-emerald-100 dark:border-emerald-900 bg-white dark:bg-background hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    const defaults = cfg || {};
+                    setNewApp({
+                      name: defaults.name || miniAppTypeLabels[type],
+                      description: defaults.description || miniAppTypeDescriptions[type],
+                      type,
+                      config: defaults.config || {},
+                      icon: "app",
+                    });
+                    setCreateDialogOpen(true);
+                  }}
+                  data-testid={`bekerja-app-card-${type}`}
+                >
+                  <div className="w-8 h-8 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
+                    <BIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium leading-tight line-clamp-2">{miniAppTypeLabels[type]}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{miniAppTypeDescriptions[type]}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Berusaha Hub */}
+      <Card className="border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <Store className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm">Berusaha — Bisnis & UMKM AI Tools</h3>
+              <p className="text-xs text-muted-foreground">Konten medsos, sales script, cashflow & survey pelanggan — generate dari konteks bisnis</p>
+            </div>
+            <Badge variant="outline" className="ml-auto text-xs border-orange-300 text-orange-700 dark:text-orange-400 shrink-0">4 Tools</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {BERUSAHA_APP_TYPES.map((type) => {
+              const RIcon = miniAppTypeIcons[type] || Store;
+              const cfg = DEFAULT_MINI_APP_CONFIGS[type];
+              return (
+                <div
+                  key={type}
+                  className="flex items-start gap-2.5 p-3 rounded-lg border border-orange-100 dark:border-orange-900 bg-white dark:bg-background hover:border-orange-300 dark:hover:border-orange-700 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    const defaults = cfg || {};
+                    setNewApp({
+                      name: defaults.name || miniAppTypeLabels[type],
+                      description: defaults.description || miniAppTypeDescriptions[type],
+                      type,
+                      config: defaults.config || {},
+                      icon: "app",
+                    });
+                    setCreateDialogOpen(true);
+                  }}
+                  data-testid={`berusaha-app-card-${type}`}
+                >
+                  <div className="w-8 h-8 rounded-md bg-orange-500/10 flex items-center justify-center shrink-0 group-hover:bg-orange-500/20 transition-colors">
+                    <RIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium leading-tight line-clamp-2">{miniAppTypeLabels[type]}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{miniAppTypeDescriptions[type]}</p>
                   </div>
                 </div>
               );

@@ -87,7 +87,7 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Operasional Lapangan Harian", description: "DPR otomatis, opname QS, EVM (CPI/SPI), NCR/CAPA, punch list, weekly report ke owner/MK" },
       { title: "Legalitas & Sengketa Konstruksi", description: "Reviewer klausul kritis, dewan sengketa, mediasi BANI, kepailitan/PKPU, pajak & asuransi konstruksi" },
       { title: "Sertifikasi SBU/SKK & ISO", description: "Klasifikasi SBU, eligibility SKK, manajemen LSBU/LSP, ISO 9001/14001/37001 (SMAP), CSMAS K3" },
-      { title: "Project Brain & Mini Apps 33 Tipe", description: "Pusatkan data proyek + 33 tipe Mini App (rubrik penilaian, risk register, brief intake, studio kompetensi, docgen, e-course) untuk tim internal" },
+      { title: "Project Brain & Mini Apps 41 Tipe", description: "Pusatkan data proyek + 41 tipe Mini App (notulis rapat, drafter kontrak, RAB, KPI, konten medsos, sales script, cashflow, NPS, rubrik penilaian, risk register) untuk tim" },
     ],
     testimonials: [
       { name: "Ir. Budi Santoso", role: "Project Manager, PT Pembangunan Jaya", avatar: "BS", content: "Project Brain mengubah cara kami mengelola data proyek. Laporan mingguan yang biasa butuh 4 jam sekarang selesai dalam 10 menit.", rating: 5 },

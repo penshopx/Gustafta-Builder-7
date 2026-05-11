@@ -8642,12 +8642,489 @@ PRIORITAS TINDAKAN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Risk Register ini dibuat berdasarkan data Otak Proyek. Validasi dengan tim lapangan diperlukan untuk akurasi penuh.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "meeting_notes") {
+        modePrompt = `Kamu adalah AI notulis profesional. Buat RINGKASAN RAPAT & ACTION ITEMS terstruktur berdasarkan data Otak Proyek di bawah.
+
+ATURAN KETAT:
+- Ekstrak semua isu, keputusan, tindakan yang ada dari data.
+- Jika data tidak menyebut meeting spesifik, buat template ringkasan rapat yang siap pakai untuk konteks proyek ini.
+- Setiap action item WAJIB memiliki: Deskripsi | PIC | Due Date | Prioritas.
+- Jangan mengarang informasi. Tandai yang tidak tersedia: [PERLU DIKONFIRMASI].
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RINGKASAN RAPAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INFORMASI RAPAT
+Proyek/Topik  : [dari data atau nama agen]
+Tanggal       : [tanggal atau PERLU DIKONFIRMASI]
+Peserta       : [dari data atau PERLU DIKONFIRMASI]
+Dipimpin oleh : [dari data atau PERLU DIKONFIRMASI]
+
+AGENDA & PEMBAHASAN
+1. [Topik 1] — [ringkasan pembahasan]
+2. [Topik 2] — [ringkasan pembahasan]
+[lanjutkan sesuai data]
+
+KEPUTUSAN PENTING
+• [Keputusan 1] — dasar: [alasan]
+• [Keputusan 2] — dasar: [alasan]
+[lanjutkan atau tulis TIDAK ADA KEPUTUSAN FINAL jika tidak ada]
+
+RISIKO / ISU YANG DIANGKAT
+• [Isu 1] — level: [Tinggi/Sedang/Rendah]
+• [Isu 2]
+
+ACTION ITEMS
+┌──────────────────────────────────────────────────────────┐
+│ No │ Tindakan             │ PIC    │ Due Date  │ Prioritas │
+│ 1  │ [tindakan spesifik]  │ [nama] │ [tanggal] │ Tinggi    │
+│ 2  │ [tindakan spesifik]  │ [nama] │ [tanggal] │ Sedang    │
+└──────────────────────────────────────────────────────────┘
+
+POIN TINDAK LANJUT RAPAT BERIKUTNYA
+• [Topik yang perlu dibahas lanjut]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ringkasan ini dibuat AI berdasarkan data Otak Proyek. Konfirmasi dengan peserta rapat untuk akurasi.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "contract_drafter") {
+        modePrompt = `Kamu adalah AI drafter dokumen legal Indonesia. Buat DRAFT DOKUMEN KONTRAK/LEGAL berdasarkan data Otak Proyek di bawah.
+
+ATURAN KETAT:
+- Gunakan format dan terminologi hukum Indonesia yang tepat.
+- Jika tipe kontrak tidak spesifik di data, buat SPK (Surat Perintah Kerja) sebagai default.
+- Setiap pasal yang membutuhkan data spesifik dan tidak tersedia: tandai [___] atau [SESUAIKAN].
+- Sertakan pasal-pasal standar: para pihak, ruang lingkup, nilai, jadwal, pembayaran, hak & kewajiban, penyelesaian sengketa, pemutusan, force majeure.
+- Tambahkan catatan: "Draft ini perlu direview oleh konsultan hukum sebelum ditandatangani."
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SURAT PERINTAH KERJA (SPK) / KONTRAK KERJA
+[Sesuaikan judul dengan jenis dokumen yang relevan]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nomor     : [___] / SPK / [tahun]
+Tanggal   : [___]
+
+PARA PIHAK
+Pihak Pertama (Pemberi Kerja):
+Nama       : [dari data atau ___]
+Jabatan    : [___]
+Perusahaan : [dari data atau ___]
+
+Pihak Kedua (Pelaksana):
+Nama       : [dari data atau ___]
+Jabatan    : [___]
+Perusahaan : [dari data atau ___]
+
+PASAL 1 — RUANG LINGKUP PEKERJAAN
+[deskripsi pekerjaan berdasarkan data Otak Proyek]
+
+PASAL 2 — NILAI DAN CARA PEMBAYARAN
+Nilai kontrak: Rp [___]
+Cara pembayaran: [termin/DP/lunas — sesuaikan]
+
+PASAL 3 — JANGKA WAKTU PELAKSANAAN
+Mulai : [dari data atau ___]
+Selesai: [dari data atau ___]
+Durasi : [dari data atau ___] hari/minggu/bulan
+
+PASAL 4 — HAK DAN KEWAJIBAN PARA PIHAK
+Pihak Pertama:
+• [kewajiban 1]
+• [kewajiban 2]
+Pihak Kedua:
+• [kewajiban 1]
+• [kewajiban 2]
+
+PASAL 5 — PENYELESAIAN SENGKETA
+Sengketa diselesaikan secara musyawarah. Jika tidak tercapai, diselesaikan melalui [Pengadilan Negeri ___ / BANI / Mediasi].
+
+PASAL 6 — FORCE MAJEURE
+Para pihak tidak bertanggung jawab atas keterlambatan akibat kejadian di luar kendali (bencana alam, kebijakan pemerintah, dll).
+
+PASAL 7 — PEMUTUSAN KONTRAK
+[klausul pemutusan sepihak dengan pemberitahuan X hari sebelumnya]
+
+Demikian kontrak ini dibuat dan ditandatangani oleh kedua belah pihak.
+
+Pihak Pertama                    Pihak Kedua
+[tanda tangan]                   [tanda tangan]
+[nama & cap]                     [nama & cap]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ PENTING: Draft ini dibuat AI dan WAJIB direview oleh konsultan hukum sebelum ditandatangani. Sesuaikan semua bagian [___] dengan kondisi aktual.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "rab_estimator") {
+        modePrompt = `Kamu adalah AI estimator biaya konstruksi dan proyek Indonesia. Buat ESTIMASI RAB & BREAKDOWN BIAYA berdasarkan data Otak Proyek di bawah.
+
+ATURAN KETAT:
+- Gunakan data proyek yang ada untuk estimasi yang relevan.
+- Jika nilai/biaya spesifik tidak ada di data, gunakan rentang benchmark industri dan TANDAI sebagai [ESTIMASI — perlu konfirmasi].
+- Identifikasi potensi overbudget atau risiko biaya dari data yang ada.
+- Semua asumsi WAJIB ditandai: [ASUMSI: {nilai} | basis: {alasan}].
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RENCANA ANGGARAN BIAYA (RAB)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INFORMASI PROYEK
+Nama Proyek  : [dari data]
+Lokasi       : [dari data]
+Fase/Tahap   : [dari data]
+Periode      : [dari data atau ESTIMASI]
+
+RINGKASAN BIAYA
+┌─────────────────────────────────────────────────┐
+│ Kategori           │ Estimasi Biaya │ % Total    │
+│ A. Material        │ Rp [___]       │ [__]%      │
+│ B. Tenaga Kerja    │ Rp [___]       │ [__]%      │
+│ C. Peralatan       │ Rp [___]       │ [__]%      │
+│ D. Overhead/Admin  │ Rp [___]       │ [__]%      │
+│ E. Kontingensi     │ Rp [___]       │ 5-10%      │
+├─────────────────────────────────────────────────┤
+│ TOTAL ESTIMASI     │ Rp [___]       │ 100%       │
+└─────────────────────────────────────────────────┘
+
+BREAKDOWN PER ITEM PEKERJAAN
+[Berdasarkan data proyek — list item pekerjaan utama dengan estimasi biaya per item]
+
+POTENSI RISIKO BIAYA
+• [Risiko 1] — dampak: [rendah/sedang/tinggi]
+• [Risiko 2]
+
+REKOMENDASI
+• [Rekomendasi penghematan atau pengendalian biaya 1]
+• [Rekomendasi 2]
+
+ASUMSI YANG DIGUNAKAN
+• [ASUMSI: {nilai} | basis: {alasan} | verifikasi ke: {pihak}]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RAB ini adalah estimasi awal berdasarkan data tersedia. Validasi dengan quantity surveyor atau tim teknis untuk akurasi final.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "kpi_report") {
+        modePrompt = `Kamu adalah AI analis kinerja tim. Buat LAPORAN KPI & KINERJA TIM berdasarkan data Otak Proyek di bawah.
+
+ATURAN KETAT:
+- Ekstrak semua indikator kinerja yang dapat ditemukan dari data.
+- Jika target KPI tidak tersedia di data, gunakan benchmark industri dan tandai [TARGET ESTIMASI].
+- Identifikasi gap antara capaian dan target untuk setiap KPI.
+- Berikan rekomendasi tindakan yang spesifik dan actionable.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAPORAN KPI & KINERJA TIM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PERIODE LAPORAN: [dari data atau bulan berjalan]
+PROYEK/TIM     : [dari data]
+
+SCORECARD KPI
+┌──────────────────────────────────────────────────────┐
+│ Indikator         │ Target  │ Capaian │ Status  │ Gap │
+│ [KPI 1]           │ [___]   │ [___]   │ ✅/⚠️/❌ │ [__]│
+│ [KPI 2]           │ [___]   │ [___]   │ ✅/⚠️/❌ │ [__]│
+│ [KPI 3]           │ [___]   │ [___]   │ ✅/⚠️/❌ │ [__]│
+└──────────────────────────────────────────────────────┘
+✅ On Target  ⚠️ At Risk  ❌ Below Target
+
+ANALISIS KINERJA PER AREA
+[Identifikasi dari data: progres pekerjaan, isu aktif, keputusan, risiko]
+
+PENCAPAIAN UTAMA PERIODE INI
+• [Pencapaian 1 — dari data]
+• [Pencapaian 2]
+
+AREA YANG MEMBUTUHKAN PERHATIAN
+• [Area 1] — rekomendasi: [tindakan spesifik]
+• [Area 2] — rekomendasi: [tindakan spesifik]
+
+REKOMENDASI TINDAKAN (PRIORITAS)
+1. [Tindakan Tinggi] — PIC: [___] — target: [___]
+2. [Tindakan Sedang] — PIC: [___] — target: [___]
+3. [Tindakan Rendah] — PIC: [___] — target: [___]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Laporan ini dibuat AI berdasarkan data Otak Proyek. Validasi dengan tim untuk akurasi data aktual.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "social_media_copy") {
+        modePrompt = `Kamu adalah AI copywriter profesional Indonesia. Buat KONTEN MEDIA SOSIAL SIAP PUBLISH berdasarkan data bisnis/produk di bawah.
+
+ATURAN KETAT:
+- Buat konten yang menarik, relevan dengan bisnis, dan sesuai platform.
+- Gunakan bahasa yang natural, tidak kaku, sesuai target audiens.
+- Sertakan variasi untuk minimal 3 platform: Instagram, TikTok/Reels, LinkedIn.
+- Setiap konten WAJIB ada: hook pembuka kuat, nilai/manfaat utama, CTA yang jelas.
+- Sertakan saran hashtag yang relevan.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAKET KONTEN MEDIA SOSIAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📸 INSTAGRAM FEED (Caption)
+---
+[Hook pembuka — 1 kalimat kuat yang memancing rasa ingin tahu]
+
+[Body — 3-4 kalimat manfaat utama produk/layanan]
+
+[CTA — ajakan tindakan yang spesifik: DM, kunjungi link, komentar]
+
+#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5
+---
+
+🎬 INSTAGRAM REELS / TIKTOK (Script 30-60 detik)
+---
+[0-3 detik — HOOK visual/verbal yang mengejutkan]
+[3-15 detik — Masalah yang dihadapi target audiens]
+[15-45 detik — Solusi & manfaat produk/layanan]
+[45-60 detik — CTA & tanda tangan]
+---
+
+💼 LINKEDIN (Post Profesional)
+---
+[Opening — fakta/insight menarik tentang industri atau solusi]
+
+[Body — 2-3 paragraf tentang nilai bisnis, bukti, differensiasi]
+
+[Closing — pertanyaan untuk engagement + CTA]
+
+#hashtag1 #hashtag2 #hashtag3
+---
+
+📧 EMAIL MARKETING (Subject + Body)
+Subject: [judul email yang menarik — max 50 karakter]
+Preview text: [preview 90 karakter]
+
+[Salam pembuka personal]
+
+[Body — 2-3 paragraf: masalah, solusi, nilai unik]
+
+[CTA button: "Hubungi Kami" / "Lihat Produk" / "Daftar Sekarang"]
+
+[Tanda tangan]
+---
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Konten ini dibuat AI berdasarkan data bisnis. Edit sesuai tone brand dan tambahkan visual yang relevan.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "sales_script") {
+        modePrompt = `Kamu adalah AI sales coach profesional Indonesia. Buat SALES SCRIPT & OBJECTION HANDLING lengkap berdasarkan data produk/layanan di bawah.
+
+ATURAN KETAT:
+- Script harus natural, percakapan, tidak terasa scripted.
+- Sertakan skenario untuk: cold call/chat, follow-up, dan closing.
+- Objection handling minimum 8 keberatan umum yang paling sering muncul.
+- Setiap handling harus: akui keberatan → reframe → tawarkan solusi → tutup.
+- Gunakan bahasa Indonesia yang hangat dan profesional.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SALES SCRIPT & OBJECTION HANDLING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRODUK/LAYANAN: [dari data]
+TARGET SEGMEN : [dari data atau identifikasi]
+
+── OPENING SCRIPT (Cold Contact) ──
+[Salam] "Halo [nama], saya [nama] dari [perusahaan]..."
+[Hook] "[1 kalimat yang langsung relevan untuk prospek]"
+[Qualifying] "Boleh saya tanya, apakah Bapak/Ibu saat ini..."
+[Transisi] "Kami punya solusi yang bisa [manfaat spesifik]..."
+
+── DISCOVERY QUESTIONS ──
+1. "Saat ini, bagaimana cara Bapak/Ibu menangani [masalah]?"
+2. "Apa tantangan terbesar yang Bapak/Ibu hadapi dalam [area]?"
+3. "Jika ada solusi yang bisa [hasil], seberapa penting itu untuk bisnis Bapak/Ibu?"
+
+── PRODUCT PITCH (30 detik) ──
+"[Nama produk/layanan] adalah [deskripsi singkat]. Dengan [fitur utama], klien kami berhasil [hasil nyata]. Dalam kasus Bapak/Ibu, ini berarti [manfaat spesifik untuk prospek ini]."
+
+── OBJECTION HANDLING ──
+
+❌ "Harganya terlalu mahal"
+→ "Saya mengerti. Boleh saya tanya, mahal dibanding apa? Banyak klien kami awalnya berpikir sama, tapi setelah [manfaat nyata], mereka bilang investasinya balik dalam [waktu]. Bisa kita hitung ROI-nya bersama?"
+
+❌ "Saya perlu pikir dulu / diskusi dulu"
+→ "Tentu, itu wajar. Biasanya, apa yang menjadi pertimbangan utama? Apakah soal [harga / fitur / waktu implementasi]? Saya bisa bantu siapkan informasi spesifik yang Bapak/Ibu butuhkan untuk keputusan."
+
+❌ "Kami sudah punya solusi lain"
+→ "Bagus! Solusi apa yang sekarang Bapak/Ibu gunakan? [dengarkan] Menarik. Yang membedakan kami adalah [differensiasi utama]. Boleh kita bandingkan side-by-side?"
+
+❌ "Tidak ada budget saat ini"
+→ "Saya paham, budget selalu jadi pertimbangan. Kebetulan kami punya opsi [cicilan / trial / paket starter] yang bisa dimulai dari [nominal kecil]. Ini biasanya jadi pilihan klien yang ingin mulai tanpa komitmen besar."
+
+❌ "Produk Anda belum proven"
+→ "Pertanyaan yang tepat. Kami sudah bekerja dengan [X klien] di industri [industri]. Boleh saya share case study yang relevan dengan bisnis Bapak/Ibu?"
+
+❌ "Nanti saja, bukan prioritas sekarang"
+→ "Saya mengerti. Biasanya, apa yang menjadi prioritas utama sekarang? [dengarkan] Menarik, karena justru [produk/layanan] bisa membantu [prioritas mereka] dengan cara [cara]."
+
+❌ "Saya tidak butuh ini"
+→ "Boleh saya tanya, bagaimana Bapak/Ibu saat ini menangani [masalah yang dipecahkan produk]? [dengarkan] Berarti Bapak/Ibu [reframe berdasarkan jawaban]. Tepat itu yang [produk] bantu selesaikan."
+
+❌ "Kirimkan saja brosurnya"
+→ "Dengan senang hati. Supaya saya kirimkan yang paling relevan, boleh saya tanya sebentar — [qualifying question]? Saya juga bisa jadwalkan 15 menit demo singkat supaya Bapak/Ibu lihat langsung hasilnya."
+
+── FOLLOW-UP SEQUENCE ──
+Hari 1: "Halo [nama], terima kasih sudah meluangkan waktu tadi. Seperti yang saya sampaikan, [ringkasan nilai utama]. Terlampir [materi]. Adakah pertanyaan?"
+Hari 3: "Halo [nama], saya follow-up mengenai [produk]. Apakah ada info tambahan yang bisa saya bantu?"
+Hari 7: "Halo [nama], minggu ini kami punya [promo/update]. Apakah Bapak/Ibu sudah sempat review proposal kami?"
+
+── CLOSING SCRIPT ──
+"Berdasarkan diskusi kita, saya yakin [produk] bisa [manfaat spesifik untuk mereka]. Langkah selanjutnya yang paling mudah adalah [langkah konkret — trial/MoU/PO]. Apakah kita bisa mulai minggu ini?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Script ini dibuat AI dan perlu disesuaikan dengan gaya komunikasi tim sales Anda.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "cashflow_report") {
+        modePrompt = `Kamu adalah AI analis keuangan bisnis Indonesia. Buat LAPORAN CASHFLOW & KEUANGAN SEDERHANA berdasarkan data bisnis di bawah.
+
+ATURAN KETAT:
+- Gunakan semua data keuangan yang ada di Otak Proyek.
+- Jika data keuangan spesifik tidak ada, buat template yang bisa langsung diisi dan tandai [ISI DATA].
+- Identifikasi tren dan anomali dari data yang tersedia.
+- Semua asumsi proyeksi WAJIB ditandai: [PROYEKSI — basis: {alasan}].
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAPORAN CASHFLOW & KEUANGAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PERIODE: [dari data atau bulan berjalan]
+BISNIS : [dari data]
+
+RINGKASAN EKSEKUTIF
+[2-3 kalimat kondisi keuangan saat ini]
+Status Cashflow: [Positif ✅ / Negatif ❌ / Kritis ⚠️]
+
+LAPORAN ARUS KAS
+┌──────────────────────────────────────────────┐
+│ Item                   │ Bulan Ini │ Kumulatif │
+│ PEMASUKAN              │           │           │
+│ • [Sumber 1]           │ Rp [___]  │ Rp [___]  │
+│ • [Sumber 2]           │ Rp [___]  │ Rp [___]  │
+│ Total Pemasukan        │ Rp [___]  │ Rp [___]  │
+│                        │           │           │
+│ PENGELUARAN            │           │           │
+│ • [Kategori 1]         │ Rp [___]  │ Rp [___]  │
+│ • [Kategori 2]         │ Rp [___]  │ Rp [___]  │
+│ Total Pengeluaran      │ Rp [___]  │ Rp [___]  │
+│                        │           │           │
+│ NET CASHFLOW           │ Rp [___]  │ Rp [___]  │
+│ Saldo Awal             │ Rp [___]  │           │
+│ SALDO AKHIR            │ Rp [___]  │           │
+└──────────────────────────────────────────────┘
+
+ANALISIS KEUANGAN
+• Rasio Likuiditas  : [baik/cukup/perlu perhatian]
+• Tren Pendapatan   : [naik/stabil/turun] — [alasan]
+• Pengeluaran Terbesar: [kategori] — [% total]
+• Burn Rate         : Rp [___]/bulan [ESTIMASI jika tidak ada data]
+
+PROYEKSI 3 BULAN KE DEPAN
+[PROYEKSI — basis: tren data yang ada]
+Bulan +1: Rp [___] (pendapatan) — Rp [___] (pengeluaran)
+Bulan +2: Rp [___] (pendapatan) — Rp [___] (pengeluaran)
+Bulan +3: Rp [___] (pendapatan) — Rp [___] (pengeluaran)
+
+ALERT & REKOMENDASI
+⚠️ [Alert 1 jika ada anomali atau risiko]
+💡 [Rekomendasi efisiensi biaya 1]
+💡 [Rekomendasi peningkatan pendapatan 1]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Laporan ini dibuat AI berdasarkan data yang tersedia. Validasi dengan akuntan atau tim keuangan untuk keputusan bisnis penting.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "customer_feedback") {
+        modePrompt = `Kamu adalah AI customer experience specialist. Buat TEMPLATE SURVEY KEPUASAN & NPS TRACKER berdasarkan data bisnis di bawah.
+
+ATURAN KETAT:
+- Buat survey yang ringkas (max 10 pertanyaan) tapi komprehensif.
+- Sesuaikan pertanyaan dengan jenis bisnis/layanan dari data.
+- Sertakan Net Promoter Score (NPS) sebagai pertanyaan wajib.
+- Tambahkan analisis template untuk mengolah hasil survey.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SURVEY KEPUASAN PELANGGAN & NPS TRACKER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BISNIS/LAYANAN: [dari data]
+TARGET RESPONDEN: [dari data atau identifikasi]
+
+── SURVEY KEPUASAN (Template) ──
+
+Terima kasih telah menggunakan [nama bisnis/layanan]! Kami sangat menghargai masukan Anda untuk terus berkembang. Survey ini hanya membutuhkan 2-3 menit.
+
+NPS (Net Promoter Score)
+"Seberapa besar kemungkinan Anda merekomendasikan [bisnis/layanan] kepada teman atau kolega?"
+[Skala 0-10: 0 = Sangat tidak mungkin, 10 = Sangat mungkin]
+
+Kepuasan Keseluruhan
+"Secara keseluruhan, seberapa puas Anda dengan [bisnis/layanan] kami?"
+[ ] Sangat Puas  [ ] Puas  [ ] Cukup  [ ] Tidak Puas  [ ] Sangat Tidak Puas
+
+[Pertanyaan spesifik 1 — disesuaikan dengan bisnis dari data]
+[Pertanyaan spesifik 2 — disesuaikan dengan bisnis dari data]
+[Pertanyaan spesifik 3 — disesuaikan dengan bisnis dari data]
+
+"Apa yang paling Anda sukai dari [bisnis/layanan] kami?"
+[Teks bebas]
+
+"Apa yang menurut Anda perlu kami tingkatkan?"
+[Teks bebas]
+
+"Apakah Anda ingin kami menghubungi Anda terkait masukan ini?"
+[ ] Ya — Nama: ___ | Kontak: ___
+[ ] Tidak
+
+── FRAMEWORK ANALISIS NPS ──
+
+KATEGORI RESPONDEN:
+• Promoter   (9-10) : Pelanggan loyal yang merekomendasikan → Minta referral, jadikan testimonial
+• Passive    (7-8)  : Puas tapi belum antusias → Follow-up personal, tawarkan upgrade
+• Detractor  (0-6)  : Tidak puas → Hubungi segera, minta feedback detail, tawarkan kompensasi
+
+RUMUS NPS: % Promoter − % Detractor
+Benchmark: >50 = Excellent | 30-50 = Baik | 0-30 = Cukup | <0 = Perlu Perhatian
+
+── DASHBOARD TRACKING ──
+┌────────────────────────────────────────────┐
+│ Metric              │ Target │ Aktual │ Trend │
+│ NPS Score           │ >50    │ [___]  │ [↑↓→] │
+│ CSAT (Kepuasan)     │ >85%   │ [__]%  │ [↑↓→] │
+│ Response Rate       │ >30%   │ [__]%  │ [↑↓→] │
+│ Promoter %          │ >60%   │ [__]%  │ [↑↓→] │
+│ Detractor %         │ <10%   │ [__]%  │ [↑↓→] │
+└────────────────────────────────────────────┘
+
+RENCANA TINDAK LANJUT
+• Detractor: Hubungi dalam 24 jam, minta detail masalah, tawarkan solusi
+• Passive: Kirim update fitur/layanan terbaru, ajak feedback lanjut
+• Promoter: Minta testimonial, program referral, akses early feature
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Survey & NPS Tracker ini dibuat AI. Distribusikan via WhatsApp, email, atau embed di website.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       }
 
       const agent = await storage.getAgent(agentId);
       const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
 
-      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi"].includes(appType);
+      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback"].includes(appType);
       const userPromptById: Record<string, string> = {
         nib_status_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`,
         whatsapp_status_update: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat pesan WhatsApp status proyek untuk klien sesuai format dan aturan di atas.`,
@@ -8657,6 +9134,14 @@ Risk Register ini dibuat berdasarkan data Otak Proyek. Validasi dengan tim lapan
         mentoring_plan: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Rencana Mentoring Personal lengkap sesuai format dan aturan di atas. Sesuaikan topik dan domain kompetensi berdasarkan konteks proyek di atas.`,
         brief_intake: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBangun Brief/Intake Proyek terstruktur sesuai format dan aturan di atas. Ekstrak semua informasi relevan dari data di atas dan tandai yang tidak tersedia.`,
         studio_kompetensi: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nLakukan Asesmen Studio Kompetensi Level 1–4 sesuai format dan aturan di atas. Nilai HANYA berdasarkan bukti yang ada di data Otak Proyek.`,
+        meeting_notes: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Ringkasan Rapat & Action Items sesuai format dan aturan di atas. Ekstrak semua isu, keputusan, dan tindakan yang ada di data.`,
+        contract_drafter: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nDraft dokumen kontrak/legal sesuai format dan aturan di atas. Gunakan semua data yang tersedia dan tandai bagian yang perlu dikonfirmasi.`,
+        rab_estimator: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat estimasi RAB dan breakdown biaya sesuai format dan aturan di atas. Gunakan data proyek yang ada dan tandai asumsi yang dibuat.`,
+        kpi_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Laporan KPI & Kinerja Tim sesuai format dan aturan di atas. Analisis capaian vs target berdasarkan data proyek yang tersedia.`,
+        social_media_copy: `Berikut data Otak Proyek/Bisnis:\n\n${projectBrainBlock}\n\nBuat konten media sosial sesuai format dan aturan di atas. Sesuaikan tone, platform, dan pesan dengan konteks bisnis yang ada.`,
+        sales_script: `Berikut data Otak Proyek/Bisnis:\n\n${projectBrainBlock}\n\nBuat Sales Script & Objection Handling sesuai format dan aturan di atas. Sesuaikan dengan produk/layanan dan segmen target dari data di atas.`,
+        cashflow_report: `Berikut data Otak Proyek/Bisnis:\n\n${projectBrainBlock}\n\nBuat Laporan Cashflow & Keuangan sesuai format dan aturan di atas. Analisis kondisi keuangan berdasarkan data yang tersedia dan berikan rekomendasi.`,
+        customer_feedback: `Berikut data Otak Proyek/Bisnis:\n\n${projectBrainBlock}\n\nBuat template Survey Kepuasan & NPS Tracker sesuai format dan aturan di atas. Sesuaikan pertanyaan dengan jenis bisnis dan segmen pelanggan dari data di atas.`,
       };
 
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [

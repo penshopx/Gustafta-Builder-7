@@ -49,7 +49,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Knowledge Base: 20 dokumen", included: true },
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp & Telegram", included: true },
-      { text: "Agentic AI Features + Mini Apps (33 Tipe)", included: true },
+      { text: "Agentic AI Features + Mini Apps (41 Tipe)", included: true },
       { text: "Orchestrator Multi-Agent (7 Specialist)", included: true },
       { text: "Analytics Dashboard", included: true },
       { text: "Email Support", included: true },
@@ -73,7 +73,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Knowledge Base: 20 dokumen", included: true },
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp & Telegram", included: true },
-      { text: "Agentic AI Features + Mini Apps (33 Tipe)", included: true },
+      { text: "Agentic AI Features + Mini Apps (41 Tipe)", included: true },
       { text: "Orchestrator Multi-Agent (7 Specialist)", included: true },
       { text: "Analytics Dashboard", included: true },
       { text: "Priority Email Support", included: true },
@@ -96,7 +96,7 @@ const subscriptionTiers: PricingTier[] = [
       { text: "Knowledge Base: 30 dokumen", included: true },
       { text: "Web Widget (No Branding)", included: true },
       { text: "WhatsApp, Telegram, Discord", included: true },
-      { text: "Agentic AI + Mini Apps (33 Tipe) + Master Standar v2.0", included: true },
+      { text: "Agentic AI + Mini Apps (41 Tipe) + Master Standar v2.0", included: true },
       { text: "Orchestrator Multi-Agent + Custom Specialist", included: true },
       { text: "SCORECARD + Win Probability (131 Hub)", included: true },
       { text: "Advanced Analytics", included: true },
@@ -399,8 +399,8 @@ const faqs = [
     answer: "Dua hal berbeda: (1) Orkestrator/Big Idea di hierarki = chatbot hub level 3 yang mengarahkan user ke chatbot spesialis lain melalui percakapan. (2) Orchestrator Multi-Agent = sistem routing otomatis di DALAM satu chatbot yang mendeteksi topik pesan dan memilih specialist agent yang tepat untuk menjawab — semuanya transparan dan mulus tanpa perpindahan chatbot.",
   },
   {
-    question: "Apa itu Mini Apps 33 tipe?",
-    answer: "Mini Apps adalah tools interaktif yang bisa dipasang di dalam chatbot — misalnya rubrik penilaian, risk register, work mode selector, brief intake, studio kompetensi (Level 1–4 dengan rubrik 0–3), docgen, dan e-course. Semua 33 tipe sudah tersedia dan bisa diaktifkan tanpa coding.",
+    question: "Apa itu Mini Apps 41 tipe?",
+    answer: "Mini Apps adalah tools interaktif yang bisa dipasang di dalam chatbot — rubrik penilaian, risk register, notulis rapat, drafter kontrak, RAB estimator, KPI report, konten medsos, sales script, cashflow, NPS tracker, work mode selector, brief intake, studio kompetensi, docgen, e-course, dan banyak lagi. Semua 41 tipe sudah tersedia dan bisa diaktifkan tanpa coding.",
   },
   {
     question: "Apa itu Master Standar v2.0?",
@@ -1076,7 +1076,7 @@ export default function Pricing() {
         <section className="text-center py-12 bg-muted/30 rounded-lg">
           <h2 className="text-2xl font-bold mb-2">Siap Memulai?</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Pilih paket dan mulai bangun ekosistem chatbot AI profesional Anda hari ini. Semua paket sudah termasuk Agentic AI, Mini Apps (33 Tipe), dan Orchestrator Multi-Agent.
+            Pilih paket dan mulai bangun ekosistem chatbot AI profesional Anda hari ini. Semua paket sudah termasuk Agentic AI, Mini Apps (41 Tipe), dan Orchestrator Multi-Agent.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="gap-2" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>

@@ -407,7 +407,7 @@ const MODULES: Module[] = [
         steps: [
           {
             title: "Apa itu Mini Apps?",
-            content: "Mini Apps adalah modul interaktif yang terintegrasi langsung di dalam chatbot. Tersedia 33 tipe, antara lain:\n\n• Rubric Scoring — Penilaian berbasis rubrik\n• Risk Register — Daftar dan analisis risiko\n• Brief Intake — Formulir intake proyek\n• Studio Kompetensi — Assessment kompetensi level 1-4\n• Work Mode Selector — Pilih mode kerja\n• Dan banyak lagi...",
+            content: "Mini Apps adalah modul interaktif yang terintegrasi langsung di dalam chatbot. Tersedia 41 tipe, antara lain:\n\n• Rubric Scoring — Penilaian berbasis rubrik\n• Risk Register — Daftar dan analisis risiko\n• AI Notulis & Ringkas Rapat — Ringkasan + action items\n• AI Drafter Kontrak — SPK, NDA, MoU, surat resmi\n• RAB Estimator — Estimasi biaya proyek\n• KPI Report — Laporan kinerja tim\n• AI Copywriter Konten Medsos — Instagram, TikTok, LinkedIn\n• Sales Script & Objection Handling — Script penjualan\n• Cashflow Report — Laporan keuangan sederhana\n• NPS Tracker — Survey kepuasan pelanggan\n• Brief Intake — Formulir intake proyek\n• Studio Kompetensi — Assessment level 1-4\n• Work Mode Selector — Pilih mode kerja\n• Dan banyak lagi...",
             tip: "Mini Apps ideal untuk proses bisnis yang membutuhkan input terstruktur dari user."
           },
           {
