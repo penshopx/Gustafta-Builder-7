@@ -68,6 +68,12 @@ export default function ModulChat() {
   const [subEmail, setSubEmail] = useState("");
   const [subPhone, setSubPhone] = useState("");
   const [subscribing, setSubscribing] = useState(false);
+  // Email-based access gate (shown when no active access but modul is paid)
+  const [showEmailGate, setShowEmailGate] = useState(false);
+  const [emailGateInput, setEmailGateInput] = useState("");
+  const [emailGateChecking, setEmailGateChecking] = useState(false);
+  const [emailGateError, setEmailGateError] = useState("");
+  const [subscribedEmail, setSubscribedEmail] = useState<string | null>(null);
   const [pwaPrompt, setPwaPrompt] = useState<any>(null);
   const [pwaInstalled, setPwaInstalled] = useState(false);
 
@@ -120,18 +126,37 @@ export default function ModulChat() {
           return;
         }
         if (data.pricing && data.pricing.monthlyPrice > 0) {
-          const savedToken = localStorage.getItem(`modul_access_${params.bigIdeaId}`);
-          const savedEmail = localStorage.getItem(`modul_email_${params.bigIdeaId}`);
-          fetch(`/api/modul/${params.bigIdeaId}/access?${savedEmail ? `email=${encodeURIComponent(savedEmail)}` : ""}${savedToken ? `&token=${encodeURIComponent(savedToken)}` : ""}`)
-            .then(r => r.json())
-            .then(result => {
-              setHasAccess(result.hasAccess);
-              setAccessChecked(true);
-            })
-            .catch(() => {
-              setHasAccess(false);
-              setAccessChecked(true);
-            });
+          // Email-based check: try URL param first, then sessionStorage, then localStorage (legacy)
+          const urlParams2 = new URLSearchParams(window.location.search);
+          const emailFromUrl = urlParams2.get("email");
+          const savedEmail = emailFromUrl ||
+            sessionStorage.getItem(`modul_email_${params.bigIdeaId}`) ||
+            localStorage.getItem(`modul_email_${params.bigIdeaId}`);
+          const savedToken = localStorage.getItem(`modul_access_${params.bigIdeaId}`) ||
+            localStorage.getItem(`modul_token_${params.bigIdeaId}`);
+
+          if (savedEmail) {
+            if (emailFromUrl) setEmailGateInput(emailFromUrl);
+            fetch(`/api/modul/${params.bigIdeaId}/access?email=${encodeURIComponent(savedEmail)}${savedToken ? `&token=${encodeURIComponent(savedToken)}` : ""}`)
+              .then(r => r.json())
+              .then(result => {
+                if (result.hasAccess) {
+                  setSubscribedEmail(savedEmail);
+                  sessionStorage.setItem(`modul_email_${params.bigIdeaId}`, savedEmail);
+                }
+                setHasAccess(result.hasAccess);
+                setAccessChecked(true);
+              })
+              .catch(() => {
+                setHasAccess(false);
+                setAccessChecked(true);
+              });
+          } else {
+            // No saved email — show email gate instead of access wall
+            setHasAccess(false);
+            setAccessChecked(true);
+            setShowEmailGate(true);
+          }
         } else {
           setAccessChecked(true);
         }
@@ -271,6 +296,29 @@ export default function ModulChat() {
     }
   }, [sendMessage]);
 
+  const handleEmailGateCheck = useCallback(async () => {
+    const email = emailGateInput.trim();
+    if (!email) return;
+    setEmailGateChecking(true);
+    setEmailGateError("");
+    try {
+      const res = await fetch(`/api/modul/${params.bigIdeaId}/access?email=${encodeURIComponent(email)}`);
+      const result = await res.json();
+      if (result.hasAccess) {
+        setSubscribedEmail(email);
+        sessionStorage.setItem(`modul_email_${params.bigIdeaId}`, email);
+        setHasAccess(true);
+        setShowEmailGate(false);
+      } else {
+        setEmailGateError("Email tidak ditemukan atau berlangganan belum aktif. Pastikan email yang Anda gunakan saat mendaftar sudah benar.");
+      }
+    } catch {
+      setEmailGateError("Gagal memeriksa akses. Coba lagi.");
+    } finally {
+      setEmailGateChecking(false);
+    }
+  }, [emailGateInput, params.bigIdeaId]);
+
   const handleSubscribe = useCallback(async (plan: string) => {
     if (!subName.trim() || !subEmail.trim()) return;
     setSubscribing(true);
@@ -291,9 +339,14 @@ export default function ModulChat() {
         return;
       }
       if (data.subscription) {
-        localStorage.setItem(`modul_access_${params.bigIdeaId}`, data.subscription.accessToken || data.accessToken || "");
+        // Save email to sessionStorage (not just localStorage) for cross-session persistence
+        sessionStorage.setItem(`modul_email_${params.bigIdeaId}`, subEmail.trim());
         localStorage.setItem(`modul_email_${params.bigIdeaId}`, subEmail.trim());
-        setHasAccess(true);
+        if (data.subscription.accessToken || data.accessToken) {
+          localStorage.setItem(`modul_access_${params.bigIdeaId}`, data.subscription.accessToken || data.accessToken || "");
+        }
+        setSubscribedEmail(subEmail.trim());
+        setHasAccess(data.subscription.status === "active");
         setShowUpgradeWall(false);
       }
     } catch (err) {
@@ -381,80 +434,131 @@ export default function ModulChat() {
           {accessChecked && !hasAccess && modul.pricing && modul.pricing.monthlyPrice > 0 ? (
             <Card data-testid="modul-upgrade-wall">
               <CardContent className="p-6 sm:p-8">
-                <div className="text-center mb-6">
-                  <Lock className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">Akses Premium</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Langganan bundle untuk mengakses semua {modul.chatbots.length} chatbot dalam Modul ini.
-                  </p>
-                </div>
-                <div className="text-center mb-6">
-                  <p className="text-3xl font-bold">
-                    Rp {modul.pricing.monthlyPrice.toLocaleString("id-ID")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">per bulan</p>
-                </div>
-                {!showUpgradeWall ? (
-                  <div className="flex flex-col items-center gap-3">
-                    {modul.pricing.trialEnabled && (
-                      <Button onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-start-trial">
-                        Coba Gratis {modul.pricing.trialDays} Hari
-                      </Button>
+                {/* EMAIL GATE — returning subscriber */}
+                {showEmailGate && !showUpgradeWall ? (
+                  <div className="max-w-sm mx-auto space-y-4">
+                    <div className="text-center">
+                      <Lock className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                      <h3 className="text-base font-semibold mb-1">Sudah berlangganan?</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Masukkan email yang Anda gunakan saat mendaftar.
+                      </p>
+                    </div>
+                    <Input
+                      placeholder="Email Anda"
+                      type="email"
+                      value={emailGateInput}
+                      onChange={(e) => setEmailGateInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleEmailGateCheck()}
+                      data-testid="input-email-gate"
+                    />
+                    {emailGateError && (
+                      <p className="text-xs text-destructive">{emailGateError}</p>
                     )}
-                    <Button variant="outline" onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-subscribe">
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      Langganan Sekarang
+                    <Button
+                      onClick={handleEmailGateCheck}
+                      disabled={emailGateChecking || !emailGateInput.trim()}
+                      className="w-full"
+                      data-testid="button-email-gate-check"
+                    >
+                      {emailGateChecking ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                      Masuk ke Modul
+                    </Button>
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">atau</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" onClick={() => { setShowEmailGate(false); setShowUpgradeWall(true); }} className="w-full" data-testid="button-new-subscribe">
+                      Daftar Berlangganan
                     </Button>
                   </div>
                 ) : (
-                  <div className="max-w-sm mx-auto space-y-3">
-                    <Input
-                      placeholder="Nama Lengkap"
-                      value={subName}
-                      onChange={(e) => setSubName(e.target.value)}
-                      data-testid="input-sub-name"
-                    />
-                    <Input
-                      placeholder="Email"
-                      type="email"
-                      value={subEmail}
-                      onChange={(e) => setSubEmail(e.target.value)}
-                      data-testid="input-sub-email"
-                    />
-                    <Input
-                      placeholder="No. WhatsApp (opsional)"
-                      value={subPhone}
-                      onChange={(e) => setSubPhone(e.target.value)}
-                      data-testid="input-sub-phone"
-                    />
-                    <div className="flex flex-col gap-2">
-                      {modul.pricing.trialEnabled && (
-                        <Button
-                          onClick={() => handleSubscribe("trial")}
-                          disabled={subscribing || !subName.trim() || !subEmail.trim()}
-                          className="w-full"
-                          data-testid="button-confirm-trial"
-                        >
-                          {subscribing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                          Mulai Trial {modul.pricing.trialDays} Hari
-                        </Button>
-                      )}
-                      {modul.pricing.monthlyPrice > 0 && (
-                        <Button
-                          variant="outline"
-                          onClick={() => handleSubscribe("monthly")}
-                          disabled={subscribing || !subName.trim() || !subEmail.trim()}
-                          className="w-full"
-                          data-testid="button-confirm-monthly"
-                        >
-                          Bayar Rp {modul.pricing.monthlyPrice.toLocaleString("id-ID")}/bulan
-                        </Button>
-                      )}
+                  <>
+                    <div className="text-center mb-6">
+                      <Lock className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold mb-2">Akses Premium</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Langganan bundle untuk mengakses semua {modul.chatbots.length} chatbot dalam Modul ini.
+                      </p>
                     </div>
-                    <Button variant="ghost" onClick={() => setShowUpgradeWall(false)} className="w-full" size="sm">
-                      Kembali
-                    </Button>
-                  </div>
+                    <div className="text-center mb-6">
+                      <p className="text-3xl font-bold">
+                        Rp {modul.pricing.monthlyPrice.toLocaleString("id-ID")}
+                      </p>
+                      <p className="text-sm text-muted-foreground">per bulan</p>
+                    </div>
+                    {!showUpgradeWall ? (
+                      <div className="flex flex-col items-center gap-3">
+                        {modul.pricing.trialEnabled && (
+                          <Button onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-start-trial">
+                            Coba Gratis {modul.pricing.trialDays} Hari
+                          </Button>
+                        )}
+                        <Button variant="outline" onClick={() => setShowUpgradeWall(true)} className="w-full max-w-xs" data-testid="button-subscribe">
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Langganan Sekarang
+                        </Button>
+                        <button
+                          className="text-xs text-muted-foreground underline underline-offset-2 mt-1"
+                          onClick={() => setShowEmailGate(true)}
+                          data-testid="button-already-subscribed"
+                        >
+                          Sudah punya akses? Masuk di sini
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="max-w-sm mx-auto space-y-3">
+                        <Input
+                          placeholder="Nama Lengkap"
+                          value={subName}
+                          onChange={(e) => setSubName(e.target.value)}
+                          data-testid="input-sub-name"
+                        />
+                        <Input
+                          placeholder="Email"
+                          type="email"
+                          value={subEmail}
+                          onChange={(e) => setSubEmail(e.target.value)}
+                          data-testid="input-sub-email"
+                        />
+                        <Input
+                          placeholder="No. WhatsApp (opsional)"
+                          value={subPhone}
+                          onChange={(e) => setSubPhone(e.target.value)}
+                          data-testid="input-sub-phone"
+                        />
+                        <div className="flex flex-col gap-2">
+                          {modul.pricing.trialEnabled && (
+                            <Button
+                              onClick={() => handleSubscribe("trial")}
+                              disabled={subscribing || !subName.trim() || !subEmail.trim()}
+                              className="w-full"
+                              data-testid="button-confirm-trial"
+                            >
+                              {subscribing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                              Mulai Trial {modul.pricing.trialDays} Hari
+                            </Button>
+                          )}
+                          {modul.pricing.monthlyPrice > 0 && (
+                            <Button
+                              variant="outline"
+                              onClick={() => handleSubscribe("monthly")}
+                              disabled={subscribing || !subName.trim() || !subEmail.trim()}
+                              className="w-full"
+                              data-testid="button-confirm-monthly"
+                            >
+                              Bayar Rp {modul.pricing.monthlyPrice.toLocaleString("id-ID")}/bulan
+                            </Button>
+                          )}
+                        </div>
+                        <Button variant="ghost" onClick={() => setShowUpgradeWall(false)} className="w-full" size="sm">
+                          Kembali
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>

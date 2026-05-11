@@ -11999,6 +11999,62 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
+  // ==================== ADMIN: MODUL SUBSCRIBERS ====================
+  app.get("/api/admin/modul-subs", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const rows = await db.select().from(clientSubscriptions)
+        .orderBy(desc(clientSubscriptions.createdAt));
+      // Attach bigIdea names
+      const biIds = [...new Set(rows.map(r => r.bigIdeaId).filter(Boolean))] as number[];
+      let biMap: Record<number, string> = {};
+      if (biIds.length > 0) {
+        const biRows = await db.select({ id: bigIdeasTable.id, name: bigIdeasTable.name }).from(bigIdeasTable).where(sql`${bigIdeasTable.id} = ANY(${biIds})`);
+        for (const bi of biRows) biMap[bi.id] = bi.name;
+      }
+      const result = rows.map(r => ({
+        id: r.id,
+        bigIdeaId: r.bigIdeaId,
+        bigIdeaName: r.bigIdeaId ? (biMap[r.bigIdeaId] || `Modul #${r.bigIdeaId}`) : "—",
+        customerName: r.customerName,
+        customerEmail: r.customerEmail,
+        customerPhone: r.customerPhone,
+        plan: r.plan,
+        status: r.status,
+        amount: r.amount,
+        accessToken: r.accessToken,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        createdAt: r.createdAt,
+      }));
+      res.json(result);
+    } catch (error: any) {
+      console.error("Admin modul-subs error:", error);
+      res.status(500).json({ error: "Gagal mengambil data subscriber modul." });
+    }
+  });
+
+  app.patch("/api/admin/modul-subs/:id", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const { status, endDate, durationDays } = req.body;
+      const updates: any = { updatedAt: new Date() };
+      if (status) updates.status = status;
+      if (endDate) {
+        updates.endDate = new Date(endDate);
+      } else if (status === "active" && durationDays) {
+        const d = new Date();
+        d.setDate(d.getDate() + parseInt(durationDays));
+        updates.endDate = d;
+        updates.startDate = new Date();
+      }
+      await db.update(clientSubscriptions).set(updates).where(eq(clientSubscriptions.id, parseInt(id)));
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Admin modul-subs PATCH error:", error);
+      res.status(500).json({ error: "Gagal memperbarui subscriber." });
+    }
+  });
+
   // ── User: Seed LexCom ecosystem into an existing Series ────────────────────
   app.post("/api/lexcom/seed", isAuthenticated, async (req: any, res: any) => {
     try {

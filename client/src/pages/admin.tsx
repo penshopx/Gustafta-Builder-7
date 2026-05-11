@@ -13,7 +13,7 @@ import {
   Users, CreditCard, FileText, ToggleLeft, ToggleRight,
   CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
   UserCheck, AlertCircle, RefreshCw, Crown, UserCog, Wrench, Scale, Database,
-  ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle
+  ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle, Loader2
 } from "lucide-react";
 
 // ---- Types ----
@@ -22,6 +22,22 @@ interface AdminMeData {
   isSuperAdmin: boolean;
   role: string;
   user: any;
+}
+
+interface ModulSub {
+  id: number;
+  bigIdeaId: number | null;
+  bigIdeaName: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string | null;
+  plan: string;
+  status: string;
+  amount: number;
+  accessToken: string;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
 }
 
 interface AdminStats {
@@ -226,6 +242,16 @@ export default function AdminPage() {
     sortOrder: number;
   }
 
+  const { data: modulSubs = [], isLoading: modulSubsLoading, refetch: refetchModulSubs } = useQuery<ModulSub[]>({
+    queryKey: ["/api/admin/modul-subs"],
+    enabled: isAdmin && activeTab === "modul-subs",
+  });
+
+  const [modulSubDialog, setModulSubDialog] = useState<{ open: boolean; sub: ModulSub | null }>({ open: false, sub: null });
+  const [modulSubStatus, setModulSubStatus] = useState("active");
+  const [modulSubDays, setModulSubDays] = useState("30");
+  const [modulWaDialog, setModulWaDialog] = useState<{ open: boolean; sub: ModulSub | null }>({ open: false, sub: null });
+
   const { data: storeOrders = [], isLoading: storeOrdersLoading, refetch: refetchOrders } = useQuery<StoreOrder[]>({
     queryKey: ["/api/store/admin/orders"],
     queryFn: async () => { const res = await fetch("/api/store/admin/orders"); return res.json(); },
@@ -354,6 +380,22 @@ export default function AdminPage() {
       toast({ title: "Produk dihapus." });
     },
     onError: () => toast({ title: "Gagal hapus produk.", variant: "destructive" }),
+  });
+
+  const updateModulSubMutation = useMutation({
+    mutationFn: ({ id, status, durationDays }: { id: number; status: string; durationDays: string }) =>
+      apiRequest("PATCH", `/api/admin/modul-subs/${id}`, { status, durationDays: parseInt(durationDays) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/modul-subs"] });
+      const activatedSub = modulSubDialog.sub;
+      const activatedStatus = modulSubStatus;
+      setModulSubDialog({ open: false, sub: null });
+      toast({ title: "Subscriber modul diperbarui." });
+      if (activatedStatus === "active" && activatedSub) {
+        setTimeout(() => setModulWaDialog({ open: true, sub: activatedSub }), 300);
+      }
+    },
+    onError: () => toast({ title: "Gagal memperbarui subscriber.", variant: "destructive" }),
   });
 
   const toggleProductMutation = useMutation({
@@ -540,6 +582,9 @@ export default function AdminPage() {
                   {stats?.pendingTrialRequests}
                 </span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="modul-subs" className="gap-1.5 text-xs" data-testid="tab-modul-subs">
+              <Package className="h-3.5 w-3.5" /> Modul
             </TabsTrigger>
             <TabsTrigger value="store" className="gap-1.5 text-xs" data-testid="tab-store">
               <ShoppingBag className="h-3.5 w-3.5" /> Store
@@ -930,6 +975,115 @@ export default function AdminPage() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ========== MODUL SUBSCRIBERS TAB ========== */}
+          <TabsContent value="modul-subs" className="mt-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Package className="h-4 w-4" /> Subscriber Paket Modul
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Kelola pelanggan yang berlangganan Paket Series/Modul
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => refetchModulSubs()} data-testid="button-refresh-modul-subs">
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Refresh
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {modulSubsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : modulSubs.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    Belum ada subscriber modul.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-xs text-muted-foreground">
+                          <th className="text-left py-2 pr-3 font-medium">Nama / Email</th>
+                          <th className="text-left py-2 pr-3 font-medium">Modul</th>
+                          <th className="text-left py-2 pr-3 font-medium">Paket</th>
+                          <th className="text-left py-2 pr-3 font-medium">Status</th>
+                          <th className="text-left py-2 pr-3 font-medium">Berakhir</th>
+                          <th className="text-left py-2 font-medium">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {modulSubs.map(sub => (
+                          <tr key={sub.id} className="border-b last:border-0 hover:bg-muted/30" data-testid={`row-modul-sub-${sub.id}`}>
+                            <td className="py-2.5 pr-3">
+                              <p className="font-medium truncate max-w-[140px]">{sub.customerName}</p>
+                              <p className="text-xs text-muted-foreground truncate max-w-[140px]">{sub.customerEmail}</p>
+                              {sub.customerPhone && (
+                                <p className="text-xs text-muted-foreground">{sub.customerPhone}</p>
+                              )}
+                            </td>
+                            <td className="py-2.5 pr-3">
+                              <p className="text-xs font-medium truncate max-w-[120px]">{sub.bigIdeaName}</p>
+                              {sub.bigIdeaId && (
+                                <a
+                                  href={`/modul/${sub.bigIdeaId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                                >
+                                  <ExternalLink className="h-2.5 w-2.5" /> Buka
+                                </a>
+                              )}
+                            </td>
+                            <td className="py-2.5 pr-3">
+                              <span className="text-xs capitalize">{sub.plan}</span>
+                              {sub.amount > 0 && (
+                                <p className="text-xs text-muted-foreground">Rp {sub.amount.toLocaleString("id-ID")}</p>
+                              )}
+                            </td>
+                            <td className="py-2.5 pr-3">{statusBadge(sub.status)}</td>
+                            <td className="py-2.5 pr-3 text-xs text-muted-foreground">{formatDate(sub.endDate)}</td>
+                            <td className="py-2.5">
+                              <div className="flex gap-1.5">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs px-2"
+                                  onClick={() => {
+                                    setModulSubDialog({ open: true, sub });
+                                    setModulSubStatus(sub.status);
+                                    setModulSubDays("30");
+                                  }}
+                                  data-testid={`button-edit-modul-sub-${sub.id}`}
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                                {sub.status === "active" && sub.bigIdeaId && (
+                                  <Button
+                                    size="sm"
+                                    className="h-7 text-xs px-2 bg-green-600 hover:bg-green-700 text-white"
+                                    onClick={() => setModulWaDialog({ open: true, sub })}
+                                    data-testid={`button-wa-modul-sub-${sub.id}`}
+                                    title="Kirim link akses via WA"
+                                  >
+                                    WA
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </CardContent>
@@ -1379,6 +1533,159 @@ export default function AdminPage() {
             >
               {updateSubMutation.isPending ? "Menyimpan..." : "Simpan"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========== MODUL SUB EDIT DIALOG ========== */}
+      <Dialog open={modulSubDialog.open} onOpenChange={(o) => setModulSubDialog({ open: o, sub: modulSubDialog.sub })}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Edit Subscriber Modul</DialogTitle>
+          </DialogHeader>
+          {modulSubDialog.sub && (
+            <div className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                <p className="font-medium">{modulSubDialog.sub.customerName}</p>
+                <p className="text-xs text-muted-foreground">{modulSubDialog.sub.customerEmail}</p>
+                <p className="text-xs text-muted-foreground">Modul: {modulSubDialog.sub.bigIdeaName}</p>
+                <p className="text-xs text-muted-foreground">Paket: {modulSubDialog.sub.plan}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Status</label>
+                <select
+                  value={modulSubStatus}
+                  onChange={(e) => setModulSubStatus(e.target.value)}
+                  className="w-full border rounded-md px-3 py-2 bg-background text-sm"
+                  data-testid="select-modul-sub-status"
+                >
+                  <option value="active">Aktif</option>
+                  <option value="pending">Pending (belum bayar)</option>
+                  <option value="expired">Expired</option>
+                  <option value="cancelled">Dibatalkan</option>
+                </select>
+              </div>
+              {modulSubStatus === "active" && (
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Durasi aktif (hari)</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={modulSubDays}
+                    onChange={(e) => setModulSubDays(e.target.value)}
+                    placeholder="30"
+                    data-testid="input-modul-sub-days"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Dihitung dari hari ini. Kosongkan untuk 30 hari.</p>
+                </div>
+              )}
+              {modulSubStatus === "active" && (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-md px-3 py-2">
+                  <MessageCircle className="h-3.5 w-3.5 shrink-0" />
+                  Setelah simpan, template WA berisi link akses akan otomatis muncul.
+                </p>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModulSubDialog({ open: false, sub: null })}>Batal</Button>
+            <Button
+              disabled={updateModulSubMutation.isPending}
+              onClick={() => modulSubDialog.sub && updateModulSubMutation.mutate({
+                id: modulSubDialog.sub.id,
+                status: modulSubStatus,
+                durationDays: modulSubDays || "30",
+              })}
+              data-testid="button-save-modul-sub"
+            >
+              {updateModulSubMutation.isPending ? "Menyimpan..." : "Simpan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========== MODUL WA DIALOG ========== */}
+      <Dialog open={modulWaDialog.open} onOpenChange={(o) => setModulWaDialog({ open: o, sub: modulWaDialog.sub })}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-green-500" />
+              Kirim Link Akses Modul via WA
+            </DialogTitle>
+          </DialogHeader>
+          {modulWaDialog.sub && (() => {
+            const sub = modulWaDialog.sub!;
+            const accessLink = `${appUrl}/modul/${sub.bigIdeaId}?email=${encodeURIComponent(sub.customerEmail)}`;
+            const planMap: Record<string, string> = { trial: "Trial", monthly: "Bulanan", yearly: "Tahunan", lifetime: "Seumur Hidup" };
+            const msg = `Halo ${sub.customerName}! 👋
+
+Akses Paket Modul *${sub.bigIdeaName}* Anda sudah *AKTIF* 🎉
+
+Klik link di bawah untuk langsung masuk:
+${accessLink}
+
+Paket: *${planMap[sub.plan] ?? sub.plan}*${sub.endDate ? `\nAktif hingga: ${new Date(sub.endDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}` : ""}
+
+💡 Bookmark link di atas agar mudah dibuka kapan saja — bahkan dari HP berbeda sekalipun!
+
+Butuh bantuan? Hubungi kami:
+📱 WA: 081287941900 / 082299417818
+
+Selamat menggunakan! 🚀
+— Tim Gustafta`;
+            const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            return (
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p className="font-medium">{sub.customerName}</p>
+                  <p className="text-xs text-muted-foreground">{sub.customerEmail}</p>
+                  <p className="text-xs text-muted-foreground">Modul: {sub.bigIdeaName}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1.5">Link Akses</p>
+                  <div className="flex gap-2">
+                    <Input value={accessLink} readOnly className="text-xs font-mono" data-testid="input-modul-access-link" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => { navigator.clipboard.writeText(accessLink); toast({ title: "Link disalin!" }); }}
+                      data-testid="button-copy-modul-link"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Preview Pesan WA</p>
+                  <div className="bg-[#dcf8c6] dark:bg-green-900/30 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-foreground leading-relaxed max-h-56 overflow-y-auto border border-green-200 dark:border-green-800">
+                    {msg}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-xs"
+                    onClick={() => { navigator.clipboard.writeText(msg); toast({ title: "Pesan disalin!" }); }}
+                    data-testid="button-copy-modul-wa-msg"
+                  >
+                    <Copy className="h-3.5 w-3.5 mr-1.5" /> Salin Teks
+                  </Button>
+                  <Button
+                    className="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => window.open(waUrl, "_blank")}
+                    data-testid="button-open-modul-wa"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Buka WA
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Link berisi email subscriber — mereka langsung masuk tanpa perlu input email ulang.
+                </p>
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModulWaDialog({ open: false, sub: null })}>Tutup</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
