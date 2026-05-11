@@ -771,18 +771,18 @@ export default function AgentChat() {
       }
     }
 
-    let messageContent = content.trim();
+    const displayContent = content.trim();
     const attachments = [...pendingFiles];
 
-    if (attachments.length > 0) {
-      const fileDescriptions = attachments.map(f => `[File: ${f.fileName} (${f.category}, ${formatFileSize(f.fileSize)})]`).join("\n");
-      messageContent = messageContent ? `${messageContent}\n\n${fileDescriptions}` : fileDescriptions;
+    let messageContent = displayContent;
+    if (attachments.length > 0 && !displayContent) {
+      messageContent = attachments.map(f => `[${f.fileName}]`).join(", ");
     }
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: messageContent,
+      content: displayContent || attachments.map(f => `[${f.fileName}]`).join(", "),
       timestamp: new Date(),
       attachments,
     };

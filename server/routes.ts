@@ -2749,6 +2749,29 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
+  // Export table data to Excel/CSV
+  app.post("/api/chat/export", async (req, res) => {
+    try {
+      const { headers, rows, filename } = req.body;
+      if (!Array.isArray(headers) || !Array.isArray(rows)) {
+        return res.status(400).json({ error: "headers and rows are required arrays" });
+      }
+      const XLSX = await import("xlsx");
+      const wsData = [headers, ...rows];
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, "Data");
+      const buf: Buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+      const safeName = (filename || `export-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, "_").replace(/\.xlsx?$/i, "") + ".xlsx";
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+      res.send(buf);
+    } catch (error) {
+      console.error("Chat export error:", error);
+      res.status(500).json({ error: "Failed to export file" });
+    }
+  });
+
   // Text-to-Speech endpoint using OpenAI via AI Integrations
   app.post("/api/tts", async (req, res) => {
     try {
@@ -3144,7 +3167,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       let agentModel = agent.aiModel || "gpt-4o-mini";
       if (hasVisionContent && !agentModel.startsWith("gpt-4o")) {
-        agentModel = "gpt-4o-mini";
+        agentModel = "gpt-4o";
       }
       const temperature = Math.max(0, Math.min(2, agent.temperature ?? 0.7));
       const maxTokens = Math.max(100, Math.min(4096, agent.maxTokens ?? 1024));
