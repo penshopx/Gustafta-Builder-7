@@ -289,31 +289,47 @@ export default function Landing() {
       avatar: "BS",
       content: "Tender LPSE Assistant menghemat 2–3 hari kerja per tender. Checklist 30+ item langsung muncul, gap analysis akurat, draft dokumen tinggal edit. Tim kami bisa fokus ke strategi, bukan administrasi.",
       rating: 5,
-      tag: "Konstruksi"
+      tag: "Kontraktor"
     },
     {
-      name: "Ahmad Fadli",
-      role: "Head of Digital, Retail Company",
-      avatar: "AF",
-      content: "Chatbot WhatsApp kami menjawab 80% pertanyaan pelanggan otomatis. Tim CS bisa fokus pada kasus yang benar-benar butuh sentuhan manusia. ROI-nya luar biasa.",
+      name: "Hendra Wijaya",
+      role: "Manajer Proyek, PT Adhi Karya Regional IV",
+      avatar: "HW",
+      content: "Project Brain benar-benar game changer. Semua dokumen kontrak, spek teknis, dan regulasi PUPR tersimpan di satu tempat. Engineer lapangan tinggal tanya via WA, AI langsung jawab berdasarkan dokumen proyek kami yang sebenarnya.",
       rating: 5,
-      tag: "Retail"
+      tag: "Manajemen Proyek"
     },
     {
-      name: "Dewi Pratiwi",
-      role: "Founder, EdTech Startup",
-      avatar: "DP",
-      content: "Knowledge Base dan Mini Apps sangat powerful. Tutor AI kami menjawab berdasarkan materi kuliah yang di-upload. Mahasiswa bisa belajar 24/7 tanpa menunggu dosen.",
+      name: "Retno Ayu",
+      role: "Kepala Divisi Sertifikasi, LSP Konstruksi Nasional",
+      avatar: "RA",
+      content: "Simulasi asesmen SKKNI via AI sangat membantu peserta kami. Tanya-jawab gaya assessor BNSP, rekap kesiapan per unit kompetensi — peserta yang latihan pakai Gustafta lulus lebih konsisten dibanding yang tidak.",
       rating: 5,
-      tag: "Pendidikan"
+      tag: "Sertifikasi LSP"
     },
     {
-      name: "Rina Kusuma",
-      role: "CEO, Digital Agency Jakarta",
-      avatar: "RK",
-      content: "Kami membuat chatbot untuk 15 klien dari berbagai industri dalam 2 bulan. Setup cepat, fleksibel untuk setiap sektor, dan hasilnya konsisten di semua channel.",
+      name: "Agus Prasetyo",
+      role: "Direktur Utama, PT Graha Mandiri Consultant",
+      avatar: "AP",
+      content: "SCORECARD Win Probability 4 dimensi membantu kami memutuskan tender mana yang layak diikuti. Tidak lagi buang waktu dan biaya untuk tender yang dari awal peluangnya kecil. Win rate kami naik 40% dalam 3 bulan.",
       rating: 5,
-      tag: "Agency"
+      tag: "Konsultan MK"
+    },
+    {
+      name: "Siti Rahayu",
+      role: "Instruktur BNSP, Lembaga Pelatihan Teknik Sipil",
+      avatar: "SR",
+      content: "SKK Coach AI menemani peserta belajar mandiri di luar jam pelatihan. Bank soal adaptif, simulasi wawancara assessor, dan rekap area lemah — peserta saya lebih siap dan lebih percaya diri saat uji kompetensi.",
+      rating: 5,
+      tag: "Pelatihan SKK"
+    },
+    {
+      name: "Darmawan Halim",
+      role: "General Manager, PT Wijaya Beton Precast",
+      avatar: "DH",
+      content: "Kami integrasikan Gustafta ke seluruh workflow K3 dan mutu produksi. AI Konsultan K3 menjawab pertanyaan tim lapangan soal prosedur SMK3 dan ISO 45001 kapan pun — tanpa perlu telepon konsultan eksternal lagi.",
+      rating: 5,
+      tag: "K3 & Mutu"
     },
   ];
 
