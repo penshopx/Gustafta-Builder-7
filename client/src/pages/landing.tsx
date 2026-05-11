@@ -26,7 +26,8 @@ import {
   HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
   Brain, Blocks, Camera, Plug, ExternalLink, Wrench,
   GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
-  Package, ChevronRight, Flame, Factory, ShieldCheck, Scale, Smartphone, CreditCard
+  Package, ChevronRight, Flame, Factory, ShieldCheck, Scale, Smartphone, CreditCard,
+  Mic, Megaphone, ShoppingBag, PenLine, PieChart, Send, Repeat2, Building
 } from "lucide-react";
 
 export default function Landing() {
@@ -92,7 +93,9 @@ export default function Landing() {
         { title: "Asisten Tender LPSE", desc: "Analisis dokumen tender, checklist 30+ item, gap analysis, dan draft dokumen otomatis sesuai Perpres 46/2025." },
         { title: "Manajemen Risiko Proyek", desc: "Risk assessment otomatis, SMKK plan, identifikasi isu dari laporan harian — semua berbasis data proyek Anda." },
         { title: "Knowledge Base Tim", desc: "Pusat pengetahuan teknis yang bisa diakses seluruh tim via WhatsApp atau web — SOP, standar, prosedur kerja." },
-        { title: "Laporan & Dokumentasi", desc: "AI membantu menyusun laporan mingguan, notulen rapat, ringkasan proyek, dan dokumen teknis dalam hitungan menit." },
+        { title: "Laporan & Dokumentasi", desc: "AI menyusun laporan mingguan, notulen rapat, ringkasan proyek, dan dokumen teknis dalam hitungan menit." },
+        { title: "AI Notulis & Drafter Dokumen", desc: "Transkripsi rapat dari audio/video otomatis, draft kontrak, SPK, NDA, MoU, dan proposal teknis — siap kirim tanpa revisi manual berulang." },
+        { title: "AI Project Monitor & RAB", desc: "Pantau status proyek via chat: tanya status, minta rekap, analisis RAB, cek anggaran vs realisasi, dan alert deadline terlewat." },
       ]
     },
     berusaha: {
@@ -107,7 +110,9 @@ export default function Landing() {
         { title: "Customer Service Otomatis", desc: "Jawab 80%+ pertanyaan pelanggan secara otomatis. Tim CS bisa fokus pada kasus kompleks yang butuh sentuhan manusia." },
         { title: "Lead Generation 24/7", desc: "Chatbot menangkap prospek, kualifikasi leads, dan kirim notifikasi ke tim sales — bahkan saat bisnis sudah tutup." },
         { title: "WhatsApp Business AI", desc: "Satu chatbot untuk ribuan percakapan WhatsApp secara bersamaan. Broadcast, follow-up, dan layanan otomatis." },
-        { title: "Konsultan Tender Konstruksi", desc: "Kontraktor bisa analisis peluang tender, cek kesiapan dokumen, dan dapatkan saran strategi penawaran lewat AI." },
+        { title: "AI Konten & Copywriting", desc: "Caption Instagram/TikTok, artikel blog, script iklan, email marketing — konten siap publish dibuat AI berdasarkan produk dan target pasar Anda." },
+        { title: "AI Sales Script & Konversi", desc: "Objection handling otomatis, script closing, follow-up sequence, dan template negosiasi — dikustomisasi per segmen pembeli." },
+        { title: "AI Analis Bisnis & Keuangan", desc: "Laporan keuangan sederhana, analisis cashflow, proyeksi omset, dan alert anomali pengeluaran — tanpa perlu akuntan tambahan." },
       ]
     }
   };
@@ -737,6 +742,125 @@ export default function Landing() {
                 Paket Bimbel
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SECTION: Bekerja & Berusaha Feature Highlights ─── */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-orange-500/10 text-sm font-semibold mb-4">
+              <Briefcase className="h-4 w-4 text-emerald-500" />
+              <span className="text-emerald-600 dark:text-emerald-400">Bekerja</span>
+              <span className="text-muted-foreground mx-1">·</span>
+              <Store className="h-4 w-4 text-orange-500" />
+              <span className="text-orange-600 dark:text-orange-400">Berusaha</span>
+            </div>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">
+              AI yang <span className="text-emerald-500">Bekerja</span> &{" "}
+              <span className="text-orange-500">Berusaha</span> untuk Anda
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Dari notulis rapat otomatis dan drafter kontrak, hingga AI copywriter dan customer service 24/7 — Gustafta membekali Anda dengan tim AI yang tidak pernah tidur, tidak pernah cuti.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
+            {/* Bekerja column */}
+            <div>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <Briefcase className="h-5 w-5 text-emerald-500" />
+                </div>
+                <h3 className="font-bold text-lg">Fitur Bekerja</h3>
+                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 text-xs">Profesional</Badge>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { icon: Mic, title: "AI Notulis & Ringkas Rapat", desc: "Upload audio/video rapat → transkripsi otomatis + ringkasan eksekutif + daftar action items. Tidak ada lagi catatan yang terlewat." },
+                  { icon: PenLine, title: "AI Drafter Dokumen Legal", desc: "Draft kontrak kerja, SPK, NDA, MoU, surat resmi, dan proposal teknis — berdasarkan template industri dan regulasi terkini, siap kirim." },
+                  { icon: Target, title: "AI Project Monitor & RAB", desc: "Status proyek, alert deadline, analisis RAB, cek realisasi vs anggaran — semua bisa ditanya via chat kapan saja dari mana saja." },
+                  { icon: ShieldCheck, title: "AI Konsultan K3 & Compliance", desc: "Panduan HIRARC, audit SMK3, prosedur ISO 45001, dan checklist kepatuhan — tersedia 24/7 di lapangan tanpa perlu hubungi konsultan." },
+                  { icon: Brain, title: "AI Knowledge Base Tim", desc: "SOP, standar, regulasi, dan prosedur kerja terpusat — diakses seluruh tim via WhatsApp atau web kapan pun dibutuhkan." },
+                  { icon: PieChart, title: "AI Analis Risiko & Laporan", desc: "Risk register otomatis, rekap mingguan, ringkasan proyek 4–5 kalimat, dan identifikasi bottleneck dari laporan harian." },
+                ].map((f) => (
+                  <div key={f.title} className="flex items-start gap-3 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 dark:bg-emerald-950/20 hover:shadow-sm transition-shadow">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <f.icon className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm mb-0.5">{f.title}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5">
+                <Link href="/packs">
+                  <Button size="sm" variant="outline" className="gap-2 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-packs-bekerja">
+                    <Package className="h-3.5 w-3.5" />
+                    Paket AI Profesional
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Berusaha column */}
+            <div>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                  <Store className="h-5 w-5 text-orange-500" />
+                </div>
+                <h3 className="font-bold text-lg">Fitur Berusaha</h3>
+                <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-0 text-xs">Bisnis & UMKM</Badge>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { icon: MessageSquare, title: "AI Customer Service 24/7", desc: "Jawab 80%+ pertanyaan pelanggan otomatis via WhatsApp, web, Telegram. Tim CS fokus ke kasus kompleks yang butuh sentuhan manusia." },
+                  { icon: TrendingUp, title: "AI Lead Generation & Sales", desc: "Chatbot tangkap leads, kualifikasi prospek otomatis, kirim notifikasi tim sales, dan follow-up sesuai jadwal tanpa campur tangan manual." },
+                  { icon: Megaphone, title: "AI Konten & Copywriting", desc: "Caption Instagram/TikTok, artikel blog, script iklan, email marketing — konten berkualitas tinggi siap publish berdasarkan produk Anda." },
+                  { icon: Zap, title: "AI Sales Script & Closing", desc: "Script penjualan, objection handling, follow-up sequence, dan template closing — dikustomisasi per segmen pembeli dan jenis produk." },
+                  { icon: ShoppingBag, title: "AI Toko & E-commerce", desc: "Deskripsi produk SEO-friendly, katalog AI interaktif, rekomendasi upsell/cross-sell, dan strategi promosi berbasis data penjualan." },
+                  { icon: Repeat2, title: "AI Customer Retention", desc: "Program loyalitas otomatis, broadcast reaktivasi pelanggan lama, follow-up pasca pembelian, dan deteksi churn lebih awal." },
+                ].map((f) => (
+                  <div key={f.title} className="flex items-start gap-3 p-3.5 rounded-xl border border-orange-200 dark:border-orange-900 bg-orange-50/40 dark:bg-orange-950/20 hover:shadow-sm transition-shadow">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <f.icon className="h-4 w-4 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm mb-0.5">{f.title}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5">
+                <Link href="/packs">
+                  <Button size="sm" variant="outline" className="gap-2 border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30" data-testid="button-packs-berusaha">
+                    <Package className="h-3.5 w-3.5" />
+                    Paket AI Bisnis & UMKM
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* ROI stats */}
+          <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { value: "80%+", label: "Pertanyaan CS terjawab otomatis", color: "text-orange-500" },
+              { value: "2–3 hari", label: "Hemat per proses tender", color: "text-emerald-500" },
+              { value: "24/7", label: "AI aktif tanpa biaya lembur", color: "text-blue-500" },
+              { value: "<30 mnt", label: "Setup chatbot pertama Anda", color: "text-primary" },
+            ].map(s => (
+              <div key={s.label} className="text-center p-4 rounded-xl border bg-muted/30">
+                <div className={`text-2xl font-bold mb-1 ${s.color}`}>{s.value}</div>
+                <div className="text-xs text-muted-foreground">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
