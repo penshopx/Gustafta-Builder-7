@@ -39,6 +39,24 @@ export default function Landing() {
   const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha" | "kreator">("belajar");
   const [trialForm, setTrialForm] = useState({ name: "", phone: "", email: "", company: "", useCase: "" });
   const [trialSubmitted, setTrialSubmitted] = useState(false);
+  const [promoCountdown, setPromoCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const PROMO_DEADLINE = new Date("2026-07-01T00:00:00+07:00");
+    const tick = () => {
+      const diff = PROMO_DEADLINE.getTime() - Date.now();
+      if (diff <= 0) { setPromoCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 }); return; }
+      setPromoCountdown({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const trialMutation = useMutation({
     mutationFn: (data: typeof trialForm) => apiRequest("POST", "/api/trial-requests", data),
@@ -532,6 +550,71 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ─── PROMO COUNTDOWN BANNER ────────────────────────────────────── */}
+      {promoCountdown.days >= 0 && (
+        <section className="py-6 bg-gradient-to-r from-red-600 via-orange-600 to-red-700 text-white relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)" }} />
+          <div className="container mx-auto px-4 relative">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
+
+              {/* Label */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-center lg:justify-start gap-2 font-bold text-lg uppercase tracking-wider">
+                  <Flame className="h-5 w-5 animate-bounce" />
+                  HARGA PROMO PAKET BISNIS — BERAKHIR SEGERA
+                </div>
+                <p className="text-white/85 text-sm">
+                  Harga naik <strong>2× per 1 Juli 2026</strong> · naik <strong>3× per 1 September 2026</strong>
+                </p>
+              </div>
+
+              {/* Countdown timer */}
+              <div className="flex gap-2 items-center">
+                {[
+                  { val: promoCountdown.days, label: "Hari" },
+                  { val: promoCountdown.hours, label: "Jam" },
+                  { val: promoCountdown.minutes, label: "Menit" },
+                  { val: promoCountdown.seconds, label: "Detik" },
+                ].map(({ val, label }, i) => (
+                  <div key={label} className="flex items-center gap-2">
+                    {i > 0 && <span className="text-white/60 text-xl font-bold">:</span>}
+                    <div className="text-center">
+                      <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl font-bold tabular-nums border border-white/20">
+                        {String(val).padStart(2, "0")}
+                      </div>
+                      <div className="text-[10px] mt-1 text-white/70 uppercase">{label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Price comparison + CTA */}
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center gap-3">
+                  <div>
+                    <div className="text-[10px] text-white/60 uppercase">Harga Sekarang</div>
+                    <div className="text-2xl font-bold">Rp 999rb<span className="text-sm font-normal">/bln</span></div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-white/50 shrink-0" />
+                  <div>
+                    <div className="text-[10px] text-white/60 uppercase">Setelah 1 Juli</div>
+                    <div className="text-xl font-bold line-through text-white/50">Rp 1,99jt<span className="text-xs">/bln</span></div>
+                  </div>
+                </div>
+                <Link href="/onboarding">
+                  <Button size="sm" className="bg-white text-red-600 hover:bg-white/90 gap-2 font-bold shadow-lg">
+                    <Rocket className="h-4 w-4" />
+                    Beli Sekarang (Promo)
+                  </Button>
+                </Link>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      )}
+      {/* ─────────────────────────────────────────────────────────────────── */}
 
       {/* ─── SECTION: 3 Persona Tabs ── */}
       <section className="py-16 md:py-24 bg-muted/20" id="persona">

@@ -2763,6 +2763,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
+  // In-memory monthly message usage tracker for platform owners (resets on server restart or new month)
+  const ownerMonthlyUsage = new Map<string, { month: string; count: number }>();
+
   // Streaming message endpoint for real-time AI responses
   app.post("/api/messages/stream", async (req, res) => {
     try {
@@ -2776,6 +2779,36 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
+
+      // ── Platform-owner monthly quota check ──────────────────────────────
+      // Authenticated dashboard users (platform owners) are subject to their
+      // Gustafta Apps subscription plan's maxMessagesPerMonth limit.
+      if ((req as any).isAuthenticated?.()) {
+        const ownerId = (req as any).user?.claims?.sub;
+        if (ownerId) {
+          const { resolvePlan } = await import("../../shared/feature-plans");
+          const subscription = await storage.getActiveSubscription(ownerId);
+          const plan = resolvePlan(subscription?.plan, subscription?.status === "active");
+          const limit = plan.maxMessagesPerMonth; // -1 = unlimited
+          if (limit > 0) {
+            const monthKey = new Date().toISOString().slice(0, 7); // "2026-05"
+            const current = ownerMonthlyUsage.get(ownerId);
+            const used = current?.month === monthKey ? current.count : 0;
+            if (used >= limit) {
+              return res.status(429).json({
+                error: `Kuota pesan bulanan Anda (${limit.toLocaleString("id-ID")} pesan) sudah habis. Upgrade paket untuk melanjutkan.`,
+                reason: "owner_quota_exceeded",
+                limit,
+                used,
+                plan: subscription?.plan ?? "free",
+                upgradeUrl: "/onboarding",
+              });
+            }
+            ownerMonthlyUsage.set(ownerId, { month: monthKey, count: used + 1 });
+          }
+        }
+      }
+      // ────────────────────────────────────────────────────────────────────
 
       // Server-side access control for monetized chatbots
       const clientAccessToken = req.headers["x-client-token"] as string || req.body.clientToken;

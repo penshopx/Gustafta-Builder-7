@@ -196,7 +196,7 @@ export function meetsMinPlan(userPlan: PlanTier, requiredPlan: PlanTier): boolea
 export const FEATURE_LABELS: Record<FeatureKey, { name: string; description: string; icon: string }> = {
   chatbot: { name: "AI Chatbot", description: "Chatbot AI cerdas berbasis LLM", icon: "MessageSquare" },
   modul_pembelajaran: { name: "Modul Pembelajaran", description: "Belajar terstruktur & interaktif", icon: "BookOpen" },
-  mini_apps: { name: "Mini Apps", description: "33+ tools produktivitas siap pakai", icon: "Blocks" },
+  mini_apps: { name: "Mini Apps", description: "45 tools produktivitas siap pakai", icon: "Blocks" },
   ecourse: { name: "E-Course", description: "Kursus digital yang bisa dijual", icon: "PlaySquare" },
   doc_generator: { name: "Document Generator", description: "Otomatisasi pembuatan dokumen", icon: "FileText" },
   podcast: { name: "Podcast", description: "Kelola konten audio", icon: "Mic" },

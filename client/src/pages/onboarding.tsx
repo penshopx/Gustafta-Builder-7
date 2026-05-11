@@ -15,7 +15,7 @@ import { queryClient } from "@/lib/queryClient";
 import {
   Check, X, ArrowRight, Rocket, Bot, Zap, Building2, Crown,
   Phone, MessageSquare, BookOpen, Blocks, PlaySquare, FileText,
-  Mic, Globe, Shield, Headphones, Star, CheckCircle2, Lock
+  Mic, Globe, Shield, Headphones, Star, CheckCircle2, Lock, Flame, Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -204,7 +204,11 @@ export default function OnboardingPage() {
                 onClick={() => setSelected(planKey)}
                 className={cn(
                   "relative rounded-2xl border-2 cursor-pointer transition-all",
-                  isSelected
+                  planKey === "bisnis"
+                    ? isSelected
+                      ? "border-red-500 shadow-xl shadow-red-500/20 scale-[1.02]"
+                      : "border-red-500/40 hover:border-red-500/70"
+                    : isSelected
                     ? "border-primary shadow-xl shadow-primary/10 scale-[1.02]"
                     : "border-border hover:border-primary/40"
                 )}
@@ -214,6 +218,13 @@ export default function OnboardingPage() {
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground px-4 text-xs gap-1">
                       <Star className="h-3 w-3" /> Paling Populer
+                    </Badge>
+                  </div>
+                )}
+                {planKey === "bisnis" && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-red-500 text-white px-3 text-xs gap-1 whitespace-nowrap">
+                      <Flame className="h-3 w-3" /> PROMO · Harga Naik 1 Juli
                     </Badge>
                   </div>
                 )}
@@ -244,11 +255,17 @@ export default function OnboardingPage() {
                         {planKey === "enterprise" ? "Negosiasi" : formatPrice(plan.setupFee)}
                       </div>
                     </div>
-                    <div className="rounded-lg bg-muted/60 p-3">
+                    <div className={cn("rounded-lg p-3", planKey === "bisnis" ? "bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900" : "bg-muted/60")}>
                       <div className="text-xs text-muted-foreground mb-0.5">Bulanan</div>
-                      <div className="font-bold" style={{ color: plan.color }}>
+                      <div className="font-bold" style={{ color: planKey === "bisnis" ? "#ef4444" : plan.color }}>
                         {planKey === "enterprise" ? "Custom" : formatPrice(plan.monthlyFee) + "/bln"}
                       </div>
+                      {planKey === "bisnis" && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Flame className="h-3 w-3 text-red-500 shrink-0" />
+                          <span className="text-[10px] text-red-500 font-medium">Naik → Rp 1,99jt/bln per 1 Jul</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
