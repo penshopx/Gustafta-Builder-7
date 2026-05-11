@@ -7208,6 +7208,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
         guestMessageLimit: agent.guestMessageLimit ?? 10,
         communicationStyle: agent.communicationStyle || "friendly",
         toneOfVoice: agent.toneOfVoice || "professional",
+        responseStyle: (agent as any).responseStyle || "balanced",
         language: agent.language || "id",
         contextQuestions: agent.contextQuestions || [],
         metaPixelId: agent.metaPixelId || "",

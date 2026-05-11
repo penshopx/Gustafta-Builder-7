@@ -102,7 +102,8 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     isPublic: agent.isPublic || false,
     allowedDomains: agent.allowedDomains || [],
     contextQuestions: (agent as any).contextQuestions || [],
-    responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced",
+    responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced" | "custom",
+    customResponseStyle: (agent as any).customResponseStyle || "",
   });
 
   const [newStarter, setNewStarter] = useState("");
@@ -147,7 +148,8 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       isPublic: agent.isPublic || false,
       allowedDomains: agent.allowedDomains || [],
       contextQuestions: (agent as any).contextQuestions || [],
-      responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced",
+      responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced" | "custom",
+      customResponseStyle: (agent as any).customResponseStyle || "",
     });
     setLexcomApplied(false);
     setAppliedAgentSources([]);
@@ -1162,7 +1164,63 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
                 )}
               </button>
             ))}
+
+            {/* 4th card: Custom */}
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({ ...formData, responseStyle: "custom" });
+                autoSaveField("responseStyle", "custom");
+              }}
+              className={`text-left p-4 rounded-xl border-2 transition-all hover:shadow-md col-span-full sm:col-span-1 ${
+                formData.responseStyle === "custom"
+                  ? "border-emerald-500 ring-2 ring-emerald-300 dark:ring-emerald-700 bg-emerald-50 dark:bg-emerald-950/30"
+                  : "border-border bg-background hover:border-muted-foreground/30"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">🎨</span>
+                <div>
+                  <div className={`font-semibold text-sm ${formData.responseStyle === "custom" ? "text-emerald-800 dark:text-emerald-300" : "text-foreground"}`}>
+                    Kustom
+                  </div>
+                  <div className={`text-[10px] font-medium px-1.5 py-0.5 rounded inline-block mt-0.5 ${formData.responseStyle === "custom" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}>
+                    Tulis sendiri
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed mb-2">Definisikan panduan gaya respons sepenuhnya sesuai kebutuhan chatbot kamu</p>
+              {formData.responseStyle === "custom" && (
+                <div className="mt-2 text-[10px] font-semibold flex items-center gap-1 text-emerald-700 dark:text-emerald-300">
+                  <CheckCircle2 className="w-3 h-3" /> Aktif
+                </div>
+              )}
+            </button>
           </div>
+
+          {/* Custom style textarea — shown when "custom" is active */}
+          {formData.responseStyle === "custom" && (
+            <div className="mt-4 space-y-2">
+              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <span>🎨</span> Panduan Gaya Kustom
+              </label>
+              <textarea
+                className="w-full min-h-[120px] rounded-lg border border-border bg-background p-3 text-xs resize-y placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 transition-colors"
+                placeholder={"Contoh panduan gaya kustom:\n- Gunakan nada formal namun ramah, hindari jargon teknis berlebihan\n- Selalu awali jawaban dengan ringkasan 1 kalimat, lalu elaborasi detail\n- Gunakan analogi dari dunia konstruksi untuk menjelaskan konsep abstrak\n- Tutup setiap jawaban dengan 1 pertanyaan klarifikasi yang relevan"}
+                value={formData.customResponseStyle}
+                onChange={(e) => {
+                  setFormData({ ...formData, customResponseStyle: e.target.value });
+                }}
+                onBlur={() => {
+                  autoSaveField("customResponseStyle", formData.customResponseStyle);
+                }}
+              />
+              <p className="text-[10px] text-muted-foreground">
+                Instruksi ini disuntikkan langsung ke awal system prompt sebagai panduan gaya. Simpan otomatis saat kamu pindah fokus dari kolom ini.
+              </p>
+            </div>
+          )}
+
           <p className="text-[11px] text-muted-foreground mt-3">
             Gaya respons disuntikkan ke awal system prompt — chatbot akan mempertahankan gaya ini di semua percakapan. Dapat dikombinasikan dengan System Prompt dan 7 Kebijakan Agen.
           </p>

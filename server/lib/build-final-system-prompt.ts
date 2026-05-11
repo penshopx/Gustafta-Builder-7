@@ -21,6 +21,7 @@ type AgentForPrompt = Agent & {
   reasoningPolicy?: string | null;
   executionGatePolicy?: string | null;
   responseStyle?: string | null;
+  customResponseStyle?: string | null;
 };
 
 // ── Response Style Injectors ─────────────────────────────────────────────────
@@ -78,7 +79,12 @@ export function buildFinalSystemPrompt(agent: AgentForPrompt): string {
 
   // === RESPONSE STYLE (injected first so it shapes all subsequent behavior) ===
   const responseStyle = (agent.responseStyle ?? "balanced").trim();
-  if (responseStyle && responseStyle !== "balanced" && RESPONSE_STYLE_PROMPTS[responseStyle]) {
+  if (responseStyle === "custom") {
+    const customStyle = (agent.customResponseStyle ?? "").trim();
+    if (customStyle) {
+      sections.push(`=== GAYA RESPONS KUSTOM ===\n${customStyle}\n\nIkuti panduan gaya di atas secara konsisten untuk setiap respons.`);
+    }
+  } else if (responseStyle && responseStyle !== "balanced" && RESPONSE_STYLE_PROMPTS[responseStyle]) {
     sections.push(RESPONSE_STYLE_PROMPTS[responseStyle]);
   }
 

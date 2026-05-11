@@ -67,6 +67,7 @@ interface AgentConfig {
   guestMessageLimit: number;
   communicationStyle: string;
   toneOfVoice: string;
+  responseStyle: string;
   language: string;
   contextQuestions?: ContextQuestion[];
   metaPixelId?: string;
@@ -102,29 +103,70 @@ function trackMetaEvent(eventName: string, params?: Record<string, any>) {
 
 // ── Slash Commands (Notion AI / gpai.app style) ─────────────────────────────
 const SLASH_COMMANDS = [
-  { cmd: "/hitung", emoji: "🔢", label: "Hitung Langkah", desc: "Kalkulasi teknik step-by-step dengan rumus", prefix: "Selesaikan perhitungan teknik berikut secara langkah demi langkah:\n\n**Diketahui:** (sebutkan data)\n**Ditanya:** (sebutkan yang dicari)\n**Penyelesaian:** (uraikan langkah dengan rumus)\n**Hasil:** (nyatakan hasil dengan satuan dan verifikasi)\n\nSoal:\n" },
-  { cmd: "/rab", emoji: "💰", label: "Buat RAB", desc: "Rencana Anggaran Biaya detail", prefix: "Buat Rencana Anggaran Biaya (RAB) yang detail dan lengkap untuk:\n\n" },
-  { cmd: "/laporan", emoji: "📄", label: "Buat Laporan", desc: "Laporan teknis formal", prefix: "Buat laporan teknis formal yang komprehensif, terstruktur, dan siap pakai untuk:\n\n" },
-  { cmd: "/spek", emoji: "📐", label: "Spesifikasi Teknis", desc: "Spek teknis / method statement", prefix: "Buat spesifikasi teknis lengkap dan method statement untuk:\n\n" },
-  { cmd: "/checklist", emoji: "✅", label: "Buat Checklist", desc: "Daftar periksa sistematis", prefix: "Buat checklist lengkap dan sistematis untuk:\n\n" },
-  { cmd: "/analisis", emoji: "🔍", label: "Analisis", desc: "Analisis mendalam & komprehensif", prefix: "Lakukan analisis mendalam dan komprehensif untuk:\n\n" },
-  { cmd: "/ringkas", emoji: "📋", label: "Ringkas", desc: "Ringkasan poin utama", prefix: "Ringkas berikut dalam 5 poin utama yang paling penting:\n\n" },
-  { cmd: "/surat", emoji: "✉️", label: "Buat Surat", desc: "Surat / memo formal profesional", prefix: "Buat surat/memo formal yang profesional untuk:\n\n" },
-  { cmd: "/tabel", emoji: "📊", label: "Buat Tabel", desc: "Data dalam format tabel", prefix: "Sajikan data berikut dalam format tabel yang lengkap dan informatif:\n\n" },
-  { cmd: "/bandingkan", emoji: "⚖️", label: "Bandingkan", desc: "Perbandingan dua atau lebih opsi", prefix: "Buat perbandingan detail antara opsi-opsi berikut dalam format tabel:\n\n" },
+  // 🔢 Teknis
+  { group: "Teknis", cmd: "/hitung", emoji: "🔢", label: "Hitung Langkah", desc: "Kalkulasi teknik step-by-step dengan rumus", prefix: "Selesaikan perhitungan teknik berikut secara langkah demi langkah:\n\n**Diketahui:** (sebutkan data)\n**Ditanya:** (sebutkan yang dicari)\n**Penyelesaian:** (uraikan langkah dengan rumus)\n**Hasil:** (nyatakan hasil dengan satuan dan verifikasi)\n\nSoal:\n" },
+  { group: "Teknis", cmd: "/rab", emoji: "💰", label: "Buat RAB", desc: "Rencana Anggaran Biaya detail", prefix: "Buat Rencana Anggaran Biaya (RAB) yang detail dan lengkap, termasuk volume, satuan, harga satuan, dan total untuk:\n\n" },
+  { group: "Teknis", cmd: "/spek", emoji: "📐", label: "Spesifikasi Teknis", desc: "Spek teknis / method statement", prefix: "Buat spesifikasi teknis lengkap dan method statement untuk:\n\n" },
+  { group: "Teknis", cmd: "/k3", emoji: "⚠️", label: "Analisis K3", desc: "Hazard identification & risk assessment", prefix: "Lakukan Hazard Identification and Risk Assessment (HIRA) untuk:\n\n**Aktivitas:** \n**Identifikasi Bahaya:** \n**Penilaian Risiko (Likelihood × Severity):** \n**Pengendalian Risiko (Hierarchy of Control):** \n\nAktivitas yang dianalisis:\n" },
+  { group: "Teknis", cmd: "/ahsp", emoji: "💹", label: "Harga Satuan", desc: "Analisis Harga Satuan Pekerjaan", prefix: "Buat Analisis Harga Satuan Pekerjaan (AHSP) yang detail untuk:\n\nPekerjaan:\n" },
+  { group: "Teknis", cmd: "/risiko", emoji: "🎯", label: "Register Risiko", desc: "Risk register proyek", prefix: "Buat Risk Register lengkap dalam format tabel dengan kolom: ID Risiko | Deskripsi | Kategori | Likelihood (1-5) | Impact (1-5) | Risk Score | Status | Mitigasi | PIC untuk:\n\nProyek/Kegiatan:\n" },
+  // 📝 Dokumen
+  { group: "Dokumen", cmd: "/laporan", emoji: "📄", label: "Buat Laporan", desc: "Laporan teknis formal", prefix: "Buat laporan teknis formal yang komprehensif, terstruktur, dan siap pakai untuk:\n\n" },
+  { group: "Dokumen", cmd: "/surat", emoji: "✉️", label: "Buat Surat", desc: "Surat / memo formal profesional", prefix: "Buat surat/memo formal yang profesional untuk:\n\n" },
+  { group: "Dokumen", cmd: "/kontrak", emoji: "📑", label: "Draf Kontrak", desc: "Kontrak / SPK / perjanjian", prefix: "Draf kontrak/SPK/perjanjian yang lengkap dan profesional untuk:\n\nPara Pihak: \nRuang Lingkup Pekerjaan: \nNilai Kontrak: \nJangka Waktu: \n\nJenis dokumen yang diminta:\n" },
+  { group: "Dokumen", cmd: "/berita", emoji: "📋", label: "Berita Acara", desc: "Berita acara formal", prefix: "Buat berita acara formal yang lengkap dan sah untuk:\n\nJenis Berita Acara: \nTanggal: \nLokasi: \nPara Pihak: \n\nKejadian/kegiatan yang didokumentasikan:\n" },
+  { group: "Dokumen", cmd: "/notulensi", emoji: "🗒️", label: "Notulensi Rapat", desc: "Notulensi rapat resmi", prefix: "Buat notulensi rapat yang lengkap dan terstruktur untuk:\n\nNama Rapat: \nTanggal & Waktu: \nPeserta: \nAgenda: \n\nPoin-poin pembahasan:\n" },
+  { group: "Dokumen", cmd: "/tender", emoji: "🏗️", label: "Dokumen Tender", desc: "Dokumen penawaran tender", prefix: "Bantu siapkan dokumen penawaran tender yang kompetitif dan lengkap untuk:\n\nNama Paket: \nPemilik Proyek: \nNilai HPS: \n\nKomponen yang dibutuhkan:\n" },
+  // 💡 Analisis
+  { group: "Analisis", cmd: "/analisis", emoji: "🔍", label: "Analisis", desc: "Analisis mendalam & komprehensif", prefix: "Lakukan analisis mendalam dan komprehensif untuk:\n\n" },
+  { group: "Analisis", cmd: "/ringkas", emoji: "📋", label: "Ringkas", desc: "Ringkasan poin utama", prefix: "Ringkas berikut dalam 5 poin utama yang paling penting:\n\n" },
+  { group: "Analisis", cmd: "/tabel", emoji: "📊", label: "Buat Tabel", desc: "Data dalam format tabel", prefix: "Sajikan data berikut dalam format tabel yang lengkap dan informatif:\n\n" },
+  { group: "Analisis", cmd: "/bandingkan", emoji: "⚖️", label: "Bandingkan", desc: "Perbandingan dua atau lebih opsi", prefix: "Buat perbandingan detail antara opsi-opsi berikut dalam format tabel:\n\n" },
+  { group: "Analisis", cmd: "/simulasi", emoji: "🔮", label: "Simulasi Skenario", desc: "Analisis skenario what-if", prefix: "Lakukan simulasi dan analisis skenario what-if untuk:\n\n**Skenario Optimis:** \n**Skenario Moderat:** \n**Skenario Pesimis:** \n\nKonteks/situasi:\n" },
+  // ✅ Aksi
+  { group: "Aksi", cmd: "/checklist", emoji: "✅", label: "Buat Checklist", desc: "Daftar periksa sistematis", prefix: "Buat checklist lengkap dan sistematis untuk:\n\n" },
 ];
 
 // ── Quick Actions (Notion AI style) ─────────────────────────────────────────
 const QUICK_ACTIONS = [
-  { emoji: "📋", label: "Ringkas", prompt: "Ringkas jawaban di atas dalam 3-5 poin kunci yang paling penting, dalam format bullet point yang jelas." },
-  { emoji: "📄", label: "Buat Dokumen", prompt: "Konversi jawaban di atas menjadi dokumen/laporan formal siap pakai dengan heading, sub-heading, dan format profesional yang rapi." },
-  { emoji: "✅", label: "Rencana Aksi", prompt: "Ekstrak semua rencana aksi (action items) dan langkah konkret yang perlu dilakukan dari jawaban di atas. Format sebagai checklist bernomor yang actionable." },
-  { emoji: "🔢", label: "Uraikan Perhitungan", prompt: "Tampilkan semua perhitungan dari jawaban di atas langkah demi langkah dengan format:\n1. Data yang diketahui (dengan satuan)\n2. Rumus yang digunakan\n3. Substitusi nilai\n4. Hasil lengkap dengan satuan\n5. Verifikasi kewajaran hasil" },
-  { emoji: "📊", label: "Buat Tabel", prompt: "Konversi informasi utama dari jawaban di atas menjadi tabel yang terstruktur dan mudah dibaca." },
-  { emoji: "⬆️", label: "Perluas", prompt: "Perluas dan elaborasi jawaban di atas dengan lebih banyak detail teknis, contoh konkret, referensi standar/regulasi terkait, dan rekomendasi praktis." },
-  { emoji: "✂️", label: "Persingkat", prompt: "Persingkat jawaban di atas menjadi 2-3 kalimat inti yang paling penting dan berdampak." },
-  { emoji: "🌐", label: "Terjemahkan EN", prompt: "Terjemahkan jawaban di atas ke Bahasa Inggris teknis yang formal dan profesional." },
+  { key: "ringkas",       emoji: "📋", label: "Ringkas",            prompt: "Ringkas jawaban di atas dalam 3-5 poin kunci yang paling penting, dalam format bullet point yang jelas." },
+  { key: "dokumen",       emoji: "📄", label: "Buat Dokumen",       prompt: "Konversi jawaban di atas menjadi dokumen/laporan formal siap pakai dengan heading, sub-heading, dan format profesional yang rapi." },
+  { key: "aksi",          emoji: "✅", label: "Rencana Aksi",       prompt: "Ekstrak semua rencana aksi (action items) dan langkah konkret yang perlu dilakukan dari jawaban di atas. Format sebagai checklist bernomor yang actionable." },
+  { key: "hitung",        emoji: "🔢", label: "Uraikan Perhitungan", prompt: "Tampilkan semua perhitungan dari jawaban di atas langkah demi langkah dengan format:\n1. Data yang diketahui (dengan satuan)\n2. Rumus yang digunakan\n3. Substitusi nilai\n4. Hasil lengkap dengan satuan\n5. Verifikasi kewajaran hasil" },
+  { key: "tabel",         emoji: "📊", label: "Buat Tabel",         prompt: "Konversi informasi utama dari jawaban di atas menjadi tabel yang terstruktur dan mudah dibaca." },
+  { key: "perluas",       emoji: "⬆️", label: "Perluas",            prompt: "Perluas dan elaborasi jawaban di atas dengan lebih banyak detail teknis, contoh konkret, referensi standar/regulasi terkait, dan rekomendasi praktis." },
+  { key: "persingkat",    emoji: "✂️", label: "Persingkat",         prompt: "Persingkat jawaban di atas menjadi 2-3 kalimat inti yang paling penting dan berdampak." },
+  { key: "terjemah",      emoji: "🌐", label: "Terjemahkan EN",     prompt: "Terjemahkan jawaban di atas ke Bahasa Inggris teknis yang formal dan profesional." },
 ];
+
+// Context-aware Quick Action scoring — promote relevant actions based on last AI message content
+function getContextualQuickActions(lastContent: string) {
+  if (!lastContent) return QUICK_ACTIONS;
+  const c = lastContent;
+  const scores: Record<string, number> = {};
+  // Math / engineering calculation detected
+  if (/\d[\s]*[×÷=]\s*\d|kN|MPa|m²|m³|kg\/|N\/m|kPa|\$\$|\\frac|σ|τ|ε|Δ/.test(c) || c.includes("**Diketahui") || c.includes("**Penyelesaian")) {
+    scores["hitung"] = 10;
+  }
+  // Very long response → prioritize summarize
+  if (c.length > 800) scores["ringkas"] = (scores["ringkas"] || 0) + 8;
+  // Has a markdown table → promote Buat Tabel (expand it) or Buat Dokumen
+  if (c.split("\n").filter(l => l.includes("|")).length >= 3) {
+    scores["dokumen"] = (scores["dokumen"] || 0) + 5;
+  }
+  // Contains action items / steps / checklist
+  if (/langkah|step|checklist|\[ \]|☐|①|②|③|^\d+\./m.test(c)) {
+    scores["aksi"] = (scores["aksi"] || 0) + 7;
+  }
+  // Comparison / multiple options
+  if (/dibandingkan|versus|vs\.|perbandingan|opsi|alternatif|pilihan/i.test(c)) {
+    scores["tabel"] = (scores["tabel"] || 0) + 6;
+  }
+  // Short response → promote expand
+  if (c.length < 300) scores["perluas"] = (scores["perluas"] || 0) + 5;
+
+  return [...QUICK_ACTIONS].sort((a, b) => (scores[b.key] || 0) - (scores[a.key] || 0));
+}
 
 // Renderer markdown chat dipindah ke @/lib/format-message (impor di atas).
 function formatMessageContent(text: string) {
@@ -1888,6 +1930,11 @@ export default function AgentChat() {
                         {styleLabels[config.toneOfVoice] || config.toneOfVoice}
                       </Badge>
                     )}
+                    {config.responseStyle && config.responseStyle !== "balanced" && (
+                      <Badge variant="secondary" className="bg-white/15 text-white/90 border-0 text-[10px] sm:text-xs no-default-hover-elevate no-default-active-elevate">
+                        {config.responseStyle === "creative" ? "✨ Kreatif" : config.responseStyle === "structured" ? "📋 Terstruktur" : "🎨 Kustom"}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2284,53 +2331,97 @@ export default function AgentChat() {
                 </div>
               )}
 
-              {!isTyping && showQuickActions && messages.some(m => m.role === "assistant") && (
-                <div className="pt-2 space-y-2">
-                  {/* Follow-up suggestions from AI */}
-                  {followUpSuggestions.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {followUpSuggestions.map((suggestion, idx) => (
-                        <Button
-                          key={idx}
-                          variant="outline"
-                          size="sm"
-                          className="text-[11px] sm:text-xs"
-                          onClick={() => {
-                            setFollowUpSuggestions([]);
-                            setShowQuickActions(false);
-                            sendMessage(suggestion);
-                          }}
-                        >
-                          {suggestion}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                  {/* Quick Actions Panel (Notion AI / gpai style) */}
-                  <div className="rounded-xl border border-border/60 bg-muted/30 p-2">
-                    <div className="flex items-center gap-1.5 mb-2 px-1">
-                      <Wand2 className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Aksi Cepat</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {QUICK_ACTIONS.map((action, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setShowQuickActions(false);
-                            setFollowUpSuggestions([]);
-                            sendMessage(action.prompt);
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] bg-background border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors text-foreground/80 hover:text-foreground"
-                        >
-                          <span>{action.emoji}</span>
-                          <span className="font-medium">{action.label}</span>
-                        </button>
-                      ))}
+              {!isTyping && showQuickActions && messages.some(m => m.role === "assistant") && (() => {
+                const lastAI = [...messages].reverse().find(m => m.role === "assistant");
+                const lastUser = [...messages].reverse().find(m => m.role === "user");
+                const contextualActions = getContextualQuickActions(lastAI?.content || "");
+                return (
+                  <div className="pt-2 space-y-2">
+                    {/* Follow-up suggestions from AI */}
+                    {followUpSuggestions.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {followUpSuggestions.map((suggestion, idx) => (
+                          <Button
+                            key={idx}
+                            variant="outline"
+                            size="sm"
+                            className="text-[11px] sm:text-xs"
+                            onClick={() => {
+                              setFollowUpSuggestions([]);
+                              setShowQuickActions(false);
+                              sendMessage(suggestion);
+                            }}
+                          >
+                            {suggestion}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                    {/* Quick Actions Panel (Notion AI / gpai style) */}
+                    <div className="rounded-xl border border-border/60 bg-muted/30 p-2.5">
+                      <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                        <Wand2 className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Aksi Cepat</span>
+                        <div className="ml-auto flex items-center gap-1">
+                          {/* Copy last response */}
+                          <button
+                            onClick={async () => {
+                              if (lastAI?.content) {
+                                await navigator.clipboard.writeText(lastAI.content);
+                              }
+                            }}
+                            title="Salin jawaban terakhir"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-background border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground hover:text-foreground"
+                          >
+                            <Copy className="w-2.5 h-2.5" />
+                            Salin
+                          </button>
+                          {/* Regenerate */}
+                          {lastUser && (
+                            <button
+                              onClick={() => {
+                                setShowQuickActions(false);
+                                setFollowUpSuggestions([]);
+                                setMessages(prev => {
+                                  const lastAIIdx = [...prev].map((m, i) => ({ m, i })).reverse().find(x => x.m.role === "assistant")?.i;
+                                  return lastAIIdx !== undefined ? prev.slice(0, lastAIIdx) : prev;
+                                });
+                                setTimeout(() => sendMessage(lastUser.content), 50);
+                              }}
+                              title="Coba lagi jawaban berbeda"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-background border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground hover:text-foreground"
+                            >
+                              <CornerDownLeft className="w-2.5 h-2.5" />
+                              Ulang
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {contextualActions.map((action, idx) => (
+                          <button
+                            key={action.key}
+                            onClick={() => {
+                              setShowQuickActions(false);
+                              setFollowUpSuggestions([]);
+                              sendMessage(action.prompt);
+                            }}
+                            className={cn(
+                              "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] border transition-colors text-foreground/80 hover:text-foreground",
+                              idx === 0
+                                ? "bg-primary/8 border-primary/30 hover:bg-primary/15 hover:border-primary/50 font-semibold"
+                                : "bg-background border-border hover:border-primary/40 hover:bg-primary/5"
+                            )}
+                          >
+                            <span>{action.emoji}</span>
+                            <span className="font-medium">{action.label}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         )}
@@ -2470,34 +2561,74 @@ export default function AgentChat() {
           {showSlashMenu && (() => {
             const filtered = getFilteredSlashCommands();
             if (!filtered.length) return null;
+            const isSearching = input.length > 1;
+            // Group commands by category when showing all
+            const grouped = isSearching ? null : filtered.reduce((acc, cmd) => {
+              const g = cmd.group || "Lainnya";
+              if (!acc[g]) acc[g] = [];
+              acc[g].push(cmd);
+              return acc;
+            }, {} as Record<string, typeof filtered>);
+            const groupEmoji: Record<string, string> = { Teknis: "🔢", Dokumen: "📝", Analisis: "💡", Aksi: "✅" };
+            let globalIdx = 0;
             return (
               <div className="max-w-2xl mx-auto mb-2">
-                <div className="rounded-xl border border-border shadow-lg bg-popover overflow-hidden">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 border-b border-border">
+                <div className="rounded-xl border border-border shadow-lg bg-popover overflow-hidden max-h-72 overflow-y-auto">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 border-b border-border sticky top-0">
                     <Hash className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Perintah Cepat</span>
-                    <span className="ml-auto text-[10px] text-muted-foreground">↑↓ pilih · Enter pakai · Esc tutup</span>
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
+                      {isSearching ? `${filtered.length} perintah ditemukan` : `${filtered.length} Perintah Cepat`}
+                    </span>
+                    <span className="ml-auto text-[10px] text-muted-foreground">↑↓ · Enter · Esc</span>
                   </div>
-                  {filtered.map((cmd, idx) => (
-                    <button
-                      key={cmd.cmd}
-                      onClick={() => applySlashCommand(cmd)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-muted/70 transition-colors",
-                        idx === slashMenuIdx && "bg-muted/70"
-                      )}
-                    >
-                      <span className="text-base shrink-0">{cmd.emoji}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-foreground">{cmd.label}</span>
-                          <code className="text-[10px] text-muted-foreground font-mono">{cmd.cmd}</code>
+                  {isSearching ? (
+                    filtered.map((cmd, idx) => (
+                      <button
+                        key={cmd.cmd}
+                        onClick={() => applySlashCommand(cmd)}
+                        className={cn("w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-muted/70 transition-colors", idx === slashMenuIdx && "bg-muted/70")}
+                      >
+                        <span className="text-base shrink-0">{cmd.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-foreground">{cmd.label}</span>
+                            <code className="text-[10px] text-muted-foreground font-mono">{cmd.cmd}</code>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground truncate">{cmd.desc}</p>
                         </div>
-                        <p className="text-[11px] text-muted-foreground truncate">{cmd.desc}</p>
+                        <CornerDownLeft className="w-3 h-3 text-muted-foreground shrink-0" />
+                      </button>
+                    ))
+                  ) : (
+                    Object.entries(grouped!).map(([groupName, cmds]) => (
+                      <div key={groupName}>
+                        <div className="px-3 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30 border-b border-border/40 flex items-center gap-1.5">
+                          <span>{groupEmoji[groupName] || "📁"}</span>
+                          <span>{groupName}</span>
+                        </div>
+                        {cmds.map((cmd) => {
+                          const localIdx = globalIdx++;
+                          return (
+                            <button
+                              key={cmd.cmd}
+                              onClick={() => applySlashCommand(cmd)}
+                              className={cn("w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-muted/70 transition-colors", localIdx === slashMenuIdx && "bg-muted/70")}
+                            >
+                              <span className="text-base shrink-0">{cmd.emoji}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-semibold text-foreground">{cmd.label}</span>
+                                  <code className="text-[10px] text-muted-foreground font-mono">{cmd.cmd}</code>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground truncate">{cmd.desc}</p>
+                              </div>
+                              <CornerDownLeft className="w-3 h-3 text-muted-foreground shrink-0" />
+                            </button>
+                          );
+                        })}
                       </div>
-                      <CornerDownLeft className="w-3 h-3 text-muted-foreground shrink-0" />
-                    </button>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             );
