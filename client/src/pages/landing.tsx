@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
 import { useTemplates } from "@/hooks/use-templates";
-import { trackLead, trackViewContent } from "@/hooks/use-meta-pixel";
+import { trackLead, trackViewContent, trackContact, trackInitiateCheckout, trackCustomEvent } from "@/hooks/use-meta-pixel";
 import { ChatPopup } from "@/components/chat-popup";
 import { SharedHeader } from "@/components/shared-header";
 import { TemplateShowcase } from "@/components/template-showcase";
@@ -83,6 +83,24 @@ export default function Landing() {
 
   const handlePricingClick = () => {
     trackViewContent({ content_name: 'Pricing Page', content_category: 'Pricing' });
+  };
+
+  const handleWAClick = (source: string) => {
+    trackContact();
+    trackCustomEvent('WhatsApp_Click', { source });
+  };
+
+  const handlePacksClick = () => {
+    trackInitiateCheckout({ content_name: 'Packs Page', value: 999000, currency: 'IDR' });
+  };
+
+  const handleOnboardingClick = () => {
+    trackInitiateCheckout({ content_name: 'Onboarding Subscribe', value: 999000, currency: 'IDR' });
+  };
+
+  const handleTenderClick = () => {
+    trackCustomEvent('Tender_CTA_Click', { source: 'Landing' });
+    trackLead({ content_name: 'Tender LPSE CTA' });
   };
 
   const personaContent = {
@@ -619,7 +637,7 @@ export default function Landing() {
                     <div className="text-xl font-bold line-through text-white/50">Rp 1,99jt<span className="text-xs">/bln</span></div>
                   </div>
                 </div>
-                <Link href="/onboarding">
+                <Link href="/onboarding" onClick={handleOnboardingClick}>
                   <Button size="sm" className="bg-white text-red-600 hover:bg-white/90 gap-2 font-bold shadow-lg">
                     <Rocket className="h-4 w-4" />
                     Beli Sekarang (Promo)
@@ -706,7 +724,7 @@ export default function Landing() {
                 </div>
                 {activePersona === "bekerja" && (
                   <div className="text-center mt-6">
-                    <Link href="/packs">
+                    <Link href="/packs" onClick={handleTenderClick}>
                       <Button className="gap-2" data-testid="button-try-tender">
                         <HardHat className="h-4 w-4" />
                         Coba Tender LPSE Assistant
@@ -1230,13 +1248,13 @@ export default function Landing() {
               Siap tingkatkan win rate tender dan efisiensi proyek dengan AI?
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <a href={`https://wa.me/6281287941900?text=${encodeURIComponent("Halo, saya tertarik dengan Gustafta untuk Project Brain dan Informasi Tender. Bisa info lebih lanjut?")}`} target="_blank" rel="noopener noreferrer">
+              <a href={`https://wa.me/6281287941900?text=${encodeURIComponent("Halo, saya tertarik dengan Gustafta untuk Project Brain dan Informasi Tender. Bisa info lebih lanjut?")}`} target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick('Kontraktor Section')}>
                 <Button size="lg" className="gap-2 bg-amber-600 hover:bg-amber-700 text-white" data-testid="button-kontraktor-wa">
                   <MessageSquare className="h-5 w-5" />
                   Konsultasi via WhatsApp
                 </Button>
               </a>
-              <Link href="/packs">
+              <Link href="/packs" onClick={handlePacksClick}>
                 <Button size="lg" variant="outline" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-kontraktor-packs">
                   <Package className="h-5 w-5" />
                   Lihat Paket Kontraktor
@@ -1490,7 +1508,7 @@ export default function Landing() {
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/onboarding">
+            <Link href="/onboarding" onClick={handleOnboardingClick}>
               <Button size="lg" variant="outline" className="gap-2" data-testid="button-onboarding-from-deliverable">
                 <CreditCard className="h-5 w-5" />
                 Pilih Paket
@@ -2486,13 +2504,15 @@ export default function Landing() {
                 </span>
                 <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
-                  data-testid="link-footer-wa-1">
+                  data-testid="link-footer-wa-1"
+                  onClick={() => handleWAClick('Footer')}>
                   <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
                   081287941900
                 </a>
                 <a href="https://wa.me/6282299417818" target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
-                  data-testid="link-footer-wa-2">
+                  data-testid="link-footer-wa-2"
+                  onClick={() => handleWAClick('Footer')}>
                   <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
                   082299417818
                 </a>
