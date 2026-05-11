@@ -2,7 +2,7 @@
  * /welcome — Post-Subscribe Welcome Kit
  * Shown to users after plan activation to guide first steps.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
@@ -132,25 +132,38 @@ const DELIVERABLES = [
   { icon: MessageSquare, label: "Support onboarding via WhatsApp", color: "text-emerald-500" },
 ];
 
-const SAMPLE_EMBED = `<!-- Gustafta Chat Widget -->
+// Embed code samples — domain filled in dynamically once app URL is fetched
+function makeSampleEmbed(base: string) {
+  return `<!-- Gustafta Chat Widget -->
 <script
-  src="https://gustafta.app/widget/loader.js"
+  src="${base}/widget/loader.js"
   data-agent-id="GANTI_DENGAN_AGENT_ID_ANDA">
 </script>
 <!-- End Gustafta Chat Widget -->`;
+}
 
-const SAMPLE_IFRAME = `<iframe
-  src="https://gustafta.app/embed/GANTI_DENGAN_AGENT_ID"
+function makeSampleIframe(base: string) {
+  return `<iframe
+  src="${base}/embed/GANTI_DENGAN_AGENT_ID"
   width="400"
   height="600"
   frameborder="0"
   style="border-radius:12px">
 </iframe>`;
+}
 
 export default function WelcomePage() {
   const { user, isAuthenticated } = useAuth();
   const { data: subscription } = useQuery<any>({ queryKey: ["/api/subscriptions/my"] });
   const [activeStep, setActiveStep] = useState(0);
+  const [appUrl, setAppUrl] = useState<string>(window.location.origin);
+
+  useEffect(() => {
+    fetch("/api/config/app-url")
+      .then((r) => r.json())
+      .then((d) => { if (d.appUrl) setAppUrl(d.appUrl); })
+      .catch(() => {});
+  }, []);
 
   const planLabel = (p?: string) => {
     const map: Record<string, string> = {
@@ -262,11 +275,11 @@ export default function WelcomePage() {
                         <div className="space-y-3">
                           <div>
                             <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Floating Widget (Disarankan)</p>
-                            <CodeBlock code={SAMPLE_EMBED} />
+                            <CodeBlock code={makeSampleEmbed(appUrl)} />
                           </div>
                           <div>
                             <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Embed sebagai iFrame</p>
-                            <CodeBlock code={SAMPLE_IFRAME} />
+                            <CodeBlock code={makeSampleIframe(appUrl)} />
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Ganti <code className="bg-muted px-1 rounded">GANTI_DENGAN_AGENT_ID_ANDA</code> dengan ID agent dari Dashboard → Settings agent Anda.

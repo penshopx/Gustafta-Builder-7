@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plug, MessageCircle, Send, Hash, Slack, Globe, Code, Check, X, Settings, Loader2, Link2, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,6 +82,14 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
   const { data: integrations = [], isLoading } = useIntegrations(agent.id);
   const createIntegration = useCreateIntegration();
   const updateIntegration = useUpdateIntegration();
+  const [prodUrl, setProdUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/config/app-url")
+      .then((r) => r.json())
+      .then((d) => { if (d.appUrl) setProdUrl(d.appUrl); })
+      .catch(() => {});
+  }, []);
 
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [selectedIntegration, setSelectedIntegration] = useState<typeof integrationTypes[0] | null>(null);
@@ -114,7 +122,7 @@ export function IntegrationsPanel({ agent }: IntegrationsPanelProps) {
   });
 
   const getBaseUrl = () => {
-    return window.location.origin;
+    return prodUrl || window.location.origin;
   };
 
   const setupTelegramWebhook = async () => {

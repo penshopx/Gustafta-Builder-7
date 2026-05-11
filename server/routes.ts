@@ -366,6 +366,23 @@ const upload = multer({
   },
 });
 
+/**
+ * Returns the canonical production base URL for building external-facing links
+ * (embed codes, chatUrls, Midtrans callbacks, etc.).
+ *
+ * Priority:
+ *   1. REPLIT_DOMAINS env — contains the deployed .replit.app domain
+ *   2. PROD_URL env — manual override for custom domain
+ *   3. req host — dev/local fallback (only correct in dev; never use in delivered links)
+ */
+function getServerBaseUrl(req: { protocol: string; get(h: string): string | undefined }): string {
+  const domains = (process.env.REPLIT_DOMAINS || "").split(",").map((d) => d.trim()).filter(Boolean);
+  const prodDomain = domains.find((d) => d.endsWith(".replit.app"));
+  if (prodDomain) return `https://${prodDomain}`;
+  if (process.env.PROD_URL) return process.env.PROD_URL.replace(/\/$/, "");
+  return `${req.protocol}://${req.get("host")}`;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -4055,9 +4072,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         },
         item_details: [{ id: `agent-${resolvedAgentId || resolvedProductId}`, price: itemPrice, quantity: 1, name: itemName }],
         callbacks: {
-          finish: `${req.protocol}://${req.get("host")}/store/access/${accessToken}`,
-          pending: `${req.protocol}://${req.get("host")}/store/access/${accessToken}`,
-          error: `${req.protocol}://${req.get("host")}/store`,
+          finish: `${getServerBaseUrl(req)}/store/access/${accessToken}`,
+          pending: `${getServerBaseUrl(req)}/store/access/${accessToken}`,
+          error: `${getServerBaseUrl(req)}/store`,
         },
       });
 
@@ -4123,7 +4140,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const order = await storage.getStoreOrderByAccessToken(req.params.token);
       if (!order) return res.status(404).json({ error: "Access token tidak valid" });
 
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const baseUrl = getServerBaseUrl(req);
       const orderAny = order as any;
 
       // Resolve agent: from order.agentId (direct agent purchase) or product.agentId
@@ -4289,7 +4306,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       await db.update(storeOrders).set({ agentId: agent.id } as any).where(eq(storeOrders.id, order.id));
 
-      const accessUrl = `${req.protocol}://${req.get("host")}/store/access/${accessToken}`;
+      const accessUrl = `${getServerBaseUrl(req)}/store/access/${accessToken}`;
       res.json({ success: true, accessToken, accessUrl, orderId, agentName: agent.name });
     } catch (error) {
       console.error("Manual order error:", error);
