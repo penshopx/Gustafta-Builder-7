@@ -35,8 +35,8 @@ class AuthStorage implements IAuthStorage {
     if (!existing) {
       // First login — assign initial role
       finalRole = initialRole;
-      // Superadmins are immediately active; all other new users need approval
-      finalIsActive = finalRole === "superadmin";
+      // All new users are immediately active (free trial access); admin can deactivate if needed
+      finalIsActive = true;
     } else if (initialRole === "superadmin") {
       // Always ensure superadmin emails keep their superadmin role and stay active
       finalRole = "superadmin";

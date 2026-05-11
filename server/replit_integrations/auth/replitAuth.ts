@@ -117,11 +117,11 @@ export async function setupAuth(app: Express) {
       failureRedirect: "/api/login",
     })(req, res, next);
   }, async (req: any, res: any) => {
-    // After successful OAuth, check if user account is active
     const userId = req.user?.claims?.sub;
     if (userId) {
       const user = await authStorage.getUser(userId);
-      if (user && user.isActive === false) {
+      // Blocked users get kicked out
+      if (user && user.role === "blocked") {
         return res.redirect("/pending-approval");
       }
     }

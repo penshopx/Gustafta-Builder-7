@@ -118,10 +118,10 @@ export function ChaesaWidget() {
 
   const QUICK_PROMPTS = [
     "Bagaimana cara membuat chatbot baru di Gustafta?",
-    "Apa itu Mini Apps 45 tipe dan cara menggunakannya?",
-    "Apa itu Master Standar v2.0 dan State Machine 7-langkah?",
+    "Mini Apps 45 tipe — apa saja & cara pakainya?",
+    "Fitur untuk Kreator Konten (YouTube, Podcast, Medsos)?",
     "Bagaimana cara kerja Orchestrator Multi-Agent?",
-    "Bagaimana sistem harga dan paket Gustafta?",
+    "Berapa harga paket Gustafta Apps & cara berlangganan?",
   ];
 
   return (
