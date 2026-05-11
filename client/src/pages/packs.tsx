@@ -6,7 +6,7 @@ import {
   CheckSquare, AlertTriangle, Building2, ShieldCheck,
   ClipboardList, ArrowRight, Star, Lock, Zap, BarChart3,
   Phone, Check, TrendingUp, Sparkles, Crown, MessageCircle,
-  GraduationCap, BookOpen, Users, Award
+  GraduationCap, BookOpen, Users, Award, ClipboardCheck, Scale
 } from "lucide-react";
 
 interface Pack {
@@ -295,6 +295,26 @@ export default function PacksPage() {
                 color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800",
                 icon: Award,
                 route: "/education#instruktur",
+              },
+              {
+                id: "bimbel-uji-kompetensi", name: "Tes Siap Uji Kompetensi", popular: true,
+                tagline: "Simulasi asesmen SKK/SKKNI — tanya-jawab gaya assessor BNSP",
+                desc: "AI mensimulasikan sesi asesmen nyata per unit kompetensi SKKNI: tanya-jawab gaya assessor, uji regulasi, rekap kesiapan, dan panduan dokumen portofolio. Untuk semua skema jabatan kerja konstruksi.",
+                outputs: ["Simulasi per unit kompetensi SKKNI", "Tanya-jawab gaya assessor BNSP", "Panduan APL & dokumen portofolio", "Rekap kesiapan & gap area", "Strategi lolos sidang asesmen"],
+                useCases: ["Kandidat sertifikasi SKK Pelaksana", "Tenaga Ahli Madya / Utama", "Peserta asesmen BNSP multi-skema"],
+                color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30", border: "border-indigo-200 dark:border-indigo-800",
+                icon: ClipboardCheck,
+                route: "/education#uji-kompetensi",
+              },
+              {
+                id: "bimbel-uji-lisensi", name: "Tes Siap Uji Lisensi Praktek Kerja", popular: false,
+                tagline: "Persiapan ujian SIPp / STRP / IUJK — simulasi soal & regulasi terkini",
+                desc: "Simulasi ujian lisensi praktek kerja: SIPp Perencana, STRP Teknik, IUJK — soal regulasi Jasa Konstruksi, prosedur perizinan, dan standar kompetensi profesional yang wajib dikuasai.",
+                outputs: ["Simulasi soal ujian lisensi nyata", "Prosedur SIPp, STRP & IUJK", "Regulasi Perpres 46/2025 terkini", "Etika profesi & tanggung jawab hukum", "Panduan permohonan & perpanjangan lisensi"],
+                useCases: ["Calon pemegang SIPp Perencana", "Kandidat STRP Teknik", "Kontraktor proses IUJK / OSS-RBA"],
+                color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30", border: "border-rose-200 dark:border-rose-800",
+                icon: Scale,
+                route: "/education#uji-lisensi",
               },
             ].map(pack => (
               <div key={pack.id} className={`relative rounded-2xl border-2 overflow-hidden transition-all ${pack.border} ${pack.popular ? "ring-2 ring-primary ring-offset-2" : ""}`} data-testid={`card-bimbel-${pack.id}`}>

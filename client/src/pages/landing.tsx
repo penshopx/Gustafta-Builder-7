@@ -660,6 +660,22 @@ export default function Landing() {
                 desc: "Mahasiswa teknik sipil, instruktur BNSP, dosen vokasi — dilengkapi 971+ agent AI spesialis regulasi, K3, perizinan, tender, dan sertifikasi konstruksi.",
                 packs: ["Regulasi & Perpres 46/2025", "Tender LPSE & SMKK", "SKK, SBU & Sertifikasi"],
               },
+              {
+                icon: ClipboardCheck,
+                color: "text-indigo-500", bg: "bg-indigo-500/10", border: "border-indigo-200 dark:border-indigo-800",
+                title: "Tes Siap Uji Kompetensi",
+                badge: "SKK / SKKNI / BNSP",
+                desc: "Simulasi asesmen kompetensi per unit SKKNI — tanya-jawab gaya assessor, uji pemahaman regulasi, dan rekap kesiapan sebelum uji nyata. Cocok untuk semua skema jabatan kerja konstruksi.",
+                packs: ["Simulasi asesmen per unit kompetensi", "Tanya-jawab gaya assessor BNSP", "Rekap kesiapan & area yang perlu diperkuat"],
+              },
+              {
+                icon: Scale,
+                color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-200 dark:border-rose-800",
+                title: "Tes Siap Uji Lisensi Praktek Kerja",
+                badge: "SIPp / STRP / IUJK",
+                desc: "Persiapan ujian lisensi praktek kerja: SIPp Perencana, STRP Teknik, IUJK — simulasi soal regulasi, prosedur perizinan, dan standar kompetensi profesional yang wajib dikuasai.",
+                packs: ["Simulasi soal ujian lisensi praktek", "Prosedur SIPp, STRP & IUJK", "Regulasi Jasa Konstruksi terkini"],
+              },
             ].map((p) => (
               <div key={p.title} className={`rounded-2xl border ${p.border} bg-background p-5 flex flex-col gap-3 hover:shadow-md transition-shadow`}>
                 <div className="flex items-center gap-3">

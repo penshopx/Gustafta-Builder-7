@@ -5,7 +5,8 @@ import { SharedHeader } from "@/components/shared-header";
 import {
   GraduationCap, BookOpen, Users, Award, Briefcase, HardHat,
   Check, ArrowRight, MessageCircle, Zap, Star, Clock, Sparkles,
-  Brain, CheckCircle2, Phone, Crown, Lock, TrendingUp, Shield
+  Brain, CheckCircle2, Phone, Crown, Lock, TrendingUp, Shield,
+  ClipboardCheck, Scale
 } from "lucide-react";
 
 const WA = "6282299417818";
@@ -113,6 +114,50 @@ const segments = [
       { name: "Paket Dosen & Instruktur Vokasi", agents: 6, subjects: ["Regulasi konstruksi terkini", "AI dari silabus vokasi Anda", "Simulasi ujian SKK per skema", "Modul K3 interaktif", "Distribusi ke semua siswa", "Dashboard progress"], price: "Rp 299rb/bln" },
     ],
     usps: ["131 hub orchestrator siap pakai", "SCORECARD + Win Probability", "Regulasi real-time (Perpres 46/2025)", "Dikembangkan khusus industri Indonesia"],
+  },
+  {
+    id: "uji-kompetensi",
+    icon: ClipboardCheck,
+    color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30", border: "border-indigo-200 dark:border-indigo-800",
+    headerBg: "bg-indigo-100 dark:bg-indigo-950/50",
+    title: "Tes Siap Uji Kompetensi",
+    badge: "SKK / SKKNI / BNSP",
+    badgeColor: "bg-indigo-600 text-white",
+    tagline: "Simulasi Asesmen Kompetensi — Latihan Tanya-Jawab Gaya Assessor BNSP",
+    desc: "AI mensimulasikan sesi asesmen nyata per unit kompetensi SKKNI: tanya-jawab gaya assessor, uji pemahaman regulasi, demonstrasi prosedur, dan rekap kesiapan sebelum hari H. Tersedia untuk semua skema jabatan kerja konstruksi.",
+    packs: [
+      { name: "Paket SKK Pelaksana Konstruksi", agents: 6, subjects: ["Simulasi asesmen per unit kompetensi", "Tanya-jawab gaya assessor BNSP", "Regulasi & SKKNI jabatan kerja", "Prosedur K3 & SMK3 praktis", "Dokumen portofolio & APL", "Rekap kesiapan & gap area"], price: "Rp 149rb/bln", popular: true },
+      { name: "Paket SKK Tenaga Ahli Madya/Utama", agents: 5, subjects: ["Kompetensi manajerial & teknis", "Etika profesi & hukum konstruksi", "Simulasi wawancara assessor", "SKKNI multi-jabatan", "Strategi lolos sidang asesmen"], price: "Rp 199rb/bln" },
+      { name: "Paket Persiapan BNSP Multi-Skema", agents: 4, subjects: ["Pemetaan skema per jabatan", "Unit kompetensi wajib & pilihan", "Simulasi portofolio & bukti kerja", "Latihan soal tulis asesmen"], price: "Rp 129rb/bln" },
+    ],
+    usps: [
+      "Simulasi tanya-jawab persis gaya assessor BNSP",
+      "Latihan per unit kompetensi SKKNI — tidak generik",
+      "Rekap kesiapan: unit lulus, unit perlu diperkuat",
+      "Panduan dokumen portofolio & APL",
+    ],
+  },
+  {
+    id: "uji-lisensi",
+    icon: Scale,
+    color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30", border: "border-rose-200 dark:border-rose-800",
+    headerBg: "bg-rose-100 dark:bg-rose-950/50",
+    title: "Tes Siap Uji Lisensi Praktek Kerja",
+    badge: "SIPp / STRP / IUJK",
+    badgeColor: "bg-rose-600 text-white",
+    tagline: "Persiapan Ujian Lisensi Profesional — SIPp, STRP, IUJK & Izin Praktek Lainnya",
+    desc: "Simulasi ujian lisensi praktek kerja yang sesungguhnya: soal regulasi Jasa Konstruksi, prosedur perizinan IUJK, standar kompetensi SIPp Perencana, STRP Teknik — dikerjakan bersama AI yang tahu aturan terkini.",
+    packs: [
+      { name: "Paket Siap Ujian SIPp Perencana", agents: 5, subjects: ["Regulasi perencanaan & tata bangunan", "Simulasi soal ujian SIPp", "Standar kompetensi perencana profesional", "Prosedur permohonan & perpanjangan", "Etika profesi Arsitek / Sipil"], price: "Rp 149rb/bln", popular: true },
+      { name: "Paket Siap IUJK & Perizinan Usaha", agents: 5, subjects: ["Prosedur IUJK & OSS-RBA", "Regulasi Perpres 46/2025", "Simulasi soal ujian perizinan", "Klasifikasi & kualifikasi SBU", "Sanksi & kepatuhan hukum konstruksi"], price: "Rp 149rb/bln" },
+      { name: "Paket Siap Ujian STRP Teknik", agents: 4, subjects: ["Regulasi teknik & standar SNI", "Simulasi soal ujian STRP", "Tanggung jawab profesional teknik", "Prosedur permohonan STRP"], price: "Rp 129rb/bln" },
+    ],
+    usps: [
+      "Simulasi soal ujian lisensi — mirip ujian nyata",
+      "Materi regulasi selalu diupdate (Perpres 46/2025)",
+      "Panduan prosedur permohonan SIPp, STRP, IUJK",
+      "Latihan etika profesi & tanggung jawab hukum",
+    ],
   },
 ];
 
