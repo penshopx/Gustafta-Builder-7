@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -13,7 +13,7 @@ import {
   Users, CreditCard, FileText, ToggleLeft, ToggleRight,
   CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
   UserCheck, AlertCircle, RefreshCw, Crown, UserCog, Wrench, Scale, Database,
-  ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil
+  ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle
 } from "lucide-react";
 
 // ---- Types ----
@@ -106,6 +106,40 @@ function roleBadge(role: string | null) {
   return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-muted text-muted-foreground">User</span>;
 }
 
+// ---- Welcome WA Template Generator ----
+const PLAN_LABEL_WA: Record<string, string> = {
+  starter: "Starter", profesional: "Profesional", bisnis: "Bisnis", enterprise: "Enterprise",
+  monthly: "1 Bulan", quarterly: "3 Bulan", semiannual: "6 Bulan", annual: "12 Bulan", free: "Free",
+};
+
+function makeWelcomeWA(sub: AdminSubscription, appUrl: string): string {
+  const name = [sub.user?.firstName, sub.user?.lastName].filter(Boolean).join(" ") || "Kak";
+  const plan = PLAN_LABEL_WA[sub.plan] ?? sub.plan;
+  return `Halo ${name}! 👋
+
+Selamat, paket Gustafta *${plan}* Anda sudah *AKTIF* 🎉
+
+Silakan langsung mulai:
+1. Buka: ${appUrl}
+2. Klik "Masuk" — gunakan akun yang sudah Anda daftarkan
+3. Pilih "Dashboard" → chatbot siap dikonfigurasi
+
+✅ Yang bisa Anda gunakan sekarang:
+• Buat & konfigurasi AI Chatbot
+• Akses 131 Hub Orchestrator siap pakai
+• Upload knowledge base (7 tipe dokumen)
+• Embed chatbot di website Anda
+• 45 Mini Apps produktivitas
+
+📖 Panduan langkah-demi-langkah: ${appUrl}/welcome
+
+Butuh bantuan? Hubungi kami:
+📱 WA: 081287941900 / 082299417818
+
+Selamat berkreasi! 🚀
+— Tim Gustafta`;
+}
+
 // ---- Main Component ----
 export default function AdminPage() {
   const { toast } = useToast();
@@ -118,6 +152,15 @@ export default function AdminPage() {
   const [subDialog, setSubDialog] = useState<{ open: boolean; sub: AdminSubscription | null }>({ open: false, sub: null });
   const [newStatus, setNewStatus] = useState("active");
   const [newEndDate, setNewEndDate] = useState("");
+  const [waDialog, setWaDialog] = useState<{ open: boolean; sub: AdminSubscription | null }>({ open: false, sub: null });
+  const [appUrl, setAppUrl] = useState<string>(window.location.origin);
+
+  useEffect(() => {
+    fetch("/api/config/app-url")
+      .then((r) => r.json())
+      .then((d) => { if (d.appUrl) setAppUrl(d.appUrl); })
+      .catch(() => {});
+  }, []);
 
   // Store tab state
   const [manualForm, setManualForm] = useState({ name: "", email: "", phone: "", agentId: "" });
@@ -262,8 +305,14 @@ export default function AdminPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      const activatedSub = subDialog.sub;
+      const activatedStatus = newStatus;
       setSubDialog({ open: false, sub: null });
       toast({ title: "Langganan diperbarui." });
+      // Auto-show WA welcome dialog when admin just activated a subscription
+      if (activatedStatus === "active" && activatedSub) {
+        setTimeout(() => setWaDialog({ open: true, sub: activatedSub }), 300);
+      }
     },
     onError: () => toast({ title: "Gagal memperbarui langganan.", variant: "destructive" }),
   });
@@ -759,17 +808,29 @@ export default function AdminPage() {
                             <td className="py-3 pr-4 text-muted-foreground text-xs">{formatDate(sub.startDate)}</td>
                             <td className="py-3 pr-4 text-muted-foreground text-xs">{formatDate(sub.endDate)}</td>
                             <td className="py-3 text-right">
-                              <Button
-                                variant="outline" size="sm" className="text-xs"
-                                onClick={() => {
-                                  setSubDialog({ open: true, sub });
-                                  setNewStatus(sub.status);
-                                  setNewEndDate(sub.endDate ? sub.endDate.slice(0, 10) : "");
-                                }}
-                                data-testid={`button-edit-sub-${sub.id}`}
-                              >
-                                Edit
-                              </Button>
+                              <div className="flex items-center justify-end gap-1.5">
+                                {sub.status === "active" && (
+                                  <Button
+                                    variant="outline" size="sm" className="text-xs text-green-600 border-green-200 hover:bg-green-50 dark:hover:bg-green-950/30"
+                                    onClick={() => setWaDialog({ open: true, sub })}
+                                    data-testid={`button-wa-sub-${sub.id}`}
+                                    title="Kirim Welcome WA"
+                                  >
+                                    <MessageCircle className="h-3 w-3 mr-1" /> WA
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="outline" size="sm" className="text-xs"
+                                  onClick={() => {
+                                    setSubDialog({ open: true, sub });
+                                    setNewStatus(sub.status);
+                                    setNewEndDate(sub.endDate ? sub.endDate.slice(0, 10) : "");
+                                  }}
+                                  data-testid={`button-edit-sub-${sub.id}`}
+                                >
+                                  Edit
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1301,6 +1362,12 @@ export default function AdminPage() {
                   data-testid="input-sub-end-date"
                 />
               </div>
+              {newStatus === "active" && (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-md px-3 py-2">
+                  <MessageCircle className="h-3.5 w-3.5 shrink-0" />
+                  Setelah simpan, template pesan WhatsApp akan otomatis muncul untuk dikirim ke pelanggan.
+                </p>
+              )}
             </div>
           )}
           <DialogFooter>
@@ -1312,6 +1379,67 @@ export default function AdminPage() {
             >
               {updateSubMutation.isPending ? "Menyimpan..." : "Simpan"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========== WELCOME WA DIALOG ========== */}
+      <Dialog open={waDialog.open} onOpenChange={(o) => setWaDialog({ open: o, sub: waDialog.sub })}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-green-500" />
+              Kirim Welcome WhatsApp
+            </DialogTitle>
+          </DialogHeader>
+          {waDialog.sub && (() => {
+            const msg = makeWelcomeWA(waDialog.sub, appUrl);
+            const phone = waDialog.sub.user?.email ?? "";
+            const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            return (
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p className="font-medium">{[waDialog.sub.user?.firstName, waDialog.sub.user?.lastName].filter(Boolean).join(" ") || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{phone}</p>
+                  <p className="text-xs text-muted-foreground">Paket: {PLAN_LABEL_WA[waDialog.sub.plan] ?? waDialog.sub.plan}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Preview Pesan WA</p>
+                  <div className="bg-[#dcf8c6] dark:bg-green-900/30 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-foreground leading-relaxed max-h-64 overflow-y-auto border border-green-200 dark:border-green-800">
+                    {msg}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-xs"
+                    onClick={() => {
+                      navigator.clipboard.writeText(msg);
+                      toast({ title: "Pesan disalin!", description: "Tempel di WhatsApp Web atau aplikasi WA." });
+                    }}
+                    data-testid="button-copy-wa-msg"
+                  >
+                    <Copy className="h-3.5 w-3.5 mr-1.5" /> Salin Teks
+                  </Button>
+                  <Button
+                    className="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => window.open(waUrl, "_blank")}
+                    data-testid="button-open-wa"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Buka WA
+                  </Button>
+                </div>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  "Buka WA" akan membuka WhatsApp Web dengan pesan sudah terisi. Pilih kontak pelanggan, lalu kirim.
+                </p>
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWaDialog({ open: false, sub: null })}>Tutup</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
