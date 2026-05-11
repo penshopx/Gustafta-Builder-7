@@ -259,9 +259,9 @@ export default function PacksPage() {
               {
                 id: "bimbel-sma", name: "Paket Bimbel SMA / SMK", popular: true,
                 tagline: "7 AI Tutor per mata pelajaran — belajar kapan saja, lebih murah dari bimbel",
-                desc: "AI aktif menjawab pertanyaan, menjelaskan konsep, dan membuat latihan soal adaptif. Tersedia paket IPA, IPS, SMK Vokasi, dan UTBK Intensif.",
-                outputs: ["Tutor Matematika AI", "Tutor Fisika / Kimia / Bio AI", "Bank soal & simulasi UTBK", "B. Indonesia & B. Inggris AI", "Progress tracking siswa"],
-                useCases: ["Pelajar SMA/SMK yang ingin belajar mandiri", "Persiapan UTBK & ujian sekolah", "Alternatif bimbel lebih hemat"],
+                desc: "AI aktif menjawab pertanyaan, menjelaskan konsep, dan membuat latihan soal adaptif. Tersedia paket IPA, IPS, SMK Vokasi, UTBK Intensif, dan Sekolah Kedinasan.",
+                outputs: ["Tutor Matematika AI", "Tutor Fisika / Kimia / Bio AI", "Bank soal UTBK & Kedinasan", "B. Indonesia & B. Inggris AI", "Simulasi SKD: TWK, TIU, TKP"],
+                useCases: ["Pelajar SMA/SMK yang ingin belajar mandiri", "Persiapan UTBK & Sekolah Kedinasan", "Alternatif bimbel lebih hemat"],
                 color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-200 dark:border-blue-800",
                 icon: GraduationCap,
                 route: "/education#pelajar",

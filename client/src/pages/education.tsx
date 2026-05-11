@@ -27,9 +27,10 @@ const segments = [
       { name: "Paket SMA IPA", agents: 7, subjects: ["Matematika", "Fisika", "Kimia", "Biologi", "B. Indonesia", "B. Inggris", "UTBK TPS"], price: "Rp 99rb/bln" },
       { name: "Paket SMA IPS", agents: 7, subjects: ["Ekonomi", "Sosiologi", "Geografi", "Sejarah", "B. Indonesia", "B. Inggris", "UTBK TPS"], price: "Rp 99rb/bln" },
       { name: "Paket SMK Vokasi", agents: 5, subjects: ["Matematika Vokasi", "B. Indonesia", "B. Inggris", "Kompetensi Kejuruan", "Etika Profesi"], price: "Rp 79rb/bln" },
-      { name: "Paket UTBK Saintek", agents: 4, subjects: ["TPS Penalaran", "Matematika UTBK", "Fisika", "Kimia / Biologi"], price: "Rp 79rb/bln", popular: true },
+      { name: "Paket UTBK & Kedinasan Saintek", agents: 5, subjects: ["TPS Penalaran", "Matematika UTBK", "Fisika", "Kimia / Biologi", "TWK / TIU / TKP Kedinasan"], price: "Rp 79rb/bln", popular: true },
+      { name: "Paket Sekolah Kedinasan", agents: 5, subjects: ["SKD: TWK, TIU, TKP", "Psikotes & Tes Karakteristik Pribadi", "Wawasan Kebangsaan", "Tes Fisik & Kesehatan", "Simulasi seleksi per instansi (STAN, IPDN, STIS, dll)"], price: "Rp 89rb/bln" },
     ],
-    usps: ["Jawab soal + penjelasan langkah per langkah", "Bank soal adaptif berdasarkan kelemahanmu", "Simulasi ujian UTBK / UN mode waktu", "Tidak terikat jadwal — belajar kapan saja"],
+    usps: ["Jawab soal + penjelasan langkah per langkah", "Bank soal adaptif berdasarkan kelemahanmu", "Simulasi ujian UTBK & Kedinasan mode waktu", "Tidak terikat jadwal — belajar kapan saja"],
   },
   {
     id: "mahasiswa",
@@ -195,7 +196,7 @@ export default function EducationPage() {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Dari pelajar SMA yang ingin lolos UTBK, mahasiswa teknik yang butuh tutor TA, guru yang ingin buat ruang belajar digital, hingga HRD yang ingin onboarding karyawan otomatis — semua dalam satu platform AI.
+            Dari pelajar SMA yang ingin lolos UTBK & Sekolah Kedinasan, mahasiswa teknik yang butuh tutor TA, guru yang ingin buat ruang belajar digital, hingga HRD yang ingin onboarding karyawan otomatis — semua dalam satu platform AI.
           </p>
 
           {/* Quick persona pills */}

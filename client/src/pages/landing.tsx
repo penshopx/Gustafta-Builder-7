@@ -605,7 +605,7 @@ export default function Landing() {
               Ruang Belajar AI untuk <span className="text-primary">Semua Peran</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Dari pelajar SMA yang ingin lolos UTBK, mahasiswa teknik yang butuh tutor TA, hingga dosen yang ingin buat ruang belajar digital — semua bisa dengan Gustafta.
+              Dari pelajar SMA yang ingin lolos UTBK & Sekolah Kedinasan, mahasiswa teknik yang butuh tutor TA, hingga dosen yang ingin buat ruang belajar digital — semua bisa dengan Gustafta.
             </p>
           </div>
 
@@ -617,8 +617,8 @@ export default function Landing() {
                 color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-200 dark:border-blue-800",
                 title: "Pelajar SMA / SMK",
                 badge: "Bimbel AI",
-                desc: "AI tutor per mata pelajaran, latihan soal UTBK, bank soal adaptif, dan pembahasan 24/7. Tidak terikat jadwal, lebih murah dari bimbel konvensional.",
-                packs: ["Paket SMA IPA — 7 AI Tutor", "Paket SMA IPS — 7 AI Tutor", "Paket UTBK Intensif"],
+                desc: "AI tutor per mata pelajaran, latihan soal UTBK & Sekolah Kedinasan, bank soal adaptif, dan pembahasan 24/7. Tidak terikat jadwal, lebih murah dari bimbel konvensional.",
+                packs: ["Paket SMA IPA — 7 AI Tutor", "Paket SMA IPS — 7 AI Tutor", "Paket UTBK & Kedinasan"],
               },
               {
                 icon: BookOpen,
