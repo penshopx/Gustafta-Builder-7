@@ -251,6 +251,7 @@ export default function AdminPage() {
   const [modulSubStatus, setModulSubStatus] = useState("active");
   const [modulSubDays, setModulSubDays] = useState("30");
   const [modulWaDialog, setModulWaDialog] = useState<{ open: boolean; sub: ModulSub | null }>({ open: false, sub: null });
+  const [storeWaDialog, setStoreWaDialog] = useState<{ open: boolean; order: StoreOrder | null }>({ open: false, order: null });
 
   const { data: storeOrders = [], isLoading: storeOrdersLoading, refetch: refetchOrders } = useQuery<StoreOrder[]>({
     queryKey: ["/api/store/admin/orders"],
@@ -1313,9 +1314,18 @@ export default function AdminPage() {
                               {order.status === "paid" ? "Lunas" : order.status === "pending" ? "Pending" : order.status}
                             </span>
                             <Button size="sm" variant="outline" className="h-7 px-2 gap-1 text-xs"
-                              onClick={() => { const url = `${window.location.origin}/store/access/${order.accessToken}`; navigator.clipboard.writeText(url); toast({ title: "Link akses disalin!" }); }}
+                              onClick={() => { const url = `${appUrl}/store/access/${order.accessToken}`; navigator.clipboard.writeText(url); toast({ title: "Link akses disalin!" }); }}
                               data-testid={`button-copy-order-${order.id}`}>
                               <Copy className="h-3 w-3" /> Link
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="h-7 px-2 gap-1 text-xs bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => setStoreWaDialog({ open: true, order })}
+                              data-testid={`button-wa-order-${order.id}`}
+                              title="Kirim link akses via WhatsApp"
+                            >
+                              WA
                             </Button>
                           </div>
                         </div>
@@ -1747,6 +1757,85 @@ Selamat menggunakan! 🚀
           })()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setWaDialog({ open: false, sub: null })}>Tutup</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========== STORE ORDER WA DIALOG ========== */}
+      <Dialog open={storeWaDialog.open} onOpenChange={(o) => setStoreWaDialog({ open: o, order: storeWaDialog.order })}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-green-500" />
+              Kirim Link Akses Chatbot via WA
+            </DialogTitle>
+          </DialogHeader>
+          {storeWaDialog.order && (() => {
+            const order = storeWaDialog.order!;
+            const accessUrl = `${appUrl}/store/access/${order.accessToken}`;
+            const msg = `Halo ${order.customerName}! 👋
+
+Terima kasih sudah membeli Chatbot di Gustafta Store 🎉
+
+Berikut link akses eksklusif Anda:
+${accessUrl}
+
+Link ini berisi:
+✅ Chat langsung dengan AI Chatbot Anda
+✅ Kode embed untuk dipasang di website
+✅ Panduan penggunaan
+
+⚠️ *Simpan link ini* — link Anda bersifat permanen dan bisa dibuka kapan saja dari browser manapun.
+
+Butuh bantuan? Hubungi kami:
+📱 WA: 081287941900 / 082299417818
+
+Selamat menggunakan! 🚀
+— Tim Gustafta`;
+            const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+            const phoneNum = order.customerPhone?.replace(/\D/g, "");
+            const waDirectUrl = phoneNum ? `https://wa.me/${phoneNum.startsWith("0") ? "62" + phoneNum.slice(1) : phoneNum}?text=${encodeURIComponent(msg)}` : waUrl;
+            return (
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <p className="font-medium">{order.customerName}</p>
+                  <p className="text-xs text-muted-foreground">{order.customerEmail}</p>
+                  {order.customerPhone && <p className="text-xs text-muted-foreground">{order.customerPhone}</p>}
+                  <p className="text-xs mt-1">{order.status === "paid" ? "✅ Lunas" : "⏳ Pending"} · {order.midtransOrderId}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-1.5">Link Akses</p>
+                  <div className="flex gap-2">
+                    <Input value={accessUrl} readOnly className="text-xs font-mono" data-testid="input-store-access-link" />
+                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(accessUrl); toast({ title: "Link disalin!" }); }} data-testid="button-copy-store-link">
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Preview Pesan WA</p>
+                  <div className="bg-[#dcf8c6] dark:bg-green-900/30 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-foreground leading-relaxed max-h-56 overflow-y-auto border border-green-200 dark:border-green-800">
+                    {msg}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1 text-xs" onClick={() => { navigator.clipboard.writeText(msg); toast({ title: "Pesan disalin!" }); }} data-testid="button-copy-store-wa-msg">
+                    <Copy className="h-3.5 w-3.5 mr-1.5" /> Salin Teks
+                  </Button>
+                  <Button className="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white" onClick={() => window.open(waDirectUrl, "_blank")} data-testid="button-open-store-wa">
+                    <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> {phoneNum ? "WA Langsung" : "Buka WA"}
+                  </Button>
+                </div>
+                {phoneNum && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    "WA Langsung" membuka chat ke nomor {order.customerPhone} dengan pesan sudah terisi.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStoreWaDialog({ open: false, order: null })}>Tutup</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
