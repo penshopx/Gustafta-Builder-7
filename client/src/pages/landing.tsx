@@ -28,7 +28,8 @@ import {
   GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
   Package, ChevronRight, Flame, Factory, ShieldCheck, Scale, Smartphone, CreditCard,
   Mic, Megaphone, ShoppingBag, PenLine, PieChart, Send, Repeat2, Building,
-  CalendarDays, Clapperboard, Video
+  CalendarDays, Clapperboard, Video,
+  Database, Bell, Search, Trophy, Newspaper, Server, FolderOpen, Activity
 } from "lucide-react";
 
 export default function Landing() {
@@ -1025,6 +1026,211 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ─── SECTION: Killer Features Kontraktor ─────────────────────────── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-amber-500/5 via-background to-emerald-500/5 border-y border-amber-200/30 dark:border-amber-900/20" id="kontraktor">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm font-semibold mb-4">
+              <HardHat className="h-4 w-4" />
+              Khusus Kontraktor & BUJK Indonesia
+            </div>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">
+              Dua Senjata Utama untuk{" "}
+              <span className="text-amber-600 dark:text-amber-400">Menangkan Tender</span>{" "}
+              &amp; Kelola Proyek
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Gustafta bukan chatbot biasa. Untuk kontraktor, kami hadirkan dua fitur inti yang langsung berdampak pada win rate tender dan efisiensi operasional proyek Anda.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
+
+            {/* ── Killer Feature 1: Project Brain ─────────────────── */}
+            <div className="relative rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 p-6 md:p-8 overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl -translate-y-1/4 translate-x-1/4 pointer-events-none" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                    <Brain className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <Badge className="bg-amber-500 text-white hover:bg-amber-600 border-0 text-xs mb-1">Fitur #1 — Project Brain</Badge>
+                    <h3 className="text-xl font-bold leading-tight">Otak Proyek — Pusat Pengetahuan AI</h3>
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                  AI Anda menjadi benar-benar <strong>paham bisnis dan proyek Anda</strong>. Bukan chatbot generik — tapi advisor AI yang tahu dokumen, SOP, regulasi, dan kontrak spesifik perusahaan Anda.
+                </p>
+
+                <div className="space-y-3 mb-5">
+                  {[
+                    { icon: FolderOpen, color: "text-amber-600", title: "Upload Semua Dokumen Perusahaan", desc: "SOP, standar kerja, kontrak, regulasi PUPR/BPJT, spesifikasi teknis — semua masuk ke Brain, AI langsung bisa menjawab berdasarkan data asli." },
+                    { icon: Database, color: "text-orange-600", title: "Konteks Bisnis Real, Jawaban Presisi", desc: "Tanya soal proyek A vs proyek B, bandingkan vendor, cek klausul kontrak — AI tahu konteks bisnis Anda, bukan jawaban generik dari internet." },
+                    { icon: Users, color: "text-amber-700", title: "Seluruh Tim Akses via WA & Web", desc: "Engineer di lapangan, PM di kantor, direksi di perjalanan — semua bisa query Brain lewat WhatsApp atau web widget kapan pun." },
+                    { icon: Shield, color: "text-emerald-600", title: "Data Aman & Terisolasi per Tenant", desc: "Dokumen perusahaan Anda hanya bisa diakses oleh chatbot Anda. Enkripsi end-to-end, tidak bocor ke tenant lain." },
+                  ].map((item) => (
+                    <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/60 dark:bg-white/5 border border-amber-200/60 dark:border-amber-800/40">
+                      <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <item.icon className={`h-4 w-4 ${item.color}`} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm mb-0.5">{item.title}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mini showcase: what you can store */}
+                <div className="rounded-xl bg-white/70 dark:bg-zinc-900/50 border border-amber-200/60 dark:border-amber-800/30 p-4 mb-5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-2">Apa yang bisa disimpan di Project Brain?</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["Dokumen Tender", "Kontrak FIDIC", "Standar SNI", "Perpres 46/2025", "SOP K3/SMK3", "RAB Template", "Spek Teknis", "SMKK Plan", "Data Personel", "Sertifikat SBU/SKK", "Laporan Proyek", "Risalah Rapat"].map(tag => (
+                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-medium">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <Link href="/dashboard">
+                  <Button className="gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20" data-testid="button-project-brain">
+                    <Brain className="h-4 w-4" />
+                    Bangun Project Brain Saya
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* ── Killer Feature 2: Informasi Tender ──────────────── */}
+            <div className="relative rounded-2xl border-2 border-emerald-300 dark:border-emerald-700 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 p-6 md:p-8 overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/4 translate-x-1/4 pointer-events-none" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/30">
+                    <Newspaper className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 border-0 text-xs mb-1">Fitur #2 — Info Tender</Badge>
+                    <h3 className="text-xl font-bold leading-tight">Informasi Tender — Analisis Kesiapan AI</h3>
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                  Dari <strong>menemukan peluang tender LPSE</strong> hingga menilai kesiapan dokumen Anda — semua dalam satu alur AI terintegrasi. Skor win probability + gap analysis + draft dokumen.
+                </p>
+
+                <div className="space-y-3 mb-5">
+                  {[
+                    { icon: Search, color: "text-emerald-600", title: "Temukan & Filter Peluang Tender LPSE", desc: "Cari tender sesuai SBU, lokasi, nilai paket, dan jenis pekerjaan. AI menyoroti peluang terbaik berdasarkan profil perusahaan Anda." },
+                    { icon: Trophy, color: "text-amber-600", title: "SCORECARD Win Probability 4 Dimensi", desc: "Skor kesiapan dokumen, teknis, kompetensi tim, dan kepatuhan regulasi — lengkap dengan PROBABILITAS X% dan KEPUTUSAN ikut/tidak." },
+                    { icon: AlertTriangle, color: "text-orange-600", title: "Gap Analysis & Rekomendasi Prioritas", desc: "Identifikasi dokumen yang kurang, kualifikasi SBU tidak match, personel belum tersertifikasi — berikut action plan langkah demi langkah." },
+                    { icon: FileText, color: "text-teal-600", title: "Draft Dokumen Teknis Otomatis", desc: "Proposal teknis, metode pelaksanaan, SMKK plan, rencana mutu, dan risk register — draf pertama siap dalam hitungan menit, bukan hari." },
+                  ].map((item) => (
+                    <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/60 dark:bg-white/5 border border-emerald-200/60 dark:border-emerald-800/40">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <item.icon className={`h-4 w-4 ${item.color}`} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm mb-0.5">{item.title}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Win Probability mini widget */}
+                <div className="rounded-xl bg-white/70 dark:bg-zinc-900/50 border border-emerald-200/60 dark:border-emerald-800/30 p-4 mb-5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">Contoh Output Scorecard AI</p>
+                  <div className="grid grid-cols-4 gap-1.5 mb-2">
+                    {[
+                      { label: "Dokumen", score: 85, color: "bg-emerald-500" },
+                      { label: "Teknis", score: 72, color: "bg-blue-500" },
+                      { label: "Personel", score: 90, color: "bg-violet-500" },
+                      { label: "Regulasi", score: 68, color: "bg-amber-500" },
+                    ].map(d => (
+                      <div key={d.label} className="text-center">
+                        <div className="h-1.5 rounded-full bg-muted/50 mb-1 overflow-hidden">
+                          <div className={`h-full rounded-full ${d.color}`} style={{ width: `${d.score}%` }} />
+                        </div>
+                        <p className="text-[9px] text-muted-foreground">{d.label}</p>
+                        <p className="text-[10px] font-bold">{d.score}%</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-emerald-200/40">
+                    <span className="text-[10px] text-muted-foreground font-medium">Probabilitas Menang</span>
+                    <span className="text-sm font-bold text-emerald-600">79% — IKUT TENDER</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Link href="/packs">
+                    <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20" data-testid="button-info-tender">
+                      <Trophy className="h-4 w-4" />
+                      Cek Kesiapan Tender
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <a href="#tender">
+                    <Button variant="outline" size="default" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30">
+                      <Search className="h-4 w-4" />
+                      Pelajari
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── ROI Stats Bar ── */}
+          <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-card p-6">
+            <p className="text-center text-xs font-bold uppercase tracking-wider text-muted-foreground mb-5">Dampak Nyata untuk Kontraktor Gustafta</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+              {[
+                { value: "2–3 hari", label: "Hemat waktu per proses tender", icon: Clock, color: "text-amber-500" },
+                { value: "131 Hub", label: "Orchestrator spesialis konstruksi", icon: Cpu, color: "text-emerald-500" },
+                { value: "30+ item", label: "Checklist Perpres 46/2025 otomatis", icon: ClipboardCheck, color: "text-blue-500" },
+                { value: "4 Dimensi", label: "SCORECARD win probability", icon: Trophy, color: "text-violet-500" },
+              ].map(s => (
+                <div key={s.label} className="text-center">
+                  <div className="flex justify-center mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center">
+                      <s.icon className={`h-5 w-5 ${s.color}`} />
+                    </div>
+                  </div>
+                  <div className={`text-2xl font-bold mb-1 ${s.color}`}>{s.value}</div>
+                  <div className="text-xs text-muted-foreground leading-tight">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── CTA strip ── */}
+          <div className="text-center mt-8">
+            <p className="text-muted-foreground text-sm mb-4">
+              Siap tingkatkan win rate tender dan efisiensi proyek dengan AI?
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <a href={`https://wa.me/6281287941900?text=${encodeURIComponent("Halo, saya tertarik dengan Gustafta untuk Project Brain dan Informasi Tender. Bisa info lebih lanjut?")}`} target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="gap-2 bg-amber-600 hover:bg-amber-700 text-white" data-testid="button-kontraktor-wa">
+                  <MessageSquare className="h-5 w-5" />
+                  Konsultasi via WhatsApp
+                </Button>
+              </a>
+              <Link href="/packs">
+                <Button size="lg" variant="outline" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-kontraktor-packs">
+                  <Package className="h-5 w-5" />
+                  Lihat Paket Kontraktor
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* ───────────────────────────────────────────────────────────────────── */}
 
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
