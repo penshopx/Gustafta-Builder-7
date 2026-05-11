@@ -27,7 +27,8 @@ import {
   Brain, Blocks, Camera, Plug, ExternalLink, Wrench,
   GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
   Package, ChevronRight, Flame, Factory, ShieldCheck, Scale, Smartphone, CreditCard,
-  Mic, Megaphone, ShoppingBag, PenLine, PieChart, Send, Repeat2, Building
+  Mic, Megaphone, ShoppingBag, PenLine, PieChart, Send, Repeat2, Building,
+  CalendarDays, Clapperboard, Video
 } from "lucide-react";
 
 export default function Landing() {
@@ -35,7 +36,7 @@ export default function Landing() {
   const { data: gustaftaAssistant } = useGustaftaAssistant();
   const { data: templatesData } = useTemplates();
   const { toast } = useToast();
-  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha">("belajar");
+  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha" | "kreator">("belajar");
   const [trialForm, setTrialForm] = useState({ name: "", phone: "", email: "", company: "", useCase: "" });
   const [trialSubmitted, setTrialSubmitted] = useState(false);
 
@@ -113,6 +114,23 @@ export default function Landing() {
         { title: "AI Konten & Copywriting", desc: "Caption Instagram/TikTok, artikel blog, script iklan, email marketing — konten siap publish dibuat AI berdasarkan produk dan target pasar Anda." },
         { title: "AI Sales Script & Konversi", desc: "Objection handling otomatis, script closing, follow-up sequence, dan template negosiasi — dikustomisasi per segmen pembeli." },
         { title: "AI Analis Bisnis & Keuangan", desc: "Laporan keuangan sederhana, analisis cashflow, proyeksi omset, dan alert anomali pengeluaran — tanpa perlu akuntan tambahan." },
+      ]
+    },
+    kreator: {
+      icon: Clapperboard,
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
+      border: "border-violet-500/30",
+      label: "Untuk Kreator",
+      tagline: "AI sebagai manajer konten, script writer, dan analis pertumbuhan channel Anda",
+      description: "Dari editorial calendar bulanan, script YouTube & Podcast, proposal brand deal, hingga laporan performa konten — AI membantu content creator Indonesia fokus berkreasi, bukan tenggelam dalam pekerjaan administratif.",
+      useCases: [
+        { title: "Editorial Calendar AI", desc: "Rencanakan konten sebulan penuh: tema mingguan, content pillars, jadwal posting per platform, ide konten konkret — dikustomisasi sesuai niche dan target audience." },
+        { title: "Script YouTube & Podcast AI", desc: "Hook 5 detik yang kuat, opening, segmen isi, outro, CTA — script lengkap terasa natural ketika dibaca keras, plus ide thumbnail dan timestamps." },
+        { title: "Proposal Brand Deal & Media Kit", desc: "Profil kreator, audience insight, rate card per paket, deliverables & SLA — media kit profesional siap kirim ke brand dalam hitungan menit." },
+        { title: "Laporan Performa Konten", desc: "Scorecard engagement, top konten, analisis underperform, benchmark niche, dan rekomendasi strategi bulan depan — actionable insight, bukan sekadar angka." },
+        { title: "AI Caption & Copy Konten", desc: "Caption Instagram, TikTok hook, thread LinkedIn, email newsletter — ditulis AI berdasarkan niche dan persona kreator, tinggal edit dan posting." },
+        { title: "Chatbot Kreator Pribadi", desc: "Bangun chatbot berisi semua konten, koleksi video, e-book, dan pengetahuan Anda — followers bisa tanya 24/7, Anda tidak perlu balas satu per satu." },
       ]
     }
   };
@@ -413,8 +431,10 @@ export default function Landing() {
                 Buat Chatbot AI Cerdas untuk
                 <br className="hidden md:block" />
                 <span className="text-primary">Belajar, Bekerja</span>
-                <span>, dan </span>
+                <span>, </span>
                 <span className="text-primary">Berusaha</span>
+                <span> &amp; </span>
+                <span className="text-violet-500">Kreator</span>
                 <span className="block text-2xl sm:text-3xl md:text-4xl mt-1 text-muted-foreground font-semibold">— Tanpa Coding</span>
               </h1>
 
@@ -431,6 +451,9 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-sm">
                   <Store className="h-4 w-4" /> Pemilik Usaha & UMKM
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-sm">
+                  <Clapperboard className="h-4 w-4" /> Content Creator
                 </div>
               </div>
               
@@ -516,7 +539,7 @@ export default function Landing() {
           <div className="text-center mb-10">
             <Badge variant="secondary" className="mb-4">Untuk Siapa Gustafta?</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Satu Platform, Tiga Peran AI
+              Satu Platform, Empat Peran AI
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Chatbot AI bukan hanya untuk bisnis. Gustafta hadir untuk mendukung siapa pun yang ingin belajar lebih cerdas, bekerja lebih efisien, dan membangun usaha yang lebih kuat.
@@ -587,6 +610,17 @@ export default function Landing() {
                       <Button className="gap-2" data-testid="button-try-tender">
                         <HardHat className="h-4 w-4" />
                         Coba Tender LPSE Assistant
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+                {activePersona === "kreator" && (
+                  <div className="text-center mt-6">
+                    <Link href="/pricing">
+                      <Button className="gap-2 bg-violet-600 hover:bg-violet-700 text-white" data-testid="button-try-kreator">
+                        <Clapperboard className="h-4 w-4" />
+                        Mulai Buat Chatbot Kreator
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -746,23 +780,27 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ─── SECTION: Bekerja & Berusaha Feature Highlights ─── */}
+      {/* ─── SECTION: Bekerja, Berusaha & Kreator Feature Highlights ─── */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-orange-500/10 text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 via-orange-500/10 to-violet-500/10 text-sm font-semibold mb-4 flex-wrap justify-center">
               <Briefcase className="h-4 w-4 text-emerald-500" />
               <span className="text-emerald-600 dark:text-emerald-400">Bekerja</span>
               <span className="text-muted-foreground mx-1">·</span>
               <Store className="h-4 w-4 text-orange-500" />
               <span className="text-orange-600 dark:text-orange-400">Berusaha</span>
+              <span className="text-muted-foreground mx-1">·</span>
+              <Clapperboard className="h-4 w-4 text-violet-500" />
+              <span className="text-violet-600 dark:text-violet-400">Kreator</span>
             </div>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              AI yang <span className="text-emerald-500">Bekerja</span> &{" "}
-              <span className="text-orange-500">Berusaha</span> untuk Anda
+              AI yang <span className="text-emerald-500">Bekerja</span>,{" "}
+              <span className="text-orange-500">Berusaha</span> &amp;{" "}
+              <span className="text-violet-500">Berkreasi</span> untuk Anda
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Dari notulis rapat otomatis dan drafter kontrak, hingga AI copywriter dan customer service 24/7 — Gustafta membekali Anda dengan tim AI yang tidak pernah tidur, tidak pernah cuti.
+              Dari notulis rapat, drafter kontrak, dan CS otomatis — hingga editorial calendar, script YouTube, dan proposal brand deal. Gustafta membekali tiga segmen dengan tim AI yang tidak pernah tidur, tidak pernah cuti.
             </p>
           </div>
 
@@ -848,12 +886,52 @@ export default function Landing() {
             </div>
           </div>
 
+          {/* Kreator column */}
+          <div className="mt-8">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                <Clapperboard className="h-5 w-5 text-violet-500" />
+              </div>
+              <h3 className="font-bold text-lg">Fitur Kreator</h3>
+              <Badge className="bg-violet-500/10 text-violet-600 dark:text-violet-400 border-0 text-xs">Content Creator</Badge>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[
+                { icon: CalendarDays, title: "Editorial Calendar AI", desc: "Kalender konten bulanan: content pillars, tema mingguan, jadwal posting per platform, dan 10 ide konten konkret — dikustomisasi sesuai niche Anda." },
+                { icon: Clapperboard, title: "Script YouTube & Podcast AI", desc: "Script lengkap: hook 5 detik yang kuat, opening problem, segmen isi, outro, dan CTA — terasa natural ketika dibaca keras, plus ide thumbnail." },
+                { icon: Award, title: "Proposal Brand Deal & Media Kit", desc: "Profil kreator, audience insight, rate card 5 paket, deliverables & SLA — media kit profesional siap kirim ke brand dalam menit." },
+                { icon: TrendingUp, title: "Laporan Performa Konten", desc: "Scorecard per platform, top 5 konten, analisis underperform, benchmark niche, dan rekomendasi strategi konten bulan depan." },
+                { icon: Megaphone, title: "AI Caption & Copy Konten", desc: "Caption Instagram, hook TikTok, thread LinkedIn, email newsletter — ditulis AI dari konteks niche kreator, tinggal posting." },
+                { icon: Video, title: "Chatbot Kreator Pribadi", desc: "Followers tanya langsung ke chatbot yang berisi semua konten, video, e-book, dan pengetahuan Anda — 24/7 tanpa perlu balas manual." },
+              ].map((f) => (
+                <div key={f.title} className="flex items-start gap-3 p-3.5 rounded-xl border border-violet-200 dark:border-violet-900 bg-violet-50/40 dark:bg-violet-950/20 hover:shadow-sm transition-shadow">
+                  <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <f.icon className="h-4 w-4 text-violet-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm mb-0.5">{f.title}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5">
+              <Link href="/pricing">
+                <Button size="sm" variant="outline" className="gap-2 border-violet-500/30 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30" data-testid="button-packs-kreator">
+                  <Package className="h-3.5 w-3.5" />
+                  Mulai Buat Chatbot Kreator
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
           {/* ROI stats */}
-          <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12">
             {[
               { value: "80%+", label: "Pertanyaan CS terjawab otomatis", color: "text-orange-500" },
               { value: "2–3 hari", label: "Hemat per proses tender", color: "text-emerald-500" },
-              { value: "24/7", label: "AI aktif tanpa biaya lembur", color: "text-blue-500" },
+              { value: "10 mnt", label: "Script YouTube siap dengan AI", color: "text-violet-500" },
               { value: "<30 mnt", label: "Setup chatbot pertama Anda", color: "text-primary" },
             ].map(s => (
               <div key={s.label} className="text-center p-4 rounded-xl border bg-muted/30">
