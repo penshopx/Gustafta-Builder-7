@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap, PenLine, Trophy, Mic, Megaphone, PieChart, Star, ScrollText, Briefcase, Store, Zap } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap, PenLine, Trophy, Mic, Megaphone, PieChart, Star, ScrollText, Briefcase, Store, Zap, CalendarDays, Video, Award, Clapperboard } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +64,11 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   sales_script: "AI Sales Script & Objection Handling",
   cashflow_report: "Laporan Cashflow & Keuangan Sederhana",
   customer_feedback: "Survey Kepuasan & NPS Tracker",
+  // Kreator Hub — Content Creator Toolkit
+  content_calendar: "Editorial Calendar & Content Planner",
+  video_script: "Script YouTube & Podcast Generator",
+  brand_deal_proposal: "Proposal Brand Deal & Media Kit",
+  content_analytics: "Laporan Performa Konten & Pertumbuhan",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -112,6 +117,11 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   sales_script: Zap,
   cashflow_report: PieChart,
   customer_feedback: Star,
+  // Kreator Hub — Content Creator Toolkit
+  content_calendar: CalendarDays,
+  video_script: Clapperboard,
+  brand_deal_proposal: Award,
+  content_analytics: TrendingUp,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -160,11 +170,17 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   sales_script: "Script penjualan, objection handling 50+ skenario, follow-up sequence, dan template closing dari data produk/layanan (AI-powered)",
   cashflow_report: "Laporan cashflow sederhana, analisis pendapatan vs pengeluaran, proyeksi omset, dan alert anomali dari data bisnis (AI-powered)",
   customer_feedback: "Template survey kepuasan pelanggan, NPS Tracker, dan analisis feedback dari data interaksi chatbot (AI-powered)",
+  // Kreator Hub — Content Creator Toolkit
+  content_calendar: "Editorial calendar bulanan: tema konten, content pillars, jadwal posting per platform, ide konten mingguan (AI-powered)",
+  video_script: "Script YouTube/Podcast lengkap: hook 5 detik, opening, segmen isi, outro, CTA — dari konteks niche & audience Anda (AI-powered)",
+  brand_deal_proposal: "Proposal kolaborasi brand + media kit: profil kreator, audience insight, rate card, paket kerjasama, cara kontak (AI-powered)",
+  content_analytics: "Laporan performa konten: top konten, engagement rate, tren pertumbuhan, rekomendasi strategi bulan berikutnya (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback", "content_calendar", "video_script", "brand_deal_proposal", "content_analytics"];
 const BEKERJA_APP_TYPES: MiniAppType[] = ["meeting_notes", "contract_drafter", "rab_estimator", "kpi_report"];
 const BERUSAHA_APP_TYPES: MiniAppType[] = ["social_media_copy", "sales_script", "cashflow_report", "customer_feedback"];
+const KREATOR_APP_TYPES: MiniAppType[] = ["content_calendar", "video_script", "brand_deal_proposal", "content_analytics"];
 const REQUIRES_PARAMS_TYPES: MiniAppType[] = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 const TENDER_DOC_TYPES: MiniAppType[] = ["compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan"];
 
@@ -720,6 +736,52 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
       guardrails: { include_followup_plan: true, segment_by_nps: true, include_benchmark: true },
     },
   },
+  // Kreator Hub — Content Creator Toolkit
+  content_calendar: {
+    name: "Editorial Calendar & Content Planner",
+    description: "Editorial calendar bulanan + content pillars + jadwal posting per platform.",
+    config: {
+      mode: "content_calendar",
+      calendar_period: "bulanan",
+      platforms: ["Instagram", "TikTok", "YouTube", "LinkedIn", "X/Twitter"],
+      content_pillars: 4,
+      posts_per_week: 5,
+      output_sections: ["content_pillars", "kalender_mingguan", "ide_konten", "jadwal_posting", "tips_konsistensi"],
+      guardrails: { realistic_schedule: true, include_hashtag_strategy: true, match_to_niche: true },
+    },
+  },
+  video_script: {
+    name: "Script YouTube & Podcast Generator",
+    description: "Script video/podcast lengkap: hook, opening, isi, outro, CTA dari niche Anda.",
+    config: {
+      mode: "video_script",
+      format: "YouTube",
+      target_duration_minutes: 10,
+      script_sections: ["hook_5detik", "opening_problem", "intro_diri", "segmen_isi", "transisi", "outro", "cta"],
+      guardrails: { hook_must_be_strong: true, include_broll_notes: true, include_thumbnail_idea: true, natural_tone: true },
+    },
+  },
+  brand_deal_proposal: {
+    name: "Proposal Brand Deal & Media Kit",
+    description: "Media kit kreator: profil, audience insight, rate card, paket kerjasama.",
+    config: {
+      mode: "brand_deal_proposal",
+      proposal_sections: ["profil_kreator", "audience_insight", "konten_terbaik", "rate_card", "paket_kerjasama", "deliverables", "cara_kontak"],
+      rate_card_tiers: ["Single Post", "Story Pack", "Video Reel", "Bundel Bulanan", "Brand Ambassador"],
+      guardrails: { professional_tone: true, include_testimonial_slot: true, no_hallucination: true },
+    },
+  },
+  content_analytics: {
+    name: "Laporan Performa Konten & Pertumbuhan",
+    description: "Analisis performa konten: top konten, engagement, tren, rekomendasi strategi.",
+    config: {
+      mode: "content_analytics",
+      report_period: "bulanan",
+      metrics: ["total_reach", "engagement_rate", "follower_growth", "top_konten", "tren_platform"],
+      output_sections: ["ringkasan_eksekutif", "scorecard_platform", "top_5_konten", "analisis_tren", "konten_underperform", "rekomendasi_strategi"],
+      guardrails: { data_driven: true, no_hallucination: true, mark_estimated_as: "ESTIMASI" },
+    },
+  },
 };
 
 function buildTenderPrompt(docType: MiniAppType, ctx: { namaProyek: string; nomorPaket: string; tahunAnggaran: string; konteksPermasalahan: string }, track: string): string {
@@ -1233,6 +1295,54 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                     <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 border-orange-200 text-orange-600 dark:text-orange-400">
                       {trackBadge}
                     </Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Kreator Hub */}
+      <Card className="border-violet-200 dark:border-violet-800 bg-violet-50/30 dark:bg-violet-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+              <Clapperboard className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm">Kreator — Content Creator AI Tools</h3>
+              <p className="text-xs text-muted-foreground">Editorial calendar, script video, media kit brand deal & laporan performa konten</p>
+            </div>
+            <Badge variant="outline" className="ml-auto text-xs border-violet-300 text-violet-700 dark:text-violet-400 shrink-0">4 Tools</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {KREATOR_APP_TYPES.map((type) => {
+              const KIcon = miniAppTypeIcons[type] || Clapperboard;
+              const cfg = DEFAULT_MINI_APP_CONFIGS[type];
+              return (
+                <div
+                  key={type}
+                  className="flex items-start gap-2.5 p-3 rounded-lg border border-violet-100 dark:border-violet-900 bg-white dark:bg-background hover:border-violet-300 dark:hover:border-violet-700 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    const defaults = cfg || {};
+                    setNewApp({
+                      name: defaults.name || miniAppTypeLabels[type],
+                      description: defaults.description || miniAppTypeDescriptions[type],
+                      type,
+                      config: defaults.config || {},
+                      icon: "app",
+                    });
+                    setCreateDialogOpen(true);
+                  }}
+                  data-testid={`kreator-app-card-${type}`}
+                >
+                  <div className="w-8 h-8 rounded-md bg-violet-500/10 flex items-center justify-center shrink-0 group-hover:bg-violet-500/20 transition-colors">
+                    <KIcon className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium leading-tight line-clamp-2">{miniAppTypeLabels[type]}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{miniAppTypeDescriptions[type]}</p>
                   </div>
                 </div>
               );

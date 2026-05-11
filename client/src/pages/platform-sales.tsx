@@ -148,7 +148,7 @@ const PACKAGES = [
       { text: "10 Seri / Domain Konten", included: true },
       { text: "Chatbot AI (200 agent)", included: true },
       { text: "Modul Pembelajaran (full)", included: true },
-      { text: "41 Tipe Mini App", included: true },
+      { text: "45 Tipe Mini App", included: true },
       { text: "20.000 pesan AI / bulan", included: true },
       { text: "E-Course tak terbatas", included: true },
       { text: "Document Generator (semua template)", included: true },

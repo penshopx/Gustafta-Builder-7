@@ -9119,12 +9119,276 @@ RENCANA TINDAK LANJUT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Survey & NPS Tracker ini dibuat AI. Distribusikan via WhatsApp, email, atau embed di website.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "content_calendar") {
+        modePrompt = `Kamu adalah AI content strategist untuk content creator Indonesia. Buat EDITORIAL CALENDAR & CONTENT PLAN BULANAN berdasarkan data kreator/bisnis di bawah.
+
+ATURAN KETAT:
+- Identifikasi niche, platform utama, dan target audience dari data yang ada.
+- Jika niche tidak spesifik, buat berdasarkan nama/deskripsi agen dan konteks yang tersedia.
+- Content pillars WAJIB konsisten dan saling melengkapi.
+- Kalender harus realistis — jadwal posting yang bisa dieksekusi solo kreator.
+- Sertakan ide konten konkret, bukan hanya tema abstrak.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EDITORIAL CALENDAR & CONTENT PLAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROFIL KREATOR
+Niche          : [dari data]
+Platform Utama : [Instagram / TikTok / YouTube / LinkedIn — sesuai data]
+Target Audience: [dari data atau identifikasi]
+Tone & Gaya    : [dari data]
+Tujuan Bulan Ini: [pertumbuhan / engagement / monetisasi / awareness]
+
+CONTENT PILLARS (4 Pilar Utama)
+┌─────────────────────────────────────────────────────────┐
+│ Pilar 1: [nama pilar]  — [deskripsi + % dari total konten] │
+│ Pilar 2: [nama pilar]  — [deskripsi + % dari total konten] │
+│ Pilar 3: [nama pilar]  — [deskripsi + % dari total konten] │
+│ Pilar 4: [nama pilar]  — [deskripsi + % dari total konten] │
+└─────────────────────────────────────────────────────────┘
+
+JADWAL POSTING MINGGUAN
+Platform    : [nama platform] | Frekuensi: [X]x/minggu | Waktu Terbaik: [jam]
+
+MINGGU 1 — Tema: [tema minggu 1]
+• Senin   : [judul/ide konten spesifik] — Pilar [X] — Format: [Reel/Post/Story/Short]
+• Rabu    : [judul/ide konten spesifik] — Pilar [X] — Format: [Reel/Post/Story/Short]
+• Jumat   : [judul/ide konten spesifik] — Pilar [X] — Format: [Reel/Post/Story/Short]
+
+MINGGU 2 — Tema: [tema minggu 2]
+• [lanjutkan format yang sama]
+
+MINGGU 3 — Tema: [tema minggu 3]
+• [lanjutkan format yang sama]
+
+MINGGU 4 — Tema: [tema minggu 4]
+• [lanjutkan format yang sama]
+
+IDE KONTEN TOP 10 (Siap Eksekusi)
+1. [Judul konten menarik] — Hook: "[kalimat pembuka]" — Format: [Reel/Video/Post]
+2. [Judul konten menarik] — Hook: "[kalimat pembuka]" — Format: [Reel/Video/Post]
+3. [lanjutkan hingga 10]
+
+STRATEGI HASHTAG
+Instagram: #[hashtag1] #[hashtag2] #[hashtag3] (mix: besar + niche + branded)
+TikTok   : #[hashtag1] #[hashtag2] #[hashtag3]
+
+TIPS KONSISTENSI
+• [Tips 1 untuk menjaga konsistensi posting]
+• [Tips 2 untuk batch content creation]
+• [Tips 3 untuk repurposing konten antar platform]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Editorial Calendar ini dibuat AI. Sesuaikan dengan momen, trending topic, dan jadwal aktualmu.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "video_script") {
+        modePrompt = `Kamu adalah AI script writer profesional untuk YouTube dan Podcast Indonesia. Buat SCRIPT VIDEO/PODCAST LENGKAP berdasarkan data kreator di bawah.
+
+ATURAN KETAT:
+- Hook pembuka 5 detik WAJIB kuat — harus bikin penonton tidak skip.
+- Script harus terasa natural ketika dibaca keras — tidak kaku.
+- Sertakan notes untuk B-Roll, transisi, atau elemen visual yang disarankan.
+- Target durasi: estimasikan berdasarkan panjang script (250 kata ≈ 2 menit berbicara normal).
+- Sertakan 1 ide thumbnail yang compelling.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SCRIPT VIDEO / PODCAST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METADATA VIDEO
+Judul (SEO)   : [judul yang searchable + menarik — max 60 karakter]
+Deskripsi     : [1-2 kalimat preview untuk deskripsi YouTube]
+Platform      : [YouTube / Podcast / Reel / Short]
+Target Durasi : [X] menit
+Ide Thumbnail : [deskripsi visual thumbnail yang bikin penasaran]
+
+── HOOK (0-5 detik) ──
+"[Kalimat pertama yang langsung mengejutkan / memancing rasa ingin tahu / membuat penonton relate]"
+[NOTE B-Roll: tampilkan visual yang relevan]
+
+── OPENING — PROBLEM AGITATION (5-30 detik) ──
+"[Perjelas masalah yang dirasakan target audience — buat mereka merasa dipahami]"
+[NOTE B-Roll: [visual yang mendukung]]
+
+── INTRO DIRI / CHANNEL (30-60 detik) ──
+"[Perkenalan singkat + apa yang akan didapatkan penonton dari video ini]"
+
+── TRANSISI ──
+"[Kalimat penghubung ke konten utama]"
+
+── SEGMEN UTAMA ──
+
+SEGMEN 1: [Nama Segmen]
+"[Script segmen 1 — spesifik, informatif, engaging]"
+[NOTE: [saran visual/animasi/infografis jika ada]]
+
+SEGMEN 2: [Nama Segmen]
+"[Script segmen 2]"
+
+SEGMEN 3: [Nama Segmen]
+"[Script segmen 3]"
+
+[lanjutkan sesuai kedalaman topik]
+
+── OUTRO (30-60 detik) ──
+"[Ringkasan takeaway utama — max 2-3 poin]"
+"[Teaser konten berikutnya atau pertanyaan untuk komentar]"
+
+── CALL TO ACTION ──
+"[CTA spesifik: subscribe, like, komentar topik, kunjungi link, atau join komunitas]"
+
+TIMESTAMPS (untuk deskripsi YouTube)
+00:00 — Hook
+00:05 — [Nama Segmen 1]
+[lanjutkan]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Script ini dibuat AI. Baca keras sebelum rekam, sesuaikan dengan gaya bicaramu sendiri.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "brand_deal_proposal") {
+        modePrompt = `Kamu adalah AI media kit & brand deal specialist untuk content creator Indonesia. Buat PROPOSAL BRAND DEAL & MEDIA KIT PROFESIONAL berdasarkan data kreator di bawah.
+
+ATURAN KETAT:
+- Gunakan semua data yang tersedia (nama, niche, platform, jumlah follower, engagement) dari Otak Proyek.
+- Jika data statistik tidak tersedia, buat template dengan placeholder [___] yang jelas.
+- Tone harus profesional tapi tetap personal dan authentic — bukan corporate kaku.
+- Rate card WAJIB ada, sertakan opsi bundel yang lebih menarik dari satuan.
+- Tambahkan social proof slot (testimonial/client list) meski data belum ada.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MEDIA KIT & PROPOSAL BRAND DEAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROFIL KREATOR
+Nama/Username : [dari data]
+Niche/Kategori: [dari data]
+Platform      : [platform utama + link]
+Tagline       : "[satu kalimat yang mendeskripsikan nilai unik kreator ini]"
+
+AUDIENCE INSIGHT
+┌────────────────────────────────────────────────┐
+│ Platform   │ Followers │ Avg. Views │ Eng. Rate │
+│ Instagram  │ [___]     │ [___]      │ [__]%     │
+│ TikTok     │ [___]     │ [___]      │ [__]%     │
+│ YouTube    │ [___]     │ [___]      │ [__]%     │
+└────────────────────────────────────────────────┘
+
+Demografi Audience:
+• Gender  : [% perempuan / % laki-laki] [ESTIMASI jika tidak ada data]
+• Usia    : [range usia dominan]
+• Lokasi  : [kota/negara dominan]
+• Minat   : [topik yang disukai audience]
+
+TOP KONTEN & PENCAPAIAN
+• [Konten viral/highlight 1] — [reach/view]
+• [Konten viral/highlight 2]
+• [Pencapaian: kolaborasi sebelumnya, media coverage, penghargaan]
+
+PAKET KERJASAMA & RATE CARD
+┌──────────────────────────────────────────────────────────┐
+│ Paket              │ Deliverable             │ Harga      │
+│ 1 Feed Post        │ 1 foto/carousel + caption│ Rp [___]  │
+│ Story Pack (3x)    │ 3 story + swipe-up      │ Rp [___]  │
+│ 1 Reel/Short       │ 1 video 30-60 detik     │ Rp [___]  │
+│ YouTube Review     │ 1 video 5-10 menit      │ Rp [___]  │
+│ Bundel Konten 1 Bulan│ Feed + Story + Reel   │ Rp [___]  │
+│ Brand Ambassador   │ Kontrak 3-6 bulan       │ Nego      │
+└──────────────────────────────────────────────────────────┘
+*Harga belum termasuk biaya produksi tambahan. Nego untuk kampanye jangka panjang.
+
+DELIVERABLES & SLA
+• Konten dikirim untuk review: H-3 sebelum tayang
+• Revisi: maks 2x revisi per konten
+• Approval final: H-1 sebelum publish
+• Laporan performa: H+7 setelah tayang
+• Hak penggunaan konten: [X] bulan
+
+TESTIMONIAL KLIEN
+"[Testimoni klien 1 — nama, brand]" [ISI DENGAN DATA AKTUAL]
+
+CARA KONTAK
+Email   : [___]
+WhatsApp: [___]
+Instagram DM: [username]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Lengkapi semua bagian [___] dengan data aktual sebelum dikirim ke brand.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "content_analytics") {
+        modePrompt = `Kamu adalah AI content analytics specialist. Buat LAPORAN PERFORMA KONTEN & PERTUMBUHAN berdasarkan data kreator di bawah.
+
+ATURAN KETAT:
+- Gunakan semua data performa yang tersedia dari Otak Proyek.
+- Jika data statistik spesifik tidak tersedia, buat template siap isi dengan placeholder [DATA] dan tandai [ESTIMASI] jika menggunakan benchmark.
+- Identifikasi pola konten yang berhasil dan yang underperform.
+- Rekomendasi harus actionable dan spesifik — bukan saran generik.
+
+FORMAT OUTPUT:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAPORAN PERFORMA KONTEN & PERTUMBUHAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PERIODE  : [bulan/periode dari data atau bulan berjalan]
+KREATOR  : [dari data]
+PLATFORM : [platform utama]
+
+RINGKASAN EKSEKUTIF
+[2-3 kalimat kondisi performa bulan ini — tren positif/negatif yang paling signifikan]
+
+SCORECARD PLATFORM
+┌──────────────────────────────────────────────────────────────┐
+│ Metrik              │ Bulan Ini │ Bulan Lalu │ Change  │ Status │
+│ Total Reach         │ [___]     │ [___]      │ [+/-]%  │ ✅/⚠️   │
+│ Engagement Rate     │ [__]%     │ [__]%      │ [+/-]%  │ ✅/⚠️   │
+│ Follower Growth     │ +[___]    │ +[___]     │ [+/-]%  │ ✅/⚠️   │
+│ Total Konten Upload │ [___]     │ [___]      │ [+/-]   │ ✅/⚠️   │
+│ Avg. Views/Konten   │ [___]     │ [___]      │ [+/-]%  │ ✅/⚠️   │
+└──────────────────────────────────────────────────────────────┘
+✅ Tren Positif  ⚠️ Perlu Perhatian
+
+TOP 5 KONTEN BULAN INI
+1. "[Judul konten]" — Reach: [___] | Engagement: [__]% | [insight: kenapa berhasil]
+2. "[Judul konten]" — [lanjutkan]
+3. [lanjutkan hingga 5]
+
+KONTEN UNDERPERFORM
+• "[Judul konten]" — Reach: [___] | [analisis: kemungkinan kenapa tidak berhasil]
+• [lanjutkan jika ada]
+
+ANALISIS TREN & POLA
+• Format Terbaik: [Reel / Carousel / Single / Video Panjang] — avg engagement [__]%
+• Waktu Posting Terbaik: [hari] jam [waktu]
+• Topik dengan Engagement Tertinggi: [topik]
+• Topik yang Perlu Dikurangi: [topik]
+
+BENCHMARK PLATFORM [ESTIMASI]
+• Engagement rate rata-rata niche [niche]: [__]% → Kamu: [__]% → [di atas/bawah benchmark]
+
+REKOMENDASI STRATEGI BULAN DEPAN
+1. [Rekomendasi prioritas tinggi — spesifik dan actionable]
+2. [Rekomendasi prioritas sedang]
+3. [Rekomendasi untuk eksperimen baru]
+
+EKSPERIMEN YANG DISARANKAN
+• [Format/topik baru yang worth dicoba berdasarkan tren platform]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platform.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       }
 
       const agent = await storage.getAgent(agentId);
       const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
 
-      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback"].includes(appType);
+      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback", "content_calendar", "video_script", "brand_deal_proposal", "content_analytics"].includes(appType);
       const userPromptById: Record<string, string> = {
         nib_status_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`,
         whatsapp_status_update: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat pesan WhatsApp status proyek untuk klien sesuai format dan aturan di atas.`,
@@ -9142,6 +9406,10 @@ Survey & NPS Tracker ini dibuat AI. Distribusikan via WhatsApp, email, atau embe
         sales_script: `Berikut data Otak Proyek/Bisnis:\n\n${projectBrainBlock}\n\nBuat Sales Script & Objection Handling sesuai format dan aturan di atas. Sesuaikan dengan produk/layanan dan segmen target dari data di atas.`,
         cashflow_report: `Berikut data Otak Proyek/Bisnis:\n\n${projectBrainBlock}\n\nBuat Laporan Cashflow & Keuangan sesuai format dan aturan di atas. Analisis kondisi keuangan berdasarkan data yang tersedia dan berikan rekomendasi.`,
         customer_feedback: `Berikut data Otak Proyek/Bisnis:\n\n${projectBrainBlock}\n\nBuat template Survey Kepuasan & NPS Tracker sesuai format dan aturan di atas. Sesuaikan pertanyaan dengan jenis bisnis dan segmen pelanggan dari data di atas.`,
+        content_calendar: `Berikut data Kreator/Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Editorial Calendar & Content Plan bulanan sesuai format dan aturan di atas. Sesuaikan niche, platform, dan tone dengan konteks kreator dari data di atas.`,
+        video_script: `Berikut data Kreator/Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Script YouTube/Podcast lengkap sesuai format dan aturan di atas. Sesuaikan topik, niche, target audience, dan gaya komunikasi dengan konteks kreator dari data di atas.`,
+        brand_deal_proposal: `Berikut data Kreator/Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Proposal Brand Deal & Media Kit sesuai format dan aturan di atas. Sesuaikan profil kreator, audience insight, dan rate card dengan konteks dari data di atas.`,
+        content_analytics: `Berikut data Kreator/Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Laporan Performa Konten & Pertumbuhan sesuai format dan aturan di atas. Analisis berdasarkan data yang tersedia dan berikan rekomendasi strategi konten bulan berikutnya.`,
       };
 
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [
