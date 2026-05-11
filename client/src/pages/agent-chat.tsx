@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle, Calculator, ListChecks, Wand2, ChevronUp, FileOutput, Hash, Pencil, CornerDownLeft } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle, Calculator, ListChecks, Wand2, ChevronUp, FileOutput, Hash, Pencil, CornerDownLeft, Link2, FileDown, FileCode2 } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 import { MessageContent as SharedMessageContent } from "@/lib/format-message";
@@ -455,14 +456,26 @@ export default function AgentChat() {
     );
   };
 
-  const exportChat = () => {
-    if (messages.length === 0) return;
+  const [chatCopied, setChatCopied] = useState(false);
+
+  const buildChatText = (format: "txt" | "md" = "txt") => {
+    const header = format === "md"
+      ? `# Chat dengan ${config?.name || "AI"}\n*${new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}*\n\n---\n\n`
+      : `Chat dengan ${config?.name || "AI"}\n${"=".repeat(40)}\n${new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n`;
     const lines = messages.map((m) => {
-      const time = m.timestamp.toLocaleString();
-      const sender = m.role === "user" ? "Anda" : (config?.name || "Assistant");
+      const time = m.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      const sender = m.role === "user" ? "Anda" : (config?.name || "AI");
+      if (format === "md") {
+        return `### ${m.role === "user" ? "👤" : "🤖"} ${sender} — ${time}\n\n${m.content}\n`;
+      }
       return `[${time}] ${sender}:\n${m.content}\n`;
     });
-    const text = `Chat dengan ${config?.name || "AI"}\n${"=".repeat(40)}\n\n${lines.join("\n")}`;
+    return header + lines.join("\n---\n\n");
+  };
+
+  const exportChat = () => {
+    if (messages.length === 0) return;
+    const text = buildChatText("txt");
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -470,6 +483,26 @@ export default function AgentChat() {
     a.download = `chat-${config?.name || "ai"}-${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const exportChatMarkdown = () => {
+    if (messages.length === 0) return;
+    const text = buildChatText("md");
+    const blob = new Blob([text], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-${config?.name || "ai"}-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const copyFullChat = async () => {
+    if (messages.length === 0) return;
+    const text = buildChatText("txt");
+    await navigator.clipboard.writeText(text);
+    setChatCopied(true);
+    setTimeout(() => setChatCopied(false), 2500);
   };
 
   const clearChat = () => {
@@ -1854,19 +1887,45 @@ export default function AgentChat() {
           >
             {voiceMode ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </Button>
-          {hasMessages && (
-            <>
-              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={exportChat}>
-                <Download className="w-4 h-4" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost" className="text-white shrink-0">
+                <Share2 className="w-4 h-4" />
               </Button>
-              <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={clearChat}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </>
-          )}
-          <Button size="icon" variant="ghost" className="text-white shrink-0" onClick={handleShare}>
-            <Share2 className="w-4 h-4" />
-          </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52">
+              <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">Bagikan</DropdownMenuLabel>
+              <DropdownMenuItem onClick={handleShare}>
+                <Link2 className="w-3.5 h-3.5 mr-2" />
+                Bagikan Link Chatbot
+              </DropdownMenuItem>
+              {hasMessages && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">Salin & Ekspor Percakapan</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={copyFullChat}>
+                    {chatCopied
+                      ? <><Check className="w-3.5 h-3.5 mr-2 text-green-500" /><span className="text-green-600 font-medium">Tersalin!</span></>
+                      : <><Copy className="w-3.5 h-3.5 mr-2" />Salin Percakapan</>
+                    }
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportChat}>
+                    <FileDown className="w-3.5 h-3.5 mr-2" />
+                    Unduh sebagai .TXT
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportChatMarkdown}>
+                    <FileCode2 className="w-3.5 h-3.5 mr-2" />
+                    Unduh sebagai .MD
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={clearChat} className="text-destructive focus:text-destructive">
+                    <Trash2 className="w-3.5 h-3.5 mr-2" />
+                    Hapus Percakapan
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -2700,9 +2759,18 @@ export default function AgentChat() {
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground text-center mt-1.5 sm:mt-2">
-            Powered by <a href="/" className="font-medium hover:underline">Gustafta</a>
-          </p>
+          <div className="flex items-center justify-center gap-3 mt-1.5 sm:mt-2">
+            {hasMessages && (
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
+                <Check className="w-2.5 h-2.5 text-green-500" />
+                Percakapan tersimpan otomatis
+              </span>
+            )}
+            {hasMessages && <span className="text-muted-foreground/30 text-[10px]">·</span>}
+            <p className="text-[10px] text-muted-foreground">
+              Powered by <a href="/" className="font-medium hover:underline">Gustafta</a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
