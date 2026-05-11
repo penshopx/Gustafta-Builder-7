@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle, Calculator, ListChecks, Wand2, ChevronUp, FileOutput, Hash, Pencil, CornerDownLeft, Link2, FileDown, FileCode2 } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle, Calculator, ListChecks, Wand2, ChevronUp, FileOutput, Hash, Pencil, CornerDownLeft, Link2, FileDown, FileCode2, Bookmark, BookmarkCheck, Search, SearchX, ChevronDown, ChevronUp as ChevronUpIcon } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -337,6 +337,12 @@ export default function AgentChat() {
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashMenuIdx, setSlashMenuIdx] = useState(0);
   const [showQuickActions, setShowQuickActions] = useState(false);
+  // Bookmark / pin
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [showPinnedPanel, setShowPinnedPanel] = useState(false);
+  // In-chat search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [clientToken, setClientToken] = useState<string | null>(null);
   const [clientInfo, setClientInfo] = useState<{ name: string; email: string; plan: string } | null>(null);
   const [showRegistration, setShowRegistration] = useState(false);
@@ -437,6 +443,67 @@ export default function AgentChat() {
       }
     } catch {}
   }, [messages, getStorageKey]);
+
+  // Load pinned message IDs from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`gustafta_pins_${params.agentId}`);
+      if (saved) setPinnedIds(new Set(JSON.parse(saved)));
+    } catch {}
+  }, [params.agentId]);
+
+  // Persist pinned IDs whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(`gustafta_pins_${params.agentId}`, JSON.stringify([...pinnedIds]));
+    } catch {}
+  }, [pinnedIds, params.agentId]);
+
+  const togglePin = (messageId: string) => {
+    setPinnedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(messageId)) next.delete(messageId);
+      else next.add(messageId);
+      return next;
+    });
+  };
+
+  const shareToWhatsApp = (text: string) => {
+    const maxLen = 1200;
+    const truncated = text.length > maxLen ? text.slice(0, maxLen) + "\n...(diperpendek)" : text;
+    window.open(`https://wa.me/?text=${encodeURIComponent(truncated)}`, "_blank");
+  };
+
+  const exportPinnedMessages = () => {
+    const pinned = messages.filter(m => pinnedIds.has(m.id));
+    if (!pinned.length) return;
+    const header = `Pesan Tersimpan — Chat dengan ${config?.name || "AI"}\n${"=".repeat(44)}\n${new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n`;
+    const lines = pinned.map(m => {
+      const time = m.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      const sender = m.role === "user" ? "Anda" : (config?.name || "AI");
+      return `[${time}] ${sender}:\n${m.content}\n`;
+    });
+    const blob = new Blob([header + lines.join("\n---\n\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pinned-${config?.name || "ai"}-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Smart slash suggestion based on attached file type
+  const getFileSuggestion = (files: UploadedFile[]): { cmd: string; label: string; emoji: string } | null => {
+    if (!files.length) return null;
+    const f = files[0];
+    const ext = f.fileName.split(".").pop()?.toLowerCase() || "";
+    const cat = f.category;
+    if (cat === "image") return { cmd: "/analisis", emoji: "🔍", label: "Analisis Gambar" };
+    if (["xlsx", "xls", "csv"].includes(ext)) return { cmd: "/tabel", emoji: "📊", label: "Buat Tabel dari File" };
+    if (["pdf", "doc", "docx"].includes(ext)) return { cmd: "/analisis", emoji: "🔍", label: "Analisis Dokumen" };
+    if (["ppt", "pptx"].includes(ext)) return { cmd: "/ringkas", emoji: "📋", label: "Ringkas Presentasi" };
+    return null;
+  };
 
   const copyToClipboard = async (text: string, messageId: string) => {
     try {
@@ -1887,13 +1954,38 @@ export default function AgentChat() {
           >
             {voiceMode ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </Button>
+          {/* Search toggle */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className={cn("text-white shrink-0", searchOpen && "bg-white/20")}
+            onClick={() => { setSearchOpen(s => !s); setSearchQuery(""); }}
+            title="Cari dalam percakapan"
+          >
+            {searchOpen ? <SearchX className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+          </Button>
+          {/* Pinned badge */}
+          {pinnedIds.size > 0 && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-white shrink-0 relative"
+              onClick={() => setShowPinnedPanel(p => !p)}
+              title="Pesan yang di-pin"
+            >
+              <BookmarkCheck className="w-4 h-4 text-amber-300" />
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-amber-400 text-[8px] font-bold text-white flex items-center justify-center">
+                {pinnedIds.size}
+              </span>
+            </Button>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" className="text-white shrink-0">
                 <Share2 className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">Bagikan</DropdownMenuLabel>
               <DropdownMenuItem onClick={handleShare}>
                 <Link2 className="w-3.5 h-3.5 mr-2" />
@@ -1917,6 +2009,12 @@ export default function AgentChat() {
                     <FileCode2 className="w-3.5 h-3.5 mr-2" />
                     Unduh sebagai .MD
                   </DropdownMenuItem>
+                  {pinnedIds.size > 0 && (
+                    <DropdownMenuItem onClick={exportPinnedMessages}>
+                      <BookmarkCheck className="w-3.5 h-3.5 mr-2 text-amber-500" />
+                      Unduh Pesan Tersimpan ({pinnedIds.size})
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={clearChat} className="text-destructive focus:text-destructive">
                     <Trash2 className="w-3.5 h-3.5 mr-2" />
@@ -2176,14 +2274,74 @@ export default function AgentChat() {
           </div>
         )}
 
+        {/* In-chat Search Bar */}
+        {searchOpen && (
+          <div className="border-b bg-muted/40 px-3 sm:px-4 py-2">
+            <div className="max-w-2xl mx-auto flex items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <input
+                autoFocus
+                type="text"
+                placeholder="Cari dalam percakapan..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent text-sm outline-none placeholder-muted-foreground"
+              />
+              {searchQuery && (
+                <span className="text-[10px] text-muted-foreground shrink-0">
+                  {messages.filter(m => m.content.toLowerCase().includes(searchQuery.toLowerCase())).length} hasil
+                </span>
+              )}
+              <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} className="text-muted-foreground hover:text-foreground">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Pinned Messages Panel */}
+        {hasMessages && showPinnedPanel && pinnedIds.size > 0 && (
+          <div className="border-b bg-amber-50 dark:bg-amber-950/20">
+            <button
+              onClick={() => setShowPinnedPanel(false)}
+              className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 text-left"
+            >
+              <BookmarkCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">{pinnedIds.size} Pesan Tersimpan</span>
+              <ChevronUpIcon className="w-3 h-3 text-amber-500 ml-auto" />
+            </button>
+            <div className="px-3 sm:px-4 pb-3 space-y-2 max-h-56 overflow-y-auto max-w-2xl mx-auto">
+              {messages.filter(m => pinnedIds.has(m.id) && m.role === "assistant").map(m => (
+                <div key={m.id} className="bg-white dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800 p-2.5">
+                  <p className="text-[11px] text-muted-foreground mb-1 flex items-center gap-1">
+                    <span>{m.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <span>·</span>
+                    <button onClick={() => togglePin(m.id)} className="text-amber-500 hover:text-amber-700 font-medium">Lepas pin</button>
+                    <button onClick={() => copyToClipboard(m.content, m.id)} className="ml-auto text-muted-foreground hover:text-foreground">
+                      {copiedId === m.id ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                    </button>
+                  </p>
+                  <p className="text-xs line-clamp-3 text-foreground/80">{m.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Chat Messages */}
         {hasMessages && (
           <div className="flex-1 overflow-y-auto px-3 sm:px-4" ref={scrollRef}>
             <div className="py-3 sm:py-4 space-y-3 sm:space-y-4 max-w-2xl mx-auto">
-              {messages.map((message) => (
+              {messages.map((message) => {
+                const isSearchMatch = searchOpen && searchQuery.trim() && message.content.toLowerCase().includes(searchQuery.toLowerCase());
+                return (
                 <div
                   key={message.id}
-                  className={cn("flex gap-2 sm:gap-3", message.role === "user" && "flex-row-reverse")}
+                  className={cn(
+                    "flex gap-2 sm:gap-3",
+                    message.role === "user" && "flex-row-reverse",
+                    isSearchMatch && "ring-2 ring-primary/40 ring-offset-2 rounded-2xl"
+                  )}
                  
                 >
                   {message.role === "assistant" ? (
@@ -2319,16 +2477,35 @@ export default function AgentChat() {
                               "hover-elevate rounded-full p-0.5",
                               message.feedback === "down" ? "text-destructive" : "text-muted-foreground/60"
                             )}
-                           
                           >
                             <ThumbsDown className="w-3 h-3" />
+                          </button>
+                          {/* Bookmark/Pin */}
+                          <button
+                            onClick={() => togglePin(message.id)}
+                            title={pinnedIds.has(message.id) ? "Lepas pin" : "Pin pesan ini"}
+                            className={cn(
+                              "hover-elevate rounded-full p-0.5",
+                              pinnedIds.has(message.id) ? "text-amber-500" : "text-muted-foreground/60"
+                            )}
+                          >
+                            {pinnedIds.has(message.id) ? <BookmarkCheck className="w-3 h-3" /> : <Bookmark className="w-3 h-3" />}
+                          </button>
+                          {/* WhatsApp share */}
+                          <button
+                            onClick={() => shareToWhatsApp(message.content)}
+                            title="Kirim ke WhatsApp"
+                            className="text-muted-foreground/60 hover-elevate rounded-full p-0.5 hover:text-green-600"
+                          >
+                            <SiWhatsapp className="w-3 h-3" />
                           </button>
                         </>
                       )}
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+              })}
 
               <SmartCtaCard />
 
@@ -2551,6 +2728,29 @@ export default function AgentChat() {
               </div>
             </div>
           )}
+
+          {/* Smart file slash suggestion */}
+          {pendingFiles.length > 0 && (() => {
+            const suggestion = getFileSuggestion(pendingFiles);
+            if (!suggestion || input.trim()) return null;
+            return (
+              <div className="max-w-2xl mx-auto mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20">
+                <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span className="text-xs text-foreground/70 flex-1">Saran untuk file ini:</span>
+                <button
+                  onClick={() => {
+                    const sc = SLASH_COMMANDS.find(c => c.cmd === suggestion.cmd);
+                    if (sc) applySlashCommand(sc);
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs bg-primary/10 hover:bg-primary/20 border border-primary/30 font-medium text-primary transition-colors"
+                >
+                  <span>{suggestion.emoji}</span>
+                  <span>{suggestion.label}</span>
+                  <span className="font-mono text-[10px] opacity-60">{suggestion.cmd}</span>
+                </button>
+              </div>
+            );
+          })()}
 
           {pendingFiles.length > 0 && (
             <div className="flex flex-wrap gap-2 max-w-2xl mx-auto mb-2">
