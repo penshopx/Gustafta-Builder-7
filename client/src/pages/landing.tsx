@@ -1147,6 +1147,138 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ─── SECTION: Apa yang Anda Dapat ─────────────────────────── */}
+      <section className="py-16 md:py-24 bg-muted/30 border-y" id="deliverable">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-3 text-xs">Yang Anda Terima</Badge>
+            <h2 className="text-2xl md:text-4xl font-bold mb-3">
+              Setelah Subscribe, Anda Langsung Dapat <span className="text-primary">Ini</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+              Bukan janji fitur — ini deliverable konkret yang siap Anda gunakan sejak hari pertama.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto mb-12">
+            {[
+              {
+                icon: Bot,
+                color: "text-primary",
+                bg: "bg-primary/10",
+                title: "Chatbot AI Siap Pakai",
+                desc: "Agent dengan sistem prompt, knowledge base, dan persona yang sudah dikonfigurasi. Jawab pertanyaan user secara otomatis 24/7.",
+                tag: "Core",
+              },
+              {
+                icon: Code,
+                color: "text-violet-500",
+                bg: "bg-violet-500/10",
+                title: "Embed Code untuk Website",
+                desc: "Satu baris kode JavaScript. Tempel di website Anda, chatbot langsung muncul sebagai floating widget atau iframe.",
+                tag: "Deploy",
+                code: true,
+              },
+              {
+                icon: Globe,
+                color: "text-blue-500",
+                bg: "bg-blue-500/10",
+                title: "URL Chat Publik",
+                desc: "Setiap agent punya URL publik sendiri (gustafta.app/bot/[id]). Bagikan ke WhatsApp, email, atau QR code.",
+                tag: "Share",
+              },
+              {
+                icon: BookOpen,
+                color: "text-emerald-500",
+                bg: "bg-emerald-500/10",
+                title: "Knowledge Base Terstruktur",
+                desc: "Upload dokumen PDF, teks, URL, atau Q&A. Agent Anda menjawab berdasarkan data yang Anda upload.",
+                tag: "Konten",
+              },
+              {
+                icon: Blocks,
+                color: "text-orange-500",
+                bg: "bg-orange-500/10",
+                title: "Mini Apps 45 Tipe",
+                desc: "RAB estimator, contract drafter, scorecard tender, notulis rapat, editorial calendar, sales script — tools produktivitas siap pakai.",
+                tag: "Tools",
+              },
+              {
+                icon: BarChart3,
+                color: "text-pink-500",
+                bg: "bg-pink-500/10",
+                title: "Dashboard Manajemen",
+                desc: "Kelola semua agent, lihat analytics percakapan, atur knowledge base, konfigurasi widget — dari satu dashboard.",
+                tag: "Admin",
+              },
+            ].map((item) => (
+              <Card key={item.title} className="hover-elevate overflow-visible border-border/60">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
+                      <item.icon className={`h-5 w-5 ${item.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-sm">{item.title}</h3>
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.tag}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                  {item.code && (
+                    <div className="mt-3 rounded-lg bg-zinc-900 dark:bg-zinc-950 p-2.5 font-mono text-[10px] text-emerald-400 overflow-x-auto">
+                      {'<script src="gustafta.app/widget/loader.js"'}
+                      <br />
+                      {'  data-agent-id="AGENT_ID"></script>'}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* How it works: 4 steps */}
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-center font-bold text-lg mb-8 text-muted-foreground uppercase tracking-wider text-sm">Dari Subscribe ke Live dalam 30 Menit</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { step: "1", icon: CreditCard, label: "Pilih Paket", desc: "Pilih plan, konfirmasi via WA" },
+                { step: "2", icon: Bot, label: "Buat Agent", desc: "Konfigurasi chatbot di dashboard" },
+                { step: "3", icon: BookOpen, label: "Upload Konten", desc: "PDF, URL, atau teks ke KB" },
+                { step: "4", icon: Globe, label: "Deploy & Share", desc: "Copy embed code atau bagikan URL" },
+              ].map(({ step, icon: Icon, label, desc }) => (
+                <div key={step} className="text-center">
+                  <div className="relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-3">
+                    <Icon className="h-6 w-6 text-primary" />
+                    <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{step}</span>
+                  </div>
+                  <div className="font-semibold text-sm mb-1">{label}</div>
+                  <div className="text-xs text-muted-foreground">{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <Link href="/welcome">
+              <Button size="lg" className="gap-2 mr-3" data-testid="button-view-welcome">
+                <Rocket className="h-5 w-5" />
+                Lihat Panduan Lengkap
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/onboarding">
+              <Button size="lg" variant="outline" className="gap-2" data-testid="button-onboarding-from-deliverable">
+                <CreditCard className="h-5 w-5" />
+                Pilih Paket
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+      {/* ─────────────────────────────────────────────────────────── */}
+
       {/* ─── SECTION: Custom Domain + Hierarki 5 Level Highlight ── */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-violet-500/5">
         <div className="container mx-auto px-4">

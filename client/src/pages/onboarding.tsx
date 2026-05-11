@@ -15,7 +15,7 @@ import { queryClient } from "@/lib/queryClient";
 import {
   Check, X, ArrowRight, Rocket, Bot, Zap, Building2, Crown,
   Phone, MessageSquare, BookOpen, Blocks, PlaySquare, FileText,
-  Mic, Globe, Shield, Headphones, Star, CheckCircle2, Lock, Flame, Clock
+  Mic, Globe, Shield, Headphones, Star, CheckCircle2, Lock, Flame, Clock, Code
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -341,6 +341,62 @@ export default function OnboardingPage() {
             </Button>
           </div>
         </div>
+
+        {/* ── Delivery Timeline ───────────────────────────────────────── */}
+        <div className="mt-14 max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Yang Anda Terima Setelah Aktivasi</p>
+            <h3 className="text-xl font-bold">Dari Konfirmasi ke Live dalam 30 Menit</h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {([
+              { step: "1", icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", title: "Akun Aktif", desc: "Login langsung, akses dashboard penuh sesuai paket" },
+              { step: "2", icon: MessageSquare, color: "text-primary", bg: "bg-primary/10", title: "Buat Agent AI", desc: "Pilih template atau dari scratch, siap dalam menit" },
+              { step: "3", icon: BookOpen, color: "text-orange-500", bg: "bg-orange-500/10", title: "Upload KB", desc: "PDF, URL, atau teks jadi knowledge base agent Anda" },
+              { step: "4", icon: Globe, color: "text-blue-500", bg: "bg-blue-500/10", title: "Deploy & Share", desc: "Embed code di website atau bagikan URL publik" },
+            ] as const).map(({ step, icon: Icon, color, bg, title, desc }) => (
+              <div key={step} className="rounded-xl border border-border bg-muted/30 p-4 text-center">
+                <div className="relative inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3" style={{ background: bg.replace("bg-", "") }}>
+                  <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center`}>
+                    <Icon className={`h-5 w-5 ${color}`} />
+                  </div>
+                  <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{step}</span>
+                </div>
+                <div className="font-semibold text-sm mb-1">{title}</div>
+                <div className="text-xs text-muted-foreground">{desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Deliverables grid */}
+          <div className="rounded-2xl border border-border bg-background p-6">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 text-center">Semua Ini Sudah Tersedia di Dashboard Anda</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {([
+                { icon: Bot, label: "AI Agent dengan system prompt & KB", color: "text-primary" },
+                { icon: Code, label: "Embed code (widget JS + iframe) siap pakai", color: "text-violet-500" },
+                { icon: Globe, label: "URL chat publik per agent", color: "text-blue-500" },
+                { icon: Blocks, label: "45 Mini Apps produktivitas (RAB, kontrak, dll)", color: "text-orange-500" },
+                { icon: BookOpen, label: "Knowledge base 7 tipe upload", color: "text-emerald-500" },
+                { icon: CheckCircle2, label: "Onboarding support via WhatsApp", color: "text-emerald-500" },
+              ] as const).map(({ icon: Icon, label, color }) => (
+                <div key={label} className="flex items-center gap-2.5 text-sm">
+                  <Icon className={`h-4 w-4 ${color} shrink-0`} />
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center mt-6">
+            <a href="/welcome" className="text-sm text-primary underline underline-offset-4 hover:no-underline" data-testid="link-panduan-lengkap">
+              Lihat Panduan Setup Lengkap →
+            </a>
+          </div>
+        </div>
+        {/* ───────────────────────────────────────────────────────────── */}
+
       </div>
     </div>
   );

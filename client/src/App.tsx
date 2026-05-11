@@ -41,6 +41,7 @@ import OnboardingPage from "@/pages/onboarding";
 import MySubscriptionPage from "@/pages/my-subscription";
 import PendingApproval from "@/pages/pending-approval";
 import Panduan from "@/pages/panduan";
+import WelcomePage from "@/pages/welcome";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
@@ -107,6 +108,7 @@ function Router() {
       <Route path="/my-subscription" component={MySubscriptionPage} />
       <Route path="/pending-approval" component={PendingApproval} />
       <Route path="/panduan" component={Panduan} />
+      <Route path="/welcome" component={WelcomePage} />
       <Route component={NotFound} />
     </Switch>
   );
