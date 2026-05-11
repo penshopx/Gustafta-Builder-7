@@ -426,6 +426,40 @@ export function MessageContent({ text, className }: { text: string; className?: 
     }
 
     flushList();
+    // Engineering calculation step label: **Diketahui:**, **Ditanya:**, etc.
+    const calcStepMatch = trimmed.match(/^\*\*([^*]{2,35}):\*\*\s*$/);
+    const CALC_KEYWORDS = ["diketahui","ditanya","penyelesaian","jawaban","hasil","verifikasi","data","given","find","solution","answer","result","langkah","step","analisis","kesimpulan","rekomendasi"];
+    if (calcStepMatch && CALC_KEYWORDS.some(kw => calcStepMatch[1].toLowerCase().includes(kw))) {
+      const label = calcStepMatch[1];
+      const labelLower = label.toLowerCase();
+      const stepColors: Record<string, string> = {
+        diketahui: "bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300",
+        given: "bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300",
+        data: "bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300",
+        ditanya: "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300",
+        find: "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300",
+        penyelesaian: "bg-violet-50 dark:bg-violet-950/40 border-violet-300 dark:border-violet-700 text-violet-800 dark:text-violet-300",
+        langkah: "bg-violet-50 dark:bg-violet-950/40 border-violet-300 dark:border-violet-700 text-violet-800 dark:text-violet-300",
+        step: "bg-violet-50 dark:bg-violet-950/40 border-violet-300 dark:border-violet-700 text-violet-800 dark:text-violet-300",
+        solution: "bg-violet-50 dark:bg-violet-950/40 border-violet-300 dark:border-violet-700 text-violet-800 dark:text-violet-300",
+        jawaban: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300",
+        hasil: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300",
+        answer: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300",
+        result: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300",
+        verifikasi: "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300",
+        kesimpulan: "bg-slate-50 dark:bg-slate-900/60 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300",
+        rekomendasi: "bg-slate-50 dark:bg-slate-900/60 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300",
+        analisis: "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-300 dark:border-indigo-700 text-indigo-800 dark:text-indigo-300",
+      };
+      const matched = Object.keys(stepColors).find(k => labelLower.includes(k));
+      const colorClass = matched ? stepColors[matched] : "bg-muted/50 border-border text-foreground";
+      elements.push(
+        <div key={`calcstep-${key++}`} className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-bold uppercase tracking-wide mt-3 mb-1", colorClass)}>
+          <span>{label}</span>
+        </div>
+      );
+      continue;
+    }
     elements.push(
       <p key={`p-${key++}`} className="leading-relaxed">
         {processInlineText(trimmed)}

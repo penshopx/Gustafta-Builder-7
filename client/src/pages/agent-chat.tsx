@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle, Calculator, ListChecks, Wand2, ChevronUp, FileOutput, Hash, Pencil, CornerDownLeft } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -99,6 +99,32 @@ function trackMetaEvent(eventName: string, params?: Record<string, any>) {
     (window as any).fbq("track", eventName, params);
   }
 }
+
+// ── Slash Commands (Notion AI / gpai.app style) ─────────────────────────────
+const SLASH_COMMANDS = [
+  { cmd: "/hitung", emoji: "🔢", label: "Hitung Langkah", desc: "Kalkulasi teknik step-by-step dengan rumus", prefix: "Selesaikan perhitungan teknik berikut secara langkah demi langkah:\n\n**Diketahui:** (sebutkan data)\n**Ditanya:** (sebutkan yang dicari)\n**Penyelesaian:** (uraikan langkah dengan rumus)\n**Hasil:** (nyatakan hasil dengan satuan dan verifikasi)\n\nSoal:\n" },
+  { cmd: "/rab", emoji: "💰", label: "Buat RAB", desc: "Rencana Anggaran Biaya detail", prefix: "Buat Rencana Anggaran Biaya (RAB) yang detail dan lengkap untuk:\n\n" },
+  { cmd: "/laporan", emoji: "📄", label: "Buat Laporan", desc: "Laporan teknis formal", prefix: "Buat laporan teknis formal yang komprehensif, terstruktur, dan siap pakai untuk:\n\n" },
+  { cmd: "/spek", emoji: "📐", label: "Spesifikasi Teknis", desc: "Spek teknis / method statement", prefix: "Buat spesifikasi teknis lengkap dan method statement untuk:\n\n" },
+  { cmd: "/checklist", emoji: "✅", label: "Buat Checklist", desc: "Daftar periksa sistematis", prefix: "Buat checklist lengkap dan sistematis untuk:\n\n" },
+  { cmd: "/analisis", emoji: "🔍", label: "Analisis", desc: "Analisis mendalam & komprehensif", prefix: "Lakukan analisis mendalam dan komprehensif untuk:\n\n" },
+  { cmd: "/ringkas", emoji: "📋", label: "Ringkas", desc: "Ringkasan poin utama", prefix: "Ringkas berikut dalam 5 poin utama yang paling penting:\n\n" },
+  { cmd: "/surat", emoji: "✉️", label: "Buat Surat", desc: "Surat / memo formal profesional", prefix: "Buat surat/memo formal yang profesional untuk:\n\n" },
+  { cmd: "/tabel", emoji: "📊", label: "Buat Tabel", desc: "Data dalam format tabel", prefix: "Sajikan data berikut dalam format tabel yang lengkap dan informatif:\n\n" },
+  { cmd: "/bandingkan", emoji: "⚖️", label: "Bandingkan", desc: "Perbandingan dua atau lebih opsi", prefix: "Buat perbandingan detail antara opsi-opsi berikut dalam format tabel:\n\n" },
+];
+
+// ── Quick Actions (Notion AI style) ─────────────────────────────────────────
+const QUICK_ACTIONS = [
+  { emoji: "📋", label: "Ringkas", prompt: "Ringkas jawaban di atas dalam 3-5 poin kunci yang paling penting, dalam format bullet point yang jelas." },
+  { emoji: "📄", label: "Buat Dokumen", prompt: "Konversi jawaban di atas menjadi dokumen/laporan formal siap pakai dengan heading, sub-heading, dan format profesional yang rapi." },
+  { emoji: "✅", label: "Rencana Aksi", prompt: "Ekstrak semua rencana aksi (action items) dan langkah konkret yang perlu dilakukan dari jawaban di atas. Format sebagai checklist bernomor yang actionable." },
+  { emoji: "🔢", label: "Uraikan Perhitungan", prompt: "Tampilkan semua perhitungan dari jawaban di atas langkah demi langkah dengan format:\n1. Data yang diketahui (dengan satuan)\n2. Rumus yang digunakan\n3. Substitusi nilai\n4. Hasil lengkap dengan satuan\n5. Verifikasi kewajaran hasil" },
+  { emoji: "📊", label: "Buat Tabel", prompt: "Konversi informasi utama dari jawaban di atas menjadi tabel yang terstruktur dan mudah dibaca." },
+  { emoji: "⬆️", label: "Perluas", prompt: "Perluas dan elaborasi jawaban di atas dengan lebih banyak detail teknis, contoh konkret, referensi standar/regulasi terkait, dan rekomendasi praktis." },
+  { emoji: "✂️", label: "Persingkat", prompt: "Persingkat jawaban di atas menjadi 2-3 kalimat inti yang paling penting dan berdampak." },
+  { emoji: "🌐", label: "Terjemahkan EN", prompt: "Terjemahkan jawaban di atas ke Bahasa Inggris teknis yang formal dan profesional." },
+];
 
 // Renderer markdown chat dipindah ke @/lib/format-message (impor di atas).
 function formatMessageContent(text: string) {
@@ -265,6 +291,9 @@ export default function AgentChat() {
   const [isUploading, setIsUploading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [slashMenuIdx, setSlashMenuIdx] = useState(0);
+  const [showQuickActions, setShowQuickActions] = useState(false);
   const [clientToken, setClientToken] = useState<string | null>(null);
   const [clientInfo, setClientInfo] = useState<{ name: string; email: string; plan: string } | null>(null);
   const [showRegistration, setShowRegistration] = useState(false);
@@ -791,6 +820,7 @@ export default function AgentChat() {
     setInput("");
     setPendingFiles([]);
     setFollowUpSuggestions([]);
+    setShowQuickActions(false);
     setIsTyping(true);
 
     if (textareaRef.current) {
@@ -968,6 +998,7 @@ export default function AgentChat() {
       }
       const followUps = extractFollowUps(assistantContent);
       setFollowUpSuggestions(followUps);
+      setShowQuickActions(true);
     } catch (err) {
       console.error("Chat error:", err);
       const errorMessage: Message = {
@@ -982,7 +1013,33 @@ export default function AgentChat() {
     }
   };
 
+  const getFilteredSlashCommands = () => {
+    if (!input.startsWith("/")) return [];
+    const q = input.toLowerCase();
+    return SLASH_COMMANDS.filter(c => c.cmd.startsWith(q) || c.label.toLowerCase().includes(q.slice(1)));
+  };
+
+  const applySlashCommand = (cmd: typeof SLASH_COMMANDS[0]) => {
+    setInput(cmd.prefix);
+    setShowSlashMenu(false);
+    setSlashMenuIdx(0);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      }
+    }, 50);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    const filtered = getFilteredSlashCommands();
+    if (showSlashMenu && filtered.length > 0) {
+      if (e.key === "ArrowDown") { e.preventDefault(); setSlashMenuIdx(i => (i + 1) % filtered.length); return; }
+      if (e.key === "ArrowUp") { e.preventDefault(); setSlashMenuIdx(i => (i - 1 + filtered.length) % filtered.length); return; }
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); applySlashCommand(filtered[slashMenuIdx]); return; }
+      if (e.key === "Escape") { setShowSlashMenu(false); return; }
+    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage(input);
@@ -2227,23 +2284,51 @@ export default function AgentChat() {
                 </div>
               )}
 
-              {!isTyping && followUpSuggestions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {followUpSuggestions.map((suggestion, idx) => (
-                    <Button
-                      key={idx}
-                      variant="outline"
-                      size="sm"
-                      className="text-[11px] sm:text-xs"
-                      onClick={() => {
-                        setFollowUpSuggestions([]);
-                        sendMessage(suggestion);
-                      }}
-                     
-                    >
-                      {suggestion}
-                    </Button>
-                  ))}
+              {!isTyping && showQuickActions && messages.some(m => m.role === "assistant") && (
+                <div className="pt-2 space-y-2">
+                  {/* Follow-up suggestions from AI */}
+                  {followUpSuggestions.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {followUpSuggestions.map((suggestion, idx) => (
+                        <Button
+                          key={idx}
+                          variant="outline"
+                          size="sm"
+                          className="text-[11px] sm:text-xs"
+                          onClick={() => {
+                            setFollowUpSuggestions([]);
+                            setShowQuickActions(false);
+                            sendMessage(suggestion);
+                          }}
+                        >
+                          {suggestion}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                  {/* Quick Actions Panel (Notion AI / gpai style) */}
+                  <div className="rounded-xl border border-border/60 bg-muted/30 p-2">
+                    <div className="flex items-center gap-1.5 mb-2 px-1">
+                      <Wand2 className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Aksi Cepat</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {QUICK_ACTIONS.map((action, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setShowQuickActions(false);
+                            setFollowUpSuggestions([]);
+                            sendMessage(action.prompt);
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] bg-background border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors text-foreground/80 hover:text-foreground"
+                        >
+                          <span>{action.emoji}</span>
+                          <span className="font-medium">{action.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -2381,6 +2466,43 @@ export default function AgentChat() {
            
           />
 
+          {/* Slash Command Menu */}
+          {showSlashMenu && (() => {
+            const filtered = getFilteredSlashCommands();
+            if (!filtered.length) return null;
+            return (
+              <div className="max-w-2xl mx-auto mb-2">
+                <div className="rounded-xl border border-border shadow-lg bg-popover overflow-hidden">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 border-b border-border">
+                    <Hash className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Perintah Cepat</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground">↑↓ pilih · Enter pakai · Esc tutup</span>
+                  </div>
+                  {filtered.map((cmd, idx) => (
+                    <button
+                      key={cmd.cmd}
+                      onClick={() => applySlashCommand(cmd)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-muted/70 transition-colors",
+                        idx === slashMenuIdx && "bg-muted/70"
+                      )}
+                    >
+                      <span className="text-base shrink-0">{cmd.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-foreground">{cmd.label}</span>
+                          <code className="text-[10px] text-muted-foreground font-mono">{cmd.cmd}</code>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground truncate">{cmd.desc}</p>
+                      </div>
+                      <CornerDownLeft className="w-3 h-3 text-muted-foreground shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="flex gap-2 items-end max-w-2xl mx-auto">
             <Button
               size="icon"
@@ -2388,25 +2510,42 @@ export default function AgentChat() {
               onClick={() => fileInputRef.current?.click()}
               disabled={isTyping || isUploading}
               className="shrink-0 rounded-xl"
+              title="Lampirkan file (PDF, Excel, Word, Gambar, dll)"
              
             >
               <Paperclip className="w-4 h-4" />
             </Button>
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                e.target.style.height = "auto";
-                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik pesan ke ${config.name}...`}
-              className="resize-none text-sm rounded-xl"
-              rows={1}
-              disabled={isTyping || isListening || !!needsContext}
-             
-            />
+            <div className="relative flex-1">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setInput(val);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+                  const isSlash = val.startsWith("/") && !val.includes("\n");
+                  setShowSlashMenu(isSlash);
+                  if (isSlash) setSlashMenuIdx(0);
+                }}
+                onKeyDown={handleKeyDown}
+                onBlur={() => setTimeout(() => setShowSlashMenu(false), 150)}
+                placeholder={isListening ? "Mendengarkan suara Anda..." : `Ketik pesan atau / untuk perintah cepat...`}
+                className="resize-none text-sm rounded-xl pr-8"
+                rows={1}
+                disabled={isTyping || isListening || !!needsContext}
+               
+              />
+              {!input && !isTyping && (
+                <button
+                  className="absolute right-2 bottom-2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                  title="Ketik / untuk perintah cepat"
+                  onClick={() => { setInput("/"); if (textareaRef.current) textareaRef.current.focus(); setShowSlashMenu(true); }}
+                >
+                  <Hash className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
             {speechSupported && (
               <Button
                 size="icon"
