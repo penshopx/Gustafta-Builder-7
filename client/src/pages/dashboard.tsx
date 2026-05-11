@@ -434,6 +434,17 @@ export default function Dashboard() {
   const shouldFetchAgents = !!effectiveToolboxId;
   const { data: agents = [], isLoading: agentsLoading } = useAgents(shouldFetchAgents ? effectiveToolboxId : undefined);
   const filteredAgents = shouldFetchAgents ? agents : [];
+
+  // All user agents (no toolbox filter) — used for setup checklist on home screen
+  const { data: allUserAgents = [] } = useQuery<any[]>({
+    queryKey: ["/api/agents"],
+    queryFn: async () => {
+      const res = await fetch("/api/agents", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+  });
+
   const { data: archivedAgents = [] } = useQuery<any[]>({
     queryKey: ["/api/agents/archived"],
     queryFn: async () => {
@@ -755,6 +766,80 @@ export default function Dashboard() {
 
             {/* Plan Status Banner */}
             <PlanStatusBanner />
+
+            {/* Setup Checklist — shown until user has a customized agent */}
+            {(() => {
+              const hasSampleOnly = allUserAgents.length > 0 && allUserAgents.every((a: any) => a.name === "Contoh: CS Toko Online");
+              const hasNoAgent = allUserAgents.length === 0;
+              if (!hasSampleOnly && !hasNoAgent) return null;
+
+              const sampleAgent = allUserAgents.find((a: any) => a.name === "Contoh: CS Toko Online");
+
+              const steps = [
+                {
+                  done: false,
+                  label: "Buka agent contoh & pelajari strukturnya",
+                  desc: sampleAgent
+                    ? 'Agent "Contoh: CS Toko Online" sudah tersedia di sidebar kiri.'
+                    : 'Buat chatbot pertama Anda dari menu "Buat Alat Bantu" di bawah.',
+                  action: sampleAgent ? null : "create",
+                },
+                {
+                  done: false,
+                  label: "Modifikasi nama & system prompt",
+                  desc: 'Ganti nama agent & isi system prompt sesuai bisnis Anda. Lihat tab "Persona".',
+                  action: null,
+                },
+                {
+                  done: false,
+                  label: "Upload knowledge base",
+                  desc: "Upload dokumen, FAQ, atau tempel URL — chatbot akan menjawab berdasarkan konten ini.",
+                  action: null,
+                },
+                {
+                  done: false,
+                  label: "Test percakapan di Chat Console",
+                  desc: 'Klik tab "Chat" di panel kanan untuk coba chatbot Anda secara langsung.',
+                  action: null,
+                },
+                {
+                  done: false,
+                  label: "Salin embed code & pasang di website",
+                  desc: 'Buka tab "Widget" → salin script embed → tempel di website Anda.',
+                  action: null,
+                },
+              ];
+
+              return (
+                <div className="border border-primary/20 rounded-xl bg-primary/5 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Rocket className="w-4 h-4 text-primary" />
+                      <p className="text-sm font-semibold">Setup Checklist — 5 Langkah Mulai</p>
+                    </div>
+                    <Link href="/welcome">
+                      <span className="text-xs text-primary underline underline-offset-2 cursor-pointer hover:opacity-80">Panduan lengkap →</span>
+                    </Link>
+                  </div>
+                  <div className="space-y-2">
+                    {steps.map((step, i) => (
+                      <div key={i} className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded-full border-2 border-muted-foreground/30 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[10px] text-muted-foreground font-bold">{i + 1}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{step.label}</p>
+                          <p className="text-xs text-muted-foreground">{step.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center pt-1 border-t border-border/50">
+                    Checklist ini hilang otomatis setelah Anda mulai mengkustomisasi agent Anda.
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
