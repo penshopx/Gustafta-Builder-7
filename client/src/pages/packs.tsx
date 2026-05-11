@@ -5,7 +5,8 @@ import { SharedHeader } from "@/components/shared-header";
 import {
   CheckSquare, AlertTriangle, Building2, ShieldCheck,
   ClipboardList, ArrowRight, Star, Lock, Zap, BarChart3,
-  Phone, Check, TrendingUp, Sparkles, Crown, MessageCircle
+  Phone, Check, TrendingUp, Sparkles, Crown, MessageCircle,
+  GraduationCap, BookOpen, Users, Award
 } from "lucide-react";
 
 interface Pack {
@@ -236,6 +237,126 @@ export default function PacksPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {comingSoon.map(pack => (
               <PackCardMini key={pack.id} pack={pack} />
+            ))}
+          </div>
+        </div>
+
+        {/* ── PAKET BIMBEL ── */}
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-px flex-1 bg-border" />
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <GraduationCap className="h-3 w-3" />
+              Paket Bimbel AI
+            </div>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <p className="text-center text-sm text-muted-foreground mb-8">
+            AI Tutor personal 24/7 untuk pelajar, mahasiswa, guru, instruktur, dan HRD — dikonfigurasi oleh tim Gustafta, Anda langsung pakai.
+          </p>
+          <div className="grid md:grid-cols-2 gap-5">
+            {[
+              {
+                id: "bimbel-sma", name: "Paket Bimbel SMA / SMK", popular: true,
+                tagline: "7 AI Tutor per mata pelajaran — belajar kapan saja, lebih murah dari bimbel",
+                desc: "AI aktif menjawab pertanyaan, menjelaskan konsep, dan membuat latihan soal adaptif. Tersedia paket IPA, IPS, SMK Vokasi, dan UTBK Intensif.",
+                outputs: ["Tutor Matematika AI", "Tutor Fisika / Kimia / Bio AI", "Bank soal & simulasi UTBK", "B. Indonesia & B. Inggris AI", "Progress tracking siswa"],
+                useCases: ["Pelajar SMA/SMK yang ingin belajar mandiri", "Persiapan UTBK & ujian sekolah", "Alternatif bimbel lebih hemat"],
+                color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", border: "border-blue-200 dark:border-blue-800",
+                icon: GraduationCap,
+                route: "/education#pelajar",
+              },
+              {
+                id: "bimbel-mahasiswa", name: "Paket Mahasiswa & Skripsi", popular: false,
+                tagline: "Tutor mata kuliah + asisten TA/skripsi + pemahaman jurnal",
+                desc: "Khusus mahasiswa S1/S2 — AI paham silabus, bantu analisis jurnal, dampingi proses TA dari brainstorm judul hingga persiapan sidang.",
+                outputs: ["Tutor per mata kuliah", "Asisten analisis jurnal & penelitian", "Brainstorm judul & kerangka TA", "Latihan soal UTS/UAS", "Khusus Teknik: Konstruksi, Arsitektur, Hukum"],
+                useCases: ["Mahasiswa S1 yang butuh tutor", "Mahasiswa teknik & konstruksi", "Persiapan TA & skripsi"],
+                color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/30", border: "border-violet-200 dark:border-violet-800",
+                icon: BookOpen,
+                route: "/education#mahasiswa",
+              },
+              {
+                id: "bimbel-pengajar", name: "Paket Guru & Dosen Digital", popular: false,
+                tagline: "Buat AI tutor dari materi Anda — siswa belajar mandiri 24/7",
+                desc: "Upload silabus & materi, AI menjadi tutor digital yang menjawab pertanyaan siswa/mahasiswa kapan pun. Pantau progress via dashboard.",
+                outputs: ["AI dari silabus & materi Anda", "Deploy ke semua siswa sekaligus", "Dashboard progress & pertanyaan", "Kuis & evaluasi otomatis", "Branding kelas sendiri"],
+                useCases: ["Guru SMA / SMK / Madrasah", "Dosen perguruan tinggi", "Pengelola kursus / LKP"],
+                color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30", border: "border-emerald-200 dark:border-emerald-800",
+                icon: Users,
+                route: "/education#guru",
+              },
+              {
+                id: "bimbel-instruktur", name: "Paket Instruktur & HRD", popular: false,
+                tagline: "AI coach untuk peserta pelatihan + portal training karyawan",
+                desc: "Peserta berlatih mandiri via AI yang tahu materi kursus. HRD otomatiskan onboarding, SOP, dan evaluasi karyawan tanpa training berulang.",
+                outputs: ["AI coach dari modul pelatihan Anda", "Simulasi ujian sertifikasi (BNSP/SKK/K3)", "Onboarding & SOP karyawan AI", "Kuis & evaluasi otomatis", "Dashboard progress peserta"],
+                useCases: ["Instruktur BNSP / SKK / K3", "HRD perusahaan konstruksi", "Lembaga pelatihan & LDP"],
+                color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800",
+                icon: Award,
+                route: "/education#instruktur",
+              },
+            ].map(pack => (
+              <div key={pack.id} className={`relative rounded-2xl border-2 overflow-hidden transition-all ${pack.border} ${pack.popular ? "ring-2 ring-primary ring-offset-2" : ""}`} data-testid={`card-bimbel-${pack.id}`}>
+                {pack.popular && <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-violet-500 to-primary" />}
+                <div className={`${pack.bg} px-5 py-4 border-b ${pack.border}`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${pack.bg} border ${pack.border} flex-shrink-0`}>
+                      <pack.icon className={`h-6 w-6 ${pack.color}`} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <h3 className="font-bold text-sm">{pack.name}</h3>
+                        {pack.popular && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-white">POPULER</span>}
+                      </div>
+                      <p className={`text-xs font-medium ${pack.color}`}>{pack.tagline}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5 space-y-4">
+                  <p className="text-xs text-muted-foreground leading-relaxed">{pack.desc}</p>
+                  <div>
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Yang Bisa Dihasilkan</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {pack.outputs.map(o => (
+                        <span key={o} className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${pack.bg} ${pack.border} ${pack.color}`}>{o}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Cocok Untuk</p>
+                    {pack.useCases.map(u => (
+                      <div key={u} className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <Check className={`h-3 w-3 flex-shrink-0 ${pack.color}`} />
+                        {u}
+                      </div>
+                    ))}
+                  </div>
+                  <div className={`rounded-lg ${pack.bg} border ${pack.border} px-3 py-2 space-y-1`}>
+                    <div className="flex items-center justify-between">
+                      <p className={`text-xs ${pack.color} font-semibold`}>Setup & Instalasi</p>
+                      <p className={`text-xs font-bold ${pack.color}`}>via Store (sekali bayar)</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground font-semibold">Hosting / Berlangganan</p>
+                      <p className="text-xs font-bold text-foreground">Rp 199rb/bln</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <a href={waLink(`Halo, saya tertarik dengan ${pack.name} Gustafta. Bisa ceritakan proses ordernya?`)} target="_blank" rel="noopener noreferrer" className="flex-1">
+                      <Button className="w-full gap-2" size="sm" data-testid={`button-wa-bimbel-${pack.id}`}>
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        Tanya via WhatsApp
+                      </Button>
+                    </a>
+                    <a href={pack.route} className="flex-shrink-0">
+                      <Button variant="outline" size="sm" className="gap-1.5" data-testid={`button-detail-bimbel-${pack.id}`}>
+                        Detail <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>

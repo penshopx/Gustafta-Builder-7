@@ -593,6 +593,138 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ─── SECTION: Ekosistem Belajar AI ─── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-blue-500/5 via-violet-500/5 to-transparent">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-semibold mb-4">
+              <GraduationCap className="h-4 w-4" />
+              Bimbel Model Baru — AI Tutor Personal 24/7
+            </div>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">
+              Ruang Belajar AI untuk <span className="text-primary">Semua Peran</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Dari pelajar SMA yang ingin lolos UTBK, mahasiswa teknik yang butuh tutor TA, hingga dosen yang ingin buat ruang belajar digital — semua bisa dengan Gustafta.
+            </p>
+          </div>
+
+          {/* 5 Persona Cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto mb-10">
+            {[
+              {
+                icon: GraduationCap,
+                color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-200 dark:border-blue-800",
+                title: "Pelajar SMA / SMK",
+                badge: "Bimbel AI",
+                desc: "AI tutor per mata pelajaran, latihan soal UTBK, bank soal adaptif, dan pembahasan 24/7. Tidak terikat jadwal, lebih murah dari bimbel konvensional.",
+                packs: ["Paket SMA IPA — 7 AI Tutor", "Paket SMA IPS — 7 AI Tutor", "Paket UTBK Intensif"],
+              },
+              {
+                icon: BookOpen,
+                color: "text-violet-500", bg: "bg-violet-500/10", border: "border-violet-200 dark:border-violet-800",
+                title: "Mahasiswa",
+                badge: "Asisten Kuliah",
+                desc: "Tutor mata kuliah, asisten TA/skripsi, pemahaman jurnal, dan latihan soal UTS/UAS — khususnya mahasiswa teknik & konstruksi.",
+                packs: ["Paket Mahasiswa Teknik Sipil", "Paket Mahasiswa Arsitektur", "Paket Asisten Skripsi AI"],
+              },
+              {
+                icon: Users,
+                color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-200 dark:border-emerald-800",
+                title: "Guru & Dosen",
+                badge: "Ruang Belajar Digital",
+                desc: "Buat AI tutor dari materi Anda sendiri, deploy ke semua siswa/mahasiswa. Siswa bisa belajar mandiri — Anda fokus ke diskusi mendalam.",
+                packs: ["AI dari silabus Anda sendiri", "Deploy ke ratusan siswa sekaligus", "Pantau progress via dashboard"],
+              },
+              {
+                icon: Award,
+                color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-200 dark:border-orange-800",
+                title: "Instruktur & Pelatih",
+                badge: "AI Coach",
+                desc: "Peserta pelatihan bisa belajar mandiri via AI yang tahu materi kursus Anda. Simulasi ujian, tanya-jawab, dan rekap pemahaman otomatis.",
+                packs: ["BNSP / SKK Coach AI", "Pelatihan K3 & SMK3", "Instruktur Sertifikasi ISO"],
+              },
+              {
+                icon: Briefcase,
+                color: "text-teal-500", bg: "bg-teal-500/10", border: "border-teal-200 dark:border-teal-800",
+                title: "HRD & Perusahaan",
+                badge: "Portal Training",
+                desc: "Onboarding karyawan, pelatihan SOP, knowledge base perusahaan — semua dalam satu chatbot AI yang bisa diakses kapan pun.",
+                packs: ["Onboarding Karyawan Baru", "Knowledge Base Internal", "Evaluasi & Kuis Otomatis"],
+              },
+              {
+                icon: HardHat,
+                color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-200 dark:border-amber-800",
+                title: "Teknik & Konstruksi",
+                badge: "971+ Agent Spesialis",
+                desc: "Mahasiswa teknik sipil, instruktur BNSP, dosen vokasi — dilengkapi 971+ agent AI spesialis regulasi, K3, perizinan, tender, dan sertifikasi konstruksi.",
+                packs: ["Regulasi & Perpres 46/2025", "Tender LPSE & SMKK", "SKK, SBU & Sertifikasi"],
+              },
+            ].map((p) => (
+              <div key={p.title} className={`rounded-2xl border ${p.border} bg-background p-5 flex flex-col gap-3 hover:shadow-md transition-shadow`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${p.bg} flex items-center justify-center flex-shrink-0`}>
+                    <p.icon className={`h-5 w-5 ${p.color}`} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">{p.title}</p>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${p.bg} ${p.color}`}>{p.badge}</span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+                <ul className="space-y-1 mt-auto">
+                  {p.packs.map(item => (
+                    <li key={item} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <CheckCircle2 className={`h-3 w-3 flex-shrink-0 ${p.color}`} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Comparison vs bimbel konvensional */}
+          <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-muted/40 overflow-hidden mb-8">
+            <div className="grid grid-cols-3 text-center text-xs font-bold border-b border-border">
+              <div className="p-3 text-muted-foreground">Aspek</div>
+              <div className="p-3 bg-primary/10 text-primary">Gustafta Belajar AI</div>
+              <div className="p-3 text-muted-foreground">Bimbel Konvensional</div>
+            </div>
+            {[
+              ["Jam belajar", "24/7 kapan saja", "Terjadwal, terbatas"],
+              ["Biaya/bulan", "Rp 79rb – 199rb", "Rp 300rb – 500rb+"],
+              ["Personalisasi", "Adaptif per pertanyaan", "Satu kurikulum untuk semua"],
+              ["Lokasi", "Di mana saja via HP/PC", "Harus datang ke tempat"],
+              ["Mata pelajaran", "Bundle semua subject", "Bayar per mapel"],
+              ["Laporan belajar", "Otomatis via dashboard", "Terbatas / manual"],
+            ].map(([aspect, ai, konv], i) => (
+              <div key={aspect} className={`grid grid-cols-3 text-center text-xs border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-muted/20"}`}>
+                <div className="p-3 text-muted-foreground font-medium">{aspect}</div>
+                <div className="p-3 bg-primary/5 text-primary font-semibold">{ai}</div>
+                <div className="p-3 text-muted-foreground">{konv}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link href="/education">
+              <Button size="lg" className="gap-2 mr-3" data-testid="button-education-detail">
+                <GraduationCap className="h-5 w-5" />
+                Lihat Ekosistem Belajar AI
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/packs">
+              <Button size="lg" variant="outline" className="gap-2" data-testid="button-packs-education">
+                <Package className="h-5 w-5" />
+                Paket Bimbel
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">

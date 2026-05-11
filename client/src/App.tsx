@@ -36,6 +36,7 @@ import StoreAccess from "@/pages/store-access";
 import TestTracker from "@/pages/test-tracker";
 import ChaesaPage from "@/pages/chaesa";
 import PlatformSales from "@/pages/platform-sales";
+import EducationPage from "@/pages/education";
 import OnboardingPage from "@/pages/onboarding";
 import MySubscriptionPage from "@/pages/my-subscription";
 import PendingApproval from "@/pages/pending-approval";
@@ -101,6 +102,7 @@ function Router() {
       <Route path="/test-tracker" component={TestTracker} />
       <Route path="/chaesa" component={ChaesaPage} />
       <Route path="/platform" component={PlatformSales} />
+      <Route path="/education" component={EducationPage} />
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/my-subscription" component={MySubscriptionPage} />
       <Route path="/pending-approval" component={PendingApproval} />
