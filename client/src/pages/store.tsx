@@ -287,17 +287,17 @@ export default function Store() {
 
         {/* Featured product cards — Paket Bisnis AI & Series Modul */}
         <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-7">
-          <a href="/platform" className="group block text-left rounded-2xl border border-violet-300 bg-gradient-to-br from-violet-50 to-indigo-100 p-5 hover:border-violet-500 hover:shadow-lg transition-all shadow-sm">
+          <a href="/pricing" className="group block text-left rounded-2xl border border-violet-300 bg-gradient-to-br from-violet-50 to-indigo-100 p-5 hover:border-violet-500 hover:shadow-lg transition-all shadow-sm">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-violet-200 flex items-center justify-center flex-shrink-0">
-                <span className="text-xl">🚀</span>
+                <span className="text-xl">🔧</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-bold text-gray-900 text-sm">Paket Bisnis AI</p>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-200 text-violet-800 border border-violet-300 font-medium">Ekosistem Lengkap</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-200 text-violet-800 border border-violet-300 font-medium">DIY — Anda Admin</span>
                 </div>
-                <p className="text-xs text-gray-700 leading-relaxed">Platform penuh: Chatbot AI, Modul, E-Course, Document Generator — satu setup untuk semua.</p>
+                <p className="text-xs text-gray-700 leading-relaxed">Anda yang build & kelola sendiri. Beli chatbot di Store, pasang di dashboard, konfigurasi sesuai kebutuhan.</p>
               </div>
             </div>
             <div className="mt-3 flex items-center gap-1.5 text-xs text-violet-700 group-hover:text-violet-800 transition-colors font-semibold">
@@ -308,14 +308,14 @@ export default function Store() {
           <a href="/packs" className="group block text-left rounded-2xl border border-blue-300 bg-gradient-to-br from-blue-50 to-cyan-100 p-5 hover:border-blue-500 hover:shadow-lg transition-all shadow-sm">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-200 flex items-center justify-center flex-shrink-0">
-                <span className="text-xl">🧩</span>
+                <span className="text-xl">✨</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-bold text-gray-900 text-sm">Paket Series Modul</p>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-200 text-blue-800 border border-blue-300 font-medium">Per Domain</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-200 text-blue-800 border border-blue-300 font-medium">Done-for-You</span>
                 </div>
-                <p className="text-xs text-gray-700 leading-relaxed">Modul AI spesialis per industri — Tender, Perizinan, K3, SMKK. Beli satu atau kombinasikan.</p>
+                <p className="text-xs text-gray-700 leading-relaxed">Pesan modul, kami yang setup & konfigurasi semuanya. Langsung pakai tanpa perlu urus teknisnya.</p>
               </div>
             </div>
             <div className="mt-3 flex items-center gap-1.5 text-xs text-blue-700 group-hover:text-blue-800 transition-colors font-semibold">

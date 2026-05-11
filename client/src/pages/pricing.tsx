@@ -16,7 +16,7 @@ import {
   MessageSquare, Users, Globe, BookOpen, BarChart3, Shield, Headphones,
   CreditCard, Wallet, Building, Smartphone, QrCode,
   Stethoscope, GraduationCap, Briefcase, ShoppingBag, Hammer, Scale,
-  Hotel, Factory, ChevronRight, Lightbulb
+  Hotel, Factory, ChevronRight, Lightbulb, Wrench
 } from "lucide-react";
 
 interface PricingTier {
@@ -608,26 +608,46 @@ export default function Pricing() {
 
       <main className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <Badge className="mb-4">Paket Berlangganan</Badge>
-          <h1 className="text-4xl font-bold mb-4">Pilih Paket Berlangganan</h1>
+          <Badge className="mb-4">Paket Bisnis AI</Badge>
+          <h1 className="text-4xl font-bold mb-4">Anda yang Build, Anda yang Kelola</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Biaya berlangganan bulanan untuk akses platform. Semua paket sudah termasuk Agentic AI, Mini Apps (33 Tipe), dan Orchestrator Multi-Agent.
+            Paket Bisnis AI adalah platform builder — Anda berperan sebagai <strong>Admin</strong> yang membuat, mengkonfigurasi, dan mengelola chatbot sendiri. Tidak perlu coding, cukup atur lewat dashboard.
           </p>
+
+          {/* Dua Jalur */}
+          <div className="mt-8 grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto text-left">
+            <div className="rounded-xl border-2 border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/20 p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Wrench className="h-4 w-4 text-violet-600" />
+                <span className="font-bold text-sm text-violet-700 dark:text-violet-300">Paket Bisnis AI — DIY</span>
+                <Badge className="text-[10px] bg-violet-600 text-white ml-auto">Halaman ini</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">Anda sebagai <strong>admin</strong>. Beli chatbot di Store, pasang sendiri di dashboard, konfigurasi sesuai kebutuhan bisnis Anda. Cocok untuk yang ingin kontrol penuh.</p>
+            </div>
+            <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4 text-blue-600" />
+                <span className="font-bold text-sm text-blue-700 dark:text-blue-300">Paket Series Modul — Done-for-You</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">Anda <strong>pesan modulnya</strong>, kami yang setup dan konfigurasi semuanya. Langsung pakai tanpa perlu urus teknisnya. <a href="/packs" className="text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:opacity-80">Lihat modul →</a></p>
+            </div>
+          </div>
+
           {/* Domain + Hosting analogy */}
-          <div className="mt-6 grid sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
+          <div className="mt-5 grid sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
             <div className="rounded-xl border border-orange-200 dark:border-orange-800/60 bg-orange-50 dark:bg-orange-950/20 p-4">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-base">🏷️</span>
-                <span className="font-semibold text-sm text-orange-700 dark:text-orange-300">Produk = Domain</span>
+                <span className="font-semibold text-sm text-orange-700 dark:text-orange-300">Produk = Domain Anda</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">Beli sekali di <a href="/store" className="text-orange-600 dark:text-orange-400 underline underline-offset-2 hover:opacity-80">Store</a> — Paket Bisnis AI, Series Modul, atau Chatbot satuan. Ini yang Anda "miliki".</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Beli sekali di <a href="/store" className="text-orange-600 dark:text-orange-400 underline underline-offset-2 hover:opacity-80">Store</a>. Ini chatbot yang Anda "miliki" dan konfigurasi sendiri.</p>
             </div>
             <div className="rounded-xl border border-green-200 dark:border-green-800/60 bg-green-50 dark:bg-green-950/20 p-4">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-base">⚡</span>
-                <span className="font-semibold text-sm text-green-700 dark:text-green-300">Berlangganan = Hosting</span>
+                <span className="font-semibold text-sm text-green-700 dark:text-green-300">Berlangganan = Hosting-nya</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">Bayar rutin — ini yang "menjalankan" produk Anda di platform Gustafta. Keduanya wajib, keduanya ada di sini.</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Bayar rutin agar chatbot Anda tetap berjalan di platform Gustafta. Berlaku untuk semua produk — Paket Bisnis maupun Series Modul.</p>
             </div>
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
@@ -884,8 +904,11 @@ export default function Pricing() {
 
         <section className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Paket 1 Chatbot</h2>
-            <p className="text-muted-foreground">Pilih durasi berlangganan untuk 1 chatbot</p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 text-green-700 dark:text-green-400 text-sm font-medium mb-4">
+              <span>⚡</span> Paket Berlangganan (Hosting) — berlaku untuk semua produk
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Pilih Durasi Hosting</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">Harga hosting sama untuk <strong>Paket Bisnis AI</strong> (DIY) maupun <strong>Paket Series Modul</strong> (done-for-you). Makin panjang durasi, makin hemat.</p>
           </div>
           <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
             {subscriptionTiers.map((tier) => (

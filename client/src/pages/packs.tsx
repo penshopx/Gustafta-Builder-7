@@ -126,29 +126,39 @@ export default function PacksPage() {
         <div className="absolute -top-20 -right-20 w-96 h-96 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
         <div className="container mx-auto px-4 text-center relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-5">
-            <Zap className="h-4 w-4 text-orange-500" />
-            Paket Series Modul — AI Spesialis per Domain Industri
             <Sparkles className="h-4 w-4" />
+            Paket Series Modul — Done-for-You
+            <Zap className="h-4 w-4 text-orange-500" />
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-            Modul AI yang Tumbuh{" "}
+            Kami yang Setup,{" "}
             <span className="bg-gradient-to-r from-violet-500 to-primary bg-clip-text text-transparent">
-              Sesuai Bisnis Anda
+              Anda Langsung Pakai
             </span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-5">
-            Setiap modul adalah solusi AI siap pakai untuk satu domain kerja spesifik. Mulai dari satu modul, tambah sesuai kebutuhan — agen AI dan konfigurasi menyesuaikan orderan Anda.
+            Berbeda dengan Paket Bisnis AI (DIY), di sini Anda cukup <strong>pesan modul yang dibutuhkan</strong> — tim Gustafta yang mengkonfigurasi, menginstal, dan mengaktifkan semuanya. Anda tidak perlu tahu teknisnya.
           </p>
-          {/* Series concept callout */}
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-muted/60 border text-sm mb-4 max-w-xl mx-auto">
-            <span className="text-muted-foreground">Konsep Series Modul:</span>
-            <span className="font-medium">1 Modul = 1 Domain Kerja</span>
-            <span className="text-muted-foreground">→</span>
-            <span className="font-medium">Pilih 1 atau kombinasikan beberapa</span>
-            <span className="text-muted-foreground">→</span>
-            <span className="font-medium text-primary">Langsung bisa dipakai</span>
+
+          {/* Perbandingan jalur */}
+          <div className="grid sm:grid-cols-2 gap-3 max-w-2xl mx-auto mb-5 text-left">
+            <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/20 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Crown className="h-3.5 w-3.5 text-violet-600" />
+                <span className="font-semibold text-xs text-violet-700 dark:text-violet-300">Paket Series Modul (halaman ini)</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Pesan modul → kami setup → Anda pakai. Cocok untuk yang ingin solusi siap pakai tanpa konfigurasi.</p>
+            </div>
+            <div className="rounded-xl border border-muted bg-muted/30 p-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Star className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="font-semibold text-xs text-muted-foreground">Paket Bisnis AI (DIY)</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Anda admin yang build & kelola sendiri. <a href="/pricing" className="text-primary underline underline-offset-2">Lihat halaman Paket Bisnis →</a></p>
+            </div>
           </div>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4">
+
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-2">
             {[
               "Setup & konfigurasi kami yang handle",
               "Agen AI fleksibel per orderan",
@@ -351,10 +361,17 @@ function PackCard({ pack, onNavigate }: { pack: Pack; onNavigate: (path: string)
           </div>
         </div>
 
-        {/* Flexible pricing note */}
-        <div className={`rounded-lg ${pack.bg} border ${pack.border} px-3 py-2`}>
-          <p className={`text-xs ${pack.iconColor} font-medium`}>Biaya Setup & Instalasi — sesuai konfigurasi & orderan</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Terpisah dari Paket Berlangganan · Hubungi kami untuk penawaran</p>
+        {/* Pricing note */}
+        <div className={`rounded-lg ${pack.bg} border ${pack.border} px-3 py-2 space-y-1`}>
+          <div className="flex items-center justify-between">
+            <p className={`text-xs ${pack.iconColor} font-semibold`}>Setup & Instalasi</p>
+            <p className={`text-xs font-bold ${pack.iconColor}`}>via Store (sekali bayar)</p>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground font-semibold">Hosting / Berlangganan</p>
+            <p className="text-xs font-bold text-foreground">Rp 199rb/bln</p>
+          </div>
+          <p className="text-[10px] text-muted-foreground pt-0.5 border-t border-border/40">Hosting sama dengan Paket Bisnis AI · <a href="/pricing" className="underline underline-offset-2">Lihat durasi & harga →</a></p>
         </div>
 
         {/* CTA */}
