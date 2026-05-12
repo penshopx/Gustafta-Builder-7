@@ -46,6 +46,8 @@ import ReferensiHarga from "@/pages/referensi-harga";
 import TenderMonitor from "@/pages/tender-monitor";
 import TenderAlertProfile from "@/pages/tender-alert-profile";
 import TenderAiChat from "@/pages/tender-ai-chat";
+import BujkProfile from "@/pages/bujk-profile";
+import WinProbability from "@/pages/win-probability";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
@@ -117,6 +119,8 @@ function Router() {
         <Route path="/tender-monitor" component={TenderMonitor} />
         <Route path="/tender-alert" component={TenderAlertProfile} />
         <Route path="/tender-ai" component={TenderAiChat} />
+        <Route path="/bujk-profile" component={BujkProfile} />
+        <Route path="/win-probability" component={WinProbability} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -244,13 +244,49 @@ function MessageBubble({ msg }: { msg: Message }) {
   );
 }
 
+const BUJK_STORAGE_KEY = "gustafta_bujk_profile_v1";
+
+function loadBujkProfile(): string | null {
+  try {
+    const stored = localStorage.getItem(BUJK_STORAGE_KEY);
+    if (!stored) return null;
+    const p = JSON.parse(stored);
+    if (!p.nama) return null;
+    const lines: string[] = [
+      `[PROFIL BUJK OTOMATIS]`,
+      `Nama: ${p.nama}`,
+      p.npwp ? `NPWP: ${p.npwp}` : "",
+      p.kualifikasi ? `Kualifikasi: ${p.kualifikasi}` : "",
+      p.sbu?.length ? `SBU: ${p.sbu.join(", ")}` : "",
+      p.lokasi ? `Domisili: ${p.lokasi}` : "",
+      p.modal_disetor ? `Modal Disetor: Rp ${p.modal_disetor}` : "",
+      p.kmk ? `KMK: Rp ${p.kmk}` : "",
+      p.skk_personel?.length
+        ? `SKK Personel: ${p.skk_personel.map((s: any) => `${s.nama} (${s.jabatan}, ${s.jenjang})`).join("; ")}`
+        : "",
+      p.pengalaman?.length
+        ? `Pengalaman: ${p.pengalaman.map((e: any) => `${e.nama_paket} (${e.tahun}, Rp ${e.nilai})`).join("; ")}`
+        : "",
+    ].filter(Boolean);
+    return lines.join("\n");
+  } catch {
+    return null;
+  }
+}
+
 export default function TenderAiChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number | null>(null);
+  const [bujkProfile, setBujkProfile] = useState<string | null>(null);
+  const [profileInjected, setProfileInjected] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setBujkProfile(loadBujkProfile());
+  }, []);
 
   const { data: agentData, isLoading: agentLoading } = useQuery<{
     id: number;
@@ -297,13 +333,20 @@ export default function TenderAiChat() {
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
     const orchStart = Date.now();
 
+    // Prepend BUJK profile to the very first message only
+    let contentToSend = text;
+    if (bujkProfile && !profileInjected && messages.length === 0) {
+      contentToSend = `${bujkProfile}\n\n---\n\n${text}`;
+      setProfileInjected(true);
+    }
+
     try {
       const res = await fetch("/api/messages/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           agentId,
-          content: text,
+          content: contentToSend,
           conversationHistory: history,
         }),
       });
@@ -464,6 +507,34 @@ export default function TenderAiChat() {
           )}
         </div>
       </div>
+
+      {/* BUJK Profile banner */}
+      {bujkProfile && (
+        <div className="shrink-0 border-b border-emerald-700/30 bg-emerald-900/20 px-4 py-2 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+          <span className="text-xs text-emerald-300 flex-1 min-w-0 truncate">
+            Profil BUJK aktif — akan otomatis disertakan di pesan pertama Anda
+          </span>
+          <Link href="/bujk-profile">
+            <button className="text-xs text-emerald-400/70 hover:text-emerald-300 transition-colors shrink-0">
+              Edit
+            </button>
+          </Link>
+        </div>
+      )}
+      {!bujkProfile && (
+        <div className="shrink-0 border-b border-yellow-700/20 bg-yellow-900/10 px-4 py-2 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-yellow-500/60 shrink-0" />
+          <span className="text-xs text-yellow-300/70 flex-1 min-w-0">
+            Isi Profil BUJK sekali agar analisis eligibility lebih akurat
+          </span>
+          <Link href="/bujk-profile">
+            <button className="text-xs text-yellow-400 hover:text-yellow-300 font-medium transition-colors shrink-0">
+              Isi Sekarang →
+            </button>
+          </Link>
+        </div>
+      )}
 
       {/* Agent legend strip */}
       <div className="shrink-0 border-b border-white/5 px-3 py-2 flex items-center gap-1.5 overflow-x-auto bg-[#0b1020]/60">

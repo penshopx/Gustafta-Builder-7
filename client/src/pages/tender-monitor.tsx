@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 import {
   Search, RefreshCw, ExternalLink, Building2,
   Flame, Mountain, Zap, Globe, MapPin, Calendar, DollarSign,
   TrendingUp, Clock, Filter, ChevronRight,
-  PlayCircle, Info, Database, Loader2, Star, Layers
+  PlayCircle, Info, Database, Loader2, Star, Layers,
+  BarChart3, Bell, Bot
 } from "lucide-react";
 import type { TenderSource, Tender } from "@shared/schema";
 
@@ -401,7 +403,27 @@ export default function TenderMonitor() {
                 Konstruksi · Oil&Gas · Pertambangan · Energi
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+              <Link href="/tender-ai">
+                <Button variant="outline" size="sm" className="gap-1 text-xs h-8 border-blue-500/40 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40" data-testid="button-nav-tendera">
+                  <Bot className="w-3.5 h-3.5" />TENDERA AI
+                </Button>
+              </Link>
+              <Link href="/win-probability">
+                <Button variant="outline" size="sm" className="gap-1 text-xs h-8 border-purple-500/40 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40" data-testid="button-nav-winprob">
+                  <BarChart3 className="w-3.5 h-3.5" />Win Prob
+                </Button>
+              </Link>
+              <Link href="/bujk-profile">
+                <Button variant="outline" size="sm" className="gap-1 text-xs h-8 border-emerald-500/40 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40" data-testid="button-nav-bujk">
+                  <Building2 className="w-3.5 h-3.5" />Profil BUJK
+                </Button>
+              </Link>
+              <Link href="/tender-alert">
+                <Button variant="outline" size="sm" className="gap-1 text-xs h-8 border-amber-500/40 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40" data-testid="button-nav-alert">
+                  <Bell className="w-3.5 h-3.5" />Alert
+                </Button>
+              </Link>
               <Button variant="outline" size="sm" onClick={() => { refetchSources(); refetchTenders(); }} data-testid="button-refresh-all" className="gap-1 text-xs h-8">
                 <RefreshCw className="w-3.5 h-3.5" />Refresh
               </Button>
