@@ -282,7 +282,7 @@ export default function IbTuChat() {
       const res = await fetch("/api/messages/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId, content: text, conversationHistory: history }),
+        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history }),
       });
 
       if (!res.body) throw new Error("No stream");
@@ -468,7 +468,7 @@ export default function IbTuChat() {
             {/* Session status chips */}
             <div className="flex flex-wrap justify-center gap-2 text-xs">
               {[
-                { icon: "📅", label: "IAA Deadline: 15 Mei 2026 (lewat)" },
+                { icon: "📅", label: "IAA Deadline: 15 Mei 2026 (3 hari lagi 🔴)" },
                 { icon: "📊", label: "PG Deadline: ~Agt 2026" },
                 { icon: "🏫", label: "Ujian Nov 2026" },
                 { icon: "✅", label: "PSP Self-Study" },
