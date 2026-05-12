@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import {
   CheckCircle2, XCircle, Clock, ArrowLeft, RotateCcw,
   ChevronDown, ChevronUp, ExternalLink, ClipboardCheck,
-  BarChart3, Bot, Info, Layers, Zap, HardHat, Copy, Check, BookOpen
+  BarChart3, Bot, Info, Layers, Zap, HardHat, Copy, Check, BookOpen, Brain
 } from "lucide-react";
 
 // ─── Tender Bots ─────────────────────────────────────────────────────────────
@@ -386,6 +386,101 @@ const KONSTRA_TESTS = [
   },
 ];
 
+// ─── BRAIN Project Agents (Orchestrator + 6 Specialists) ─────────────────────
+
+const BRAIN_BOTS = [
+  { id: 949, name: "BRAIN-ORCHESTRATOR",                     role: "Orchestrator", color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300",           subs: 6 },
+  { id: 943, name: "BRAIN-PROXIMA — Manajer Proyek",         role: "PM",           color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",        subs: 0 },
+  { id: 944, name: "BRAIN-EVM — Earned Value Management",    role: "EVM",          color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300", subs: 0 },
+  { id: 945, name: "BRAIN-MUTU — Pengendalian Mutu",         role: "QA/QC",        color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",         subs: 0 },
+  { id: 946, name: "BRAIN-SAFIRA — K3 Konstruksi",           role: "HSE",          color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",             subs: 0 },
+  { id: 947, name: "BRAIN-ENVIRA — Lingkungan Hidup",        role: "Enviro",       color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 0 },
+  { id: 948, name: "BRAIN-KONTRAK — Kontrak & Klaim",        role: "Kontrak",      color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300", subs: 0 },
+];
+
+// ─── BRAIN Sprint 1 Test Scenarios (T-01 to T-06) ────────────────────────────
+
+const BRAIN_TESTS = [
+  {
+    id: "T-01", label: "T-01 — LHP Holistik", badge: "bg-sky-50 text-sky-700 border-sky-200",
+    title: "Orchestration: Laporan Hasil Pengawasan Holistik",
+    description: "Kirim skenario proyek lengkap ke BRAIN-ORCHESTRATOR. Bot harus dispatch ke semua 6 specialist secara paralel, lalu sintesis menjadi LHP terintegrasi.",
+    prompt: "Proyek konstruksi gedung 10 lantai Jakarta, Rp 85M, bulan ke-8 dari 18 bulan. SPI=0.87, CPI=0.91, ada NCR beton kolom lantai 6, 1 near miss scaffolding minggu lalu, progress aktual 42% vs rencana 48%. Buat Laporan Hasil Pengawasan komprehensif.",
+    weight: "25%",
+    criteria: [
+      "Panel orchestrasi muncul (sub-agents dispatched paralel)",
+      "Output mencakup laporan dari semua 6 domain (PM, EVM, Mutu, K3, Enviro, Kontrak)",
+      "Ada block LAPORAN SUB-AGEN sebelum sintesis final",
+      "LHP terstruktur dengan ringkasan eksekutif + rekomendasi prioritas",
+    ],
+  },
+  {
+    id: "T-02", label: "T-02 — EVM Calc", badge: "bg-violet-50 text-violet-700 border-violet-200",
+    title: "EVM Calculation: Analisis Nilai Hasil Proyek",
+    description: "Kirim data progress dan biaya ke BRAIN-EVM. Bot harus kalkulasi semua metrik EVM (SV, CV, SPI, CPI, EAC, VAC) dengan rumus eksplisit.",
+    prompt: "BAC = Rp 85M, PV bulan ke-8 = Rp 37.4M (48%), EV aktual = Rp 32.7M (42%), AC = Rp 35.9M. Hitung semua metrik EVM dan proyeksi penyelesaian.",
+    weight: "15%",
+    criteria: [
+      "Semua metrik dihitung: SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI",
+      "Rumus eksplisit ditampilkan (bukan hanya hasil angka)",
+      "Ada proyeksi EAC dengan minimal 2 metode (EAC₁ dan EAC₂)",
+      "Interpretasi bisnis: apakah proyek over-budget/behind schedule + rekomendasi",
+    ],
+  },
+  {
+    id: "T-03", label: "T-03 — NCR Mutu", badge: "bg-lime-50 text-lime-700 border-lime-200",
+    title: "NCR Mutu: Non-Conformance Report Beton Kolom",
+    description: "Laporkan temuan mutu ke BRAIN-MUTU. Bot harus membuat NCR terstruktur, analisis penyebab, dan protokol CAPA.",
+    prompt: "Hasil uji core sample beton kolom lantai 6: 3 dari 12 sampel di bawah f'c 30 MPa (hasil: 24.5, 26.1, 27.3 MPa). Lokasi: Grid C3–D4. Buat NCR dan rencana tindak lanjut.",
+    weight: "15%",
+    criteria: [
+      "NCR terstruktur: nomor NCR, tanggal, lokasi, deskripsi ketidaksesuaian",
+      "Root cause analysis (minimal 3 potensi penyebab)",
+      "CAPA: corrective action + preventive action terpisah",
+      "Sitasi standar: SNI 2847:2019 atau ACI 318 + prosedur pengujian ulang",
+    ],
+  },
+  {
+    id: "T-04", label: "T-04 — Near Miss K3", badge: "bg-red-50 text-red-700 border-red-200",
+    title: "Near Miss K3: Insiden Harness Scaffolding",
+    description: "Laporkan kejadian hampir celaka ke BRAIN-SAFIRA. Bot harus proseskan SOP penanganan near miss, investigasi, dan tindakan pencegahan.",
+    prompt: "Pekerja di lantai 8 hampir jatuh karena karabiner harness tidak terkunci sempurna saat berpindah jalur scaffolding. Tidak ada cedera. Saksi: 2 orang. Hari: Selasa, 10:30 WIB. Buat laporan near miss dan SOP tindak lanjut.",
+    weight: "15%",
+    criteria: [
+      "Form near miss terisi: what/who/when/where/how/why",
+      "Klasifikasi risiko dengan risk matrix (likelihood × severity)",
+      "Tindakan segera (immediate action) + jangka menengah",
+      "Sitasi: Permen PUPR No.10/2021 atau SMK3 PP 50/2012",
+    ],
+  },
+  {
+    id: "T-05", label: "T-05 — Klaim EOT", badge: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    title: "Klaim Kontrak: Extension of Time (EOT)",
+    description: "Ajukan klaim perpanjangan waktu ke BRAIN-KONTRAK. Bot harus analisis dasar klaim, hitung durasi, dan siapkan draft surat klaim.",
+    prompt: "Proyek terlambat 21 hari karena: (1) hujan ekstrem 18 hari di atas threshold kontrak, (2) keterlambatan approval shop drawing 12 hari oleh owner. Kontrak FIDIC Red Book 2017. Siapkan klaim EOT.",
+    weight: "15%",
+    criteria: [
+      "Identifikasi concurrent delay dan excusable delay terpisah",
+      "Hitung total EOT yang dapat diklaim (logic penjumlahan/concurrent)",
+      "Draft surat klaim dengan dasar klausul FIDIC (Clause 8.4 + 20.1)",
+      "Dokumen pendukung yang diperlukan: list lengkap",
+    ],
+  },
+  {
+    id: "T-06", label: "T-06 — Limbah B3", badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    title: "Enviro: Pengelolaan Limbah B3 Proyek",
+    description: "Konsultasikan masalah limbah berbahaya ke BRAIN-ENVIRA. Bot harus identifikasi kategori B3, prosedur pengelolaan, dan dokumen lingkungan yang wajib.",
+    prompt: "Proyek menghasilkan: cat dan solvent sisa (±500 liter/bulan), oli bekas mesin (±200 liter/bulan), baterai forklift bekas (±12 unit/bulan). Lokasi proyek: Jakarta Selatan. Apa kewajiban pengelolaan limbah B3 dan dokumen yang diperlukan?",
+    weight: "15%",
+    criteria: [
+      "Klasifikasi setiap limbah per PP No.22/2021 (kategori 1 atau 2)",
+      "Prosedur penyimpanan B3: syarat TPS, labeling, manifest",
+      "Kewajiban dokumen: neraca limbah B3, manifest elektronik (SiLH)",
+      "Sitasi: PP No.22/2021 + PermenLHK terkait pengelolaan B3",
+    ],
+  },
+];
+
 // ─── KONSTRA Test Prompts per Agent ──────────────────────────────────────────
 
 interface AgentPrompt { acId: string; label: string; prompt: string; tip: string; }
@@ -444,7 +539,7 @@ const KONSTRA_PROMPTS: Record<number, AgentPrompt[]> = {
 };
 
 type TestStatus = "pending" | "pass" | "fail" | "skip";
-type TabType = "tender" | "federation" | "pilot" | "konstra";
+type TabType = "tender" | "federation" | "pilot" | "konstra" | "brain";
 
 interface CellResult {
   status: TestStatus;
@@ -458,6 +553,7 @@ const STORAGE_KEY = "gustafta_test_tracker_v1";
 const FED_STORAGE_KEY = "gustafta_fed_tracker_v1";
 const PILOT_STORAGE_KEY = "gustafta_pilot_tracker_v1";
 const KONSTRA_STORAGE_KEY = "gustafta_konstra_tracker_v1";
+const BRAIN_STORAGE_KEY = "gustafta_brain_tracker_v1";
 const SIGNOFF_STORAGE_KEY = "gustafta_konstra_signoff_v1";
 
 interface SignOffManual {
@@ -724,6 +820,7 @@ export default function TestTrackerPage() {
   const [fedGrid, setFedGrid] = useState<GridState>(() => loadGrid(FED_STORAGE_KEY, FED_BOTS, FED_TESTS));
   const [pilotGrid, setPilotGrid] = useState<GridState>(() => loadGrid(PILOT_STORAGE_KEY, PILOT_BOTS, TESTS));
   const [konstraGrid, setKonstraGrid] = useState<GridState>(() => loadGrid(KONSTRA_STORAGE_KEY, KONSTRA_BOTS, KONSTRA_TESTS));
+  const [brainGrid, setBrainGrid] = useState<GridState>(() => loadGrid(BRAIN_STORAGE_KEY, BRAIN_BOTS, BRAIN_TESTS));
   const [signOff, setSignOff] = useState<SignOffManual>(() => loadSignOff());
   const [showPromptSheet, setShowPromptSheet] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
@@ -735,6 +832,7 @@ export default function TestTrackerPage() {
   useEffect(() => { saveGrid(FED_STORAGE_KEY, fedGrid); }, [fedGrid]);
   useEffect(() => { saveGrid(PILOT_STORAGE_KEY, pilotGrid); }, [pilotGrid]);
   useEffect(() => { saveGrid(KONSTRA_STORAGE_KEY, konstraGrid); }, [konstraGrid]);
+  useEffect(() => { saveGrid(BRAIN_STORAGE_KEY, brainGrid); }, [brainGrid]);
   useEffect(() => { saveSignOff(signOff); }, [signOff]);
   useEffect(() => { setSelected(null); }, [activeTab]);
 
@@ -746,13 +844,15 @@ export default function TestTrackerPage() {
     if (activeTab === "tender") setGrid(updater);
     else if (activeTab === "federation") setFedGrid(updater);
     else if (activeTab === "pilot") setPilotGrid(updater);
-    else setKonstraGrid(updater);
+    else if (activeTab === "konstra") setKonstraGrid(updater);
+    else setBrainGrid(updater);
   }, [activeTab]);
 
   const resetAll = () => {
     if (activeTab === "tender") setGrid(defaultGrid(TENDER_BOTS, TESTS));
     else if (activeTab === "federation") setFedGrid(defaultGrid(FED_BOTS, FED_TESTS));
     else if (activeTab === "pilot") setPilotGrid(defaultGrid(PILOT_BOTS, TESTS));
+    else if (activeTab === "brain") setBrainGrid(defaultGrid(BRAIN_BOTS, BRAIN_TESTS));
     else {
       setKonstraGrid(defaultGrid(KONSTRA_BOTS, KONSTRA_TESTS));
       const blank: SignOffManual = { so2_noCritical: false, so3_maxOneMajor: false, so5_tenderReadiness: 0, so6_uxRating: 0, tc16_pass: 0 };
@@ -765,13 +865,16 @@ export default function TestTrackerPage() {
   const currentBots = activeTab === "tender" ? TENDER_BOTS
     : activeTab === "federation" ? FED_BOTS
     : activeTab === "pilot" ? PILOT_BOTS
+    : activeTab === "brain" ? BRAIN_BOTS
     : KONSTRA_BOTS;
   const currentTests = activeTab === "tender" || activeTab === "pilot" ? TESTS
     : activeTab === "federation" ? FED_TESTS
+    : activeTab === "brain" ? BRAIN_TESTS
     : KONSTRA_TESTS;
   const currentGrid = activeTab === "tender" ? grid
     : activeTab === "federation" ? fedGrid
     : activeTab === "pilot" ? pilotGrid
+    : activeTab === "brain" ? brainGrid
     : konstraGrid;
 
   const allCells = currentBots.flatMap(b => currentTests.map(t => currentGrid[cellKey(b.id, t.id)]));
@@ -827,6 +930,8 @@ export default function TestTrackerPage() {
                   ? `${FED_BOTS.length} Hub Orchestrator × 5 Federation test · ${FED_BOTS.length * 5} sel`
                   : activeTab === "pilot"
                   ? "6 Bot Pilot × 7 skenario · 42 sel"
+                  : activeTab === "brain"
+                  ? "7 BRAIN Agent × 6 Sprint 1 skenario · 42 sel"
                   : "10 KONSTRA Agent × 7 AC ABD · 70 sel"}
               </p>
             </div>
@@ -882,6 +987,18 @@ export default function TestTrackerPage() {
               <HardHat className="w-3 h-3 text-orange-500" />
               KONSTRA (70)
             </button>
+            <button
+              onClick={() => setActiveTab("brain")}
+              data-testid="tab-brain"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                activeTab === "brain"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              <Brain className="w-3 h-3 text-sky-500" />
+              BRAIN (42)
+            </button>
           </div>
 
           <div className="ml-auto flex items-center gap-3">
@@ -905,6 +1022,71 @@ export default function TestTrackerPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+        {/* ── BRAIN info banner ── */}
+        {activeTab === "brain" && (
+          <div className="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <Brain className="w-4 h-4 text-sky-600 dark:text-sky-400 mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div>
+                    <p className="text-sm font-medium text-sky-800 dark:text-sky-300">
+                      BRAIN Project — Multi-Agent Pengawas Konstruksi (Sprint 1)
+                    </p>
+                    <p className="text-xs text-sky-600 dark:text-sky-400 mt-0.5">
+                      7 agen (1 Orchestrator + 6 Specialist) · 6 skenario Sprint 1 · <strong>42 sel</strong>.
+                      Bobot: T-01 = 25%, T-02 s/d T-06 masing-masing 15%. Min lulus: <strong>80%</strong>.
+                    </p>
+                  </div>
+                  <a
+                    href="https://www.notion.so/agent/4df5eb0d0f004342acb59266ab8f08c1?wfv=chat"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="brain-notion-link"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-900 border border-sky-200 dark:border-sky-700 rounded-lg text-xs font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/50 transition-colors shrink-0"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Notion AI Agent
+                  </a>
+                </div>
+                {/* Bobot skenario badges */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {BRAIN_TESTS.map(t => (
+                    <span key={t.id} className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${t.badge}`}>
+                      {t.id} · {(t as any).weight}
+                    </span>
+                  ))}
+                </div>
+                {/* Agent links */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {BRAIN_BOTS.map(b => (
+                    <a key={b.id} href={`/bot/${b.id}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-900 border border-sky-200 dark:border-sky-800 rounded-lg text-[10px] font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/50 transition-colors"
+                      data-testid={`brain-agent-link-${b.id}`}>
+                      <Brain className="w-2.5 h-2.5" />
+                      {b.role}
+                      {b.subs > 0 && <span className="ml-0.5 text-violet-500 font-mono">{b.subs}✦</span>}
+                    </a>
+                  ))}
+                </div>
+                {/* Sprint 1 target criteria */}
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { label: "Min 80% Pass", desc: "Bobot T-01=25%, T02-T06=15% each", cls: "border-sky-200 dark:border-sky-800" },
+                    { label: "T-01 Holistik LHP", desc: "Orchestrator dispatch 6 specialist paralel", cls: "border-violet-200 dark:border-violet-800" },
+                    { label: "ABD v1.1 Compliant", desc: "Anti-Blocking Doctrine per semua agen", cls: "border-emerald-200 dark:border-emerald-800" },
+                  ].map(c => (
+                    <div key={c.label} className={`bg-white dark:bg-gray-900 rounded-lg p-2 border ${c.cls}`}>
+                      <p className="text-[10px] font-semibold text-sky-800 dark:text-sky-300">{c.label}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{c.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── KONSTRA info banner ── */}
         {activeTab === "konstra" && (
@@ -1413,6 +1595,8 @@ export default function TestTrackerPage() {
                 ? "Skenario Federation (F1–F5)"
                 : activeTab === "konstra"
                 ? "Acceptance Criteria ABD (AC-4, AC-1, AC-2, AC-3, AC-5, AC-6, AC-7)"
+                : activeTab === "brain"
+                ? "Skenario Sprint 1 BRAIN (T-01 s/d T-06)"
                 : "Skenario Test (T1–T7)"}
             </span>
             {activeTab === "pilot" && (
@@ -1423,6 +1607,11 @@ export default function TestTrackerPage() {
             {activeTab === "konstra" && (
               <span className="ml-auto text-[10px] text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800 font-medium">
                 Sign-off Sprint 4: ≥14/16 TC
+              </span>
+            )}
+            {activeTab === "brain" && (
+              <span className="ml-auto text-[10px] text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/30 px-2 py-0.5 rounded-full border border-sky-200 dark:border-sky-800 font-medium">
+                Target ≥80% pass · T-01 bobot 25%
               </span>
             )}
           </div>
@@ -1565,6 +1754,14 @@ export default function TestTrackerPage() {
                       </Button>
                     </a>
                   )}
+                  {activeTab === "brain" && (
+                    <a href={`/chat/${selected.botId}`} target="_blank" rel="noopener noreferrer" data-testid="btn-open-brain-chat">
+                      <Button size="sm" variant="outline" className="text-xs gap-1.5 border-sky-300 text-sky-700 dark:border-sky-700 dark:text-sky-300">
+                        <Brain className="w-3 h-3" />
+                        Uji BRAIN
+                      </Button>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -1581,6 +1778,7 @@ export default function TestTrackerPage() {
             {activeTab === "tender" ? "Tender"
               : activeTab === "federation" ? "Federation"
               : activeTab === "pilot" ? "Pilot"
+              : activeTab === "brain" ? "BRAIN Sprint 1"
               : "KONSTRA ABD"}?
           </DialogTitle>
           </DialogHeader>
@@ -1592,6 +1790,8 @@ export default function TestTrackerPage() {
               ? `Federation (${FED_BOTS.length * 5} sel)`
               : activeTab === "pilot"
               ? "Pilot (42 sel)"
+              : activeTab === "brain"
+              ? "BRAIN Sprint 1 (42 sel)"
               : "KONSTRA ABD (70 sel)"}{" "}
             akan dihapus.
           </p>
