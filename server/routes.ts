@@ -3045,6 +3045,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       let userContent = parsed.data.content;
       let hasVisionContent = false;
       let imageDataUrls: Array<{ url: string }> = [];
+      // Track if technical vision mode should be activated
+      const { isTechnicalVisionRequest, TECHNICAL_VISION_SYSTEM_PROMPT, TECHNICAL_VISION_COMMAND_PROMPTS } = await import("./lib/technical-vision-prompt");
 
       if (attachments.length > 0 || userContent.match(/youtube\.com|youtu\.be|drive\.google\.com|docs\.google\.com|1drv\.ms|onedrive\.live\.com|sharepoint\.com/)) {
         try {
@@ -3071,7 +3073,24 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         }
       }
 
+      // ── Technical Vision Mode: inject specialized prompt for construction drawings ──
       if (hasVisionContent && imageDataUrls.length > 0) {
+        const isTechVision = isTechnicalVisionRequest(userContent);
+        if (isTechVision) {
+          // Find the specific command used to get the focused sub-prompt
+          const { TECHNICAL_VISION_COMMANDS } = await import("./lib/technical-vision-prompt");
+          const matchedCmd = TECHNICAL_VISION_COMMANDS.find(cmd =>
+            userContent.toLowerCase().includes(cmd)
+          );
+          const cmdPrompt = matchedCmd ? (TECHNICAL_VISION_COMMAND_PROMPTS[matchedCmd] || "") : "";
+          // Inject into system prompt
+          if (chatMessages.length > 0 && chatMessages[0].role === "system") {
+            chatMessages[0] = {
+              role: "system",
+              content: (chatMessages[0].content as string) + "\n\n" + TECHNICAL_VISION_SYSTEM_PROMPT + (cmdPrompt ? "\n\n" + cmdPrompt : ""),
+            };
+          }
+        }
         const visionContent: any[] = [{ type: "text", text: userContent }];
         for (const img of imageDataUrls) {
           visionContent.push({ type: "image_url", image_url: { url: img.url, detail: "high" } });

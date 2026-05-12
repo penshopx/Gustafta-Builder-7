@@ -126,6 +126,13 @@ const SLASH_COMMANDS = [
   { group: "Analisis", cmd: "/simulasi", emoji: "🔮", label: "Simulasi Skenario", desc: "Analisis skenario what-if", prefix: "Lakukan simulasi dan analisis skenario what-if untuk:\n\n**Skenario Optimis:** \n**Skenario Moderat:** \n**Skenario Pesimis:** \n\nKonteks/situasi:\n" },
   // ✅ Aksi
   { group: "Aksi", cmd: "/checklist", emoji: "✅", label: "Buat Checklist", desc: "Daftar periksa sistematis", prefix: "Buat checklist lengkap dan sistematis untuk:\n\n" },
+  // 🖼️ Gambar Teknis
+  { group: "Gambar Teknis", cmd: "/gambar-teknis", emoji: "🖼️", label: "Analisis Gambar Teknis", desc: "Analisis menyeluruh gambar konstruksi/keteknikan", prefix: "Analisis gambar teknis yang saya kirim secara menyeluruh. Identifikasi jenis gambar, baca semua elemen, dimensi, material, dan berikan temuan teknis lengkap:\n\n/gambar-teknis\n" },
+  { group: "Gambar Teknis", cmd: "/denah", emoji: "🏠", label: "Analisis Denah", desc: "Baca & analisis denah / floor plan", prefix: "Analisis denah/floor plan berikut. Identifikasi layout ruang, dimensi, sirkulasi, struktur tampak, dan bukaan:\n\n/denah\n" },
+  { group: "Gambar Teknis", cmd: "/struktur", emoji: "🏗️", label: "Analisis Struktur", desc: "Baca gambar struktur: kolom, balok, pondasi", prefix: "Analisis gambar struktur berikut. Identifikasi sistem struktur, dimensi elemen, tulangan, sambungan, dan mutu material:\n\n/struktur\n" },
+  { group: "Gambar Teknis", cmd: "/mep", emoji: "⚙️", label: "Analisis MEP", desc: "Baca gambar Mekanikal/Elektrikal/Plumbing", prefix: "Analisis gambar MEP (Mekanikal/Elektrikal/Plumbing) berikut. Identifikasi sistem, jalur, ukuran, dan spesifikasi:\n\n/mep\n" },
+  { group: "Gambar Teknis", cmd: "/shopdrw", emoji: "📐", label: "Review Shop Drawing", desc: "Review shop drawing siap fabrikasi", prefix: "Review shop drawing berikut untuk kelengkapan dokumen, kebenaran teknis, dan kesiapan fabrikasi/konstruksi:\n\n/shopdrw\n" },
+  { group: "Gambar Teknis", cmd: "/as-built", emoji: "📍", label: "Analisis As-Built", desc: "Baca gambar kondisi terbangun (as-built)", prefix: "Analisis as-built drawing berikut. Identifikasi kondisi aktual, perubahan dari rencana awal, dan kelengkapan dokumentasi:\n\n/as-built\n" },
 ];
 
 // ── Quick Actions (Notion AI style) ─────────────────────────────────────────
@@ -138,6 +145,11 @@ const QUICK_ACTIONS = [
   { key: "perluas",       emoji: "⬆️", label: "Perluas",            prompt: "Perluas dan elaborasi jawaban di atas dengan lebih banyak detail teknis, contoh konkret, referensi standar/regulasi terkait, dan rekomendasi praktis." },
   { key: "persingkat",    emoji: "✂️", label: "Persingkat",         prompt: "Persingkat jawaban di atas menjadi 2-3 kalimat inti yang paling penting dan berdampak." },
   { key: "terjemah",      emoji: "🌐", label: "Terjemahkan EN",     prompt: "Terjemahkan jawaban di atas ke Bahasa Inggris teknis yang formal dan profesional." },
+  // Gambar Teknis
+  { key: "rab-gambar",    emoji: "💰", label: "Estimasi RAB",       prompt: "Berdasarkan gambar teknis yang telah dianalisis di atas, buat estimasi Rencana Anggaran Biaya (RAB) untuk pekerjaan yang teridentifikasi. Gunakan format tabel: No | Uraian Pekerjaan | Volume | Satuan | Harga Satuan (Rp) | Jumlah (Rp). Sertakan asumsi harga berdasarkan HSPK daerah rata-rata Indonesia 2024–2025." },
+  { key: "k3-gambar",     emoji: "⚠️", label: "Identifikasi K3",    prompt: "Berdasarkan gambar teknis yang telah dianalisis di atas, lakukan Hazard Identification & Risk Assessment (HIRA) untuk pelaksanaan konstruksinya. Format: tabel Potensi Bahaya | Lokasi/Elemen | Likelihood | Severity | Pengendalian (Hierarchy of Control)." },
+  { key: "skk-gambar",    emoji: "🎓", label: "Relevansi SKK/SBU",  prompt: "Berdasarkan gambar teknis di atas, identifikasi: (1) Sub-klasifikasi SBU yang relevan, (2) Jabatan kerja SKK yang dibutuhkan untuk melaksanakan pekerjaan ini, (3) Referensi SKKNI yang berlaku, (4) Sertifikasi kompetensi apa yang harus dimiliki pelaksana lapangan." },
+  { key: "shopdrw-check", emoji: "📐", label: "Checklist Shop Drw", prompt: "Buat checklist review shop drawing berdasarkan gambar yang dianalisis di atas. Format: tabel No | Item Pemeriksaan | Status (OK/NG/NA) | Catatan. Kelompokkan: (A) Kelengkapan Dokumen, (B) Kebenaran Dimensi, (C) Spesifikasi Material, (D) Kesesuaian Standar." },
 ];
 
 // Context-aware Quick Action scoring — promote relevant actions based on last AI message content
@@ -145,9 +157,24 @@ function getContextualQuickActions(lastContent: string) {
   if (!lastContent) return QUICK_ACTIONS;
   const c = lastContent;
   const scores: Record<string, number> = {};
+
+  // Technical drawing analysis detected — promote gambar teknis actions
+  const isTechVision = /IDENTIFIKASI GAMBAR|Jenis Gambar|Elemen Utama|DENAH|STRUKTUR|MEP|Shop Drawing|As-Built|Skala.*1:/i.test(c)
+    || /📐|🔎|🏗️|⚙️/.test(c)
+    || c.includes("PERLU KLARIFIKASI")
+    || /denah|floor plan|potongan|tampak|kolom.*balok|pelat lantai|pondasi|MEP|shop drawing/i.test(c);
+  if (isTechVision) {
+    scores["rab-gambar"]    = 12;
+    scores["k3-gambar"]     = 10;
+    scores["skk-gambar"]    = 9;
+    scores["shopdrw-check"] = 8;
+    scores["tabel"]         = 7;
+    scores["dokumen"]       = 6;
+  }
+
   // Math / engineering calculation detected
   if (/\d[\s]*[×÷=]\s*\d|kN|MPa|m²|m³|kg\/|N\/m|kPa|\$\$|\\frac|σ|τ|ε|Δ/.test(c) || c.includes("**Diketahui") || c.includes("**Penyelesaian")) {
-    scores["hitung"] = 10;
+    scores["hitung"] = (scores["hitung"] || 0) + 10;
   }
   // Very long response → prioritize summarize
   if (c.length > 800) scores["ringkas"] = (scores["ringkas"] || 0) + 8;
@@ -493,12 +520,17 @@ export default function AgentChat() {
   };
 
   // Smart slash suggestion based on attached file type
-  const getFileSuggestion = (files: UploadedFile[]): { cmd: string; label: string; emoji: string } | null => {
+  const getFileSuggestion = (files: UploadedFile[]): { cmd: string; label: string; emoji: string; secondary?: { cmd: string; label: string; emoji: string } } | null => {
     if (!files.length) return null;
     const f = files[0];
     const ext = f.fileName.split(".").pop()?.toLowerCase() || "";
     const cat = f.category;
-    if (cat === "image") return { cmd: "/analisis", emoji: "🔍", label: "Analisis Gambar" };
+    if (cat === "image") return {
+      cmd: "/gambar-teknis",
+      emoji: "🖼️",
+      label: "Analisis Gambar Teknis",
+      secondary: { cmd: "/analisis", emoji: "🔍", label: "Analisis Umum" },
+    };
     if (["xlsx", "xls", "csv"].includes(ext)) return { cmd: "/tabel", emoji: "📊", label: "Buat Tabel dari File" };
     if (["pdf", "doc", "docx"].includes(ext)) return { cmd: "/analisis", emoji: "🔍", label: "Analisis Dokumen" };
     if (["ppt", "pptx"].includes(ext)) return { cmd: "/ringkas", emoji: "📋", label: "Ringkas Presentasi" };
@@ -2737,17 +2769,31 @@ export default function AgentChat() {
               <div className="max-w-2xl mx-auto mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20">
                 <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
                 <span className="text-xs text-foreground/70 flex-1">Saran untuk file ini:</span>
-                <button
-                  onClick={() => {
-                    const sc = SLASH_COMMANDS.find(c => c.cmd === suggestion.cmd);
-                    if (sc) applySlashCommand(sc);
-                  }}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs bg-primary/10 hover:bg-primary/20 border border-primary/30 font-medium text-primary transition-colors"
-                >
-                  <span>{suggestion.emoji}</span>
-                  <span>{suggestion.label}</span>
-                  <span className="font-mono text-[10px] opacity-60">{suggestion.cmd}</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      const sc = SLASH_COMMANDS.find(c => c.cmd === suggestion.cmd);
+                      if (sc) applySlashCommand(sc);
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs bg-primary/10 hover:bg-primary/20 border border-primary/30 font-medium text-primary transition-colors"
+                  >
+                    <span>{suggestion.emoji}</span>
+                    <span>{suggestion.label}</span>
+                    <span className="font-mono text-[10px] opacity-60">{suggestion.cmd}</span>
+                  </button>
+                  {suggestion.secondary && (
+                    <button
+                      onClick={() => {
+                        const sc = SLASH_COMMANDS.find(c => c.cmd === suggestion.secondary!.cmd);
+                        if (sc) applySlashCommand(sc);
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-muted hover:bg-muted/80 border border-border font-medium text-foreground/60 hover:text-foreground transition-colors"
+                    >
+                      <span>{suggestion.secondary.emoji}</span>
+                      <span>{suggestion.secondary.label}</span>
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })()}
