@@ -31,6 +31,7 @@ import {
   tenderSources,
   tenders,
   tenderDocumentCatalog,
+  tenderAlertProfiles,
   leads,
   scoringResults,
   companyProfiles,
@@ -44,6 +45,8 @@ import {
 import type {
   TenderDocumentCatalog,
   InsertTenderDocumentCatalog,
+  TenderAlertProfile,
+  InsertTenderAlertProfile,
   ChatbotTemplate,
   InsertChatbotTemplate,
   StoreProduct,
@@ -3525,6 +3528,74 @@ export class DatabaseStorage implements IStorage {
   async deleteScalevMapping(id: number): Promise<boolean> {
     const rows = await db.delete(scalevMappings).where(eq(scalevMappings.id, id)).returning();
     return rows.length > 0;
+  }
+
+  // ── Tender Alert Profiles ─────────────────────────────────────────────────
+
+  async getTenderAlertProfile(userId: string): Promise<TenderAlertProfile | undefined> {
+    const [row] = await db.select().from(tenderAlertProfiles).where(eq(tenderAlertProfiles.userId, userId));
+    return row;
+  }
+
+  async upsertTenderAlertProfile(data: InsertTenderAlertProfile): Promise<TenderAlertProfile> {
+    const existing = await this.getTenderAlertProfile(data.userId);
+    if (existing) {
+      const [row] = await db
+        .update(tenderAlertProfiles)
+        .set({ ...data, updatedAt: new Date() } as any)
+        .where(eq(tenderAlertProfiles.userId, data.userId))
+        .returning();
+      return row;
+    }
+    const [row] = await db.insert(tenderAlertProfiles).values(data as any).returning();
+    return row;
+  }
+
+  async getAllActiveTenderAlertProfiles(): Promise<TenderAlertProfile[]> {
+    return db
+      .select()
+      .from(tenderAlertProfiles)
+      .where(eq(tenderAlertProfiles.notifEnabled, true));
+  }
+
+  async getTendersMatchingProfile(profile: TenderAlertProfile, limit = 30): Promise<Tender[]> {
+    const all = await db
+      .select()
+      .from(tenders)
+      .orderBy(desc(tenders.createdAt))
+      .limit(500);
+
+    return all
+      .filter((t) => {
+        // Sektor filter
+        if (profile.sectors?.length > 0) {
+          if (!profile.sectors.includes(t.sector ?? "konstruksi")) return false;
+        }
+        // Kualifikasi filter (dari rawData SIRUP)
+        if (profile.kualifikasi?.length > 0) {
+          const k = ((t.rawData as any)?.kualifikasi ?? "").toLowerCase();
+          if (k && !profile.kualifikasi.some((q) => k.includes(q.toLowerCase()))) return false;
+        }
+        // Wilayah filter
+        if (profile.wilayah?.length > 0) {
+          const loc = (t.location ?? "").toLowerCase();
+          if (loc && !profile.wilayah.some((w) => loc.includes(w.toLowerCase()))) return false;
+        }
+        // Keyword filter
+        if (profile.keywords?.length > 0) {
+          const name = (t.name ?? "").toLowerCase();
+          if (!profile.keywords.some((kw) => name.includes(kw.toLowerCase()))) return false;
+        }
+        return true;
+      })
+      .slice(0, limit);
+  }
+
+  async markAlertProfileNotified(userId: string): Promise<void> {
+    await db
+      .update(tenderAlertProfiles)
+      .set({ lastNotifiedAt: new Date() })
+      .where(eq(tenderAlertProfiles.userId, userId));
   }
 }
 

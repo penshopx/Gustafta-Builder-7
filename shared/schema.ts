@@ -1827,3 +1827,32 @@ export const scalevMappings = pgTable("scalev_mappings", {
 export const insertScalevMappingSchema = createInsertSchema(scalevMappings).omit({ id: true, createdAt: true });
 export type InsertScalevMapping = z.infer<typeof insertScalevMappingSchema>;
 export type ScalevMapping = typeof scalevMappings.$inferSelect;
+
+// ==================== TENDER ALERT PROFILES ====================
+// Profil bisnis BUJK untuk notifikasi tender harian (WA/Email jam 08:00 WIB)
+export const tenderAlertProfiles = pgTable("tender_alert_profiles", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().unique(),
+  companyName: text("company_name").default(""),
+  // Filter preferensi tender
+  sectors:      text("sectors").array().notNull().default(["konstruksi"]),  // konstruksi | oil_gas | pertambangan | energi
+  kualifikasi:  text("kualifikasi").array().notNull().default([]),           // Kecil | Menengah | Besar
+  wilayah:      text("wilayah").array().notNull().default([]),               // provinsi/kab/kota
+  keywords:     text("keywords").array().notNull().default([]),              // kata kunci paket
+  minBudgetJuta: integer("min_budget_juta"),                                 // min pagu (juta Rp)
+  maxBudgetJuta: integer("max_budget_juta"),                                 // max pagu (juta Rp)
+  // Saluran notifikasi
+  waPhone:       text("wa_phone").default(""),    // no WA (format: 628xxx)
+  email:         text("email").default(""),
+  notifEnabled:  boolean("notif_enabled").default(true),
+  // Meta
+  lastNotifiedAt: timestamp("last_notified_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertTenderAlertProfileSchema = createInsertSchema(tenderAlertProfiles).omit({
+  id: true, createdAt: true, updatedAt: true, lastNotifiedAt: true,
+});
+export type InsertTenderAlertProfile = z.infer<typeof insertTenderAlertProfileSchema>;
+export type TenderAlertProfile = typeof tenderAlertProfiles.$inferSelect;

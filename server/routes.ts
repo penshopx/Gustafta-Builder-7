@@ -11032,6 +11032,172 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // ==================== TENDER ALERT PROFILES (Notifikasi Harian 08:00) ====================
+
+  // Helper: detect sector from paket name
+  function detectSirupSector(name: string): string {
+    const n = name.toLowerCase();
+    if (/minyak|gas|migas|petroleum|kilang|wellhead|sumur|pertamina|kkks/.test(n)) return "oil_gas";
+    if (/tambang|batubara|nikel|bauksit|mineral|coal|mining/.test(n)) return "pertambangan";
+    if (/pltu|pltg|listrik|transmisi|gardu|pln|trafo|solar panel|geothermal/.test(n)) return "energi";
+    return "konstruksi";
+  }
+
+  // GET profile notifikasi user
+  app.get("/api/tender-alerts/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub || "guest";
+      const profile = await storage.getTenderAlertProfile(userId);
+      res.json(profile || null);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST buat/update profil notifikasi
+  app.post("/api/tender-alerts/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub || "guest";
+      const data = { ...req.body, userId };
+      const profile = await storage.upsertTenderAlertProfile(data);
+      res.json(profile);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET tender yang cocok dengan profil user
+  app.get("/api/tender-alerts/matches", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub || "guest";
+      const profile = await storage.getTenderAlertProfile(userId);
+      if (!profile) return res.json([]);
+      const matches = await storage.getTendersMatchingProfile(profile, 50);
+      res.json(matches);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST kirim test notifikasi WA
+  app.post("/api/tender-alerts/test-notify", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub || "guest";
+      const profile = await storage.getTenderAlertProfile(userId);
+      if (!profile?.waPhone) return res.status(400).json({ error: "Nomor WA belum diisi di profil notifikasi." });
+
+      const matches = await storage.getTendersMatchingProfile(profile, 5);
+      const date = new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+      let message = `🏗️ *TENDER MONITOR GUSTAFTA*\n📅 ${date}\n\n`;
+      message += `Halo *${profile.companyName || "BUJK"}*!\n`;
+      message += `Berikut ${matches.length} tender yang cocok dengan profil bisnis Anda:\n\n`;
+
+      if (matches.length === 0) {
+        message += "Belum ada tender baru yang sesuai filter. Coba perluas wilayah atau sektor.\n";
+      } else {
+        matches.forEach((t: any, i: number) => {
+          message += `${i + 1}. *${t.name.replace("[DEMO] ", "")}*\n`;
+          message += `   🏢 ${t.agency}\n`;
+          if (t.budget) message += `   💰 ${t.budget}\n`;
+          if (t.location) message += `   📍 ${t.location}\n`;
+          if (t.deadlineDate) message += `   ⏰ Deadline: ${t.deadlineDate}\n`;
+          if (t.url && !t.url.includes("demo")) message += `   🔗 ${t.url}\n`;
+          message += "\n";
+        });
+      }
+
+      const sectors = (profile.sectors || ["konstruksi"]).join(", ");
+      const kual = (profile.kualifikasi || []).join("/") || "Semua";
+      message += `_Filter: ${sectors} | Kualifikasi: ${kual}_\n`;
+      message += `_Sumber: SIRUP Nasional + LPSE 120+ sumber_\n`;
+      message += `_— Gustafta Tender Monitor_`;
+
+      const waToken = process.env.FONNTE_API_TOKEN || req.body.waToken;
+      if (!waToken) {
+        return res.json({ ok: false, preview: message, message: "Pesan siap. Tambahkan FONNTE_API_TOKEN ke environment variable untuk kirim WA otomatis." });
+      }
+
+      const fonnteRes = await fetch("https://api.fonnte.com/send", {
+        method: "POST",
+        headers: { Authorization: waToken },
+        body: new URLSearchParams({ target: profile.waPhone, message }),
+      });
+      const fonnteData = await fonnteRes.json() as any;
+
+      res.json({ ok: fonnteData.status || true, message: `Notifikasi test terkirim ke ${profile.waPhone}`, preview: message });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET real-time search SIRUP API
+  app.get("/api/tender-sirup/search", async (req, res) => {
+    try {
+      const { tahun, kualifikasi, keyword, start = "0", length = "50" } = req.query as Record<string, string>;
+      const year = tahun || String(new Date().getFullYear());
+      const params = new URLSearchParams({
+        tahun: year, kd_klpd: "", satkerMapingId: "",
+        draw: "1", start, length,
+      });
+      const response = await fetch(
+        `https://sirup.lkpp.go.id/sirup/ro/datatablesPaketPenyediaPublic?${params}`,
+        {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; GustaftaBot/1.0)",
+            Accept: "application/json",
+            Referer: "https://sirup.lkpp.go.id/sirup/ro/paketpenyediaumum",
+          },
+          signal: AbortSignal.timeout(15000),
+        }
+      );
+      if (!response.ok) throw new Error(`SIRUP API error: ${response.status}`);
+      const data = await response.json() as any;
+      let rows: any[] = data.data || [];
+
+      if (keyword) {
+        const kw = keyword.toLowerCase();
+        rows = rows.filter((r) => String(r[1] || "").toLowerCase().includes(kw) || String(r[3] || "").toLowerCase().includes(kw));
+      }
+      if (kualifikasi) {
+        rows = rows.filter((r) => String(r[9] || "").toLowerCase().includes(kualifikasi.toLowerCase()));
+      }
+
+      const result = rows.map((row, idx) => ({
+        id: idx,
+        tenderId: `sirup-${row[0] || idx}`,
+        name: String(row[1] || ""),
+        agency: String(row[3] || ""),
+        budget: typeof row[6] === "number" ? `Rp ${(row[6] / 1_000_000).toFixed(0)} juta` : String(row[6] || ""),
+        type: String(row[7] || ""),
+        kualifikasi: String(row[9] || ""),
+        location: String(row[12] || ""),
+        publishDate: String(row[10] || ""),
+        deadlineDate: String(row[11] || ""),
+        status: String(row[13] || "Pengumuman"),
+        url: row[0] ? `https://sirup.lkpp.go.id/sirup/ro/paketpenyedia/view/${row[0]}` : "https://sirup.lkpp.go.id",
+        sourceType: "sirup",
+        sector: detectSirupSector(String(row[1] || "")),
+      }));
+
+      res.json({ total: data.recordsTotal || rows.length, data: result });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message, data: [] });
+    }
+  });
+
+  // GET document adequacy checklist
+  app.get("/api/tender-doc-checker", async (req, res) => {
+    try {
+      const { jenis = "pekerjaan_konstruksi", kualifikasi = "kecil" } = req.query as Record<string, string>;
+      const docs = await (storage as any).getTenderDocumentCatalog?.({ jenisTender: jenis }) ?? [];
+      const filtered = (docs as any[]).filter((d) => d.isActive);
+      res.json({ jenis, kualifikasi, total: filtered.length, docs: filtered });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Lead routes (Protected - admin)
   app.get("/api/leads/:agentId", isAuthenticated, async (req, res) => {
     try {

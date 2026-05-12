@@ -76,6 +76,8 @@ import type {
   InsertStoreOrder,
   ScalevMapping,
   InsertScalevMapping,
+  TenderAlertProfile,
+  InsertTenderAlertProfile,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -316,6 +318,13 @@ export interface IStorage {
   getScoringResult(id: string): Promise<ScoringResult | undefined>;
   createScoringResult(result: InsertScoringResult): Promise<ScoringResult>;
   getScoringResultsBySession(agentId: string, sessionId: string): Promise<ScoringResult[]>;
+
+  // Tender Alert Profile methods
+  getTenderAlertProfile(userId: string): Promise<TenderAlertProfile | undefined>;
+  upsertTenderAlertProfile(data: InsertTenderAlertProfile): Promise<TenderAlertProfile>;
+  getAllActiveTenderAlertProfiles(): Promise<TenderAlertProfile[]>;
+  getTendersMatchingProfile(profile: TenderAlertProfile, limit?: number): Promise<Tender[]>;
+  markAlertProfileNotified(userId: string): Promise<void>;
 
   // Company Profile methods (Tender LPSE Pack)
   getCompanyProfiles(userId: string): Promise<CompanyProfile[]>;
@@ -2046,6 +2055,15 @@ export class MemStorage implements IStorage {
       .filter((r) => r.agentId === parseInt(agentId) && r.sessionId === sessionId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
+
+  // Tender Alert Profile stubs (MemStorage)
+  async getTenderAlertProfile(_userId: string): Promise<TenderAlertProfile | undefined> { return undefined; }
+  async upsertTenderAlertProfile(data: InsertTenderAlertProfile): Promise<TenderAlertProfile> {
+    return { id: 1, ...data, notifEnabled: data.notifEnabled ?? true, waPhone: data.waPhone ?? "", email: data.email ?? "", companyName: data.companyName ?? "", sectors: data.sectors ?? ["konstruksi"], kualifikasi: data.kualifikasi ?? [], wilayah: data.wilayah ?? [], keywords: data.keywords ?? [], minBudgetJuta: data.minBudgetJuta ?? null, maxBudgetJuta: data.maxBudgetJuta ?? null, lastNotifiedAt: null, createdAt: new Date(), updatedAt: new Date() } as TenderAlertProfile;
+  }
+  async getAllActiveTenderAlertProfiles(): Promise<TenderAlertProfile[]> { return []; }
+  async getTendersMatchingProfile(_profile: TenderAlertProfile, _limit?: number): Promise<Tender[]> { return []; }
+  async markAlertProfileNotified(_userId: string): Promise<void> {}
 
   // Company Profile stubs (MemStorage)
   async getCompanyProfiles(_userId: string): Promise<CompanyProfile[]> { return []; }

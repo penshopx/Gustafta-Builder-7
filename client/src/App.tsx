@@ -44,6 +44,7 @@ import Panduan from "@/pages/panduan";
 import WelcomePage from "@/pages/welcome";
 import ReferensiHarga from "@/pages/referensi-harga";
 import TenderMonitor from "@/pages/tender-monitor";
+import TenderAlertProfile from "@/pages/tender-alert-profile";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
@@ -113,6 +114,7 @@ function Router() {
       <Route path="/welcome" component={WelcomePage} />
       <Route path="/referensi-harga" component={ReferensiHarga} />
         <Route path="/tender-monitor" component={TenderMonitor} />
+        <Route path="/tender-alert" component={TenderAlertProfile} />
       <Route component={NotFound} />
     </Switch>
   );
