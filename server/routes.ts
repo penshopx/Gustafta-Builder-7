@@ -6203,7 +6203,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
       const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "";
       const whatsapp = (agent as any).whatsappCta || "";
-      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const agentSlug6206 = (agent as any).slug || slugify(agent.name);
+      const chatUrl = `${getServerBaseUrl(req)}/chatbot/${agentSlug6206}`;
       const category = agent.category || "konstruksi";
 
       const agentCtx = `
@@ -6730,7 +6731,8 @@ Post 5 — Produk Baru: Judul | Deskripsi produk | Harga | Link
       const painPoints = ((agent as any).landingPainPoints as string[] || []).join(", ");
       const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
       const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "";
-      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const agentSlug6733 = (agent as any).slug || slugify(agent.name);
+      const chatUrl = `${getServerBaseUrl(req)}/chatbot/${agentSlug6733}`;
       const category = agent.category || "konstruksi";
 
       const productLabels: Record<string, string> = {
@@ -6914,7 +6916,8 @@ Akhiri dengan 2-3 poin key takeaway untuk pembaca lain.`;
       const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
       const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "";
       const whatsapp = (agent as any).whatsappCta || "";
-      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const agentSlug6917 = (agent as any).slug || slugify(agent.name);
+      const chatUrl = `${getServerBaseUrl(req)}/chatbot/${agentSlug6917}`;
       const category = agent.category || "konstruksi";
       const personality = agent.personality || "";
       const toneOfVoice = (agent as any).toneOfVoice || "";
@@ -7010,7 +7013,8 @@ Output: HANYA kode HTML, mulai dari <!DOCTYPE html>, tanpa markdown fence atau p
       const benefits = ((agent as any).landingBenefits as string[] || []).join(", ");
       const price = (agent as any).monthlyPrice ? `Rp ${Number((agent as any).monthlyPrice).toLocaleString("id-ID")}/bulan` : "Hubungi kami";
       const whatsapp = (agent as any).whatsappCta || "";
-      const chatUrl = `${req.protocol}://${req.get("host")}/bot/${agent.id}`;
+      const agentSlug7013 = (agent as any).slug || slugify(agent.name);
+      const chatUrl = `${getServerBaseUrl(req)}/chatbot/${agentSlug7013}`;
       const category = agent.category || "konstruksi";
 
       const agentCtx = `Nama: ${name} | Tagline: ${tagline} | Deskripsi: ${description} | Kategori: ${category} | Keunggulan: ${expertise} | Fitur: ${features} | Pain Points: ${painPoints} | Manfaat: ${benefits} | Harga: ${price} | WA: ${whatsapp} | Link: ${chatUrl}`;
@@ -7370,7 +7374,8 @@ Balas dengan JSON dengan struktur PERSIS ini:
 
       const agentName = (agent.name || "Gustafta").replace(/[<>"'&]/g, "");
       const color = agent.widgetColor || "#6366f1";
-      const startUrl = `/bot/${agent.id.toString()}`;
+      const manifestSlug = (agent as any).slug || slugify(agent.name);
+      const startUrl = `/chatbot/${manifestSlug}`;
       const description = (agent.description || agent.tagline || `Chat with ${agentName}`).replace(/[<>"'&]/g, "").substring(0, 200);
 
       sendManifest(res, {
@@ -7403,12 +7408,13 @@ Balas dengan JSON dengan struktur PERSIS ini:
       const description = (agent.description || agent.tagline || `Chat with ${name}`).replace(/[<>"'&]/g, "").substring(0, 200);
       const color = agent.widgetColor || "#6366f1";
       const avatar = agent.avatar || "/icon-512.png";
+      const metaSlug = (agent as any).slug || slugify(agent.name);
       res.json({
         title: `${name} - Gustafta AI`,
         description,
         color,
         avatar,
-        url: `/bot/${agent.id.toString()}`,
+        url: `/chatbot/${metaSlug}`,
         name,
       });
     } catch (error) {
@@ -10684,7 +10690,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
 
   const socialBotPattern = /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Slackbot|Discordbot|Pinterest|vkShare|OGP|crawler|spider|bot/i;
 
-  app.get(["/bot/:agentId", "/chat/:agentId"], async (req, res, next) => {
+  app.get(["/bot/:agentId", "/chat/:agentId", "/chatbot/:agentId"], async (req, res, next) => {
     const ua = req.headers["user-agent"] || "";
     if (!socialBotPattern.test(ua)) {
       return next();

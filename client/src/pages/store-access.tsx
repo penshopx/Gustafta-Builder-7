@@ -63,6 +63,31 @@ function CopyBox({ label, value, testId }: { label: string; value: string; testI
   );
 }
 
+/**
+ * Rewrite a full URL to use the current browser's origin.
+ * Example: "https://xxx.replit.dev/chatbot/slug" → "https://myapp.replit.app/chatbot/slug"
+ * This ensures delivery links always reflect the domain the customer is actually using.
+ */
+function rewriteToCurrentOrigin(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return `${window.location.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * Replace the domain inside a code snippet (embedCode / widgetScript).
+ * Replaces any http(s)://xxx domain with the current browser origin.
+ */
+function rewriteDomainInCode(code: string | null | undefined): string | null {
+  if (!code) return null;
+  return code.replace(/https?:\/\/[^\s"']+\.replit\.(dev|app)/g, window.location.origin)
+             .replace(/https?:\/\/localhost:\d+/g, window.location.origin);
+}
+
 export default function StoreAccess() {
   const { token } = useParams<{ token: string }>();
   const [activeFormat, setActiveFormat] = useState<"chat" | "iframe" | "widget">("chat");
@@ -77,7 +102,15 @@ export default function StoreAccess() {
     enabled: !!token,
   });
 
-  const isDevUrl = data?.baseUrl?.includes(".replit.dev") || data?.baseUrl?.includes("localhost");
+  // Rewrite all delivery URLs to use the current browser's domain.
+  // When customer opens this page from the deployed .replit.app link, all
+  // chatbot links will automatically use the production domain — no config needed.
+  const chatUrl = rewriteToCurrentOrigin(data?.chatUrl);
+  const embedCode = rewriteDomainInCode(data?.embedCode);
+  const widgetScript = rewriteDomainInCode(data?.widgetScript);
+
+  const currentOrigin = window.location.origin;
+  const isDevUrl = currentOrigin.includes(".replit.dev") || currentOrigin.includes("localhost");
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
@@ -141,13 +174,16 @@ export default function StoreAccess() {
 
             {/* ── Dev URL Warning ── */}
             {isDevUrl && (
-              <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 flex gap-3">
-                <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold text-red-400">URL Development — Jangan Dibagikan ke Customer</p>
-                  <p className="text-xs text-red-300 mt-1">
-                    Link di bawah menggunakan domain sementara (.dev) yang bisa berubah sewaktu-waktu.
-                    Deploy app dulu atau set PROD_URL di Admin → Tools agar link stabil.
+              <div className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-4 flex gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1.5">
+                  <p className="text-sm font-bold text-amber-300">Anda membuka halaman ini dari URL development</p>
+                  <p className="text-xs text-amber-200/80">
+                    Link di bawah menggunakan domain <code className="bg-white/10 px-1 rounded">.replit.dev</code> yang tidak stabil dan bisa berubah.
+                    <strong className="block mt-1 text-amber-200">
+                      Solusi: Kirim link halaman ini ke customer melalui URL deployed (bukan preview dev).
+                      Ketika customer membuka dari domain production, semua link otomatis menggunakan domain yang benar.
+                    </strong>
                   </p>
                 </div>
               </div>
@@ -185,7 +221,7 @@ export default function StoreAccess() {
             </Card>
 
             {/* ── Kemasan Produk: 4 Format ── */}
-            {data.chatUrl && (
+            {chatUrl && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Package className="h-4 w-4 text-violet-400" />
@@ -250,11 +286,11 @@ export default function StoreAccess() {
                         </p>
                         <CopyBox
                           label="Link Chatbot (bagikan ke customer)"
-                          value={data.chatUrl!}
+                          value={chatUrl!}
                           testId="button-copy-chat-url"
                         />
                       </div>
-                      <a href={data.chatUrl!} target="_blank" rel="noopener noreferrer">
+                      <a href={chatUrl!} target="_blank" rel="noopener noreferrer">
                         <Button className="w-full bg-violet-600 hover:bg-violet-700" data-testid="button-open-chat">
                           <ExternalLink className="h-4 w-4 mr-2" />
                           Buka Chatbot Sekarang (Test)
@@ -273,7 +309,7 @@ export default function StoreAccess() {
                 )}
 
                 {/* Format: iFrame Embed */}
-                {activeFormat === "iframe" && data.embedCode && (
+                {activeFormat === "iframe" && embedCode && (
                   <Card className="bg-blue-500/10 border-blue-500/30">
                     <CardContent className="p-5 space-y-4">
                       <div>
@@ -287,7 +323,7 @@ export default function StoreAccess() {
                         </p>
                         <CopyBox
                           label="Kode iFrame (paste di HTML website)"
-                          value={data.embedCode}
+                          value={embedCode}
                           testId="button-copy-embed"
                         />
                       </div>
@@ -304,7 +340,7 @@ export default function StoreAccess() {
                 )}
 
                 {/* Format: Widget Floating */}
-                {activeFormat === "widget" && data.widgetScript && (
+                {activeFormat === "widget" && widgetScript && (
                   <Card className="bg-emerald-500/10 border-emerald-500/30">
                     <CardContent className="p-5 space-y-4">
                       <div>
@@ -318,7 +354,7 @@ export default function StoreAccess() {
                         </p>
                         <CopyBox
                           label="Kode Widget (paste sebelum </body>)"
-                          value={data.widgetScript}
+                          value={widgetScript}
                           testId="button-copy-widget"
                         />
                       </div>
