@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { db } from "./db";
 import { lmsCourses, lmsLessons, lmsEnrollments, lmsLessonProgress } from "@shared/schema";
-import { eq, and, asc } from "drizzle-orm";
+import { eq, and, asc, sql } from "drizzle-orm";
 
 function isAuthenticated(req: any, res: any, next: any) {
   if (req.isAuthenticated?.() || req.user) return next();
@@ -328,6 +328,42 @@ export function registerLmsRoutes(app: Express) {
       });
     } catch (e) {
       res.status(500).json({ error: "Gagal mengambil progress" });
+    }
+  });
+
+  // GET /api/lms/ecourses — public orchestrator agents grouped by category, usable as ecourses
+  app.get("/api/lms/ecourses", async (req, res) => {
+    try {
+      const { category } = req.query as { category?: string };
+      let extra = "";
+      if (category && category !== "all") {
+        const safe = category.replace(/'/g, "''");
+        extra = ` AND lower(a.category) = lower('${safe}')`;
+      }
+      const rows = await db.execute(sql.raw(`
+        SELECT
+          a.id,
+          a.name,
+          a.description,
+          a.tagline,
+          a.avatar,
+          a.category,
+          a.subcategory,
+          a.widget_color,
+          (SELECT COUNT(*)::int FROM knowledge_bases kb WHERE kb.agent_id = a.id AND kb.status = 'active') AS kb_count
+        FROM agents a
+        WHERE a.is_public = true
+          AND a.is_orchestrator = true
+          AND a.category IS NOT NULL AND a.category != ''
+          AND (a.description IS NOT NULL AND length(a.description) > 20)
+          ${extra}
+        ORDER BY a.category ASC, a.id ASC
+        LIMIT 200
+      `));
+      res.json(rows.rows ?? rows);
+    } catch (e) {
+      console.error("[LMS] GET ecourses:", e);
+      res.status(500).json({ error: "Gagal mengambil ecourse" });
     }
   });
 }
