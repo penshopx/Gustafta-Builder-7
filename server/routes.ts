@@ -3144,7 +3144,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           // ── TENDER_ORCHESTRATOR_v1: Pre-fetch SIRUP real-time data ──────────
           let enrichedUserContent = userContent;
           const orchSysPrompt = typeof (agent as any).systemPrompt === "string" ? (agent as any).systemPrompt : "";
-          if (orchSysPrompt.includes("TENDER_ORCHESTRATOR_v1")) {
+          if (orchSysPrompt.includes("TENDER_ORCHESTRATOR_v1") || orchSysPrompt.includes("TENDERA_ORCHESTRATOR_v1")) {
             try {
               const kualMatch = userContent.match(/\b(kecil|menengah|besar)\b/i);
               const kualifikasi = kualMatch ? kualMatch[1] : "";
@@ -11220,33 +11220,37 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   });
 
   // GET document adequacy checklist
-  // GET /api/tender-ai/orchestrator — return KONSTRA-TENDER-ORCHESTRATOR agent info for frontend
+  // GET /api/tender-ai/orchestrator — prefer TENDERA-ORCHESTRATOR, fallback to KONSTRA-TENDER-ORCHESTRATOR
   app.get("/api/tender-ai/orchestrator", async (_req, res) => {
     try {
-      // Try by slug first, then fall back to name search
-      let agent = await storage.getAgentBySlug("konstra-tender-orchestrator");
+      const { agents: agentsTable } = await import("../shared/schema");
+      const { ilike, or } = await import("drizzle-orm");
+
+      // 1. Prefer TENDERA-ORCHESTRATOR (full 10-agent system)
+      let agent = await storage.getAgentBySlug("tendera-orchestrator");
+
+      // 2. Fall back to old slug
+      if (!agent) agent = await storage.getAgentBySlug("konstra-tender-orchestrator");
+
+      // 3. Search by name
       if (!agent) {
-        // Search by name using DB directly
-        const { agents: agentsTable } = await import("../shared/schema");
-        const { ilike } = await import("drizzle-orm");
         const rows = await db.select().from(agentsTable)
-          .where(ilike(agentsTable.name, "%KONSTRA-TENDER-ORCHESTRATOR%"))
+          .where(ilike(agentsTable.name, "%TENDERA-ORCHESTRATOR%"))
           .limit(1);
-        if (rows.length > 0) {
-          agent = await storage.getAgent(String(rows[0].id));
-        }
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
+
+      // 4. Search by either marker in system prompt
       if (!agent) {
-        // Last resort: search by TENDER_ORCHESTRATOR_v1 marker in system prompt
-        const { agents: agentsTable } = await import("../shared/schema");
-        const { ilike } = await import("drizzle-orm");
         const rows = await db.select({ id: agentsTable.id, name: agentsTable.name }).from(agentsTable)
-          .where(ilike(agentsTable.systemPrompt, "%TENDER_ORCHESTRATOR_v1%"))
+          .where(or(
+            ilike(agentsTable.systemPrompt, "%TENDERA_ORCHESTRATOR_v1%"),
+            ilike(agentsTable.systemPrompt, "%TENDER_ORCHESTRATOR_v1%"),
+          ))
           .limit(1);
-        if (rows.length > 0) {
-          agent = await storage.getAgent(String(rows[0].id));
-        }
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
+
       if (!agent) return res.status(404).json({ error: "Tender AI orchestrator belum diinisialisasi. Restart server." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
     } catch (err: any) {

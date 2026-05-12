@@ -97,6 +97,7 @@ import * as M_ahspHspk from "./seed-ahsp-hspk";
 import * as M_tenderSources from "./seed-tender-sources";
 import * as M_kabKotaSources from "./seed-kabkota-sources";
 import * as M_tenderAiAgents from "./seed-tender-ai-agents";
+import * as M_tenderaAgents from "./seed-tendera-agents";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1364,6 +1365,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedTenderAiAgents();
       } catch (err) {
         log("[Seed TenderAI] Error: " + (err as Error).message);
+      }
+
+      // Seed: TENDERA — OpenClaw + 10 MultiClaw agents (full BUJK tender system)
+      try {
+        const { seedTenderaAgents } = M_tenderaAgents;
+        await seedTenderaAgents();
+      } catch (err) {
+        log("[Seed TENDERA] Error: " + (err as Error).message);
       }
 
       startScheduler();
