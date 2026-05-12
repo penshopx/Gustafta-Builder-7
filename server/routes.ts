@@ -381,20 +381,46 @@ function slugify(name: string): string {
     .slice(0, 60);
 }
 
+// In-memory cache for the production URL — loaded at startup from DB or env
+let _cachedProdUrl: string | null = null;
+
+/** Load production URL from DB (system_config table) */
+async function loadProdUrlFromDb(): Promise<string | null> {
+  try {
+    const { db: dbCfg } = await import("./db");
+    const { systemConfig } = await import("@shared/schema");
+    const { eq } = await import("drizzle-orm");
+    const rows = await dbCfg.select().from(systemConfig).where(eq(systemConfig.key, "prod_url")).limit(1);
+    return rows[0]?.value || null;
+  } catch { return null; }
+}
+
+/** Save production URL to DB (upsert) */
+async function saveProdUrlToDb(url: string): Promise<void> {
+  try {
+    const { db: dbCfg } = await import("./db");
+    const { systemConfig } = await import("@shared/schema");
+    await dbCfg.insert(systemConfig).values({ key: "prod_url", value: url })
+      .onConflictDoUpdate({ target: systemConfig.key, set: { value: url, updatedAt: new Date() } });
+    _cachedProdUrl = url;
+  } catch { /* non-critical */ }
+}
+
 /**
- * Returns the canonical production base URL for building external-facing links
- * (embed codes, chatUrls, Midtrans callbacks, etc.).
+ * Returns the canonical production base URL for building external-facing links.
  *
  * Priority:
- *   1. REPLIT_DOMAINS env — contains the deployed .replit.app domain
- *   2. PROD_URL env — manual override for custom domain
- *   3. req host — dev/local fallback (only correct in dev; never use in delivered links)
+ *   1. REPLIT_DOMAINS env — .replit.app domain (deployed server knows its own URL)
+ *   2. PROD_URL env — manual env override
+ *   3. DB system_config.prod_url — set by admin or auto-saved at deploy time
+ *   4. req host — dev/local fallback (NEVER safe for customer-facing links)
  */
 function getServerBaseUrl(req: { protocol: string; get(h: string): string | undefined }): string {
   const domains = (process.env.REPLIT_DOMAINS || "").split(",").map((d) => d.trim()).filter(Boolean);
   const prodDomain = domains.find((d) => d.endsWith(".replit.app"));
   if (prodDomain) return `https://${prodDomain}`;
   if (process.env.PROD_URL) return process.env.PROD_URL.replace(/\/$/, "");
+  if (_cachedProdUrl) return _cachedProdUrl;
   return `${req.protocol}://${req.get("host")}`;
 }
 
@@ -428,6 +454,30 @@ export async function registerRoutes(
     ".zip": "application/zip",
     ".rar": "application/x-rar-compressed",
   };
+
+  // ── Startup: load production URL from DB + auto-save if deployed ──────────
+  (async () => {
+    try {
+      // 1. Check if this server is running on a .replit.app domain (deployed)
+      const domains = (process.env.REPLIT_DOMAINS || "").split(",").map((d) => d.trim()).filter(Boolean);
+      const prodDomain = domains.find((d) => d.endsWith(".replit.app"));
+      if (prodDomain) {
+        const url = `https://${prodDomain}`;
+        _cachedProdUrl = url;
+        await saveProdUrlToDb(url); // persist so dev server can read it too
+        console.log(`[startup] Production URL auto-saved: ${url}`);
+      } else if (process.env.PROD_URL) {
+        _cachedProdUrl = process.env.PROD_URL.replace(/\/$/, "");
+      } else {
+        // 2. Try to load from DB (written by deployed server previously)
+        const dbUrl = await loadProdUrlFromDb();
+        if (dbUrl) {
+          _cachedProdUrl = dbUrl;
+          console.log(`[startup] Production URL loaded from DB: ${dbUrl}`);
+        }
+      }
+    } catch { /* non-critical */ }
+  })();
 
   // Serve uploaded files with proper MIME types
   app.use("/uploads", (req, res, next) => {
@@ -7144,9 +7194,22 @@ Balas dengan JSON dengan struktur PERSIS ini:
   app.get("/api/config/app-url", (_req, res) => {
     const domains = (process.env.REPLIT_DOMAINS || "").split(",").map((d) => d.trim());
     const prodDomain = domains.find((d) => d.endsWith(".replit.app"));
-    if (prodDomain) return res.json({ appUrl: `https://${prodDomain}` });
-    if (process.env.PROD_URL) return res.json({ appUrl: process.env.PROD_URL });
-    return res.json({ appUrl: null }); // dev — client falls back to window.location.origin
+    if (prodDomain) return res.json({ appUrl: `https://${prodDomain}`, source: "replit_domains" });
+    if (process.env.PROD_URL) return res.json({ appUrl: process.env.PROD_URL, source: "env" });
+    if (_cachedProdUrl) return res.json({ appUrl: _cachedProdUrl, source: "db" });
+    return res.json({ appUrl: null, source: "none" });
+  });
+
+  // Admin: manually set the production URL (saved to DB + in-memory cache)
+  app.post("/api/admin/set-prod-url", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    const { url } = req.body as { url?: string };
+    if (!url || typeof url !== "string") return res.status(400).json({ error: "url required" });
+    const clean = url.trim().replace(/\/$/, "");
+    if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+      return res.status(400).json({ error: "URL harus dimulai dengan https://" });
+    }
+    await saveProdUrlToDb(clean);
+    return res.json({ ok: true, appUrl: clean });
   });
 
   // Short name → bigIdea ID mapping (add more as needed)

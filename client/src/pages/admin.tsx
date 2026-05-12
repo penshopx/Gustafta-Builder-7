@@ -117,6 +117,120 @@ function statusBadge(status: string) {
   return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${m.className}`}>{m.label}</span>;
 }
 
+// ── ProdUrlCard: configure stable production URL ──────────────────────────
+function ProdUrlCard({ appUrl, isDevUrl, onSaved }: { appUrl: string; isDevUrl: boolean; onSaved: (u: string) => void }) {
+  const { toast } = useToast();
+  const [input, setInput] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    const url = input.trim();
+    if (!url) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/set-prod-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal menyimpan");
+      onSaved(data.appUrl);
+      setInput("");
+      toast({ title: "URL Production tersimpan!", description: data.appUrl });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally { setSaving(false); }
+  }
+
+  return (
+    <Card className={isDevUrl ? "border-red-500/50 bg-red-500/5" : "border-green-500/30 bg-green-500/5"}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <Globe className="h-5 w-5 text-blue-500" />
+          <CardTitle className="text-base">URL Production (Delivery Produk)</CardTitle>
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          URL yang dipakai untuk generate link chatbot, embed code, dan widget yang dikirim ke customer.
+          Harus URL stabil — bukan <code className="bg-muted px-1 rounded text-xs">.replit.dev</code>.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Status badge */}
+        <div className={`rounded-lg p-4 flex gap-3 ${isDevUrl ? "bg-red-500/10 border border-red-500/30" : "bg-green-500/10 border border-green-500/30"}`}>
+          {isDevUrl ? (
+            <>
+              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-red-500">URL Saat Ini TIDAK STABIL — Jangan Dibagikan!</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  <code className="bg-muted px-1 rounded">{appUrl}</code> adalah URL development yang berubah-ubah dan akan <strong>rusak dalam beberapa jam</strong>.
+                  Semua link chatbot dan embed code yang digenerate saat ini <strong>tidak aman</strong> untuk dikirim ke customer.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-green-600 dark:text-green-400">URL Stabil Terdeteksi ✓</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  <code className="bg-muted px-1 rounded">{appUrl}</code> — aman untuk delivery ke customer.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Manual input */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Set URL Production Manual</p>
+          <p className="text-xs text-muted-foreground">
+            Setelah deploy, buka app di browser → salin URL dari address bar → paste di sini. URL ini disimpan ke database dan dipakai di semua link delivery.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              placeholder="https://nama-app.replit.app"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="text-sm font-mono"
+              data-testid="input-prod-url"
+            />
+            <Button size="sm" onClick={handleSave} disabled={saving || !input.trim()} data-testid="button-save-prod-url">
+              {saving ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : "Simpan"}
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cara Mendapatkan URL Production</p>
+          <div className="space-y-2 text-sm">
+            <div className="flex gap-3 rounded-lg border bg-muted/30 p-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+              <div>
+                <p className="font-medium">Deploy / Publish App di Replit</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Klik tombol <strong>Deploy</strong> di Replit. Setelah selesai, URL production otomatis tersimpan ke database — tidak perlu set manual.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 rounded-lg border bg-muted/30 p-3">
+              <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+              <div>
+                <p className="font-medium">Atau: Set Manual di Kolom Atas</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Buka app dari tab <strong>Deployments</strong> Replit, salin URL-nya (format: <code className="bg-muted px-1 rounded">https://xxx.replit.app</code>), lalu paste dan simpan di sini.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-800 dark:text-amber-200">
+          <strong>Penting:</strong> Jangan pernah menyalin URL dari browser saat berada di halaman dev preview (berisi <code>.replit.dev</code>). Selalu gunakan URL dari deployment tab.
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function roleBadge(role: string | null) {
   if (role === "superadmin") return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 flex items-center gap-1 w-fit"><Crown className="h-3 w-3" /> Super Admin</span>;
   if (role === "admin") return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 flex items-center gap-1 w-fit"><Shield className="h-3 w-3" /> Admin</span>;
@@ -1671,68 +1785,7 @@ export default function AdminPage() {
             <div className="space-y-4">
 
               {/* ── URL Delivery Setting ── */}
-              <Card className={isDevUrl ? "border-red-500/50 bg-red-500/5" : "border-green-500/30 bg-green-500/5"}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-5 w-5 text-blue-500" />
-                    <CardTitle className="text-base">URL Delivery Produk</CardTitle>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    URL yang digunakan untuk generate link chat, embed code, dan widget script yang dikirim ke customer.
-                    Pastikan ini bukan URL <code className="bg-muted px-1 rounded text-xs">.dev</code>.
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className={`rounded-lg p-4 flex gap-3 ${isDevUrl ? "bg-red-500/10 border border-red-500/30" : "bg-green-500/10 border border-green-500/30"}`}>
-                    {isDevUrl ? (
-                      <>
-                        <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-bold text-red-500">URL Saat Ini TIDAK STABIL</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            <code className="bg-muted px-1 rounded">{appUrl}</code> adalah URL development yang berubah-ubah.
-                            Link yang dibagikan ke customer akan rusak.
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-bold text-green-600 dark:text-green-400">URL Stabil Terdeteksi ✓</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            <code className="bg-muted px-1 rounded">{appUrl}</code> — aman untuk delivery ke customer.
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cara Fix URL Development:</p>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex gap-3 rounded-lg border bg-muted/30 p-3">
-                        <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
-                        <div>
-                          <p className="font-medium">Deploy / Publish App</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Klik tombol Deploy di Replit → URL berubah otomatis ke <code className="bg-muted px-1 rounded">.replit.app</code> yang stabil.</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3 rounded-lg border bg-muted/30 p-3">
-                        <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
-                        <div>
-                          <p className="font-medium">Set Environment Variable <code className="bg-muted px-1 rounded">PROD_URL</code></p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Di Replit → Secrets → tambahkan <code className="bg-muted px-1 rounded">PROD_URL</code> = URL domain Anda (mis. <code className="bg-muted px-1 rounded">https://gustafta.replit.app</code>). Lalu restart server.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg bg-muted/30 p-3 text-xs text-muted-foreground">
-                    <span className="font-semibold">Catatan:</span> Setelah deploy, refresh halaman ini — banner merah akan hilang dan URL delivery akan stabil.
-                  </div>
-                </CardContent>
-              </Card>
+              <ProdUrlCard appUrl={appUrl} isDevUrl={isDevUrl} onSaved={(u) => setAppUrl(u)} />
 
               <Card>
                 <CardHeader className="pb-3">

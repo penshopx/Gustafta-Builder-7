@@ -1929,3 +1929,11 @@ export const insertTenderAlertProfileSchema = createInsertSchema(tenderAlertProf
 });
 export type InsertTenderAlertProfile = z.infer<typeof insertTenderAlertProfileSchema>;
 export type TenderAlertProfile = typeof tenderAlertProfiles.$inferSelect;
+
+// ==================== SYSTEM CONFIG ====================
+// Simple key-value store for platform-level settings (e.g. production URL)
+export const systemConfig = pgTable("system_config", {
+  key:       text("key").primaryKey(),
+  value:     text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

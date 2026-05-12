@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "wouter";
-import { Copy, Check, Code2, ExternalLink, Bot, Zap, Shield, MessageCircle } from "lucide-react";
+import { Copy, Check, Code2, ExternalLink, Bot, Zap, Shield, MessageCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -128,6 +128,20 @@ export default function WidgetDemo() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
 
+      {/* ── DEV URL WARNING BANNER — shown when URL is unstable ─── */}
+      {isDevUrl && (
+        <div className="bg-red-600 text-white px-4 py-3 text-center">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2">
+            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+            <div className="text-sm">
+              <strong>JANGAN BAGIKAN URL INI KE CUSTOMER!</strong>
+              {" "}URL ini (<code className="bg-red-800 px-1 rounded text-xs">.replit.dev</code>) adalah URL development yang <strong>sementara dan akan rusak dalam beberapa jam</strong>.
+              Buka <a href="/admin" className="underline font-bold">Admin → Tools</a> untuk set URL production yang stabil.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Top Bar ────────────────────────────────────────────── */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
@@ -152,19 +166,33 @@ export default function WidgetDemo() {
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5" />
               Widget Aktif
             </Badge>
-            <Button size="sm" variant="outline" className="gap-1.5 text-xs" onClick={copyLink}>
-              {codeCopied ? <Check className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-              {codeCopied ? "Disalin!" : "Link Chat"}
-            </Button>
-            <Button
-              size="sm"
-              className="gap-1.5 text-xs text-white"
-              style={{ backgroundColor: accentColor }}
-              onClick={copyEmbed}
-            >
-              {copied ? <Check className="w-3 h-3" /> : <Code2 className="w-3 h-3" />}
-              {copied ? "Disalin!" : "Salin Kode Embed"}
-            </Button>
+            {isDevUrl ? (
+              <Button size="sm" variant="outline" className="gap-1.5 text-xs border-red-400 text-red-600 cursor-not-allowed opacity-60" disabled title="URL development — tidak aman untuk dibagikan">
+                <AlertTriangle className="w-3 h-3" />
+                URL Dev — Jangan Bagikan
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" className="gap-1.5 text-xs" onClick={copyLink}>
+                {codeCopied ? <Check className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
+                {codeCopied ? "Disalin!" : "Link Chat"}
+              </Button>
+            )}
+            {isDevUrl ? (
+              <Button size="sm" className="gap-1.5 text-xs cursor-not-allowed opacity-60" disabled style={{ backgroundColor: "#ef4444" }} title="Set URL production dulu di Admin → Tools">
+                <AlertTriangle className="w-3 h-3" />
+                Embed Tidak Aman
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="gap-1.5 text-xs text-white"
+                style={{ backgroundColor: accentColor }}
+                onClick={copyEmbed}
+              >
+                {copied ? <Check className="w-3 h-3" /> : <Code2 className="w-3 h-3" />}
+                {copied ? "Disalin!" : "Salin Kode Embed"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
