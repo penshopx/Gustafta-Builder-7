@@ -94,6 +94,7 @@ import * as M_itLspPaperlessAjjExtra from "./seed-it-lsp-paperless-ajj-extra";
 import * as M_fixOrchestrators from "./fix-orchestrators";
 import * as M_inaprocScraper from "./lib/inaproc-scraper";
 import * as M_ahspHspk from "./seed-ahsp-hspk";
+import * as M_tenderSources from "./seed-tender-sources";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -170,6 +171,7 @@ const seedModuleRegistry: Record<string, any> = {
   "./fix-orchestrators": M_fixOrchestrators,
   "./lib/inaproc-scraper": M_inaprocScraper,
   "./seed-ahsp-hspk": M_ahspHspk,
+  "./seed-tender-sources": M_tenderSources,
 };
 
 // Push DB schema on startup in production (build time has no DB access)
@@ -1335,6 +1337,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedAhspHspk();
       } catch (err) {
         log("[Seed AHSP] Error: " + (err as Error).message);
+      }
+
+      // Seed: Default Tender Sources (LPSE + BUMN + Asing)
+      try {
+        const { seedTenderSources } = M_tenderSources;
+        await seedTenderSources();
+      } catch (err) {
+        log("[Seed Tender Sources] Error: " + (err as Error).message);
       }
 
       startScheduler();

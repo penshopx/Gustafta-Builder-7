@@ -10932,12 +10932,103 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     try {
       const source = await storage.getTenderSource(req.params.id as string);
       if (!source) return res.status(404).json({ error: "Source not found" });
-      
-      const { scrapeInaproc } = await import("./lib/inaproc-scraper");
-      const result = await scrapeInaproc(source, storage);
-      res.json(result);
+
+      // Tandai status running
+      await storage.updateTenderSource(req.params.id as string, {
+        scrapeStatus: "running",
+      } as any);
+
+      const { scrapeMultiSource } = await import("./lib/multi-source-tender-scraper");
+      const result = await scrapeMultiSource(source as any);
+
+      let totalNew = 0, totalUpdated = 0;
+      for (const tender of result.tenders) {
+        try {
+          const existing = await storage.getTenders(String(source.id), 500);
+          const exists = existing.find(t => t.tenderId === tender.tenderId);
+          await storage.upsertTender(tender as any);
+          exists ? totalUpdated++ : totalNew++;
+        } catch (_) {}
+      }
+
+      // Update source stats
+      await storage.updateTenderSource(req.params.id as string, {
+        lastScrapedAt: new Date(),
+        totalTenders: result.totalScraped,
+        scrapeStatus: result.success ? "success" : "demo",
+        lastError: result.errors.slice(0, 2).join(" | "),
+      } as any);
+
+      res.json({
+        ...result,
+        totalNew,
+        totalUpdated,
+      });
     } catch (error: any) {
+      await storage.updateTenderSource(req.params.id as string, {
+        scrapeStatus: "error",
+        lastError: error.message,
+      } as any).catch(() => {});
       res.status(500).json({ error: error.message || "Failed to scrape tenders" });
+    }
+  });
+
+  // Tender monitor feed — agregasi semua sumber dengan filter
+  app.get("/api/tender-monitor/feed", isAuthenticated, async (req, res) => {
+    try {
+      const { sourceType, sector, search, limit: limitStr } = req.query as Record<string, string>;
+      const limit = Math.min(parseInt(limitStr || "100"), 200);
+
+      let allTenders = await storage.getTenders(undefined, limit);
+
+      if (sourceType && sourceType !== "all") {
+        allTenders = allTenders.filter((t: any) => t.sourceType === sourceType);
+      }
+      if (sector && sector !== "all") {
+        allTenders = allTenders.filter((t: any) => t.sector === sector);
+      }
+      if (search) {
+        const q = search.toLowerCase();
+        allTenders = allTenders.filter((t: any) =>
+          t.name.toLowerCase().includes(q) ||
+          (t.agency || "").toLowerCase().includes(q) ||
+          (t.location || "").toLowerCase().includes(q)
+        );
+      }
+
+      res.json({ tenders: allTenders, total: allTenders.length });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Tender monitor stats — ringkasan per sektor & tipe sumber
+  app.get("/api/tender-monitor/stats", isAuthenticated, async (_req, res) => {
+    try {
+      const sources = await storage.getTenderSources();
+      const tenders = await storage.getTenders(undefined, 500);
+
+      const realSources = sources.filter((s: any) => !s.name?.includes("[TENDER_SOURCES_v1]"));
+      const stats = {
+        totalSources: realSources.length,
+        bySourceType: {} as Record<string, number>,
+        bySector: {} as Record<string, number>,
+        totalTenders: tenders.length,
+        lastUpdated: new Date().toISOString(),
+      };
+
+      for (const s of realSources) {
+        const st = (s as any).sourceType || "lpse_pusat";
+        stats.bySourceType[st] = (stats.bySourceType[st] || 0) + 1;
+      }
+      for (const t of tenders) {
+        const sec = (t as any).sector || "konstruksi";
+        stats.bySector[sec] = (stats.bySector[sec] || 0) + 1;
+      }
+
+      res.json(stats);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 

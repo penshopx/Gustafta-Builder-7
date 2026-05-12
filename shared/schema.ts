@@ -1464,6 +1464,12 @@ export const tenderSources = pgTable("tender_sources", {
   userId: varchar("user_id", { length: 255 }).notNull().default(""),
   name: text("name").notNull(),
   baseUrl: text("base_url").notNull(),
+  sourceType: text("source_type").default("lpse_pusat"),  // lpse_pusat | lpse_provinsi | lpse_kabkota | bumn | asing
+  sector: text("sector").default("konstruksi"),           // konstruksi | oil_gas | pertambangan | energi | umum | multiple
+  region: text("region").default(""),                     // Nama provinsi/kab/kota/negara
+  logoUrl: text("logo_url").default(""),                  // URL logo instansi
+  scrapeStatus: text("scrape_status").default("idle"),    // idle | running | success | error | demo
+  lastError: text("last_error").default(""),
   isEnabled: boolean("is_enabled").default(true),
   lastScrapedAt: timestamp("last_scraped_at"),
   totalTenders: integer("total_tenders").default(0),
@@ -1484,6 +1490,8 @@ export const tenders = pgTable("tenders", {
   agency: text("agency").default(""),
   budget: text("budget").default(""),
   type: text("type").default(""),
+  sector: text("sector").default("konstruksi"),           // konstruksi | oil_gas | pertambangan | energi | umum
+  sourceType: text("source_type").default("lpse_pusat"),  // lpse_pusat | lpse_provinsi | lpse_kabkota | bumn | asing
   status: text("status").default(""),
   stage: text("stage").default(""),
   location: text("location").default(""),
