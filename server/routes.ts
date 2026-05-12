@@ -4247,9 +4247,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         }
       }
 
-      const chatUrl = resolvedAgentId ? `${baseUrl}/chat/${resolvedAgentId}` : null;
+      const chatUrl = resolvedAgentId ? `${baseUrl}/demo/${resolvedAgentId}` : null;
       const embedCode = resolvedAgentId
         ? `<iframe src="${baseUrl}/embed/${resolvedAgentId}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
+        : null;
+      const widgetScript = resolvedAgentId
+        ? `<script src="${baseUrl}/widget.js" data-agent="${resolvedAgentId}" data-color="#6366f1" async></script>`
         : null;
 
       res.json({
@@ -4257,6 +4260,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         product: { id: resolvedAgentId || order.productId, agentId: resolvedAgentId, ...productInfo },
         chatUrl,
         embedCode,
+        widgetScript,
+        baseUrl,
       });
     } catch (error) {
       console.error("Store access error:", error);

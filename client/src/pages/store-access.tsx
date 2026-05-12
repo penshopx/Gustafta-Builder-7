@@ -3,7 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bot, MessageSquare, Copy, CheckCircle2, ExternalLink, Smartphone } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Bot, MessageSquare, Copy, CheckCircle2, ExternalLink,
+  Smartphone, Code2, Globe, Zap, Package, BookOpen, AlertTriangle
+} from "lucide-react";
 import { useState } from "react";
 
 interface StoreAccessData {
@@ -23,15 +27,45 @@ interface StoreAccessData {
   };
   chatUrl: string | null;
   embedCode: string | null;
+  widgetScript: string | null;
+  baseUrl: string | null;
 }
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(price);
 }
 
+function CopyBox({ label, value, testId }: { label: string; value: string; testId: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</label>
+      <div className="flex gap-2">
+        <pre className="flex-1 bg-gray-900 rounded-lg px-3 py-2.5 text-xs text-gray-200 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+          {value}
+        </pre>
+        <Button
+          size="sm"
+          variant="outline"
+          className="border-white/20 text-white hover:bg-white/10 flex-shrink-0 self-start mt-0"
+          onClick={handleCopy}
+          data-testid={testId}
+        >
+          {copied ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function StoreAccess() {
   const { token } = useParams<{ token: string }>();
-  const [copied, setCopied] = useState<string | null>(null);
+  const [activeFormat, setActiveFormat] = useState<"chat" | "iframe" | "widget">("chat");
 
   const { data, isLoading, isError } = useQuery<StoreAccessData>({
     queryKey: ["/api/store/access", token],
@@ -43,17 +77,13 @@ export default function StoreAccess() {
     enabled: !!token,
   });
 
-  const handleCopy = (text: string, key: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(key);
-    setTimeout(() => setCopied(null), 2000);
-  };
+  const isDevUrl = data?.baseUrl?.includes(".replit.dev") || data?.baseUrl?.includes("localhost");
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       {/* Header */}
       <header className="border-b border-white/10 bg-gray-950/90 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
               <Bot className="h-5 w-5 text-white" />
@@ -69,16 +99,11 @@ export default function StoreAccess() {
               <Smartphone className="h-4 w-4" />
               <span className="hidden sm:inline">081287941900</span>
             </a>
-            <span className="hidden sm:inline text-gray-700">·</span>
-            <a href="https://wa.me/6282299417818" target="_blank" rel="noopener noreferrer"
-              className="hidden sm:inline hover:text-white transition-colors">
-              082299417818
-            </a>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-2xl mx-auto px-4 py-16 w-full">
+      <main className="flex-1 max-w-3xl mx-auto px-4 py-12 w-full">
         {isLoading ? (
           <div className="space-y-4">
             <Skeleton className="h-10 w-2/3 bg-white/10" />
@@ -101,13 +126,7 @@ export default function StoreAccess() {
             <div className="text-6xl mb-4">⏳</div>
             <h1 className="text-2xl font-bold mb-2 text-yellow-400">Pembayaran Diproses</h1>
             <p className="text-gray-400 mb-6">
-              Pembayaran Anda sedang diverifikasi. Halaman ini akan aktif setelah pembayaran berhasil dikonfirmasi (biasanya dalam beberapa menit).
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              Butuh bantuan? Hubungi kami di WhatsApp{" "}
-              <a href="https://wa.me/6281287941900" className="text-violet-400 hover:underline">081287941900</a>
-              {" "}atau{" "}
-              <a href="https://wa.me/6282299417818" className="text-violet-400 hover:underline">082299417818</a>
+              Pembayaran Anda sedang diverifikasi. Halaman ini akan aktif setelah pembayaran berhasil dikonfirmasi.
             </p>
             <Button
               variant="outline"
@@ -119,115 +138,249 @@ export default function StoreAccess() {
           </div>
         ) : data ? (
           <div className="space-y-6">
-            {/* Success Banner */}
-            <div className="text-center mb-8">
+
+            {/* ── Dev URL Warning ── */}
+            {isDevUrl && (
+              <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 flex gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-red-400">URL Development — Jangan Dibagikan ke Customer</p>
+                  <p className="text-xs text-red-300 mt-1">
+                    Link di bawah menggunakan domain sementara (.dev) yang bisa berubah sewaktu-waktu.
+                    Deploy app dulu atau set PROD_URL di Admin → Tools agar link stabil.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Success Banner ── */}
+            <div className="text-center mb-2">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/20 border border-green-500/30 mb-4">
                 <CheckCircle2 className="h-10 w-10 text-green-400" />
               </div>
-              <h1 className="text-3xl font-bold mb-2">Pembayaran Berhasil!</h1>
+              <h1 className="text-3xl font-bold mb-2">Chatbot Anda Siap!</h1>
               <p className="text-gray-400">
-                Halo {data.order.customerName}, chatbot Anda sudah siap digunakan.
+                Halo <strong>{data.order.customerName}</strong>, berikut semua format akses chatbot Anda.
               </p>
             </div>
 
-            {/* Product Info */}
+            {/* ── Product Card ── */}
             <Card className="bg-white/5 border-white/10">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0"
-                    style={{ background: `${data.product.color}20`, border: `1px solid ${data.product.color}40` }}
-                  >
-                    {data.product.emoji}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">{data.product.name}</h2>
-                    <p className="text-gray-400 text-sm">{data.product.description}</p>
-                  </div>
+              <CardContent className="p-5 flex items-center gap-4">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+                  style={{ background: `${data.product.color}25`, border: `1px solid ${data.product.color}40` }}
+                >
+                  {data.product.emoji}
                 </div>
-                <div className="bg-white/5 rounded-lg p-3 text-sm text-gray-400">
-                  Pembayaran: <span className="text-white font-semibold">{formatPrice(data.order.amount)}</span>
-                  <span className="ml-2 text-green-400">✓ Lunas</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-lg font-bold">{data.product.name}</h2>
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px]">✓ Lunas</Badge>
+                  </div>
+                  <p className="text-gray-400 text-sm mt-0.5 truncate">{data.product.description}</p>
+                  <p className="text-xs text-gray-500 mt-1">{formatPrice(data.order.amount)}</p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Chat Access */}
+            {/* ── Kemasan Produk: 4 Format ── */}
             {data.chatUrl && (
-              <Card className="bg-violet-500/10 border-violet-500/30">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-violet-400" />
-                    Link Chat Anda
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-4">
-                    Simpan link ini untuk mengakses chatbot kapan saja.
-                  </p>
-                  <div className="flex gap-2">
-                    <div className="flex-1 bg-gray-800 rounded-lg px-3 py-2 text-sm text-gray-300 truncate font-mono">
-                      {data.chatUrl}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-white/20 text-white hover:bg-white/10 flex-shrink-0"
-                      onClick={() => handleCopy(data.chatUrl!, "chatUrl")}
-                      data-testid="button-copy-chat-url"
-                    >
-                      {copied === "chatUrl" ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <a href={data.chatUrl} target="_blank" rel="noopener noreferrer" className="block mt-3">
-                    <Button className="w-full bg-violet-600 hover:bg-violet-700" data-testid="button-open-chat">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Buka Chatbot Sekarang
-                    </Button>
-                  </a>
-                </CardContent>
-              </Card>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Package className="h-4 w-4 text-violet-400" />
+                  <h3 className="font-bold text-base">Kemasan Produk — Pilih Format Akses</h3>
+                </div>
+                <p className="text-xs text-gray-500 mb-3">
+                  Chatbot Anda bisa diakses dalam 3 format berbeda. Pilih sesuai kebutuhan.
+                </p>
+
+                {/* Format selector tabs */}
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setActiveFormat("chat")}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      activeFormat === "chat"
+                        ? "bg-violet-600 text-white"
+                        : "bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10"
+                    }`}
+                    data-testid="tab-format-chat"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    Link Halaman Chat
+                  </button>
+                  <button
+                    onClick={() => setActiveFormat("iframe")}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      activeFormat === "iframe"
+                        ? "bg-violet-600 text-white"
+                        : "bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10"
+                    }`}
+                    data-testid="tab-format-iframe"
+                  >
+                    <Code2 className="h-3.5 w-3.5" />
+                    Embed di Website (iFrame)
+                  </button>
+                  <button
+                    onClick={() => setActiveFormat("widget")}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      activeFormat === "widget"
+                        ? "bg-violet-600 text-white"
+                        : "bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10"
+                    }`}
+                    data-testid="tab-format-widget"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Widget Floating (Tombol Chat)
+                  </button>
+                </div>
+
+                {/* Format: Link Chat */}
+                {activeFormat === "chat" && (
+                  <Card className="bg-violet-500/10 border-violet-500/30">
+                    <CardContent className="p-5 space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Globe className="h-4 w-4 text-violet-400" />
+                          <h4 className="font-semibold">Format 1 — Link Halaman Chat</h4>
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3">
+                          Berikan link ini ke customer. Customer bisa langsung chat dengan AI tanpa perlu login.
+                          Cocok untuk dibagikan via WA, email, atau QR code.
+                        </p>
+                        <CopyBox
+                          label="Link Chatbot (bagikan ke customer)"
+                          value={data.chatUrl!}
+                          testId="button-copy-chat-url"
+                        />
+                      </div>
+                      <a href={data.chatUrl!} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full bg-violet-600 hover:bg-violet-700" data-testid="button-open-chat">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Buka Chatbot Sekarang (Test)
+                        </Button>
+                      </a>
+                      <div className="rounded-lg bg-white/5 p-3 space-y-1">
+                        <p className="text-xs font-semibold text-gray-300">Cara bagikan:</p>
+                        <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
+                          <li>Salin link → kirim via WhatsApp ke customer</li>
+                          <li>Buat QR code dari link ini (pakai qr-code-generator.com)</li>
+                          <li>Tambahkan sebagai link di bio Instagram/profil bisnis</li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Format: iFrame Embed */}
+                {activeFormat === "iframe" && data.embedCode && (
+                  <Card className="bg-blue-500/10 border-blue-500/30">
+                    <CardContent className="p-5 space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Code2 className="h-4 w-4 text-blue-400" />
+                          <h4 className="font-semibold">Format 2 — Embed iFrame di Website</h4>
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3">
+                          Salin kode ini dan paste di halaman HTML website Anda. Chatbot akan tampil
+                          sebagai kotak chat langsung di dalam halaman — cocok untuk halaman layanan atau FAQ.
+                        </p>
+                        <CopyBox
+                          label="Kode iFrame (paste di HTML website)"
+                          value={data.embedCode}
+                          testId="button-copy-embed"
+                        />
+                      </div>
+                      <div className="rounded-lg bg-white/5 p-3 space-y-1">
+                        <p className="text-xs font-semibold text-gray-300">Cara pasang:</p>
+                        <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
+                          <li>Buka editor HTML website Anda (WordPress, Webflow, custom, dll)</li>
+                          <li>Paste kode ini di posisi di mana chatbot ingin ditampilkan</li>
+                          <li>Ganti <code className="bg-white/10 px-1 rounded">width="100%"</code> dan <code className="bg-white/10 px-1 rounded">height="600"</code> sesuai kebutuhan layout</li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Format: Widget Floating */}
+                {activeFormat === "widget" && data.widgetScript && (
+                  <Card className="bg-emerald-500/10 border-emerald-500/30">
+                    <CardContent className="p-5 space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <MessageSquare className="h-4 w-4 text-emerald-400" />
+                          <h4 className="font-semibold">Format 3 — Widget Floating (Tombol Chat Sudut Halaman)</h4>
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3">
+                          Salin kode ini dan paste sebelum tag <code className="bg-white/10 px-1 rounded">&lt;/body&gt;</code> di semua halaman website.
+                          Tombol chat akan muncul mengambang di sudut kanan bawah — seperti tombol chat WhatsApp yang sudah umum.
+                        </p>
+                        <CopyBox
+                          label="Kode Widget (paste sebelum </body>)"
+                          value={data.widgetScript}
+                          testId="button-copy-widget"
+                        />
+                      </div>
+                      <div className="rounded-lg bg-white/5 p-3 space-y-1">
+                        <p className="text-xs font-semibold text-gray-300">Cara pasang:</p>
+                        <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
+                          <li>Buka template/header website Anda</li>
+                          <li>Paste kode ini tepat sebelum tag <code className="bg-white/10 px-1 rounded">&lt;/body&gt;</code></li>
+                          <li>Refresh website → tombol chat akan muncul di sudut kanan bawah</li>
+                          <li>Ganti <code className="bg-white/10 px-1 rounded">data-color</code> jika ingin ubah warna tombol</li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
 
-            {/* Embed Code */}
-            {data.embedCode && (
-              <Card className="bg-white/5 border-white/10">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-lg mb-2">Embed di Website Anda</h3>
-                  <p className="text-gray-400 text-sm mb-3">
-                    Salin kode ini dan tempel di halaman website Anda untuk menampilkan chatbot.
-                  </p>
-                  <div className="relative">
-                    <pre className="bg-gray-800 rounded-lg p-4 text-xs text-gray-300 overflow-x-auto whitespace-pre-wrap break-all">
-                      {data.embedCode}
-                    </pre>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="absolute top-2 right-2 border-white/20 text-white hover:bg-white/10"
-                      onClick={() => handleCopy(data.embedCode!, "embed")}
-                      data-testid="button-copy-embed"
-                    >
-                      {copied === "embed" ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Support */}
+            {/* ── Panduan Singkat ── */}
             <Card className="bg-white/5 border-white/10">
-              <CardContent className="p-6 text-center">
-                <p className="text-gray-400 text-sm mb-3">Ada pertanyaan atau butuh bantuan setup?</p>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <BookOpen className="h-4 w-4 text-amber-400" />
+                  <h3 className="font-semibold">Ringkasan Kemasan Produk</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-3 text-center">
+                    <Globe className="h-6 w-6 text-violet-400 mx-auto mb-2" />
+                    <p className="text-xs font-bold text-violet-300 mb-1">Link Chat</p>
+                    <p className="text-xs text-gray-400">Bagikan via WA/email. Customer buka langsung di browser.</p>
+                  </div>
+                  <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-center">
+                    <Code2 className="h-6 w-6 text-blue-400 mx-auto mb-2" />
+                    <p className="text-xs font-bold text-blue-300 mb-1">Embed iFrame</p>
+                    <p className="text-xs text-gray-400">Pasang di halaman website. Chatbot tampil di dalam halaman.</p>
+                  </div>
+                  <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-center">
+                    <MessageSquare className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
+                    <p className="text-xs font-bold text-emerald-300 mb-1">Widget Floating</p>
+                    <p className="text-xs text-gray-400">Tombol chat mengambang di sudut website — paling populer.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* ── Support ── */}
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-5 text-center">
+                <Zap className="h-5 w-5 text-amber-400 mx-auto mb-2" />
+                <p className="text-gray-300 text-sm font-medium mb-1">Butuh bantuan pasang atau setup?</p>
+                <p className="text-gray-500 text-xs mb-3">Tim Gustafta siap bantu melalui WhatsApp.</p>
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                  <a href="https://wa.me/6281287941900?text=Halo%2C%20saya%20baru%20beli%20chatbot%20dari%20Gustafta%20Store%20dan%20butuh%20bantuan." target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/6281287941900?text=Halo%2C%20saya%20baru%20beli%20chatbot%20dari%20Gustafta%20Store%20dan%20butuh%20bantuan%20pasang." target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto" data-testid="button-wa-support-1">
                       <Smartphone className="h-4 w-4 mr-2" />
-                      081287941900
+                      WA 081287941900
                     </Button>
                   </a>
-                  <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20baru%20beli%20chatbot%20dari%20Gustafta%20Store%20dan%20butuh%20bantuan." target="_blank" rel="noopener noreferrer">
+                  <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20baru%20beli%20chatbot%20dari%20Gustafta%20Store%20dan%20butuh%20bantuan%20pasang." target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto" data-testid="button-wa-support-2">
                       <Smartphone className="h-4 w-4 mr-2" />
-                      082299417818
+                      WA 082299417818
                     </Button>
                   </a>
                 </div>

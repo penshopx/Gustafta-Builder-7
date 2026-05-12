@@ -14,7 +14,7 @@ import {
   CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
   UserCheck, AlertCircle, RefreshCw, Crown, UserCog, Wrench, Scale, Database,
   ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle, Loader2,
-  Link2, Zap
+  Link2, Zap, Globe
 } from "lucide-react";
 
 // ---- Types ----
@@ -528,9 +528,22 @@ export default function AdminPage() {
   };
 
   const tabCount = isSuperAdmin ? 7 : 6;
+  const isDevUrl = appUrl.includes(".replit.dev") || appUrl.includes("localhost");
 
   return (
     <div className="min-h-screen bg-background">
+      {/* ── URL WARNING BANNER ── */}
+      {isDevUrl && (
+        <div className="bg-red-600 text-white px-4 py-2.5 text-center text-sm flex items-center justify-center gap-2 flex-wrap">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <span>
+            <strong>⚠️ URL DEVELOPMENT terdeteksi:</strong> Semua link yang digenerate ({appUrl}) adalah URL sementara yang <strong>akan rusak</strong> jika dibagikan ke customer.
+            Silakan deploy app dulu → URL akan berubah ke <code className="bg-red-800 px-1 rounded">.replit.app</code>,
+            atau set <strong>PROD_URL</strong> di tab Tools.
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -1656,6 +1669,71 @@ export default function AdminPage() {
           {/* ========== TOOLS TAB ========== */}
           <TabsContent value="tools" className="mt-4">
             <div className="space-y-4">
+
+              {/* ── URL Delivery Setting ── */}
+              <Card className={isDevUrl ? "border-red-500/50 bg-red-500/5" : "border-green-500/30 bg-green-500/5"}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-blue-500" />
+                    <CardTitle className="text-base">URL Delivery Produk</CardTitle>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    URL yang digunakan untuk generate link chat, embed code, dan widget script yang dikirim ke customer.
+                    Pastikan ini bukan URL <code className="bg-muted px-1 rounded text-xs">.dev</code>.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className={`rounded-lg p-4 flex gap-3 ${isDevUrl ? "bg-red-500/10 border border-red-500/30" : "bg-green-500/10 border border-green-500/30"}`}>
+                    {isDevUrl ? (
+                      <>
+                        <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-bold text-red-500">URL Saat Ini TIDAK STABIL</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            <code className="bg-muted px-1 rounded">{appUrl}</code> adalah URL development yang berubah-ubah.
+                            Link yang dibagikan ke customer akan rusak.
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-bold text-green-600 dark:text-green-400">URL Stabil Terdeteksi ✓</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            <code className="bg-muted px-1 rounded">{appUrl}</code> — aman untuk delivery ke customer.
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cara Fix URL Development:</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex gap-3 rounded-lg border bg-muted/30 p-3">
+                        <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                        <div>
+                          <p className="font-medium">Deploy / Publish App</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Klik tombol Deploy di Replit → URL berubah otomatis ke <code className="bg-muted px-1 rounded">.replit.app</code> yang stabil.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3 rounded-lg border bg-muted/30 p-3">
+                        <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                        <div>
+                          <p className="font-medium">Set Environment Variable <code className="bg-muted px-1 rounded">PROD_URL</code></p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Di Replit → Secrets → tambahkan <code className="bg-muted px-1 rounded">PROD_URL</code> = URL domain Anda (mis. <code className="bg-muted px-1 rounded">https://gustafta.replit.app</code>). Lalu restart server.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg bg-muted/30 p-3 text-xs text-muted-foreground">
+                    <span className="font-semibold">Catatan:</span> Setelah deploy, refresh halaman ini — banner merah akan hilang dan URL delivery akan stabil.
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
