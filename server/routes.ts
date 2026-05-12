@@ -61,6 +61,7 @@ import {
   createNotionPage,
 } from "./notion";
 import { registerLegalRoutes } from "./routes-legal";
+import { registerLmsRoutes } from "./routes-lms";
 import { seedLexCom, seedLexComInSeries } from "./seed-lexcom";
 
 const _require = createRequire(import.meta.url);
@@ -13676,6 +13677,7 @@ Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.
   });
 
   registerLegalRoutes(app);
+  registerLmsRoutes(app);
 
   // ── Admin Agent System Endpoints ──────────────────────────────────────────
 

@@ -1828,6 +1828,79 @@ export const insertScalevMappingSchema = createInsertSchema(scalevMappings).omit
 export type InsertScalevMapping = z.infer<typeof insertScalevMappingSchema>;
 export type ScalevMapping = typeof scalevMappings.$inferSelect;
 
+// ==================== LMS (Learning Management System) ====================
+
+export const lmsCourses = pgTable("lms_courses", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull(),
+  shortDesc: text("short_desc").default(""),
+  description: text("description").default(""),
+  category: text("category").notNull().default("onboarding"), // onboarding | konstruksi | demo
+  subcategory: text("subcategory").default(""),
+  thumbnail: text("thumbnail").default(""),
+  color: text("color").default("#6366f1"),
+  emoji: text("emoji").default("📚"),
+  instructor: text("instructor").default("Tim Gustafta"),
+  durationMinutes: integer("duration_minutes").default(0),
+  price: integer("price").notNull().default(0),
+  level: text("level").default("beginner"),
+  tags: jsonb("tags").default([]),
+  isPublic: boolean("is_public").default(true),
+  isFeatured: boolean("is_featured").default(false),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLmsCourseSchema = createInsertSchema(lmsCourses).omit({ id: true, createdAt: true });
+export type InsertLmsCourse = z.infer<typeof insertLmsCourseSchema>;
+export type LmsCourse = typeof lmsCourses.$inferSelect;
+
+export const lmsLessons = pgTable("lms_lessons", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull(),
+  content: text("content").default(""),
+  videoUrl: text("video_url").default(""),
+  type: text("type").default("article"),
+  durationMinutes: integer("duration_minutes").default(5),
+  sortOrder: integer("sort_order").default(0),
+  isPreview: boolean("is_preview").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLmsLessonSchema = createInsertSchema(lmsLessons).omit({ id: true, createdAt: true });
+export type InsertLmsLesson = z.infer<typeof insertLmsLessonSchema>;
+export type LmsLesson = typeof lmsLessons.$inferSelect;
+
+export const lmsEnrollments = pgTable("lms_enrollments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  courseId: integer("course_id").notNull(),
+  progress: integer("progress").default(0),
+  completedAt: timestamp("completed_at"),
+  enrolledAt: timestamp("enrolled_at").defaultNow().notNull(),
+});
+
+export const insertLmsEnrollmentSchema = createInsertSchema(lmsEnrollments).omit({ id: true, enrolledAt: true });
+export type InsertLmsEnrollment = z.infer<typeof insertLmsEnrollmentSchema>;
+export type LmsEnrollment = typeof lmsEnrollments.$inferSelect;
+
+export const lmsLessonProgress = pgTable("lms_lesson_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  courseId: integer("course_id").notNull(),
+  lessonId: integer("lesson_id").notNull(),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+});
+
+export const insertLmsLessonProgressSchema = createInsertSchema(lmsLessonProgress).omit({ id: true, completedAt: true });
+export type InsertLmsLessonProgress = z.infer<typeof insertLmsLessonProgressSchema>;
+export type LmsLessonProgress = typeof lmsLessonProgress.$inferSelect;
+
 // ==================== TENDER ALERT PROFILES ====================
 // Profil bisnis BUJK untuk notifikasi tender harian (WA/Email jam 08:00 WIB)
 export const tenderAlertProfiles = pgTable("tender_alert_profiles", {

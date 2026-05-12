@@ -53,6 +53,10 @@ import IbTuChat from "@/pages/ib-tu-chat";
 import AiTutorChat from "@/pages/ai-tutor-chat";
 import SbuClawChat from "@/pages/sbu-claw-chat";
 import WidgetDemo from "@/pages/widget-demo";
+import LmsPage from "@/pages/lms";
+import LmsCourse from "@/pages/lms-course";
+import LmsLesson from "@/pages/lms-lesson";
+import ProductTour from "@/pages/product-tour";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
@@ -131,6 +135,10 @@ function Router() {
         <Route path="/ai-tutor" component={AiTutorChat} />
         <Route path="/sbu-claw" component={SbuClawChat} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
+        <Route path="/lms" component={LmsPage} />
+        <Route path="/lms/course/:id/lesson/:lessonId" component={LmsLesson} />
+        <Route path="/lms/course/:id" component={LmsCourse} />
+        <Route path="/product-tour" component={ProductTour} />
       <Route component={NotFound} />
     </Switch>
   );
