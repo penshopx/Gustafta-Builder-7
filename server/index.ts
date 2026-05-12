@@ -96,6 +96,7 @@ import * as M_inaprocScraper from "./lib/inaproc-scraper";
 import * as M_ahspHspk from "./seed-ahsp-hspk";
 import * as M_tenderSources from "./seed-tender-sources";
 import * as M_kabKotaSources from "./seed-kabkota-sources";
+import * as M_tenderAiAgents from "./seed-tender-ai-agents";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1355,6 +1356,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedKabKotaSources();
       } catch (err) {
         log("[Seed KabKota] Error: " + (err as Error).message);
+      }
+
+      // Seed: KONSTRA-TENDER-ORCHESTRATOR + 4 sub-agents (Agentic AI Tender)
+      try {
+        const { seedTenderAiAgents } = M_tenderAiAgents;
+        await seedTenderAiAgents();
+      } catch (err) {
+        log("[Seed TenderAI] Error: " + (err as Error).message);
       }
 
       startScheduler();

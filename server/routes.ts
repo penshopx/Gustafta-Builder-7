@@ -3141,13 +3141,46 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             .filter(m => m.role === "user" || m.role === "assistant")
             .slice(-6) as Array<{ role: "user" | "assistant"; content: string }>;
 
+          // ── TENDER_ORCHESTRATOR_v1: Pre-fetch SIRUP real-time data ──────────
+          let enrichedUserContent = userContent;
+          const orchSysPrompt = typeof (agent as any).systemPrompt === "string" ? (agent as any).systemPrompt : "";
+          if (orchSysPrompt.includes("TENDER_ORCHESTRATOR_v1")) {
+            try {
+              const kualMatch = userContent.match(/\b(kecil|menengah|besar)\b/i);
+              const kualifikasi = kualMatch ? kualMatch[1] : "";
+              const stopWords = /\b(cari|tender|proyek|untuk|usaha|kualifikasi|di|dan|atau|dengan|nilai|pagu|wilayah|provinsi|kabupaten|kota|tahun|bantu|saya|kami|mau|minta|tolong|tentang|yang|ada|bisa|apa|ini|itu|dari|ke|juga|sudah|belum|akan|baru|lagi|saja|jika|kalau|karena|namun)\b/gi;
+              const keywords = userContent.replace(stopWords, " ").trim().split(/\s+/).filter(w => w.length > 3).slice(0, 3).join(" ");
+              const tahun = new Date().getFullYear();
+              const sirupUrl = new URL(`http://localhost:5000/api/tender-sirup/search`);
+              if (keywords) sirupUrl.searchParams.set("keyword", keywords);
+              if (kualifikasi) sirupUrl.searchParams.set("kualifikasi", kualifikasi);
+              sirupUrl.searchParams.set("tahun", String(tahun));
+              sirupUrl.searchParams.set("length", "20");
+              const sirupResp = await fetch(sirupUrl.toString(), { signal: AbortSignal.timeout(10000) });
+              if (sirupResp.ok) {
+                const sirupData = await sirupResp.json() as any;
+                const tenders = Array.isArray(sirupData.data) ? sirupData.data : [];
+                if (tenders.length > 0) {
+                  const tenderList = tenders.slice(0, 15).map((t: any, i: number) =>
+                    `${i + 1}. ${t.name}\n   Instansi: ${t.agency} | Pagu: ${t.budget} | Kualifikasi: ${t.kualifikasi || "-"}\n   Lokasi: ${t.location || "-"} | Deadline: ${t.deadlineDate || "-"}\n   Link: ${t.url || "sirup.lkpp.go.id"}`
+                  ).join("\n\n");
+                  enrichedUserContent = `${userContent}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nDATA TENDER REAL-TIME SIRUP LKPP (${tenders.length} dari ${sirupData.total ?? "?"} total paket)\nTahun: ${tahun} | Keyword: "${keywords || "-"}" | Kualifikasi: "${kualifikasi || "semua"}"\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${tenderList}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+                  res.write(`data: ${JSON.stringify({ type: "sirup_fetched", count: tenders.length, total: sirupData.total, keyword: keywords, kualifikasi })}\n\n`);
+                }
+              }
+            } catch (sirupErr) {
+              console.warn("[TENDER_ORCHESTRATOR] SIRUP pre-fetch failed:", sirupErr);
+            }
+          }
+          // ─────────────────────────────────────────────────────────────────────
+
           // Phase 2: Call all sub-agents in parallel with conversation context + 25s timeout
           const subAgentResults = await Promise.allSettled(
             subAgentsConfig.map(async (subCfg) => {
               const subAgentIdStr = String(subCfg.agentId);
               res.write(`data: ${JSON.stringify({ type: "sub_agent_start", agentId: subCfg.agentId, role: subCfg.role })}\n\n`);
               const t0 = Date.now();
-              const result = await callAgentInternal(subAgentIdStr, userContent, convHistory, 25000);
+              const result = await callAgentInternal(subAgentIdStr, enrichedUserContent, convHistory, 25000);
               const elapsed = Date.now() - t0;
               res.write(`data: ${JSON.stringify({ type: "sub_agent_done", agentId: subCfg.agentId, role: subCfg.role, elapsed, chars: result.length, preview: result.substring(0, 300) })}\n\n`);
               return { agentId: subCfg.agentId, role: subCfg.role, result };
@@ -11187,6 +11220,40 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   });
 
   // GET document adequacy checklist
+  // GET /api/tender-ai/orchestrator — return KONSTRA-TENDER-ORCHESTRATOR agent info for frontend
+  app.get("/api/tender-ai/orchestrator", async (_req, res) => {
+    try {
+      // Try by slug first, then fall back to name search
+      let agent = await storage.getAgentBySlug("konstra-tender-orchestrator");
+      if (!agent) {
+        // Search by name using DB directly
+        const { agents: agentsTable } = await import("../shared/schema");
+        const { ilike } = await import("drizzle-orm");
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%KONSTRA-TENDER-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) {
+          agent = await storage.getAgent(String(rows[0].id));
+        }
+      }
+      if (!agent) {
+        // Last resort: search by TENDER_ORCHESTRATOR_v1 marker in system prompt
+        const { agents: agentsTable } = await import("../shared/schema");
+        const { ilike } = await import("drizzle-orm");
+        const rows = await db.select({ id: agentsTable.id, name: agentsTable.name }).from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%TENDER_ORCHESTRATOR_v1%"))
+          .limit(1);
+        if (rows.length > 0) {
+          agent = await storage.getAgent(String(rows[0].id));
+        }
+      }
+      if (!agent) return res.status(404).json({ error: "Tender AI orchestrator belum diinisialisasi. Restart server." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/tender-doc-checker", async (req, res) => {
     try {
       const { jenis = "pekerjaan_konstruksi", kualifikasi = "kecil" } = req.query as Record<string, string>;
