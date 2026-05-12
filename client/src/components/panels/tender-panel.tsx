@@ -1,5 +1,6 @@
 import { useState, useRef, type FormEvent, type ChangeEvent } from "react";
-import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle, Upload, Loader2, Sparkles, Network, Shield, AlertTriangle, CheckCircle2, XCircle, AlertCircle, Copy, X, GitBranch, ArrowRight, Wand2 } from "lucide-react";
+import { Search, Plus, Trash2, RefreshCw, ExternalLink, Database, Globe, FileText, PlusCircle, Upload, Loader2, Sparkles, Network, Shield, AlertTriangle, CheckCircle2, XCircle, AlertCircle, Copy, X, GitBranch, ArrowRight, Wand2, Bot, Brain, TrendingUp } from "lucide-react";
+import { Link } from "wouter";
 import { useMultiClaw } from "@/contexts/multiclaw-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -268,6 +269,42 @@ export function TenderPanel({ agent }: { agent: any }) {
           </h2>
           <p className="text-muted-foreground">Kelola sumber dan data tender pengadaan</p>
         </div>
+      </div>
+
+      {/* AI Chatbot Shortcuts */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Link href="/tender-ai">
+          <div className="flex items-center gap-3 p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all cursor-pointer group" data-testid="card-shortcut-tendera">
+            <div className="w-9 h-9 rounded-full bg-blue-900/60 border border-blue-600/40 flex items-center justify-center text-lg shrink-0">🎯</div>
+            <div className="min-w-0">
+              <div className="font-semibold text-sm text-blue-300 group-hover:text-blue-200">TENDERA AI</div>
+              <div className="text-xs text-muted-foreground truncate">10 agen · Analisis tender BUJK</div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-blue-400/50 group-hover:text-blue-300 ml-auto shrink-0" />
+          </div>
+        </Link>
+        <Link href="/brain-project">
+          <div className="flex items-center gap-3 p-3 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/50 transition-all cursor-pointer group" data-testid="card-shortcut-brain">
+            <div className="w-9 h-9 rounded-full bg-indigo-900/60 border border-indigo-600/40 flex items-center justify-center text-lg shrink-0">🧠</div>
+            <div className="min-w-0">
+              <div className="font-semibold text-sm text-indigo-300 group-hover:text-indigo-200">Brain Project</div>
+              <div className="text-xs text-muted-foreground truncate">6 spesialis · Manajemen proyek</div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-indigo-400/50 group-hover:text-indigo-300 ml-auto shrink-0" />
+          </div>
+        </Link>
+        <Link href="/tender-monitor">
+          <div className="flex items-center gap-3 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all cursor-pointer group" data-testid="card-shortcut-monitor">
+            <div className="w-9 h-9 rounded-full bg-emerald-900/60 border border-emerald-600/40 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="min-w-0">
+              <div className="font-semibold text-sm text-emerald-300 group-hover:text-emerald-200">Tender Monitor</div>
+              <div className="text-xs text-muted-foreground truncate">SIRUP · LPSE · Multi-sumber</div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-emerald-400/50 group-hover:text-emerald-300 ml-auto shrink-0" />
+          </div>
+        </Link>
       </div>
 
       <Tabs defaultValue="sources" data-testid="tabs-tender">
