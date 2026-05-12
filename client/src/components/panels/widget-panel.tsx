@@ -416,6 +416,49 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
             </CardContent>
           </Card>
 
+          <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                <ExternalLink className="w-4 h-4" />
+                Demo Page untuk Customer
+              </CardTitle>
+              <CardDescription>
+                Halaman siap kirim ke calon customer — widget langsung aktif, lengkap embed code.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={`${getBaseUrl()}/demo/${agent.id}`}
+                  readOnly
+                  className="text-sm font-mono"
+                  data-testid="input-demo-link"
+                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${getBaseUrl()}/demo/${agent.id}`);
+                    toast({ title: "Disalin!", description: "Link demo berhasil disalin" });
+                  }}
+                  data-testid="button-copy-demo-link"
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+                <a href={`/demo/${agent.id}`} target="_blank" rel="noopener noreferrer">
+                  <Button size="icon" variant="outline" data-testid="button-open-demo">
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                </a>
+              </div>
+              <div className="p-3 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800">
+                <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                  Kirim link ini ke customer. Mereka bisa langsung coba chatbot, lihat cara embed, dan salin kode untuk pasang di website mereka — tanpa login apapun.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {bigIdeaId && (
             <Card>
               <CardContent className="p-4 space-y-3">

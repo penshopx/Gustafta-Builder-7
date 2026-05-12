@@ -52,11 +52,12 @@ import BrainProjectChat from "@/pages/brain-project-chat";
 import IbTuChat from "@/pages/ib-tu-chat";
 import AiTutorChat from "@/pages/ai-tutor-chat";
 import SbuClawChat from "@/pages/sbu-claw-chat";
+import WidgetDemo from "@/pages/widget-demo";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 
-const WIDGET_EXCLUDED_PATHS = ["/legal", "/embed/", "/chaesa"];
+const WIDGET_EXCLUDED_PATHS = ["/legal", "/embed/", "/chaesa", "/demo/"];
 
 function MarketplaceRedirect() {
   const { toast } = useToast();
@@ -129,6 +130,7 @@ function Router() {
         <Route path="/ib-tu" component={IbTuChat} />
         <Route path="/ai-tutor" component={AiTutorChat} />
         <Route path="/sbu-claw" component={SbuClawChat} />
+        <Route path="/demo/:agentId" component={WidgetDemo} />
       <Route component={NotFound} />
     </Switch>
   );
