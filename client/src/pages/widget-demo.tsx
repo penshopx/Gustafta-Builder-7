@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Copy, Check, Code2, ExternalLink, Bot, Zap, Shield, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,8 @@ interface WidgetConfig {
 
 export default function WidgetDemo() {
   const { agentId } = useParams<{ agentId: string }>();
+  const [location] = useLocation();
+  const isPaidAccess = location.startsWith("/chatbot/");
   const [config, setConfig] = useState<WidgetConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -126,7 +128,7 @@ export default function WidgetDemo() {
             </div>
             <div>
               <p className="font-semibold text-slate-800 text-sm leading-none">{config.name}</p>
-              <p className="text-xs text-slate-400 mt-0.5">Demo Halaman · Gustafta</p>
+              <p className="text-xs text-slate-400 mt-0.5">{isPaidAccess ? "Chatbot Anda · Gustafta" : "Demo Halaman · Gustafta"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">

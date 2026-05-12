@@ -4273,7 +4273,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       // Prefer slug in URLs — cleaner for sharing to customers
       const agentRef = agentSlug || resolvedAgentId;
-      const chatUrl = agentRef ? `${baseUrl}/demo/${agentRef}` : null;
+      const chatUrl = agentRef ? `${baseUrl}/chatbot/${agentRef}` : null;
       const embedCode = agentRef
         ? `<iframe src="${baseUrl}/embed/${agentRef}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
         : null;

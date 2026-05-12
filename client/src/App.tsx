@@ -137,6 +137,7 @@ function Router() {
         <Route path="/ai-tutor" component={AiTutorChat} />
         <Route path="/sbu-claw" component={SbuClawChat} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
+        <Route path="/chatbot/:agentId" component={WidgetDemo} />
         <Route path="/lms" component={LmsPage} />
         <Route path="/lms/course/:id/lesson/:lessonId" component={LmsLesson} />
         <Route path="/lms/course/:id" component={LmsCourse} />
