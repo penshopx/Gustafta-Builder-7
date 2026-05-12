@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown, User, Store, Rocket, TrendingUp, MessageCircle } from "lucide-react";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown, User, Store, Rocket, TrendingUp, MessageCircle, GraduationCap } from "lucide-react";
 
 const WA_NUMBERS = [
   { display: "081287941900", link: "6281287941900" },
@@ -130,6 +130,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/platform", label: "Paket Bisnis AI", icon: TrendingUp },
     { href: "/packs", label: "Paket Series Modul", icon: Package },
     { href: "/store", label: "Store", icon: ShoppingBag },
+    { href: "/lms", label: "Learning Center", icon: GraduationCap },
     { href: "/pricing", label: "Paket Berlangganan", icon: BarChart3 },
     { href: "/panduan", label: "Panduan", icon: BookOpen },
   ];
