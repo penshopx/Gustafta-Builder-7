@@ -1217,6 +1217,13 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
                     </div>
                   </Link>
+                  <Link href="/ai-tutor">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-ai-tutor">
+                      <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">AI Tutor Adaptif</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
                   {orchestratorHub ? (
                     <div
                       className={cn(
