@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, Loader2, ArrowLeft, MessageCircle, ChevronRight, Lock, CreditCard, Download, Smartphone } from "lucide-react";
+import { Send, Bot, Loader2, ArrowLeft, MessageCircle, ChevronRight, Lock, CreditCard, Download, Smartphone, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 import { MessageContent } from "@/lib/format-message";
+
+interface UploadedFile {
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  fileUrl: string;
+  category: string;
+  mimeType: string;
+}
 
 interface ChatbotInfo {
   agentId: string;
@@ -76,6 +85,138 @@ export default function ModulChat() {
   const [subscribedEmail, setSubscribedEmail] = useState<string | null>(null);
   const [pwaPrompt, setPwaPrompt] = useState<any>(null);
   const [pwaInstalled, setPwaInstalled] = useState(false);
+
+  // File upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingFiles, setPendingFiles] = useState<UploadedFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Voice STT
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // TTS voice mode
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // File upload helpers
+  const getFileIcon = (category: string) => {
+    switch (category) {
+      case "image": return <ImageIcon className="w-4 h-4" />;
+      case "audio": return <Music className="w-4 h-4" />;
+      case "video": return <Video className="w-4 h-4" />;
+      case "document": return <FileText className="w-4 h-4" />;
+      default: return <File className="w-4 h-4" />;
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setIsUploading(true);
+    const uploaded: UploadedFile[] = [];
+    for (const file of Array.from(files)) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/chat/upload", { method: "POST", body: formData });
+        if (res.ok) {
+          const data = await res.json();
+          uploaded.push(data);
+        }
+      } catch (err) {
+        console.error("Upload failed:", err);
+      }
+    }
+    setPendingFiles(prev => [...prev, ...uploaded]);
+    setIsUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removePendingFile = (idx: number) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  // TTS speak
+  const speakText = async (text: string) => {
+    const cleanText = text
+      .replace(/#{1,6}\s*/g, "")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1")
+      .replace(/_([^_]+)_/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/^[-*+]\s+/gm, "")
+      .replace(/^\d+\.\s+/gm, "")
+      .replace(/^>\s*/gm, "")
+      .replace(/---+/g, "")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .trim();
+    if (!cleanText) return;
+    try {
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: cleanText }),
+      });
+      if (!response.ok) return;
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      setIsSpeaking(true);
+      audio.onended = () => { setIsSpeaking(false); audioRef.current = null; URL.revokeObjectURL(audioUrl); };
+      audio.onerror = () => { setIsSpeaking(false); audioRef.current = null; URL.revokeObjectURL(audioUrl); };
+      await audio.play();
+    } catch { setIsSpeaking(false); }
+  };
+
+  const stopSpeaking = () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    setIsSpeaking(false);
+  };
+
+  // Speech recognition init
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    setSpeechSupported(true);
+    const recognition = new SpeechRecognition();
+    recognition.lang = "id-ID";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    let finalTranscript = "";
+    recognition.onstart = () => { finalTranscript = ""; setIsListening(true); };
+    recognition.onresult = (e: any) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+      }
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+      if (finalTranscript.trim()) setInput(finalTranscript.trim());
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognitionRef.current = recognition;
+  }, []);
+
+  const toggleSpeech = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      setInput("");
+      recognitionRef.current.start();
+    }
+  };
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -189,12 +330,16 @@ export default function ModulChat() {
   }, []);
 
   const sendMessage = useCallback(async () => {
-    if (!input.trim() || !selectedBot || isStreaming) return;
+    if ((!input.trim() && pendingFiles.length === 0) || !selectedBot || isStreaming) return;
 
+    const attachments = [...pendingFiles];
+    setPendingFiles([]);
+
+    const displayContent = input.trim() || attachments.map(f => `[${f.fileName}]`).join(", ");
     const userMsg: Message = {
       id: `user_${Date.now()}`,
       role: "user",
-      content: input.trim(),
+      content: displayContent,
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMsg]);
@@ -223,10 +368,17 @@ export default function ModulChat() {
         headers: streamHeaders,
         body: JSON.stringify({
           agentId: String(selectedBot.agentId),
-          content: messageContent,
+          content: messageContent || attachments.map(f => `[${f.fileName}]`).join(", "),
           role: "user",
           sessionId: sessionIdRef.current,
           clientToken: storedToken || undefined,
+          attachments: attachments.length > 0 ? attachments.map(f => ({
+            fileName: f.fileName,
+            fileUrl: f.fileUrl,
+            category: f.category,
+            fileSize: f.fileSize,
+            mimeType: f.mimeType,
+          })) : undefined,
         }),
       });
 
@@ -279,6 +431,9 @@ export default function ModulChat() {
             }
           }
         }
+        if (voiceMode && accumulated.trim()) {
+          speakText(accumulated.trim());
+        }
       }
     } catch (err) {
       setMessages(prev => prev.map(m =>
@@ -287,7 +442,7 @@ export default function ModulChat() {
     } finally {
       setIsStreaming(false);
     }
-  }, [input, selectedBot, isStreaming]);
+  }, [input, selectedBot, isStreaming, pendingFiles, voiceMode]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -785,27 +940,102 @@ export default function ModulChat() {
       </div>
 
       <div className="border-t p-3 shrink-0">
+        {/* Pending files preview */}
+        {pendingFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 max-w-3xl mx-auto mb-2">
+            {pendingFiles.map((file, idx) => (
+              <div key={idx} className="flex items-center gap-1.5 bg-muted rounded-lg px-2.5 py-1.5 text-xs">
+                {file.category === "image" ? (
+                  <img src={file.fileUrl} alt={file.fileName} className="w-8 h-8 rounded object-cover" />
+                ) : getFileIcon(file.category)}
+                <span className="truncate max-w-[120px]">{file.fileName}</span>
+                <span className="text-muted-foreground">{formatFileSize(file.fileSize)}</span>
+                <button onClick={() => removePendingFile(idx)} className="ml-0.5 text-muted-foreground/60 hover:text-foreground rounded-full" data-testid={`button-remove-file-${idx}`}>
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {isUploading && (
+          <div className="flex items-center gap-2 max-w-3xl mx-auto mb-2">
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Mengunggah file...</span>
+          </div>
+        )}
+
         <div className="flex items-end gap-2 max-w-3xl mx-auto">
+          {/* File upload button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isStreaming || isUploading}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+            title="Upload file / dokumen"
+            data-testid="button-upload-file"
+          >
+            <Paperclip className="w-5 h-5" />
+          </Button>
+
+          {/* Mic button */}
+          {speechSupported && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSpeech}
+              disabled={isStreaming}
+              className={cn("shrink-0", isListening ? "text-red-500 animate-pulse" : "text-muted-foreground hover:text-foreground")}
+              title={isListening ? "Berhenti merekam" : "Bicara"}
+              data-testid="button-voice-input"
+            >
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </Button>
+          )}
+
           <Textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ketik pesan..."
+            placeholder={isListening ? "Sedang mendengarkan..." : "Ketik pesan..."}
             className="resize-none min-h-[44px] max-h-[120px]"
             rows={1}
-            disabled={isStreaming}
+            disabled={isStreaming || isListening}
             data-testid="input-chat-message"
           />
+
+          {/* TTS toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => { setVoiceMode(v => !v); if (isSpeaking) stopSpeaking(); }}
+            className={cn("shrink-0", voiceMode ? "text-primary" : "text-muted-foreground hover:text-foreground")}
+            title={voiceMode ? "Matikan suara balasan" : "Aktifkan suara balasan"}
+            data-testid="button-voice-mode"
+          >
+            {voiceMode ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+          </Button>
+
           <Button
             onClick={sendMessage}
-            disabled={!input.trim() || isStreaming}
+            disabled={(!input.trim() && pendingFiles.length === 0) || isStreaming}
             size="icon"
             data-testid="button-send-message"
           >
             {isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={handleFileSelect}
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.gif,.webp,.svg,.mp3,.wav,.webm,.ogg,.mp4,.mov,.zip,.rar"
+          data-testid="input-file-hidden"
+        />
       </div>
     </div>
   );
