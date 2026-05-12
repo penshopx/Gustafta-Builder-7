@@ -7443,6 +7443,18 @@ Balas dengan JSON dengan struktur PERSIS ini:
           name: i.name,
         }));
 
+      // Auto-generate & persist slug if missing — so /chatbot/:slug links work
+      let agentSlugForWidget = (agent as any).slug || "";
+      if (!agentSlugForWidget) {
+        agentSlugForWidget = slugify(agent.name);
+        try {
+          const { db: dbW } = await import("./db");
+          const { agents: agentsTableW } = await import("@shared/schema");
+          const { eq: eqW } = await import("drizzle-orm");
+          await dbW.update(agentsTableW).set({ slug: agentSlugForWidget }).where(eqW(agentsTableW.id, parseInt(agentId)));
+        } catch (_e) { /* non-critical */ }
+      }
+
       const widgetConfig = {
         agentId: agent.id,
         name: agent.name,
@@ -7462,7 +7474,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
         borderRadius: agent.widgetBorderRadius || "rounded",
         showBranding: agent.widgetShowBranding ?? true,
         buttonIcon: agent.widgetButtonIcon || "chat",
-        slug: "",
+        slug: agentSlugForWidget,
         isActive: agent.isActive,
         isPublic: agent.isPublic,
         channels: enabledChannels,

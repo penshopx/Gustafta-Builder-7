@@ -17,6 +17,7 @@ interface WidgetConfig {
   borderRadius: string;
   showBranding: boolean;
   category: string;
+  slug: string;
 }
 
 export default function WidgetDemo() {
@@ -27,14 +28,29 @@ export default function WidgetDemo() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [prodBaseUrl, setProdBaseUrl] = useState<string | null>(null);
   const widgetInjected = useRef(false);
 
-  const baseUrl = window.location.origin;
+  // Fetch stable production URL — avoids using .dev URL in shared links
+  useEffect(() => {
+    fetch("/api/config/app-url")
+      .then(r => r.json())
+      .then(d => { if (d.appUrl) setProdBaseUrl(d.appUrl); })
+      .catch(() => {});
+  }, []);
+
+  // Use production URL if available, otherwise dev (for rendering only — not for sharing)
+  const shareBaseUrl = prodBaseUrl || window.location.origin;
+  const isDevUrl = shareBaseUrl.includes(".replit.dev") || shareBaseUrl.includes("localhost");
+
+  // Prefer slug in shared links — more human-friendly than numeric ID
+  const agentRef = config?.slug || agentId;
+
   const embedCode = `<!-- ${config?.name || "Gustafta"} Chat Widget -->
-<script src="${baseUrl}/widget/loader.js" data-agent-id="${agentId}"></script>
+<script src="${shareBaseUrl}/widget/loader.js" data-agent-id="${agentRef}"></script>
 <!-- End Widget -->`;
 
-  const publicChatUrl = `${baseUrl}/bot/${agentId}`;
+  const publicChatUrl = `${shareBaseUrl}/chatbot/${agentRef}`;
 
   useEffect(() => {
     if (!agentId) return;
@@ -285,23 +301,38 @@ export default function WidgetDemo() {
             </div>
 
             {/* Public link card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div className={`bg-white rounded-2xl border p-5 shadow-sm ${isDevUrl ? "border-red-200" : "border-slate-200"}`}>
               <h3 className="font-semibold text-slate-800 text-sm mb-1 flex items-center gap-2">
                 <ExternalLink className="w-4 h-4" style={{ color: accentColor }} />
                 Link Chat Langsung
               </h3>
-              <p className="text-xs text-slate-500 mb-3">
-                Bagikan link ini — pengguna langsung bisa chat tanpa install apapun.
-              </p>
-              <div className="bg-slate-50 rounded-lg px-3 py-2 text-xs font-mono text-slate-600 break-all border border-slate-200">
+
+              {isDevUrl ? (
+                <div className="mb-3 rounded-lg bg-red-50 border border-red-200 px-3 py-2 flex gap-2">
+                  <span className="text-red-500 text-xs flex-shrink-0 mt-0.5">⚠️</span>
+                  <div>
+                    <p className="text-xs font-bold text-red-600">URL Development — Jangan dibagikan!</p>
+                    <p className="text-xs text-red-500 mt-0.5">
+                      Deploy app dulu agar link stabil. Setelah deploy, kembali ke halaman ini — URL otomatis berubah ke domain production.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 mb-3">
+                  Bagikan link ini — customer langsung bisa chat tanpa install apapun.
+                </p>
+              )}
+
+              <div className={`rounded-lg px-3 py-2 text-xs font-mono break-all border ${isDevUrl ? "bg-red-50 text-red-700 border-red-200" : "bg-slate-50 text-slate-600 border-slate-200"}`}>
                 {publicChatUrl}
               </div>
               <button
                 onClick={copyLink}
-                className="mt-3 w-full py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-90 border"
-                style={{ color: accentColor, borderColor: `${accentColor}40`, backgroundColor: `${accentColor}08` }}
+                disabled={isDevUrl}
+                className="mt-3 w-full py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-90 border disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ color: isDevUrl ? "#ef4444" : accentColor, borderColor: isDevUrl ? "#fca5a5" : `${accentColor}40`, backgroundColor: isDevUrl ? "#fef2f2" : `${accentColor}08` }}
               >
-                {codeCopied ? "✓ Link disalin!" : "Salin Link Chat"}
+                {isDevUrl ? "⚠️ Deploy dulu sebelum share" : codeCopied ? "✓ Link disalin!" : "Salin Link Chat"}
               </button>
             </div>
 
