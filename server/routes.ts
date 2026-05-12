@@ -368,6 +368,20 @@ const upload = multer({
 });
 
 /**
+ * Converts an agent name to a URL-safe slug.
+ * e.g. "Tender Readiness Checker" → "tender-readiness-checker"
+ */
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+}
+
+/**
  * Returns the canonical production base URL for building external-facing links
  * (embed codes, chatUrls, Midtrans callbacks, etc.).
  *
@@ -4225,11 +4239,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         name: "Chatbot AI", emoji: "🤖", color: "#6366f1", description: ""
       };
 
+      let agentSlug: string | null = null;
       if (resolvedAgentId) {
         const { db } = await import("./db");
         const { agents: agentsTable } = await import("@shared/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select({ id: agentsTable.id, name: agentsTable.name, avatar: agentsTable.avatar, widgetColor: agentsTable.widgetColor, description: agentsTable.description })
+        const rows = await db.select({ id: agentsTable.id, name: agentsTable.name, avatar: agentsTable.avatar, widgetColor: agentsTable.widgetColor, description: agentsTable.description, slug: agentsTable.slug })
           .from(agentsTable).where(eq(agentsTable.id, resolvedAgentId)).limit(1);
         if (rows[0]) {
           productInfo = {
@@ -4238,6 +4253,15 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             color: rows[0].widgetColor || "#6366f1",
             description: rows[0].description || "",
           };
+          // Use existing slug or auto-generate from name, then save if blank
+          agentSlug = rows[0].slug || null;
+          if (!agentSlug) {
+            agentSlug = slugify(rows[0].name);
+            // Persist the auto-generated slug so future lookups by slug work
+            await db.update(agentsTable)
+              .set({ slug: agentSlug })
+              .where(eq(agentsTable.id, resolvedAgentId));
+          }
         }
       } else if (order.productId) {
         const product = await storage.getStoreProduct(order.productId);
@@ -4247,12 +4271,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         }
       }
 
-      const chatUrl = resolvedAgentId ? `${baseUrl}/demo/${resolvedAgentId}` : null;
-      const embedCode = resolvedAgentId
-        ? `<iframe src="${baseUrl}/embed/${resolvedAgentId}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
+      // Prefer slug in URLs — cleaner for sharing to customers
+      const agentRef = agentSlug || resolvedAgentId;
+      const chatUrl = agentRef ? `${baseUrl}/demo/${agentRef}` : null;
+      const embedCode = agentRef
+        ? `<iframe src="${baseUrl}/embed/${agentRef}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
         : null;
-      const widgetScript = resolvedAgentId
-        ? `<script src="${baseUrl}/widget.js" data-agent="${resolvedAgentId}" data-color="#6366f1" async></script>`
+      const widgetScript = agentRef
+        ? `<script src="${baseUrl}/widget.js" data-agent="${agentRef}" data-color="#6366f1" async></script>`
         : null;
 
       res.json({
