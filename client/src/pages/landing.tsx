@@ -551,6 +551,28 @@ export default function Landing() {
                 </a>
               </div>
               
+              <div className="flex flex-wrap items-center gap-2 mt-1 mb-2">
+                <span className="text-xs text-muted-foreground font-medium">Coba langsung:</span>
+                <Link href="/brain-project">
+                  <Button size="sm" variant="secondary" className="gap-1.5 h-7 text-xs" data-testid="button-quick-brain">
+                    <Brain className="h-3.5 w-3.5 text-amber-500" />
+                    Brain Project AI
+                  </Button>
+                </Link>
+                <Link href="/tender-ai">
+                  <Button size="sm" variant="secondary" className="gap-1.5 h-7 text-xs" data-testid="button-quick-tender">
+                    <Target className="h-3.5 w-3.5 text-emerald-500" />
+                    TENDERA AI
+                  </Button>
+                </Link>
+                <Link href="/tender-monitor">
+                  <Button size="sm" variant="secondary" className="gap-1.5 h-7 text-xs" data-testid="button-quick-monitor">
+                    <Search className="h-3.5 w-3.5 text-blue-500" />
+                    Tender Monitor
+                  </Button>
+                </Link>
+              </div>
+
               <p className="text-sm text-muted-foreground text-center lg:text-left">
                 <CheckCircle2 className="h-4 w-4 inline mr-1 text-green-500" />
                 Mulai dari Rp 199.000/bulan. Semua paket termasuk Agentic AI + Orchestrator Multi-Agent. Setup kurang dari 30 menit.
@@ -1128,13 +1150,20 @@ export default function Landing() {
                   </div>
                 </div>
 
-                <Link href="/dashboard">
-                  <Button className="gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20" data-testid="button-project-brain">
-                    <Brain className="h-4 w-4" />
-                    Bangun Project Brain Saya
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/brain-project">
+                    <Button className="gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20" data-testid="button-project-brain">
+                      <Brain className="h-4 w-4" />
+                      Coba Brain Project AI
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard">
+                    <Button variant="outline" className="gap-2 border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30" data-testid="button-project-brain-dashboard">
+                      Bangun Sendiri
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -1200,20 +1229,20 @@ export default function Landing() {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <Link href="/packs">
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/tender-ai">
                     <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20" data-testid="button-info-tender">
-                      <Trophy className="h-4 w-4" />
-                      Cek Kesiapan Tender
+                      <Target className="h-4 w-4" />
+                      Coba TENDERA AI
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <a href="#tender">
+                  <Link href="/tender-monitor">
                     <Button variant="outline" size="default" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30">
                       <Search className="h-4 w-4" />
-                      Pelajari
+                      Monitor Tender
                     </Button>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
