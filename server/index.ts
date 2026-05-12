@@ -93,6 +93,7 @@ import * as M_itLspPaperlessAjj from "./seed-it-lsp-paperless-ajj";
 import * as M_itLspPaperlessAjjExtra from "./seed-it-lsp-paperless-ajj-extra";
 import * as M_fixOrchestrators from "./fix-orchestrators";
 import * as M_inaprocScraper from "./lib/inaproc-scraper";
+import * as M_ahspHspk from "./seed-ahsp-hspk";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -168,6 +169,7 @@ const seedModuleRegistry: Record<string, any> = {
   "./seed-it-lsp-paperless-ajj-extra": M_itLspPaperlessAjjExtra,
   "./fix-orchestrators": M_fixOrchestrators,
   "./lib/inaproc-scraper": M_inaprocScraper,
+  "./seed-ahsp-hspk": M_ahspHspk,
 };
 
 // Push DB schema on startup in production (build time has no DB access)
@@ -1325,6 +1327,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await patchSkkOrchestratorHub();
       } catch (err) {
         log("Patch SKK Orchestrator error: " + (err as Error).message);
+      }
+
+      // Seed: AHSP & HSPK Knowledge Base (KONSTRA agents)
+      try {
+        const { seedAhspHspk } = M_ahspHspk;
+        await seedAhspHspk();
+      } catch (err) {
+        log("[Seed AHSP] Error: " + (err as Error).message);
       }
 
       startScheduler();

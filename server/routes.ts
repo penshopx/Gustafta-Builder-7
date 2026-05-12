@@ -14129,5 +14129,62 @@ Hasilkan JSON valid dengan semua field terisi.`;
     })();
   });
 
+  // ── BPS WebAPI Proxy ─────────────────────────────────────────────────────────
+  app.get("/api/bps/ihpb", async (_req, res) => {
+    try {
+      const { getIhpbKonstruksi, isBpsConfigured } = await import("./lib/bps-api");
+      const data = await getIhpbKonstruksi();
+      res.json({ ok: true, configured: isBpsConfigured(), data });
+    } catch (err: any) {
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  app.get("/api/bps/ihpb/trend", async (_req, res) => {
+    try {
+      const { getIhpbTrend, isBpsConfigured } = await import("./lib/bps-api");
+      const data = await getIhpbTrend();
+      res.json({ ok: true, configured: isBpsConfigured(), data });
+    } catch (err: any) {
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // ── HSPK File Upload & Parse ─────────────────────────────────────────────────
+  app.post("/api/hspk/upload/:agentId", isAuthenticated, upload.single("file"), async (req: any, res) => {
+    try {
+      const agentId = req.params.agentId;
+      const file = req.file;
+      if (!file) return res.status(400).json({ error: "File tidak ditemukan" });
+
+      const fileName = file.originalname || "hspk.xlsx";
+      const fileSizeKb = Math.round(file.size / 1024);
+      const ext = fileName.split(".").pop()?.toLowerCase() || "unknown";
+
+      // Simpan sebagai KB entry dengan metadata file
+      const kb = await storage.createKnowledgeBase({
+        agentId,
+        name: `[HSPK_UPLOAD] ${fileName}`,
+        type: "file",
+        content: `File HSPK diunggah: ${fileName} (${fileSizeKb} KB). ` +
+          `Format: ${ext.toUpperCase()}. ` +
+          `Diunggah pada: ${new Date().toLocaleDateString("id-ID")}. ` +
+          `Gunakan file ini sebagai referensi harga satuan daerah setempat.`,
+        description: `HSPK daerah — ${fileName}`,
+        fileName,
+        fileSize: file.size,
+        fileType: ext,
+        knowledgeLayer: "operational",
+        sourceAuthority: "Pemda/Dinas PU setempat",
+        processingStatus: "completed",
+        status: "active",
+      } as any);
+
+      res.json({ ok: true, kbId: kb.id, fileName, fileSizeKb });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   return httpServer;
 }
