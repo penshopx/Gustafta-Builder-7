@@ -3,7 +3,7 @@
  * Protects API routes based on user's active subscription plan.
  */
 import type { Request, Response, NextFunction } from "express";
-import { resolvePlan, meetsMinPlan, type PlanTier, type FeatureKey, PLAN_CONFIGS } from "../../shared/feature-plans";
+import { resolvePlan, meetsMinPlan, type PlanTier, type FeatureKey, PLAN_CONFIGS } from "@shared/feature-plans";
 
 interface AuthRequest extends Request {
   user?: any;

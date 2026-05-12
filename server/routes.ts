@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { customDomains, trialRequests, subscriptionsTable, vouchers, series as seriesTable, bigIdeas as bigIdeasTable, toolboxes as toolboxesTable, agents as agentsTable, cores as coresTable } from "@shared/schema";
+import { customDomains, trialRequests, subscriptionsTable, vouchers, series as seriesTable, bigIdeas as bigIdeasTable, toolboxes as toolboxesTable, agents as agentsTable, cores as coresTable, systemConfig } from "@shared/schema";
 import { users } from "@shared/models/auth";
 import { eq, and, desc, sql as sqlExpr, inArray, isNull, or } from "drizzle-orm";
 import {
@@ -387,10 +387,7 @@ let _cachedProdUrl: string | null = null;
 /** Load production URL from DB (system_config table) */
 async function loadProdUrlFromDb(): Promise<string | null> {
   try {
-    const { db: dbCfg } = await import("./db");
-    const { systemConfig } = await import("@shared/schema");
-    const { eq } = await import("drizzle-orm");
-    const rows = await dbCfg.select().from(systemConfig).where(eq(systemConfig.key, "prod_url")).limit(1);
+    const rows = await db.select().from(systemConfig).where(eq(systemConfig.key, "prod_url")).limit(1);
     return rows[0]?.value || null;
   } catch { return null; }
 }
@@ -398,9 +395,7 @@ async function loadProdUrlFromDb(): Promise<string | null> {
 /** Save production URL to DB (upsert) */
 async function saveProdUrlToDb(url: string): Promise<void> {
   try {
-    const { db: dbCfg } = await import("./db");
-    const { systemConfig } = await import("@shared/schema");
-    await dbCfg.insert(systemConfig).values({ key: "prod_url", value: url })
+    await db.insert(systemConfig).values({ key: "prod_url", value: url })
       .onConflictDoUpdate({ target: systemConfig.key, set: { value: url, updatedAt: new Date() } });
     _cachedProdUrl = url;
   } catch { /* non-critical */ }
@@ -2891,7 +2886,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       if ((req as any).isAuthenticated?.()) {
         const ownerId = (req as any).user?.claims?.sub;
         if (ownerId) {
-          const { resolvePlan } = await import("../../shared/feature-plans");
+          const { resolvePlan } = await import("@shared/feature-plans");
           const subscription = await storage.getActiveSubscription(ownerId);
           const plan = resolvePlan(subscription?.plan, subscription?.status === "active");
           const limit = plan.maxMessagesPerMonth; // -1 = unlimited
@@ -3668,7 +3663,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   app.get("/api/subscriptions/my", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || "";
-      const { resolvePlan, LEGACY_PLAN_MAP, PLAN_CONFIGS } = await import("../../shared/feature-plans");
+      const { resolvePlan, LEGACY_PLAN_MAP, PLAN_CONFIGS } = await import("@shared/feature-plans");
 
       const subscription = await storage.getActiveSubscription(userId);
       const isActive = subscription?.status === "active";
@@ -3699,7 +3694,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   app.get("/api/subscriptions/features", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || "";
-      const { resolvePlan } = await import("../../shared/feature-plans");
+      const { resolvePlan } = await import("@shared/feature-plans");
       const subscription = await storage.getActiveSubscription(userId);
       const plan = resolvePlan(subscription?.plan, subscription?.status === "active");
       res.json({ features: plan.features, limits: {
@@ -3749,7 +3744,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
         // New Gustafta Apps plans — save as pending, admin confirms after payment
         if (isGustaftaPlan) {
-          const { PLAN_CONFIGS, LEGACY_PLAN_MAP } = await import("../../shared/feature-plans");
+          const { PLAN_CONFIGS, LEGACY_PLAN_MAP } = await import("@shared/feature-plans");
           const planConfig = PLAN_CONFIGS[plan as keyof typeof PLAN_CONFIGS];
           const now = new Date();
           const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days default
@@ -11336,7 +11331,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/tender-ai/orchestrator — prefer TENDERA-ORCHESTRATOR, fallback to KONSTRA-TENDER-ORCHESTRATOR
   app.get("/api/tender-ai/orchestrator", async (_req, res) => {
     try {
-      const { agents: agentsTable } = await import("../shared/schema");
+      const { agents: agentsTable } = await import("@shared/schema");
       const { ilike, or } = await import("drizzle-orm");
 
       // 1. Prefer TENDERA-ORCHESTRATOR (full 10-agent system)
@@ -11374,7 +11369,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/ib-tu/orchestrator — IB TU Coordinator multi-agent orchestrator
   app.get("/api/ib-tu/orchestrator", async (_req, res) => {
     try {
-      const { agents: agentsTable } = await import("../shared/schema");
+      const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
       let agent = await storage.getAgent("1307");
@@ -11403,7 +11398,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/ai-tutor/orchestrator — AI Tutor Coordinator multi-agent orchestrator
   app.get("/api/ai-tutor/orchestrator", async (_req, res) => {
     try {
-      const { agents: agentsTable } = await import("../shared/schema");
+      const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
       let agent = await storage.getAgent("1368");
@@ -11432,7 +11427,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/sbuclaw/orchestrator — SBUClaw Orchestrator multi-agent
   app.get("/api/sbuclaw/orchestrator", async (_req, res) => {
     try {
-      const { agents: agentsTable } = await import("../shared/schema");
+      const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
       let agent = await storage.getAgent("1404");
@@ -11461,7 +11456,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/brain-project/orchestrator — Brain Project multi-agent orchestrator
   app.get("/api/brain-project/orchestrator", async (_req, res) => {
     try {
-      const { agents: agentsTable } = await import("../shared/schema");
+      const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
       let agent = await storage.getAgentBySlug("brain-project-orchestrator");
