@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle,
   HardHat, ClipboardList, ShieldCheck, Brain, ChevronDown, ChevronUp,
+  BarChart2, FileSearch, Leaf, Scale, Building2,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -30,31 +31,55 @@ interface Message {
 
 // ─── Agent Metadata ───────────────────────────────────────────────────────────
 
-const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
-  "BRAIN-KONSULTAN": {
-    icon: <ClipboardList className="h-3 w-3" />,
-    label: "Konsultan",
+const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: string; code: string }> = {
+  "BRAIN-PROXIMA": {
+    icon: <Building2 className="h-3 w-3" />,
+    label: "PROXIMA",
     color: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    code: "BR-PROX",
   },
-  "BRAIN-MK": {
-    icon: <HardHat className="h-3 w-3" />,
-    label: "Pengawas/MK",
+  "BRAIN-EVM": {
+    icon: <BarChart2 className="h-3 w-3" />,
+    label: "EVM",
     color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    code: "BR-EVM",
   },
-  "BRAIN-K3": {
+  "BRAIN-MUTU": {
+    icon: <FileSearch className="h-3 w-3" />,
+    label: "MUTU",
+    color: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+    code: "BR-MUT",
+  },
+  "BRAIN-SAFIRA": {
     icon: <ShieldCheck className="h-3 w-3" />,
-    label: "K3 & Lingkungan",
+    label: "SAFIRA",
     color: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    code: "BR-SAF",
+  },
+  "BRAIN-ENVIRA": {
+    icon: <Leaf className="h-3 w-3" />,
+    label: "ENVIRA",
+    color: "bg-green-500/20 text-green-300 border-green-500/30",
+    code: "BR-ENV",
+  },
+  "BRAIN-KONTRAK": {
+    icon: <Scale className="h-3 w-3" />,
+    label: "KONTRAK",
+    color: "bg-violet-500/20 text-violet-300 border-violet-500/30",
+    code: "BR-KON",
   },
 };
 
-const AGENT_LEGEND = ["BRAIN-KONSULTAN", "BRAIN-MK", "BRAIN-K3"];
+const AGENT_LEGEND = [
+  "BRAIN-PROXIMA", "BRAIN-EVM", "BRAIN-MUTU",
+  "BRAIN-SAFIRA", "BRAIN-ENVIRA", "BRAIN-KONTRAK",
+];
 
 function getRoleMeta(role: string) {
   for (const key of Object.keys(ROLE_META)) {
     if (role.includes(key)) return ROLE_META[key];
   }
-  return { icon: <Brain className="h-3 w-3" />, label: role, color: "bg-white/10 text-white/60 border-white/20" };
+  return { icon: <Brain className="h-3 w-3" />, label: role, color: "bg-white/10 text-white/60 border-white/20", code: "BR" };
 }
 
 function statusIcon(status: SubAgentStatus["status"]) {
@@ -76,10 +101,11 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
       <button
         className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/5 transition-colors"
         onClick={() => setExpanded(!expanded)}
+        data-testid="button-expand-subagents"
       >
         <Brain className="h-3 w-3 text-indigo-400 shrink-0" />
         <span className="text-indigo-300 font-medium">
-          {running > 0 ? `${running} topi aktif…` : `${done}/${agents.length} topi selesai`}
+          {running > 0 ? `${running} spesialis aktif…` : `${done}/${agents.length} spesialis selesai`}
         </span>
         <div className="flex gap-1 ml-auto">
           {agents.map((a, i) => (
@@ -101,9 +127,14 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
                 {statusIcon(a.status)}
                 <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-xs ${meta.color}`}>
                   {meta.icon}
+                  <span className="font-mono">{meta.code}</span>
+                  <span className="text-white/40">·</span>
                   <span>{meta.label}</span>
                 </div>
                 {a.elapsed && <span className="text-white/30 ml-auto">{(a.elapsed / 1000).toFixed(1)}s</span>}
+                {a.preview && (
+                  <span className="text-white/30 text-xs italic ml-1 truncate max-w-[200px]">{a.preview}</span>
+                )}
               </div>
             );
           })}
@@ -143,11 +174,11 @@ function ChatMessage({ msg }: { msg: Message }) {
         >
           {msg.content || (msg.isStreaming ? <span className="animate-pulse">▋</span> : "")}
         </div>
-        {!isUser && msg.orchestrationMs && (
+        {!isUser && msg.orchestrationMs && msg.subAgents && msg.subAgents.length > 0 && (
           <div className="flex items-center gap-1 text-xs text-white/30 px-1 mt-1">
             <Zap className="h-2.5 w-2.5" />
             <span>
-              {msg.subAgents?.length ?? 0} topi paralel · {(msg.orchestrationMs / 1000).toFixed(1)}s
+              {msg.subAgents.length} spesialis paralel · {(msg.orchestrationMs / 1000).toFixed(1)}s
             </span>
           </div>
         )}
@@ -159,12 +190,39 @@ function ChatMessage({ msg }: { msg: Message }) {
 // ─── Sample Prompts ───────────────────────────────────────────────────────────
 
 const SAMPLE_PROMPTS = [
-  { icon: "📊", text: "Review LHP proyek gedung kantor Rp 8 M — deviasi kurva-S −7%, cuaca hujan 3 hari terakhir" },
-  { icon: "⚠️", text: "Hitung SPI/CPI: PV Rp 3,2 M | EV Rp 2,8 M | AC Rp 3,5 M | BAC Rp 10 M. Analisis EAC & rekomendasi" },
-  { icon: "🦺", text: "Near miss: pekerja hampir jatuh dari scaffold lantai 5. Ini ke-2 kalinya. Buat investigasi 5-Why dan CAPA" },
-  { icon: "📋", text: "Kuat tekan beton kolom hasil test cube 24 MPa, spesifikasi f'c 30 MPa. Langkah NCR dan klaim kontrak?" },
-  { icon: "⏱️", text: "VO kumulatif sudah 9,5% nilai kontrak (Rp 850 jt dari Rp 8,9 M). Risiko kontrak dan langkah formal FIDIC?" },
-  { icon: "💰", text: "Cuaca ekstrem 5 hari menyebabkan pekerjaan pondasi terhenti. Bagaimana prosedur klaim EOT? Dokumen apa yang diperlukan?" },
+  {
+    icon: "📋",
+    text: "Review LHP proyek gedung 5 lantai Bekasi: deviasi kurva-S −7%, beton kolom L3 = 24 MPa (target fc'=30), hujan 4 hari, near miss harness, VO kumulatif 8%",
+  },
+  {
+    icon: "📊",
+    text: "Hitung EVM: BAC Rp 28 M | PV Rp 10,92 M | EV Rp 8,96 M | AC Rp 10,2 M. Proyeksikan EAC dan berikan rekomendasi corrective action",
+  },
+  {
+    icon: "⛑️",
+    text: "Near miss: pekerja hampir jatuh dari scaffold L4, harness terlepas dari anchor. Ini ke-2 kalinya. Buat investigasi 5-Why + Bowtie + CAPA",
+  },
+  {
+    icon: "🔍",
+    text: "Uji beton 3 silinder: 22, 24, 26 MPa (target fc'=30 MPa), volume 12 m³. Apa status NCR dan langkah selanjutnya?",
+  },
+  {
+    icon: "📜",
+    text: "Cuaca ekstrem 4 hari (2026-05-04 s/d 07). Kontrak FIDIC Red Book 1999. Draft surat klaim EOT lengkap + TIA",
+  },
+  {
+    icon: "🌿",
+    text: "Ditemukan 12 drum oli bekas di stockyard 60 hari tanpa manifest B3. Apa pelanggaran regulasi dan langkah penanganan?",
+  },
+];
+
+// ─── KPI Legend ───────────────────────────────────────────────────────────────
+
+const KPI_LEGEND = [
+  { icon: "🟢", label: "CPI/SPI ≥ 0,95" },
+  { icon: "🟡", label: "Watch 0,85–0,95" },
+  { icon: "🔴", label: "Alert < 0,85" },
+  { icon: "🚨", label: "Kritis (LTI/Fatal)" },
 ];
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
@@ -226,11 +284,7 @@ export default function BrainProjectChat() {
       const res = await fetch("/api/messages/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          agentId,
-          content: text,
-          conversationHistory: history,
-        }),
+        body: JSON.stringify({ agentId, content: text, conversationHistory: history }),
       });
 
       if (!res.body) throw new Error("No stream");
@@ -259,7 +313,7 @@ export default function BrainProjectChat() {
               const subs: SubAgentStatus[] = (evt.subAgents ?? []).map((sa: any) => ({
                 agentId: sa.agentId,
                 role: sa.role,
-                status: "waiting",
+                status: "waiting" as const,
               }));
               subs.forEach(s => subAgentMap.set(s.agentId, s));
               setMessages(prev => {
@@ -276,9 +330,7 @@ export default function BrainProjectChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
-                }
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
                 return updated;
               });
             } else if (evt.type === "sub_agent_done") {
@@ -287,9 +339,7 @@ export default function BrainProjectChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
-                }
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
                 return updated;
               });
             } else if (evt.type === "content" && evt.text) {
@@ -298,11 +348,7 @@ export default function BrainProjectChat() {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
                 if (last.role === "assistant") {
-                  updated[updated.length - 1] = {
-                    ...last,
-                    content: fullContent,
-                    subAgents: [...subAgentMap.values()],
-                  };
+                  updated[updated.length - 1] = { ...last, content: fullContent, subAgents: [...subAgentMap.values()] };
                 }
                 return updated;
               });
@@ -316,12 +362,7 @@ export default function BrainProjectChat() {
         const updated = [...prev];
         const last = updated[updated.length - 1];
         if (last.role === "assistant") {
-          updated[updated.length - 1] = {
-            ...last,
-            isStreaming: false,
-            subAgents: [...subAgentMap.values()],
-            orchestrationMs: orchMs,
-          };
+          updated[updated.length - 1] = { ...last, isStreaming: false, subAgents: [...subAgentMap.values()], orchestrationMs: orchMs };
         }
         return updated;
       });
@@ -330,11 +371,7 @@ export default function BrainProjectChat() {
         const updated = [...prev];
         const last = updated[updated.length - 1];
         if (last.role === "assistant") {
-          updated[updated.length - 1] = {
-            ...last,
-            content: "Maaf, terjadi kesalahan. Silakan coba lagi.",
-            isStreaming: false,
-          };
+          updated[updated.length - 1] = { ...last, content: "Maaf, terjadi kesalahan. Silakan coba lagi.", isStreaming: false };
         }
         return updated;
       });
@@ -360,17 +397,15 @@ export default function BrainProjectChat() {
           🧠
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm">
-            {agentData?.name ?? "BRAIN-ORCHESTRATOR"}
-          </div>
+          <div className="font-semibold text-sm">{agentData?.name ?? "BRAIN-ORCHESTRATOR"}</div>
           <div className="text-xs text-white/40 flex items-center gap-1">
             <Zap className="h-2.5 w-2.5 text-indigo-400" />
-            <span>3 Topi Paralel: Konsultan · Pengawas/MK · K3 & Lingkungan · ABD-7</span>
+            <span>6 Spesialis Paralel · OpenClaw · ABD-7 · Early Warning · Sitasi Regulasi Wajib</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs border-indigo-500/40 text-indigo-300 hidden sm:flex">
-            Brain Project
+            Brain Project v2
           </Badge>
           <Badge variant="outline" className="text-xs border-white/20 text-white/50">
             ABD v1.1
@@ -380,19 +415,21 @@ export default function BrainProjectChat() {
         </div>
       </div>
 
-      {/* Agent legend strip */}
-      <div className="shrink-0 border-b border-white/5 px-3 py-2 flex items-center gap-2 overflow-x-auto bg-[#0b0c1a]/60">
-        <span className="text-xs text-white/30 shrink-0">3 Topi:</span>
+      {/* 6-Agent legend strip */}
+      <div className="shrink-0 border-b border-white/5 px-3 py-2 flex items-center gap-1.5 overflow-x-auto bg-[#0b0c1a]/60">
+        <span className="text-xs text-white/30 shrink-0 mr-1">6 Spesialis:</span>
         {AGENT_LEGEND.map(role => {
           const meta = getRoleMeta(role);
           return (
             <div key={role} className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded border shrink-0 ${meta.color}`}>
               {meta.icon}
-              <span>{meta.label}</span>
+              <span className="font-mono text-[10px]">{meta.code}</span>
+              <span className="hidden sm:inline">·</span>
+              <span className="hidden sm:inline">{meta.label}</span>
             </div>
           );
         })}
-        <span className="text-xs text-white/20 ml-2 shrink-0">Output: ABD-7 · Early Warning · Confidence Score</span>
+        <span className="text-xs text-white/20 ml-2 shrink-0 hidden md:inline">ABD-7 · Early Warning · Confidence Score</span>
       </div>
 
       {/* Messages */}
@@ -404,18 +441,22 @@ export default function BrainProjectChat() {
               <div className="font-semibold text-xl mb-1 bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent">
                 Brain Project — Pendamping Proyek Konstruksi
               </div>
-              <div className="text-sm text-white/50 max-w-md">
-                3 topi bekerja paralel: <span className="text-blue-300">Konsultan</span> (kontrak/FIDIC/VO) · <span className="text-emerald-300">Pengawas/MK</span> (EVM/SPI/CPI/NCR) · <span className="text-amber-300">K3 & Lingkungan</span> (SMK3/JSA/insiden). Output selalu ABD-7 dengan early warning dan confidence score.
+              <div className="text-sm text-white/50 max-w-lg">
+                6 spesialis bekerja paralel: <span className="text-blue-300">PROXIMA</span> (PM lapangan) ·{" "}
+                <span className="text-emerald-300">EVM</span> (biaya/jadwal) ·{" "}
+                <span className="text-sky-300">MUTU</span> (NCR/ITP) ·{" "}
+                <span className="text-amber-300">SAFIRA</span> (K3) ·{" "}
+                <span className="text-green-300">ENVIRA</span> (lingkungan) ·{" "}
+                <span className="text-violet-300">KONTRAK</span> (FIDIC/EOT/VO)
+              </div>
+              <div className="text-xs text-white/30 mt-2 max-w-md mx-auto">
+                Output selalu ABD-7: Ringkasan · Asumsi · Analisis Q-C-T+K3-S · Early Warning · Rekomendasi H/M/L · Confidence%
               </div>
             </div>
 
-            {/* Early Warning Legend */}
+            {/* KPI Legend */}
             <div className="flex flex-wrap justify-center gap-2 text-xs">
-              {[
-                { icon: "⚠️", label: "Watch (SPI/CPI < 0,95)" },
-                { icon: "🔴", label: "Alert (SPI/CPI < 0,85)" },
-                { icon: "🚨", label: "Kritis (LTI/Fatality)" },
-              ].map(c => (
+              {KPI_LEGEND.map(c => (
                 <span key={c.label} className="px-2 py-1 rounded border border-white/10 bg-white/5 text-white/60">
                   {c.icon} {c.label}
                 </span>
@@ -438,6 +479,11 @@ export default function BrainProjectChat() {
               ))}
             </div>
 
+            {/* Deliverables hint */}
+            <div className="text-xs text-white/25 max-w-md text-center">
+              26 deliverables tersedia: D-01 Review LHP · D-06 Laporan EVM · D-15 Investigasi Insiden · D-20 Klaim EOT · D-23 BA PHO/FHO
+            </div>
+
             {!ready && !agentLoading && (
               <div className="text-xs text-red-300/70 bg-red-900/10 border border-red-800/30 rounded-lg px-4 py-2">
                 Brain Project agent belum diinisialisasi. Restart server diperlukan.
@@ -446,9 +492,7 @@ export default function BrainProjectChat() {
           </div>
         ) : (
           <div>
-            {messages.map((msg, i) => (
-              <ChatMessage key={i} msg={msg} />
-            ))}
+            {messages.map((msg, i) => <ChatMessage key={i} msg={msg} />)}
           </div>
         )}
       </ScrollArea>
@@ -461,7 +505,11 @@ export default function BrainProjectChat() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-            placeholder={ready ? "Ceritakan kondisi proyek atau tanya tentang kontrak, EVM, K3…" : "Menghubungkan ke Brain Project…"}
+            placeholder={
+              ready
+                ? "Ceritakan kondisi proyek — LHP, NCR, insiden K3, EVM, klaim EOT, limbah B3…"
+                : "Menghubungkan ke Brain Project…"
+            }
             disabled={!ready || streaming}
             className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-indigo-500/40 text-sm h-10"
             data-testid="input-message"
@@ -476,7 +524,7 @@ export default function BrainProjectChat() {
           </Button>
         </div>
         <div className="text-center mt-2 text-xs text-white/20">
-          Brain Project · 3 topi spesialis paralel · ABD-7 · Standar FIDIC · PP 50/2012 SMK3 · Permen PUPR 10/2021
+          Brain Project v2 · PROXIMA · EVM · MUTU · SAFIRA · ENVIRA · KONTRAK · ABD-7 · FIDIC · PP 50/2012 SMK3 · Permen PUPR 8/2023
         </div>
       </div>
 
