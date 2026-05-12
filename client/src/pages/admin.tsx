@@ -557,6 +557,12 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/panduan-delivery">
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs hidden sm:flex" data-testid="button-panduan-delivery">
+                <FileText className="h-3.5 w-3.5" />
+                Panduan Delivery
+              </Button>
+            </Link>
             {isSuperAdmin ? <Crown className="h-4 w-4 text-purple-500" /> : <Shield className="h-4 w-4 text-primary" />}
             <span className="text-sm font-medium hidden sm:block">{meData.user?.email}</span>
           </div>

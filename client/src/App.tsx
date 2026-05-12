@@ -41,6 +41,7 @@ import OnboardingPage from "@/pages/onboarding";
 import MySubscriptionPage from "@/pages/my-subscription";
 import PendingApproval from "@/pages/pending-approval";
 import Panduan from "@/pages/panduan";
+import PanduanDelivery from "@/pages/panduan-delivery";
 import WelcomePage from "@/pages/welcome";
 import ReferensiHarga from "@/pages/referensi-harga";
 import TenderMonitor from "@/pages/tender-monitor";
@@ -123,6 +124,7 @@ function Router() {
       <Route path="/my-subscription" component={MySubscriptionPage} />
       <Route path="/pending-approval" component={PendingApproval} />
       <Route path="/panduan" component={Panduan} />
+      <Route path="/panduan-delivery" component={PanduanDelivery} />
       <Route path="/welcome" component={WelcomePage} />
       <Route path="/referensi-harga" component={ReferensiHarga} />
         <Route path="/tender-monitor" component={TenderMonitor} />
