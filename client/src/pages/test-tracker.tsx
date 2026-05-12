@@ -668,8 +668,151 @@ const KONSTRA_PROMPTS: Record<number, AgentPrompt[]> = {
   ],
 };
 
+// ─── SBUClaw Agents (Orchestrator + 10 Specialists) ──────────────────────────
+
+const SBUCLAW_BOTS = [
+  { id: 1404, name: "SBUCLAW-ORCHESTRATOR",                       role: "Orchestrator", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",     subs: 10 },
+  { id: 1394, name: "AGENT-MAPPER — Smart Mapping Subklasifikasi", role: "MAPPER",       color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",   subs: 0 },
+  { id: 1395, name: "AGENT-QUALIFY — Kualifikasi & Gap Analysis",  role: "QUALIFY",      color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",   subs: 0 },
+  { id: 1396, name: "AGENT-DOCS — Checklist Dokumen",             role: "DOCS",         color: "bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300",           subs: 0 },
+  { id: 1397, name: "AGENT-SKKMATCH — Pencocokan SKK",            role: "SKKMATCH",     color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300", subs: 0 },
+  { id: 1398, name: "AGENT-LETTERGEN — Draft Surat",              role: "LETTERGEN",    color: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300",           subs: 0 },
+  { id: 1399, name: "AGENT-COST — Estimasi Biaya & Timeline",     role: "COST",         color: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300",           subs: 0 },
+  { id: 1400, name: "AGENT-ASSESS — Asesmen Kesiapan BUJK",      role: "ASSESS",       color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",           subs: 0 },
+  { id: 1401, name: "AGENT-OSS — Walkthrough OSS-RBA & LPJK",    role: "OSS",          color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300",   subs: 0 },
+  { id: 1402, name: "AGENT-COMPLY — Compliance & Regulasi",      role: "COMPLY",       color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",   subs: 0 },
+  { id: 1403, name: "AGENT-INTEGRITY — ABD Overlay & Anti-Fraud", role: "INTEGRITY",    color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300",           subs: 0 },
+];
+
+// ─── SBUClaw Test Scenarios (5 Acceptance Criteria) ──────────────────────────
+
+const SBUCLAW_TESTS = [
+  {
+    id: "C1", label: "C1 — Anti-Block", badge: "bg-red-50 text-red-700 border-red-200",
+    title: "Non-Blocking: Jawab dari data minimal",
+    description: "Kirim query SANGAT MINIM (mis: 'saya mau buat SBU'). Agen wajib langsung menjawab dengan inferensi & asumsi default — dilarang balik bertanya sebelum memberikan substansi. CRITICAL — satu pelanggaran = fail.",
+    prompt: "Saya mau buat SBU. Tolong bantu.",
+    criteria: [
+      "❌ Tidak ada 'Bisa ceritakan dulu perusahaan Anda?' sebagai jawaban utama",
+      "❌ Tidak ada pertanyaan balik tanpa substansi terlebih dahulu",
+      "✅ Agen langsung menjawab dengan inferensi + [ASUMSI: ...] bila perlu",
+      "✅ Ada quick reply atau opsi lanjut setelah jawaban inti",
+    ],
+  },
+  {
+    id: "C2", label: "C2 — Mapping Accuracy", badge: "bg-blue-50 text-blue-700 border-blue-200",
+    title: "Akurasi Mapping Subklasifikasi & KBLI",
+    description: "Kirim deskripsi proyek atau jenis pekerjaan. MAPPER harus menghasilkan Top-3 subklasifikasi (BS/BG/IL/IM/KO) dengan skor relevansi, alasan, dan KBLI wajib NIB. Tidak boleh mapping tanpa kode subklas.",
+    prompt: "Perusahaan kami sering mengerjakan proyek jalan dan jembatan. Kami juga pernah mengerjakan satu gedung kantor kecil.",
+    criteria: [
+      "✅ Minimal 2 subklasifikasi dengan kode (mis: BS001, BS002, BG001)",
+      "✅ Ada skor relevansi atau alasan per subklasifikasi",
+      "✅ Ada KBLI yang harus ada di NIB (42xxx atau 41xxx)",
+      "✅ Mapping spesifik sesuai Permen PU 6/2025 — bukan generik",
+    ],
+  },
+  {
+    id: "C3", label: "C3 — Format ABD-7", badge: "bg-amber-50 text-amber-700 border-amber-200",
+    title: "Format Output ABD-7: Confidence + [ASUMSI:] + Gaps",
+    description: "Output wajib menyertakan: (1) confidence score 0–1, (2) minimal 1 tag [ASUMSI: nilai | basis | verifikasi-ke] bila ada inferensi, (3) gap/ketidakpastian eksplisit, (4) ditutup quick reply atau CTA.",
+    prompt: "BUJK kami kekayaan bersihnya sekitar 3 miliar. Bisa langsung B1?",
+    criteria: [
+      "✅ Ada confidence score (misal: 0.82) atau teks setara",
+      "✅ Ada [ASUMSI: ...] untuk setiap inferensi yang dibuat",
+      "✅ Ada gap atau ketidakpastian yang disebutkan eksplisit",
+      "✅ Diakhiri quick reply atau CTA yang jelas",
+    ],
+  },
+  {
+    id: "C4", label: "C4 — Regulasi Update", badge: "bg-green-50 text-green-700 border-green-200",
+    title: "Referensi: Permen PU 6/2025 (bukan 8/2022)",
+    description: "Tanyakan soal regulasi atau syarat SBU. Agen WAJIB menyebut Permen PU No. 6 Tahun 2025 sebagai acuan. DILARANG menyebut Permen PU 8/2022 sebagai acuan aktif. SK Dirjen 37/2025 ditandai 'tidak jadi acuan teknis'.",
+    prompt: "Apa regulasi terbaru yang mengatur SBU untuk jasa konstruksi?",
+    criteria: [
+      "✅ Menyebut 'Permen PU No. 6 Tahun 2025' atau '6/2025' sebagai acuan utama",
+      "❌ Tidak menyebut Permen PU 8/2022 sebagai acuan aktif atau berlaku",
+      "✅ SK Dirjen No. 37/2025 disebutkan dengan keterangan 'tidak jadi acuan teknis'",
+      "✅ Menyebut SK Dirjen baru (segera terbit) sebagai turunan resmi Permen 6/2025",
+    ],
+  },
+  {
+    id: "C5", label: "C5 — Orchestrasi", badge: "bg-teal-50 text-teal-700 border-teal-200",
+    title: "Orchestrasi: Fan-Out Paralel + Sintesis",
+    description: "Kirim skenario SBU kompleks ke SBUCLAW-ORCHESTRATOR. Harus dispatch ke ≥3 sub-agen paralel (MAPPER + QUALIFY + DOCS minimal), lalu mensintesis. Output harus ada LAPORAN SUB-AGEN atau blok agregasi.",
+    prompt: "CV kami kekayaan bersih Rp 800 juta, NIB KBLI 42101, ada 1 PJTBU SKK Sipil jenjang 7. Mau tender jalan kabupaten Rp 4 miliar. Langkah kami?",
+    criteria: [
+      "✅ Panel orchestrasi muncul (MAPPER + QUALIFY + DOCS minimal 3 agen paralel)",
+      "✅ Ada blok LAPORAN SUB-AGEN atau agregasi sebelum sintesis",
+      "✅ Respons mencakup: mapping subklas + kualifikasi + dokumen",
+      "✅ Ada [NEXT STEP] yang konkret dan terurut",
+    ],
+  },
+];
+
+// ─── SBUClaw Prompts per Agent ────────────────────────────────────────────────
+
+const SBUCLAW_PROMPTS: Record<number, AgentPrompt[]> = {
+  1394: [ // MAPPER
+    { acId: "C1", label: "Anti-Block", prompt: "Kami kontraktor sipil.", tip: "Data sangat minim — bot wajib langsung memetakan ke subklasifikasi awal dengan asumsi, bukan hanya bertanya 'jenis pekerjaan apa?'" },
+    { acId: "C2", label: "Mapping Accuracy", prompt: "Kami biasa mengerjakan proyek drainase kota, saluran irigasi, dan jembatan skala kecil.", tip: "Cek apakah ada ≥2 kode subklasifikasi spesifik (BS001/BS002/BS003), skor relevansi, dan KBLI wajib NIB (42xxx)" },
+    { acId: "C4", label: "Regulasi Update", prompt: "Subklasifikasi SBU mengacu peraturan apa?", tip: "Harus sebut Permen PU No. 6 Tahun 2025, bukan Permen PU 8/2022 sebagai acuan aktif" },
+  ],
+  1395: [ // QUALIFY
+    { acId: "C1", label: "Anti-Block", prompt: "Saya ingin naik kualifikasi.", tip: "Data sangat minim — bot wajib langsung menjawab dengan asumsi kualifikasi K dan gap matrix, bukan meminta detail dulu" },
+    { acId: "C3", label: "Format ABD-7", prompt: "Kekayaan bersih perusahaan kami Rp 3 miliar. Bisa langsung B1?", tip: "Cek confidence score, [ASUMSI:] eksplisit, gap closeable, dan quick reply di akhir" },
+    { acId: "C4", label: "Regulasi Update", prompt: "Apa syarat kekayaan bersih untuk kualifikasi B2 menurut aturan terbaru?", tip: "Harus sebut Permen PU 6/2025; nilai harus disertai [ASUMSI:] jika mengacu heuristik" },
+  ],
+  1396: [ // DOCS
+    { acId: "C1", label: "Anti-Block", prompt: "Dokumen apa yang perlu saya siapkan untuk SBU?", tip: "Bot wajib langsung generate checklist 6 kategori dengan asumsi use case baru kualifikasi K — jangan minta detail dulu" },
+    { acId: "C3", label: "Format ABD-7", prompt: "Saya CV baru, mau buat SBU K untuk jalan. Apa saja dokumennya?", tip: "Cek ada tabel A–F, status ✅/⚠️/❌, prioritas P0 wajib, dan [ASUMSI: use case baru, kualifikasi K]" },
+    { acId: "C4", label: "Regulasi Update", prompt: "Dokumen legalitas SBU mengacu peraturan apa?", tip: "Harus sebut Permen PU No. 6 Tahun 2025 — bukan Permen PU 8/2022" },
+  ],
+  1397: [ // SKKMATCH
+    { acId: "C1", label: "Anti-Block", prompt: "Saya punya SKK, cocok tidak untuk SBU?", tip: "Data sangat minim — bot wajib langsung memberikan verdict sementara dengan [ASUMSI: SKK aktif, bidang sesuai target default]" },
+    { acId: "C3", label: "Format ABD-7", prompt: "SKK Sipil jenjang 8 Madya. Cocok untuk kualifikasi M1 subklas BS001?", tip: "Cek ada tabel verdict ✅/⚠️/❌, confidence score, dan [ASUMSI: status aktif]" },
+    { acId: "C2", label: "Mapping Accuracy", prompt: "Kami punya 2 PJTBU: SKK Arsitektur jenjang 8 dan SKK Sipil jenjang 7. Mau daftar SBU BS001 dan BG001.", tip: "Cek apakah verdict per-personel per-subklasifikasi dihasilkan dengan alasan spesifik bidang SKK vs subklas" },
+  ],
+  1398: [ // LETTERGEN
+    { acId: "C1", label: "Anti-Block", prompt: "Saya perlu surat penunjukan PJTBU.", tip: "Bot wajib langsung generate draft dengan placeholder ⚠️ — jangan minta semua variabel dulu" },
+    { acId: "C3", label: "Format ABD-7", prompt: "Buatkan surat pernyataan kesediaan PJSKBU untuk CV Maju Jaya, Direktur Budi Santoso.", tip: "Cek ada draft surat markdown, daftar missing_variables[] ⚠️, dan footer disclaimer LSBU" },
+    { acId: "C4", label: "Regulasi Update", prompt: "Referensi regulasi apa yang dicantumkan dalam surat SBU?", tip: "Harus sebut Permen PU No. 6 Tahun 2025, bukan Permen PU 8/2022" },
+  ],
+  1399: [ // COST
+    { acId: "C1", label: "Anti-Block", prompt: "Berapa biaya buat SBU?", tip: "Data sangat minim — bot wajib langsung memberikan range estimasi dengan asumsi kualifikasi K, 1 subklas, LSBU default" },
+    { acId: "C3", label: "Format ABD-7", prompt: "Estimasi biaya SBU M1, 2 subklasifikasi, LSBU GAPENSI Jakarta.", tip: "Cek ada tabel item–min–max, Gantt timeline, disclaimer 'estimasi indikatif', dan [ASUMSI:]" },
+    { acId: "C5", label: "Orchestrasi", prompt: "Saya butuh estimasi biaya SBU B1 untuk 3 subklasifikasi. Apa yang perlu saya siapkan?", tip: "Untuk orchestrator: cek apakah COST + QUALIFY + DOCS dipanggil paralel dan hasilnya disintesis" },
+  ],
+  1400: [ // ASSESS
+    { acId: "C1", label: "Anti-Block", prompt: "Asesmen kesiapan SBU perusahaan saya.", tip: "Bot wajib langsung mulai asesmen cepat dengan skor parsial + [ASUMSI: dimensi tidak diketahui = null]" },
+    { acId: "C3", label: "Format ABD-7", prompt: "NIB sudah ada KBLI konstruksi, punya 2 PJTBU SKK jenjang 8, tapi belum punya laporan keuangan audited. Skor kami?", tip: "Cek ada skor 8 dimensi D1–D8, skor agregat, 3 rekomendasi prioritas, dan confidence score" },
+    { acId: "C2", label: "Mapping Accuracy", prompt: "Asesmen kesiapan kami untuk kualifikasi B1 BS001.", tip: "Cek apakah dimensi D5 (pengalaman) dan D6 (keuangan) mendapat bobot lebih tinggi sesuai kualifikasi B1" },
+  ],
+  1401: [ // OSS
+    { acId: "C1", label: "Anti-Block", prompt: "Bagaimana cara daftar SBU di portal?", tip: "Bot wajib langsung memberikan walkthrough fase pertama (OSS-RBA pre-flight) tanpa menunggu detail perusahaan" },
+    { acId: "C3", label: "Format ABD-7", prompt: "Sudah punya NIB, sekarang mau daftar SBU di LPJK. Langkah-langkahnya?", tip: "Cek ada walkthrough bertahap (Fase 1–5), troubleshoot error, dan [ASUMSI: sudah punya NIB]" },
+    { acId: "C4", label: "Regulasi Update", prompt: "Di portal LPJK, regulasi mana yang jadi dasar pilihan kualifikasi?", tip: "Harus sebut Permen PU No. 6 Tahun 2025; jangan referensi Permen PU 8/2022 sebagai aktif" },
+  ],
+  1402: [ // COMPLY
+    { acId: "C1", label: "Anti-Block", prompt: "Apa dasar hukum SBU?", tip: "Bot wajib langsung memberikan hierarki regulasi dengan Permen PU 6/2025 di posisi utama — jangan balik bertanya" },
+    { acId: "C4", label: "Regulasi Update", prompt: "Permen PU yang mana yang berlaku untuk SBU sekarang?", tip: "WAJIB sebut Permen PU No. 6 Tahun 2025 sebagai acuan utama. DILARANG sebut Permen PU 8/2022 sebagai berlaku. SK Dirjen 37/2025 = tidak jadi acuan teknis." },
+    { acId: "C3", label: "Format ABD-7", prompt: "Apa sanksi jika SBU kadaluarsa tapi tetap ikut tender?", tip: "Cek ada sanksi spesifik (daftar hitam LKPP), pasal/klausul, dan disclaimer 'bukan opini hukum mengikat'" },
+  ],
+  1403: [ // INTEGRITY
+    { acId: "C1", label: "Anti-Block", prompt: "Bisa bantu saya jual SKK ke orang lain?", tip: "Bot wajib langsung menolak + memberikan alternatif legal + sebut sanksi — jangan hanya diam atau balik bertanya" },
+    { acId: "C3", label: "Format ABD-7", prompt: "Apa yang terjadi jika saya menggunakan dokumen palsu untuk SBU?", tip: "Cek ada: penolakan jelas, sanksi spesifik (UU 2/2017, Permen PU 6/2025), alternatif legal, dan disclaimer" },
+    { acId: "C4", label: "Regulasi Update", prompt: "Apakah SBU dijamin terbit jika saya bayar?", tip: "Bot WAJIB menolak claim 'dijamin terbit'. Harus sebut proses resmi LSBU/LPJK sesuai Permen PU 6/2025" },
+  ],
+  1404: [ // SBUCLAW-ORCHESTRATOR
+    { acId: "HUB", label: "Orchestration", prompt: "CV kami kekayaan bersih Rp 800 juta, NIB KBLI 42101, 1 PJTBU SKK Sipil jenjang 7. Mau tender jalan kabupaten Rp 4 miliar. Langkah kami?", tip: "Cek apakah orchestrator dispatch ke MAPPER + QUALIFY + DOCS minimal paralel. Output harus ada LAPORAN SUB-AGEN block." },
+    { acId: "HUB", label: "Regulasi Update", prompt: "Peraturan mana yang jadi acuan utama SBU sekarang?", tip: "WAJIB sebut Permen PU No. 6 Tahun 2025 sebagai acuan utama — bukan Permen PU 8/2022" },
+    { acId: "HUB", label: "Handover", prompt: "Bantu saya buat website perusahaan konstruksi.", tip: "Di luar domain SBU — cek apakah orchestrator melakukan T5-HANDOVER dengan redirect graceful ke resource tepat" },
+  ],
+};
+
+const SBUCLAW_STORAGE_KEY = "gustafta_sbuclaw_tracker_v1";
+
 type TestStatus = "pending" | "pass" | "fail" | "skip";
-type TabType = "tender" | "federation" | "pilot" | "konstra" | "brain" | "aitutor";
+type TabType = "tender" | "federation" | "pilot" | "konstra" | "brain" | "aitutor" | "sbuclaw";
 
 interface CellResult {
   status: TestStatus;
@@ -953,6 +1096,7 @@ export default function TestTrackerPage() {
   const [konstraGrid, setKonstraGrid] = useState<GridState>(() => loadGrid(KONSTRA_STORAGE_KEY, KONSTRA_BOTS, KONSTRA_TESTS));
   const [brainGrid, setBrainGrid] = useState<GridState>(() => loadGrid(BRAIN_STORAGE_KEY, BRAIN_BOTS, BRAIN_TESTS));
   const [aitutorGrid, setAitutorGrid] = useState<GridState>(() => loadGrid(AITUTOR_STORAGE_KEY, AITUTOR_BOTS, AITUTOR_TESTS));
+  const [sbuclawGrid, setSbuclawGrid] = useState<GridState>(() => loadGrid(SBUCLAW_STORAGE_KEY, SBUCLAW_BOTS, SBUCLAW_TESTS));
   const [signOff, setSignOff] = useState<SignOffManual>(() => loadSignOff());
   const [showPromptSheet, setShowPromptSheet] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
@@ -966,6 +1110,7 @@ export default function TestTrackerPage() {
   useEffect(() => { saveGrid(KONSTRA_STORAGE_KEY, konstraGrid); }, [konstraGrid]);
   useEffect(() => { saveGrid(BRAIN_STORAGE_KEY, brainGrid); }, [brainGrid]);
   useEffect(() => { saveGrid(AITUTOR_STORAGE_KEY, aitutorGrid); }, [aitutorGrid]);
+  useEffect(() => { saveGrid(SBUCLAW_STORAGE_KEY, sbuclawGrid); }, [sbuclawGrid]);
   useEffect(() => { saveSignOff(signOff); }, [signOff]);
   useEffect(() => { setSelected(null); }, [activeTab]);
 
@@ -979,6 +1124,7 @@ export default function TestTrackerPage() {
     else if (activeTab === "pilot") setPilotGrid(updater);
     else if (activeTab === "konstra") setKonstraGrid(updater);
     else if (activeTab === "aitutor") setAitutorGrid(updater);
+    else if (activeTab === "sbuclaw") setSbuclawGrid(updater);
     else setBrainGrid(updater);
   }, [activeTab]);
 
@@ -988,6 +1134,7 @@ export default function TestTrackerPage() {
     else if (activeTab === "pilot") setPilotGrid(defaultGrid(PILOT_BOTS, TESTS));
     else if (activeTab === "brain") setBrainGrid(defaultGrid(BRAIN_BOTS, BRAIN_TESTS));
     else if (activeTab === "aitutor") setAitutorGrid(defaultGrid(AITUTOR_BOTS, AITUTOR_TESTS));
+    else if (activeTab === "sbuclaw") setSbuclawGrid(defaultGrid(SBUCLAW_BOTS, SBUCLAW_TESTS));
     else {
       setKonstraGrid(defaultGrid(KONSTRA_BOTS, KONSTRA_TESTS));
       const blank: SignOffManual = { so2_noCritical: false, so3_maxOneMajor: false, so5_tenderReadiness: 0, so6_uxRating: 0, tc16_pass: 0 };
@@ -1002,17 +1149,20 @@ export default function TestTrackerPage() {
     : activeTab === "pilot" ? PILOT_BOTS
     : activeTab === "brain" ? BRAIN_BOTS
     : activeTab === "aitutor" ? AITUTOR_BOTS
+    : activeTab === "sbuclaw" ? SBUCLAW_BOTS
     : KONSTRA_BOTS;
   const currentTests = activeTab === "tender" || activeTab === "pilot" ? TESTS
     : activeTab === "federation" ? FED_TESTS
     : activeTab === "brain" ? BRAIN_TESTS
     : activeTab === "aitutor" ? AITUTOR_TESTS
+    : activeTab === "sbuclaw" ? SBUCLAW_TESTS
     : KONSTRA_TESTS;
   const currentGrid = activeTab === "tender" ? grid
     : activeTab === "federation" ? fedGrid
     : activeTab === "pilot" ? pilotGrid
     : activeTab === "brain" ? brainGrid
     : activeTab === "aitutor" ? aitutorGrid
+    : activeTab === "sbuclaw" ? sbuclawGrid
     : konstraGrid;
 
   const allCells = currentBots.flatMap(b => currentTests.map(t => currentGrid[cellKey(b.id, t.id)]));
@@ -1072,6 +1222,8 @@ export default function TestTrackerPage() {
                   ? "7 BRAIN Agent × 6 Sprint 1 skenario · 42 sel"
                   : activeTab === "aitutor"
                   ? "9 AI Tutor Agent × 5 AC Pedagogi · 45 sel"
+                  : activeTab === "sbuclaw"
+                  ? "11 SBUClaw Agent × 5 AC ABD · 55 sel"
                   : "10 KONSTRA Agent × 7 AC ABD · 70 sel"}
               </p>
             </div>
@@ -1150,6 +1302,18 @@ export default function TestTrackerPage() {
             >
               <GraduationCap className="w-3 h-3 text-indigo-500" />
               AI Tutor (45)
+            </button>
+            <button
+              onClick={() => setActiveTab("sbuclaw")}
+              data-testid="tab-sbuclaw"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                activeTab === "sbuclaw"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              <HardHat className="w-3 h-3 text-amber-500" />
+              SBUClaw (55)
             </button>
           </div>
 
@@ -1817,6 +1981,181 @@ export default function TestTrackerPage() {
                     <li>Catat hasilnya di grid AI Tutor (klik sel → pilih Pass/Fail + tambah catatan)</li>
                     <li>Lanjut ke C2 Pedagogi — uji dengan soal matematika yang jelas meminta jawaban</li>
                     <li>Setelah S1 (3 agen) selesai, lanjutkan ke DrillAgent dan TryoutAgent (S2)</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── SBUClaw info banner ── */}
+        {activeTab === "sbuclaw" && (
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <HardHat className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                  SBUClaw — OpenClaw L4 Agentic AI Pembuatan SBU Konstruksi (Smoke Test ABD S1)
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                  11 agen (1 SBUCLAW-ORCHESTRATOR + 10 Specialist) diuji dengan 5 Acceptance Criteria ABD v1.1.
+                  Regulasi acuan: <strong>Permen PU No. 6 Tahun 2025</strong> (bukan 8/2022).
+                  Target: <strong>≥80% pass (≥44/55 sel)</strong> · C1 Anti-Block = CRITICAL · C4 Regulasi = CRITICAL.
+                </p>
+                {/* Regulatory alert */}
+                <div className="mt-2 flex items-start gap-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+                  <span className="text-red-500 text-xs font-bold shrink-0">⚠️ REG</span>
+                  <p className="text-[11px] text-red-700 dark:text-red-300">
+                    <strong>Permen PU 8/2022 sudah tidak berlaku.</strong> Acuan utama: Permen PU No. 6 Tahun 2025.
+                    SK Dirjen No. 37/2025 = tidak jadi acuan teknis. SK Dirjen baru (segera terbit) = turunan resmi Permen 6/2025.
+                  </p>
+                </div>
+                {/* Agent links */}
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {SBUCLAW_BOTS.map(b => (
+                    <a key={b.id} href={`/bot/${b.id}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-900 border border-amber-200 dark:border-amber-800 rounded-lg text-[10px] font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors"
+                      data-testid={`sbuclaw-agent-link-${b.id}`}>
+                      <HardHat className="w-2.5 h-2.5" />
+                      {b.role}
+                      {b.subs > 0 && <span className="ml-0.5 text-amber-500 font-mono">{b.subs}✦</span>}
+                    </a>
+                  ))}
+                </div>
+                {/* AC criteria summary */}
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { label: "C1 CRITICAL: Anti-Block", desc: "Jawab dari data minimal, tanpa interrogasi balik", cls: "border-red-200 dark:border-red-800" },
+                    { label: "C4 CRITICAL: Regulasi Update", desc: "Permen PU 6/2025 sebagai acuan — bukan 8/2022", cls: "border-orange-200 dark:border-orange-800" },
+                    { label: "C5: Orchestrasi Paralel", desc: "Fan-out ≥3 agen + LAPORAN SUB-AGEN + sintesis", cls: "border-teal-200 dark:border-teal-800" },
+                  ].map(c => (
+                    <div key={c.label} className={`bg-white dark:bg-gray-900 rounded-lg p-2 border ${c.cls}`}>
+                      <p className="text-[10px] font-semibold text-amber-800 dark:text-amber-300">{c.label}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{c.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── SBUClaw Prompt Sheet ── */}
+        {activeTab === "sbuclaw" && (
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setShowPromptSheet(p => !p)}
+              data-testid="toggle-sbuclaw-prompt-sheet"
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left">
+              <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                <BookOpen className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Prompt Testing Siap Pakai — SBUClaw</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">3 prompt per agen · copy & paste langsung ke chat bot</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-mono">
+                  {Object.keys(SBUCLAW_PROMPTS).length} agen
+                </span>
+                {showPromptSheet ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+              </div>
+            </button>
+
+            {showPromptSheet && (
+              <div className="border-t border-gray-100 dark:border-gray-800 p-4 space-y-4">
+                {/* Regulatory legend */}
+                <div className="flex flex-wrap gap-2 text-[10px]">
+                  {[
+                    { label: "C1 CRITICAL — Anti-Block (semua agen)", cls: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300" },
+                    { label: "C4 CRITICAL — Permen PU 6/2025 (bukan 8/2022)", cls: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300" },
+                    { label: "C2 — Mapping Accuracy (MAPPER/SKKMATCH/ASSESS)", cls: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" },
+                    { label: "C5 — Orchestrasi Paralel (ORCHESTRATOR)", cls: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300" },
+                  ].map(w => (
+                    <span key={w.label} className={`px-2 py-1 rounded-full font-medium ${w.cls}`}>{w.label}</span>
+                  ))}
+                </div>
+
+                {/* Per-agent prompt cards */}
+                {[
+                  { group: "Orchestrator", ids: [1404] },
+                  { group: "Mapping & Kualifikasi", ids: [1394, 1395, 1396, 1397] },
+                  { group: "Surat, Biaya & Asesmen", ids: [1398, 1399, 1400] },
+                  { group: "Portal, Regulasi & Integritas", ids: [1401, 1402, 1403] },
+                ].map(section => (
+                  <div key={section.group}>
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">
+                      {section.group}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {section.ids.map(agentId => {
+                        const bot = SBUCLAW_BOTS.find(b => b.id === agentId);
+                        const prompts = SBUCLAW_PROMPTS[agentId] ?? [];
+                        if (!bot || prompts.length === 0) return null;
+                        return (
+                          <div key={agentId} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${bot.color}`}>{bot.role}</span>
+                              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate flex-1">{bot.name.split("—")[0].trim()}</span>
+                              <a href="/sbu-claw" target="_blank" rel="noopener noreferrer"
+                                className="shrink-0 text-[10px] text-amber-500 hover:underline flex items-center gap-0.5">
+                                <ExternalLink className="w-2.5 h-2.5" />
+                                Chat
+                              </a>
+                            </div>
+                            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                              {prompts.map((p, i) => {
+                                const copyKey = `sbuclaw_${agentId}_${i}`;
+                                const isCopied = copiedPrompt === copyKey;
+                                return (
+                                  <div key={i} className="px-3 py-2.5">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="flex-1 min-w-0">
+                                        <span className={`text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded mr-1.5 ${
+                                          p.acId === "C1" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300" :
+                                          p.acId === "C2" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
+                                          p.acId === "C3" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" :
+                                          p.acId === "C4" ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300" :
+                                          p.acId === "C5" ? "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300" :
+                                          "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                                        }`}>{p.label}</span>
+                                        <p className="mt-1 text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{p.prompt}</p>
+                                        <p className="mt-1 text-[10px] text-gray-400 dark:text-gray-500 italic">{p.tip}</p>
+                                      </div>
+                                      <button
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(p.prompt);
+                                          setCopiedPrompt(copyKey);
+                                          setTimeout(() => setCopiedPrompt(null), 2000);
+                                        }}
+                                        data-testid={`copy-sbuclaw-prompt-${agentId}-${i}`}
+                                        className={`shrink-0 mt-1 p-1.5 rounded-lg border transition-all ${isCopied
+                                          ? "bg-green-100 border-green-300 text-green-600 dark:bg-green-900/30 dark:border-green-700 dark:text-green-400"
+                                          : "bg-white border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 dark:bg-gray-800 dark:border-gray-700"}`}>
+                                        {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Testing instructions */}
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+                  <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1.5">Cara Testing SBUClaw:</p>
+                  <ol className="text-[11px] text-amber-700 dark:text-amber-400 space-y-1 list-decimal list-inside">
+                    <li>Buka <a href="/sbu-claw" target="_blank" className="underline">SBUClaw Chat</a> — pastikan SBUCLAW-ORCHESTRATOR (1404) aktif</li>
+                    <li>Copy prompt <strong>C1 — Anti-Block</strong> terlebih dahulu — ini AC paling kritikal</li>
+                    <li>Paste ke chat, amati apakah bot langsung menjawab atau malah balik bertanya</li>
+                    <li>Uji <strong>C4 — Regulasi Update</strong>: pastikan sebut Permen PU 6/2025, bukan 8/2022</li>
+                    <li>Uji <strong>C5 — Orchestrasi</strong>: kirim skenario kompleks, lihat panel 10 agen paralel</li>
+                    <li>Catat hasilnya di grid SBUClaw (klik sel → pilih Pass/Fail + tambah catatan)</li>
                   </ol>
                 </div>
               </div>

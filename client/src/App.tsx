@@ -51,6 +51,7 @@ import WinProbability from "@/pages/win-probability";
 import BrainProjectChat from "@/pages/brain-project-chat";
 import IbTuChat from "@/pages/ib-tu-chat";
 import AiTutorChat from "@/pages/ai-tutor-chat";
+import SbuClawChat from "@/pages/sbu-claw-chat";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
@@ -127,6 +128,7 @@ function Router() {
         <Route path="/brain-project" component={BrainProjectChat} />
         <Route path="/ib-tu" component={IbTuChat} />
         <Route path="/ai-tutor" component={AiTutorChat} />
+        <Route path="/sbu-claw" component={SbuClawChat} />
       <Route component={NotFound} />
     </Switch>
   );
