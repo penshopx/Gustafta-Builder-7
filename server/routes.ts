@@ -11258,6 +11258,35 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/brain-project/orchestrator — Brain Project multi-agent orchestrator
+  app.get("/api/brain-project/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("../shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgentBySlug("brain-project-orchestrator");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%BRAIN_PROJECT_ORCHESTRATOR_v1%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%BRAIN-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "Brain Project orchestrator belum diinisialisasi. Restart server." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/tender-doc-checker", async (req, res) => {
     try {
       const { jenis = "pekerjaan_konstruksi", kualifikasi = "kecil" } = req.query as Record<string, string>;

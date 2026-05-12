@@ -98,6 +98,7 @@ import * as M_tenderSources from "./seed-tender-sources";
 import * as M_kabKotaSources from "./seed-kabkota-sources";
 import * as M_tenderAiAgents from "./seed-tender-ai-agents";
 import * as M_tenderaAgents from "./seed-tendera-agents";
+import * as M_brainProject from "./seed-brain-project";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1373,6 +1374,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedTenderaAgents();
       } catch (err) {
         log("[Seed TENDERA] Error: " + (err as Error).message);
+      }
+
+      // Seed: Brain Project — OpenClaw + 3 MultiClaw (Konsultan, MK, K3)
+      try {
+        const { seedBrainProjectAgents } = M_brainProject;
+        await seedBrainProjectAgents();
+      } catch (err) {
+        log("[Seed Brain Project] Error: " + (err as Error).message);
       }
 
       startScheduler();
