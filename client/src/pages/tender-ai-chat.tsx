@@ -399,8 +399,12 @@ export default function TenderAiChat() {
               }
             } else if (evt.type === "chunk") {
               fullContent += evt.content ?? "";
+            } else if (evt.type === "aggregating") {
+              // Sub-agents selesai, orchestrator mulai menyintesis
             } else if (evt.type === "done") {
               fullContent = evt.fullContent ?? fullContent;
+            } else if (evt.type === "complete") {
+              if (evt.message?.content) fullContent = evt.message.content;
             }
             setMessages((prev) => {
               const updated = [...prev];

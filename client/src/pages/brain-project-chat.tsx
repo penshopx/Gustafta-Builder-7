@@ -342,8 +342,8 @@ export default function BrainProjectChat() {
                 if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
                 return updated;
               });
-            } else if (evt.type === "content" && evt.text) {
-              fullContent += evt.text;
+            } else if (evt.type === "chunk") {
+              fullContent += evt.content ?? "";
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
@@ -352,6 +352,17 @@ export default function BrainProjectChat() {
                 }
                 return updated;
               });
+            } else if (evt.type === "aggregating") {
+              setMessages(prev => {
+                const updated = [...prev];
+                const last = updated[updated.length - 1];
+                if (last.role === "assistant") {
+                  updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                }
+                return updated;
+              });
+            } else if (evt.type === "complete") {
+              if (evt.message?.content) fullContent = evt.message.content;
             }
           } catch {}
         }
