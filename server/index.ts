@@ -95,6 +95,7 @@ import * as M_fixOrchestrators from "./fix-orchestrators";
 import * as M_inaprocScraper from "./lib/inaproc-scraper";
 import * as M_ahspHspk from "./seed-ahsp-hspk";
 import * as M_tenderSources from "./seed-tender-sources";
+import * as M_kabKotaSources from "./seed-kabkota-sources";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -172,6 +173,7 @@ const seedModuleRegistry: Record<string, any> = {
   "./lib/inaproc-scraper": M_inaprocScraper,
   "./seed-ahsp-hspk": M_ahspHspk,
   "./seed-tender-sources": M_tenderSources,
+  "./seed-kabkota-sources": M_kabKotaSources,
 };
 
 // Push DB schema on startup in production (build time has no DB access)
@@ -1345,6 +1347,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedTenderSources();
       } catch (err) {
         log("[Seed Tender Sources] Error: " + (err as Error).message);
+      }
+
+      // Seed: SIRUP + 80+ LPSE Kabupaten/Kota (UKM focus)
+      try {
+        const { seedKabKotaSources } = M_kabKotaSources;
+        await seedKabKotaSources();
+      } catch (err) {
+        log("[Seed KabKota] Error: " + (err as Error).message);
       }
 
       startScheduler();

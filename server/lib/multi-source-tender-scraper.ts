@@ -1,22 +1,24 @@
 /**
  * Multi-Source Tender Scraper
- * Strategi scraping untuk 5 tipe sumber:
+ * Strategi scraping untuk 6 tipe sumber:
  * 1. LPSE Pusat (LKPP/SPSE Nasional)
  * 2. LPSE Daerah Provinsi
  * 3. LPSE Daerah Kabupaten/Kota
  * 4. BUMN (procurement portal BUMN)
  * 5. Asing (SKK Migas, foreign company procurement)
+ * 6. SIRUP (sirup.lkpp.go.id — agregator nasional, cover semua 514 Kab/Kota)
  *
- * Setiap sumber mencoba strategi berikut secara berurutan:
- * A. SPSE JSON API  → /api/0/tenderStatus
- * B. DataTables API → /dt/lelang
- * C. HTML Scraping  → /lelang
- * D. Demo Data      → fallback untuk sumber yang memblokir akses
+ * Urutan strategi scraping:
+ * A. SIRUP API      → sirup.lkpp.go.id (khusus sumber type=sirup)
+ * B. SPSE JSON API  → /api/0/tenderStatus
+ * C. DataTables API → /dt/lelang
+ * D. HTML Scraping  → /lelang
+ * E. Demo Data      → fallback untuk sumber yang memblokir akses
  */
 
 import type { InsertTender, TenderSource } from "@shared/schema";
 
-export type ScrapeStrategy = "spse_json" | "datatables" | "html" | "demo";
+export type ScrapeStrategy = "sirup" | "spse_json" | "datatables" | "html" | "demo";
 
 export interface MultiScrapeResult {
   success: boolean;
@@ -34,7 +36,98 @@ const HEADERS = {
   "X-Requested-With": "XMLHttpRequest",
 };
 
-// ── Strategy A: SPSE JSON API ──────────────────────────────────────────────────
+// ── Sektor auto-detection dari nama paket ─────────────────────────────────────
+function detectSector(name: string, type?: string): string {
+  const n = (name + " " + (type || "")).toLowerCase();
+  if (/minyak|gas|migas|petroleum|offshore|pipeline|pipa gas|lpg|lng|kilang|wellhead|sumur|pertamina|blok|kkks/.test(n)) return "oil_gas";
+  if (/tambang|batubara|nikel|bauksit|tembaga|mineral|ore|overburden|hauling|coal|mining|stockpile|settling pond|revegetasi/.test(n)) return "pertambangan";
+  if (/pltu|pltg|pltd|plts|pltmh|energi|listrik|transmisi|sutt|sutet|gardu|pln|trafo|solar panel|panel surya|biomassa|panas bumi|geothermal/.test(n)) return "energi";
+  return "konstruksi"; // default: gedung, jalan, jembatan, drainase, dll
+}
+
+// ── Strategy A: SIRUP API (Nasional) ─────────────────────────────────────────
+// sirup.lkpp.go.id — API publik LKPP, cover semua Kab/Kota, field kualifikasi usaha
+async function scrapeSirup(source: TenderSource): Promise<InsertTender[]> {
+  const year = new Date().getFullYear();
+  // Coba tahun ini; jika kosong, coba tahun lalu
+  for (const tahun of [year, year - 1]) {
+    try {
+      const params = new URLSearchParams({
+        tahun: String(tahun),
+        kd_klpd: "",          // kosong = semua Kab/Kota nasional
+        satkerMapingId: "",
+        draw: "1",
+        start: "0",
+        length: "100",        // ambil 100 paket terbaru
+      });
+
+      const res = await fetch(
+        `https://sirup.lkpp.go.id/sirup/ro/datatablesPaketPenyediaPublic?${params}`,
+        {
+          headers: {
+            ...HEADERS,
+            Referer: "https://sirup.lkpp.go.id/sirup/ro/paketpenyediaumum",
+          },
+          signal: AbortSignal.timeout(20000),
+        }
+      );
+
+      if (!res.ok) throw new Error(`SIRUP HTTP ${res.status}`);
+      const ct = res.headers.get("content-type") || "";
+      if (!ct.includes("json")) throw new Error("SIRUP response not JSON");
+
+      const data = await res.json() as any;
+      if (!data?.data || !Array.isArray(data.data)) throw new Error("SIRUP: invalid response format");
+      if (data.data.length === 0) continue; // coba tahun sebelumnya
+
+      // SIRUP row fields (array format):
+      // [0]=kode_rup [1]=nama_paket [2]=kode_klpd [3]=nama_instansi [4]=tahun
+      // [5]=sumber_dana [6]=pagu [7]=metode [8]=jenis_kontrak [9]=kualifikasi
+      // [10]=tgl_awal [11]=tgl_akhir [12]=lokasi [13]=status
+      return data.data.slice(0, 100).map((row: any[], idx: number) => {
+        const namaPaket = String(row[1] || "");
+        const namaInstansi = String(row[3] || "");
+        const kualifikasi = String(row[9] || "");
+        const pagu = typeof row[6] === "number"
+          ? `Rp ${(row[6] / 1_000_000).toFixed(0)} juta`
+          : String(row[6] || "");
+
+        return {
+          sourceId: source.id,
+          tenderId: `sirup-${row[0] || `${tahun}-${idx}`}`,
+          name: namaPaket || "Paket Tidak Diketahui",
+          agency: namaInstansi,
+          budget: pagu,
+          type: String(row[7] || ""),
+          sector: detectSector(namaPaket, String(row[8] || "")),
+          sourceType: "sirup",
+          status: String(row[13] || "Pengumuman Tender"),
+          stage: kualifikasi ? `Kualifikasi: ${kualifikasi}` : "",
+          location: String(row[12] || ""),
+          publishDate: String(row[10] || ""),
+          deadlineDate: String(row[11] || ""),
+          url: row[0]
+            ? `https://sirup.lkpp.go.id/sirup/ro/paketpenyedia/view/${row[0]}`
+            : "https://sirup.lkpp.go.id",
+          rawData: {
+            kode_rup: row[0],
+            kode_klpd: row[2],
+            tahun: row[4],
+            sumber_dana: row[5],
+            kualifikasi,
+            metode: row[7],
+            sirup: true,
+          },
+        } as InsertTender;
+      });
+    } catch (err: any) {
+      if (tahun === year - 1) throw err; // jika kedua tahun gagal, lempar error
+    }
+  }
+  return [];
+}
+
+// ── Strategy B: SPSE JSON API ──────────────────────────────────────────────────
 async function scrapeSpseJson(baseUrl: string, source: TenderSource): Promise<InsertTender[]> {
   const url = `${baseUrl}/api/0/tenderStatus`;
   const res = await fetch(url, {
@@ -251,9 +344,32 @@ export async function scrapeMultiSource(source: TenderSource): Promise<MultiScra
   };
 
   const base = source.baseUrl.replace(/\/$/, "");
-  const sType = source.sourceType || "lpse_pusat";
+  const sType = (source as any).sourceType || "lpse_pusat";
 
-  // BUMN & Asing → langsung demo (portal mereka tertutup)
+  // ── SIRUP Nasional → gunakan SIRUP API (terbuka, cover semua Kab/Kota)
+  if (sType === "sirup") {
+    try {
+      const data = await scrapeSirup(source);
+      if (data.length > 0) {
+        result.tenders = data;
+        result.strategy = "sirup";
+        result.success = true;
+        result.totalScraped = data.length;
+        result.message = `SIRUP: ${data.length} paket pengadaan dari seluruh Kab/Kota nasional`;
+        return result;
+      }
+    } catch (err: any) {
+      result.errors.push(`[sirup] ${err.message}`);
+    }
+    // SIRUP fallback
+    result.tenders = generateDemoData({ ...source, sector: "konstruksi", sourceType: "sirup" } as any);
+    result.strategy = "demo";
+    result.totalScraped = result.tenders.length;
+    result.message = `[SIRUP tidak tersedia] Menampilkan contoh data — cek koneksi ke sirup.lkpp.go.id`;
+    return result;
+  }
+
+  // ── BUMN & Asing → langsung demo (portal mereka tertutup)
   if (sType === "bumn" || sType === "asing") {
     result.tenders = generateDemoData(source);
     result.strategy = "demo";
@@ -263,11 +379,11 @@ export async function scrapeMultiSource(source: TenderSource): Promise<MultiScra
     return result;
   }
 
-  // LPSE sites → coba strategi bertahap
+  // ── LPSE sites (Pusat/Provinsi/Kab/Kota) → coba strategi bertahap
   const strategies: Array<{ name: ScrapeStrategy; fn: () => Promise<InsertTender[]> }> = [
-    { name: "spse_json",   fn: () => scrapeSpseJson(base, source) },
-    { name: "datatables",  fn: () => scrapeDataTables(base, source) },
-    { name: "html",        fn: () => scrapeHtml(base, source) },
+    { name: "spse_json",  fn: () => scrapeSpseJson(base, source) },
+    { name: "datatables", fn: () => scrapeDataTables(base, source) },
+    { name: "html",       fn: () => scrapeHtml(base, source) },
   ];
 
   for (const { name, fn } of strategies) {
