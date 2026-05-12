@@ -26,6 +26,7 @@ import {
   Scale,
   ScrollText,
   FileText,
+  Brain,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -493,6 +494,17 @@ export default function TenderAiChat() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link href="/brain-project">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-indigo-400/70 hover:text-indigo-300 hover:bg-indigo-900/30 hidden sm:flex gap-1"
+              data-testid="button-nav-brain-project"
+            >
+              <Brain className="h-3 w-3" />
+              Brain Project
+            </Button>
+          </Link>
           <Badge
             variant="outline"
             className="text-xs border-blue-500/40 text-blue-300 hidden sm:flex"

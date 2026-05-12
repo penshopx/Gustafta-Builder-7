@@ -13,7 +13,7 @@ import {
   Flame, Mountain, Zap, Globe, MapPin, Calendar, DollarSign,
   TrendingUp, Clock, Filter, ChevronRight,
   PlayCircle, Info, Database, Loader2, Star, Layers,
-  BarChart3, Bell, Bot
+  BarChart3, Bell, Bot, Brain
 } from "lucide-react";
 import type { TenderSource, Tender } from "@shared/schema";
 
@@ -407,6 +407,11 @@ export default function TenderMonitor() {
               <Link href="/tender-ai">
                 <Button variant="outline" size="sm" className="gap-1 text-xs h-8 border-blue-500/40 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40" data-testid="button-nav-tendera">
                   <Bot className="w-3.5 h-3.5" />TENDERA AI
+                </Button>
+              </Link>
+              <Link href="/brain-project">
+                <Button variant="outline" size="sm" className="gap-1 text-xs h-8 border-indigo-500/40 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40" data-testid="button-nav-brain-project">
+                  <Brain className="w-3.5 h-3.5" />Brain Project
                 </Button>
               </Link>
               <Link href="/win-probability">

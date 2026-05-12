@@ -399,7 +399,7 @@ export default function BrainProjectChat() {
 
       {/* Header */}
       <div className="shrink-0 border-b border-white/10 px-4 py-3 flex items-center gap-3 bg-[#0d0e1e]/80 backdrop-blur">
-        <Link href="/">
+        <Link href="/tender-monitor">
           <Button variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white" data-testid="button-back">
             <ArrowLeft className="h-4 w-4" />
           </Button>
