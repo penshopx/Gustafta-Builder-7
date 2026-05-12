@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle,
   HardHat, ClipboardList, ShieldCheck, Brain, ChevronDown, ChevronUp,
-  BarChart2, FileSearch, Leaf, Scale, Building2,
+  BarChart2, FileSearch, Leaf, Scale, Building2, Target,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -415,6 +415,17 @@ export default function BrainProjectChat() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link href="/tender-ai">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-emerald-400/70 hover:text-emerald-300 hover:bg-emerald-900/30 hidden sm:flex gap-1"
+              data-testid="button-nav-tender-ai"
+            >
+              <Target className="h-3 w-3" />
+              TENDERA AI
+            </Button>
+          </Link>
           <Badge variant="outline" className="text-xs border-indigo-500/40 text-indigo-300 hidden sm:flex">
             Brain Project v2
           </Badge>
