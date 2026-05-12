@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, Loader2, ArrowLeft, MessageCircle, ChevronRight, Lock, CreditCard, Download, Smartphone, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File } from "lucide-react";
+import { Send, Bot, Loader2, ArrowLeft, MessageCircle, ChevronRight, Lock, CreditCard, Download, Smartphone, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Share2, Copy, Check, FileDown, FileCode2, Trash2, Link2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -182,6 +183,67 @@ export default function ModulChat() {
   const stopSpeaking = () => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     setIsSpeaking(false);
+  };
+
+  // Chat save / share
+  const [chatCopied, setChatCopied] = useState(false);
+
+  const buildChatText = (format: "txt" | "md" = "txt") => {
+    const botName = selectedBot?.name || "AI";
+    const header = format === "md"
+      ? `# Chat dengan ${botName}\n*${new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}*\n\n---\n\n`
+      : `Chat dengan ${botName}\n${"=".repeat(40)}\n${new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}\n\n`;
+    const lines = messages.map(m => {
+      const time = m.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      const sender = m.role === "user" ? "Anda" : botName;
+      if (format === "md") return `### ${m.role === "user" ? "👤" : "🤖"} ${sender} — ${time}\n\n${m.content}\n`;
+      return `[${time}] ${sender}:\n${m.content}\n`;
+    });
+    return header + lines.join("\n---\n\n");
+  };
+
+  const exportChat = () => {
+    if (messages.length === 0) return;
+    const blob = new Blob([buildChatText("txt")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-${selectedBot?.name || "ai"}-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportChatMarkdown = () => {
+    if (messages.length === 0) return;
+    const blob = new Blob([buildChatText("md")], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-${selectedBot?.name || "ai"}-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const copyFullChat = async () => {
+    if (messages.length === 0) return;
+    await navigator.clipboard.writeText(buildChatText("txt"));
+    setChatCopied(true);
+    setTimeout(() => setChatCopied(false), 2500);
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    if (selectedBot) {
+      sessionIdRef.current = `modul_${selectedBot.agentId}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try { await navigator.share({ title: selectedBot?.name || modul?.name || "Chat", url: window.location.href }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+    }
   };
 
   // Speech recognition init
@@ -799,22 +861,59 @@ export default function ModulChat() {
           <h2 className="font-semibold text-sm truncate" data-testid="text-active-bot-name">{selectedBot.name}</h2>
           <p className="text-xs text-muted-foreground truncate">{selectedBot.tagline || selectedBot.toolboxName}</p>
         </div>
-        {!pwaInstalled && pwaPrompt ? (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleInstallPwa}
-            className="gap-1 text-xs shrink-0 px-2"
-            data-testid="button-install-pwa-chat"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Pasang</span>
-          </Button>
-        ) : (
-          <Badge variant="secondary" className="text-xs shrink-0">
-            {modul.name}
-          </Badge>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {!pwaInstalled && pwaPrompt ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleInstallPwa}
+              className="gap-1 text-xs shrink-0 px-2"
+              data-testid="button-install-pwa-chat"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Pasang</span>
+            </Button>
+          ) : null}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="ghost" className="shrink-0" data-testid="button-share-menu">
+                <Share2 className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">Bagikan</DropdownMenuLabel>
+              <DropdownMenuItem onClick={handleShare}>
+                <Link2 className="w-3.5 h-3.5 mr-2" />
+                Bagikan Link
+              </DropdownMenuItem>
+              {messages.length > 1 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">Simpan Percakapan</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={copyFullChat} data-testid="button-copy-chat">
+                    {chatCopied
+                      ? <><Check className="w-3.5 h-3.5 mr-2 text-green-500" /><span className="text-green-600 font-medium">Tersalin!</span></>
+                      : <><Copy className="w-3.5 h-3.5 mr-2" />Salin Percakapan</>
+                    }
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportChat} data-testid="button-export-txt">
+                    <FileDown className="w-3.5 h-3.5 mr-2" />
+                    Unduh sebagai .TXT
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportChatMarkdown} data-testid="button-export-md">
+                    <FileCode2 className="w-3.5 h-3.5 mr-2" />
+                    Unduh sebagai .MD
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={clearChat} className="text-destructive focus:text-destructive" data-testid="button-clear-chat">
+                    <Trash2 className="w-3.5 h-3.5 mr-2" />
+                    Hapus Percakapan
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
