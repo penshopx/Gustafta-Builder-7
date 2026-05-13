@@ -784,16 +784,6 @@ function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a:
         )}
 
         <div className="mt-auto pt-3 border-t border-gray-100">
-          {agent.agentCount && agent.agentCount > 1 && (
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-gray-400 flex items-center gap-1">
-                <Layers className="h-3 w-3" />{agent.agentCount} agen
-              </span>
-              <span className="text-xs text-violet-500 font-medium">
-                {agent.agentCount < 5 ? "Rp 49rb" : agent.agentCount <= 10 ? "Rp 39rb" : "Rp 29rb"}/agen
-              </span>
-            </div>
-          )}
           <div className="flex items-center justify-between gap-2">
           <span className="font-bold text-gray-900 text-base">{formatPrice(agent.price)}</span>
           <div className="flex gap-1.5">

@@ -4060,13 +4060,13 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }).from(agentsTable).where(agentWhere).orderBy(agentsTable.id);
 
       // Pricing formula: total = 1 (orchestrator/agent) + sub-agent count
-      // <5 total → Rp 49k/agen | 5-10 total → Rp 39k/agen | >10 total → Rp 29k/agen
+      // 1-5 total → Rp 49.000/unit | 6-10 total → Rp 429.000 flat | 11+ total → Rp 39.000/unit
       function calcStorePrice(agenticSubAgents: any): number {
         const subCount = Array.isArray(agenticSubAgents) ? agenticSubAgents.length : 0;
         const total = 1 + subCount;
-        if (total < 5) return 49000 * total;
-        if (total <= 10) return 39000 * total;
-        return 29000 * total;
+        if (total <= 5) return 49000 * total;
+        if (total <= 10) return 429000;
+        return 39000 * total;
       }
 
       const agentItems = agentRows
