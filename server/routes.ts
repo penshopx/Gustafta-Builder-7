@@ -4023,11 +4023,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const spRows = await db.select().from(storeProducts).where(spWhere).orderBy(storeProducts.sortOrder, storeProducts.id);
 
       // Pricing formula: total = 1 (orchestrator/agent) + sub-agent count
-      // 1-5 total → Rp 49.000/unit | 6-10 total → Rp 429.000 flat | 11+ total → Rp 39.000/unit
+      // 1-5 total → Rp 75.000/unit | 6-10 total → Rp 429.000 flat | 11+ total → Rp 39.000/unit
       function calcStorePrice(agenticSubAgents: any): number {
         const subCount = Array.isArray(agenticSubAgents) ? agenticSubAgents.length : 0;
         const total = 1 + subCount;
-        if (total <= 5) return 49000 * total;
+        if (total <= 5) return 75000 * total;
         if (total <= 10) return 429000;
         return 39000 * total;
       }
@@ -4139,7 +4139,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           const childCount = childCountMap.get(a.id) ?? 0;
           const effectiveTotal = 1 + Math.max(subCount, childCount);
           const price = (() => {
-            if (effectiveTotal <= 5) return 49000 * effectiveTotal;
+            if (effectiveTotal <= 5) return 75000 * effectiveTotal;
             if (effectiveTotal <= 10) return 429000;
             return 39000 * effectiveTotal;
           })();

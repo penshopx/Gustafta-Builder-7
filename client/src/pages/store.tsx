@@ -331,12 +331,12 @@ export default function Store() {
             <div className="grid grid-cols-4 gap-2">
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
                 <div className="text-[10px] font-bold text-gray-500 mb-1">Basic</div>
-                <div className="text-base font-bold text-violet-700">Rp 98rb</div>
+                <div className="text-base font-bold text-violet-700">Rp 150rb</div>
                 <div className="text-[10px] text-gray-400 mt-0.5">mulai dari</div>
               </div>
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
                 <div className="text-[10px] font-bold text-gray-500 mb-1">Profesional</div>
-                <div className="text-base font-bold text-violet-700">Rp 245rb</div>
+                <div className="text-base font-bold text-violet-700">Rp 300rb</div>
                 <div className="text-[10px] text-gray-400 mt-0.5">mulai dari</div>
               </div>
               <div className="rounded-xl bg-violet-600 border border-violet-700 p-3 text-center shadow-sm">
