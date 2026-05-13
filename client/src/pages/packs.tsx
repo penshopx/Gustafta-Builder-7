@@ -257,10 +257,10 @@ export default function PacksPage() {
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-4">
             {[
-              { tier: "Tier 1", price: "Rp 1.499.000", agents: "1–5 agen AI", desc: "Setup & instalasi dasar", tag: "Mulai", tagClass: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", highlight: false },
-              { tier: "Tier 2", price: "Rp 2.499.000", agents: "6–10 agen AI", desc: "Sistem multi-agen menengah", tag: "Populer", tagClass: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300", highlight: true },
-              { tier: "Tier 3", price: "Rp 4.900.000", agents: "11–20 agen AI", desc: "Ekosistem chatbot lengkap", tag: "Bisnis", tagClass: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300", highlight: false },
-              { tier: "Tier 4", price: "Rp 7.490.000", agents: "21+ agen AI", desc: "Solusi enterprise penuh", tag: "Enterprise", tagClass: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", highlight: false },
+              { tier: "Tier 1", price: "Rp 1.499.000", scope: "Chatbot Dasar", desc: "Chatbot ringan — FAQ, info produk, layanan dasar", tag: "Mulai", tagClass: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", highlight: false },
+              { tier: "Tier 2", price: "Rp 2.499.000", scope: "Chatbot Menengah", desc: "Chatbot menengah — multi-fungsi, lead gen, sales assist", tag: "Populer", tagClass: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300", highlight: true },
+              { tier: "Tier 3", price: "Rp 4.900.000", scope: "Chatbot Kompleks", desc: "Chatbot kompleks — orkestrasi, knowledge base luas", tag: "Bisnis", tagClass: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300", highlight: false },
+              { tier: "Tier 4", price: "Rp 7.490.000", scope: "Chatbot Enterprise", desc: "Chatbot enterprise — multi-domain, agentic penuh", tag: "Enterprise", tagClass: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", highlight: false },
             ].map((t) => (
               <div key={t.tier} className={`rounded-2xl border p-5 flex flex-col gap-3 bg-background ${t.highlight ? "ring-2 ring-primary" : ""}`}>
                 <div className="flex items-center justify-between">
@@ -268,7 +268,7 @@ export default function PacksPage() {
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${t.tagClass}`}>{t.tag}</span>
                 </div>
                 <div className="text-2xl font-bold text-primary">{t.price}</div>
-                <div className="text-xs text-muted-foreground font-medium">{t.agents}</div>
+                <div className="text-xs text-muted-foreground font-medium">{t.scope}</div>
                 <div className="text-xs text-muted-foreground">{t.desc}</div>
                 <div className="text-[10px] text-muted-foreground border-t pt-2 mt-auto">+ Hosting Rp 199rb–1.999rb/periode</div>
               </div>

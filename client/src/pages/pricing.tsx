@@ -134,33 +134,33 @@ const subscriptionTiers: PricingTier[] = [
 const chatbotPackages = [
   {
     name: "Tier 1",
-    description: "Setup & instalasi dasar",
+    description: "Chatbot ringan — FAQ, info produk, layanan dasar",
     price: "Rp 1.499.000",
-    agents: "1–5 agen AI",
+    scope: "Chatbot Dasar",
     tag: "Mulai",
     tagColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   },
   {
     name: "Tier 2",
-    description: "Sistem multi-agen menengah",
+    description: "Chatbot menengah — multi-fungsi, lead gen, sales assist",
     price: "Rp 2.499.000",
-    agents: "6–10 agen AI",
+    scope: "Chatbot Menengah",
     tag: "Populer",
     tagColor: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
   },
   {
     name: "Tier 3",
-    description: "Ekosistem chatbot lengkap",
+    description: "Chatbot kompleks — orkestrasi, knowledge base luas",
     price: "Rp 4.900.000",
-    agents: "11–20 agen AI",
+    scope: "Chatbot Kompleks",
     tag: "Bisnis",
     tagColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
   },
   {
     name: "Tier 4",
-    description: "Solusi enterprise penuh",
+    description: "Chatbot enterprise — multi-domain, agentic penuh",
     price: "Rp 7.490.000",
-    agents: "21+ agen AI",
+    scope: "Chatbot Enterprise",
     tag: "Enterprise",
     tagColor: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
   },
@@ -940,7 +940,7 @@ export default function Pricing() {
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${pkg.tagColor}`}>{pkg.tag}</span>
                 </div>
                 <div className="text-2xl font-bold text-primary">{pkg.price}</div>
-                <div className="text-xs text-muted-foreground font-medium">{pkg.agents}</div>
+                <div className="text-xs text-muted-foreground font-medium">{pkg.scope}</div>
                 <div className="text-xs text-muted-foreground">{pkg.description}</div>
                 <div className="text-[10px] text-muted-foreground border-t pt-2 mt-auto">+ Hosting Rp 199rb–1.999rb/periode</div>
               </div>

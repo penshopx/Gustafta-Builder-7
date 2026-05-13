@@ -324,25 +324,25 @@ export default function Store() {
           </a>
         </div>
 
-        {/* Harga per banyak agen */}
+        {/* Harga chatbot bundle */}
         <div className="max-w-2xl mx-auto mb-7">
           <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
-            <p className="text-xs font-bold text-violet-700 uppercase tracking-wider mb-3 text-center">💡 Harga Chatbot — Berdasarkan Jumlah Agen AI</p>
+            <p className="text-xs font-bold text-violet-700 uppercase tracking-wider mb-3 text-center">💡 Harga Setup Chatbot</p>
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
-                <div className="text-[10px] text-gray-500 font-medium mb-1">1–5 Agen</div>
+                <div className="text-[10px] text-gray-500 font-medium mb-1">Chatbot Dasar</div>
                 <div className="text-lg font-bold text-violet-700">Rp 49rb</div>
-                <div className="text-[10px] text-gray-500">/agen</div>
+                <div className="text-[10px] text-gray-500">mulai dari</div>
               </div>
               <div className="rounded-xl bg-violet-600 border border-violet-700 p-3 text-center shadow-sm">
-                <div className="text-[10px] text-violet-200 font-medium mb-1">6–10 Agen</div>
+                <div className="text-[10px] text-violet-200 font-medium mb-1">Chatbot Menengah</div>
                 <div className="text-lg font-bold text-white">Rp 429rb</div>
                 <div className="text-[10px] text-violet-200">paket bundle</div>
               </div>
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
-                <div className="text-[10px] text-gray-500 font-medium mb-1">11+ Agen</div>
+                <div className="text-[10px] text-gray-500 font-medium mb-1">Chatbot Kompleks</div>
                 <div className="text-lg font-bold text-violet-700">Rp 39rb</div>
-                <div className="text-[10px] text-gray-500">/agen</div>
+                <div className="text-[10px] text-gray-500">per modul</div>
               </div>
             </div>
             <p className="text-[10px] text-gray-500 text-center mt-2">* Harga setup sekali bayar. Hosting/berlangganan terpisah mulai Rp 199rb/bln.</p>
