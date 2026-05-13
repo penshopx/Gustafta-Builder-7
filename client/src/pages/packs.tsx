@@ -242,6 +242,47 @@ export default function PacksPage() {
           </div>
         </div>
 
+        {/* ── HARGA PAKET SERIES MODUL ── */}
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-px flex-1 bg-border" />
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <Star className="h-3 w-3" />
+              Harga Setup & Instalasi
+            </div>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <p className="text-center text-sm text-muted-foreground mb-8">
+            Harga setup modul dibayar sekali. Berlaku untuk semua modul Paket Series — kami yang konfigurasi, Anda langsung pakai. Hosting dibayar terpisah via Paket Berlangganan.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-4">
+            {[
+              { tier: "Tier 1", price: "Rp 1.499.000", agents: "1–5 agen AI", desc: "Setup & instalasi dasar", tag: "Mulai", tagClass: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", highlight: false },
+              { tier: "Tier 2", price: "Rp 2.499.000", agents: "6–10 agen AI", desc: "Sistem multi-agen menengah", tag: "Populer", tagClass: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300", highlight: true },
+              { tier: "Tier 3", price: "Rp 4.900.000", agents: "11–20 agen AI", desc: "Ekosistem chatbot lengkap", tag: "Bisnis", tagClass: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300", highlight: false },
+              { tier: "Tier 4", price: "Rp 7.490.000", agents: "21+ agen AI", desc: "Solusi enterprise penuh", tag: "Enterprise", tagClass: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", highlight: false },
+            ].map((t) => (
+              <div key={t.tier} className={`rounded-2xl border p-5 flex flex-col gap-3 bg-background ${t.highlight ? "ring-2 ring-primary" : ""}`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm">{t.tier}</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${t.tagClass}`}>{t.tag}</span>
+                </div>
+                <div className="text-2xl font-bold text-primary">{t.price}</div>
+                <div className="text-xs text-muted-foreground font-medium">{t.agents}</div>
+                <div className="text-xs text-muted-foreground">{t.desc}</div>
+                <div className="text-[10px] text-muted-foreground border-t pt-2 mt-auto">+ Hosting Rp 199rb–1.999rb/periode</div>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20 px-5 py-3 flex items-center gap-3 max-w-xl mx-auto">
+            <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
+            <p className="text-xs text-green-800 dark:text-green-300">
+              Paket Berlangganan (hosting) mulai <strong>Rp 199.000/bln · Rp 299.000/3bln · Rp 999.000/6bln · Rp 1.999.000/thn</strong>.{" "}
+              <a href="/pricing" className="underline underline-offset-2 hover:opacity-80">Lihat detail →</a>
+            </p>
+          </div>
+        </div>
+
         {/* ── PAKET BIMBEL ── */}
         <div className="mb-16">
           <div className="flex items-center gap-3 mb-2">

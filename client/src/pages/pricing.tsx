@@ -60,11 +60,11 @@ const subscriptionTiers: PricingTier[] = [
   {
     name: "3 Bulan",
     planKey: "monthly_3",
-    description: "Hemat 17% dengan berlangganan 3 bulan",
-    price: "Rp 499.000",
+    description: "Hemat lebih besar dengan berlangganan triwulan",
+    price: "Rp 299.000",
     priceNote: "/3 bulan",
     duration: "3 Bulan",
-    savings: "Hemat Rp 98.000",
+    savings: "Hemat Rp 298.000",
     icon: Sparkles,
     popular: true,
     features: [
@@ -133,36 +133,36 @@ const subscriptionTiers: PricingTier[] = [
 
 const chatbotPackages = [
   {
-    name: "5 Chatbot",
-    description: "Untuk tim kecil",
-    price1m: "Rp 899.000",
-    price3m: "Rp 2.399.000",
-    price6m: "Rp 4.499.000",
-    price12m: "Rp 8.999.000",
+    name: "Tier 1",
+    description: "Setup & instalasi dasar",
+    price: "Rp 1.499.000",
+    agents: "1–5 agen AI",
+    tag: "Mulai",
+    tagColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   },
   {
-    name: "10 Chatbot",
-    description: "Untuk bisnis menengah",
-    price1m: "Rp 1.699.000",
-    price3m: "Rp 4.499.000",
-    price6m: "Rp 8.499.000",
-    price12m: "Rp 16.999.000",
+    name: "Tier 2",
+    description: "Sistem multi-agen menengah",
+    price: "Rp 2.499.000",
+    agents: "6–10 agen AI",
+    tag: "Populer",
+    tagColor: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
   },
   {
-    name: "20 Chatbot",
-    description: "Untuk enterprise",
-    price1m: "Rp 2.999.000",
-    price3m: "Rp 7.999.000",
-    price6m: "Rp 14.999.000",
-    price12m: "Rp 29.999.000",
+    name: "Tier 3",
+    description: "Ekosistem chatbot lengkap",
+    price: "Rp 4.900.000",
+    agents: "11–20 agen AI",
+    tag: "Bisnis",
+    tagColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
   },
   {
-    name: "Unlimited",
-    description: "Custom solution",
-    price1m: "Custom",
-    price3m: "Custom",
-    price6m: "Custom",
-    price12m: "Custom",
+    name: "Tier 4",
+    description: "Solusi enterprise penuh",
+    price: "Rp 7.490.000",
+    agents: "21+ agen AI",
+    tag: "Enterprise",
+    tagColor: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
   },
 ];
 
@@ -792,7 +792,7 @@ export default function Pricing() {
                   <Zap className="h-4 w-4 text-indigo-500" />
                   <span className="font-bold text-indigo-600 dark:text-indigo-400">Paket Profesional</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Rp 499.000/3bln · 1 Chatbot · 5.000 pesan/bln</p>
+                <p className="text-xs text-muted-foreground">Rp 299.000/3bln · 1 Chatbot · 5.000 pesan/bln</p>
                 <p className="text-xs text-muted-foreground">Kuota total: <span className="font-semibold text-indigo-600 dark:text-indigo-400">50 agen AI</span> (dibagi ke semua chatbot)</p>
                 <p className="text-xs mt-2 text-indigo-700 dark:text-indigo-300 font-medium">Cocok untuk: startup, konsultan, sekolah swasta</p>
               </div>
@@ -925,38 +925,30 @@ export default function Pricing() {
 
         <section className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-2">Paket Multiple Chatbot</h2>
-            <p className="text-muted-foreground">Untuk kebutuhan bisnis dengan banyak chatbot</p>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <Wrench className="h-4 w-4" />
+              Paket Bisnis AI
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Harga Setup & Instalasi</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">Bayar sekali — ini biaya setup platform Anda. Terpisah dari biaya berlangganan hosting bulanan.</p>
           </div>
-          <Card>
-            <CardContent className="p-0 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-4 font-medium">Paket</th>
-                    <th className="text-center p-4 font-medium">1 Bulan</th>
-                    <th className="text-center p-4 font-medium bg-primary/5">3 Bulan</th>
-                    <th className="text-center p-4 font-medium">6 Bulan</th>
-                    <th className="text-center p-4 font-medium">12 Bulan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {chatbotPackages.map((pkg, index) => (
-                    <tr key={index} className="border-b last:border-0">
-                      <td className="p-4">
-                        <div className="font-medium">{pkg.name}</div>
-                        <div className="text-xs text-muted-foreground">{pkg.description}</div>
-                      </td>
-                      <td className="text-center p-4 font-medium">{pkg.price1m}</td>
-                      <td className="text-center p-4 font-medium bg-primary/5">{pkg.price3m}</td>
-                      <td className="text-center p-4 font-medium">{pkg.price6m}</td>
-                      <td className="text-center p-4 font-medium">{pkg.price12m}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {chatbotPackages.map((pkg, index) => (
+              <div key={index} className={`rounded-2xl border p-5 flex flex-col gap-3 bg-background ${index === 1 ? "ring-2 ring-primary" : ""}`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm">{pkg.name}</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${pkg.tagColor}`}>{pkg.tag}</span>
+                </div>
+                <div className="text-2xl font-bold text-primary">{pkg.price}</div>
+                <div className="text-xs text-muted-foreground font-medium">{pkg.agents}</div>
+                <div className="text-xs text-muted-foreground">{pkg.description}</div>
+                <div className="text-[10px] text-muted-foreground border-t pt-2 mt-auto">+ Hosting Rp 199rb–1.999rb/periode</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-4">
+            * Harga setup dibayar sekali. Hosting dibayar terpisah sesuai durasi berlangganan yang dipilih.
+          </p>
         </section>
 
         <section className="mb-16">
