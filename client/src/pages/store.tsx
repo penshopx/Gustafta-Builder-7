@@ -183,7 +183,7 @@ export default function Store() {
   const handleBuy = (agent: AgentProduct) => {
     if (!paymentConfig?.paymentConfigured) {
       const msg = encodeURIComponent(
-        `Halo, saya ingin memesan chatbot:\n*${agent.name}*\nHarga: ${formatPrice(agent.price)}\n\nMohon informasi cara pembayaran dan proses akses.`
+        `Halo, saya ingin memesan chatbot:\n*${agent.name}*\n\nBiaya Lisensi: ${formatPrice(agent.price)} (sekali bayar)\nBiaya Setup oleh tim Gustafta: Rp 999.000 (opsional)\nBiaya Berlangganan: terpisah sesuai paket\n\nMohon informasi cara pembayaran dan proses akses.`
       );
       window.open(`https://wa.me/6282299417818?text=${msg}`, "_blank");
       return;
@@ -265,7 +265,7 @@ export default function Store() {
               <span className="text-orange-800 font-semibold text-sm">Produk = Domain Anda</span>
             </div>
             <p className="text-xs text-gray-700 leading-relaxed">Beli sekali — ini yang Anda "miliki". Tanpa produk, tidak ada yang bisa dijalankan. Pilih dari Store di bawah.</p>
-            <p className="text-xs text-orange-700 mt-2 font-semibold">↓ Biaya Setup & Instalasi (satu kali)</p>
+            <p className="text-xs text-orange-700 mt-2 font-semibold">↓ Biaya Lisensi (sekali bayar)</p>
           </div>
           <div className="rounded-xl border border-green-300 bg-green-50 p-4 text-left shadow-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -328,30 +328,33 @@ export default function Store() {
         {/* Harga chatbot bundle — 4 tier */}
         <div className="max-w-2xl mx-auto mb-7">
           <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
-            <p className="text-xs font-bold text-violet-700 uppercase tracking-wider mb-3 text-center">💡 Harga Setup Chatbot</p>
-            <div className="grid grid-cols-4 gap-2">
-              <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
-                <div className="text-[10px] font-bold text-gray-500 mb-1">Basic</div>
-                <div className="text-base font-bold text-violet-700">Rp 250rb</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">2–3 agen</div>
+            <p className="text-xs font-bold text-violet-700 uppercase tracking-wider mb-3 text-center">💡 Struktur Biaya Gustafta</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between rounded-xl bg-white border border-violet-200 px-4 py-3 shadow-sm">
+                <div>
+                  <p className="text-xs font-bold text-gray-700">Biaya Lisensi</p>
+                  <p className="text-[11px] text-gray-400">Hak pakai chatbot — sekali bayar, install mandiri</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-gray-400 line-through">Rp 450.000</p>
+                  <p className="text-base font-bold text-violet-700">Rp 299.000</p>
+                </div>
               </div>
-              <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
-                <div className="text-[10px] font-bold text-gray-500 mb-1">Profesional</div>
-                <div className="text-base font-bold text-violet-700">Rp 450rb</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">4–5 agen</div>
+              <div className="flex items-center justify-between rounded-xl bg-white border border-orange-200 px-4 py-3 shadow-sm">
+                <div>
+                  <p className="text-xs font-bold text-gray-700">Biaya Setup <span className="font-normal text-gray-400">(opsional)</span></p>
+                  <p className="text-[11px] text-gray-400">Dikonfigurasi penuh oleh tim Gustafta</p>
+                </div>
+                <p className="text-base font-bold text-orange-600">Rp 999.000</p>
               </div>
-              <div className="rounded-xl bg-violet-600 border border-violet-700 p-3 text-center shadow-sm">
-                <div className="text-[10px] font-bold text-violet-200 mb-1">Advanced</div>
-                <div className="text-base font-bold text-white">Rp 750rb</div>
-                <div className="text-[10px] text-violet-200 mt-0.5">6–10 agen</div>
-              </div>
-              <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
-                <div className="text-[10px] font-bold text-gray-500 mb-1">Enterprise</div>
-                <div className="text-base font-bold text-violet-700">Rp 1,25jt</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">11+ agen</div>
+              <div className="flex items-center justify-between rounded-xl bg-white border border-emerald-200 px-4 py-3 shadow-sm">
+                <div>
+                  <p className="text-xs font-bold text-gray-700">Biaya Berlangganan</p>
+                  <p className="text-[11px] text-gray-400">Hosting & akses platform — bulanan</p>
+                </div>
+                <p className="text-base font-bold text-emerald-600">mulai Rp 199rb/bln</p>
               </div>
             </div>
-            <p className="text-[10px] text-gray-500 text-center mt-2">* Harga setup sekali bayar. Hosting/berlangganan terpisah mulai Rp 199rb/bln.</p>
           </div>
         </div>
 
@@ -594,11 +597,12 @@ export default function Store() {
 
                 <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-400 mb-0.5">Harga</p>
+                    <p className="text-xs text-gray-400 mb-0.5">Biaya Lisensi</p>
                     {detailAgent.originalPrice && detailAgent.originalPrice > detailAgent.price && (
                       <p className="text-sm text-gray-400 line-through leading-none mb-0.5">{formatPrice(detailAgent.originalPrice)}</p>
                     )}
                     <p className="text-2xl font-bold text-gray-900">{formatPrice(detailAgent.price)}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Sekali bayar · install mandiri</p>
                   </div>
                   <Button onClick={() => handleBuy(detailAgent)}
                     className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-6"
@@ -627,9 +631,21 @@ export default function Store() {
 
           {selectedAgent && (
             <div className="space-y-4 mt-1">
-              <div className="bg-violet-50 border border-violet-200 rounded-xl p-3 flex items-center justify-between">
-                <span className="text-gray-600 text-sm">Total Pembayaran</span>
-                <span className="text-xl font-bold text-violet-600">{formatPrice(selectedAgent.price)}</span>
+              <div className="space-y-2">
+                <div className="bg-violet-50 border border-violet-200 rounded-xl p-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-700 text-sm font-medium">Biaya Lisensi</p>
+                    <p className="text-[11px] text-gray-400">Sekali bayar · install mandiri</p>
+                  </div>
+                  <span className="text-xl font-bold text-violet-600">{formatPrice(selectedAgent.price)}</span>
+                </div>
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-700 text-sm font-medium">Biaya Setup <span className="font-normal text-gray-400">(opsional)</span></p>
+                    <p className="text-[11px] text-gray-400">Dikonfigurasi penuh oleh tim Gustafta</p>
+                  </div>
+                  <span className="text-base font-bold text-orange-600">Rp 999.000</span>
+                </div>
               </div>
 
               <div className="space-y-3">

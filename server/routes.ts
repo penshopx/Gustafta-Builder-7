@@ -4022,22 +4022,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const spWhere = spConditions.length > 1 ? and(...spConditions) : spConditions[0];
       const spRows = await db.select().from(storeProducts).where(spWhere).orderBy(storeProducts.sortOrder, storeProducts.id);
 
-      // Pricing formula (flat bracket per tier):
-      // 2-3 agen → Rp 250.000 | 4-5 agen → Rp 450.000 | 6-10 agen → Rp 750.000 | 11+ agen → Rp 1.250.000
-      function calcStorePrice(agenticSubAgents: any): number {
-        const subCount = Array.isArray(agenticSubAgents) ? agenticSubAgents.length : 0;
-        const total = 1 + subCount;
-        if (total <= 3) return 250000;
-        if (total <= 5) return 450000;
-        if (total <= 10) return 750000;
-        return 1250000;
+      // Biaya Lisensi: flat Rp 299.000 (hak pakai, install mandiri)
+      // Biaya Setup oleh tim Gustafta: Rp 999.000 (terpisah, opsional)
+      function calcStorePrice(_agenticSubAgents: any): number {
+        return 299000;
       }
-      // Original (pre-discount) price per tier — shown as harga coret di store
-      function calcOriginalPrice(total: number): number {
-        if (total <= 3) return 350000;
-        if (total <= 5) return 650000;
-        if (total <= 10) return 1050000;
-        return 1750000;
+      // Harga coret (original price sebelum promo)
+      function calcOriginalPrice(_total: number): number {
+        return 450000;
       }
 
       // Pre-fetch agenticSubAgents for store_products that link to an agent
@@ -4146,12 +4138,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           const subCount = Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0;
           const childCount = childCountMap.get(a.id) ?? 0;
           const effectiveTotal = 1 + Math.max(subCount, childCount);
-          const price = (() => {
-            if (effectiveTotal <= 3) return 250000;
-            if (effectiveTotal <= 5) return 450000;
-            if (effectiveTotal <= 10) return 750000;
-            return 1250000;
-          })();
+          const price = 299000;
           return {
             id: `ag-${a.id}`,
             agentId: a.id,
