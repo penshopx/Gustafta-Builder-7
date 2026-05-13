@@ -62,6 +62,7 @@ interface AgentProduct {
   color: string;
   isOrchestrator?: boolean;
   price: number;
+  originalPrice?: number | null;
   agentId?: number | null;
   agentCount?: number;
   type?: string;
@@ -594,6 +595,9 @@ export default function Store() {
                 <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-400 mb-0.5">Harga</p>
+                    {detailAgent.originalPrice && detailAgent.originalPrice > detailAgent.price && (
+                      <p className="text-sm text-gray-400 line-through leading-none mb-0.5">{formatPrice(detailAgent.originalPrice)}</p>
+                    )}
                     <p className="text-2xl font-bold text-gray-900">{formatPrice(detailAgent.price)}</p>
                   </div>
                   <Button onClick={() => handleBuy(detailAgent)}
@@ -797,7 +801,12 @@ function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a:
 
         <div className="mt-auto pt-3 border-t border-gray-100">
           <div className="flex items-center justify-between gap-2">
-            <span className="font-bold text-gray-900 text-base">{formatPrice(agent.price)}</span>
+            <div className="flex flex-col">
+              {agent.originalPrice && agent.originalPrice > agent.price && (
+                <span className="text-xs text-gray-400 line-through leading-none mb-0.5">{formatPrice(agent.originalPrice)}</span>
+              )}
+              <span className="font-bold text-gray-900 text-base">{formatPrice(agent.price)}</span>
+            </div>
             <div className="flex gap-1.5">
               {hasDetail && (
                 agent.agentId ? (

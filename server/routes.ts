@@ -4032,6 +4032,13 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         if (total <= 10) return 750000;
         return 1250000;
       }
+      // Original (pre-discount) price per tier — shown as harga coret di store
+      function calcOriginalPrice(total: number): number {
+        if (total <= 3) return 350000;
+        if (total <= 5) return 650000;
+        if (total <= 10) return 1050000;
+        return 1750000;
+      }
 
       // Pre-fetch agenticSubAgents for store_products that link to an agent
       const spLinkedAgentIds = spRows.map(p => p.agentId).filter(Boolean) as number[];
@@ -4157,6 +4164,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             emoji: a.avatar && a.avatar.length <= 4 ? a.avatar : "🤖",
             color: a.widgetColor || "#6366f1",
             price,
+            originalPrice: calcOriginalPrice(effectiveTotal),
             agentCount: effectiveTotal,
             type: "agent",
           };
