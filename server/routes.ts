@@ -4022,21 +4022,47 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const spWhere = spConditions.length > 1 ? and(...spConditions) : spConditions[0];
       const spRows = await db.select().from(storeProducts).where(spWhere).orderBy(storeProducts.sortOrder, storeProducts.id);
 
-      const storeProductItems = spRows.map((p) => ({
-        id: `sp-${p.id}`,
-        productId: p.id,
-        agentId: p.agentId,
-        name: p.name,
-        category: p.category || "Konstruksi",
-        tagline: p.description?.slice(0, 80) || "",
-        description: p.description || "",
-        productSummary: p.description || "",
-        productFeatures: (p.features as string[]) || [],
-        emoji: p.emoji || "🤖",
-        color: p.color || "#6366f1",
-        price: p.price,
-        type: "product",
-      }));
+      // Pricing formula: total = 1 (orchestrator/agent) + sub-agent count
+      // 1-5 total → Rp 49.000/unit | 6-10 total → Rp 429.000 flat | 11+ total → Rp 39.000/unit
+      function calcStorePrice(agenticSubAgents: any): number {
+        const subCount = Array.isArray(agenticSubAgents) ? agenticSubAgents.length : 0;
+        const total = 1 + subCount;
+        if (total <= 5) return 49000 * total;
+        if (total <= 10) return 429000;
+        return 39000 * total;
+      }
+
+      // Pre-fetch agenticSubAgents for store_products that link to an agent
+      const spLinkedAgentIds = spRows.map(p => p.agentId).filter(Boolean) as number[];
+      const agentSubMap = new Map<number, any>();
+      if (spLinkedAgentIds.length > 0) {
+        const { inArray } = await import("drizzle-orm");
+        const linkedAgentRows = await db.select({
+          id: agentsTable.id,
+          agenticSubAgents: agentsTable.agenticSubAgents,
+        }).from(agentsTable).where(inArray(agentsTable.id, spLinkedAgentIds));
+        for (const r of linkedAgentRows) agentSubMap.set(r.id, r.agenticSubAgents);
+      }
+
+      const storeProductItems = spRows.map((p) => {
+        const linkedSubAgents = p.agentId != null ? agentSubMap.get(p.agentId) : undefined;
+        const price = linkedSubAgents !== undefined ? calcStorePrice(linkedSubAgents) : p.price;
+        return {
+          id: `sp-${p.id}`,
+          productId: p.id,
+          agentId: p.agentId,
+          name: p.name,
+          category: p.category || "Konstruksi",
+          tagline: p.description?.slice(0, 80) || "",
+          description: p.description || "",
+          productSummary: p.description || "",
+          productFeatures: (p.features as string[]) || [],
+          emoji: p.emoji || "🤖",
+          color: p.color || "#6366f1",
+          price,
+          type: "product",
+        };
+      });
 
       // 2. Fetch ALL active agents (secondary, no duplicate with store_products)
       const spAgentIds = new Set(spRows.map(p => p.agentId).filter(Boolean));
@@ -4057,37 +4083,77 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         isOrchestrator: agentsTable.isOrchestrator, monthlyPrice: agentsTable.monthlyPrice,
         productSummary: agentsTable.productSummary, productFeatures: agentsTable.productFeatures,
         agenticSubAgents: agentsTable.agenticSubAgents,
+        parentAgentId: agentsTable.parentAgentId,
       }).from(agentsTable).where(agentWhere).orderBy(agentsTable.id);
 
-      // Pricing formula: total = 1 (orchestrator/agent) + sub-agent count
-      // 1-5 total → Rp 49.000/unit | 6-10 total → Rp 429.000 flat | 11+ total → Rp 39.000/unit
-      function calcStorePrice(agenticSubAgents: any): number {
-        const subCount = Array.isArray(agenticSubAgents) ? agenticSubAgents.length : 0;
-        const total = 1 + subCount;
-        if (total <= 5) return 49000 * total;
-        if (total <= 10) return 429000;
-        return 39000 * total;
+      // Count direct child agents per parent for accurate team-size pricing
+      const allAgentIds = agentRows.map(a => a.id);
+      const childCountMap = new Map<number, number>();
+      if (allAgentIds.length > 0) {
+        const { inArray: inArrayA, sql: sqlChild } = await import("drizzle-orm");
+        const childCounts = await db.select({
+          parentId: agentsTable.parentAgentId,
+          cnt: sqlChild<number>`count(*)::int`,
+        }).from(agentsTable)
+          .where(inArrayA(agentsTable.parentAgentId, allAgentIds))
+          .groupBy(agentsTable.parentAgentId);
+        for (const row of childCounts) {
+          if (row.parentId != null) childCountMap.set(row.parentId, row.cnt);
+        }
       }
 
-      const agentItems = agentRows
-        .filter((a) => !spAgentIds.has(a.id))
-        .map((a) => ({
-          id: `ag-${a.id}`,
-          agentId: a.id,
-          name: a.name,
-          category: a.category || "Konstruksi",
-          tagline: a.tagline || "",
-          description: a.description || "",
-          productSummary: a.productSummary || "",
-          productFeatures: (a.productFeatures as string[]) || [],
-          emoji: a.avatar && a.avatar.length <= 4 ? a.avatar : "🤖",
-          color: a.widgetColor || "#6366f1",
-          price: calcStorePrice(a.agenticSubAgents),
-          agentCount: 1 + (Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0),
-          type: "agent",
-        }));
+      // Also update store_products' agentSubMap with child counts
+      for (const [agentId] of agentSubMap.entries()) {
+        const childCount = childCountMap.get(agentId) ?? 0;
+        if (childCount > 0) {
+          // If child count > agenticSubAgents count, treat child count as the sub count
+          const existingSub = agentSubMap.get(agentId);
+          const existingSubCount = Array.isArray(existingSub) ? existingSub.length : 0;
+          if (childCount > existingSubCount) {
+            // Store as a proxy array length
+            agentSubMap.set(agentId, Array(childCount).fill(null));
+          }
+        }
+      }
 
-      const allItems = [...storeProductItems, ...agentItems];
+      // Re-compute store product prices with updated child counts
+      const storeProductItemsFinal = storeProductItems.map(p => {
+        if (p.agentId != null) {
+          const linkedSub = agentSubMap.get(p.agentId);
+          return { ...p, price: linkedSub !== undefined ? calcStorePrice(linkedSub) : p.price };
+        }
+        return p;
+      });
+
+      const agentItems = agentRows
+        .filter((a) => !spAgentIds.has(a.id) && a.parentAgentId == null)
+        .map((a) => {
+          const subCount = Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0;
+          const childCount = childCountMap.get(a.id) ?? 0;
+          const effectiveTotal = 1 + Math.max(subCount, childCount);
+          const price = (() => {
+            if (effectiveTotal <= 5) return 49000 * effectiveTotal;
+            if (effectiveTotal <= 10) return 429000;
+            return 39000 * effectiveTotal;
+          })();
+          return {
+            id: `ag-${a.id}`,
+            agentId: a.id,
+            name: a.name,
+            category: a.category || "Konstruksi",
+            tagline: a.tagline || "",
+            description: a.description || "",
+            productSummary: a.productSummary || "",
+            productFeatures: (a.productFeatures as string[]) || [],
+            emoji: a.avatar && a.avatar.length <= 4 ? a.avatar : "🤖",
+            color: a.widgetColor || "#6366f1",
+            price,
+            agentCount: effectiveTotal,
+            type: "agent",
+          };
+        });
+
+      const allItems = [...storeProductItemsFinal, ...agentItems];
       const total = allItems.length;
       const offset = (page - 1) * limit;
       const pageItems = allItems.slice(offset, offset + limit);
