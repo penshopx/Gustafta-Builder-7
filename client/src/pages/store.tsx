@@ -331,7 +331,7 @@ export default function Store() {
             <div className="grid grid-cols-4 gap-2">
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
                 <div className="text-[10px] font-bold text-gray-500 mb-1">Basic</div>
-                <div className="text-base font-bold text-violet-700">Rp 49rb</div>
+                <div className="text-base font-bold text-violet-700">Rp 98rb</div>
                 <div className="text-[10px] text-gray-400 mt-0.5">mulai dari</div>
               </div>
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
@@ -357,7 +357,7 @@ export default function Store() {
         {/* Divider ke katalog chatbot */}
         <div className="flex items-center gap-3 max-w-2xl mx-auto mb-1">
           <div className="h-px flex-1 bg-gray-300" />
-          <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">atau pilih chatbot satuan</span>
+          <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">pilih chatbot bundle</span>
           <div className="h-px flex-1 bg-gray-300" />
         </div>
         <p className="text-xs text-gray-500 font-medium mb-6">{total > 0 ? `${total.toLocaleString("id-ID")} chatbot AI tersedia` : "Katalog chatbot AI siap pakai"}</p>
@@ -745,11 +745,11 @@ function CustomChatbotCard() {
 }
 
 function getChatbotTier(agentCount?: number): { label: string; className: string } {
-  const n = agentCount ?? 1;
-  if (n >= 11) return { label: "Enterprise", className: "bg-purple-100 text-purple-700 border-purple-200" };
-  if (n >= 6)  return { label: "Advanced",   className: "bg-blue-100 text-blue-700 border-blue-200" };
-  if (n >= 2)  return { label: "Profesional", className: "bg-emerald-100 text-emerald-700 border-emerald-200" };
-  return { label: "Basic", className: "bg-gray-100 text-gray-600 border-gray-200" };
+  const n = agentCount ?? 2;
+  if (n >= 11) return { label: "Enterprise",   className: "bg-purple-100 text-purple-700 border-purple-200" };
+  if (n >= 6)  return { label: "Advanced",     className: "bg-blue-100 text-blue-700 border-blue-200" };
+  if (n >= 4)  return { label: "Profesional",  className: "bg-emerald-100 text-emerald-700 border-emerald-200" };
+  return       { label: "Basic",               className: "bg-gray-100 text-gray-600 border-gray-200" };
 }
 
 function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a: AgentProduct) => void; onDetail: (a: AgentProduct) => void }) {

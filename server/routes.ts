@@ -4126,7 +4126,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       });
 
       const agentItems = agentRows
-        .filter((a) => !spAgentIds.has(a.id) && a.parentAgentId == null)
+        .filter((a) => {
+          if (spAgentIds.has(a.id)) return false;
+          if (a.parentAgentId != null) return false;
+          // Only include chatbot bundles (2+ components) — single agents not sold standalone
+          const subCount = Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0;
+          const childCount = childCountMap.get(a.id) ?? 0;
+          return (1 + Math.max(subCount, childCount)) >= 2;
+        })
         .map((a) => {
           const subCount = Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0;
           const childCount = childCountMap.get(a.id) ?? 0;
