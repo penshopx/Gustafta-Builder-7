@@ -324,25 +324,30 @@ export default function Store() {
           </a>
         </div>
 
-        {/* Harga chatbot bundle */}
+        {/* Harga chatbot bundle — 4 tier */}
         <div className="max-w-2xl mx-auto mb-7">
           <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
             <p className="text-xs font-bold text-violet-700 uppercase tracking-wider mb-3 text-center">💡 Harga Setup Chatbot</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-2">
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
-                <div className="text-[10px] text-gray-500 font-medium mb-1">Chatbot Dasar</div>
-                <div className="text-lg font-bold text-violet-700">Rp 49rb</div>
-                <div className="text-[10px] text-gray-500">mulai dari</div>
+                <div className="text-[10px] font-bold text-gray-500 mb-1">Basic</div>
+                <div className="text-base font-bold text-violet-700">Rp 49rb</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">mulai dari</div>
+              </div>
+              <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
+                <div className="text-[10px] font-bold text-gray-500 mb-1">Profesional</div>
+                <div className="text-base font-bold text-violet-700">Rp 245rb</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">mulai dari</div>
               </div>
               <div className="rounded-xl bg-violet-600 border border-violet-700 p-3 text-center shadow-sm">
-                <div className="text-[10px] text-violet-200 font-medium mb-1">Chatbot Menengah</div>
-                <div className="text-lg font-bold text-white">Rp 429rb</div>
-                <div className="text-[10px] text-violet-200">paket bundle</div>
+                <div className="text-[10px] font-bold text-violet-200 mb-1">Advanced</div>
+                <div className="text-base font-bold text-white">Rp 429rb</div>
+                <div className="text-[10px] text-violet-200 mt-0.5">paket bundle</div>
               </div>
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
-                <div className="text-[10px] text-gray-500 font-medium mb-1">Chatbot Kompleks</div>
-                <div className="text-lg font-bold text-violet-700">Rp 39rb</div>
-                <div className="text-[10px] text-gray-500">per modul</div>
+                <div className="text-[10px] font-bold text-gray-500 mb-1">Enterprise</div>
+                <div className="text-base font-bold text-violet-700">Rp 429rb+</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">skala besar</div>
               </div>
             </div>
             <p className="text-[10px] text-gray-500 text-center mt-2">* Harga setup sekali bayar. Hosting/berlangganan terpisah mulai Rp 199rb/bln.</p>
@@ -739,9 +744,18 @@ function CustomChatbotCard() {
   );
 }
 
+function getChatbotTier(agentCount?: number): { label: string; className: string } {
+  const n = agentCount ?? 1;
+  if (n >= 11) return { label: "Enterprise", className: "bg-purple-100 text-purple-700 border-purple-200" };
+  if (n >= 6)  return { label: "Advanced",   className: "bg-blue-100 text-blue-700 border-blue-200" };
+  if (n >= 2)  return { label: "Profesional", className: "bg-emerald-100 text-emerald-700 border-emerald-200" };
+  return { label: "Basic", className: "bg-gray-100 text-gray-600 border-gray-200" };
+}
+
 function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a: AgentProduct) => void; onDetail: (a: AgentProduct) => void }) {
   const categoryLabel = CATEGORY_LABELS[agent.category] || agent.category;
   const hasDetail = !!(agent.productSummary || agent.description || (agent.productFeatures ?? []).length > 0);
+  const tier = getChatbotTier(agent.agentCount);
 
   return (
     <Card className="bg-white border-gray-200 hover:border-violet-400 hover:shadow-md transition-all group flex flex-col"
@@ -754,11 +768,9 @@ function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a:
           </div>
           <div className="flex flex-col items-end gap-1">
             <Badge variant="secondary" className="text-xs px-2 py-0">{categoryLabel}</Badge>
-            {agent.isOrchestrator && (
-              <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs px-2 py-0 flex items-center gap-1">
-                <Layers className="h-2.5 w-2.5" />Multi-Agent
-              </Badge>
-            )}
+            <Badge className={`text-xs px-2 py-0 border ${tier.className}`}>
+              {tier.label}
+            </Badge>
           </div>
         </div>
 
@@ -785,30 +797,30 @@ function AgentCard({ agent, onBuy, onDetail }: { agent: AgentProduct; onBuy: (a:
 
         <div className="mt-auto pt-3 border-t border-gray-100">
           <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-gray-900 text-base">{formatPrice(agent.price)}</span>
-          <div className="flex gap-1.5">
-            {hasDetail && (
-              agent.agentId ? (
-                <a href={`/product/${agent.agentId}`} data-testid={`link-detail-${agent.id}`}>
-                  <Button size="sm" variant="ghost"
-                    className="text-gray-400 hover:text-violet-700 text-xs h-8 px-2.5">
+            <span className="font-bold text-gray-900 text-base">{formatPrice(agent.price)}</span>
+            <div className="flex gap-1.5">
+              {hasDetail && (
+                agent.agentId ? (
+                  <a href={`/product/${agent.agentId}`} data-testid={`link-detail-${agent.id}`}>
+                    <Button size="sm" variant="ghost"
+                      className="text-gray-400 hover:text-violet-700 text-xs h-8 px-2.5">
+                      Detail
+                    </Button>
+                  </a>
+                ) : (
+                  <Button size="sm" variant="ghost" onClick={() => onDetail(agent)}
+                    className="text-gray-400 hover:text-gray-700 text-xs h-8 px-2.5"
+                    data-testid={`button-detail-${agent.id}`}>
                     Detail
                   </Button>
-                </a>
-              ) : (
-                <Button size="sm" variant="ghost" onClick={() => onDetail(agent)}
-                  className="text-gray-400 hover:text-gray-700 text-xs h-8 px-2.5"
-                  data-testid={`button-detail-${agent.id}`}>
-                  Detail
-                </Button>
-              )
-            )}
-            <Button size="sm" onClick={() => onBuy(agent)}
-              className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3 flex-shrink-0"
-              data-testid={`button-buy-${agent.id}`}>
-              <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Beli
-            </Button>
-          </div>
+                )
+              )}
+              <Button size="sm" onClick={() => onBuy(agent)}
+                className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3 flex-shrink-0"
+                data-testid={`button-buy-${agent.id}`}>
+                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Beli
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
