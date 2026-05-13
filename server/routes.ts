@@ -4022,14 +4022,15 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const spWhere = spConditions.length > 1 ? and(...spConditions) : spConditions[0];
       const spRows = await db.select().from(storeProducts).where(spWhere).orderBy(storeProducts.sortOrder, storeProducts.id);
 
-      // Pricing formula: total = 1 (orchestrator/agent) + sub-agent count
-      // 1-5 total → Rp 75.000/unit | 6-10 total → Rp 429.000 flat | 11+ total → Rp 39.000/unit
+      // Pricing formula (flat bracket per tier):
+      // 2-3 agen → Rp 250.000 | 4-5 agen → Rp 450.000 | 6-10 agen → Rp 750.000 | 11+ agen → Rp 1.250.000
       function calcStorePrice(agenticSubAgents: any): number {
         const subCount = Array.isArray(agenticSubAgents) ? agenticSubAgents.length : 0;
         const total = 1 + subCount;
-        if (total <= 5) return 75000 * total;
-        if (total <= 10) return 429000;
-        return 39000 * total;
+        if (total <= 3) return 250000;
+        if (total <= 5) return 450000;
+        if (total <= 10) return 750000;
+        return 1250000;
       }
 
       // Pre-fetch agenticSubAgents for store_products that link to an agent
@@ -4139,9 +4140,10 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           const childCount = childCountMap.get(a.id) ?? 0;
           const effectiveTotal = 1 + Math.max(subCount, childCount);
           const price = (() => {
-            if (effectiveTotal <= 5) return 75000 * effectiveTotal;
-            if (effectiveTotal <= 10) return 429000;
-            return 39000 * effectiveTotal;
+            if (effectiveTotal <= 3) return 250000;
+            if (effectiveTotal <= 5) return 450000;
+            if (effectiveTotal <= 10) return 750000;
+            return 1250000;
           })();
           return {
             id: `ag-${a.id}`,

@@ -331,23 +331,23 @@ export default function Store() {
             <div className="grid grid-cols-4 gap-2">
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
                 <div className="text-[10px] font-bold text-gray-500 mb-1">Basic</div>
-                <div className="text-base font-bold text-violet-700">Rp 150rb</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">mulai dari</div>
+                <div className="text-base font-bold text-violet-700">Rp 250rb</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">2–3 agen</div>
               </div>
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
                 <div className="text-[10px] font-bold text-gray-500 mb-1">Profesional</div>
-                <div className="text-base font-bold text-violet-700">Rp 300rb</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">mulai dari</div>
+                <div className="text-base font-bold text-violet-700">Rp 450rb</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">4–5 agen</div>
               </div>
               <div className="rounded-xl bg-violet-600 border border-violet-700 p-3 text-center shadow-sm">
                 <div className="text-[10px] font-bold text-violet-200 mb-1">Advanced</div>
-                <div className="text-base font-bold text-white">Rp 429rb</div>
-                <div className="text-[10px] text-violet-200 mt-0.5">paket bundle</div>
+                <div className="text-base font-bold text-white">Rp 750rb</div>
+                <div className="text-[10px] text-violet-200 mt-0.5">6–10 agen</div>
               </div>
               <div className="rounded-xl bg-white border border-violet-200 p-3 text-center shadow-sm">
                 <div className="text-[10px] font-bold text-gray-500 mb-1">Enterprise</div>
-                <div className="text-base font-bold text-violet-700">Rp 429rb+</div>
-                <div className="text-[10px] text-gray-400 mt-0.5">skala besar</div>
+                <div className="text-base font-bold text-violet-700">Rp 1,25jt</div>
+                <div className="text-[10px] text-gray-400 mt-0.5">11+ agen</div>
               </div>
             </div>
             <p className="text-[10px] text-gray-500 text-center mt-2">* Harga setup sekali bayar. Hosting/berlangganan terpisah mulai Rp 199rb/bln.</p>
