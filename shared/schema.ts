@@ -1946,3 +1946,23 @@ export const systemConfig = pgTable("system_config", {
   value:     text("value").notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ==================== AGENTIC DELIVERABLES ====================
+// Structured artifacts produced by MultiClaw L4 orchestration (per agent/session)
+export const agenticDeliverables = pgTable("agentic_deliverables", {
+  id:        serial("id").primaryKey(),
+  agentId:   integer("agent_id").notNull(),
+  type:      text("type").notNull(),         // CLARIFYING_QUESTIONS | CHECKLIST | TIMELINE | ANSWER_SUMMARY
+  title:     text("title").notNull().default(""),
+  content:   jsonb("content").notNull().default({}),  // structured payload (jsonb)
+  status:    text("status").notNull().default("open"), // open | needs_input | resolved | archived
+  dedupeKey: text("dedupe_key").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertAgenticDeliverableSchema = createInsertSchema(agenticDeliverables).omit({
+  id: true, createdAt: true, updatedAt: true,
+});
+export type InsertAgenticDeliverable = z.infer<typeof insertAgenticDeliverableSchema>;
+export type AgenticDeliverable = typeof agenticDeliverables.$inferSelect;

@@ -3670,6 +3670,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           const finalText = cleanContent;
           setImmediate(async () => {
             try {
+              // 1) Update Project Brain values
               const brainInstance = await storage.getActiveProjectBrainInstance(wb.agentId);
               if (brainInstance) {
                 const existing = (brainInstance.values as Record<string, any>) || {};
@@ -3691,6 +3692,45 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
                 };
                 await storage.updateProjectBrainInstance(String(brainInstance.id), { values: brainPatch });
                 console.log(`[PR#3 WriteBack] Brain ${brainInstance.id} updated for agent ${wb.agentId}: ${wb.actionItems.length} actions, ${wb.openQuestions.length} questions`);
+              }
+
+              // 2) Write Agentic Deliverable (idempotent via dedupeKey)
+              const agentIdNum = parseInt(wb.agentId);
+              if (!isNaN(agentIdNum)) {
+                const dateSlot = new Date().toISOString().slice(0, 10); // YYYY-MM-DD bucket
+                if (wb.criticPass === false && wb.openQuestions.length > 0) {
+                  // Critic failed → save CLARIFYING_QUESTIONS deliverable
+                  const dedupeKey = `${agentIdNum}:CLARIFYING_QUESTIONS:${dateSlot}`;
+                  await storage.upsertAgenticDeliverable({
+                    agentId: agentIdNum,
+                    type: "CLARIFYING_QUESTIONS",
+                    title: `Pertanyaan Klarifikasi (${dateSlot})`,
+                    content: {
+                      type: "CLARIFYING_QUESTIONS",
+                      items: wb.openQuestions.slice(0, 5),
+                      source: { critic: true, routerInvoked: wb.routerMeta.invoked },
+                    },
+                    status: "needs_input",
+                    dedupeKey,
+                  });
+                } else {
+                  // Critic pass or no critic → save ANSWER_SUMMARY deliverable
+                  const dedupeKey = `${agentIdNum}:ANSWER_SUMMARY:${dateSlot}`;
+                  await storage.upsertAgenticDeliverable({
+                    agentId: agentIdNum,
+                    type: "ANSWER_SUMMARY",
+                    title: `Ringkasan Jawaban (${dateSlot})`,
+                    content: {
+                      type: "ANSWER_SUMMARY",
+                      text: finalText.slice(0, 4000),
+                      actionItems: wb.actionItems,
+                      source: { criticPass: wb.criticPass, routerInvoked: wb.routerMeta.invoked },
+                    },
+                    status: "open",
+                    dedupeKey,
+                  });
+                }
+                console.log(`[PR#3 WriteBack] Deliverable written for agent ${wb.agentId} (criticPass=${wb.criticPass})`);
               }
             } catch (wbErr) {
               console.warn("[PR#3 WriteBack] Failed:", wbErr);
@@ -8327,6 +8367,41 @@ Balas dengan JSON dengan struktur PERSIS ini:
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete instance" });
+    }
+  });
+
+  // ==================== Agentic Deliverables Routes ====================
+
+  app.get("/api/agentic-deliverables/:agentId", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getAgenticDeliverables(req.params.agentId as string);
+      res.json(items);
+    } catch {
+      res.status(500).json({ error: "Failed to fetch deliverables" });
+    }
+  });
+
+  app.patch("/api/agentic-deliverables/:id/status", isAuthenticated, async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!["open", "needs_input", "resolved", "archived"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      const updated = await storage.updateAgenticDeliverableStatus(req.params.id as string, status);
+      if (!updated) return res.status(404).json({ error: "Deliverable not found" });
+      res.json(updated);
+    } catch {
+      res.status(500).json({ error: "Failed to update deliverable" });
+    }
+  });
+
+  app.delete("/api/agentic-deliverables/:id", isAuthenticated, async (req, res) => {
+    try {
+      const deleted = await storage.deleteAgenticDeliverable(req.params.id as string);
+      if (!deleted) return res.status(404).json({ error: "Deliverable not found" });
+      res.status(204).send();
+    } catch {
+      res.status(500).json({ error: "Failed to delete deliverable" });
     }
   });
 

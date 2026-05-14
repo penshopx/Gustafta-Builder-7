@@ -25,6 +25,8 @@ import type {
   InsertProjectBrainTemplate,
   ProjectBrainInstance,
   InsertProjectBrainInstance,
+  AgenticDeliverable,
+  InsertAgenticDeliverable,
   MiniApp,
   InsertMiniApp,
   MiniAppResult,
@@ -217,6 +219,12 @@ export interface IStorage {
   updateProjectBrainInstance(id: string, data: Partial<InsertProjectBrainInstance>): Promise<ProjectBrainInstance | undefined>;
   setActiveProjectBrainInstance(id: string): Promise<ProjectBrainInstance | undefined>;
   deleteProjectBrainInstance(id: string): Promise<boolean>;
+
+  // Agentic Deliverables methods
+  getAgenticDeliverables(agentId: string): Promise<AgenticDeliverable[]>;
+  upsertAgenticDeliverable(data: InsertAgenticDeliverable): Promise<AgenticDeliverable>;
+  updateAgenticDeliverableStatus(id: string, status: string): Promise<AgenticDeliverable | undefined>;
+  deleteAgenticDeliverable(id: string): Promise<boolean>;
 
   // Mini App methods
   getMiniApps(agentId: string): Promise<MiniApp[]>;
@@ -2123,6 +2131,14 @@ export class MemStorage implements IStorage {
   }
   async updateScalevMapping(_id: number, _data: Partial<InsertScalevMapping>): Promise<ScalevMapping | undefined> { return undefined; }
   async deleteScalevMapping(_id: number): Promise<boolean> { return false; }
+
+  // Agentic Deliverables stubs (MemStorage)
+  async getAgenticDeliverables(_agentId: string): Promise<AgenticDeliverable[]> { return []; }
+  async upsertAgenticDeliverable(data: InsertAgenticDeliverable): Promise<AgenticDeliverable> {
+    return { id: 1, ...data, status: data.status ?? "open", createdAt: new Date(), updatedAt: new Date() } as AgenticDeliverable;
+  }
+  async updateAgenticDeliverableStatus(_id: string, _status: string): Promise<AgenticDeliverable | undefined> { return undefined; }
+  async deleteAgenticDeliverable(_id: string): Promise<boolean> { return false; }
 }
 
 import { dbStorage } from "./db-storage";

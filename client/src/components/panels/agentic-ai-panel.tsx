@@ -45,6 +45,11 @@ import {
   Bot,
   Cpu,
   ChevronRight,
+  Package,
+  ClipboardList,
+  CircleHelp,
+  FileText,
+  Archive,
 } from "lucide-react";
 
 type Settings = {
@@ -1067,6 +1072,188 @@ function buildDefaultOrchConfig(): OrchestratorConfig {
     specialists[key] = { name: label, prompt: defaultPrompt, enabled: true };
   });
   return { enabled: false, routingModel: "deepseek-chat", specialists };
+}
+
+// ── Agentic Deliverables Panel ──────────────────────────────────────────────
+type AgenticDeliverable = {
+  id: number;
+  agentId: number;
+  type: string;
+  title: string;
+  content: Record<string, any>;
+  status: string;
+  dedupeKey: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const DELIVERABLE_TYPE_META: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+  CLARIFYING_QUESTIONS: { label: "Pertanyaan Klarifikasi", icon: <CircleHelp className="h-3.5 w-3.5" />, color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/30" },
+  ANSWER_SUMMARY: { label: "Ringkasan Jawaban", icon: <FileText className="h-3.5 w-3.5" />, color: "text-blue-500 bg-blue-500/10 border-blue-500/30" },
+  CHECKLIST: { label: "Checklist", icon: <ClipboardList className="h-3.5 w-3.5" />, color: "text-green-500 bg-green-500/10 border-green-500/30" },
+  TIMELINE: { label: "Timeline", icon: <Activity className="h-3.5 w-3.5" />, color: "text-purple-500 bg-purple-500/10 border-purple-500/30" },
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  open: "bg-blue-500/10 text-blue-500 border-blue-500/30",
+  needs_input: "bg-yellow-500/10 text-yellow-500 border-yellow-500/30",
+  resolved: "bg-green-500/10 text-green-500 border-green-500/30",
+  archived: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+};
+
+function AgenticDeliverablesPanel({ agentId }: { agentId: string }) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [expanded, setExpanded] = useState<number | null>(null);
+
+  const { data: deliverables = [], isLoading } = useQuery<AgenticDeliverable[]>({
+    queryKey: ["/api/agentic-deliverables", agentId],
+    queryFn: () => fetch(`/api/agentic-deliverables/${agentId}`, { credentials: "include" }).then(r => r.json()),
+    refetchInterval: 30000,
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      apiRequest("PATCH", `/api/agentic-deliverables/${id}/status`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agentic-deliverables", agentId] });
+      toast({ title: "Status diperbarui" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/agentic-deliverables/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/agentic-deliverables", agentId] });
+      toast({ title: "Deliverable dihapus" });
+    },
+  });
+
+  const active = deliverables.filter(d => d.status !== "archived");
+  const archived = deliverables.filter(d => d.status === "archived");
+
+  return (
+    <Card className="border-indigo-500/20">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Package className="h-4 w-4 text-indigo-400" />
+          Agentic Deliverables
+          {active.length > 0 && (
+            <Badge variant="outline" className="ml-auto text-xs bg-indigo-500/10 text-indigo-400 border-indigo-500/30">
+              {active.length} aktif
+            </Badge>
+          )}
+        </CardTitle>
+        <CardDescription className="text-xs">
+          Artefak terstruktur yang dihasilkan otomatis oleh MultiClaw L4 setelah setiap sesi orkestrasi.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {isLoading && (
+          <div className="text-xs text-muted-foreground animate-pulse text-center py-3">Memuat deliverables...</div>
+        )}
+        {!isLoading && active.length === 0 && (
+          <div className="text-xs text-muted-foreground text-center py-4 flex flex-col items-center gap-1.5">
+            <Package className="h-6 w-6 opacity-30" />
+            <span>Belum ada deliverable. Jalankan sesi orkestrasi untuk menghasilkan artefak.</span>
+          </div>
+        )}
+        {active.map(d => {
+          const meta = DELIVERABLE_TYPE_META[d.type] ?? { label: d.type, icon: <FileText className="h-3.5 w-3.5" />, color: "text-gray-400 bg-gray-500/10 border-gray-500/20" };
+          const isOpen = expanded === d.id;
+          const content = d.content as Record<string, any>;
+          return (
+            <div key={d.id} className="border border-border/50 rounded-lg overflow-hidden">
+              <div
+                className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-muted/30 transition-colors"
+                onClick={() => setExpanded(isOpen ? null : d.id)}
+              >
+                <span className={`flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded border ${meta.color}`}>
+                  {meta.icon} {meta.label}
+                </span>
+                <span className="text-xs font-medium flex-1 truncate">{d.title}</span>
+                <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${STATUS_BADGE[d.status] ?? ""}`}>
+                  {d.status === "needs_input" ? "butuh input" : d.status === "resolved" ? "selesai" : d.status}
+                </Badge>
+                {isOpen ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+              </div>
+              {isOpen && (
+                <div className="px-3 pb-3 space-y-2 border-t border-border/30 pt-2">
+                  {/* Content rendering */}
+                  {d.type === "CLARIFYING_QUESTIONS" && Array.isArray(content.items) && (
+                    <ul className="space-y-1">
+                      {(content.items as string[]).map((q, i) => (
+                        <li key={i} className="flex gap-2 text-xs text-foreground/80">
+                          <CircleHelp className="h-3.5 w-3.5 mt-0.5 shrink-0 text-yellow-500" />
+                          <span>{q}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {d.type === "ANSWER_SUMMARY" && typeof content.text === "string" && (
+                    <p className="text-xs text-foreground/80 line-clamp-6 whitespace-pre-wrap">{content.text}</p>
+                  )}
+                  {d.type === "ANSWER_SUMMARY" && Array.isArray(content.actionItems) && content.actionItems.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Action Items</p>
+                      <ul className="space-y-1">
+                        {(content.actionItems as string[]).map((a, i) => (
+                          <li key={i} className="flex gap-2 text-xs text-foreground/80">
+                            <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0 text-blue-400" />
+                            <span>{a}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-1">
+                    {d.status !== "resolved" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-[11px] px-2 text-green-500 border-green-500/30 hover:bg-green-500/10"
+                        onClick={() => statusMutation.mutate({ id: d.id, status: "resolved" })}
+                        disabled={statusMutation.isPending}
+                        data-testid={`btn-resolve-deliverable-${d.id}`}
+                      >
+                        <CheckCircle2 className="h-3 w-3 mr-1" /> Selesai
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[11px] px-2 text-muted-foreground"
+                      onClick={() => statusMutation.mutate({ id: d.id, status: "archived" })}
+                      disabled={statusMutation.isPending}
+                      data-testid={`btn-archive-deliverable-${d.id}`}
+                    >
+                      <Archive className="h-3 w-3 mr-1" /> Arsipkan
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-[11px] px-2 text-red-400 hover:text-red-500 ml-auto"
+                      onClick={() => deleteMutation.mutate(d.id)}
+                      disabled={deleteMutation.isPending}
+                      data-testid={`btn-delete-deliverable-${d.id}`}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {archived.length > 0 && (
+          <p className="text-[11px] text-muted-foreground text-center">
+            + {archived.length} deliverable diarsipkan
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 export function AgenticAIPanel() {
@@ -2776,6 +2963,9 @@ export function AgenticAIPanel() {
 
       {/* ── INTER-AGENT API ── */}
       <InterAgentPanel agent={agent} updateAgent={updateAgent} toast={toast} />
+
+      {/* ── AGENTIC DELIVERABLES ── */}
+      {agent && <AgenticDeliverablesPanel agentId={String(agent.id)} />}
 
       {/* Memory Management Section */}
       {agent && <MemoryManager agentId={String(agent.id)} />}

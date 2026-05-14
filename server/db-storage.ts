@@ -41,6 +41,7 @@ import {
   storeProducts,
   storeOrders,
   scalevMappings,
+  agenticDeliverables,
 } from "@shared/schema";
 import type {
   TenderDocumentCatalog,
@@ -55,6 +56,8 @@ import type {
   InsertStoreOrder,
   ScalevMapping,
   InsertScalevMapping,
+  AgenticDeliverable,
+  InsertAgenticDeliverable,
 } from "@shared/schema";
 import { applyDefaultPolicies } from "./lib/agent-policies";
 import type { IStorage } from "./storage";
@@ -3596,6 +3599,44 @@ export class DatabaseStorage implements IStorage {
       .update(tenderAlertProfiles)
       .set({ lastNotifiedAt: new Date() })
       .where(eq(tenderAlertProfiles.userId, userId));
+  }
+
+  // ── Agentic Deliverables ─────────────────────────────────────────────────
+  async getAgenticDeliverables(agentId: string): Promise<AgenticDeliverable[]> {
+    return db.select().from(agenticDeliverables)
+      .where(eq(agenticDeliverables.agentId, parseInt(agentId)))
+      .orderBy(desc(agenticDeliverables.updatedAt));
+  }
+
+  async upsertAgenticDeliverable(data: InsertAgenticDeliverable): Promise<AgenticDeliverable> {
+    const now = new Date();
+    const existing = await db.select().from(agenticDeliverables)
+      .where(eq(agenticDeliverables.dedupeKey, data.dedupeKey)).limit(1);
+    if (existing.length > 0) {
+      const [updated] = await db.update(agenticDeliverables)
+        .set({ title: data.title, content: data.content, status: data.status ?? existing[0].status, updatedAt: now })
+        .where(eq(agenticDeliverables.id, existing[0].id))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(agenticDeliverables)
+      .values({ ...data, status: data.status ?? "open", createdAt: now, updatedAt: now })
+      .returning();
+    return created;
+  }
+
+  async updateAgenticDeliverableStatus(id: string, status: string): Promise<AgenticDeliverable | undefined> {
+    const [updated] = await db.update(agenticDeliverables)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(agenticDeliverables.id, parseInt(id)))
+      .returning();
+    return updated;
+  }
+
+  async deleteAgenticDeliverable(id: string): Promise<boolean> {
+    const result = await db.delete(agenticDeliverables)
+      .where(eq(agenticDeliverables.id, parseInt(id)));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 
