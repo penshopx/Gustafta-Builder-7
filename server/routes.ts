@@ -1215,8 +1215,8 @@ export async function registerRoutes(
       const includeArchived = req.query.includeArchived === "true";
 
       const userId = (req.user as any)?.claims?.sub || "";
-      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((id: string) => id.trim()).filter(Boolean);
-      const isAdmin = userId && adminIds.includes(userId);
+      const role = await getDbRole(req);
+      const isAdmin = role === "admin" || role === "superadmin";
 
       let agents = await storage.getAgents(toolboxId);
 
