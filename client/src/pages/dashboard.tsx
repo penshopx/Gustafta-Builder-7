@@ -445,6 +445,17 @@ export default function Dashboard() {
     },
   });
 
+  // Demo agent — shown in sidebar when user has no agents
+  const { data: demoAgent } = useQuery<{ id: number; name: string; description: string; emoji?: string; color?: string } | null>({
+    queryKey: ["/api/agents/demo"],
+    queryFn: async () => {
+      const res = await fetch("/api/agents/demo", { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: archivedAgents = [] } = useQuery<any[]>({
     queryKey: ["/api/agents/archived"],
     queryFn: async () => {
@@ -1576,8 +1587,27 @@ export default function Dashboard() {
                           <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 py-1">Alat Bantu</div>
                         )}
                         {regularAgents.length === 0 && orchAgents.length === 0 ? (
-                          <div className="py-3 text-sm text-muted-foreground text-center">
-                            Belum ada Alat Bantu
+                          <div className="py-2 space-y-1">
+                            <div className="text-xs text-muted-foreground text-center pb-1">Belum ada Alat Bantu</div>
+                            {demoAgent && (
+                              <a
+                                href={`/chat/${demoAgent.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors border border-dashed border-primary/30 text-primary/70 hover:bg-primary/5 hover:text-primary"
+                                data-testid="nav-demo-agent"
+                              >
+                                <Avatar className="w-5 h-5 shrink-0">
+                                  <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                                    {demoAgent.emoji || demoAgent.name.substring(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <div className="truncate text-xs font-medium">{demoAgent.name}</div>
+                                  <div className="text-[10px] text-muted-foreground">Coba agen demo →</div>
+                                </div>
+                              </a>
+                            )}
                           </div>
                         ) : (
                           regularAgents.map((agent) => (

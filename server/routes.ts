@@ -1189,6 +1189,23 @@ export async function registerRoutes(
     }
   });
 
+  // GET /api/agents/demo — random active agent as demo (public, no auth needed)
+  app.get("/api/agents/demo", async (_req, res) => {
+    try {
+      const [row] = await db
+        .select({ id: agentsTable.id, name: agentsTable.name, description: agentsTable.description, category: agentsTable.category })
+        .from(agentsTable)
+        .where(eq(agentsTable.isActive, true))
+        .orderBy(sqlExpr`RANDOM()`)
+        .limit(1);
+      if (!row) return res.status(404).json({ error: "No demo agent" });
+      res.json(row);
+    } catch (err) {
+      console.error("[/api/agents/demo]", err);
+      res.status(500).json({ error: "Failed" });
+    }
+  });
+
   // ==================== Agent Routes (Protected) ====================
   
   // Get all agents (optionally filter by toolbox)
