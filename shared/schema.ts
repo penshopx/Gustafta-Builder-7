@@ -253,6 +253,7 @@ export const agents = pgTable("agents", {
   deliverableBundle: text("deliverable_bundle").default(""),
   orchestratorConfig: jsonb("orchestrator_config").default({}),
   agenticSubAgents: jsonb("agentic_sub_agents").default([]),
+  agenticConfig: jsonb("agentic_config").default({}),
   isActive: boolean("is_active").default(false),
   isEnabled: boolean("is_enabled").default(true).notNull(),
   folderName: text("folder_name"),
@@ -803,7 +804,15 @@ export const insertAgentSchema = z.object({
     agentId: z.number(),
     role: z.string().default(""),
     description: z.string().default(""),
+    outputFormat: z.enum(["text", "json"]).optional().default("text"),
+    tags: z.array(z.string()).optional().default([]),
+    priority: z.number().optional().default(0),
   })).optional().default([]),
+  agenticConfig: z.object({
+    maxParallelSubAgents: z.number().optional().default(4),
+    criticEnabled: z.boolean().optional().default(false),
+    criticStrictness: z.enum(["fast", "strict"]).optional().default("fast"),
+  }).optional().default({}),
 }).refine(
   (data) => {
     // Orchestrator must have bigIdeaId, Module must have toolboxId

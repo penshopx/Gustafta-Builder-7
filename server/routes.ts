@@ -3205,13 +3205,21 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       // Send user message first
       res.write(`data: ${JSON.stringify({ type: "user_message", message: userMessage })}\n\n`);
 
-      // ── INTER-AGENT API: Parallel Sub-Agent Orchestration v2 ────────────────
-      const subAgentsConfig = (agent as any).agenticSubAgents as Array<{ agentId: number; role: string; description: string }> | null | undefined;
-      if (Array.isArray(subAgentsConfig) && subAgentsConfig.length > 0) {
+      // ── INTER-AGENT API: MultiClaw Level 4 Orchestration ────────────────────
+      const subAgentsConfigRaw = (agent as any).agenticSubAgents as Array<SubAgentLink> | null | undefined;
+      if (Array.isArray(subAgentsConfigRaw) && subAgentsConfigRaw.length > 0) {
         try {
           const orchStart = Date.now();
-          const subAgentMeta = subAgentsConfig.map(s => ({ agentId: s.agentId, role: s.role, description: s.description }));
-          res.write(`data: ${JSON.stringify({ type: "orchestrating_start", subAgents: subAgentMeta, total: subAgentsConfig.length })}\n\n`);
+
+          // Read MultiClaw L4 config from agent (agenticConfig jsonb field)
+          const agentCfg = (agent as any).agenticConfig as any ?? {};
+          const cap: number = typeof agentCfg?.maxParallelSubAgents === "number" ? Math.max(1, agentCfg.maxParallelSubAgents) : 4;
+          const criticEnabled: boolean = agentCfg?.criticEnabled === true;
+
+          // Sort candidates by priority (higher first), stable
+          const candidatesSorted = sortByPriorityStable(subAgentsConfigRaw);
+          const subAgentMeta = candidatesSorted.map(s => ({ agentId: s.agentId, role: s.role, description: s.description, outputFormat: s.outputFormat, priority: s.priority }));
+          res.write(`data: ${JSON.stringify({ type: "orchestrating_start", subAgents: subAgentMeta, total: candidatesSorted.length, cap, criticEnabled })}\n\n`);
 
           // Extract conversation history (user+assistant turns) for context passing
           const convHistory = chatMessages
@@ -3251,45 +3259,119 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           }
           // ─────────────────────────────────────────────────────────────────────
 
-          // Phase 2: Call all sub-agents in parallel with conversation context + 25s timeout
+          // ── Phase 1: Selective Router (only when N > cap) ────────────────────
+          let selectedCandidates = candidatesSorted;
+          if (candidatesSorted.length > cap) {
+            const intentSummary = buildIntentSummaryA(userContent, (agent as any).name);
+            const routerResult = await routeAgentsLLMInternal(userContent, intentSummary, candidatesSorted, cap);
+            if (routerResult.ids.length > 0) {
+              const picked = pickByIdsPreserveOrder(candidatesSorted, routerResult.ids).slice(0, cap);
+              selectedCandidates = picked.length > 0 ? picked : candidatesSorted.slice(0, cap);
+            } else {
+              selectedCandidates = candidatesSorted.slice(0, cap);
+            }
+            res.write(`data: ${JSON.stringify({ type: "router_decision", selected: selectedCandidates.map(s => s.agentId), fromTotal: candidatesSorted.length, cap, parseOk: routerResult.parseOk, reason: routerResult.reason ?? "" })}\n\n`);
+          }
+          // ─────────────────────────────────────────────────────────────────────
+
+          // ── Phase 2: Dispatch selected sub-agents in parallel ─────────────────
           const subAgentResults = await Promise.allSettled(
-            subAgentsConfig.map(async (subCfg) => {
+            selectedCandidates.map(async (subCfg) => {
               const subAgentIdStr = String(subCfg.agentId);
-              res.write(`data: ${JSON.stringify({ type: "sub_agent_start", agentId: subCfg.agentId, role: subCfg.role })}\n\n`);
+              const wantsJson = subCfg.outputFormat === "json";
+              res.write(`data: ${JSON.stringify({ type: "sub_agent_start", agentId: subCfg.agentId, role: subCfg.role, jsonMode: wantsJson })}\n\n`);
               const t0 = Date.now();
-              const result = await callAgentInternal(subAgentIdStr, enrichedUserContent, convHistory, 25000);
-              const elapsed = Date.now() - t0;
-              res.write(`data: ${JSON.stringify({ type: "sub_agent_done", agentId: subCfg.agentId, role: subCfg.role, elapsed, chars: result.length, preview: result.substring(0, 300) })}\n\n`);
-              return { agentId: subCfg.agentId, role: subCfg.role, result };
+
+              // JSON mode: prepend instruction so agent knows to output JSON
+              let callMessage = enrichedUserContent;
+              if (wantsJson) {
+                callMessage = `[SYSTEM: Output ONLY a valid JSON object. Required keys: agentName, summary, confidence (0-1), claims (array), questions (array), actions (array). No markdown, no code fences.]\n\n${enrichedUserContent}`;
+              }
+
+              const rawResult = await callAgentInternal(
+                subAgentIdStr, callMessage, convHistory, 25000,
+                wantsJson ? { type: "json_object" } : undefined,
+              );
+              const durationMs = Date.now() - t0;
+
+              let report: SubAgentReport;
+              if (wantsJson) {
+                try {
+                  const obj = JSON.parse(extractJsonLike(rawResult));
+                  report = normalizeSubAgentReport(obj, subCfg.agentId, subCfg.role, durationMs);
+                } catch {
+                  report = {
+                    agentId: subCfg.agentId, role: subCfg.role, agentName: subCfg.role,
+                    summary: "RAW_UNPARSED: " + rawResult.slice(0, 1500),
+                    confidence: 0.2, claims: [], questions: [], actions: [],
+                    parseOk: false, durationMs,
+                  };
+                }
+                res.write(`data: ${JSON.stringify({ type: "sub_agent_done", agentId: subCfg.agentId, role: subCfg.role, elapsed: durationMs, jsonMode: true, parseOk: report.parseOk, confidence: report.confidence, preview: report.summary.substring(0, 200) })}\n\n`);
+              } else {
+                report = {
+                  agentId: subCfg.agentId, role: subCfg.role, agentName: subCfg.role,
+                  summary: rawResult, confidence: 0.7,
+                  claims: [], questions: [], actions: [],
+                  parseOk: true, durationMs,
+                };
+                res.write(`data: ${JSON.stringify({ type: "sub_agent_done", agentId: subCfg.agentId, role: subCfg.role, elapsed: durationMs, chars: rawResult.length, preview: rawResult.substring(0, 300) })}\n\n`);
+              }
+              return report;
             })
           );
+          // ─────────────────────────────────────────────────────────────────────
 
-          // Phase 3: Separate successful vs failed results
-          const successfulResults = subAgentResults
-            .filter((r): r is PromiseFulfilledResult<{ agentId: number; role: string; result: string }> => r.status === "fulfilled")
+          // ── Phase 3: Aggregate reports ────────────────────────────────────────
+          const successfulReports = subAgentResults
+            .filter((r): r is PromiseFulfilledResult<SubAgentReport> => r.status === "fulfilled")
             .map(r => r.value);
-          const failedResults = subAgentResults
-            .filter(r => r.status === "rejected")
-            .length;
+          const failedCount = subAgentResults.filter(r => r.status === "rejected").length;
 
-          if (successfulResults.length > 0) {
-            const subAgentContext = successfulResults
-              .map(r => `╔══ ${r.role || `Agent #${r.agentId}`} ══╗\n${r.result}\n╚═══════════════════════════════╝`)
-              .join("\n\n");
-            // Inject into system prompt (first message in chatMessages)
+          if (successfulReports.length > 0) {
+            const subAgentContext = successfulReports.map(report => {
+              if (report.parseOk && report.claims.length > 0) {
+                return `╔══ ${report.agentName} (${(report.confidence * 100).toFixed(0)}%) ══╗\n${renderSubAgentReport(report)}\n╚═══════════════════════════════╝`;
+              }
+              return `╔══ ${report.role || `Agent #${report.agentId}`} ══╗\n${report.summary}\n╚═══════════════════════════════╝`;
+            }).join("\n\n");
+
+            // ── Phase 4: Critic Gate (if enabled) ────────────────────────────
+            let criticPassed = true;
+            let criticClarifyingBlock = "";
+            if (criticEnabled) {
+              const reportsSummary = successfulReports.map(r =>
+                `Agent: ${r.agentName}\nSummary: ${r.summary.slice(0, 500)}`
+              ).join("\n---\n");
+              const criticResult = await criticGateInternal(userContent, reportsSummary);
+              res.write(`data: ${JSON.stringify({ type: "critic_result", pass: criticResult.pass, confidence: criticResult.confidence, missingCount: criticResult.missingInfoQuestions.length, conflictsCount: criticResult.conflicts.length })}\n\n`);
+              if (!criticResult.pass && criticResult.missingInfoQuestions.length > 0) {
+                criticPassed = false;
+                const qList = criticResult.missingInfoQuestions.map((q, i) => `   ${i + 1}. ${q}`).join("\n");
+                const conflictList = criticResult.conflicts.length > 0
+                  ? `\n\nKonflik yang perlu diselesaikan:\n${criticResult.conflicts.map(c => `   • ${c}`).join("\n")}`
+                  : "";
+                criticClarifyingBlock = `\n\n═══ CRITIC GATE: INFORMASI BELUM CUKUP ═══\nJANGAN buat jawaban final. Sampaikan:\n1. Apa yang sudah diketahui (1-2 kalimat ringkas)\n2. Pertanyaan klarifikasi yang perlu dijawab user:\n${qList}${conflictList}\nGunakan gaya konsultatif. Jangan mengarang jawaban.`;
+              }
+            }
+            // ─────────────────────────────────────────────────────────────────
+
+            // Inject into system prompt
             if (chatMessages.length > 0 && chatMessages[0].role === "system") {
               const existingSystemPrompt = typeof chatMessages[0].content === "string" ? chatMessages[0].content : "";
+              const synthesisInstruction = criticPassed
+                ? `\n\n═══ INSTRUKSI SINTESIS WAJIB ═══\nGunakan SELURUH laporan sub-agen di atas sebagai input utama. Sintesiskan menjadi 1 respons terpadu yang:\n1. Dimulai dengan STATUS KESELURUHAN (siap/bersyarat/belum siap)\n2. Merangkum temuan kritis dari setiap sub-agen\n3. Memberikan PRIORITAS TINDAKAN yang konkret dan terurut\n4. Menggunakan bahasa bisnis yang jelas\nJANGAN ulangi laporan mentah — olah menjadi sintesis eksekutif.`
+                : criticClarifyingBlock;
               chatMessages[0] = {
                 role: "system",
-                content: existingSystemPrompt + `\n\n═══════════════════════════════════════════════\nLAPORAN PARALEL SUB-AGEN (${successfulResults.length}/${subAgentsConfig.length} berhasil, ${failedResults} gagal, ${Date.now() - orchStart}ms)\n═══════════════════════════════════════════════\n\n${subAgentContext}\n\n═══ INSTRUKSI SINTESIS WAJIB ═══\nGunakan SELURUH laporan sub-agen di atas sebagai input utama. Sintesiskan menjadi 1 respons terpadu yang:\n1. Dimulai dengan STATUS KESELURUHAN (siap/bersyarat/belum siap)\n2. Merangkum temuan kritis dari setiap sub-agen\n3. Memberikan PRIORITAS TINDAKAN yang konkret dan terurut\n4. Menggunakan bahasa bisnis yang jelas\nJANGAN ulangi laporan mentah — olah menjadi sintesis eksekutif.`,
+                content: existingSystemPrompt + `\n\n═══════════════════════════════════════════════\nMULTICLAW L4 — LAPORAN SUB-AGEN (${successfulReports.length}/${selectedCandidates.length} berhasil, ${failedCount} gagal, ${Date.now() - orchStart}ms)\n═══════════════════════════════════════════════\n\n${subAgentContext}${synthesisInstruction}`,
               };
             }
-            res.write(`data: ${JSON.stringify({ type: "aggregating", count: successfulResults.length, failed: failedResults, totalMs: Date.now() - orchStart })}\n\n`);
+            res.write(`data: ${JSON.stringify({ type: "aggregating", count: successfulReports.length, failed: failedCount, totalMs: Date.now() - orchStart, criticEnabled, criticPassed })}\n\n`);
           }
         } catch (orchErr) {
-          console.error("[Inter-agent API] Orchestration error:", orchErr);
+          console.error("[MultiClaw L4] Orchestration error:", orchErr);
           res.write(`data: ${JSON.stringify({ type: "orchestration_error", error: String(orchErr) })}\n\n`);
-          // Continue with normal orchestrator response even if sub-agents fail
         }
       }
       // ─────────────────────────────────────────────────────────────────────────
@@ -4670,11 +4752,13 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
   // ── callAgentInternal: call a sub-agent's AI without HTTP overhead ────────
   // v2: timeout protection, increased maxTokens, conversation history, """ strip
+  // v3: optional responseFormat for JSON mode (MultiClaw L4)
   async function callAgentInternal(
     agentId: string,
     userMessage: string,
     conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>,
     timeoutMs: number = 25000,
+    responseFormat?: { type: "json_object" },
   ): Promise<string> {
     const subAgent = await storage.getAgent(agentId);
     if (!subAgent) return `[Sub-agent ${agentId} tidak ditemukan]`;
@@ -4735,8 +4819,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
+        const completionParams: any = { model: modelName, messages: chatMessages, max_tokens: maxTokens, temperature };
+        if (responseFormat && !agentModel.startsWith("deepseek-") && agentModel !== "custom") {
+          completionParams.response_format = responseFormat;
+        }
         const completion = await client.chat.completions.create(
-          { model: modelName, messages: chatMessages, max_tokens: maxTokens, temperature },
+          completionParams,
           { signal: controller.signal as any },
         );
         clearTimeout(timer);
@@ -4754,6 +4842,244 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   }
   // ─────────────────────────────────────────────────────────────────────────
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MultiClaw Level 4 — Utility Functions
+  // ══════════════════════════════════════════════════════════════════════════
+
+  type SubAgentLink = {
+    agentId: number;
+    role: string;
+    description?: string;
+    outputFormat?: "json" | "text";
+    tags?: string[];
+    priority?: number;
+  };
+
+  type SubAgentReport = {
+    agentId: number;
+    role: string;
+    agentName: string;
+    summary: string;
+    confidence: number;
+    claims: string[];
+    questions: string[];
+    actions: string[];
+    parseOk: boolean;
+    durationMs: number;
+  };
+
+  type CriticResult = {
+    pass: boolean;
+    confidence: number;
+    missingInfoQuestions: string[];
+    conflicts: string[];
+    mustFix: string[];
+    suggestedAnswerOutline: string[];
+  };
+
+  function extractJsonLike(text: string): string {
+    let t = (text ?? "").trim();
+    t = t.replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
+    const first = t.indexOf("{");
+    const last = t.lastIndexOf("}");
+    if (first >= 0 && last > first) t = t.slice(first, last + 1);
+    return t.trim();
+  }
+
+  function normalizeSubAgentReport(obj: any, agentId: number, role: string, durationMs: number): SubAgentReport {
+    const agentName = typeof obj?.agentName === "string" && obj.agentName ? obj.agentName : role;
+    const summary = typeof obj?.summary === "string" ? obj.summary : "";
+    let confidence = typeof obj?.confidence === "number" ? obj.confidence : 0.3;
+    confidence = Math.max(0, Math.min(1, confidence));
+    const toStrArray = (v: any): string[] =>
+      Array.isArray(v) ? v.filter((x: any) => typeof x === "string").slice(0, 12) : [];
+    return {
+      agentId, role, agentName, summary, confidence,
+      claims: toStrArray(obj?.claims),
+      questions: toStrArray(obj?.questions),
+      actions: toStrArray(obj?.actions),
+      parseOk: true, durationMs,
+    };
+  }
+
+  function renderSubAgentReport(report: SubAgentReport): string {
+    const summaryLines = report.summary.split("\n").slice(0, 6).join("\n");
+    const fmt = (arr: string[], prefix: string) => arr.slice(0, 5).map(x => `  ${prefix} ${x}`).join("\n") || `  (none)`;
+    return `SUB-AGENT: ${report.agentName} [confidence: ${(report.confidence * 100).toFixed(0)}%]\nSummary: ${summaryLines}\nClaims:\n${fmt(report.claims, "•")}\nQuestions:\n${fmt(report.questions, "?")}\nActions:\n${fmt(report.actions, "→")}`;
+  }
+
+  const L4_DOMAIN_KEYWORDS = [
+    { domain: "SBU", keys: ["sbu", "sertifikat badan usaha", "badan usaha"] },
+    { domain: "SKK", keys: ["skk", "sertifikasi kompetensi kerja", "sertifikasi kompetensi"] },
+    { domain: "Tender", keys: ["tender", "pengadaan", "lpse", "sirup"] },
+    { domain: "Perizinan", keys: ["izin", "perizinan", "oss", "nib"] },
+    { domain: "Konstruksi", keys: ["regulasi", "jasa konstruksi", "bujk", "kontraktor"] },
+    { domain: "K3/SMK3", keys: ["k3", "smk3", "keselamatan kerja"] },
+    { domain: "ISO", keys: ["iso 9001", "iso 14001", "manajemen mutu"] },
+    { domain: "Kontrak", keys: ["kontrak", "fidic", "spk", "perjanjian"] },
+    { domain: "ASKOM", keys: ["askom", "asesmen", "asesi", "asesor"] },
+    { domain: "Legal", keys: ["hukum", "legal", "regulasi", "peraturan"] },
+  ];
+  const L4_DELIVERABLE_KEYWORDS = [
+    { name: "Checklist", keys: ["checklist", "daftar", "persyaratan", "syarat"] },
+    { name: "Timeline", keys: ["timeline", "jadwal", "roadmap", "deadline", "target"] },
+    { name: "Draft/Template", keys: ["draft", "template", "surat", "format", "dokumen"] },
+    { name: "Ringkasan", keys: ["ringkas", "summary", "rangkuman", "resume"] },
+    { name: "Scorecard", keys: ["scorecard", "skor", "penilaian", "readiness"] },
+    { name: "Audit/Review", keys: ["audit", "cek", "review", "compliance", "gap"] },
+  ];
+  const L4_SBU_REQUIRED = [
+    { label: "kualifikasi", keys: ["kualifikasi", "kecil", "menengah", "besar"] },
+    { label: "subklasifikasi/bidang", keys: ["subklasifikasi", "klasifikasi", "bidang"] },
+    { label: "KBLI", keys: ["kbli"] },
+  ];
+
+  function buildIntentSummaryA(userText: string, agentName?: string): string {
+    const raw = (userText ?? "").trim();
+    const t = raw.toLowerCase();
+    const domains: string[] = [];
+    for (const d of L4_DOMAIN_KEYWORDS) {
+      if (d.keys.some(k => t.includes(k))) domains.push(d.domain);
+      if (domains.length >= 3) break;
+    }
+    if (agentName) {
+      const an = agentName.toLowerCase();
+      if (an.includes("sbu") && !domains.includes("SBU")) domains.unshift("SBU");
+      else if (an.includes("skk") && !domains.includes("SKK")) domains.unshift("SKK");
+      else if (an.includes("tender") && !domains.includes("Tender")) domains.unshift("Tender");
+    }
+    const deliverables: string[] = [];
+    for (const d of L4_DELIVERABLE_KEYWORDS) {
+      if (d.keys.some(k => t.includes(k))) deliverables.push(d.name);
+      if (deliverables.length >= 2) break;
+    }
+    if (deliverables.length === 0) {
+      if (/\b(buat|susun|rancang|siapkan)\b/.test(t)) deliverables.push("Draft/Checklist");
+      else if (/\b(jelaskan|apa|bagaimana)\b/.test(t)) deliverables.push("Ringkasan");
+      else if (/\b(cek|audit|review)\b/.test(t)) deliverables.push("Audit");
+    }
+    const constraints: string[] = [];
+    if (/\b(bilingual|id\/en|english)\b/.test(t)) constraints.push("bilingual");
+    if (/\b(deadline|hari ini|besok|minggu ini)\b/.test(t)) constraints.push("deadline-sensitive");
+    if (/\b(rahasia|konfidensial)\b/.test(t)) constraints.push("confidential");
+    const unknowns: string[] = [];
+    if (domains.includes("SBU")) {
+      for (const req of L4_SBU_REQUIRED) {
+        if (!req.keys.some(k => t.includes(k))) unknowns.push(req.label);
+      }
+    }
+    const goal = raw.split(/\n|[.?!]/)[0].trim().slice(0, 160);
+    return `INTENT:\n- Goal: ${goal || "User needs help"}\n- Domain: ${domains.length ? domains.join(", ") : "General"}\n- Deliverable: ${deliverables.length ? deliverables.join(", ") : "Answer"}\n- Constraints: ${constraints.length ? constraints.join("; ") : "-"}\n- Unknowns: ${unknowns.length ? unknowns.join("; ") : "-"}`;
+  }
+
+  function sortByPriorityStable(arr: SubAgentLink[]): SubAgentLink[] {
+    return arr
+      .map((x, i) => ({ x, i }))
+      .sort((a, b) => ((b.x.priority ?? 0) - (a.x.priority ?? 0)) || (a.i - b.i))
+      .map(o => o.x);
+  }
+
+  function uniqueNumPreserveOrder(arr: number[]): number[] {
+    const seen = new Set<number>();
+    const out: number[] = [];
+    for (const x of arr) { if (!seen.has(x)) { seen.add(x); out.push(x); } }
+    return out;
+  }
+
+  function pickByIdsPreserveOrder(candidates: SubAgentLink[], ids: number[]): SubAgentLink[] {
+    const idSet = new Set(ids);
+    return candidates.filter(c => idSet.has(c.agentId));
+  }
+
+  function minifyCandidates(links: SubAgentLink[]) {
+    const oneLine = (s: string) => (s ?? "").replace(/\s+/g, " ").trim();
+    const clampStr = (s: string, max: number) => s.length > max ? s.slice(0, max - 1) + "…" : s;
+    return links.map(l => {
+      const desc = clampStr(oneLine(l.description ?? "") || oneLine(l.role) || `Agent ${l.agentId}`, 120);
+      const tags = l.tags?.length
+        ? [...new Set(l.tags.map(x => clampStr(oneLine(x.toLowerCase()), 24)).filter(Boolean))].slice(0, 6)
+        : undefined;
+      const out: any = { agentId: l.agentId, role: oneLine(l.role) || "SUBAGENT", desc };
+      if (tags?.length) out.tags = tags;
+      if (typeof l.priority === "number") out.priority = l.priority;
+      return out;
+    });
+  }
+
+  async function routeAgentsLLMInternal(
+    question: string,
+    intentSummary: string,
+    candidatesSorted: SubAgentLink[],
+    cap: number,
+  ): Promise<{ ids: number[]; reason?: string; parseOk: boolean }> {
+    if (!openaiApiKey) return { ids: [], parseOk: false };
+    try {
+      const candidatesMin = minifyCandidates(candidatesSorted);
+      const routerPrompt = `Select up to ${cap} agents from the candidate list that best match the user request.\nReturn JSON exactly: {"selectedAgentIds":[...],"reason":"..."}\n\nINTENT_SUMMARY:\n${intentSummary}\n\nUSER_QUESTION:\n${question.slice(0, 800)}\n\nCANDIDATE_AGENTS:\n${JSON.stringify(candidatesMin)}`;
+      const resp = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are an agent router. Output ONLY valid JSON. No markdown. No code fences." },
+          { role: "user", content: routerPrompt },
+        ],
+        max_tokens: 300,
+        temperature: 0,
+        response_format: { type: "json_object" },
+      });
+      const raw = resp.choices[0]?.message?.content ?? "";
+      const obj = JSON.parse(extractJsonLike(raw));
+      const rawIds = obj?.selectedAgentIds;
+      if (!Array.isArray(rawIds)) return { ids: [], parseOk: false };
+      const ids = uniqueNumPreserveOrder(
+        rawIds
+          .map((x: any) => typeof x === "number" ? Math.trunc(x) : (typeof x === "string" && /^\d+$/.test(x.trim()) ? parseInt(x.trim(), 10) : null))
+          .filter((x: any): x is number => typeof x === "number" && x > 0)
+      ).slice(0, cap);
+      const allowed = new Set(candidatesSorted.map(c => c.agentId));
+      return { ids: ids.filter(id => allowed.has(id)), reason: typeof obj?.reason === "string" ? obj.reason : undefined, parseOk: true };
+    } catch {
+      return { ids: [], reason: undefined, parseOk: false };
+    }
+  }
+
+  async function criticGateInternal(
+    question: string,
+    reportsSummary: string,
+  ): Promise<CriticResult> {
+    const DEFAULT: CriticResult = { pass: true, confidence: 0.6, missingInfoQuestions: [], conflicts: [], mustFix: [], suggestedAnswerOutline: [] };
+    if (!openaiApiKey) return DEFAULT;
+    try {
+      const resp = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are a strict evaluator. Output ONLY valid JSON. No markdown. No code fences." },
+          {
+            role: "user",
+            content: `Evaluate the aggregated sub-agent reports.\nRules:\n- If critical info is missing, set pass=false and propose 1-5 questions.\n- If agents disagree, list conflicts and mark mustFix.\n- If the answer would be speculation, fail it.\nReturn JSON:\n{"pass":boolean,"confidence":number,"missingInfoQuestions":string[],"conflicts":string[],"mustFix":string[],"suggestedAnswerOutline":string[]}\n\nUSER_QUESTION:\n${question.slice(0, 600)}\n\nSUB_AGENT_REPORTS:\n${reportsSummary.slice(0, 3000)}`,
+          },
+        ],
+        max_tokens: 600,
+        temperature: 0,
+        response_format: { type: "json_object" },
+      });
+      const raw = resp.choices[0]?.message?.content ?? "";
+      const obj = JSON.parse(extractJsonLike(raw));
+      const toStrArr = (v: any): string[] => Array.isArray(v) ? v.filter((x: any) => typeof x === "string").slice(0, 8) : [];
+      return {
+        pass: typeof obj.pass === "boolean" ? obj.pass : true,
+        confidence: typeof obj.confidence === "number" ? Math.max(0, Math.min(1, obj.confidence)) : 0.6,
+        missingInfoQuestions: toStrArr(obj.missingInfoQuestions),
+        conflicts: toStrArr(obj.conflicts),
+        mustFix: toStrArr(obj.mustFix),
+        suggestedAnswerOutline: toStrArr(obj.suggestedAnswerOutline),
+      };
+    } catch {
+      return DEFAULT;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
 
   async function generateAIResponse(agentId: string, userMessage: string): Promise<string> {
     const agent = await storage.getAgent(agentId);

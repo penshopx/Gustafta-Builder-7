@@ -552,7 +552,16 @@ function SelectRow({
   );
 }
 
-// ── InterAgentPanel: sub-agent selector for orchestrators ────────────────────
+type SubAgentLinkUI = {
+  agentId: number;
+  role: string;
+  description: string;
+  outputFormat?: "text" | "json";
+  tags?: string[];
+  priority?: number;
+};
+
+// ── InterAgentPanel: sub-agent selector for orchestrators (MultiClaw L4) ─────
 function InterAgentPanel({ agent, updateAgent, toast }: {
   agent: any;
   updateAgent: any;
@@ -560,14 +569,31 @@ function InterAgentPanel({ agent, updateAgent, toast }: {
 }) {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [subAgents, setSubAgents] = useState<Array<{ agentId: number; role: string; description: string }>>([]);
+  const [subAgents, setSubAgents] = useState<SubAgentLinkUI[]>([]);
   const [newRole, setNewRole] = useState("");
+  const [expandedAgent, setExpandedAgent] = useState<number | null>(null);
 
-  // Load sub-agents from agent config on mount
+  // MultiClaw L4 config state
+  const [l4Config, setL4Config] = useState({
+    maxParallelSubAgents: 4,
+    criticEnabled: false,
+    criticStrictness: "fast" as "fast" | "strict",
+  });
+  const [savingConfig, setSavingConfig] = useState(false);
+
+  // Load sub-agents + l4config from agent config on mount
   useEffect(() => {
     if (agent) {
       const raw = (agent as any).agenticSubAgents;
       if (Array.isArray(raw)) setSubAgents(raw);
+      const cfg = (agent as any).agenticConfig;
+      if (cfg && typeof cfg === "object") {
+        setL4Config(prev => ({
+          maxParallelSubAgents: typeof cfg.maxParallelSubAgents === "number" ? cfg.maxParallelSubAgents : prev.maxParallelSubAgents,
+          criticEnabled: typeof cfg.criticEnabled === "boolean" ? cfg.criticEnabled : prev.criticEnabled,
+          criticStrictness: cfg.criticStrictness === "strict" ? "strict" : "fast",
+        }));
+      }
     }
   }, [agent?.id]);
 
@@ -590,7 +616,7 @@ function InterAgentPanel({ agent, updateAgent, toast }: {
     enabled: !!agent && (!!bigIdeaId || !!toolboxId),
   });
 
-  const save = async (next: typeof subAgents) => {
+  const saveSubAgents = async (next: SubAgentLinkUI[]) => {
     try {
       await updateAgent.mutateAsync({ id: agent.id, data: { agenticSubAgents: next } as any });
       queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
@@ -600,26 +626,58 @@ function InterAgentPanel({ agent, updateAgent, toast }: {
     }
   };
 
+  const saveL4Config = async () => {
+    setSavingConfig(true);
+    try {
+      await updateAgent.mutateAsync({ id: agent.id, data: { agenticConfig: l4Config } as any });
+      queryClient.invalidateQueries({ queryKey: ["/api/agents"] });
+      toast({ title: "L4 Config Disimpan", description: "Konfigurasi MultiClaw Level 4 berhasil diperbarui." });
+    } catch {
+      toast({ title: "Error", description: "Gagal menyimpan konfigurasi L4", variant: "destructive" });
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
   const addSubAgent = async (candidateId: number, candidateName: string) => {
     if (subAgents.some(s => s.agentId === candidateId)) {
       toast({ description: "Agen ini sudah ditambahkan", variant: "destructive" });
       return;
     }
-    const next = [...subAgents, { agentId: candidateId, role: newRole || candidateName, description: "" }];
+    const next: SubAgentLinkUI[] = [...subAgents, {
+      agentId: candidateId,
+      role: newRole || candidateName,
+      description: "",
+      outputFormat: "text",
+      tags: [],
+      priority: 0,
+    }];
     setSubAgents(next);
     setNewRole("");
-    await save(next);
+    await saveSubAgents(next);
   };
 
   const removeSubAgent = async (agentId: number) => {
     const next = subAgents.filter(s => s.agentId !== agentId);
     setSubAgents(next);
-    await save(next);
+    await saveSubAgents(next);
+  };
+
+  const updateSubAgentField = (agentId: number, field: keyof SubAgentLinkUI, value: any) => {
+    const next = subAgents.map(s => s.agentId === agentId ? { ...s, [field]: value } : s);
+    setSubAgents(next);
+  };
+
+  const saveSubAgentInline = async (agentId: number) => {
+    await saveSubAgents(subAgents);
+    setExpandedAgent(null);
   };
 
   if (!agent) return null;
 
   const addableAgents = candidateAgents.filter(c => Number(c.id) !== Number(agent.id) && !subAgents.some(s => s.agentId === Number(c.id)));
+  const sortedSubAgents = [...subAgents].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  const jsonAgentCount = subAgents.filter(s => s.outputFormat === "json").length;
 
   return (
     <Card className="border-2 border-blue-200 dark:border-blue-800">
@@ -627,59 +685,203 @@ function InterAgentPanel({ agent, updateAgent, toast }: {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <Network className="h-4 w-4 text-blue-500" />
-            Inter-Agent API
+            MultiClaw Inter-Agent API
             {subAgents.length > 0 && (
               <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
                 {subAgents.length} sub-agen
               </span>
             )}
+            <span className="ml-0.5 text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">
+              L4
+            </span>
           </CardTitle>
           <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setIsOpen(!isOpen)} data-testid="toggle-inter-agent-panel">
             {isOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </Button>
         </div>
         <CardDescription>
-          Konfigurasikan sub-agen yang dipanggil secara paralel setiap kali chatbot ini menerima pesan. Hasilnya digabung menjadi satu respons oleh orchestrator.
+          MultiClaw Level 4: selective fan-out, JSON structured reports, critic gate. Sub-agen dipilih cerdas oleh router dan hasilnya disintesis oleh orchestrator.
         </CardDescription>
       </CardHeader>
 
       {isOpen && (
-        <CardContent className="space-y-4">
-          {/* Current sub-agents */}
-          {subAgents.length > 0 && (
+        <CardContent className="space-y-5">
+
+          {/* ── MultiClaw L4 Config ── */}
+          <div className="rounded-lg border border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/20 p-3 space-y-3">
+            <div className="flex items-center gap-2">
+              <Cpu className="h-3.5 w-3.5 text-violet-500" />
+              <span className="text-xs font-semibold text-violet-700 dark:text-violet-300 uppercase tracking-wide">MultiClaw L4 Engine Config</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Max Sub-Agen Paralel</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={l4Config.maxParallelSubAgents}
+                  onChange={e => setL4Config(p => ({ ...p, maxParallelSubAgents: Math.max(1, parseInt(e.target.value) || 4) }))}
+                  className="h-7 text-xs"
+                  data-testid="input-max-parallel-agents"
+                />
+                <p className="text-[10px] text-muted-foreground">Router aktif jika N &gt; nilai ini</p>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">Critic Strictness</Label>
+                <Select
+                  value={l4Config.criticStrictness}
+                  onValueChange={(v: "fast" | "strict") => setL4Config(p => ({ ...p, criticStrictness: v }))}
+                >
+                  <SelectTrigger className="h-7 text-xs" data-testid="select-critic-strictness">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fast">Fast (brainstorming)</SelectItem>
+                    <SelectItem value="strict">Strict (regulasi/hukum)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-[11px] font-medium flex items-center gap-1.5">
+                  <ShieldCheck className="h-3 w-3 text-violet-500" />
+                  Critic Gate
+                </Label>
+                <p className="text-[10px] text-muted-foreground">Evaluasi kualitas sebelum deliver jawaban</p>
+              </div>
+              <Switch
+                checked={l4Config.criticEnabled}
+                onCheckedChange={v => setL4Config(p => ({ ...p, criticEnabled: v }))}
+                data-testid="switch-critic-enabled"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <Button size="sm" className="h-7 text-xs bg-violet-600 hover:bg-violet-700" onClick={saveL4Config} disabled={savingConfig} data-testid="button-save-l4-config">
+                {savingConfig ? "Menyimpan..." : "Simpan L4 Config"}
+              </Button>
+              {jsonAgentCount > 0 && (
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                  {jsonAgentCount} agen JSON mode aktif
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* ── Current sub-agents ── */}
+          {sortedSubAgents.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sub-agen aktif</Label>
-              {subAgents.map(sa => {
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sub-agen aktif ({sortedSubAgents.length})</Label>
+              {sortedSubAgents.map(sa => {
                 const meta = candidateAgents.find(c => Number(c.id) === sa.agentId);
+                const isExpanded = expandedAgent === sa.agentId;
                 return (
-                  <div key={sa.agentId} className="flex items-center justify-between gap-2 p-2.5 rounded-lg border bg-muted/30" data-testid={`row-sub-agent-${sa.agentId}`}>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium truncate">{sa.role}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{meta?.name || `Agent #${sa.agentId}`}</p>
+                  <div key={sa.agentId} className="rounded-lg border bg-muted/20" data-testid={`row-sub-agent-${sa.agentId}`}>
+                    <div className="flex items-center justify-between gap-2 p-2.5">
+                      <button
+                        className="flex items-center gap-2 min-w-0 flex-1 text-left"
+                        onClick={() => setExpandedAgent(isExpanded ? null : sa.agentId)}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="text-xs font-medium truncate">{sa.role}</p>
+                            {sa.outputFormat === "json" && (
+                              <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">JSON</span>
+                            )}
+                            {(sa.priority ?? 0) > 0 && (
+                              <span className="text-[9px] px-1 py-0.5 rounded bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300">P{sa.priority}</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground truncate">{meta?.name || `Agent #${sa.agentId}`}</p>
+                        </div>
+                        <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                      </button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-destructive hover:text-destructive shrink-0"
+                        onClick={() => removeSubAgent(sa.agentId)}
+                        data-testid={`button-remove-sub-agent-${sa.agentId}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7 text-destructive hover:text-destructive shrink-0"
-                      onClick={() => removeSubAgent(sa.agentId)}
-                      data-testid={`button-remove-sub-agent-${sa.agentId}`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+
+                    {isExpanded && (
+                      <div className="border-t px-3 pb-3 pt-2.5 space-y-3 bg-background/50 rounded-b-lg">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-1">
+                            <Label className="text-[11px] text-muted-foreground">Output Format</Label>
+                            <Select
+                              value={sa.outputFormat ?? "text"}
+                              onValueChange={v => updateSubAgentField(sa.agentId, "outputFormat", v)}
+                            >
+                              <SelectTrigger className="h-7 text-xs" data-testid={`select-output-format-${sa.agentId}`}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="text">Text (default)</SelectItem>
+                                <SelectItem value="json">JSON Structured</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[11px] text-muted-foreground">Prioritas (0-10)</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={10}
+                              value={sa.priority ?? 0}
+                              onChange={e => updateSubAgentField(sa.agentId, "priority", parseInt(e.target.value) || 0)}
+                              className="h-7 text-xs"
+                              data-testid={`input-priority-${sa.agentId}`}
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[11px] text-muted-foreground">Tags (pisah koma, untuk router)</Label>
+                          <Input
+                            value={(sa.tags ?? []).join(", ")}
+                            onChange={e => updateSubAgentField(sa.agentId, "tags", e.target.value.split(",").map(t => t.trim()).filter(Boolean))}
+                            placeholder="sbu, regulasi, intake, mapping..."
+                            className="h-7 text-xs"
+                            data-testid={`input-tags-${sa.agentId}`}
+                          />
+                        </div>
+                        {sa.outputFormat === "json" && (
+                          <div className="flex items-start gap-1.5 p-2 rounded bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-[10px] text-emerald-700 dark:text-emerald-300">
+                            <CheckCircle2 className="h-3 w-3 shrink-0 mt-0.5" />
+                            <span>Mode JSON aktif: sub-agen akan mengembalikan laporan terstruktur (agentName, summary, confidence, claims, questions, actions) yang bisa diparse dan dievaluasi oleh critic.</span>
+                          </div>
+                        )}
+                        <Button
+                          size="sm"
+                          className="h-7 text-xs w-full"
+                          onClick={() => saveSubAgentInline(sa.agentId)}
+                          data-testid={`button-save-sub-agent-${sa.agentId}`}
+                        >
+                          Simpan Perubahan
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
           )}
 
-          {/* Add sub-agent */}
+          {/* ── Add sub-agent ── */}
           {addableAgents.length > 0 ? (
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Tambah sub-agen</Label>
               <Input
                 value={newRole}
                 onChange={e => setNewRole(e.target.value)}
-                placeholder="Label peran (opsional, misal: Spesialis Hukum)"
+                placeholder="Label peran (opsional, misal: Spesialis SBU)"
                 className="h-8 text-xs"
                 data-testid="input-sub-agent-role"
               />
@@ -705,7 +907,7 @@ function InterAgentPanel({ agent, updateAgent, toast }: {
             </div>
           ) : candidateAgents.length === 0 ? (
             <div className="text-[11px] text-muted-foreground bg-muted/30 rounded-md p-3">
-              Tidak ada agen lain yang ditemukan dalam BigIdea/Toolbox yang sama. Pastikan agen ini memiliki BigIdea atau Toolbox yang berisi agen lain.
+              Tidak ada agen lain yang ditemukan dalam BigIdea/Toolbox yang sama.
             </div>
           ) : (
             <div className="text-[11px] text-muted-foreground bg-muted/30 rounded-md p-3">
@@ -713,12 +915,15 @@ function InterAgentPanel({ agent, updateAgent, toast }: {
             </div>
           )}
 
-          {/* Info */}
-          <div className="flex items-start gap-2 p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-[11px] text-blue-700 dark:text-blue-300">
-            <Zap className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-            <span>
-              <strong>Cara kerja:</strong> Setiap pesan pengguna dikirim ke semua sub-agen secara paralel. Hasilnya diinjeksi ke konteks orchestrator, yang kemudian menyintesis satu respons terpadu. Ini mengupgrade platform ke level L2.5 (true multi-agent).
-            </span>
+          {/* ── How it works ── */}
+          <div className="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20 p-3 space-y-1.5 text-[11px] text-blue-700 dark:text-blue-300">
+            <div className="font-semibold flex items-center gap-1.5"><Zap className="h-3 w-3" /> MultiClaw L4 — Cara Kerja</div>
+            <div className="space-y-1 text-[10px] leading-relaxed">
+              <p><strong>1. Router:</strong> Jika sub-agen &gt; cap, LLM router memilih agen paling relevan berdasarkan intent pengguna</p>
+              <p><strong>2. Dispatch:</strong> Agen terpilih dipanggil paralel; agen JSON menghasilkan laporan terstruktur (confidence + claims)</p>
+              <p><strong>3. Critic Gate:</strong> (Jika aktif) Critic mengevaluasi kelengkapan — jika gagal, orchestrator meminta klarifikasi, bukan mengarang</p>
+              <p><strong>4. Synthesis:</strong> Orchestrator menyintesis semua laporan menjadi satu respons terpadu</p>
+            </div>
           </div>
         </CardContent>
       )}
