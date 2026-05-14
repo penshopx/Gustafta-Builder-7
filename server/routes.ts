@@ -3665,6 +3665,20 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const userId = req.user?.claims?.sub || "";
       const { resolvePlan, LEGACY_PLAN_MAP, PLAN_CONFIGS } = await import("@shared/feature-plans");
 
+      // Superadmin & admin get enterprise plan automatically
+      const role = await getDbRole(req);
+      if (role === "superadmin" || role === "admin") {
+        return res.json({
+          plan: "enterprise",
+          status: "active",
+          startDate: null,
+          endDate: null,
+          daysRemaining: null,
+          config: PLAN_CONFIGS.enterprise,
+          tier: 4,
+        });
+      }
+
       const subscription = await storage.getActiveSubscription(userId);
       const isActive = subscription?.status === "active";
       const planConfig = resolvePlan(subscription?.plan, isActive);
@@ -3694,7 +3708,21 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   app.get("/api/subscriptions/features", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || "";
-      const { resolvePlan } = await import("@shared/feature-plans");
+      const { resolvePlan, PLAN_CONFIGS } = await import("@shared/feature-plans");
+
+      // Superadmin & admin get enterprise features automatically
+      const role = await getDbRole(req);
+      if (role === "superadmin" || role === "admin") {
+        const ep = PLAN_CONFIGS.enterprise;
+        return res.json({ features: ep.features, limits: {
+          maxAgents: ep.maxAgents,
+          maxSeries: ep.maxSeries,
+          maxMiniAppTypes: ep.maxMiniAppTypes,
+          maxMessagesPerMonth: ep.maxMessagesPerMonth,
+          maxCustomDomains: ep.maxCustomDomains,
+        }, tier: 4, plan: "enterprise" });
+      }
+
       const subscription = await storage.getActiveSubscription(userId);
       const plan = resolvePlan(subscription?.plan, subscription?.status === "active");
       res.json({ features: plan.features, limits: {
