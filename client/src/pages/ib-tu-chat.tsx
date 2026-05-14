@@ -322,6 +322,8 @@ export default function IbTuChat() {
                 }
                 return updated;
               });
+            } else if (evt.type === "router_decision" || evt.type === "critic_result") {
+              // MultiClaw L4 events — acknowledged
             } else if (evt.type === "sub_agent_start") {
               const s = subAgentMap.get(evt.agentId);
               if (s) { s.status = "running"; subAgentMap.set(evt.agentId, { ...s }); }

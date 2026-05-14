@@ -321,6 +321,16 @@ export default function SbuClawChat() {
                 }
                 return updated;
               });
+            } else if (evt.type === "router_decision") {
+              // Router selected subset of agents — update display to fade out non-selected
+              const selectedIds: Set<number> = new Set(evt.selected ?? []);
+              subAgentMap.forEach((s, id) => {
+                if (selectedIds.size > 0 && !selectedIds.has(id)) {
+                  subAgentMap.set(id, { ...s, status: "waiting" });
+                }
+              });
+            } else if (evt.type === "critic_result") {
+              // Critic gate result — no specific display update needed for SBUClaw
             } else if (evt.type === "sub_agent_start") {
               const s = subAgentMap.get(evt.agentId);
               if (s) { s.status = "running"; subAgentMap.set(evt.agentId, { ...s }); }

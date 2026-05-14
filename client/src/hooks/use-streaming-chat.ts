@@ -11,12 +11,16 @@ interface StreamingChatOptions {
   onSubAgentStart?: (agentId: number, role: string) => void;
   onSubAgentDone?: (agentId: number, role: string, result: string) => void;
   onAggregating?: (count: number) => void;
+  onRouterDecision?: (selected: number[], fromTotal: number, reason?: string) => void;
+  onCriticResult?: (pass: boolean, confidence: number, missingCount: number) => void;
 }
 
 export interface SubAgentMeta {
   agentId: number;
   role: string;
   description?: string;
+  outputFormat?: "text" | "json";
+  priority?: number;
 }
 
 export interface SubAgentResult {
@@ -24,12 +28,35 @@ export interface SubAgentResult {
   role: string;
   result?: string;
   status: "pending" | "done" | "error";
+  elapsed?: number;
+  confidence?: number;
+  parseOk?: boolean;
+  jsonMode?: boolean;
+}
+
+export interface RouterDecision {
+  selected: number[];
+  fromTotal: number;
+  cap: number;
+  parseOk: boolean;
+  reason?: string;
+}
+
+export interface CriticDecision {
+  pass: boolean;
+  confidence: number;
+  missingCount: number;
+  conflictsCount: number;
 }
 
 export interface OrchestrationState {
   active: boolean;
-  phase: "idle" | "dispatching" | "aggregating" | "done";
+  phase: "idle" | "routing" | "dispatching" | "aggregating" | "critic" | "done";
   subAgents: SubAgentResult[];
+  cap?: number;
+  criticEnabled?: boolean;
+  routerDecision?: RouterDecision;
+  criticDecision?: CriticDecision;
 }
 
 interface StreamingChatState {
@@ -187,7 +214,26 @@ export function useStreamingChat() {
               orchestration: {
                 active: true,
                 phase: "dispatching",
-                subAgents: subAgents.map(s => ({ agentId: s.agentId, role: s.role, status: "pending" })),
+                subAgents: subAgents.map(s => ({ agentId: s.agentId, role: s.role, status: "pending", jsonMode: s.outputFormat === "json" })),
+                cap: data.cap,
+                criticEnabled: data.criticEnabled,
+              },
+            }));
+
+          } else if (data.type === "router_decision") {
+            onRouterDecision?.(data.selected || [], data.fromTotal || 0, data.reason);
+            setState(prev => ({
+              ...prev,
+              orchestration: {
+                ...prev.orchestration,
+                phase: "dispatching",
+                routerDecision: {
+                  selected: data.selected || [],
+                  fromTotal: data.fromTotal || 0,
+                  cap: data.cap || 4,
+                  parseOk: data.parseOk !== false,
+                  reason: data.reason,
+                },
               },
             }));
 
@@ -198,7 +244,7 @@ export function useStreamingChat() {
               orchestration: {
                 ...prev.orchestration,
                 subAgents: prev.orchestration.subAgents.map(s =>
-                  s.agentId === data.agentId ? { ...s, status: "pending" } : s
+                  s.agentId === data.agentId ? { ...s, status: "pending", jsonMode: data.jsonMode } : s
                 ),
               },
             }));
@@ -210,8 +256,26 @@ export function useStreamingChat() {
               orchestration: {
                 ...prev.orchestration,
                 subAgents: prev.orchestration.subAgents.map(s =>
-                  s.agentId === data.agentId ? { ...s, status: "done", result: data.result } : s
+                  s.agentId === data.agentId
+                    ? { ...s, status: "done", result: data.result, elapsed: data.elapsed, confidence: data.confidence, parseOk: data.parseOk }
+                    : s
                 ),
+              },
+            }));
+
+          } else if (data.type === "critic_result") {
+            onCriticResult?.(data.pass, data.confidence, data.missingCount);
+            setState(prev => ({
+              ...prev,
+              orchestration: {
+                ...prev.orchestration,
+                phase: "critic",
+                criticDecision: {
+                  pass: data.pass,
+                  confidence: data.confidence ?? 0.6,
+                  missingCount: data.missingCount ?? 0,
+                  conflictsCount: data.conflictsCount ?? 0,
+                },
               },
             }));
 

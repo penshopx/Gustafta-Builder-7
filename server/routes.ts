@@ -3205,6 +3205,16 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       // Send user message first
       res.write(`data: ${JSON.stringify({ type: "user_message", message: userMessage })}\n\n`);
 
+      // ── PR#3: Write-back accumulator (filled during orchestration, consumed after complete) ──
+      let l4WritebackData: {
+        agentId: string;
+        openQuestions: string[];
+        actionItems: string[];
+        routerMeta: { invoked: boolean; parseOk: boolean; selectedCount: number; totalCount: number };
+        criticPass: boolean | null;
+        criticConfidence: number | null;
+      } | null = null;
+
       // ── INTER-AGENT API: MultiClaw Level 4 Orchestration ────────────────────
       const subAgentsConfigRaw = (agent as any).agenticSubAgents as Array<SubAgentLink> | null | undefined;
       if (Array.isArray(subAgentsConfigRaw) && subAgentsConfigRaw.length > 0) {
@@ -3368,6 +3378,28 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
               };
             }
             res.write(`data: ${JSON.stringify({ type: "aggregating", count: successfulReports.length, failed: failedCount, totalMs: Date.now() - orchStart, criticEnabled, criticPassed })}\n\n`);
+
+            // ── PR#3: Populate write-back data from orchestration results ────────
+            const dedup = <T>(arr: T[]): T[] => [...new Set(arr)];
+            const wb_openQuestions =
+              !criticPassed && criticClarifyingBlock
+                ? dedup(successfulReports.flatMap(r => r.questions)).slice(0, 10)
+                : dedup(successfulReports.flatMap(r => r.questions)).slice(0, 8);
+            const wb_actionItems = dedup(successfulReports.flatMap(r => r.actions)).slice(0, 12);
+            l4WritebackData = {
+              agentId: String((agent as any).id),
+              openQuestions: wb_openQuestions,
+              actionItems: wb_actionItems,
+              routerMeta: {
+                invoked: candidatesSorted.length > cap,
+                parseOk: true,
+                selectedCount: selectedCandidates.length,
+                totalCount: candidatesSorted.length,
+              },
+              criticPass: criticEnabled ? criticPassed : null,
+              criticConfidence: null,
+            };
+            // ────────────────────────────────────────────────────────────────────
           }
         } catch (orchErr) {
           console.error("[MultiClaw L4] Orchestration error:", orchErr);
@@ -3631,6 +3663,41 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         cleanup();
         res.write(`data: ${JSON.stringify({ type: "complete", message: aiMessage })}\n\n`);
         res.end();
+
+        // ── PR#3: Write-back to Project Brain (non-blocking, after response sent) ──
+        if (l4WritebackData) {
+          const wb = l4WritebackData;
+          const finalText = cleanContent;
+          setImmediate(async () => {
+            try {
+              const brainInstance = await storage.getActiveProjectBrainInstance(wb.agentId);
+              if (brainInstance) {
+                const existing = (brainInstance.values as Record<string, any>) || {};
+                const now = new Date().toISOString();
+                const brainPatch: Record<string, any> = {
+                  ...existing,
+                  openQuestions: wb.openQuestions.length ? wb.openQuestions : (existing.openQuestions ?? []),
+                  actionItems: wb.actionItems.length ? wb.actionItems : (existing.actionItems ?? []),
+                  latestSummary: finalText.slice(0, 1200),
+                  lastRun: {
+                    at: now,
+                    selectedAgents: wb.routerMeta.selectedCount,
+                    totalAgents: wb.routerMeta.totalCount,
+                    routerInvoked: wb.routerMeta.invoked,
+                    routerParseOk: wb.routerMeta.parseOk,
+                    criticPass: wb.criticPass,
+                    criticConfidence: wb.criticConfidence,
+                  },
+                };
+                await storage.updateProjectBrainInstance(String(brainInstance.id), { values: brainPatch });
+                console.log(`[PR#3 WriteBack] Brain ${brainInstance.id} updated for agent ${wb.agentId}: ${wb.actionItems.length} actions, ${wb.openQuestions.length} questions`);
+              }
+            } catch (wbErr) {
+              console.warn("[PR#3 WriteBack] Failed:", wbErr);
+            }
+          });
+        }
+        // ───────────────────────────────────────────────────────────────────────
         
       } catch (streamError) {
         console.error("Streaming error:", streamError);
