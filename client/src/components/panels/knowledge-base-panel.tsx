@@ -68,6 +68,225 @@ const isImageType = (fileType?: string) => {
   return fileType && ["jpg", "jpeg", "png", "gif", "webp"].includes(fileType);
 };
 
+function detectAgentDomain(agent: Agent): string {
+  const h = ((agent.name || "") + " " + (agent.domainCharter || "") + " " + (agent.category || "")).toLowerCase();
+  if (/pengelasan|welding|smaw|tig|mig|fcaw/.test(h)) return "pengelasan";
+  if (/alat berat|operator alat|excavator|bulldozer|crane operator/.test(h)) return "alat_berat";
+  if (/sbu|subklasifikasi|kualifikasi usaha|bujk/.test(h)) return "sbu";
+  if (/skk|sertifikat kompetensi kerja|skkni|kompetensi.*kerja/.test(h)) return "skk";
+  if (/askom|asesor kompetensi|muk|fr-apl|asesor sertifikasi/.test(h)) return "askom";
+  if (/lsp|lisensi lsp|akreditasi lsp|bnsp|kan.*lsp/.test(h)) return "lsp";
+  if (/tender|pengadaan|pbjp|lkpp|e-procurement/.test(h)) return "tender";
+  if (/hukum|legal|kontrak|fidic|klausul|sengketa/.test(h)) return "legal";
+  if (/k3|smk3|hse|keselamatan kerja|csms|safety/.test(h)) return "k3";
+  if (/iso.9001|mutu|smm|quality management|nonconformity/.test(h)) return "iso9001";
+  if (/iso.14001|sml|lingkungan|amdal|ukl-upl/.test(h)) return "iso14001";
+  if (/smap|anti.suap|iso.37001|anti.penyuapan/.test(h)) return "smap";
+  if (/odoo|erp.*bujk|implementasi.*odoo/.test(h)) return "odoo";
+  if (/properti|real estate|devproperti|estatecare/.test(h)) return "properti";
+  if (/ib dp|ib.*diploma|registrar.*ib|ibis|malpractice.*ib|internal assessment/.test(h)) return "ibdp";
+  if (/tutor|pedagogi|belajar adaptif|theoryagent|drillagent|gamification.*learn/.test(h)) return "tutor";
+  if (/proyek|pm.*konstruksi|manajemen.*proyek|project management.*konstruksi/.test(h)) return "pm";
+  if (/keuangan.*konstruksi|psak.34|rab|cash.flow.*proyek/.test(h)) return "keuangan";
+  if (/perizinan|osrba|nib|siujk|lpjk.*daftar/.test(h)) return "perizinan";
+  if (/katalog jabatan|jabatan.*skkni|jabatan.*kerja/.test(h)) return "katalog";
+  if (agent.category === "education" || /edukasi|pelatihan|training/.test(h)) return "edukasi";
+  if (agent.category === "legal" || agent.category === "compliance") return "regulasi";
+  if (agent.category === "certification") return "skk";
+  return "konstruksi";
+}
+
+function getAgentContextualTopics(agent: Agent, docType: string): string[] {
+  const domain = detectAgentDomain(agent);
+
+  type TopicMap = Record<string, Record<string, string[]>>;
+  const DOMAIN_TOPICS: TopicMap = {
+    pengelasan: {
+      sop: [`SOP Proses Pengelasan SMAW — Persiapan, Pelaksanaan, Inspeksi`, `SOP Pengelasan TIG (GTAW) untuk Material Stainless Steel`, `SOP Keselamatan Kerja Pengelasan — APD, Ventilasi, Fire Watch`, `SOP Inspeksi Hasil Las — Visual Test & NDT (PT/UT)`, `SOP Kalibrasi Mesin Las MIG/MAG sebelum Produksi`],
+      template: [`Template WPS (Welding Procedure Specification) — Format AWS`, `Template Log Pengujian Juru Las (Welder Qualification Test)`, `Template Checklist Pre-weld & Post-weld Inspection`, `Template Dokumentasi PQR (Procedure Qualification Record)`],
+      bank_soal: [`Bank Soal Teori Pengelasan SMAW — Prinsip & Parameter (30 soal)`, `Bank Soal Interpretasi Simbol Las pada Gambar Teknik (25 soal)`, `Bank Soal Cacat Las & Cara Identifikasi — NDT & Visual (30 soal)`, `Bank Soal K3 Pengelasan — Bahaya & Pengendalian Risiko (20 soal)`],
+      studi_kasus: [`Studi Kasus: Porositas Tinggi pada Las SMAW — Root Cause & Perbaikan`, `Studi Kasus: Deformasi Material akibat Overheating — Langkah Koreksi`, `Studi Kasus: Juru Las Tidak Memiliki WQR — Tindakan yang Benar`],
+      checklist: [`Checklist Kesiapan Uji Kompetensi Juru Las SMAW (SKKNI)`, `Checklist Dokumen Welder Qualification (AWS/ASME)`, `Checklist Inspeksi Peralatan Las sebelum Operasi`, `Checklist APD & K3 Area Pengelasan`],
+      rubrik: [`Rubrik Penilaian Unjuk Kerja Pengelasan SMAW (Posisi 1G-6G)`, `Rubrik Portofolio Bukti Kompetensi Juru Las Madya`],
+      cheat_sheet: [`Cheat Sheet Parameter Las SMAW per Diameter Elektroda`, `Cheat Sheet Simbol Las AWS A2.4 — Ringkasan Visual`, `Cheat Sheet Cacat Las: Jenis, Penyebab, Solusi`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Pengelasan Struktur Baja (STAR)`, `Narasi Portofolio: Kegiatan Inspeksi Las & NDT di Proyek`, `Panduan Menulis Narasi Bukti Kompetensi Juru Las untuk SKKNI`],
+    },
+    alat_berat: {
+      sop: [`SOP Pre-Start Inspection Excavator sebelum Operasi Harian`, `SOP Mobilisasi & Demobilisasi Alat Berat antar Lokasi Proyek`, `SOP Pemeliharaan Preventif Bulldozer — 250/500/1000 Jam`, `SOP Operasi Crane di Area Terbatas — Radius & Kapasitas`, `SOP Penanganan Kerusakan Minor Alat Berat di Lapangan`],
+      template: [`Template Daily Equipment Check Sheet — Excavator`, `Template Service Record & Maintenance Log Alat Berat`, `Template Laporan OEE (Overall Equipment Effectiveness) Bulanan`, `Template Berita Acara Serah Terima Alat Sewa`],
+      bank_soal: [`Bank Soal Teori Operator Excavator — Komponen & Fungsi (30 soal)`, `Bank Soal K3 Operasi Alat Berat — Kewajiban SIO (25 soal)`, `Bank Soal Troubleshooting Hidrolik Excavator (20 soal)`],
+      studi_kasus: [`Studi Kasus: Alat Berat Breakdown saat Pekerjaan Kritis — Mitigasi`, `Studi Kasus: Operator Tanpa SIO Tertangkap Inspeksi — Langkah Benar`, `Studi Kasus: OEE Rendah 55% — Analisis & Rencana Perbaikan`],
+      checklist: [`Checklist Kesiapan Uji Kompetensi Operator Excavator (SKKNI)`, `Checklist Inspeksi Harian Bulldozer (Engine, Hidraulik, Undercarriage)`, `Checklist Dokumen Kelayakan Operasi Crane (SIO, SILO, K3)`],
+      rubrik: [`Rubrik Penilaian Unjuk Kerja Operator Excavator (Uji SKKNI)`, `Rubrik Portofolio Bukti Kompetensi Operator Alat Berat`],
+      cheat_sheet: [`Cheat Sheet Persyaratan SIO per Jenis Alat Berat (Permenaker 8/2020)`, `Cheat Sheet Kode Sinyal Rigger untuk Crane Operasi`, `Cheat Sheet Interval Maintenance Alat Berat Umum`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Operasi Excavator di Proyek Tambang (STAR)`, `Narasi Portofolio: Kegiatan Pemeliharaan Preventif Alat Berat`, `Panduan Menulis Narasi Bukti Operator Alat Berat untuk SKKNI`],
+    },
+    katalog: {
+      sop: [`SOP Identifikasi Jabatan SKK yang Tepat berdasarkan Pekerjaan`, `SOP Persiapan Portofolio Bukti untuk Uji Kompetensi SKK`, `SOP Pemilihan LSP & TUK yang Tepat untuk Skema Jabatan`, `SOP Proses Asesmen Kompetensi dari Pendaftaran hingga Sertifikat`],
+      template: [`Template Pemetaan Jabatan → Subklasifikasi SBU (${name})`, `Template Checklist Bukti Minimum per Jabatan Kerja`, `Template Narasi Portofolio per Unit Kompetensi SKKNI`, `Template Rencana Pengembangan Kompetensi Tenaga Kerja`],
+      bank_soal: [`Bank Soal Pengetahuan Kompetensi Bidang Terkait (25 soal)`, `Bank Soal Regulasi SKK & Sertifikasi BNSP (20 soal)`, `Bank Soal Identifikasi Jabatan berdasarkan Deskripsi Pekerjaan (20 soal)`],
+      studi_kasus: [`Studi Kasus: Pemilihan Jabatan Keliru → Dampak & Koreksi`, `Studi Kasus: Bukti Portofolio Tidak Cukup → Cara Melengkapi`, `Studi Kasus: SKK Kadaluarsa saat Tender — Langkah Mitigasi`],
+      checklist: [`Checklist Dokumen Pendaftaran Uji Kompetensi (FR-APL-01 & FR-APL-02)`, `Checklist Kelengkapan Bukti per Unit Kompetensi`, `Checklist Kesiapan Asesmen — Pengetahuan, Keterampilan, Sikap`],
+      rubrik: [`Rubrik Penilaian Kelayakan Bukti Portofolio (Asli/Relevan/Terkini/Memadai)`, `Rubrik Asesmen Unjuk Kerja vs Observasi Langsung`],
+      cheat_sheet: [`Cheat Sheet Jenjang KKNI L1-L9 — Kriteria & Jabatan Contoh`, `Cheat Sheet Alur Sertifikasi SKK (Permen PUPR 9/2023)`, `Cheat Sheet Daftar LSP Konstruksi yang Berlisensi BNSP`],
+      narasi_portofolio: [`Narasi Portofolio Bukti Kompetensi — Format STAR untuk SKKNI`, `Panduan Menulis Narasi Bukti yang Lolos Verifikasi Asesor`],
+    },
+    sbu: {
+      sop: [`SOP Pendaftaran SBU Baru melalui OSS-RBA & LPJK (Permen PU 6/2025)`, `SOP Perpanjangan SBU yang Hampir Kadaluarsa — Langkah & Dokumen`, `SOP Kenaikan Kualifikasi SBU dari M ke B — Persyaratan & Timeline`, `SOP Penambahan Subklasifikasi pada SBU Existing`, `SOP Pemenuhan Gap TKK (Tenaga Kerja Kompeten) untuk Kualifikasi SBU`],
+      template: [`Template Gap Analysis Kualifikasi SBU (Kondisi vs Persyaratan)`, `Template Checklist Dokumen Pendaftaran SBU per Kualifikasi`, `Template Rencana Pemenuhan TKK untuk Target Kualifikasi`, `Template Timeline Proses Perpanjangan SBU (12 bulan sebelum expired)`],
+      bank_soal: [`Bank Soal Regulasi SBU — Permen PU 6/2025 (30 soal)`, `Bank Soal Subklasifikasi SBU — Kode, Nama, Klaster (25 soal)`, `Bank Soal Persyaratan TKK per Kualifikasi (20 soal)`],
+      studi_kasus: [`Studi Kasus: SBU Ditolak karena TKK Kurang — Analisis & Solusi`, `Studi Kasus: Mismatch Subklasifikasi dan Pekerjaan Aktual — Koreksi`, `Studi Kasus: SBU Expired saat Tender — Langkah Darurat`],
+      checklist: [`Checklist Dokumen SBU Baru — Akta, Modal, TKK, Peralatan, Pengalaman`, `Checklist Kesiapan Kenaikan Kualifikasi SBU (M→B)`, `Checklist Pemenuhan Persyaratan PJBU/PJTBU/PJKBU/PJSKBU`],
+      rubrik: [`Rubrik Penilaian Kelengkapan Dokumen SBU (skor per kategori)`, `Rubrik Evaluasi Gap Kualifikasi SBU (Ready/In Progress/Gap)`],
+      cheat_sheet: [`Cheat Sheet Kode Subklasifikasi SBU — BS/BG/IL/IM/KO (Permen PU 6/2025)`, `Cheat Sheet Persyaratan Kualifikasi K/M/B per Klaster`, `Cheat Sheet Perubahan dari Permen PU 8/2022 ke 6/2025`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Pengurusan SBU Perusahaan (STAR)`, `Panduan Menyusun Dokumen Pengalaman untuk SBU Kualifikasi B`],
+    },
+    skk: {
+      sop: [`SOP Persiapan Uji Kompetensi SKK — H-14 hingga Hari Asesmen`, `SOP Pengumpulan Bukti Portofolio untuk Skema SKK Jabatan Kerja`, `SOP Pendaftaran Uji Kompetensi melalui LSP Konstruksi`, `SOP Pemilihan Skema dan Jenjang SKK yang Tepat (KKNI L4-L9)`],
+      template: [`Template FR-APL-01 — Formulir Permohonan Sertifikasi Kompetensi`, `Template FR-APL-02 — Asesmen Mandiri per Unit Kompetensi`, `Template Rencana Pengembangan Kompetensi (Learning Path SKK)`, `Template Checklist Bukti per Unit Kompetensi SKKNI`],
+      bank_soal: [`Bank Soal Teori Jabatan Kerja Terkait — Kompetensi Inti (30 soal)`, `Bank Soal Regulasi Sertifikasi SKK (Permen PUPR 9/2023 + SK Dirjen 114)`, `Bank Soal SKKNI — Unit Kompetensi dan Elemen Kompetensi (25 soal)`],
+      studi_kasus: [`Studi Kasus: Uji Kompetensi Tidak Lulus — Analisis Gap & Rencana Perbaikan`, `Studi Kasus: Bukti Portofolio Ditolak Asesor — Cara Melengkapi`, `Studi Kasus: SKK Kadaluarsa — Jalur Pemeliharaan vs Uji Ulang`],
+      checklist: [`Checklist Dokumen Pendaftaran Uji SKK (FR-APL-01, Ijazah, Portofolio)`, `Checklist Kesiapan Asesmen Pengetahuan & Keterampilan`, `Checklist Persyaratan TUK — Tempat, Peralatan, Penilai`],
+      rubrik: [`Rubrik Penilaian Portofolio Bukti Kompetensi (VATM Criteria)`, `Rubrik Asesmen Unjuk Kerja Jabatan Kerja Terkait`],
+      cheat_sheet: [`Cheat Sheet Jenjang KKNI dan Kriteria per Level (L1-L9)`, `Cheat Sheet Alur Sertifikasi SKK (Permen PUPR 9/2023)`, `Cheat Sheet Unit Kompetensi Inti vs Pilihan per Skema`],
+      narasi_portofolio: [`Narasi Portofolio Bukti Kompetensi untuk Skema SKK Terkait (STAR)`, `Panduan Menulis Narasi yang Memenuhi Standar Asesor BNSP`],
+    },
+    askom: {
+      sop: [`SOP Proses Asesmen Kompetensi dari Pendaftaran hingga Penerbitan Sertifikat`, `SOP Verifikasi Bukti Portofolio Asesi (FR-APL-02)`, `SOP Penentuan Keputusan Asesmen — Kompeten vs Belum Kompeten`, `SOP Penanganan Banding/Sanggah Hasil Asesmen`],
+      template: [`Template FR-MAK-01 — Rencana Asesmen`, `Template FR-MAK-04 — Catatan Asesmen dan Umpan Balik`, `Template Berita Acara Asesmen Kompetensi (per Skema)`, `Template Laporan Hasil Asesmen ke LSP`],
+      bank_soal: [`Bank Soal Teori SKKNI Asesor Kompetensi (SKKNI 333/2020 — 30 soal)`, `Bank Soal Etika & Prinsip Asesmen Kompetensi (20 soal)`, `Bank Soal Jenis Bukti & Aturan Pengumpulan Bukti (25 soal)`],
+      studi_kasus: [`Studi Kasus: Asesi Tidak Bisa Membuktikan Kompetensi — Proses Keputusan`, `Studi Kasus: Konflik Kepentingan Asesor — Tindakan yang Benar`, `Studi Kasus: Bukti Portofolio Palsu — Deteksi & Pelaporan`],
+      checklist: [`Checklist Persiapan Asesmen — Dokumen, TUK, Instrumen`, `Checklist Kelengkapan MUK (Materi Uji Kompetensi) per Skema`, `Checklist Kesiapan Asesor sebelum Asesmen (Lisensi, Rekam Jejak)`],
+      rubrik: [`Rubrik Kualitas MUK — Validitas, Reliabilitas, Adil, Fleksibel`, `Rubrik Penilaian Performa Asesor (Observasi Asesmen)`],
+      cheat_sheet: [`Cheat Sheet Prinsip Asesmen: Valid, Reliabel, Fleksibel, Adil`, `Cheat Sheet Jenis Bukti Kompetensi (Langsung, Tidak Langsung, Tambahan)`, `Cheat Sheet SKKNI 333/2020 — Unit Kompetensi Asesor`],
+      narasi_portofolio: [`Narasi Portofolio Asesor: Pengalaman Mengases di TUK (STAR)`, `Panduan Menyusun Portofolio Bukti Lisensi Asesor Baru`],
+    },
+    lsp: {
+      sop: [`SOP Proses Lisensi LSP Baru ke BNSP — Tahapan & Dokumen`, `SOP Pemeliharaan Lisensi LSP — Surveillance & Renewal`, `SOP Penambahan Skema Sertifikasi pada LSP Existing`, `SOP Pengelolaan TUK (Tempat Uji Kompetensi) — Sewaktu & Mandiri`],
+      template: [`Template Sistem Manajemen Mutu LSP (dokumen inti)`, `Template Skema Sertifikasi — Format Standar BNSP`, `Template Laporan Kinerja LSP Triwulanan ke BNSP`, `Template Perjanjian Kerja Sama LSP dengan TUK`],
+      bank_soal: [`Bank Soal BNSP Pedoman 201/202 — Persyaratan Lisensi LSP (25 soal)`, `Bank Soal Pedoman 301/303 — Persyaratan TUK (20 soal)`, `Bank Soal SNI ISO/IEC 17024:2012 — Klausul Utama (30 soal)`],
+      studi_kasus: [`Studi Kasus: LSP Gagal Surveillance BNSP — Analisis Temuan & CAR`, `Studi Kasus: TUK Tidak Memenuhi Standar — Tindakan Koreksi`, `Studi Kasus: Sengketa Asesor & LSP — Prosedur yang Benar`],
+      checklist: [`Checklist Dokumen Permohonan Lisensi LSP Baru (Pedoman BNSP 201)`, `Checklist Kesiapan Audit BNSP (Dokumentasi, SDM, Fasilitas)`, `Checklist Kelengkapan TUK untuk Akreditasi`],
+      rubrik: [`Rubrik Penilaian Kesiapan LSP untuk Audit BNSP`, `Rubrik Review Kualitas Skema Sertifikasi (Standar Pedoman BNSP)`],
+      cheat_sheet: [`Cheat Sheet Pedoman BNSP 201/202 — Persyaratan LSP (1 halaman)`, `Cheat Sheet SNI ISO/IEC 17024:2012 — Klausul Kunci`, `Cheat Sheet Jadwal Surveillance & Renewal Lisensi LSP`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Pengembangan LSP (STAR)`, `Panduan Menyusun Dokumen Portofolio Konsultan LSP`],
+    },
+    tender: {
+      sop: [`SOP Siklus Tender BUJK — dari Identifikasi hingga Kontrak`, `SOP Penyusunan Dokumen Penawaran Lengkap (Admin, Teknis, Harga)`, `SOP Evaluasi Kesiapan BUJK sebelum Mendaftar Paket Tender`, `SOP Penanganan Sanggah dan Sanggah Banding (Perpres 12/2021)`, `SOP Finalisasi Harga Penawaran — Cross-check HPS & RAB`],
+      template: [`Template Metodologi Pelaksanaan Proyek (Dokumen Teknis)`, `Template Struktur Organisasi Penawaran & CV Personel Kunci`, `Template Analisis Harga Satuan Pekerjaan Konstruksi`, `Template Surat Dukungan Bank / Jaminan Penawaran`],
+      bank_soal: [`Bank Soal Regulasi Perpres 12/2021 — Pengadaan Jasa Konstruksi (30 soal)`, `Bank Soal Evaluasi Penawaran — Metode & Kriteria (25 soal)`, `Bank Soal Kontrak Konstruksi — FIDIC & Standar Pemerintah (20 soal)`],
+      studi_kasus: [`Studi Kasus: Penawaran Gugur Administrasi — Penyebab & Pencegahan`, `Studi Kasus: HPS Jauh di Bawah Penawaran Terendah — Langkah PPK`, `Studi Kasus: BUJK Masuk Blacklist — Kronologi & Dampak`],
+      checklist: [`Checklist Dokumen Administrasi Penawaran (lengkap & terurut)`, `Checklist Kualifikasi BUJK sebelum Ikut Tender (SBU, SKK, Lapkeu)`, `Checklist Pengecekan Akhir Sebelum Submit Penawaran`],
+      rubrik: [`Rubrik Penilaian Metodologi Teknis Penawaran (skor per aspek)`, `Rubrik Evaluasi Win Probability Tender (4 dimensi)`],
+      cheat_sheet: [`Cheat Sheet Perpres 12/2021 — Metode Pemilihan & Ambang Nilai`, `Cheat Sheet Kriteria Evaluasi Teknis per Jenis Pengadaan`, `Cheat Sheet Timeline Pengadaan — Tahapan & Batas Waktu`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Menangani Paket Tender Besar (STAR)`, `Panduan Menulis Pengalaman Sejenis untuk Dokumen Kualifikasi`],
+    },
+    legal: {
+      sop: [`SOP Review Kontrak Konstruksi sebelum Penandatanganan`, `SOP Pengajuan Klaim & Variasi berdasarkan Kontrak FIDIC`, `SOP Penyelesaian Sengketa — Mediasi, DAB, Arbitrase`, `SOP Pengelolaan Dokumen Hukum Proyek (Filing & Version Control)`],
+      template: [`Template Notifikasi Klaim (Notice of Claim) — Format FIDIC`, `Template Kronologi Sengketa Konstruksi untuk Mediasi`, `Template Surat Kuasa & Perjanjian Kerahasiaan Proyek`, `Template Laporan Insiden yang Berimplikasi Hukum`],
+      bank_soal: [`Bank Soal UU 2/2017 Jasa Konstruksi — Pasal Kunci (25 soal)`, `Bank Soal FIDIC Red Book — Klausul & Prosedur (30 soal)`, `Bank Soal Hukum Kontrak Indonesia (KUHPerdata) Konstruksi (20 soal)`],
+      studi_kasus: [`Studi Kasus: Klausul Force Majeure COVID — Hak & Prosedur BUJK`, `Studi Kasus: Keterlambatan karena Kesalahan Desain — Klaim yang Tepat`, `Studi Kasus: Pembayaran Macet — Mekanisme Hukum yang Tersedia`],
+      checklist: [`Checklist Review Kontrak Konstruksi (risiko, hak, kewajiban)`, `Checklist Dokumen Klaim Konstruksi (lengkap & tepat waktu)`, `Checklist Persiapan Hearing Arbitrase`],
+      rubrik: [`Rubrik Penilaian Kekuatan Argumen Klaim Konstruksi`, `Rubrik Analisis Risiko Klausul Kontrak (tinggi/sedang/rendah)`],
+      cheat_sheet: [`Cheat Sheet Klausul FIDIC Red Book yang Paling Sering Dipersengketakan`, `Cheat Sheet Batas Waktu Notifikasi Klaim per Jenis Kejadian`, `Cheat Sheet Mekanisme Penyelesaian Sengketa (Negosiasi → DAB → BANI)`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Menangani Sengketa Kontrak (STAR)`, `Panduan Mendokumentasikan Bukti untuk Proses Klaim`],
+    },
+    k3: {
+      sop: [`SOP Hazard Identification & Risk Assessment (HIRA) di Proyek Konstruksi`, `SOP Permit to Work — Pekerjaan di Ketinggian, Ruang Terbatas, Panas`, `SOP Investigasi Insiden K3 — Kronologi, Root Cause, CAR`, `SOP Emergency Response Plan Proyek Konstruksi`, `SOP Audit Internal SMK3 PP 50/2012`],
+      template: [`Template Risk Register & Matriks Risiko K3 Proyek`, `Template HSE Plan Proyek Konstruksi (sesuai PP 50/2012)`, `Template Form Investigasi Insiden (LTI, FAC, Near Miss)`, `Template Toolbox Meeting Record Mingguan`],
+      bank_soal: [`Bank Soal PP 50/2012 SMK3 — Elemen & Klausul (30 soal)`, `Bank Soal UU 1/1970 K3 — Kewajiban & Sanksi (20 soal)`, `Bank Soal ISO 45001:2018 — Persyaratan Klausul 4-10 (25 soal)`],
+      studi_kasus: [`Studi Kasus: Kecelakaan Kerja Fatal — Investigasi & SEAR`, `Studi Kasus: Temuan Major Audit K3 — CAPA yang Efektif`, `Studi Kasus: Unsafe Act Berulang — Intervensi Perilaku K3`],
+      checklist: [`Checklist Audit Internal SMK3 PP 50/2012 (166 elemen)`, `Checklist K3 Pekerjaan Berisiko Tinggi — Ketinggian & Confined Space`, `Checklist Kesiapan APD & Peralatan K3 per Jenis Pekerjaan`],
+      rubrik: [`Rubrik Penilaian HSE Plan Proyek (skor per komponen)`, `Rubrik Evaluasi Kinerja K3 — TRIR, LTI Rate, Near Miss Ratio`],
+      cheat_sheet: [`Cheat Sheet Hirarki Pengendalian Risiko (Eliminasi → APD)`, `Cheat Sheet Persyaratan APD per Jenis Pekerjaan Konstruksi`, `Cheat Sheet Elemen SMK3 PP 50/2012 (12 elemen utama)`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Implementasi SMK3 di Proyek (STAR)`, `Panduan Menyusun Portofolio HSE Officer untuk Sertifikasi`],
+    },
+    iso9001: {
+      sop: [`SOP Pengelolaan Dokumen & Rekaman Mutu (Klausul 7.5 ISO 9001)`, `SOP Penanganan Nonconformity & Corrective Action (Klausul 10.2)`, `SOP Audit Internal Mutu — Perencanaan, Pelaksanaan, Pelaporan`, `SOP Tinjauan Manajemen Berkala (Klausul 9.3)`, `SOP Pengendalian Produk & Jasa yang Tidak Sesuai`],
+      template: [`Template Quality Plan Proyek Konstruksi`, `Template Form Nonconformity Report (NCR)`, `Template Form Corrective Action Request (CAR)`, `Template Laporan Audit Internal ISO 9001`],
+      bank_soal: [`Bank Soal ISO 9001:2015 — Klausul 4-10 (40 soal)`, `Bank Soal PDCA & Continual Improvement (20 soal)`, `Bank Soal Pendekatan Berbasis Risiko dalam ISO 9001 (20 soal)`],
+      studi_kasus: [`Studi Kasus: Major Nonconformity saat Audit Sertifikasi — CAPA`, `Studi Kasus: Supplier Bermasalah Berulang — Tindakan SMM`, `Studi Kasus: Customer Complaint Tinggi — Root Cause & Perbaikan`],
+      checklist: [`Checklist Gap Analysis ISO 9001:2015 per Klausul (4-10)`, `Checklist Kesiapan Audit Sertifikasi ISO 9001`, `Checklist Dokumen Wajib ISO 9001:2015 (Prosedur + Rekaman)`],
+      rubrik: [`Rubrik Penilaian Kesiapan ISO 9001 (per klausul, skor 0-4)`, `Rubrik Evaluasi Efektivitas CAPA (Root Cause → Implementasi → Verifikasi)`],
+      cheat_sheet: [`Cheat Sheet Klausul ISO 9001:2015 — Ringkasan 1 Halaman`, `Cheat Sheet Dokumen & Rekaman Wajib ISO 9001:2015`, `Cheat Sheet 7 Prinsip Manajemen Mutu ISO`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Implementasi ISO 9001 (STAR)`, `Panduan Menyusun Evidence Portfolio untuk Re-Sertifikasi ISO 9001`],
+    },
+    iso14001: {
+      sop: [`SOP Identifikasi Aspek Lingkungan & Evaluasi Dampak (Klausul 6.1.2)`, `SOP Pengelolaan Limbah B3 Konstruksi`, `SOP Penanganan Kedaruratan Lingkungan (Tumpahan, Kebocoran)`, `SOP Pemantauan & Pengukuran Kinerja Lingkungan`],
+      template: [`Template Daftar Aspek Lingkungan & Matriks Penilaian Dampak`, `Template Rencana Pengelolaan Lingkungan (RKL/RPL Sederhana)`, `Template Laporan Pemantauan Lingkungan Triwulanan`, `Template Emergency Response Plan Lingkungan`],
+      bank_soal: [`Bank Soal ISO 14001:2015 — Klausul Kunci (35 soal)`, `Bank Soal Regulasi Lingkungan Indonesia (PP 22/2021) (20 soal)`, `Bank Soal Identifikasi Aspek & Dampak Lingkungan (20 soal)`],
+      studi_kasus: [`Studi Kasus: Pencemaran Tanah di Area Proyek — Respons & Pelaporan`, `Studi Kasus: Temuan Legal Compliance di Audit SML`, `Studi Kasus: Emisi Debu Melebihi Baku Mutu — Pengendalian`],
+      checklist: [`Checklist Gap Analysis ISO 14001:2015 per Klausul`, `Checklist Kesiapan AMDAL/UKL-UPL untuk Proyek Konstruksi`, `Checklist Pengelolaan Limbah Konstruksi (B3 & Non-B3)`],
+      rubrik: [`Rubrik Penilaian Kesiapan ISO 14001 (per klausul, skor 0-4)`, `Rubrik Evaluasi Rencana Pengelolaan Lingkungan Proyek`],
+      cheat_sheet: [`Cheat Sheet Klausul ISO 14001:2015 — Ringkasan 1 Halaman`, `Cheat Sheet Jenis Izin Lingkungan per Skala Kegiatan (PP 22/2021)`, `Cheat Sheet Aspek Lingkungan Konstruksi yang Signifikan`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Implementasi ISO 14001 (STAR)`, `Panduan Menyusun Evidence Kinerja Lingkungan untuk Audit`],
+    },
+    pm: {
+      sop: [`SOP Kick-Off Meeting & Baseline Proyek Konstruksi`, `SOP Monitoring Progres Mingguan — Earned Value & S-Curve`, `SOP Pengelolaan Perubahan (Change Management) di Proyek`, `SOP Rapat Koordinasi Rutin — Agenda, Notulen, Action Item`, `SOP Serah Terima Proyek (PHO/FHO) — Dokumen & Prosedur`],
+      template: [`Template WBS & Project Schedule (Gantt Chart)`, `Template Laporan Kemajuan Proyek Mingguan`, `Template Risk Register & Rencana Respons Risiko`, `Template Berita Acara Serah Terima Pekerjaan`],
+      bank_soal: [`Bank Soal PMBOK — Knowledge Area Utama (30 soal)`, `Bank Soal Earned Value Management — Rumus & Interpretasi (25 soal)`, `Bank Soal Manajemen Risiko Proyek Konstruksi (20 soal)`],
+      studi_kasus: [`Studi Kasus: Proyek Terlambat 3 Bulan — Recovery Plan`, `Studi Kasus: Cost Overrun 20% — Analisis Root Cause & Mitigasi`, `Studi Kasus: Konflik Stakeholder — Langkah Manajemen`],
+      checklist: [`Checklist Milestone Review Gate per Fase Proyek`, `Checklist Serah Terima Dokumen Proyek (As-Built, Manual, Garansi)`, `Checklist Kesiapan Mobilisasi Awal Proyek`],
+      rubrik: [`Rubrik Penilaian Kualitas Laporan Kemajuan Proyek`, `Rubrik Evaluasi Kinerja Project Manager (KPI-based)`],
+      cheat_sheet: [`Cheat Sheet EVM — Rumus CPI, SPI, EAC, VAC`, `Cheat Sheet PMBOK 7 Performance Domain (ringkasan)`, `Cheat Sheet Critical Path Method — Cara Hitung Float`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Memimpin Proyek Besar (STAR)`, `Panduan Menyusun CV & Portofolio Project Manager Konstruksi`],
+    },
+    ibdp: {
+      sop: [`SOP Registrasi Kandidat IB DP di IBIS — Langkah per Sesi`, `SOP Manajemen Predicted Grades — Dari Guru ke IBIS`, `SOP Penanganan Academic Integrity Incident (IBO Policy)`, `SOP Persiapan Exam Session — Logistik, Invigilator, Materi`],
+      template: [`Template Kalender Deadline IB DP — Sesi May & November`, `Template Form Permintaan Predicted Grade ke Subject Teacher`, `Template Laporan Monitoring Kemajuan Kandidat per Sesi`, `Template Checklist Kesiapan Visit Authorization IBO`],
+      bank_soal: [`Bank Soal IB DP Programme Standards & Practices (20 soal)`, `Bank Soal Prosedur IBIS — Registrasi & Submission (15 soal)`, `Bank Soal Academic Integrity Policy IBO (20 soal)`],
+      studi_kasus: [`Studi Kasus: Kandidat Terlambat Daftar — Prosedur Darurat IBIS`, `Studi Kasus: Pelanggaran Academic Integrity — Proses Investigasi`, `Studi Kasus: Nilai IA Berbeda Jauh dengan Prediksi — Tindakan Koordinator`],
+      checklist: [`Checklist Persiapan Exam Session IB DP (invigilator, materi, ruangan)`, `Checklist Submission Internal Assessment ke IBO`, `Checklist Kesiapan Authorization Visit (Programme Standards)`],
+      rubrik: [`Rubrik Evaluasi Kesiapan Sekolah IB (Programme Standards Compliance)`, `Rubrik Review Kualitas Predicted Grade Process`],
+      cheat_sheet: [`Cheat Sheet Deadline IB DP — May & November Session`, `Cheat Sheet Klausul Academic Integrity Policy IBO`, `Cheat Sheet Alur Proses IBIS — Registrasi hingga Result`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman sebagai IB DP Coordinator (STAR)`, `Panduan Menyusun Self-Study Document untuk IB Authorization`],
+    },
+    tutor: {
+      sop: [`SOP Sesi Tutoring Adaptif — Diagnosa, Materi, Latihan, Evaluasi`, `SOP Penyusunan Learning Path Personalisasi per Siswa`, `SOP Gamifikasi Sesi Belajar — XP, Level, Badge`, `SOP Laporan Progress Mingguan ke Orang Tua`],
+      template: [`Template Learning Plan Individu Siswa`, `Template Diagnostic Assessment per Mata Pelajaran`, `Template Laporan Progress Belajar Mingguan (Parent Summary)`, `Template Soal Adaptif per Level Bloom's Taxonomy`],
+      bank_soal: [`Bank Soal Diagnostik Kemampuan Awal — Multi Mata Pelajaran`, `Bank Soal Latihan Harian per Topik (Level C1-C6 Bloom)`, `Bank Soal Tryout Ujian Nasional / UTBK (Simulasi Realistis)`],
+      studi_kasus: [`Studi Kasus: Siswa Kecemasan Ujian — Strategi Intervensi SEL`, `Studi Kasus: Miskonsepsi Mendalam — Pendekatan Remediasi`, `Studi Kasus: Siswa Tidak Konsisten — Desain Gamifikasi yang Tepat`],
+      checklist: [`Checklist Kesiapan Sesi Tutoring (Materi, Soal, Platform)`, `Checklist Monitoring Perkembangan Siswa per Kompetensi`, `Checklist Evaluasi Efektivitas Program Tutor`],
+      rubrik: [`Rubrik Penilaian Kualitas Sesi Tutoring (5 dimensi)`, `Rubrik Evaluasi Pemahaman Siswa per Level Bloom`],
+      cheat_sheet: [`Cheat Sheet Bloom's Taxonomy — Kata Kerja per Level`, `Cheat Sheet Strategi Gamifikasi Pembelajaran yang Efektif`, `Cheat Sheet Teknik Socratic Questioning`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Mengajar & Tutoring (STAR)`, `Panduan Menyusun Portofolio Pengajar untuk Sertifikasi`],
+    },
+    konstruksi: {
+      sop: [`SOP Pelaksanaan Pekerjaan Konstruksi — Standar Mutu & K3`, `SOP Pengendalian Kualitas Material Masuk ke Lapangan`, `SOP Rapat Koordinasi Mingguan Proyek`, `SOP Dokumentasi As-Built Drawing`, `SOP Serah Terima Pekerjaan Antar Subkontraktor`],
+      template: [`Template Metode Kerja (Method Statement) Pekerjaan Kritis`, `Template Berita Acara Kemajuan Pekerjaan`, `Template Request for Information (RFI) ke Konsultan`, `Template Instruksi Kerja per Jenis Pekerjaan`],
+      bank_soal: [`Bank Soal Regulasi Jasa Konstruksi — UU 2/2017 & PP 14/2021 (30 soal)`, `Bank Soal Teknik Pelaksanaan Konstruksi Umum (25 soal)`, `Bank Soal Manajemen Kontrak & Administrasi Proyek (20 soal)`],
+      studi_kasus: [`Studi Kasus: Mutu Pekerjaan Tidak Sesuai Spesifikasi — Tindakan`, `Studi Kasus: Sengketa Antara Kontraktor & Subkontraktor`, `Studi Kasus: Site Condition Berbeda dari Dokumen — Klaim`],
+      checklist: [`Checklist Kesiapan Mulai Pekerjaan (Method Statement, Izin, APD)`, `Checklist Inspeksi Kualitas Pekerjaan per Milestone`, `Checklist Dokumen Serah Terima Proyek (PHO/FHO)`],
+      rubrik: [`Rubrik Penilaian Kualitas Metode Kerja Konstruksi`, `Rubrik Evaluasi Kinerja Subkontraktor`],
+      cheat_sheet: [`Cheat Sheet Hierarki Dokumen Kontrak Konstruksi`, `Cheat Sheet Perbedaan Kewajiban Kontraktor vs Konsultan`, `Cheat Sheet Milestone Proyek Konstruksi — Dokumen per Tahap`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Pelaksanaan Proyek Konstruksi (STAR)`, `Panduan Menyusun Portofolio Tenaga Ahli Konstruksi`],
+    },
+    regulasi: {
+      sop: [`SOP Penelusuran Regulasi yang Berlaku untuk Kasus Tertentu`, `SOP Update Monitoring Perubahan Regulasi Jasa Konstruksi`, `SOP Penyusunan Legal Opinion Internal BUJK`],
+      template: [`Template Matriks Kepatuhan Regulasi (Compliance Matrix)`, `Template Ringkasan Perubahan Regulasi Terbaru`, `Template Memo Hukum Internal untuk Manajemen`],
+      bank_soal: [`Bank Soal UU 2/2017 Jasa Konstruksi (30 soal)`, `Bank Soal PP 14/2021 & Turunannya (25 soal)`, `Bank Soal Permen PUPR terkait Jasa Konstruksi (20 soal)`],
+      studi_kasus: [`Studi Kasus: Penerapan Regulasi Baru — Transisi & Kepatuhan`, `Studi Kasus: Interpretasi Pasal yang Ambigu — Panduan Analisis`, `Studi Kasus: BUJK Tidak Patuh Regulasi — Risiko & Sanksi`],
+      checklist: [`Checklist Kepatuhan Regulasi Jasa Konstruksi (Tahunan)`, `Checklist Update Lisensi & Sertifikat BUJK (SBU, SKK, SIUJK)`],
+      rubrik: [`Rubrik Penilaian Kualitas Analisis Regulasi`, `Rubrik Evaluasi Risiko Hukum BUJK`],
+      cheat_sheet: [`Cheat Sheet Hierarki Regulasi Jasa Konstruksi Indonesia`, `Cheat Sheet Perubahan Kunci Permen PU 6/2025 vs 8/2022`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Analisis & Kepatuhan Regulasi (STAR)`],
+    },
+    edukasi: {
+      sop: [`SOP Perancangan Modul Pelatihan Konstruksi (ADDIE Model)`, `SOP Evaluasi Efektivitas Pelatihan (Kirkpatrick 4 Level)`, `SOP Blended Learning — Offline & Online Integration`],
+      template: [`Template Rancangan Program Pelatihan (RPP/Silabus)`, `Template Evaluasi Reaksi Peserta (Formulir Feedback Pelatihan)`, `Template Pre-test & Post-test per Topik Pelatihan`],
+      bank_soal: [`Bank Soal Kompetensi Domain Terkait (30 soal pre/post-test)`, `Bank Soal Evaluasi Pengetahuan Peserta Pelatihan (25 soal)`],
+      studi_kasus: [`Studi Kasus: Peserta Tidak Lulus Post-test — Analisis & Remedial`, `Studi Kasus: Transfer of Learning Rendah — Desain Ulang Pelatihan`],
+      checklist: [`Checklist Persiapan Pelaksanaan Pelatihan (Fasilitator, Materi, Ruang)`, `Checklist Evaluasi Penyelenggaraan Pelatihan`],
+      rubrik: [`Rubrik Penilaian Presentasi/Demo Peserta Pelatihan`, `Rubrik Evaluasi Modul Pelatihan (Kelengkapan & Kualitas)`],
+      cheat_sheet: [`Cheat Sheet Model ADDIE untuk Desain Pelatihan`, `Cheat Sheet Kirkpatrick 4 Level Evaluation`],
+      narasi_portofolio: [`Narasi Portofolio: Pengalaman Merancang & Memfasilitasi Pelatihan (STAR)`],
+    },
+  };
+
+  const domainTopics = DOMAIN_TOPICS[domain] || DOMAIN_TOPICS["konstruksi"];
+  return domainTopics[docType] || [];
+}
+
 export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
   const { toast } = useToast();
   const { data: knowledgeBases = [], isLoading } = useKnowledgeBases(agent.id);
@@ -776,65 +995,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
               </svg>
             );
 
-            const QUICK_TOPICS: Record<string, string[]> = {
-              sop: [
-                "SOP Persiapan Uji PBJP LKPP Level 1 (H-14 s.d. H-1)",
-                "SOP Diagnostik Awal & Tryout 30 Soal PBJP",
-                "SOP Latihan Harian 45 Menit PBJP (Konsep → Soal → Review)",
-                "SOP Simulasi 90 Menit Uji Kompetensi PBJP",
-                "SOP Menyusun HPS Secara Naratif",
-                "SOP Menanggapi Sanggah dalam PBJP",
-                "SOP Final Review H-1 Uji Kompetensi PBJP",
-              ],
-              template: [
-                "Template Mapping Bukti Portofolio PBJP (Bukti → Kompetensi → Narasi)",
-                "Template Error Log Latihan PBJP (Salah Konsep vs Salah Teliti)",
-                "Template Narasi Bukti dengan Format STAR Versi Pengadaan",
-                "Template Ringkasan Portofolio 1 Halaman PBJP Level 1",
-                "Template Evaluasi Dokumen Penawaran",
-              ],
-              bank_soal: [
-                "Bank Soal Prinsip & Etika Pengadaan PBJP (50 soal + pembahasan)",
-                "Bank Soal Perencanaan Pengadaan PBJP (50 soal + pembahasan)",
-                "Bank Soal Pemilihan Penyedia PBJP (50 soal + pembahasan)",
-                "Bank Soal Kontrak & Pelaksanaan PBJP (50 soal + pembahasan)",
-                "Paket Tryout Campuran PBJP Level 1 (30 soal)",
-              ],
-              studi_kasus: [
-                "Studi Kasus: Spesifikasi Diskriminatif → Langkah Perbaikan",
-                "Studi Kasus: HPS Tidak Wajar → Koreksi & Dokumen",
-                "Studi Kasus: Evaluasi Penyedia Bermasalah → BA yang Benar",
-                "Studi Kasus: Perubahan Kontrak → Dokumen & Manajemen Risiko",
-                "Contoh Jawaban Essay PBJP Baik vs Kurang + Anotasi",
-              ],
-              checklist: [
-                "Checklist Dokumen Perencanaan Pengadaan (siap audit)",
-                "Checklist Dokumen Pemilihan Penyedia (siap audit)",
-                "Checklist Dokumen Kontrak & Adendum (siap audit)",
-                "Checklist Pelaksanaan & Serah Terima (siap audit)",
-                "Checklist Kelengkapan Portofolio PBJP Level 1",
-              ],
-              rubrik: [
-                "Rubrik Penilaian Essay PBJP (skor 0–4 per kriteria)",
-                "Rubrik Studi Kasus PBJP (Masalah → Aturan → Langkah → Output)",
-                "Rubrik Penilaian Portofolio Bukti PBJP Level 1",
-              ],
-              cheat_sheet: [
-                "Cheat Sheet PBJP Level 1 — Semua Materi (1 Halaman)",
-                "Cheat Sheet Prinsip & Etika Pengadaan",
-                "Cheat Sheet Dokumen Kunci per Tahap Pengadaan",
-                "Cheat Sheet Jebakan Umum Peserta PBJP + Solusi",
-              ],
-              narasi_portofolio: [
-                "Narasi Portofolio: Pengalaman Perencanaan Pengadaan (STAR)",
-                "Narasi Portofolio: Pengalaman Evaluasi & Pemilihan Penyedia",
-                "Narasi Portofolio: Pengalaman Pelaksanaan & Pengawasan Kontrak",
-                "Panduan Menulis Narasi Bukti Siap Asesor PBJP",
-              ],
-              custom: [],
-            };
-
-            const chips = QUICK_TOPICS[aiGenDocType] || [];
+            const chips = getAgentContextualTopics(agent, aiGenDocType);
 
             // Simple markdown → HTML renderer
             function mdToHtml(md: string): string {
