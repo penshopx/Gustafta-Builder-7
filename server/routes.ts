@@ -12355,11 +12355,15 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     if (!userId) return "user";
     const superadminEmails = (process.env.SUPERADMIN_EMAILS || "")
       .split(",").map((s: string) => s.trim().toLowerCase()).filter(Boolean);
+    const adminEmails = (process.env.ADMIN_EMAILS || "")
+      .split(",").map((s: string) => s.trim().toLowerCase()).filter(Boolean);
     const adminIds = (process.env.ADMIN_USER_IDS || "")
       .split(",").map((s: string) => s.trim()).filter(Boolean);
     const [dbUser] = await db.select({ role: users.role, email: users.email }).from(users).where(eq(users.id, userId));
     if (!dbUser) return adminIds.includes(userId) ? "superadmin" : "user";
-    if (superadminEmails.includes((dbUser.email || "").toLowerCase())) return "superadmin";
+    const userEmail = (dbUser.email || "").toLowerCase();
+    if (superadminEmails.includes(userEmail)) return "superadmin";
+    if (adminEmails.includes(userEmail)) return "admin";
     if (adminIds.includes(userId)) return dbUser.role === "superadmin" ? "superadmin" : "admin";
     return dbUser.role || "user";
   }
