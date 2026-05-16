@@ -322,6 +322,13 @@ export default function IbTuChat() {
                 }
                 return updated;
               });
+            } else if (evt.type === "data_master_injected") {
+              setMessages(prev => {
+                const updated = [...prev];
+                const last = updated[updated.length - 1];
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, dataMasterInjected: true } as any;
+                return updated;
+              });
             } else if (evt.type === "router_decision" || evt.type === "critic_result") {
               // MultiClaw L4 events — acknowledged
             } else if (evt.type === "sub_agent_start") {

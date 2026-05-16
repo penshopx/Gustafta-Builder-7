@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle,
   BookOpen, ChevronDown, ChevronUp, Map, FileText, Shield,
-  DollarSign, ClipboardList, Search, Globe, Scale, Lock, Star,
+  DollarSign, ClipboardList, Search, Globe, Scale, Lock, Star, Database,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -27,6 +27,7 @@ interface Message {
   isStreaming?: boolean;
   subAgents?: SubAgentStatus[];
   orchestrationMs?: number;
+  dataMasterInjected?: boolean;
 }
 
 // ─── Agent Metadata ───────────────────────────────────────────────────────────
@@ -199,6 +200,12 @@ function ChatMessage({ msg }: { msg: Message }) {
             </span>
           ) : msg.content}
         </div>
+        {msg.dataMasterInjected && (
+          <div className="flex items-center gap-1.5 text-[10px] text-emerald-400/70 px-1 mt-0.5">
+            <Database className="h-2.5 w-2.5" />
+            <span>Data Nyata BUJK &amp; Harga Material digunakan</span>
+          </div>
+        )}
         {msg.subAgents && msg.subAgents.length > 0 && (
           <SubAgentPanel agents={msg.subAgents} />
         )}
@@ -328,6 +335,13 @@ export default function SbuClawChat() {
                 if (selectedIds.size > 0 && !selectedIds.has(id)) {
                   subAgentMap.set(id, { ...s, status: "waiting" });
                 }
+              });
+            } else if (evt.type === "data_master_injected") {
+              setMessages(prev => {
+                const updated = [...prev];
+                const last = updated[updated.length - 1];
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, dataMasterInjected: true };
+                return updated;
               });
             } else if (evt.type === "critic_result") {
               // Critic gate result — no specific display update needed for SBUClaw

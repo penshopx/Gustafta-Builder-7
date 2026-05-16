@@ -62,7 +62,7 @@ import {
 } from "./notion";
 import { registerLegalRoutes } from "./routes-legal";
 import { registerLmsRoutes } from "./routes-lms";
-import { registerDataMasterRoutes } from "./routes-data-master";
+import { registerDataMasterRoutes, buildDataMasterContext } from "./routes-data-master";
 import { seedLexCom, seedLexComInSeries } from "./seed-lexcom";
 
 const _require = createRequire(import.meta.url);
@@ -3267,6 +3267,21 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             } catch (sirupErr) {
               console.warn("[TENDER_ORCHESTRATOR] SIRUP pre-fetch failed:", sirupErr);
             }
+          }
+          // ─────────────────────────────────────────────────────────────────────
+
+          // ── DATA MASTER: Inject real BUJK & material price data ──────────────
+          try {
+            const dmUserId = (req as any).user?.claims?.sub || (req as any).user?.id || "";
+            if (dmUserId) {
+              const dmContext = await buildDataMasterContext(dmUserId, enrichedUserContent);
+              if (dmContext) {
+                enrichedUserContent = enrichedUserContent + dmContext;
+                res.write(`data: ${JSON.stringify({ type: "data_master_injected" })}\n\n`);
+              }
+            }
+          } catch (dmErr) {
+            console.warn("[DataMaster] Context injection failed:", dmErr);
           }
           // ─────────────────────────────────────────────────────────────────────
 

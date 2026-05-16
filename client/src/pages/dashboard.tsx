@@ -4,7 +4,7 @@ import {
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
-  Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap
+  Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1233,6 +1233,13 @@ export default function Dashboard() {
                       <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">AI Tutor Adaptif</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/data-master">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/10 border border-cyan-500/20 mb-2" data-testid="nav-shortcut-data-master">
+                      <DatabaseZap className="w-4 h-4 text-cyan-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">Data Master OpenClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-cyan-500/50" />
                     </div>
                   </Link>
                   {orchestratorHub ? (
