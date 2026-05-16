@@ -131,7 +131,7 @@ export function useStreamingChat() {
   ): Promise<Message | null> => {
     const { agentId, onChunk, onComplete, onError, onOrchestrating, onSubAgentStart, onSubAgentDone, onAggregating } = options;
 
-    setState({ isStreaming: true, streamingContent: "", error: null, orchestration: INITIAL_ORCHESTRATION });
+    setState({ isStreaming: true, streamingContent: "", error: null, orchestration: INITIAL_ORCHESTRATION, dataMasterInjected: false });
     bufferRef.current = "";
     abortControllerRef.current = new AbortController();
 

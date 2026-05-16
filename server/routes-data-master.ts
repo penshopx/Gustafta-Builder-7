@@ -401,6 +401,23 @@ export function registerDataMasterRoutes(app: Express) {
   });
 
   // ─────────────────────────────────────────────────────────────
+  // STATS — counts for summary cards
+  // ─────────────────────────────────────────────────────────────
+
+  app.get("/api/data-master/stats", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const [bujkRows, matRows] = await Promise.all([
+        db.select().from(bujkData).where(eq(bujkData.userId, userId)),
+        db.select().from(materialPrices).where(eq(materialPrices.userId, userId)),
+      ]);
+      res.json({ bujkCount: bujkRows.length, materialCount: matRows.length });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ─────────────────────────────────────────────────────────────
   // CEK OSS-RBA — real-time NIB/SBU lookup
   // ─────────────────────────────────────────────────────────────
 
@@ -410,79 +427,9 @@ export function registerDataMasterRoutes(app: Express) {
       return res.status(400).json({ error: "NIB tidak valid. Masukkan minimal 5 karakter." });
     }
     try {
-      // Try OSS public API
-      const ossUrl = `https://oss.go.id/api/nib/${encodeURIComponent(nib)}`;
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
-      let ossData: any = null;
-      let ossOk = false;
-      try {
-        const ossResp = await fetch(ossUrl, {
-          signal: controller.signal,
-          headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
-        });
-        clearTimeout(timeout);
-        if (ossResp.ok) {
-          ossData = await ossResp.json();
-          ossOk = true;
-        }
-      } catch (_) {
-        clearTimeout(timeout);
-      }
-
-      if (ossOk && ossData) {
-        return res.json({ source: "oss", data: ossData, nib });
-      }
-
-      // Try SIKI LPJK
-      const lpjkUrl = `https://siki.lpjk.pu.go.id/api/bujk?nib=${encodeURIComponent(nib)}`;
-      const ctrl2 = new AbortController();
-      const t2 = setTimeout(() => ctrl2.abort(), 8000);
-      let lpjkData: any = null;
-      try {
-        const lpjkResp = await fetch(lpjkUrl, {
-          signal: ctrl2.signal,
-          headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
-        });
-        clearTimeout(t2);
-        if (lpjkResp.ok) {
-          lpjkData = await lpjkResp.json();
-        }
-      } catch (_) {
-        clearTimeout(t2);
-      }
-
-      if (lpjkData) {
-        return res.json({ source: "lpjk", data: lpjkData, nib });
-      }
-
-      // Fallback: manual scrape OSS web
-      const webUrl = `https://oss.go.id/portal/api/nib/${encodeURIComponent(nib)}`;
-      const ctrl3 = new AbortController();
-      const t3 = setTimeout(() => ctrl3.abort(), 8000);
-      try {
-        const webResp = await fetch(webUrl, {
-          signal: ctrl3.signal,
-          headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" }
-        });
-        clearTimeout(t3);
-        if (webResp.ok) {
-          const webData = await webResp.json();
-          return res.json({ source: "oss_portal", data: webData, nib });
-        }
-      } catch (_) {
-        clearTimeout(t3);
-      }
-
-      return res.json({
-        source: "unavailable",
-        nib,
-        message: "Sistem OSS-RBA sedang tidak bisa diakses secara otomatis. Silakan cek manual di https://oss.go.id atau https://siki.lpjk.pu.go.id dengan NIB: " + nib,
-        manualLinks: [
-          { label: "OSS-RBA — Cek NIB", url: `https://oss.go.id/portal/api/v1/nib/verifikasi?nib=${nib}` },
-          { label: "SIKI LPJK — Cari BUJK", url: `https://siki.lpjk.pu.go.id` },
-        ]
-      });
+      const text = await lookupNibPublic(nib);
+      const found = !text.includes("CEK MANUAL NIB") && !text.includes("tidak dapat diakses");
+      res.json({ nib, text, found });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

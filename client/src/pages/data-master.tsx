@@ -44,6 +44,37 @@ function BujkTab() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [form, setForm] = useState<any>({});
+  const [nibLookupLoading, setNibLookupLoading] = useState(false);
+
+  async function autoFillFromNib() {
+    const nib = (form.nib || "").trim();
+    if (!nib || nib.length < 5) {
+      toast({ title: "NIB tidak valid", description: "Masukkan NIB terlebih dahulu (minimal 5 digit)", variant: "destructive" });
+      return;
+    }
+    setNibLookupLoading(true);
+    try {
+      const resp = await apiRequest("GET", `/api/data-master/cek-oss?nib=${encodeURIComponent(nib)}`);
+      const data = await resp.json();
+      if (!data.found) {
+        toast({ title: "Data tidak ditemukan", description: "Coba cek manual di tab Cek OSS-RBA", variant: "destructive" });
+        return;
+      }
+      const text: string = data.text || "";
+      const extract = (key: string) => { const m = text.match(new RegExp(`${key}:\\s*(.+)`)); return m ? m[1].trim() : ""; };
+      setForm((f: any) => ({
+        ...f,
+        namaPerusahaan: extract("Nama") || f.namaPerusahaan,
+        npwp: extract("NPWP") || f.npwp,
+        alamat: extract("Alamat") || f.alamat,
+      }));
+      toast({ title: "Data diisi otomatis", description: "Lengkapi field yang belum terisi" });
+    } catch (e: any) {
+      toast({ title: "Gagal lookup NIB", description: e.message, variant: "destructive" });
+    } finally {
+      setNibLookupLoading(false);
+    }
+  }
 
   const { data: rows = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/data-master/bujk", search],
@@ -172,7 +203,14 @@ function BujkTab() {
             </div>
             <div>
               <label className="text-sm font-medium">NIB</label>
-              <Input value={form.nib || ""} onChange={e => setForm((f: any) => ({ ...f, nib: e.target.value }))} placeholder="1234567890123" data-testid="input-nib" />
+              <div className="flex gap-1.5">
+                <Input value={form.nib || ""} onChange={e => setForm((f: any) => ({ ...f, nib: e.target.value }))} placeholder="1234567890123" data-testid="input-nib" className="font-mono" />
+                <Button type="button" size="sm" variant="outline" onClick={autoFillFromNib} disabled={nibLookupLoading || !form.nib} className="shrink-0 gap-1 text-xs" data-testid="button-autofill-nib">
+                  {nibLookupLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Globe className="h-3 w-3" />}
+                  Auto-fill
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Isi NIB lalu klik Auto-fill untuk mengambil data dari OSS/LPJK</p>
             </div>
             <div>
               <label className="text-sm font-medium">NPWP</label>
@@ -447,20 +485,27 @@ function HargaTab() {
 // TAB 3 — CEK OSS-RBA
 // ─────────────────────────────────────────────────────────────────
 
+function extractFromText(text: string, key: string): string {
+  const m = text.match(new RegExp(`${key}:\\s*(.+)`));
+  return m ? m[1].trim() : "";
+}
+
 function OssTab() {
   const { toast } = useToast();
+  const qc = useQueryClient();
   const [nib, setNib] = useState("");
-  const [queried, setQueried] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{ nib: string; text: string; found: boolean } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveForm, setSaveForm] = useState<any>({});
 
   async function cekOss() {
-    if (!nib.trim()) return;
+    const trimmed = nib.trim();
+    if (!trimmed) return;
     setLoading(true);
     setResult(null);
-    setQueried(nib.trim());
     try {
-      const resp = await apiRequest("GET", `/api/data-master/cek-oss?nib=${encodeURIComponent(nib.trim())}`);
+      const resp = await apiRequest("GET", `/api/data-master/cek-oss?nib=${encodeURIComponent(trimmed)}`);
       const data = await resp.json();
       setResult(data);
     } catch (e: any) {
@@ -470,22 +515,59 @@ function OssTab() {
     }
   }
 
-  const isUnavailable = result?.source === "unavailable";
-  const hasData = result && !isUnavailable && result.data;
-
-  function renderValue(v: any): string {
-    if (v === null || v === undefined) return "—";
-    if (typeof v === "object") return JSON.stringify(v);
-    return String(v);
+  function openSave() {
+    if (!result) return;
+    const nama = extractFromText(result.text, "Nama");
+    const npwp = extractFromText(result.text, "NPWP");
+    const alamat = extractFromText(result.text, "Alamat");
+    const status = extractFromText(result.text, "Status");
+    setSaveForm({
+      namaPerusahaan: nama,
+      nib: result.nib,
+      npwp,
+      alamat,
+      kabKota: "",
+      provinsi: "",
+      picNama: "",
+      picPhone: "",
+      picEmail: "",
+      kualifikasi: "",
+      subklasifikasi: "",
+      nomorSbu: "",
+      statusSbu: status || "aktif",
+      masaBerlakuSbu: "",
+      catatan: `Auto-import dari OSS/LPJK lookup`,
+    });
+    setSaveOpen(true);
   }
+
+  const saveMutation = useMutation({
+    mutationFn: (data: any) => apiRequest("POST", "/api/data-master/bujk", data).then(r => r.json()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/data-master/bujk"] });
+      setSaveOpen(false);
+      toast({ title: "Data BUJK disimpan", description: "Tersedia di tab Data BUJK Binaan" });
+    },
+    onError: (e: any) => toast({ title: "Gagal menyimpan", description: e.message, variant: "destructive" }),
+  });
+
+  const manualLinks = [
+    { label: "OSS-RBA — Portal Perizinan Berusaha", url: "https://oss.go.id" },
+    { label: "SIKI LPJK — Registrasi BUJK & SBU", url: "https://siki.lpjk.pu.go.id" },
+    { label: "SIMPAN BNSP — Sertifikat Kompetensi", url: "https://sertifikasi.bnsp.go.id" },
+    { label: "SIUJK Online — Izin Usaha Jasa Konstruksi", url: "https://siujk.pu.go.id" },
+  ];
 
   return (
     <div className="space-y-4 max-w-2xl">
+      {/* Lookup card */}
       <Card className="border border-border/60">
         <CardContent className="p-4 space-y-3">
           <div>
             <h3 className="font-semibold text-sm mb-1">Cek Status NIB / SBU via OSS-RBA & LPJK</h3>
-            <p className="text-xs text-muted-foreground">Masukkan NIB perusahaan untuk mengecek status legalitas secara real-time dari sistem pemerintah</p>
+            <p className="text-xs text-muted-foreground">
+              Masukkan NIB 13 digit — sistem mencoba 5 strategi: OSS API → SIKI LPJK → OSS Portal → Web Scraping → Fallback
+            </p>
           </div>
           <div className="flex gap-2">
             <Input
@@ -495,6 +577,7 @@ function OssTab() {
               onKeyDown={e => e.key === "Enter" && cekOss()}
               className="font-mono"
               data-testid="input-nib-oss"
+              maxLength={20}
             />
             <Button onClick={cekOss} disabled={loading || !nib.trim()} data-testid="button-cek-oss">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
@@ -504,81 +587,134 @@ function OssTab() {
         </CardContent>
       </Card>
 
+      {/* Loading */}
       {loading && (
         <Card className="border border-border/60">
-          <CardContent className="py-8 text-center text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-            <p className="text-sm">Menghubungi server OSS-RBA & LPJK…</p>
+          <CardContent className="py-10 text-center text-muted-foreground space-y-2">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+            <p className="text-sm">Mencoba 5 strategi lookup ke OSS-RBA & LPJK…</p>
+            <p className="text-xs opacity-60">Proses ini bisa memakan waktu hingga 30 detik</p>
           </CardContent>
         </Card>
       )}
 
+      {/* Result */}
       {result && !loading && (
-        <Card className={`border ${isUnavailable ? "border-amber-500/40" : "border-emerald-500/40"}`}>
+        <Card className={`border ${result.found ? "border-emerald-500/40" : "border-amber-500/40"}`}>
           <CardContent className="p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              {isUnavailable
-                ? <AlertCircle className="h-4 w-4 text-amber-400 shrink-0" />
-                : <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />}
-              <span className="font-semibold text-sm">
-                {isUnavailable ? "Akses Langsung Tidak Tersedia" : `Data ditemukan via ${result.source?.toUpperCase()}`}
-              </span>
-              <Badge variant="outline" className="font-mono text-xs">{queried}</Badge>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                {result.found
+                  ? <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
+                  : <AlertCircle className="h-4 w-4 text-amber-400 shrink-0" />}
+                <span className="font-semibold text-sm">
+                  {result.found ? "Data ditemukan" : "Akses langsung tidak tersedia"}
+                </span>
+                <Badge variant="outline" className="font-mono text-xs">{result.nib}</Badge>
+              </div>
+              {result.found && (
+                <Button size="sm" variant="outline" onClick={openSave}
+                  className="gap-1.5 text-emerald-600 border-emerald-500/40 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                  data-testid="button-simpan-ke-bujk">
+                  <Plus className="h-3.5 w-3.5" /> Simpan ke Data BUJK
+                </Button>
+              )}
             </div>
 
-            {isUnavailable ? (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">{result.message}</p>
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground">Cek manual di sini:</p>
-                  {result.manualLinks?.map((l: any) => (
-                    <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-primary hover:underline" data-testid="link-manual-oss">
-                      <ExternalLink className="h-3.5 w-3.5" /> {l.label}
-                    </a>
-                  ))}
-                </div>
-                <div className="bg-muted/40 rounded-lg p-3 border border-border/40 text-xs text-muted-foreground space-y-1">
-                  <p className="font-medium">Tips penggunaan manual:</p>
-                  <p>1. Buka link OSS-RBA di atas dan login dengan akun OSS perusahaan</p>
-                  <p>2. Buka SIKI LPJK, masukkan NIB atau nama perusahaan di kolom pencarian</p>
-                  <p>3. Data yang ditemukan bisa kamu input manual ke tab "Data BUJK Binaan"</p>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-muted/30 rounded-lg p-3 border border-border/40">
-                <div className="grid grid-cols-2 gap-2">
-                  {hasData && Object.entries(result.data).slice(0, 20).map(([k, v]: any) => (
-                    <div key={k} className="text-xs">
-                      <span className="text-muted-foreground capitalize">{k.replace(/_/g, " ")}: </span>
-                      <span className="font-medium">{renderValue(v)}</span>
-                    </div>
-                  ))}
-                </div>
+            <pre className={`text-xs whitespace-pre-wrap rounded-lg p-3 border font-mono leading-relaxed ${
+              result.found
+                ? "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200/40 dark:border-emerald-800/30 text-foreground"
+                : "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/40 dark:border-amber-800/30 text-muted-foreground"
+            }`}>
+              {result.text}
+            </pre>
+
+            {!result.found && (
+              <div className="space-y-2 pt-1">
+                <p className="text-xs font-medium text-muted-foreground">Cek manual di sini:</p>
+                {manualLinks.slice(0, 2).map(l => (
+                  <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-primary hover:underline" data-testid="link-manual-oss">
+                    <ExternalLink className="h-3.5 w-3.5" /> {l.label}
+                  </a>
+                ))}
+                <p className="text-xs text-muted-foreground pt-1">
+                  Data yang ditemukan bisa diinput manual ke tab <strong>Data BUJK Binaan</strong>.
+                </p>
               </div>
             )}
           </CardContent>
         </Card>
       )}
 
+      {/* Link referensi */}
       <Card className="border border-border/40 bg-muted/10">
         <CardContent className="p-4 space-y-2">
           <h4 className="text-sm font-semibold">Link Referensi Pemerintah</h4>
           <div className="grid grid-cols-1 gap-2 text-sm">
-            {[
-              { label: "OSS-RBA — Portal Perizinan Berusaha", url: "https://oss.go.id" },
-              { label: "SIKI LPJK — Registrasi BUJK & SBU", url: "https://siki.lpjk.pu.go.id" },
-              { label: "SIMPAN BNSP — Sertifikat Kompetensi", url: "https://sertifikasi.bnsp.go.id" },
-              { label: "SIUJK Online — Izin Usaha Jasa Konstruksi", url: "https://siujk.pu.go.id" },
-            ].map(link => (
+            {manualLinks.map(link => (
               <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 text-primary hover:underline" data-testid={`link-ref-${link.label}`}>
+                className="flex items-center gap-2 text-primary hover:underline" data-testid={`link-ref-${link.url}`}>
                 <ExternalLink className="h-3.5 w-3.5 shrink-0" /> {link.label}
               </a>
             ))}
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog Simpan ke BUJK */}
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" /> Simpan ke Data BUJK Binaan
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <p className="text-xs text-muted-foreground">
+              Data diisi otomatis dari hasil lookup. Lengkapi field yang kosong lalu simpan.
+            </p>
+            {[
+              { label: "Nama Perusahaan *", key: "namaPerusahaan", placeholder: "PT / CV ..." },
+              { label: "NIB", key: "nib", placeholder: "13 digit" },
+              { label: "NPWP", key: "npwp", placeholder: "00.000.000.0-000.000" },
+              { label: "Alamat", key: "alamat", placeholder: "Jl. ..." },
+              { label: "Kabupaten / Kota", key: "kabKota", placeholder: "Kota ..." },
+              { label: "Provinsi", key: "provinsi", placeholder: "Provinsi ..." },
+              { label: "Nama PIC", key: "picNama", placeholder: "Nama kontak" },
+              { label: "No. HP PIC", key: "picPhone", placeholder: "08..." },
+              { label: "Email PIC", key: "picEmail", placeholder: "email@..." },
+              { label: "Kualifikasi", key: "kualifikasi", placeholder: "K1, M1, B1 ..." },
+              { label: "Subklasifikasi / Subbidang", key: "subklasifikasi", placeholder: "BG, BS, IL ..." },
+              { label: "Nomor SBU", key: "nomorSbu", placeholder: "0-00000-0-00000" },
+              { label: "Masa Berlaku SBU", key: "masaBerlakuSbu", placeholder: "YYYY-MM-DD" },
+              { label: "Catatan", key: "catatan", placeholder: "Catatan tambahan..." },
+            ].map(f => (
+              <div key={f.key}>
+                <label className="text-xs font-medium mb-1 block">{f.label}</label>
+                <Input
+                  value={saveForm[f.key] || ""}
+                  onChange={e => setSaveForm((prev: any) => ({ ...prev, [f.key]: e.target.value }))}
+                  placeholder={f.placeholder}
+                  className="h-8 text-sm"
+                  data-testid={`input-save-bujk-${f.key}`}
+                />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setSaveOpen(false)} data-testid="button-cancel-save-bujk">Batal</Button>
+            <Button
+              onClick={() => saveMutation.mutate(saveForm)}
+              disabled={saveMutation.isPending || !saveForm.namaPerusahaan}
+              data-testid="button-confirm-save-bujk"
+            >
+              {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+              Simpan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -589,6 +725,12 @@ function OssTab() {
 
 export default function DataMasterPage() {
   const [tab, setTab] = useState("bujk");
+
+  const { data: stats } = useQuery<{ bujkCount: number; materialCount: number }>({
+    queryKey: ["/api/data-master/stats"],
+    queryFn: () => apiRequest("GET", "/api/data-master/stats").then(r => r.json()),
+    staleTime: 30_000,
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -612,20 +754,28 @@ export default function DataMasterPage() {
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-3">
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-center">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-center cursor-pointer hover:bg-primary/15 transition-colors" onClick={() => setTab("bujk")}>
               <Building2 className="h-5 w-5 mx-auto mb-1 text-primary" />
               <p className="text-xs text-muted-foreground">Data BUJK Binaan</p>
-              <p className="text-xs font-medium">Profil & SBU klien</p>
+              {stats ? (
+                <p className="text-sm font-bold text-primary">{stats.bujkCount} <span className="text-xs font-normal text-muted-foreground">perusahaan</span></p>
+              ) : (
+                <p className="text-xs font-medium">Profil & SBU klien</p>
+              )}
             </div>
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-center">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-center cursor-pointer hover:bg-emerald-500/15 transition-colors" onClick={() => setTab("harga")}>
               <DollarSign className="h-5 w-5 mx-auto mb-1 text-emerald-400" />
               <p className="text-xs text-muted-foreground">Harga Material</p>
-              <p className="text-xs font-medium">RAB & estimasi biaya</p>
+              {stats ? (
+                <p className="text-sm font-bold text-emerald-400">{stats.materialCount} <span className="text-xs font-normal text-muted-foreground">item</span></p>
+              ) : (
+                <p className="text-xs font-medium">RAB & estimasi biaya</p>
+              )}
             </div>
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-center">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-center cursor-pointer hover:bg-amber-500/15 transition-colors" onClick={() => setTab("oss")}>
               <Globe className="h-5 w-5 mx-auto mb-1 text-amber-400" />
               <p className="text-xs text-muted-foreground">Cek OSS-RBA</p>
-              <p className="text-xs font-medium">Status NIB & SBU live</p>
+              <p className="text-xs font-medium">5 strategi lookup</p>
             </div>
           </div>
         </div>
