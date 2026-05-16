@@ -1966,3 +1966,57 @@ export const insertAgenticDeliverableSchema = createInsertSchema(agenticDelivera
 });
 export type InsertAgenticDeliverable = z.infer<typeof insertAgenticDeliverableSchema>;
 export type AgenticDeliverable = typeof agenticDeliverables.$inferSelect;
+
+// ==================== DATA MASTER ====================
+
+// Tabel Data BUJK Binaan — data perusahaan klien yang ditangani
+export const bujkData = pgTable("bujk_data", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().default(""),
+  namaPerusahaan: text("nama_perusahaan").notNull(),
+  nib: text("nib").default(""),
+  npwp: text("npwp").default(""),
+  alamat: text("alamat").default(""),
+  kabKota: text("kab_kota").default(""),
+  provinsi: text("provinsi").default(""),
+  picNama: text("pic_nama").default(""),
+  picPhone: text("pic_phone").default(""),
+  picEmail: text("pic_email").default(""),
+  kualifikasi: text("kualifikasi").default(""),
+  subklasifikasi: text("subklasifikasi").default(""),
+  nomorSbu: text("nomor_sbu").default(""),
+  statusSbu: text("status_sbu").default("aktif"),
+  masaBerlakuSbu: text("masa_berlaku_sbu").default(""),
+  catatan: text("catatan").default(""),
+  tags: jsonb("tags").default([]),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBujkDataSchema = createInsertSchema(bujkData).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertBujkData = z.infer<typeof insertBujkDataSchema>;
+export type BujkData = typeof bujkData.$inferSelect;
+
+// Tabel Harga Material & RAB — referensi harga internal
+export const materialPrices = pgTable("material_prices", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().default(""),
+  kategori: text("kategori").notNull(),
+  namaItem: text("nama_item").notNull(),
+  satuan: text("satuan").default(""),
+  hargaMin: integer("harga_min").default(0),
+  hargaMax: integer("harga_max").default(0),
+  hargaAcuan: integer("harga_acuan").default(0),
+  sumber: text("sumber").default(""),
+  wilayah: text("wilayah").default(""),
+  tahunAnggaran: text("tahun_anggaran").default(""),
+  catatan: text("catatan").default(""),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertMaterialPriceSchema = createInsertSchema(materialPrices).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertMaterialPrice = z.infer<typeof insertMaterialPriceSchema>;
+export type MaterialPrice = typeof materialPrices.$inferSelect;

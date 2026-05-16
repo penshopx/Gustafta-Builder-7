@@ -50,6 +50,7 @@ import TenderAiChat from "@/pages/tender-ai-chat";
 import BujkProfile from "@/pages/bujk-profile";
 import WinProbability from "@/pages/win-probability";
 import BrainProjectChat from "@/pages/brain-project-chat";
+import DataMasterPage from "@/pages/data-master";
 import IbTuChat from "@/pages/ib-tu-chat";
 import AiTutorChat from "@/pages/ai-tutor-chat";
 import SbuClawChat from "@/pages/sbu-claw-chat";
@@ -133,6 +134,7 @@ function Router() {
         <Route path="/bujk-profile" component={BujkProfile} />
         <Route path="/win-probability" component={WinProbability} />
         <Route path="/brain-project" component={BrainProjectChat} />
+        <Route path="/data-master" component={DataMasterPage} />
         <Route path="/ib-tu" component={IbTuChat} />
         <Route path="/ai-tutor" component={AiTutorChat} />
         <Route path="/sbu-claw" component={SbuClawChat} />
