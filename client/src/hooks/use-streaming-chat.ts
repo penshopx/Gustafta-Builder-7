@@ -64,6 +64,7 @@ interface StreamingChatState {
   streamingContent: string;
   error: string | null;
   orchestration: OrchestrationState;
+  dataMasterInjected: boolean;
 }
 
 const INITIAL_ORCHESTRATION: OrchestrationState = {
@@ -79,6 +80,7 @@ export function useStreamingChat() {
     streamingContent: "",
     error: null,
     orchestration: INITIAL_ORCHESTRATION,
+    dataMasterInjected: false,
   });
   const abortControllerRef = useRef<AbortController | null>(null);
   const bufferRef = useRef<string>("");
@@ -317,6 +319,9 @@ export function useStreamingChat() {
 
           } else if (data.type === "error") {
             throw new Error(data.error);
+
+          } else if (data.type === "data_master_injected") {
+            setState(prev => ({ ...prev, dataMasterInjected: true }));
 
           } else if (data.type === "ping") {
             // keepalive

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle, Calculator, ListChecks, Wand2, ChevronUp, FileOutput, Hash, Pencil, CornerDownLeft, Link2, FileDown, FileCode2, Bookmark, BookmarkCheck, Search, SearchX, ChevronDown, ChevronUp as ChevronUpIcon } from "lucide-react";
+import { Send, Bot, User, Loader2, ArrowLeft, Share2, Mic, MicOff, Volume2, VolumeX, Paperclip, X, FileText, Image as ImageIcon, Music, Video, File, Copy, Check, ThumbsUp, ThumbsDown, Download, Trash2, Globe, Code, MessageCircle, PlayCircle, Sparkles, Zap, Languages, Shield, Smartphone, ClipboardList, Target, Phone, Calendar, ExternalLink, CheckCircle, Calculator, ListChecks, Wand2, ChevronUp, FileOutput, Hash, Pencil, CornerDownLeft, Link2, FileDown, FileCode2, Bookmark, BookmarkCheck, Search, SearchX, ChevronDown, ChevronUp as ChevronUpIcon, Database } from "lucide-react";
 import { SiWhatsapp, SiTelegram, SiDiscord, SiSlack } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -381,6 +381,7 @@ export default function AgentChat() {
   const [quotaError, setQuotaError] = useState<string | null>(null);
   const [guestMessageCount, setGuestMessageCount] = useState(0);
   const [showUpgradeWall, setShowUpgradeWall] = useState(false);
+  const [dataMasterInjected, setDataMasterInjected] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
 
   // Per-chatbot trial tracking (localStorage)
@@ -999,6 +1000,7 @@ export default function AgentChat() {
     setPendingFiles([]);
     setFollowUpSuggestions([]);
     setShowQuickActions(false);
+    setDataMasterInjected(false);
     setIsTyping(true);
 
     if (textareaRef.current) {
@@ -1157,6 +1159,8 @@ export default function AgentChat() {
                 } : prev);
               } else if (parsed.type === "aggregating") {
                 setOrchestrationState(prev => prev ? { ...prev, phase: "aggregating", totalMs: parsed.totalMs } : prev);
+              } else if (parsed.type === "data_master_injected") {
+                setDataMasterInjected(true);
               } else if (parsed.type === "complete") {
                 setOrchestrationState(null);
               }
@@ -2658,6 +2662,12 @@ export default function AgentChat() {
                       <span className="text-xs text-muted-foreground">
                         {messages[messages.length - 1]?.attachments?.length ? "Memproses file & mengetik..." : "Mengetik..."}
                       </span>
+                      {dataMasterInjected && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800">
+                          <Database className="w-2.5 h-2.5" />
+                          Data Master
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

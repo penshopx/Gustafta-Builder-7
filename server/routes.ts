@@ -3424,6 +3424,39 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
       // ─────────────────────────────────────────────────────────────────────────
 
+      // ── DATA MASTER: Inject for single agents (no agenticSubAgents) ──────────
+      // For orchestrators, injection already happened inside the orchestration
+      // block above. For all other agents, inject here into the user message.
+      const isSingleAgent = !Array.isArray(subAgentsConfigRaw) || subAgentsConfigRaw.length === 0;
+      if (isSingleAgent) {
+        try {
+          const dmUserId = (req as any).user?.claims?.sub || (req as any).user?.id || "";
+          if (dmUserId) {
+            const dmContext = await buildDataMasterContext(dmUserId, userContent);
+            if (dmContext) {
+              // Inject into the last user message (handle both string and vision array)
+              const lastUserIdx = [...chatMessages].map(m => m.role).lastIndexOf("user");
+              if (lastUserIdx >= 0) {
+                const lastMsg = chatMessages[lastUserIdx];
+                if (typeof lastMsg.content === "string") {
+                  chatMessages[lastUserIdx] = { ...lastMsg, content: lastMsg.content + dmContext };
+                } else if (Array.isArray(lastMsg.content)) {
+                  // Vision message — append as extra text item
+                  chatMessages[lastUserIdx] = {
+                    ...lastMsg,
+                    content: [...lastMsg.content, { type: "text", text: dmContext }],
+                  };
+                }
+              }
+              res.write(`data: ${JSON.stringify({ type: "data_master_injected" })}\n\n`);
+            }
+          }
+        } catch (dmErr) {
+          console.warn("[DataMaster] Single-agent injection failed:", dmErr);
+        }
+      }
+      // ─────────────────────────────────────────────────────────────────────────
+
       let agentModel = agent.aiModel || "gpt-4o-mini";
       if (hasVisionContent && !agentModel.startsWith("gpt-4o")) {
         agentModel = "gpt-4o";
