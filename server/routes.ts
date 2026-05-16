@@ -16086,6 +16086,38 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     }
   });
 
+  // GET /api/tutor-builder/teams — list user's assembled teams (orchestrators tagged ai-tutor+orchestrator)
+  app.get("/api/tutor-builder/teams", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+      const teams = await db
+        .select({
+          id: agentsTable.id,
+          name: agentsTable.name,
+          tagline: agentsTable.tagline,
+          tags: agentsTable.tags,
+          agenticSubAgents: agentsTable.agenticSubAgents,
+          createdAt: agentsTable.createdAt,
+        })
+        .from(agentsTable)
+        .where(
+          and(
+            eq(agentsTable.userId, userId),
+            sqlExpr`'ai-tutor' = ANY(${agentsTable.tags})`,
+            sqlExpr`'orchestrator' = ANY(${agentsTable.tags})`
+          )
+        )
+        .orderBy(desc(agentsTable.id));
+
+      res.json(teams);
+    } catch (err: any) {
+      console.error("[/api/tutor-builder/teams]", err);
+      res.status(500).json({ error: err.message || "Gagal mengambil daftar tim" });
+    }
+  });
+
   // GET /api/tutor-builder/blueprints — list available blueprints
   app.get("/api/tutor-builder/blueprints", (_req, res) => {
     const list = Object.entries(TUTOR_BLUEPRINTS).map(([id, bp]) => ({

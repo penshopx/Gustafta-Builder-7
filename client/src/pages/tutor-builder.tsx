@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
   BookOpen, Brain, Swords, Users, Layers, ArrowLeft, Loader2,
@@ -543,29 +543,173 @@ function SuccessPanel({
 }) {
   const [, navigate] = useLocation();
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center space-y-4">
-      <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
-        <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+    <div className="max-w-2xl mx-auto py-12 px-4 text-center space-y-6">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+          <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold">Tim OpenClaw berhasil dirakit!</h2>
+          <p className="text-muted-foreground text-sm mt-1">
+            <strong>{teamName}</strong> sudah aktif. Semua agen terhubung dan orchestrator siap mendispatc secara paralel.
+          </p>
+        </div>
       </div>
-      <div>
-        <h2 className="text-xl font-semibold">Tim berhasil dirakit!</h2>
-        <p className="text-muted-foreground text-sm mt-1">
-          <strong>{teamName}</strong> sudah siap. Semua agen sudah terhubung dan bisa langsung digunakan.
+
+      {/* OpenClaw info card */}
+      <div className="rounded-xl border bg-primary/5 border-primary/20 p-4 text-left space-y-3">
+        <div className="flex items-center gap-2 text-sm font-medium text-primary">
+          <Zap className="w-4 h-4" />
+          OpenClaw L4 — Aktif
+        </div>
+        <div className="grid grid-cols-3 gap-3 text-center">
+          {[
+            { label: "Mode", value: "Paralel Dispatch" },
+            { label: "Protokol", value: "SSE Streaming" },
+            { label: "Standar", value: "ABD v1.1" },
+          ].map(s => (
+            <div key={s.label} className="rounded-lg bg-background/60 border border-border/50 p-2">
+              <div className="text-xs font-semibold text-foreground">{s.value}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Saat Anda mengirim pesan, orchestrator akan mendispatc agen yang paling relevan secara paralel,
+          mengagregasi laporan, lalu mensintesis respons tunggal — semua real-time via SSE.
         </p>
       </div>
-      <div className="flex flex-wrap gap-3 justify-center mt-2">
-        <Button onClick={() => navigate(`/bot/${orchestratorId}`)} className="gap-2" data-testid="button-open-orchestrator">
-          <MessageSquare className="w-4 h-4" />
-          Buka Chat Tim Sekarang
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <Button
+          onClick={() => navigate(`/trilogi-chat/${orchestratorId}`)}
+          className="gap-2 bg-primary hover:bg-primary/90"
+          data-testid="button-open-openclaw-chat"
+        >
+          <Zap className="w-4 h-4" />
+          Buka OpenClaw Chat
         </Button>
         <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2" data-testid="button-go-dashboard">
           <Users className="w-4 h-4" />
           Lihat di Dashboard
         </Button>
         <Button variant="ghost" onClick={onReset} className="gap-2" data-testid="button-build-another">
-          <Zap className="w-4 h-4" />
+          <Sparkles className="w-4 h-4" />
           Rakit Tim Lain
         </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── My Teams Panel ──────────────────────────────────────────────────────────
+
+interface TeamRecord {
+  id: number;
+  name: string;
+  tagline?: string;
+  tags?: string[];
+  agenticSubAgents?: Array<{ agentId: number; role: string }>;
+  createdAt?: string;
+}
+
+function BLUEPRINT_ICON_FROM_TAGS(tags?: string[]) {
+  if (!tags) return <Bot className="w-4 h-4" />;
+  if (tags.includes("studio-audio")) return <Headphones className="w-4 h-4" />;
+  if (tags.includes("penerbit-mikro")) return <BookText className="w-4 h-4" />;
+  if (tags.includes("komunitas-builder")) return <Users className="w-4 h-4" />;
+  if (tags.includes("pipeline-konten")) return <Target className="w-4 h-4 text-rose-500" />;
+  if (tags.includes("domain-profesional")) return <Brain className="w-4 h-4" />;
+  if (tags.includes("tim-rapat")) return <MessageSquare className="w-4 h-4" />;
+  if (tags.includes("umkm-stack")) return <ShoppingBag className="w-4 h-4" />;
+  if (tags.includes("tutor-sokratik")) return <GraduationCap className="w-4 h-4" />;
+  if (tags.includes("lexskripsi")) return <BookMarked className="w-4 h-4" />;
+  if (tags.includes("learning-stack")) return <Layers className="w-4 h-4" />;
+  return <Sparkles className="w-4 h-4" />;
+}
+
+function BLUEPRINT_THEME_FROM_TAGS(tags?: string[]) {
+  if (!tags) return "from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30";
+  if (tags.includes("studio-audio")) return "from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30";
+  if (tags.includes("penerbit-mikro")) return "from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30";
+  if (tags.includes("komunitas-builder")) return "from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30";
+  if (tags.includes("pipeline-konten")) return "from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30";
+  if (tags.includes("tim-rapat")) return "from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30";
+  if (tags.includes("umkm-stack")) return "from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30";
+  return "from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30";
+}
+
+function MyTeamsPanel() {
+  const [, navigate] = useLocation();
+  const { data: teams, isLoading } = useQuery<TeamRecord[]>({
+    queryKey: ["/api/tutor-builder/teams"],
+    retry: 1,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border bg-muted/20 p-4 flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        Memuat tim yang sudah dirakit…
+      </div>
+    );
+  }
+
+  if (!teams || teams.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+          Tim Saya — {teams.length} tim sudah dirakit
+        </p>
+        <div className="flex-1 border-t border-border/40" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {teams.map(team => {
+          const specCount = team.agenticSubAgents?.length ?? 0;
+          const gradient = BLUEPRINT_THEME_FROM_TAGS(team.tags ?? []);
+          return (
+            <div
+              key={team.id}
+              className={`rounded-xl border bg-gradient-to-br ${gradient} p-3 flex flex-col gap-2 hover:shadow-sm transition-all`}
+              data-testid={`card-my-team-${team.id}`}
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-white/70 dark:bg-white/10 flex items-center justify-center shadow-sm shrink-0">
+                  {BLUEPRINT_ICON_FROM_TAGS(team.tags ?? [])}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold leading-tight truncate">{team.name}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{specCount} spesialis · OpenClaw L4</p>
+                </div>
+              </div>
+              {specCount > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {team.agenticSubAgents?.slice(0, 3).map(sa => (
+                    <span key={sa.agentId} className="text-[9px] bg-white/50 dark:bg-white/10 border border-border/40 rounded px-1.5 py-0.5 text-muted-foreground">
+                      {sa.role.split(" ")[0]}
+                    </span>
+                  ))}
+                  {specCount > 3 && (
+                    <span className="text-[9px] text-muted-foreground border border-dashed border-border/40 rounded px-1.5 py-0.5">
+                      +{specCount - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+              <Button
+                size="sm"
+                className="h-7 text-xs gap-1.5 w-full mt-auto"
+                onClick={() => navigate(`/trilogi-chat/${team.id}`)}
+                data-testid={`button-open-team-${team.id}`}
+              >
+                <Zap className="w-3 h-3" />
+                Buka OpenClaw Chat
+              </Button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -672,6 +816,9 @@ export default function TutorBuilderPage() {
                 </div>
               ))}
             </div>
+
+            {/* My Teams panel */}
+            <MyTeamsPanel />
 
             {/* Tab navigation */}
             <div className="space-y-4">
