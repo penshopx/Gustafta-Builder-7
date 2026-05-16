@@ -201,8 +201,8 @@ export async function buildDataMasterContext(userId: string, userMessage: string
     }
 
     // ── 2. NIB auto-detect → public lookup (skip if already in internal) ───
-    const nibsInMessage = [...userMessage.matchAll(NIB_PATTERN)].map(m => m[1]);
-    const nibsToLookup = [...new Set(nibsInMessage)].filter(n => !internalNibs.has(n));
+    const nibsInMessage = Array.from(userMessage.matchAll(NIB_PATTERN)).map(m => m[1]);
+    const nibsToLookup = Array.from(new Set(nibsInMessage)).filter(n => !internalNibs.has(n));
 
     if (nibsToLookup.length > 0) {
       // Lookup up to 2 NIBs in parallel (avoid too many concurrent requests)

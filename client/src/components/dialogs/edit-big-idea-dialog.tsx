@@ -87,7 +87,7 @@ export function EditBigIdeaDialog({ open, onOpenChange, bigIdea }: EditBigIdeaDi
           trialDays,
           requireRegistration,
           seriesId: selectedSeriesId !== "none" ? String(selectedSeriesId) : "",
-          coreId: selectedCoreId !== "none" ? String(selectedCoreId) : null,
+          coreId: selectedCoreId !== "none" ? String(selectedCoreId) : undefined,
         },
       });
 

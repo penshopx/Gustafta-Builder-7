@@ -739,7 +739,11 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
         content: aiGenResult.content,
         description: `AI-generated · ${aiGenDocType.replace(/_/g, " ")} · ${aiGenLayer}`,
         knowledgeLayer: aiGenLayer,
-      },
+        status: "active" as const,
+        fileName: "",
+        fileSize: 0,
+        fileUrl: "",
+      } as any,
       {
         onSuccess: () => {
           toast({ title: "Disimpan ke Knowledge Base", description: `"${aiGenResult.title}" berhasil ditambahkan.` });
@@ -794,7 +798,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       ? kbAiActionResult
       : (kbAiActionItem.content || "") + "\n\n---\n\n" + kbAiActionResult;
     updateKnowledgeBase.mutate(
-      { id: kbAiActionItem.id, data: { content: newContent } },
+      { id: kbAiActionItem.id, agentId: kbAiActionItem.agentId, data: { content: newContent } },
       {
         onSuccess: () => {
           toast({ title: "Konten diperbarui", description: `"${kbAiActionItem.name}" diperbarui dengan hasil AI.` });
@@ -943,7 +947,11 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
           content: finalContent,
           description: `Import dari Notion — ${page.url}${descSuffix}`,
           knowledgeLayer: notionImportLayer,
-        },
+          status: "active" as const,
+          fileName: "",
+          fileSize: 0,
+          fileUrl: "",
+        } as any,
         {
           onSuccess: () => {
             toast({ title: "Berhasil Diimpor", description: `"${data.title || page.title}" berhasil ditambahkan ke Knowledge Base.` });

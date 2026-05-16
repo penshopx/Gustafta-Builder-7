@@ -327,7 +327,7 @@ export default function AiTutorChat() {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
                 if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                  updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 }
                 return updated;
               });
@@ -346,7 +346,7 @@ export default function AiTutorChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "sub_agent_done") {
@@ -355,7 +355,7 @@ export default function AiTutorChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "chunk") {
@@ -364,7 +364,7 @@ export default function AiTutorChat() {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
                 if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, content: fullContent, subAgents: [...subAgentMap.values()] };
+                  updated[updated.length - 1] = { ...last, content: fullContent, subAgents: Array.from(subAgentMap.values()) };
                 }
                 return updated;
               });
@@ -373,7 +373,7 @@ export default function AiTutorChat() {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
                 if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                  updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 }
                 return updated;
               });
@@ -389,7 +389,7 @@ export default function AiTutorChat() {
         const updated = [...prev];
         const last = updated[updated.length - 1];
         if (last.role === "assistant") {
-          updated[updated.length - 1] = { ...last, isStreaming: false, subAgents: [...subAgentMap.values()], orchestrationMs: orchMs };
+          updated[updated.length - 1] = { ...last, isStreaming: false, subAgents: Array.from(subAgentMap.values()), orchestrationMs: orchMs };
         }
         return updated;
       });

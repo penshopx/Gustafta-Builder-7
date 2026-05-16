@@ -1109,58 +1109,58 @@ export default function TenderWizardPage() {
                   value={(technicalApproach as any).understanding} onChange={v => setTechnicalApproach(p => ({ ...p, understanding: v }))}
                   placeholder="1. Pekerjaan meliputi pembangunan 3 lantai...\n2. Lokasi di daerah perkotaan padat..." />
                 <TextareaField label="Metode Pelaksanaan *" helper="Minimal 5 tahap pekerjaan utama."
-                  value={(technicalApproach as any).executionMethod} onChange={v => setTechnicalApproach(p => ({ ...p, executionMethod: v }))}
+                  value={(technicalApproach as any).executionMethod} onChange={v => setTechnicalApproach((p: any) => ({ ...p, executionMethod: v }))}
                   placeholder="Tahap 1: Persiapan & Mobilisasi (minggu 1-2)\nTahap 2: Pekerjaan Pondasi (minggu 3-8)\nTahap 3: Struktur Beton (minggu 9-20)\n..." />
                 <TextareaField label="Rencana Jadwal" helper="Tahap pekerjaan + estimasi durasi."
-                  value={(technicalApproach as any).schedule} onChange={v => setTechnicalApproach(p => ({ ...p, schedule: v }))}
+                  value={(technicalApproach as any).schedule} onChange={v => setTechnicalApproach((p: any) => ({ ...p, schedule: v }))}
                   placeholder="Persiapan: 2 minggu\nPondasi: 4 minggu\nStruktur: 12 minggu\n..." />
                 <TextareaField label="Rencana Mutu" helper="3–7 poin rencana kendali mutu."
-                  value={(technicalApproach as any).qualityPlan} onChange={v => setTechnicalApproach(p => ({ ...p, qualityPlan: v }))}
+                  value={(technicalApproach as any).qualityPlan} onChange={v => setTechnicalApproach((p: any) => ({ ...p, qualityPlan: v }))}
                   placeholder="1. Pemeriksaan material sebelum digunakan\n2. Uji beton sesuai SNI 2847\n3. Inspeksi pekerjaan struktur per lantai..." />
                 <TextareaField label="Rencana SMKK / K3 *" helper="Wajib untuk semua paket konstruksi. Minimal 5 poin."
-                  value={(technicalApproach as any).smkkPlan} onChange={v => setTechnicalApproach(p => ({ ...p, smkkPlan: v }))}
+                  value={(technicalApproach as any).smkkPlan} onChange={v => setTechnicalApproach((p: any) => ({ ...p, smkkPlan: v }))}
                   placeholder="1. Toolbox meeting setiap pagi sebelum kerja\n2. Inspeksi K3 mingguan oleh Petugas K3\n3. APD wajib semua pekerja: helm, sepatu, rompi\n4. JSA (Job Safety Analysis) per pekerjaan berisiko tinggi\n5. Emergency response plan..." />
                 <TextareaField label="Risiko & Mitigasi" helper="Minimal 3 risiko + mitigasi spesifik."
-                  value={(technicalApproach as any).risks} onChange={v => setTechnicalApproach(p => ({ ...p, risks: v }))}
+                  value={(technicalApproach as any).risks} onChange={v => setTechnicalApproach((p: any) => ({ ...p, risks: v }))}
                   placeholder="1. Risiko cuaca buruk → Jadwal buffer 10% + protective cover\n2. Risiko keterlambatan material → Vendor list cadangan + stok minimum\n3. Risiko konflik sosial → Koordinasi dengan RT/RW setempat..." />
 
                 <Separator />
                 <p className="text-sm font-semibold text-muted-foreground">Sumber Daya & Subkontrak</p>
 
                 <TextareaField label="Alat Berat / Peralatan Utama" helper="Daftar alat yang akan digunakan + status kepemilikan."
-                  value={(technicalApproach as any).alatBerat} onChange={v => setTechnicalApproach(p => ({ ...p, alatBerat: v }))}
+                  value={(technicalApproach as any).alatBerat} onChange={v => setTechnicalApproach((p: any) => ({ ...p, alatBerat: v }))}
                   placeholder="1. Excavator 0.8 m³ — milik sendiri\n2. Concrete pump — sewa jangka panjang\n3. Scaffolding sistem — milik sendiri (1.500 m²)\n4. Truck mixer — sewa per volume..." />
 
                 <TextareaField label="Material Utama & Vendor" helper="Material kritis + rencana pengadaan."
-                  value={(technicalApproach as any).materialUtama} onChange={v => setTechnicalApproach(p => ({ ...p, materialUtama: v }))}
+                  value={(technicalApproach as any).materialUtama} onChange={v => setTechnicalApproach((p: any) => ({ ...p, materialUtama: v }))}
                   placeholder="1. Beton ready-mix fc'30 — PT Holcim / Wika Beton (kontrak tahunan)\n2. Baja tulangan BJTS 420 — distributor resmi SNI\n3. Keramik/granit — PT Arwana (approved supplier)..." />
 
                 <TextareaField label="Rencana Subkontrak (opsional)" helper="Jika ada bagian pekerjaan yang disubkonkan (maks 30% nilai kontrak per Perpres 46/2025)."
-                  value={(technicalApproach as any).subkon} onChange={v => setTechnicalApproach(p => ({ ...p, subkon: v }))}
+                  value={(technicalApproach as any).subkon} onChange={v => setTechnicalApproach((p: any) => ({ ...p, subkon: v }))}
                   placeholder="1. Pekerjaan MEP (M/E/P) → PT Elektra Jaya (maks 15% nilai kontrak)\n2. Pekerjaan waterproofing → spesialis berpengalaman\nCatatan: semua subkon harus persetujuan PPK..." />
               </>
             ) : (
               <>
                 <TextareaField label="Pemahaman Pekerjaan MK"
-                  value={(technicalApproach as any).understanding} onChange={v => setTechnicalApproach(p => ({ ...p, understanding: v }))}
+                  value={(technicalApproach as any).understanding} onChange={v => setTechnicalApproach((p: any) => ({ ...p, understanding: v }))}
                   placeholder="Sasaran MK: mutu, waktu, biaya, K3/SMKK, administrasi kontrak..." />
                 <TextareaField label="Metodologi Pelaksanaan *" helper="Per proses: mutu, waktu, biaya, dokumen, risiko."
-                  value={(technicalApproach as any).methodology} onChange={v => setTechnicalApproach(p => ({ ...p, methodology: v }))}
+                  value={(technicalApproach as any).methodology} onChange={v => setTechnicalApproach((p: any) => ({ ...p, methodology: v }))}
                   placeholder="Pengendalian Mutu: inspeksi mingguan, ITP, laporan NCR...\nPengendalian Waktu: kurva-S, weekly progress report..." />
                 <TextareaField label="Organisasi Tim & Penugasan"
-                  value={(technicalApproach as any).teamOrg} onChange={v => setTechnicalApproach(p => ({ ...p, teamOrg: v }))}
+                  value={(technicalApproach as any).teamOrg} onChange={v => setTechnicalApproach((p: any) => ({ ...p, teamOrg: v }))}
                   placeholder="Team Leader: Ir. Budi (30 th pengalaman MK)\nSite Engineer: ..." />
                 <TextareaField label="Jadwal Kerja & Milestone"
-                  value={(technicalApproach as any).workSchedule} onChange={v => setTechnicalApproach(p => ({ ...p, workSchedule: v }))}
+                  value={(technicalApproach as any).workSchedule} onChange={v => setTechnicalApproach((p: any) => ({ ...p, workSchedule: v }))}
                   placeholder="Minggu 1: Mobilisasi & kick-off\nMingguan: Weekly meeting + progress report..." />
                 <TextareaField label="Rencana QA/QC Deliverable"
-                  value={(technicalApproach as any).qaQcPlan} onChange={v => setTechnicalApproach(p => ({ ...p, qaQcPlan: v }))}
+                  value={(technicalApproach as any).qaQcPlan} onChange={v => setTechnicalApproach((p: any) => ({ ...p, qaQcPlan: v }))}
                   placeholder="Review berlapis: draft → review internal → approval → submit..." />
                 <TextareaField label="Pendampingan SMKK Proyek *" helper="Ruang lingkup pendampingan SMKK oleh konsultan MK."
-                  value={(technicalApproach as any).smkkMentoring} onChange={v => setTechnicalApproach(p => ({ ...p, smkkMentoring: v }))}
+                  value={(technicalApproach as any).smkkMentoring} onChange={v => setTechnicalApproach((p: any) => ({ ...p, smkkMentoring: v }))}
                   placeholder="Coaching toolbox meeting, monitoring K3 mingguan, laporan temuan & CAPA..." />
                 <TextareaField label="Risiko & Mitigasi"
-                  value={(technicalApproach as any).risks} onChange={v => setTechnicalApproach(p => ({ ...p, risks: v }))}
+                  value={(technicalApproach as any).risks} onChange={v => setTechnicalApproach((p: any) => ({ ...p, risks: v }))}
                   placeholder="1. Keterlambatan informasi dari kontraktor → Protokol komunikasi tertulis..." />
               </>
             )}

@@ -487,7 +487,7 @@ export default function AgentChat() {
   // Persist pinned IDs whenever they change
   useEffect(() => {
     try {
-      localStorage.setItem(`gustafta_pins_${params.agentId}`, JSON.stringify([...pinnedIds]));
+      localStorage.setItem(`gustafta_pins_${params.agentId}`, JSON.stringify(Array.from(pinnedIds)));
     } catch {}
   }, [pinnedIds, params.agentId]);
 

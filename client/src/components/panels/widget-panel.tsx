@@ -214,7 +214,7 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
                 <Label>Ikon Tombol</Label>
                 <Select
                   value={settings.widgetButtonIcon}
-                  onValueChange={(v) => setSettings({ ...settings, widgetButtonIcon: v })}
+                  onValueChange={(v) => setSettings({ ...settings, widgetButtonIcon: v as any })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -236,7 +236,7 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
                 <Label>Bentuk Sudut</Label>
                 <Select
                   value={settings.widgetBorderRadius}
-                  onValueChange={(v) => setSettings({ ...settings, widgetBorderRadius: v })}
+                  onValueChange={(v) => setSettings({ ...settings, widgetBorderRadius: v as any })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -265,7 +265,7 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
                 <Label>Posisi Widget</Label>
                 <Select
                   value={settings.widgetPosition}
-                  onValueChange={(v) => setSettings({ ...settings, widgetPosition: v })}
+                  onValueChange={(v) => setSettings({ ...settings, widgetPosition: v as any })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -284,7 +284,7 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
                 <Label>Ukuran Chat Window</Label>
                 <Select
                   value={settings.widgetSize}
-                  onValueChange={(v) => setSettings({ ...settings, widgetSize: v })}
+                  onValueChange={(v) => setSettings({ ...settings, widgetSize: v as any })}
                 >
                   <SelectTrigger>
                     <SelectValue />

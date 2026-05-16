@@ -2237,7 +2237,7 @@ export default function Dashboard() {
       <CreateToolboxDialog 
         open={toolboxDialogOpen} 
         onOpenChange={setToolboxDialogOpen} 
-        bigIdea={effectiveBigIdeaObj}
+        bigIdea={effectiveBigIdeaObj ?? undefined}
         activeSeriesId={activeSeriesId}
         onCreateModule={() => setBigIdeaDialogOpen(true)}
         onCreated={() => {

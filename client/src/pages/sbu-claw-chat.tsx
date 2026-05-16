@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle,
-  BookOpen, ChevronDown, ChevronUp, Map, FileText, Shield,
+  BookOpen, ChevronDown, ChevronUp, Map as MapIcon, FileText, Shield,
   DollarSign, ClipboardList, Search, Globe, Scale, Lock, Star, Database,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -34,7 +34,7 @@ interface Message {
 
 const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: string; code: string }> = {
   "MAPPER": {
-    icon: <Map className="h-3 w-3" />,
+    icon: <MapIcon className="h-3 w-3" />,
     label: "Mapping",
     color: "bg-amber-500/20 text-amber-300 border-amber-500/30",
     code: "MAP",
@@ -324,7 +324,7 @@ export default function SbuClawChat() {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
                 if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                  updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 }
                 return updated;
               });
@@ -351,7 +351,7 @@ export default function SbuClawChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "sub_agent_done") {
@@ -360,7 +360,7 @@ export default function SbuClawChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "chunk") {
@@ -369,7 +369,7 @@ export default function SbuClawChat() {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
                 if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, content: fullContent, subAgents: [...subAgentMap.values()] };
+                  updated[updated.length - 1] = { ...last, content: fullContent, subAgents: Array.from(subAgentMap.values()) };
                 }
                 return updated;
               });
@@ -378,7 +378,7 @@ export default function SbuClawChat() {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
                 if (last.role === "assistant") {
-                  updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                  updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 }
                 return updated;
               });
@@ -394,7 +394,7 @@ export default function SbuClawChat() {
         const updated = [...prev];
         const last = updated[updated.length - 1];
         if (last.role === "assistant") {
-          updated[updated.length - 1] = { ...last, isStreaming: false, subAgents: [...subAgentMap.values()], orchestrationMs: orchMs };
+          updated[updated.length - 1] = { ...last, isStreaming: false, subAgents: Array.from(subAgentMap.values()), orchestrationMs: orchMs };
         }
         return updated;
       });

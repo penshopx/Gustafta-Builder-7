@@ -253,6 +253,17 @@ const DEFAULT_SETTINGS: Settings = {
   workMode: "Answer Mode",
   executionGatePolicy: "Konfirmasi untuk write",
   clarificationTriggers: ["Output target tidak jelas", "Risiko salah tinggi", "Butuh data spesifik untuk eksekusi"],
+  openClawTrustedActions: [],
+  openClawBlockedActions: [],
+  openClawAuditLog: false,
+  openClawNotifyOnGate: false,
+  openClawStepTrace: false,
+  openClawTrack: "",
+  openClawEntityOwner: "",
+  openClawRulebook: "",
+  openClawRulebookCategory: [],
+  openClawRulebookStatus: "",
+  openClawClauseRefRequired: false,
 };
 
 function MultiSelectField({
@@ -1049,7 +1060,7 @@ function MemoryManager({ agentId }: { agentId: string }) {
   );
 }
 
-type SpecialistConfig = { name: string; prompt: string; enabled: boolean };
+type SpecialistConfig = { name: string; prompt: string; enabled: boolean; icon?: string };
 type OrchestratorConfig = {
   enabled: boolean;
   routingModel: string;

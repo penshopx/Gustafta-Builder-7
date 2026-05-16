@@ -798,7 +798,7 @@ export class MemStorage implements IStorage {
     // jadi pakai default kategori (helper akan fallback ke "regulasi").
     const filled = applyDefaultPolicies(insertAgent, null);
 
-    const agent: Agent = {
+    const agent: Agent = ({
       id,
       name: insertAgent.name,
       description: insertAgent.description || "",
@@ -879,7 +879,7 @@ export class MemStorage implements IStorage {
       requireRegistration: insertAgent.requireRegistration ?? false,
       brandingName: insertAgent.brandingName || "",
       brandingLogo: insertAgent.brandingLogo || "",
-      userId: insertAgent.userId || "",
+      userId: (insertAgent as any).userId || "",
       // Kebijakan Agen — auto-filled by applyDefaultPolicies above.
       primaryOutcome: filled.primaryOutcome,
       conversationWinConditions: filled.conversationWinConditions,
@@ -890,7 +890,7 @@ export class MemStorage implements IStorage {
       riskCompliance: filled.riskCompliance,
       isActive: true,
       createdAt: new Date().toISOString(),
-    };
+    } as unknown as Agent);
     
     this.agents.set(id, agent);
     return agent;
@@ -1179,7 +1179,7 @@ export class MemStorage implements IStorage {
 
   async deleteChunksByKnowledgeBase(knowledgeBaseId: string): Promise<boolean> {
     const kbId = parseInt(knowledgeBaseId);
-    for (const [id, chunk] of this.knowledgeChunksStore) {
+    for (const [id, chunk] of Array.from(this.knowledgeChunksStore)) {
       if (chunk.knowledgeBaseId === kbId) this.knowledgeChunksStore.delete(id);
     }
     return true;
@@ -1187,7 +1187,7 @@ export class MemStorage implements IStorage {
 
   async deleteChunksByAgent(agentId: string): Promise<boolean> {
     const aId = parseInt(agentId);
-    for (const [id, chunk] of this.knowledgeChunksStore) {
+    for (const [id, chunk] of Array.from(this.knowledgeChunksStore)) {
       if (chunk.agentId === aId) this.knowledgeChunksStore.delete(id);
     }
     return true;
@@ -1471,7 +1471,7 @@ export class MemStorage implements IStorage {
   async countUserAgents(userId: string): Promise<number> {
     let count = 0;
     this.agents.forEach((agent) => {
-      if (agent.userId === userId) {
+      if ((agent as any).userId === userId) {
         count++;
       }
     });

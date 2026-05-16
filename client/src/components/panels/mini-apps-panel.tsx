@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap, PenLine, Trophy, Mic, Megaphone, PieChart, Star, ScrollText, Briefcase, Store, Zap, CalendarDays, Video, Award, Clapperboard } from "lucide-react";
+import { Blocks, Plus, Trash2, Pencil, CheckSquare, Calculator, AlertTriangle, TrendingUp, FileOutput, Wrench, Play, BarChart3, ClipboardList, Radar, Loader2, ListChecks, Users, FileWarning, Target, GitCompare, Lightbulb, UserPlus, FileSearch, Copy, CheckCheck, Check, MessageSquare, Layers, Search, Shield, ChevronRight, FileText, HardHat, ClipboardCheck, LayoutList, ShieldCheck, ArrowRight, BookOpen, Sparkles, Link2, ExternalLink, GraduationCap, PenLine, Trophy, Mic, Megaphone, PieChart, Star, ScrollText, Briefcase, Store, Zap, CalendarDays, Video, Award, Clapperboard } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -1325,7 +1325,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                   key={type}
                   className="flex items-start gap-2.5 p-3 rounded-lg border border-violet-100 dark:border-violet-900 bg-white dark:bg-background hover:border-violet-300 dark:hover:border-violet-700 transition-colors cursor-pointer group"
                   onClick={() => {
-                    const defaults = cfg || {};
+                    const defaults = (cfg || {}) as any;
                     setNewApp({
                       name: defaults.name || miniAppTypeLabels[type],
                       description: defaults.description || miniAppTypeDescriptions[type],
@@ -1373,7 +1373,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                   key={type}
                   className="flex items-start gap-2.5 p-3 rounded-lg border border-emerald-100 dark:border-emerald-900 bg-white dark:bg-background hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors cursor-pointer group"
                   onClick={() => {
-                    const defaults = cfg || {};
+                    const defaults = (cfg || {}) as any;
                     setNewApp({
                       name: defaults.name || miniAppTypeLabels[type],
                       description: defaults.description || miniAppTypeDescriptions[type],
@@ -1421,7 +1421,7 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                   key={type}
                   className="flex items-start gap-2.5 p-3 rounded-lg border border-orange-100 dark:border-orange-900 bg-white dark:bg-background hover:border-orange-300 dark:hover:border-orange-700 transition-colors cursor-pointer group"
                   onClick={() => {
-                    const defaults = cfg || {};
+                    const defaults = (cfg || {}) as any;
                     setNewApp({
                       name: defaults.name || miniAppTypeLabels[type],
                       description: defaults.description || miniAppTypeDescriptions[type],
@@ -2084,147 +2084,6 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
           )}
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType: MiniAppType }) {
-  const { data: results = [], isLoading } = useMiniAppResults(miniAppId);
-  const [sourceFilter, setSourceFilter] = useState<"all" | "owner" | "public">("all");
-
-  const publicCount = results.filter((r) => r.source === "public").length;
-  const filteredResults = results.filter((r) => {
-    if (sourceFilter === "all") return true;
-    const src = r.source || "owner";
-    return src === sourceFilter;
-  });
-
-  if (isLoading) {
-    return (
-      <div className="space-y-3 py-2">
-        {[1, 2].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-3"><div className="h-4 bg-muted rounded w-1/2 mb-2" /><div className="h-3 bg-muted rounded w-full" /></CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3 py-2">
-      {results.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => setSourceFilter("all")}
-            data-testid="filter-results-all"
-            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
-          >
-            Semua ({results.length})
-          </button>
-          <button
-            onClick={() => setSourceFilter("owner")}
-            data-testid="filter-results-owner"
-            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "owner" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
-          >
-            Milik Saya ({results.length - publicCount})
-          </button>
-          <button
-            onClick={() => setSourceFilter("public")}
-            data-testid="filter-results-public"
-            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "public" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
-          >
-            Publik ({publicCount})
-          </button>
-        </div>
-      )}
-
-      {filteredResults.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">
-            {results.length === 0
-              ? "Belum ada riwayat eksekusi."
-              : sourceFilter === "public"
-              ? "Belum ada respons dari pengguna publik."
-              : "Belum ada eksekusi dari pemilik."}
-          </p>
-        </div>
-      )}
-
-      {filteredResults.map((result) => {
-        const output = typeof result.output === "object" && result.output ? (result.output as Record<string, any>) : {};
-        const input = typeof result.input === "object" && result.input ? (result.input as Record<string, any>) : {};
-        const isPublic = result.source === "public";
-        return (
-          <Card key={result.id} data-testid={`card-result-${result.id}`}>
-            <CardContent className="p-3 space-y-2">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <Badge variant="secondary" className="text-xs">
-                    {result.status === "completed" ? "Selesai" : result.status}
-                  </Badge>
-                  {isPublic ? (
-                    <Badge variant="outline" className="text-xs border-blue-300 text-blue-600 dark:border-blue-700 dark:text-blue-400">
-                      Pengguna Publik
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-xs border-muted-foreground/40 text-muted-foreground">
-                      Pemilik
-                    </Badge>
-                  )}
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(result.createdAt).toLocaleString("id-ID")}
-                </span>
-              </div>
-              {isPublic && Object.keys(input).length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Input pengguna:</p>
-                  <pre className="text-xs bg-muted/50 p-2 rounded-md overflow-auto max-h-20">
-                    {JSON.stringify(input, null, 2)}
-                  </pre>
-                </div>
-              )}
-              {appType === "checklist" && (output.percentage !== undefined || output.completion_percentage !== undefined) && (
-                <div className="space-y-1">
-                  {(() => {
-                    const pct = output.percentage ?? output.completion_percentage ?? 0;
-                    const completed = output.completed ?? output.done ?? 0;
-                    const total = output.total ?? 0;
-                    return (
-                      <>
-                        <div className="flex items-center justify-between text-sm">
-                          <span>Progres</span>
-                          <span className="font-medium">{completed}/{total} ({pct}%)</span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                        {output.summary && (
-                          <p className="text-xs text-muted-foreground">{output.summary}</p>
-                        )}
-                      </>
-                    );
-                  })()}
-                </div>
-              )}
-              {AI_MINI_APP_TYPES.includes(appType) && output.analysis && (
-                <div className="text-xs whitespace-pre-wrap leading-relaxed max-h-40 overflow-auto">
-                  {output.analysis}
-                </div>
-              )}
-              {appType !== "checklist" && !AI_MINI_APP_TYPES.includes(appType) && Object.keys(output).length > 0 && (
-                <pre className="text-xs bg-muted p-2 rounded-md overflow-auto max-h-24">
-                  {JSON.stringify(output, null, 2)}
-                </pre>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
 
       {/* Notion Export Dialog */}
       <Dialog open={notionExportOpen} onOpenChange={setNotionExportOpen}>
@@ -2516,6 +2375,147 @@ function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function MiniAppResultsList({ miniAppId, appType }: { miniAppId: string; appType: MiniAppType }) {
+  const { data: results = [], isLoading } = useMiniAppResults(miniAppId);
+  const [sourceFilter, setSourceFilter] = useState<"all" | "owner" | "public">("all");
+
+  const publicCount = results.filter((r) => r.source === "public").length;
+  const filteredResults = results.filter((r) => {
+    if (sourceFilter === "all") return true;
+    const src = r.source || "owner";
+    return src === sourceFilter;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3 py-2">
+        {[1, 2].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-3"><div className="h-4 bg-muted rounded w-1/2 mb-2" /><div className="h-3 bg-muted rounded w-full" /></CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3 py-2">
+      {results.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setSourceFilter("all")}
+            data-testid="filter-results-all"
+            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
+          >
+            Semua ({results.length})
+          </button>
+          <button
+            onClick={() => setSourceFilter("owner")}
+            data-testid="filter-results-owner"
+            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "owner" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
+          >
+            Milik Saya ({results.length - publicCount})
+          </button>
+          <button
+            onClick={() => setSourceFilter("public")}
+            data-testid="filter-results-public"
+            className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${sourceFilter === "public" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:bg-muted"}`}
+          >
+            Publik ({publicCount})
+          </button>
+        </div>
+      )}
+
+      {filteredResults.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">
+            {results.length === 0
+              ? "Belum ada riwayat eksekusi."
+              : sourceFilter === "public"
+              ? "Belum ada respons dari pengguna publik."
+              : "Belum ada eksekusi dari pemilik."}
+          </p>
+        </div>
+      )}
+
+      {filteredResults.map((result) => {
+        const output = typeof result.output === "object" && result.output ? (result.output as Record<string, any>) : {};
+        const input = typeof result.input === "object" && result.input ? (result.input as Record<string, any>) : {};
+        const isPublic = result.source === "public";
+        return (
+          <Card key={result.id} data-testid={`card-result-${result.id}`}>
+            <CardContent className="p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">
+                    {result.status === "completed" ? "Selesai" : result.status}
+                  </Badge>
+                  {isPublic ? (
+                    <Badge variant="outline" className="text-xs border-blue-300 text-blue-600 dark:border-blue-700 dark:text-blue-400">
+                      Pengguna Publik
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs border-muted-foreground/40 text-muted-foreground">
+                      Pemilik
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(result.createdAt).toLocaleString("id-ID")}
+                </span>
+              </div>
+              {isPublic && Object.keys(input).length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Input pengguna:</p>
+                  <pre className="text-xs bg-muted/50 p-2 rounded-md overflow-auto max-h-20">
+                    {JSON.stringify(input, null, 2)}
+                  </pre>
+                </div>
+              )}
+              {appType === "checklist" && (output.percentage !== undefined || output.completion_percentage !== undefined) && (
+                <div className="space-y-1">
+                  {(() => {
+                    const pct = output.percentage ?? output.completion_percentage ?? 0;
+                    const completed = output.completed ?? output.done ?? 0;
+                    const total = output.total ?? 0;
+                    return (
+                      <>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Progres</span>
+                          <span className="font-medium">{completed}/{total} ({pct}%)</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        {output.summary && (
+                          <p className="text-xs text-muted-foreground">{output.summary}</p>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+              {AI_MINI_APP_TYPES.includes(appType) && output.analysis && (
+                <div className="text-xs whitespace-pre-wrap leading-relaxed max-h-40 overflow-auto">
+                  {output.analysis}
+                </div>
+              )}
+              {appType !== "checklist" && !AI_MINI_APP_TYPES.includes(appType) && Object.keys(output).length > 0 && (
+                <pre className="text-xs bg-muted p-2 rounded-md overflow-auto max-h-24">
+                  {JSON.stringify(output, null, 2)}
+                </pre>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

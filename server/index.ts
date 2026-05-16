@@ -413,7 +413,7 @@ for (const envVar of requiredEnvVars) {
         const { db: rawDb } = await import("./db");
         const { sql: rawSql } = await import("drizzle-orm");
 
-        function nameToModulSlug(name: string): string {
+        const nameToModulSlug = (name: string): string => {
           return name
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, " ")
@@ -460,7 +460,7 @@ for (const envVar of requiredEnvVars) {
         const { db: rawDb } = await import("./db");
         const { sql: rawSql } = await import("drizzle-orm");
 
-        function nameToAgentSlug(name: string): string {
+        const nameToAgentSlug = (name: string): string => {
           return name
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, " ")

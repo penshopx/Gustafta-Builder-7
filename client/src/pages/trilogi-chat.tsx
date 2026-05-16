@@ -353,7 +353,7 @@ export default function TrilogiChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "sub_agent_start") {
@@ -362,7 +362,7 @@ export default function TrilogiChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "sub_agent_done") {
@@ -371,7 +371,7 @@ export default function TrilogiChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "chunk") {
@@ -379,14 +379,14 @@ export default function TrilogiChat() {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, content: fullContent, subAgents: [...subAgentMap.values()] };
+                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, content: fullContent, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "aggregating") {
               setMessages(prev => {
                 const updated = [...prev];
                 const last = updated[updated.length - 1];
-                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: [...subAgentMap.values()] };
+                if (last?.role === "assistant") updated[updated.length - 1] = { ...last, subAgents: Array.from(subAgentMap.values()) };
                 return updated;
               });
             } else if (evt.type === "complete" && evt.message?.content) {
@@ -401,7 +401,7 @@ export default function TrilogiChat() {
         const updated = [...prev];
         const last = updated[updated.length - 1];
         if (last?.role === "assistant") {
-          updated[updated.length - 1] = { ...last, isStreaming: false, subAgents: [...subAgentMap.values()], orchestrationMs: orchMs };
+          updated[updated.length - 1] = { ...last, isStreaming: false, subAgents: Array.from(subAgentMap.values()), orchestrationMs: orchMs };
         }
         return updated;
       });

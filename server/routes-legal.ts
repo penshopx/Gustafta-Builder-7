@@ -55,7 +55,7 @@ async function searchLegalCasesRAG(query: string, topK = 5): Promise<string> {
           embedding: c.embedding as number[],
           metadata: {},
           createdAt: c.createdAt,
-        }));
+        })) as any[];
         const relevant = retrieveRelevantChunks(queryEmbedding, fakeChunks, topK, 0.25);
         if (relevant.length > 0) {
           const caseMap = new Map(allCases.map(c => [c.id, c]));
@@ -141,7 +141,7 @@ async function searchLegalKBChunks(query: string, topK = 5): Promise<string> {
       embedding: c.embedding as number[],
       metadata: { sourceName: c.kbName, sourceAuthority: c.kbSourceAuthority },
       createdAt: c.createdAt,
-    }));
+    })) as any[];
 
     const relevant = retrieveRelevantChunks(queryEmbedding, fakeChunks, topK, 0.3);
     if (relevant.length === 0) return allChunks.slice(0, 3).map(c => c.content).join("\n\n");
@@ -748,7 +748,7 @@ export function registerLegalRoutes(app: Express) {
             embedding: c.embedding as number[],
             metadata: {},
             createdAt: c.createdAt,
-          }));
+          })) as any[];
           const relevant = retrieveRelevantChunks(queryEmbedding, fakeChunks, 10, 0.2);
           if (relevant.length > 0) {
             const caseMap = new Map(allCases.map(c => [c.id, c]));

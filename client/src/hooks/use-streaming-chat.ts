@@ -129,7 +129,7 @@ export function useStreamingChat() {
     content: string,
     options: StreamingChatOptions
   ): Promise<Message | null> => {
-    const { agentId, onChunk, onComplete, onError, onOrchestrating, onSubAgentStart, onSubAgentDone, onAggregating } = options;
+    const { agentId, onChunk, onComplete, onError, onOrchestrating, onSubAgentStart, onSubAgentDone, onAggregating, onRouterDecision, onCriticResult } = options;
 
     setState({ isStreaming: true, streamingContent: "", error: null, orchestration: INITIAL_ORCHESTRATION, dataMasterInjected: false });
     bufferRef.current = "";

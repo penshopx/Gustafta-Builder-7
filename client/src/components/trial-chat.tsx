@@ -31,7 +31,7 @@ export function TrialChat({ agent }: TrialChatProps) {
     if (!input.trim()) return;
 
     sendMessage.mutate(
-      { agentId: agent.id, role: "user", content: input.trim() },
+      { agentId: agent.id, role: "user", content: input.trim(), reasoning: "", sources: [] },
       {
         onSuccess: () => {
           setInput("");

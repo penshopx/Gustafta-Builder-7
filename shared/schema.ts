@@ -254,6 +254,7 @@ export const agents = pgTable("agents", {
   orchestratorConfig: jsonb("orchestrator_config").default({}),
   agenticSubAgents: jsonb("agentic_sub_agents").default([]),
   agenticConfig: jsonb("agentic_config").default({}),
+  tags: text("tags").array().default([]),
   isActive: boolean("is_active").default(false),
   isEnabled: boolean("is_enabled").default(true).notNull(),
   folderName: text("folder_name"),
@@ -517,6 +518,7 @@ export const insertBigIdeaSchema = z.object({
 export type InsertBigIdea = z.infer<typeof insertBigIdeaSchema>;
 export type BigIdea = InsertBigIdea & {
   id: string;
+  slug?: string | null;
   isActive: boolean;
   createdAt: string;
 };
@@ -831,6 +833,14 @@ export type InsertAgent = z.infer<typeof insertAgentSchema>;
 export type Agent = InsertAgent & {
   id: string;
   slug?: string | null;
+  userId?: string;
+  agentRole?: string;
+  workMode?: string;
+  executionGatePolicy?: string;
+  clarificationTriggers?: string[];
+  fallbackObjective?: string;
+  reasoningPolicy?: string;
+  orchestratorConfig?: Record<string, any>;
   isActive: boolean;
   isEnabled: boolean;
   folderName: string | null;

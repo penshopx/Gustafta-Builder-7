@@ -306,7 +306,7 @@ export default function EducationPage() {
                   <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">Paket Tersedia</p>
                   <div className="grid sm:grid-cols-2 gap-4">
                     {seg.packs.map(pack => (
-                      <div key={pack.name} className={`relative rounded-xl border ${seg.border} ${seg.bg} p-4 ${(pack as any).popular ? `ring-2 ring-offset-1` : ""}`} style={(pack as any).popular ? {ringColor: "currentColor"} : {}}>
+                      <div key={pack.name} className={`relative rounded-xl border ${seg.border} ${seg.bg} p-4 ${(pack as any).popular ? `ring-2 ring-offset-1` : ""}`} style={(pack as any).popular ? ({ringColor: "currentColor"} as any) : {}}>
                         {(pack as any).popular && (
                           <span className={`absolute -top-2.5 left-4 text-[10px] font-bold px-2 py-0.5 rounded-full ${seg.badgeColor}`}>POPULER</span>
                         )}

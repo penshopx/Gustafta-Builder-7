@@ -163,8 +163,8 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
       name: formData.name.trim(),
       description: formData.description.trim(),
       tagline: formData.tagline.trim(),
-      toolboxId: activeToolbox?.id,
-      bigIdeaId: activeBigIdea?.id || undefined,
+      toolboxId: activeToolbox?.id ? String(activeToolbox.id) : undefined,
+      bigIdeaId: activeBigIdea?.id ? String(activeBigIdea.id) : undefined,
       isOrchestrator: isOrchestrator,
     };
 

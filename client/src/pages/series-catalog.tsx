@@ -17,7 +17,7 @@ export default function SeriesCatalog() {
   });
 
   const categories = allSeries
-    ? [...new Set(allSeries.map(s => s.category).filter(Boolean))]
+    ? Array.from(new Set(allSeries.map(s => s.category).filter(Boolean)))
     : [];
 
   const filtered = allSeries?.filter(s => {

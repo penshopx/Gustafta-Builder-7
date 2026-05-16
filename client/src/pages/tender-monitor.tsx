@@ -299,7 +299,7 @@ export default function TenderMonitor() {
     mutationFn: (sourceId: number) =>
       apiRequest("POST", `/api/tender-sources/${sourceId}/scrape`, {}),
     onMutate: (sourceId) => {
-      setScrapingIds(prev => new Set([...prev, sourceId]));
+      setScrapingIds(prev => new Set(Array.from(prev).concat(sourceId)));
     },
     onSuccess: async (data: any, sourceId) => {
       setScrapingIds(prev => { const s = new Set(prev); s.delete(sourceId); return s; });
@@ -384,7 +384,7 @@ export default function TenderMonitor() {
     { type: "lpse_kabkota", sources: visibleSources.filter((s: any) => s.sourceType === "lpse_kabkota"), note: "80+ Kab/Kota prioritas UKM Kecil" },
     { type: "bumn",         sources: visibleSources.filter((s: any) => s.sourceType === "bumn"), note: "Portal tertutup — data contoh ditampilkan" },
     { type: "asing",        sources: visibleSources.filter((s: any) => s.sourceType === "asing"), note: "Portal tertutup — data contoh ditampilkan" },
-  ].filter(g => g.sources.length > 0);
+  ].filter((g): g is { type: SourceType; sources: any[]; note?: string } => g.sources.length > 0);
 
   return (
     <div className="min-h-screen bg-background">

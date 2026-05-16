@@ -312,15 +312,15 @@ export function AdminAgentsPanel() {
           </div>
 
           {/* Retry banner when there are errored agents */}
-          {(bulkFillJob?.result?.errored > 0) && bulkFillJob.status !== "running" && (
+          {((bulkFillJob?.result as any)?.errored > 0) && bulkFillJob?.status !== "running" && (
             <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
               <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-red-300 font-medium">
-                  {bulkFillJob.result.errored} agen gagal diisi field-nya
+                  {(bulkFillJob?.result as any)?.errored} agen gagal diisi field-nya
                 </p>
-                {bulkFillJob.result.erroredIds?.length > 0
-                  ? <p className="text-xs text-red-400/60">ID: {bulkFillJob.result.erroredIds.slice(0, 8).join(", ")}{bulkFillJob.result.erroredIds.length > 8 ? ` +${bulkFillJob.result.erroredIds.length - 8} lainnya` : ""}</p>
+                {(bulkFillJob?.result as any)?.erroredIds?.length > 0
+                  ? <p className="text-xs text-red-400/60">ID: {(bulkFillJob?.result as any)?.erroredIds.slice(0, 8).join(", ")}{(bulkFillJob?.result as any)?.erroredIds.length > 8 ? ` +${(bulkFillJob?.result as any)?.erroredIds.length - 8} lainnya` : ""}</p>
                   : <p className="text-xs text-red-400/60">Klik Ulangi untuk proses ulang agen yang error</p>
                 }
               </div>
@@ -331,7 +331,7 @@ export function AdminAgentsPanel() {
                 className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 flex-shrink-0"
                 data-testid="button-retry-bulk-fill"
               >
-                {retryBulkFillMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {bulkFillJob.result.errored} Error</>}
+                {retryBulkFillMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {(bulkFillJob?.result as any)?.errored} Error</>}
               </Button>
             </div>
           )}
@@ -410,15 +410,15 @@ export function AdminAgentsPanel() {
             <LogBox logs={kbJob?.log ?? []} />
 
             {/* Retry banner when there are failed agents */}
-            {(kbJob?.result?.failed > 0) && kbJob.status !== "running" && (
+            {((kbJob?.result as any)?.failed > 0) && kbJob?.status !== "running" && (
               <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
                 <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-red-300 font-medium">
-                    {kbJob.result.failed} agen gagal dibuat KB-nya
+                    {(kbJob?.result as any)?.failed} agen gagal dibuat KB-nya
                   </p>
-                  {kbJob.result.failedIds?.length > 0
-                    ? <p className="text-xs text-red-400/60">ID: {kbJob.result.failedIds.slice(0, 8).join(", ")}{kbJob.result.failedIds.length > 8 ? ` +${kbJob.result.failedIds.length - 8} lainnya` : ""}</p>
+                  {(kbJob?.result as any)?.failedIds?.length > 0
+                    ? <p className="text-xs text-red-400/60">ID: {(kbJob?.result as any)?.failedIds.slice(0, 8).join(", ")}{(kbJob?.result as any)?.failedIds.length > 8 ? ` +${(kbJob?.result as any)?.failedIds.length - 8} lainnya` : ""}</p>
                     : <p className="text-xs text-red-400/60">Klik Ulangi untuk proses ulang agen yang gagal</p>
                   }
                 </div>
@@ -429,7 +429,7 @@ export function AdminAgentsPanel() {
                   className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 flex-shrink-0"
                   data-testid="button-retry-kb-research"
                 >
-                  {retryKbMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {kbJob.result.failed} Gagal</>}
+                  {retryKbMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <>↺ Ulangi {(kbJob?.result as any)?.failed} Gagal</>}
                 </Button>
               </div>
             )}
@@ -538,7 +538,7 @@ export function AdminAgentsPanel() {
                       </span>
                       <span className="text-gray-300 truncate" title={a.name}>{a.name}</span>
                       {a.empty_critical.length > 0 && (
-                        <AlertTriangle className="h-3 w-3 text-red-400 flex-shrink-0" title={`Kritis: ${a.empty_critical.join(", ")}`} />
+                        <AlertTriangle className="h-3 w-3 text-red-400 flex-shrink-0" />
                       )}
                     </div>
                   ))}

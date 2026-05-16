@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { customDomains, trialRequests, subscriptionsTable, vouchers, series as seriesTable, bigIdeas as bigIdeasTable, toolboxes as toolboxesTable, agents as agentsTable, cores as coresTable, systemConfig } from "@shared/schema";
+import { customDomains, trialRequests, subscriptionsTable, vouchers, series as seriesTable, bigIdeas as bigIdeasTable, toolboxes as toolboxesTable, agents as agentsTable, cores as coresTable, systemConfig, clientSubscriptions } from "@shared/schema";
 import { users } from "@shared/models/auth";
 import { eq, and, desc, sql as sqlExpr, inArray, isNull, or } from "drizzle-orm";
 import {
@@ -1414,10 +1414,10 @@ export async function registerRoutes(
         const tb = await storage.getToolbox(String(toolboxIdRaw));
         if (tb) {
           if (tb.seriesId) {
-            seriesId = tb.seriesId;
+            seriesId = Number(tb.seriesId);
           } else if (tb.bigIdeaId) {
             const bi = await storage.getBigIdea(String(tb.bigIdeaId));
-            if (bi && bi.seriesId) seriesId = bi.seriesId;
+            if (bi && bi.seriesId) seriesId = Number(bi.seriesId);
           }
         }
       }
@@ -1430,7 +1430,7 @@ export async function registerRoutes(
             : null;
         if (bigIdeaIdRaw && !Number.isNaN(bigIdeaIdRaw)) {
           const bi = await storage.getBigIdea(String(bigIdeaIdRaw));
-          if (bi && bi.seriesId) seriesId = bi.seriesId;
+          if (bi && bi.seriesId) seriesId = Number(bi.seriesId);
         }
       }
       if (!seriesId) return null;
@@ -2137,7 +2137,7 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
 
   app.patch("/api/taxonomy/:id", isAuthenticated, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
       const parsed = insertKnowledgeTaxonomySchema.partial().safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
@@ -2151,7 +2151,7 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
 
   app.delete("/api/taxonomy/:id", isAuthenticated, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
       const ok = await storage.deleteTaxonomyNode(id);
       if (!ok) return res.status(404).json({ error: "Taxonomy node not found" });
@@ -2185,7 +2185,7 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
   // KB by taxonomy node — auth wajib, hasil DI-FILTER hanya milik user (ownership lewat agent).
   app.get("/api/taxonomy/:id/knowledge-bases", isAuthenticated, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
       const userId = (req as any).user?.claims?.sub || (req as any).user?.id;
       if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -2208,9 +2208,9 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
 
   app.get("/api/knowledge-base/:id/versions", isAuthenticated, async (req, res) => {
     try {
-      const denial = await assertKBOwnership(req.params.id, req);
+      const denial = await assertKBOwnership(req.params.id as string, req);
       if (denial) return res.status(denial.status).json({ error: denial.error });
-      const history = await storage.getKBVersionHistory(req.params.id);
+      const history = await storage.getKBVersionHistory(req.params.id as string);
       res.json(history);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch KB versions", details: error instanceof Error ? error.message : String(error) });
@@ -2223,11 +2223,11 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
       const newId = (req.body?.newKbId ?? "").toString();
       if (!newId) return res.status(400).json({ error: "newKbId is required" });
       // Cek ownership baik KB lama maupun KB pengganti — keduanya harus milik user.
-      const denialOld = await assertKBOwnership(oldId, req);
+      const denialOld = await assertKBOwnership(oldId as string, req);
       if (denialOld) return res.status(denialOld.status).json({ error: denialOld.error });
-      const denialNew = await assertKBOwnership(newId, req);
+      const denialNew = await assertKBOwnership(newId as string, req);
       if (denialNew) return res.status(denialNew.status).json({ error: denialNew.error });
-      const updated = await storage.supersedeKnowledgeBase(oldId, newId);
+      const updated = await storage.supersedeKnowledgeBase(oldId as string, newId as string);
       if (!updated) return res.status(404).json({ error: "KB not found" });
       res.json(updated);
     } catch (error) {
@@ -2298,7 +2298,7 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
     try {
       const adminCheck = isAdminRequest(req);
       if (!adminCheck.ok) return res.status(adminCheck.status).json({ error: adminCheck.error });
-      const ok = await storage.deleteTenderDocumentCatalog(req.params.code);
+      const ok = await storage.deleteTenderDocumentCatalog(req.params.code as string);
       if (!ok) return res.status(404).json({ error: "Document not found" });
       res.status(204).send();
     } catch (error) {
@@ -3396,7 +3396,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             res.write(`data: ${JSON.stringify({ type: "aggregating", count: successfulReports.length, failed: failedCount, totalMs: Date.now() - orchStart, criticEnabled, criticPassed })}\n\n`);
 
             // ── PR#3: Populate write-back data from orchestration results ────────
-            const dedup = <T>(arr: T[]): T[] => [...new Set(arr)];
+            const dedup = <T>(arr: T[]): T[] => Array.from(new Set(arr));
             const wb_openQuestions =
               !criticPassed && criticClarifyingBlock
                 ? dedup(successfulReports.flatMap(r => r.questions)).slice(0, 10)
@@ -3827,8 +3827,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           const agentRecord = await storage.getAgent(agentIdStr);
           if (!agentRecord) return { agentId: c.agentId, role: c.role, error: "Agent tidak ditemukan", result: null };
           // Ownership check
-          const userId = req.user?.claims?.sub || "";
-          if (agentRecord.userId && agentRecord.userId !== userId && !agentRecord.isPublic) {
+          const userId = (req.user as any)?.claims?.sub || "";
+          if ((agentRecord as any).userId && (agentRecord as any).userId !== userId && !agentRecord.isPublic) {
             return { agentId: c.agentId, role: c.role, error: "Akses ditolak", result: null };
           }
           const t0 = Date.now();
@@ -4210,13 +4210,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     try {
       // Only admins can activate
       const userId = req.user?.claims?.sub;
-      const adminCheck = await storage.getUserById?.(userId);
+      const adminCheck = await (storage as any).getUserById?.(userId);
       if (!adminCheck || (adminCheck.role !== "superadmin" && adminCheck.role !== "admin")) {
         return res.status(403).json({ error: "Admin access required" });
       }
 
-      const subscription = await storage.getSubscriptionById ? 
-        await (storage as any).getSubscriptionById(req.params.id) : null;
+      const subscription = await (storage as any).getSubscriptionById?.(req.params.id) ?? null;
       if (!subscription) {
         return res.status(404).json({ error: "Subscription not found" });
       }
@@ -4307,13 +4306,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       // Biaya Lisensi: flat Rp 299.000 (hak pakai, install mandiri)
       // Biaya Setup oleh tim Gustafta: Rp 999.000 (terpisah, opsional)
-      function calcStorePrice(_agenticSubAgents: any): number {
-        return 299000;
-      }
-      // Harga coret (original price sebelum promo)
-      function calcOriginalPrice(_total: number): number {
-        return 450000;
-      }
+      const calcStorePrice = (_agenticSubAgents: any): number => 299000;
+      const calcOriginalPrice = (_total: number): number => 450000;
 
       // Pre-fetch agenticSubAgents for store_products that link to an agent
       const spLinkedAgentIds = spRows.map(p => p.agentId).filter(Boolean) as number[];
@@ -4386,7 +4380,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
 
       // Also update store_products' agentSubMap with child counts
-      for (const [agentId] of agentSubMap.entries()) {
+      for (const [agentId] of Array.from(agentSubMap.entries())) {
         const childCount = childCountMap.get(agentId) ?? 0;
         if (childCount > 0) {
           // If child count > agenticSubAgents count, treat child count as the sub count
@@ -4961,7 +4955,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       let modelName = agentModel;
       if (agentModel === "custom" && subAgent.customApiKey && subAgent.customBaseUrl) {
         client = new OpenAI({ apiKey: subAgent.customApiKey, baseURL: subAgent.customBaseUrl });
-        modelName = subAgent.customModelName || "gpt-4";
+        modelName = (subAgent.customModelName || "gpt-4") as any;
       } else if (agentModel.startsWith("deepseek-")) {
         const dsKey = process.env.DEEPSEEK_API_KEY || subAgent.customApiKey;
         if (!dsKey) return "[DeepSeek API key tidak dikonfigurasi untuk sub-agen ini]";
@@ -5154,7 +5148,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     return links.map(l => {
       const desc = clampStr(oneLine(l.description ?? "") || oneLine(l.role) || `Agent ${l.agentId}`, 120);
       const tags = l.tags?.length
-        ? [...new Set(l.tags.map(x => clampStr(oneLine(x.toLowerCase()), 24)).filter(Boolean))].slice(0, 6)
+        ? Array.from(new Set(l.tags.map(x => clampStr(oneLine(x.toLowerCase()), 24)).filter(Boolean))).slice(0, 6)
         : undefined;
       const out: any = { agentId: l.agentId, role: oneLine(l.role) || "SUBAGENT", desc };
       if (tags?.length) out.tags = tags;
@@ -6314,6 +6308,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             fileUrl: "",
             processingStatus: "completed" as const,
             extractedText: "",
+            status: "active" as const,
+            knowledgeLayer: "operational" as const,
+            sourceUrl: "",
+            sourceAuthority: "",
+            isShared: false,
           });
         }
       }
@@ -6427,6 +6426,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
               fileUrl: "",
               processingStatus: "completed" as const,
               extractedText: String(kb.content),
+              status: "active" as const,
+              knowledgeLayer: "operational" as const,
+              sourceUrl: "",
+              sourceAuthority: "",
+              isShared: false,
             });
             kbCreated.push({ id: created.id, name: created.name });
           } catch (kbErr: any) {
@@ -8522,8 +8526,8 @@ Balas dengan JSON dengan struktur PERSIS ini:
       const agent = await storage.getAgent(agentId);
       if (!agent) return res.status(404).json({ error: "Agent not found" });
 
-      const requestingUserId: string | undefined = req.user?.claims?.sub ?? (req.user as Record<string, any>)?.id;
-      if (agent.userId && requestingUserId && agent.userId !== requestingUserId) {
+      const requestingUserId: string | undefined = (req.user as any)?.claims?.sub ?? (req.user as Record<string, any>)?.id;
+      if ((agent as any).userId && requestingUserId && (agent as any).userId !== requestingUserId) {
         return res.status(403).json({ error: "Forbidden: you do not own this agent" });
       }
 
@@ -10384,7 +10388,7 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
 
   app.get("/api/company-profiles/:id", isAuthenticated, async (req, res) => {
     try {
-      const profile = await storage.getCompanyProfile(parseInt(req.params.id));
+      const profile = await storage.getCompanyProfile(parseInt(req.params.id as string));
       if (!profile) return res.status(404).json({ error: "Profil tidak ditemukan" });
       res.json(profile);
     } catch (error) {
@@ -10404,7 +10408,7 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
 
   app.patch("/api/company-profiles/:id", isAuthenticated, async (req, res) => {
     try {
-      const profile = await storage.updateCompanyProfile(parseInt(req.params.id), req.body);
+      const profile = await storage.updateCompanyProfile(parseInt(req.params.id as string), req.body);
       if (!profile) return res.status(404).json({ error: "Profil tidak ditemukan" });
       res.json(profile);
     } catch (error) {
@@ -10414,7 +10418,7 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
 
   app.delete("/api/company-profiles/:id", isAuthenticated, async (req, res) => {
     try {
-      const ok = await storage.deleteCompanyProfile(parseInt(req.params.id));
+      const ok = await storage.deleteCompanyProfile(parseInt(req.params.id as string));
       if (!ok) return res.status(404).json({ error: "Profil tidak ditemukan" });
       res.json({ success: true });
     } catch (error) {
@@ -10436,7 +10440,7 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
 
   app.get("/api/tender-sessions/:id", isAuthenticated, async (req, res) => {
     try {
-      const session = await storage.getTenderSession(parseInt(req.params.id));
+      const session = await storage.getTenderSession(parseInt(req.params.id as string));
       if (!session) return res.status(404).json({ error: "Sesi tidak ditemukan" });
       res.json(session);
     } catch (error) {
@@ -10456,7 +10460,7 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
 
   app.patch("/api/tender-sessions/:id", isAuthenticated, async (req, res) => {
     try {
-      const session = await storage.updateTenderSession(parseInt(req.params.id), req.body);
+      const session = await storage.updateTenderSession(parseInt(req.params.id as string), req.body);
       if (!session) return res.status(404).json({ error: "Sesi tidak ditemukan" });
       res.json(session);
     } catch (error) {
@@ -10466,7 +10470,7 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
 
   app.delete("/api/tender-sessions/:id", isAuthenticated, async (req, res) => {
     try {
-      const ok = await storage.deleteTenderSession(parseInt(req.params.id));
+      const ok = await storage.deleteTenderSession(parseInt(req.params.id as string));
       if (!ok) return res.status(404).json({ error: "Sesi tidak ditemukan" });
       res.json({ success: true });
     } catch (error) {
@@ -10779,9 +10783,9 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const miniApp = await storage.getMiniApp(miniAppId);
       if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
 
-      const requestingUserId: string | undefined = req.user?.claims?.sub ?? (req.user as Record<string, any>)?.id;
+      const requestingUserId: string | undefined = (req.user as any)?.claims?.sub ?? (req.user as Record<string, any>)?.id;
       const agent = await storage.getAgent(String(miniApp.agentId));
-      if (agent && agent.userId && requestingUserId && agent.userId !== requestingUserId) {
+      if (agent && (agent as any).userId && requestingUserId && (agent as any).userId !== requestingUserId) {
         return res.status(403).json({ error: "Forbidden: you do not own this mini app" });
       }
 
@@ -10798,9 +10802,9 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const miniApp = await storage.getMiniApp(miniAppId);
       if (!miniApp) return res.status(404).json({ error: "Mini app not found" });
 
-      const requestingUserId: string | undefined = req.user?.claims?.sub ?? (req.user as Record<string, any>)?.id;
+      const requestingUserId: string | undefined = (req.user as any)?.claims?.sub ?? (req.user as Record<string, any>)?.id;
       const agent = await storage.getAgent(String(miniApp.agentId));
-      if (agent && agent.userId && requestingUserId && agent.userId !== requestingUserId) {
+      if (agent && (agent as any).userId && requestingUserId && (agent as any).userId !== requestingUserId) {
         return res.status(403).json({ error: "Forbidden: you do not own this mini app" });
       }
 
@@ -12389,7 +12393,7 @@ Return JSON format:
         greetingMessage: (agent as any).greetingMessage || "",
         conversationStarters: starters,
         kbCount: kbs.length,
-        kbCategories: [...new Set(kbs.map((k: any) => k.category || k.title).filter(Boolean))].slice(0, 8),
+        kbCategories: Array.from(new Set(kbs.map((k: any) => k.category || k.title).filter(Boolean))).slice(0, 8),
         miniAppCount: miniApps.length,
         miniApps: miniApps.map((m: any) => ({ id: m.id, name: m.name, description: m.description, type: m.type })),
         moduleCount: kbs.length,
@@ -12462,7 +12466,7 @@ Return JSON format:
   // Get full text content of a Notion page (for KB import)
   app.get("/api/notion/page/:pageId/content", isAuthenticated, async (req, res) => {
     try {
-      const { pageId } = req.params;
+      const pageId = req.params.pageId as string;
       const [page, content] = await Promise.all([
         getNotionPage(pageId),
         extractNotionPageContent(pageId),
@@ -13236,10 +13240,10 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
       const rows = await db.select().from(clientSubscriptions)
         .orderBy(desc(clientSubscriptions.createdAt));
       // Attach bigIdea names
-      const biIds = [...new Set(rows.map(r => r.bigIdeaId).filter(Boolean))] as number[];
+      const biIds = Array.from(new Set(rows.map(r => r.bigIdeaId).filter(Boolean))) as number[];
       let biMap: Record<number, string> = {};
       if (biIds.length > 0) {
-        const biRows = await db.select({ id: bigIdeasTable.id, name: bigIdeasTable.name }).from(bigIdeasTable).where(sql`${bigIdeasTable.id} = ANY(${biIds})`);
+        const biRows = await db.select({ id: bigIdeasTable.id, name: bigIdeasTable.name }).from(bigIdeasTable).where(sqlExpr`${bigIdeasTable.id} = ANY(${biIds})`);
         for (const bi of biRows) biMap[bi.id] = bi.name;
       }
       const result = rows.map(r => ({
@@ -14284,10 +14288,10 @@ Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.
           expertise: agent.expertise,
           systemPrompt: agent.systemPrompt,
           contextQuestions: agent.contextQuestions,
-          sampleQuestions: agent.sampleQuestions,
+          sampleQuestions: (agent as any).sampleQuestions,
           primaryOutcome: agent.primaryOutcome,
-          agentRole: agent.agentRole,
-          workMode: agent.workMode,
+          agentRole: (agent as any).agentRole,
+          workMode: (agent as any).workMode,
           behaviorPreset: agent.behaviorPreset,
         },
         knowledgeBases: knowledgeBases.map((kb: any) => ({
@@ -14354,6 +14358,11 @@ Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.
             fileUrl: "",
             processingStatus: "completed" as const,
             extractedText: "",
+            status: "active" as const,
+            knowledgeLayer: "operational" as const,
+            sourceUrl: "",
+            sourceAuthority: "",
+            isShared: false,
           });
         }
       }
@@ -16036,7 +16045,7 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
           conversationStarters: [],
           tags: ["ai-tutor", blueprintId, spec.role.toLowerCase().replace(/\s+/g, "-")],
         } as any);
-        subAgentIds.push(agent.id);
+        subAgentIds.push(Number(agent.id));
       }
 
       // 2. Build agenticSubAgents config

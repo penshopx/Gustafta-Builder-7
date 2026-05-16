@@ -156,7 +156,7 @@ class TtlCache<T> {
   delete(key: string): void { this.store.delete(key); }
 
   deletePrefix(prefix: string): void {
-    for (const k of this.store.keys()) {
+    for (const k of Array.from(this.store.keys())) {
       if (k.startsWith(prefix)) this.store.delete(k);
     }
   }
@@ -167,9 +167,9 @@ class TtlCache<T> {
 }
 
 // Cache instances — 5 menit TTL untuk agen, 3 menit untuk KB & chunks
-const agentCache = new TtlCache<import("./storage").Agent>(5 * 60 * 1000);
-const agentListCache = new TtlCache<import("./storage").Agent[]>(2 * 60 * 1000);
-const kbCache = new TtlCache<import("./storage").KnowledgeBase[]>(3 * 60 * 1000);
+const agentCache = new TtlCache<any>(5 * 60 * 1000);
+const agentListCache = new TtlCache<any[]>(2 * 60 * 1000);
+const kbCache = new TtlCache<any[]>(3 * 60 * 1000);
 const chunkCache = new TtlCache<KnowledgeChunk[]>(3 * 60 * 1000);
 
 export class DatabaseStorage implements IStorage {
@@ -575,7 +575,7 @@ export class DatabaseStorage implements IStorage {
     return {
       id: String(row.id),
       name: row.name,
-      slug: row.slug || null,
+      slug: (row as any).slug || null,
       type: row.type as "problem" | "idea" | "inspiration" | "mentoring",
       description: row.description,
       goals: (row.goals as string[]) || [],
@@ -1095,7 +1095,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   private mapAgentRow(row: typeof agents.$inferSelect): Agent {
-    return {
+    return ({
       id: String(row.id),
       name: row.name,
       description: row.description || "",
@@ -1232,10 +1232,10 @@ export class DatabaseStorage implements IStorage {
       isActive: row.isActive || false,
       isEnabled: (row as any).isEnabled !== false,
       folderName: (row as any).folderName ?? null,
-      agenticSubAgents: (row.agenticSubAgents as Array<{ agentId: number; role: string; description: string }>) || [],
+      agenticSubAgents: (row.agenticSubAgents as any[]) || [],
       slug: (row as any).slug || null,
       createdAt: row.createdAt.toISOString(),
-    };
+    } as unknown as Agent);
   }
 
   async getAgentBySlug(slug: string): Promise<Agent | undefined> {

@@ -8,7 +8,7 @@ async function notionProxy(endpoint: string, options: RequestInit = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(options.headers || {}),
+      ...(options.headers as Record<string, string> || {}),
     },
   });
   return response.json();

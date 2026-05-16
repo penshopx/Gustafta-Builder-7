@@ -16,7 +16,7 @@ const PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID;
 let isInitialized = false;
 
 function injectPixelScript(): void {
-  if (typeof window === 'undefined' || window.fbq) return;
+  if (typeof window === 'undefined' || (window as any).fbq) return;
 
   const fbq = function (...args: unknown[]) {
     if (fbq.callMethod) {
