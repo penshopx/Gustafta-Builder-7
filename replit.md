@@ -23,7 +23,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 ## Where things live
 - **Database Schema**: `shared/schema.ts` (source of truth; `db/schema.ts` is symlinked)
 - **API Routes**: `server/routes/*.ts`
-- **Tutor Builder Page**: `client/src/pages/tutor-builder.tsx` (route `/tutor-builder`) — 5 blueprint presets dari ebook Trilogi: Tutor Sokratik 4-Mode, LexSkripsi, Satpam Belajar, Pendamping Baca, Learning Stack. Backend: `POST /api/tutor-builder/create-team` + `GET /api/tutor-builder/blueprints` di `server/routes.ts` (end of file).
+- **Rakit Tim Agen — Trilogi Page**: `client/src/pages/tutor-builder.tsx` (route `/tutor-builder`) — 9 blueprint dari 3 domain Trilogi. Tab DIALOG (Buku I, 5 blueprint): Tutor Sokratik 4-Mode, LexSkripsi, Satpam Belajar, Pendamping Baca, Learning Stack. Tab KOLABORASI (Buku II, 3 blueprint): Asisten Domain Profesional (Kurator/Standar/Skeptis/Penerjemah), Tim Rapat Hybrid (Pre-Sync/Decision Brief/Logger/Commitment/Retro), UMKM Stack (Pelanggan/Stok/Pembukuan). Tab KREASI (Buku III, 1 blueprint): Pipeline Konten Kreator (Peneliti/Narator/Editor/Penjadwal). Backend: `POST /api/tutor-builder/create-team` + `GET /api/tutor-builder/blueprints` di `server/routes.ts` (end of file). Universal principles shown: multi-agen, mindset rekan, gerbang manusia (◆), anti-ghostwriter.
 - **Inter-Agent API v2**: `server/routes.ts` ~line 2806 (orchestration block), ~line 3926 (`callAgentInternal` v2)
 - **Legal AI Configuration**: `server/lib/legal-agents.ts`
 - **AI Field Regeneration Component**: `client/src/components/ai-field-regen.tsx`

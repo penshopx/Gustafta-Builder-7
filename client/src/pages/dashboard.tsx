@@ -1238,7 +1238,7 @@ export default function Dashboard() {
                   <Link href="/tutor-builder">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-violet-700 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 mb-2" data-testid="nav-shortcut-tutor-builder">
                       <Sparkles className="w-4 h-4 text-violet-500 shrink-0" />
-                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">Rakit Tim AI Tutor</span></div>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">Rakit Tim Agen — Trilogi</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
                     </div>
                   </Link>

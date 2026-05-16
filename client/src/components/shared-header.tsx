@@ -131,7 +131,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/packs", label: "Paket Series Modul", icon: Package },
     { href: "/store", label: "Store", icon: ShoppingBag },
     { href: "/lms", label: "Learning Center", icon: GraduationCap },
-    { href: "/tutor-builder", label: "Rakit Tim AI Tutor", icon: Sparkles },
+    { href: "/tutor-builder", label: "Rakit Tim Agen — Trilogi", icon: Sparkles },
     { href: "/pricing", label: "Paket Berlangganan", icon: BarChart3 },
     { href: "/panduan", label: "Panduan", icon: BookOpen },
   ];
