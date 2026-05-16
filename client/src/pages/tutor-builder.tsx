@@ -7,7 +7,8 @@ import {
   Eye, Target, Heart, PenLine, BookMarked, Play, RotateCcw,
   Sparkles, Bot, Star, ArrowRight, Briefcase, ShoppingBag,
   ClipboardList, Mic, Edit3, Calendar, Search, FileText,
-  BarChart2, UserCheck, FlaskConical, Scale
+  BarChart2, UserCheck, FlaskConical, Scale, Headphones,
+  BookText, Archive, Scissors, Radio, Shield, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -213,21 +214,80 @@ const KOLABORASI_BLUEPRINTS: BlueprintMeta[] = [
 const KREASI_BLUEPRINTS: BlueprintMeta[] = [
   {
     id: "pipeline-konten",
-    label: "Pipeline Konten Kreator — 4 Agen Produksi",
+    label: "Pipeline Konten Multi-Platform — 4 Agen Produksi",
     tagline: "Konten bagus bukan kerja cepat — kerja dengan sistem",
     description:
       "Empat agen menutup seluruh pipeline produksi konten: Peneliti menemukan angle unik berbasis data, Narator mengubah riset menjadi script yang compelling, Editor menjaga akurasi dan konsistensi brand voice, Penjadwal memastikan kalender konten realistis dan konsisten. AI adalah bahan — kreator tetap jiwa konten.",
-    useCase: "YouTuber, podcaster, penulis newsletter, content creator media sosial",
+    useCase: "YouTuber multi-platform, content creator Instagram/TikTok/LinkedIn, penulis newsletter",
     color: "rose",
     bgGradient: "from-rose-50 to-pink-50 dark:from-rose-950/30 dark:to-pink-950/30",
     icon: <Mic className="w-6 h-6" />,
-    sourceChapter: "Buku III — Pipeline Kreasi Konten",
+    sourceChapter: "Buku III Bab 3 — Pipeline Multi-Platform (Naya)",
     agentCount: 5,
     specialists: [
       { name: "PENELITI", role: "Research Agent", icon: <Search className="w-3.5 h-3.5" />, color: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300" },
       { name: "NARATOR", role: "Storytelling & Script", icon: <Mic className="w-3.5 h-3.5" />, color: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300" },
       { name: "EDITOR", role: "Editor & QC", icon: <Edit3 className="w-3.5 h-3.5" />, color: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300" },
       { name: "PENJADWAL", role: "Content Calendar", icon: <Calendar className="w-3.5 h-3.5" />, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" },
+    ],
+  },
+  {
+    id: "studio-audio",
+    label: "Studio Audio Mikro — Podcast & Video",
+    tagline: "Suara manusia yang otentik — AI hanya mengurus pasca-rekaman",
+    description:
+      "Empat agen menangani seluruh pipeline pasca-rekaman: Transkripsi mengubah audio menjadi teks bertanda narasi (momen [KUAT], [EMOSI], [JEDA]), Editor Audio merekomendasikan cut tanpa mengorbankan jeda emosional, Shownotes menyiapkan semua aset teks untuk semua platform, Snippet menemukan klip terbaik untuk TikTok/Reels/Shorts. Rekaman tetap di tangan manusia.",
+    useCase: "Podcaster, YouTuber wawancara, kreator video dokumentasi",
+    color: "amber",
+    bgGradient: "from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30",
+    icon: <Headphones className="w-6 h-6" />,
+    sourceChapter: "Buku III Bab 5 — Studio Audio Mikro (Pak Joko)",
+    agentCount: 5,
+    specialists: [
+      { name: "TRANSKRIPSI", role: "Transkripsi & Penanda Narasi", icon: <FileText className="w-3.5 h-3.5" />, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
+      { name: "EDITOR AUDIO", role: "Audio Editor Asisten", icon: <Scissors className="w-3.5 h-3.5" />, color: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
+      { name: "SHOWNOTES", role: "Shownotes & Distribusi", icon: <Globe className="w-3.5 h-3.5" />, color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300" },
+      { name: "SNIPPET", role: "Klip Media Sosial", icon: <Radio className="w-3.5 h-3.5" />, color: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
+    ],
+  },
+  {
+    id: "penerbit-mikro",
+    label: "Penerbit Mikro — Self-Publisher & Penulis",
+    tagline: "Tulis apa yang hanya kamu yang bisa — biarkan agen urus sisanya",
+    description:
+      "Lima agen mendukung siklus penuh penerbitan mandiri: Arsip mengorganisir semua bahan riset dan wawancara, Sparring menjadi mitra berpikir saat macet tanpa menulis menggantikan penulis, Editorial memeriksa konsistensi karakter dan timeline, Visual menyiapkan brief kover dan panduan layout, Distribusi mengelola listing multi-platform dan jadwal launching. Kalimat di naskah final hanya dari tangan penulis.",
+    useCase: "Penulis buku indie, self-publisher, jurnalis buku, penulis non-fiksi",
+    color: "teal",
+    bgGradient: "from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30",
+    icon: <BookText className="w-6 h-6" />,
+    sourceChapter: "Buku III Bab 4 — Penerbit Mikro (Bu Rahma)",
+    agentCount: 6,
+    specialists: [
+      { name: "ARSIP", role: "Riset & Arsip Pengetahuan", icon: <Archive className="w-3.5 h-3.5" />, color: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300" },
+      { name: "SPARRING", role: "Drafting Partner", icon: <Swords className="w-3.5 h-3.5" />, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
+      { name: "EDITORIAL", role: "Editor Pertama", icon: <Edit3 className="w-3.5 h-3.5" />, color: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300" },
+      { name: "VISUAL", role: "Layout & Penerbitan", icon: <Eye className="w-3.5 h-3.5" />, color: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300" },
+      { name: "DISTRIBUSI", role: "Promosi & Penjualan", icon: <Globe className="w-3.5 h-3.5" />, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
+    ],
+  },
+  {
+    id: "komunitas-builder",
+    label: "Komunitas Builder — 5 Agen Ruang Hidup",
+    tagline: "Komunitas harus dirasakan oleh manusia — bukan dioperasikan olehnya",
+    description:
+      "Lima agen menjaga komunitas tetap hidup tanpa membakar pengelolanya: Penyambut onboarding anggota baru secara personal, FAQ menjawab pertanyaan berulang agar pengelola tidak kelelahan, Kurator mendestilasi diskusi harian menjadi kompas prioritas, Kohort mengurus administrasi program, dan Penjaga memastikan tidak ada pesan krisis yang terlewat. Transparansi wajib: anggota selalu tahu mereka berbicara dengan agen.",
+    useCase: "Pengelola komunitas online, fasilitator kursus, pembangun membership",
+    color: "violet",
+    bgGradient: "from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30",
+    icon: <Users className="w-6 h-6" />,
+    sourceChapter: "Buku III Bab 7 — Komunitas Builder (Lulu)",
+    agentCount: 6,
+    specialists: [
+      { name: "PENYAMBUT", role: "Onboarding Concierge", icon: <Heart className="w-3.5 h-3.5" />, color: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
+      { name: "FAQ", role: "Penjawab Berulang", icon: <MessageSquare className="w-3.5 h-3.5" />, color: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" },
+      { name: "KURATOR", role: "Pemantau Diskusi", icon: <Eye className="w-3.5 h-3.5" />, color: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300" },
+      { name: "KOHORT", role: "Asisten Program", icon: <ClipboardList className="w-3.5 h-3.5" />, color: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300" },
+      { name: "PENJAGA", role: "Krisis & Eskalasi", icon: <Shield className="w-3.5 h-3.5" />, color: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
     ],
   },
 ];
@@ -332,6 +392,9 @@ const PLACEHOLDER_MAP: Record<string, string> = {
   "tim-rapat": "Tim Produk Q3 2025",
   "umkm-stack": "Warung Makan Bu Ningsih",
   "pipeline-konten": "Channel YouTube Hukum Konstruksi",
+  "studio-audio": "Podcast Suara Konstruksi",
+  "penerbit-mikro": "Buku Non-Fiksi UMKM Digital",
+  "komunitas-builder": "Komunitas Belajar Ibu Produktif",
 };
 
 function CreateTeamDialog({
@@ -517,6 +580,8 @@ const UNIVERSAL_PRINCIPLES = [
   { icon: <CheckCircle2 className="w-3 h-3" />, text: "Gerbang manusia (◆) eksplisit" },
   { icon: <Zap className="w-3 h-3" />, text: "Anti-ghostwriter — AI bantu berpikir" },
   { icon: <RotateCcw className="w-3 h-3" />, text: "Log & ringkasan otomatis" },
+  { icon: <Heart className="w-3 h-3" />, text: "Jangkar suara — kalimatmu di setiap output" },
+  { icon: <Shield className="w-3 h-3" />, text: "Transparansi agen wajib ke audiens" },
 ];
 
 // ─── Main Page ──────────────────────────────────────────────────────────────
@@ -641,7 +706,7 @@ export default function TutorBuilderPage() {
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     {currentTab.id === "dialog" && "Blueprint untuk skenario belajar: kursus, riset, membaca, dan literasi digital."}
                     {currentTab.id === "kolaborasi" && "Blueprint untuk skenario kerja & bisnis: domain profesional, rapat, dan operasional UMKM."}
-                    {currentTab.id === "kreasi" && "Blueprint untuk skenario berkarya: produksi konten dari riset hingga kalender publish."}
+                    {currentTab.id === "kreasi" && "Blueprint untuk skenario berkarya: pipeline konten multi-platform, studio podcast & video, penerbitan mandiri, dan manajemen komunitas."}
                   </p>
                 </div>
               </div>
