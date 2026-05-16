@@ -14664,12 +14664,7 @@ Format output JSON HARUS:
 
     (async () => {
       try {
-        const { db } = await import("./db");
-        const { sql: sqlE } = await import("drizzle-orm");
-        const OpenAI = (await import("openai")).default;
         const pLimit = (await import("p-limit")).default;
-
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY, baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL });
         const limit = pLimit(8);
 
         const CRITICAL = ["name", "tagline", "description", "personality", "expertise", "primary_outcome"];
@@ -14738,6 +14733,8 @@ Format output JSON HARUS:
               try {
                 const fillable = missing.filter(c => c !== "name" && c !== "category");
                 if (fillable.length === 0) return;
+                const OpenAI = (await import("openai")).default;
+                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY, baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL });
                 const expertStr = Array.isArray(agent.expertise) ? agent.expertise.slice(0, 5).join(", ") : "";
                 const resp = await openai.chat.completions.create({
                   model: "gpt-4o-mini",
@@ -14831,10 +14828,11 @@ Format output JSON HARUS:
     (async () => {
       try {
         const { db } = await import("./db");
-        const OpenAI = (await import("openai")).default;
         const pLimit = (await import("p-limit")).default;
 
         const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+        if (!openaiKey) throw new Error("OpenAI API key tidak ditemukan. Pastikan OPENAI_API_KEY sudah dikonfigurasi.");
+        const OpenAI = (await import("openai")).default;
         const openai = new OpenAI({ apiKey: openaiKey });
         const limit = pLimit(4);
 
