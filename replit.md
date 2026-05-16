@@ -23,6 +23,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 ## Where things live
 - **Database Schema**: `shared/schema.ts` (source of truth; `db/schema.ts` is symlinked)
 - **API Routes**: `server/routes/*.ts`
+- **Tutor Builder Page**: `client/src/pages/tutor-builder.tsx` (route `/tutor-builder`) — 5 blueprint presets dari ebook Trilogi: Tutor Sokratik 4-Mode, LexSkripsi, Satpam Belajar, Pendamping Baca, Learning Stack. Backend: `POST /api/tutor-builder/create-team` + `GET /api/tutor-builder/blueprints` di `server/routes.ts` (end of file).
 - **Inter-Agent API v2**: `server/routes.ts` ~line 2806 (orchestration block), ~line 3926 (`callAgentInternal` v2)
 - **Legal AI Configuration**: `server/lib/legal-agents.ts`
 - **AI Field Regeneration Component**: `client/src/components/ai-field-regen.tsx`

@@ -53,6 +53,7 @@ import BrainProjectChat from "@/pages/brain-project-chat";
 import DataMasterPage from "@/pages/data-master";
 import IbTuChat from "@/pages/ib-tu-chat";
 import AiTutorChat from "@/pages/ai-tutor-chat";
+import TutorBuilder from "@/pages/tutor-builder";
 import SbuClawChat from "@/pages/sbu-claw-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -137,6 +138,7 @@ function Router() {
         <Route path="/data-master" component={DataMasterPage} />
         <Route path="/ib-tu" component={IbTuChat} />
         <Route path="/ai-tutor" component={AiTutorChat} />
+        <Route path="/tutor-builder" component={TutorBuilder} />
         <Route path="/sbu-claw" component={SbuClawChat} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
