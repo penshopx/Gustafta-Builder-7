@@ -346,7 +346,8 @@ export default function TenderAiChat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          agentId,
+          agentId: String(agentId),
+          role: "user",
           content: contentToSend,
           conversationHistory: history,
         }),
