@@ -117,10 +117,10 @@ export function ChaesaWidget() {
   };
 
   const QUICK_PROMPTS = [
-    "Bagaimana cara membuat chatbot baru di Gustafta?",
-    "Mini Apps 45 tipe — apa saja & cara pakainya?",
-    "Fitur untuk Kreator Konten (YouTube, Podcast, Medsos)?",
-    "Bagaimana cara kerja Orchestrator Multi-Agent?",
+    "EduCounsel AI StudentHub — konseling akademik siswa itu apa?",
+    "SBUClaw OpenClaw — bantu proses SBU Konstruksi bagaimana?",
+    "Rakit Tim Agen Trilogi — 12 blueprint itu untuk siapa?",
+    "Bagaimana cara membuat chatbot & pakai Mini Apps 45 tipe?",
     "Berapa harga paket Gustafta Apps & cara berlangganan?",
   ];
 

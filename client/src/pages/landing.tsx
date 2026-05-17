@@ -1083,6 +1083,181 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ─── SECTION: Sistem AI Spesialis ────────────────────────────────── */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-teal-500/5 via-background to-violet-500/5 border-y border-teal-200/20 dark:border-teal-900/20" id="ai-spesialis">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 text-sm font-semibold mb-4">
+              <Sparkles className="h-4 w-4" />
+              Sistem AI Spesialis Gustafta
+            </div>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">
+              Lima Ekosistem AI{" "}
+              <span className="text-teal-600 dark:text-teal-400">Siap Pakai</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Bukan hanya chatbot builder — Gustafta menyediakan sistem AI spesialis yang sudah dikonfigurasi penuh, siap digunakan langsung tanpa setup dari nol.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+
+            {/* EduCounsel AI */}
+            <div className="relative rounded-2xl border-2 border-teal-200 dark:border-teal-800 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-xl bg-teal-600 flex items-center justify-center shadow-md shadow-teal-600/20 shrink-0">
+                  <GraduationCap className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <Badge className="bg-teal-600 text-white hover:bg-teal-700 border-0 text-[10px] mb-0.5">11 Agen · StudentHub</Badge>
+                  <h3 className="font-bold text-base leading-tight">EduCounsel AI</h3>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
+                Konseling akademik siswa SMA berbasis multi-agent. Safety gate, profil siswa, analisis nilai, rencana intervensi 14-hari, pathway kuliah DN/LN, dan dokumentasi BK — dalam satu sistem.
+              </p>
+              <div className="flex flex-wrap gap-1 mb-4">
+                {["Safety Gate", "Pathway DN/LN", "Intervensi 14-hari", "Laporan BK"].map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 font-medium">{t}</span>
+                ))}
+              </div>
+              <Link href="/edu-counsel">
+                <Button size="sm" className="w-full gap-2 bg-teal-600 hover:bg-teal-700 text-white" data-testid="button-educounsel-landing">
+                  <GraduationCap className="h-3.5 w-3.5" />
+                  Coba EduCounsel AI
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* SBUClaw */}
+            <div className="relative rounded-2xl border-2 border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-xl bg-amber-600 flex items-center justify-center shadow-md shadow-amber-600/20 shrink-0">
+                  <HardHat className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <Badge className="bg-amber-600 text-white hover:bg-amber-700 border-0 text-[10px] mb-0.5">10 Agen · SBU Konstruksi</Badge>
+                  <h3 className="font-bold text-base leading-tight">SBUClaw OpenClaw</h3>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
+                Sistem multi-agent untuk proses SBU Konstruksi sesuai Permen PU 6/2025. Mapping subklasifikasi, gap kualifikasi, checklist dokumen, SKK match, draft surat, estimasi biaya — paralel & terkoordinasi.
+              </p>
+              <div className="flex flex-wrap gap-1 mb-4">
+                {["Mapping SBU", "Gap Analysis", "Draft Surat", "OSS-RBA Guide"].map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-medium">{t}</span>
+                ))}
+              </div>
+              <Link href="/sbu-claw">
+                <Button size="sm" className="w-full gap-2 bg-amber-600 hover:bg-amber-700 text-white" data-testid="button-sbuclaw-landing">
+                  <HardHat className="h-3.5 w-3.5" />
+                  Coba SBUClaw
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* KONSTRA */}
+            <div className="relative rounded-2xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-950/30 dark:to-slate-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-xl bg-blue-700 flex items-center justify-center shadow-md shadow-blue-700/20 shrink-0">
+                  <Building className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <Badge className="bg-blue-700 text-white hover:bg-blue-800 border-0 text-[10px] mb-0.5">9 Agen · Manajemen Proyek</Badge>
+                  <h3 className="font-bold text-base leading-tight">KONSTRA OpenClaw</h3>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
+                Manajemen konstruksi multi-agent: PM, Engineering, Kontrak/FIDIC, K3/SMK3, Mutu/ISO9001, Lingkungan/ISO14001, Peralatan, Supply Chain, dan Keuangan/PSAK34 — semua terhubung paralel.
+              </p>
+              <div className="flex flex-wrap gap-1 mb-4">
+                {["FIDIC Kontrak", "K3/SMK3", "ISO 9001/14001", "PSAK 34"].map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-medium">{t}</span>
+                ))}
+              </div>
+              <Link href="/trilogi-chat/1281">
+                <Button size="sm" className="w-full gap-2 bg-blue-700 hover:bg-blue-800 text-white" data-testid="button-konstra-landing">
+                  <Building className="h-3.5 w-3.5" />
+                  Coba KONSTRA
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* AI Tutor */}
+            <div className="relative rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-xl bg-emerald-600 flex items-center justify-center shadow-md shadow-emerald-600/20 shrink-0">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 border-0 text-[10px] mb-0.5">9 Agen · Tutor Adaptif</Badge>
+                  <h3 className="font-bold text-base leading-tight">AI Tutor Bimbel</h3>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
+                Tutor AI adaptif untuk bimbingan belajar: analisis kelemahan siswa, rencana belajar personal, latihan soal adaptif, motivasi, dan tracking progress — seperti guru privat AI 24/7.
+              </p>
+              <div className="flex flex-wrap gap-1 mb-4">
+                {["Tutor Adaptif", "Latihan Soal", "Progress Tracker", "Motivasi AI"].map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-medium">{t}</span>
+                ))}
+              </div>
+              <Link href="/ai-tutor">
+                <Button size="sm" className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-ai-tutor-landing">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Coba AI Tutor
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Trilogi Builder */}
+            <div className="relative rounded-2xl border-2 border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-11 h-11 rounded-xl bg-violet-600 flex items-center justify-center shadow-md shadow-violet-600/20 shrink-0">
+                  <Blocks className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <Badge className="bg-violet-600 text-white hover:bg-violet-700 border-0 text-[10px] mb-0.5">12 Blueprint · 3 Domain</Badge>
+                  <h3 className="font-bold text-base leading-tight">Rakit Tim Agen Trilogi</h3>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
+                Bangun tim agen AI dari 12 blueprint siap pakai: Dialog (Tutor Sokratik, LexSkripsi, Pendamping Baca), Kolaborasi (Tim Rapat, UMKM Stack, Domain Profesional), dan Kreasi (Pipeline Konten, Studio Audio, Penerbit Mikro).
+              </p>
+              <div className="flex flex-wrap gap-1 mb-4">
+                {["Tutor Sokratik", "UMKM Stack", "Pipeline Konten", "Studio Audio"].map(t => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800 font-medium">{t}</span>
+                ))}
+              </div>
+              <Link href="/tutor-builder">
+                <Button size="sm" className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white" data-testid="button-trilogi-landing">
+                  <Blocks className="h-3.5 w-3.5" />
+                  Rakit Tim Agen
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+
+          </div>
+
+          <div className="text-center mt-10">
+            <p className="text-muted-foreground text-sm mb-4">Semua sistem di atas tersedia di dalam platform Gustafta dan terus diperbarui.</p>
+            <Link href="/dashboard">
+              <Button size="lg" variant="outline" className="gap-2" data-testid="button-ai-spesialis-dashboard">
+                <Rocket className="h-5 w-5" />
+                Eksplorasi di Dashboard
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+      {/* ─────────────────────────────────────────────────────────────────────── */}
+
       {/* ─── SECTION: Killer Features Kontraktor ─────────────────────────── */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-amber-500/5 via-background to-emerald-500/5 border-y border-amber-200/30 dark:border-amber-900/20" id="kontraktor">
         <div className="container mx-auto px-4">
