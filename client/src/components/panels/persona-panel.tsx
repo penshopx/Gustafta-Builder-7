@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateAgent } from "@/hooks/use-agents";
 import { getCategoryById, getSubcategoryLabel } from "@/lib/categories";
@@ -66,15 +66,28 @@ const languages = [
 ];
 
 const aiModels = [
-  { value: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", description: "Fast and affordable" },
-  { value: "gpt-4o", name: "GPT-4o", provider: "OpenAI", description: "Most capable" },
-  { value: "gpt-4-turbo", name: "GPT-4 Turbo", provider: "OpenAI", description: "High performance" },
-  { value: "gpt-3.5-turbo", name: "GPT-3.5 Turbo", provider: "OpenAI", description: "Legacy model" },
-  { value: "deepseek-chat", name: "DeepSeek Chat", provider: "DeepSeek", description: "Cost-effective" },
-  { value: "deepseek-reasoner", name: "DeepSeek Reasoner", provider: "DeepSeek", description: "Advanced reasoning" },
-  { value: "claude-3-haiku", name: "Claude 3 Haiku", provider: "Anthropic", description: "Fast responses" },
-  { value: "claude-3-sonnet", name: "Claude 3 Sonnet", provider: "Anthropic", description: "Balanced performance" },
-  { value: "custom", name: "Custom Model", provider: "Custom", description: "Use your own API" },
+  // OpenAI
+  { value: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", description: "Cepat & hemat biaya — pilihan terbaik untuk penggunaan sehari-hari" },
+  { value: "gpt-4o", name: "GPT-4o", provider: "OpenAI", description: "Paling canggih dari OpenAI — pemahaman mendalam & multibahasa" },
+  { value: "gpt-4-turbo", name: "GPT-4 Turbo", provider: "OpenAI", description: "Performa tinggi dengan konteks panjang (128K token)" },
+  { value: "gpt-3.5-turbo", name: "GPT-3.5 Turbo", provider: "OpenAI", description: "Model lama yang masih cepat dan ekonomis" },
+  // DeepSeek
+  { value: "deepseek-chat", name: "DeepSeek V3 Chat", provider: "DeepSeek", description: "Sangat hemat biaya — performa setara GPT-4 dengan harga lebih rendah" },
+  { value: "deepseek-reasoner", name: "DeepSeek R1 Reasoner", provider: "DeepSeek", description: "Penalaran bertahap (chain-of-thought) — ideal untuk analisis kompleks & regulasi" },
+  // Qwen (Alibaba)
+  { value: "qwen-turbo", name: "Qwen Turbo", provider: "Alibaba Qwen", description: "Ringan & cepat — optimal untuk percakapan volume tinggi" },
+  { value: "qwen-plus", name: "Qwen Plus", provider: "Alibaba Qwen", description: "Seimbang antara kecepatan dan kemampuan — pilihan umum untuk chatbot bisnis" },
+  { value: "qwen-max", name: "Qwen Max", provider: "Alibaba Qwen", description: "Model terkuat Qwen — multi-bahasa Asia terbaik termasuk Bahasa Indonesia" },
+  // Google Gemini
+  { value: "gemini-1.5-flash", name: "Gemini 1.5 Flash", provider: "Google Gemini", description: "Sangat cepat — ideal untuk respons real-time dan konteks panjang" },
+  { value: "gemini-1.5-pro", name: "Gemini 1.5 Pro", provider: "Google Gemini", description: "Kapabilitas penuh Gemini — konteks 1 juta token, multimodal" },
+  { value: "gemini-2.0-flash", name: "Gemini 2.0 Flash", provider: "Google Gemini", description: "Generasi terbaru Gemini — kecepatan dan akurasi tinggi" },
+  // Anthropic (via proxy)
+  { value: "claude-3-haiku", name: "Claude 3 Haiku", provider: "Anthropic", description: "Respons cepat — cocok untuk tugas-tugas ringan dan chatbot customer service" },
+  { value: "claude-3-sonnet", name: "Claude 3 Sonnet", provider: "Anthropic", description: "Performa seimbang — analisis mendalam dengan nuansa bahasa yang baik" },
+  { value: "claude-3-5-sonnet", name: "Claude 3.5 Sonnet", provider: "Anthropic", description: "Terkuat Claude saat ini — coding, analisis, dan penulisan profesional" },
+  // Custom
+  { value: "custom", name: "Model Kustom", provider: "Custom", description: "Gunakan API model Anda sendiri — kompatibel OpenAI API format" },
 ];
 
 export function PersonaPanel({ agent }: PersonaPanelProps) {
@@ -989,14 +1002,54 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
                 <SelectValue placeholder="Select AI model" />
               </SelectTrigger>
               <SelectContent>
-                {aiModels.map((model) => (
-                  <SelectItem key={model.value} value={model.value}>
-                    <div className="flex items-center gap-2">
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 pt-1">OpenAI</SelectLabel>
+                  {aiModels.filter(m => m.provider === "OpenAI").map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
                       <span>{model.name}</span>
-                      <span className="text-xs text-muted-foreground">({model.provider})</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 pt-1">DeepSeek</SelectLabel>
+                  {aiModels.filter(m => m.provider === "DeepSeek").map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      <span>{model.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 pt-1">Alibaba Qwen</SelectLabel>
+                  {aiModels.filter(m => m.provider === "Alibaba Qwen").map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      <span>{model.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 pt-1">Google Gemini</SelectLabel>
+                  {aiModels.filter(m => m.provider === "Google Gemini").map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      <span>{model.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 pt-1">Anthropic</SelectLabel>
+                  {aiModels.filter(m => m.provider === "Anthropic").map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      <span>{model.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 pt-1">Lainnya</SelectLabel>
+                  {aiModels.filter(m => m.provider === "Custom").map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      <span>{model.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
@@ -1004,75 +1057,122 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
             </p>
           </div>
 
-          {(formData.aiModel === "custom" || formData.aiModel.startsWith("claude-") || formData.aiModel.startsWith("deepseek-")) && (
+          {/* Model-specific info badge */}
+          {(formData.aiModel.startsWith("deepseek-") || formData.aiModel.startsWith("qwen-") || formData.aiModel.startsWith("gemini-") || formData.aiModel.startsWith("gpt-")) && (
+            <div className="flex items-start gap-2 p-3 rounded-lg border bg-primary/5 border-primary/20">
+              <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground">
+                {formData.aiModel.startsWith("deepseek-") && (
+                  <>API key DeepSeek sudah dikonfigurasi di server. Tidak perlu pengaturan tambahan. Untuk menggunakan API key pribadi, masukkan di kolom API Key di bawah. Dapatkan di <a href="https://platform.deepseek.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">platform.deepseek.com</a></>
+                )}
+                {formData.aiModel.startsWith("qwen-") && (
+                  <>API key Qwen (Alibaba Cloud) sudah dikonfigurasi di server. Model Qwen unggul untuk Bahasa Indonesia & konten Asia Tenggara. Dapatkan API key di <a href="https://dashscope.aliyuncs.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">dashscope.aliyuncs.com</a></>
+                )}
+                {formData.aiModel.startsWith("gemini-") && (
+                  <>API key Gemini (Google) sudah dikonfigurasi di server. Model Gemini mendukung konteks sangat panjang (hingga 1 juta token). Dapatkan API key di <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">aistudio.google.com</a></>
+                )}
+                {formData.aiModel.startsWith("gpt-") && (
+                  <>Model OpenAI — API key sudah dikonfigurasi di server. Jika ingin menggunakan API key Anda sendiri, masukkan di bawah atau gunakan opsi "Model Kustom".</>
+                )}
+              </p>
+            </div>
+          )}
+
+          {(formData.aiModel === "custom" || formData.aiModel.startsWith("claude-") || formData.aiModel.startsWith("deepseek-") || formData.aiModel.startsWith("qwen-") || formData.aiModel.startsWith("gemini-") || formData.aiModel.startsWith("gpt-")) && (
             <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
               <div className="flex items-center gap-2 text-sm font-medium text-primary">
                 <Settings2 className="w-4 h-4" />
-                {formData.aiModel.startsWith("claude-") 
-                  ? "Claude Proxy Settings" 
+                {formData.aiModel.startsWith("claude-")
+                  ? "Pengaturan Claude Proxy"
                   : formData.aiModel.startsWith("deepseek-")
-                    ? "DeepSeek API Settings"
-                    : "Custom Model Settings"}
+                    ? "Pengaturan API DeepSeek (Opsional)"
+                    : formData.aiModel.startsWith("qwen-")
+                      ? "Pengaturan API Qwen (Opsional)"
+                      : formData.aiModel.startsWith("gemini-")
+                        ? "Pengaturan API Gemini (Opsional)"
+                        : formData.aiModel.startsWith("gpt-")
+                          ? "Pengaturan API OpenAI (Opsional)"
+                          : "Pengaturan Model Kustom"}
               </div>
               {formData.aiModel.startsWith("claude-") && (
                 <p className="text-xs text-muted-foreground">
-                  Claude models require an OpenAI-compatible proxy (like OpenRouter or LiteLLM). Configure your proxy endpoint below.
+                  Model Claude memerlukan proxy OpenAI-compatible (seperti OpenRouter atau LiteLLM). Isi endpoint proxy Anda di bawah.
                 </p>
               )}
-              {formData.aiModel.startsWith("deepseek-") && (
+              {formData.aiModel === "custom" && (
                 <p className="text-xs text-muted-foreground">
-                  Masukkan API key DeepSeek Anda. Dapatkan di <a href="https://platform.deepseek.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">platform.deepseek.com</a>
+                  Gunakan model AI Anda sendiri dengan API yang kompatibel format OpenAI. Isi API Key, Base URL, dan nama model.
                 </p>
               )}
               <div className="space-y-2">
-                <Label htmlFor="customApiKey">API Key</Label>
+                <Label htmlFor="customApiKey">
+                  {formData.aiModel.startsWith("deepseek-") ? "API Key DeepSeek (Opsional)" :
+                   formData.aiModel.startsWith("qwen-") ? "API Key Qwen (Opsional)" :
+                   formData.aiModel.startsWith("gemini-") ? "API Key Gemini (Opsional)" :
+                   formData.aiModel.startsWith("gpt-") ? "API Key OpenAI (Opsional)" :
+                   "API Key"}
+                </Label>
                 <div className="flex gap-2">
                   <Input
                     id="customApiKey"
                     type={showApiKey ? "text" : "password"}
                     value={formData.customApiKey}
                     onChange={(e) => setFormData({ ...formData, customApiKey: e.target.value })}
-                    placeholder="sk-..."
+                    placeholder={
+                      formData.aiModel.startsWith("deepseek-") ? "sk-..." :
+                      formData.aiModel.startsWith("qwen-") ? "sk-..." :
+                      formData.aiModel.startsWith("gemini-") ? "AIza..." :
+                      "sk-..."
+                    }
                     className="font-mono text-sm"
-                   
+                    data-testid="input-custom-api-key"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
                     onClick={() => setShowApiKey(!showApiKey)}
-                   
+                    data-testid="button-toggle-api-key-visibility"
                   >
                     {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="customBaseUrl">Base URL</Label>
-                <Input
-                  id="customBaseUrl"
-                  value={formData.customBaseUrl}
-                  onChange={(e) => setFormData({ ...formData, customBaseUrl: e.target.value })}
-                  placeholder="https://api.example.com/v1"
-                 
-                />
                 <p className="text-xs text-muted-foreground">
-                  The API endpoint URL (e.g., https://api.openai.com/v1)
+                  {formData.aiModel.startsWith("deepseek-") || formData.aiModel.startsWith("qwen-") || formData.aiModel.startsWith("gemini-") || formData.aiModel.startsWith("gpt-")
+                    ? "Biarkan kosong untuk menggunakan API key server default. Isi hanya jika ingin memakai key Anda sendiri."
+                    : "API key untuk autentikasi ke layanan model"}
                 </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="customModelName">Model Name</Label>
-                <Input
-                  id="customModelName"
-                  value={formData.customModelName}
-                  onChange={(e) => setFormData({ ...formData, customModelName: e.target.value })}
-                  placeholder="gpt-4"
-                 
-                />
-                <p className="text-xs text-muted-foreground">
-                  The specific model identifier to use
-                </p>
-              </div>
+              {(formData.aiModel === "custom" || formData.aiModel.startsWith("claude-")) && (
+                <div className="space-y-2">
+                  <Label htmlFor="customBaseUrl">Base URL</Label>
+                  <Input
+                    id="customBaseUrl"
+                    value={formData.customBaseUrl}
+                    onChange={(e) => setFormData({ ...formData, customBaseUrl: e.target.value })}
+                    placeholder="https://api.example.com/v1"
+                    data-testid="input-custom-base-url"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL endpoint API (contoh: https://openrouter.ai/api/v1)
+                  </p>
+                </div>
+              )}
+              {(formData.aiModel === "custom" || formData.aiModel.startsWith("claude-")) && (
+                <div className="space-y-2">
+                  <Label htmlFor="customModelName">Nama Model</Label>
+                  <Input
+                    id="customModelName"
+                    value={formData.customModelName}
+                    onChange={(e) => setFormData({ ...formData, customModelName: e.target.value })}
+                    placeholder={formData.aiModel.startsWith("claude-") ? "claude-3-5-sonnet-20241022" : "gpt-4"}
+                    data-testid="input-custom-model-name"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Identifier model spesifik yang digunakan (sesuai dokumentasi provider)
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

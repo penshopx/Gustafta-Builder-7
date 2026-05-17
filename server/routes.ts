@@ -2677,7 +2677,56 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           temperature: temperature,
         });
         aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
-        
+
+      } else if (agentModel.startsWith("qwen-")) {
+        // Qwen (Alibaba) models - OpenAI-compatible API
+        const qwenApiKey = process.env.QWEN_API_KEY || agent.customApiKey;
+        if (!qwenApiKey) {
+          return res.status(400).json({
+            error: "Qwen API key not configured. Please set QWEN_API_KEY environment variable or provide custom API key in Persona settings."
+          });
+        }
+        const qwenClient = new OpenAI({
+          apiKey: qwenApiKey,
+          baseURL: process.env.QWEN_BASE_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        });
+        const qwenCompletion = await qwenClient.chat.completions.create({
+          model: agentModel,
+          messages: chatMessages as any,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        aiResponseContent = qwenCompletion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+
+      } else if (agentModel.startsWith("gemini-")) {
+        // Google Gemini models
+        const geminiKey = process.env.GEMINI_API_KEY || agent.customApiKey;
+        if (!geminiKey) {
+          return res.status(400).json({
+            error: "Gemini API key not configured. Please set GEMINI_API_KEY environment variable or provide custom API key in Persona settings."
+          });
+        }
+        const geminiSysParts: string[] = [];
+        const geminiMsgs: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+        for (const m of chatMessages as any[]) {
+          const text = typeof m.content === "string" ? m.content
+            : Array.isArray(m.content) ? m.content.map((p: any) => typeof p === "string" ? p : p?.text || "").filter(Boolean).join("\n")
+            : "";
+          if (!text) continue;
+          if (m.role === "system") { geminiSysParts.push(text); }
+          else { geminiMsgs.push({ role: m.role === "assistant" ? "model" : "user", parts: [{ text }] }); }
+        }
+        const geminiResponse = await genai.models.generateContent({
+          model: agentModel,
+          contents: geminiMsgs as any,
+          config: {
+            ...(geminiSysParts.length ? { systemInstruction: geminiSysParts.join("\n\n") } : {}),
+            temperature,
+            maxOutputTokens: maxTokens,
+          },
+        });
+        aiResponseContent = (geminiResponse as any).text || "Maaf, saya tidak dapat merespons saat ini.";
+
       } else if (agentModel.startsWith("claude-")) {
         // Claude models - require custom configuration with OpenAI-compatible proxy
         // Anthropic's native API is not OpenAI-compatible, so users must use a proxy service
@@ -3485,6 +3534,32 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           apiKey: deepseekApiKey,
           baseURL: "https://api.deepseek.com",
         });
+      } else if (agentModel.startsWith("qwen-")) {
+        // Qwen primary model streaming
+        const qwenApiKey = process.env.QWEN_API_KEY || agent.customApiKey;
+        if (!qwenApiKey) {
+          res.write(`data: ${JSON.stringify({ type: "error", error: "Qwen API key not configured. Please set QWEN_API_KEY environment variable." })}\n\n`);
+          cleanup();
+          res.end();
+          return;
+        }
+        streamClient = new OpenAI({
+          apiKey: qwenApiKey,
+          baseURL: process.env.QWEN_BASE_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        });
+      } else if (agentModel.startsWith("gemini-")) {
+        // Gemini primary model — use non-streaming via genai then emit as single chunk
+        // (Gemini streaming via SSE is handled inline in the fallbackAttempts array)
+        const geminiKey = process.env.GEMINI_API_KEY || agent.customApiKey;
+        if (!geminiKey) {
+          res.write(`data: ${JSON.stringify({ type: "error", error: "Gemini API key not configured. Please set GEMINI_API_KEY environment variable." })}\n\n`);
+          cleanup();
+          res.end();
+          return;
+        }
+        // For Gemini, override primary fallbackAttempt below using genai streaming
+        streamClient = openai; // placeholder; will be overridden in fallbackAttempts
+        modelName = agentModel; // keep original model name for the override
       } else if (agentModel.startsWith("claude-") && agent.customApiKey && agent.customBaseUrl) {
         streamClient = new OpenAI({
           apiKey: agent.customApiKey,
@@ -3504,27 +3579,64 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       try {
         const fallbackAttempts: Array<{ name: string; createStream: () => Promise<AsyncIterable<{ content: string }>> }> = [];
 
-        fallbackAttempts.push({
-          name: `primary(${modelName})`,
-          createStream: async () => {
-            const stream = await streamClient.chat.completions.create({
-              model: modelName,
-              messages: chatMessages,
-              max_tokens: maxTokens,
-              temperature: temperature,
-              stream: true,
-            });
-            return (async function* () {
-              for await (const chunk of stream) {
-                const content = chunk.choices[0]?.delta?.content || "";
-                if (content) yield { content };
-              }
-            })();
-          },
-        });
-
+        const isPrimaryGemini = agentModel.startsWith("gemini-");
+        const isPrimaryQwen = agentModel.startsWith("qwen-");
         const isPrimaryDeepseek = modelName.startsWith("deepseek");
-        if (!isPrimaryDeepseek && process.env.DEEPSEEK_API_KEY) {
+
+        if (isPrimaryGemini) {
+          // Gemini primary — use genai streaming directly
+          fallbackAttempts.push({
+            name: `primary(${agentModel})`,
+            createStream: async () => {
+              const geminiSysP: string[] = [];
+              const geminiC: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+              for (const m of chatMessages as any[]) {
+                const text = typeof m.content === "string" ? m.content
+                  : Array.isArray(m.content) ? m.content.map((p: any) => typeof p === "string" ? p : p?.text || "").filter(Boolean).join("\n")
+                  : "";
+                if (!text) continue;
+                if (m.role === "system") { geminiSysP.push(text); }
+                else { geminiC.push({ role: m.role === "assistant" ? "model" : "user", parts: [{ text }] }); }
+              }
+              const stream = await genai.models.generateContentStream({
+                model: agentModel,
+                contents: geminiC as any,
+                config: {
+                  ...(geminiSysP.length ? { systemInstruction: geminiSysP.join("\n\n") } : {}),
+                  temperature,
+                  maxOutputTokens: maxTokens,
+                },
+              });
+              return (async function* () {
+                for await (const chunk of stream) {
+                  const content = (chunk as any).text || "";
+                  if (content) yield { content };
+                }
+              })();
+            },
+          });
+        } else {
+          fallbackAttempts.push({
+            name: `primary(${modelName})`,
+            createStream: async () => {
+              const stream = await streamClient.chat.completions.create({
+                model: modelName,
+                messages: chatMessages,
+                max_tokens: maxTokens,
+                temperature: temperature,
+                stream: true,
+              });
+              return (async function* () {
+                for await (const chunk of stream) {
+                  const content = chunk.choices[0]?.delta?.content || "";
+                  if (content) yield { content };
+                }
+              })();
+            },
+          });
+        }
+
+        if (!isPrimaryDeepseek && !isPrimaryGemini && !isPrimaryQwen && process.env.DEEPSEEK_API_KEY) {
           fallbackAttempts.push({
             name: "fallback(deepseek)",
             createStream: async () => {
@@ -3549,7 +3661,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           });
         }
 
-        if (process.env.QWEN_API_KEY) {
+        if (!isPrimaryQwen && !isPrimaryGemini && process.env.QWEN_API_KEY) {
           fallbackAttempts.push({
             name: "fallback(qwen)",
             createStream: async () => {
@@ -3558,7 +3670,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
                 baseURL: process.env.QWEN_BASE_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
               });
               const stream = await qwen.chat.completions.create({
-                model: process.env.QWEN_MODEL || "qwen-plus",
+                model: isPrimaryQwen ? agentModel : (process.env.QWEN_MODEL || "qwen-plus"),
                 messages: chatMessages as any,
                 max_tokens: maxTokens,
                 temperature: temperature,
@@ -4822,6 +4934,35 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         const dsKey = process.env.DEEPSEEK_API_KEY || subAgent.customApiKey;
         if (!dsKey) return "[DeepSeek API key tidak dikonfigurasi untuk sub-agen ini]";
         client = new OpenAI({ apiKey: dsKey, baseURL: "https://api.deepseek.com" });
+      } else if (agentModel.startsWith("qwen-")) {
+        const qwenKey = process.env.QWEN_API_KEY || subAgent.customApiKey;
+        if (!qwenKey) return "[Qwen API key tidak dikonfigurasi untuk sub-agen ini]";
+        client = new OpenAI({ apiKey: qwenKey, baseURL: process.env.QWEN_BASE_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1" });
+      } else if (agentModel.startsWith("gemini-")) {
+        // Gemini sub-agent — use genai directly (no AbortController for now, handled by timeout wrapper)
+        const geminiSysP: string[] = [];
+        const geminiC: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+        for (const m of chatMessages) {
+          if (m.role === "system") { geminiSysP.push(m.content); }
+          else { geminiC.push({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }); }
+        }
+        const controller2 = new AbortController();
+        const timer2 = setTimeout(() => controller2.abort(), timeoutMs);
+        try {
+          const gResp = await genai.models.generateContent({
+            model: agentModel,
+            contents: geminiC as any,
+            config: { ...(geminiSysP.length ? { systemInstruction: geminiSysP.join("\n\n") } : {}), temperature, maxOutputTokens: maxTokens },
+          });
+          clearTimeout(timer2);
+          return (gResp as any).text || "[Tidak ada respons dari Gemini sub-agen]";
+        } catch (gErr: any) {
+          clearTimeout(timer2);
+          if (gErr?.name === "AbortError" || gErr?.message?.includes("aborted")) {
+            return `[Sub-agent ${subAgent.name} timeout setelah ${timeoutMs / 1000}s — melanjutkan dengan data tersedia]`;
+          }
+          throw gErr;
+        }
       } else {
         if (!openaiApiKey) return "[AI service tidak dikonfigurasi]";
         client = openai;
@@ -4832,7 +4973,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
         const completionParams: any = { model: modelName, messages: chatMessages, max_tokens: maxTokens, temperature };
-        if (responseFormat && !agentModel.startsWith("deepseek-") && agentModel !== "custom") {
+        if (responseFormat && !agentModel.startsWith("deepseek-") && !agentModel.startsWith("qwen-") && agentModel !== "custom") {
           completionParams.response_format = responseFormat;
         }
         const completion = await client.chat.completions.create(
@@ -5205,6 +5346,37 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           temperature: temperature,
         });
         return completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      } else if (agentModel.startsWith("qwen-")) {
+        const qwenApiKey = process.env.QWEN_API_KEY || agent.customApiKey;
+        if (!qwenApiKey) return "Qwen API key belum dikonfigurasi.";
+        const qwenClient = new OpenAI({
+          apiKey: qwenApiKey,
+          baseURL: process.env.QWEN_BASE_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        });
+        const completion = await qwenClient.chat.completions.create({
+          model: agentModel,
+          messages: chatMessages as any,
+          max_tokens: maxTokens,
+          temperature: temperature,
+        });
+        return completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
+      } else if (agentModel.startsWith("gemini-")) {
+        const geminiSysP: string[] = [];
+        const geminiC: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+        for (const m of chatMessages) {
+          if (m.role === "system") { geminiSysP.push(m.content); }
+          else { geminiC.push({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }); }
+        }
+        const gResp = await genai.models.generateContent({
+          model: agentModel,
+          contents: geminiC as any,
+          config: {
+            ...(geminiSysP.length ? { systemInstruction: geminiSysP.join("\n\n") } : {}),
+            temperature,
+            maxOutputTokens: maxTokens,
+          },
+        });
+        return (gResp as any).text || "Maaf, saya tidak dapat merespons saat ini.";
       } else {
         // OpenAI models (default)
         const completion = await openai.chat.completions.create({

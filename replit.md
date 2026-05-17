@@ -19,6 +19,8 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Styling**: Tailwind CSS, shadcn/ui
 - **Build Tool**: Vite (frontend), esbuild (backend)
 - **State Management**: TanStack React Query
+- **Payment Provider**: Scalev.id (menggantikan Midtrans)
+- **AI Models**: OpenAI (gpt-4o-mini/gpt-4o/gpt-4-turbo/gpt-3.5-turbo), DeepSeek (deepseek-chat/deepseek-reasoner), Qwen (qwen-turbo/qwen-plus/qwen-max), Google Gemini (gemini-1.5-flash/gemini-1.5-pro/gemini-2.0-flash), Anthropic via proxy (claude-3-haiku/claude-3-sonnet/claude-3-5-sonnet), Custom
 
 ## Where things live
 - **Database Schema**: `shared/schema.ts` (source of truth; `db/schema.ts` is symlinked)
