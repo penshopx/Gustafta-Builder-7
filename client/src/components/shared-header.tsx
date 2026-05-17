@@ -109,7 +109,7 @@ function ContactTopBar() {
       </div>
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <CreditCard className="h-3 w-3" />
-        <span>Pembayaran aman via <strong className="text-foreground/70">Midtrans</strong> — Midtrans Verified Merchant</span>
+        <span>Pembayaran aman via <strong className="text-foreground/70">Scalev.id</strong> — Pembayaran Terverifikasi</span>
       </div>
     </div>
   );
