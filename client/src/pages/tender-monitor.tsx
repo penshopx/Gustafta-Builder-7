@@ -301,29 +301,52 @@ export default function TenderMonitor() {
     onMutate: (sourceId) => {
       setScrapingIds(prev => new Set(Array.from(prev).concat(sourceId)));
     },
-    onSuccess: async (data: any, sourceId) => {
+    onSuccess: (data: any, sourceId) => {
       setScrapingIds(prev => { const s = new Set(prev); s.delete(sourceId); return s; });
-      const result = await data.json().catch(() => ({}));
-      toast({
-        title: result.success ? "Berhasil" : "Selesai (parsial)",
-        description: result.message || "Data tender diperbarui",
-        variant: result.success ? "default" : "destructive",
-      });
+      const result = (data && typeof data === "object" && !data.json) ? data : {};
+      if (result.success) {
+        toast({
+          title: "Berhasil",
+          description: result.message || "Data tender diperbarui",
+        });
+      } else if (result.message) {
+        toast({
+          title: "Selesai (parsial)",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/tenders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tender-sources"] });
     },
-    onError: (_err, sourceId) => {
+    onError: (err: any, sourceId) => {
       setScrapingIds(prev => { const s = new Set(prev); s.delete(sourceId); return s; });
-      toast({ title: "Gagal scraping", variant: "destructive" });
+      const msg = err?.message || "Gagal mengakses sumber";
+      if (!msg.includes("401")) {
+        toast({ title: "Sumber tidak terjangkau", description: msg.slice(0, 120), variant: "destructive" });
+      }
     },
   });
 
   async function handleScrapeAll() {
     const enabled = realSources.filter(s => (s as any).isEnabled);
     toast({ title: "Memulai scraping…", description: `${enabled.length} sumber akan diproses` });
+    let ok = 0, fail = 0;
     for (const src of enabled.slice(0, 8)) {
-      await scrapeMutation.mutateAsync((src as any).id);
+      try {
+        await scrapeMutation.mutateAsync((src as any).id);
+        ok++;
+      } catch {
+        fail++;
+      }
       await new Promise(r => setTimeout(r, 400));
+    }
+    if (ok + fail > 1) {
+      toast({
+        title: fail === 0 ? "Scraping selesai" : `Scraping selesai (${fail} gagal)`,
+        description: `${ok} sumber berhasil diproses`,
+        variant: fail > 0 ? "destructive" : "default",
+      });
     }
   }
 
