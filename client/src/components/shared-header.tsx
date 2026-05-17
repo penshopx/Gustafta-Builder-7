@@ -141,23 +141,168 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   return (
     <div className="sticky top-0 z-50">
       <ContactTopBar />
-    <header className={`border-b ${transparent ? "bg-background/80" : "bg-background/95"} backdrop-blur`}>
-      <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between gap-2">
-        <Link href="/">
-          <div className="flex items-center gap-2 cursor-pointer shrink-0">
-            <Bot className="h-6 w-6 md:h-7 md:w-7 text-primary" />
-            <span className="text-base md:text-lg font-bold">Gustafta</span>
-          </div>
-        </Link>
+      <header className={`border-b ${transparent ? "bg-background/80" : "bg-background/95"} backdrop-blur`}>
 
-        {/* Nav terpusat */}
-        <nav className="hidden md:flex items-center justify-center gap-0.5 flex-1">
+        {/* ── Baris 1: Logo + Aksi Kanan ── */}
+        <div className="container mx-auto px-4 h-12 flex items-center justify-between gap-2">
+          <Link href="/">
+            <div className="flex items-center gap-2 cursor-pointer shrink-0">
+              <Bot className="h-6 w-6 text-primary" />
+              <span className="text-base font-bold">Gustafta</span>
+            </div>
+          </Link>
+
+          {/* Aksi kanan — desktop */}
+          <div className="hidden md:flex items-center gap-1.5 shrink-0">
+            <PWAInstallButton />
+            <ThemeToggle />
+            {isLoading ? (
+              <Button disabled size="sm">Loading...</Button>
+            ) : isAuthenticated ? (
+              <div className="flex items-center gap-1.5">
+                {adminData?.isAdmin && (
+                  <Link href="/admin">
+                    <Button
+                      variant="outline" size="sm"
+                      className={`gap-1 text-xs h-8 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
+                      data-testid="button-admin-link"
+                    >
+                      {adminData.isSuperAdmin ? <Crown className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
+                      {adminData.isSuperAdmin ? "Super Admin" : "Admin"}
+                    </Button>
+                  </Link>
+                )}
+                <Link href="/dashboard">
+                  <Button size="sm" className="gap-1.5 text-xs h-8">
+                    <LayoutDashboard className="h-3.5 w-3.5" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href="/account" title="Akun Saya">
+                  <Avatar className="h-7 w-7 cursor-pointer ring-2 ring-transparent hover:ring-primary/40 transition-all" data-testid="avatar-account-link">
+                    <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
+                    <AvatarFallback className="text-xs">{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
+                  </Avatar>
+                </Link>
+                <a href="/api/logout">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Keluar">
+                    <LogOut className="h-3.5 w-3.5" />
+                  </Button>
+                </a>
+              </div>
+            ) : (
+              <a href="/api/login">
+                <Button size="sm" className="gap-1.5 text-xs h-8">
+                  <LogIn className="h-3.5 w-3.5" />
+                  Masuk
+                </Button>
+              </a>
+            )}
+          </div>
+
+          {/* Aksi kanan — mobile */}
+          <div className="flex md:hidden items-center gap-2">
+            <PWAInstallButton />
+            <ThemeToggle />
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <div className="flex items-center gap-2 mb-6">
+                  <Bot className="h-6 w-6 text-primary" />
+                  <span className="font-bold">Gustafta</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {navItems.map((item) => (
+                    <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive(item.href) ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <item.icon className="h-4 w-4 mr-2" />
+                        {item.label}
+                      </Button>
+                    </Link>
+                  ))}
+                  {isAuthenticated && (
+                    <Link href="/my-subscription" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/my-subscription") || isActive("/subscription") ? "secondary" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Crown className="h-4 w-4 mr-2" />
+                        Paket Saya
+                      </Button>
+                    </Link>
+                  )}
+                  <div className="border-t pt-3 mt-1">
+                    <Link href="/documentation" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-muted-foreground" size="sm">
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Dokumentasi
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="border-t pt-4 mt-2">
+                    {isAuthenticated ? (
+                      <div className="space-y-2">
+                        {adminData?.isAdmin && (
+                          <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                            <Button
+                              variant="outline"
+                              className={`w-full gap-2 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
+                              data-testid="button-admin-mobile"
+                            >
+                              {adminData.isSuperAdmin ? <Crown className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                              {adminData.isSuperAdmin ? "Super Admin Panel" : "Admin Panel"}
+                            </Button>
+                          </Link>
+                        )}
+                        <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                          <Button className="w-full">
+                            <LayoutDashboard className="h-4 w-4 mr-2" />
+                            Dashboard
+                          </Button>
+                        </Link>
+                        <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
+                          <Button variant="outline" className="w-full gap-2" data-testid="button-account-mobile">
+                            <User className="h-4 w-4" />
+                            Akun Saya
+                          </Button>
+                        </Link>
+                        <a href="/api/logout">
+                          <Button variant="outline" className="w-full gap-2">
+                            <LogOut className="h-4 w-4" />
+                            Keluar
+                          </Button>
+                        </a>
+                      </div>
+                    ) : (
+                      <a href="/api/login">
+                        <Button className="w-full gap-2">
+                          <LogIn className="h-4 w-4" />
+                          Masuk
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+
+        {/* ── Baris 2: Nav — desktop only ── */}
+        <nav className="hidden md:flex items-center justify-center gap-0.5 border-t border-border/50 h-10 overflow-x-auto">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive(item.href) ? "secondary" : "ghost"}
                 size="sm"
-                className="text-xs px-2.5 h-8 font-medium"
+                className="text-xs px-3 h-8 font-medium"
               >
                 {item.label}
               </Button>
@@ -168,7 +313,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
               <Button
                 variant={isActive("/my-subscription") || isActive("/subscription") ? "secondary" : "ghost"}
                 size="sm"
-                className="text-xs px-2.5 h-8 font-medium"
+                className="text-xs px-3 h-8 font-medium"
               >
                 <Crown className="h-3.5 w-3.5 mr-1" />
                 Paket Saya
@@ -177,148 +322,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
           )}
         </nav>
 
-        {/* Aksi kanan */}
-        <div className="hidden md:flex items-center gap-1.5 shrink-0">
-          <PWAInstallButton />
-          <ThemeToggle />
-          {isLoading ? (
-            <Button disabled size="sm">Loading...</Button>
-          ) : isAuthenticated ? (
-            <div className="flex items-center gap-1.5">
-              {adminData?.isAdmin && (
-                <Link href="/admin">
-                  <Button
-                    variant="outline" size="sm"
-                    className={`gap-1 text-xs h-8 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
-                    data-testid="button-admin-link"
-                  >
-                    {adminData.isSuperAdmin ? <Crown className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
-                    {adminData.isSuperAdmin ? "Super Admin" : "Admin"}
-                  </Button>
-                </Link>
-              )}
-              <Link href="/dashboard">
-                <Button size="sm" className="gap-1.5 text-xs h-8">
-                  <LayoutDashboard className="h-3.5 w-3.5" />
-                  Dashboard
-                </Button>
-              </Link>
-              <Link href="/account" title="Akun Saya">
-                <Avatar className="h-7 w-7 cursor-pointer ring-2 ring-transparent hover:ring-primary/40 transition-all" data-testid="avatar-account-link">
-                  <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
-                  <AvatarFallback className="text-xs">{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
-                </Avatar>
-              </Link>
-              <a href="/api/logout">
-                <Button variant="ghost" size="icon" className="h-8 w-8" title="Keluar">
-                  <LogOut className="h-3.5 w-3.5" />
-                </Button>
-              </a>
-            </div>
-          ) : (
-            <a href="/api/login">
-              <Button size="sm" className="gap-1.5 text-xs h-8">
-                <LogIn className="h-3.5 w-3.5" />
-                Masuk
-              </Button>
-            </a>
-          )}
-        </div>
-
-        <div className="flex md:hidden items-center gap-2">
-          <PWAInstallButton />
-          <ThemeToggle />
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <div className="flex items-center gap-2 mb-6">
-                <Bot className="h-6 w-6 text-primary" />
-                <span className="font-bold">Gustafta</span>
-              </div>
-              <div className="flex flex-col gap-2">
-                {navItems.map((item) => (
-                  <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive(item.href) ? "secondary" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <item.icon className="h-4 w-4 mr-2" />
-                      {item.label}
-                    </Button>
-                  </Link>
-                ))}
-                {isAuthenticated && (
-                  <Link href="/my-subscription" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/my-subscription") || isActive("/subscription") ? "secondary" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Crown className="h-4 w-4 mr-2" />
-                      Paket Saya
-                    </Button>
-                  </Link>
-                )}
-                <div className="border-t pt-3 mt-1">
-                  <Link href="/documentation" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start text-muted-foreground" size="sm">
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Dokumentasi
-                    </Button>
-                  </Link>
-                </div>
-                <div className="border-t pt-4 mt-2">
-                  {isAuthenticated ? (
-                    <div className="space-y-2">
-                      {adminData?.isAdmin && (
-                        <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                          <Button
-                            variant="outline"
-                            className={`w-full gap-2 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
-                            data-testid="button-admin-mobile"
-                          >
-                            {adminData.isSuperAdmin ? <Crown className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
-                            {adminData.isSuperAdmin ? "Super Admin Panel" : "Admin Panel"}
-                          </Button>
-                        </Link>
-                      )}
-                      <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                        <Button className="w-full">
-                          <LayoutDashboard className="h-4 w-4 mr-2" />
-                          Dashboard
-                        </Button>
-                      </Link>
-                      <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full gap-2" data-testid="button-account-mobile">
-                          <User className="h-4 w-4" />
-                          Akun Saya
-                        </Button>
-                      </Link>
-                      <a href="/api/logout">
-                        <Button variant="outline" className="w-full gap-2">
-                          <LogOut className="h-4 w-4" />
-                          Keluar
-                        </Button>
-                      </a>
-                    </div>
-                  ) : (
-                    <a href="/api/login">
-                      <Button className="w-full gap-2">
-                        <LogIn className="h-4 w-4" />
-                        Masuk
-                      </Button>
-                    </a>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </div>
-    </header>
+      </header>
     </div>
   );
 }
