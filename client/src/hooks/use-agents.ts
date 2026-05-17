@@ -54,8 +54,7 @@ export function useAgent(id: string) {
 export function useCreateAgent() {
   return useMutation({
     mutationFn: async (data: Partial<InsertAgent> & { name: string }) => {
-      const response = await apiRequest("POST", "/api/agents", data);
-      return await response.json();
+      return await apiRequest("POST", "/api/agents", data);
     },
     onSuccess: () => {
       invalidateHierarchy();
@@ -66,8 +65,7 @@ export function useCreateAgent() {
 export function useUpdateAgent() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<InsertAgent> }) => {
-      const response = await apiRequest("PATCH", `/api/agents/${id}`, data);
-      return await response.json();
+      return await apiRequest("PATCH", `/api/agents/${id}`, data);
     },
     onSuccess: (updatedAgent, { id }) => {
       // Gunakan hasil PATCH langsung untuk update cache — menghindari re-fetch
@@ -83,8 +81,7 @@ export function useUpdateAgent() {
 export function useSetActiveAgent() {
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest("POST", `/api/agents/${id}/activate`);
-      return await response.json();
+      return await apiRequest("POST", `/api/agents/${id}/activate`);
     },
     onSuccess: () => {
       invalidateHierarchy();

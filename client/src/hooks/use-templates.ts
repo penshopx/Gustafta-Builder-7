@@ -32,11 +32,10 @@ export function useCreateAgentFromTemplate() {
       customName?: string; 
       toolboxId?: string; 
     }) => {
-      const response = await apiRequest("POST", `/api/templates/${templateId}/create-agent`, {
+      return await apiRequest("POST", `/api/templates/${templateId}/create-agent`, {
         customName,
         toolboxId,
       });
-      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/series"] });

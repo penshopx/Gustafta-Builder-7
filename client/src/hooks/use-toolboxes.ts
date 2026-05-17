@@ -60,8 +60,7 @@ export function useToolbox(id: string) {
 export function useCreateToolbox() {
   return useMutation({
     mutationFn: async (data: InsertToolbox) => {
-      const res = await apiRequest("POST", "/api/toolboxes", data);
-      return res.json();
+      return await apiRequest("POST", "/api/toolboxes", data);
     },
     onSuccess: () => {
       invalidateHierarchy();
@@ -72,8 +71,7 @@ export function useCreateToolbox() {
 export function useUpdateToolbox() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<InsertToolbox> }) => {
-      const res = await apiRequest("PATCH", `/api/toolboxes/${id}`, data);
-      return res.json();
+      return await apiRequest("PATCH", `/api/toolboxes/${id}`, data);
     },
     onSuccess: () => {
       invalidateHierarchy();
@@ -84,8 +82,7 @@ export function useUpdateToolbox() {
 export function useActivateToolbox() {
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest("POST", `/api/toolboxes/${id}/activate`);
-      return res.json();
+      return await apiRequest("POST", `/api/toolboxes/${id}/activate`);
     },
     onSuccess: () => {
       invalidateHierarchy();

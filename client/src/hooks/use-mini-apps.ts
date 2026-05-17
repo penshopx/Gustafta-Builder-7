@@ -12,8 +12,7 @@ export function useMiniApps(agentId: string) {
 export function useCreateMiniApp() {
   return useMutation({
     mutationFn: async (data: InsertMiniApp) => {
-      const response = await apiRequest("POST", `/api/mini-apps/${data.agentId}`, data);
-      return await response.json();
+      return await apiRequest("POST", `/api/mini-apps/${data.agentId}`, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/mini-apps", variables.agentId] });
@@ -24,8 +23,8 @@ export function useCreateMiniApp() {
 export function useUpdateMiniApp() {
   return useMutation({
     mutationFn: async ({ id, agentId, data }: { id: string; agentId: string; data: Partial<InsertMiniApp> }) => {
-      const response = await apiRequest("PATCH", `/api/mini-app/${id}`, data);
-      return { result: await response.json(), agentId };
+      const result = await apiRequest("PATCH", `/api/mini-app/${id}`, data);
+      return { result, agentId };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/mini-apps", data.agentId] });
@@ -55,8 +54,7 @@ export function useMiniAppResults(miniAppId: string) {
 export function useCreateMiniAppResult() {
   return useMutation({
     mutationFn: async (data: InsertMiniAppResult) => {
-      const response = await apiRequest("POST", `/api/mini-app-results/${data.miniAppId}`, data);
-      return await response.json();
+      return await apiRequest("POST", `/api/mini-app-results/${data.miniAppId}`, data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/mini-app-results", variables.miniAppId] });
@@ -67,8 +65,8 @@ export function useCreateMiniAppResult() {
 export function useRunAIMiniApp() {
   return useMutation({
     mutationFn: async ({ id, agentId, extraParams }: { id: string; agentId: string; extraParams?: Record<string, any> }) => {
-      const response = await apiRequest("POST", `/api/mini-app/${id}/run`, extraParams || {});
-      return { data: await response.json(), agentId, miniAppId: id };
+      const data = await apiRequest("POST", `/api/mini-app/${id}/run`, extraParams || {});
+      return { data, agentId, miniAppId: id };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/mini-app-results", result.miniAppId] });
@@ -79,8 +77,8 @@ export function useRunAIMiniApp() {
 export function useAutoGenerateMiniApps() {
   return useMutation({
     mutationFn: async (agentId: string) => {
-      const response = await apiRequest("POST", `/api/mini-apps/${agentId}/auto-generate`, {});
-      return { data: await response.json(), agentId };
+      const data = await apiRequest("POST", `/api/mini-apps/${agentId}/auto-generate`, {});
+      return { data, agentId };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/mini-apps", result.agentId] });

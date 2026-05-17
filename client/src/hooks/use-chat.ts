@@ -12,8 +12,7 @@ export function useMessages(agentId: string) {
 export function useSendMessage() {
   return useMutation({
     mutationFn: async (data: InsertMessage) => {
-      const response = await apiRequest("POST", "/api/messages", data);
-      return await response.json();
+      return await apiRequest("POST", "/api/messages", data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages", variables.agentId] });

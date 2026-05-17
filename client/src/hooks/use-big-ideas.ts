@@ -35,8 +35,7 @@ export function useBigIdea(id: string) {
 export function useCreateBigIdea() {
   return useMutation({
     mutationFn: async (data: InsertBigIdea) => {
-      const res = await apiRequest("POST", "/api/big-ideas", data);
-      return res.json();
+      return await apiRequest("POST", "/api/big-ideas", data);
     },
     onSuccess: () => {
       invalidateHierarchy();
@@ -47,8 +46,7 @@ export function useCreateBigIdea() {
 export function useUpdateBigIdea() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<InsertBigIdea> }) => {
-      const res = await apiRequest("PATCH", `/api/big-ideas/${id}`, data);
-      return res.json();
+      return await apiRequest("PATCH", `/api/big-ideas/${id}`, data);
     },
     onSuccess: () => {
       invalidateHierarchy();
@@ -59,8 +57,7 @@ export function useUpdateBigIdea() {
 export function useActivateBigIdea() {
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest("POST", `/api/big-ideas/${id}/activate`);
-      return res.json();
+      return await apiRequest("POST", `/api/big-ideas/${id}/activate`);
     },
     onSuccess: () => {
       invalidateHierarchy();

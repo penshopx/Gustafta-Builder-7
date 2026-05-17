@@ -84,8 +84,7 @@ export function useUserSubscription(userId: string | undefined) {
 export function useCreateSubscription() {
   return useMutation({
     mutationFn: async (data: { plan: string }) => {
-      const response = await apiRequest("POST", "/api/subscriptions/create", data);
-      return await response.json() as CreateSubscriptionResponse;
+      return await apiRequest("POST", "/api/subscriptions/create", data) as CreateSubscriptionResponse;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });

@@ -24,8 +24,7 @@ export function useKnowledgeBases(agentId: string) {
 export function useCreateKnowledgeBase() {
   return useMutation({
     mutationFn: async (data: InsertKnowledgeBase) => {
-      const response = await apiRequest("POST", "/api/knowledge-base", data);
-      return await response.json();
+      return await apiRequest("POST", "/api/knowledge-base", data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", variables.agentId] });
@@ -67,8 +66,8 @@ export function useDeleteKnowledgeBase() {
 export function useUpdateKnowledgeBase() {
   return useMutation({
     mutationFn: async ({ id, agentId, data }: { id: string; agentId: string; data: Partial<InsertKnowledgeBase> }) => {
-      const response = await apiRequest("PATCH", `/api/knowledge-base/${id}`, data);
-      return { result: await response.json(), agentId };
+      const result = await apiRequest("PATCH", `/api/knowledge-base/${id}`, data);
+      return { result, agentId };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId] });
@@ -87,8 +86,8 @@ export function useRagStats(agentId: string) {
 export function useReprocessRag() {
   return useMutation({
     mutationFn: async ({ id, agentId }: { id: string; agentId: string }) => {
-      const response = await apiRequest("POST", `/api/knowledge-base/${id}/reprocess`, { agentId });
-      return { result: await response.json(), agentId };
+      const result = await apiRequest("POST", `/api/knowledge-base/${id}/reprocess`, { agentId });
+      return { result, agentId };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/knowledge-base", data.agentId] });

@@ -12,8 +12,7 @@ export function useIntegrations(agentId: string) {
 export function useCreateIntegration() {
   return useMutation({
     mutationFn: async (data: InsertIntegration) => {
-      const response = await apiRequest("POST", "/api/integrations", data);
-      return await response.json();
+      return await apiRequest("POST", "/api/integrations", data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/integrations", variables.agentId] });
@@ -24,8 +23,7 @@ export function useCreateIntegration() {
 export function useUpdateIntegration() {
   return useMutation({
     mutationFn: async ({ id, data, agentId }: { id: string; data: Partial<InsertIntegration>; agentId: string }) => {
-      const response = await apiRequest("PATCH", `/api/integrations/${id}`, data);
-      const result = await response.json();
+      const result = await apiRequest("PATCH", `/api/integrations/${id}`, data);
       return { ...result, agentId };
     },
     onSuccess: (_, variables) => {
