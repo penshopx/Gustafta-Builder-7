@@ -30,6 +30,9 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath));
 
   app.use("/{*path}", (_req, res) => {
+    res.set({
+      "X-Robots-Tag": "index, follow",
+    });
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

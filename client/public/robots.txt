@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gustafta.replit.app/sitemap.xml
+Sitemap: https://gustafta.my.id/sitemap.xml
