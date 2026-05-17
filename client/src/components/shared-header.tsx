@@ -142,19 +142,22 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     <div className="sticky top-0 z-50">
       <ContactTopBar />
     <header className={`border-b ${transparent ? "bg-background/80" : "bg-background/95"} backdrop-blur`}>
-      <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between gap-4">
+      <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between gap-2">
         <Link href="/">
-          <div className="flex items-center gap-2 cursor-pointer">
-            <Bot className="h-7 w-7 md:h-8 md:w-8 text-primary" />
-            <span className="text-lg md:text-xl font-bold">Gustafta</span>
+          <div className="flex items-center gap-2 cursor-pointer shrink-0">
+            <Bot className="h-6 w-6 md:h-7 md:w-7 text-primary" />
+            <span className="text-base md:text-lg font-bold">Gustafta</span>
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-2">
+        {/* Nav terpusat */}
+        <nav className="hidden md:flex items-center justify-center gap-0.5 flex-1">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive(item.href) ? "secondary" : "ghost"}
+                size="sm"
+                className="text-xs px-2.5 h-8 font-medium"
               >
                 {item.label}
               </Button>
@@ -164,23 +167,29 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
             <Link href="/my-subscription">
               <Button
                 variant={isActive("/my-subscription") || isActive("/subscription") ? "secondary" : "ghost"}
+                size="sm"
+                className="text-xs px-2.5 h-8 font-medium"
               >
-                <Crown className="h-4 w-4 mr-2" />
+                <Crown className="h-3.5 w-3.5 mr-1" />
                 Paket Saya
               </Button>
             </Link>
           )}
+        </nav>
+
+        {/* Aksi kanan */}
+        <div className="hidden md:flex items-center gap-1.5 shrink-0">
           <PWAInstallButton />
           <ThemeToggle />
           {isLoading ? (
-            <Button disabled>Loading...</Button>
+            <Button disabled size="sm">Loading...</Button>
           ) : isAuthenticated ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {adminData?.isAdmin && (
                 <Link href="/admin">
                   <Button
                     variant="outline" size="sm"
-                    className={`gap-1 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
+                    className={`gap-1 text-xs h-8 ${adminData.isSuperAdmin ? "border-purple-400 text-purple-600 dark:text-purple-400" : "border-primary/40 text-primary"}`}
                     data-testid="button-admin-link"
                   >
                     {adminData.isSuperAdmin ? <Crown className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
@@ -189,27 +198,27 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                 </Link>
               )}
               <Link href="/dashboard">
-                <Button>
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                <Button size="sm" className="gap-1.5 text-xs h-8">
+                  <LayoutDashboard className="h-3.5 w-3.5" />
                   Dashboard
                 </Button>
               </Link>
               <Link href="/account" title="Akun Saya">
-                <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-primary/40 transition-all" data-testid="avatar-account-link">
+                <Avatar className="h-7 w-7 cursor-pointer ring-2 ring-transparent hover:ring-primary/40 transition-all" data-testid="avatar-account-link">
                   <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
-                  <AvatarFallback>{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
+                  <AvatarFallback className="text-xs">{user?.firstName?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
                 </Avatar>
               </Link>
               <a href="/api/logout">
-                <Button variant="ghost" size="icon" title="Keluar">
-                  <LogOut className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="Keluar">
+                  <LogOut className="h-3.5 w-3.5" />
                 </Button>
               </a>
             </div>
           ) : (
             <a href="/api/login">
-              <Button className="gap-2">
-                <LogIn className="h-4 w-4" />
+              <Button size="sm" className="gap-1.5 text-xs h-8">
+                <LogIn className="h-3.5 w-3.5" />
                 Masuk
               </Button>
             </a>
