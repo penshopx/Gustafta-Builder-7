@@ -261,19 +261,15 @@ const MODE_RISK_RADAR = `Assess and report current project risks based on Projec
 Keep it non-technical and actionable.`;
 
 const isProduction = process.env.NODE_ENV === "production";
-const rawBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-// In dev, Replit provides a localhost proxy — use it with its dummy key.
-// In production, the localhost proxy is unavailable — use the real OPENAI_API_KEY.
-const isLocalhostProxy = rawBaseURL?.includes("localhost");
+// Use Replit AI Integration proxy if available (works in both dev and prod),
+// otherwise fall back to a real OPENAI_API_KEY.
 let openaiApiKey: string | undefined;
 let openaiBaseURL: string | undefined;
-if (!isProduction && isLocalhostProxy && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-  // Development: use the Replit modelfarm proxy
+if (process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL) {
   openaiApiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-  openaiBaseURL = rawBaseURL;
+  openaiBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
 } else {
-  // Production (or dev without proxy): use the real OpenAI key
-  openaiApiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+  openaiApiKey = process.env.OPENAI_API_KEY;
   openaiBaseURL = undefined;
 }
 if (!openaiApiKey) {
@@ -14540,16 +14536,7 @@ Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.
         const { db } = await import("./db");
         const { agents: agentsTable, knowledgeBases, knowledgeChunks } = await import("@shared/schema");
         const { eq, and, notExists, sql: sqlE } = await import("drizzle-orm");
-        const OpenAI = (await import("openai")).default;
         const pLimit = (await import("p-limit")).default;
-
-        const _kbOpenaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-        const _kbBaseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-        const _useIntegrationProxy = !process.env.OPENAI_API_KEY && _kbBaseURL && !_kbBaseURL.includes("localhost");
-        const openai = new OpenAI({
-          apiKey: _kbOpenaiKey || "missing-key",
-          ...(_useIntegrationProxy ? { baseURL: _kbBaseURL } : {}),
-        });
         const limit = pLimit(3);
 
         // Only agents without any KB
@@ -14796,8 +14783,6 @@ Format output JSON HARUS:
               try {
                 const fillable = missing.filter(c => c !== "name" && c !== "category");
                 if (fillable.length === 0) return;
-                const OpenAI = (await import("openai")).default;
-                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY, baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL });
                 const expertStr = Array.isArray(agent.expertise) ? agent.expertise.slice(0, 5).join(", ") : "";
                 const resp = await openai.chat.completions.create({
                   model: "gpt-4o-mini",
@@ -14893,10 +14878,6 @@ Format output JSON HARUS:
         const { db } = await import("./db");
         const pLimit = (await import("p-limit")).default;
 
-        const openaiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-        if (!openaiKey) throw new Error("OpenAI API key tidak ditemukan. Pastikan OPENAI_API_KEY sudah dikonfigurasi.");
-        const OpenAI = (await import("openai")).default;
-        const openai = new OpenAI({ apiKey: openaiKey });
         const limit = pLimit(4);
 
         // Columns to check and fill
@@ -15066,9 +15047,7 @@ Hasilkan JSON valid dengan SEMUA field di atas terisi penuh. Jangan kosongkan sa
         const { db } = await import("./db");
         const { knowledgeBases, knowledgeChunks } = await import("@shared/schema");
         const { sql: sqlE } = await import("drizzle-orm");
-        const OpenAI = (await import("openai")).default;
         const pLimit = (await import("p-limit")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY, baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL });
         const limit = pLimit(3);
 
         let queryResult: any;
@@ -15227,9 +15206,7 @@ Format: { "foundational": { "name": "...", "content": "...", "description": "...
 
     (async () => {
       try {
-        const OpenAI = (await import("openai")).default;
         const pLimit = (await import("p-limit")).default;
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY });
         const limit = pLimit(3);
 
         const TEXT_COLS = [
