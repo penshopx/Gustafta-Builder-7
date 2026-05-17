@@ -12123,6 +12123,35 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/educounsel/orchestrator — EduCounsel AI Orchestrator multi-agent
+  app.get("/api/educounsel/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike, eq } = await import("drizzle-orm");
+
+      let agent = await storage.getAgent("899");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%EDUC_ORCHESTRATOR_v1.0%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(eq(agentsTable.slug, "educounsel-orchestrator"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "EduCounsel Orchestrator belum diinisialisasi." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/brain-project/orchestrator — Brain Project multi-agent orchestrator
   app.get("/api/brain-project/orchestrator", async (_req, res) => {
     try {
