@@ -46,6 +46,9 @@ export interface CreateSubscriptionResponse {
   amount?: number;
   planName?: string;
   message?: string;
+  waUrl?: string;
+  itemName?: string;
+  accessToken?: string;
 }
 
 export function useSubscriptionPlans() {
