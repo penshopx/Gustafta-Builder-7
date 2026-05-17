@@ -32,7 +32,6 @@ import { createRequire } from "module";
 import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
 import { subscriptionPlans, type SubscriptionPlanKey } from "./lib/mayar";
-import * as midtrans from "./lib/midtrans";
 import { isAuthenticated, invalidateUserActiveCache } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import {
@@ -4004,10 +4003,10 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     // Payment system status
     app.get("/api/subscriptions/status", (_req, res) => {
       res.json({
-        paymentConfigured: !!(process.env.MIDTRANS_SERVER_KEY),
-        provider: "midtrans",
-        isSandbox: midtrans.isSandbox(),
-        clientKey: midtrans.CLIENT_KEY,
+        paymentConfigured: false,
+        provider: "scalev",
+        isSandbox: false,
+        clientKey: "",
       });
     });
 
@@ -4065,10 +4064,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           return res.status(201).json({ subscription, message: "Free trial activated" });
         }
 
-        // Paket berbayar — buat Midtrans Snap token
+        // Paket berbayar — arahkan ke pembayaran via WA (Scalev)
         const orderId = `GUS-${userId.slice(0, 8)}-${Date.now()}`;
 
-        // Simpan subscription dulu dengan status pending
         const subscription = await storage.createSubscription({
           userId,
           plan: selectedPlan,
@@ -4079,94 +4077,22 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           mayarOrderId: orderId,
         });
 
-        // Ambil info user dari auth
-        const userInfo = req.user?.claims || {};
-        const firstName = userInfo.first_name || userInfo.given_name || "User";
-        const lastName = userInfo.last_name || userInfo.family_name || "";
-        const email = userInfo.email || `user-${userId}@gustafta.id`;
-
-        const snapData = await midtrans.createSnapToken({
-          transaction_details: {
-            order_id: orderId,
-            gross_amount: pricing.price,
-          },
-          customer_details: {
-            first_name: firstName,
-            last_name: lastName,
-            email,
-            phone: "081287941900",
-          },
-          item_details: [
-            {
-              id: selectedPlan,
-              price: pricing.price,
-              quantity: 1,
-              name: `Gustafta ${pricing.name}`,
-            },
-          ],
-          callbacks: {
-            finish: `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : ""}/pricing?payment=success`,
-            error: `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : ""}/pricing?payment=error`,
-            pending: `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : ""}/pricing?payment=pending`,
-          },
-        });
+        const waMsg = encodeURIComponent(
+          `Halo, saya ingin berlangganan Gustafta ${pricing.name}.\nOrder ID: ${orderId}\nHarga: Rp ${pricing.price.toLocaleString("id-ID")}/bulan\n\nMohon info cara pembayaran.`
+        );
+        const waUrl = `https://wa.me/6282299417818?text=${waMsg}`;
 
         res.status(201).json({
           subscription,
-          snapToken: snapData.token,
-          redirectUrl: snapData.redirect_url,
           orderId,
           amount: pricing.price,
           planName: pricing.name,
+          waUrl,
+          message: `Paket ${pricing.name} berhasil didaftarkan. Tim kami akan menghubungi Anda untuk konfirmasi pembayaran.`,
         });
       } catch (error) {
-        console.error("Failed to create Midtrans subscription:", error);
-        res.status(500).json({ error: "Failed to create payment" });
-      }
-    });
-
-    // Midtrans payment notification webhook
-    app.post("/api/subscriptions/midtrans-notify", async (req, res) => {
-      try {
-        const notification: import("./lib/midtrans").MidtransNotification = req.body;
-        const orderId = notification.order_id;
-
-        if (!orderId) return res.status(400).json({ error: "Missing order_id" });
-
-        // Verifikasi status dari Midtrans langsung (jangan hanya percaya payload webhook)
-        let statusData: import("./lib/midtrans").MidtransNotification;
-        try {
-          statusData = await midtrans.getTransactionStatus(orderId);
-        } catch {
-          statusData = notification;
-        }
-
-        if (midtrans.isPaymentSuccess(statusData)) {
-          // Cari subscription by mayar_order_id
-          const sub = await storage.getSubscriptionByMayarOrderId(orderId);
-          if (sub) {
-            const plan = subscriptionPlans[sub.plan as SubscriptionPlanKey];
-            const now = new Date();
-            const endDate = new Date(now.getTime() + plan.duration * 24 * 60 * 60 * 1000);
-            await storage.updateSubscription(String(sub.id), {
-              status: "active",
-              startDate: now.toISOString(),
-              endDate: endDate.toISOString(),
-            });
-            console.log(`[Midtrans] Subscription ${sub.id} activated for order ${orderId}`);
-          }
-        } else if (midtrans.isPaymentFailed(statusData)) {
-          const sub = await storage.getSubscriptionByMayarOrderId(orderId);
-          if (sub) {
-            await storage.updateSubscription(String(sub.id), { status: "cancelled" });
-            console.log(`[Midtrans] Subscription ${sub.id} cancelled for order ${orderId}`);
-          }
-        }
-
-        res.status(200).json({ ok: true });
-      } catch (error) {
-        console.error("Midtrans webhook error:", error);
-        res.status(500).json({ error: "Webhook processing failed" });
+        console.error("Failed to create subscription:", error);
+        res.status(500).json({ error: "Failed to create subscription" });
       }
     });
 
@@ -4182,24 +4108,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         if (sub.status === "active") {
           return res.json({ status: "active", subscription: sub });
         }
-        // Cek ke Midtrans
-        try {
-          const statusData = await midtrans.getTransactionStatus(orderId);
-          if (midtrans.isPaymentSuccess(statusData)) {
-            const plan = subscriptionPlans[sub.plan as SubscriptionPlanKey];
-            const now = new Date();
-            const endDate = new Date(now.getTime() + plan.duration * 24 * 60 * 60 * 1000);
-            await storage.updateSubscription(String(sub.id), {
-              status: "active",
-              startDate: now.toISOString(),
-              endDate: endDate.toISOString(),
-            });
-            return res.json({ status: "active" });
-          }
-          return res.json({ status: statusData.transaction_status || "pending" });
-        } catch {
-          return res.json({ status: sub.status });
-        }
+        return res.json({ status: sub.status });
       } catch (error) {
         res.status(500).json({ error: "Failed to check payment status" });
       }
@@ -4544,22 +4453,6 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const orderId = `STORE-${Date.now()}-${randomUUID().split("-")[0].toUpperCase()}`;
       const accessToken = randomUUID();
 
-      const snapData = await midtrans.createSnapToken({
-        transaction_details: { order_id: orderId, gross_amount: itemPrice },
-        customer_details: {
-          first_name: name.split(" ")[0],
-          last_name: name.split(" ").slice(1).join(" ") || "",
-          email,
-          phone: phone || "082299417818",
-        },
-        item_details: [{ id: `agent-${resolvedAgentId || resolvedProductId}`, price: itemPrice, quantity: 1, name: itemName }],
-        callbacks: {
-          finish: `${getServerBaseUrl(req)}/store/access/${accessToken}`,
-          pending: `${getServerBaseUrl(req)}/store/access/${accessToken}`,
-          error: `${getServerBaseUrl(req)}/store`,
-        },
-      });
-
       const order = await storage.createStoreOrder({
         productId: resolvedProductId,
         customerName: name,
@@ -4579,41 +4472,21 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         await db.update(storeOrders).set({ agentId: resolvedAgentId } as any).where(eq(storeOrders.id, order.id));
       }
 
-      res.json({ token: snapData.token, orderId, accessToken });
+      const waMsg = encodeURIComponent(
+        `Halo, saya ingin memesan:\n*${itemName}*\nOrder ID: ${orderId}\nHarga: Rp ${itemPrice.toLocaleString("id-ID")}\nNama: ${name}\nEmail: ${email}\n\nMohon info cara pembayaran via Scalev.`
+      );
+      const waUrl = `https://wa.me/6282299417818?text=${waMsg}`;
+
+      res.json({ orderId, accessToken, waUrl, itemName, amount: itemPrice });
     } catch (error) {
       console.error("Store order error:", error);
       res.status(500).json({ error: "Gagal membuat pesanan" });
     }
   });
 
-  // POST /api/store/notify — Midtrans webhook for store orders
-  app.post("/api/store/notify", async (req, res) => {
-    try {
-      const notification = req.body as midtrans.MidtransNotification;
-      const { order_id } = notification;
-
-      if (!order_id?.startsWith("STORE-")) {
-        return res.status(400).json({ error: "Invalid store order" });
-      }
-
-      const order = await storage.getStoreOrderByMidtransId(order_id);
-      if (!order) return res.status(404).json({ error: "Order not found" });
-
-      let newStatus = order.status;
-      if (midtrans.isPaymentSuccess(notification)) newStatus = "paid";
-      else if (midtrans.isPaymentFailed(notification)) newStatus = "failed";
-      else if (midtrans.isPaymentPending(notification)) newStatus = "pending";
-
-      if (newStatus !== order.status) {
-        await storage.updateStoreOrderStatus(order.id, newStatus);
-        console.log(`[Store] Order ${order_id} status → ${newStatus}`);
-      }
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Store notify error:", error);
-      res.status(500).json({ error: "Webhook error" });
-    }
+  // POST /api/store/notify — stub (payment via Scalev, admin confirms manually)
+  app.post("/api/store/notify", async (_req, res) => {
+    res.json({ success: true });
   });
 
   // GET /api/store/access/:token — verify access token & return chatbot info
@@ -4687,23 +4560,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
-  // POST /api/store/check/:orderId — re-check Midtrans status for store order
+  // POST /api/store/check/:orderId — return current order status
   app.post("/api/store/check/:orderId", async (req, res) => {
     try {
       const order = await storage.getStoreOrderByMidtransId(req.params.orderId);
       if (!order) return res.status(404).json({ error: "Order not found" });
-
-      const txStatus = await midtrans.getTransactionStatus(req.params.orderId);
-      let newStatus = order.status;
-      if (midtrans.isPaymentSuccess(txStatus)) newStatus = "paid";
-      else if (midtrans.isPaymentFailed(txStatus)) newStatus = "failed";
-      else if (midtrans.isPaymentPending(txStatus)) newStatus = "pending";
-
-      if (newStatus !== order.status) {
-        await storage.updateStoreOrderStatus(order.id, newStatus);
-      }
-
-      res.json({ status: newStatus, accessToken: order.accessToken });
+      res.json({ status: order.status, accessToken: order.accessToken });
     } catch (error) {
       res.status(500).json({ error: "Failed to check status" });
     }

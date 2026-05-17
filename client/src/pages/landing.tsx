@@ -2547,16 +2547,16 @@ export default function Landing() {
                 </a>
               </div>
 
-              {/* Midtrans Verified Badge */}
+              {/* Scalev Payment Badge */}
               <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground bg-muted/40">
                 <CreditCard className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
                 <div className="text-left">
-                  <span className="font-semibold text-foreground/80">Midtrans Verified</span>
+                  <span className="font-semibold text-foreground/80">Scalev.id</span>
                   <span className="ml-1 text-muted-foreground">— Pembayaran aman & terenkripsi</span>
                 </div>
                 <div className="flex gap-1 ml-1">
                   <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] px-1.5 py-0.5 rounded font-medium">SSL</span>
-                  <span className="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0.5 rounded font-medium">PCI DSS</span>
+                  <span className="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0.5 rounded font-medium">Aman</span>
                 </div>
               </div>
             </div>

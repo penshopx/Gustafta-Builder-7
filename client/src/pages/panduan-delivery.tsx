@@ -59,7 +59,7 @@ const PRODUCTS: Product[] = [
     route: "/store",
     badge: "Semi-Otomatis",
     badgeColor: "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300",
-    method: "2 Jalur: Midtrans (online) ATAU Order Manual (offline)",
+    method: "2 Jalur: Scalev (online via WA) ATAU Order Manual (offline)",
     summary: "Customer beli chatbot satuan. Setelah bayar, sistem otomatis beri link akses berisi URL chat + kode embed. Jika customer bayar via transfer/WA, admin buat Order Manual.",
     adminLocation: "Admin Panel → Tab \"Store\"",
     steps: [
@@ -71,20 +71,20 @@ const PRODUCTS: Product[] = [
       },
       {
         who: "customer",
-        label: "[Jalur A] Customer beli & bayar via Midtrans",
-        detail: "Customer buka /store → pilih chatbot → isi nama/email/HP → klik \"Beli\" → pop-up Midtrans muncul → bayar via transfer/e-wallet/QRIS.",
+        label: "[Jalur A] Customer beli & bayar via Scalev",
+        detail: "Customer buka /store → pilih chatbot → isi nama/email/HP → klik \"Beli\" → WhatsApp tim kami terbuka → konfirmasi & bayar via Scalev.id.",
       },
       {
         who: "system",
-        label: "[Jalur A] Sistem buat link akses otomatis",
-        detail: "Setelah Midtrans konfirmasi pembayaran, sistem redirect customer ke /store/access/:token. Halaman ini langsung tampilkan link chat + kode embed.",
-        tip: "Tidak perlu tindakan admin untuk Jalur A — sistem bekerja otomatis.",
+        label: "[Jalur A] Admin konfirmasi & buat link akses",
+        detail: "Setelah pembayaran dikonfirmasi via Scalev, admin buat Order Manual di Admin Panel → Tab \"Store\". Link akses /store/access/:token langsung aktif.",
+        tip: "Admin mengkonfirmasi pembayaran lewat dashboard Scalev.id lalu buat order manual.",
       },
       {
         who: "admin",
         label: "[Jalur B] Jika customer bayar transfer/WA — buat Order Manual",
         detail: "Admin Panel → Tab \"Store\" → scroll ke bawah → klik \"Buat Order Manual\". Isi: Agent ID (nomor agen), Nama customer, Email, Nomor HP. Klik Buat.",
-        warning: "Gunakan Jalur B jika Midtrans belum dikonfigurasi, atau customer bayar offline.",
+        warning: "Jalur B cocok untuk customer yang bayar transfer langsung atau offline.",
       },
       {
         who: "system",
@@ -105,12 +105,12 @@ const PRODUCTS: Product[] = [
     ],
     commonIssues: [
       {
-        problem: "Midtrans pop-up tidak muncul / tombol Beli tidak bereaksi",
-        fix: "Konfigurasi MIDTRANS_SERVER_KEY dan MIDTRANS_CLIENT_KEY di environment variables. Gunakan Jalur B (Order Manual) sebagai alternatif.",
+        problem: "WhatsApp tidak terbuka setelah klik Beli",
+        fix: "Pastikan popup tidak diblokir browser. Gunakan Jalur B (Order Manual) jika diperlukan.",
       },
       {
         problem: "Halaman /store/access/:token tampilkan \"Pembayaran Diproses\" terus",
-        fix: "Status order masih \"pending\" — Midtrans belum konfirmasi. Untuk bypass, gunakan Order Manual (status langsung \"paid\").",
+        fix: "Status order masih \"pending\" — admin belum konfirmasi pembayaran. Gunakan Order Manual untuk langsung set status \"paid\".",
       },
       {
         problem: "Halaman /store/access/:token tampilkan \"Akses Tidak Valid\"",

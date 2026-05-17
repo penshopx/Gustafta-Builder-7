@@ -504,23 +504,6 @@ export default function Pricing() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentResult, setPaymentResult] = useState<"success" | "pending" | "error" | null>(null);
 
-  // Muat Midtrans Snap JS kalau belum ada
-  const loadSnapScript = (clientKey: string) => {
-    const isSandbox = clientKey.startsWith("SB-");
-    const snapUrl = isSandbox
-      ? "https://app.sandbox.midtrans.com/snap/snap.js"
-      : "https://app.midtrans.com/snap/snap.js";
-    if (document.querySelector(`script[src="${snapUrl}"]`)) return Promise.resolve();
-    return new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = snapUrl;
-      script.setAttribute("data-client-key", clientKey);
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap"));
-      document.head.appendChild(script);
-    });
-  };
-
   const handleSelectPlan = async (planKey: string) => {
     if (!isAuthenticated) {
       toast({
@@ -539,43 +522,21 @@ export default function Pricing() {
       const result = await createSubscription.mutateAsync({ plan: planKey });
 
       // Free trial — langsung aktif
-      if (!result.snapToken) {
+      if (!result.waUrl) {
         queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
         toast({ title: "Free Trial Aktif!", description: "Selamat menikmati Gustafta selama 14 hari gratis." });
         navigate("/");
         return;
       }
 
-      // Paket berbayar — buka Midtrans Snap popup
-      const clientKey = (paymentStatus as any)?.clientKey || "";
-      await loadSnapScript(clientKey);
-
-      const snap = (window as any).snap;
-      if (!snap) throw new Error("Midtrans Snap tidak tersedia");
-
-      snap.pay(result.snapToken, {
-        onSuccess: () => {
-          setPaymentResult("success");
-          queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
-          toast({ title: "Pembayaran Berhasil!", description: "Langganan Anda sudah aktif." });
-        },
-        onPending: () => {
-          setPaymentResult("pending");
-          toast({
-            title: "Menunggu Pembayaran",
-            description: "Selesaikan pembayaran sesuai instruksi. Akun akan aktif otomatis.",
-          });
-        },
-        onError: () => {
-          setPaymentResult("error");
-          toast({ title: "Pembayaran Gagal", description: "Silakan coba lagi.", variant: "destructive" });
-        },
-        onClose: () => {
-          if (!paymentResult) {
-            toast({ title: "Pembayaran Dibatalkan", description: "Anda menutup jendela pembayaran." });
-          }
-        },
+      // Paket berbayar — arahkan ke WA untuk pembayaran via Scalev
+      toast({
+        title: "Pesanan Berhasil Dibuat!",
+        description: result.message || "Tim kami akan menghubungi Anda untuk konfirmasi pembayaran.",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
+      if (result.waUrl) window.open(result.waUrl, "_blank");
+      setPaymentResult("pending");
     } catch (error: any) {
       toast({
         title: "Gagal Memproses",

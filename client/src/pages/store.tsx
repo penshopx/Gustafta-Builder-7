@@ -124,18 +124,6 @@ export default function Store() {
     queryFn: async () => { const res = await fetch("/api/subscriptions/status"); return res.json(); },
   });
 
-  useEffect(() => {
-    const clientKey = paymentConfig?.clientKey;
-    if (!clientKey) return;
-    if (document.querySelector('script[data-midtrans-snap]')) return;
-    const script = document.createElement("script");
-    script.src = paymentConfig?.isSandbox
-      ? "https://app.sandbox.midtrans.com/snap/snap.js"
-      : "https://app.midtrans.com/snap/snap.js";
-    script.setAttribute("data-client-key", clientKey);
-    script.setAttribute("data-midtrans-snap", "1");
-    document.head.appendChild(script);
-  }, [paymentConfig?.clientKey]);
 
   const catalogParams = new URLSearchParams({
     page: String(page), limit: String(LIMIT),
@@ -159,18 +147,10 @@ export default function Store() {
     },
     onSuccess: async (res: Response) => {
       const data = await res.json();
-      const { token } = data;
-      if (!token) throw new Error("Tidak ada token pembayaran");
-      if (!window.snap) {
-        toast({ title: "Error", description: "Payment gateway belum dimuat, coba refresh halaman.", variant: "destructive" });
-        return;
-      }
-      window.snap.pay(token, {
-        onSuccess: () => { setShowBuyDialog(false); toast({ title: "Pembayaran berhasil!", description: "Cek email Anda untuk link akses chatbot." }); },
-        onPending: () => { setShowBuyDialog(false); toast({ title: "Menunggu pembayaran", description: "Selesaikan pembayaran dan link akses akan dikirim via email." }); },
-        onError: () => { toast({ title: "Pembayaran gagal", description: "Silakan coba lagi.", variant: "destructive" }); },
-        onClose: () => {},
-      });
+      const { waUrl } = data;
+      setShowBuyDialog(false);
+      toast({ title: "Pesanan dibuat!", description: "Tim kami akan menghubungi Anda untuk konfirmasi pembayaran via Scalev." });
+      if (waUrl) window.open(waUrl, "_blank");
     },
     onError: (err: Error) => {
       toast({ title: "Gagal membuat pesanan", description: err.message, variant: "destructive" });
@@ -181,13 +161,6 @@ export default function Store() {
   const handleCategoryChange = (cat: string) => { setSelectedCategory(cat); setPage(1); };
 
   const handleBuy = (agent: AgentProduct) => {
-    if (!paymentConfig?.paymentConfigured) {
-      const msg = encodeURIComponent(
-        `Halo, saya ingin memesan chatbot:\n*${agent.name}*\n\nBiaya Lisensi: ${formatPrice(agent.price)} (sekali bayar)\nBiaya Setup oleh tim Gustafta: Rp 999.000 (opsional)\nBiaya Berlangganan: terpisah sesuai paket\n\nMohon informasi cara pembayaran dan proses akses.`
-      );
-      window.open(`https://wa.me/6282299417818?text=${msg}`, "_blank");
-      return;
-    }
     setSelectedAgent(agent);
     setBuyForm({ name: "", email: "", phone: "" });
     setShowBuyDialog(true);
@@ -697,7 +670,7 @@ export default function Store() {
               </Button>
 
               <p className="text-xs text-gray-400 text-center">
-                Pembayaran aman via Midtrans. VA Bank, Kartu Kredit, GoPay, OVO, QRIS.
+                Pembayaran aman via Scalev.id. Konfirmasi order via WhatsApp tim kami.
               </p>
             </div>
           )}
