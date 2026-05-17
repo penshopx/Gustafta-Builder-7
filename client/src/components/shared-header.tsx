@@ -144,11 +144,16 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
       <header className={`border-b ${transparent ? "bg-background/80" : "bg-background/95"} backdrop-blur`}>
 
         {/* ── Baris 1: Logo + Aksi Kanan ── */}
-        <div className="container mx-auto px-4 h-12 flex items-center justify-between gap-2">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer shrink-0">
-              <Bot className="h-6 w-6 text-primary" />
-              <span className="text-base font-bold">Gustafta</span>
+            <div className="flex items-center gap-3 cursor-pointer shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30">
+                <Bot className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-xl font-bold tracking-tight">Gustafta</span>
+                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">AI Builder</span>
+              </div>
             </div>
           </Link>
 
