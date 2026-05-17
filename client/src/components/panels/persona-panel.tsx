@@ -405,9 +405,9 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            Identity
+            Identitas
           </CardTitle>
-          <CardDescription>Basic information about your chatbot</CardDescription>
+          <CardDescription>Informasi dasar tentang chatbot Anda</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Avatar Upload */}
@@ -465,14 +465,14 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-1">
-                <Label htmlFor="name" className="text-sm">Chatbot Name</Label>
+                <Label htmlFor="name" className="text-sm">Nama Chatbot</Label>
                 <AiFieldRegen fieldName="name" fieldLabel="Chatbot Name" currentValue={formData.name} agentContext={{ agentName: formData.name, agentDescription: formData.description }} onApply={(v) => setFormData({ ...formData, name: v })} />
               </div>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="My Assistant"
+                placeholder="Asisten Saya"
                
               />
             </div>
@@ -485,33 +485,33 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
                 id="tagline"
                 value={formData.tagline}
                 onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
-                placeholder="Your helpful AI companion"
+                placeholder="Asisten AI yang siap membantu Anda"
                
               />
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-1">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Deskripsi</Label>
               <AiFieldRegen fieldName="description" fieldLabel="Description" currentValue={formData.description} agentContext={{ agentName: formData.name, agentDescription: formData.description }} onApply={(v) => setFormData({ ...formData, description: v })} />
             </div>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="A brief description of what your chatbot does..."
+              placeholder="Deskripsi singkat apa yang dilakukan chatbot ini dan untuk siapa..."
               rows={3}
              
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="language">Primary Language</Label>
+            <Label htmlFor="language">Bahasa Utama</Label>
             <Select
               value={formData.language}
               onValueChange={(value) => setFormData({ ...formData, language: value })}
             >
               <SelectTrigger id="language">
-                <SelectValue placeholder="Select language" />
+                <SelectValue placeholder="Pilih bahasa" />
               </SelectTrigger>
               <SelectContent>
                 {languages.map((lang) => (
@@ -525,7 +525,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
 
           {agent.category && (
             <div className="space-y-2">
-              <Label>Business Category</Label>
+              <Label>Kategori Bisnis</Label>
               <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
                 {(() => {
                   const category = getCategoryById(agent.category);
@@ -556,32 +556,32 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" />
-            Welcome Experience
+            Sambutan Pertama
           </CardTitle>
-          <CardDescription>First impression when users start a conversation</CardDescription>
+          <CardDescription>Kesan pertama saat pengguna membuka percakapan dengan chatbot Anda</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-1">
-              <Label htmlFor="greetingMessage">Greeting Message</Label>
+              <Label htmlFor="greetingMessage">Pesan Sambutan</Label>
               <AiFieldRegen fieldName="greetingMessage" fieldLabel="Greeting Message" currentValue={formData.greetingMessage} agentContext={{ agentName: formData.name, agentDescription: formData.description, systemPromptSnippet: formData.systemPrompt }} onApply={(v) => setFormData({ ...formData, greetingMessage: v })} />
             </div>
             <Textarea
               id="greetingMessage"
               value={formData.greetingMessage}
               onChange={(e) => setFormData({ ...formData, greetingMessage: e.target.value })}
-              placeholder="Hello! Welcome to our service. How can I help you today?"
+              placeholder="Halo! Selamat datang. Ada yang bisa saya bantu hari ini?"
               rows={2}
              
             />
             <p className="text-xs text-muted-foreground">
-              This message is shown when users first open the chat
+              Pesan ini ditampilkan saat pengguna pertama kali membuka chat
             </p>
           </div>
           <div className="space-y-2">
-            <Label>Conversation Starters</Label>
+            <Label>Pertanyaan Pembuka</Label>
             <p className="text-xs text-muted-foreground mb-2">
-              Quick prompts users can click to start a conversation (max 5)
+              Tombol pintasan yang bisa diklik pengguna untuk memulai percakapan (maks 5)
             </p>
             <div className="flex flex-wrap gap-2 mb-2">
               {formData.conversationStarters.map((starter, index) => (
@@ -602,7 +602,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
                 <Input
                   value={newStarter}
                   onChange={(e) => setNewStarter(e.target.value)}
-                  placeholder="e.g., How do I get started?"
+                  placeholder="Contoh: Bagaimana cara memulai?"
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addConversationStarter())}
                  
                 />
@@ -762,21 +762,21 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Globe className="w-5 h-5 text-primary" />
-            Personality & Behavior
+            Kepribadian & Perilaku
           </CardTitle>
-          <CardDescription>How your chatbot interacts with users</CardDescription>
+          <CardDescription>Cara chatbot berinteraksi dan berkomunikasi dengan pengguna</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-1">
-              <Label htmlFor="philosophy">Communication Philosophy</Label>
+              <Label htmlFor="philosophy">Filosofi Komunikasi</Label>
               <AiFieldRegen fieldName="philosophy" fieldLabel="Communication Philosophy" currentValue={formData.philosophy} agentContext={{ agentName: formData.name, agentDescription: formData.description, systemPromptSnippet: formData.systemPrompt }} onApply={(v) => setFormData({ ...formData, philosophy: v })} />
             </div>
             <Textarea
               id="philosophy"
               value={formData.philosophy}
               onChange={(e) => setFormData({ ...formData, philosophy: e.target.value })}
-              placeholder="Describe the communication style and values your chatbot should embody..."
+              placeholder="Contoh: Komunikasi direktif berbasis regulasi, hindari spekulasi, selalu kutip sumber hukum, gunakan bahasa formal namun mudah dipahami..."
               rows={3}
              
             />
@@ -803,7 +803,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               id="systemPrompt"
               value={formData.systemPrompt}
               onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
-              placeholder="You are a helpful assistant that..."
+              placeholder="Anda adalah asisten ahli yang membantu pengguna dengan..."
               rows={5}
               className="font-mono text-sm"
              
@@ -999,7 +999,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
               onValueChange={(value) => setFormData({ ...formData, aiModel: value as typeof formData.aiModel })}
             >
               <SelectTrigger id="aiModel">
-                <SelectValue placeholder="Select AI model" />
+                <SelectValue placeholder="Pilih model AI" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -1442,7 +1442,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
                 <Input
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
-                  placeholder="e.g., example.com"
+                  placeholder="contoh: namawebsite.com"
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addAllowedDomain())}
                  
                 />
