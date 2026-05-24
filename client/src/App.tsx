@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -58,6 +58,10 @@ import AiTutorChat from "@/pages/ai-tutor-chat";
 import TutorBuilder from "@/pages/tutor-builder";
 import SbuClawChat from "@/pages/sbu-claw-chat";
 import EduCounselChat from "@/pages/edu-counsel-chat";
+import SkkCoachLanding from "@/pages/skk-coach-landing";
+import SkkCoachChat from "@/pages/skk-coach-chat";
+import AskomLanding from "@/pages/askom-landing";
+import AskomChat from "@/pages/askom-chat";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -209,6 +213,26 @@ function Router() {
             highlights={["Safety gate wajib di setiap sesi konseling","Analisis akademik 3-level: Hijau/Kuning/Merah","Intervention plan 14-hari personal","Pathway universitas DN & LN + beasiswa"]}
             icon={<Bot className="h-12 w-12 text-blue-400" />}
           ><EduCounselChat /></PremiumPageGuard>
+        )} />
+        <Route path="/skk-coach" component={SkkCoachLanding} />
+        <Route path="/skk-coach/chat" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SKK Coach — Sertifikasi Kompetensi Konstruksi"
+            description="5 agen spesialis yang memandu perjalanan SKK Konstruksi Anda: cek kelayakan KKNI, pilih jabatan kerja, checklist dokumen, monitoring perpanjangan, dan analisis ketergantungan SKK-SBU."
+            highlights={["Cek kelayakan & jabatan kerja KKNI L1-9","Checklist dokumen per skema SKK","Monitoring perpanjangan & re-sertifikasi","Analisis ketergantungan SKK ↔ SBU BUJK"]}
+            icon={<Award className="h-12 w-12 text-emerald-500" />}
+          ><SkkCoachChat /></PremiumPageGuard>
+        )} />
+        <Route path="/askom" component={AskomLanding} />
+        <Route path="/askom/chat" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ASKOM AI — Asesor & Lisensi LSP Konstruksi"
+            description="8 agen spesialis ASKOM & LSP yang bekerja paralel: metodologi VRFA/CASR, MUK & FR-APL-01, kode etik asesor, evaluasi portofolio, RPL, hingga jalur karier ASKOM Senior."
+            highlights={["Metodologi asesmen VRFA, CASR & 5 Dimensi","MUK & FR-APL-01/02 sebagai titik masuk standar","Kode etik & guardrail anti-manipulasi MUK","RPL & evaluasi portofolio kompetensi"]}
+            icon={<Shield className="h-12 w-12 text-blue-500" />}
+          ><AskomChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />

@@ -4,7 +4,8 @@ import {
   Bot, BookOpen, Plug, MessageSquare, Plus, ChevronDown, ChevronRight, ArrowLeft, Settings, BarChart3,
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
-  Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap
+  Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
+  Award, Shield
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1943,6 +1944,11 @@ export default function Dashboard() {
           </button>
         </Link>
 
+        {!sidebarCollapsed && (
+          <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-0.5">
+            Premium AI Chatbot
+          </div>
+        )}
         <Link href="/legal/chat">
           <button
             className={cn(
@@ -1954,6 +1960,32 @@ export default function Dashboard() {
           >
             <Scale className="w-4 h-4 shrink-0" />
             {!sidebarCollapsed && <span className="truncate">LexCom AI Hukum</span>}
+          </button>
+        </Link>
+        <Link href="/skk-coach/chat">
+          <button
+            className={cn(
+              "w-full flex items-center rounded-md text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors",
+              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
+            )}
+            title={sidebarCollapsed ? "SKK Coach — Sertifikasi Konstruksi" : undefined}
+            data-testid="nav-skk-coach"
+          >
+            <Award className="w-4 h-4 shrink-0" />
+            {!sidebarCollapsed && <span className="truncate">SKK Coach</span>}
+          </button>
+        </Link>
+        <Link href="/askom/chat">
+          <button
+            className={cn(
+              "w-full flex items-center rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-300 transition-colors",
+              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
+            )}
+            title={sidebarCollapsed ? "ASKOM AI — Asesor & LSP" : undefined}
+            data-testid="nav-askom"
+          >
+            <Shield className="w-4 h-4 shrink-0" />
+            {!sidebarCollapsed && <span className="truncate">ASKOM AI</span>}
           </button>
         </Link>
         
