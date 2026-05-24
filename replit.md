@@ -57,6 +57,16 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Chatbot Templates & Gustafta Store**: Public marketplace with Midtrans payment integration.
 - **Test Tracker**: 6-tab evaluation tool — Tender (35 sel, 5 bot × 7 T-test) + Federation (655 sel, 131 hub × 5 F-test) + Pilot (42 sel, 6 bot × 7 T-test, target ≥90% pass) + KONSTRA (70 sel, 10 agen × 7 AC ABD v1.1, Sprint 4 sign-off ≥14/16 TC) + AI Tutor (45 sel, 9 agen × 5 AC Pedagogi, target ≥80% pass, C1 Anti-Block CRITICAL) + **SBUClaw (55 sel, 11 agen × 5 AC ABD v1.1, target ≥80% pass, C1 Anti-Block CRITICAL + C4 Regulasi CRITICAL)**. Route: `/test-tracker`. (DB: 106 orchestrators, 982 agents total, 132 hub dengan sub-agents)
 - **SBUClaw Chat**: `/sbu-claw` — OpenClaw L4 multi-agent SBU Konstruksi UI (amber/yellow theme). Endpoint: `GET /api/sbuclaw/orchestrator`. 10-agen legend strip. SSE streaming dengan sub-agent panel.
+- **Multiclaw Suite (8 halaman — COMPLETE Sprint 1-4)**:
+  - `/smap-claw` — SMAPClaw ISO 37001 Anti-Penyuapan (8 agen, ID 272). Endpoint: `GET /api/smap-claw/orchestrator`.
+  - `/pancek-claw` — PanCEKClaw KPK (5 agen, ID 281). Endpoint: `GET /api/pancek-claw/orchestrator`.
+  - `/iso-claw-9001` — ISOClaw 9001 SMM (6 agen, ID 140). Endpoint: `GET /api/iso-claw/9001/orchestrator`.
+  - `/iso-claw-14001` — ISOClaw 14001 SML (6 agen, ID 131). Endpoint: `GET /api/iso-claw/14001/orchestrator`.
+  - `/smk3-claw` — SMK3Claw IMS & SMK3 (7 agen, ID 307). Endpoint: `GET /api/smk3-claw/orchestrator`.
+  - `/lkut-claw` — LKUTClaw LKUT BUJK (4 agen, ID 302). Endpoint: `GET /api/lkut-claw/orchestrator`.
+  - `/pjbu-claw` — PJBUClaw Personel Manajerial (5 agen, ID 1008). Endpoint: `GET /api/pjbu-claw/orchestrator`.
+  - `/keuangan-claw` — KeuanganClaw Keuangan BUJK (4 agen, ID 298). Endpoint: `GET /api/keuangan-claw/orchestrator`.
+  - Semua pakai PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional". SSE streaming, sub-agent panel dots, legend strip, 6 sample prompts. Shortcuts di desktop sidebar + mobile dropdown dashboard.
 - **SCORECARD/WIN PROBABILITY (129/129 hubs — COMPLETE)**: All 129 Federation orchestrators upgraded with 4-dimension `┌──...┐` table scorecard + `PROBABILITAS X %` + `KEPUTUSAN:` line. Rumus weights vary by hub type. Covers: Tender, SBU, SKK, ISO 9001/14001, SMAP, PANCEK, Odoo, LSBU, LSP, ASKOM, AJJ, Legal Konstruksi, LexCom Wings, SKKNI Jabatan Kerja (PKBG-ARS/MPBG/PKFS/PBH/MPK/MK-CM/QS/QE/K3K/JLN/JBT/REL/TWG/PJJ), Project Management (StrategiTender/DokPenawaran/EksekusiKontrak/Perencanaan/Operasional/Pengendalian/Hukum/PlaybookBNSP), Personel Manajerial BUJK, dan seluruh discipline hubs.
 - **T5-HANDOVER (103/103 orchestrators — COMPLETE)**: All active orchestrators upgraded with domain-specific `HANDOVER — TOPIK DI LUAR DOMAIN` block. Bot gracefully acknowledges out-of-domain queries, names the correct resource, and redirects back to core domain. Marker: `luar domain` in system_prompt.
 - **F3-FALLBACK MODE (103/103 orchestrators — COMPLETE)**: All active orchestrators upgraded with `FALLBACK MODE — OPERASIONAL MANDIRI` block. Bot answers independently when sub-agents unavailable, using domain-specific 4-perspective coverage + `[ASUMSI: ...]` tagging. Marker: `FALLBACK` in system_prompt.

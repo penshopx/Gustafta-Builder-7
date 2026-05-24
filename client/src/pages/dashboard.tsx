@@ -5,7 +5,7 @@ import {
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
-  Award, Shield
+  Award, Shield, ShieldCheck, ShieldAlert, Leaf
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1279,10 +1279,66 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/askom/chat">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-2" data-testid="nav-shortcut-askom">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-askom">
                       <Shield className="w-4 h-4 text-blue-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ASKOM AI</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/pjbu-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-violet-700 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 mb-1" data-testid="nav-shortcut-pjbu">
+                      <Users className="w-4 h-4 text-violet-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PJBUClaw (Manajerial)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/keuangan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-keuangan">
+                      <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KeuanganClaw (BUJK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/smk3-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-smk3">
+                      <HardHat className="w-4 h-4 text-orange-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SMK3Claw (IMS)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/lkut-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-lkut">
+                      <BarChart3 className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">LKUTClaw (BUJK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/iso-claw-9001">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-iso-9001">
+                      <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ISOClaw 9001 (Mutu)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/iso-claw-14001">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-lime-700 dark:text-lime-400 hover:bg-lime-500/10 border border-lime-500/20 mb-1" data-testid="nav-shortcut-iso-14001">
+                      <Leaf className="w-4 h-4 text-lime-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ISOClaw 14001 (LH)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-lime-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/smap-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-smap-claw">
+                      <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SMAPClaw ISO 37001</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/pancek-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-red-700 dark:text-red-400 hover:bg-red-500/10 border border-red-500/20 mb-2" data-testid="nav-shortcut-pancek-claw">
+                      <ShieldAlert className="w-4 h-4 text-red-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PanCEKClaw KPK</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-red-500/50" />
                     </div>
                   </Link>
                   {orchestratorHub ? (
@@ -2229,6 +2285,54 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-blue-600 dark:text-blue-400">
                     <Shield className="w-4 h-4" />
                     ASKOM AI
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/pjbu-claw">
+                  <DropdownMenuItem className="gap-2 text-violet-600 dark:text-violet-400">
+                    <Users className="w-4 h-4" />
+                    PJBUClaw (Manajerial)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/keuangan-claw">
+                  <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
+                    <TrendingUp className="w-4 h-4" />
+                    KeuanganClaw (BUJK)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/smk3-claw">
+                  <DropdownMenuItem className="gap-2 text-orange-600 dark:text-orange-400">
+                    <HardHat className="w-4 h-4" />
+                    SMK3Claw (IMS)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/lkut-claw">
+                  <DropdownMenuItem className="gap-2 text-teal-600 dark:text-teal-400">
+                    <BarChart3 className="w-4 h-4" />
+                    LKUTClaw (BUJK)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/iso-claw-9001">
+                  <DropdownMenuItem className="gap-2 text-blue-600 dark:text-blue-400">
+                    <CheckCircle2 className="w-4 h-4" />
+                    ISOClaw 9001 (Mutu)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/iso-claw-14001">
+                  <DropdownMenuItem className="gap-2 text-lime-600 dark:text-lime-400">
+                    <Leaf className="w-4 h-4" />
+                    ISOClaw 14001 (LH)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/smap-claw">
+                  <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
+                    <ShieldCheck className="w-4 h-4" />
+                    SMAPClaw ISO 37001
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/pancek-claw">
+                  <DropdownMenuItem className="gap-2 text-red-600 dark:text-red-400">
+                    <ShieldAlert className="w-4 h-4" />
+                    PanCEKClaw KPK
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>

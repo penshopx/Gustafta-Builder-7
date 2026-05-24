@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -57,6 +57,14 @@ import IbTuChat from "@/pages/ib-tu-chat";
 import AiTutorChat from "@/pages/ai-tutor-chat";
 import TutorBuilder from "@/pages/tutor-builder";
 import SbuClawChat from "@/pages/sbu-claw-chat";
+import Smk3ClawChat from "@/pages/smk3-claw";
+import LkutClawChat from "@/pages/lkut-claw";
+import PjbuClawChat from "@/pages/pjbu-claw";
+import KeuanganClawChat from "@/pages/keuangan-claw";
+import SmapClawChat from "@/pages/smap-claw";
+import PancekClawChat from "@/pages/pancek-claw";
+import IsoClaw9001Chat from "@/pages/iso-claw-9001";
+import IsoClaw14001Chat from "@/pages/iso-claw-14001";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
@@ -241,6 +249,78 @@ function Router() {
             highlights={["Metodologi asesmen VRFA, CASR & 5 Dimensi","MUK & FR-APL-01/02 sebagai titik masuk standar","Kode etik & guardrail anti-manipulasi MUK","RPL & evaluasi portofolio kompetensi"]}
             icon={<Shield className="h-12 w-12 text-blue-500" />}
           ><AskomChat /></PremiumPageGuard>
+        )} />
+        <Route path="/pjbu-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PJBUClaw — Personel Manajerial BUJK AI"
+            description="5 agen spesialis bekerja paralel: panduan PJBU, PJTBU, PJKBU, SIP-PJBU kontraktor, dan SIP-PJBU konsultan — lengkap dengan kompetensi, persyaratan SKK, dan prosedur pendaftaran LPJK."
+            highlights={["Panduan PJBU, PJTBU & PJKBU sesuai PP 14/2021","Persyaratan SKK manajerial per kualifikasi BUJK","Prosedur pendaftaran & update SIP LPJK","Panduan PJBU kontraktor & konsultan berbeda"]}
+            icon={<Users className="h-12 w-12 text-violet-500" />}
+          ><PjbuClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/keuangan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KeuanganClaw — Analisis Keuangan & Manajerial BUJK AI"
+            description="4 agen spesialis bekerja paralel: analisis rasio keuangan BUJK, panduan manager keuangan & KPI, toolkit manajerial (cash flow, anggaran proyek), dan matriks kompetensi & JD tim keuangan."
+            highlights={["Analisis rasio keuangan BUJK + PSAK 34 konstruksi","Cash flow proyeksi & working capital management","KPI keuangan & dashboard monitoring proyek","JD & matriks kompetensi tim keuangan"]}
+            icon={<TrendingUp className="h-12 w-12 text-emerald-500" />}
+          ><KeuanganClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/smk3-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SMK3Claw — IMS & SMK3 Terintegrasi AI"
+            description="7 agen spesialis bekerja paralel: gap analysis IMS, audit internal, SMK3 PP 50/2012 (166 kriteria), self-assessment, RKK & P2K3, CSMS pre-qualification builder, dan statistik K3."
+            highlights={["Gap analysis IMS terintegrasi SMK3 + ISO 45001 + ISO 14001","Self-assessment SMK3 PP 50/2012 — 166 kriteria","Generator RKK & Program P2K3 per proyek","CSMS Pre-Qualification builder + statistik K3"]}
+            icon={<HardHat className="h-12 w-12 text-orange-500" />}
+          ><Smk3ClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/lkut-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="LKUTClaw — Laporan Kegiatan Usaha Tahunan BUJK AI"
+            description="4 agen spesialis LKUT bekerja paralel: panduan LKUT kontraktor, LKUT konsultan, penyusunan laporan lengkap, dan analisis keuangan & rasio BUJK."
+            highlights={["Panduan LKUT kontraktor & konsultan sesuai PP 14/2021","Generator format LKUT lengkap siap submit OSS","Analisis rasio keuangan BUJK & indikator pelaporan","Timeline & checklist persiapan LKUT tahunan"]}
+            icon={<BarChart3 className="h-12 w-12 text-teal-500" />}
+          ><LkutClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/iso-claw-9001" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ISOClaw 9001 — Sistem Manajemen Mutu AI"
+            description="6 agen spesialis ISO 9001:2015 bekerja paralel: readiness assessment klausul 4-10, peta proses & quality planning, dokumen mutu & RMPK, audit internal, quality KPI, dan persiapan surveillance."
+            highlights={["Gap analysis ISO 9001:2015 klausul 4-10 lengkap","Generator Manual Mutu, Kebijakan, & RMPK Konstruksi","Audit internal + CAPA tracker per klausul","Surveillance prep & re-sertifikasi checklist"]}
+            icon={<Award className="h-12 w-12 text-blue-500" />}
+          ><IsoClaw9001Chat /></PremiumPageGuard>
+        )} />
+        <Route path="/iso-claw-14001" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ISOClaw 14001 — Sistem Manajemen Lingkungan AI"
+            description="6 agen spesialis ISO 14001:2015 bekerja paralel: readiness assessment, identifikasi aspek & dampak lingkungan (debu, B3, kebisingan, run-off), dokumen lingkungan, audit internal, env KPI, dan surveillance."
+            highlights={["Identifikasi aspek & dampak lingkungan konstruksi","Pengelolaan B3, limbah, dan run-off proyek","Audit internal ISO 14001 klausul 4-10","Env KPI monitoring + surveillance & re-sertifikasi"]}
+            icon={<Leaf className="h-12 w-12 text-green-500" />}
+          ><IsoClaw14001Chat /></PremiumPageGuard>
+        )} />
+        <Route path="/smap-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SMAPClaw — Sistem Manajemen Anti Penyuapan AI"
+            description="8 agen spesialis ISO 37001 bekerja paralel: edukasi klausul, gap analysis 4-10, generator kebijakan & SK FKAP, due diligence mitra, bribery risk register, konsultasi kasus gratifikasi, whistleblowing, dan persiapan sertifikasi."
+            highlights={["Gap analysis ISO 37001 klausul 4-10 lengkap","Generator kebijakan anti-penyuapan & SK FKAP","Bribery Risk Register P1-P10 untuk proyek konstruksi","Whistleblowing intake dengan kerahasiaan absolut"]}
+            icon={<Shield className="h-12 w-12 text-emerald-500" />}
+          ><SmapClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/pancek-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PanCEKClaw — Panduan Cegah Korupsi KPK AI"
+            description="5 agen spesialis PanCEK KPK bekerja paralel: edukasi 5 pilar, self-assessment 45 kriteria & Indeks Integritas Korporasi, generator 79 indikator JAGA.id, corporate defense Perma 13/2016, dan triple mapping PanCEK ↔ ISO 37001 ↔ UU Tipikor."
+            highlights={["Self-assessment 5 Pilar × 45 Kriteria + Indeks IIK","Generator 79 Indikator JAGA.id KPK (6 seksi K/P/D/C/A/R)","Corporate defense dossier Perma 13/2016 Pasal 4(2)","Triple mapping PanCEK ↔ ISO 37001 ↔ UU Tipikor"]}
+            icon={<Shield className="h-12 w-12 text-red-500" />}
+          ><PancekClawChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
