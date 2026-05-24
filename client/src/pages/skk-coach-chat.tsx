@@ -10,6 +10,7 @@ import {
   ClipboardList, Users, GraduationCap, Shield, RefreshCw,
 } from "lucide-react";
 import { Link } from "wouter";
+import { MessageContent } from "@/lib/format-message";
 
 interface SubAgentStatus {
   agentId: number;
@@ -145,13 +146,13 @@ function ChatMessage({ msg }: { msg: Message }) {
   return (
     <div className="flex justify-start mb-4">
       <div className="max-w-[90%] space-y-1">
-        <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-white/8 border border-white/10 text-sm text-white/90 leading-relaxed whitespace-pre-wrap">
+        <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-white/8 border border-white/10 text-sm text-white/90 leading-relaxed">
           {msg.isStreaming && !msg.content ? (
             <span className="inline-flex items-center gap-1.5 text-white/40">
               <Loader2 className="h-3 w-3 animate-spin" />
               <span className="text-xs">Mengkoordinasikan 5 agen SKK Coach…</span>
             </span>
-          ) : msg.content}
+          ) : <MessageContent text={msg.content} className="text-sm" />}
         </div>
         {msg.subAgents && msg.subAgents.length > 0 && (
           <SubAgentPanel agents={msg.subAgents} />
