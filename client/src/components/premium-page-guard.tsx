@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Lock, LogIn, Zap, ArrowRight, Crown, Star, Shield,
-  Brain, Cpu, Bot, Sparkles, CheckCircle2
+  Brain, Cpu, Bot, Sparkles, CheckCircle2, MessageCircle, Phone
 } from "lucide-react";
 import { useFeatureAccess, type FeatureKey, type PlanTier, PLAN_CONFIGS, FEATURE_LABELS } from "@/hooks/use-feature-access";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+
+const WA_TRIAL_NUMBER = "6281287941900";
+const WA_TRIAL_NUMBER_2 = "6282299417818";
 
 interface PremiumPageGuardProps {
   feature: FeatureKey;
@@ -86,8 +89,23 @@ interface LockedScreenProps {
   className?: string;
 }
 
+function buildWaMessage(title: string, reason: "auth" | "plan", requiredPlan: PlanTier) {
+  const planConfig = PLAN_CONFIGS[requiredPlan];
+  if (reason === "auth") {
+    return encodeURIComponent(
+      `Halo, saya ingin coba trial ${title} di Gustafta. Bagaimana caranya?`
+    );
+  }
+  return encodeURIComponent(
+    `Halo, saya sudah login di Gustafta dan ingin mengajukan trial ${title} (Paket ${planConfig.name}). Apakah tersedia?`
+  );
+}
+
 function LockedScreen({ title, description, highlights, icon, reason, requiredPlan, className }: LockedScreenProps) {
   const planConfig = PLAN_CONFIGS[requiredPlan];
+  const waMsg = buildWaMessage(title, reason, requiredPlan);
+  const waUrl1 = `https://wa.me/${WA_TRIAL_NUMBER}?text=${waMsg}`;
+  const waUrl2 = `https://wa.me/${WA_TRIAL_NUMBER_2}?text=${waMsg}`;
 
   return (
     <div className={cn("min-h-screen bg-background flex flex-col", className)}>
@@ -175,10 +193,46 @@ function LockedScreen({ title, description, highlights, icon, reason, requiredPl
             )}
           </div>
 
+          {/* Trial via WhatsApp */}
+          <div className="rounded-2xl border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/20 p-5 space-y-3">
+            <div className="flex items-center justify-center gap-2">
+              <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <p className="text-sm font-semibold text-green-800 dark:text-green-300">
+                Ingin coba trial dulu? Hubungi kami langsung
+              </p>
+            </div>
+            <p className="text-xs text-green-700 dark:text-green-400">
+              Kami siapkan akses trial untuk Anda — cukup kirim pesan, admin akan aktifkan dalam hitungan jam.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <a href={waUrl1} target="_blank" rel="noopener noreferrer">
+                <Button
+                  size="sm"
+                  className="gap-2 w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+                  data-testid="button-wa-trial-1"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  081287941900
+                </Button>
+              </a>
+              <a href={waUrl2} target="_blank" rel="noopener noreferrer">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-2 w-full sm:w-auto border-green-500/40 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/30"
+                  data-testid="button-wa-trial-2"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  082299417818
+                </Button>
+              </a>
+            </div>
+          </div>
+
           <p className="text-xs text-muted-foreground">
             {reason === "auth"
-              ? "Butuh akun? Daftar gratis dan mulai trial."
-              : `Saat ini Anda di paket gratis. Upgrade ke ${planConfig.name} (Rp ${planConfig.monthlyFee.toLocaleString("id")}/bln) untuk akses penuh.`}
+              ? "Sudah punya akun? Masuk sekarang. Belum punya? Daftar gratis, lalu hubungi kami untuk trial."
+              : `Saat ini Anda di paket gratis. Upgrade ke ${planConfig.name} (Rp ${planConfig.monthlyFee.toLocaleString("id")}/bln) atau minta trial via WhatsApp.`}
           </p>
 
         </div>
