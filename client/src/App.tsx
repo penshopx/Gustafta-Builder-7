@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -63,6 +63,8 @@ import PjbuClawChat from "@/pages/pjbu-claw";
 import KeuanganClawChat from "@/pages/keuangan-claw";
 import CsmsClawChat from "@/pages/csms-claw";
 import SafiraClawChat from "@/pages/safira-claw";
+import TenderaClawChat from "@/pages/tendera-claw";
+import KonstraTenderClawChat from "@/pages/konstra-tender-claw";
 import SmapClawChat from "@/pages/smap-claw";
 import PancekClawChat from "@/pages/pancek-claw";
 import IsoClaw9001Chat from "@/pages/iso-claw-9001";
@@ -269,6 +271,24 @@ function Router() {
             highlights={["Analisis rasio keuangan BUJK + PSAK 34 konstruksi","Cash flow proyeksi & working capital management","KPI keuangan & dashboard monitoring proyek","JD & matriks kompetensi tim keuangan"]}
             icon={<TrendingUp className="h-12 w-12 text-emerald-500" />}
           ><KeuanganClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/tendera-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="TenderaClaw — AI Tender Multi-Agent BUJK"
+            description="10 agen spesialis tender bekerja paralel: pencari tender LPSE/SIRUP, cek kelaikan SBU/SKK, risk scanner SDP, generator 12 dokumen administrasi LKPP, technical proposal, HPS optimizer, FIDIC analyzer, win probability 7-dimensi, anti-suap SMAP, dan sanggah/banding."
+            highlights={["Tender Hunter LPSE/SIRUP/INAPROC real-time","Kelaikan SBU·SKK·KBLI — GO/CONDITIONAL/NO-GO","Risk Scanner SDP/RKS/SSKK — Heat-Map prioritas","Win Probability 7-dimensi + Action Levers"]}
+            icon={<TrendingUp className="h-12 w-12 text-blue-500" />}
+          ><TenderaClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/konstra-tender-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KonstraTenderClaw — Monitor Tender SIRUP/LKPP AI"
+            description="4 agen spesialis SIRUP/LKPP bekerja paralel: pencari & ranking tender real-time, cek kecukupan dokumen Perpres 46/2025, kalkulasi probabilitas menang 4-dimensi, dan action plan 7 hari."
+            highlights={["Cari & ranking tender SIRUP LKPP real-time","Cek dokumen sesuai Perpres 46/2025","Probabilitas menang scorecard 4-dimensi","Action plan optimal 7 hari siap submit"]}
+            icon={<Search className="h-12 w-12 text-green-500" />}
+          ><KonstraTenderClawChat /></PremiumPageGuard>
         )} />
         <Route path="/csms-claw" component={() => (
           <PremiumPageGuard

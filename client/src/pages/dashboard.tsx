@@ -5,7 +5,7 @@ import {
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
-  Award, Shield, ShieldCheck, ShieldAlert, Leaf
+  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1299,6 +1299,20 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
                     </div>
                   </Link>
+                  <Link href="/tendera-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-tendera">
+                      <TrendingUp className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TenderaClaw (10 Agen)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/konstra-tender-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-green-700 dark:text-green-400 hover:bg-green-500/10 border border-green-500/20 mb-1" data-testid="nav-shortcut-konstra-tender">
+                      <Search className="w-4 h-4 text-green-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KonstraTender (LKPP)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-green-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/csms-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-csms">
                       <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
@@ -2311,6 +2325,18 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
                     <TrendingUp className="w-4 h-4" />
                     KeuanganClaw (BUJK)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/tendera-claw">
+                  <DropdownMenuItem className="gap-2 text-blue-600 dark:text-blue-400">
+                    <TrendingUp className="w-4 h-4" />
+                    TenderaClaw (10 Agen)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/konstra-tender-claw">
+                  <DropdownMenuItem className="gap-2 text-green-600 dark:text-green-400">
+                    <Search className="w-4 h-4" />
+                    KonstraTender (LKPP)
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/csms-claw">
