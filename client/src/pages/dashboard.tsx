@@ -1264,6 +1264,27 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-cyan-500/50" />
                     </div>
                   </Link>
+                  <Link href="/legal/chat">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-purple-700 dark:text-purple-400 hover:bg-purple-500/10 border border-purple-500/20 mb-1" data-testid="nav-shortcut-lexcom">
+                      <Scale className="w-4 h-4 text-purple-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">LexCom AI Hukum</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-purple-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/skk-coach/chat">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-skk-coach">
+                      <Award className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SKK Coach</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/askom/chat">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-2" data-testid="nav-shortcut-askom">
+                      <Shield className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ASKOM AI</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
                   {orchestratorHub ? (
                     <div
                       className={cn(
@@ -1944,51 +1965,6 @@ export default function Dashboard() {
           </button>
         </Link>
 
-        {!sidebarCollapsed && (
-          <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-3 pt-1 pb-0.5">
-            Premium AI Chatbot
-          </div>
-        )}
-        <Link href="/legal/chat">
-          <button
-            className={cn(
-              "w-full flex items-center rounded-md text-sm font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 hover:text-purple-700 dark:hover:text-purple-300 transition-colors",
-              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
-            )}
-            title={sidebarCollapsed ? "LexCom AI Hukum" : undefined}
-            data-testid="nav-lexcom"
-          >
-            <Scale className="w-4 h-4 shrink-0" />
-            {!sidebarCollapsed && <span className="truncate">LexCom AI Hukum</span>}
-          </button>
-        </Link>
-        <Link href="/skk-coach/chat">
-          <button
-            className={cn(
-              "w-full flex items-center rounded-md text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors",
-              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
-            )}
-            title={sidebarCollapsed ? "SKK Coach — Sertifikasi Konstruksi" : undefined}
-            data-testid="nav-skk-coach"
-          >
-            <Award className="w-4 h-4 shrink-0" />
-            {!sidebarCollapsed && <span className="truncate">SKK Coach</span>}
-          </button>
-        </Link>
-        <Link href="/askom/chat">
-          <button
-            className={cn(
-              "w-full flex items-center rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-300 transition-colors",
-              sidebarCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
-            )}
-            title={sidebarCollapsed ? "ASKOM AI — Asesor & LSP" : undefined}
-            data-testid="nav-askom"
-          >
-            <Shield className="w-4 h-4 shrink-0" />
-            {!sidebarCollapsed && <span className="truncate">ASKOM AI</span>}
-          </button>
-        </Link>
-        
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className={cn(
@@ -2236,10 +2212,23 @@ export default function Dashboard() {
                     Beranda
                   </DropdownMenuItem>
                 </Link>
+                <DropdownMenuSeparator />
                 <Link href="/legal/chat">
                   <DropdownMenuItem className="gap-2 text-purple-600 dark:text-purple-400">
                     <Scale className="w-4 h-4" />
                     LexCom AI Hukum
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/skk-coach/chat">
+                  <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
+                    <Award className="w-4 h-4" />
+                    SKK Coach
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/askom/chat">
+                  <DropdownMenuItem className="gap-2 text-blue-600 dark:text-blue-400">
+                    <Shield className="w-4 h-4" />
+                    ASKOM AI
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>
