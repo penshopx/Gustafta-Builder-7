@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2 } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -67,6 +67,7 @@ import TenderaClawChat from "@/pages/tendera-claw";
 import KonstraTenderClawChat from "@/pages/konstra-tender-claw";
 import BgClawChat from "@/pages/bg-claw";
 import BsClawChat from "@/pages/bs-claw";
+import ImClawChat from "@/pages/im-claw";
 import SmapClawChat from "@/pages/smap-claw";
 import PancekClawChat from "@/pages/pancek-claw";
 import IsoClaw9001Chat from "@/pages/iso-claw-9001";
@@ -309,6 +310,15 @@ function Router() {
             highlights={["10 subklasifikasi BS001–BS010 paralel","Ruang lingkup infrastruktur sipil lengkap","Irisan teknis antar subklasifikasi BS","KBLI 2020 Kelompok 42xxx · Permen PU 6/2025"]}
             icon={<HardHat className="h-12 w-12 text-sky-400" />}
           ><BsClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/im-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="IMClaw — Navigator Ruang Lingkup Pekerjaan Instalasi Mekanikal-Elektrikal"
+            description="9 spesialis IM001–IM009 bekerja paralel: listrik gedung, HVAC, plambing, proteksi kebakaran, lift, gas, telekomunikasi/IT, mekanikal pabrik, dan panel surya — berdasarkan Permen PU 6/2025."
+            highlights={["9 subklasifikasi IM001–IM009 paralel","Ruang lingkup MEP & utiliti gedung lengkap","Irisan teknis antar subklasifikasi IM","KBLI 2020 Kelompok 43xxx · Permen PU 6/2025"]}
+            icon={<Wrench className="h-12 w-12 text-emerald-400" />}
+          ><ImClawChat /></PremiumPageGuard>
         )} />
         <Route path="/csms-claw" component={() => (
           <PremiumPageGuard

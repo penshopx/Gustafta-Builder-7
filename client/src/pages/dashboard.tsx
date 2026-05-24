@@ -1327,6 +1327,13 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-sky-500/50" />
                     </div>
                   </Link>
+                  <Link href="/im-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-im-claw">
+                      <Wrench className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">IMClaw (IM001–IM009)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/csms-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-csms">
                       <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
@@ -2363,6 +2370,12 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-sky-600 dark:text-sky-400">
                     <Construction className="w-4 h-4" />
                     BSClaw (BS001–BS010)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/im-claw">
+                  <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
+                    <Wrench className="w-4 h-4" />
+                    IMClaw (IM001–IM009)
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/csms-claw">
