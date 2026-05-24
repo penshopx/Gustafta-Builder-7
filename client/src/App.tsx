@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -118,7 +118,15 @@ function Router() {
       <Route path="/account" component={AccountPage} />
       <Route path="/mini-app/:slug" component={MiniAppPublic} />
       <Route path="/legal" component={LegalLanding} />
-      <Route path="/legal/chat" component={LegalChat} />
+        <Route path="/legal/chat" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="LexCom AI — Hukum Konstruksi"
+            description="17 agen spesialis hukum konstruksi yang bekerja paralel: kontrak FIDIC, sengketa, perizinan, ketenagakerjaan, perpajakan, hingga legal opinion siap pakai."
+            highlights={["17 agen hukum spesialis + LEX-ORCHESTRATOR","Analisis kontrak FIDIC, SPK, MoU end-to-end","Riset yurisprudensi & regulasi konstruksi terkini","Draft gugatan, legal opinion, dan surat somasi"]}
+            icon={<Scale className="h-12 w-12 text-purple-500" />}
+          ><LegalChat /></PremiumPageGuard>
+        )} />
       <Route path="/templates" component={TemplatesPage} />
       <Route path="/store" component={StorePage} />
       <Route path="/store/access/:token" component={StoreAccess} />
