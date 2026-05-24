@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -37,7 +38,20 @@ export function PremiumPageGuard({
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { hasFeature, planInfo } = useFeatureAccess();
 
-  if (authLoading || planInfo.status === "loading") {
+  // Admin/SuperAdmin bypass — check role from /api/admin/me
+  const { data: adminData, isLoading: adminLoading } = useQuery<{
+    isAdmin: boolean;
+    isSuperAdmin: boolean;
+    role: string;
+  }>({
+    queryKey: ["/api/admin/me"],
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isAdmin = adminData?.isAdmin === true;
+
+  if (authLoading || adminLoading || planInfo.status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
@@ -61,6 +75,9 @@ export function PremiumPageGuard({
       />
     );
   }
+
+  // Admin & SuperAdmin get full access — no subscription required
+  if (isAdmin) return <>{children}</>;
 
   if (!hasFeature(feature)) {
     return (
