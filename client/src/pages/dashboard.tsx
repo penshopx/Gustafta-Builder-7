@@ -1228,6 +1228,13 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
                     </div>
                   </Link>
+                  <Link href="/edu-counsel">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-edu-counsel">
+                      <GraduationCap className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">EduCounsel AI</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/ai-tutor">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-ai-tutor">
                       <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
@@ -1240,6 +1247,13 @@ export default function Dashboard() {
                       <Sparkles className="w-4 h-4 text-violet-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">Rakit Tim Agen — Trilogi</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/sbu-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-2" data-testid="nav-shortcut-sbu-claw">
+                      <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SBUClaw OpenClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
                     </div>
                   </Link>
                   <Link href="/data-master">
