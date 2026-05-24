@@ -49,7 +49,7 @@ export function PremiumPageGuard({
     staleTime: 5 * 60 * 1000,
   });
 
-  const isAdmin = adminData?.isAdmin === true;
+  const isSuperAdmin = adminData?.isSuperAdmin === true;
 
   if (authLoading || adminLoading || planInfo.status === "loading") {
     return (
@@ -76,8 +76,8 @@ export function PremiumPageGuard({
     );
   }
 
-  // Admin & SuperAdmin get full access — no subscription required
-  if (isAdmin) return <>{children}</>;
+  // Only SuperAdmin gets full bypass — regular admin still needs subscription
+  if (isSuperAdmin) return <>{children}</>;
 
   if (!hasFeature(feature)) {
     return (
