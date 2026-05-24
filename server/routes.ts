@@ -12036,20 +12036,26 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   app.get("/api/ib-tu/orchestrator", async (_req, res) => {
     try {
       const { agents: agentsTable } = await import("@shared/schema");
-      const { ilike } = await import("drizzle-orm");
+      const { ilike, eq, and } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("1307");
+      // 1. Slug-first lookup (most reliable — auto-assigned ID)
+      let agent = await storage.getAgentBySlug("ib-tu-coordinator");
 
+      // 2. Fallback: name match (exact orchestrator name)
       if (!agent) {
         const rows = await db.select().from(agentsTable)
-          .where(ilike(agentsTable.systemPrompt, "%IB_TU_COORDINATOR_v1%"))
+          .where(ilike(agentsTable.name, "%IB-TU COORDINATOR%"))
           .limit(1);
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
+      // 3. Fallback: prompt marker + isOrchestrator flag
       if (!agent) {
         const rows = await db.select().from(agentsTable)
-          .where(ilike(agentsTable.name, "%IB-TU COORDINATOR%"))
+          .where(and(
+            ilike(agentsTable.systemPrompt, "%IB_TU_COORDINATOR_v1%"),
+            eq(agentsTable.isOrchestrator, true)
+          ))
           .limit(1);
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }

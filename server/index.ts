@@ -100,6 +100,7 @@ import * as M_tenderAiAgents from "./seed-tender-ai-agents";
 import * as M_tenderaAgents from "./seed-tendera-agents";
 import * as M_brainProject from "./seed-brain-project";
 import * as M_educounsel from "./seed-educounsel";
+import * as M_ibTu from "./seed-ib-tu";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1391,6 +1392,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedEducounselAgents();
       } catch (err) {
         log("[Seed EDUCOUNSEL] Error: " + (err as Error).message);
+      }
+
+      // Seed: IB-TU COORDINATOR — Tata Usaha IB Diploma Programme (7 sub-agents + 1 orchestrator)
+      try {
+        const { seedIbTu } = M_ibTu;
+        await seedIbTu();
+      } catch (err) {
+        log("[Seed IB-TU] Error: " + (err as Error).message);
       }
 
       startScheduler();
