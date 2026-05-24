@@ -12271,6 +12271,24 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/csms-claw/orchestrator — CSMSClaw 12-Agent CSMS Indonesia
+  app.get("/api/csms-claw/orchestrator", async (_req, res) => {
+    try {
+      let agent = await storage.getAgent("69");
+      if (!agent) return res.status(404).json({ error: "CSMSClaw Orchestrator tidak ditemukan. Pastikan agen ID 69 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/safira-claw/orchestrator — SafiraClaw SKK K3 Konstruksi Coach
+  app.get("/api/safira-claw/orchestrator", async (_req, res) => {
+    try {
+      let agent = await storage.getAgent("501");
+      if (!agent) return res.status(404).json({ error: "SafiraClaw Orchestrator tidak ditemukan. Pastikan agen ID 501 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   // GET /api/pjbu-claw/orchestrator — PJBUClaw Multi-Agent Personel Manajerial BUJK
   app.get("/api/pjbu-claw/orchestrator", async (_req, res) => {
     try {

@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -61,6 +61,8 @@ import Smk3ClawChat from "@/pages/smk3-claw";
 import LkutClawChat from "@/pages/lkut-claw";
 import PjbuClawChat from "@/pages/pjbu-claw";
 import KeuanganClawChat from "@/pages/keuangan-claw";
+import CsmsClawChat from "@/pages/csms-claw";
+import SafiraClawChat from "@/pages/safira-claw";
 import SmapClawChat from "@/pages/smap-claw";
 import PancekClawChat from "@/pages/pancek-claw";
 import IsoClaw9001Chat from "@/pages/iso-claw-9001";
@@ -267,6 +269,24 @@ function Router() {
             highlights={["Analisis rasio keuangan BUJK + PSAK 34 konstruksi","Cash flow proyeksi & working capital management","KPI keuangan & dashboard monitoring proyek","JD & matriks kompetensi tim keuangan"]}
             icon={<TrendingUp className="h-12 w-12 text-emerald-500" />}
           ><KeuanganClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/csms-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="CSMSClaw — Contractor Safety Management System AI"
+            description="12 agen spesialis CSMS bekerja paralel: generator Form 1-7, simulator quiz K3L, risk assessment 5×5, pre-qualification 16 elemen, HSE plan, pre-job activity, WIP monitor, permit to work, stop work authority, KPI K3L, dan final evaluation."
+            highlights={["Generator Form CSMS 1-7 + Berita Acara SWA & Kick-off","Risk Assessment 5×5 + 4 aspek konsekuensi","Pre-Qualification 16 elemen + scoring 0/1/2","Final Evaluation: KPI×35% + PJA×20% + WIP×45%"]}
+            icon={<ShieldAlert className="h-12 w-12 text-amber-500" />}
+          ><CsmsClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/safira-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SafiraClaw — SKK K3 Konstruksi Coach AI"
+            description="5 agen spesialis SKK K3 bekerja paralel: katalog K3 Umum & Petugas K3, asesmen mandiri K3 Umum, panduan Ahli K3 Konstruksi Muda/Madya/Utama, K3 Spesialis, dan SMK3 & ISO 45001."
+            highlights={["Katalog jabatan SKK K3 Konstruksi lengkap (SKKNI 333/2020)","Asesmen mandiri K3 + simulasi wawancara asesor","Panduan Ahli K3 Muda/Madya/Utama + K3 Spesialis","SMK3 PP 50/2012 & ISO 45001:2018 — unit kompetensi lengkap"]}
+            icon={<HardHat className="h-12 w-12 text-red-500" />}
+          ><SafiraClawChat /></PremiumPageGuard>
         )} />
         <Route path="/smk3-claw" component={() => (
           <PremiumPageGuard

@@ -1299,6 +1299,20 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
                     </div>
                   </Link>
+                  <Link href="/csms-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-csms">
+                      <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">CSMSClaw (K3L)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/safira-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-red-700 dark:text-red-400 hover:bg-red-500/10 border border-red-500/20 mb-1" data-testid="nav-shortcut-safira">
+                      <HardHat className="w-4 h-4 text-red-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SafiraClaw (SKK K3)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-red-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/smk3-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-smk3">
                       <HardHat className="w-4 h-4 text-orange-500 shrink-0" />
@@ -2297,6 +2311,18 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
                     <TrendingUp className="w-4 h-4" />
                     KeuanganClaw (BUJK)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/csms-claw">
+                  <DropdownMenuItem className="gap-2 text-amber-600 dark:text-amber-400">
+                    <ShieldAlert className="w-4 h-4" />
+                    CSMSClaw (K3L)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/safira-claw">
+                  <DropdownMenuItem className="gap-2 text-red-600 dark:text-red-400">
+                    <HardHat className="w-4 h-4" />
+                    SafiraClaw (SKK K3)
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/smk3-claw">
