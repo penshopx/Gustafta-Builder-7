@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { MessageContent } from "@/lib/format-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -168,11 +169,10 @@ function ChatMessage({ msg }: { msg: Message }) {
         {msg.subAgents && msg.subAgents.length > 0 && (
           <SubAgentPanel agents={msg.subAgents} />
         )}
-        <div
-          className="mt-2 text-sm text-white/90 leading-relaxed whitespace-pre-wrap"
-          style={{ wordBreak: "break-word" }}
-        >
-          {msg.content || (msg.isStreaming ? <span className="animate-pulse">▋</span> : "")}
+        <div className="mt-2" style={{ wordBreak: "break-word" }}>
+          {msg.isStreaming && !msg.content
+            ? <span className="animate-pulse text-white/60">▋</span>
+            : <MessageContent text={msg.content} className="text-sm text-white/90 leading-relaxed" />}
         </div>
         {!isUser && msg.orchestrationMs && msg.subAgents && msg.subAgents.length > 0 && (
           <div className="flex items-center gap-1 text-xs text-white/30 px-1 mt-1">

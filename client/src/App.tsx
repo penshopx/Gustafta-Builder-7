@@ -158,7 +158,15 @@ function Router() {
         )} />
         <Route path="/bujk-profile" component={BujkProfile} />
         <Route path="/win-probability" component={WinProbability} />
-        <Route path="/brain-project" component={BrainProjectChat} />
+        <Route path="/brain-project" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="Brain Project"
+            description="Pendamping proyek konstruksi berbasis AI multi-agen — analisis LHP, EVM, NCR, K3, lingkungan, dan klaim FIDIC dalam satu sesi."
+            highlights={["6 spesialis paralel: PROXIMA, EVM, MUTU, SAFIRA, ENVIRA, KONTRAK","Output ABD-7: analisis Q-C-T+K3 + Early Warning + Confidence%","Klaim EOT & VO berbasis FIDIC Red/Yellow Book","Review NCR, uji beton, insiden K3, dan laporan lingkungan B3"]}
+            icon={<Brain className="h-12 w-12 text-indigo-500" />}
+          ><BrainProjectChat /></PremiumPageGuard>
+        )} />
         <Route path="/data-master" component={() => (
           <PremiumPageGuard
             feature="advanced_ai_tools" requiredPlan="profesional"
