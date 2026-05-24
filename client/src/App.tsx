@@ -66,6 +66,7 @@ import SafiraClawChat from "@/pages/safira-claw";
 import TenderaClawChat from "@/pages/tendera-claw";
 import KonstraTenderClawChat from "@/pages/konstra-tender-claw";
 import BgClawChat from "@/pages/bg-claw";
+import BsClawChat from "@/pages/bs-claw";
 import SmapClawChat from "@/pages/smap-claw";
 import PancekClawChat from "@/pages/pancek-claw";
 import IsoClaw9001Chat from "@/pages/iso-claw-9001";
@@ -299,6 +300,15 @@ function Router() {
             highlights={["9 subklasifikasi BG001–BG009 paralel","Ruang lingkup pekerjaan & batas teknis","Irisan & overlap antar subklasifikasi","KBLI 2020 · Permen PU 6/2025"]}
             icon={<Building2 className="h-12 w-12 text-stone-400" />}
           ><BgClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/bs-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="BSClaw — Navigator Ruang Lingkup Pekerjaan Bangunan Sipil"
+            description="10 spesialis BS001–BS010 bekerja paralel: jalan raya, jembatan, irigasi, drainase, pelabuhan, pipeline, rel kereta, bandara, pembangkit listrik, dan sipil lainnya — berdasarkan Permen PU 6/2025."
+            highlights={["10 subklasifikasi BS001–BS010 paralel","Ruang lingkup infrastruktur sipil lengkap","Irisan teknis antar subklasifikasi BS","KBLI 2020 Kelompok 42xxx · Permen PU 6/2025"]}
+            icon={<HardHat className="h-12 w-12 text-sky-400" />}
+          ><BsClawChat /></PremiumPageGuard>
         )} />
         <Route path="/csms-claw" component={() => (
           <PremiumPageGuard

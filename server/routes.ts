@@ -12280,6 +12280,15 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // GET /api/bs-claw/orchestrator — BSClaw 10-Agent Ruang Lingkup Bangunan Sipil
+  app.get("/api/bs-claw/orchestrator", async (_req, res) => {
+    try {
+      let agent = await storage.getAgent("1043");
+      if (!agent) return res.status(404).json({ error: "BSClaw Orchestrator tidak ditemukan. Pastikan agen ID 1043 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   // GET /api/bg-claw/orchestrator — BGClaw 9-Agent Ruang Lingkup Bangunan Gedung
   app.get("/api/bg-claw/orchestrator", async (_req, res) => {
     try {
