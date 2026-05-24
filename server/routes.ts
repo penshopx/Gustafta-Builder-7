@@ -12280,6 +12280,24 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // GET /api/ko-claw/orchestrator — KOClaw 8-Agent Konstruksi Spesialis
+  app.get("/api/ko-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgent("1064");
+      if (!agent) return res.status(404).json({ error: "KOClaw Orchestrator tidak ditemukan (ID 1064)." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/kk-claw/orchestrator — KKClaw 7-Agent Konsultansi Konstruksi
+  app.get("/api/kk-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgent("1073");
+      if (!agent) return res.status(404).json({ error: "KKClaw Orchestrator tidak ditemukan (ID 1073)." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   // GET /api/im-claw/orchestrator — IMClaw 9-Agent Ruang Lingkup Instalasi Mekanikal-Elektrikal
   app.get("/api/im-claw/orchestrator", async (_req, res) => {
     try {

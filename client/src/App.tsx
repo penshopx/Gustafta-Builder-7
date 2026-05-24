@@ -68,6 +68,8 @@ import KonstraTenderClawChat from "@/pages/konstra-tender-claw";
 import BgClawChat from "@/pages/bg-claw";
 import BsClawChat from "@/pages/bs-claw";
 import ImClawChat from "@/pages/im-claw";
+import KoClawChat from "@/pages/ko-claw";
+import KkClawChat from "@/pages/kk-claw";
 import SmapClawChat from "@/pages/smap-claw";
 import PancekClawChat from "@/pages/pancek-claw";
 import IsoClaw9001Chat from "@/pages/iso-claw-9001";
@@ -319,6 +321,24 @@ function Router() {
             highlights={["9 subklasifikasi IM001–IM009 paralel","Ruang lingkup MEP & utiliti gedung lengkap","Irisan teknis antar subklasifikasi IM","KBLI 2020 Kelompok 43xxx · Permen PU 6/2025"]}
             icon={<Wrench className="h-12 w-12 text-emerald-400" />}
           ><ImClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/ko-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KOClaw — Navigator Ruang Lingkup Pekerjaan Konstruksi Spesialis"
+            description="8 spesialis KO001–KO008 bekerja paralel: penyiapan lahan, pondasi dalam, baja, finishing, waterproofing, pengeboran, pengaspalan, dan konstruksi khusus — berdasarkan Permen PU 6/2025."
+            highlights={["8 subklasifikasi KO001–KO008 paralel","Ruang lingkup konstruksi spesialis/khusus lengkap","Irisan teknis antar subklasifikasi KO","KBLI 2020 Kelompok 43xxx · Permen PU 6/2025"]}
+            icon={<HardHat className="h-12 w-12 text-violet-400" />}
+          ><KoClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/kk-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KKClaw — Navigator Ruang Lingkup Jasa Konsultansi Konstruksi"
+            description="7 spesialis KK001–KK007 bekerja paralel: perencana arsitektur, struktur/sipil, MEP, lingkungan, pengawas & MK, inspeksi teknis, dan PMO/penilaian — berdasarkan Permen PU 6/2025."
+            highlights={["7 subklasifikasi KK001–KK007 paralel","Perencana · Pengawas · MK · PMO · Penilaian","Irisan teknis antar subklasifikasi KK","UU 2/2017 · Permen PU 6/2025"]}
+            icon={<Scale className="h-12 w-12 text-rose-400" />}
+          ><KkClawChat /></PremiumPageGuard>
         )} />
         <Route path="/csms-claw" component={() => (
           <PremiumPageGuard
