@@ -125,9 +125,9 @@ function Router() {
         <Route path="/legal/chat" component={() => (
           <PremiumPageGuard
             feature="advanced_ai_tools" requiredPlan="profesional"
-            title="LexCom AI — Hukum Konstruksi"
-            description="17 agen spesialis hukum konstruksi yang bekerja paralel: kontrak FIDIC, sengketa, perizinan, ketenagakerjaan, perpajakan, hingga legal opinion siap pakai."
-            highlights={["17 agen hukum spesialis + LEX-ORCHESTRATOR","Analisis kontrak FIDIC, SPK, MoU end-to-end","Riset yurisprudensi & regulasi konstruksi terkini","Draft gugatan, legal opinion, dan surat somasi"]}
+            title="LexCom AI — Konsultasi Hukum Indonesia"
+            description="17 agen spesialis hukum Indonesia yang siap membantu: pidana, perdata, korporasi, pajak, ketenagakerjaan, pertanahan, HKI, imigrasi, yurisprudensi MA/MK, hingga draft legal opinion formal."
+            highlights={["17 agen hukum spesialis + LEX-ORCHESTRATOR","Riset yurisprudensi MA & MK + RAG Knowledge Base","Draft gugatan, legal opinion, somasi, kontrak & MoU","Ekspor dokumen ke PDF & HTML siap pakai"]}
             icon={<Scale className="h-12 w-12 text-purple-500" />}
           ><LegalChat /></PremiumPageGuard>
         )} />
