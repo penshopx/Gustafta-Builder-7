@@ -14,7 +14,9 @@ export type FeatureKey =
   | "custom_domain"
   | "white_label"
   | "priority_support"
-  | "api_access";
+  | "api_access"
+  | "ai_tools"
+  | "advanced_ai_tools";
 
 export type PlanTier = "free" | "starter" | "profesional" | "bisnis" | "enterprise";
 
@@ -59,6 +61,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       white_label: false,
       priority_support: false,
       api_access: false,
+      ai_tools: false,
+      advanced_ai_tools: false,
     },
   },
   starter: {
@@ -85,6 +89,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       white_label: false,
       priority_support: false,
       api_access: false,
+      ai_tools: true,
+      advanced_ai_tools: false,
     },
   },
   profesional: {
@@ -111,6 +117,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       white_label: false,
       priority_support: false,
       api_access: false,
+      ai_tools: true,
+      advanced_ai_tools: true,
     },
   },
   bisnis: {
@@ -137,6 +145,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       white_label: true,
       priority_support: true,
       api_access: false,
+      ai_tools: true,
+      advanced_ai_tools: true,
     },
   },
   enterprise: {
@@ -163,6 +173,8 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       white_label: true,
       priority_support: true,
       api_access: true,
+      ai_tools: true,
+      advanced_ai_tools: true,
     },
   },
 };
@@ -204,4 +216,6 @@ export const FEATURE_LABELS: Record<FeatureKey, { name: string; description: str
   white_label: { name: "White-label", description: "Hapus branding Gustafta, tampilkan merek Anda", icon: "Shield" },
   priority_support: { name: "Priority Support", description: "Dukungan WhatsApp prioritas 1×24 jam", icon: "Headphones" },
   api_access: { name: "API Access", description: "Akses API penuh untuk integrasi", icon: "Cpu" },
+  ai_tools: { name: "AI Tools", description: "EduCounsel AI & AI Tutor Adaptif multi-agen", icon: "Brain" },
+  advanced_ai_tools: { name: "Advanced AI Tools", description: "Tendera AI, IB-TU Coordinator, Data Master, SBUClaw, Rakit Tim Agen", icon: "Cpu" },
 };

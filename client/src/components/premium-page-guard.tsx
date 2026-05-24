@@ -1,0 +1,188 @@
+import { type ReactNode } from "react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Lock, LogIn, Zap, ArrowRight, Crown, Star, Shield,
+  Brain, Cpu, Bot, Sparkles, CheckCircle2
+} from "lucide-react";
+import { useFeatureAccess, type FeatureKey, type PlanTier, PLAN_CONFIGS, FEATURE_LABELS } from "@/hooks/use-feature-access";
+import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
+
+interface PremiumPageGuardProps {
+  feature: FeatureKey;
+  requiredPlan?: PlanTier;
+  title: string;
+  description: string;
+  highlights?: string[];
+  icon?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}
+
+export function PremiumPageGuard({
+  feature,
+  requiredPlan = "starter",
+  title,
+  description,
+  highlights = [],
+  icon,
+  children,
+  className,
+}: PremiumPageGuardProps) {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { hasFeature, planInfo } = useFeatureAccess();
+
+  if (authLoading || planInfo.status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+          <p className="text-sm text-muted-foreground">Memeriksa akses…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <LockedScreen
+        title={title}
+        description={description}
+        highlights={highlights}
+        icon={icon}
+        reason="auth"
+        requiredPlan={requiredPlan}
+        className={className}
+      />
+    );
+  }
+
+  if (!hasFeature(feature)) {
+    return (
+      <LockedScreen
+        title={title}
+        description={description}
+        highlights={highlights}
+        icon={icon}
+        reason="plan"
+        requiredPlan={requiredPlan}
+        className={className}
+      />
+    );
+  }
+
+  return <>{children}</>;
+}
+
+interface LockedScreenProps {
+  title: string;
+  description: string;
+  highlights: string[];
+  icon?: ReactNode;
+  reason: "auth" | "plan";
+  requiredPlan: PlanTier;
+  className?: string;
+}
+
+function LockedScreen({ title, description, highlights, icon, reason, requiredPlan, className }: LockedScreenProps) {
+  const planConfig = PLAN_CONFIGS[requiredPlan];
+
+  return (
+    <div className={cn("min-h-screen bg-background flex flex-col", className)}>
+      <div className="flex-1 flex items-center justify-center px-4 py-16">
+        <div className="max-w-lg w-full text-center space-y-8">
+
+          <div className="relative flex justify-center">
+            <div className="w-24 h-24 rounded-3xl bg-muted flex items-center justify-center text-4xl shadow-lg">
+              {icon ?? <Bot className="h-12 w-12 text-muted-foreground" />}
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow">
+              <Lock className="h-5 w-5 text-amber-500" />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Badge
+              className="gap-1.5 px-3 py-1 text-xs font-semibold"
+              style={{
+                backgroundColor: `${planConfig.color}15`,
+                color: planConfig.color,
+                border: `1px solid ${planConfig.color}30`,
+              }}
+            >
+              <Crown className="h-3.5 w-3.5" />
+              {reason === "auth" ? "Login Diperlukan" : `Perlu Paket ${planConfig.name}`}
+            </Badge>
+
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
+            <p className="text-muted-foreground text-base leading-relaxed">{description}</p>
+          </div>
+
+          {highlights.length > 0 && (
+            <div className="bg-muted/40 rounded-2xl p-5 text-left space-y-3 border border-border/50">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fitur yang tersedia:</p>
+              <ul className="space-y-2.5">
+                {highlights.map((h, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {reason === "auth" ? (
+              <>
+                <a href="/api/login">
+                  <Button size="lg" className="gap-2 w-full sm:w-auto" data-testid="button-login-access">
+                    <LogIn className="h-4 w-4" />
+                    Masuk untuk Akses
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </a>
+                <Link href="/pricing">
+                  <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto" data-testid="button-see-pricing">
+                    <Star className="h-4 w-4" />
+                    Lihat Paket
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/onboarding">
+                  <Button
+                    size="lg"
+                    className="gap-2 w-full sm:w-auto"
+                    style={{ backgroundColor: planConfig.color }}
+                    data-testid="button-upgrade-premium"
+                  >
+                    <Zap className="h-4 w-4" />
+                    Upgrade ke {planConfig.name}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/my-subscription">
+                  <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto" data-testid="button-my-subscription">
+                    <Crown className="h-4 w-4" />
+                    Paket Saya
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            {reason === "auth"
+              ? "Butuh akun? Daftar gratis dan mulai trial."
+              : `Saat ini Anda di paket gratis. Upgrade ke ${planConfig.name} (Rp ${planConfig.monthlyFee.toLocaleString("id")}/bln) untuk akses penuh.`}
+          </p>
+
+        </div>
+      </div>
+    </div>
+  );
+}

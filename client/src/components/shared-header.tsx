@@ -131,10 +131,18 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/packs", label: "Paket Series Modul", icon: Package },
     { href: "/store", label: "Store", icon: ShoppingBag },
     { href: "/lms", label: "Learning Center", icon: GraduationCap },
-    { href: "/edu-counsel", label: "EduCounsel AI", icon: Brain },
-    { href: "/tutor-builder", label: "Rakit Tim Agen — Trilogi", icon: Sparkles },
     { href: "/pricing", label: "Paket Berlangganan", icon: BarChart3 },
     { href: "/panduan", label: "Panduan", icon: BookOpen },
+  ];
+
+  const premiumNavItems = [
+    { href: "/edu-counsel", label: "EduCounsel AI", icon: Brain },
+    { href: "/ai-tutor", label: "AI Tutor Adaptif", icon: GraduationCap },
+    { href: "/tutor-builder", label: "Rakit Tim Agen", icon: Sparkles },
+    { href: "/tender-ai", label: "Tendera AI", icon: TrendingUp },
+    { href: "/ib-tu", label: "IB-TU Coordinator", icon: GraduationCap },
+    { href: "/sbu-claw", label: "SBUClaw", icon: TrendingUp },
+    { href: "/data-master", label: "Data Master", icon: TrendingUp },
   ];
 
   const isActive = (href: string) => location === href;
