@@ -99,6 +99,7 @@ import * as M_kabKotaSources from "./seed-kabkota-sources";
 import * as M_tenderAiAgents from "./seed-tender-ai-agents";
 import * as M_tenderaAgents from "./seed-tendera-agents";
 import * as M_brainProject from "./seed-brain-project";
+import * as M_educounsel from "./seed-educounsel";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1382,6 +1383,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedBrainProjectAgents();
       } catch (err) {
         log("[Seed Brain Project] Error: " + (err as Error).message);
+      }
+
+      // Seed: EDUCOUNSEL AI — StudentHub (11 sub-agents + 1 orchestrator)
+      try {
+        const { seedEducounselAgents } = M_educounsel;
+        await seedEducounselAgents();
+      } catch (err) {
+        log("[Seed EDUCOUNSEL] Error: " + (err as Error).message);
       }
 
       startScheduler();
