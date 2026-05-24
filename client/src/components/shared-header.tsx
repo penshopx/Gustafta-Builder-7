@@ -241,6 +241,20 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                       </Button>
                     </Link>
                   ))}
+                  <div className="border-t pt-2 mt-1">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold px-3 mb-1.5">Produk Premium</p>
+                    {premiumNavItems.slice(0, 3).map((item) => (
+                      <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}>
+                        <Button
+                          variant={isActive(item.href) ? "secondary" : "ghost"}
+                          className="w-full justify-start gap-2 text-primary/80"
+                        >
+                          <Crown className="h-4 w-4 text-amber-500" />
+                          {item.label}
+                        </Button>
+                      </Link>
+                    ))}
+                  </div>
                   {isAuthenticated && (
                     <Link href="/my-subscription" onClick={() => setMobileMenuOpen(false)}>
                       <Button
@@ -318,6 +332,19 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                 size="sm"
                 className="text-xs px-3 h-8 font-medium"
               >
+                {item.label}
+              </Button>
+            </Link>
+          ))}
+          <div className="h-5 w-px bg-border/60 mx-1" />
+          {premiumNavItems.slice(0, 3).map((item) => (
+            <Link key={item.href} href={item.href}>
+              <Button
+                variant={isActive(item.href) ? "secondary" : "ghost"}
+                size="sm"
+                className="text-xs px-3 h-8 font-medium gap-1 text-primary/80 hover:text-primary"
+              >
+                <Crown className="h-3 w-3 text-amber-500" />
                 {item.label}
               </Button>
             </Link>
