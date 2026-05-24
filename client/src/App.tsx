@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2 } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -65,6 +65,7 @@ import CsmsClawChat from "@/pages/csms-claw";
 import SafiraClawChat from "@/pages/safira-claw";
 import TenderaClawChat from "@/pages/tendera-claw";
 import KonstraTenderClawChat from "@/pages/konstra-tender-claw";
+import BgClawChat from "@/pages/bg-claw";
 import SmapClawChat from "@/pages/smap-claw";
 import PancekClawChat from "@/pages/pancek-claw";
 import IsoClaw9001Chat from "@/pages/iso-claw-9001";
@@ -289,6 +290,15 @@ function Router() {
             highlights={["Cari & ranking tender SIRUP LKPP real-time","Cek dokumen sesuai Perpres 46/2025","Probabilitas menang scorecard 4-dimensi","Action plan optimal 7 hari siap submit"]}
             icon={<Search className="h-12 w-12 text-green-500" />}
           ><KonstraTenderClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/bg-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="BGClaw — Navigator Ruang Lingkup Pekerjaan Bangunan Gedung"
+            description="9 spesialis ruang lingkup BG001–BG009 bekerja paralel: panduan lengkap jenis pekerjaan yang tercakup, batasan teknis, irisan antar subklasifikasi, dan KBLI 2020 berdasarkan Permen PU 6/2025."
+            highlights={["9 subklasifikasi BG001–BG009 paralel","Ruang lingkup pekerjaan & batas teknis","Irisan & overlap antar subklasifikasi","KBLI 2020 · Permen PU 6/2025"]}
+            icon={<Building2 className="h-12 w-12 text-stone-400" />}
+          ><BgClawChat /></PremiumPageGuard>
         )} />
         <Route path="/csms-claw" component={() => (
           <PremiumPageGuard

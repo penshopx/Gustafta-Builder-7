@@ -5,7 +5,7 @@ import {
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
-  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat
+  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1313,6 +1313,13 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-green-500/50" />
                     </div>
                   </Link>
+                  <Link href="/bg-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-stone-600 dark:text-stone-400 hover:bg-stone-500/10 border border-stone-500/20 mb-1" data-testid="nav-shortcut-bg-claw">
+                      <Building2 className="w-4 h-4 text-stone-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">BGClaw (BG001–BG009)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/csms-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-csms">
                       <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0" />
@@ -2337,6 +2344,12 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-green-600 dark:text-green-400">
                     <Search className="w-4 h-4" />
                     KonstraTender (LKPP)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/bg-claw">
+                  <DropdownMenuItem className="gap-2 text-stone-600 dark:text-stone-400">
+                    <Building2 className="w-4 h-4" />
+                    BGClaw (BG001–BG009)
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/csms-claw">
