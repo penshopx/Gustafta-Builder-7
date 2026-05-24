@@ -552,25 +552,16 @@ export default function Landing() {
               </div>
               
               <div className="flex flex-wrap items-center gap-2 mt-1 mb-2">
-                <span className="text-xs text-muted-foreground font-medium">Coba langsung:</span>
-                <Link href="/brain-project">
-                  <Button size="sm" variant="secondary" className="gap-1.5 h-7 text-xs" data-testid="button-quick-brain">
-                    <Brain className="h-3.5 w-3.5 text-amber-500" />
-                    Brain Project AI
-                  </Button>
-                </Link>
-                <Link href="/tender-ai">
-                  <Button size="sm" variant="secondary" className="gap-1.5 h-7 text-xs" data-testid="button-quick-tender">
-                    <Target className="h-3.5 w-3.5 text-emerald-500" />
-                    TENDERA AI
-                  </Button>
-                </Link>
-                <Link href="/tender-monitor">
-                  <Button size="sm" variant="secondary" className="gap-1.5 h-7 text-xs" data-testid="button-quick-monitor">
-                    <Search className="h-3.5 w-3.5 text-blue-500" />
-                    Tender Monitor
-                  </Button>
-                </Link>
+                <span className="text-xs text-muted-foreground font-medium">Tersedia dalam platform:</span>
+                <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-medium border border-amber-200 dark:border-amber-800">
+                  <Brain className="h-3.5 w-3.5" />Brain Project AI
+                </span>
+                <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-medium border border-emerald-200 dark:border-emerald-800">
+                  <Target className="h-3.5 w-3.5" />TENDERA AI
+                </span>
+                <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium border border-blue-200 dark:border-blue-800">
+                  <Search className="h-3.5 w-3.5" />Tender Monitor
+                </span>
               </div>
 
               <p className="text-sm text-muted-foreground text-center lg:text-left">
@@ -746,10 +737,10 @@ export default function Landing() {
                 </div>
                 {activePersona === "bekerja" && (
                   <div className="text-center mt-6">
-                    <Link href="/packs" onClick={handleTenderClick}>
-                      <Button className="gap-2" data-testid="button-try-tender">
+                    <Link href="/pricing" onClick={handlePricingClick}>
+                      <Button variant="outline" className="gap-2" data-testid="button-try-tender">
                         <HardHat className="h-4 w-4" />
-                        Coba Tender LPSE Assistant
+                        Lihat Paket untuk Kontraktor
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -1121,10 +1112,10 @@ export default function Landing() {
                   <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 font-medium">{t}</span>
                 ))}
               </div>
-              <Link href="/edu-counsel">
-                <Button size="sm" className="w-full gap-2 bg-teal-600 hover:bg-teal-700 text-white" data-testid="button-educounsel-landing">
-                  <GraduationCap className="h-3.5 w-3.5" />
-                  Coba EduCounsel AI
+              <Link href="/pricing">
+                <Button size="sm" variant="outline" className="w-full gap-2 border-teal-500/40 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/30" data-testid="button-educounsel-landing">
+                  <Lock className="h-3.5 w-3.5" />
+                  Tersedia di Paket Starter
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -1149,10 +1140,10 @@ export default function Landing() {
                   <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-medium">{t}</span>
                 ))}
               </div>
-              <Link href="/sbu-claw">
-                <Button size="sm" className="w-full gap-2 bg-amber-600 hover:bg-amber-700 text-white" data-testid="button-sbuclaw-landing">
-                  <HardHat className="h-3.5 w-3.5" />
-                  Coba SBUClaw
+              <Link href="/pricing">
+                <Button size="sm" variant="outline" className="w-full gap-2 border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30" data-testid="button-sbuclaw-landing">
+                  <Lock className="h-3.5 w-3.5" />
+                  Tersedia di Paket Profesional
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -1177,10 +1168,10 @@ export default function Landing() {
                   <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-medium">{t}</span>
                 ))}
               </div>
-              <Link href="/trilogi-chat/1281">
-                <Button size="sm" className="w-full gap-2 bg-blue-700 hover:bg-blue-800 text-white" data-testid="button-konstra-landing">
-                  <Building className="h-3.5 w-3.5" />
-                  Coba KONSTRA
+              <Link href="/pricing">
+                <Button size="sm" variant="outline" className="w-full gap-2 border-blue-500/40 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30" data-testid="button-konstra-landing">
+                  <Lock className="h-3.5 w-3.5" />
+                  Tersedia di Paket Profesional
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -1205,10 +1196,10 @@ export default function Landing() {
                   <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-medium">{t}</span>
                 ))}
               </div>
-              <Link href="/ai-tutor">
-                <Button size="sm" className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-ai-tutor-landing">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Coba AI Tutor
+              <Link href="/pricing">
+                <Button size="sm" variant="outline" className="w-full gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-ai-tutor-landing">
+                  <Lock className="h-3.5 w-3.5" />
+                  Tersedia di Paket Starter
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -1233,10 +1224,10 @@ export default function Landing() {
                   <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800 font-medium">{t}</span>
                 ))}
               </div>
-              <Link href="/tutor-builder">
-                <Button size="sm" className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white" data-testid="button-trilogi-landing">
-                  <Blocks className="h-3.5 w-3.5" />
-                  Rakit Tim Agen
+              <Link href="/pricing">
+                <Button size="sm" variant="outline" className="w-full gap-2 border-violet-500/40 text-violet-700 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30" data-testid="button-trilogi-landing">
+                  <Lock className="h-3.5 w-3.5" />
+                  Tersedia di Paket Profesional
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -1245,11 +1236,11 @@ export default function Landing() {
           </div>
 
           <div className="text-center mt-10">
-            <p className="text-muted-foreground text-sm mb-4">Semua sistem di atas tersedia di dalam platform Gustafta dan terus diperbarui.</p>
-            <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="gap-2" data-testid="button-ai-spesialis-dashboard">
+            <p className="text-muted-foreground text-sm mb-4">Semua sistem di atas tersedia dalam platform Gustafta. Pilih paket yang sesuai untuk mendapatkan akses penuh.</p>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="gap-2" data-testid="button-ai-spesialis-pricing">
                 <Rocket className="h-5 w-5" />
-                Eksplorasi di Dashboard
+                Lihat Paket & Harga
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
@@ -1326,16 +1317,16 @@ export default function Landing() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/brain-project">
-                    <Button className="gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-600/20" data-testid="button-project-brain">
-                      <Brain className="h-4 w-4" />
-                      Coba Brain Project AI
+                  <Link href="/pricing">
+                    <Button variant="outline" className="gap-2 border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30" data-testid="button-project-brain">
+                      <Lock className="h-4 w-4" />
+                      Tersedia di Paket Profesional
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href="/dashboard">
-                    <Button variant="outline" className="gap-2 border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30" data-testid="button-project-brain-dashboard">
-                      Bangun Sendiri
+                  <Link href="/platform">
+                    <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground" data-testid="button-project-brain-info">
+                      Pelajari Selengkapnya
                     </Button>
                   </Link>
                 </div>
@@ -1405,17 +1396,16 @@ export default function Landing() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Link href="/tender-ai">
-                    <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20" data-testid="button-info-tender">
-                      <Target className="h-4 w-4" />
-                      Coba TENDERA AI
+                  <Link href="/pricing">
+                    <Button variant="outline" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-info-tender">
+                      <Lock className="h-4 w-4" />
+                      Tersedia di Paket Profesional
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href="/tender-monitor">
-                    <Button variant="outline" size="default" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30">
-                      <Search className="h-4 w-4" />
-                      Monitor Tender
+                  <Link href="/platform">
+                    <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
+                      Pelajari Selengkapnya
                     </Button>
                   </Link>
                 </div>
@@ -1999,10 +1989,10 @@ export default function Landing() {
                 <p className="font-bold mb-1">MultiClaw Context — Data Mengalir Otomatis Lintas Panel</p>
                 <p className="text-sm text-muted-foreground">Setiap panel membaca dan menulis ke shared context yang tersimpan di browser. "AI Intelligence Banner" muncul otomatis di panel berikutnya, menampilkan ringkasan data sebelumnya — siap diimport dengan satu klik.</p>
               </div>
-              <Link href="/dashboard">
-                <Button className="gap-2 shrink-0" data-testid="button-try-multiclaw">
-                  <Blocks className="h-4 w-4" />
-                  Coba MultiClaw
+              <Link href="/pricing">
+                <Button variant="outline" className="gap-2 shrink-0" data-testid="button-try-multiclaw">
+                  <Lock className="h-4 w-4" />
+                  Lihat Paket
                 </Button>
               </Link>
             </div>
@@ -2361,12 +2351,12 @@ export default function Landing() {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <a href="https://falling-bloom-7842.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-yellow-600 hover:bg-yellow-700 text-xs" data-testid="button-konstruksi-ai">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          Buka Konstruksi AI
+                      <Link href="/pricing" className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-yellow-500/40 text-yellow-700 dark:text-yellow-400" data-testid="button-konstruksi-ai">
+                          <Lock className="h-3.5 w-3.5" />
+                          Tersedia di Platform
                         </Button>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
@@ -2394,16 +2384,10 @@ export default function Landing() {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <a href="https://linear-snow-8672.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-blue-600 hover:bg-blue-700 text-xs" data-testid="button-uji-kompetensi">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          Buka Chatbot Persiapan
-                        </Button>
-                      </a>
-                      <Link href="/bot/siap-ukom">
-                        <Button size="sm" variant="outline" className="gap-1.5 text-xs" data-testid="button-chat-ukom">
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          Chat
+                      <Link href="/pricing" className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-blue-500/40 text-blue-700 dark:text-blue-400" data-testid="button-uji-kompetensi">
+                          <Lock className="h-3.5 w-3.5" />
+                          Tersedia di Platform
                         </Button>
                       </Link>
                     </div>
@@ -2433,18 +2417,10 @@ export default function Landing() {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-xs" data-testid="button-dokumentender">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          chat.dokumentender.com
-                        </Button>
-                      </a>
-                      <Link href="/bot/dokumentender">
-                        <Button size="sm" variant="outline" className="gap-1.5 text-xs" data-testid="button-chat-dokumentender">
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          Chat
-                        </Button>
-                      </Link>
+                      <div className="flex-1 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800">
+                        <Globe className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">chat.dokumentender.com</span>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -2472,12 +2448,12 @@ export default function Landing() {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <a href="https://dual-voxel-1743.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-orange-600 hover:bg-orange-700 text-xs" data-testid="button-aplikasi-industri">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          Buka Aplikasi Industri
+                      <Link href="/pricing" className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-orange-500/40 text-orange-700 dark:text-orange-400" data-testid="button-aplikasi-industri">
+                          <Lock className="h-3.5 w-3.5" />
+                          Tersedia di Platform
                         </Button>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
@@ -2505,12 +2481,12 @@ export default function Landing() {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <a href="https://soft-reed-1971.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-violet-600 hover:bg-violet-700 text-xs" data-testid="button-manajemen-iso">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          Buka Manajemen ISO
+                      <Link href="/pricing" className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-violet-500/40 text-violet-700 dark:text-violet-400" data-testid="button-manajemen-iso">
+                          <Lock className="h-3.5 w-3.5" />
+                          Tersedia di Platform
                         </Button>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
@@ -2538,12 +2514,12 @@ export default function Landing() {
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <a href="https://open-token-0622.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button size="sm" className="w-full gap-1.5 bg-rose-600 hover:bg-rose-700 text-xs" data-testid="button-aplikasi-hukum">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          Buka Aplikasi Hukum
+                      <Link href="/pricing" className="flex-1">
+                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-rose-500/40 text-rose-700 dark:text-rose-400" data-testid="button-aplikasi-hukum">
+                          <Lock className="h-3.5 w-3.5" />
+                          Tersedia di Platform
                         </Button>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
