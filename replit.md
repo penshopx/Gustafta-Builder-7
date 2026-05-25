@@ -74,6 +74,9 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/panduan-sbu` | PanduanSBU — Tanya Jawab SBU untuk Masyarakat Umum (answer machine) | 1 | 1458 | emerald | — |
 | `/abu-claw` | ABUClaw — Konsultan ABU & LSBU Asesmen Badan Usaha | 8 | 1459 | slate | 214·228·393·107·110·111·112·555 |
 | `/panduan-askom` | PanduanASKOM — Tanya Jawab Uji Kompetensi SKK (answer machine) | 1 | 1460 | teal | — |
+| `/manprojak-claw` | ManprojakClaw — Jabatan Kerja SKK Manajemen Pelaksanaan | 7 | 1383 | indigo | 1376–1382 |
+| `/arsitektur-claw` | ArsitekturClaw — Jabatan Kerja SKK Klasifikasi Arsitektur | 7 | 1391 | rose | 1384–1390 |
+| `/surveipemetaan-claw` | SurveiPemetaanClaw — Jabatan Kerja SKK Survei & Pemetaan | 7 | 1399 | teal | 1392–1398 |
 | `/konstra-claw` | KonstraClaw — Manajemen Proyek Konstruksi | 9 | 1281 | slate | 1272–1280 |
 | `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
 | `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |
@@ -88,6 +91,9 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 - **EducounselClaw (899)**: Safety Gate wajib first. Mode: Siswa/Konselor/OrangTua/Admin. Marker: `EDUC_ORCHESTRATOR_v1.0`.
 - **MigasClaw (564)**: BUJKM·KTEK·PLTS·EBT·IUP·K3TBG·GAPA·KASUS·LSP. UU Minerba 3/2020 · Kepmen ESDM 1827/2018 · SKKNI EBT · IWCF/IADC.
 - **BGClaw (1033)**: BUKAN tentang SBU — tentang RUANG LINGKUP PEKERJAAN per subklasifikasi (Permen PU 6/2025).
+- **ManprojakClaw (1383)**: MP-MANPRO·LAPANGAN·MUTU·ESTIMASI·KONTRAK·KEUANGAN·LOGISTIK. FIDIC/EVM/PSAK 34/AHSP PermenPUPR 1/2022.
+- **ArsitekturClaw (1391)**: ARS-DESAIN·STRUKTUR·INTERIOR·LANSEKAP·REGULASI·TEKNIS·URBAN. UU BG 28/2002·PP 16/2021·PermenPUPR 22/2018·Neufert·Greenship·ISO 19650 BIM.
+- **SurveiPemetaanClaw (1399)**: SP-GEODESI·TOPOGRAFI·KADASTER·GIS·HIDROGRAFI·KONSTRUKSI·DRONE. SRGI2013·BPN/PTSL·IHO S-44·ASPRS LAS·HEC-RAS·Permenhub UAV PM 37/2020.
 
 ## User preferences
 Preferred communication style: Simple, everyday language.

@@ -108,6 +108,8 @@ import * as M_mepClaw from "./seed-mep-claw";
 import * as M_k3Claw from "./seed-k3-claw";
 import * as M_lingkunganClaw from "./seed-lingkungan-claw";
 import * as M_manprojakClaw from "./seed-manprojak-claw";
+import * as M_arsitekturClaw from "./seed-arsitektur-claw";
+import * as M_surveiPemetaanClaw from "./seed-surveipemetaan-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1463,6 +1465,22 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedManprojakClaw();
       } catch (err) {
         log("[Seed ManprojakClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: ArsitekturClaw — AI Arsitektur & Jabatan Kerja SKK Klasifikasi Arsitektur (7 sub-agen spesialis)
+      try {
+        const { seedArsitekturClaw } = M_arsitekturClaw;
+        await seedArsitekturClaw();
+      } catch (err) {
+        log("[Seed ArsitekturClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: SurveiPemetaanClaw — AI Survei & Pemetaan, Jabatan Kerja SKK (7 sub-agen spesialis)
+      try {
+        const { seedSurveiPemetaanClaw } = M_surveiPemetaanClaw;
+        await seedSurveiPemetaanClaw();
+      } catch (err) {
+        log("[Seed SurveiPemetaanClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

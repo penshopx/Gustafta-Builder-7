@@ -1433,10 +1433,24 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/manprojak-claw">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-manprojak-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-1" data-testid="nav-shortcut-manprojak-claw">
                       <BarChart3 className="w-4 h-4 text-indigo-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ManprojakClaw (SKK)</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/arsitektur-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 mb-1" data-testid="nav-shortcut-arsitektur-claw">
+                      <Building2 className="w-4 h-4 text-rose-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ArsitekturClaw (SKK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/surveipemetaan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-2" data-testid="nav-shortcut-surveipemetaan-claw">
+                      <Map className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SurveiPemetaanClaw (SKK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
                     </div>
                   </Link>
                   {orchestratorHub ? (
@@ -2515,6 +2529,18 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-indigo-600 dark:text-indigo-400">
                     <BarChart3 className="w-4 h-4" />
                     ManprojakClaw (SKK Manprojak)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/arsitektur-claw">
+                  <DropdownMenuItem className="gap-2 text-rose-600 dark:text-rose-400">
+                    <Building2 className="w-4 h-4" />
+                    ArsitekturClaw (SKK Arsitektur)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/surveipemetaan-claw">
+                  <DropdownMenuItem className="gap-2 text-teal-600 dark:text-teal-400">
+                    <Map className="w-4 h-4" />
+                    SurveiPemetaanClaw (SKK Survei & Pemetaan)
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>

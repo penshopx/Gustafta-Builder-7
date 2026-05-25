@@ -98,6 +98,8 @@ import MepClawChat from "@/pages/mep-claw";
 import K3ClawChat from "@/pages/k3-claw";
 import LingkunganClawChat from "@/pages/lingkungan-claw";
 import ManprojakClawChat from "@/pages/manprojak-claw";
+import ArsitekturClawChat from "@/pages/arsitektur-claw";
+import SurveiPemetaanClawChat from "@/pages/surveipemetaan-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -538,6 +540,24 @@ function Router() {
             highlights={["HVAC: sizing AC, chiller, AHU, VRF, ducting berbasis ASHRAE","Plumbing & listrik: fixture unit, panel, genset, kabel, grounding PUIL","Fire Protection (NFPA 13/14/20) & Transportasi Vertikal (EN 81)","ELV/BMS/ICT + Estimasi BOQ & RAB MEP komprehensif"]}
             icon={<Settings2 className="h-12 w-12 text-emerald-400" />}
           ><MepClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/surveipemetaan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SurveiPemetaanClaw — AI Konsultan Survei & Pemetaan, Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Klasifikasi Survei & Pemetaan: Geodesi, Topografi, Kadaster/BPN, GIS, Hidrografi, Survei Konstruksi, dan Drone/UAV."
+            highlights={["Geodesi & GNSS: datum SRGI2013, GPS RTK/PPK/CORS, traverse, leveling, geoid Indonesia","Kadastral & BPN: pengukuran batas tanah, SHM/HGB, PTSL, surveyor berlisensi KJSKB/SKB","GIS & Analisis Spasial: ArcGIS/QGIS, overlay, remote sensing, citra satelit, Ina-Geoportal BIG","Drone/UAV Fotogrametri: orthophoto, DSM/DTM, LiDAR, NDVI, regulasi Permenhub PM 37/2020"]}
+            icon={<Map className="h-12 w-12 text-teal-400" />}
+          ><SurveiPemetaanClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/arsitektur-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ArsitekturClaw — AI Konsultan Arsitektur & Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Klasifikasi Arsitektur: Desain, Struktur, Interior, Lansekap, Regulasi, BIM/Teknis, dan Urban Design."
+            highlights={["Desain bioklimatik tropis: orientasi, shading, ventilasi silang, strategi pasif untuk iklim Indonesia","Regulasi bangunan: PBG/SLF, KDB/KLB/GSB, RDTR, aksesibilitas disabilitas (PermenPUPR 22/2018)","BIM Revit & Gambar Teknis: LOD, clash detection, RKS arsitektur, detail konstruksi, submittal","Urban Design: TOD Indonesia (PermenATR 16/2017), kawasan heritage, waterfront, masterplan kawasan"]}
+            icon={<Building2 className="h-12 w-12 text-rose-400" />}
+          ><ArsitekturClawChat /></PremiumPageGuard>
         )} />
         <Route path="/manprojak-claw" component={() => (
           <PremiumPageGuard

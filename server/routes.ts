@@ -12572,6 +12572,28 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/surveipemetaan-claw/orchestrator — SurveiPemetaanClaw MultiClaw 7-Agent AI Survei & Pemetaan
+  app.get("/api/surveipemetaan-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("surveipemetaanclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "SurveiPemetaanClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/arsitektur-claw/orchestrator — ArsitekturClaw MultiClaw 7-Agent AI Arsitektur & Jabatan Kerja SKK
+  app.get("/api/arsitektur-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("arsitekturclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "ArsitekturClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/manprojak-claw/orchestrator — ManprojakClaw MultiClaw 7-Agent AI Manajemen Proyek & Jabatan Kerja SKK
   app.get("/api/manprojak-claw/orchestrator", async (_req, res) => {
     try {
