@@ -118,6 +118,7 @@ import * as M_qsClaw from "./seed-qs-claw";
 import * as M_pengawasClaw from "./seed-pengawas-claw";
 import * as M_kontrakClaw from "./seed-kontrak-claw";
 import * as M_k3ManClaw from "./seed-k3man-claw";
+import * as M_ibtuClaw from "./seed-ibtu-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1553,6 +1554,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedK3ManClaw();
       } catch (err) {
         log("[Seed K3ManClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: IBTUClaw — IB Testing Unit AI (7 sub-agen spesialis)
+      try {
+        const { seedIBTUClaw } = M_ibtuClaw;
+        await seedIBTUClaw();
+      } catch (err) {
+        log("[Seed IBTUClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

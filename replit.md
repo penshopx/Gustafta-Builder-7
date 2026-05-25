@@ -44,7 +44,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Chatbot Templates & Gustafta Store**: Public marketplace with payment integration.
 - **Gustafta Apps Feature Access System**: Plan-gated. Tiers: `free`(0) `starter`(1) `profesional`(2) `bisnis`(3) `enterprise`(4). Source: `shared/feature-plans.ts`. Hook: `use-feature-access.ts`. Gate: `feature-gate.tsx`. Admin activates via `POST /api/subscriptions/activate/:id`.
 
-## MultiClaw Suite (25 halaman)
+## MultiClaw Suite (42 halaman)
 Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesional". SSE streaming, sub-agent panel dots, legend strip, 6 sample prompts.
 
 | Rute | Nama | Agen | Hub ID | Theme | Sub-agent IDs |
@@ -77,18 +77,21 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/manprojak-claw` | ManprojakClaw — Jabatan Kerja SKK Manajemen Pelaksanaan | 7 | 1383 | indigo | 1376–1382 |
 | `/arsitektur-claw` | ArsitekturClaw — Jabatan Kerja SKK Klasifikasi Arsitektur | 7 | 1391 | rose | 1384–1390 |
 | `/surveipemetaan-claw` | SurveiPemetaanClaw — Jabatan Kerja SKK Survei & Pemetaan | 7 | 1399 | teal | 1392–1398 |
-| `/geoteknik-claw` | GeoteknikClaw — Jabatan Kerja SKK Klasifikasi Sipil (Geoteknik) | 7 | TBD | amber | TBD |
-| `/jalanjembatan-claw` | JalanJembatanClaw — Jabatan Kerja SKK Klasifikasi Sipil (Jalan & Jembatan) | 7 | TBD | yellow | TBD |
-| `/tatalingkungan-claw` | TataLingkunganClaw — Jabatan Kerja SKK Klasifikasi Tata Lingkungan | 7 | TBD | green | TBD |
-| `/elektrikal-claw` | ElektrikalClaw — Jabatan Kerja SKK Klasifikasi Elektrikal | 7 | TBD | blue | TBD |
-| `/qs-claw` | QSClaw — Quantity Surveying & Estimasi Biaya Konstruksi | 7 | 1759 | amber | 1752–1758 |
-| `/pengawas-claw` | PengawasClaw — Pengawas Konstruksi & Jabatan Kerja SKK | 7 | 1767 | orange | 1760–1766 |
-| `/kontrak-claw` | KontrakClaw — Manajemen Kontrak & Klaim Konstruksi | 7 | 1775 | red | 1768–1774 |
-| `/k3man-claw` | K3ManClaw — Manajemen K3 Konstruksi & Jabatan Kerja SKK | 7 | 1783 | orange/red | 1776–1782 |
+| `/geoteknik-claw` | GeoteknikClaw — Jabatan Kerja SKK Klasifikasi Sipil (Geoteknik) | 7 | 1879 | amber | 1872–1878 |
+| `/jalanjembatan-claw` | JalanJembatanClaw — Jabatan Kerja SKK Klasifikasi Sipil (Jalan & Jembatan) | 7 | 1887 | yellow | 1880–1886 |
+| `/tatalingkungan-claw` | TataLingkunganClaw — Jabatan Kerja SKK Klasifikasi Tata Lingkungan | 7 | 1895 | green | 1888–1894 |
+| `/elektrikal-claw` | ElektrikalClaw — Jabatan Kerja SKK Klasifikasi Elektrikal | 7 | 1903 | blue | 1896–1902 |
+| `/mep-claw` | MEPClaw — AI Konsultan MEP (Mekanikal-Elektrikal-Plumbing) | 7 | 1831 | emerald | 1824–1830 |
+| `/sipil-claw` | SipilClaw — AI Konsultan Teknik Sipil | 7 | 1823 | sky | 1816–1822 |
+| `/lingkungan-claw` | LingkunganClaw — AI Konsultan Lingkungan Hidup | 7 | 1847 | teal | 1840–1846 |
+| `/qs-claw` | QSClaw — Quantity Surveying & Estimasi Biaya Konstruksi | 7 | 1911 | amber | 1904–1910 |
+| `/pengawas-claw` | PengawasClaw — Pengawas Konstruksi & Jabatan Kerja SKK | 7 | 1919 | orange | 1912–1918 |
+| `/kontrak-claw` | KontrakClaw — Manajemen Kontrak & Klaim Konstruksi | 7 | 1927 | red | 1920–1926 |
+| `/k3man-claw` | K3ManClaw — Manajemen K3 Konstruksi & Jabatan Kerja SKK | 7 | 1935 | orange/red | 1928–1934 |
 | `/konstra-claw` | KonstraClaw — Manajemen Proyek Konstruksi | 9 | 1281 | slate | 1272–1280 |
 | `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
 | `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |
-| `/ibtu-claw` | IBTUClaw — IB Testing Unit | 7 | ~IB | indigo | — |
+| `/ibtu-claw` | IBTUClaw — IB Testing Unit AI | 7 | 1953 | indigo | 1946–1952 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`
@@ -106,10 +109,14 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 - **ManprojakClaw (1383)**: MP-MANPRO·LAPANGAN·MUTU·ESTIMASI·KONTRAK·KEUANGAN·LOGISTIK. FIDIC/EVM/PSAK 34/AHSP PermenPUPR 1/2022.
 - **ArsitekturClaw (1391)**: ARS-DESAIN·STRUKTUR·INTERIOR·LANSEKAP·REGULASI·TEKNIS·URBAN. UU BG 28/2002·PP 16/2021·PermenPUPR 22/2018·Neufert·Greenship·ISO 19650 BIM.
 - **SurveiPemetaanClaw (1399)**: SP-GEODESI·TOPOGRAFI·KADASTER·GIS·HIDROGRAFI·KONSTRUKSI·DRONE. SRGI2013·BPN/PTSL·IHO S-44·ASPRS LAS·HEC-RAS·Permenhub UAV PM 37/2020.
-- **QSClaw (1759)**: QS-TAKEOFF·HARGA·RAB·COSTCONTROL·VE·TENDER·BIM5D. AHSP PermenPUPR 01/2022·Perpres 16/2018·PSAK 34·PMI EVM·SAVE International·ISO 19650.
-- **PengawasClaw (1767)**: PW-LAPANGAN·STRUKTUR·FINISHING·MEP·K3·MUTU·ADMIN. SNI 2847:2019·PUIL 2011·PP 50/2012·ISO 9001·FIDIC·PermenPUPR 10/2021.
-- **KontrakClaw (1775)**: KT-FIDIC·PEMERINTAH·KLAIM·DISPUTE·SUBKON·ASURANSI·KOMERSIAL. FIDIC 1999/2017·Perpres 16/2018·UU Arbitrase 30/1999·BANI·SCL Protocol 2017.
-- **K3ManClaw (1783)**: K3M-SMKK·HAZID·PTW·CSMS·INSIDEN·KEBAKARAN·AUDIT. PP 50/2012·PermenPUPR 10/2021·ISO 45001:2018·NFPA 10/13/72·OSHA 1926.
+- **MEPClaw (1831)**: MEP-HVAC·PLUMB·LISTRIK·FIRE·LIFT·ELV·ESTIMASI. ASHRAE·SNI 03-6572·SNI 03-7065·PUIL 2011·NFPA·SNI 03-6573·PermenPUPR 26/2008.
+- **SipilClaw (1823)**: SC-STRUCT·GEOTEK·JALAN·JEMBATAN·SDA·MATERIAL·METODE. SNI 2847:2019·SNI 8460·SNI 1725:2016·KP-01·Bina Marga·AASHTO LRFD.
+- **LingkunganClaw (1847)**: LH-AMDAL·B3·AIR·UDARA·TANAH·KARBON·GREENSHIP. PP 22/2021·UU 32/2009·PermenLHK P.68/2016·PermenLHK P.14/2020·AERMOD.
+- **QSClaw (1911)**: QS-TAKEOFF·HARGA·RAB·COSTCONTROL·VE·TENDER·BIM5D. AHSP PermenPUPR 01/2022·Perpres 16/2018·PSAK 34·PMI EVM·SAVE International·ISO 19650.
+- **PengawasClaw (1919)**: PW-LAPANGAN·STRUKTUR·FINISHING·MEP·K3·MUTU·ADMIN. SNI 2847:2019·PUIL 2011·PP 50/2012·ISO 9001·FIDIC·PermenPUPR 10/2021.
+- **KontrakClaw (1927)**: KT-FIDIC·PEMERINTAH·KLAIM·DISPUTE·SUBKON·ASURANSI·KOMERSIAL. FIDIC 1999/2017·Perpres 16/2018·UU Arbitrase 30/1999·BANI·SCL Protocol 2017.
+- **K3ManClaw (1935)**: K3M-SMKK·HAZID·PTW·CSMS·INSIDEN·KEBAKARAN·AUDIT. PP 50/2012·PermenPUPR 10/2021·ISO 45001:2018·NFPA 10/13/72·OSHA 1926.
+- **IBTUClaw (1953)**: TU-REGISTRAR·SENTINEL·IAA·PG·EXAM·COMMS·AUDIT. IBO DP/MYP/PYP/CP·IBIS·DAP·Academic Integrity Policy 2023·IBO Standards & Practices 2020.
 
 ## User preferences
 Preferred communication style: Simple, everyday language.

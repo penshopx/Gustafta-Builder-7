@@ -16827,5 +16827,16 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     res.json(list);
   });
 
+  // GET /api/ibtu-claw/orchestrator — IBTUClaw MultiClaw 7-Agent AI IB Testing Unit
+  app.get("/api/ibtu-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("ibtuclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "IBTUClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   return httpServer;
 }
