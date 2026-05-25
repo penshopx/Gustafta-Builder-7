@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen, Landmark } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -88,6 +88,8 @@ import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
 import AskomLanding from "@/pages/askom-landing";
 import AskomChat from "@/pages/askom-chat";
+import AbuClawChat from "@/pages/abu-claw";
+import PanduanAskomChat from "@/pages/panduan-askom";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -501,6 +503,24 @@ function Router() {
             highlights={["Jawaban langsung tanpa format akademis","Bahasa sederhana — cocok untuk pemilik BUJK & masyarakat umum","Cakupan: SBU, kualifikasi, dokumen, konversi, sanksi, SIJKT","Berbasis Permen PU 6/2025 & materi workshop resmi LPJK"]}
             icon={<BookOpen className="h-12 w-12 text-emerald-400" />}
           ><PanduanSBUChat /></PremiumPageGuard>
+        )} />
+        <Route path="/abu-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="Konsultan ABU & LSBU — Asesmen Badan Usaha Konstruksi"
+            description="8 agen spesialis untuk Asesor Badan Usaha (ABU) dan pengelola LSBU — audit lapangan, penilaian kesesuaian, manajemen asesor, surveilans, banding BUJK, hingga audit LPJK. Adaptif per level karier, koreksi aktif prosedur keliru."
+            highlights={["Panduan teknis ABU: peran, kualifikasi & kewenangan asesor BU","Audit lapangan & penilaian kesesuaian BUJK berbasis Permen PU 6/2025","Manajemen asesor, surveilans, banding & penanganan sengketa BUJK","Audit LPJK & perpanjangan lisensi LSBU — tata kelola kelembagaan"]}
+            icon={<Landmark className="h-12 w-12 text-slate-400" />}
+          ><AbuClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/panduan-askom" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PanduanASKOM — Tanya Jawab Uji Kompetensi SKK"
+            description="Chatbot informasi tentang Asesor Kompetensi (ASKOM) dan proses uji kompetensi SKK untuk masyarakat umum. Tanya apa saja: syarat peserta, alur uji, RPL, biaya, hak banding — dijawab langsung, bahasa sederhana."
+            highlights={["Apa itu ASKOM & bagaimana proses uji kompetensi SKK","Syarat peserta uji, APL-01/02, dan dokumen yang dibutuhkan","RPL: pengakuan pengalaman kerja tanpa uji ulang","Hak asesi: banding, keberatan, perlindungan data"]}
+            icon={<GraduationCap className="h-12 w-12 text-teal-400" />}
+          ><PanduanAskomChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />

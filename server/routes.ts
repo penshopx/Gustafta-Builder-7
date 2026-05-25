@@ -12516,6 +12516,40 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/abu-claw/orchestrator — Konsultan ABU & LSBU 8-Agent Asesmen Badan Usaha
+  app.get("/api/abu-claw/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgent("1459");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%ABU_LSBU_ORCHESTRATOR_v1.0%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "ABU-LSBU Orchestrator belum ditemukan. Pastikan agen ID 1459 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/panduan-askom/agent — PanduanASKOM single-agent untuk masyarakat umum
+  app.get("/api/panduan-askom/agent", async (_req, res) => {
+    try {
+      let agent = await storage.getAgent("1460");
+
+      if (!agent) return res.status(404).json({ error: "PanduanASKOM agent belum ditemukan. Pastikan agen ID 1460 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/skema-claw/orchestrator — SkemaClaw 9-Agent Konsultan Cerdas Sertifikasi BUJK Permen PU 6/2025
   app.get("/api/skema-claw/orchestrator", async (_req, res) => {
     try {

@@ -72,6 +72,8 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/estate-care-claw` | EstateCareClaw — Konsultan Properti Konsumen | 10 | 586 | emerald | 587–596 |
 | `/skema-claw` | SkemaClaw — Konsultan Cerdas Sertifikasi BUJK Permen PU 6/2025 | 9 | 1448 | blue/indigo | 1449–1457 |
 | `/panduan-sbu` | PanduanSBU — Tanya Jawab SBU untuk Masyarakat Umum (answer machine) | 1 | 1458 | emerald | — |
+| `/abu-claw` | ABUClaw — Konsultan ABU & LSBU Asesmen Badan Usaha | 8 | 1459 | slate | 214·228·393·107·110·111·112·555 |
+| `/panduan-askom` | PanduanASKOM — Tanya Jawab Uji Kompetensi SKK (answer machine) | 1 | 1460 | teal | — |
 | `/konstra-claw` | KonstraClaw — Manajemen Proyek Konstruksi | 9 | 1281 | slate | 1272–1280 |
 | `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
 | `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |
