@@ -10,40 +10,26 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Environment Variables**: `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY` (for Midtrans payment integration)
 
 ## Stack
-- **Frontend Framework**: React 18 with TypeScript
-- **Backend Framework**: Express 5 with TypeScript
-- **Runtime**: Node.js (`tsx`)
-- **ORM**: Drizzle ORM
-- **Validation**: Zod
-- **Database**: PostgreSQL (with in-memory fallback for development)
-- **Styling**: Tailwind CSS, shadcn/ui
-- **Build Tool**: Vite (frontend), esbuild (backend)
-- **State Management**: TanStack React Query
-- **Payment Provider**: Scalev.id (menggantikan Midtrans)
+- **Frontend**: React 18 + TypeScript, Tailwind CSS, shadcn/ui, TanStack React Query, Vite
+- **Backend**: Express 5 + TypeScript, Node.js (`tsx`), Drizzle ORM + Zod, PostgreSQL
+- **Payment**: Scalev.id (menggantikan Midtrans)
 - **AI Models**: OpenAI (gpt-4o-mini/gpt-4o/gpt-4-turbo/gpt-3.5-turbo), DeepSeek (deepseek-chat/deepseek-reasoner), Qwen (qwen-turbo/qwen-plus/qwen-max), Google Gemini (gemini-1.5-flash/gemini-1.5-pro/gemini-2.0-flash), Anthropic via proxy (claude-3-haiku/claude-3-sonnet/claude-3-5-sonnet), Custom
 
 ## Where things live
 - **Database Schema**: `shared/schema.ts` (source of truth; `db/schema.ts` is symlinked)
-- **API Routes**: `server/routes/*.ts`
-- **Rakit Tim Agen — Trilogi Page**: `client/src/pages/tutor-builder.tsx` (route `/tutor-builder`) — 12 blueprint dari 3 domain Trilogi. Tab DIALOG (Buku I, 5 blueprint): Tutor Sokratik 4-Mode, LexSkripsi, Satpam Belajar, Pendamping Baca, Learning Stack. Tab KOLABORASI (Buku II, 3 blueprint): Asisten Domain Profesional (Kurator/Standar/Skeptis/Penerjemah), Tim Rapat Hybrid (Pre-Sync/Decision Brief/Logger/Commitment/Retro), UMKM Stack (Pelanggan/Stok/Pembukuan). Tab KREASI (Buku III, 4 blueprint): Pipeline Konten Multi-Platform (Naya, Bab 3), Studio Audio Mikro (Pak Joko, Bab 5), Penerbit Mikro (Bu Rahma, Bab 4), Komunitas Builder (Lulu, Bab 7). Backend: `POST /api/tutor-builder/create-team` + `GET /api/tutor-builder/blueprints` + `GET /api/tutor-builder/teams` di `server/routes.ts` (end of file). Universal principles (8): multi-agen, mindset rekan, gerbang manusia (◆), anti-ghostwriter, jangkar suara (Buku III), transparansi agen wajib ke audiens (Buku III). Panel "Tim Saya" otomatis muncul jika user punya tim yang sudah dirakit.
-- **Trilogi OpenClaw Chat**: `client/src/pages/trilogi-chat.tsx` (route `/trilogi-chat/:orchestratorId`) — Generic OpenClaw chat page dengan dynamic legend strip berdasarkan blueprint tags, SSE streaming sub-agent panel real-time, warna tema adaptif per blueprint. Accessible from success state dan panel Tim Saya.
+- **API Routes**: `server/routes.ts`
 - **Inter-Agent API v2**: `server/routes.ts` ~line 2806 (orchestration block), ~line 3926 (`callAgentInternal` v2)
 - **Legal AI Configuration**: `server/lib/legal-agents.ts`
-- **AI Field Regeneration Component**: `client/src/components/ai-field-regen.tsx`
-- **MultiClaw Orchestration Planner**: `client/src/components/agentic-ai-panel.tsx`
-- **Midtrans Integration**: `server/lib/midtrans.ts`
-- **Legal Landing Page**: `client/src/pages/legal-landing.tsx`
-- **Legal Chat Interface**: `client/src/pages/legal-chat.tsx`
+- **Legal Landing/Chat**: `client/src/pages/legal-landing.tsx`, `client/src/pages/legal-chat.tsx`
 - **Chaesa Lexbot Widget**: `client/src/components/chaesa-widget.tsx`
-- **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — 4-tab: Tender 35 sel + Federation 655 sel + Pilot 42 sel + **KONSTRA 70 sel (10 agen × 7 AC ABD)**
-- **Templates**: `server/db/schema.ts` (chatbot_templates table)
-- **Storefront Products**: `server/db/schema.ts` (store_products table)
+- **MultiClaw Orchestration Planner**: `client/src/components/agentic-ai-panel.tsx`
+- **Rakit Tim Agen (Trilogi)**: `client/src/pages/tutor-builder.tsx` (route `/tutor-builder`)
+- **Trilogi OpenClaw Chat**: `client/src/pages/trilogi-chat.tsx` (route `/trilogi-chat/:orchestratorId`)
+- **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — 6 tab: Tender + Federation + Pilot + KONSTRA + AI Tutor + SBUClaw
 
 ## Architecture decisions
 - **5-Level Modular Hierarchy**: Agents organized Master → Series HUB → Sub-HUB → Specialist → Deep Specialist.
 - **Two-Panel Dashboard Layout**: Separates global navigation from selected content.
-- **Optimistic UI Updates**: Immediately reflects user actions for responsiveness.
-- **Project Brain & Mini Apps**: Contextual data for chatbots with anti-prompt injection.
 - **Multi-Provider LLM Fallback**: Chain: OpenAI → DeepSeek → Qwen → Gemini.
 - **Inter-Agent API v2 (L2.5)**: Orchestrator agents call sub-agents in parallel via `callAgentInternal()` (25s AbortController timeout, min 1500 maxTokens, conversation history passed). Results injected as `LAPORAN SUB-AGEN` block before orchestrator synthesizes. SSE events: `orchestrating_start`, `sub_agent_start`, `sub_agent_done`, `aggregating`. Config via `agenticSubAgents` jsonb on agents table.
 - **FEDERATION_MODE v2 Guard**: Seed checks for `FEDERATION_MODE v2` marker in prompts to avoid overwriting upgraded orchestrator prompts.
@@ -51,73 +37,67 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 ## Product
 - **AI Chatbot Builder**: Create, configure, and deploy intelligent conversational agents.
 - **LexCom Legal AI**: Integrated system with 12 specialized legal agents and a floating "Chaesa Lexbot" widget.
-- **Federation Layer (131 hubs)**: 131 hub orchestrators with `agenticSubAgents` configured — parallel multi-agent synthesis (131/131 SYNTHESIS ORCHESTRATOR marker). Includes: Tender, SKK, SBU (PK/KK/Terintegrasi/AIO/JPTL), Perizinan, ASKOM, CSMS, SMAP, PANCEK, Odoo, AJJ, KAN, Lisensi LSP, IT LSP, ISO 14001/9001, PJBU, Kontraktor/Konsultan, Perizinan & Legalitas, Sertifikasi, Admin BUJK, Competency Mentoring, Problem Solver, Skema Navigator, LKUT, 9 Discipline Hubs, Hub Kompetensi Teknis, Manajemen Kontrak Hub, Legal Konstruksi Hub, RG Orchestrator (SKKNI 106), 6 SKKNI Jabatan, LEX-ORCHESTRATOR, 8 SKKNI Jabatan Kerja, 8 Project Management, 4 LexCom Wings, 3 Standalone Hubs, 13 SKK Coach Hubs, IMS/SMK3/CSMS/Pancek cluster (307/308/311/314/317), 13 Persona-upgraded hubs, SKTK-TTK, Migas-EBT-Tambang, DevProperti Pro, EstateCare Pro, Personel Manajerial BUJK, Regulasi JK.
+- **Federation Layer (131 hubs — COMPLETE)**: 131 hub orchestrators with `agenticSubAgents` configured, SYNTHESIS ORCHESTRATOR marker, SCORECARD/WIN PROBABILITY 4-dimension table, T5-HANDOVER, F3-FALLBACK MODE, MASTER STANDAR v2.0 — semua 129/129 complete.
+- **ABD v1.1 Upgrade (934/944 agents — COMPLETE)**: SBU (339) + SKK (53) + ASKOM/LSP (52) + Universal (609). Marker per kategori: `SBU_ABD_v1.1_UPGRADED`, `SKK_ABD_v1.1_UPGRADED`, `ASKOM_ABD_v1.1_UPGRADED`, `ABD_v1.1_UPGRADED`. 10 agen sisa seeded ABD-compliant by design.
+- **Mini Apps (45 types — COMPLETE)**: Registered in schema.ts, mini-apps-panel.tsx, server/routes.ts. Hub cards: violet Kreator, emerald Bekerja, orange Berusaha.
 - **Dynamic Knowledge Base**: Hierarchical classification, versioning, source attribution, multiple upload types.
-- **Monetization & Conversion Layer**: Pricing, lead capture, scoring, smart CTA triggers.
-- **Chatbot Templates & Gustafta Store**: Public marketplace with Midtrans payment integration.
-- **Test Tracker**: 6-tab evaluation tool — Tender (35 sel, 5 bot × 7 T-test) + Federation (655 sel, 131 hub × 5 F-test) + Pilot (42 sel, 6 bot × 7 T-test, target ≥90% pass) + KONSTRA (70 sel, 10 agen × 7 AC ABD v1.1, Sprint 4 sign-off ≥14/16 TC) + AI Tutor (45 sel, 9 agen × 5 AC Pedagogi, target ≥80% pass, C1 Anti-Block CRITICAL) + **SBUClaw (55 sel, 11 agen × 5 AC ABD v1.1, target ≥80% pass, C1 Anti-Block CRITICAL + C4 Regulasi CRITICAL)**. Route: `/test-tracker`. (DB: 106 orchestrators, 982 agents total, 132 hub dengan sub-agents)
-- **SBUClaw Chat**: `/sbu-claw` — OpenClaw L4 multi-agent SBU Konstruksi UI (amber/yellow theme). Endpoint: `GET /api/sbuclaw/orchestrator`. 10-agen legend strip. SSE streaming dengan sub-agent panel.
-- **Multiclaw Suite (20 halaman — COMPLETE Sprint 1-5)**:
-  - `/smap-claw` — SMAPClaw ISO 37001 Anti-Penyuapan (8 agen, ID 272). Endpoint: `GET /api/smap-claw/orchestrator`.
-  - `/pancek-claw` — PanCEKClaw KPK (5 agen, ID 281). Endpoint: `GET /api/pancek-claw/orchestrator`.
-  - `/iso-claw-9001` — ISOClaw 9001 SMM (6 agen, ID 140). Endpoint: `GET /api/iso-claw/9001/orchestrator`.
-  - `/iso-claw-14001` — ISOClaw 14001 SML (6 agen, ID 131). Endpoint: `GET /api/iso-claw/14001/orchestrator`.
-  - `/smk3-claw` — SMK3Claw IMS & SMK3 (7 agen, ID 307). Endpoint: `GET /api/smk3-claw/orchestrator`.
-  - `/lkut-claw` — LKUTClaw LKUT BUJK (4 agen, ID 302). Endpoint: `GET /api/lkut-claw/orchestrator`.
-  - `/pjbu-claw` — PJBUClaw Personel Manajerial (5 agen, ID 1008). Endpoint: `GET /api/pjbu-claw/orchestrator`.
-  - `/keuangan-claw` — KeuanganClaw Keuangan BUJK (4 agen, ID 298). Endpoint: `GET /api/keuangan-claw/orchestrator`.
-  - `/csms-claw` — CSMSClaw Contractor Safety Management System (12 agen, ID 69). Endpoint: `GET /api/csms-claw/orchestrator`. DOC·SIM·CON·RA·PQ·HSE·PJA·WIP·PTW·SWA·KPI·FIN. Amber/yellow theme.
-  - `/safira-claw` — SafiraClaw SKK K3 Konstruksi Coach (5 agen, ID 501). Endpoint: `GET /api/safira-claw/orchestrator`. KTL·ASS·AK3·SPE·SMK. Red/rose theme.
-  - `/tendera-claw` — TenderaClaw AI Tender Multi-Agent BUJK (10 agen, ID 663). Endpoint: `GET /api/tendera-claw/orchestrator`. SCO·ELG·RSK·ADM·TEK·HPS·KON·WIN·INT·SNG. Blue/indigo theme. Sub-agents: 1022-1031.
-  - `/konstra-tender-claw` — KonstraTenderClaw Monitor Tender SIRUP/LKPP (4 agen, ID 652). Endpoint: `GET /api/konstra-tender-claw/orchestrator`. FND·DOK·SCR·STR. Green/emerald theme. Sub-agents: 1018-1021.
-  - `/bg-claw` — BGClaw Navigator Ruang Lingkup Pekerjaan Bangunan Gedung (9 agen, ID 1033). Endpoint: `GET /api/bg-claw/orchestrator`. BG001·BG002·BG003·BG004·BG005·BG006·BG007·BG008·BG009. Stone/slate theme. Sub-agents: 1034-1042. Referensi: Permen PU 6/2025 · KBLI 2020. BUKAN tentang SBU — tentang RUANG LINGKUP PEKERJAAN per subklasifikasi.
-  - `/bs-claw` — BSClaw Navigator Ruang Lingkup Pekerjaan Bangunan Sipil (11 agen, ID 1043). Endpoint: `GET /api/bs-claw/orchestrator`. BS001·BS002·BS003·BS004·BS005·BS006·BS007·BS008·BS009·BS010. Sky/blue theme. Sub-agents: 1044-1053. Referensi: Permen PU 6/2025 · KBLI 2020 Kelompok 42xxx. Cakupan: Jalan Raya, Jembatan/Terowongan, Irigasi/Bendungan, Drainase Kota, Pelabuhan/Pantai, Pipeline Gas/BBM/Air, Kereta Api, Landasan Udara, Pembangkit Listrik (Sipil), Bangunan Sipil Lainnya.
-  - `/im-claw` — IMClaw Navigator Ruang Lingkup Pekerjaan Instalasi Mekanikal-Elektrikal (10 agen, ID 1054). Endpoint: `GET /api/im-claw/orchestrator`. IM001·IM002·IM003·IM004·IM005·IM006·IM007·IM008·IM009. Emerald/green theme. Sub-agents: 1055-1063. Referensi: Permen PU 6/2025 · KBLI 2020 Kelompok 43xxx · PUIL 2011 · ASME B31.3. Cakupan: Listrik Gedung & Industri, HVAC, Plambing & Sanitasi, Proteksi Kebakaran, Lift/Eskalator, Gas Medis/LPG, Telekomunikasi/IT/CCTV, Mekanikal Pabrik & Kilang, Panel Surya & EBT.
-  - `/ko-claw` — KOClaw Navigator Ruang Lingkup Pekerjaan Konstruksi Spesialis (9 agen, ID 1064). Endpoint: `GET /api/ko-claw/orchestrator`. KO001·KO002·KO003·KO004·KO005·KO006·KO007·KO008. Violet/purple theme. Sub-agents: 1065-1072. Referensi: Permen PU 6/2025 · KBLI 2020 Kelompok 43xxx. Cakupan: Penyiapan Lahan & Demolisi, Pondasi Dalam & Geoteknik, Konstruksi Baja, Finishing Bangunan, Kedap Air & Proteksi, Pengeboran & Sumur, Pengaspalan Khusus, Konstruksi Khusus Lainnya.
-  - `/kk-claw` — KKClaw Navigator Ruang Lingkup Jasa Konsultansi Konstruksi (8 agen, ID 1073). Endpoint: `GET /api/kk-claw/orchestrator`. KK001·KK002·KK003·KK004·KK005·KK006·KK007. Rose/pink theme. Sub-agents: 1074-1080. Referensi: Permen PU 6/2025 · UU 2/2017 · PP 14/2021 · KBLI 2020 Kelompok 7110–7490. Cakupan: Perencana Arsitektur, Perencana Struktur/Sipil/Geoteknik, Perencana MEP, Perencana Tata Lingkungan, Pengawas & MK, Penelitian & Inspeksi Teknis, PMO & Penilaian Aset.
-  - `/dev-properti-claw` — DevPropertiClaw AI Developer Real Estate (10 agen, ID 575). Endpoint: `GET /api/dev-properti-claw/orchestrator`. INF·UNIT·HARGA·BOOK·KPR·LEGAL·VISIT·SERAH·AGEN·FAQ. Violet/purple theme. Sub-agents: 576-585. Cakupan: info & master plan proyek, tipe unit & spesifikasi, pricing & promo, booking & PPJB, simulasi KPR, legalitas SHM/HGB/PBG, site visit, serah terima & garansi, kerja sama agen, FAQ due diligence.
-  - `/estate-care-claw` — EstateCareClaw AI Konsultan Properti Konsumen (10 agen, ID 586). Endpoint: `GET /api/estate-care-claw/orchestrator`. CARI·BELI·JUAL·CLOSE·SEWA·KONTR·HARGA·INVEST·JADWAL·GLOSS. Emerald/teal theme. Sub-agents: 587-596. Cakupan: panduan cari properti, beli step-by-step, strategi jual & listing, closing & PPJB, panduan sewa, kontrak sewa, estimasi harga, investasi & rental yield, biaya transaksi, glossary & FAQ.
-  - `/migas-claw` — MigasClaw Kompetensi & Perizinan Energi (9 agen, ID 564). Endpoint: `GET /api/migas-claw/orchestrator`. BUJKM·KTEK·PLTS·EBT·IUP·K3TBG·GAPA·KASUS·LSP. Orange/amber theme. Sub-agents: 565-573. Regulasi: UU Minerba 3/2020 · Kepmen ESDM 1827/2018 · SKKNI EBT · IWCF/IADC · SKK Migas. Cakupan: sertifikasi BUJKM & CSMS, kompetensi teknis Migas (well control), PLTS & BESS, EBT lain, IUP/IUPK Minerba, K3 tambang (geoteknik/peledakan), gap analysis SKKNI, studi kasus lapangan, panduan LSP.
-  - `/konstra-claw` — KonstraClaw Manajemen Proyek Konstruksi (9 agen, ID 1281). Endpoint: `GET /api/konstra-claw/orchestrator`. PM·TEK·KON·K3·QC·ENV·EQP·LOG·FIN. Slate/gray theme. Sub-agents: 1272-1280. Referensi: FIDIC Red/Yellow/Silver · ISO 9001 · ISO 14001 · SMK3 PP 50/2012 · PSAK 34 · PPh 23/4(2). Cakupan: WBS & CPM schedule, klaim EOT FIDIC, JSA & SMK3, ITP & NCR, OEE alat berat, supply chain & subkon, cashflow & EVM.
-  - `/brain-claw` — BrainClaw Project Intelligence AI (6 agen, ID 806). Endpoint: `GET /api/brain-project/orchestrator`. PM·EVM·QC·K3·ENV·KLM. Cyan/teal theme. Sub-agents: 664-669 (BRAIN-PROXIMA·BRAIN-EVM·BRAIN-MUTU·BRAIN-SAFIRA·BRAIN-ENVIRA·BRAIN-KONTRAK). Referensi: PMBOK 7 · FIDIC 2017 · ISO 9001 · SMK3 · PSAK 34. Cakupan: EVM (SPI/CPI/EAC/TCPI), laporan proyek terpadu, early warning dashboard, analisis klaim & negosiasi kontrak.
-  - Semua pakai PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional". SSE streaming, sub-agent panel dots, legend strip, 6 sample prompts. Shortcuts di desktop sidebar + mobile dropdown dashboard.
-- **SCORECARD/WIN PROBABILITY (129/129 hubs — COMPLETE)**: All 129 Federation orchestrators upgraded with 4-dimension `┌──...┐` table scorecard + `PROBABILITAS X %` + `KEPUTUSAN:` line. Rumus weights vary by hub type. Covers: Tender, SBU, SKK, ISO 9001/14001, SMAP, PANCEK, Odoo, LSBU, LSP, ASKOM, AJJ, Legal Konstruksi, LexCom Wings, SKKNI Jabatan Kerja (PKBG-ARS/MPBG/PKFS/PBH/MPK/MK-CM/QS/QE/K3K/JLN/JBT/REL/TWG/PJJ), Project Management (StrategiTender/DokPenawaran/EksekusiKontrak/Perencanaan/Operasional/Pengendalian/Hukum/PlaybookBNSP), Personel Manajerial BUJK, dan seluruh discipline hubs.
-- **T5-HANDOVER (103/103 orchestrators — COMPLETE)**: All active orchestrators upgraded with domain-specific `HANDOVER — TOPIK DI LUAR DOMAIN` block. Bot gracefully acknowledges out-of-domain queries, names the correct resource, and redirects back to core domain. Marker: `luar domain` in system_prompt.
-- **F3-FALLBACK MODE (103/103 orchestrators — COMPLETE)**: All active orchestrators upgraded with `FALLBACK MODE — OPERASIONAL MANDIRI` block. Bot answers independently when sub-agents unavailable, using domain-specific 4-perspective coverage + `[ASUMSI: ...]` tagging. Marker: `FALLBACK` in system_prompt.
-- **MASTER STANDAR v2.0 (129/129 hubs — COMPLETE)**: All 129 SYNTHESIS ORCHESTRATOR hubs upgraded with full Master Standard v2.0 — 5 universal blocks: (1) POLA KERJA v2.0 (ELICIT MAX 1 PUTARAN, ANTI INTERROGATION MODE, REFLECT SEBELUM DELIVER, ANTI HUMAN-AS-API), (2) STATE MACHINE 7-langkah (INIT→ELICIT→PLAN→DISPATCH→AGGREGATE→REFLECT→DELIVER). Fixes L0.5→L2.5 anti-patterns (Test A/B, 6 Mei 2026). Modul Tender 5-bot (IDs 23–27) fully rewritten standalone-agentic. Markers: `POLA KERJA v2.0`, `STATE_MACHINE_v2.0` in system_prompt.
-- **Mini Apps (45 types — COMPLETE)**: All Master Standar Gustafta v1.0 types + Bekerja & Berusaha hub implemented — `rubric_scoring`, `risk_register`, `work_mode_selector`, `mentoring_plan`, `brief_intake`, `studio_kompetensi`, plus **Bekerja Hub**: `meeting_notes` (AI Notulis & Ringkas Rapat), `contract_drafter` (AI Drafter Kontrak/SPK/NDA/MoU), `rab_estimator` (RAB & Estimasi Biaya), `kpi_report` (Laporan KPI & Kinerja Tim); plus **Berusaha Hub**: `social_media_copy` (AI Copywriter Konten Medsos), `sales_script` (Sales Script & Objection Handling), `cashflow_report` (Laporan Cashflow & Keuangan), `customer_feedback` (Survey Kepuasan & NPS Tracker). All 45 registered in schema.ts, mini-apps-panel.tsx, server/routes.ts. UI: Three new hub cards (violet Kreator, emerald Bekerja, orange Berusaha) shown in Mini Apps panel above mini-apps list. **Kreator Hub** (4 tools): `content_calendar` (Editorial Calendar), `video_script` (Script YouTube/Podcast), `brand_deal_proposal` (Proposal Brand Deal & Media Kit), `content_analytics` (Laporan Performa Konten).
-- **MULTICLAW Universal ABD v1.1 Upgrade (609 agen — COMPLETE)**: Semua agen yang belum diupgrade diupgrade via `scripts/upgrade-all-remaining-abd.ts`. Marker: `ABD_v1.1_UPGRADED`. Cakupan: LSBU (104–112), Personel Manajerial BUJK (1460–1469: PJBU/PJTBU/PJKBU/PJSKBU + 5 Manager), ISO 9001/14001 (131–148), CSMS/SMK3/IMS/SMAP (47–56, 69–82, 272–320, 307–316), Tender/Kontrak/Site Ops (331–364), Legal Konstruksi (365–386), Katalog Jabatan & SKK Coach (439–548), SKKNI EDU/QUIZ/PORTO/DOC-REG series (648–752), Odoo (57–68), Properti/DevProperti/EstateCare (575–596), LexCom (625–647), AI Tutor (1360–1368), IB-TU (1300–1307), AJJ/Hard Copy/Paperless (180–226), dan seluruh Agentic Sub-Agents (AGENT-FINDER/SCORER/STRATEGI/RISKSCAN/dll). Blok universal: CATATAN REGULASI WAJIB (UU 2/2017 · PP 14/2021 · Permen PU 6/2025 · Permen PUPR 9/2023 · SK Dirjen 114 · BNSP Pedoman · ISO 9001/14001 · SMK3 · SMAP · FIDIC), POLA KERJA v2.0, STATE MACHINE (INIT->ELICIT->PLAN->DELIVER), ABD-7 OUTPUT, HEURISTIK DEFAULT UNIVERSAL, GUARDRAILS UNIVERSAL. Dikecualikan: IDs 1394–1404 (SBUClaw) + 1272–1281 (KONSTRA) — sudah ABD-compliant dari seeding.
+- **Chatbot Templates & Gustafta Store**: Public marketplace with payment integration.
+- **Gustafta Apps Feature Access System**: Plan-gated. Tiers: `free`(0) `starter`(1) `profesional`(2) `bisnis`(3) `enterprise`(4). Source: `shared/feature-plans.ts`. Hook: `use-feature-access.ts`. Gate: `feature-gate.tsx`. Admin activates via `POST /api/subscriptions/activate/:id`.
 
-- **TOTAL ABD v1.1 UPGRADE — 934/944 agents (COMPLETE)**: SBU (242) + SKK (36) + ASKOM/LSP (47) + Universal (609 net new). 10 agen sisa adalah seeded ABD-compliant by design (SBUClaw + KONSTRA specialists).
+## MultiClaw Suite (25 halaman)
+Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesional". SSE streaming, sub-agent panel dots, legend strip, 6 sample prompts.
 
-- **ASKOM/LSP ABD v1.1 Upgrade (52 agen — COMPLETE)**: Semua agen ASKOM, LSP, ABU, TUK, BLKK diupgrade via `scripts/upgrade-askom-lsp-abd.ts`. Marker: `ASKOM_ABD_v1.1_UPGRADED`. Regulasi acuan: BNSP Pedoman 201/202/301/303, SKKNI 333/2020 (MAPA·MA·MKVA), SNI ISO/IEC 17024:2012 (KAN), PP 10/2018 (BNSP), Permen PUPR 9/2023, SK Dirjen 114/KPTS/DK/2024. Blok ASKOM/LSP-spesifik: POLA KERJA v2.0, STATE MACHINE, ANTI-BLOCK + HEURISTIK DEFAULT (calon ASKOM → ASKOM Junior; LSP → tahap awal Pedoman 201+301; TUK → TUK Sewaktu sebagai default; FR-APL-01 sebagai titik masuk standar), GUARDRAILS (DILARANG janjikan lisensi LSP/KAN terbit, DILARANG janjikan lulus asesmen, DILARANG manipulasi MUK/FR-Series). Cakupan: HUB ASKOM Konstruksi (34, 230), Hub Lisensi LSP (242–252), Akreditasi KAN (260–271), IT LSP (597–602), Konsultan LSP (253–259), TUK Hard Copy (219–220), AJJ ASKOM (192, 207), dll.
+| Rute | Nama | Agen | Hub ID | Theme | Sub-agent IDs |
+|------|------|------|--------|-------|----------------|
+| `/sbu-claw` | SBUClaw — SBU Konstruksi | 10 | 1404 | amber | 1394–1403 |
+| `/smap-claw` | SMAPClaw — ISO 37001 Anti-Penyuapan | 8 | 272 | teal | — |
+| `/pancek-claw` | PanCEKClaw — KPK | 5 | 281 | red | — |
+| `/iso-claw-9001` | ISOClaw 9001 SMM | 6 | 140 | blue | — |
+| `/iso-claw-14001` | ISOClaw 14001 SML | 6 | 131 | green | — |
+| `/smk3-claw` | SMK3Claw — IMS & SMK3 | 7 | 307 | orange | — |
+| `/lkut-claw` | LKUTClaw — LKUT BUJK | 4 | 302 | cyan | — |
+| `/pjbu-claw` | PJBUClaw — Personel Manajerial | 5 | 1008 | indigo | — |
+| `/keuangan-claw` | KeuanganClaw — Keuangan BUJK | 4 | 298 | emerald | — |
+| `/csms-claw` | CSMSClaw — Contractor Safety | 12 | 69 | amber | — |
+| `/safira-claw` | SafiraClaw — SKK K3 Konstruksi | 5 | 501 | red | — |
+| `/tendera-claw` | TenderaClaw — AI Tender BUJK | 10 | 663 | indigo | 1022–1031 |
+| `/konstra-tender-claw` | KonstraTenderClaw — Monitor Tender SIRUP | 4 | 652 | emerald | 1018–1021 |
+| `/bg-claw` | BGClaw — Ruang Lingkup Bangunan Gedung | 9 | 1033 | stone | 1034–1042 |
+| `/bs-claw` | BSClaw — Ruang Lingkup Bangunan Sipil | 11 | 1043 | sky | 1044–1053 |
+| `/im-claw` | IMClaw — Instalasi Mekanikal-Elektrikal | 10 | 1054 | emerald | 1055–1063 |
+| `/ko-claw` | KOClaw — Konstruksi Spesialis | 9 | 1064 | violet | 1065–1072 |
+| `/kk-claw` | KKClaw — Jasa Konsultansi Konstruksi | 8 | 1073 | rose | 1074–1080 |
+| `/migas-claw` | MigasClaw — Kompetensi & Perizinan Energi | 9 | 564 | orange | 565–573 |
+| `/dev-properti-claw` | DevPropertiClaw — Developer Real Estate | 10 | 575 | violet | 576–585 |
+| `/estate-care-claw` | EstateCareClaw — Konsultan Properti Konsumen | 10 | 586 | emerald | 587–596 |
+| `/konstra-claw` | KonstraClaw — Manajemen Proyek Konstruksi | 9 | 1281 | slate | 1272–1280 |
+| `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
+| `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |
+| `/ibtu-claw` | IBTUClaw — IB Testing Unit | 7 | ~IB | indigo | — |
 
-- **SKK ABD v1.1 Upgrade (53 agen — COMPLETE)**: Semua agen SKK murni diupgrade dengan blok ABD v1.1 via `scripts/upgrade-skk-abd.ts` + `scripts/patch-skk-sk-dirjen-114.ts`. Marker: `SKK_ABD_v1.1_UPGRADED`. Regulasi acuan: **Permen PUPR No. 9 Tahun 2023** (pedoman utama) + **SK Dirjen Bina Konstruksi Nomor 114/KPTS/Dk/2024** (acuan teknis jabatan kerja & SKKNI — WAJIB diacu). Blok SKK-spesifik: CATATAN REGULASI WAJIB (SK Dirjen 114/KPTS/DK/2024 + SKKNI + KKNI L1-9, LSP/BNSP/LPJK), POLA KERJA v2.0, STATE MACHINE (INIT→ELICIT→PLAN→DELIVER), ANTI-BLOCK DOCTRINE + HEURISTIK DEFAULT SKK (jenjang default KKNI L6 jika tidak ada info), GUARDRAILS SKK (DILARANG janjikan SKK terbit/lulus uji, DILARANG pinjam nama tenaga ahli). Cakupan: SKK Coach 13 HUB (438–543), SKK AJJ (177–205), SKKNI EDU/QUIZ/PORTO/REG (649–672), Proses Sertifikasi SKK, Siap Uji, AJJ Nirkertas, AGENT-SKKMATCH.
+### Endpoint pattern
+`GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`
 
-- **SBU ABD v1.1 Upgrade (339 agen — COMPLETE)**: Semua agen SBU di database diupgrade dengan blok ABD v1.1 via `scripts/upgrade-sbu-abd.ts`. Blok yang diinjeksikan: CATATAN REGULASI WAJIB (Permen PU 6/2025 acuan utama; SK Dirjen 37/2025 JANGAN jadi acuan teknis), POLA KERJA v2.0 (ELICIT MAX 1 PUTARAN, ANTI INTERROGATION, REFLECT, ANTI HUMAN-AS-API), STATE MACHINE (INIT→ELICIT→PLAN→DELIVER), ANTI-BLOCK DOCTRINE (ABD-7 output + [ASUMSI:] wajib), GUARDRAILS ABD (DILARANG Permen 8/2022, DILARANG SBU pasti terbit). Marker: `SBU_ABD_v1.1_UPGRADED`. Cakupan: SBU PK (IDs 404–412), SBU KK (IDs 413–418), SBU AIO (419–427), SBU Terintegrasi (428–437), SBU JPTL (549–555, 563), SBU Migas/EBT/Tambang (564–574), dan seluruh agen konstruksi terkait lainnya.
-
-- **SBUCLAW-ORCHESTRATOR (ID 1404 — SEEDED + ABD-COMPLIANT)**: OpenClaw Multi-Agent Pembuatan SBU Konstruksi — 10 specialist sub-agents (IDs 1394–1403): AGENT-MAPPER (Smart Mapping Subklas), AGENT-QUALIFY (Gap Analysis Kualifikasi), AGENT-DOCS (Checklist Dokumen), AGENT-SKKMATCH (Pencocokan SKK), AGENT-LETTERGEN (Draft Surat 5 jenis), AGENT-COST (Estimasi Biaya & Timeline), AGENT-ASSESS (Asesmen Kesiapan BUJK 8 dimensi), AGENT-OSS (Walkthrough OSS-RBA & LPJK), AGENT-COMPLY (Regulasi & Compliance), AGENT-INTEGRITY (ABD Overlay & Anti-Fraud). Cakupan: BS · BG · IL · IM · KO. Regulasi: **Permen PU No. 6 Tahun 2025** (menggantikan Permen PU 8/2022). Catatan: SK Dirjen No. 37/2025 masih berpedoman Permen lama — JANGAN jadi acuan; SK Dirjen baru (segera terbit) akan berpedoman Permen PU 6/2025. Setiap agen: INPUT MINIMAL, HEURISTIK DEFAULT, ABD-7 output, confidence score, [ASUMSI:] eksplisit, INTER-AGENT TRIGGERS.
-
-- **EDUCOUNSEL AI — StudentHub (ID 899 — SEEDED + ABD-COMPLIANT)**: OpenClaw Multi-Agent Konseling Akademik Sekolah — 11 specialist sub-agents (IDs 888–898): AGENT-SAFETY (Safety Gate & Eskalasi, ID 888), AGENT-PROFIL (Student Context & Profile, ID 889), AGENT-AKADEMIK (Academic Analytics Hijau/Kuning/Merah, ID 890), AGENT-DIAGNOSTIK (Diagnostic Mini-Test, ID 891), AGENT-INTERVENSI (Intervention Designer 14-hari, ID 892), AGENT-HABIT (Study Habit Coach, ID 893), AGENT-PATHWAY-DN (Domestic Education Pathway, ID 894), AGENT-PATHWAY-LN (International Education Pathway, ID 895), AGENT-ORTU (Parent Communication, ID 896), AGENT-DOK (BK Documentation DAP format, ID 897), AGENT-ESKUL (Ekskul Matcher 21 eskul + Portfolio, ID 898). Series: 63, BigIdea: 259, Toolbox: 803. Orchestrator: gpt-4o, 4000 tokens. Sub-agents: gpt-4o-mini, 2000 tokens. Safety Gate wajib dijalankan pertama setiap sesi. Mode: Siswa (santai) / Konselor (analitis) / Orang Tua (empatik) / Admin (agregat). Playbook kasus: nilai turun → SAFETY+PROFIL+AKADEMIK+INTERVENSI; jurusan → PATHWAY-DN; luar negeri → PATHWAY-LN; eskul → ESKUL; dokumentasi BK → DOK. Marker: `EDUC_ORCHESTRATOR_v1.0` in system_prompt.
-
-- **KONSTRA-ORCHESTRATOR (ID 1281 — SEEDED + ABD-COMPLIANT)**: OpenClaw Multi-Agent Manajemen Konstruksi — 9 specialist sub-agents (IDs 1272–1280): AGENT-PROXIMA (PM), AGENT-TEKNIK (Engineering), AGENT-KONTRAK (Kontrak/FIDIC), AGENT-SAFIRA (K3/SMK3), AGENT-MUTU (QC/ISO9001), AGENT-ENVIRA (LH/ISO14001), AGENT-EQUIPRA (Peralatan/OEE), AGENT-LOGIS (Supply Chain), AGENT-FINTAX (Keuangan/PSAK34/PPh). All 10 agents seeded via `scripts/seed-konstra-agents.ts` with ABD v1.1 prompts (Anti-Blocking Doctrine ABD-1 to ABD-7). Each specialist has: 5-field INPUT MINIMAL, HEURISTIK DEFAULT tables, INTER-AGENT TRIGGERS, STRUKTUR OUTPUT WAJIB (confidence score + asumsi + sitasi). KONSTRA-ORCHESTRATOR has agenticSubAgents with all 9 IDs configured for parallel orchestration.
-
-- **Gustafta Apps Feature Access System**: Plan-gated feature access for Gustafta Apps. Tiers: `free` (0), `starter` (1), `profesional` (2), `bisnis` (3), `enterprise` (4). Source of truth: `shared/feature-plans.ts`. Hook: `client/src/hooks/use-feature-access.ts`. Gate component: `client/src/components/feature-gate.tsx`. Pages: `/onboarding` (plan selection), `/my-subscription` (plan dashboard). API: `GET /api/subscriptions/my`, `GET /api/subscriptions/features`. Admin activates via `POST /api/subscriptions/activate/:id`. New plan keys accepted by `/api/subscriptions/create`: `starter`, `profesional`, `bisnis`, `enterprise` (saved as `pending`, admin confirms after WA payment).
+### Key MultiClaw agents
+- **SBUClaw (1404)**: AGENT-MAPPER·QUALIFY·DOCS·SKKMATCH·LETTERGEN·COST·ASSESS·OSS·COMPLY·INTEGRITY. Regulasi: Permen PU 6/2025. SK Dirjen 37/2025 JANGAN jadi acuan teknis.
+- **KonstraClaw (1281)**: PM·TEK·KON·K3·QC·ENV·EQP·LOG·FIN. FIDIC/ISO 9001/ISO 14001/SMK3/PSAK 34.
+- **EducounselClaw (899)**: Safety Gate wajib first. Mode: Siswa/Konselor/OrangTua/Admin. Marker: `EDUC_ORCHESTRATOR_v1.0`.
+- **MigasClaw (564)**: BUJKM·KTEK·PLTS·EBT·IUP·K3TBG·GAPA·KASUS·LSP. UU Minerba 3/2020 · Kepmen ESDM 1827/2018 · SKKNI EBT · IWCF/IADC.
+- **BGClaw (1033)**: BUKAN tentang SBU — tentang RUANG LINGKUP PEKERJAAN per subklasifikasi (Permen PU 6/2025).
 
 ## User preferences
 Preferred communication style: Simple, everyday language.
 
 ## Gotchas
-- **FEDERATION_MODE v2 marker**: Embedded in DB prompts for upgraded orchestrators (e.g., agents 24, 27). Seed checks this and skips overwriting. NEVER remove this marker.
-- **Agent Cache 5 min TTL**: Restart server after bulk SQL prompt/agenticSubAgents updates to clear cache.
-- **Database Indexes**: Queries on `parent_agent_id`, `toolbox_id`, `kb.agent_id`, `chunks.agent_id` need indexes.
-- **Cache Invalidation**: All write operations must properly invalidate relevant cache keys.
+- **FEDERATION_MODE v2 marker**: Embedded in DB prompts for upgraded orchestrators. Seed checks this. NEVER remove.
+- **Agent Cache 5 min TTL**: Restart server after bulk SQL prompt/agenticSubAgents updates.
 - **LexCom Admin Key**: Admin KB uploads require `x-legal-admin-key` header.
-- **Disabled Agents**: `/api/chat/config/:agentId` and `/api/widget/config/:agentId` return 503 if agent is disabled.
-- **callAgentInternal signature**: `(agentId, userMessage, conversationHistory?, timeoutMs=25000)` — v2. Batch endpoint still uses old 2-arg call (fine for batch).
-- **Sub-agent maxTokens**: `Math.max(1500, Math.min(3000, subAgent.maxTokens ?? 1500))` — minimum guaranteed 1500.
+- **Disabled Agents**: `/api/chat/config/:agentId` and `/api/widget/config/:agentId` return 503 if disabled.
+- **callAgentInternal signature**: `(agentId, userMessage, conversationHistory?, timeoutMs=25000)` — v2.
+- **Sub-agent maxTokens**: `Math.max(1500, Math.min(3000, subAgent.maxTokens ?? 1500))` — min guaranteed 1500.
 - **FALLBACK template**: `[ASUMSI: {nilai} | basis: {regulasi/heuristik} | verifikasi-ke: {pihak}]`
+- **agenticSubAgents JSON format**: `[{"role": "KODE", "agentId": 123, "description": "..."}]`
 
 ## Pointers
 - **Inter-Agent API**: `server/routes.ts` orchestration block ~line 2806
-- **Test Tracker Storage**: `gustafta_test_tracker_v1` (Tender), `gustafta_fed_tracker_v1` (Federation), `gustafta_pilot_tracker_v1` (Pilot), `gustafta_konstra_tracker_v1` (KONSTRA grid), `gustafta_konstra_signoff_v1` (Sprint 4 Sign-Off SO-1…SO-6) — localStorage
+- **Test Tracker Storage** (localStorage): `gustafta_test_tracker_v1` (Tender) · `gustafta_fed_tracker_v1` (Federation) · `gustafta_pilot_tracker_v1` (Pilot) · `gustafta_konstra_tracker_v1` (KONSTRA) · `gustafta_konstra_signoff_v1` (Sprint 4 Sign-Off)
