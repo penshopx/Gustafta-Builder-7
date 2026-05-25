@@ -95,6 +95,7 @@ import ScopeManpelChat from "@/pages/scope-manpel";
 import ScopeMekanikalChat from "@/pages/scope-mekanikal";
 import SipilClawChat from "@/pages/sipil-claw";
 import MepClawChat from "@/pages/mep-claw";
+import K3ClawChat from "@/pages/k3-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -535,6 +536,15 @@ function Router() {
             highlights={["HVAC: sizing AC, chiller, AHU, VRF, ducting berbasis ASHRAE","Plumbing & listrik: fixture unit, panel, genset, kabel, grounding PUIL","Fire Protection (NFPA 13/14/20) & Transportasi Vertikal (EN 81)","ELV/BMS/ICT + Estimasi BOQ & RAB MEP komprehensif"]}
             icon={<Settings2 className="h-12 w-12 text-emerald-400" />}
           ><MepClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/k3-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="K3Claw — AI Konsultan K3 Teknis Lapangan"
+            description="MultiClaw AI dengan 7 spesialis K3 paralel: JSA & PTW, HIRARC, K3 Kelistrikan, K3 Kimia, Fire Safety, Investigasi Insiden, dan Ergonomi & Higiene Industri. Implementasi teknis K3 berbasis Permenaker, ISO 45001, OSHA, dan NFPA."
+            highlights={["JSA & Permit to Work: ketinggian, confined space, penggalian, lifting","HIRARC: risk matrix 5×5, bow-tie analysis, ISO 45001, PP 50/2012 SMK3","K3 Listrik (arc flash, LOTO, PUIL) & K3 Kimia (GHS, SDS, NAB, spill)","Investigasi insiden (ICAM, 5 Why, CAPA) & Ergonomi (NAB bising, WBGT)"]}
+            icon={<HardHat className="h-12 w-12 text-orange-400" />}
+          ><K3ClawChat /></PremiumPageGuard>
         )} />
         <Route path="/sipil-claw" component={() => (
           <PremiumPageGuard

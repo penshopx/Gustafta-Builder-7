@@ -105,6 +105,7 @@ import * as M_konsultanPermenPu from "./seed-konsultan-permen-pu";
 import * as M_scopeSKK from "./seed-scope-skk";
 import * as M_sipilClaw from "./seed-sipil-claw";
 import * as M_mepClaw from "./seed-mep-claw";
+import * as M_k3Claw from "./seed-k3-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1436,6 +1437,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedMepClaw();
       } catch (err) {
         log("[Seed MEPClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: K3Claw — AI Konsultan K3 Teknis Lapangan (7 sub-agen spesialis)
+      try {
+        const { seedK3Claw } = M_k3Claw;
+        await seedK3Claw();
+      } catch (err) {
+        log("[Seed K3Claw] Error: " + (err as Error).message);
       }
 
       startScheduler();

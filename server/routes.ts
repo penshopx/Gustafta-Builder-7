@@ -12561,6 +12561,17 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/k3-claw/orchestrator — K3Claw MultiClaw 7-Agent AI Konsultan K3 Teknis Lapangan
+  app.get("/api/k3-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("k3claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "K3Claw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/sipil-claw/orchestrator — SipilClaw MultiClaw 7-Agent AI Konsultan Teknik Sipil
   app.get("/api/sipil-claw/orchestrator", async (_req, res) => {
     try {
