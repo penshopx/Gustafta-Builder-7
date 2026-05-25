@@ -12450,6 +12450,50 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/dev-properti-claw/orchestrator — DevPropertiClaw 10-Agent AI Developer Real Estate
+  app.get("/api/dev-properti-claw/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgent("575");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%DevProperti Pro%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "DevPropertiClaw Orchestrator tidak ditemukan. Pastikan agen ID 575 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/estate-care-claw/orchestrator — EstateCareClaw 10-Agent AI Konsultan Properti Konsumen
+  app.get("/api/estate-care-claw/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgent("586");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%EstateCare Pro%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "EstateCareClaw Orchestrator tidak ditemukan. Pastikan agen ID 586 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/migas-claw/orchestrator — MigasClaw 9-Agent Kompetensi & Perizinan Energi
   app.get("/api/migas-claw/orchestrator", async (_req, res) => {
     try {

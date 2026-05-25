@@ -79,6 +79,8 @@ import BrainClawChat from "@/pages/brain-claw";
 import EducounselClawChat from "@/pages/educounsel-claw";
 import IBTUClawChat from "@/pages/ibtu-claw";
 import MigasClawChat from "@/pages/migas-claw";
+import DevPropertiClawChat from "@/pages/dev-properti-claw";
+import EstateCareClaw from "@/pages/estate-care-claw";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
@@ -461,6 +463,24 @@ function Router() {
             highlights={["BUJKM & CSMS SKK Migas — dokumen K3LL & pengajuan","IUP/IUPK Minerba — OSS-RBA, CNC, UU Minerba 3/2020","Sertifikasi SKKNI EBT: PLTS/BESS, PLTB, PLTP, biomassa","Gap analysis → rekomendasi jalur LSP Migas/ESDM"]}
             icon={<Zap className="h-12 w-12 text-orange-400" />}
           ><MigasClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/dev-properti-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="DevPropertiClaw — AI Developer Real Estate"
+            description="10 agen spesialis developer properti bekerja paralel: informasi & master plan proyek, tipe unit & spesifikasi, harga & promo, proses booking & PPJB, simulasi KPR & pembiayaan, legalitas SHM/HGB/PBG, site visit, serah terima & garansi, kerja sama agen, dan FAQ due diligence."
+            highlights={["Materi pemasaran: USP, pricing, skrip sales tim lapangan","Legalitas SHM/HGB/PBG — BPHTB, PPh, balik nama","Simulasi KPR & panduan pembiayaan bank rekanan","Program agen & co-marketing — struktur komisi & onboarding"]}
+            icon={<Building2 className="h-12 w-12 text-violet-400" />}
+          ><DevPropertiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/estate-care-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="EstateCareClaw — AI Konsultan Properti Konsumen"
+            description="10 agen spesialis properti konsumen bekerja paralel: panduan cari properti, panduan beli step-by-step, strategi jual & listing, proses closing & PPJB, panduan sewa, kontrak sewa, estimasi harga awal, strategi investasi & rental yield, biaya transaksi, dan glossary properti."
+            highlights={["Due diligence sertifikat & legalitas — AJB, PPAT, SHM/HGB","Estimasi pajak penjual: BPHTB, PPh final 2,5%, biaya notaris","Analisis rental yield, ROI, & strategi investasi properti","Hak penyewa vs pemilik — klausul kontrak sewa & sengketa"]}
+            icon={<Search className="h-12 w-12 text-emerald-400" />}
+          ><EstateCareClaw /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
