@@ -12450,6 +12450,35 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/migas-claw/orchestrator — MigasClaw 9-Agent Kompetensi & Perizinan Energi
+  app.get("/api/migas-claw/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgent("564");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%MIGAS_ORCHESTRATOR_v1.0%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%HUB SBU Kompetensi Migas%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "MigasClaw Orchestrator belum ditemukan. Pastikan agen ID 564 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/konstra-claw/orchestrator — KonstraClaw 9-Agent Manajemen Proyek Konstruksi
   app.get("/api/konstra-claw/orchestrator", async (_req, res) => {
     try {

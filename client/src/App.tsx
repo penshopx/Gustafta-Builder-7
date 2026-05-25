@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -78,6 +78,7 @@ import KonstraClawChat from "@/pages/konstra-claw";
 import BrainClawChat from "@/pages/brain-claw";
 import EducounselClawChat from "@/pages/educounsel-claw";
 import IBTUClawChat from "@/pages/ibtu-claw";
+import MigasClawChat from "@/pages/migas-claw";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
@@ -451,6 +452,15 @@ function Router() {
             highlights={["Registrasi & eligibilitas IB DP / MYP / PYP","Jadwal ujian, mock exam & deadline TOK/EE/CAS","Audit dokumen & kepatuhan regulasi IBO","Strategi skor 38+ IB untuk kampus internasional"]}
             icon={<GraduationCap className="h-12 w-12 text-indigo-400" />}
           ><IBTUClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/migas-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="MigasClaw — Kompetensi & Perizinan Energi AI"
+            description="9 agen spesialis energi bekerja paralel: sertifikasi BUJKM & CSMS SKK Migas, kompetensi teknis Migas (well control & inspeksi), PLTS & BESS (solar & storage), EBT lain (PLTB/PLTP/biomassa), IUP/IUPK Minerba, K3 tambang, gap analysis SKKNI, studi kasus lapangan, dan panduan LSP."
+            highlights={["BUJKM & CSMS SKK Migas — dokumen K3LL & pengajuan","IUP/IUPK Minerba — OSS-RBA, CNC, UU Minerba 3/2020","Sertifikasi SKKNI EBT: PLTS/BESS, PLTB, PLTP, biomassa","Gap analysis → rekomendasi jalur LSP Migas/ESDM"]}
+            icon={<Zap className="h-12 w-12 text-orange-400" />}
+          ><MigasClawChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
