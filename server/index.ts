@@ -101,6 +101,7 @@ import * as M_tenderaAgents from "./seed-tendera-agents";
 import * as M_brainProject from "./seed-brain-project";
 import * as M_educounsel from "./seed-educounsel";
 import * as M_ibTu from "./seed-ib-tu";
+import * as M_konsultanPermenPu from "./seed-konsultan-permen-pu";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1400,6 +1401,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedIbTu();
       } catch (err) {
         log("[Seed IB-TU] Error: " + (err as Error).message);
+      }
+
+      // Seed: Konsultan Permen PU 6/2025 — ASKOM upgrade + ABU/LSBU + PanduanASKOM
+      try {
+        const { seedKonsultanPermenPU } = M_konsultanPermenPu;
+        await seedKonsultanPermenPU();
+      } catch (err) {
+        log("[Seed KonsultanPermenPU] Error: " + (err as Error).message);
       }
 
       startScheduler();
