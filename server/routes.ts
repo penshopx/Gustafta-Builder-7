@@ -12627,6 +12627,50 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/qs-claw/orchestrator — QSClaw MultiClaw 7-Agent AI Quantity Surveying & Estimasi Biaya
+  app.get("/api/qs-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("qsclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "QSClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/pengawas-claw/orchestrator — PengawasClaw MultiClaw 7-Agent AI Pengawas Konstruksi
+  app.get("/api/pengawas-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("pengawasclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "PengawasClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/kontrak-claw/orchestrator — KontrakClaw MultiClaw 7-Agent AI Manajemen Kontrak & Klaim
+  app.get("/api/kontrak-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("kontrakclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "KontrakClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/k3man-claw/orchestrator — K3ManClaw MultiClaw 7-Agent AI Manajemen K3 Konstruksi
+  app.get("/api/k3man-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("k3manclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "K3ManClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/arsitektur-claw/orchestrator — ArsitekturClaw MultiClaw 7-Agent AI Arsitektur & Jabatan Kerja SKK
   app.get("/api/arsitektur-claw/orchestrator", async (_req, res) => {
     try {

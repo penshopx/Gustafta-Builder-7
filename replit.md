@@ -81,6 +81,10 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/jalanjembatan-claw` | JalanJembatanClaw — Jabatan Kerja SKK Klasifikasi Sipil (Jalan & Jembatan) | 7 | TBD | yellow | TBD |
 | `/tatalingkungan-claw` | TataLingkunganClaw — Jabatan Kerja SKK Klasifikasi Tata Lingkungan | 7 | TBD | green | TBD |
 | `/elektrikal-claw` | ElektrikalClaw — Jabatan Kerja SKK Klasifikasi Elektrikal | 7 | TBD | blue | TBD |
+| `/qs-claw` | QSClaw — Quantity Surveying & Estimasi Biaya Konstruksi | 7 | 1759 | amber | 1752–1758 |
+| `/pengawas-claw` | PengawasClaw — Pengawas Konstruksi & Jabatan Kerja SKK | 7 | 1767 | orange | 1760–1766 |
+| `/kontrak-claw` | KontrakClaw — Manajemen Kontrak & Klaim Konstruksi | 7 | 1775 | red | 1768–1774 |
+| `/k3man-claw` | K3ManClaw — Manajemen K3 Konstruksi & Jabatan Kerja SKK | 7 | 1783 | orange/red | 1776–1782 |
 | `/konstra-claw` | KonstraClaw — Manajemen Proyek Konstruksi | 9 | 1281 | slate | 1272–1280 |
 | `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
 | `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |
@@ -102,6 +106,10 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 - **ManprojakClaw (1383)**: MP-MANPRO·LAPANGAN·MUTU·ESTIMASI·KONTRAK·KEUANGAN·LOGISTIK. FIDIC/EVM/PSAK 34/AHSP PermenPUPR 1/2022.
 - **ArsitekturClaw (1391)**: ARS-DESAIN·STRUKTUR·INTERIOR·LANSEKAP·REGULASI·TEKNIS·URBAN. UU BG 28/2002·PP 16/2021·PermenPUPR 22/2018·Neufert·Greenship·ISO 19650 BIM.
 - **SurveiPemetaanClaw (1399)**: SP-GEODESI·TOPOGRAFI·KADASTER·GIS·HIDROGRAFI·KONSTRUKSI·DRONE. SRGI2013·BPN/PTSL·IHO S-44·ASPRS LAS·HEC-RAS·Permenhub UAV PM 37/2020.
+- **QSClaw (1759)**: QS-TAKEOFF·HARGA·RAB·COSTCONTROL·VE·TENDER·BIM5D. AHSP PermenPUPR 01/2022·Perpres 16/2018·PSAK 34·PMI EVM·SAVE International·ISO 19650.
+- **PengawasClaw (1767)**: PW-LAPANGAN·STRUKTUR·FINISHING·MEP·K3·MUTU·ADMIN. SNI 2847:2019·PUIL 2011·PP 50/2012·ISO 9001·FIDIC·PermenPUPR 10/2021.
+- **KontrakClaw (1775)**: KT-FIDIC·PEMERINTAH·KLAIM·DISPUTE·SUBKON·ASURANSI·KOMERSIAL. FIDIC 1999/2017·Perpres 16/2018·UU Arbitrase 30/1999·BANI·SCL Protocol 2017.
+- **K3ManClaw (1783)**: K3M-SMKK·HAZID·PTW·CSMS·INSIDEN·KEBAKARAN·AUDIT. PP 50/2012·PermenPUPR 10/2021·ISO 45001:2018·NFPA 10/13/72·OSHA 1926.
 
 ## User preferences
 Preferred communication style: Simple, everyday language.

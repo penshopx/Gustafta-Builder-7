@@ -114,6 +114,10 @@ import * as M_geoteknikClaw from "./seed-geoteknik-claw";
 import * as M_jalanJembatanClaw from "./seed-jalanjembatan-claw";
 import * as M_tataLingkunganClaw from "./seed-tatalingkungan-claw";
 import * as M_elekTrikalClaw from "./seed-elektrikal-claw";
+import * as M_qsClaw from "./seed-qs-claw";
+import * as M_pengawasClaw from "./seed-pengawas-claw";
+import * as M_kontrakClaw from "./seed-kontrak-claw";
+import * as M_k3ManClaw from "./seed-k3man-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1517,6 +1521,38 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedElektrikalClaw();
       } catch (err) {
         log("[Seed ElektrikalClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: QSClaw — AI Quantity Surveying & Estimasi Biaya Konstruksi (7 sub-agen spesialis)
+      try {
+        const { seedQSClaw } = M_qsClaw;
+        await seedQSClaw();
+      } catch (err) {
+        log("[Seed QSClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: PengawasClaw — AI Pengawas Konstruksi & Jabatan Kerja SKK (7 sub-agen spesialis)
+      try {
+        const { seedPengawasClaw } = M_pengawasClaw;
+        await seedPengawasClaw();
+      } catch (err) {
+        log("[Seed PengawasClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: KontrakClaw — AI Manajemen Kontrak & Klaim Konstruksi (7 sub-agen spesialis)
+      try {
+        const { seedKontrakClaw } = M_kontrakClaw;
+        await seedKontrakClaw();
+      } catch (err) {
+        log("[Seed KontrakClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: K3ManClaw — AI Manajemen K3 Konstruksi & Jabatan Kerja SKK (7 sub-agen spesialis)
+      try {
+        const { seedK3ManClaw } = M_k3ManClaw;
+        await seedK3ManClaw();
+      } catch (err) {
+        log("[Seed K3ManClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

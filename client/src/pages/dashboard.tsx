@@ -1439,6 +1439,34 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
                     </div>
                   </Link>
+                  <Link href="/qs-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-qs-claw">
+                      <span className="text-sm shrink-0">💰</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">QSClaw (QS &amp; Estimasi)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/pengawas-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-pengawas-claw">
+                      <span className="text-sm shrink-0">👷</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PengawasClaw (Pengawas)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/kontrak-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-red-700 dark:text-red-400 hover:bg-red-500/10 border border-red-500/20 mb-1" data-testid="nav-shortcut-kontrak-claw">
+                      <span className="text-sm shrink-0">📝</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KontrakClaw (Kontrak &amp; Klaim)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-red-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/k3man-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-k3man-claw">
+                      <span className="text-sm shrink-0">⛑️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">K3ManClaw (K3 Konstruksi)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/arsitektur-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 mb-1" data-testid="nav-shortcut-arsitektur-claw">
                       <Building2 className="w-4 h-4 text-rose-500 shrink-0" />
@@ -2557,6 +2585,30 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-indigo-600 dark:text-indigo-400">
                     <BarChart3 className="w-4 h-4" />
                     ManprojakClaw (SKK Manprojak)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/qs-claw">
+                  <DropdownMenuItem className="gap-2 text-amber-600 dark:text-amber-400">
+                    <span className="w-4 h-4 text-sm flex items-center justify-center">💰</span>
+                    QSClaw (QS &amp; Estimasi Biaya)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/pengawas-claw">
+                  <DropdownMenuItem className="gap-2 text-orange-600 dark:text-orange-400">
+                    <span className="w-4 h-4 text-sm flex items-center justify-center">👷</span>
+                    PengawasClaw (Pengawas Konstruksi)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/kontrak-claw">
+                  <DropdownMenuItem className="gap-2 text-red-600 dark:text-red-400">
+                    <span className="w-4 h-4 text-sm flex items-center justify-center">📝</span>
+                    KontrakClaw (Kontrak &amp; Klaim)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/k3man-claw">
+                  <DropdownMenuItem className="gap-2 text-orange-600 dark:text-orange-400">
+                    <span className="w-4 h-4 text-sm flex items-center justify-center">⛑️</span>
+                    K3ManClaw (K3 Konstruksi)
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/arsitektur-claw">

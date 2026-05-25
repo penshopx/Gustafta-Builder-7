@@ -104,6 +104,10 @@ import GeoteknikClawChat from "@/pages/geoteknik-claw";
 import JalanJembatanClawChat from "@/pages/jalanjembatan-claw";
 import TataLingkunganClawChat from "@/pages/tatalingkungan-claw";
 import ElektrikalClawChat from "@/pages/elektrikal-claw";
+import QSClawChat from "@/pages/qs-claw";
+import PengawasClawChat from "@/pages/pengawas-claw";
+import KontrakClawChat from "@/pages/kontrak-claw";
+import K3ManClawChat from "@/pages/k3man-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -607,6 +611,42 @@ function Router() {
             highlights={["Manajer Proyek: WBS, Earned Value (SPI/CPI/EAC), risk, FIDIC, serah terima PHO/FHO","QC: ITP, NCR & CAPA, uji beton (slump, tekan, core drill), commissioning MEP","Estimator/QS: AHSP PermenPUPR 1/2022, BoQ, RAB, HPS, Variation Order, eskalasi harga","Kontrak: SSUK/SSKK, FIDIC Clause 20, klaim delay, LD, terminasi, arbitrase BANI"]}
             icon={<BarChart3 className="h-12 w-12 text-indigo-400" />}
           ><ManprojakClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/qs-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="QSClaw — AI Quantity Surveying & Estimasi Biaya Konstruksi"
+            description="MultiClaw AI dengan 7 spesialis paralel: QTO dari gambar/BIM, Analisis Harga Satuan AHSP, Penyusunan RAB/BOQ, Cost Control & Earned Value, Value Engineering & LCC, Dokumen Tender & HPS, dan BIM 5D Cost."
+            highlights={["QTO & AHSP: pengukuran volume, analisis harga satuan PermenPUPR 01/2022, OH&P, eskalasi","RAB/BOQ: struktur WBS, format tender LPSE, contingency, LKPP, koreksi aritmatik","Cost Control EVM: CPI/SPI/EAC, S-curve, PSAK 34, monthly cost report, variance analysis","Value Engineering: FAST diagram, LCC analysis, alternatif material/sistem, BIM 5D Revit/CostX"]}
+            icon={<span className="text-4xl">💰</span>}
+          ><QSClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/pengawas-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PengawasClaw — AI Pengawas Konstruksi & Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel: Pengawas Lapangan, Inspeksi Struktur, Finishing, MEP Commissioning, K3 Lapangan, Quality Control ITP, dan Administrasi berita acara/PHO/FHO."
+            highlights={["Inspeksi Struktur: beton fc' 28 hari, tulangan, pondasi bore pile, NCR & remedial, SNI 2847:2019","MEP Commissioning: HVAC TAB, plumbing pressure test, SLO listrik, BAS integration, O&M manual","K3 Lapangan: PTW hot work/confined space/height, toolbox talk, APD, investigasi insiden","Administrasi: berita acara kemajuan, Variation Order, PHO/FHO snagging list, klaim FIDIC"]}
+            icon={<span className="text-4xl">👷</span>}
+          ><PengawasClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/kontrak-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KontrakClaw — AI Manajemen Kontrak & Klaim Konstruksi"
+            description="MultiClaw AI dengan 7 spesialis paralel: FIDIC Red/Yellow/Silver Book, Kontrak Pemerintah SSUK/SSKK, Klaim Delay & EOT, Dispute DAAB/BANI, Subkontrak, Asuransi CAR/EAR, dan Manajemen Komersial."
+            highlights={["FIDIC 1999/2017: EOT, VO valuation, payment, termination, DAAB — interpretasi klausul lengkap","Klaim & Delay Analysis: SCL Protocol, as-planned vs as-built, concurrent delay, prolongation cost","Kontrak Pemerintah: SSUK/SSKK Perpres 16/2018, addendum, BPK/BPKP audit compliance","Asuransi & Jaminan: CAR/EAR, TPL, PI, surety bond, jaminan penawaran/pelaksanaan"]}
+            icon={<span className="text-4xl">📝</span>}
+          ><KontrakClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/k3man-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="K3ManClaw — AI Manajemen K3 Konstruksi & Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel: SMKK & RK3K, HIRADC & JSA, Permit to Work, CSMS Kontraktor, Investigasi Insiden, Proteksi Kebakaran NFPA, dan Audit SMK3/ISO 45001."
+            highlights={["SMKK & RK3K: PermenPUPR 10/2021, PP 50/2012, anggaran K3, KPI TRIR/LTIR, organisasi P2K3","HIRADC & JSA: risk matrix L×S, hierarki pengendalian, HAZOP, bow-tie, risk register proyek","PTW: hot work, confined space entry (O₂/LEL/toxic gas test), working at height, LOTO","Audit SMK3: 166 kriteria PP 50/2012, ISO 45001:2018 klausul 4-10, NCR/CAR, target emas ≥85%"]}
+            icon={<span className="text-4xl">⛑️</span>}
+          ><K3ManClawChat /></PremiumPageGuard>
         )} />
         <Route path="/lingkungan-claw" component={() => (
           <PremiumPageGuard
