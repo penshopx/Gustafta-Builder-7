@@ -97,6 +97,7 @@ import SipilClawChat from "@/pages/sipil-claw";
 import MepClawChat from "@/pages/mep-claw";
 import K3ClawChat from "@/pages/k3-claw";
 import LingkunganClawChat from "@/pages/lingkungan-claw";
+import ManprojakClawChat from "@/pages/manprojak-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -537,6 +538,15 @@ function Router() {
             highlights={["HVAC: sizing AC, chiller, AHU, VRF, ducting berbasis ASHRAE","Plumbing & listrik: fixture unit, panel, genset, kabel, grounding PUIL","Fire Protection (NFPA 13/14/20) & Transportasi Vertikal (EN 81)","ELV/BMS/ICT + Estimasi BOQ & RAB MEP komprehensif"]}
             icon={<Settings2 className="h-12 w-12 text-emerald-400" />}
           ><MepClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/manprojak-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ManprojakClaw — AI Manajemen Proyek & Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Manajemen Pelaksanaan: Manajer Proyek, Manajer Lapangan, QC, Estimator/QS, Kontrak, Keuangan Proyek, dan Logistik."
+            highlights={["Manajer Proyek: WBS, Earned Value (SPI/CPI/EAC), risk, FIDIC, serah terima PHO/FHO","QC: ITP, NCR & CAPA, uji beton (slump, tekan, core drill), commissioning MEP","Estimator/QS: AHSP PermenPUPR 1/2022, BoQ, RAB, HPS, Variation Order, eskalasi harga","Kontrak: SSUK/SSKK, FIDIC Clause 20, klaim delay, LD, terminasi, arbitrase BANI"]}
+            icon={<BarChart3 className="h-12 w-12 text-indigo-400" />}
+          ><ManprojakClawChat /></PremiumPageGuard>
         )} />
         <Route path="/lingkungan-claw" component={() => (
           <PremiumPageGuard

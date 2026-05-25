@@ -107,6 +107,7 @@ import * as M_sipilClaw from "./seed-sipil-claw";
 import * as M_mepClaw from "./seed-mep-claw";
 import * as M_k3Claw from "./seed-k3-claw";
 import * as M_lingkunganClaw from "./seed-lingkungan-claw";
+import * as M_manprojakClaw from "./seed-manprojak-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1454,6 +1455,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedLingkunganClaw();
       } catch (err) {
         log("[Seed LingkunganClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: ManprojakClaw — AI Manajemen Proyek & Jabatan Kerja SKK (7 sub-agen spesialis)
+      try {
+        const { seedManprojakClaw } = M_manprojakClaw;
+        await seedManprojakClaw();
+      } catch (err) {
+        log("[Seed ManprojakClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();
