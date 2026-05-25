@@ -110,6 +110,9 @@ import * as M_lingkunganClaw from "./seed-lingkungan-claw";
 import * as M_manprojakClaw from "./seed-manprojak-claw";
 import * as M_arsitekturClaw from "./seed-arsitektur-claw";
 import * as M_surveiPemetaanClaw from "./seed-surveipemetaan-claw";
+import * as M_geoteknikClaw from "./seed-geoteknik-claw";
+import * as M_jalanJembatanClaw from "./seed-jalanjembatan-claw";
+import * as M_tataLingkunganClaw from "./seed-tatalingkungan-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1481,6 +1484,30 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedSurveiPemetaanClaw();
       } catch (err) {
         log("[Seed SurveiPemetaanClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: GeoteknikClaw — AI Geoteknik & Jabatan Kerja SKK Klasifikasi Sipil (Geoteknik) (7 sub-agen spesialis)
+      try {
+        const { seedGeoteknikClaw } = M_geoteknikClaw;
+        await seedGeoteknikClaw();
+      } catch (err) {
+        log("[Seed GeoteknikClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: JalanJembatanClaw — AI Jalan & Jembatan, Jabatan Kerja SKK (7 sub-agen spesialis)
+      try {
+        const { seedJalanJembatanClaw } = M_jalanJembatanClaw;
+        await seedJalanJembatanClaw();
+      } catch (err) {
+        log("[Seed JalanJembatanClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: TataLingkunganClaw — AI Teknik Lingkungan, Jabatan Kerja SKK Klasifikasi Tata Lingkungan (7 sub-agen spesialis)
+      try {
+        const { seedTataLingkunganClaw } = M_tataLingkunganClaw;
+        await seedTataLingkunganClaw();
+      } catch (err) {
+        log("[Seed TataLingkunganClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

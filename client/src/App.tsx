@@ -100,6 +100,9 @@ import LingkunganClawChat from "@/pages/lingkungan-claw";
 import ManprojakClawChat from "@/pages/manprojak-claw";
 import ArsitekturClawChat from "@/pages/arsitektur-claw";
 import SurveiPemetaanClawChat from "@/pages/surveipemetaan-claw";
+import GeoteknikClawChat from "@/pages/geoteknik-claw";
+import JalanJembatanClawChat from "@/pages/jalanjembatan-claw";
+import TataLingkunganClawChat from "@/pages/tatalingkungan-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -549,6 +552,33 @@ function Router() {
             highlights={["Geodesi & GNSS: datum SRGI2013, GPS RTK/PPK/CORS, traverse, leveling, geoid Indonesia","Kadastral & BPN: pengukuran batas tanah, SHM/HGB, PTSL, surveyor berlisensi KJSKB/SKB","GIS & Analisis Spasial: ArcGIS/QGIS, overlay, remote sensing, citra satelit, Ina-Geoportal BIG","Drone/UAV Fotogrametri: orthophoto, DSM/DTM, LiDAR, NDVI, regulasi Permenhub PM 37/2020"]}
             icon={<Map className="h-12 w-12 text-teal-400" />}
           ><SurveiPemetaanClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/geoteknik-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="GeoteknikClaw — AI Konsultan Geoteknik & Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Klasifikasi Sipil (Geoteknik): Penyelidikan Tanah, Fondasi, Stabilitas Lereng, Penurunan, Dinamika Tanah/Gempa, Terowongan, dan Turap."
+            highlights={["Penyelidikan Tanah: SPT, CPT/sondir, boring, parameter tanah, soil investigation report","Fondasi: bore pile, tiang pancang, kapasitas dukung Terzaghi/Meyerhof, efisiensi kelompok","Stabilitas Lereng: Bishop/Spencer, tekanan tanah aktif/pasif, soil nail, mitigasi longsor","Likuifaksi & Gempa: site class SNI 1726:2019, amplifikasi, analisis Idriss & Boulanger (2008)"]}
+            icon={<span className="text-4xl">⛏️</span>}
+          ><GeoteknikClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/jalanjembatan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="JalanJembatanClaw — AI Konsultan Teknik Jalan & Jembatan, Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Klasifikasi Sipil (Teknik Jalan & Jembatan): Perkerasan, Geometrik, Drainase, Jembatan, Laik Fungsi, Material, dan Pemeliharaan."
+            highlights={["Perkerasan Jalan: desain lentur & kaku, MDP Bina Marga 2021, AASHTO 1993, CBR, CESA","Geometrik Jalan: alignment H/V, Rmin, superelevasi, persimpangan PKJI 2023, interchange","Teknik Jembatan: SNI 1725:2016, gelagar PCU/baja/komposit, fondasi, scour HEC-18","Laik Fungsi & Audit: SLF Jalan (Permen PU 19/2011), RSA, BMS, PCI, IRI assessment"]}
+            icon={<span className="text-4xl">🛣️</span>}
+          ><JalanJembatanClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/tatalingkungan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="TataLingkunganClaw — AI Konsultan Teknik Lingkungan & Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Klasifikasi Tata Lingkungan: Sanitasi, Air Minum, Limbah Padat, IPAL, Kebisingan, Remediasi, dan Infrastruktur Kota."
+            highlights={["Sanitasi & Septik Tank: SNI 03-2398-2017, bidang resapan, Sanimas, IPLT, STBM ODF","Air Minum & SPAM: WTP koagulasi-flokulasi-filtrasi-desinfeksi, distribusi, EPANET, Permenkes","IPAL: lumpur aktif, biofilter, MBR, pengolahan lumpur, standar efluent PP 22/2021","Remediasi Lahan: Phase I/II ESA, SVE, bioremediation, BTEX/logam berat, reklamasi tambang"]}
+            icon={<span className="text-4xl">🌿</span>}
+          ><TataLingkunganClawChat /></PremiumPageGuard>
         )} />
         <Route path="/arsitektur-claw" component={() => (
           <PremiumPageGuard

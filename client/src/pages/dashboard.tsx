@@ -1447,10 +1447,31 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/surveipemetaan-claw">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-2" data-testid="nav-shortcut-surveipemetaan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-surveipemetaan-claw">
                       <Map className="w-4 h-4 text-teal-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SurveiPemetaanClaw (SKK)</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/geoteknik-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-geoteknik-claw">
+                      <span className="text-sm shrink-0">⛏️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">GeoteknikClaw (SKK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/jalanjembatan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-yellow-700 dark:text-yellow-400 hover:bg-yellow-500/10 border border-yellow-500/20 mb-1" data-testid="nav-shortcut-jalanjembatan-claw">
+                      <span className="text-sm shrink-0">🛣️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">JalanJembatanClaw (SKK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-yellow-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/tatalingkungan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-green-700 dark:text-green-400 hover:bg-green-500/10 border border-green-500/20 mb-2" data-testid="nav-shortcut-tatalingkungan-claw">
+                      <span className="text-sm shrink-0">🌿</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TataLingkunganClaw (SKK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-green-500/50" />
                     </div>
                   </Link>
                   {orchestratorHub ? (
@@ -2541,6 +2562,24 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-teal-600 dark:text-teal-400">
                     <Map className="w-4 h-4" />
                     SurveiPemetaanClaw (SKK Survei & Pemetaan)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/geoteknik-claw">
+                  <DropdownMenuItem className="gap-2 text-amber-600 dark:text-amber-400">
+                    <span className="text-sm">⛏️</span>
+                    GeoteknikClaw (SKK Geoteknik)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/jalanjembatan-claw">
+                  <DropdownMenuItem className="gap-2 text-yellow-600 dark:text-yellow-400">
+                    <span className="text-sm">🛣️</span>
+                    JalanJembatanClaw (SKK Jalan & Jembatan)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/tatalingkungan-claw">
+                  <DropdownMenuItem className="gap-2 text-green-600 dark:text-green-400">
+                    <span className="text-sm">🌿</span>
+                    TataLingkunganClaw (SKK Tata Lingkungan)
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>
