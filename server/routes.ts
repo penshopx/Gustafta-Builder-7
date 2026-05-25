@@ -12450,6 +12450,35 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/konstra-claw/orchestrator — KonstraClaw 9-Agent Manajemen Proyek Konstruksi
+  app.get("/api/konstra-claw/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgent("1281");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%KONSTRA-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%KONSTRA-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "KonstraClaw Orchestrator belum ditemukan. Pastikan agen ID 1281 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/tender-doc-checker", async (req, res) => {
     try {
       const { jenis = "pekerjaan_konstruksi", kualifikasi = "kecil" } = req.query as Record<string, string>;

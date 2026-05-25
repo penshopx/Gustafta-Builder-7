@@ -74,6 +74,8 @@ import SmapClawChat from "@/pages/smap-claw";
 import PancekClawChat from "@/pages/pancek-claw";
 import IsoClaw9001Chat from "@/pages/iso-claw-9001";
 import IsoClaw14001Chat from "@/pages/iso-claw-14001";
+import KonstraClawChat from "@/pages/konstra-claw";
+import BrainClawChat from "@/pages/brain-claw";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
@@ -411,6 +413,24 @@ function Router() {
             highlights={["Self-assessment 5 Pilar × 45 Kriteria + Indeks IIK","Generator 79 Indikator JAGA.id KPK (6 seksi K/P/D/C/A/R)","Corporate defense dossier Perma 13/2016 Pasal 4(2)","Triple mapping PanCEK ↔ ISO 37001 ↔ UU Tipikor"]}
             icon={<Shield className="h-12 w-12 text-red-500" />}
           ><PancekClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/konstra-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KonstraClaw — Manajemen Proyek Konstruksi AI"
+            description="9 agen spesialis manajemen konstruksi bekerja paralel: PM & penjadwalan, teknik & shop drawing, kontrak FIDIC & klaim, K3 & SMK3, mutu & ISO 9001, lingkungan & ISO 14001, peralatan & OEE, supply chain & subkon, dan keuangan proyek PSAK34."
+            highlights={["WBS, CPM & schedule recovery proyek konstruksi","Variasi & klaim FIDIC — EOT, VO, loss & expense","OEE alat berat + pengadaan material & subkontraktor","EVM: SPI, CPI, EAC, TCPI + laporan keuangan PSAK34"]}
+            icon={<Building2 className="h-12 w-12 text-slate-400" />}
+          ><KonstraClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/brain-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="BrainClaw — Project Intelligence AI"
+            description="6 agen spesialis project intelligence bekerja paralel: project manager & control, earned value management, mutu proyek, K3 lapangan, manajemen lingkungan, dan analisis klaim kontrak."
+            highlights={["EVM lengkap: SPI, CPI, EAC, TCPI, VAC per paket","Laporan proyek terpadu: fisik, biaya, K3, mutu, kontrak","Early warning dashboard & action plan 90 hari","Analisis klaim & posisi negosiasi kontrak"]}
+            icon={<Brain className="h-12 w-12 text-cyan-400" />}
+          ><BrainClawChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
