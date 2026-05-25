@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle,
   ShieldCheck, ChevronDown, ChevronUp, BookOpen, FileText,
-  Search, AlertTriangle, MessageSquare, Mic, ClipboardCheck, Map,
+  Search, AlertTriangle, MessageSquare, Mic, ClipboardCheck, Map as MapIcon,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -52,7 +52,7 @@ const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: s
     code: "POL",
   },
   "AGENT-DUEDIL": {
-    icon: <Map className="h-3 w-3" />,
+    icon: <MapIcon className="h-3 w-3" />,
     label: "Due Diligence",
     color: "bg-sky-500/20 text-sky-300 border-sky-500/30",
     code: "DDL",

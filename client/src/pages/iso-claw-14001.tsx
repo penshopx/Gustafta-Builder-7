@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle,
-  Leaf, ChevronDown, ChevronUp, Search, Map, FileText,
+  Leaf, ChevronDown, ChevronUp, Search, Map as MapIcon, FileText,
   ClipboardCheck, BarChart2, RefreshCw,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -40,7 +40,7 @@ const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: s
     code: "RDY",
   },
   "AGENT-ASPDAMP": {
-    icon: <Map className="h-3 w-3" />,
+    icon: <MapIcon className="h-3 w-3" />,
     label: "Aspek/Dampak",
     color: "bg-lime-500/20 text-lime-300 border-lime-500/30",
     code: "A/D",

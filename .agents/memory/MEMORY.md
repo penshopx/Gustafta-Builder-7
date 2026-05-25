@@ -1,0 +1,1 @@
+- [Lucide Map icon crash](lucide-map-crash.md) — `{ Map }` from lucide-react (no alias) → global Map in prod build → blank screen crash.

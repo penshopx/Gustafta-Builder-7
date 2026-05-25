@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen, Landmark, Settings2 } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen, Landmark, Settings2, Map as MapIcon } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -555,7 +555,7 @@ function Router() {
             title="SurveiPemetaanClaw — AI Konsultan Survei & Pemetaan, Jabatan Kerja SKK"
             description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Klasifikasi Survei & Pemetaan: Geodesi, Topografi, Kadaster/BPN, GIS, Hidrografi, Survei Konstruksi, dan Drone/UAV."
             highlights={["Geodesi & GNSS: datum SRGI2013, GPS RTK/PPK/CORS, traverse, leveling, geoid Indonesia","Kadastral & BPN: pengukuran batas tanah, SHM/HGB, PTSL, surveyor berlisensi KJSKB/SKB","GIS & Analisis Spasial: ArcGIS/QGIS, overlay, remote sensing, citra satelit, Ina-Geoportal BIG","Drone/UAV Fotogrametri: orthophoto, DSM/DTM, LiDAR, NDVI, regulasi Permenhub PM 37/2020"]}
-            icon={<Map className="h-12 w-12 text-teal-400" />}
+            icon={<MapIcon className="h-12 w-12 text-teal-400" />}
           ><SurveiPemetaanClawChat /></PremiumPageGuard>
         )} />
         <Route path="/geoteknik-claw" component={() => (

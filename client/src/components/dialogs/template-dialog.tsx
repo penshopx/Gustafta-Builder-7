@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, ShoppingCart, GraduationCap, HeartPulse, Building2, Utensils, Briefcase, MessageCircle, Check, Wrench, Plane, Calculator, Scale, PawPrint, Shirt, Car, Wifi, Landmark, UtensilsCrossed, Dumbbell, Stethoscope, BookOpen, Home, CreditCard, Map, Users, Gavel, Factory, Cpu, Zap, Cog, FlaskConical, Leaf, Ship, HardHat, Shield, Globe, FileText, Layers, Search, LayoutGrid } from "lucide-react";
+import { Sparkles, ShoppingCart, GraduationCap, HeartPulse, Building2, Utensils, Briefcase, MessageCircle, Check, Wrench, Plane, Calculator, Scale, PawPrint, Shirt, Car, Wifi, Landmark, UtensilsCrossed, Dumbbell, Stethoscope, BookOpen, Home, CreditCard, Map as MapIcon, Users, Gavel, Factory, Cpu, Zap, Cog, FlaskConical, Leaf, Ship, HardHat, Shield, Globe, FileText, Layers, Search, LayoutGrid } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
