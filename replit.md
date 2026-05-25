@@ -100,6 +100,13 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/ketenagalistrikan-claw` | KetenagalistrikanClaw — Konsultan Sistem Ketenagalistrikan Indonesia | 8 | 994 | yellow | 986–993 |
 | `/energi-claw` | EnergiClaw — Konsultan Energi & EBT Indonesia | 8 | 1003 | orange | 995–1002 |
 | `/pertambangan-claw` | PertambanganClaw — Konsultan Pertambangan Indonesia | 8 | 1012 | stone | 1004–1011 |
+| `/digital-marketing-claw` | DigitalMarketingClaw — AI Konsultan Digital Marketing Indonesia | 8 | 1159 | violet | 1151–1158 |
+| `/crm-sales-claw` | CrmSalesClaw — AI Konsultan CRM & Sales Excellence Indonesia | 8 | 1168 | blue | 1160–1167 |
+| `/brand-content-claw` | BrandContentClaw — AI Konsultan Brand & Content Marketing Indonesia | 8 | 1177 | rose | 1169–1176 |
+| `/ecommerce-claw` | EcommerceClaw — AI Konsultan E-Commerce & Perdagangan Digital Indonesia | 8 | 1186 | orange | 1178–1185 |
+| `/rekrutmen-claw` | RekrutmenClaw — AI Konsultan Rekrutmen & Talent Acquisition Indonesia | 8 | 1195 | teal | 1187–1194 |
+| `/ld-kompetensi-claw` | LdKompetensiClaw — AI Konsultan Learning & Development Indonesia | 8 | 1204 | emerald | 1196–1203 |
+| `/penilaian-kinerja-claw` | PenilaianKinerjaClaw — AI Konsultan Penilaian Kinerja & Manajemen SDM Indonesia | 8 | 1213 | indigo | 1205–1212 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`
@@ -133,6 +140,13 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 - **RisetSkripsiClaw (1122)**: SKR-TOPIK·LITREV·METODE·DATA·TULISAN·SIDANG·PUBLIKASI. PRISMA·APA 7th·IEEE·SmartPLS/SEM·SPSS·Scopus/SINTA·PKM·Hibah Dikti. Route: `/riset-skripsi-claw`.
 - **NSPKNavigatorClaw (1131)**: NSP-KONSTRUKSI·ENERGI·LINGKUNGAN·K3·TATARUANG·DIGITAL·TAMBANG·INDUSTRI. SNI·PUIL 2011·PP 22/2021·PP 50/2012 (SMK3)·UU 26/2007·PP 5/2021 (OSS-RBA)·UU 3/2020 (Minerba)·ISO 9001/22000/45001·BPOM·BPJPH. Route: `/nspk-navigator-claw`.
 - **KorporasiClaw (1140)**: KOR-PENDIRIAN·PERIZINAN·PAJAK·SAHAM·KONTRAK·HR·KEUANGAN·MA. UU 40/2007·PP 5/2021·UU 13/2003·PP 35/2021·UU PPh/PPN·PSAK·POJK·KPPU UU 5/1999·KUH Perdata·BANI. Route: `/korporasi-claw`.
+- **DigitalMarketingClaw (1159)**: DM-SEO·SEM·SOSMED·CONTENT·EMAIL·ANALITIK·INFLUENCER·GROWTH. Google Ads·Meta Ads·GA4·SEMrush·Moz·Mailchimp·HubSpot·Tokopedia/Shopee Ads. Route: `/digital-marketing-claw`.
+- **CrmSalesClaw (1168)**: CRM-PIPELINE·PROSPEK·CLOSING·RETENSI·TOOLS·REPORTING·OMNICHANNEL·STRATEGI. Salesforce·HubSpot·Zoho·SPIN Selling·Challenger Sale·NPS·CLV. Route: `/crm-sales-claw`.
+- **BrandContentClaw (1177)**: BC-BRAND·COPY·VISUAL·STORY·VIDEO·PR·UGC·AUDIT. Brand strategy·Positioning·Copywriting·Storytelling·PR & Media·Reputation management. Route: `/brand-content-claw`.
+- **EcommerceClaw (1186)**: EC-MARKETPLACE·PRODUK·IKLAN·OPERASI·LOGISTIK·KEUANGAN·CUSTOMER·EKSPANSI. Tokopedia/Shopee/TikTok Shop·Shopify/WooCommerce·3PL·CRO·Growth hacking. Route: `/ecommerce-claw`.
+- **RekrutmenClaw (1195)**: REK-STRATEGI·SOURCING·SELEKSI·INTERVIEW·ONBOARDING·EVP·KONTRAK·ATS. LinkedIn Recruiter·Boolean search·Psychometric·Assessment center·Employer branding·D&I. Route: `/rekrutmen-claw`.
+- **LdKompetensiClaw (1204)**: LD-TNA·KURIKULUM·FASILITASI·ELEARNING·EVALUASI·KOMPETENSI·COACHING·SERTIFIKASI. ADDIE/SAM·LMS·Microlearning·Kirkpatrick 4 levels·360 feedback·Competency framework. Route: `/ld-kompetensi-claw`.
+- **PenilaianKinerjaClaw (1213)**: PK-OKR·KPI·REVIEW·PIP·KOMPENSASI·TALENT·ENGAGEMENT·HRIS. OKR/SMART framework·Pay-for-performance·Calibration·Forced ranking·People analytics·Attrition prediction. Route: `/penilaian-kinerja-claw`.
 
 ## User preferences
 Preferred communication style: Simple, everyday language.

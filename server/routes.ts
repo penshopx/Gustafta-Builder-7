@@ -17004,5 +17004,68 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // GET /api/digital-marketing-claw/orchestrator
+  app.get("/api/digital-marketing-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("digital-marketing-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "DigitalMarketingClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/crm-sales-claw/orchestrator
+  app.get("/api/crm-sales-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("crm-sales-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "CrmSalesClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/brand-content-claw/orchestrator
+  app.get("/api/brand-content-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("brand-content-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "BrandContentClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/ecommerce-claw/orchestrator
+  app.get("/api/ecommerce-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("ecommerce-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "EcommerceClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/rekrutmen-claw/orchestrator
+  app.get("/api/rekrutmen-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("rekrutmen-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "RekrutmenClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/ld-kompetensi-claw/orchestrator
+  app.get("/api/ld-kompetensi-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("ld-kompetensi-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "LdKompetensiClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/penilaian-kinerja-claw/orchestrator
+  app.get("/api/penilaian-kinerja-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("penilaian-kinerja-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "PenilaianKinerjaClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   return httpServer;
 }

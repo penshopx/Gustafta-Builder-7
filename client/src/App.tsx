@@ -608,6 +608,69 @@ function Router() {
             icon={<span className="text-4xl">🌿</span>}
           ><TransisiEnergiClawChat /></PremiumPageGuard>
         )} />
+        <Route path="/digital-marketing-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="DigitalMarketingClaw — AI Konsultan Digital Marketing Indonesia"
+            description="8 spesialis digital marketing bekerja paralel: strategi SEO & SEM (Google Ads/Meta Ads), social media marketing (Instagram/TikTok/LinkedIn), content marketing & copywriting, email marketing & marketing automation, analytics & data-driven decision making, influencer & KOL marketing, marketplace optimization (Tokopedia/Shopee/Lazada), dan performance marketing & conversion rate optimization."
+            highlights={["SEO/SEM — keyword research, on-page/off-page, Google Ads ROAS optimization","Social Media — algoritma Instagram/TikTok, content calendar, paid social","Analytics — GA4, Meta Pixel, attribution model, funnel analysis","Marketplace — Tokopedia/Shopee ads, ranking algorithm, review management"]}
+            icon={<span className="text-4xl">📱</span>}
+          ><DigitalMarketingClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/crm-sales-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="CrmSalesClaw — AI Konsultan CRM & Sales Excellence Indonesia"
+            description="8 spesialis CRM & sales bekerja paralel: strategi sales funnel & pipeline management, CRM implementation (Salesforce/HubSpot/Zoho), customer segmentation & lifetime value, B2B & B2C sales methodology, negotiation & closing techniques, customer retention & loyalty program, sales analytics & forecasting, serta team performance & sales coaching."
+            highlights={["Sales Funnel — pipeline design, lead scoring, conversion rate optimization","CRM — Salesforce/HubSpot setup, automation, reporting dashboard","B2B Sales — SPIN Selling, Challenger Sale, account-based selling","Customer Retention — NPS, churn analysis, loyalty program design"]}
+            icon={<span className="text-4xl">🤝</span>}
+          ><CrmSalesClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/brand-content-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="BrandContentClaw — AI Konsultan Brand & Content Marketing Indonesia"
+            description="8 spesialis brand & content bekerja paralel: brand strategy & positioning, visual identity & brand guidelines, content strategy & editorial planning, storytelling & copywriting, video content & podcast production, PR & media relations, brand measurement & equity tracking, serta crisis communication & reputation management."
+            highlights={["Brand Strategy — positioning, USP, brand architecture, brand story","Content Planning — editorial calendar, content mix, repurposing strategy","Copywriting — headline formula, persuasive writing, tone of voice","PR & Media — press release, media kit, spokesperson training"]}
+            icon={<span className="text-4xl">✨</span>}
+          ><BrandContentClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/ecommerce-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="EcommerceClaw — AI Konsultan E-Commerce & Perdagangan Digital Indonesia"
+            description="8 spesialis e-commerce bekerja paralel: strategi marketplace (Tokopedia/Shopee/Lazada/TikTok Shop), D2C & website optimization, inventory & supply chain management, pricing strategy & promotion, customer experience & UX, payment & logistics integration, cross-border e-commerce, serta data analytics & growth hacking."
+            highlights={["Marketplace — Tokopedia/Shopee/TikTok Shop ads, ranking, flash sale strategy","D2C — Shopify/WooCommerce setup, CRO, checkout optimization","Logistics — 3PL selection, last-mile delivery, return management","Growth Hacking — viral loop, referral program, retention automation"]}
+            icon={<span className="text-4xl">🛒</span>}
+          ><EcommerceClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/rekrutmen-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="RekrutmenClaw — AI Konsultan Rekrutmen & Talent Acquisition Indonesia"
+            description="8 spesialis rekrutmen bekerja paralel: talent strategy & workforce planning, job analysis & competency mapping, sourcing strategy (LinkedIn/jobboard/referral), selection & assessment design, employer branding & EVP, interview & onboarding, diversity & inclusion hiring, serta HR analytics & recruitment metrics."
+            highlights={["Talent Strategy — workforce planning, succession planning, talent pipeline","Sourcing — Boolean search, LinkedIn Recruiter, talent mapping","Assessment — psychometric test, structured interview, assessment center","Employer Branding — EVP, Glassdoor management, campus recruitment"]}
+            icon={<span className="text-4xl">🎯</span>}
+          ><RekrutmenClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/ld-kompetensi-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="LdKompetensiClaw — AI Konsultan Learning & Development Indonesia"
+            description="8 spesialis L&D bekerja paralel: training needs analysis & competency framework, learning design & instructional design, LMS & e-learning development, leadership development program, coaching & mentoring system, organizational development, knowledge management, serta learning impact measurement & Kirkpatrick model."
+            highlights={["TNA — competency gap analysis, learning roadmap, skills matrix","Instructional Design — ADDIE/SAM model, microlearning, blended learning","Leadership Dev — leadership pipeline, 360 feedback, executive coaching","Learning Metrics — Kirkpatrick 4 levels, ROI training, learning analytics"]}
+            icon={<span className="text-4xl">🌱</span>}
+          ><LdKompetensiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/penilaian-kinerja-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PenilaianKinerjaClaw — AI Konsultan Penilaian Kinerja & Manajemen SDM Indonesia"
+            description="8 spesialis penilaian kinerja bekerja paralel: performance management system design, KPI & OKR framework, 360-degree feedback, performance appraisal process, compensation & reward linked to performance, performance improvement plan (PIP), HR analytics & people analytics, serta employee engagement & retention strategy."
+            highlights={["OKR/KPI — objective setting, cascading goals, SMART framework","Performance Review — appraisal form design, calibration session, forced ranking","Compensation — pay-for-performance, salary band, incentive scheme design","People Analytics — attrition prediction, engagement survey, HRIS dashboard"]}
+            icon={<span className="text-4xl">📊</span>}
+          ><PenilaianKinerjaClawChat /></PremiumPageGuard>
+        )} />
         <Route path="/tutor-teknik-claw" component={() => (
           <PremiumPageGuard
             feature="advanced_ai_tools" requiredPlan="profesional"

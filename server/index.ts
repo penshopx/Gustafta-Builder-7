@@ -1715,6 +1715,62 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         log("[Seed KorporasiClaw] Error: " + (err as Error).message);
       }
 
+      // Seed: DigitalMarketingClaw — AI Konsultan Digital Marketing Indonesia (8 spesialis)
+      try {
+        const { seedDigitalMarketingClaw } = M_digitalMarketingClaw;
+        await seedDigitalMarketingClaw();
+      } catch (err) {
+        log("[Seed DigitalMarketingClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: CrmSalesClaw — AI Konsultan CRM & Sales Indonesia (8 spesialis)
+      try {
+        const { seedCrmSalesClaw } = M_crmSalesClaw;
+        await seedCrmSalesClaw();
+      } catch (err) {
+        log("[Seed CrmSalesClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: BrandContentClaw — AI Konsultan Brand & Content Marketing Indonesia (8 spesialis)
+      try {
+        const { seedBrandContentClaw } = M_brandContentClaw;
+        await seedBrandContentClaw();
+      } catch (err) {
+        log("[Seed BrandContentClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: EcommerceClaw — AI Konsultan E-Commerce Indonesia (8 spesialis)
+      try {
+        const { seedEcommerceClaw } = M_ecommerceClaw;
+        await seedEcommerceClaw();
+      } catch (err) {
+        log("[Seed EcommerceClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: RekrutmenClaw — AI Konsultan Rekrutmen & Talent Acquisition Indonesia (8 spesialis)
+      try {
+        const { seedRekrutmenClaw } = M_rekrutmenClaw;
+        await seedRekrutmenClaw();
+      } catch (err) {
+        log("[Seed RekrutmenClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: LdKompetensiClaw — AI Konsultan L&D & Pengembangan Kompetensi Indonesia (8 spesialis)
+      try {
+        const { seedLdKompetensiClaw } = M_ldKompetensiClaw;
+        await seedLdKompetensiClaw();
+      } catch (err) {
+        log("[Seed LdKompetensiClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: PenilaianKinerjaClaw — AI Konsultan Penilaian Kinerja & Manajemen SDM Indonesia (8 spesialis)
+      try {
+        const { seedPenilaianKinerjaClaw } = M_penilaianKinerjaClaw;
+        await seedPenilaianKinerjaClaw();
+      } catch (err) {
+        log("[Seed PenilaianKinerjaClaw] Error: " + (err as Error).message);
+      }
+
       startScheduler();
     },
   );
