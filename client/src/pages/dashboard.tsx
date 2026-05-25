@@ -1419,10 +1419,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/k3-claw">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-2" data-testid="nav-shortcut-k3-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-k3-claw">
                       <ShieldAlert className="w-4 h-4 text-orange-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">K3Claw (K3 Teknis)</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/lingkungan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-green-700 dark:text-green-400 hover:bg-green-500/10 border border-green-500/20 mb-2" data-testid="nav-shortcut-lingkungan-claw">
+                      <Leaf className="w-4 h-4 text-green-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">LingkunganClaw (LH)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-green-500/50" />
                     </div>
                   </Link>
                   {orchestratorHub ? (
@@ -2489,6 +2496,12 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-orange-600 dark:text-orange-400">
                     <ShieldAlert className="w-4 h-4" />
                     K3Claw (K3 Teknis)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/lingkungan-claw">
+                  <DropdownMenuItem className="gap-2 text-green-600 dark:text-green-400">
+                    <Leaf className="w-4 h-4" />
+                    LingkunganClaw (LH)
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>

@@ -96,6 +96,7 @@ import ScopeMekanikalChat from "@/pages/scope-mekanikal";
 import SipilClawChat from "@/pages/sipil-claw";
 import MepClawChat from "@/pages/mep-claw";
 import K3ClawChat from "@/pages/k3-claw";
+import LingkunganClawChat from "@/pages/lingkungan-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -536,6 +537,15 @@ function Router() {
             highlights={["HVAC: sizing AC, chiller, AHU, VRF, ducting berbasis ASHRAE","Plumbing & listrik: fixture unit, panel, genset, kabel, grounding PUIL","Fire Protection (NFPA 13/14/20) & Transportasi Vertikal (EN 81)","ELV/BMS/ICT + Estimasi BOQ & RAB MEP komprehensif"]}
             icon={<Settings2 className="h-12 w-12 text-emerald-400" />}
           ><MepClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/lingkungan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="LingkunganClaw — AI Konsultan Lingkungan Hidup"
+            description="MultiClaw AI dengan 7 spesialis lingkungan paralel: AMDAL & Perizinan KLHK, Limbah B3, Kualitas Air & IPAL, Kualitas Udara & Emisi, Tanah & Sampah, Karbon & Iklim, dan Green Building Greenship/EDGE/LEED."
+            highlights={["AMDAL & UKL-UPL: perizinan KLHK, RKL-RPL, konsultasi publik berbasis PP 22/2021","Limbah B3: manifest Siraja, TPS B3, pengolahan — oli bekas, FABA, e-waste, limbah medis","IPAL & kualitas udara: CEMS, ISPU, FGD/ESP/SCR, dispersi AERMOD, remediasi lahan","GRK Scope 1/2/3, IDX Carbon, NDC Indonesia, PROPER, Greenship GBCI/EDGE/LEED"]}
+            icon={<Leaf className="h-12 w-12 text-green-400" />}
+          ><LingkunganClawChat /></PremiumPageGuard>
         )} />
         <Route path="/k3-claw" component={() => (
           <PremiumPageGuard
