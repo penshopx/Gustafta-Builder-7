@@ -80,6 +80,9 @@ import EducounselClawChat from "@/pages/educounsel-claw";
 import IBTUClawChat from "@/pages/ibtu-claw";
 import EtloAcademyClawChat from "@/pages/etlo-academy-claw";
 import EtloBizDevClawChat from "@/pages/etlo-bizdev-claw";
+import BimClawChat from "@/pages/bim-claw";
+import DesainClawChat from "@/pages/desain-claw";
+import SiteOpsClawChat from "@/pages/siteops-claw";
 import KetenagalistrikanClawChat from "@/pages/ketenagalistrikan-claw";
 import EnergiClawChat from "@/pages/energi-claw";
 import PertambanganClawChat from "@/pages/pertambangan-claw";
@@ -499,6 +502,33 @@ function Router() {
             highlights={["Proposal grant internasional ADB/GCF/BPDLH/UNDP — Theory of Change & M&E","ESG & climate finance — TCFD, GHG Protocol Scope 1/2/3, IDXCarbon, JETP","ROI & SROI — kalkulasi NPV, IRR, payback, tCO2eq, social return on investment","Scale-up nasional — franchise model, hub regional, lisensi konten 20+ kota"]}
             icon={<span className="text-4xl">🌿</span>}
           ><EtloBizDevClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/bim-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="BIMClaw — AI Konsultan BIM & Konstruksi Digital Indonesia"
+            description="8 spesialis BIM bekerja paralel: standar ISO 19650 & BEP, pemodelan Revit/ArchiCAD/IFC, clash detection Navisworks, simulasi konstruksi 4D, quantity takeoff & cost BIM (5D), koordinasi MEP dalam BIM, Civil BIM infrastruktur (jalan/jembatan), dan CDE/kolaborasi Autodesk Construction Cloud."
+            highlights={["ISO 19650 & BEP — LOD 100–500, EIR, MIDP/TIDP, Permen PUPR 22/2018","Clash Detection — Navisworks, koordinasi multidisiplin, BCF, RFI workflow","4D/5D BIM — simulasi konstruksi, QTO dari Revit, cost BIM terintegrasi","CDE & Handover — ACC/BIM 360, folder ISO 19650, COBie, FM BIM"]}
+            icon={<span className="text-4xl">🏗️</span>}
+          ><BimClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/desain-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="DesainClaw — AI Konsultan Desain Arsitektur & Rekayasa Indonesia"
+            description="8 spesialis desain bekerja paralel: konsep arsitektur & Greenship, desain struktur (SNI 2847/1726/1729), sistem MEP (ASHRAE/PUIL/NFPA), interior & FF&E, lansekap & RTH, masterplan urban (KDB/KLB/TOD), perizinan PBG/SLF/KKPR (PP 16/2021), dan dokumen teknis DED/RKS/BOQ."
+            highlights={["Arsitektur & Greenship — konsep fasad, program ruang, green building GBCI/EDGE","Struktur SNI — beton (SNI 2847:2019), baja (SNI 1729:2020), gempa (SNI 1726:2019)","PBG/SLF/KKPR — PP 16/2021, dokumen wajib, TABG, proses perizinan","DED & RKS — kelengkapan gambar per disiplin, BOQ format standar, shop drawing"]}
+            icon={<span className="text-4xl">🎨</span>}
+          ><DesainClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/siteops-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SiteOpsClaw — AI Konsultan Operasional Lapangan Konstruksi"
+            description="8 spesialis lapangan bekerja paralel: mobilisasi & site setup, penjadwalan CPM/EVM (Primavera P6), laporan produksi harian, manajemen logistik & MTO, K3 lapangan & SMKK (PermenPUPR 10/2021), quality control & ITP (ISO 9001), klaim konstruksi FIDIC/VO/EOT, dan project closeout SLF/PHO/FHO."
+            highlights={["K3 & SMKK — RKK wajib, JSA, PTW, PermenPUPR 10/2021, PP 50/2012","Schedule & EVM — master schedule P6/MSP, look-ahead, SPI/CPI, recovery plan","Klaim FIDIC — VO/CO, EOT (Sub-Clause 20.1), SCL Protocol 2017, prolongation","Closeout — commissioning MEP, SLF, punch list, PHO/FHO, O&M package"]}
+            icon={<span className="text-4xl">🦺</span>}
+          ><SiteOpsClawChat /></PremiumPageGuard>
         )} />
         <Route path="/ketenagalistrikan-claw" component={() => (
           <PremiumPageGuard

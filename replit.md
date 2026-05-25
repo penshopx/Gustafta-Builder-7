@@ -94,6 +94,9 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/ibtu-claw` | IBTUClaw — IB Testing Unit AI | 7 | 1953 | indigo | 1946–1952 |
 | `/etlo-academy-claw` | ETLOAcademyClaw — Program ETLO: Kurikulum, Audit Energi & Sertifikasi EBT | 10 | 964 | emerald | 954–963 |
 | `/etlo-bizdev-claw` | ETLOBizDevClaw — Strategi Bisnis & Pengembangan Program ETLO | 10 | 975 | teal | 965–974 |
+| `/bim-claw` | BIMClaw — AI Konsultan BIM & Konstruksi Digital Indonesia | 8 | 1031 | blue | 1023–1030 |
+| `/desain-claw` | DesainClaw — AI Konsultan Desain Arsitektur & Rekayasa Indonesia | 8 | 1040 | rose | 1032–1039 |
+| `/siteops-claw` | SiteOpsClaw — AI Konsultan Operasional Lapangan Konstruksi | 8 | 1049 | orange | 1041–1048 |
 | `/ketenagalistrikan-claw` | KetenagalistrikanClaw — Konsultan Sistem Ketenagalistrikan Indonesia | 8 | 994 | yellow | 986–993 |
 | `/energi-claw` | EnergiClaw — Konsultan Energi & EBT Indonesia | 8 | 1003 | orange | 995–1002 |
 | `/pertambangan-claw` | PertambanganClaw — Konsultan Pertambangan Indonesia | 8 | 1012 | stone | 1004–1011 |

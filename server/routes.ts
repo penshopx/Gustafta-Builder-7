@@ -16860,6 +16860,39 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     }
   });
 
+  // GET /api/bim-claw/orchestrator — BIMClaw MultiClaw 8-Agent BIM & Konstruksi Digital
+  app.get("/api/bim-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("bim-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "BIMClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/desain-claw/orchestrator — DesainClaw MultiClaw 8-Agent Desain Arsitektur & Rekayasa
+  app.get("/api/desain-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("desain-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "DesainClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/siteops-claw/orchestrator — SiteOpsClaw MultiClaw 8-Agent Operasional Lapangan Konstruksi
+  app.get("/api/siteops-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("siteops-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "SiteOpsClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/ketenagalistrikan-claw/orchestrator — KetenagalistrikanClaw MultiClaw 8-Agent Ketenagalistrikan Indonesia
   app.get("/api/ketenagalistrikan-claw/orchestrator", async (_req, res) => {
     try {

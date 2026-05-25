@@ -121,6 +121,9 @@ import * as M_k3ManClaw from "./seed-k3man-claw";
 import * as M_ibtuClaw from "./seed-ibtu-claw";
 import * as M_etloAcademyClaw from "./seed-etlo-academy-claw";
 import * as M_etloBizDevClaw from "./seed-etlo-bizdev-claw";
+import * as M_bimClaw from "./seed-bim-claw";
+import * as M_desainClaw from "./seed-desain-claw";
+import * as M_siteOpsClaw from "./seed-siteops-claw";
 import * as M_ketenagalistrikanClaw from "./seed-ketenagalistrikan-claw";
 import * as M_energiClaw from "./seed-energi-claw";
 import * as M_pertambanganClaw from "./seed-pertambangan-claw";
@@ -1583,6 +1586,30 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedEtloBizDevClaw();
       } catch (err) {
         log("[Seed ETLOBizDevClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: BIMClaw — BIM & Konstruksi Digital (8 sub-agen spesialis)
+      try {
+        const { seedBimClaw } = M_bimClaw;
+        await seedBimClaw();
+      } catch (err) {
+        log("[Seed BIMClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: DesainClaw — Desain Arsitektur & Rekayasa (8 sub-agen spesialis)
+      try {
+        const { seedDesainClaw } = M_desainClaw;
+        await seedDesainClaw();
+      } catch (err) {
+        log("[Seed DesainClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: SiteOpsClaw — Operasional Lapangan Konstruksi (8 sub-agen spesialis)
+      try {
+        const { seedSiteOpsClaw } = M_siteOpsClaw;
+        await seedSiteOpsClaw();
+      } catch (err) {
+        log("[Seed SiteOpsClaw] Error: " + (err as Error).message);
       }
 
       // Seed: KetenagalistrikanClaw — Ketenagalistrikan Indonesia (8 sub-agen spesialis)
