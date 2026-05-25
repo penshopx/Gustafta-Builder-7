@@ -70,6 +70,7 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/migas-claw` | MigasClaw — Kompetensi & Perizinan Energi | 9 | 564 | orange | 565–573 |
 | `/dev-properti-claw` | DevPropertiClaw — Developer Real Estate | 10 | 575 | violet | 576–585 |
 | `/estate-care-claw` | EstateCareClaw — Konsultan Properti Konsumen | 10 | 586 | emerald | 587–596 |
+| `/skema-claw` | SkemaClaw — Konsultan Cerdas Sertifikasi BUJK Permen PU 6/2025 | 9 | 1448 | blue/indigo | 1449–1457 |
 | `/konstra-claw` | KonstraClaw — Manajemen Proyek Konstruksi | 9 | 1281 | slate | 1272–1280 |
 | `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
 | `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |

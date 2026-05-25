@@ -81,6 +81,7 @@ import IBTUClawChat from "@/pages/ibtu-claw";
 import MigasClawChat from "@/pages/migas-claw";
 import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
+import SkemaClawChat from "@/pages/skema-claw";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
@@ -481,6 +482,15 @@ function Router() {
             highlights={["Due diligence sertifikat & legalitas — AJB, PPAT, SHM/HGB","Estimasi pajak penjual: BPHTB, PPh final 2,5%, biaya notaris","Analisis rental yield, ROI, & strategi investasi properti","Hak penyewa vs pemilik — klausul kontrak sewa & sengketa"]}
             icon={<Search className="h-12 w-12 text-emerald-400" />}
           ><EstateCareClaw /></PremiumPageGuard>
+        )} />
+        <Route path="/skema-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SkemaClaw — Konsultan Cerdas Sertifikasi BUJK"
+            description="9 spesialis regulasi bekerja paralel: kerangka hukum Permen PU 6/2025, kualifikasi & 4 kriteria penilaian, kemampuan keuangan & audit KAP, tenaga kerja konstruksi (PJBU/PJTBU/PJKBU), peralatan & SIMPK, alur sertifikasi LSBU 10 tahap, konversi 349K SBU & KBLI 2025, sistem informasi SIJKT, dan kewajiban BUJK & sanksi administratif."
+            highlights={["Konversi 349.239 SBU — peta jalan KBLI 2020 ke KBLI 2025","4 Kriteria Penilaian Kumulatif — K1/K2/K3/Menengah/Besar","Alur sertifikasi LSBU 10 tahap — PKS, surveilans, QR Code SBU","Mode: Konsultasi · Audit · Simulasi · Ujian · Debat · Strategis"]}
+            icon={<Scale className="h-12 w-12 text-blue-400" />}
+          ><SkemaClawChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
