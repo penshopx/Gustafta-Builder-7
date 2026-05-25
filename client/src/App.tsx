@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -82,6 +82,7 @@ import MigasClawChat from "@/pages/migas-claw";
 import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
 import SkemaClawChat from "@/pages/skema-claw";
+import PanduanSBUChat from "@/pages/panduan-sbu";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
@@ -491,6 +492,15 @@ function Router() {
             highlights={["Konversi 349.239 SBU — peta jalan KBLI 2020 ke KBLI 2025","4 Kriteria Penilaian Kumulatif — K1/K2/K3/Menengah/Besar","Alur sertifikasi LSBU 10 tahap — PKS, surveilans, QR Code SBU","Mode: Konsultasi · Audit · Simulasi · Ujian · Debat · Strategis"]}
             icon={<Scale className="h-12 w-12 text-blue-400" />}
           ><SkemaClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/panduan-sbu" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PanduanSBU — Tanya Jawab Sertifikasi BUJK"
+            description="Chatbot ramah untuk semua kalangan — tanya apa saja tentang SBU, kualifikasi perusahaan konstruksi, syarat dokumen, konversi KBLI 2025, dan aturan Permen PU 6/2025. Dijawab langsung, jelas, dan mudah dipahami."
+            highlights={["Jawaban langsung tanpa format akademis","Bahasa sederhana — cocok untuk pemilik BUJK & masyarakat umum","Cakupan: SBU, kualifikasi, dokumen, konversi, sanksi, SIJKT","Berbasis Permen PU 6/2025 & materi workshop resmi LPJK"]}
+            icon={<BookOpen className="h-12 w-12 text-emerald-400" />}
+          ><PanduanSBUChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />

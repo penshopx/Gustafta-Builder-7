@@ -12494,6 +12494,28 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/panduan-sbu/agent — PanduanSBU single-agent answer machine untuk masyarakat umum
+  app.get("/api/panduan-sbu/agent", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgent("1458");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.slug, "%panduan-sbu%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "PanduanSBU agent belum ditemukan. Pastikan agen ID 1458 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/skema-claw/orchestrator — SkemaClaw 9-Agent Konsultan Cerdas Sertifikasi BUJK Permen PU 6/2025
   app.get("/api/skema-claw/orchestrator", async (_req, res) => {
     try {
