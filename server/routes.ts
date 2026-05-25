@@ -16926,5 +16926,38 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     }
   });
 
+  // GET /api/ebt-solar-claw/orchestrator — EBTSolarClaw MultiClaw 9-Agent PLTS & Energi Surya
+  app.get("/api/ebt-solar-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("ebt-solar-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "EBTSolarClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/geologi-claw/orchestrator — GeologiClaw MultiClaw 9-Agent Geologi & Eksplorasi Mineral
+  app.get("/api/geologi-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("geologi-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "GeologiClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/offshore-safety-claw/orchestrator — OffshoreSafetyClaw MultiClaw 9-Agent K3 & Operasi Migas Offshore
+  app.get("/api/offshore-safety-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("offshore-safety-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "OffshoreSafetyClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   return httpServer;
 }

@@ -127,6 +127,9 @@ import * as M_siteOpsClaw from "./seed-siteops-claw";
 import * as M_ketenagalistrikanClaw from "./seed-ketenagalistrikan-claw";
 import * as M_energiClaw from "./seed-energi-claw";
 import * as M_pertambanganClaw from "./seed-pertambangan-claw";
+import * as M_ebtSolarClaw from "./seed-ebt-solar-claw";
+import * as M_geologiClaw from "./seed-geologi-claw";
+import * as M_offshoreSafetyClaw from "./seed-offshore-safety-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1634,6 +1637,30 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedPertambanganClaw();
       } catch (err) {
         log("[Seed PertambanganClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: EBTSolarClaw — PLTS & Energi Surya Indonesia (8 sub-agen spesialis)
+      try {
+        const { seedEbtSolarClaw } = M_ebtSolarClaw;
+        await seedEbtSolarClaw();
+      } catch (err) {
+        log("[Seed EBTSolarClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: GeologiClaw — Geologi & Eksplorasi Mineral Indonesia (8 sub-agen spesialis)
+      try {
+        const { seedGeologiClaw } = M_geologiClaw;
+        await seedGeologiClaw();
+      } catch (err) {
+        log("[Seed GeologiClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: OffshoreSafetyClaw — K3 & Operasi Migas Offshore Indonesia (8 sub-agen spesialis)
+      try {
+        const { seedOffshoreSafetyClaw } = M_offshoreSafetyClaw;
+        await seedOffshoreSafetyClaw();
+      } catch (err) {
+        log("[Seed OffshoreSafetyClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

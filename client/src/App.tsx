@@ -86,6 +86,9 @@ import SiteOpsClawChat from "@/pages/siteops-claw";
 import KetenagalistrikanClawChat from "@/pages/ketenagalistrikan-claw";
 import EnergiClawChat from "@/pages/energi-claw";
 import PertambanganClawChat from "@/pages/pertambangan-claw";
+import EbtSolarClawChat from "@/pages/ebt-solar-claw";
+import GeologiClawChat from "@/pages/geologi-claw";
+import OffshoreClawChat from "@/pages/offshore-safety-claw";
 import MigasClawChat from "@/pages/migas-claw";
 import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
@@ -556,6 +559,33 @@ function Router() {
             highlights={["IUP/IUPK/SIPB — OSS-RBA, CnC, RKAB tahunan, UU Minerba 3/2020","Hilirisasi Mineral — smelter RKEF/NPI vs HPAL/nickel sulfate, wajib olah","K3 Tambang & SMKP — KTT/KIT, POP/POM/POU, Kepmen ESDM 1827/2018","Reklamasi & Pascatambang — jaminan reklamasi, AMD, RPT, PP 78/2010"]}
             icon={<span className="text-4xl">⛏️</span>}
           ><PertambanganClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/ebt-solar-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="EBTSolarClaw — AI Konsultan PLTS & Energi Surya Indonesia"
+            description="8 spesialis PLTS bekerja paralel: sizing & PVsyst/yield analysis, PPA & FIT Permen ESDM 2/2023, perizinan IUPTL/KKPR/AMDAL/SLO, EPC konstruksi & commissioning IEC, integrasi grid PLN, O&M & monitoring, BESS LFP/NMC penyimpanan energi, dan inovasi agrivoltaic/floating solar."
+            highlights={["Sizing & Yield — PVsyst/PVWatts P50/P90, GHI Indonesia 1.300-1.500 kWh/kWp","PPA & FIT — Permen ESDM 2/2023, tarif per zona, LCOE, project finance","BESS — LFP vs NMC, dispatch strategy, LCOS, NFPA 855, VRE integration","Perizinan — IUPTL OSS-RBA, KKPR, AMDAL, SLO PLN, net metering"]}
+            icon={<span className="text-4xl">☀️</span>}
+          ><EbtSolarClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/geologi-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="GeologiClaw — AI Konsultan Geologi & Eksplorasi Mineral Indonesia"
+            description="8 spesialis geologi bekerja paralel: geologi regional & metalogenik Indonesia, program eksplorasi & QAQC, geofisika (IP/magnetic/EM/seismik), pemboran & core logging, estimasi sumber daya JORC 2012/KCMI 2017, alterasi & mineralisasi epithermal/porphyry, geoteknik lereng (RMR/Hoek-Brown), dan hidrogeologi AMD."
+            highlights={["JORC 2012 & KCMI 2017 — Inferred/Indicated/Measured, Competent Person PERHAPI/AusIMM","Geofisika — IP/induced polarization, magnetic, EM, seismik refraksi, CSAMT","Geoteknik Lereng — RMR, Q-system, Hoek-Brown, FoS slope open pit/underground","AMD & Hidrogeologi — ABA test, NAG, dewatering, pit lake, reklamasi PP 22/2021"]}
+            icon={<span className="text-4xl">🔬</span>}
+          ><GeologiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/offshore-safety-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="OffshoreSafetyClaw — AI Konsultan K3 & Operasi Migas Offshore Indonesia"
+            description="8 spesialis offshore bekerja paralel: CSMS & SMK3 (SKK Migas/ISM Code), operasi platform/FPSO, well control & BOP (IWCF/IADC), marine operations & DP vessels (SOLAS), process safety (HAZOP/QRA/SIL IEC 61511), lingkungan MARPOL/oil spill response, asset integrity (API RP 2SIM/NDT), dan regulasi KKKS/PSC/WP&B SKK Migas."
+            highlights={["CSMS SKK Migas — pre-qualification, KPI K3, PTK 036, ISM Code offshore","Well Control — BOP API 16A, IWCF/IADC, kill method, deepwater MPD","Process Safety — HAZOP, QRA, SIL IEC 61511, bow-tie, LOPA, PFEER EER","MARPOL & Oil Spill — Annex I/V, produced water, Tier 1/2/3 response"]}
+            icon={<span className="text-4xl">🛢️</span>}
+          ><OffshoreClawChat /></PremiumPageGuard>
         )} />
         <Route path="/migas-claw" component={() => (
           <PremiumPageGuard
