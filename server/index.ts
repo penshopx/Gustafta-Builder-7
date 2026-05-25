@@ -130,6 +130,11 @@ import * as M_pertambanganClaw from "./seed-pertambangan-claw";
 import * as M_ebtSolarClaw from "./seed-ebt-solar-claw";
 import * as M_geologiClaw from "./seed-geologi-claw";
 import * as M_offshoreSafetyClaw from "./seed-offshore-safety-claw";
+import * as M_transisiEnergiClaw from "./seed-transisi-energi-claw";
+import * as M_tutorTeknikClaw from "./seed-tutor-teknik-claw";
+import * as M_risetSkripsiClaw from "./seed-riset-skripsi-claw";
+import * as M_nspkNavigatorClaw from "./seed-nspk-navigator-claw";
+import * as M_korporasiClaw from "./seed-korporasi-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1661,6 +1666,46 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedOffshoreSafetyClaw();
       } catch (err) {
         log("[Seed OffshoreSafetyClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: TransisiEnergiClaw — Transisi Energi & Dekarbonisasi Indonesia (8 spesialis)
+      try {
+        const { seedTransisiEnergiClaw } = M_transisiEnergiClaw;
+        await seedTransisiEnergiClaw();
+      } catch (err) {
+        log("[Seed TransisiEnergiClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: TutorTeknikClaw — AI Tutor Teknik Mahasiswa Indonesia (8 tutor)
+      try {
+        const { seedTutorTeknikClaw } = M_tutorTeknikClaw;
+        await seedTutorTeknikClaw();
+      } catch (err) {
+        log("[Seed TutorTeknikClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: RisetSkripsiClaw — Konsultan Riset & Skripsi (7 spesialis)
+      try {
+        const { seedRisetSkripsiClaw } = M_risetSkripsiClaw;
+        await seedRisetSkripsiClaw();
+      } catch (err) {
+        log("[Seed RisetSkripsiClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: NSPKNavigatorClaw — Navigator NSPK & Standar Teknis Indonesia (8 spesialis)
+      try {
+        const { seedNspkNavigatorClaw } = M_nspkNavigatorClaw;
+        await seedNspkNavigatorClaw();
+      } catch (err) {
+        log("[Seed NSPKNavigatorClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: KorporasiClaw — Konsultan Korporasi & Bisnis Indonesia (8 spesialis)
+      try {
+        const { seedKorporasiClaw } = M_korporasiClaw;
+        await seedKorporasiClaw();
+      } catch (err) {
+        log("[Seed KorporasiClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

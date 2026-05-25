@@ -16959,5 +16959,50 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     }
   });
 
+  // GET /api/transisi-energi-claw/orchestrator
+  app.get("/api/transisi-energi-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("transisi-energi-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "TransisiEnergiClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/tutor-teknik-claw/orchestrator
+  app.get("/api/tutor-teknik-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("tutor-teknik-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "TutorTeknikClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/riset-skripsi-claw/orchestrator
+  app.get("/api/riset-skripsi-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("riset-skripsi-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "RisetSkripsiClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/nspk-navigator-claw/orchestrator
+  app.get("/api/nspk-navigator-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("nspk-navigator-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "NSPKNavigatorClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // GET /api/korporasi-claw/orchestrator
+  app.get("/api/korporasi-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("korporasi-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "KorporasiClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   return httpServer;
 }

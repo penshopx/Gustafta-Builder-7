@@ -89,6 +89,11 @@ import PertambanganClawChat from "@/pages/pertambangan-claw";
 import EbtSolarClawChat from "@/pages/ebt-solar-claw";
 import GeologiClawChat from "@/pages/geologi-claw";
 import OffshoreClawChat from "@/pages/offshore-safety-claw";
+import TransisiEnergiClawChat from "@/pages/transisi-energi-claw";
+import TutorTeknikClawChat from "@/pages/tutor-teknik-claw";
+import RisetSkripsiClawChat from "@/pages/riset-skripsi-claw";
+import NspkNavigatorClawChat from "@/pages/nspk-navigator-claw";
+import KorporasiClawChat from "@/pages/korporasi-claw";
 import MigasClawChat from "@/pages/migas-claw";
 import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
@@ -586,6 +591,51 @@ function Router() {
             highlights={["CSMS SKK Migas — pre-qualification, KPI K3, PTK 036, ISM Code offshore","Well Control — BOP API 16A, IWCF/IADC, kill method, deepwater MPD","Process Safety — HAZOP, QRA, SIL IEC 61511, bow-tie, LOPA, PFEER EER","MARPOL & Oil Spill — Annex I/V, produced water, Tier 1/2/3 response"]}
             icon={<span className="text-4xl">🛢️</span>}
           ><OffshoreClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/transisi-energi-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="TransisiEnergiClaw — AI Konsultan Transisi Energi & Dekarbonisasi Indonesia"
+            description="8 spesialis transisi energi bekerja paralel: kebijakan JETP/NZE 2060/NDC Indonesia, hidrogen hijau & CCUS, panas bumi (WKP/PPA/Permen ESDM 4/2020), PLTB onshore/offshore (IEC 61400), grid-scale storage & pumped hydro (PHS/BESS/VRFB), pasar karbon IDXCarbon & VCM (Perpres 98/2021), pensiun dini PLTU ETM (ADB), dan smart grid/VRE integration."
+            highlights={["JETP/NZE 2060 — CIPP Indonesia, coal phase-down, climate finance blended","Green Hydrogen — elektrolizer PEM/alkaline, LCOH, CCUS PP 2/2023","IDXCarbon — NEK Perpres 98/2021, VCM, Artikel 6, SBTi corporate net zero","ETM PLTU — early retirement ADB, stranded asset, just transition"]}
+            icon={<span className="text-4xl">🌿</span>}
+          ><TransisiEnergiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/tutor-teknik-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="TutorTeknikClaw — AI Tutor Teknik Komprehensif untuk Mahasiswa Indonesia"
+            description="8 tutor teknik bekerja paralel: teknik sipil (SNI 2847/1726/1729), teknik mesin (termodinamika/fluida/elemen mesin), teknik elektro (rangkaian/mesin listrik/elektronika), teknik kimia (neraca massa/reaktor/distilasi), informatika (algoritma/Python/ML), matematika teknik (kalkulus/ODE/metode numerik), fisika teknik, dan praktikum lab. Cocok untuk D3, D4, S1, S2."
+            highlights={["Penyelesaian soal step-by-step dengan perhitungan lengkap dan satuan","Penjelasan konsep dari prinsip dasar + intuisi fisik/matematis","Review dan koreksi jawaban mahasiswa dengan tone supportive","Code debugging Python/Java/C++ dengan contoh running output"]}
+            icon={<span className="text-4xl">🎓</span>}
+          ><TutorTeknikClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/riset-skripsi-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="RisetSkripsiClaw — AI Konsultan Riset & Skripsi untuk Mahasiswa Indonesia"
+            description="7 spesialis riset bekerja paralel: pemilihan topik & research gap, systematic literature review (PRISMA/SLR), metodologi penelitian (kuantitatif/kualitatif/mixed methods), analisis data statistik (SPSS/SmartPLS/R/Python), penulisan ilmiah (APA 7th/IEEE), persiapan sidang & presentasi, serta publikasi jurnal Scopus/SINTA & proposal PKM/hibah."
+            highlights={["Research gap & topik: dari ide ke RQ yang tajam dan novelty claim","SLR PRISMA: keyword strategy, Scopus/WoS, bibliometrik VOSviewer","SmartPLS/SPSS: analisis SEM, regresi, CFA, interpretasi output","Sidang Q&A simulator: latihan menjawab pertanyaan penguji"]}
+            icon={<span className="text-4xl">📚</span>}
+          ><RisetSkripsiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/nspk-navigator-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="NSPKNavigatorClaw — AI Panduan Norma, Standar, Prosedur & Kriteria Indonesia"
+            description="8 spesialis NSPK bekerja paralel: konstruksi (SNI/PBG/SMKK), ketenagalistrikan (PUIL 2011/IEC/SLO), lingkungan (PP 22/2021/AMDAL/baku mutu), K3 nasional (PP 50/2012 SMK3/ISO 45001), tata ruang (UU 26/2007/RTRW/KKPR), perizinan digital OSS-RBA (PP 5/2021/NIB/KBLI), pertambangan (UU 3/2020/SMKP), dan industri/pangan (SNI wajib/BPOM/halal BPJPH)."
+            highlights={["OSS-RBA NIB — KBLI 2020, perizinan berbasis risiko, PP 5/2021","SMK3 PP 50/2012 — 12 elemen, audit internal/eksternal, kewajiban","PUIL 2011 & SLO — instalasi tegangan rendah/menengah, riksa uji","AMDAL/UKL-UPL → Persetujuan Lingkungan PP 22/2021"]}
+            icon={<span className="text-4xl">📋</span>}
+          ><NspkNavigatorClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/korporasi-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KorporasiClaw — AI Konsultan Korporasi & Bisnis Indonesia"
+            description="8 spesialis korporasi bekerja paralel: pendirian PT/CV/Koperasi (AHU Online), perizinan NIB/OSS-RBA (PP 5/2021/KBLI 2020), perpajakan badan (PPh/PPN/transfer pricing), saham & RUPS/GCG (UU 40/2007), kontrak bisnis & LDD (KUH Perdata/BANI), HR compliance (UU 13/2003/PP 35/2021/BPJS), keuangan korporasi & IPO (PSAK/POJK/OJK), serta M&A & restrukturisasi (KPPU/PKPU)."
+            highlights={["Pendirian PT: AHU Online, modal minimal, biaya notaris, timeline","NIB/OSS-RBA: KBLI 2020, risiko rendah/menengah/tinggi, Sertifikat Standar","PPh Badan: rekonsiliasi fiskal, tarif 22%/11%, koreksi positif/negatif","PHK/PKWT: hitung pesangon PP 35/2021, uang kompensasi PKWT"]}
+            icon={<span className="text-4xl">🏢</span>}
+          ><KorporasiClawChat /></PremiumPageGuard>
         )} />
         <Route path="/migas-claw" component={() => (
           <PremiumPageGuard
