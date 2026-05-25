@@ -12550,6 +12550,17 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/sipil-claw/orchestrator — SipilClaw MultiClaw 7-Agent AI Konsultan Teknik Sipil
+  app.get("/api/sipil-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("sipilclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "SipilClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/scope-sipil/agent — ScopeSipil single-agent ruang lingkup SKK Klasifikasi Sipil
   app.get("/api/scope-sipil/agent", async (_req, res) => {
     try {

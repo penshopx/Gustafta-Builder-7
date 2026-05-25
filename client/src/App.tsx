@@ -93,6 +93,7 @@ import PanduanAskomChat from "@/pages/panduan-askom";
 import ScopeSipilChat from "@/pages/scope-sipil";
 import ScopeManpelChat from "@/pages/scope-manpel";
 import ScopeMekanikalChat from "@/pages/scope-mekanikal";
+import SipilClawChat from "@/pages/sipil-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -524,6 +525,15 @@ function Router() {
             highlights={["Apa itu ASKOM & bagaimana proses uji kompetensi SKK","Syarat peserta uji, APL-01/02, dan dokumen yang dibutuhkan","RPL: pengakuan pengalaman kerja tanpa uji ulang","Hak asesi: banding, keberatan, perlindungan data"]}
             icon={<GraduationCap className="h-12 w-12 text-teal-400" />}
           ><PanduanAskomChat /></PremiumPageGuard>
+        )} />
+        <Route path="/sipil-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SipilClaw — AI Konsultan Teknik Sipil"
+            description="MultiClaw AI dengan 7 spesialis paralel: Struktur, Geoteknik, Jalan, Jembatan, SDA, Material, dan Metode Pelaksanaan. Diskusi teknis mendalam — perhitungan, desain, analisis, berbasis SNI, AASHTO, dan Bina Marga."
+            highlights={["Analisis & desain struktur beton/baja berbasis SNI 2847/1729/1726","Geoteknik: kapasitas fondasi, stabilitas lereng, perbaikan tanah","Perkerasan jalan (Bina Marga), jembatan (SNI 1725), hidrologi & SDA","Material & QC lapangan, metode pelaksanaan & K3 konstruksi"]}
+            icon={<HardHat className="h-12 w-12 text-blue-400" />}
+          ><SipilClawChat /></PremiumPageGuard>
         )} />
         <Route path="/scope-sipil" component={() => (
           <PremiumPageGuard
