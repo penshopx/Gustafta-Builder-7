@@ -94,6 +94,9 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/ibtu-claw` | IBTUClaw — IB Testing Unit AI | 7 | 1953 | indigo | 1946–1952 |
 | `/etlo-academy-claw` | ETLOAcademyClaw — Program ETLO: Kurikulum, Audit Energi & Sertifikasi EBT | 10 | 964 | emerald | 954–963 |
 | `/etlo-bizdev-claw` | ETLOBizDevClaw — Strategi Bisnis & Pengembangan Program ETLO | 10 | 975 | teal | 965–974 |
+| `/ketenagalistrikan-claw` | KetenagalistrikanClaw — Konsultan Sistem Ketenagalistrikan Indonesia | 8 | 994 | yellow | 986–993 |
+| `/energi-claw` | EnergiClaw — Konsultan Energi & EBT Indonesia | 8 | 1003 | orange | 995–1002 |
+| `/pertambangan-claw` | PertambanganClaw — Konsultan Pertambangan Indonesia | 8 | 1012 | stone | 1004–1011 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`

@@ -121,6 +121,9 @@ import * as M_k3ManClaw from "./seed-k3man-claw";
 import * as M_ibtuClaw from "./seed-ibtu-claw";
 import * as M_etloAcademyClaw from "./seed-etlo-academy-claw";
 import * as M_etloBizDevClaw from "./seed-etlo-bizdev-claw";
+import * as M_ketenagalistrikanClaw from "./seed-ketenagalistrikan-claw";
+import * as M_energiClaw from "./seed-energi-claw";
+import * as M_pertambanganClaw from "./seed-pertambangan-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1580,6 +1583,30 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedEtloBizDevClaw();
       } catch (err) {
         log("[Seed ETLOBizDevClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: KetenagalistrikanClaw — Ketenagalistrikan Indonesia (8 sub-agen spesialis)
+      try {
+        const { seedKetenagalistrikanClaw } = M_ketenagalistrikanClaw;
+        await seedKetenagalistrikanClaw();
+      } catch (err) {
+        log("[Seed KetenagalistrikanClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: EnergiClaw — Energi & EBT Indonesia (8 sub-agen spesialis)
+      try {
+        const { seedEnergiClaw } = M_energiClaw;
+        await seedEnergiClaw();
+      } catch (err) {
+        log("[Seed EnergiClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: PertambanganClaw — Pertambangan Indonesia (8 sub-agen spesialis)
+      try {
+        const { seedPertambanganClaw } = M_pertambanganClaw;
+        await seedPertambanganClaw();
+      } catch (err) {
+        log("[Seed PertambanganClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

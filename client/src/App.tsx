@@ -80,6 +80,9 @@ import EducounselClawChat from "@/pages/educounsel-claw";
 import IBTUClawChat from "@/pages/ibtu-claw";
 import EtloAcademyClawChat from "@/pages/etlo-academy-claw";
 import EtloBizDevClawChat from "@/pages/etlo-bizdev-claw";
+import KetenagalistrikanClawChat from "@/pages/ketenagalistrikan-claw";
+import EnergiClawChat from "@/pages/energi-claw";
+import PertambanganClawChat from "@/pages/pertambangan-claw";
 import MigasClawChat from "@/pages/migas-claw";
 import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
@@ -496,6 +499,33 @@ function Router() {
             highlights={["Proposal grant internasional ADB/GCF/BPDLH/UNDP — Theory of Change & M&E","ESG & climate finance — TCFD, GHG Protocol Scope 1/2/3, IDXCarbon, JETP","ROI & SROI — kalkulasi NPV, IRR, payback, tCO2eq, social return on investment","Scale-up nasional — franchise model, hub regional, lisensi konten 20+ kota"]}
             icon={<span className="text-4xl">🌿</span>}
           ><EtloBizDevClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/ketenagalistrikan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="KetenagalistrikanClaw — AI Konsultan Sistem Ketenagalistrikan Indonesia"
+            description="8 spesialis ketenagalistrikan bekerja paralel: perizinan IUPTL/IO/IUPP, instalasi tenaga listrik & SLO (PUIL 2011), sistem distribusi TM/TR & AMI PLN, transmisi SUTT/SUTET & gardu induk, PLTS on-grid/off-grid (Permen ESDM 26/2021), K3 ketenagalistrikan (Permen ESDM 12/2021), tarif listrik & RUPTL PLN, serta regulasi UU 30/2009."
+            highlights={["Perizinan IUPTL & IO — OSS-RBA, dokumen teknis, persetujuan ESDM","PLTS Atap & SLO — sizing, Permen ESDM 26/2021, net metering PLN","K3 Ketenagalistrikan — LOTO, ARC Flash IEEE 1584, AK3 Listrik Permen ESDM 12/2021","Tarif & Power Factor — golongan tarif, denda kVArh, capacitor bank, RUPTL"]}
+            icon={<span className="text-4xl">⚡</span>}
+          ><KetenagalistrikanClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/energi-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="EnergiClaw — AI Konsultan Energi & EBT Indonesia"
+            description="8 spesialis energi bekerja paralel: kebijakan RUEN/KEN/NZE 2060/JETP, PLTS skala besar & PPA PLN, energi angin PLTB, mini hidro PLTM/PLTMH, bioenergi & cofiring PLN, konservasi energi & ECM, audit energi ISO 50001, dan perizinan EBT (WKP, IUPTL, KKPR, insentif fiskal)."
+            highlights={["Kebijakan EBT — RUEN, KEN, NZE 2060, JETP $20M, Perpres 112/2022","PLTS Utility Scale — PVsyst, PPA PLN, FIT Permen ESDM 2/2023, LCOE","Bioenergi — cofiring PLN 5%, biodiesel B35/B40, biogas POME/landfill","Audit Energi ISO 50001 — SNI 6196, IPMVP, auditor BNSP bersertifikat"]}
+            icon={<span className="text-4xl">🔆</span>}
+          ><EnergiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/pertambangan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PertambanganClaw — AI Konsultan Pertambangan Indonesia"
+            description="8 spesialis pertambangan bekerja paralel: perizinan IUP/IUPK/SIPB (UU Minerba 3/2020), geologi eksplorasi & JORC/KCMI, teknik open pit & underground, pengolahan & smelter (RKEF/HPAL), K3 tambang & SMKP, AMDAL & reklamasi (PP 78/2010), PNBP royalti & CSR, serta regulasi UU Minerba."
+            highlights={["IUP/IUPK/SIPB — OSS-RBA, CnC, RKAB tahunan, UU Minerba 3/2020","Hilirisasi Mineral — smelter RKEF/NPI vs HPAL/nickel sulfate, wajib olah","K3 Tambang & SMKP — KTT/KIT, POP/POM/POU, Kepmen ESDM 1827/2018","Reklamasi & Pascatambang — jaminan reklamasi, AMD, RPT, PP 78/2010"]}
+            icon={<span className="text-4xl">⛏️</span>}
+          ><PertambanganClawChat /></PremiumPageGuard>
         )} />
         <Route path="/migas-claw" component={() => (
           <PremiumPageGuard

@@ -16860,5 +16860,38 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     }
   });
 
+  // GET /api/ketenagalistrikan-claw/orchestrator — KetenagalistrikanClaw MultiClaw 8-Agent Ketenagalistrikan Indonesia
+  app.get("/api/ketenagalistrikan-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("ketenagalistrikan-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "KetenagalistrikanClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/energi-claw/orchestrator — EnergiClaw MultiClaw 8-Agent Energi & EBT Indonesia
+  app.get("/api/energi-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("energi-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "EnergiClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/pertambangan-claw/orchestrator — PertambanganClaw MultiClaw 8-Agent Pertambangan Indonesia
+  app.get("/api/pertambangan-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("pertambangan-claw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "PertambanganClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   return httpServer;
 }
