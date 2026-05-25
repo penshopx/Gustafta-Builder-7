@@ -140,6 +140,7 @@ import ProductTour from "@/pages/product-tour";
 import NotFound from "@/pages/not-found";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
+import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
 
 const WIDGET_EXCLUDED_PATHS = ["/legal", "/embed/", "/chaesa", "/demo/"];
 
@@ -951,6 +952,7 @@ function AppContent() {
 
   return (
     <>
+      <ProfileCompletionGuard />
       <Router />
       {showWidget && <ChaesaWidget />}
       <Toaster />

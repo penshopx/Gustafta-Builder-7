@@ -2,16 +2,61 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown, User, Store, Rocket, TrendingUp, MessageCircle, GraduationCap, Sparkles, Brain } from "lucide-react";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown, User, Store, Rocket, TrendingUp, MessageCircle, GraduationCap, Sparkles, Brain, Zap } from "lucide-react";
 
 const WA_NUMBERS = [
   { display: "081287941900", link: "6281287941900" },
   { display: "082299417818", link: "6282299417818" },
 ];
+
+const PLAN_BADGE_CONFIG: Record<string, { label: string; className: string }> = {
+  free:        { label: "Free",        className: "bg-muted text-muted-foreground border-border" },
+  free_trial:  { label: "Trial",       className: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30" },
+  starter:     { label: "Starter",     className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  profesional: { label: "Profesional", className: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30" },
+  bisnis:      { label: "Bisnis",      className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  enterprise:  { label: "Enterprise",  className: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30" },
+};
+
+function PlanBadge() {
+  const { planInfo, isLoading } = useFeatureAccess();
+  if (isLoading || planInfo.status === "unauthenticated" || planInfo.status === "loading") return null;
+
+  const planKey = planInfo.plan ?? "free";
+  const cfg = PLAN_BADGE_CONFIG[planKey] ?? PLAN_BADGE_CONFIG.free;
+  const isActive = planInfo.status === "active";
+  const isPaid = planInfo.tier > 0;
+  const urgent = isActive && isPaid && planInfo.daysRemaining !== null && planInfo.daysRemaining <= 7;
+
+  return (
+    <Link href="/my-subscription">
+      <Badge
+        variant="outline"
+        className={`gap-1 text-[10px] h-6 px-2 cursor-pointer transition-opacity hover:opacity-80 font-semibold ${cfg.className} ${urgent ? "animate-pulse" : ""}`}
+        data-testid="badge-plan-header"
+        title={
+          isActive && planInfo.daysRemaining !== null
+            ? `${cfg.label} — ${planInfo.daysRemaining} hari tersisa`
+            : cfg.label
+        }
+      >
+        {isPaid ? <Crown className="h-2.5 w-2.5" /> : <Zap className="h-2.5 w-2.5" />}
+        {cfg.label}
+        {isActive && planInfo.daysRemaining !== null && planInfo.daysRemaining <= 14 && (
+          <span className={urgent ? "text-red-500" : "opacity-70"}>
+            · {planInfo.daysRemaining}h
+          </span>
+        )}
+      </Badge>
+    </Link>
+  );
+}
 
 interface SharedHeaderProps {
   transparent?: boolean;
@@ -186,6 +231,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                     </Button>
                   </Link>
                 )}
+                <PlanBadge />
                 <Link href="/dashboard">
                   <Button size="sm" className="gap-1.5 text-xs h-8">
                     <LayoutDashboard className="h-3.5 w-3.5" />
@@ -280,6 +326,15 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                             <LayoutDashboard className="h-4 w-4 mr-2" />
                             Dashboard
                           </Button>
+                        </Link>
+                        <Link href="/my-subscription" onClick={() => setMobileMenuOpen(false)}>
+                          <div className="w-full flex items-center justify-between px-4 py-2.5 rounded-md border bg-card hover:bg-muted/50 transition-colors cursor-pointer">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <Crown className="h-4 w-4 text-amber-500" />
+                              Status Membership
+                            </div>
+                            <PlanBadge />
+                          </div>
                         </Link>
                         <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
                           <Button variant="outline" className="w-full gap-2" data-testid="button-account-mobile">
