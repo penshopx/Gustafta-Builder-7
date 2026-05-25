@@ -92,6 +92,8 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
 | `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |
 | `/ibtu-claw` | IBTUClaw — IB Testing Unit AI | 7 | 1953 | indigo | 1946–1952 |
+| `/etlo-academy-claw` | ETLOAcademyClaw — Program ETLO: Kurikulum, Audit Energi & Sertifikasi EBT | 10 | 964 | emerald | 954–963 |
+| `/etlo-bizdev-claw` | ETLOBizDevClaw — Strategi Bisnis & Pengembangan Program ETLO | 10 | 975 | teal | 965–974 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`

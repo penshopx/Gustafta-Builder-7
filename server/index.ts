@@ -119,6 +119,8 @@ import * as M_pengawasClaw from "./seed-pengawas-claw";
 import * as M_kontrakClaw from "./seed-kontrak-claw";
 import * as M_k3ManClaw from "./seed-k3man-claw";
 import * as M_ibtuClaw from "./seed-ibtu-claw";
+import * as M_etloAcademyClaw from "./seed-etlo-academy-claw";
+import * as M_etloBizDevClaw from "./seed-etlo-bizdev-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1562,6 +1564,22 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedIBTUClaw();
       } catch (err) {
         log("[Seed IBTUClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: ETLOAcademyClaw — Program ETLO Akademik (10 sub-agen spesialis)
+      try {
+        const { seedEtloAcademyClaw } = M_etloAcademyClaw;
+        await seedEtloAcademyClaw();
+      } catch (err) {
+        log("[Seed ETLOAcademyClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: ETLOBizDevClaw — Program ETLO Business Development (10 sub-agen spesialis)
+      try {
+        const { seedEtloBizDevClaw } = M_etloBizDevClaw;
+        await seedEtloBizDevClaw();
+      } catch (err) {
+        log("[Seed ETLOBizDevClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

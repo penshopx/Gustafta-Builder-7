@@ -78,6 +78,8 @@ import KonstraClawChat from "@/pages/konstra-claw";
 import BrainClawChat from "@/pages/brain-claw";
 import EducounselClawChat from "@/pages/educounsel-claw";
 import IBTUClawChat from "@/pages/ibtu-claw";
+import EtloAcademyClawChat from "@/pages/etlo-academy-claw";
+import EtloBizDevClawChat from "@/pages/etlo-bizdev-claw";
 import MigasClawChat from "@/pages/migas-claw";
 import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
@@ -476,6 +478,24 @@ function Router() {
             highlights={["Registrasi & eligibilitas IB DP / MYP / PYP","Jadwal ujian, mock exam & deadline TOK/EE/CAS","Audit dokumen & kepatuhan regulasi IBO","Strategi skor 38+ IB untuk kampus internasional"]}
             icon={<GraduationCap className="h-12 w-12 text-indigo-400" />}
           ><IBTUClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/etlo-academy-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ETLOAcademyClaw — AI Program ETLO: Kurikulum, Audit Energi & Sertifikasi EBT"
+            description="10 agen spesialis program ETLO bekerja paralel: panduan ETL vs ETO, desain kurikulum 100 jam, audit energi SNI/ISO 50001, retrofit efisiensi (ECM & IPMVP), simulasi PLTS rooftop, sertifikasi BNSP/LSP/SKKNI, monitoring IoT/SCADA, pipeline proyek pilot, framework mentoring, dan checker regulasi RUEN/KEN/NZE 2060."
+            highlights={["Audit energi SNI/ISO 50001 — walkthrough, rinci, laporan PermenESDM","Simulasi PLTS rooftop — sizing, yield, payback, perizinan PLN & SLO","Sertifikasi BNSP/LSP SKKNI EBT — auditor energi muda & teknisi PLTS","Regulasi RUEN/KEN/NZE 2060 — Paris Agreement, JETP, NDC Indonesia"]}
+            icon={<span className="text-4xl">🌱</span>}
+          ><EtloAcademyClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/etlo-bizdev-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ETLOBizDevClaw — AI Strategi Bisnis & Pengembangan Program ETLO"
+            description="10 agen spesialis business development ETLO bekerja paralel: strategi B2G/B2B, navigator ESG & climate finance (TCFD, carbon credit), drafting proposal grant (ADB/GCF/BPDLH), positioning 5 paket program, kalkulasi ROI & carbon saving, kolaborasi kampus/asosiasi, KPI dampak, dana hijau internasional, model scale-up nasional, dan unit economics."
+            highlights={["Proposal grant internasional ADB/GCF/BPDLH/UNDP — Theory of Change & M&E","ESG & climate finance — TCFD, GHG Protocol Scope 1/2/3, IDXCarbon, JETP","ROI & SROI — kalkulasi NPV, IRR, payback, tCO2eq, social return on investment","Scale-up nasional — franchise model, hub regional, lisensi konten 20+ kota"]}
+            icon={<span className="text-4xl">🌿</span>}
+          ><EtloBizDevClawChat /></PremiumPageGuard>
         )} />
         <Route path="/migas-claw" component={() => (
           <PremiumPageGuard

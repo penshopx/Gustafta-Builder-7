@@ -16838,5 +16838,27 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     }
   });
 
+  // GET /api/etlo-academy-claw/orchestrator — ETLOAcademyClaw MultiClaw 10-Agent Program ETLO Akademik
+  app.get("/api/etlo-academy-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("etloacademyclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "ETLOAcademyClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/etlo-bizdev-claw/orchestrator — ETLOBizDevClaw MultiClaw 10-Agent Program ETLO Business Development
+  app.get("/api/etlo-bizdev-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("etlobizdevclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "ETLOBizDevClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   return httpServer;
 }
