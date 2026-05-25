@@ -76,6 +76,8 @@ import IsoClaw9001Chat from "@/pages/iso-claw-9001";
 import IsoClaw14001Chat from "@/pages/iso-claw-14001";
 import KonstraClawChat from "@/pages/konstra-claw";
 import BrainClawChat from "@/pages/brain-claw";
+import EducounselClawChat from "@/pages/educounsel-claw";
+import IBTUClawChat from "@/pages/ibtu-claw";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
 import SkkCoachChat from "@/pages/skk-coach-chat";
@@ -431,6 +433,24 @@ function Router() {
             highlights={["EVM lengkap: SPI, CPI, EAC, TCPI, VAC per paket","Laporan proyek terpadu: fisik, biaya, K3, mutu, kontrak","Early warning dashboard & action plan 90 hari","Analisis klaim & posisi negosiasi kontrak"]}
             icon={<Brain className="h-12 w-12 text-cyan-400" />}
           ><BrainClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/educounsel-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="EducounselClaw — AI Konseling Akademik Sekolah"
+            description="11 agen spesialis konseling akademik bekerja paralel: safety gate & eskalasi krisis, profil siswa, analitik akademik, mini-test diagnostik, intervensi 14 hari, study habit coach, jalur PTN, beasiswa luar negeri, komunikasi orang tua, dokumentasi BK, dan matching eskul & portfolio."
+            highlights={["Analisis akademik Hijau/Kuning/Merah + intervensi 14-hari","Jalur PTN (SNBT/SNBP) & beasiswa universitas luar negeri","Safety gate krisis + eskalasi ke psikolog sekolah","Laporan BK format DAP & matching 21 eskul + portfolio"]}
+            icon={<GraduationCap className="h-12 w-12 text-teal-400" />}
+          ><EducounselClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/ibtu-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="IBTUClaw — IB Testing Unit AI"
+            description="7 agen spesialis IB Testing Unit bekerja paralel: registrar (pendaftaran siswa), sentinel (jadwal & deadline), IAA (internal assessment & integritas akademik), pengawas ujian, manajemen exam IB, komunikasi resmi, dan audit dokumen kepatuhan IBO."
+            highlights={["Registrasi & eligibilitas IB DP / MYP / PYP","Jadwal ujian, mock exam & deadline TOK/EE/CAS","Audit dokumen & kepatuhan regulasi IBO","Strategi skor 38+ IB untuk kampus internasional"]}
+            icon={<GraduationCap className="h-12 w-12 text-indigo-400" />}
+          ><IBTUClawChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
