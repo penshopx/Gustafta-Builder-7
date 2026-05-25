@@ -104,6 +104,7 @@ import * as M_ibTu from "./seed-ib-tu";
 import * as M_konsultanPermenPu from "./seed-konsultan-permen-pu";
 import * as M_scopeSKK from "./seed-scope-skk";
 import * as M_sipilClaw from "./seed-sipil-claw";
+import * as M_mepClaw from "./seed-mep-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1427,6 +1428,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedSipilClaw();
       } catch (err) {
         log("[Seed SipilClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: MEPClaw — AI Konsultan MEP (7 sub-agen spesialis)
+      try {
+        const { seedMepClaw } = M_mepClaw;
+        await seedMepClaw();
+      } catch (err) {
+        log("[Seed MEPClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();

@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { useMetaPixel } from "@/hooks/use-meta-pixel";
 import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
-import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen, Landmark } from "lucide-react";
+import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen, Landmark, Settings2 } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -94,6 +94,7 @@ import ScopeSipilChat from "@/pages/scope-sipil";
 import ScopeManpelChat from "@/pages/scope-manpel";
 import ScopeMekanikalChat from "@/pages/scope-mekanikal";
 import SipilClawChat from "@/pages/sipil-claw";
+import MepClawChat from "@/pages/mep-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -525,6 +526,15 @@ function Router() {
             highlights={["Apa itu ASKOM & bagaimana proses uji kompetensi SKK","Syarat peserta uji, APL-01/02, dan dokumen yang dibutuhkan","RPL: pengakuan pengalaman kerja tanpa uji ulang","Hak asesi: banding, keberatan, perlindungan data"]}
             icon={<GraduationCap className="h-12 w-12 text-teal-400" />}
           ><PanduanAskomChat /></PremiumPageGuard>
+        )} />
+        <Route path="/mep-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="MEPClaw — AI Konsultan Mekanikal-Elektrikal-Plumbing"
+            description="MultiClaw AI dengan 7 spesialis paralel: HVAC, Plumbing, Listrik, Fire Protection, Lift, ELV/ICT, dan Estimasi MEP. Sizing, desain, spesifikasi, dan BOQ/RAB berbasis PUIL, ASHRAE, NFPA, SNI."
+            highlights={["HVAC: sizing AC, chiller, AHU, VRF, ducting berbasis ASHRAE","Plumbing & listrik: fixture unit, panel, genset, kabel, grounding PUIL","Fire Protection (NFPA 13/14/20) & Transportasi Vertikal (EN 81)","ELV/BMS/ICT + Estimasi BOQ & RAB MEP komprehensif"]}
+            icon={<Settings2 className="h-12 w-12 text-emerald-400" />}
+          ><MepClawChat /></PremiumPageGuard>
         )} />
         <Route path="/sipil-claw" component={() => (
           <PremiumPageGuard
