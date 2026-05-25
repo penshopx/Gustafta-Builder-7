@@ -12550,6 +12550,39 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/scope-sipil/agent — ScopeSipil single-agent ruang lingkup SKK Klasifikasi Sipil
+  app.get("/api/scope-sipil/agent", async (_req, res) => {
+    try {
+      const agent = await storage.getAgent("1461");
+      if (!agent) return res.status(404).json({ error: "ScopeSipil agent belum ditemukan. Pastikan agen ID 1461 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/scope-manpel/agent — ScopeManpel single-agent ruang lingkup SKK Manajemen Pelaksanaan
+  app.get("/api/scope-manpel/agent", async (_req, res) => {
+    try {
+      const agent = await storage.getAgent("1462");
+      if (!agent) return res.status(404).json({ error: "ScopeManpel agent belum ditemukan. Pastikan agen ID 1462 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/scope-mekanikal/agent — ScopeMekanikal single-agent ruang lingkup SKK Mekanikal
+  app.get("/api/scope-mekanikal/agent", async (_req, res) => {
+    try {
+      const agent = await storage.getAgent("1463");
+      if (!agent) return res.status(404).json({ error: "ScopeMekanikal agent belum ditemukan. Pastikan agen ID 1463 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/skema-claw/orchestrator — SkemaClaw 9-Agent Konsultan Cerdas Sertifikasi BUJK Permen PU 6/2025
   app.get("/api/skema-claw/orchestrator", async (_req, res) => {
     try {

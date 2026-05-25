@@ -90,6 +90,9 @@ import AskomLanding from "@/pages/askom-landing";
 import AskomChat from "@/pages/askom-chat";
 import AbuClawChat from "@/pages/abu-claw";
 import PanduanAskomChat from "@/pages/panduan-askom";
+import ScopeSipilChat from "@/pages/scope-sipil";
+import ScopeManpelChat from "@/pages/scope-manpel";
+import ScopeMekanikalChat from "@/pages/scope-mekanikal";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -521,6 +524,33 @@ function Router() {
             highlights={["Apa itu ASKOM & bagaimana proses uji kompetensi SKK","Syarat peserta uji, APL-01/02, dan dokumen yang dibutuhkan","RPL: pengakuan pengalaman kerja tanpa uji ulang","Hak asesi: banding, keberatan, perlindungan data"]}
             icon={<GraduationCap className="h-12 w-12 text-teal-400" />}
           ><PanduanAskomChat /></PremiumPageGuard>
+        )} />
+        <Route path="/scope-sipil" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ScopeSipil — Ruang Lingkup SKK Klasifikasi Sipil"
+            description="Konsultan ruang lingkup pekerjaan per jabatan kerja SKK Sipil: Gedung, Jalan, Jembatan, SDA, Geoteknik, Terowongan, dan lainnya. Tanya apa yang bisa dikerjakan per jenjang — dari Operator sampai Ahli Utama."
+            highlights={["Ruang lingkup per jabatan kerja SKK Sipil (Operator, Teknisi, Ahli)","Batas kewenangan & jenis proyek per jenjang KKNI 2–9","Perbandingan jenjang Muda vs Madya vs Utama per subklasifikasi","Acuan SK Dirjen Bina Konstruksi No. 114/KPTS/Dk/2024"]}
+            icon={<HardHat className="h-12 w-12 text-blue-400" />}
+          ><ScopeSipilChat /></PremiumPageGuard>
+        )} />
+        <Route path="/scope-manpel" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ScopeManpel — Ruang Lingkup SKK Manajemen Pelaksanaan"
+            description="Konsultan ruang lingkup pekerjaan per jabatan kerja SKK Manajemen Pelaksanaan: PM, Pelaksana, Pengawas, K3 Konstruksi, dan Manajemen Mutu. Tanya posisi apa yang bisa dijabat dan proyek apa yang bisa dipimpin."
+            highlights={["Ruang lingkup PM, Pelaksana & Pengawas per jenjang KKNI","Kewenangan Ahli Muda vs Madya Manajemen Proyek di lapangan","Lingkup K3 Konstruksi: dari RK3K sampai SMKK","Posisi struktural yang bisa dijabat per jabatan kerja"]}
+            icon={<Award className="h-12 w-12 text-indigo-400" />}
+          ><ScopeManpelChat /></PremiumPageGuard>
+        )} />
+        <Route path="/scope-mekanikal" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ScopeMekanikal — Ruang Lingkup SKK Mekanikal"
+            description="Konsultan ruang lingkup pekerjaan per jabatan kerja SKK Mekanikal: HVAC & Tata Udara, Plumbing & Pompa, Pemadam Kebakaran, Elevator & Eskalator, hingga Mekanikal Industri. Tanya sistem apa yang boleh dirancang & dipasang per jenjang."
+            highlights={["Ruang lingkup HVAC, Plumbing, Fire Protection & Elevator per jenjang","Sistem apa yang boleh dirancang Ahli Muda vs Ahli Madya Mekanikal","Perbedaan kewenangan Teknisi vs Ahli untuk setiap subklasifikasi","Standar acuan: ASHRAE, NFPA, SNI & SK Dirjen 114/2024"]}
+            icon={<Wrench className="h-12 w-12 text-amber-400" />}
+          ><ScopeMekanikalChat /></PremiumPageGuard>
         )} />
         <Route path="/demo/:agentId" component={WidgetDemo} />
         <Route path="/chatbot/:agentId" component={WidgetDemo} />
