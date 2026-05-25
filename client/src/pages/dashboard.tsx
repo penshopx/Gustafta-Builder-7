@@ -1398,10 +1398,24 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/pancek-claw">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-red-700 dark:text-red-400 hover:bg-red-500/10 border border-red-500/20 mb-2" data-testid="nav-shortcut-pancek-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-red-700 dark:text-red-400 hover:bg-red-500/10 border border-red-500/20 mb-1" data-testid="nav-shortcut-pancek-claw">
                       <ShieldAlert className="w-4 h-4 text-red-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PanCEKClaw KPK</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-red-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/sipil-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-sipil-claw">
+                      <HardHat className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SipilClaw (Teknik Sipil)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/mep-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-2" data-testid="nav-shortcut-mep-claw">
+                      <Wrench className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">MEPClaw (MEP Gedung)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
                     </div>
                   </Link>
                   {orchestratorHub ? (
@@ -2450,6 +2464,18 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-red-600 dark:text-red-400">
                     <ShieldAlert className="w-4 h-4" />
                     PanCEKClaw KPK
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/sipil-claw">
+                  <DropdownMenuItem className="gap-2 text-blue-600 dark:text-blue-400">
+                    <HardHat className="w-4 h-4" />
+                    SipilClaw (Teknik Sipil)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/mep-claw">
+                  <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
+                    <Wrench className="w-4 h-4" />
+                    MEPClaw (MEP Gedung)
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>
