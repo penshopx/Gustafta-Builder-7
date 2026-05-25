@@ -984,6 +984,7 @@ export class DatabaseStorage implements IStorage {
       riskCompliance: filled.riskCompliance,
       orchestratorConfig: (filled as any).orchestratorConfig ?? {},
       isActive: true,
+      slug: (insertAgent as any).slug || null,
     }).returning();
     const mapped = this.mapAgentRow(result[0]);
     // Populate cache & invalidate list cache
