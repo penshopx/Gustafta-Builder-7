@@ -103,6 +103,7 @@ import SurveiPemetaanClawChat from "@/pages/surveipemetaan-claw";
 import GeoteknikClawChat from "@/pages/geoteknik-claw";
 import JalanJembatanClawChat from "@/pages/jalanjembatan-claw";
 import TataLingkunganClawChat from "@/pages/tatalingkungan-claw";
+import ElektrikalClawChat from "@/pages/elektrikal-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -579,6 +580,15 @@ function Router() {
             highlights={["Sanitasi & Septik Tank: SNI 03-2398-2017, bidang resapan, Sanimas, IPLT, STBM ODF","Air Minum & SPAM: WTP koagulasi-flokulasi-filtrasi-desinfeksi, distribusi, EPANET, Permenkes","IPAL: lumpur aktif, biofilter, MBR, pengolahan lumpur, standar efluent PP 22/2021","Remediasi Lahan: Phase I/II ESA, SVE, bioremediation, BTEX/logam berat, reklamasi tambang"]}
             icon={<span className="text-4xl">🌿</span>}
           ><TataLingkunganClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/elektrikal-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ElektrikalClaw — AI Konsultan Teknik Elektrikal & Jabatan Kerja SKK"
+            description="MultiClaw AI dengan 7 spesialis paralel untuk Jabatan Kerja SKK Klasifikasi Elektrikal: Distribusi TM/TR, Instalasi PUIL, Proteksi/Grounding/Petir, Otomasi PLC/SCADA, PLTS/EBT, Gardu Induk/Switchgear HV, dan Estimasi BOQ/RAB."
+            highlights={["Distribusi 20 kV & Instalasi PUIL 2011: jaringan TM/TR, SLD, panel MDP/SDP, kabel, SLO","Proteksi & Petir: koordinasi relay IEC, arc flash IEEE 1584, grounding IEEE 80, SPD IEC 62305","PLTS & EBT: on-grid net metering (Permen ESDM 26/2021), off-grid/hybrid, yield analysis, LCOE","Otomasi Industri: PLC IEC 61131-3, SCADA/HMI, DCS, SIL IEC 61511, IEC 61850 substation"]}
+            icon={<span className="text-4xl">🔌</span>}
+          ><ElektrikalClawChat /></PremiumPageGuard>
         )} />
         <Route path="/arsitektur-claw" component={() => (
           <PremiumPageGuard

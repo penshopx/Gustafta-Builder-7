@@ -12616,6 +12616,17 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/elektrikal-claw/orchestrator — ElektrikalClaw MultiClaw 7-Agent AI Teknik Elektrikal & SKK
+  app.get("/api/elektrikal-claw/orchestrator", async (_req, res) => {
+    try {
+      const agent = await storage.getAgentBySlug("elektrikalclaw-orchestrator");
+      if (!agent) return res.status(404).json({ error: "ElektrikalClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/arsitektur-claw/orchestrator — ArsitekturClaw MultiClaw 7-Agent AI Arsitektur & Jabatan Kerja SKK
   app.get("/api/arsitektur-claw/orchestrator", async (_req, res) => {
     try {

@@ -80,6 +80,7 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/geoteknik-claw` | GeoteknikClaw — Jabatan Kerja SKK Klasifikasi Sipil (Geoteknik) | 7 | TBD | amber | TBD |
 | `/jalanjembatan-claw` | JalanJembatanClaw — Jabatan Kerja SKK Klasifikasi Sipil (Jalan & Jembatan) | 7 | TBD | yellow | TBD |
 | `/tatalingkungan-claw` | TataLingkunganClaw — Jabatan Kerja SKK Klasifikasi Tata Lingkungan | 7 | TBD | green | TBD |
+| `/elektrikal-claw` | ElektrikalClaw — Jabatan Kerja SKK Klasifikasi Elektrikal | 7 | TBD | blue | TBD |
 | `/konstra-claw` | KonstraClaw — Manajemen Proyek Konstruksi | 9 | 1281 | slate | 1272–1280 |
 | `/brain-claw` | BrainClaw — Project Intelligence AI | 6 | 806 | cyan | 664–669 |
 | `/educounsel-claw` | EducounselClaw — Konseling Akademik | 11 | 899 | teal | 888–898 |
@@ -97,6 +98,7 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 - **GeoteknikClaw**: GEO-SONDIR·FONDASI·LERENG·SETTLEMENT·GEMPA·TEROWONGAN·TURAP. SNI 8460:2017·SNI 1726:2019·SNI 4153:2008 (SPT)·SNI 2827:2008 (CPT)·ASTM D1586·Eurocode 7.
 - **JalanJembatanClaw**: JJ-PERKERASAN·GEOMETRIK·DRAINASE·JEMBATAN·LAIK·MATERIAL·PEMELIHARAAN. MDP Bina Marga 2021·SNI 1725:2016·RSNI T-14-2004·PKJI 2023·Permen PU 19/2011.
 - **TataLingkunganClaw**: TL-SANITASI·AIRBERSIH·LIMBAHPADAT·IPAL·KEBISINGAN·REMEDIASI·INFRASTRUKTUR. SNI 03-2398-2017·PP 22/2021·Kepmen LH 48/1996·Metcalf & Eddy·EPA ESA.
+- **ElektrikalClaw**: EL-DISTRIBUSI·INSTALASI·PROTEKSI·OTOMASI·PLTS·GARDU·ESTIMASI. PUIL 2011·IEC 60364·IEC 62305·IEEE 80·IEEE 1584·SPLN·Permen ESDM 26/2021·SNI 8172:2017.
 - **ManprojakClaw (1383)**: MP-MANPRO·LAPANGAN·MUTU·ESTIMASI·KONTRAK·KEUANGAN·LOGISTIK. FIDIC/EVM/PSAK 34/AHSP PermenPUPR 1/2022.
 - **ArsitekturClaw (1391)**: ARS-DESAIN·STRUKTUR·INTERIOR·LANSEKAP·REGULASI·TEKNIS·URBAN. UU BG 28/2002·PP 16/2021·PermenPUPR 22/2018·Neufert·Greenship·ISO 19650 BIM.
 - **SurveiPemetaanClaw (1399)**: SP-GEODESI·TOPOGRAFI·KADASTER·GIS·HIDROGRAFI·KONSTRUKSI·DRONE. SRGI2013·BPN/PTSL·IHO S-44·ASPRS LAS·HEC-RAS·Permenhub UAV PM 37/2020.

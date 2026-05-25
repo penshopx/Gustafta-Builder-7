@@ -1468,10 +1468,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/tatalingkungan-claw">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-green-700 dark:text-green-400 hover:bg-green-500/10 border border-green-500/20 mb-2" data-testid="nav-shortcut-tatalingkungan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-green-700 dark:text-green-400 hover:bg-green-500/10 border border-green-500/20 mb-1" data-testid="nav-shortcut-tatalingkungan-claw">
                       <span className="text-sm shrink-0">🌿</span>
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TataLingkunganClaw (SKK)</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-green-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/elektrikal-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-2" data-testid="nav-shortcut-elektrikal-claw">
+                      <span className="text-sm shrink-0">🔌</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ElektrikalClaw (SKK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
                     </div>
                   </Link>
                   {orchestratorHub ? (
@@ -2580,6 +2587,12 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-green-600 dark:text-green-400">
                     <span className="text-sm">🌿</span>
                     TataLingkunganClaw (SKK Tata Lingkungan)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/elektrikal-claw">
+                  <DropdownMenuItem className="gap-2 text-blue-600 dark:text-blue-400">
+                    <span className="text-sm">🔌</span>
+                    ElektrikalClaw (SKK Elektrikal)
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuContent>

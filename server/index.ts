@@ -113,6 +113,7 @@ import * as M_surveiPemetaanClaw from "./seed-surveipemetaan-claw";
 import * as M_geoteknikClaw from "./seed-geoteknik-claw";
 import * as M_jalanJembatanClaw from "./seed-jalanjembatan-claw";
 import * as M_tataLingkunganClaw from "./seed-tatalingkungan-claw";
+import * as M_elekTrikalClaw from "./seed-elektrikal-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1508,6 +1509,14 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
         await seedTataLingkunganClaw();
       } catch (err) {
         log("[Seed TataLingkunganClaw] Error: " + (err as Error).message);
+      }
+
+      // Seed: ElektrikalClaw — AI Teknik Elektrikal, Jabatan Kerja SKK Klasifikasi Elektrikal (7 sub-agen spesialis)
+      try {
+        const { seedElektrikalClaw } = M_elekTrikalClaw;
+        await seedElektrikalClaw();
+      } catch (err) {
+        log("[Seed ElektrikalClaw] Error: " + (err as Error).message);
       }
 
       startScheduler();
