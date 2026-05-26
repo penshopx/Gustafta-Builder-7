@@ -40,6 +40,10 @@ export default function LoginPage() {
     window.location.href = "/api/logout";
   };
 
+  const handleReplitLogin = () => {
+    window.location.href = "/api/login";
+  };
+
   const handleLogin = async () => {
     if (!email || !password) {
       toast({ title: "Isi email dan password", variant: "destructive" });
@@ -432,6 +436,20 @@ export default function LoginPage() {
             </>
           )}
         </div>
+
+        {/* Admin / Replit OIDC fallback — small discreet link */}
+        {mode !== "verify" && (
+          <p className="text-center text-xs text-muted-foreground mt-3">
+            <button
+              type="button"
+              onClick={handleReplitLogin}
+              className="underline hover:text-foreground"
+              data-testid="link-admin-replit-login"
+            >
+              Masuk sebagai admin (Replit)
+            </button>
+          </p>
+        )}
 
         <p className="text-center text-xs text-muted-foreground mt-4">
           Dengan masuk, Anda menyetujui{" "}
