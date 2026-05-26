@@ -251,7 +251,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                 </a>
               </div>
             ) : (
-              <a href="/api/login">
+              <a href="/login">
                 <Button size="sm" className="gap-1.5 text-xs h-8">
                   <LogIn className="h-3.5 w-3.5" />
                   Masuk
@@ -350,7 +350,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                         </a>
                       </div>
                     ) : (
-                      <a href="/api/login">
+                      <a href="/login">
                         <Button className="w-full gap-2">
                           <LogIn className="h-4 w-4" />
                           Masuk

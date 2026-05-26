@@ -100,7 +100,7 @@ export default function SectorLanding() {
                   </Button>
                 </Link>
               ) : (
-                <a href="/api/login" className="w-full sm:w-auto">
+                <a href="/login" className="w-full sm:w-auto">
                   <Button size="lg" className="w-full gap-2 text-lg px-8 py-6" data-testid="button-sector-start">
                     <Rocket className="h-5 w-5" />
                     Mulai Gratis Sekarang
@@ -365,7 +365,7 @@ export default function SectorLanding() {
                 </Button>
               </Link>
             ) : (
-              <a href="/api/login">
+              <a href="/login">
                 <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6" data-testid="button-sector-cta-start">
                   <Rocket className="h-5 w-5" />
                   Mulai Gratis Sekarang

@@ -58,7 +58,7 @@ export default function PendingApproval() {
 
         <p className="mt-6 text-xs text-muted-foreground">
           Akun sudah dipulihkan?{" "}
-          <a href="/api/login" className="text-primary hover:underline">
+          <a href="/login" className="text-primary hover:underline">
             Coba login ulang
           </a>{" "}
           atau{" "}

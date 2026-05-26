@@ -205,7 +205,21 @@ async function checkUserIsActive(userId: string): Promise<boolean> {
   return isActive;
 }
 
-export const isAuthenticated: RequestHandler = async (req, res, next) => {
+export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
+  // Allow email-session authenticated users through
+  if (req.session?.emailUser?.id) {
+    // Inject a synthetic req.user so downstream code can read userId consistently
+    if (!req.user) {
+      req.user = {
+        claims: { sub: req.session.emailUser.id },
+        emailUser: req.session.emailUser,
+      };
+    }
+    const active = await checkUserIsActive(req.session.emailUser.id);
+    if (!active) return res.status(403).json({ message: "Akun Anda telah dinonaktifkan. Hubungi admin Gustafta." });
+    return next();
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user) {

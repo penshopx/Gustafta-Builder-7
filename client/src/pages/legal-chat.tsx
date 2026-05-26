@@ -1231,7 +1231,7 @@ export default function LegalChat() {
                   <p className="text-purple-200 font-semibold text-sm">Batas pesan tamu tercapai</p>
                   <p className="text-purple-300/70 text-xs mt-0.5">Login untuk lanjut berkonsultasi tanpa batas dengan 17 agen hukum spesialis</p>
                 </div>
-                <Link href="/api/login">
+                <Link href="/login">
                   <Button
                     className="text-white border-0 text-sm whitespace-nowrap flex-shrink-0"
                     style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}

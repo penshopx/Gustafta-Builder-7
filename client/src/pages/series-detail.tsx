@@ -228,7 +228,7 @@ export default function SeriesDetail() {
                     </Link>
                   </div>
                 ) : !authUser ? (
-                  <a href="/api/login">
+                  <a href="/login">
                     <Button className="gap-2 bg-white text-violet-700 hover:bg-white/90 font-semibold shadow-lg" data-testid="button-login-to-install">
                       <Download className="w-4 h-4" />
                       Masuk & Tambah ke Workspace

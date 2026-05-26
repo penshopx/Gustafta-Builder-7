@@ -172,7 +172,7 @@ function LockedScreen({ title, description, highlights, icon, reason, requiredPl
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {reason === "auth" ? (
               <>
-                <a href="/api/login">
+                <a href="/login">
                   <Button size="lg" className="gap-2 w-full sm:w-auto" data-testid="button-login-access">
                     <LogIn className="h-4 w-4" />
                     Masuk untuk Akses

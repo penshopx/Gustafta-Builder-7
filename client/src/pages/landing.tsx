@@ -529,7 +529,7 @@ export default function Landing() {
                     </Button>
                   </Link>
                 ) : (
-                  <a href="/api/login" onClick={handleStartNowClick} className="w-full sm:w-auto">
+                  <a href="/login" onClick={handleStartNowClick} className="w-full sm:w-auto">
                     <Button size="lg" className="w-full gap-2 text-lg px-8 py-6" data-testid="button-start">
                       <Rocket className="h-5 w-5" />
                       Mulai Sekarang
@@ -1542,7 +1542,7 @@ export default function Landing() {
           
           <div className="text-center mt-10">
             {!isAuthenticated && (
-              <a href="/api/login" onClick={handleStartNowClick}>
+              <a href="/login" onClick={handleStartNowClick}>
                 <Button size="lg" className="gap-2" data-testid="button-try-now">
                   <Target className="h-5 w-5" />
                   Coba Sekarang - Gratis
@@ -1853,7 +1853,7 @@ export default function Landing() {
                     </Button>
                   </Link>
                   {!isAuthenticated && (
-                    <a href="/api/login" onClick={handleStartNowClick}>
+                    <a href="/login" onClick={handleStartNowClick}>
                       <Button variant="outline" className="gap-2">
                         <Rocket className="h-4 w-4" />
                         Daftar Gratis
@@ -2573,7 +2573,7 @@ export default function Landing() {
                 </Button>
               </Link>
             ) : (
-              <a href="/api/login" onClick={handleStartNowClick}>
+              <a href="/login" onClick={handleStartNowClick}>
                 <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6" data-testid="button-cta-start">
                   <Rocket className="h-5 w-5" />
                   Mulai Gratis Sekarang

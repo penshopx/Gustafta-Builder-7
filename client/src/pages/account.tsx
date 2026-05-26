@@ -129,7 +129,7 @@ export default function AccountPage() {
         <div className="text-center space-y-4">
           <User className="h-12 w-12 text-muted-foreground mx-auto" />
           <h1 className="text-xl font-bold">Login Diperlukan</h1>
-          <a href="/api/login">
+          <a href="/login">
             <Button>Masuk ke Gustafta</Button>
           </a>
         </div>

@@ -217,7 +217,7 @@ export default function WelcomePage() {
               </Button>
             </Link>
             {!isAuthenticated && (
-              <a href="/api/login">
+              <a href="/login">
                 <Button size="lg" variant="outline" className="gap-2" data-testid="button-login-welcome">
                   <Zap className="h-5 w-5" />
                   Login / Daftar Gratis

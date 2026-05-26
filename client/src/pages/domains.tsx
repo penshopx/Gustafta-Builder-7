@@ -120,7 +120,7 @@ export default function DomainsPage() {
     return (
       <div className="flex items-center justify-center h-screen flex-col gap-4">
         <p>Silakan login untuk mengakses halaman ini.</p>
-        <a href="/api/login"><Button>Masuk</Button></a>
+        <a href="/login"><Button>Masuk</Button></a>
       </div>
     );
   }

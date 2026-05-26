@@ -600,7 +600,7 @@ export default function AdminPage() {
           <Shield className="h-16 w-16 text-muted-foreground mx-auto" />
           <h1 className="text-2xl font-bold">Login Diperlukan</h1>
           <p className="text-muted-foreground">Silakan login terlebih dahulu untuk mengakses admin panel.</p>
-          <a href="/api/login">
+          <a href="/login">
             <Button className="gap-2">Masuk ke Gustafta</Button>
           </a>
         </div>

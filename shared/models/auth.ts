@@ -26,8 +26,20 @@ export const users = pgTable("users", {
   jabatan: varchar("jabatan"),
   perusahaan: varchar("perusahaan"),
   bio: varchar("bio", { length: 500 }),
+  passwordHash: varchar("password_hash"),
+  emailVerified: boolean("email_verified").default(false),
+  authProvider: varchar("auth_provider").default("replit"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailVerifications = pgTable("email_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").notNull(),
+  code: varchar("code", { length: 6 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export type UpsertUser = typeof users.$inferInsert;
