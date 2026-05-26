@@ -65,7 +65,7 @@ export default function MySubscriptionPage() {
           <div className="text-center space-y-4 max-w-sm">
             <Lock className="h-12 w-12 text-muted-foreground mx-auto" />
             <h2 className="text-xl font-bold">Login Diperlukan</h2>
-            <Button onClick={() => (window.location.href = "/api/login")} className="gap-2">
+            <Button onClick={() => (window.location.href = "/login")} className="gap-2">
               <Rocket className="h-4 w-4" /> Login Sekarang
             </Button>
           </div>

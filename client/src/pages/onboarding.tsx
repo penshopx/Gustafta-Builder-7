@@ -85,7 +85,7 @@ export default function OnboardingPage() {
 
   async function handleActivateFree() {
     if (!isAuthenticated) {
-      window.location.href = "/api/login";
+      window.location.href = "/login";
       return;
     }
     setIsSubmitting(true);
@@ -111,7 +111,7 @@ export default function OnboardingPage() {
           <p className="text-muted-foreground text-sm">
             Untuk memilih paket Gustafta Apps, Anda perlu login terlebih dahulu.
           </p>
-          <Button onClick={() => (window.location.href = "/api/login")} className="w-full gap-2">
+          <Button onClick={() => (window.location.href = "/login")} className="w-full gap-2">
             <Rocket className="h-4 w-4" /> Login / Daftar
           </Button>
         </div>

@@ -84,7 +84,7 @@ export default function Subscription() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button onClick={() => window.location.href = "/api/login"}>
+            <Button onClick={() => window.location.href = "/login"}>
               Login dengan Replit
             </Button>
           </CardContent>

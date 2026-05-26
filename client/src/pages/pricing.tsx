@@ -511,7 +511,7 @@ export default function Pricing() {
         description: "Silakan login terlebih dahulu untuk berlangganan.",
         variant: "destructive",
       });
-      window.location.href = "/api/login";
+      window.location.href = "/login";
       return;
     }
 

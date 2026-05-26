@@ -5,7 +5,7 @@ async function throwIfResNotOk(res: Response) {
     if (res.status === 401) {
       const currentPath = window.location.pathname;
       if (currentPath === "/dashboard") {
-        window.location.href = "/api/login";
+        window.location.href = "/login";
         throw new Error("401: Session expired, redirecting to login...");
       }
     }

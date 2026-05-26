@@ -95,7 +95,7 @@ const MODULES: Module[] = [
             title: "Login — Cukup Pakai Gmail",
             content: "Untuk masuk ke Gustafta, klik tombol Masuk di pojok kanan atas. Sistem login kami menggunakan akun Google/Gmail — Anda tidak perlu membuat akun baru atau mengingat password tambahan.\n\nLangkahnya:\n1. Klik tombol Masuk\n2. Pilih akun Gmail Anda\n3. Izinkan akses (satu kali saja)\n4. Langsung masuk ke dashboard",
             tip: "Gunakan Gmail yang aktif dan sering Anda cek — notifikasi dan link akses produk akan dikirim ke email ini.",
-            action: { label: "Login Sekarang", href: "/api/login" }
+            action: { label: "Login Sekarang", href: "/login" }
           },
           {
             title: "Pertama Kali Login — Pilih Paket",
