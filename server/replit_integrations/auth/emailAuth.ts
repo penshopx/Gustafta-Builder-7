@@ -42,41 +42,42 @@ function generateOTP(): string {
   return String(randomInt(100000, 999999));
 }
 
-async function sendVerificationEmail(email: string, code: string, firstName: string): Promise<void> {
-  // Try SMTP via nodemailer if configured, otherwise log to console (dev mode)
+// Returns true if email was sent via SMTP, false if SMTP not configured
+async function sendVerificationEmail(email: string, code: string, firstName: string): Promise<boolean> {
+  const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  if (!hasSmtp) {
+    console.log(`[EmailAuth] SMTP not configured — OTP for ${email}: ${code}`);
+    return false;
+  }
   try {
-    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      const nodemailer = await import("nodemailer");
-      const transporter = nodemailer.default.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT || 587),
-        secure: false,
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-      });
-      await transporter.sendMail({
-        from: `"Gustafta" <${process.env.SMTP_USER}>`,
-        to: email,
-        subject: "Kode Verifikasi Gustafta",
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;background:#f9f9f9;border-radius:12px">
-            <h2 style="color:#6366f1;margin-bottom:8px">Verifikasi Email Anda</h2>
-            <p>Halo <b>${firstName}</b>! Gunakan kode berikut untuk menyelesaikan registrasi:</p>
-            <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#111;text-align:center;padding:24px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;margin:24px 0">
-              ${code}
-            </div>
-            <p style="color:#666;font-size:14px">Kode berlaku selama <b>10 menit</b>. Jangan bagikan kode ini kepada siapapun.</p>
-            <p style="color:#999;font-size:12px">Jika kamu tidak mendaftar di Gustafta, abaikan email ini.</p>
+    const nodemailer = await import("nodemailer");
+    const transporter = nodemailer.default.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: false,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+    await transporter.sendMail({
+      from: `"Gustafta" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Kode Verifikasi Gustafta",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;background:#f9f9f9;border-radius:12px">
+          <h2 style="color:#6366f1;margin-bottom:8px">Verifikasi Email Anda</h2>
+          <p>Halo <b>${firstName}</b>! Gunakan kode berikut untuk menyelesaikan registrasi:</p>
+          <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#111;text-align:center;padding:24px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;margin:24px 0">
+            ${code}
           </div>
-        `,
-      });
-    } else {
-      // Dev fallback — log OTP to console
-      console.log(`[EmailAuth] OTP for ${email}: ${code}`);
-    }
+          <p style="color:#666;font-size:14px">Kode berlaku selama <b>10 menit</b>. Jangan bagikan kode ini kepada siapapun.</p>
+          <p style="color:#999;font-size:12px">Jika kamu tidak mendaftar di Gustafta, abaikan email ini.</p>
+        </div>
+      `,
+    });
+    return true;
   } catch (err) {
     console.error("[EmailAuth] Failed to send email:", err);
-    // Still log so dev can see it
-    console.log(`[EmailAuth] OTP for ${email}: ${code}`);
+    console.log(`[EmailAuth] OTP fallback for ${email}: ${code}`);
+    return false;
   }
 }
 
@@ -130,9 +131,15 @@ export function registerEmailAuthRoutes(app: Express): void {
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
       await db.insert(emailVerifications).values({ id: randomUUID(), email, code, expiresAt });
 
-      await sendVerificationEmail(email, code, firstName);
+      const emailSent = await sendVerificationEmail(email, code, firstName);
 
-      res.json({ success: true, message: "Kode OTP telah dikirim ke email Anda." });
+      res.json({
+        success: true,
+        message: emailSent
+          ? "Kode OTP telah dikirim ke email Anda."
+          : "Kode OTP berhasil dibuat. Email belum dikonfigurasi — lihat kode di bawah.",
+        otpFallback: emailSent ? undefined : code,
+      });
     } catch (err) {
       console.error("[EmailAuth] Register error:", err);
       res.status(500).json({ error: "Terjadi kesalahan. Silakan coba lagi." });
@@ -212,8 +219,12 @@ export function registerEmailAuthRoutes(app: Express): void {
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
       await db.insert(emailVerifications).values({ id: randomUUID(), email, code, expiresAt });
 
-      await sendVerificationEmail(email, code, userRow.firstName || "");
-      res.json({ success: true, message: "Kode OTP baru telah dikirim." });
+      const emailSent = await sendVerificationEmail(email, code, userRow.firstName || "");
+      res.json({
+        success: true,
+        message: emailSent ? "Kode OTP baru telah dikirim." : "Kode OTP baru dibuat.",
+        otpFallback: emailSent ? undefined : code,
+      });
     } catch (err) {
       console.error("[EmailAuth] Resend error:", err);
       res.status(500).json({ error: "Terjadi kesalahan. Silakan coba lagi." });

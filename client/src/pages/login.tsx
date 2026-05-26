@@ -26,6 +26,7 @@ export default function LoginPage() {
   const [lastName, setLastName] = useState("");
   const [otp, setOtp] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
+  const [otpFallback, setOtpFallback] = useState<string | undefined>(undefined);
 
   const handleGoogleLogin = () => {
     window.location.href = "/api/login";
@@ -70,10 +71,15 @@ export default function LoginPage() {
     }
     setLoading(true);
     try {
-      await apiRequest("POST", "/api/auth/register", { email, password, firstName, lastName });
+      const res = await apiRequest("POST", "/api/auth/register", { email, password, firstName, lastName });
       setPendingEmail(email);
+      setOtpFallback(res?.otpFallback);
       setMode("verify");
-      toast({ title: "Kode OTP dikirim!", description: `Cek email ${email} untuk kode verifikasi.` });
+      if (res?.otpFallback) {
+        toast({ title: "OTP dibuat", description: "Lihat kode OTP yang tampil di layar (email belum dikonfigurasi)." });
+      } else {
+        toast({ title: "Kode OTP dikirim!", description: `Cek email ${email} untuk kode verifikasi.` });
+      }
     } catch (err: any) {
       toast({ title: "Registrasi gagal", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
     } finally {
@@ -102,8 +108,13 @@ export default function LoginPage() {
   const handleResendOTP = async () => {
     setLoading(true);
     try {
-      await apiRequest("POST", "/api/auth/resend-otp", { email: pendingEmail });
-      toast({ title: "Kode OTP baru dikirim", description: `Cek email ${pendingEmail}.` });
+      const res = await apiRequest("POST", "/api/auth/resend-otp", { email: pendingEmail });
+      setOtpFallback(res?.otpFallback);
+      if (res?.otpFallback) {
+        toast({ title: "OTP baru dibuat", description: "Lihat kode OTP yang tampil di layar." });
+      } else {
+        toast({ title: "Kode OTP baru dikirim", description: `Cek email ${pendingEmail}.` });
+      }
     } catch (err: any) {
       toast({ title: "Gagal kirim ulang", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
     } finally {
@@ -387,10 +398,23 @@ export default function LoginPage() {
                 </div>
                 <h1 className="text-lg font-bold">Verifikasi Email</h1>
                 <p className="text-sm text-muted-foreground">
-                  Kode OTP dikirim ke<br />
-                  <span className="font-medium text-foreground">{pendingEmail}</span>
+                  {otpFallback ? (
+                    <>Email server belum dikonfigurasi.</>
+                  ) : (
+                    <>Kode OTP dikirim ke<br />
+                    <span className="font-medium text-foreground">{pendingEmail}</span></>
+                  )}
                 </p>
               </div>
+
+              {/* OTP Fallback Display — shown when SMTP not configured */}
+              {otpFallback && (
+                <div className="rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-4 text-center space-y-1">
+                  <p className="text-xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wide">Kode OTP Anda</p>
+                  <p className="text-3xl font-bold tracking-[0.3em] text-amber-900 dark:text-amber-200 select-all">{otpFallback}</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-500">Salin kode ini dan masukkan di bawah</p>
+                </div>
+              )}
 
               <div className="space-y-3">
                 <div className="space-y-1.5">
@@ -417,7 +441,7 @@ export default function LoginPage() {
 
               <button
                 className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
-                onClick={() => { setMode("choose"); setOtp(""); }}
+                onClick={() => { setMode("choose"); setOtp(""); setOtpFallback(undefined); }}
               >
                 ← Kembali ke halaman login
               </button>
