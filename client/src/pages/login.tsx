@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Sparkles, CheckCircle2, LogOut } from "lucide-react";
 
 type Mode = "choose" | "login" | "register" | "verify";
 
@@ -28,8 +29,15 @@ export default function LoginPage() {
   const [pendingEmail, setPendingEmail] = useState("");
   const [otpFallback, setOtpFallback] = useState<string | undefined>(undefined);
 
-  const handleGoogleLogin = () => {
-    window.location.href = "/api/login";
+  // Detect existing session so user can switch accounts
+  const { data: currentUser } = useQuery<any>({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+    staleTime: 0,
+  });
+
+  const handleSwitchAccount = () => {
+    window.location.href = "/api/logout";
   };
 
   const handleLogin = async () => {
@@ -133,6 +141,24 @@ export default function LoginPage() {
       </a>
 
       <div className="w-full max-w-sm">
+        {/* Switch account banner — shown only if a session already exists */}
+        {currentUser?.email && (
+          <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm flex items-start gap-3" data-testid="banner-switch-account">
+            <div className="flex-1 min-w-0">
+              <p className="text-amber-900 dark:text-amber-200 font-medium">Sudah masuk sebagai</p>
+              <p className="text-amber-700 dark:text-amber-300 truncate">{currentUser.email}</p>
+            </div>
+            <div className="flex flex-col gap-1 shrink-0">
+              <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => navigate("/dashboard")} data-testid="button-continue-session">
+                Lanjutkan
+              </Button>
+              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-amber-700 dark:text-amber-300" onClick={handleSwitchAccount} data-testid="button-switch-account">
+                <LogOut className="h-3 w-3" /> Ganti akun
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="bg-card border rounded-2xl shadow-sm p-6 space-y-5">
 
           {/* ── CHOOSE MODE ── */}

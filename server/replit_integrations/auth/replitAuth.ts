@@ -128,14 +128,35 @@ export async function setupAuth(app: Express) {
     res.redirect("/");
   });
 
-  app.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+  app.get("/api/logout", (req: any, res) => {
+    const hadReplitSession = !!(req.user && (req.user as any).claims);
+    const hadEmailSession = !!(req.session && req.session.emailUser);
+
+    // Clear email session if present
+    if (hadEmailSession) {
+      delete req.session.emailUser;
+    }
+
+    req.logout((err: any) => {
+      if (err) console.error("[Logout] req.logout error:", err);
+      // Destroy whole session to be safe (covers email-only users)
+      req.session?.destroy?.(() => {
+        res.clearCookie("connect.sid");
+        // Only invoke Replit OIDC end-session if user actually had a Replit OIDC session
+        if (hadReplitSession) {
+          try {
+            return res.redirect(
+              client.buildEndSessionUrl(config, {
+                client_id: process.env.REPL_ID!,
+                post_logout_redirect_uri: `${req.protocol}://${req.hostname}/login`,
+              }).href
+            );
+          } catch (e) {
+            console.error("[Logout] buildEndSessionUrl failed, falling back:", e);
+          }
+        }
+        res.redirect("/login");
+      });
     });
   });
 }
