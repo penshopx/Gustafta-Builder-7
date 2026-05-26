@@ -182,6 +182,24 @@ export function registerEmailAuthRoutes(app: Express): void {
       // Seed sample agent for new user — non-blocking
       seedSampleAgentForEmailUser(userRow.id, userRow.firstName).catch(() => {});
 
+      // Auto-create pending trial request so super-admin can approve from admin panel
+      try {
+        const { trialRequests } = await import("@shared/schema");
+        const existing = await db.select().from(trialRequests).where(eq(trialRequests.email, email)).limit(1);
+        if (existing.length === 0) {
+          await db.insert(trialRequests).values({
+            name: `${userRow.firstName || ""} ${userRow.lastName || ""}`.trim() || email,
+            phone: "-",
+            email,
+            company: null,
+            useCase: "Auto-created from email registration",
+            status: "pending",
+          });
+        }
+      } catch (e) {
+        console.error("[EmailAuth] Failed to auto-create trial request:", e);
+      }
+
       await new Promise<void>((resolve, reject) => {
         req.session.regenerate((err: any) => {
           if (err) reject(err); else resolve();

@@ -278,7 +278,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("users");
   const [approveDialog, setApproveDialog] = useState<{ open: boolean; request: TrialRequest | null }>({ open: false, request: null });
   const [rejectDialog, setRejectDialog] = useState<{ open: boolean; request: TrialRequest | null }>({ open: false, request: null });
-  const [durationDays, setDurationDays] = useState("14");
+  const [durationDays, setDurationDays] = useState("7");
+  const [trialPlan, setTrialPlan] = useState("enterprise");
   const [rejectNotes, setRejectNotes] = useState("");
   const [subDialog, setSubDialog] = useState<{ open: boolean; sub: AdminSubscription | null }>({ open: false, sub: null });
   const [newStatus, setNewStatus] = useState("active");
@@ -465,16 +466,21 @@ export default function AdminPage() {
   });
 
   const approveTrialMutation = useMutation({
-    mutationFn: ({ id, durationDays }: { id: number; durationDays: number }) =>
-      apiRequest("POST", `/api/admin/trial-requests/${id}/approve`, { durationDays }),
+    mutationFn: ({ id, durationDays, plan }: { id: number; durationDays: number; plan: string }) =>
+      apiRequest("POST", `/api/admin/trial-requests/${id}/approve`, { durationDays, plan }),
     onSuccess: async (data: any) => {
       const result = await data.json();
       queryClient.invalidateQueries({ queryKey: ["/api/admin/trial-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/subscriptions"] });
       setApproveDialog({ open: false, request: null });
       toast({
-        title: `Trial disetujui! Kode: ${result.voucherCode}`,
-        description: "Salin kode dan kirimkan ke pengguna via WA/Email.",
+        title: result.instantActivated
+          ? `Aktif! Plan ${result.plan} ${result.durationDays} hari`
+          : `Voucher dibuat: ${result.voucherCode}`,
+        description: result.instantActivated
+          ? `User langsung dapat akses. Voucher cadangan: ${result.voucherCode}`
+          : "User belum daftar — kirim kode voucher via WA/Email agar bisa redeem.",
       });
     },
     onError: () => toast({ title: "Gagal menyetujui trial.", variant: "destructive" }),
@@ -1865,20 +1871,36 @@ export default function AdminPage() {
                 <p><strong>HP/WA:</strong> {approveDialog.request.phone}</p>
                 <p><strong>Email:</strong> {approveDialog.request.email}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Durasi Trial (hari)</label>
-                <Input
-                  type="number"
-                  value={durationDays}
-                  onChange={(e) => setDurationDays(e.target.value)}
-                  min="1" max="90"
-                  data-testid="input-duration-days"
-                />
-                <p className="text-xs text-muted-foreground mt-1">Default: 14 hari. Voucher berlaku untuk 1 chatbot.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Durasi (hari)</label>
+                  <Input
+                    type="number"
+                    value={durationDays}
+                    onChange={(e) => setDurationDays(e.target.value)}
+                    min="1" max="365"
+                    data-testid="input-duration-days"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Plan</label>
+                  <select
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                    value={trialPlan}
+                    onChange={(e) => setTrialPlan(e.target.value)}
+                    data-testid="select-trial-plan"
+                  >
+                    <option value="enterprise">Enterprise (semua fitur)</option>
+                    <option value="bisnis">Bisnis</option>
+                    <option value="profesional">Profesional</option>
+                    <option value="starter">Starter</option>
+                  </select>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Setelah disetujui, kode voucher akan digenerate otomatis. Salin dan kirimkan ke pengguna via WA/Email.
-              </p>
+              <div className="rounded-md bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-3 text-xs text-emerald-800 dark:text-emerald-200">
+                <strong>Jika user sudah daftar:</strong> trial langsung aktif tanpa perlu redeem.<br />
+                <strong>Jika belum:</strong> kode voucher cadangan otomatis dibuat untuk dikirim manual.
+              </div>
             </div>
           )}
           <DialogFooter>
@@ -1888,11 +1910,12 @@ export default function AdminPage() {
               disabled={approveTrialMutation.isPending}
               onClick={() => approveDialog.request && approveTrialMutation.mutate({
                 id: approveDialog.request.id,
-                durationDays: parseInt(durationDays) || 14,
+                durationDays: parseInt(durationDays) || 7,
+                plan: trialPlan,
               })}
               data-testid="button-confirm-approve"
             >
-              {approveTrialMutation.isPending ? "Memproses..." : "Setujui & Generate Voucher"}
+              {approveTrialMutation.isPending ? "Memproses..." : "Setujui & Aktifkan"}
             </Button>
           </DialogFooter>
         </DialogContent>

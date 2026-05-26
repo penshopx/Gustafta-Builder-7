@@ -13878,16 +13878,48 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
   app.post("/api/admin/trial-requests/:id/approve", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
       const { id } = req.params;
-      const { durationDays = 14, notes } = req.body;
+      const { durationDays: rawDays = 7, plan: rawPlan = "enterprise", notes } = req.body;
+      const ALLOWED_PLANS = ["starter", "profesional", "bisnis", "enterprise"];
+      const plan = ALLOWED_PLANS.includes(rawPlan) ? rawPlan : "enterprise";
+      const durationDays = Math.max(1, Math.min(365, parseInt(String(rawDays)) || 7));
       const [trialReq] = await db.select().from(trialRequests).where(eq(trialRequests.id, parseInt(id)));
       if (!trialReq) return res.status(404).json({ error: "Permintaan tidak ditemukan." });
       if (trialReq.status !== "pending") return res.status(400).json({ error: "Permintaan ini sudah diproses." });
 
-      // Generate voucher code
-      const code = "TRIAL-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days to redeem
+      const now = new Date();
+      const endDate = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
-      // Create voucher in vouchers table
+      // 1. Try to find a registered user by email and grant them ACTIVE subscription directly
+      let instantActivated = false;
+      let activatedUserId: string | null = null;
+      try {
+        const [registeredUser] = await db.select().from(users).where(eq(users.email, trialReq.email)).limit(1);
+        if (registeredUser) {
+          activatedUserId = registeredUser.id;
+          // Deactivate any existing active subs for this user
+          await db.update(subscriptionsTable)
+            .set({ status: "expired", updatedAt: now })
+            .where(and(eq(subscriptionsTable.userId, registeredUser.id), eq(subscriptionsTable.status, "active")));
+          // Create fresh active subscription
+          await db.insert(subscriptionsTable).values({
+            userId: registeredUser.id,
+            plan,
+            status: "active",
+            amount: 0,
+            currency: "IDR",
+            chatbotLimit: 999,
+            startDate: now,
+            endDate,
+          });
+          instantActivated = true;
+        }
+      } catch (e) {
+        console.error("[Approve trial] Direct activation failed, will fall back to voucher:", e);
+      }
+
+      // 2. Always also generate a voucher code (fallback if user re-registers / shares with others)
+      const code = "TRIAL-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const voucherExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const [newVoucher] = await db.insert(vouchers).values({
         code,
         name: `Trial untuk ${trialReq.name}`,
@@ -13896,19 +13928,30 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
         maxRedemptions: 1,
         totalRedeemed: 0,
         isActive: true,
-        expiresAt,
+        expiresAt: voucherExpiresAt,
       }).returning();
 
-      // Update trial request
+      // 3. Update trial request status
       await db.update(trialRequests).set({
         status: "approved",
         voucherCode: code,
         voucherId: newVoucher.id,
-        notes: notes || null,
-        updatedAt: new Date(),
+        notes: notes || (instantActivated ? `Auto-activated plan ${plan} for ${durationDays} hari` : null),
+        updatedAt: now,
       }).where(eq(trialRequests.id, parseInt(id)));
 
-      res.json({ success: true, voucherCode: code, durationDays, message: `Trial disetujui. Kode voucher: ${code}` });
+      res.json({
+        success: true,
+        voucherCode: code,
+        durationDays,
+        plan,
+        instantActivated,
+        activatedUserId,
+        endDate: endDate.toISOString(),
+        message: instantActivated
+          ? `Trial aktif: ${trialReq.email} dapat plan ${plan} selama ${durationDays} hari. Voucher cadangan: ${code}`
+          : `Trial disetujui. Voucher: ${code} (user belum daftar — kirim kode ini agar mereka redeem)`,
+      });
     } catch (error: any) {
       console.error("Admin approve trial error:", error);
       res.status(500).json({ error: "Gagal menyetujui permintaan trial: " + error.message });
