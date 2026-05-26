@@ -17,6 +17,8 @@ export const userProfiles = pgTable("user_profiles", {
   bio: text("bio").default(""),
   company: text("company").default(""),
   position: text("position").default(""),
+  email: text("email").default(""),
+  phone: text("phone").default(""),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -419,6 +421,8 @@ export const insertUserProfileSchema = z.object({
   bio: z.string().optional().default(""),
   company: z.string().optional().default(""),
   position: z.string().optional().default(""),
+  email: z.string().optional().default(""),
+  phone: z.string().optional().default(""),
 });
 
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;

@@ -26,6 +26,8 @@ export function ProfileCompletionGuard() {
   const [displayName, setDisplayName] = useState("");
   const [jabatan, setJabatan] = useState("");
   const [perusahaan, setPerusahaan] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export function ProfileCompletionGuard() {
           ? `${user.firstName} ${user.lastName}`.trim()
           : user?.firstName || ""
       );
+      setEmail(user?.email || "");
       setOpen(true);
     }
   }, [isAuthenticated, authLoading, profileLoading, profile, submitted, user]);
@@ -59,6 +62,8 @@ export function ProfileCompletionGuard() {
         bio: profile?.bio || "",
         company: perusahaan.trim(),
         position: jabatan.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
       });
       setSubmitted(true);
       setOpen(false);
@@ -106,14 +111,14 @@ export function ProfileCompletionGuard() {
           </div>
         </DialogHeader>
 
-        <div className="space-y-5 py-2">
+        <div className="space-y-4 py-2">
           <div className="flex items-center gap-4 p-3 rounded-xl bg-muted/50 border">
             <Avatar className="h-12 w-12 shrink-0">
               <AvatarImage src={user?.profileImageUrl || ""} alt={displayName} />
               <AvatarFallback className="font-semibold">{initials}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground mb-0.5">Email akun Anda</p>
+              <p className="text-xs text-muted-foreground mb-0.5">Akun Replit Anda</p>
               <p className="text-sm font-medium truncate">{user?.email || "—"}</p>
               <Badge variant="outline" className="mt-1 text-[10px] h-4">
                 <CheckCircle2 className="h-2.5 w-2.5 mr-1 text-green-500" />
@@ -136,6 +141,31 @@ export function ProfileCompletionGuard() {
               autoFocus
               data-testid="input-profile-name"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="pc-email">Email</Label>
+              <Input
+                id="pc-email"
+                type="email"
+                placeholder="nama@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                data-testid="input-profile-email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pc-phone">No. HP</Label>
+              <Input
+                id="pc-phone"
+                type="tel"
+                placeholder="08xxxxxxxxxx"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                data-testid="input-profile-phone"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -179,7 +209,7 @@ export function ProfileCompletionGuard() {
 
           <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
             Informasi ini digunakan untuk personalisasi pengalaman Anda di Gustafta.
-            Jabatan dan perusahaan bersifat opsional.
+            Jabatan, perusahaan, email, dan no. HP bersifat opsional.
           </p>
         </div>
       </DialogContent>

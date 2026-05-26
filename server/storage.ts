@@ -480,6 +480,8 @@ export class MemStorage implements IStorage {
       bio: data.bio !== undefined ? data.bio : profile.bio,
       company: data.company !== undefined ? data.company : profile.company,
       position: data.position !== undefined ? data.position : profile.position,
+      email: data.email !== undefined ? data.email : profile.email,
+      phone: data.phone !== undefined ? data.phone : profile.phone,
       updatedAt: new Date().toISOString(),
     };
     this.userProfiles.set(profile.id, updated);

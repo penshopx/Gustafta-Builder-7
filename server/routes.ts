@@ -519,18 +519,22 @@ export async function registerRoutes(
   });
 
   // Create or update user profile
-  app.post("/api/profile", isAuthenticated, async (req, res) => {
+  app.post("/api/profile", isAuthenticated, async (req: any, res) => {
     try {
-      const parsed = insertUserProfileSchema.safeParse(req.body);
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const parsed = insertUserProfileSchema.safeParse({ ...req.body, userId });
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
       
-      const existingProfile = await storage.getUserProfile(parsed.data.userId);
+      const existingProfile = await storage.getUserProfile(userId);
       let profile;
       
       if (existingProfile) {
-        profile = await storage.updateUserProfile(parsed.data.userId, parsed.data);
+        profile = await storage.updateUserProfile(userId, parsed.data);
       } else {
         profile = await storage.createUserProfile(parsed.data);
       }

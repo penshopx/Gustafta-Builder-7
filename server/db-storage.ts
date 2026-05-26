@@ -200,6 +200,8 @@ export class DatabaseStorage implements IStorage {
       bio: row.bio || "",
       company: row.company || "",
       position: row.position || "",
+      email: (row as any).email || "",
+      phone: (row as any).phone || "",
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     };
@@ -213,6 +215,8 @@ export class DatabaseStorage implements IStorage {
       bio: insertProfile.bio || "",
       company: insertProfile.company || "",
       position: insertProfile.position || "",
+      email: insertProfile.email || "",
+      phone: insertProfile.phone || "",
     }).returning();
     const row = result[0];
     return {
@@ -223,14 +227,25 @@ export class DatabaseStorage implements IStorage {
       bio: row.bio || "",
       company: row.company || "",
       position: row.position || "",
+      email: (row as any).email || "",
+      phone: (row as any).phone || "",
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     };
   }
 
   async updateUserProfile(userId: string, data: Partial<InsertUserProfile>): Promise<UserProfile | undefined> {
+    const updateData: Record<string, any> = { updatedAt: new Date() };
+    if (data.displayName !== undefined) updateData.displayName = data.displayName;
+    if (data.avatarUrl !== undefined) updateData.avatarUrl = data.avatarUrl;
+    if (data.bio !== undefined) updateData.bio = data.bio;
+    if (data.company !== undefined) updateData.company = data.company;
+    if (data.position !== undefined) updateData.position = data.position;
+    if (data.email !== undefined) updateData.email = data.email;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+
     const result = await db.update(userProfiles)
-      .set({ ...data, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(userProfiles.userId, userId))
       .returning();
     if (result.length === 0) return undefined;
@@ -243,6 +258,8 @@ export class DatabaseStorage implements IStorage {
       bio: row.bio || "",
       company: row.company || "",
       position: row.position || "",
+      email: (row as any).email || "",
+      phone: (row as any).phone || "",
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     };
