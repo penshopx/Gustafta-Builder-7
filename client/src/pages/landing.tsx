@@ -599,6 +599,43 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ─── TENTANG GAIA TEASER ───────────────────────────────────────── */}
+      <section className="py-16 md:py-20 bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(252,211,77,0.15),transparent_50%)]" />
+        <div className="container mx-auto px-4 relative">
+          <div className="grid md:grid-cols-3 gap-8 items-center max-w-6xl mx-auto">
+            <div className="md:col-span-2">
+              <Badge className="bg-amber-300/20 text-amber-200 border-amber-300/40 mb-3">
+                <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Tentang Gustafta AI Academy
+              </Badge>
+              <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight" data-testid="text-about-gaia-title">
+                Pelopor <span className="text-amber-300">No-Code AI Ecosystem Builder</span> Indonesia
+              </h2>
+              <p className="text-white/85 text-base md:text-lg leading-relaxed mb-2">
+                Kami tidak sekadar membangun perangkat lunak — kami membangun{" "}
+                <strong className="text-white">Mesin Pencipta Solusi</strong>. Visi kami: mengubah cara Indonesia{" "}
+                <em>belajar, bekerja, berbisnis, dan berkreasi</em> melalui ekosistem AI yang inklusif.
+              </p>
+              <p className="text-white/70 text-sm md:text-base">
+                Berhentilah menjadi <em>Konsumen Teknologi</em> — mulailah menjadi <strong>Arsitek Solusi</strong>.
+              </p>
+            </div>
+            <div className="flex md:flex-col gap-3 md:items-end">
+              <Link href="/profil">
+                <Button size="lg" className="w-full md:w-auto bg-white text-violet-700 hover:bg-amber-300 hover:text-violet-900 gap-2 shadow-lg" data-testid="button-about-gaia">
+                  Pelajari Profil GAIA <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button size="lg" variant="outline" className="w-full md:w-auto border-white/40 text-white hover:bg-white/10 bg-transparent gap-2" data-testid="button-about-gaia-build">
+                  <Rocket className="h-4 w-4" /> Mulai Membangun
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── PROMO COUNTDOWN BANNER ────────────────────────────────────── */}
       {promoCountdown.days >= 0 && (
         <section className="py-6 bg-gradient-to-r from-red-600 via-orange-600 to-red-700 text-white relative overflow-hidden">
