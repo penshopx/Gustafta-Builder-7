@@ -20,7 +20,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **API Routes**: `server/routes.ts`
 - **Inter-Agent API v2**: `server/routes.ts` ~line 2806 (orchestration block), ~line 3926 (`callAgentInternal` v2)
 - **Legal AI Configuration**: `server/lib/legal-agents.ts`
-- **Legal Landing/Chat**: `client/src/pages/legal-landing.tsx`, `client/src/pages/legal-chat.tsx`
+- **Legal Landing/Chat**: `client/src/pages/legal-landing.tsx` (route `/legal`), `client/src/pages/legal-chat.tsx` (route `/legal/chat`)
 - **Chaesa Lexbot Widget**: `client/src/components/chaesa-widget.tsx`
 - **MultiClaw Orchestration Planner**: `client/src/components/agentic-ai-panel.tsx`
 - **Rakit Tim Agen (Trilogi)**: `client/src/pages/tutor-builder.tsx` (route `/tutor-builder`)
