@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PremiumPageGuard } from "@/components/premium-page-guard";
 import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shield, Award, Leaf, BarChart3, Users, TrendingUp, ShieldAlert, Search, Building2, Wrench, Zap, BookOpen, Landmark, Settings2, Map as MapIcon } from "lucide-react";
 import Landing from "@/pages/landing";
+import Profil from "@/pages/profil";
 import LoginPage from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -169,6 +170,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
+      <Route path="/profil" component={Profil} />
       <Route path="/login" component={LoginPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/documentation" component={Documentation} />

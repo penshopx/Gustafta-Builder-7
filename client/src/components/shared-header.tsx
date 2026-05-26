@@ -178,6 +178,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/lms", label: "Learning Center", icon: GraduationCap },
     { href: "/pricing", label: "Paket Berlangganan", icon: BarChart3 },
     { href: "/panduan", label: "Panduan", icon: BookOpen },
+    { href: "/profil", label: "Profil GAIA", icon: Sparkles },
   ];
 
   const premiumNavItems = [
