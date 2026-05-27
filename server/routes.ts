@@ -7830,6 +7830,42 @@ Balas dengan JSON dengan struktur PERSIS ini:
     return res.json({ appUrl: null, source: "none" });
   });
 
+  // Bootstrap: promote a user to superadmin via shared secret token.
+  // Use case: pertama kali setup di environment baru (production) di mana
+  // belum ada superadmin yang bisa promote akun lain via UI.
+  // Header: x-bootstrap-token  Body: { email: string }
+  app.post("/api/admin/bootstrap-superadmin", async (req: any, res: any) => {
+    try {
+      const expected = process.env.BOOTSTRAP_ADMIN_TOKEN;
+      if (!expected) {
+        return res.status(503).json({ error: "BOOTSTRAP_ADMIN_TOKEN belum dikonfigurasi di server" });
+      }
+      const provided = req.header("x-bootstrap-token");
+      if (!provided || provided !== expected) {
+        return res.status(401).json({ error: "Token tidak valid" });
+      }
+      const email = String((req.body?.email || "")).trim().toLowerCase();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: "Email tidak valid" });
+      }
+      const { users: usersTable } = await import("@shared/schema");
+      const { eq, sql: sqlOp } = await import("drizzle-orm");
+      const result = await db
+        .update(usersTable)
+        .set({ role: "superadmin" })
+        .where(eq(sqlOp`LOWER(${usersTable.email})`, email))
+        .returning({ id: usersTable.id, email: usersTable.email, role: usersTable.role });
+      if (result.length === 0) {
+        return res.status(404).json({ error: `User dengan email ${email} tidak ditemukan. Pastikan sudah registrasi terlebih dahulu.` });
+      }
+      console.log(`[bootstrap-superadmin] Promoted ${email} to superadmin`);
+      res.json({ success: true, promoted: result[0], message: `${email} sekarang superadmin. Logout & login ulang.` });
+    } catch (err: any) {
+      console.error("[bootstrap-superadmin] error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Admin: manually set the production URL (saved to DB + in-memory cache)
   app.post("/api/admin/set-prod-url", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     const { url } = req.body as { url?: string };
