@@ -154,6 +154,15 @@ import * as M_cybersecurityClaw from "./seed-cybersecurity-claw";
 import * as M_haccpClaw from "./seed-haccp-claw";
 import * as M_lkpmClaw from "./seed-lkpm-claw";
 import * as M_pubLkutClaw from "./seed-pub-lkut-claw";
+import * as M_bgClaw from "./seed-bg-claw";
+import * as M_bsClaw from "./seed-bs-claw";
+import * as M_imClaw from "./seed-im-claw";
+import * as M_koClaw from "./seed-ko-claw";
+import * as M_kkClaw from "./seed-kk-claw";
+import * as M_pjbuClaw from "./seed-pjbu-claw";
+import * as M_keuanganClaw from "./seed-keuangan-claw";
+import * as M_sbuClaw from "./seed-sbuclaw";
+import * as M_aiTutor from "./seed-ai-tutor";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -232,6 +241,15 @@ const seedModuleRegistry: Record<string, any> = {
   "./seed-ahsp-hspk": M_ahspHspk,
   "./seed-tender-sources": M_tenderSources,
   "./seed-kabkota-sources": M_kabKotaSources,
+  "./seed-bg-claw": M_bgClaw,
+  "./seed-bs-claw": M_bsClaw,
+  "./seed-im-claw": M_imClaw,
+  "./seed-ko-claw": M_koClaw,
+  "./seed-kk-claw": M_kkClaw,
+  "./seed-pjbu-claw": M_pjbuClaw,
+  "./seed-keuangan-claw": M_keuanganClaw,
+  "./seed-sbuclaw": M_sbuClaw,
+  "./seed-ai-tutor": M_aiTutor,
 };
 
 // Push DB schema on startup in production (build time has no DB access)
@@ -1803,6 +1821,17 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
       try { await M_haccpClaw.seedHaccpClaw(); } catch (err) { log("[Seed HACCPClaw] Error: " + (err as Error).message); }
       try { await M_lkpmClaw.seedLkpmClaw(); } catch (err) { log("[Seed LKPMClaw] Error: " + (err as Error).message); }
       try { await M_pubLkutClaw.seedPubLkutClaw(); } catch (err) { log("[Seed PUB-LKUTClaw] Error: " + (err as Error).message); }
+
+      // Seed: Missing MultiClaw Systems (BGClaw, BSClaw, IMClaw, KOClaw, KKClaw, PJBUClaw, KeuanganClaw, SBUClaw, AI Tutor)
+      try { await M_bgClaw.seedBgClaw(); } catch (err) { log("[Seed BGClaw] Error: " + (err as Error).message); }
+      try { await M_bsClaw.seedBsClaw(); } catch (err) { log("[Seed BSClaw] Error: " + (err as Error).message); }
+      try { await M_imClaw.seedImClaw(); } catch (err) { log("[Seed IMClaw] Error: " + (err as Error).message); }
+      try { await M_koClaw.seedKoClaw(); } catch (err) { log("[Seed KOClaw] Error: " + (err as Error).message); }
+      try { await M_kkClaw.seedKkClaw(); } catch (err) { log("[Seed KKClaw] Error: " + (err as Error).message); }
+      try { await M_pjbuClaw.seedPjbuClaw(); } catch (err) { log("[Seed PJBUClaw] Error: " + (err as Error).message); }
+      try { await M_keuanganClaw.seedKeuanganClaw(); } catch (err) { log("[Seed KeuanganClaw] Error: " + (err as Error).message); }
+      try { await M_sbuClaw.seedSbuClaw(); } catch (err) { log("[Seed SBUClaw] Error: " + (err as Error).message); }
+      try { await M_aiTutor.seedAiTutor(); } catch (err) { log("[Seed AI Tutor] Error: " + (err as Error).message); }
 
       startScheduler();
     },

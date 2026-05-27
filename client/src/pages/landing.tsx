@@ -2456,7 +2456,7 @@ export default function Landing() {
                     <div className="flex gap-2">
                       <div className="flex-1 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800">
                         <Globe className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">chat.dokumentender.com</span>
+                        <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">chat.aspekindo-pub.com</span>
                       </div>
                     </div>
                   </div>
@@ -2679,8 +2679,8 @@ export default function Landing() {
                 <li><Link href="/documentation" className="hover:text-foreground">API Reference</Link></li>
                 <li><Link href="/series" className="hover:text-foreground">Chatbot Series</Link></li>
                 <li>
-                  <a href="https://chat.dokumentender.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" /> Dokumentender
+                  <a href="https://chat.aspekindo-pub.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" /> Aspekindo Chat
                   </a>
                 </li>
                 <li>

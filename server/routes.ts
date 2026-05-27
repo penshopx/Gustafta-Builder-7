@@ -12681,6 +12681,16 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // GET /api/sbu-claw/orchestrator — SBUClaw 10-Agent SBU Konstruksi
+  app.get("/api/sbu-claw/orchestrator", async (_req, res) => {
+    try {
+      const found = await findOrchestratorAgent({ id: 1404, slug: "sbuclaw-orchestrator", nameKeywords: ["SBUClaw"] });
+      if (!found) return res.status(404).json({ error: "SBUClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   // GET /api/smk3-claw/orchestrator — SMK3Claw Multi-Agent IMS & SMK3 Terintegrasi
   app.get("/api/smk3-claw/orchestrator", async (_req, res) => {
     try {
