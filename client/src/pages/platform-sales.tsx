@@ -55,7 +55,7 @@ const FEATURES = [
     color: "text-orange-500",
     bg: "bg-orange-500/10",
     border: "border-orange-500/20",
-    items: ["Video + modul teks", "Akses berbasis langganan", "Sertifikat penyelesaian", "Integrasi pembayaran Midtrans"],
+    items: ["Video + modul teks", "Akses berbasis langganan", "Sertifikat penyelesaian", "Integrasi pembayaran terintegrasi"],
   },
   {
     icon: FileText,
@@ -235,7 +235,7 @@ const FAQS = [
   },
   {
     q: "Bisakah saya menjual kursus atau konten dari platform ini?",
-    a: "Ya! Paket Profesional ke atas sudah dilengkapi fitur E-Course dengan sistem pembayaran terintegrasi (Midtrans). Anda bisa membuat, mempublish, dan menjual kursus digital langsung dari platform Gustafta Apps.",
+    a: "Ya! Paket Profesional ke atas sudah dilengkapi fitur E-Course dengan sistem pembayaran terintegrasi. Anda bisa membuat, mempublish, dan menjual kursus digital langsung dari platform Gustafta Apps.",
   },
   {
     q: "Apakah ada uji coba gratis?",
@@ -243,7 +243,7 @@ const FAQS = [
   },
   {
     q: "Bagaimana sistem pembayaran?",
-    a: "Biaya setup dibayar di awal via transfer bank atau QRIS sebelum proses setup dimulai. Biaya bulanan ditagih setiap awal bulan via Midtrans (kartu kredit, transfer bank, e-wallet, QRIS). Invoice resmi tersedia untuk kebutuhan korporat.",
+    a: "Biaya setup dibayar di awal via transfer bank atau QRIS sebelum proses setup dimulai. Biaya bulanan dikonfirmasi setiap awal bulan via WhatsApp (transfer bank, QRIS). Invoice resmi tersedia untuk kebutuhan korporat.",
   },
 ];
 

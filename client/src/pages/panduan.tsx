@@ -296,7 +296,7 @@ const MODULES: Module[] = [
           },
           {
             title: "Proses Pembelian",
-            content: "Klik produk yang diminati, lalu klik Beli:\n\n1. Isi form: Nama Lengkap, Email (bukan nomor HP!), No. WhatsApp\n2. Klik tombol bayar\n3. Popup Midtrans akan muncul — pilih metode pembayaran\n4. Selesaikan pembayaran\n5. Link akses chatbot dikirim ke email Anda\n\nMetode bayar: Transfer Bank, Kartu Kredit, GoPay, OVO, QRIS.",
+            content: "Klik produk yang diminati, lalu klik Beli:\n\n1. Isi form: Nama Lengkap, Email (bukan nomor HP!), No. WhatsApp\n2. Klik tombol Beli — Anda akan dihubungkan ke tim kami via WhatsApp\n3. Konfirmasi pesanan dan selesaikan pembayaran\n4. Link akses chatbot dikirim ke email Anda\n\nMetode bayar: Transfer Bank, QRIS, dan metode lain yang tersedia.",
             warning: "Pastikan email yang Anda masukkan valid (format: nama@gmail.com). Link akses dikirim ke email tersebut. Jangan isi nomor HP di kolom email."
           },
           {
@@ -359,7 +359,7 @@ const MODULES: Module[] = [
           },
           {
             title: "Cara Berlangganan",
-            content: "Proses berlangganan:\n\n1. Buka halaman Paket Berlangganan\n2. Pilih paket yang sesuai\n3. Klik Pilih Paket\n4. Pembayaran via Midtrans (transfer/kartu/e-wallet)\n5. Akses aktif otomatis setelah pembayaran\n\nAtau hubungi kami via WhatsApp untuk pembayaran manual.",
+            content: "Proses berlangganan:\n\n1. Buka halaman Paket Berlangganan\n2. Pilih paket yang sesuai\n3. Klik Pilih Paket\n4. Anda akan dihubungkan ke tim kami via WhatsApp untuk konfirmasi\n5. Selesaikan pembayaran — akses aktif setelah dikonfirmasi\n\nAtau hubungi kami langsung via WhatsApp untuk pemesanan.",
             warning: "Paket berlangganan adalah bulanan. Pastikan memilih paket yang sesuai dengan kebutuhan dan anggaran jangka panjang."
           }
         ]

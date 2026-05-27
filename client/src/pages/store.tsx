@@ -14,19 +14,6 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
-declare global {
-  interface Window {
-    snap?: {
-      pay: (token: string, options: {
-        onSuccess?: (result: unknown) => void;
-        onPending?: (result: unknown) => void;
-        onError?: (result: unknown) => void;
-        onClose?: () => void;
-      }) => void;
-    };
-  }
-}
-
 const CATEGORY_LABELS: Record<string, string> = {
   engineering: "Teknik & Engineering",
   certification: "Sertifikasi & Kompetensi",

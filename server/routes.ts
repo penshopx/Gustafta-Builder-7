@@ -560,7 +560,7 @@ export async function registerRoutes(
         if (existingProfile) {
           await storage.updateUserProfile(userId, { avatarUrl });
         } else {
-          await storage.createUserProfile({ userId, displayName: userId, avatarUrl, bio: "", company: "", position: "" });
+          await storage.createUserProfile({ userId, displayName: userId, avatarUrl, bio: "", company: "", position: "", email: "", phone: "" });
         }
       } catch (e) {
         console.error("Failed to persist avatar to profile:", e);

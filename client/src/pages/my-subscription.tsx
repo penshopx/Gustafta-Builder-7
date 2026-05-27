@@ -29,6 +29,8 @@ const FEATURE_ICONS: Record<FeatureKey, typeof Check> = {
   white_label: Shield,
   priority_support: Headphones,
   api_access: Cpu,
+  ai_tools: Bot,
+  advanced_ai_tools: Sparkles,
 };
 
 const PLAN_ORDER = ["starter", "profesional", "bisnis", "enterprise"] as const;

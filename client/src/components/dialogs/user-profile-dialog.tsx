@@ -98,6 +98,8 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
         bio: bio.trim(),
         company: company.trim(),
         position: position.trim(),
+        email: profile?.email ?? "",
+        phone: profile?.phone ?? "",
       });
       
       toast({
