@@ -117,11 +117,12 @@ export function ChaesaWidget() {
   };
 
   const QUICK_PROMPTS = [
-    "EduCounsel AI StudentHub — konseling akademik siswa itu apa?",
-    "SBUClaw OpenClaw — bantu proses SBU Konstruksi bagaimana?",
-    "Rakit Tim Agen Trilogi — 12 blueprint itu untuk siapa?",
-    "Bagaimana cara membuat chatbot & pakai Mini Apps 45 tipe?",
-    "Berapa harga paket Gustafta Apps & cara berlangganan?",
+    "Berapa harga paket Gustafta & cara berlangganan?",
+    "Bagaimana cara daftar akun dan mulai buat chatbot?",
+    "MultiClaw itu apa? Ada berapa tools AI-nya?",
+    "SBUClaw bisa bantu proses SBU Konstruksi bagaimana?",
+    "Mini Apps 45 tipe itu untuk apa saja?",
+    "Cara hubungkan chatbot ke WhatsApp atau website?",
   ];
 
   return (
