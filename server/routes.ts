@@ -17433,6 +17433,7 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     ["cybersecurity-claw", "cybersecurity-claw-orchestrator", "CybersecurityClaw"],
     ["haccp-claw", "haccp-claw-orchestrator", "HACCPClaw"],
     ["lkpm-claw", "lkpm-claw-orchestrator", "LKPMClaw"],
+    ["pub-lkut-claw", "pub-lkut-claw-orchestrator", "PUB-LKUTClaw"],
   ];
   for (const [routeSlug, agentSlug, displayName] of newClawOrchestrators) {
     app.get(`/api/${routeSlug}/orchestrator`, async (_req, res) => {

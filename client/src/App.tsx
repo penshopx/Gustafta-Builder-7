@@ -145,6 +145,7 @@ import TransmisiClawChat from "@/pages/transmisi-claw";
 import CybersecurityClawChat from "@/pages/cybersecurity-claw";
 import HaccpClawChat from "@/pages/haccp-claw";
 import LkpmClawChat from "@/pages/lkpm-claw";
+import PubLkutClawChat from "@/pages/pub-lkut-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -805,6 +806,14 @@ function Router() {
             highlights={["OSS-RBA & NIB — KBLI 2020, KKPR, risiko UMK/Menengah/Besar","LKPM Triwulan — deadline tanggal 10, sanksi tidak lapor","PMA & DPI Perpres 10/2021 — kepemilikan asing, prioritas investasi","Tax Holiday/Allowance — PMK 130/2020, PP 78/2019, KEK"]}
             icon={<span className="text-4xl">📊</span>}
           ><LkpmClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/pub-lkut-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PUB-LKUTClaw — AI Konsultan Pengembangan Usaha Berkelanjutan & LKUT BUJK Indonesia"
+            description="8 spesialis bekerja paralel: PUB Umum (workshop/sosialisasi min 1×/tahun), PUB Khusus (pembelajaran tekstual/interaktif/bimtek/pendampingan), format & isian Laporan Kegiatan Usaha Tahunan (LKUT) BUJK via SIJK Terintegrasi, penilaian kinerja & grading BUJK (AAA/AA/A/B/C/D/E), peran Asosiasi Badan Usaha sebagai pembina, modul kompetensi & standar instruktur, sanksi & compliance LKUT/PUB, serta strategi peningkatan grade & roadmap upgrade kualifikasi BUJK."
+            highlights={["Permen PUPR 7/2024 — PUB Umum & Khusus, 4 tahapan, laporan 14 hari kerja","LKUT BUJK — deadline 30 April via SIJK Terintegrasi (BUKAN laporan keuangan)","Grade Kinerja — AAA/AA/A/B/C/D/E, pemetaan prioritas PUB Khusus","Strategi BUJK — roadmap kecil→menengah→besar, sinergi PUB + SBU Permen PU 6/2025"]}
+            icon={<span className="text-4xl">📋</span>}
+          ><PubLkutClawChat /></PremiumPageGuard>
         )} />
         <Route path="/migas-claw" component={() => (
           <PremiumPageGuard

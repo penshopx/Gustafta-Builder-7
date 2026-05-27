@@ -117,6 +117,7 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/cybersecurity-claw` | CybersecurityClaw — Cybersecurity & PDP Indonesia | 8 | 1245 | slate | 1237–1244 |
 | `/haccp-claw` | HACCPClaw — HACCP, BPOM & Sertifikasi Halal Indonesia | 8 | 1254 | green | 1246–1253 |
 | `/lkpm-claw` | LKPMClaw — LKPM & Penanaman Modal BKPM Indonesia | 7 | 1262 | teal | 1255–1261 |
+| `/pub-lkut-claw` | PUB-LKUTClaw — Pengembangan Usaha Berkelanjutan & LKUT BUJK (Permen PUPR 7/2024) | 8 | 1281 | sky | 1273–1280 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`

@@ -152,6 +152,7 @@ import * as M_transmisiClaw from "./seed-transmisi-claw";
 import * as M_cybersecurityClaw from "./seed-cybersecurity-claw";
 import * as M_haccpClaw from "./seed-haccp-claw";
 import * as M_lkpmClaw from "./seed-lkpm-claw";
+import * as M_pubLkutClaw from "./seed-pub-lkut-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1792,6 +1793,7 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
       try { await M_cybersecurityClaw.seedCybersecurityClaw(); } catch (err) { log("[Seed CybersecurityClaw] Error: " + (err as Error).message); }
       try { await M_haccpClaw.seedHaccpClaw(); } catch (err) { log("[Seed HACCPClaw] Error: " + (err as Error).message); }
       try { await M_lkpmClaw.seedLkpmClaw(); } catch (err) { log("[Seed LKPMClaw] Error: " + (err as Error).message); }
+      try { await M_pubLkutClaw.seedPubLkutClaw(); } catch (err) { log("[Seed PUB-LKUTClaw] Error: " + (err as Error).message); }
 
       startScheduler();
     },
