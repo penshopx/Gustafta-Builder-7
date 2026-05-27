@@ -1509,6 +1509,258 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
                     </div>
                   </Link>
+                  {/* ── Konstruksi Manajemen & Digital ── */}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-0.5">Konstruksi — Manajemen & Digital</div>
+                  <Link href="/konstra-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-slate-700 dark:text-slate-400 hover:bg-slate-500/10 border border-slate-500/20 mb-1" data-testid="nav-shortcut-konstra-claw">
+                      <HardHat className="w-4 h-4 text-slate-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KonstraClaw (Manpro)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/brain-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500/10 border border-cyan-500/20 mb-1" data-testid="nav-shortcut-brain-claw">
+                      <Brain className="w-4 h-4 text-cyan-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">BrainClaw (Project Intel)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-cyan-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/bim-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-bim-claw">
+                      <span className="text-sm shrink-0">🏗️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">BIMClaw (BIM Digital)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/desain-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 mb-1" data-testid="nav-shortcut-desain-claw">
+                      <span className="text-sm shrink-0">🎨</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">DesainClaw (Arsitektur)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/siteops-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-2" data-testid="nav-shortcut-siteops-claw">
+                      <span className="text-sm shrink-0">🦺</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SiteOpsClaw (Lapangan)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  {/* ── Energi & Pertambangan ── */}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-0.5">Energi & Pertambangan</div>
+                  <Link href="/ketenagalistrikan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-yellow-700 dark:text-yellow-400 hover:bg-yellow-500/10 border border-yellow-500/20 mb-1" data-testid="nav-shortcut-ketenagalistrikan-claw">
+                      <span className="text-sm shrink-0">⚡</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KetenagalistrikanClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-yellow-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/energi-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-energi-claw">
+                      <span className="text-sm shrink-0">🔋</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">EnergiClaw (EBT)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/ebt-solar-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-ebt-solar-claw">
+                      <span className="text-sm shrink-0">☀️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">EbtSolarClaw (PLTS)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/transisi-energi-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-transisi-energi-claw">
+                      <span className="text-sm shrink-0">🌱</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TransisiEnergiClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/migas-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-migas-claw">
+                      <span className="text-sm shrink-0">🛢️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">MigasClaw (Energi)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/pertambangan-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-stone-600 dark:text-stone-400 hover:bg-stone-500/10 border border-stone-500/20 mb-1" data-testid="nav-shortcut-pertambangan-claw">
+                      <span className="text-sm shrink-0">⛏️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PertambanganClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/geologi-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-stone-600 dark:text-stone-400 hover:bg-stone-500/10 border border-stone-500/20 mb-1" data-testid="nav-shortcut-geologi-claw">
+                      <span className="text-sm shrink-0">🪨</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">GeologiClaw (Eksplorasi)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/offshore-safety-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-2" data-testid="nav-shortcut-offshore-safety-claw">
+                      <span className="text-sm shrink-0">🛥️</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">OffshoreSafetyClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
+                    </div>
+                  </Link>
+                  {/* ── Properti & Real Estate ── */}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-0.5">Properti & Real Estate</div>
+                  <Link href="/dev-properti-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-violet-700 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 mb-1" data-testid="nav-shortcut-dev-properti-claw">
+                      <Building2 className="w-4 h-4 text-violet-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">DevPropertiClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/estate-care-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-2" data-testid="nav-shortcut-estate-care-claw">
+                      <Building2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">EstateCareClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  {/* ── Sertifikasi & Perizinan ── */}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-0.5">Sertifikasi & Perizinan</div>
+                  <Link href="/skema-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-1" data-testid="nav-shortcut-skema-claw">
+                      <Award className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SkemaClaw (BUJK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/abu-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-slate-700 dark:text-slate-400 hover:bg-slate-500/10 border border-slate-500/20 mb-1" data-testid="nav-shortcut-abu-claw">
+                      <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ABUClaw (LSBU)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/panduan-sbu">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-panduan-sbu">
+                      <BookOpen className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PanduanSBU (Tanya Jawab)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/panduan-askom">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-2" data-testid="nav-shortcut-panduan-askom">
+                      <BookOpen className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PanduanASKOM (Uji SKK)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  {/* ── ETLO & Pendidikan ── */}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-0.5">ETLO & Pendidikan</div>
+                  <Link href="/educounsel-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-educounsel-claw">
+                      <GraduationCap className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">EducounselClaw (Konseling)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/ibtu-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-1" data-testid="nav-shortcut-ibtu-claw">
+                      <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">IBTUClaw (IB Testing)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/etlo-academy-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-etlo-academy-claw">
+                      <GraduationCap className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ETLOAcademyClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/etlo-bizdev-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-etlo-bizdev-claw">
+                      <TrendingUp className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ETLOBizDevClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/tutor-teknik-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-tutor-teknik-claw">
+                      <GraduationCap className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TutorTeknikClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/riset-skripsi-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-2" data-testid="nav-shortcut-riset-skripsi-claw">
+                      <BookOpen className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">RisetSkripsiClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  {/* ── Bisnis & HR ── */}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-0.5">Bisnis & HR</div>
+                  <Link href="/digital-marketing-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-violet-700 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 mb-1" data-testid="nav-shortcut-digital-marketing-claw">
+                      <TrendingUp className="w-4 h-4 text-violet-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">DigitalMarketingClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/crm-sales-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-crm-sales-claw">
+                      <Users className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">CrmSalesClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/brand-content-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 mb-1" data-testid="nav-shortcut-brand-content-claw">
+                      <Sparkles className="w-4 h-4 text-rose-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">BrandContentClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/ecommerce-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-ecommerce-claw">
+                      <span className="text-sm shrink-0">🛒</span>
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">EcommerceClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/rekrutmen-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-rekrutmen-claw">
+                      <Users className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">RekrutmenClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/ld-kompetensi-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-ld-kompetensi-claw">
+                      <GraduationCap className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">LdKompetensiClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/penilaian-kinerja-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-penilaian-kinerja-claw">
+                      <BarChart3 className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PenilaianKinerjaClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
+                  {/* ── Regulasi & Hukum ── */}
+                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-2 pb-0.5">Regulasi & Hukum</div>
+                  <Link href="/nspk-navigator-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-nspk-navigator-claw">
+                      <Shield className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">NspkNavigatorClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/korporasi-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-korporasi-claw">
+                      <Scale className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KorporasiClaw</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
                   {orchestratorHub ? (
                     <div
                       className={cn(
