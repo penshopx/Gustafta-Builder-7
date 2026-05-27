@@ -9,6 +9,8 @@ When an `/api/{name}-claw/orchestrator` route hardcodes `storage.getAgent("<id>"
 
 **Rule:** orchestrator routes must resolve via multi-strategy fallback: **slug → ID (validated by name keyword) → name word-boundary → optional systemPrompt marker**. Use the `findOrchestratorAgent()` helper in `server/routes.ts`.
 
+**CRITICAL — promptMarker gates EVERY step.** When the helper is called with a `promptMarker`, that marker must be validated on the agent returned by the slug, ID, and name-keyword steps — NOT only as a step-4 fallback. Otherwise the slug step happily returns an agent whose name is correct but whose `system_prompt` was overwritten by an unrelated seed (prod EduCounsel: slug `educounsel-orchestrator` → agent 682 named "EDUCOUNSEL-ORCHESTRATOR" but prompt body was "HUB Regulasi Jasa Konstruksi…"). The chat endpoint then serves the wrong persona invisibly — name+avatar look right in the header, but every reply is off-topic. With strict gating, the name step should also scan multiple candidates (limit ~10, ordered by id) and pick the one whose prompt has the marker; the step-4 marker-only scan remains the last-resort rescue path.
+
 **Why:** in prod we observed routes returning wildly wrong agents (e.g. `/bg-claw` → "RG-ASESOR — Simulasi Wawancara") because ID 1033 was reassigned. Slug stays stable.
 
 **How to apply:**

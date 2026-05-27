@@ -7838,49 +7838,60 @@ Balas dengan JSON dengan struktur PERSIS ini:
     nameKeywords?: string[];
     promptMarker?: string;
   }): Promise<{ agent: any; source: "slug" | "id" | "name" } | null> {
+    // CRITICAL: kalau promptMarker disediakan, marker WAJIB ada di systemPrompt
+    // pada SETIAP step — bukan cuma sebagai fallback. Tanpa ini, slug bisa
+    // mereturn agent yang namanya benar tapi prompt-nya korup (kasus EduCounsel
+    // di prod: agent ID 682 bernama EDUCOUNSEL-ORCHESTRATOR tapi system_prompt-
+    // nya "HUB Regulasi Jasa Konstruksi" — runtime menyajikan persona salah).
+    const promptHasMarker = (a: any) =>
+      !opts.promptMarker ||
+      ((a?.systemPrompt || "") as string).includes(opts.promptMarker);
+    const nameMatches = (a: any) => {
+      if (!opts.nameKeywords?.length) return true;
+      const n = (a?.name || "").toLowerCase();
+      return opts.nameKeywords.some((k) => n.includes(k.toLowerCase()));
+    };
+
     // 1) Slug lookup (paling reliable — auto-assigned ID, tidak bentrok)
     if (opts.slug) {
       const bySlug = await storage.getAgentBySlug(opts.slug).catch(() => null);
-      if (bySlug) {
-        if (!opts.nameKeywords?.length) return { agent: bySlug, source: "slug" };
-        const n = (bySlug.name || "").toLowerCase();
-        if (opts.nameKeywords.some((k) => n.includes(k.toLowerCase()))) {
-          return { agent: bySlug, source: "slug" };
-        }
+      if (bySlug && nameMatches(bySlug) && promptHasMarker(bySlug)) {
+        return { agent: bySlug, source: "slug" };
       }
     }
-    // 2) ID lookup — validate dengan keyword jika ada
+    // 2) ID lookup — validate dengan keyword + marker jika ada
     if (opts.id) {
       const byId = await storage.getAgent(String(opts.id)).catch(() => null);
-      if (byId) {
-        if (!opts.nameKeywords?.length) return { agent: byId, source: "id" };
-        const n = (byId.name || "").toLowerCase();
-        if (opts.nameKeywords.some((k) => n.includes(k.toLowerCase()))) {
-          return { agent: byId, source: "id" };
-        }
+      if (byId && nameMatches(byId) && promptHasMarker(byId)) {
+        return { agent: byId, source: "id" };
       }
     }
     // 3) Name keyword fallback — scan agents table dengan word-boundary regex
     // (mencegah "IMClaw" salah match ke "BIMClaw" dst). Pakai \m...\M (full word
-    // boundary) + ORDER BY id ASC agar deterministic.
+    // boundary) + ORDER BY id ASC agar deterministic. Marker juga divalidasi.
     if (opts.nameKeywords?.length) {
       const { agents: agentsTbl } = await import("@shared/schema");
       const { sql, asc } = await import("drizzle-orm");
       for (const kw of opts.nameKeywords) {
         const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         const pattern = `\\m${escaped}\\M`;
+        // Kalau marker disediakan, scan kandidat lebih luas (limit 10) dan pilih
+        // yang prompt-nya valid; bukan cuma row pertama by ID.
         const rows = await db
           .select()
           .from(agentsTbl)
           .where(sql`${agentsTbl.name} ~* ${pattern}`)
           .orderBy(asc(agentsTbl.id))
-          .limit(1);
-        if (rows.length > 0) {
-          return { agent: rows[0], source: "name" };
+          .limit(opts.promptMarker ? 10 : 1);
+        const valid = rows.find((r) => promptHasMarker(r));
+        if (valid) {
+          return { agent: valid, source: "name" };
         }
       }
     }
-    // 4) Optional: systemPrompt marker fallback (untuk orchestrator yg punya marker unik)
+    // 4) Marker-only fallback — agent yg di-rename / slug hilang tapi prompt benar.
+    // Ini "rescue path" terakhir: lebih baik temukan agent ber-prompt benar
+    // daripada return null & jatuh ke 404.
     if (opts.promptMarker) {
       const { agents: agentsTbl } = await import("@shared/schema");
       const { ilike, asc } = await import("drizzle-orm");
