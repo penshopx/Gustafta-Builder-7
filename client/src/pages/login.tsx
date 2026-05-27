@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Sparkles, CheckCircle2, LogOut } from "lucide-react";
+import { trackCompleteRegistration, trackLead } from "@/lib/meta-pixel";
 
 type Mode = "choose" | "login" | "register" | "verify";
 
@@ -53,6 +54,7 @@ export default function LoginPage() {
     try {
       await apiRequest("POST", "/api/auth/login-email", { email, password });
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      trackLead({ content_name: "Email Login" });
       navigate("/dashboard");
     } catch (err: any) {
       const msg = err?.message || "";
@@ -108,6 +110,7 @@ export default function LoginPage() {
     try {
       await apiRequest("POST", "/api/auth/verify-email", { email: pendingEmail, code: otp });
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      trackCompleteRegistration({ content_name: "Email Registration" });
       toast({ title: "Email terverifikasi!", description: "Selamat datang di Gustafta." });
       navigate("/dashboard");
     } catch (err: any) {
@@ -255,12 +258,20 @@ export default function LoginPage() {
                 </Button>
               </div>
 
-              <p className="text-center text-sm text-muted-foreground">
-                Belum punya akun?{" "}
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <button className="text-primary font-medium hover:underline" onClick={() => setMode("register")}>
-                  Daftar sekarang
+                  Belum punya akun? Daftar
                 </button>
-              </p>
+                <a
+                  href="https://wa.me/6282299417818?text=Halo%2C+saya+lupa+password+akun+Gustafta+saya.+Email%3A+"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground hover:underline"
+                  data-testid="link-forgot-password"
+                >
+                  Lupa password?
+                </a>
+              </div>
             </>
           )}
 

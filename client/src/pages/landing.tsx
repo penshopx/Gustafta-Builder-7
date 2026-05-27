@@ -182,7 +182,7 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-            <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
               <Button size="lg" className="w-full sm:w-auto gap-2 text-base font-bold px-8 py-6" data-testid="button-hero-start">
                 <Rocket className="w-5 h-5" />
                 Mulai Sekarang — Gratis
@@ -418,7 +418,7 @@ export default function Landing() {
               })}
             </div>
             <div className="mt-5 flex justify-end">
-              <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+              <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
                 <button className={`flex items-center gap-2 text-sm font-semibold ${p.color} hover:underline`} data-testid={`button-persona-cta-${activePersona}`}>
                   Mulai untuk {p.label} <ChevronRight className="w-4 h-4" />
                 </button>
@@ -540,7 +540,7 @@ export default function Landing() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold gap-2 px-8" data-testid="button-pricing-cta-start">
                 <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
               </Button>
@@ -602,7 +602,7 @@ export default function Landing() {
             Bergabung dengan ratusan kontraktor, konsultan, dan bisnis Indonesia yang sudah menggunakan Gustafta. Mulai gratis, upgrade kapan pun Anda butuh.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
               <Button size="lg" className="gap-2 font-bold px-8" data-testid="button-final-cta-start">
                 <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
               </Button>

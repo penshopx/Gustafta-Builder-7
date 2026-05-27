@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackInitiateCheckout, trackPurchase } from "@/lib/meta-pixel";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -519,6 +520,9 @@ export default function Pricing() {
     setPaymentLoading(true);
 
     try {
+      const tier = subscriptionTiers.find(t => t.planKey === planKey);
+      trackInitiateCheckout({ content_name: tier?.name ?? planKey, currency: "IDR" });
+
       const result = await createSubscription.mutateAsync({ plan: planKey });
 
       // Free trial — langsung aktif
@@ -530,6 +534,7 @@ export default function Pricing() {
       }
 
       // Paket berbayar — arahkan ke WA untuk pembayaran via Scalev
+      trackPurchase({ value: 0, currency: "IDR", content_name: tier?.name ?? planKey });
       toast({
         title: "Pesanan Berhasil Dibuat!",
         description: result.message || "Tim kami akan menghubungi Anda untuk konfirmasi pembayaran.",

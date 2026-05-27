@@ -188,6 +188,7 @@ function Router() {
       <Route path="/bootstrap-admin" component={BootstrapAdmin} />
       <Route path="/admin/audit" component={AdminAudit} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/auth" component={LoginPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/documentation" component={Documentation} />
       <Route path="/pricing" component={Pricing} />
@@ -223,6 +224,7 @@ function Router() {
         )} />
       <Route path="/templates" component={TemplatesPage} />
       <Route path="/store" component={StorePage} />
+      <Route path="/gustafta-store" component={StorePage} />
       <Route path="/store/access/:token" component={StoreAccess} />
       <Route path="/test-tracker" component={TestTracker} />
       <Route path="/chaesa" component={ChaesaPage} />

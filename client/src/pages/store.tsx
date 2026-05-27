@@ -13,6 +13,7 @@ import {
   Wrench, Sparkles,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { trackViewContent, trackInitiateCheckout } from "@/lib/meta-pixel";
 
 const CATEGORY_LABELS: Record<string, string> = {
   engineering: "Teknik & Engineering",
@@ -136,6 +137,7 @@ export default function Store() {
       const data = await res.json();
       const { waUrl } = data;
       setShowBuyDialog(false);
+      trackInitiateCheckout({ content_name: selectedAgent?.name ?? "Store Product", currency: "IDR" });
       toast({ title: "Pesanan dibuat!", description: "Tim kami akan menghubungi Anda untuk konfirmasi pembayaran via Scalev." });
       if (waUrl) window.open(waUrl, "_blank");
     },
@@ -152,6 +154,7 @@ export default function Store() {
     setBuyForm({ name: "", email: "", phone: "" });
     setShowBuyDialog(true);
     setDetailAgent(null);
+    trackViewContent({ content_name: agent.name, content_category: agent.category ?? "chatbot" });
   };
 
   const handleDetail = (agent: AgentProduct) => setDetailAgent(agent);
