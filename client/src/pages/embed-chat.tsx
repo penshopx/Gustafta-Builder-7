@@ -82,20 +82,30 @@ export default function EmbedChat() {
         }),
       });
       
-      if (!response.ok) throw new Error("Failed to send message");
-      
+      // Resolve human-readable error before adding assistant bubble
+      if (!response.ok) {
+        let errText = "Maaf, terjadi kesalahan. Silakan coba lagi.";
+        try {
+          const errData = await response.json();
+          if (response.status === 429) errText = "Kuota pesan habis. Silakan daftar untuk melanjutkan.";
+          else if (response.status === 503) errText = errData.error || "Chatbot sedang tidak aktif.";
+          else if (errData.error) errText = errData.error;
+        } catch {}
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(), role: "assistant" as const,
+          content: errText, timestamp: new Date(),
+        }]);
+        return;
+      }
+
+      const assistantId = (Date.now() + 1).toString();
+      setMessages(prev => [...prev, {
+        id: assistantId, role: "assistant" as const, content: "", timestamp: new Date(),
+      }]);
+
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantContent = "";
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
-        timestamp: new Date(),
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
       
       while (reader) {
         const { done, value } = await reader.read();
@@ -136,13 +146,19 @@ export default function EmbedChat() {
       setShowRating(true);
     } catch (error) {
       console.error("Chat error:", error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Maaf, terjadi kesalahan. Silakan coba lagi.",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      // Update last assistant bubble if it exists (empty), otherwise append
+      setMessages(prev => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last?.role === "assistant" && !last.content) {
+          updated[updated.length - 1] = { ...last, content: "Maaf, terjadi kesalahan. Silakan coba lagi." };
+          return updated;
+        }
+        return [...prev, {
+          id: (Date.now() + 1).toString(), role: "assistant" as const,
+          content: "Maaf, terjadi kesalahan. Silakan coba lagi.", timestamp: new Date(),
+        }];
+      });
     } finally {
       setIsLoading(false);
     }
