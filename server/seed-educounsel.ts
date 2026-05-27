@@ -555,27 +555,40 @@ Untuk ORANG TUA:
 export async function seedEducounselAgents() {
   const logPrefix = "[Seed EDUCOUNSEL]";
 
-  // Check if already seeded
+  // Check if already seeded — DAN prompt-nya benar (mengandung marker EDUC_ORCHESTRATOR_v1.0).
+  // Kalau marker hilang berarti agent ini di-overwrite seed lain (mis. HUB Regulasi Jasa Konstruksi),
+  // wajib re-seed prompt + sub-agents config.
   const existingOrch = await storage.getAgentBySlug("educounsel-orchestrator").catch(() => null);
   if (existingOrch) {
-    // Update sub-agents config to ensure it's current
-    const allSubs = await Promise.all([
-      storage.getAgentBySlug("educounsel-safety"),
-      storage.getAgentBySlug("educounsel-profil"),
-      storage.getAgentBySlug("educounsel-akademik"),
-      storage.getAgentBySlug("educounsel-diagnostik"),
-      storage.getAgentBySlug("educounsel-intervensi"),
-      storage.getAgentBySlug("educounsel-habit"),
-      storage.getAgentBySlug("educounsel-pathway-dn"),
-      storage.getAgentBySlug("educounsel-pathway-ln"),
-      storage.getAgentBySlug("educounsel-ortu"),
-      storage.getAgentBySlug("educounsel-dok"),
-      storage.getAgentBySlug("educounsel-eskul"),
-    ]);
-    const allExist = allSubs.every(s => s !== null);
-    if (allExist) {
-      log(`${logPrefix} Sudah ada dan lengkap, skip.`);
-      return;
+    const orchPromptOk = ((existingOrch as any).systemPrompt || "").includes("EDUC_ORCHESTRATOR_v1.0");
+    if (!orchPromptOk) {
+      log(`${logPrefix} Orchestrator ada (ID ${existingOrch.id}) tapi systemPrompt tidak punya marker EDUC_ORCHESTRATOR_v1.0 — force re-seed prompt & sub-agents.`);
+    } else {
+      // Marker valid — cek juga semua sub-agent slug + marker prompt-nya
+      const allSubs = await Promise.all([
+        storage.getAgentBySlug("educounsel-safety"),
+        storage.getAgentBySlug("educounsel-profil"),
+        storage.getAgentBySlug("educounsel-akademik"),
+        storage.getAgentBySlug("educounsel-diagnostik"),
+        storage.getAgentBySlug("educounsel-intervensi"),
+        storage.getAgentBySlug("educounsel-habit"),
+        storage.getAgentBySlug("educounsel-pathway-dn"),
+        storage.getAgentBySlug("educounsel-pathway-ln"),
+        storage.getAgentBySlug("educounsel-ortu"),
+        storage.getAgentBySlug("educounsel-dok"),
+        storage.getAgentBySlug("educounsel-eskul"),
+      ]);
+      const allExist = allSubs.every(s => s !== null);
+      const allSubPromptsOk = allSubs.every(s => {
+        const p = (s as any)?.systemPrompt || "";
+        // sub-agent prompt minimal harus mulai dengan "Kamu adalah" (semua sub diawali begitu)
+        return p.startsWith("Kamu adalah");
+      });
+      if (allExist && allSubPromptsOk) {
+        log(`${logPrefix} Sudah ada, marker valid, dan sub-agent prompt utuh — skip.`);
+        return;
+      }
+      log(`${logPrefix} Orchestrator OK tapi sub-agent ada yang hilang/prompt salah — re-seed.`);
     }
   }
 

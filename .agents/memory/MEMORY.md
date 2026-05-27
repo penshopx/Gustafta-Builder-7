@@ -1,2 +1,3 @@
 - [Lucide Map icon crash](lucide-map-crash.md) — `{ Map }` from lucide-react (no alias) → global Map in prod build → blank screen crash.
 - [Orchestrator lookup pattern](orchestrator-lookup.md) — never trust hardcoded agent IDs; resolve via slug → ID-validated → word-boundary name fallback. Audit must mirror runtime, not raw ID lookup.
+- [Seed early-return guards](seed-early-return-guards.md) — "skip if slug exists" lets stale-prompt agents persist forever; guard MUST check a unique prompt marker too.
