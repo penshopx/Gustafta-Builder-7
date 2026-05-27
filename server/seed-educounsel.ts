@@ -554,17 +554,26 @@ Untuk ORANG TUA:
 
 export async function seedEducounselAgents() {
   const logPrefix = "[Seed EDUCOUNSEL]";
+  log(`${logPrefix} Mulai cek state orchestrator…`);
 
-  // Check if already seeded — DAN prompt-nya benar (mengandung marker EDUC_ORCHESTRATOR_v1.0).
-  // Kalau marker hilang berarti agent ini di-overwrite seed lain (mis. HUB Regulasi Jasa Konstruksi),
-  // wajib re-seed prompt + sub-agents config.
+  // Cek state orchestrator — prompt WAJIB:
+  //  (a) mengandung marker EDUC_ORCHESTRATOR_v1.0, DAN
+  //  (b) TIDAK mengandung anti-marker "HUB Regulasi Jasa Konstruksi"
+  //      (kasus prod: prompt agent 682 ditimpa konten HUB Regulasi tapi
+  //      kebetulan masih menyimpan marker EduCounsel — cek substring saja
+  //      lulus tapi persona chat tetap salah).
   const existingOrch = await storage.getAgentBySlug("educounsel-orchestrator").catch(() => null);
   if (existingOrch) {
-    const orchPromptOk = ((existingOrch as any).systemPrompt || "").includes("EDUC_ORCHESTRATOR_v1.0");
+    const promptText = (((existingOrch as any).systemPrompt || "") as string);
+    const hasMarker = promptText.includes("EDUC_ORCHESTRATOR_v1.0");
+    const hasAntiMarker =
+      promptText.includes("HUB Regulasi Jasa Konstruksi") ||
+      promptText.includes("Global Navigator for construction");
+    const orchPromptOk = hasMarker && !hasAntiMarker;
     if (!orchPromptOk) {
-      log(`${logPrefix} Orchestrator ada (ID ${existingOrch.id}) tapi systemPrompt tidak punya marker EDUC_ORCHESTRATOR_v1.0 — force re-seed prompt & sub-agents.`);
+      log(`${logPrefix} Orchestrator ada (ID ${existingOrch.id}) tapi prompt korup (marker=${hasMarker}, antiMarker=${hasAntiMarker}) — FORCE re-seed prompt & sub-agents.`);
     } else {
-      // Marker valid — cek juga semua sub-agent slug + marker prompt-nya
+      // Prompt valid — cek juga semua sub-agent slug + marker prompt-nya
       const allSubs = await Promise.all([
         storage.getAgentBySlug("educounsel-safety"),
         storage.getAgentBySlug("educounsel-profil"),
@@ -585,11 +594,13 @@ export async function seedEducounselAgents() {
         return p.startsWith("Kamu adalah");
       });
       if (allExist && allSubPromptsOk) {
-        log(`${logPrefix} Sudah ada, marker valid, dan sub-agent prompt utuh — skip.`);
+        log(`${logPrefix} Sudah ada, prompt utuh, sub-agent OK — skip.`);
         return;
       }
       log(`${logPrefix} Orchestrator OK tapi sub-agent ada yang hilang/prompt salah — re-seed.`);
     }
+  } else {
+    log(`${logPrefix} Orchestrator belum ada — full seed.`);
   }
 
   log(`${logPrefix} Mulai seeding EDUCOUNSEL AI StudentHub (12 agents)...`);
