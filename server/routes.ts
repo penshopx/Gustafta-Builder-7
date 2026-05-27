@@ -7830,6 +7830,150 @@ Balas dengan JSON dengan struktur PERSIS ini:
     return res.json({ appUrl: null, source: "none" });
   });
 
+  // Audit: cek apakah agent orchestrator di DB sesuai dengan yang di-expect per replit.md
+  // Akses: superadmin only
+  app.get("/api/admin/audit-orchestrators", async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.session?.userId;
+      if (!userId) return res.status(401).json({ error: "Login dulu" });
+      const me = await storage.getUser(userId);
+      if (!me || me.role !== "superadmin") {
+        return res.status(403).json({ error: "Hanya superadmin" });
+      }
+
+      // (route, expectedId, expectedNameKeywords) — dari replit.md MultiClaw table
+      const EXPECTED: Array<{ route: string; id: number; keywords: string[] }> = [
+        { route: "/sbu-claw", id: 1404, keywords: ["SBU"] },
+        { route: "/smap-claw", id: 272, keywords: ["SMAP", "37001", "Anti-Penyuapan"] },
+        { route: "/pancek-claw", id: 281, keywords: ["PanCEK", "KPK"] },
+        { route: "/iso-claw-9001", id: 140, keywords: ["9001", "SMM"] },
+        { route: "/iso-claw-14001", id: 131, keywords: ["14001", "SML"] },
+        { route: "/smk3-claw", id: 307, keywords: ["SMK3", "IMS"] },
+        { route: "/lkut-claw", id: 302, keywords: ["LKUT", "BUJK"] },
+        { route: "/pjbu-claw", id: 1008, keywords: ["PJBU", "Personel"] },
+        { route: "/keuangan-claw", id: 298, keywords: ["Keuangan"] },
+        { route: "/csms-claw", id: 69, keywords: ["CSMS", "Contractor"] },
+        { route: "/safira-claw", id: 501, keywords: ["Safira", "K3"] },
+        { route: "/tendera-claw", id: 663, keywords: ["Tendera", "Tender"] },
+        { route: "/konstra-tender-claw", id: 652, keywords: ["KonstraTender", "SIRUP", "Tender"] },
+        { route: "/bg-claw", id: 1033, keywords: ["BGClaw", "Bangunan Gedung"] },
+        { route: "/bs-claw", id: 1043, keywords: ["BSClaw", "Bangunan Sipil"] },
+        { route: "/im-claw", id: 1054, keywords: ["IMClaw", "Instalasi", "Mekanikal"] },
+        { route: "/ko-claw", id: 1064, keywords: ["KOClaw", "Spesialis"] },
+        { route: "/kk-claw", id: 1073, keywords: ["KKClaw", "Konsultansi"] },
+        { route: "/migas-claw", id: 564, keywords: ["Migas", "Energi"] },
+        { route: "/dev-properti-claw", id: 575, keywords: ["DevProperti", "Properti", "Developer"] },
+        { route: "/estate-care-claw", id: 586, keywords: ["EstateCare", "Properti"] },
+        { route: "/skema-claw", id: 1448, keywords: ["Skema", "SBU"] },
+        { route: "/panduan-sbu", id: 1458, keywords: ["PanduanSBU", "SBU"] },
+        { route: "/abu-claw", id: 1459, keywords: ["ABU", "LSBU"] },
+        { route: "/panduan-askom", id: 1460, keywords: ["PanduanASKOM", "ASKOM", "SKK"] },
+        { route: "/manprojak-claw", id: 1383, keywords: ["Manprojak", "Manajemen Pelaksanaan"] },
+        { route: "/arsitektur-claw", id: 1391, keywords: ["Arsitektur"] },
+        { route: "/surveipemetaan-claw", id: 1399, keywords: ["Survei", "Pemetaan"] },
+        { route: "/geoteknik-claw", id: 1879, keywords: ["Geoteknik"] },
+        { route: "/jalanjembatan-claw", id: 1887, keywords: ["Jalan", "Jembatan"] },
+        { route: "/tatalingkungan-claw", id: 1895, keywords: ["TataLingkungan", "Tata Lingkungan"] },
+        { route: "/elektrikal-claw", id: 1903, keywords: ["Elektrikal"] },
+        { route: "/mep-claw", id: 1831, keywords: ["MEP", "Mekanikal"] },
+        { route: "/sipil-claw", id: 1823, keywords: ["SipilClaw", "Teknik Sipil"] },
+        { route: "/lingkungan-claw", id: 1847, keywords: ["Lingkungan"] },
+        { route: "/qs-claw", id: 1911, keywords: ["QS", "Quantity Surveying"] },
+        { route: "/pengawas-claw", id: 1919, keywords: ["Pengawas"] },
+        { route: "/kontrak-claw", id: 1927, keywords: ["Kontrak"] },
+        { route: "/k3man-claw", id: 1935, keywords: ["K3Man", "K3"] },
+        { route: "/konstra-claw", id: 1281, keywords: ["Konstra", "Manajemen Proyek"] },
+        { route: "/brain-claw", id: 806, keywords: ["Brain", "Project Intelligence"] },
+        { route: "/educounsel-claw", id: 899, keywords: ["EduCounsel", "Konseling"] },
+        { route: "/ibtu-claw", id: 1953, keywords: ["IBTU", "IB Testing"] },
+        { route: "/etlo-academy-claw", id: 964, keywords: ["ETLOAcademy", "ETLO"] },
+        { route: "/etlo-bizdev-claw", id: 975, keywords: ["ETLOBizDev", "BizDev"] },
+        { route: "/bim-claw", id: 1031, keywords: ["BIM"] },
+        { route: "/desain-claw", id: 1040, keywords: ["Desain", "Arsitektur"] },
+        { route: "/siteops-claw", id: 1049, keywords: ["SiteOps", "Operasional"] },
+        { route: "/ketenagalistrikan-claw", id: 994, keywords: ["Ketenagalistrikan"] },
+        { route: "/energi-claw", id: 1003, keywords: ["Energi", "EBT"] },
+        { route: "/pertambangan-claw", id: 1012, keywords: ["Pertambangan"] },
+        { route: "/digital-marketing-claw", id: 1159, keywords: ["DigitalMarketing", "Marketing"] },
+        { route: "/crm-sales-claw", id: 1168, keywords: ["CRM", "Sales"] },
+        { route: "/brand-content-claw", id: 1177, keywords: ["Brand", "Content"] },
+        { route: "/ecommerce-claw", id: 1186, keywords: ["Ecommerce", "E-Commerce"] },
+        { route: "/rekrutmen-claw", id: 1195, keywords: ["Rekrutmen", "Talent"] },
+        { route: "/ld-kompetensi-claw", id: 1204, keywords: ["LdKompetensi", "Learning"] },
+        { route: "/penilaian-kinerja-claw", id: 1213, keywords: ["Penilaian Kinerja", "PK"] },
+        { route: "/ebt-solar-claw", id: 1068, keywords: ["EBTSolar", "Solar", "PLTS"] },
+        { route: "/geologi-claw", id: 1077, keywords: ["Geologi"] },
+        { route: "/offshore-safety-claw", id: 1086, keywords: ["Offshore"] },
+        { route: "/transisi-energi-claw", id: 1105, keywords: ["Transisi Energi"] },
+        { route: "/tutor-teknik-claw", id: 1114, keywords: ["Tutor Teknik", "Tutor"] },
+        { route: "/riset-skripsi-claw", id: 1122, keywords: ["Riset", "Skripsi"] },
+        { route: "/nspk-navigator-claw", id: 1131, keywords: ["NSPK"] },
+        { route: "/korporasi-claw", id: 1140, keywords: ["Korporasi"] },
+      ];
+
+      const results: any[] = [];
+      for (const exp of EXPECTED) {
+        const [agent] = await db
+          .select({
+            id: agentsTable.id,
+            name: agentsTable.name,
+            slug: agentsTable.slug,
+            tagline: agentsTable.tagline,
+            avatar: agentsTable.avatar,
+            isActive: agentsTable.isActive,
+          })
+          .from(agentsTable)
+          .where(eq(agentsTable.id, exp.id))
+          .limit(1);
+
+        if (!agent) {
+          results.push({
+            route: exp.route,
+            expectedId: exp.id,
+            status: "MISSING",
+            issue: "Agent ID tidak ditemukan di DB",
+            actual: null,
+            expectedKeywords: exp.keywords,
+          });
+          continue;
+        }
+
+        const nameLower = (agent.name || "").toLowerCase();
+        const matchedKeyword = exp.keywords.find((kw) => nameLower.includes(kw.toLowerCase()));
+        if (!matchedKeyword) {
+          results.push({
+            route: exp.route,
+            expectedId: exp.id,
+            status: "MISMATCH",
+            issue: `Nama "${agent.name}" tidak mengandung keyword yang diharapkan`,
+            actual: agent,
+            expectedKeywords: exp.keywords,
+          });
+        } else {
+          results.push({
+            route: exp.route,
+            expectedId: exp.id,
+            status: "OK",
+            actual: agent,
+            matchedKeyword,
+          });
+        }
+      }
+
+      const summary = {
+        total: results.length,
+        ok: results.filter((r) => r.status === "OK").length,
+        mismatch: results.filter((r) => r.status === "MISMATCH").length,
+        missing: results.filter((r) => r.status === "MISSING").length,
+      };
+
+      res.json({ summary, results });
+    } catch (e: any) {
+      console.error("[Audit orchestrators] error:", e);
+      res.status(500).json({ error: e?.message || "Audit gagal" });
+    }
+  });
+
   // Bootstrap: promote a user to superadmin via shared secret token.
   // Use case: pertama kali setup di environment baru (production) di mana
   // belum ada superadmin yang bisa promote akun lain via UI.

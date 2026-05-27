@@ -12,6 +12,7 @@ import { Brain, Cpu, GraduationCap, Sparkles, Database, HardHat, Bot, Scale, Shi
 import Landing from "@/pages/landing";
 import Profil from "@/pages/profil";
 import BootstrapAdmin from "@/pages/bootstrap-admin";
+import AdminAudit from "@/pages/admin-audit";
 import LoginPage from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
@@ -173,6 +174,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/profil" component={Profil} />
       <Route path="/bootstrap-admin" component={BootstrapAdmin} />
+      <Route path="/admin/audit" component={AdminAudit} />
       <Route path="/login" component={LoginPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/documentation" component={Documentation} />
