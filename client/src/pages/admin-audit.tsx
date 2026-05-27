@@ -9,13 +9,14 @@ interface AuditRow {
   route: string;
   expectedId: number;
   actualId?: string | number;
-  status: "OK" | "DEGRADED" | "MISMATCH" | "MISSING";
+  status: "OK" | "DEGRADED" | "PROMPT_CORRUPT" | "MISMATCH" | "MISSING";
   source?: "slug" | "id" | "name";
   issue?: string;
   note?: string;
   matchedKeyword?: string;
   expectedKeywords?: string[];
   triedSlug?: string;
+  promptHasKeyword?: boolean;
   actual: {
     id: string;
     name: string;
@@ -27,7 +28,7 @@ interface AuditRow {
 }
 
 interface AuditResponse {
-  summary: { total: number; ok: number; degraded?: number; mismatch: number; missing: number };
+  summary: { total: number; ok: number; degraded?: number; promptCorrupt?: number; mismatch: number; missing: number };
   results: AuditRow[];
 }
 
@@ -76,16 +77,18 @@ export default function AdminAudit() {
               <SummaryCard label="Total" value={data.summary.total} color="default" />
               <SummaryCard label="Benar (OK)" value={data.summary.ok} color="emerald" icon={<CheckCircle2 className="h-5 w-5" />} />
               <SummaryCard label="Jalan tapi ID Beda" value={data.summary.degraded ?? 0} color="blue" icon={<AlertTriangle className="h-5 w-5" />} />
+              <SummaryCard label="Prompt Korup" value={data.summary.promptCorrupt ?? 0} color="fuchsia" icon={<AlertTriangle className="h-5 w-5" />} />
               <SummaryCard label="Salah Nama" value={data.summary.mismatch} color="amber" icon={<AlertTriangle className="h-5 w-5" />} />
               <SummaryCard label="Hilang" value={data.summary.missing} color="red" icon={<XCircle className="h-5 w-5" />} />
             </div>
 
-            {(data.summary.mismatch > 0 || data.summary.missing > 0) && (
+            {(data.summary.mismatch > 0 || data.summary.missing > 0 || (data.summary.promptCorrupt ?? 0) > 0) && (
               <Card className="border-amber-500/40 bg-amber-50/50 dark:bg-amber-950/20">
                 <CardContent className="pt-6">
                   <p className="text-sm">
-                    <strong>{data.summary.mismatch + data.summary.missing}</strong> orchestrator benar-benar bermasalah (salah nama atau hilang).
+                    <strong>{data.summary.mismatch + data.summary.missing + (data.summary.promptCorrupt ?? 0)}</strong> orchestrator benar-benar bermasalah (prompt korup, salah nama, atau hilang).
                     Yang berstatus "Jalan tapi ID Beda" tetap berfungsi di halaman user — cuma ID di <code>replit.md</code> perlu disesuaikan.
+                    Yang "Prompt Korup" wajib re-seed prompt (nama benar tapi isi prompt salah persona).
                   </p>
                 </CardContent>
               </Card>
@@ -123,6 +126,7 @@ function SummaryCard({ label, value, color, icon }: { label: string; value: numb
     blue: "bg-blue-50 dark:bg-blue-950/30 border-blue-500/30 text-blue-700 dark:text-blue-400",
     amber: "bg-amber-50 dark:bg-amber-950/30 border-amber-500/30 text-amber-700 dark:text-amber-400",
     red: "bg-red-50 dark:bg-red-950/30 border-red-500/30 text-red-700 dark:text-red-400",
+    fuchsia: "bg-fuchsia-50 dark:bg-fuchsia-950/30 border-fuchsia-500/30 text-fuchsia-700 dark:text-fuchsia-400",
   };
   return (
     <Card className={colorClasses[color] ?? colorClasses.default}>
@@ -148,6 +152,11 @@ function AuditRowItem({ row }: { row: AuditRow }) {
       icon: <AlertTriangle className="h-4 w-4 text-blue-600" />,
       color: "border-blue-500/30 bg-blue-50/30 dark:bg-blue-950/10",
       badgeClass: "bg-blue-600",
+    },
+    PROMPT_CORRUPT: {
+      icon: <AlertTriangle className="h-4 w-4 text-fuchsia-600" />,
+      color: "border-fuchsia-500/40 bg-fuchsia-50/40 dark:bg-fuchsia-950/20",
+      badgeClass: "bg-fuchsia-600",
     },
     MISMATCH: {
       icon: <AlertTriangle className="h-4 w-4 text-amber-600" />,

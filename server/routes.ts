@@ -8024,12 +8024,32 @@ Balas dengan JSON dengan struktur PERSIS ini:
         }
 
         const idDrift = String(found.agent.id) !== String(exp.id);
+        // Cek isi systemPrompt — silent corruption detector.
+        // Kalau prompt tidak mengandung satu pun keyword expected (mis. agent
+        // bernama "EduCounsel" tapi prompt-nya "HUB Regulasi Jasa Konstruksi"),
+        // status = PROMPT_CORRUPT — UI/chat akan jawab sebagai persona yang salah.
+        const promptText = ((found.agent as any).systemPrompt || "").toLowerCase();
+        const promptHasKeyword = exp.keywords.some((kw) =>
+          promptText.includes(kw.toLowerCase()),
+        );
+
+        let status: "OK" | "DEGRADED" | "PROMPT_CORRUPT";
+        let note: string | undefined;
+        if (!promptHasKeyword) {
+          status = "PROMPT_CORRUPT";
+          note = `Nama agent benar tapi system prompt tidak mengandung keyword expected (${exp.keywords.join(" / ")}). Agent kemungkinan ditimpa seed lain — perlu re-seed prompt.`;
+        } else if (idDrift) {
+          status = "DEGRADED";
+          note = `Resolved via ${found.source} (ID asli ${found.agent.id}, beda dari expected ${exp.id} — replit.md perlu update)`;
+        } else {
+          status = "OK";
+        }
+
         results.push({
           route: exp.route,
           expectedId: exp.id,
           actualId: found.agent.id,
-          // OK = ID match. DEGRADED = berfungsi tapi via fallback (slug/name) di ID berbeda.
-          status: idDrift ? "DEGRADED" : "OK",
+          status,
           source: found.source,
           actual: {
             id: found.agent.id,
@@ -8042,9 +8062,8 @@ Balas dengan JSON dengan struktur PERSIS ini:
           matchedKeyword: exp.keywords.find((kw) =>
             (found.agent.name || "").toLowerCase().includes(kw.toLowerCase()),
           ),
-          ...(idDrift
-            ? { note: `Resolved via ${found.source} (ID asli ${found.agent.id}, beda dari expected ${exp.id} — replit.md perlu update)` }
-            : {}),
+          promptHasKeyword,
+          ...(note ? { note } : {}),
         });
       }
 
@@ -8052,6 +8071,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
         total: results.length,
         ok: results.filter((r) => r.status === "OK").length,
         degraded: results.filter((r) => r.status === "DEGRADED").length,
+        promptCorrupt: results.filter((r) => r.status === "PROMPT_CORRUPT").length,
         mismatch: results.filter((r) => r.status === "MISMATCH").length,
         missing: results.filter((r) => r.status === "MISSING").length,
       };

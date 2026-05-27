@@ -274,15 +274,41 @@ export async function seedKonsultanPermenPU() {
     log("[Seed KonsultanPermenPU] Error upgrade ID 230: " + (err as Error).message);
   }
 
-  // ── 2. Hub Konsultan ABU & LSBU (ID 1459) — insert if missing ──
+  // ── 2. Hub Konsultan ABU & LSBU (ID 1459) — insert or repair-if-corrupted ──
+  // Guard: bukan cuma cek "sudah ada", tapi juga validasi marker ABU_LSBU_ORCHESTRATOR_v1.0
+  // di system_prompt. Kalau marker hilang berarti row 1459 sudah ditimpa seed lain
+  // (mis. HUB Regulasi Jasa Konstruksi) — wajib di-overwrite kembali.
   try {
-    const existing = await db.select({ id: agents.id })
+    const existing = await db.select({ id: agents.id, systemPrompt: agents.systemPrompt })
       .from(agents)
       .where(eq(agents.id, 1459))
       .limit(1);
 
-    if (existing.length > 0) {
-      log("[Seed KonsultanPermenPU] ID 1459 sudah ada — skip.");
+    const promptOk = existing.length > 0
+      && (existing[0].systemPrompt || "").includes("ABU_LSBU_ORCHESTRATOR_v1.0");
+
+    if (promptOk) {
+      log("[Seed KonsultanPermenPU] ID 1459 sudah ada & prompt valid — skip.");
+    } else if (existing.length > 0) {
+      // Row ada tapi prompt korup → UPDATE
+      // CATATAN: jangan force is_active / is_enabled — ops bisa saja sengaja
+      // menonaktifkan agen ini. Repair hanya pulihkan konten prompt + struktur
+      // orchestrator; status enable/aktif dibiarkan apa adanya.
+      await db.execute(sql`
+        UPDATE agents SET
+          name = 'Hub Konsultan ABU & LSBU',
+          description = 'Konsultan Cerdas untuk Asesor Badan Usaha dan pengelola LSBU Jasa Konstruksi',
+          tagline = 'Panduan teknis ABU, audit SBU, manajemen LSBU — 8 agen spesialis, berbasis Permen PU 6/2025 & LPJK',
+          avatar = '🏛️',
+          system_prompt = ${PROMPT_ABU_HUB},
+          ai_model = 'gpt-4o-mini',
+          max_tokens = 4000,
+          is_orchestrator = true,
+          agentic_sub_agents = ${AGENTIC_SUB_ABU}::jsonb,
+          agentic_mode = true
+        WHERE id = 1459
+      `);
+      log("[Seed KonsultanPermenPU] ID 1459 prompt korup (marker hilang) — REPAIRED via UPDATE.");
     } else {
       await db.execute(sql`
         INSERT INTO agents (
@@ -305,7 +331,7 @@ export async function seedKonsultanPermenPU() {
       log("[Seed KonsultanPermenPU] ID 1459 Hub Konsultan ABU & LSBU — inserted OK.");
     }
   } catch (err) {
-    log("[Seed KonsultanPermenPU] Error insert ID 1459: " + (err as Error).message);
+    log("[Seed KonsultanPermenPU] Error insert/repair ID 1459: " + (err as Error).message);
   }
 
   // ── 3. PanduanASKOM (ID 1460) — insert if missing ──
