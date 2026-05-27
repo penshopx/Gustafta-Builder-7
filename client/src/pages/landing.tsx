@@ -17,12 +17,13 @@ import {
   TrendingUp, Users, CreditCard, Smartphone, ChevronRight,
   FileText, ClipboardCheck, BarChart3, HardHat, Layers,
   MessageSquare, Lock, HeartHandshake, Award, RefreshCw,
+  Clapperboard, PenLine, Video, Megaphone,
 } from "lucide-react";
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
-  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha">("bekerja");
+  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha" | "kreator">("bekerja");
   const [promoCountdown, setPromoCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -97,6 +98,21 @@ export default function Landing() {
         { icon: BarChart3, title: "Analis Bisnis & Cashflow", desc: "Laporan keuangan sederhana, proyeksi omset, alert anomali pengeluaran — tanpa akuntan tambahan." },
       ],
     },
+    kreator: {
+      icon: Clapperboard,
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
+      border: "border-violet-500/30",
+      label: "Kreator",
+      tagline: "AI Manajer Konten & Script Writer",
+      desc: "Dari editorial calendar bulanan, script YouTube & Podcast, proposal brand deal, hingga laporan performa — AI bantu kreator fokus berkreasi, bukan tenggelam di pekerjaan administratif.",
+      useCases: [
+        { icon: PenLine, title: "Editorial Calendar & Ide Konten", desc: "Rencanakan konten sebulan penuh: tema mingguan, content pillars, jadwal per platform, dikustomisasi sesuai niche." },
+        { icon: Video, title: "Script YouTube & Podcast AI", desc: "Hook 5 detik yang kuat, opening, segmen isi, outro, CTA — script lengkap terasa natural saat dibacakan." },
+        { icon: Megaphone, title: "Proposal Brand Deal & Media Kit", desc: "Profil kreator, audience insight, rate card, deliverables & SLA — media kit profesional siap kirim ke brand dalam menit." },
+        { icon: MessageSquare, title: "Chatbot Kreator Pribadi", desc: "Bangun chatbot berisi semua konten, koleksi video, e-book, dan pengetahuan Anda — followers bisa tanya 24/7." },
+      ],
+    },
   };
 
   const p = personas[activePersona];
@@ -148,15 +164,20 @@ export default function Landing() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
-            Chatbot AI untuk<br />
-            <span className="text-primary">Konstruksi, Bisnis</span>
+            Buat Chatbot AI Cerdas untuk
+            <br className="hidden md:block" />
+            <span className="text-primary"> Belajar</span>
+            <span className="text-muted-foreground">, </span>
+            <span className="text-primary">Bekerja</span>
+            <span className="text-muted-foreground">, </span>
+            <span className="text-orange-500">Berusaha</span>
             <span className="text-muted-foreground"> &amp; </span>
-            <span className="text-primary">Profesional</span>
-            <span className="text-muted-foreground"> Indonesia</span>
+            <span className="text-violet-500">Kreator</span>
+            <span className="block text-2xl sm:text-3xl md:text-4xl mt-1 text-muted-foreground font-semibold">— Tanpa Coding</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Dari <strong className="text-foreground">Asisten Tender LPSE</strong>, AI Tutor SKK, hingga Customer Service otomatis —
+            Dari <strong className="text-foreground">Asisten Tender LPSE</strong>, AI Tutor SKK, Customer Service otomatis, hingga Script Writer —
             bangun chatbot AI dalam <strong className="text-foreground">30 menit tanpa coding</strong>. Sudah dipakai ratusan kontraktor, konsultan, dan bisnis Indonesia.
           </p>
 
@@ -349,7 +370,7 @@ export default function Landing() {
           </div>
 
           <div className="flex justify-center gap-2 mb-6 flex-wrap">
-            {(["belajar", "bekerja", "berusaha"] as const).map((key) => {
+            {(["belajar", "bekerja", "berusaha", "kreator"] as const).map((key) => {
               const tab = personas[key];
               const TabIcon = tab.icon;
               return (
