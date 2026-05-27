@@ -7830,6 +7830,73 @@ Balas dengan JSON dengan struktur PERSIS ini:
     return res.json({ appUrl: null, source: "none" });
   });
 
+  // Helper: cari agent orchestrator pakai multi-strategy (slug → ID → name keyword)
+  // Mengembalikan agent valid (yang nama-nya mengandung keyword) bila ditemukan
+  async function findOrchestratorAgent(opts: {
+    id?: number;
+    slug?: string;
+    nameKeywords?: string[];
+    promptMarker?: string;
+  }): Promise<{ agent: any; source: "slug" | "id" | "name" } | null> {
+    // 1) Slug lookup (paling reliable — auto-assigned ID, tidak bentrok)
+    if (opts.slug) {
+      const bySlug = await storage.getAgentBySlug(opts.slug).catch(() => null);
+      if (bySlug) {
+        if (!opts.nameKeywords?.length) return { agent: bySlug, source: "slug" };
+        const n = (bySlug.name || "").toLowerCase();
+        if (opts.nameKeywords.some((k) => n.includes(k.toLowerCase()))) {
+          return { agent: bySlug, source: "slug" };
+        }
+      }
+    }
+    // 2) ID lookup — validate dengan keyword jika ada
+    if (opts.id) {
+      const byId = await storage.getAgent(String(opts.id)).catch(() => null);
+      if (byId) {
+        if (!opts.nameKeywords?.length) return { agent: byId, source: "id" };
+        const n = (byId.name || "").toLowerCase();
+        if (opts.nameKeywords.some((k) => n.includes(k.toLowerCase()))) {
+          return { agent: byId, source: "id" };
+        }
+      }
+    }
+    // 3) Name keyword fallback — scan agents table dengan word-boundary regex
+    // (mencegah "IMClaw" salah match ke "BIMClaw" dst). Pakai \m...\M (full word
+    // boundary) + ORDER BY id ASC agar deterministic.
+    if (opts.nameKeywords?.length) {
+      const { agents: agentsTbl } = await import("@shared/schema");
+      const { sql, asc } = await import("drizzle-orm");
+      for (const kw of opts.nameKeywords) {
+        const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const pattern = `\\m${escaped}\\M`;
+        const rows = await db
+          .select()
+          .from(agentsTbl)
+          .where(sql`${agentsTbl.name} ~* ${pattern}`)
+          .orderBy(asc(agentsTbl.id))
+          .limit(1);
+        if (rows.length > 0) {
+          return { agent: rows[0], source: "name" };
+        }
+      }
+    }
+    // 4) Optional: systemPrompt marker fallback (untuk orchestrator yg punya marker unik)
+    if (opts.promptMarker) {
+      const { agents: agentsTbl } = await import("@shared/schema");
+      const { ilike, asc } = await import("drizzle-orm");
+      const rows = await db
+        .select()
+        .from(agentsTbl)
+        .where(ilike(agentsTbl.systemPrompt, `%${opts.promptMarker}%`))
+        .orderBy(asc(agentsTbl.id))
+        .limit(1);
+      if (rows.length > 0) {
+        return { agent: rows[0], source: "name" };
+      }
+    }
+    return null;
+  }
+
   // Audit: cek apakah agent orchestrator di DB sesuai dengan yang di-expect per replit.md
   // Akses: superadmin only
   app.get("/api/admin/audit-orchestrators", isAuthenticated, async (req: any, res: any) => {
@@ -7909,58 +7976,82 @@ Balas dengan JSON dengan struktur PERSIS ini:
         { route: "/korporasi-claw", id: 1140, keywords: ["Korporasi"] },
       ];
 
+      // Derive slug per route (pattern: "{route-without-leading-slash}-orchestrator")
+      // dengan beberapa exception khusus (educounsel pakai slug tanpa "-claw")
+      const SLUG_OVERRIDE: Record<string, string> = {
+        "/educounsel-claw": "educounsel-orchestrator",
+        "/ibtu-claw": "ibtuclaw-orchestrator",
+        "/etlo-academy-claw": "etloacademyclaw-orchestrator",
+        "/etlo-bizdev-claw": "etlobizdevclaw-orchestrator",
+        "/ib-tu": "ib-tu-coordinator",
+      };
+      const slugFor = (route: string) =>
+        SLUG_OVERRIDE[route] ?? `${route.replace(/^\//, "")}-orchestrator`;
+
       const results: any[] = [];
       for (const exp of EXPECTED) {
-        const [agent] = await db
-          .select({
-            id: agentsTable.id,
-            name: agentsTable.name,
-            slug: agentsTable.slug,
-            tagline: agentsTable.tagline,
-            avatar: agentsTable.avatar,
-            isActive: agentsTable.isActive,
-          })
-          .from(agentsTable)
-          .where(eq(agentsTable.id, exp.id))
-          .limit(1);
+        const found = await findOrchestratorAgent({
+          id: exp.id,
+          slug: slugFor(exp.route),
+          nameKeywords: exp.keywords,
+        });
 
-        if (!agent) {
+        if (!found) {
+          // Coba tampilkan apa yang ada di ID tersebut (untuk konteks debug)
+          const [byIdRaw] = await db
+            .select({
+              id: agentsTable.id,
+              name: agentsTable.name,
+              slug: agentsTable.slug,
+              tagline: agentsTable.tagline,
+            })
+            .from(agentsTable)
+            .where(eq(agentsTable.id, exp.id))
+            .limit(1);
+
           results.push({
             route: exp.route,
             expectedId: exp.id,
-            status: "MISSING",
-            issue: "Agent ID tidak ditemukan di DB",
-            actual: null,
+            status: byIdRaw ? "MISMATCH" : "MISSING",
+            issue: byIdRaw
+              ? `ID ${exp.id} ditempati "${byIdRaw.name}" — orchestrator yang benar tidak ada di slug/keyword manapun`
+              : "Orchestrator tidak ditemukan via slug, ID, maupun name keyword",
+            actual: byIdRaw ?? null,
             expectedKeywords: exp.keywords,
+            triedSlug: slugFor(exp.route),
           });
           continue;
         }
 
-        const nameLower = (agent.name || "").toLowerCase();
-        const matchedKeyword = exp.keywords.find((kw) => nameLower.includes(kw.toLowerCase()));
-        if (!matchedKeyword) {
-          results.push({
-            route: exp.route,
-            expectedId: exp.id,
-            status: "MISMATCH",
-            issue: `Nama "${agent.name}" tidak mengandung keyword yang diharapkan`,
-            actual: agent,
-            expectedKeywords: exp.keywords,
-          });
-        } else {
-          results.push({
-            route: exp.route,
-            expectedId: exp.id,
-            status: "OK",
-            actual: agent,
-            matchedKeyword,
-          });
-        }
+        const idDrift = String(found.agent.id) !== String(exp.id);
+        results.push({
+          route: exp.route,
+          expectedId: exp.id,
+          actualId: found.agent.id,
+          // OK = ID match. DEGRADED = berfungsi tapi via fallback (slug/name) di ID berbeda.
+          status: idDrift ? "DEGRADED" : "OK",
+          source: found.source,
+          actual: {
+            id: found.agent.id,
+            name: found.agent.name,
+            slug: found.agent.slug,
+            tagline: found.agent.tagline,
+            avatar: found.agent.avatar,
+            isActive: found.agent.isActive,
+          },
+          matchedKeyword: exp.keywords.find((kw) =>
+            (found.agent.name || "").toLowerCase().includes(kw.toLowerCase()),
+          ),
+          ...(idDrift
+            ? { note: `Resolved via ${found.source} (ID asli ${found.agent.id}, beda dari expected ${exp.id} — replit.md perlu update)` }
+            : {}),
+        });
       }
 
       const summary = {
         total: results.length,
         ok: results.filter((r) => r.status === "OK").length,
+        degraded: results.filter((r) => r.status === "DEGRADED").length,
         mismatch: results.filter((r) => r.status === "MISMATCH").length,
         missing: results.filter((r) => r.status === "MISSING").length,
       };
@@ -12366,27 +12457,15 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/educounsel/orchestrator — EduCounsel AI Orchestrator multi-agent
   app.get("/api/educounsel/orchestrator", async (_req, res) => {
     try {
-      const { agents: agentsTable } = await import("@shared/schema");
-      const { ilike, eq } = await import("drizzle-orm");
-
-      let agent = await storage.getAgent("899");
-
-      if (!agent) {
-        const rows = await db.select().from(agentsTable)
-          .where(ilike(agentsTable.systemPrompt, "%EDUC_ORCHESTRATOR_v1.0%"))
-          .limit(1);
-        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
-      }
-
-      if (!agent) {
-        const rows = await db.select().from(agentsTable)
-          .where(eq(agentsTable.slug, "educounsel-orchestrator"))
-          .limit(1);
-        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
-      }
-
-      if (!agent) return res.status(404).json({ error: "EduCounsel Orchestrator belum diinisialisasi." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+      const found = await findOrchestratorAgent({
+        id: 899,
+        slug: "educounsel-orchestrator",
+        nameKeywords: ["EDUCOUNSEL", "EduCounsel"],
+        promptMarker: "EDUC_ORCHESTRATOR_v1.0",
+      });
+      if (!found) return res.status(404).json({ error: "EduCounsel Orchestrator belum diinisialisasi." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -12477,45 +12556,50 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/ko-claw/orchestrator — KOClaw 8-Agent Konstruksi Spesialis
   app.get("/api/ko-claw/orchestrator", async (_req, res) => {
     try {
-      const agent = await storage.getAgent("1064");
-      if (!agent) return res.status(404).json({ error: "KOClaw Orchestrator tidak ditemukan (ID 1064)." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+      const found = await findOrchestratorAgent({ id: 1064, slug: "ko-claw-orchestrator", nameKeywords: ["KOClaw"] });
+      if (!found) return res.status(404).json({ error: "KOClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
   // GET /api/kk-claw/orchestrator — KKClaw 7-Agent Konsultansi Konstruksi
   app.get("/api/kk-claw/orchestrator", async (_req, res) => {
     try {
-      const agent = await storage.getAgent("1073");
-      if (!agent) return res.status(404).json({ error: "KKClaw Orchestrator tidak ditemukan (ID 1073)." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+      const found = await findOrchestratorAgent({ id: 1073, slug: "kk-claw-orchestrator", nameKeywords: ["KKClaw"] });
+      if (!found) return res.status(404).json({ error: "KKClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
   // GET /api/im-claw/orchestrator — IMClaw 9-Agent Ruang Lingkup Instalasi Mekanikal-Elektrikal
   app.get("/api/im-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("1054");
-      if (!agent) return res.status(404).json({ error: "IMClaw Orchestrator tidak ditemukan. Pastikan agen ID 1054 ada di database." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+      const found = await findOrchestratorAgent({ id: 1054, slug: "im-claw-orchestrator", nameKeywords: ["IMClaw"] });
+      if (!found) return res.status(404).json({ error: "IMClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
   // GET /api/bs-claw/orchestrator — BSClaw 10-Agent Ruang Lingkup Bangunan Sipil
   app.get("/api/bs-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("1043");
-      if (!agent) return res.status(404).json({ error: "BSClaw Orchestrator tidak ditemukan. Pastikan agen ID 1043 ada di database." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+      const found = await findOrchestratorAgent({ id: 1043, slug: "bs-claw-orchestrator", nameKeywords: ["BSClaw"] });
+      if (!found) return res.status(404).json({ error: "BSClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
   // GET /api/bg-claw/orchestrator — BGClaw 9-Agent Ruang Lingkup Bangunan Gedung
   app.get("/api/bg-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("1033");
-      if (!agent) return res.status(404).json({ error: "BGClaw Orchestrator tidak ditemukan. Pastikan agen ID 1033 ada di database." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+      const found = await findOrchestratorAgent({ id: 1033, slug: "bg-claw-orchestrator", nameKeywords: ["BGClaw"] });
+      if (!found) return res.status(404).json({ error: "BGClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
@@ -12549,18 +12633,20 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/pjbu-claw/orchestrator — PJBUClaw Multi-Agent Personel Manajerial BUJK
   app.get("/api/pjbu-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("1008");
-      if (!agent) return res.status(404).json({ error: "PJBUClaw Orchestrator tidak ditemukan. Pastikan agen ID 1008 ada di database." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+      const found = await findOrchestratorAgent({ id: 1008, slug: "pjbu-claw-orchestrator", nameKeywords: ["PJBUClaw"] });
+      if (!found) return res.status(404).json({ error: "PJBUClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
   // GET /api/keuangan-claw/orchestrator — KeuanganClaw Multi-Agent Keuangan & Manajerial BUJK
   app.get("/api/keuangan-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("298");
-      if (!agent) return res.status(404).json({ error: "KeuanganClaw Orchestrator tidak ditemukan. Pastikan agen ID 298 ada di database." });
-      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+      const found = await findOrchestratorAgent({ id: 298, slug: "keuangan-claw-orchestrator", nameKeywords: ["KeuanganClaw"] });
+      if (!found) return res.status(404).json({ error: "KeuanganClaw Orchestrator tidak ditemukan." });
+      const a: any = found.agent;
+      res.json({ id: a.id, name: a.name, tagline: a.tagline, avatar: a.avatar });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
