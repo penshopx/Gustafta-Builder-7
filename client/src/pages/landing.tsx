@@ -1,45 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
-import { useTemplates } from "@/hooks/use-templates";
 import { trackLead, trackViewContent, trackContact, trackInitiateCheckout, trackCustomEvent } from "@/hooks/use-meta-pixel";
 import { ChatPopup } from "@/components/chat-popup";
 import { SharedHeader } from "@/components/shared-header";
-import { TemplateShowcase } from "@/components/template-showcase";
-import { featuredSectors } from "@/lib/sector-content";
-import { 
-  Bot, Sparkles, MessageSquare, Globe, Shield, 
-  BookOpen, BarChart3, Lightbulb, ArrowRight, Check,
-  Zap, Palette, Code, Cpu, Layers,
-  Clock, TrendingUp, Users, Star, CheckCircle2, XCircle, AlertTriangle,
-  HeartHandshake, Award, Target, Rocket, Lock, RefreshCw, Play,
-  Brain, Blocks, Camera, Plug, ExternalLink, Wrench,
-  GraduationCap, Briefcase, Store, HardHat, FileText, ClipboardCheck,
-  Package, ChevronRight, Flame, Factory, ShieldCheck, Scale, Smartphone, CreditCard,
-  Mic, Megaphone, ShoppingBag, PenLine, PieChart, Send, Repeat2, Building,
-  CalendarDays, Clapperboard, Video,
-  Database, Bell, Search, Trophy, Newspaper, Server, FolderOpen, Activity
+import {
+  Bot, Sparkles, Globe, Shield, BookOpen, ArrowRight, Check,
+  Zap, Rocket, Brain, Plug, GraduationCap, Briefcase, Store,
+  Flame, Package, CheckCircle2, Star, ChevronRight,
+  CreditCard, Smartphone, Lock, RefreshCw, HeartHandshake, Award
 } from "lucide-react";
 
 export default function Landing() {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
-  const { data: templatesData } = useTemplates();
-  const { toast } = useToast();
-  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha" | "kreator">("belajar");
-  const [trialForm, setTrialForm] = useState({ name: "", phone: "", email: "", company: "", useCase: "" });
-  const [trialSubmitted, setTrialSubmitted] = useState(false);
+  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha">("belajar");
   const [promoCountdown, setPromoCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -59,245 +37,62 @@ export default function Landing() {
     return () => clearInterval(id);
   }, []);
 
-  const trialMutation = useMutation({
-    mutationFn: (data: typeof trialForm) => apiRequest("POST", "/api/trial-requests", data),
-    onSuccess: () => {
-      setTrialSubmitted(true);
-      setTrialForm({ name: "", phone: "", email: "", company: "", useCase: "" });
-      toast({ title: "Permintaan trial terkirim!", description: "Tim kami akan menghubungi Anda segera via WA/Email." });
-    },
-    onError: () => toast({ title: "Gagal mengirim permintaan.", description: "Silakan coba lagi.", variant: "destructive" }),
-  });
-
   useEffect(() => {
-    trackViewContent({ content_name: 'Landing Page', content_category: 'Homepage' });
+    trackViewContent({ content_name: "Landing Page", content_category: "Homepage" });
   }, []);
 
-  const handleLoginClick = () => {
-    trackLead({ content_name: 'Login Button Click' });
-  };
+  const handleStartNowClick = () => trackLead({ content_name: "Start Now CTA" });
+  const handlePricingClick = () => trackViewContent({ content_name: "Pricing Page", content_category: "Pricing" });
+  const handleWAClick = (source: string) => { trackContact(); trackCustomEvent("WhatsApp_Click", { source }); };
+  const handlePacksClick = () => trackInitiateCheckout({ content_name: "Packs Page", value: 999000, currency: "IDR" });
 
-  const handleStartNowClick = () => {
-    trackLead({ content_name: 'Start Now CTA' });
-  };
-
-  const handlePricingClick = () => {
-    trackViewContent({ content_name: 'Pricing Page', content_category: 'Pricing' });
-  };
-
-  const handleWAClick = (source: string) => {
-    trackContact();
-    trackCustomEvent('WhatsApp_Click', { source });
-  };
-
-  const handlePacksClick = () => {
-    trackInitiateCheckout({ content_name: 'Packs Page', value: 999000, currency: 'IDR' });
-  };
-
-  const handleOnboardingClick = () => {
-    trackInitiateCheckout({ content_name: 'Onboarding Subscribe', value: 999000, currency: 'IDR' });
-  };
-
-  const handleTenderClick = () => {
-    trackCustomEvent('Tender_CTA_Click', { source: 'Landing' });
-    trackLead({ content_name: 'Tender LPSE CTA' });
-  };
-
-  const personaContent = {
+  const personas = {
     belajar: {
       icon: GraduationCap,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
       border: "border-blue-500/30",
-      label: "Untuk Belajar",
-      tagline: "AI sebagai tutor, mentor BIMTEK, dan asisten belajar personal",
-      description: "Chatbot AI untuk modul pembelajaran, sertifikasi, dan pelatihan teknis. Mulai dari BIMTEK konstruksi, sertifikasi SKK, quiz interaktif, bank soal, hingga toolbox perhitungan — semuanya tersedia 24/7 tanpa batas.",
-      useCases: [
-        { title: "Mentoring & BIMTEK Konstruksi", desc: "Modul pembelajaran terstruktur, progress tracking, quiz interaktif, dan AI expert agent untuk pelatihan teknis konstruksi." },
-        { title: "Simulasi Ujian SKK", desc: "Latihan soal Sertifikasi Kompetensi Kerja (SKK) dengan AI yang mengoreksi, menjelaskan, dan memberi saran belajar personal." },
-        { title: "Belajar Regulasi Konstruksi", desc: "Chatbot khusus Perpres 46/2025, Permen PUPR, SNI — tanya langsung, jawaban akurat dari dokumen asli." },
-        { title: "E-Learning & Onboarding", desc: "Onboarding karyawan, pelatihan K3, SOP produk, dan quiz evaluasi — semua bisa diakses via chatbot kapan pun dibutuhkan." },
-      ]
+      label: "Belajar",
+      tagline: "AI Tutor & BIMTEK 24/7",
+      desc: "AI tutor per mata pelajaran, simulasi ujian SKK/UTBK, bank soal adaptif, dan bimbingan BNSP — tersedia kapan saja tanpa terikat jadwal.",
+      bullets: ["Simulasi ujian SKK & UTBK", "Tutor konstruksi & teknik sipil", "BIMTEK & onboarding karyawan"],
     },
     bekerja: {
       icon: Briefcase,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
       border: "border-emerald-500/30",
-      label: "Untuk Bekerja",
-      tagline: "AI sebagai asisten profesional, manajer proyek, dan konsultan teknis",
-      description: "Chatbot yang memahami konteks pekerjaan Anda — proyek konstruksi, dokumen teknis, laporan, analisis risiko, dan koordinasi tim. Kerja lebih cepat, lebih akurat, dengan dukungan AI yang selalu siap.",
-      useCases: [
-        { title: "Asisten Tender LPSE", desc: "Analisis dokumen tender, checklist 30+ item, gap analysis, dan draft dokumen otomatis sesuai Perpres 46/2025." },
-        { title: "Manajemen Risiko Proyek", desc: "Risk assessment otomatis, SMKK plan, identifikasi isu dari laporan harian — semua berbasis data proyek Anda." },
-        { title: "Knowledge Base Tim", desc: "Pusat pengetahuan teknis yang bisa diakses seluruh tim via WhatsApp atau web — SOP, standar, prosedur kerja." },
-        { title: "Laporan & Dokumentasi", desc: "AI menyusun laporan mingguan, notulen rapat, ringkasan proyek, dan dokumen teknis dalam hitungan menit." },
-        { title: "AI Notulis & Drafter Dokumen", desc: "Transkripsi rapat dari audio/video otomatis, draft kontrak, SPK, NDA, MoU, dan proposal teknis — siap kirim tanpa revisi manual berulang." },
-        { title: "AI Project Monitor & RAB", desc: "Pantau status proyek via chat: tanya status, minta rekap, analisis RAB, cek anggaran vs realisasi, dan alert deadline terlewat." },
-      ]
+      label: "Bekerja",
+      tagline: "Asisten Profesional & Tender LPSE",
+      desc: "Analisis tender LPSE otomatis, drafter dokumen teknis, notulis rapat, dan konsultan K3 yang siap kerja kapan saja dari mana saja.",
+      bullets: ["Asisten Tender LPSE + checklist 30 item", "Draft kontrak, SPK, SMKK, laporan", "AI Konsultan K3 & regulasi PUPR"],
     },
     berusaha: {
       icon: Store,
       color: "text-orange-500",
       bg: "bg-orange-500/10",
       border: "border-orange-500/30",
-      label: "Untuk Berusaha",
-      tagline: "AI sebagai CS, sales, dan tim operasional yang tidak pernah tidur",
-      description: "Dari menjawab pertanyaan pelanggan hingga menutup penjualan — chatbot AI bekerja 24/7 untuk bisnis Anda. Lebih banyak leads, lebih sedikit biaya operasional, pelayanan yang konsisten di semua channel.",
-      useCases: [
-        { title: "Customer Service Otomatis", desc: "Jawab 80%+ pertanyaan pelanggan secara otomatis. Tim CS bisa fokus pada kasus kompleks yang butuh sentuhan manusia." },
-        { title: "Lead Generation 24/7", desc: "Chatbot menangkap prospek, kualifikasi leads, dan kirim notifikasi ke tim sales — bahkan saat bisnis sudah tutup." },
-        { title: "WhatsApp Business AI", desc: "Satu chatbot untuk ribuan percakapan WhatsApp secara bersamaan. Broadcast, follow-up, dan layanan otomatis." },
-        { title: "AI Konten & Copywriting", desc: "Caption Instagram/TikTok, artikel blog, script iklan, email marketing — konten siap publish dibuat AI berdasarkan produk dan target pasar Anda." },
-        { title: "AI Sales Script & Konversi", desc: "Objection handling otomatis, script closing, follow-up sequence, dan template negosiasi — dikustomisasi per segmen pembeli." },
-        { title: "AI Analis Bisnis & Keuangan", desc: "Laporan keuangan sederhana, analisis cashflow, proyeksi omset, dan alert anomali pengeluaran — tanpa perlu akuntan tambahan." },
-      ]
+      label: "Berusaha",
+      tagline: "CS Otomatis & Lead Generation",
+      desc: "Jawab 80%+ pertanyaan pelanggan otomatis, tangkap leads 24/7, kirim broadcast WhatsApp, dan tingkatkan konversi tanpa tambah tim.",
+      bullets: ["Customer Service WhatsApp otomatis", "Lead gen & follow-up tanpa manual", "Konten & copywriting AI"],
     },
-    kreator: {
-      icon: Clapperboard,
-      color: "text-violet-500",
-      bg: "bg-violet-500/10",
-      border: "border-violet-500/30",
-      label: "Untuk Kreator",
-      tagline: "AI sebagai manajer konten, script writer, dan analis pertumbuhan channel Anda",
-      description: "Dari editorial calendar bulanan, script YouTube & Podcast, proposal brand deal, hingga laporan performa konten — AI membantu content creator Indonesia fokus berkreasi, bukan tenggelam dalam pekerjaan administratif.",
-      useCases: [
-        { title: "Editorial Calendar AI", desc: "Rencanakan konten sebulan penuh: tema mingguan, content pillars, jadwal posting per platform, ide konten konkret — dikustomisasi sesuai niche dan target audience." },
-        { title: "Script YouTube & Podcast AI", desc: "Hook 5 detik yang kuat, opening, segmen isi, outro, CTA — script lengkap terasa natural ketika dibaca keras, plus ide thumbnail dan timestamps." },
-        { title: "Proposal Brand Deal & Media Kit", desc: "Profil kreator, audience insight, rate card per paket, deliverables & SLA — media kit profesional siap kirim ke brand dalam hitungan menit." },
-        { title: "Laporan Performa Konten", desc: "Scorecard engagement, top konten, analisis underperform, benchmark niche, dan rekomendasi strategi bulan depan — actionable insight, bukan sekadar angka." },
-        { title: "AI Caption & Copy Konten", desc: "Caption Instagram, TikTok hook, thread LinkedIn, email newsletter — ditulis AI berdasarkan niche dan persona kreator, tinggal edit dan posting." },
-        { title: "Chatbot Kreator Pribadi", desc: "Bangun chatbot berisi semua konten, koleksi video, e-book, dan pengetahuan Anda — followers bisa tanya 24/7, Anda tidak perlu balas satu per satu." },
-      ]
-    }
   };
 
-  const tenderFeatures = [
-    { icon: ClipboardCheck, title: "Checklist 30+ Item", desc: "Validasi kelengkapan dokumen administrasi, kualifikasi SBU, teknis, SMKK/K3, dan kepatuhan Perpres 46/2025 secara otomatis." },
-    { icon: BarChart3, title: "Skor Kesiapan Tender", desc: "Skor Kelengkapan Dokumen + Skor Teknis (0–100) dengan penjelasan detail per bagian dan prioritas perbaikan." },
-    { icon: AlertTriangle, title: "Gap Analysis Prioritas", desc: "Identifikasi kekurangan spesifik vs persyaratan tender, dengan rekomendasi tindakan dan estimasi waktu penyelesaian." },
-    { icon: FileText, title: "Draft Dokumen AI", desc: "Proposal teknis, rencana mutu, SMKK plan, risk assessment, dan metode pelaksanaan — draf pertama siap dalam menit." },
-    { icon: Brain, title: "Executive Summary", desc: "Ringkasan kesiapan tender 4–5 kalimat: kekuatan utama, risiko terbesar, dan rekomendasi strategis untuk diputuskan." },
-    { icon: HardHat, title: "Wizard 7 Langkah", desc: "Input profil perusahaan, data tender, upload dokumen (auto-extract AI), strategi teknis, compliance, dan pilih output." },
-  ];
-
-  const painPoints = [
-    {
-      icon: Clock,
-      problem: "Tim CS kewalahan menjawab pertanyaan yang sama berulang-ulang",
-      solution: "Chatbot AI menjawab FAQ otomatis 24/7 - pelanggan mendapat respons instan tanpa antrian"
-    },
-    {
-      icon: AlertTriangle,
-      problem: "Informasi bisnis tersebar dan sulit diakses oleh tim maupun pelanggan",
-      solution: "Knowledge Base terpusat + chatbot sebagai pintu akses informasi kapan saja"
-    },
-    {
-      icon: TrendingUp,
-      problem: "Kehilangan peluang bisnis di luar jam operasional",
-      solution: "AI bekerja 24/7 menangkap leads, menjawab pertanyaan, dan melayani pelanggan"
-    },
-    {
-      icon: Users,
-      problem: "Biaya operasional tinggi untuk customer service multi-channel",
-      solution: "Satu chatbot AI melayani di WhatsApp, web, Telegram, dan channel lainnya sekaligus"
-    },
-  ];
-
   const features = [
-    {
-      icon: Brain,
-      title: "Otak Proyek",
-      description: "Pusatkan semua data dan konteks bisnis dalam satu tempat. AI menggunakan data ini untuk memberikan jawaban yang akurat dan kontekstual."
-    },
-    {
-      icon: Layers,
-      title: "Hierarki 5 Level",
-      description: "Bangun ekosistem multi-agent terstruktur: Series → Core → Big Idea → Toolbox → Agent. Skala bebas, koordinasi cerdas."
-    },
-    {
-      icon: Globe,
-      title: "Custom Domain",
-      description: "Pasang domain kustom (misal: bot.perusahaan.com) ke chatbot manapun. CNAME setup, verifikasi otomatis, embed code siap pakai."
-    },
-    {
-      icon: Sparkles,
-      title: "Agentic AI + OpenClaw",
-      description: "Metodologi agentic berlapis: listen → detect → plan → execute → follow-up. Reasoning multi-step, self-correction, dan proactive assistance bawaan."
-    },
-    {
-      icon: Blocks,
-      title: "MultiClaw 4-Panel",
-      description: "Info Tender → Studio Kompetensi → Ekosistem Produk → WA Broadcast: empat panel terintegrasi dengan shared context lintas panel, bridge button, AI Intelligence Banner, dan A/B test pesan broadcast otomatis."
-    },
-    {
-      icon: Cpu,
-      title: "Orchestrator Multi-Agent",
-      description: "Routing cerdas otomatis ke 7 specialist domain konstruksi (Tender, SKK/SBU, Hukum, K3, Marketing, dll) + tambah specialist custom sendiri."
-    },
-    {
-      icon: BookOpen,
-      title: "Knowledge Base 7 Tipe",
-      description: "Upload teks, file (PDF/DOCX/Excel), URL, YouTube, Cloud Drive, Video, atau Audio. AI transkripsi & RAG otomatis dari semua sumber."
-    },
-    {
-      icon: Plug,
-      title: "Multi-Channel",
-      description: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget, REST API, dan Custom Domain. Satu chatbot, semua channel terhubung."
-    },
-    {
-      icon: Package,
-      title: "Mini Apps 45 Tipe",
-      description: "Rubrik penilaian, risk register, notulis rapat, drafter kontrak, RAB, KPI, editorial calendar, script video, media kit, laporan konten — 45 tipe Mini App siap pakai langsung di dalam chatbot."
-    },
-    {
-      icon: ShieldCheck,
-      title: "Master Standar v2.0",
-      description: "State Machine 7-langkah (INIT→ELICIT→PLAN→DISPATCH→AGGREGATE→REFLECT→DELIVER), ANTI-INTERROGATION MODE, dan FALLBACK mandiri saat sub-agent tidak tersedia."
-    },
+    { icon: Brain, title: "Otak Proyek", desc: "Pusatkan semua data bisnis. AI jawab berdasarkan konteks nyata bisnis Anda.", color: "text-amber-500", bg: "bg-amber-500/10" },
+    { icon: Globe, title: "Custom Domain", desc: "Pasang bot.perusahaan.com ke chatbot Anda. Setup CNAME dalam 5 menit.", color: "text-blue-500", bg: "bg-blue-500/10" },
+    { icon: BookOpen, title: "Knowledge Base 7 Tipe", desc: "Upload PDF, URL, YouTube, video, audio — AI transkripsi & RAG otomatis.", color: "text-violet-500", bg: "bg-violet-500/10" },
+    { icon: Plug, title: "Multi-Channel", desc: "WhatsApp, Telegram, web widget, REST API — satu chatbot, semua channel.", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { icon: Zap, title: "Agentic AI + Orchestrator", desc: "Routing otomatis ke specialist domain: Tender, K3, SKK, Hukum, Marketing.", color: "text-orange-500", bg: "bg-orange-500/10" },
+    { icon: Shield, title: "Aman & Privat", desc: "Token akses per chatbot, mode publik/privat, enkripsi data, OAuth Replit.", color: "text-slate-500", bg: "bg-slate-500/10" },
   ];
 
-  const advancedFeatures = [
-    {
-      icon: Camera,
-      title: "Project Snapshot AI",
-      description: "Ringkasan kondisi bisnis atau proyek otomatis — status, isu, risiko, dan keputusan terakhir dalam satu laporan"
-    },
-    {
-      icon: BarChart3,
-      title: "Analytics Dashboard",
-      description: "Pantau performa chatbot dengan metrik pesan, sesi, engagement, dan peak hours secara real-time"
-    },
-    {
-      icon: Cpu,
-      title: "Multi-Model AI",
-      description: "GPT-4o, GPT-4o-mini, DeepSeek, Qwen, Gemini — fallback otomatis antar provider, tidak ada single point of failure"
-    },
-    {
-      icon: Palette,
-      title: "Widget & Embed Kustom",
-      description: "Widget floating atau iframe embed. Kustomisasi warna, posisi, ukuran, logo, dan welcome message sesuai brand"
-    },
-    {
-      icon: Shield,
-      title: "Access Control & Keamanan",
-      description: "Token akses per chatbot, mode publik/privat, Custom Domain verifikasi, OAuth Replit Identity, dan enkripsi data"
-    },
-    {
-      icon: Code,
-      title: "API & Integrasi Kustom",
-      description: "REST API lengkap, webhook, dan Broadcast WA. Integrasi dengan CRM, ERP, LPSE tender scraper, atau tools lainnya"
-    },
-    {
-      icon: Scale,
-      title: "SCORECARD + Win Probability",
-      description: "Semua 131 hub orchestrator dilengkapi tabel 4-dimensi + persentase probabilitas keputusan dan rekomendasi LANJUT/TUNDA/GUGUR"
-    },
-    {
-      icon: ExternalLink,
-      title: "Export ke Aspekindo LLM",
-      description: "Export agent ke format LibreChat JSON — import langsung ke chat.aspekindo-pub.com tanpa perlu copy-paste satu per satu"
-    },
+  const steps = [
+    { n: "1", title: "Buat Hierarki Chatbot", desc: "Buat Series, Modul, dan Chatbot sesuai kebutuhan — dalam 10 menit.", time: "±10 mnt" },
+    { n: "2", title: "Isi Knowledge Base", desc: "Upload PDF, URL, YouTube, atau audio. AI transkripsi otomatis di background.", time: "±10–15 mnt" },
+    { n: "3", title: "Konfigurasi & Deploy", desc: "Atur persona, pasang custom domain, lalu hubungkan ke WhatsApp atau web.", time: "±5–7 mnt" },
+    { n: "4", title: "Mulai Layani Pengguna", desc: "Chatbot aktif 24/7. Monitor performa via analytics dashboard real-time.", time: "±3–5 mnt" },
   ];
 
   const testimonials = [
@@ -305,601 +100,310 @@ export default function Landing() {
       name: "Budi Santoso",
       role: "Direktur Teknik, PT Bangun Nusa Konstruksi",
       avatar: "BS",
-      content: "Tender LPSE Assistant menghemat 2–3 hari kerja per tender. Checklist 30+ item langsung muncul, gap analysis akurat, draft dokumen tinggal edit. Tim kami bisa fokus ke strategi, bukan administrasi.",
-      rating: 5,
-      tag: "Kontraktor"
-    },
-    {
-      name: "Hendra Wijaya",
-      role: "Manajer Proyek, PT Adhi Karya Regional IV",
-      avatar: "HW",
-      content: "Project Brain benar-benar game changer. Semua dokumen kontrak, spek teknis, dan regulasi PUPR tersimpan di satu tempat. Engineer lapangan tinggal tanya via WA, AI langsung jawab berdasarkan dokumen proyek kami yang sebenarnya.",
-      rating: 5,
-      tag: "Manajemen Proyek"
+      text: "Tender LPSE Assistant menghemat 2–3 hari kerja per tender. Checklist 30+ item langsung muncul, gap analysis akurat, draft dokumen tinggal edit.",
+      tag: "Kontraktor",
     },
     {
       name: "Retno Ayu",
       role: "Kepala Divisi Sertifikasi, LSP Konstruksi Nasional",
       avatar: "RA",
-      content: "Simulasi asesmen SKKNI via AI sangat membantu peserta kami. Tanya-jawab gaya assessor BNSP, rekap kesiapan per unit kompetensi — peserta yang latihan pakai Gustafta lulus lebih konsisten dibanding yang tidak.",
-      rating: 5,
-      tag: "Sertifikasi LSP"
+      text: "Simulasi asesmen SKKNI via AI sangat membantu peserta kami. Peserta yang latihan pakai Gustafta lulus lebih konsisten.",
+      tag: "Sertifikasi LSP",
     },
     {
       name: "Agus Prasetyo",
       role: "Direktur Utama, PT Graha Mandiri Consultant",
       avatar: "AP",
-      content: "SCORECARD Win Probability 4 dimensi membantu kami memutuskan tender mana yang layak diikuti. Tidak lagi buang waktu dan biaya untuk tender yang dari awal peluangnya kecil. Win rate kami naik 40% dalam 3 bulan.",
-      rating: 5,
-      tag: "Konsultan MK"
-    },
-    {
-      name: "Siti Rahayu",
-      role: "Instruktur BNSP, Lembaga Pelatihan Teknik Sipil",
-      avatar: "SR",
-      content: "SKK Coach AI menemani peserta belajar mandiri di luar jam pelatihan. Bank soal adaptif, simulasi wawancara assessor, dan rekap area lemah — peserta saya lebih siap dan lebih percaya diri saat uji kompetensi.",
-      rating: 5,
-      tag: "Pelatihan SKK"
-    },
-    {
-      name: "Darmawan Halim",
-      role: "General Manager, PT Wijaya Beton Precast",
-      avatar: "DH",
-      content: "Kami integrasikan Gustafta ke seluruh workflow K3 dan mutu produksi. AI Konsultan K3 menjawab pertanyaan tim lapangan soal prosedur SMK3 dan ISO 45001 kapan pun — tanpa perlu telepon konsultan eksternal lagi.",
-      rating: 5,
-      tag: "K3 & Mutu"
+      text: "SCORECARD Win Probability membantu kami memutuskan tender mana yang layak diikuti. Win rate naik 40% dalam 3 bulan.",
+      tag: "Konsultan MK",
     },
   ];
 
-  const comparisonData = [
-    { feature: "Hierarki 5 Level: Series → Core → Big Idea → Toolbox → Agent", gustafta: true, others: false },
-    { feature: "MultiClaw 4-Panel: Info Tender → Studio → Ekosistem → Broadcast WA + Cross-Panel Context", gustafta: true, others: false },
-    { feature: "Orchestrator Multi-Agent: Routing ke 7+ Specialist Domain", gustafta: true, others: false },
-    { feature: "Custom Specialist Agent (tambah domain keahlian sendiri)", gustafta: true, others: false },
-    { feature: "Custom Domain (bot.perusahaan.com → chatbot)", gustafta: true, others: false },
-    { feature: "Knowledge Base 7 Tipe (YouTube, Video, Audio, Cloud Drive)", gustafta: true, others: "Terbatas" },
-    { feature: "Otak Proyek / Project Brain + Tender Wizard", gustafta: true, others: false },
-    { feature: "Multi-Channel (WhatsApp, Telegram, Widget, API)", gustafta: "4+ channel", others: "1–2 channel" },
-    { feature: "Multi-Model AI (GPT-4o, Claude, DeepSeek, Custom API)", gustafta: true, others: "Terbatas" },
-    { feature: "A/B Test Pesan Broadcast + Personalisasi AI per Kontak", gustafta: true, others: false },
-    { feature: "Monetisasi, Voucher & Afiliasi", gustafta: true, others: false },
+  const faqs = [
+    { q: "Apakah perlu keahlian coding?", a: "Tidak sama sekali. Semua konfigurasi dilakukan lewat antarmuka visual — Knowledge Base, persona AI, Custom Domain, Tender Wizard — tanpa menulis satu baris kode pun." },
+    { q: "Channel apa saja yang didukung?", a: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget (iframe & floating), Custom Domain, dan REST API. Semua bisa dihubungkan dari satu dashboard." },
+    { q: "Berapa lama setup-nya?", a: "Rata-rata kurang dari 30 menit dari daftar sampai chatbot aktif. Untuk chatbot sederhana (FAQ/CS), bahkan bisa 10–15 menit." },
+    { q: "Apa itu 971+ agent AI spesialis?", a: "Gustafta memiliki ratusan agent AI yang sudah dikonfigurasi untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, dan banyak lagi. Tinggal pakai, tidak perlu build dari nol." },
+    { q: "Bagaimana keamanan data saya?", a: "Data terenkripsi, akses berbasis token per chatbot, mode publik/privat, dan OAuth via Replit Identity. Anda punya kontrol penuh atas siapa yang bisa mengakses chatbot Anda." },
+    { q: "Bisa untuk sektor apa saja?", a: "Gustafta paling dalam untuk Jasa Konstruksi Indonesia — 971+ agent dalam 131 hub siap pakai. Platform juga fleksibel untuk 12 sektor lain: properti, energi, pendidikan, marketing, HR, dan lainnya." },
   ];
 
-  const faqItems = [
-    {
-      question: "Apa itu Gustafta?",
-      answer: "Gustafta adalah platform AI chatbot builder multi-tenant yang memungkinkan siapa saja — pelajar, profesional, dan pengusaha — membangun ekosistem chatbot AI cerdas menggunakan hierarki 5 level (Series → Core → Big Idea → Toolbox → Agent). Dari tutor AI kampus, asisten tender konstruksi, hingga CS otomatis WhatsApp — semuanya dalam satu platform, tanpa coding. Platform ini memiliki 971+ agent AI spesialis, 131 hub orchestrator dengan Master Standar v2.0 (State Machine 7-langkah), 45 tipe Mini App bawaan, SCORECARD + Win Probability, dan fitur Export ke Aspekindo LLM."
-    },
-    {
-      question: "Apa itu hierarki 5 Level Gustafta?",
-      answer: "Arsitektur multi-agent Gustafta terdiri dari 5 level: Series (L1) = payung ekosistem strategis, Core (L2) = sudut pandang tematik dalam Series, Big Idea (L3) = Orkestrator sebagai dispatcher cerdas lintas Core, Toolbox (L4) = chatbot spesialis per area operasional, Agent (L5) = unit tugas mikro eksekutor di dalam Toolbox. Dengan hierarki ini Anda bisa bangun ekosistem chatbot skalabel yang terkoordinasi cerdas."
-    },
-    {
-      question: "Apa itu MultiClaw 4-Panel dan bagaimana cara kerjanya?",
-      answer: "MultiClaw adalah sistem 4 panel terintegrasi yang berbagi context data secara otomatis lintas panel: (1) Info Tender — analisis kesiapan tender LPSE, skor, gap analysis; (2) Studio Kompetensi — rancang program pelatihan SKK/SKKNI berbasis gap tender; (3) Ekosistem Kompetensi — buat produk digital (eBook, eCourse, template dokumen) dari program kompetensi; (4) Broadcast WA — kirim kampanye WhatsApp dengan konten dari tender & produk ekosistem, dilengkapi A/B test AI dan personalisasi per kontak. Setiap panel menampilkan 'AI Intelligence Banner' yang otomatis membaca data panel sebelumnya."
-    },
-    {
-      question: "Apa itu Custom Domain dan bagaimana cara pakainya?",
-      answer: "Custom Domain memungkinkan Anda memasang domain kustom (misal: bot.perusahaan.com) yang langsung mengarah ke chatbot Anda. Caranya: tambahkan CNAME record di provider domain → arahkan ke host Gustafta → verifikasi di dashboard → domain aktif. Tersedia juga embed code (iframe & floating widget) untuk dipasang di website lain."
-    },
-    {
-      question: "Apa itu Tender LPSE Assistant dan bagaimana cara kerjanya?",
-      answer: "Tender LPSE Assistant adalah alat AI khusus untuk kontraktor dan konsultan MK yang ingin mengikuti tender pengadaan pemerintah (LPSE). Wizard 7 langkah memandu Anda dari input profil perusahaan → data tender → upload dokumen (auto-extract AI) → strategi teknis → compliance Perpres 46/2025 → pilih output. Hasilnya: checklist 30+ item, gap analysis, skor kesiapan, executive summary, dan draft dokumen siap pakai."
-    },
-    {
-      question: "Tipe sumber apa saja yang bisa jadi Knowledge Base?",
-      answer: "7 tipe sumber: Teks (ketik langsung), File (PDF/DOCX/CSV/Excel), URL (crawl website), YouTube (ambil transkrip otomatis), Cloud Drive (Google Drive/OneDrive), Video (.mp4/.webm/.mov → transkripsi), dan Audio (.mp3/.wav/.m4a/.aac → transkripsi). Semua diproses otomatis di background dan tersedia sebagai RAG chunks untuk chatbot."
-    },
-    {
-      question: "Apakah saya perlu keahlian coding?",
-      answer: "Tidak! Semua konfigurasi dilakukan melalui antarmuka visual. Otak Proyek, Knowledge Base 7 tipe, Custom Domain, Persona AI, dan Tender Wizard semuanya bisa di-setup tanpa menulis kode apapun."
-    },
-    {
-      question: "Channel apa saja yang didukung?",
-      answer: "Gustafta mendukung WhatsApp (Fonnte/Kirimi/Multichat/Cloud API), Telegram, Web Widget (iframe & floating), Custom Domain, REST API, dan PWA (bisa install di HP). Discord dan Slack akan hadir segera."
-    },
-    {
-      question: "Apa itu Orchestrator Multi-Agent dan bagaimana cara kerjanya?",
-      answer: "Orchestrator Multi-Agent adalah sistem routing cerdas di dalam satu chatbot. Setiap pesan user dianalisis oleh AI classifier (DeepSeek) yang menentukan specialist mana yang paling tepat menjawab — misalnya pertanyaan tender diarahkan ke Specialist Tender, pertanyaan SKK/SBU ke Specialist Sertifikasi, dan seterusnya. Ada 7 specialist domain konstruksi bawaan, dan Anda bisa tambah specialist custom sendiri sesuai kebutuhan bisnis."
-    },
-    {
-      question: "Apakah Orchestrator Multi-Agent menambah biaya?",
-      answer: "Orchestrator menggunakan DeepSeek sebagai model classifier dengan biaya routing ~Rp 1–2 per pesan (sekitar $0.0001/call). Biaya ini sudah termasuk dalam semua paket berlangganan. Untuk estimasi: 5.000 pesan/bulan ≈ Rp 5.000–10.000 biaya routing — sangat terjangkau dan tidak ada biaya tambahan."
-    },
-    {
-      question: "Bagaimana dengan keamanan data?",
-      answer: "Data Anda aman dengan enkripsi, token akses per chatbot, mode publik/privat, kontrol domain, dan OAuth via Replit Identity. Anda memiliki kontrol penuh atas siapa yang bisa mengakses chatbot dan data Anda."
-    },
-    {
-      question: "Bisa digunakan untuk sektor usaha apa saja?",
-      answer: "Gustafta adalah platform AI chatbot terdalam untuk industri Jasa Konstruksi Indonesia — 971+ agent AI spesialis dalam 131 hub orchestrator siap pakai mencakup Regulasi, Perizinan/SBU/SKK, Tender LPSE, Pasca Tender & Manajemen Kontrak, Pelaksanaan Proyek, Legalitas Konstruksi, Sertifikasi ISO/SMAP, K3, dan Pengembangan Profesi. Semua hub dilengkapi SCORECARD Win Probability, Master Standar v2.0, T5-HANDOVER domain, dan F3-FALLBACK mandiri. Selain itu, platform fleksibel untuk 12 sektor usaha lain — tinggal kustomisasi Knowledge Base, Mini Apps (45 tipe), Persona, dan Conversion Layer sesuai kebutuhan."
-    },
-  ];
-
-  const steps = [
-    {
-      number: "1",
-      title: "Bangun Hierarki Series → Alat Bantu",
-      description: "Definisikan ekosistem chatbot Anda. Buat Series, Modul, Chatbot (termasuk Orkestrator), dan Alat Bantu sesuai kebutuhan.",
-      time: "± 10 menit",
-      bullets: ["Buat Series sebagai payung ekosistem", "Tambahkan Modul & Chatbot spesialis", "Buat Orkestrator sebagai hub routing (opsional)"]
-    },
-    {
-      number: "2",
-      title: "Isi Knowledge Base (7 Tipe)",
-      description: "Upload sumber pengetahuan — teks, file, URL, YouTube, Cloud Drive, video, atau audio. AI transkripsi & RAG otomatis.",
-      time: "± 10–15 menit",
-      bullets: ["Upload PDF/DOCX/Excel atau paste URL", "Tambahkan link YouTube untuk transkripsi otomatis", "Upload video/audio — AI transkripsi background"]
-    },
-    {
-      number: "3",
-      title: "Konfigurasi & Custom Domain",
-      description: "Aktifkan Otak Proyek, setup persona, dan opsional pasang custom domain untuk branding profesional.",
-      time: "± 5–7 menit",
-      bullets: ["Isi Otak Proyek dengan data bisnis", "Atur persona, greeting & conversation starters", "Setup Custom Domain (CNAME → chatbot Anda)"]
-    },
-    {
-      number: "4",
-      title: "Deploy & Uji Coba",
-      description: "Hubungkan ke channel, tes pertanyaan kunci, lalu bagikan ke pengguna melalui link, widget, atau domain kustom.",
-      time: "± 3–5 menit",
-      bullets: ["Hubungkan WhatsApp / Web Widget", "Tes 5 pertanyaan kunci via chat console", "Bagikan link atau embed code ke website"]
-    },
-  ];
-
-  const trustBadges = [
-    { icon: Lock, label: "Data Terenkripsi" },
-    { icon: RefreshCw, label: "99.9% Uptime" },
-    { icon: HeartHandshake, label: "Support 24/7" },
-    { icon: Award, label: "Multi-Sektor" },
-  ];
-
-  const stats = [
-    { value: "971+", label: "Agent AI Spesialis" },
-    { value: "131", label: "Hub Orchestrator Multi-Agent" },
-    { value: "33", label: "Tipe Mini App Bawaan" },
-    { value: "24/7", label: "AI Selalu Aktif" },
-  ];
+  const p = personas[activePersona];
+  const PersonaIcon = p.icon;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" data-testid="page-landing">
       <SharedHeader />
 
-      <section className="relative overflow-hidden py-16 md:py-28 lg:py-36">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
+      {/* Promo Banner */}
+      <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white py-2.5 px-4">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <Flame className="w-4 h-4 animate-bounce" />
+            Promo Paket Bisnis — Harga naik 2× per 1 Juli 2026
+          </div>
+          <div className="flex items-center gap-1 text-xs font-mono">
+            {[
+              { v: promoCountdown.days, l: "Hari" },
+              { v: promoCountdown.hours, l: "Jam" },
+              { v: promoCountdown.minutes, l: "Mnt" },
+              { v: promoCountdown.seconds, l: "Dtk" },
+            ].map(({ v, l }, i) => (
+              <span key={l} className="flex items-center gap-1">
+                {i > 0 && <span className="opacity-50">:</span>}
+                <span className="bg-white/20 px-1.5 py-0.5 rounded font-bold tabular-nums">{String(v).padStart(2, "0")}</span>
+                <span className="opacity-70 text-[10px]">{l}</span>
+              </span>
+            ))}
+          </div>
+          <Link href="/packs" onClick={handlePacksClick}>
+            <button className="bg-white text-red-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors" data-testid="button-promo-cta">
+              Beli Sekarang Rp 999rb/bln →
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden py-16 md:py-24 px-4">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
         <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-4 relative">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center max-w-7xl mx-auto">
-            {/* Left: Text Content */}
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                <Sparkles className="h-4 w-4" />
-                <span>Baru: Master Standar v2.0 · Mini Apps 45 Tipe · 131 Hub Orchestrator · Export ke Aspekindo LLM</span>
-                <Flame className="h-4 w-4 text-orange-500" />
-              </div>
-              
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight" data-testid="text-hero-title">
-                Buat Chatbot AI Cerdas untuk
-                <br className="hidden md:block" />
-                <span className="text-primary">Belajar, Bekerja</span>
-                <span>, </span>
-                <span className="text-primary">Berusaha</span>
-                <span> &amp; </span>
-                <span className="text-violet-500">Kreator</span>
-                <span className="block text-2xl sm:text-3xl md:text-4xl mt-1 text-muted-foreground font-semibold">— Tanpa Coding</span>
-              </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground mb-6 max-w-2xl lg:mx-0 mx-auto">
-                Platform multi-tenant untuk membangun ekosistem chatbot AI terstruktur menggunakan hierarki 5 level: <strong>Series → Core → Big Idea → Toolbox → Agent</strong>. Dilengkapi <strong>131 Hub Orchestrator</strong> dengan Master Standar v2.0, <strong>Mini Apps 45 tipe</strong>, SCORECARD Win Probability, MultiClaw 4-Panel, Knowledge Base 7 tipe, Custom Domain, dan Agentic AI. Tanpa coding, siap dalam kurang dari 30 menit.
-              </p>
+        <div className="max-w-4xl mx-auto text-center relative">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+            <Sparkles className="h-4 w-4" />
+            Platform AI Chatbot Builder #1 untuk Konstruksi Indonesia
+          </div>
 
-              <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-8">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm">
-                  <GraduationCap className="h-4 w-4" /> Pelajar & Mahasiswa
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm">
-                  <Briefcase className="h-4 w-4" /> Profesional & Kontraktor
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-sm">
-                  <Store className="h-4 w-4" /> Pemilik Usaha & UMKM
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-sm">
-                  <Clapperboard className="h-4 w-4" /> Content Creator
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
-                {trustBadges.map((badge) => (
-                  <div key={badge.label} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <badge.icon className="h-4 w-4 text-primary" />
-                    <span>{badge.label}</span>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
-                {isAuthenticated ? (
-                  <Link href="/dashboard">
-                    <Button size="lg" className="w-full sm:w-auto gap-2 text-lg px-8 py-6" data-testid="button-dashboard">
-                      <Rocket className="h-5 w-5" />
-                      Buka Dashboard
-                      <ArrowRight className="h-5 w-5" />
-                    </Button>
-                  </Link>
-                ) : (
-                  <a href="/login" onClick={handleStartNowClick} className="w-full sm:w-auto">
-                    <Button size="lg" className="w-full gap-2 text-lg px-8 py-6" data-testid="button-start">
-                      <Rocket className="h-5 w-5" />
-                      Mulai Sekarang
-                      <ArrowRight className="h-5 w-5" />
-                    </Button>
-                  </a>
-                )}
-                <Link href="/packs" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full gap-2 text-lg px-8 py-6 border-primary/30" data-testid="button-packs">
-                    <Package className="h-5 w-5" />
-                    Lihat Paket Domain
-                  </Button>
-                </Link>
-                <a href="#trial" className="w-full sm:w-auto">
-                  <Button size="lg" variant="ghost" className="w-full gap-2 text-lg px-8 py-6 text-muted-foreground hover:text-foreground" data-testid="button-request-trial">
-                    <FileText className="h-5 w-5" />
-                    Request Trial Gratis
-                  </Button>
-                </a>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-2 mt-1 mb-2">
-                <span className="text-xs text-muted-foreground font-medium">Tersedia dalam platform:</span>
-                <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-medium border border-amber-200 dark:border-amber-800">
-                  <Brain className="h-3.5 w-3.5" />Brain Project AI
-                </span>
-                <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-medium border border-emerald-200 dark:border-emerald-800">
-                  <Target className="h-3.5 w-3.5" />TENDERA AI
-                </span>
-                <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium border border-blue-200 dark:border-blue-800">
-                  <Search className="h-3.5 w-3.5" />Tender Monitor
-                </span>
-              </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
+            Chatbot AI Cerdas untuk<br />
+            <span className="text-primary">Bisnis &amp; Profesional</span>
+            <span className="text-muted-foreground"> Indonesia</span>
+          </h1>
 
-              <p className="text-sm text-muted-foreground text-center lg:text-left">
-                <CheckCircle2 className="h-4 w-4 inline mr-1 text-green-500" />
-                Mulai dari Rp 199.000/bulan. Semua paket termasuk Agentic AI + Orchestrator Multi-Agent. Setup kurang dari 30 menit.
-              </p>
+          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+            Bangun chatbot AI dalam <strong className="text-foreground">30 menit tanpa coding</strong>. Dari Customer Service otomatis, Asisten Tender LPSE, AI Tutor, hingga Knowledge Base tim — satu platform untuk semua kebutuhan.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+              <Button size="lg" className="w-full sm:w-auto gap-2 text-base font-bold px-8 py-6" data-testid="button-hero-start">
+                <Rocket className="w-5 h-5" />
+                Mulai Sekarang — Gratis
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link href="/packs" onClick={handlePricingClick}>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base font-semibold px-8 py-6" data-testid="button-hero-pricing">
+                <Package className="w-5 h-5" />
+                Lihat Paket Harga
+              </Button>
+            </Link>
+          </div>
+
+          <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5" data-testid="text-hero-trust">
+            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            Mulai dari Rp 199.000/bulan · Tanpa kartu kredit · Setup &lt; 30 menit
+          </p>
+        </div>
+      </section>
+
+      {/* Stats Bar */}
+      <div className="border-y bg-muted/30 py-8 px-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          {[
+            { value: "971+", label: "Agent AI Spesialis" },
+            { value: "131", label: "Hub Orchestrator" },
+            { value: "45", label: "Tipe Mini App" },
+            { value: "24/7", label: "Selalu Aktif" },
+          ].map((s) => (
+            <div key={s.label} data-testid={`stat-${s.label.toLowerCase().replace(/\s+/g, "-")}`}>
+              <div className="text-3xl font-extrabold text-primary mb-1">{s.value}</div>
+              <div className="text-sm text-muted-foreground">{s.label}</div>
             </div>
+          ))}
+        </div>
+      </div>
 
-            {/* Right: Illustration */}
-            <div className="flex items-center justify-center relative order-first lg:order-last">
-              <div className="absolute inset-0 bg-primary/5 rounded-3xl blur-3xl" />
-              <img
-                src="/hero-illustration.png"
-                alt="Gustafta AI Chatbot Builder Illustration"
-                className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl drop-shadow-2xl animate-float"
-                data-testid="img-hero-illustration"
-              />
+      {/* Untuk Siapa */}
+      <section className="py-16 px-4 bg-muted/20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Untuk Siapa?</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Satu Platform, Banyak Kegunaan</h2>
+          </div>
+
+          <div className="flex justify-center gap-2 mb-6 flex-wrap">
+            {(["belajar", "bekerja", "berusaha"] as const).map((key) => {
+              const tab = personas[key];
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActivePersona(key)}
+                  data-testid={`tab-persona-${key}`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold border-2 transition-all ${
+                    activePersona === key
+                      ? `${tab.bg} ${tab.color} ${tab.border}`
+                      : "bg-background border-border text-muted-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <TabIcon className="w-4 h-4" /> {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className={`rounded-2xl border-2 ${p.border} ${p.bg} p-6 md:p-8`}>
+            <div className="flex items-start gap-4 mb-4">
+              <div className={`w-12 h-12 rounded-xl bg-background border ${p.border} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                <PersonaIcon className={`w-6 h-6 ${p.color}`} />
+              </div>
+              <div>
+                <p className={`text-xs font-bold uppercase tracking-wide ${p.color} mb-1`}>{p.label}</p>
+                <h3 className="text-lg font-bold mb-1">{p.tagline}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mt-4">
+              {p.bullets.map((b) => (
+                <div key={b} className="flex items-center gap-2 bg-background/70 rounded-lg px-3 py-2 text-xs font-medium flex-1 border border-border/50">
+                  <Check className={`w-4 h-4 flex-shrink-0 ${p.color}`} />
+                  {b}
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-12 bg-muted/50 border-y">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center" data-testid={`stat-${stat.label}`}>
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
-                  {stat.value}
+      {/* Fitur Utama */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Fitur Utama</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Semua yang Anda Butuhkan</h2>
+            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-sm">
+              Platform lengkap dari Knowledge Base, multi-channel, AI orchestrator, hingga custom domain.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {features.map((f) => {
+              const FIcon = f.icon;
+              return (
+                <div key={f.title} className={`rounded-xl border p-5 hover:shadow-md transition-shadow ${f.bg}`} data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center mb-3 shadow-sm border border-border/30">
+                    <FIcon className={`w-5 h-5 ${f.color}`} />
+                  </div>
+                  <h3 className="font-bold text-sm mb-1.5">{f.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
                 </div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Cara Kerja */}
+      <section className="py-16 px-4 bg-muted/20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Cara Kerja</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Siap dalam 30 Menit</h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+            {steps.map((s, i) => (
+              <div key={s.n} className="relative">
+                {i < 3 && (
+                  <div className="hidden md:block absolute top-5 left-full w-full h-px bg-gradient-to-r from-primary/30 to-transparent -translate-x-4 z-0" />
+                )}
+                <div className="relative bg-background rounded-xl border p-5 text-center hover:shadow-md transition-shadow">
+                  <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-base font-bold mx-auto mb-3">
+                    {s.n}
+                  </div>
+                  <div className="text-[10px] font-semibold text-muted-foreground mb-1">{s.time}</div>
+                  <h3 className="font-bold text-sm mb-1.5">{s.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── TENTANG GAIA TEASER ───────────────────────────────────────── */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(252,211,77,0.15),transparent_50%)]" />
-        <div className="container mx-auto px-4 relative">
-          <div className="grid md:grid-cols-3 gap-8 items-center max-w-6xl mx-auto">
-            <div className="md:col-span-2">
-              <Badge className="bg-amber-300/20 text-amber-200 border-amber-300/40 mb-3">
-                <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Tentang Gustafta AI Academy
-              </Badge>
-              <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight" data-testid="text-about-gaia-title">
-                Pelopor <span className="text-amber-300">No-Code AI Ecosystem Builder</span> Indonesia
-              </h2>
-              <p className="text-white/85 text-base md:text-lg leading-relaxed mb-2">
-                Kami tidak sekadar membangun perangkat lunak — kami membangun{" "}
-                <strong className="text-white">Mesin Pencipta Solusi</strong>. Visi kami: mengubah cara Indonesia{" "}
-                <em>belajar, bekerja, berbisnis, dan berkreasi</em> melalui ekosistem AI yang inklusif.
-              </p>
-              <p className="text-white/70 text-sm md:text-base">
-                Berhentilah menjadi <em>Konsumen Teknologi</em> — mulailah menjadi <strong>Arsitek Solusi</strong>.
-              </p>
-            </div>
-            <div className="flex md:flex-col gap-3 md:items-end">
-              <Link href="/profil">
-                <Button size="lg" className="w-full md:w-auto bg-white text-violet-700 hover:bg-amber-300 hover:text-violet-900 gap-2 shadow-lg" data-testid="button-about-gaia">
-                  Pelajari Profil GAIA <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button size="lg" variant="outline" className="w-full md:w-auto border-white/40 text-white hover:bg-white/10 bg-transparent gap-2" data-testid="button-about-gaia-build">
-                  <Rocket className="h-4 w-4" /> Mulai Membangun
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── PROMO COUNTDOWN BANNER ────────────────────────────────────── */}
-      {promoCountdown.days >= 0 && (
-        <section className="py-6 bg-gradient-to-r from-red-600 via-orange-600 to-red-700 text-white relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)" }} />
-          <div className="container mx-auto px-4 relative">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
-
-              {/* Label */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-center lg:justify-start gap-2 font-bold text-lg uppercase tracking-wider">
-                  <Flame className="h-5 w-5 animate-bounce" />
-                  HARGA PROMO PAKET BISNIS — BERAKHIR SEGERA
-                </div>
-                <p className="text-white/85 text-sm">
-                  Harga naik <strong>2× per 1 Juli 2026</strong> · naik <strong>3× per 1 September 2026</strong>
-                </p>
-              </div>
-
-              {/* Countdown timer */}
-              <div className="flex gap-2 items-center">
-                {[
-                  { val: promoCountdown.days, label: "Hari" },
-                  { val: promoCountdown.hours, label: "Jam" },
-                  { val: promoCountdown.minutes, label: "Menit" },
-                  { val: promoCountdown.seconds, label: "Detik" },
-                ].map(({ val, label }, i) => (
-                  <div key={label} className="flex items-center gap-2">
-                    {i > 0 && <span className="text-white/60 text-xl font-bold">:</span>}
-                    <div className="text-center">
-                      <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-2xl font-bold tabular-nums border border-white/20">
-                        {String(val).padStart(2, "0")}
-                      </div>
-                      <div className="text-[10px] mt-1 text-white/70 uppercase">{label}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Price comparison + CTA */}
-              <div className="text-center space-y-2">
-                <div className="flex items-center justify-center gap-3">
-                  <div>
-                    <div className="text-[10px] text-white/60 uppercase">Harga Sekarang</div>
-                    <div className="text-2xl font-bold">Rp 999rb<span className="text-sm font-normal">/bln</span></div>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-white/50 shrink-0" />
-                  <div>
-                    <div className="text-[10px] text-white/60 uppercase">Setelah 1 Juli</div>
-                    <div className="text-xl font-bold line-through text-white/50">Rp 1,99jt<span className="text-xs">/bln</span></div>
-                  </div>
-                </div>
-                <Link href="/onboarding" onClick={handleOnboardingClick}>
-                  <Button size="sm" className="bg-white text-red-600 hover:bg-white/90 gap-2 font-bold shadow-lg">
-                    <Rocket className="h-4 w-4" />
-                    Beli Sekarang (Promo)
-                  </Button>
-                </Link>
-              </div>
-
-            </div>
-          </div>
-        </section>
-      )}
-      {/* ─────────────────────────────────────────────────────────────────── */}
-
-      {/* ─── SECTION: 3 Persona Tabs ── */}
-      <section className="py-16 md:py-24 bg-muted/20" id="persona">
-        <div className="container mx-auto px-4">
+      {/* Testimoni */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <Badge variant="secondary" className="mb-4">Untuk Siapa Gustafta?</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Satu Platform, Empat Peran AI
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Chatbot AI bukan hanya untuk bisnis. Gustafta hadir untuk mendukung siapa pun yang ingin belajar lebih cerdas, bekerja lebih efisien, dan membangun usaha yang lebih kuat.
-            </p>
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Testimoni</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Dipercaya Ratusan Profesional</h2>
           </div>
 
-          {/* Tab switcher */}
-          <div className="flex justify-center gap-2 mb-8 flex-wrap">
-            {(["belajar", "bekerja", "berusaha"] as const).map((key) => {
-              const p = personaContent[key];
-              const Icon = p.icon;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setActivePersona(key)}
-                  data-testid={`tab-persona-${key}`}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all border ${
-                    activePersona === key
-                      ? `${p.bg} ${p.color} ${p.border} border-2 shadow-sm`
-                      : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {p.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Active persona content */}
-          {(() => {
-            const p = personaContent[activePersona];
-            const Icon = p.icon;
-            return (
-              <div className="max-w-5xl mx-auto">
-                <div className={`rounded-2xl border-2 ${p.border} p-6 md:p-8 mb-6 ${p.bg}`}>
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className={`w-12 h-12 rounded-xl ${p.bg} border ${p.border} flex items-center justify-center shrink-0`}>
-                      <Icon className={`h-6 w-6 ${p.color}`} />
-                    </div>
-                    <div>
-                      <p className={`text-xs font-bold uppercase tracking-wide ${p.color} mb-1`}>{p.label}</p>
-                      <h3 className="text-lg md:text-xl font-bold mb-2">{p.tagline}</h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">{p.description}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {p.useCases.map((uc, i) => (
-                    <Card key={i} className="hover-elevate overflow-visible border">
-                      <CardContent className="p-5">
-                        <div className="flex items-start gap-3">
-                          <div className={`w-8 h-8 rounded-lg ${p.bg} flex items-center justify-center shrink-0 mt-0.5`}>
-                            <CheckCircle2 className={`h-4 w-4 ${p.color}`} />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-sm mb-1">{uc.title}</h4>
-                            <p className="text-muted-foreground text-xs leading-relaxed">{uc.desc}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+          <div className="grid md:grid-cols-3 gap-5">
+            {testimonials.map((t) => (
+              <div key={t.name} className="rounded-xl border bg-muted/30 p-5" data-testid={`card-testimonial-${t.avatar.toLowerCase()}`}>
+                <div className="flex items-center gap-0.5 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                {activePersona === "bekerja" && (
-                  <div className="text-center mt-6">
-                    <Link href="/pricing" onClick={handlePricingClick}>
-                      <Button variant="outline" className="gap-2" data-testid="button-try-tender">
-                        <HardHat className="h-4 w-4" />
-                        Lihat Paket untuk Kontraktor
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">"{t.text}"</p>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    {t.avatar}
                   </div>
-                )}
-                {activePersona === "kreator" && (
-                  <div className="text-center mt-6">
-                    <Link href="/pricing">
-                      <Button className="gap-2 bg-violet-600 hover:bg-violet-700 text-white" data-testid="button-try-kreator">
-                        <Clapperboard className="h-4 w-4" />
-                        Mulai Buat Chatbot Kreator
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold truncate">{t.name}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{t.role}</p>
                   </div>
-                )}
+                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary flex-shrink-0">
+                    {t.tag}
+                  </span>
+                </div>
               </div>
-            );
-          })()}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ─── SECTION: Ekosistem Belajar AI ─── */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-blue-500/5 via-violet-500/5 to-transparent">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-semibold mb-4">
-              <GraduationCap className="h-4 w-4" />
-              Bimbel Model Baru — AI Tutor Personal 24/7
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Ruang Belajar AI untuk <span className="text-primary">Semua Peran</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Dari pelajar SMA yang ingin lolos UTBK & Sekolah Kedinasan, mahasiswa teknik yang butuh tutor TA, hingga dosen yang ingin buat ruang belajar digital — semua bisa dengan Gustafta.
-            </p>
+      {/* Pricing CTA */}
+      <section className="py-16 px-4 bg-gradient-to-br from-primary to-violet-600 text-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full mb-6">
+            <Flame className="w-3.5 h-3.5" /> Promo aktif — harga naik 2× per 1 Juli 2026
           </div>
+          <h2 className="text-2xl md:text-4xl font-extrabold mb-3">Mulai dari Rp 199.000/bulan</h2>
+          <p className="text-white/75 text-base md:text-lg mb-8 max-w-xl mx-auto">
+            Semua paket sudah termasuk Agentic AI, Orchestrator Multi-Agent, Knowledge Base 7 tipe, dan Multi-Channel. Tanpa biaya setup tambahan.
+          </p>
 
-          {/* 5 Persona Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto mb-10">
+          <div className="grid sm:grid-cols-3 gap-4 mb-8 text-left">
             {[
-              {
-                icon: GraduationCap,
-                color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-200 dark:border-blue-800",
-                title: "Pelajar SMA / SMK",
-                badge: "Bimbel AI",
-                desc: "AI tutor per mata pelajaran, latihan soal UTBK & Sekolah Kedinasan, bank soal adaptif, dan pembahasan 24/7. Tidak terikat jadwal, lebih murah dari bimbel konvensional.",
-                packs: ["Paket SMA IPA — 7 AI Tutor", "Paket SMA IPS — 7 AI Tutor", "Paket UTBK & Kedinasan"],
-              },
-              {
-                icon: BookOpen,
-                color: "text-violet-500", bg: "bg-violet-500/10", border: "border-violet-200 dark:border-violet-800",
-                title: "Mahasiswa",
-                badge: "Asisten Kuliah",
-                desc: "Tutor mata kuliah, asisten TA/skripsi, pemahaman jurnal, dan latihan soal UTS/UAS — khususnya mahasiswa teknik & konstruksi.",
-                packs: ["Paket Mahasiswa Teknik Sipil", "Paket Mahasiswa Arsitektur", "Paket Asisten Skripsi AI"],
-              },
-              {
-                icon: Users,
-                color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-200 dark:border-emerald-800",
-                title: "Guru & Dosen",
-                badge: "Ruang Belajar Digital",
-                desc: "Buat AI tutor dari materi Anda sendiri, deploy ke semua siswa/mahasiswa. Siswa bisa belajar mandiri — Anda fokus ke diskusi mendalam.",
-                packs: ["AI dari silabus Anda sendiri", "Deploy ke ratusan siswa sekaligus", "Pantau progress via dashboard"],
-              },
-              {
-                icon: Award,
-                color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-200 dark:border-orange-800",
-                title: "Instruktur & Pelatih",
-                badge: "AI Coach",
-                desc: "Peserta pelatihan bisa belajar mandiri via AI yang tahu materi kursus Anda. Simulasi ujian, tanya-jawab, dan rekap pemahaman otomatis.",
-                packs: ["BNSP / SKK Coach AI", "Pelatihan K3 & SMK3", "Instruktur Sertifikasi ISO"],
-              },
-              {
-                icon: Briefcase,
-                color: "text-teal-500", bg: "bg-teal-500/10", border: "border-teal-200 dark:border-teal-800",
-                title: "HRD & Perusahaan",
-                badge: "Portal Training",
-                desc: "Onboarding karyawan, pelatihan SOP, knowledge base perusahaan — semua dalam satu chatbot AI yang bisa diakses kapan pun.",
-                packs: ["Onboarding Karyawan Baru", "Knowledge Base Internal", "Evaluasi & Kuis Otomatis"],
-              },
-              {
-                icon: HardHat,
-                color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-200 dark:border-amber-800",
-                title: "Teknik & Konstruksi",
-                badge: "971+ Agent Spesialis",
-                desc: "Mahasiswa teknik sipil, instruktur BNSP, dosen vokasi — dilengkapi 971+ agent AI spesialis regulasi, K3, perizinan, tender, dan sertifikasi konstruksi.",
-                packs: ["Regulasi & Perpres 46/2025", "Tender LPSE & SMKK", "SKK, SBU & Sertifikasi"],
-              },
-              {
-                icon: ClipboardCheck,
-                color: "text-indigo-500", bg: "bg-indigo-500/10", border: "border-indigo-200 dark:border-indigo-800",
-                title: "Tes Siap Uji Kompetensi",
-                badge: "SKK / SKKNI / BNSP",
-                desc: "Simulasi asesmen kompetensi per unit SKKNI — tanya-jawab gaya assessor, uji pemahaman regulasi, dan rekap kesiapan sebelum uji nyata. Cocok untuk semua skema jabatan kerja konstruksi.",
-                packs: ["Simulasi asesmen per unit kompetensi", "Tanya-jawab gaya assessor BNSP", "Rekap kesiapan & area yang perlu diperkuat"],
-              },
-              {
-                icon: Scale,
-                color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-200 dark:border-rose-800",
-                title: "Tes Siap Uji Lisensi Praktek Kerja",
-                badge: "SIPp / STRP / IUJK",
-                desc: "Persiapan ujian lisensi praktek kerja: SIPp Perencana, STRP Teknik, IUJK — simulasi soal regulasi, prosedur perizinan, dan standar kompetensi profesional yang wajib dikuasai.",
-                packs: ["Simulasi soal ujian lisensi praktek", "Prosedur SIPp, STRP & IUJK", "Regulasi Jasa Konstruksi terkini"],
-              },
-            ].map((p) => (
-              <div key={p.title} className={`rounded-2xl border ${p.border} bg-background p-5 flex flex-col gap-3 hover:shadow-md transition-shadow`}>
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${p.bg} flex items-center justify-center flex-shrink-0`}>
-                    <p.icon className={`h-5 w-5 ${p.color}`} />
+              { plan: "Starter", price: "199rb", badge: null, features: ["3 chatbot", "Knowledge Base 7 tipe", "Multi-Channel", "API akses"] },
+              { plan: "Profesional", price: "499rb", badge: "TERPOPULER", features: ["20 chatbot", "Custom Domain", "Analytics lengkap", "Agentic AI"] },
+              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "971+ agent spesialis", "Priority support", "Semua fitur"] },
+            ].map((plan) => (
+              <div
+                key={plan.plan}
+                className={`rounded-xl border-2 p-4 bg-white/5 relative ${plan.badge ? "border-amber-300" : "border-white/20"}`}
+                data-testid={`card-pricing-${plan.plan.toLowerCase()}`}
+              >
+                {plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-gray-900 text-[10px] font-bold px-3 py-0.5 rounded-full">
+                    {plan.badge}
                   </div>
-                  <div>
-                    <p className="font-bold text-sm">{p.title}</p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${p.bg} ${p.color}`}>{p.badge}</span>
-                  </div>
+                )}
+                <div className="text-base font-bold mb-0.5">{plan.plan}</div>
+                <div className="text-2xl font-extrabold mb-3">
+                  Rp {plan.price}<span className="text-sm font-normal opacity-70">/bln</span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
-                <ul className="space-y-1 mt-auto">
-                  {p.packs.map(item => (
-                    <li key={item} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <CheckCircle2 className={`h-3 w-3 flex-shrink-0 ${p.color}`} />
-                      {item}
+                <ul className="space-y-1.5">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-1.5 text-xs text-white/80">
+                      <Check className="w-3.5 h-3.5 text-green-300 flex-shrink-0" /> {f}
                     </li>
                   ))}
                 </ul>
@@ -907,1865 +411,131 @@ export default function Landing() {
             ))}
           </div>
 
-          {/* Comparison vs bimbel konvensional */}
-          <div className="max-w-3xl mx-auto rounded-2xl border border-border bg-muted/40 overflow-hidden mb-8">
-            <div className="grid grid-cols-3 text-center text-xs font-bold border-b border-border">
-              <div className="p-3 text-muted-foreground">Aspek</div>
-              <div className="p-3 bg-primary/10 text-primary">Gustafta Belajar AI</div>
-              <div className="p-3 text-muted-foreground">Bimbel Konvensional</div>
-            </div>
-            {[
-              ["Jam belajar", "24/7 kapan saja", "Terjadwal, terbatas"],
-              ["Biaya/bulan", "Rp 79rb – 199rb", "Rp 300rb – 500rb+"],
-              ["Personalisasi", "Adaptif per pertanyaan", "Satu kurikulum untuk semua"],
-              ["Lokasi", "Di mana saja via HP/PC", "Harus datang ke tempat"],
-              ["Mata pelajaran", "Bundle semua subject", "Bayar per mapel"],
-              ["Laporan belajar", "Otomatis via dashboard", "Terbatas / manual"],
-            ].map(([aspect, ai, konv], i) => (
-              <div key={aspect} className={`grid grid-cols-3 text-center text-xs border-b border-border last:border-0 ${i % 2 === 0 ? "" : "bg-muted/20"}`}>
-                <div className="p-3 text-muted-foreground font-medium">{aspect}</div>
-                <div className="p-3 bg-primary/5 text-primary font-semibold">{ai}</div>
-                <div className="p-3 text-muted-foreground">{konv}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link href="/education">
-              <Button size="lg" className="gap-2 mr-3" data-testid="button-education-detail">
-                <GraduationCap className="h-5 w-5" />
-                Lihat Ekosistem Belajar AI
-                <ArrowRight className="h-5 w-5" />
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold gap-2 px-8" data-testid="button-pricing-cta-start">
+                <Rocket className="w-4 h-4" /> Mulai Sekarang
               </Button>
             </Link>
-            <Link href="/packs">
-              <Button size="lg" variant="outline" className="gap-2" data-testid="button-packs-education">
-                <Package className="h-5 w-5" />
-                Paket Bimbel
+            <Link href="/packs" onClick={handlePricingClick}>
+              <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 hover:text-white font-semibold px-8" data-testid="button-pricing-cta-plans">
+                Lihat Semua Paket →
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ─── SECTION: Bekerja, Berusaha & Kreator Feature Highlights ─── */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 via-orange-500/10 to-violet-500/10 text-sm font-semibold mb-4 flex-wrap justify-center">
-              <Briefcase className="h-4 w-4 text-emerald-500" />
-              <span className="text-emerald-600 dark:text-emerald-400">Bekerja</span>
-              <span className="text-muted-foreground mx-1">·</span>
-              <Store className="h-4 w-4 text-orange-500" />
-              <span className="text-orange-600 dark:text-orange-400">Berusaha</span>
-              <span className="text-muted-foreground mx-1">·</span>
-              <Clapperboard className="h-4 w-4 text-violet-500" />
-              <span className="text-violet-600 dark:text-violet-400">Kreator</span>
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              AI yang <span className="text-emerald-500">Bekerja</span>,{" "}
-              <span className="text-orange-500">Berusaha</span> &amp;{" "}
-              <span className="text-violet-500">Berkreasi</span> untuk Anda
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Dari notulis rapat, drafter kontrak, dan CS otomatis — hingga editorial calendar, script YouTube, dan proposal brand deal. Gustafta membekali tiga segmen dengan tim AI yang tidak pernah tidur, tidak pernah cuti.
-            </p>
+      {/* FAQ */}
+      <section className="py-16 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">FAQ</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Pertanyaan Umum</h2>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
-            {/* Bekerja column */}
-            <div>
-              <div className="flex items-center gap-2 mb-5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                  <Briefcase className="h-5 w-5 text-emerald-500" />
-                </div>
-                <h3 className="font-bold text-lg">Fitur Bekerja</h3>
-                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 text-xs">Profesional</Badge>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { icon: Mic, title: "AI Notulis & Ringkas Rapat", desc: "Upload audio/video rapat → transkripsi otomatis + ringkasan eksekutif + daftar action items. Tidak ada lagi catatan yang terlewat." },
-                  { icon: PenLine, title: "AI Drafter Dokumen Legal", desc: "Draft kontrak kerja, SPK, NDA, MoU, surat resmi, dan proposal teknis — berdasarkan template industri dan regulasi terkini, siap kirim." },
-                  { icon: Target, title: "AI Project Monitor & RAB", desc: "Status proyek, alert deadline, analisis RAB, cek realisasi vs anggaran — semua bisa ditanya via chat kapan saja dari mana saja." },
-                  { icon: ShieldCheck, title: "AI Konsultan K3 & Compliance", desc: "Panduan HIRARC, audit SMK3, prosedur ISO 45001, dan checklist kepatuhan — tersedia 24/7 di lapangan tanpa perlu hubungi konsultan." },
-                  { icon: Brain, title: "AI Knowledge Base Tim", desc: "SOP, standar, regulasi, dan prosedur kerja terpusat — diakses seluruh tim via WhatsApp atau web kapan pun dibutuhkan." },
-                  { icon: PieChart, title: "AI Analis Risiko & Laporan", desc: "Risk register otomatis, rekap mingguan, ringkasan proyek 4–5 kalimat, dan identifikasi bottleneck dari laporan harian." },
-                ].map((f) => (
-                  <div key={f.title} className="flex items-start gap-3 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 dark:bg-emerald-950/20 hover:shadow-sm transition-shadow">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <f.icon className="h-4 w-4 text-emerald-500" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm mb-0.5">{f.title}</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5">
-                <Link href="/packs">
-                  <Button size="sm" variant="outline" className="gap-2 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-packs-bekerja">
-                    <Package className="h-3.5 w-3.5" />
-                    Paket AI Profesional
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Berusaha column */}
-            <div>
-              <div className="flex items-center gap-2 mb-5">
-                <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                  <Store className="h-5 w-5 text-orange-500" />
-                </div>
-                <h3 className="font-bold text-lg">Fitur Berusaha</h3>
-                <Badge className="bg-orange-500/10 text-orange-600 dark:text-orange-400 border-0 text-xs">Bisnis & UMKM</Badge>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { icon: MessageSquare, title: "AI Customer Service 24/7", desc: "Jawab 80%+ pertanyaan pelanggan otomatis via WhatsApp, web, Telegram. Tim CS fokus ke kasus kompleks yang butuh sentuhan manusia." },
-                  { icon: TrendingUp, title: "AI Lead Generation & Sales", desc: "Chatbot tangkap leads, kualifikasi prospek otomatis, kirim notifikasi tim sales, dan follow-up sesuai jadwal tanpa campur tangan manual." },
-                  { icon: Megaphone, title: "AI Konten & Copywriting", desc: "Caption Instagram/TikTok, artikel blog, script iklan, email marketing — konten berkualitas tinggi siap publish berdasarkan produk Anda." },
-                  { icon: Zap, title: "AI Sales Script & Closing", desc: "Script penjualan, objection handling, follow-up sequence, dan template closing — dikustomisasi per segmen pembeli dan jenis produk." },
-                  { icon: ShoppingBag, title: "AI Toko & E-commerce", desc: "Deskripsi produk SEO-friendly, katalog AI interaktif, rekomendasi upsell/cross-sell, dan strategi promosi berbasis data penjualan." },
-                  { icon: Repeat2, title: "AI Customer Retention", desc: "Program loyalitas otomatis, broadcast reaktivasi pelanggan lama, follow-up pasca pembelian, dan deteksi churn lebih awal." },
-                ].map((f) => (
-                  <div key={f.title} className="flex items-start gap-3 p-3.5 rounded-xl border border-orange-200 dark:border-orange-900 bg-orange-50/40 dark:bg-orange-950/20 hover:shadow-sm transition-shadow">
-                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <f.icon className="h-4 w-4 text-orange-500" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm mb-0.5">{f.title}</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5">
-                <Link href="/packs">
-                  <Button size="sm" variant="outline" className="gap-2 border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30" data-testid="button-packs-berusaha">
-                    <Package className="h-3.5 w-3.5" />
-                    Paket AI Bisnis & UMKM
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Kreator column */}
-          <div className="mt-8">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                <Clapperboard className="h-5 w-5 text-violet-500" />
-              </div>
-              <h3 className="font-bold text-lg">Fitur Kreator</h3>
-              <Badge className="bg-violet-500/10 text-violet-600 dark:text-violet-400 border-0 text-xs">Content Creator</Badge>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {[
-                { icon: CalendarDays, title: "Editorial Calendar AI", desc: "Kalender konten bulanan: content pillars, tema mingguan, jadwal posting per platform, dan 10 ide konten konkret — dikustomisasi sesuai niche Anda." },
-                { icon: Clapperboard, title: "Script YouTube & Podcast AI", desc: "Script lengkap: hook 5 detik yang kuat, opening problem, segmen isi, outro, dan CTA — terasa natural ketika dibaca keras, plus ide thumbnail." },
-                { icon: Award, title: "Proposal Brand Deal & Media Kit", desc: "Profil kreator, audience insight, rate card 5 paket, deliverables & SLA — media kit profesional siap kirim ke brand dalam menit." },
-                { icon: TrendingUp, title: "Laporan Performa Konten", desc: "Scorecard per platform, top 5 konten, analisis underperform, benchmark niche, dan rekomendasi strategi konten bulan depan." },
-                { icon: Megaphone, title: "AI Caption & Copy Konten", desc: "Caption Instagram, hook TikTok, thread LinkedIn, email newsletter — ditulis AI dari konteks niche kreator, tinggal posting." },
-                { icon: Video, title: "Chatbot Kreator Pribadi", desc: "Followers tanya langsung ke chatbot yang berisi semua konten, video, e-book, dan pengetahuan Anda — 24/7 tanpa perlu balas manual." },
-              ].map((f) => (
-                <div key={f.title} className="flex items-start gap-3 p-3.5 rounded-xl border border-violet-200 dark:border-violet-900 bg-violet-50/40 dark:bg-violet-950/20 hover:shadow-sm transition-shadow">
-                  <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <f.icon className="h-4 w-4 text-violet-500" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm mb-0.5">{f.title}</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-5">
-              <Link href="/pricing">
-                <Button size="sm" variant="outline" className="gap-2 border-violet-500/30 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30" data-testid="button-packs-kreator">
-                  <Package className="h-3.5 w-3.5" />
-                  Mulai Buat Chatbot Kreator
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* ROI stats */}
-          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12">
-            {[
-              { value: "80%+", label: "Pertanyaan CS terjawab otomatis", color: "text-orange-500" },
-              { value: "2–3 hari", label: "Hemat per proses tender", color: "text-emerald-500" },
-              { value: "10 mnt", label: "Script YouTube siap dengan AI", color: "text-violet-500" },
-              { value: "<30 mnt", label: "Setup chatbot pertama Anda", color: "text-primary" },
-            ].map(s => (
-              <div key={s.label} className="text-center p-4 rounded-xl border bg-muted/30">
-                <div className={`text-2xl font-bold mb-1 ${s.color}`}>{s.value}</div>
-                <div className="text-xs text-muted-foreground">{s.label}</div>
-              </div>
+          <Accordion type="single" collapsible defaultValue="item-0" className="space-y-2">
+            {faqs.map((item, i) => (
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
+                className="border rounded-xl px-4 overflow-hidden"
+                data-testid={`faq-item-${i}`}
+              >
+                <AccordionTrigger className="text-sm font-semibold text-left py-4 hover:no-underline">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-4">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         </div>
       </section>
 
-      {/* ─── SECTION: Sistem AI Spesialis ────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-teal-500/5 via-background to-violet-500/5 border-y border-teal-200/20 dark:border-teal-900/20" id="ai-spesialis">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 text-sm font-semibold mb-4">
-              <Sparkles className="h-4 w-4" />
-              Sistem AI Spesialis Gustafta
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Lima Ekosistem AI{" "}
-              <span className="text-teal-600 dark:text-teal-400">Siap Pakai</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Bukan hanya chatbot builder — Gustafta menyediakan sistem AI spesialis yang sudah dikonfigurasi penuh, siap digunakan langsung tanpa setup dari nol.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-
-            {/* EduCounsel AI */}
-            <div className="relative rounded-2xl border-2 border-teal-200 dark:border-teal-800 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl bg-teal-600 flex items-center justify-center shadow-md shadow-teal-600/20 shrink-0">
-                  <GraduationCap className="h-6 w-6 text-white" />
+      {/* Footer */}
+      <footer className="bg-muted/30 border-t py-10 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-primary-foreground" />
                 </div>
-                <div>
-                  <Badge className="bg-teal-600 text-white hover:bg-teal-700 border-0 text-[10px] mb-0.5">11 Agen · StudentHub</Badge>
-                  <h3 className="font-bold text-base leading-tight">EduCounsel AI</h3>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
-                Konseling akademik siswa SMA berbasis multi-agent. Safety gate, profil siswa, analisis nilai, rencana intervensi 14-hari, pathway kuliah DN/LN, dan dokumentasi BK — dalam satu sistem.
-              </p>
-              <div className="flex flex-wrap gap-1 mb-4">
-                {["Safety Gate", "Pathway DN/LN", "Intervensi 14-hari", "Laporan BK"].map(t => (
-                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 font-medium">{t}</span>
-                ))}
-              </div>
-              <Link href="/pricing">
-                <Button size="sm" variant="outline" className="w-full gap-2 border-teal-500/40 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/30" data-testid="button-educounsel-landing">
-                  <Lock className="h-3.5 w-3.5" />
-                  Tersedia di Paket Starter
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
-
-            {/* SBUClaw */}
-            <div className="relative rounded-2xl border-2 border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl bg-amber-600 flex items-center justify-center shadow-md shadow-amber-600/20 shrink-0">
-                  <HardHat className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Badge className="bg-amber-600 text-white hover:bg-amber-700 border-0 text-[10px] mb-0.5">10 Agen · SBU Konstruksi</Badge>
-                  <h3 className="font-bold text-base leading-tight">SBUClaw OpenClaw</h3>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
-                Sistem multi-agent untuk proses SBU Konstruksi sesuai Permen PU 6/2025. Mapping subklasifikasi, gap kualifikasi, checklist dokumen, SKK match, draft surat, estimasi biaya — paralel & terkoordinasi.
-              </p>
-              <div className="flex flex-wrap gap-1 mb-4">
-                {["Mapping SBU", "Gap Analysis", "Draft Surat", "OSS-RBA Guide"].map(t => (
-                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-medium">{t}</span>
-                ))}
-              </div>
-              <Link href="/pricing">
-                <Button size="sm" variant="outline" className="w-full gap-2 border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30" data-testid="button-sbuclaw-landing">
-                  <Lock className="h-3.5 w-3.5" />
-                  Tersedia di Paket Profesional
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
-
-            {/* KONSTRA */}
-            <div className="relative rounded-2xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-950/30 dark:to-slate-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl bg-blue-700 flex items-center justify-center shadow-md shadow-blue-700/20 shrink-0">
-                  <Building className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Badge className="bg-blue-700 text-white hover:bg-blue-800 border-0 text-[10px] mb-0.5">9 Agen · Manajemen Proyek</Badge>
-                  <h3 className="font-bold text-base leading-tight">KONSTRA OpenClaw</h3>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
-                Manajemen konstruksi multi-agent: PM, Engineering, Kontrak/FIDIC, K3/SMK3, Mutu/ISO9001, Lingkungan/ISO14001, Peralatan, Supply Chain, dan Keuangan/PSAK34 — semua terhubung paralel.
-              </p>
-              <div className="flex flex-wrap gap-1 mb-4">
-                {["FIDIC Kontrak", "K3/SMK3", "ISO 9001/14001", "PSAK 34"].map(t => (
-                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-medium">{t}</span>
-                ))}
-              </div>
-              <Link href="/pricing">
-                <Button size="sm" variant="outline" className="w-full gap-2 border-blue-500/40 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30" data-testid="button-konstra-landing">
-                  <Lock className="h-3.5 w-3.5" />
-                  Tersedia di Paket Profesional
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
-
-            {/* AI Tutor */}
-            <div className="relative rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl bg-emerald-600 flex items-center justify-center shadow-md shadow-emerald-600/20 shrink-0">
-                  <BookOpen className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 border-0 text-[10px] mb-0.5">9 Agen · Tutor Adaptif</Badge>
-                  <h3 className="font-bold text-base leading-tight">AI Tutor Bimbel</h3>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
-                Tutor AI adaptif untuk bimbingan belajar: analisis kelemahan siswa, rencana belajar personal, latihan soal adaptif, motivasi, dan tracking progress — seperti guru privat AI 24/7.
-              </p>
-              <div className="flex flex-wrap gap-1 mb-4">
-                {["Tutor Adaptif", "Latihan Soal", "Progress Tracker", "Motivasi AI"].map(t => (
-                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-medium">{t}</span>
-                ))}
-              </div>
-              <Link href="/pricing">
-                <Button size="sm" variant="outline" className="w-full gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-ai-tutor-landing">
-                  <Lock className="h-3.5 w-3.5" />
-                  Tersedia di Paket Starter
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
-
-            {/* Trilogi Builder */}
-            <div className="relative rounded-2xl border-2 border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/20 p-5 flex flex-col hover:shadow-lg transition-shadow sm:col-span-2 lg:col-span-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl bg-violet-600 flex items-center justify-center shadow-md shadow-violet-600/20 shrink-0">
-                  <Blocks className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <Badge className="bg-violet-600 text-white hover:bg-violet-700 border-0 text-[10px] mb-0.5">12 Blueprint · 3 Domain</Badge>
-                  <h3 className="font-bold text-base leading-tight">Rakit Tim Agen Trilogi</h3>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">
-                Bangun tim agen AI dari 12 blueprint siap pakai: Dialog (Tutor Sokratik, LexSkripsi, Pendamping Baca), Kolaborasi (Tim Rapat, UMKM Stack, Domain Profesional), dan Kreasi (Pipeline Konten, Studio Audio, Penerbit Mikro).
-              </p>
-              <div className="flex flex-wrap gap-1 mb-4">
-                {["Tutor Sokratik", "UMKM Stack", "Pipeline Konten", "Studio Audio"].map(t => (
-                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800 font-medium">{t}</span>
-                ))}
-              </div>
-              <Link href="/pricing">
-                <Button size="sm" variant="outline" className="w-full gap-2 border-violet-500/40 text-violet-700 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/30" data-testid="button-trilogi-landing">
-                  <Lock className="h-3.5 w-3.5" />
-                  Tersedia di Paket Profesional
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            </div>
-
-          </div>
-
-          <div className="text-center mt-10">
-            <p className="text-muted-foreground text-sm mb-4">Semua sistem di atas tersedia dalam platform Gustafta. Pilih paket yang sesuai untuk mendapatkan akses penuh.</p>
-            <Link href="/pricing">
-              <Button size="lg" variant="outline" className="gap-2" data-testid="button-ai-spesialis-pricing">
-                <Rocket className="h-5 w-5" />
-                Lihat Paket & Harga
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-      {/* ─────────────────────────────────────────────────────────────────────── */}
-
-      {/* ─── SECTION: Killer Features Kontraktor ─────────────────────────── */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-amber-500/5 via-background to-emerald-500/5 border-y border-amber-200/30 dark:border-amber-900/20" id="kontraktor">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm font-semibold mb-4">
-              <HardHat className="h-4 w-4" />
-              Khusus Kontraktor & BUJK Indonesia
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Dua Senjata Utama untuk{" "}
-              <span className="text-amber-600 dark:text-amber-400">Menangkan Tender</span>{" "}
-              &amp; Kelola Proyek
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Gustafta bukan chatbot biasa. Untuk kontraktor, kami hadirkan dua fitur inti yang langsung berdampak pada win rate tender dan efisiensi operasional proyek Anda.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
-
-            {/* ── Killer Feature 1: Project Brain ─────────────────── */}
-            <div className="relative rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 p-6 md:p-8 overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl -translate-y-1/4 translate-x-1/4 pointer-events-none" />
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                    <Brain className="h-7 w-7 text-white" />
-                  </div>
-                  <div>
-                    <Badge className="bg-amber-500 text-white hover:bg-amber-600 border-0 text-xs mb-1">Fitur #1 — Project Brain</Badge>
-                    <h3 className="text-xl font-bold leading-tight">Otak Proyek — Pusat Pengetahuan AI</h3>
-                  </div>
-                </div>
-
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                  AI Anda menjadi benar-benar <strong>paham bisnis dan proyek Anda</strong>. Bukan chatbot generik — tapi advisor AI yang tahu dokumen, SOP, regulasi, dan kontrak spesifik perusahaan Anda.
-                </p>
-
-                <div className="space-y-3 mb-5">
-                  {[
-                    { icon: FolderOpen, color: "text-amber-600", title: "Upload Semua Dokumen Perusahaan", desc: "SOP, standar kerja, kontrak, regulasi PUPR/BPJT, spesifikasi teknis — semua masuk ke Brain, AI langsung bisa menjawab berdasarkan data asli." },
-                    { icon: Database, color: "text-orange-600", title: "Konteks Bisnis Real, Jawaban Presisi", desc: "Tanya soal proyek A vs proyek B, bandingkan vendor, cek klausul kontrak — AI tahu konteks bisnis Anda, bukan jawaban generik dari internet." },
-                    { icon: Users, color: "text-amber-700", title: "Seluruh Tim Akses via WA & Web", desc: "Engineer di lapangan, PM di kantor, direksi di perjalanan — semua bisa query Brain lewat WhatsApp atau web widget kapan pun." },
-                    { icon: Shield, color: "text-emerald-600", title: "Data Aman & Terisolasi per Tenant", desc: "Dokumen perusahaan Anda hanya bisa diakses oleh chatbot Anda. Enkripsi end-to-end, tidak bocor ke tenant lain." },
-                  ].map((item) => (
-                    <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/60 dark:bg-white/5 border border-amber-200/60 dark:border-amber-800/40">
-                      <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <item.icon className={`h-4 w-4 ${item.color}`} />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm mb-0.5">{item.title}</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Mini showcase: what you can store */}
-                <div className="rounded-xl bg-white/70 dark:bg-zinc-900/50 border border-amber-200/60 dark:border-amber-800/30 p-4 mb-5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-2">Apa yang bisa disimpan di Project Brain?</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {["Dokumen Tender", "Kontrak FIDIC", "Standar SNI", "Perpres 46/2025", "SOP K3/SMK3", "RAB Template", "Spek Teknis", "SMKK Plan", "Data Personel", "Sertifikat SBU/SKK", "Laporan Proyek", "Risalah Rapat"].map(tag => (
-                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-medium">{tag}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <Link href="/pricing">
-                    <Button variant="outline" className="gap-2 border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30" data-testid="button-project-brain">
-                      <Lock className="h-4 w-4" />
-                      Tersedia di Paket Profesional
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link href="/platform">
-                    <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground" data-testid="button-project-brain-info">
-                      Pelajari Selengkapnya
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Killer Feature 2: Informasi Tender ──────────────── */}
-            <div className="relative rounded-2xl border-2 border-emerald-300 dark:border-emerald-700 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 p-6 md:p-8 overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/10 rounded-full blur-3xl -translate-y-1/4 translate-x-1/4 pointer-events-none" />
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/30">
-                    <Newspaper className="h-7 w-7 text-white" />
-                  </div>
-                  <div>
-                    <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 border-0 text-xs mb-1">Fitur #2 — Info Tender</Badge>
-                    <h3 className="text-xl font-bold leading-tight">Informasi Tender — Analisis Kesiapan AI</h3>
-                  </div>
-                </div>
-
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">
-                  Dari <strong>menemukan peluang tender LPSE</strong> hingga menilai kesiapan dokumen Anda — semua dalam satu alur AI terintegrasi. Skor win probability + gap analysis + draft dokumen.
-                </p>
-
-                <div className="space-y-3 mb-5">
-                  {[
-                    { icon: Search, color: "text-emerald-600", title: "Temukan & Filter Peluang Tender LPSE", desc: "Cari tender sesuai SBU, lokasi, nilai paket, dan jenis pekerjaan. AI menyoroti peluang terbaik berdasarkan profil perusahaan Anda." },
-                    { icon: Trophy, color: "text-amber-600", title: "SCORECARD Win Probability 4 Dimensi", desc: "Skor kesiapan dokumen, teknis, kompetensi tim, dan kepatuhan regulasi — lengkap dengan PROBABILITAS X% dan KEPUTUSAN ikut/tidak." },
-                    { icon: AlertTriangle, color: "text-orange-600", title: "Gap Analysis & Rekomendasi Prioritas", desc: "Identifikasi dokumen yang kurang, kualifikasi SBU tidak match, personel belum tersertifikasi — berikut action plan langkah demi langkah." },
-                    { icon: FileText, color: "text-teal-600", title: "Draft Dokumen Teknis Otomatis", desc: "Proposal teknis, metode pelaksanaan, SMKK plan, rencana mutu, dan risk register — draf pertama siap dalam hitungan menit, bukan hari." },
-                  ].map((item) => (
-                    <div key={item.title} className="flex items-start gap-3 p-3 rounded-xl bg-white/60 dark:bg-white/5 border border-emerald-200/60 dark:border-emerald-800/40">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <item.icon className={`h-4 w-4 ${item.color}`} />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm mb-0.5">{item.title}</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Win Probability mini widget */}
-                <div className="rounded-xl bg-white/70 dark:bg-zinc-900/50 border border-emerald-200/60 dark:border-emerald-800/30 p-4 mb-5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">Contoh Output Scorecard AI</p>
-                  <div className="grid grid-cols-4 gap-1.5 mb-2">
-                    {[
-                      { label: "Dokumen", score: 85, color: "bg-emerald-500" },
-                      { label: "Teknis", score: 72, color: "bg-blue-500" },
-                      { label: "Personel", score: 90, color: "bg-violet-500" },
-                      { label: "Regulasi", score: 68, color: "bg-amber-500" },
-                    ].map(d => (
-                      <div key={d.label} className="text-center">
-                        <div className="h-1.5 rounded-full bg-muted/50 mb-1 overflow-hidden">
-                          <div className={`h-full rounded-full ${d.color}`} style={{ width: `${d.score}%` }} />
-                        </div>
-                        <p className="text-[9px] text-muted-foreground">{d.label}</p>
-                        <p className="text-[10px] font-bold">{d.score}%</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-emerald-200/40">
-                    <span className="text-[10px] text-muted-foreground font-medium">Probabilitas Menang</span>
-                    <span className="text-sm font-bold text-emerald-600">79% — IKUT TENDER</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <Link href="/pricing">
-                    <Button variant="outline" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-info-tender">
-                      <Lock className="h-4 w-4" />
-                      Tersedia di Paket Profesional
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link href="/platform">
-                    <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
-                      Pelajari Selengkapnya
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── ROI Stats Bar ── */}
-          <div className="max-w-4xl mx-auto rounded-2xl border border-border bg-card p-6">
-            <p className="text-center text-xs font-bold uppercase tracking-wider text-muted-foreground mb-5">Dampak Nyata untuk Kontraktor Gustafta</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-              {[
-                { value: "2–3 hari", label: "Hemat waktu per proses tender", icon: Clock, color: "text-amber-500" },
-                { value: "131 Hub", label: "Orchestrator spesialis konstruksi", icon: Cpu, color: "text-emerald-500" },
-                { value: "30+ item", label: "Checklist Perpres 46/2025 otomatis", icon: ClipboardCheck, color: "text-blue-500" },
-                { value: "4 Dimensi", label: "SCORECARD win probability", icon: Trophy, color: "text-violet-500" },
-              ].map(s => (
-                <div key={s.label} className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center">
-                      <s.icon className={`h-5 w-5 ${s.color}`} />
-                    </div>
-                  </div>
-                  <div className={`text-2xl font-bold mb-1 ${s.color}`}>{s.value}</div>
-                  <div className="text-xs text-muted-foreground leading-tight">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── CTA strip ── */}
-          <div className="text-center mt-8">
-            <p className="text-muted-foreground text-sm mb-4">
-              Siap tingkatkan win rate tender dan efisiensi proyek dengan AI?
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <a href={`https://wa.me/6281287941900?text=${encodeURIComponent("Halo, saya tertarik dengan Gustafta untuk Project Brain dan Informasi Tender. Bisa info lebih lanjut?")}`} target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick('Kontraktor Section')}>
-                <Button size="lg" className="gap-2 bg-amber-600 hover:bg-amber-700 text-white" data-testid="button-kontraktor-wa">
-                  <MessageSquare className="h-5 w-5" />
-                  Konsultasi via WhatsApp
-                </Button>
-              </a>
-              <Link href="/packs" onClick={handlePacksClick}>
-                <Button size="lg" variant="outline" className="gap-2 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" data-testid="button-kontraktor-packs">
-                  <Package className="h-5 w-5" />
-                  Lihat Paket Kontraktor
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* ───────────────────────────────────────────────────────────────────── */}
-
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Masalah & Solusi</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Tantangan yang Kami Selesaikan
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Apapun sektor usaha Anda, tantangan ini pasti familiar. Gustafta hadir sebagai solusi cerdas.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {painPoints.map((item, index) => (
-              <Card key={index} className="hover-elevate overflow-visible" data-testid={`card-pain-${index}`}>
-                <CardContent className="p-6">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0">
-                      <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                        <item.icon className="h-6 w-6 text-destructive" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start gap-2 mb-2">
-                        <XCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                        <p className="font-medium text-destructive">{item.problem}</p>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-muted-foreground">{item.solution}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Cara Kerja</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              4 Langkah, Kurang dari 30 Menit Sampai Deploy
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Tidak perlu developer, tidak perlu coding. Setup pertama memang butuh waktu untuk menyiapkan dokumen & integrasi — tapi hasilnya chatbot yang benar-benar memahami bisnis Anda.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {steps.map((step, index) => (
-              <div key={step.number} className="relative">
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-10 left-[calc(50%+2rem)] w-[calc(100%-2rem)] h-0.5 bg-border z-0" />
-                )}
-                <div className="relative bg-background rounded-xl p-6 border hover-elevate h-full flex flex-col">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-bold shrink-0">
-                      {step.number}
-                    </div>
-                    <Badge variant="outline" className="text-xs">{step.time}</Badge>
-                  </div>
-                  <h3 className="text-base font-semibold mb-2">{step.title}</h3>
-                  <p className="text-muted-foreground text-xs mb-3 leading-relaxed">{step.description}</p>
-                  <ul className="space-y-1 mt-auto">
-                    {step.bullets.map((b) => (
-                      <li key={b} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                        <Check className="h-3 w-3 text-primary mt-0.5 shrink-0" />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="text-center mt-10">
-            {!isAuthenticated && (
-              <a href="/login" onClick={handleStartNowClick}>
-                <Button size="lg" className="gap-2" data-testid="button-try-now">
-                  <Target className="h-5 w-5" />
-                  Coba Sekarang - Gratis
-                </Button>
-              </a>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section id="features" className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Fitur Utama</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Platform Chatbot AI Terlengkap
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Semua yang Anda butuhkan untuk membangun chatbot AI profesional dalam satu platform
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => (
-              <Card key={feature.title} className="hover-elevate overflow-visible" data-testid={`card-feature-${feature.title}`}>
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── SECTION: Apa yang Anda Dapat ─────────────────────────── */}
-      <section className="py-16 md:py-24 bg-muted/30 border-y" id="deliverable">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-3 text-xs">Yang Anda Terima</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-3">
-              Setelah Subscribe, Anda Langsung Dapat <span className="text-primary">Ini</span>
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
-              Bukan janji fitur — ini deliverable konkret yang siap Anda gunakan sejak hari pertama.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto mb-12">
-            {[
-              {
-                icon: Bot,
-                color: "text-primary",
-                bg: "bg-primary/10",
-                title: "Chatbot AI Siap Pakai",
-                desc: "Agent dengan sistem prompt, knowledge base, dan persona yang sudah dikonfigurasi. Jawab pertanyaan user secara otomatis 24/7.",
-                tag: "Core",
-              },
-              {
-                icon: Code,
-                color: "text-violet-500",
-                bg: "bg-violet-500/10",
-                title: "Embed Code untuk Website",
-                desc: "Satu baris kode JavaScript. Tempel di website Anda, chatbot langsung muncul sebagai floating widget atau iframe.",
-                tag: "Deploy",
-                code: true,
-              },
-              {
-                icon: Globe,
-                color: "text-blue-500",
-                bg: "bg-blue-500/10",
-                title: "URL Chat Publik",
-                desc: "Setiap agent punya URL publik sendiri (gustafta.app/bot/[id]). Bagikan ke WhatsApp, email, atau QR code.",
-                tag: "Share",
-              },
-              {
-                icon: BookOpen,
-                color: "text-emerald-500",
-                bg: "bg-emerald-500/10",
-                title: "Knowledge Base Terstruktur",
-                desc: "Upload dokumen PDF, teks, URL, atau Q&A. Agent Anda menjawab berdasarkan data yang Anda upload.",
-                tag: "Konten",
-              },
-              {
-                icon: Blocks,
-                color: "text-orange-500",
-                bg: "bg-orange-500/10",
-                title: "Mini Apps 45 Tipe",
-                desc: "RAB estimator, contract drafter, scorecard tender, notulis rapat, editorial calendar, sales script — tools produktivitas siap pakai.",
-                tag: "Tools",
-              },
-              {
-                icon: BarChart3,
-                color: "text-pink-500",
-                bg: "bg-pink-500/10",
-                title: "Dashboard Manajemen",
-                desc: "Kelola semua agent, lihat analytics percakapan, atur knowledge base, konfigurasi widget — dari satu dashboard.",
-                tag: "Admin",
-              },
-            ].map((item) => (
-              <Card key={item.title} className="hover-elevate overflow-visible border-border/60">
-                <CardContent className="p-5">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
-                      <item.icon className={`h-5 w-5 ${item.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-sm">{item.title}</h3>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">{item.tag}</Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-                    </div>
-                  </div>
-                  {item.code && (
-                    <div className="mt-3 rounded-lg bg-zinc-900 dark:bg-zinc-950 p-2.5 font-mono text-[10px] text-emerald-400 overflow-x-auto">
-                      {'<script src="gustafta.app/widget/loader.js"'}
-                      <br />
-                      {'  data-agent-id="AGENT_ID"></script>'}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* How it works: 4 steps */}
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-center font-bold text-lg mb-8 text-muted-foreground uppercase tracking-wider text-sm">Dari Subscribe ke Live dalam 30 Menit</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { step: "1", icon: CreditCard, label: "Pilih Paket", desc: "Pilih plan, konfirmasi via WA" },
-                { step: "2", icon: Bot, label: "Buat Agent", desc: "Konfigurasi chatbot di dashboard" },
-                { step: "3", icon: BookOpen, label: "Upload Konten", desc: "PDF, URL, atau teks ke KB" },
-                { step: "4", icon: Globe, label: "Deploy & Share", desc: "Copy embed code atau bagikan URL" },
-              ].map(({ step, icon: Icon, label, desc }) => (
-                <div key={step} className="text-center">
-                  <div className="relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-3">
-                    <Icon className="h-6 w-6 text-primary" />
-                    <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{step}</span>
-                  </div>
-                  <div className="font-semibold text-sm mb-1">{label}</div>
-                  <div className="text-xs text-muted-foreground">{desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="text-center mt-10">
-            <Link href="/welcome">
-              <Button size="lg" className="gap-2 mr-3" data-testid="button-view-welcome">
-                <Rocket className="h-5 w-5" />
-                Lihat Panduan Lengkap
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/onboarding" onClick={handleOnboardingClick}>
-              <Button size="lg" variant="outline" className="gap-2" data-testid="button-onboarding-from-deliverable">
-                <CreditCard className="h-5 w-5" />
-                Pilih Paket
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-      {/* ─────────────────────────────────────────────────────────── */}
-
-      {/* ─── SECTION: Custom Domain + Hierarki 5 Level Highlight ── */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-primary/5 via-background to-violet-500/5">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Custom Domain card */}
-              <Card className="border-2 border-primary/30 hover-elevate overflow-visible">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Globe className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <Badge className="mb-1 text-xs bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">Fitur Baru</Badge>
-                      <h3 className="text-xl font-bold">Custom Domain</h3>
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                    Pasang domain kustom Anda sendiri (misal: <strong>bot.perusahaan.com</strong>) langsung ke chatbot manapun. Cocok untuk branding profesional dan white-label deployment.
-                  </p>
-                  <ul className="space-y-2 mb-4">
-                    {[
-                      "CNAME setup + verifikasi otomatis",
-                      "Redirect langsung ke halaman chat",
-                      "Embed code: iframe & floating widget",
-                      "Ganti chatbot tujuan tanpa hapus domain",
-                    ].map(item => (
-                      <li key={item} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/domains">
-                    <Button variant="outline" size="sm" className="gap-2 border-primary/30" data-testid="button-custom-domain">
-                      <Globe className="h-4 w-4" />
-                      Kelola Domain
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Hierarki 5 Level card */}
-              <Card className="border-2 border-violet-500/30 hover-elevate overflow-visible">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                      <Layers className="h-6 w-6 text-violet-500" />
-                    </div>
-                    <div>
-                      <Badge className="mb-1 text-xs bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20 border-violet-500/20">Multi-Agent</Badge>
-                      <h3 className="text-xl font-bold">Hierarki 5 Level</h3>
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                    Bangun ekosistem chatbot yang terkoordinasi dan skalabel menggunakan arsitektur multi-agent unik Gustafta — dari payung strategis hingga unit tugas mikro.
-                  </p>
-                  <div className="space-y-2 mb-4">
-                    {[
-                      { level: "L1", name: "Series", desc: "Payung ekosistem strategis" },
-                      { level: "L2", name: "Core", desc: "Sudut pandang tematik dalam Series" },
-                      { level: "L3", name: "Big Idea", desc: "Orkestrator — dispatcher cerdas lintas Core" },
-                      { level: "L4", name: "Toolbox", desc: "Chatbot spesialis per area operasional" },
-                      { level: "L5", name: "Agent", desc: "Unit tugas mikro eksekutor" },
-                    ].map(item => (
-                      <div key={item.level} className="flex items-center gap-3 text-sm">
-                        <span className="h-6 w-8 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold flex items-center justify-center shrink-0">{item.level}</span>
-                        <span className="font-semibold w-20 shrink-0">{item.name}</span>
-                        <span className="text-muted-foreground">{item.desc}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Link href="/dashboard">
-                    <Button variant="outline" size="sm" className="gap-2 border-violet-500/30 text-violet-600 dark:text-violet-400" data-testid="button-hierarchy">
-                      <Layers className="h-4 w-4" />
-                      Mulai Bangun Ekosistem
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── SECTION: Tender LPSE Spotlight ── */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-emerald-500/5 via-background to-blue-500/5" id="tender">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <Badge className="mb-4 gap-2 bg-emerald-600 text-white hover:bg-emerald-700">
-                <Flame className="h-3 w-3" /> Flagship — Paket Domain Konstruksi
-              </Badge>
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                Tender LPSE Assistant
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Alat AI pertama di Indonesia khusus untuk kontraktor dan konsultan MK yang ingin memenangkan tender pengadaan pemerintah. Analisis mendalam sesuai <strong>Perpres 46/2025</strong> — dari checklist dokumen hingga draft teknis siap kirim.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Left: Pack cards */}
-              <div className="space-y-4">
-                <Card className="border-2 border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                        <HardHat className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm">Pelaksana Konstruksi</p>
-                        <p className="text-xs text-muted-foreground">Kontraktor / Penyedia Jasa</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Analisis kesiapan tender sebagai kontraktor: SBU, pengalaman proyek, personel, alat berat, metode pelaksanaan, SMKK/K3, dan kepatuhan regulasi.</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-2 border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20">
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
-                        <Briefcase className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm">Konsultansi MK</p>
-                        <p className="text-xs text-muted-foreground">Manajemen Konstruksi / Pengawas</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Analisis kesiapan sebagai konsultan MK: metodologi pengawasan, organisasi tim, pengalaman MK, rencana QA/QC, dan SMKK mentoring.</p>
-                  </CardContent>
-                </Card>
-                <div className="flex gap-3">
-                  <Link href="/packs" className="flex-1">
-                    <Button className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700" data-testid="button-go-packs">
-                      <Package className="h-4 w-4" />
-                      Buka Paket Domain
-                    </Button>
-                  </Link>
-                  {!isAuthenticated && (
-                    <a href="/login" onClick={handleStartNowClick}>
-                      <Button variant="outline" className="gap-2">
-                        <Rocket className="h-4 w-4" />
-                        Daftar Gratis
-                      </Button>
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* Right: Feature grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {tenderFeatures.map((f, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <f.icon className="h-4 w-4 text-emerald-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold mb-0.5">{f.title}</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* How it works wizard */}
-            <div className="rounded-xl border bg-card p-5">
-              <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">Alur Wizard 7 Langkah</p>
-              <div className="flex flex-wrap gap-2">
-                {["Pilih Pack", "Profil Perusahaan", "Data Tender", "Upload Dokumen (AI)", "Strategi Teknis", "Compliance Check", "Generate Hasil"].map((step, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">
-                      {i + 1}
-                    </div>
-                    <span className="text-xs text-muted-foreground">{step}</span>
-                    {i < 6 && <ChevronRight className="h-3 w-3 text-muted-foreground/50" />}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── SECTION: MultiClaw 4-Panel ── */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-violet-500/5 via-background to-emerald-500/5" id="multiclaw">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <Badge className="mb-4 gap-2 bg-violet-600 text-white hover:bg-violet-700">
-                <Blocks className="h-3 w-3" /> Fitur Terbaru — MultiClaw 4-Panel
-              </Badge>
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                Empat Panel, Satu Alur Terintegrasi
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Data mengalir otomatis dari analisis tender → program kompetensi → produk digital → kampanye WhatsApp. Satu klik, semua panel terhubung melalui <strong>MultiClaw Context</strong>.
-              </p>
-            </div>
-
-            {/* Flow diagram */}
-            <div className="flex flex-col md:flex-row items-stretch gap-3 mb-10">
-              {[
-                {
-                  num: "01", color: "violet", icon: ClipboardCheck,
-                  title: "Info Tender", badge: "LPSE Analyzer",
-                  desc: "Analisis kesiapan tender: checklist 30+ item, skor 0–100, gap analysis, dan executive summary berbasis Perpres 46/2025.",
-                  outputs: ["Skor Kecocokan", "Key Gaps", "Rekomendasi Strategis"],
-                },
-                {
-                  num: "02", color: "blue", icon: GraduationCap,
-                  title: "Studio Kompetensi", badge: "SKK Planner",
-                  desc: "Rancang program pelatihan SKK/SKKNI dari gap tender. AI menyusun kurikulum, modul, dan rencana sertifikasi.",
-                  outputs: ["Program SKK", "Roadmap Pelatihan", "Estimasi Biaya"],
-                },
-                {
-                  num: "03", color: "orange", icon: BookOpen,
-                  title: "Ekosistem Produk", badge: "Content Creator",
-                  desc: "Buat eBook, eCourse, dan template dokumen dari program kompetensi. Monetisasi keahlian dalam produk digital.",
-                  outputs: ["eBook AI", "eCourse Online", "Template Dokumen"],
-                },
-                {
-                  num: "04", color: "emerald", icon: MessageSquare,
-                  title: "Broadcast WA", badge: "Campaign Manager",
-                  desc: "Kirim kampanye WhatsApp dengan konten dari tender & produk. A/B test AI untuk optimasi pesan sebelum broadcast.",
-                  outputs: ["A/B Test Varian", "Personalisasi AI", "Broadcast Terjadwal"],
-                },
-              ].map((panel, i) => {
-                const Icon = panel.icon;
-                const colorMap: Record<string, { bg: string; border: string; text: string; badge: string; num: string }> = {
-                  violet: { bg: "bg-violet-50 dark:bg-violet-950/20", border: "border-violet-200 dark:border-violet-800", text: "text-violet-700 dark:text-violet-300", badge: "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300", num: "bg-violet-600" },
-                  blue:   { bg: "bg-blue-50 dark:bg-blue-950/20",   border: "border-blue-200 dark:border-blue-800",   text: "text-blue-700 dark:text-blue-300",   badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",   num: "bg-blue-600" },
-                  orange: { bg: "bg-orange-50 dark:bg-orange-950/20", border: "border-orange-200 dark:border-orange-800", text: "text-orange-700 dark:text-orange-300", badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300", num: "bg-orange-600" },
-                  emerald:{ bg: "bg-emerald-50 dark:bg-emerald-950/20", border: "border-emerald-200 dark:border-emerald-800", text: "text-emerald-700 dark:text-emerald-300", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300", num: "bg-emerald-600" },
-                };
-                const c = colorMap[panel.color];
-                return (
-                  <div key={i} className="flex-1 flex flex-col">
-                    <div className={`flex-1 rounded-xl border-2 ${c.border} ${c.bg} p-5 flex flex-col`} data-testid={`card-multiclaw-${i}`}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className={`w-7 h-7 rounded-full ${c.num} text-white text-xs font-bold flex items-center justify-center shrink-0`}>{panel.num}</span>
-                        <Icon className={`h-5 w-5 ${c.text}`} />
-                        <div>
-                          <p className={`text-sm font-bold ${c.text}`}>{panel.title}</p>
-                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-4 ${c.badge} border-0`}>{panel.badge}</Badge>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">{panel.desc}</p>
-                      <div className="space-y-1">
-                        {panel.outputs.map(o => (
-                          <div key={o} className={`flex items-center gap-1.5 text-xs ${c.text}`}>
-                            <CheckCircle2 className="h-3 w-3 shrink-0" /> {o}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {i < 3 && (
-                      <div className="flex justify-center items-center py-2 md:hidden">
-                        <ArrowRight className="h-4 w-4 text-muted-foreground rotate-90" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Cross-panel context highlight */}
-            <div className="rounded-xl border bg-gradient-to-r from-violet-500/10 via-blue-500/5 to-emerald-500/10 p-6 flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <Blocks className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <p className="font-bold mb-1">MultiClaw Context — Data Mengalir Otomatis Lintas Panel</p>
-                <p className="text-sm text-muted-foreground">Setiap panel membaca dan menulis ke shared context yang tersimpan di browser. "AI Intelligence Banner" muncul otomatis di panel berikutnya, menampilkan ringkasan data sebelumnya — siap diimport dengan satu klik.</p>
-              </div>
-              <Link href="/pricing">
-                <Button variant="outline" className="gap-2 shrink-0" data-testid="button-try-multiclaw">
-                  <Lock className="h-4 w-4" />
-                  Lihat Paket
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24 bg-muted/30" id="sectors">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Sektor Usaha</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4" data-testid="text-sectors-title">
-              Untuk Berbagai Sektor Usaha
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Gustafta dirancang fleksibel untuk semua industri. Pilih sektor Anda dan lihat bagaimana AI chatbot bisa membantu bisnis Anda.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            {featuredSectors.map((sector) => {
-              const Icon = sector.icon;
-              return (
-                <Link key={sector.id} href={`/sector/${sector.id}`}>
-                  <Card className="hover-elevate overflow-visible cursor-pointer h-full" data-testid={`card-sector-${sector.id}`}>
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <Icon className={`h-5 w-5 ${sector.color}`} />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-sm mb-1">{sector.label}</h3>
-                          <p className="text-xs text-muted-foreground line-clamp-2">{sector.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 mt-3 text-xs text-primary font-medium">
-                        <span>Pelajari lebih lanjut</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Testimoni</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Dipercaya oleh Berbagai Bisnis
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Lihat bagaimana Gustafta membantu bisnis dari berbagai sektor
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover-elevate overflow-visible" data-testid={`card-testimonial-${index}`}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                    <Badge variant="outline" className="text-xs">{testimonial.tag}</Badge>
-                  </div>
-                  <p className="text-muted-foreground mb-5 italic text-sm leading-relaxed">"{testimonial.content}"</p>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                        {testimonial.avatar}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-semibold text-sm">{testimonial.name}</div>
-                      <div className="text-xs text-muted-foreground">{testimonial.role}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Perbandingan</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Mengapa Gustafta Lebih Unggul?
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Bandingkan fitur Gustafta dengan platform chatbot builder lainnya
-            </p>
-          </div>
-          
-          <div className="max-w-3xl mx-auto">
-            <Card>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-4 font-semibold">Fitur</th>
-                        <th className="text-center p-4 font-semibold bg-primary/5">
-                          <div className="flex items-center justify-center gap-2">
-                            <Bot className="h-5 w-5 text-primary" />
-                            Gustafta
-                          </div>
-                        </th>
-                        <th className="text-center p-4 font-semibold text-muted-foreground">Kompetitor</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {comparisonData.map((row, index) => (
-                        <tr key={index} className="border-b last:border-b-0">
-                          <td className="p-4 text-sm">{row.feature}</td>
-                          <td className="p-4 text-center bg-primary/5">
-                            {typeof row.gustafta === 'boolean' ? (
-                              row.gustafta ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
-                              ) : (
-                                <XCircle className="h-5 w-5 text-destructive mx-auto" />
-                              )
-                            ) : (
-                              <span className="text-sm font-medium text-primary">{row.gustafta}</span>
-                            )}
-                          </td>
-                          <td className="p-4 text-center">
-                            {typeof row.others === 'boolean' ? (
-                              row.others ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
-                              ) : (
-                                <XCircle className="h-5 w-5 text-destructive mx-auto" />
-                              )
-                            ) : (
-                              <span className="text-sm text-muted-foreground">{row.others}</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Fitur Lanjutan</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Kemampuan Lebih untuk Bisnis Anda
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Fitur tambahan untuk monitoring, pelaporan, dan integrasi yang lebih mendalam
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {advancedFeatures.map((feature) => (
-              <Card key={feature.title} className="hover-elevate overflow-visible" data-testid={`card-advanced-${feature.title}`}>
-                <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========== TRIAL REQUEST SECTION ========== */}
-      <section className="py-16 md:py-24" id="trial">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-8">
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Coba Gratis</Badge>
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                Request Voucher Trial Gustafta
-              </h2>
-              <p className="text-muted-foreground">
-                Belum siap berlangganan? Ajukan permintaan trial — tim kami akan mengirimkan voucher akses gratis 14 hari via WA/Email Anda.
-              </p>
-            </div>
-
-            {trialSubmitted ? (
-              <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
-                <CardContent className="pt-8 pb-8 text-center space-y-3">
-                  <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto" />
-                  <h3 className="text-xl font-bold text-green-700 dark:text-green-300">Permintaan Terkirim!</h3>
-                  <p className="text-green-600 dark:text-green-400">
-                    Tim Gustafta akan menghubungi Anda via WA/Email dalam 1x24 jam kerja dengan voucher trial Anda.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="mt-4"
-                    onClick={() => setTrialSubmitted(false)}
-                    data-testid="button-trial-again"
-                  >
-                    Ajukan Lagi
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border-primary/20 shadow-lg">
-                <CardContent className="pt-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-1.5 block">Nama Lengkap <span className="text-red-500">*</span></label>
-                      <Input
-                        placeholder="Budi Santoso"
-                        value={trialForm.name}
-                        onChange={(e) => setTrialForm(f => ({ ...f, name: e.target.value }))}
-                        data-testid="input-trial-name"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-1.5 block">No. HP / WhatsApp <span className="text-red-500">*</span></label>
-                      <Input
-                        placeholder="08123456789"
-                        value={trialForm.phone}
-                        onChange={(e) => setTrialForm(f => ({ ...f, phone: e.target.value }))}
-                        data-testid="input-trial-phone"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-1.5 block">Email <span className="text-red-500">*</span></label>
-                      <Input
-                        type="email"
-                        placeholder="budi@perusahaan.com"
-                        value={trialForm.email}
-                        onChange={(e) => setTrialForm(f => ({ ...f, email: e.target.value }))}
-                        data-testid="input-trial-email"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-1.5 block">Nama Perusahaan</label>
-                      <Input
-                        placeholder="PT Maju Konstruksi (opsional)"
-                        value={trialForm.company}
-                        onChange={(e) => setTrialForm(f => ({ ...f, company: e.target.value }))}
-                        data-testid="input-trial-company"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1.5 block">Kebutuhan / Use Case</label>
-                    <Textarea
-                      placeholder="Contoh: Ingin membuat chatbot untuk menjawab pertanyaan pelanggan tentang harga material bangunan..."
-                      value={trialForm.useCase}
-                      onChange={(e) => setTrialForm(f => ({ ...f, useCase: e.target.value }))}
-                      rows={3}
-                      data-testid="input-trial-usecase"
-                    />
-                  </div>
-                  <Button
-                    className="w-full gap-2 py-5 text-base"
-                    disabled={trialMutation.isPending || !trialForm.name || !trialForm.phone || !trialForm.email}
-                    onClick={() => trialMutation.mutate(trialForm)}
-                    data-testid="button-submit-trial"
-                  >
-                    <FileText className="h-4 w-4" />
-                    {trialMutation.isPending ? "Mengirim permintaan..." : "Kirim Permintaan Trial"}
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Voucher trial berlaku 14 hari • Akses penuh semua fitur termasuk Agentic AI & Orchestrator
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">FAQ</Badge>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Pertanyaan yang Sering Diajukan
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Temukan jawaban untuk pertanyaan umum tentang Gustafta
-            </p>
-          </div>
-          
-          <div className="max-w-3xl mx-auto">
-            <Accordion type="single" collapsible className="w-full">
-              {faqItems.map((item, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left" data-testid={`faq-trigger-${index}`}>
-                    {item.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {item.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24 bg-muted/20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <Badge variant="secondary" className="mb-4">
-                <Globe className="h-3 w-3 mr-1" />
-                Chatbot Terintegrasi
-              </Badge>
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                Ekosistem AI Konstruksi & Teknik
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Gustafta terintegrasi dengan chatbot AI spesialis untuk mendukung kebutuhan belajar, bekerja, dan berusaha di sektor konstruksi dan keteknikan.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* 1. Konstruksi AI */}
-              <Card className="hover-elevate overflow-visible border-2 border-yellow-200 dark:border-yellow-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
-                      <HardHat className="h-6 w-6 text-yellow-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Konstruksi AI</h3>
-                      <p className="text-xs text-muted-foreground">Asisten AI Proyek Konstruksi</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Asisten AI khusus proyek konstruksi — perencanaan jadwal, estimasi biaya, monitoring progres lapangan, manajemen subkontraktor, dan pelaporan proyek berbasis AI.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["Jadwal Proyek", "Estimasi Biaya", "Progres Lapangan", "Subkontraktor", "Pelaporan"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-yellow-700 border-yellow-300 dark:text-yellow-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href="/pricing" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-yellow-500/40 text-yellow-700 dark:text-yellow-400" data-testid="button-konstruksi-ai">
-                          <Lock className="h-3.5 w-3.5" />
-                          Tersedia di Platform
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 2. Siap Uji Kompetensi */}
-              <Card className="hover-elevate overflow-visible border-2 border-blue-200 dark:border-blue-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <GraduationCap className="h-6 w-6 text-blue-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Siap Uji Kompetensi</h3>
-                      <p className="text-xs text-muted-foreground">Chatbot Persiapan SKK, Asesmen & Audit</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Persiapkan diri menghadapi Uji Kompetensi SKK, Asesmen Tenaga Ahli, dan Audit Sistem Manajemen. Latihan soal interaktif, simulasi wawancara asesor, dan panduan dokumen portofolio berbasis AI.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["SKK Konstruksi", "Asesmen Ahli", "Audit SMKK", "Portofolio", "Simulasi"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-blue-700 border-blue-300 dark:text-blue-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href="/pricing" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-blue-500/40 text-blue-700 dark:text-blue-400" data-testid="button-uji-kompetensi">
-                          <Lock className="h-3.5 w-3.5" />
-                          Tersedia di Platform
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 3. Dokumentender */}
-              <Card className="hover-elevate overflow-visible border-2 border-emerald-200 dark:border-emerald-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                      <Wrench className="h-6 w-6 text-emerald-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Dokumentender</h3>
-                      <p className="text-xs text-muted-foreground">Knowledge Base Keteknikan & Konstruksi</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Akses pengetahuan lengkap tentang Teknik Sipil, Mesin, Elektro — standar SNI, ISO, metode pelaksanaan, RAB, K3, dokumen tender, kontrak, dan peraturan LKPP. Jawaban akurat dari dokumen asli.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["Teknik Sipil", "SNI & ISO", "RAB & K3", "Pengadaan", "LKPP"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-emerald-700 border-emerald-300 dark:text-emerald-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="flex-1 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800">
-                        <Globe className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                        <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">chat.aspekindo-pub.com</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 4. Aplikasi Industri */}
-              <Card className="hover-elevate overflow-visible border-2 border-orange-200 dark:border-orange-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
-                      <Factory className="h-6 w-6 text-orange-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Aplikasi Industri</h3>
-                      <p className="text-xs text-muted-foreground">Tools Operasional Sektor Industri</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Aplikasi AI terintegrasi untuk kebutuhan operasional industri — manajemen produksi, quality control, efisiensi proses, dan digitalisasi sistem kerja di lapangan.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["Produksi", "Quality Control", "Efisiensi Proses", "Digitalisasi", "Lapangan"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-orange-700 border-orange-300 dark:text-orange-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href="/pricing" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-orange-500/40 text-orange-700 dark:text-orange-400" data-testid="button-aplikasi-industri">
-                          <Lock className="h-3.5 w-3.5" />
-                          Tersedia di Platform
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 5. Manajemen ISO */}
-              <Card className="hover-elevate overflow-visible border-2 border-violet-200 dark:border-violet-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
-                      <ShieldCheck className="h-6 w-6 text-violet-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Manajemen ISO</h3>
-                      <p className="text-xs text-muted-foreground">Sistem Manajemen Mutu & Kepatuhan ISO</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Kelola implementasi standar ISO secara menyeluruh — dokumentasi prosedur, audit internal, tindakan korektif, pemantauan KPI mutu, dan persiapan sertifikasi berbasis AI.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["ISO 9001", "ISO 14001", "ISO 45001", "Audit Internal", "Sertifikasi"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-violet-700 border-violet-300 dark:text-violet-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href="/pricing" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-violet-500/40 text-violet-700 dark:text-violet-400" data-testid="button-manajemen-iso">
-                          <Lock className="h-3.5 w-3.5" />
-                          Tersedia di Platform
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 6. Aplikasi Hukum */}
-              <Card className="hover-elevate overflow-visible border-2 border-rose-200 dark:border-rose-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
-                      <Scale className="h-6 w-6 text-rose-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">Aplikasi Hukum</h3>
-                      <p className="text-xs text-muted-foreground">Asisten AI Bidang Hukum & Kontrak</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Asisten AI untuk kebutuhan hukum bisnis dan konstruksi — review kontrak, analisis klausul, draf perjanjian, kepatuhan regulasi, dan konsultasi hukum pengadaan.
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {["Review Kontrak", "Analisis Klausul", "Regulasi", "Pengadaan", "Hukum Bisnis"].map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs text-rose-700 border-rose-300 dark:text-rose-400">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href="/pricing" className="flex-1">
-                        <Button size="sm" variant="outline" className="w-full gap-1.5 text-xs border-rose-500/40 text-rose-700 dark:text-rose-400" data-testid="button-aplikasi-hukum">
-                          <Lock className="h-3.5 w-3.5" />
-                          Tersedia di Platform
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 md:py-32 bg-primary text-primary-foreground relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-4 text-center relative">
-          <Badge variant="secondary" className="mb-6 bg-white/20 text-white border-white/30">
-            <Bot className="h-3 w-3 mr-1" />
-            AI Chatbot Builder Spesialis Konstruksi (Konfigurabel untuk Sektor Lain)
-          </Badge>
-          
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Siap Membangun Chatbot AI Anda?
-          </h2>
-          <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto text-lg">
-            Bergabung dengan kontraktor, konsultan, dan pelaku jasa konstruksi yang sudah memakai 131 hub orchestrator & 971+ agent Gustafta — 
-            dan tetap bisa Anda konfigurasi untuk sektor lain. Setup chatbot AI dan mulai melayani hari ini.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <div className="flex items-center gap-2 text-primary-foreground/90">
-              <CheckCircle2 className="h-5 w-5" />
-              <span>Setup &lt; 30 menit</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/90">
-              <CheckCircle2 className="h-5 w-5" />
-              <span>971+ agent AI konstruksi</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/90">
-              <CheckCircle2 className="h-5 w-5" />
-              <span>Tanpa coding</span>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {isAuthenticated ? (
-              <Link href="/dashboard">
-                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6" data-testid="button-cta-dashboard">
-                  <Rocket className="h-5 w-5" />
-                  Buka Dashboard
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
-            ) : (
-              <a href="/login" onClick={handleStartNowClick}>
-                <Button size="lg" variant="secondary" className="gap-2 text-lg px-8 py-6" data-testid="button-cta-start">
-                  <Rocket className="h-5 w-5" />
-                  Mulai Gratis Sekarang
-                  <ArrowRight className="h-5 w-5" />
-                </Button>
-              </a>
-            )}
-            <Link href="/pricing" onClick={handlePricingClick}>
-              <Button size="lg" variant="outline" className="gap-2 text-lg px-8 py-6 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-                Lihat Harga
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <footer className="py-12 border-t">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Bot className="h-6 w-6 text-primary" />
                 <span className="font-bold text-lg">Gustafta</span>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                AI Chatbot Builder spesialis jasa konstruksi Indonesia — 131 hub orchestrator, 971+ agent AI. Konfigurabel untuk sektor lain.
+              <p className="text-sm text-muted-foreground mb-4 max-w-xs leading-relaxed">
+                Platform AI Chatbot Builder terdalam untuk Jasa Konstruksi Indonesia. 971+ agent spesialis, 131 hub orchestrator, siap pakai.
               </p>
-              <div className="flex flex-wrap gap-2">
-                {trustBadges.slice(0, 2).map((badge) => (
-                  <Badge key={badge.label} variant="outline" className="text-xs">
-                    <badge.icon className="h-3 w-3 mr-1" />
-                    {badge.label}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Produk</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/marketplace" className="hover:text-foreground">Marketplace</Link></li>
-                <li><Link href="/packs" className="hover:text-foreground">Paket Domain</Link></li>
-                <li><Link href="/domains" className="hover:text-foreground">Domain Kustom (URL)</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground">Harga</Link></li>
-                <li><Link href="/#multiclaw" className="hover:text-foreground">MultiClaw 4-Panel</Link></li>
-                <li><Link href="/documentation" className="hover:text-foreground">Template</Link></li>
-                <li><Link href="/documentation" className="hover:text-foreground">Integrasi</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Sektor Usaha</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                {featuredSectors.slice(0, 6).map((sector) => (
-                  <li key={sector.id}>
-                    <Link href={`/sector/${sector.id}`} className="hover:text-foreground">{sector.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/documentation" className="hover:text-foreground">Dokumentasi</Link></li>
-                <li><Link href="/documentation" className="hover:text-foreground">API Reference</Link></li>
-                <li><Link href="/series" className="hover:text-foreground">Chatbot Series</Link></li>
-                <li>
-                  <a href="https://chat.aspekindo-pub.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" /> Aspekindo Chat
-                  </a>
-                </li>
-                <li>
-                  <a href="https://linear-snow-8672.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" /> Siap Uji Kompetensi
-                  </a>
-                </li>
-                <li>
-                  <a href="https://dual-voxel-1743.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" /> Aplikasi Industri
-                  </a>
-                </li>
-                <li>
-                  <a href="https://soft-reed-1971.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" /> Manajemen ISO
-                  </a>
-                </li>
-                <li>
-                  <a href="https://falling-bloom-7842.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" /> Konstruksi AI
-                  </a>
-                </li>
-                <li>
-                  <a href="https://open-token-0622.d.kiloapps.io/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground flex items-center gap-1">
-                    <ExternalLink className="h-3 w-3" /> Aplikasi Hukum
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          {/* Contact + Midtrans strip */}
-          <div className="border-t pt-6 mb-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-4 text-sm">
-                <span className="text-muted-foreground font-medium flex items-center gap-1.5">
-                  <Smartphone className="h-4 w-4" /> Hubungi Kami:
-                </span>
-                <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Smartphone className="w-4 h-4" /> Hubungi Kami:
+                </div>
+                <a
+                  href="https://wa.me/6281287941900"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
                   data-testid="link-footer-wa-1"
-                  onClick={() => handleWAClick('Footer')}>
+                  onClick={() => handleWAClick("Footer")}
+                >
                   <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
                   081287941900
                 </a>
-                <a href="https://wa.me/6282299417818" target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
+                <a
+                  href="https://wa.me/6282299417818"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
                   data-testid="link-footer-wa-2"
-                  onClick={() => handleWAClick('Footer')}>
+                  onClick={() => handleWAClick("Footer")}
+                >
                   <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
                   082299417818
                 </a>
               </div>
+            </div>
 
-              {/* Scalev Payment Badge */}
-              <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground bg-muted/40">
-                <CreditCard className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                <div className="text-left">
-                  <span className="font-semibold text-foreground/80">Scalev.id</span>
-                  <span className="ml-1 text-muted-foreground">— Pembayaran aman & terenkripsi</span>
-                </div>
-                <div className="flex gap-1 ml-1">
-                  <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] px-1.5 py-0.5 rounded font-medium">SSL</span>
-                  <span className="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0.5 rounded font-medium">Aman</span>
-                </div>
-              </div>
+            <div>
+              <p className="font-semibold text-sm mb-3">Platform</p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/packs" className="hover:text-foreground transition-colors" onClick={handlePricingClick}>Paket Harga</Link></li>
+                <li><Link href="/gustafta-store" className="hover:text-foreground transition-colors">Template Store</Link></li>
+                <li><Link href="/documentation" className="hover:text-foreground transition-colors">Dokumentasi</Link></li>
+                <li><Link href="/legal" className="hover:text-foreground transition-colors">LexCom Legal AI</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-semibold text-sm mb-3">Produk</p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/tendera-claw" className="hover:text-foreground transition-colors">TenderaClaw</Link></li>
+                <li><Link href="/sbu-claw" className="hover:text-foreground transition-colors">SBUClaw</Link></li>
+                <li><Link href="/konstra-claw" className="hover:text-foreground transition-colors">KonstraClaw</Link></li>
+                <li><Link href="/brain-claw" className="hover:text-foreground transition-colors">BrainClaw</Link></li>
+              </ul>
             </div>
           </div>
 
           <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              &copy; 2026 Gustafta. All rights reserved.
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-muted-foreground">© 2026 Gustafta. All rights reserved.</p>
+              <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground bg-muted/40">
+                <CreditCard className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
+                <span className="font-semibold text-foreground/80">Scalev.id</span>
+                <span className="text-[10px] bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded font-medium">Aman</span>
+              </div>
+            </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Link href="/documentation" className="hover:text-foreground">Terms</Link>
               <Link href="/documentation" className="hover:text-foreground">Privacy</Link>
-              <Link href="/documentation" className="hover:text-foreground">Cookies</Link>
+              <Link href="/documentation" className="hover:text-foreground">Terms</Link>
             </div>
           </div>
         </div>
       </footer>
 
-      {gustaftaAssistant && (
-        <ChatPopup agent={gustaftaAssistant} />
-      )}
+      {gustaftaAssistant && <ChatPopup agent={gustaftaAssistant} />}
     </div>
   );
 }
