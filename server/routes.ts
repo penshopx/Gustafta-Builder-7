@@ -7832,13 +7832,11 @@ Balas dengan JSON dengan struktur PERSIS ini:
 
   // Audit: cek apakah agent orchestrator di DB sesuai dengan yang di-expect per replit.md
   // Akses: superadmin only
-  app.get("/api/admin/audit-orchestrators", async (req: any, res: any) => {
+  app.get("/api/admin/audit-orchestrators", isAuthenticated, async (req: any, res: any) => {
     try {
-      const userId = req.user?.claims?.sub || req.session?.userId;
-      if (!userId) return res.status(401).json({ error: "Login dulu" });
-      const me = await storage.getUser(userId);
-      if (!me || me.role !== "superadmin") {
-        return res.status(403).json({ error: "Hanya superadmin" });
+      const role = await getDbRole(req);
+      if (role !== "superadmin") {
+        return res.status(403).json({ error: "Hanya superadmin", currentRole: role });
       }
 
       // (route, expectedId, expectedNameKeywords) — dari replit.md MultiClaw table
