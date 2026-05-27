@@ -117,6 +117,7 @@ import AskomLanding from "@/pages/askom-landing";
 import AskomChat from "@/pages/askom-chat";
 import AbuClawChat from "@/pages/abu-claw";
 import PanduanAskomChat from "@/pages/panduan-askom";
+import KonsultanPermenPU2026Chat from "@/pages/konsultan-permen-pu-2026";
 import ScopeSipilChat from "@/pages/scope-sipil";
 import ScopeManpelChat from "@/pages/scope-manpel";
 import ScopeMekanikalChat from "@/pages/scope-mekanikal";
@@ -877,6 +878,15 @@ function Router() {
             highlights={["Apa itu ASKOM & bagaimana proses uji kompetensi SKK","Syarat peserta uji, APL-01/02, dan dokumen yang dibutuhkan","RPL: pengakuan pengalaman kerja tanpa uji ulang","Hak asesi: banding, keberatan, perlindungan data"]}
             icon={<GraduationCap className="h-12 w-12 text-teal-400" />}
           ><PanduanAskomChat /></PremiumPageGuard>
+        )} />
+        <Route path="/konsultan-permen-pu-2026" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="Konsultan Cerdas Permen PU No. 06 Tahun 2026"
+            description="Agentic AI Regulatory Consultant — bukan sekadar menjawab, tetapi mengkritisi, menguji, dan memperdalam pemahaman regulasi jasa konstruksi. 7 mode interaksi: Konsultasi, Simulasi, Audit, Ujian, Debat, Strategis, Pendalaman."
+            highlights={["7 Mode Interaksi: Konsultasi · Simulasi · Audit · Ujian · Debat · Strategis · Pendalaman","Karakter Agentic: Proaktif · Adaptif · Kritis · Trigger Otomatis","Format respons 5-bagian: Jawaban Regulasi · Analisis Kritis · Potensi Risiko · Trigger · Insight","Regulatory Challenge: menguji logika & analisis regulasi Anda"]}
+            icon={<Scale className="h-12 w-12 text-indigo-400" />}
+          ><KonsultanPermenPU2026Chat /></PremiumPageGuard>
         )} />
         <Route path="/mep-claw" component={() => (
           <PremiumPageGuard

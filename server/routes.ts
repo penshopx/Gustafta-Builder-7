@@ -12861,6 +12861,17 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/konsultan-permen-pu-2026/agent — Konsultan Cerdas Permen PU No. 06 Tahun 2026
+  app.get("/api/konsultan-permen-pu-2026/agent", async (_req, res) => {
+    try {
+      const agent = await storage.getAgent("1464");
+      if (!agent) return res.status(404).json({ error: "Konsultan Permen PU 2026 agent belum ditemukan. Pastikan agen ID 1464 ada di database." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/mep-claw/orchestrator — MEPClaw MultiClaw 7-Agent AI Konsultan MEP
   app.get("/api/mep-claw/orchestrator", async (_req, res) => {
     try {
