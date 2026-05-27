@@ -7836,13 +7836,25 @@ Balas dengan JSON dengan struktur PERSIS ini:
   // Header: x-bootstrap-token  Body: { email: string }
   app.post("/api/admin/bootstrap-superadmin", async (req: any, res: any) => {
     try {
-      const expected = process.env.BOOTSTRAP_ADMIN_TOKEN;
-      if (!expected) {
+      const expectedRaw = process.env.BOOTSTRAP_ADMIN_TOKEN;
+      if (!expectedRaw) {
         return res.status(503).json({ error: "BOOTSTRAP_ADMIN_TOKEN belum dikonfigurasi di server" });
       }
-      const provided = req.header("x-bootstrap-token");
+      const expected = expectedRaw.trim();
+      const providedRaw = req.header("x-bootstrap-token") || "";
+      const provided = providedRaw.trim();
       if (!provided || provided !== expected) {
-        return res.status(401).json({ error: "Token tidak valid" });
+        return res.status(401).json({
+          error: "Token tidak valid",
+          debug: {
+            providedLength: provided.length,
+            expectedLength: expected.length,
+            providedFirst3: provided.slice(0, 3),
+            providedLast3: provided.slice(-3),
+            expectedFirst3: expected.slice(0, 3),
+            expectedLast3: expected.slice(-3),
+          }
+        });
       }
       const email = String((req.body?.email || "")).trim().toLowerCase();
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

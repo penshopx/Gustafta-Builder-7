@@ -26,7 +26,14 @@ export default function BootstrapAdmin() {
       if (res.ok) {
         setResult({ ok: true, message: data.message || "Berhasil! Silakan logout & login ulang." });
       } else {
-        setResult({ ok: false, message: data.error || `Error ${res.status}` });
+        let msg = data.error || `Error ${res.status}`;
+        if (data.debug) {
+          msg += `\n\n🔍 Debug info:\n• Token yang Anda kirim: ${data.debug.providedLength} karakter (mulai "${data.debug.providedFirst3}…", akhir "…${data.debug.providedLast3}")\n• Token di server: ${data.debug.expectedLength} karakter (mulai "${data.debug.expectedFirst3}…", akhir "…${data.debug.expectedLast3}")`;
+          if (data.debug.providedLength !== data.debug.expectedLength) {
+            msg += `\n\n⚠️ Panjang berbeda ${Math.abs(data.debug.providedLength - data.debug.expectedLength)} karakter — kemungkinan ada karakter ter-skip/ter-tambah saat paste.`;
+          }
+        }
+        setResult({ ok: false, message: msg });
       }
     } catch (err: any) {
       setResult({ ok: false, message: err.message });
@@ -98,7 +105,7 @@ export default function BootstrapAdmin() {
                 ) : (
                   <AlertCircle className="h-4 w-4" />
                 )}
-                <AlertDescription data-testid="text-result">
+                <AlertDescription data-testid="text-result" className="whitespace-pre-line">
                   {result.message}
                   {result.ok && (
                     <div className="mt-3">
