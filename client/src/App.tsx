@@ -135,6 +135,16 @@ import QSClawChat from "@/pages/qs-claw";
 import PengawasClawChat from "@/pages/pengawas-claw";
 import KontrakClawChat from "@/pages/kontrak-claw";
 import K3ManClawChat from "@/pages/k3man-claw";
+import PajakClawChat from "@/pages/pajak-claw";
+import HubunganIndustrialClawChat from "@/pages/hubungan-industrial-claw";
+import EsgClawChat from "@/pages/esg-claw";
+import LeanOpExClawChat from "@/pages/lean-opex-claw";
+import SupplyChainClawChat from "@/pages/supply-chain-claw";
+import Industri40ClawChat from "@/pages/industri40-claw";
+import TransmisiClawChat from "@/pages/transmisi-claw";
+import CybersecurityClawChat from "@/pages/cybersecurity-claw";
+import HaccpClawChat from "@/pages/haccp-claw";
+import LkpmClawChat from "@/pages/lkpm-claw";
 import TrilogiChat from "@/pages/trilogi-chat";
 import WidgetDemo from "@/pages/widget-demo";
 import LmsPage from "@/pages/lms";
@@ -715,6 +725,86 @@ function Router() {
             highlights={["Pendirian PT: AHU Online, modal minimal, biaya notaris, timeline","NIB/OSS-RBA: KBLI 2020, risiko rendah/menengah/tinggi, Sertifikat Standar","PPh Badan: rekonsiliasi fiskal, tarif 22%/11%, koreksi positif/negatif","PHK/PKWT: hitung pesangon PP 35/2021, uang kompensasi PKWT"]}
             icon={<span className="text-4xl">🏢</span>}
           ><KorporasiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/pajak-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="PajakClaw — AI Advisor Pajak Indonesia"
+            description="8 spesialis pajak bekerja paralel: PPh 21/22/23/25/26, PPN 12% & e-Faktur, sistem Coretax DJP 2025, Transfer Pricing & BEPS, Tax Treaty P3B & Pillar 2 GMT, insentif Tax Holiday/Tax Allowance, sengketa pajak & Pengadilan Pajak, serta compliance SPT & risk management."
+            highlights={["PPh Karyawan & Badan — tarif progresif, kredit pajak, NPWP/NIK","PPN e-Faktur 12% — Coretax 2025, restitusi, KMS-PPN","Transfer Pricing — Doc-TP, CbCR, BEPS, advance pricing agreement","Banding Pajak — Keberatan, Pengadilan Pajak, PK MA"]}
+            icon={<span className="text-4xl">💰</span>}
+          ><PajakClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/hubungan-industrial-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="HubunganIndustrialClaw — AI Konsultan HR & Industrial Relations Indonesia"
+            description="8 spesialis HR/IR bekerja paralel: PKB & SP/SB, PHK & pesangon UU 6/2023, UMP/UMK & struktur skala upah, BPJS Ketenagakerjaan & Kesehatan, Pengadilan Hubungan Industrial, PKWT vs PKWTT & outsourcing, K3 ketenagakerjaan & kesejahteraan, serta compliance WLKP & RPTKA."
+            highlights={["PHK & Pesangon — perhitungan UP/UPMK/UPH PP 35/2021","UMP/UMK — struktur skala upah, THR, lembur Permenaker 18/2022","BPJS — JHT/JKK/JKM/JP & JKP, iuran & manfaat","PHI — bipartit → mediasi → PHI → kasasi MA"]}
+            icon={<span className="text-4xl">🤝</span>}
+          ><HubunganIndustrialClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/esg-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ESGClaw — AI Konsultan ESG & Keberlanjutan Indonesia"
+            description="8 spesialis ESG bekerja paralel: Sustainability Report POJK 51 & GRI/ISSB/TCFD, GHG inventory Scope 1/2/3 & SBTi, green bond & sustainable finance, audit energi ISO 50001, HAM bisnis & CSR ISO 26000, GCG & anti-bribery ISO 37001, sertifikasi Greenship/EDGE/LEED, serta rating MSCI/Sustainalytics."
+            highlights={["POJK 51 & ISSB IFRS S1/S2 — Sustainability Report, double materiality","GHG Protocol & IDXCarbon — Scope 1/2/3, NEK Perpres 98/2021","Green Bond POJK 60/2017 — Sustainability-Linked Loan, Taxonomi Hijau OJK","Greenship NB/EB — GBCI, EDGE, LEED v4.1, BREEAM"]}
+            icon={<span className="text-4xl">🌱</span>}
+          ><EsgClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/lean-opex-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="LeanOpExClaw — AI Konsultan Lean Manufacturing & Operational Excellence"
+            description="8 spesialis Lean/OpEx bekerja paralel: Lean & TPS (7 wastes, VSM, Kaizen), Six Sigma DMAIC/DMADV (SPC, FMEA), 5S & visual management, TPM & OEE, QC ISO 9001 & Poka-Yoke, PDCA & A3 problem solving, productivity & line balancing, serta strategi OpEx (Shingo, EFQM, Hoshin Kanri)."
+            highlights={["Lean TPS — VSM current/future, Kaizen, Jidoka, Pull system Kanban","Six Sigma — DMAIC, SPC, FMEA, Belt Yellow/Green/Black","TPM & OEE — Availability × Performance × Quality, 8 Pillars","A3 & Hoshin Kanri — root cause 5-Why, X-Matrix, KPI cascading"]}
+            icon={<span className="text-4xl">⚙️</span>}
+          ><LeanOpExClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/supply-chain-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SupplyChainClaw — AI Konsultan Supply Chain & Logistics Indonesia"
+            description="8 spesialis SCM bekerja paralel: procurement & vendor management, inventory EOQ/safety stock, WMS & warehouse layout, transportation TMS & INCOTERMS 2020, SCOR APICS Plan/Source/Make/Deliver, demand planning S&OP/IBP, supply chain risk & business continuity, serta digital SC (ERP/IoT/blockchain/AI)."
+            highlights={["Procurement & Inventory — RFQ/RFP, EOQ, ABC/XYZ, JIT, VMI","WMS & TMS — slotting, picking FIFO/FEFO, 3PL/4PL, cold chain","SCOR & S&OP — KPI OTIF/Fill Rate, demand forecasting Holt-Winters","Digital SC — SAP/Oracle/Odoo, control tower, blockchain traceability"]}
+            icon={<span className="text-4xl">🚚</span>}
+          ><SupplyChainClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/industri40-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="Industri40Claw — AI Konsultan Industri 4.0 & Digital Manufacturing Indonesia"
+            description="8 spesialis Industri 4.0 bekerja paralel: IoT industrial (MQTT/OPC UA/edge), AI/ML predictive maintenance & computer vision, otomasi PLC/SCADA/robotics, Digital Twin & simulation, big data & OEE analytics real-time, OT/ICS cybersecurity IEC 62443, cloud manufacturing & MES, serta Making Indonesia 4.0 (Kemenperin, INDI 4.0)."
+            highlights={["IoT & Edge — MQTT/OPC UA, ThingsBoard, brownfield retrofit","AI/ML — predictive maintenance, computer vision defect, MLOps","Digital Twin — virtual commissioning, what-if scenarios","Making Indonesia 4.0 — 7 priority sectors, INDI 4.0 readiness"]}
+            icon={<span className="text-4xl">🤖</span>}
+          ><Industri40ClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/transmisi-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="TransmisiClaw — AI Konsultan Transmisi & Gardu Induk Indonesia"
+            description="7 spesialis transmisi bekerja paralel: SUTT 70/150 kV (konduktor, tower, ROW 20m), SUTET 500 kV (bundled conductor, EHV, ROW 54m), GI AIS outdoor switchyard, GI GIS modular SF6, sistem proteksi (distance/differential/IEC 61850), SKTT XLPE 150/500 kV, serta perizinan ROW & kompensasi tanah."
+            highlights={["SUTT/SUTET — konduktor ACSR/AAAC, span, sagging, ROW PLN UIP","GI AIS vs GIS — SF6, partial discharge, IEC 62271, commissioning","Proteksi — distance 21, differential 87, IEC 61850, teleprotection","ROW & Permen ESDM 18/2015 — EMF, kompensasi, AMDAL transmisi"]}
+            icon={<span className="text-4xl">🏗️</span>}
+          ><TransmisiClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/cybersecurity-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="CybersecurityClaw — AI Konsultan Cybersecurity & PDP Indonesia"
+            description="8 spesialis cybersecurity bekerja paralel: UU 27/2022 PDP & DPO, ISO 27001:2022 ISMS Annex A, NIST CSF 2.0 & Zero Trust, penetration testing OWASP/PTES, SOC SIEM/SOAR MITRE ATT&CK, cloud security AWS/Azure/GCP CIS, cyber governance & BCMS ISO 22301, serta compliance Indonesia (BSSN, PSE PP 71/2019, OJK)."
+            highlights={["UU PDP — DPO, breach notification 72 jam, sanksi pidana","ISO 27001:2022 — 93 controls, SOA, ISMS, surveillance audit","NIST CSF 2.0 — Govern/Identify/Protect/Detect/Respond/Recover","SOC & MITRE ATT&CK — SIEM Splunk/QRadar, SOAR playbook, IR"]}
+            icon={<span className="text-4xl">🔐</span>}
+          ><CybersecurityClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/haccp-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="HACCPClaw — AI Konsultan HACCP, BPOM & Sertifikasi Halal Indonesia"
+            description="8 spesialis food safety bekerja paralel: HACCP Codex 7 principles 12 steps, ISO 22000:2018 FSMS & FSSC 22000, registrasi BPOM MD/ML/SP & e-Registration, CPPOB/GMP & SSOP sanitasi, sertifikasi halal UU 33/2014 & BPJPH SiHalal, label & klaim gizi PerBPOM, cemaran mikroba & kimia SNI, serta standar internasional Codex/FDA/EU."
+            highlights={["HACCP Codex — 7 principles, CCP, prerequisite program PRP","BPOM MD/ML/SP — e-Registration, kategori pangan PerBPOM 34/2019","Halal — BPJPH, LPH MUI, SiHalal, mandatory Okt 2024","FSSC 22000 GFSI — ISO/TS 22002-1, traceability, recall"]}
+            icon={<span className="text-4xl">🍱</span>}
+          ><HaccpClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/lkpm-claw" component={() => (
+          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+            title="LKPMClaw — AI Konsultan LKPM & Penanaman Modal BKPM Indonesia"
+            description="7 spesialis penanaman modal bekerja paralel: OSS-RBA NIB & KBLI 2020, LKPM triwulan/semester format BKPM, persyaratan PMA & DPI Perpres 10/2021, insentif fiskal Tax Holiday/Allowance/BMDTP, realisasi & verifikasi BKPM lapangan, izin usaha sektor teknis K/L, serta KEK/KIK/KB/PLB kawasan khusus."
+            highlights={["OSS-RBA & NIB — KBLI 2020, KKPR, risiko UMK/Menengah/Besar","LKPM Triwulan — deadline tanggal 10, sanksi tidak lapor","PMA & DPI Perpres 10/2021 — kepemilikan asing, prioritas investasi","Tax Holiday/Allowance — PMK 130/2020, PP 78/2019, KEK"]}
+            icon={<span className="text-4xl">📊</span>}
+          ><LkpmClawChat /></PremiumPageGuard>
         )} />
         <Route path="/migas-claw" component={() => (
           <PremiumPageGuard

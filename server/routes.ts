@@ -17421,5 +17421,28 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // ─── 10 New MultiClaws (Batch May 2026) ─────────────────────────────────────
+  const newClawOrchestrators: Array<[string, string, string]> = [
+    ["pajak-claw", "pajak-claw-orchestrator", "PajakClaw"],
+    ["hubungan-industrial-claw", "hubungan-industrial-claw-orchestrator", "HubunganIndustrialClaw"],
+    ["esg-claw", "esg-claw-orchestrator", "ESGClaw"],
+    ["lean-opex-claw", "lean-opex-claw-orchestrator", "LeanOpExClaw"],
+    ["supply-chain-claw", "supply-chain-claw-orchestrator", "SupplyChainClaw"],
+    ["industri40-claw", "industri40-claw-orchestrator", "Industri40Claw"],
+    ["transmisi-claw", "transmisi-claw-orchestrator", "TransmisiClaw"],
+    ["cybersecurity-claw", "cybersecurity-claw-orchestrator", "CybersecurityClaw"],
+    ["haccp-claw", "haccp-claw-orchestrator", "HACCPClaw"],
+    ["lkpm-claw", "lkpm-claw-orchestrator", "LKPMClaw"],
+  ];
+  for (const [routeSlug, agentSlug, displayName] of newClawOrchestrators) {
+    app.get(`/api/${routeSlug}/orchestrator`, async (_req, res) => {
+      try {
+        const agent = await storage.getAgentBySlug(agentSlug);
+        if (!agent) return res.status(404).json({ error: `${displayName} Orchestrator tidak ditemukan.` });
+        res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+      } catch (err: any) { res.status(500).json({ error: err.message }); }
+    });
+  }
+
   return httpServer;
 }

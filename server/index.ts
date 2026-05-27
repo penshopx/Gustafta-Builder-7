@@ -142,6 +142,16 @@ import * as M_tutorTeknikClaw from "./seed-tutor-teknik-claw";
 import * as M_risetSkripsiClaw from "./seed-riset-skripsi-claw";
 import * as M_nspkNavigatorClaw from "./seed-nspk-navigator-claw";
 import * as M_korporasiClaw from "./seed-korporasi-claw";
+import * as M_pajakClaw from "./seed-pajak-claw";
+import * as M_hubunganIndustrialClaw from "./seed-hubungan-industrial-claw";
+import * as M_esgClaw from "./seed-esg-claw";
+import * as M_leanOpExClaw from "./seed-lean-opex-claw";
+import * as M_supplyChainClaw from "./seed-supply-chain-claw";
+import * as M_industri40Claw from "./seed-industri40-claw";
+import * as M_transmisiClaw from "./seed-transmisi-claw";
+import * as M_cybersecurityClaw from "./seed-cybersecurity-claw";
+import * as M_haccpClaw from "./seed-haccp-claw";
+import * as M_lkpmClaw from "./seed-lkpm-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1770,6 +1780,18 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
       } catch (err) {
         log("[Seed PenilaianKinerjaClaw] Error: " + (err as Error).message);
       }
+
+      // Seed: 10 New MultiClaws (Batch May 2026)
+      try { await M_pajakClaw.seedPajakClaw(); } catch (err) { log("[Seed PajakClaw] Error: " + (err as Error).message); }
+      try { await M_hubunganIndustrialClaw.seedHubunganIndustrialClaw(); } catch (err) { log("[Seed HubunganIndustrialClaw] Error: " + (err as Error).message); }
+      try { await M_esgClaw.seedEsgClaw(); } catch (err) { log("[Seed ESGClaw] Error: " + (err as Error).message); }
+      try { await M_leanOpExClaw.seedLeanOpExClaw(); } catch (err) { log("[Seed LeanOpExClaw] Error: " + (err as Error).message); }
+      try { await M_supplyChainClaw.seedSupplyChainClaw(); } catch (err) { log("[Seed SupplyChainClaw] Error: " + (err as Error).message); }
+      try { await M_industri40Claw.seedIndustri40Claw(); } catch (err) { log("[Seed Industri40Claw] Error: " + (err as Error).message); }
+      try { await M_transmisiClaw.seedTransmisiClaw(); } catch (err) { log("[Seed TransmisiClaw] Error: " + (err as Error).message); }
+      try { await M_cybersecurityClaw.seedCybersecurityClaw(); } catch (err) { log("[Seed CybersecurityClaw] Error: " + (err as Error).message); }
+      try { await M_haccpClaw.seedHaccpClaw(); } catch (err) { log("[Seed HACCPClaw] Error: " + (err as Error).message); }
+      try { await M_lkpmClaw.seedLkpmClaw(); } catch (err) { log("[Seed LKPMClaw] Error: " + (err as Error).message); }
 
       startScheduler();
     },

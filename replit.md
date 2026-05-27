@@ -107,6 +107,16 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/rekrutmen-claw` | RekrutmenClaw — AI Konsultan Rekrutmen & Talent Acquisition Indonesia | 8 | 1195 | teal | 1187–1194 |
 | `/ld-kompetensi-claw` | LdKompetensiClaw — AI Konsultan Learning & Development Indonesia | 8 | 1204 | emerald | 1196–1203 |
 | `/penilaian-kinerja-claw` | PenilaianKinerjaClaw — AI Konsultan Penilaian Kinerja & Manajemen SDM Indonesia | 8 | 1213 | indigo | 1205–1212 |
+| `/pajak-claw` | PajakClaw — AI Advisor Pajak Indonesia | 8 | 1183 | amber | 1175–1182 |
+| `/hubungan-industrial-claw` | HubunganIndustrialClaw — HR & Industrial Relations Indonesia | 8 | 1192 | orange | 1184–1191 |
+| `/esg-claw` | ESGClaw — ESG & Keberlanjutan Indonesia | 8 | 1201 | emerald | 1193–1200 |
+| `/lean-opex-claw` | LeanOpExClaw — Lean Manufacturing & Operational Excellence | 8 | 1210 | blue | 1202–1209 |
+| `/supply-chain-claw` | SupplyChainClaw — Supply Chain & Logistics Indonesia | 8 | 1219 | indigo | 1211–1218 |
+| `/industri40-claw` | Industri40Claw — Industri 4.0 & Digital Manufacturing Indonesia | 8 | 1228 | violet | 1220–1227 |
+| `/transmisi-claw` | TransmisiClaw — Transmisi & Gardu Induk PLN | 7 | 1236 | red | 1229–1235 |
+| `/cybersecurity-claw` | CybersecurityClaw — Cybersecurity & PDP Indonesia | 8 | 1245 | slate | 1237–1244 |
+| `/haccp-claw` | HACCPClaw — HACCP, BPOM & Sertifikasi Halal Indonesia | 8 | 1254 | green | 1246–1253 |
+| `/lkpm-claw` | LKPMClaw — LKPM & Penanaman Modal BKPM Indonesia | 7 | 1262 | teal | 1255–1261 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`
