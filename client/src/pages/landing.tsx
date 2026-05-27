@@ -4,20 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
-import { trackLead, trackViewContent, trackContact, trackInitiateCheckout, trackCustomEvent } from "@/hooks/use-meta-pixel";
+import {
+  trackLead, trackViewContent, trackContact,
+  trackInitiateCheckout, trackCustomEvent,
+} from "@/hooks/use-meta-pixel";
 import { ChatPopup } from "@/components/chat-popup";
 import { SharedHeader } from "@/components/shared-header";
 import {
-  Bot, Sparkles, Globe, Shield, BookOpen, ArrowRight, Check,
+  Bot, Sparkles, Globe, Shield, BookOpen, ArrowRight, Check, X,
   Zap, Rocket, Brain, Plug, GraduationCap, Briefcase, Store,
-  Flame, Package, CheckCircle2, Star, ChevronRight,
-  CreditCard, Smartphone, Lock, RefreshCw, HeartHandshake, Award
+  Flame, Package, CheckCircle2, Star, AlertTriangle, Clock,
+  TrendingUp, Users, CreditCard, Smartphone, ChevronRight,
+  FileText, ClipboardCheck, BarChart3, HardHat, Layers,
+  MessageSquare, Lock, HeartHandshake, Award, RefreshCw,
 } from "lucide-react";
 
 export default function Landing() {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
-  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha">("belajar");
+  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha">("bekerja");
   const [promoCountdown, setPromoCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -55,7 +60,12 @@ export default function Landing() {
       label: "Belajar",
       tagline: "AI Tutor & BIMTEK 24/7",
       desc: "AI tutor per mata pelajaran, simulasi ujian SKK/UTBK, bank soal adaptif, dan bimbingan BNSP — tersedia kapan saja tanpa terikat jadwal.",
-      bullets: ["Simulasi ujian SKK & UTBK", "Tutor konstruksi & teknik sipil", "BIMTEK & onboarding karyawan"],
+      useCases: [
+        { icon: GraduationCap, title: "Simulasi Ujian SKK & UTBK", desc: "Latihan soal yang mengoreksi, menjelaskan, dan memberi saran belajar personal." },
+        { icon: Brain, title: "Tutor Konstruksi & Teknik Sipil", desc: "Pembahasan materi SKKNI, Permen PUPR, SNI dari dokumen asli — tanya jawab langsung." },
+        { icon: Users, title: "BIMTEK & Onboarding Karyawan", desc: "Modul terstruktur, quiz evaluasi, progress tracking, dan sertifikat otomatis." },
+        { icon: BookOpen, title: "E-Learning Sertifikasi BNSP", desc: "Persiapan uji kompetensi LSP, bank soal adaptif, dan analisis kelemahan per unit kompetensi." },
+      ],
     },
     bekerja: {
       icon: Briefcase,
@@ -65,7 +75,12 @@ export default function Landing() {
       label: "Bekerja",
       tagline: "Asisten Profesional & Tender LPSE",
       desc: "Analisis tender LPSE otomatis, drafter dokumen teknis, notulis rapat, dan konsultan K3 yang siap kerja kapan saja dari mana saja.",
-      bullets: ["Asisten Tender LPSE + checklist 30 item", "Draft kontrak, SPK, SMKK, laporan", "AI Konsultan K3 & regulasi PUPR"],
+      useCases: [
+        { icon: ClipboardCheck, title: "Asisten Tender LPSE", desc: "Checklist 30+ item, gap analysis, SCORECARD Win Probability, draft dokumen sesuai Perpres 46/2025." },
+        { icon: FileText, title: "Draft Dokumen & Kontrak", desc: "Proposal teknis, SPK, SMKK plan, risk assessment, NDA, MoU — draf pertama dalam menit." },
+        { icon: HardHat, title: "Konsultan K3 & Regulasi PUPR", desc: "Tanya Permen PUPR, SMK3, PP 50/2012, PermenPUPR 10/2021 — jawaban akurat berbasis regulasi." },
+        { icon: MessageSquare, title: "Notulis Rapat & Knowledge Base Tim", desc: "Transkripsi audio/video otomatis, ringkasan rapat, dan pusat pengetahuan teknis yang bisa diakses via WA." },
+      ],
     },
     berusaha: {
       icon: Store,
@@ -75,58 +90,14 @@ export default function Landing() {
       label: "Berusaha",
       tagline: "CS Otomatis & Lead Generation",
       desc: "Jawab 80%+ pertanyaan pelanggan otomatis, tangkap leads 24/7, kirim broadcast WhatsApp, dan tingkatkan konversi tanpa tambah tim.",
-      bullets: ["Customer Service WhatsApp otomatis", "Lead gen & follow-up tanpa manual", "Konten & copywriting AI"],
+      useCases: [
+        { icon: MessageSquare, title: "Customer Service WhatsApp Otomatis", desc: "Jawab FAQ, tracking order, dan eskalasi ke CS manusia — 24/7 tanpa gaji tambahan." },
+        { icon: TrendingUp, title: "Lead Generation & Follow-Up", desc: "Tangkap prospek, kualifikasi leads, kirim notifikasi ke sales — bahkan saat toko tutup." },
+        { icon: Sparkles, title: "Konten & Copywriting AI", desc: "Caption IG/TikTok, artikel blog, script iklan, email marketing — siap publish berbasis produk Anda." },
+        { icon: BarChart3, title: "Analis Bisnis & Cashflow", desc: "Laporan keuangan sederhana, proyeksi omset, alert anomali pengeluaran — tanpa akuntan tambahan." },
+      ],
     },
   };
-
-  const features = [
-    { icon: Brain, title: "Otak Proyek", desc: "Pusatkan semua data bisnis. AI jawab berdasarkan konteks nyata bisnis Anda.", color: "text-amber-500", bg: "bg-amber-500/10" },
-    { icon: Globe, title: "Custom Domain", desc: "Pasang bot.perusahaan.com ke chatbot Anda. Setup CNAME dalam 5 menit.", color: "text-blue-500", bg: "bg-blue-500/10" },
-    { icon: BookOpen, title: "Knowledge Base 7 Tipe", desc: "Upload PDF, URL, YouTube, video, audio — AI transkripsi & RAG otomatis.", color: "text-violet-500", bg: "bg-violet-500/10" },
-    { icon: Plug, title: "Multi-Channel", desc: "WhatsApp, Telegram, web widget, REST API — satu chatbot, semua channel.", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { icon: Zap, title: "Agentic AI + Orchestrator", desc: "Routing otomatis ke specialist domain: Tender, K3, SKK, Hukum, Marketing.", color: "text-orange-500", bg: "bg-orange-500/10" },
-    { icon: Shield, title: "Aman & Privat", desc: "Token akses per chatbot, mode publik/privat, enkripsi data, OAuth Replit.", color: "text-slate-500", bg: "bg-slate-500/10" },
-  ];
-
-  const steps = [
-    { n: "1", title: "Buat Hierarki Chatbot", desc: "Buat Series, Modul, dan Chatbot sesuai kebutuhan — dalam 10 menit.", time: "±10 mnt" },
-    { n: "2", title: "Isi Knowledge Base", desc: "Upload PDF, URL, YouTube, atau audio. AI transkripsi otomatis di background.", time: "±10–15 mnt" },
-    { n: "3", title: "Konfigurasi & Deploy", desc: "Atur persona, pasang custom domain, lalu hubungkan ke WhatsApp atau web.", time: "±5–7 mnt" },
-    { n: "4", title: "Mulai Layani Pengguna", desc: "Chatbot aktif 24/7. Monitor performa via analytics dashboard real-time.", time: "±3–5 mnt" },
-  ];
-
-  const testimonials = [
-    {
-      name: "Budi Santoso",
-      role: "Direktur Teknik, PT Bangun Nusa Konstruksi",
-      avatar: "BS",
-      text: "Tender LPSE Assistant menghemat 2–3 hari kerja per tender. Checklist 30+ item langsung muncul, gap analysis akurat, draft dokumen tinggal edit.",
-      tag: "Kontraktor",
-    },
-    {
-      name: "Retno Ayu",
-      role: "Kepala Divisi Sertifikasi, LSP Konstruksi Nasional",
-      avatar: "RA",
-      text: "Simulasi asesmen SKKNI via AI sangat membantu peserta kami. Peserta yang latihan pakai Gustafta lulus lebih konsisten.",
-      tag: "Sertifikasi LSP",
-    },
-    {
-      name: "Agus Prasetyo",
-      role: "Direktur Utama, PT Graha Mandiri Consultant",
-      avatar: "AP",
-      text: "SCORECARD Win Probability membantu kami memutuskan tender mana yang layak diikuti. Win rate naik 40% dalam 3 bulan.",
-      tag: "Konsultan MK",
-    },
-  ];
-
-  const faqs = [
-    { q: "Apakah perlu keahlian coding?", a: "Tidak sama sekali. Semua konfigurasi dilakukan lewat antarmuka visual — Knowledge Base, persona AI, Custom Domain, Tender Wizard — tanpa menulis satu baris kode pun." },
-    { q: "Channel apa saja yang didukung?", a: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget (iframe & floating), Custom Domain, dan REST API. Semua bisa dihubungkan dari satu dashboard." },
-    { q: "Berapa lama setup-nya?", a: "Rata-rata kurang dari 30 menit dari daftar sampai chatbot aktif. Untuk chatbot sederhana (FAQ/CS), bahkan bisa 10–15 menit." },
-    { q: "Apa itu 971+ agent AI spesialis?", a: "Gustafta memiliki ratusan agent AI yang sudah dikonfigurasi untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, dan banyak lagi. Tinggal pakai, tidak perlu build dari nol." },
-    { q: "Bagaimana keamanan data saya?", a: "Data terenkripsi, akses berbasis token per chatbot, mode publik/privat, dan OAuth via Replit Identity. Anda punya kontrol penuh atas siapa yang bisa mengakses chatbot Anda." },
-    { q: "Bisa untuk sektor apa saja?", a: "Gustafta paling dalam untuk Jasa Konstruksi Indonesia — 971+ agent dalam 131 hub siap pakai. Platform juga fleksibel untuk 12 sektor lain: properti, energi, pendidikan, marketing, HR, dan lainnya." },
-  ];
 
   const p = personas[activePersona];
   const PersonaIcon = p.icon;
@@ -135,7 +106,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background" data-testid="page-landing">
       <SharedHeader />
 
-      {/* Promo Banner */}
+      {/* ── ATTENTION: Promo Banner ── */}
       <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white py-2.5 px-4">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
           <div className="flex items-center gap-2 text-sm font-semibold">
@@ -158,13 +129,13 @@ export default function Landing() {
           </div>
           <Link href="/packs" onClick={handlePacksClick}>
             <button className="bg-white text-red-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors" data-testid="button-promo-cta">
-              Beli Sekarang Rp 999rb/bln →
+              Kunci Harga Sekarang →
             </button>
           </Link>
         </div>
       </div>
 
-      {/* Hero */}
+      {/* ── ATTENTION: Hero ── */}
       <section className="relative overflow-hidden py-16 md:py-24 px-4">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
         <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
@@ -173,17 +144,20 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Sparkles className="h-4 w-4" />
-            Platform AI Chatbot Builder #1 untuk Konstruksi Indonesia
+            971+ Agent AI Spesialis · 131 Hub Orchestrator · Siap Pakai
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
-            Chatbot AI Cerdas untuk<br />
-            <span className="text-primary">Bisnis &amp; Profesional</span>
+            Chatbot AI untuk<br />
+            <span className="text-primary">Konstruksi, Bisnis</span>
+            <span className="text-muted-foreground"> &amp; </span>
+            <span className="text-primary">Profesional</span>
             <span className="text-muted-foreground"> Indonesia</span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Bangun chatbot AI dalam <strong className="text-foreground">30 menit tanpa coding</strong>. Dari Customer Service otomatis, Asisten Tender LPSE, AI Tutor, hingga Knowledge Base tim — satu platform untuk semua kebutuhan.
+            Dari <strong className="text-foreground">Asisten Tender LPSE</strong>, AI Tutor SKK, hingga Customer Service otomatis —
+            bangun chatbot AI dalam <strong className="text-foreground">30 menit tanpa coding</strong>. Sudah dipakai ratusan kontraktor, konsultan, dan bisnis Indonesia.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
@@ -202,23 +176,23 @@ export default function Landing() {
             </Link>
           </div>
 
-          <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5" data-testid="text-hero-trust">
+          <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
             Mulai dari Rp 199.000/bulan · Tanpa kartu kredit · Setup &lt; 30 menit
           </p>
         </div>
       </section>
 
-      {/* Stats Bar */}
+      {/* ── Stats Bar ── */}
       <div className="border-y bg-muted/30 py-8 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
             { value: "971+", label: "Agent AI Spesialis" },
             { value: "131", label: "Hub Orchestrator" },
             { value: "45", label: "Tipe Mini App" },
-            { value: "24/7", label: "Selalu Aktif" },
+            { value: "24/7", label: "AI Selalu Aktif" },
           ].map((s) => (
-            <div key={s.label} data-testid={`stat-${s.label.toLowerCase().replace(/\s+/g, "-")}`}>
+            <div key={s.label}>
               <div className="text-3xl font-extrabold text-primary mb-1">{s.value}</div>
               <div className="text-sm text-muted-foreground">{s.label}</div>
             </div>
@@ -226,12 +200,152 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Untuk Siapa */}
+      {/* ── PROBLEM: Pain Points ── */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Masalah yang Anda Hadapi</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Apakah Ini Terasa Familiar?</h2>
+            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-sm">
+              Ribuan profesional dan bisnis di Indonesia menghadapi masalah ini setiap hari.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              { icon: Clock, problem: "Tim CS kewalahan menjawab pertanyaan yang sama berulang-ulang, jam kerja habis hanya untuk FAQ" },
+              { icon: AlertTriangle, problem: "Dokumen tender dikerjakan manual berhari-hari, padahal deadline mepet dan checklist puluhan item" },
+              { icon: TrendingUp, problem: "Leads masuk di luar jam kerja tapi tidak ada yang merespons — prospek pergi ke kompetitor" },
+              { icon: Users, problem: "Pengetahuan perusahaan tersebar di mana-mana, tim baru butuh berminggu-minggu untuk onboarding" },
+            ].map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div key={i} className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10 p-4">
+                  <div className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon className="w-5 h-5 text-red-500" />
+                  </div>
+                  <p className="text-sm text-foreground leading-relaxed">{item.problem}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── AGITATION: Consequences ── */}
+      <section className="py-12 px-4 bg-muted/20">
+        <div className="max-w-3xl mx-auto">
+          <div className="rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 p-6 md:p-8">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+              <p className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Sementara Itu...</p>
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold mb-3">
+              Kompetitor Anda Sudah Menggunakan AI untuk Pekerjaan Ini
+            </h3>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+              Kontraktor yang pakai AI Tender Assistant menyelesaikan analisis dokumen 3× lebih cepat dan win rate-nya naik 40%.
+              Bisnis dengan CS otomatis 24/7 tidak pernah kehilangan leads lagi. Tim yang punya Knowledge Base AI onboarding karyawan baru dalam 2 hari, bukan 2 minggu.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {[
+                { label: "3× lebih cepat", sub: "analisis dokumen tender" },
+                { label: "80%+ pertanyaan", sub: "dijawab otomatis tanpa CS manual" },
+                { label: "Win rate naik 40%", sub: "dengan SCORECARD AI" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex-1 bg-background rounded-lg p-3 text-center border border-border/50">
+                  <div className="font-bold text-primary text-sm">{stat.label}</div>
+                  <div className="text-xs text-muted-foreground">{stat.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SOLUTION: Intro ── */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Solusinya</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Kenalkan Gustafta — Platform AI Chatbot Builder</h2>
+            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-sm leading-relaxed">
+              Satu platform untuk membangun chatbot AI yang benar-benar memahami konteks bisnis Anda.
+              Bukan chatbot template kosong — tapi 971+ agent spesialis yang sudah dilatih khusus untuk konstruksi, tender, K3, SKK, marketing, dan lebih dari 20 domain lainnya.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {[
+              { icon: Brain, title: "Otak Proyek", desc: "Pusatkan semua data bisnis. AI jawab berdasarkan konteks nyata, bukan jawaban generik.", color: "text-amber-500", bg: "bg-amber-500/10" },
+              { icon: Globe, title: "Custom Domain", desc: "Pasang bot.perusahaan.com. Branding profesional, bukan link chatbot biasa.", color: "text-blue-500", bg: "bg-blue-500/10" },
+              { icon: BookOpen, title: "Knowledge Base 7 Tipe", desc: "PDF, URL, YouTube, video, audio — AI transkripsi dan RAG secara otomatis.", color: "text-violet-500", bg: "bg-violet-500/10" },
+              { icon: Plug, title: "Multi-Channel", desc: "WhatsApp, Telegram, web widget, REST API — satu chatbot, semua channel sekaligus.", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+              { icon: Zap, title: "Agentic AI + 131 Orchestrator", desc: "Routing otomatis ke specialist: Tender, K3, SKK/SBU, Hukum, Marketing, dan 20+ domain lain.", color: "text-orange-500", bg: "bg-orange-500/10" },
+              { icon: Shield, title: "Aman & Privat", desc: "Token per chatbot, mode publik/privat, enkripsi end-to-end, OAuth Replit Identity.", color: "text-slate-500", bg: "bg-slate-500/10" },
+            ].map((f) => {
+              const FIcon = f.icon;
+              return (
+                <div key={f.title} className={`rounded-xl border p-5 hover:shadow-md transition-shadow ${f.bg}`} data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center mb-3 shadow-sm border border-border/30">
+                    <FIcon className={`w-5 h-5 ${f.color}`} />
+                  </div>
+                  <h3 className="font-bold text-sm mb-1.5">{f.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── INTEREST: Cara Kerja ── */}
       <section className="py-16 px-4 bg-muted/20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Cara Kerja</p>
+            <h2 className="text-2xl md:text-3xl font-bold">Dari Daftar Sampai Chatbot Aktif: &lt; 30 Menit</h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+            {[
+              { n: "1", title: "Buat Hierarki Chatbot", desc: "Buat Series, Modul, dan Chatbot sesuai struktur bisnis Anda.", time: "±10 mnt", bullets: ["Buat Series sebagai payung ekosistem", "Tambah Modul & Chatbot spesialis", "Aktifkan Orchestrator routing (opsional)"] },
+              { n: "2", title: "Isi Knowledge Base", desc: "Upload sumber pengetahuan — PDF, URL, YouTube, video, atau audio.", time: "±10–15 mnt", bullets: ["Upload PDF/DOCX/Excel atau paste URL", "YouTube → transkripsi otomatis AI", "Video/audio → RAG background"] },
+              { n: "3", title: "Konfigurasi & Deploy", desc: "Atur persona, Otak Proyek, dan pasang custom domain opsional.", time: "±5–7 mnt", bullets: ["Isi Otak Proyek dengan data bisnis", "Atur persona & conversation starters", "Custom Domain: CNAME setup otomatis"] },
+              { n: "4", title: "Mulai Layani Pengguna", desc: "Hubungkan ke WhatsApp, embed web widget, atau share link langsung.", time: "±3–5 mnt", bullets: ["Connect WhatsApp / Telegram / Web", "Test 5 pertanyaan kunci via console", "Pantau analytics real-time"] },
+            ].map((s, i) => (
+              <div key={s.n} className="relative">
+                {i < 3 && (
+                  <div className="hidden md:block absolute top-5 left-full w-full h-px bg-gradient-to-r from-primary/30 to-transparent -translate-x-4 z-0" />
+                )}
+                <div className="relative bg-background rounded-xl border p-5 hover:shadow-md transition-shadow h-full">
+                  <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-base font-bold mx-auto mb-3">
+                    {s.n}
+                  </div>
+                  <div className="text-[10px] font-semibold text-primary text-center mb-1">{s.time}</div>
+                  <h3 className="font-bold text-sm mb-1.5 text-center">{s.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-3 text-center">{s.desc}</p>
+                  <ul className="space-y-1">
+                    {s.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+                        <Check className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" /> {b}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── DESIRE: Untuk Siapa (Persona Tabs) ── */}
+      <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Untuk Siapa?</p>
             <h2 className="text-2xl md:text-3xl font-bold">Satu Platform, Banyak Kegunaan</h2>
+            <p className="text-muted-foreground mt-2 text-sm">Pilih peran Anda dan lihat bagaimana Gustafta bekerja untuk Anda.</p>
           </div>
 
           <div className="flex justify-center gap-2 mb-6 flex-wrap">
@@ -256,7 +370,7 @@ export default function Landing() {
           </div>
 
           <div className={`rounded-2xl border-2 ${p.border} ${p.bg} p-6 md:p-8`}>
-            <div className="flex items-start gap-4 mb-4">
+            <div className="flex items-start gap-4 mb-6">
               <div className={`w-12 h-12 rounded-xl bg-background border ${p.border} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                 <PersonaIcon className={`w-6 h-6 ${p.color}`} />
               </div>
@@ -266,85 +380,66 @@ export default function Landing() {
                 <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 mt-4">
-              {p.bullets.map((b) => (
-                <div key={b} className="flex items-center gap-2 bg-background/70 rounded-lg px-3 py-2 text-xs font-medium flex-1 border border-border/50">
-                  <Check className={`w-4 h-4 flex-shrink-0 ${p.color}`} />
-                  {b}
-                </div>
-              ))}
+            <div className="grid sm:grid-cols-2 gap-3">
+              {p.useCases.map((uc) => {
+                const UCIcon = uc.icon;
+                return (
+                  <div key={uc.title} className="flex items-start gap-3 bg-background/70 rounded-xl p-3.5 border border-border/50">
+                    <div className={`w-8 h-8 rounded-lg bg-background border border-border/30 flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                      <UCIcon className={`w-4 h-4 ${p.color}`} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold mb-0.5">{uc.title}</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{uc.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-5 flex justify-end">
+              <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+                <button className={`flex items-center gap-2 text-sm font-semibold ${p.color} hover:underline`} data-testid={`button-persona-cta-${activePersona}`}>
+                  Mulai untuk {p.label} <ChevronRight className="w-4 h-4" />
+                </button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Fitur Utama */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Fitur Utama</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Semua yang Anda Butuhkan</h2>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-sm">
-              Platform lengkap dari Knowledge Base, multi-channel, AI orchestrator, hingga custom domain.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {features.map((f) => {
-              const FIcon = f.icon;
-              return (
-                <div key={f.title} className={`rounded-xl border p-5 hover:shadow-md transition-shadow ${f.bg}`} data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center mb-3 shadow-sm border border-border/30">
-                    <FIcon className={`w-5 h-5 ${f.color}`} />
-                  </div>
-                  <h3 className="font-bold text-sm mb-1.5">{f.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Cara Kerja */}
+      {/* ── DESIRE: Testimoni ── */}
       <section className="py-16 px-4 bg-muted/20">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Cara Kerja</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Siap dalam 30 Menit</h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
-            {steps.map((s, i) => (
-              <div key={s.n} className="relative">
-                {i < 3 && (
-                  <div className="hidden md:block absolute top-5 left-full w-full h-px bg-gradient-to-r from-primary/30 to-transparent -translate-x-4 z-0" />
-                )}
-                <div className="relative bg-background rounded-xl border p-5 text-center hover:shadow-md transition-shadow">
-                  <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-base font-bold mx-auto mb-3">
-                    {s.n}
-                  </div>
-                  <div className="text-[10px] font-semibold text-muted-foreground mb-1">{s.time}</div>
-                  <h3 className="font-bold text-sm mb-1.5">{s.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimoni */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
             <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Testimoni</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Dipercaya Ratusan Profesional</h2>
+            <h2 className="text-2xl md:text-3xl font-bold">Dipercaya Ratusan Profesional Indonesia</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5">
-            {testimonials.map((t) => (
-              <div key={t.name} className="rounded-xl border bg-muted/30 p-5" data-testid={`card-testimonial-${t.avatar.toLowerCase()}`}>
+            {[
+              {
+                name: "Budi Santoso",
+                role: "Direktur Teknik, PT Bangun Nusa Konstruksi",
+                avatar: "BS",
+                text: "TenderaClaw menghemat 2–3 hari kerja per tender. Checklist 30+ item langsung muncul, gap analysis akurat, draft dokumen tinggal edit. Win rate naik signifikan.",
+                tag: "Kontraktor BUJK",
+              },
+              {
+                name: "Retno Ayu",
+                role: "Kepala Divisi Sertifikasi, LSP Konstruksi",
+                avatar: "RA",
+                text: "Simulasi asesmen SKKNI via AI sangat membantu peserta kami. Peserta yang latihan pakai Gustafta kelulusannya jauh lebih konsisten dibanding batch sebelumnya.",
+                tag: "Sertifikasi LSP",
+              },
+              {
+                name: "Agus Prasetyo",
+                role: "CEO, PT Graha Mandiri Consultant",
+                avatar: "AP",
+                text: "SCORECARD Win Probability dari BrainClaw membantu kami milih tender yang layak. Win rate naik 40% dalam 3 bulan — return on investment-nya jelas dan terukur.",
+                tag: "Konsultan MK",
+              },
+            ].map((t) => (
+              <div key={t.name} className="rounded-xl border bg-background p-5 shadow-sm" data-testid={`card-testimonial-${t.avatar.toLowerCase()}`}>
                 <div className="flex items-center gap-0.5 mb-3">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -359,17 +454,29 @@ export default function Landing() {
                     <p className="text-xs font-bold truncate">{t.name}</p>
                     <p className="text-[10px] text-muted-foreground truncate">{t.role}</p>
                   </div>
-                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary flex-shrink-0">
-                    {t.tag}
-                  </span>
+                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary flex-shrink-0">{t.tag}</span>
                 </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Trust Badges */}
+          <div className="flex flex-wrap justify-center gap-4 mt-8">
+            {[
+              { icon: Lock, label: "Data Terenkripsi" },
+              { icon: RefreshCw, label: "99.9% Uptime" },
+              { icon: HeartHandshake, label: "Support 24/7" },
+              { icon: Award, label: "Multi-Sektor" },
+            ].map(({ icon: TIcon, label }) => (
+              <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-full border bg-background text-sm text-muted-foreground">
+                <TIcon className="w-4 h-4 text-primary" /> {label}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing CTA */}
+      {/* ── ACTION: Pricing CTA ── */}
       <section className="py-16 px-4 bg-gradient-to-br from-primary to-violet-600 text-white">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full mb-6">
@@ -377,14 +484,14 @@ export default function Landing() {
           </div>
           <h2 className="text-2xl md:text-4xl font-extrabold mb-3">Mulai dari Rp 199.000/bulan</h2>
           <p className="text-white/75 text-base md:text-lg mb-8 max-w-xl mx-auto">
-            Semua paket sudah termasuk Agentic AI, Orchestrator Multi-Agent, Knowledge Base 7 tipe, dan Multi-Channel. Tanpa biaya setup tambahan.
+            Semua paket sudah termasuk Agentic AI, 131 Orchestrator Multi-Agent, Knowledge Base 7 tipe, dan Multi-Channel. Tanpa biaya setup. Cancel kapan saja.
           </p>
 
           <div className="grid sm:grid-cols-3 gap-4 mb-8 text-left">
             {[
-              { plan: "Starter", price: "199rb", badge: null, features: ["3 chatbot", "Knowledge Base 7 tipe", "Multi-Channel", "API akses"] },
-              { plan: "Profesional", price: "499rb", badge: "TERPOPULER", features: ["20 chatbot", "Custom Domain", "Analytics lengkap", "Agentic AI"] },
-              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "971+ agent spesialis", "Priority support", "Semua fitur"] },
+              { plan: "Starter", price: "199rb", badge: null, features: ["3 chatbot", "Knowledge Base 7 tipe", "Multi-Channel (WA, TG, Web)", "REST API akses"] },
+              { plan: "Profesional", price: "499rb", badge: "TERPOPULER", features: ["20 chatbot", "Custom Domain", "Analytics & Reporting", "Agentic AI + Orchestrator"] },
+              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "971+ agent spesialis", "Priority support", "Semua fitur lengkap"] },
             ].map((plan) => (
               <div
                 key={plan.plan}
@@ -414,32 +521,44 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold gap-2 px-8" data-testid="button-pricing-cta-start">
-                <Rocket className="w-4 h-4" /> Mulai Sekarang
+                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
               </Button>
             </Link>
             <Link href="/packs" onClick={handlePricingClick}>
               <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 hover:text-white font-semibold px-8" data-testid="button-pricing-cta-plans">
-                Lihat Semua Paket →
+                Bandingkan Semua Paket →
               </Button>
             </Link>
           </div>
+
+          <p className="text-white/50 text-xs mt-4 flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Tanpa kartu kredit · Cancel kapan saja · Support via WhatsApp
+          </p>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ── FAQ ── */}
       <section className="py-16 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
             <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">FAQ</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Pertanyaan Umum</h2>
+            <h2 className="text-2xl md:text-3xl font-bold">Pertanyaan yang Sering Ditanya</h2>
           </div>
 
           <Accordion type="single" collapsible defaultValue="item-0" className="space-y-2">
-            {faqs.map((item, i) => (
+            {[
+              { q: "Apakah perlu keahlian coding untuk mulai?", a: "Tidak sama sekali. Semua konfigurasi dilakukan lewat antarmuka visual — Knowledge Base, persona AI, Custom Domain, Tender Wizard — tanpa menulis satu baris kode pun. Rata-rata user mulai aktif dalam 30 menit setelah daftar." },
+              { q: "Channel apa saja yang didukung?", a: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget (iframe & floating button), Custom Domain (bot.perusahaan.com), dan REST API untuk integrasi custom. Semua bisa diaktifkan dari satu dashboard tanpa biaya tambahan." },
+              { q: "Apa itu 971+ agent AI spesialis?", a: "Gustafta memiliki ratusan agent AI yang sudah dikonfigurasi dan dilatih untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, ISO, hukum perdata, marketing, HR, dan lebih banyak lagi. Tinggal aktifkan, tidak perlu training dari nol." },
+              { q: "Apa itu Orchestrator Multi-Agent?", a: "Orchestrator adalah sistem routing cerdas yang menganalisis setiap pesan user dan mengarahkannya ke specialist yang paling tepat secara otomatis. Misalnya: pertanyaan tender → Specialist Tender, pertanyaan SKK → Specialist Sertifikasi. Ada 131 hub orchestrator siap pakai, dan Anda bisa buat custom sendiri." },
+              { q: "Bagaimana keamanan data saya?", a: "Data terenkripsi, akses berbasis token per chatbot, mode publik/privat yang bisa dikontrol, dan autentikasi via OAuth Replit Identity. Anda punya kontrol penuh atas siapa yang bisa mengakses chatbot dan data Knowledge Base Anda." },
+              { q: "Bisa digunakan untuk bisnis di luar konstruksi?", a: "Ya. Meskipun Gustafta paling dalam untuk Jasa Konstruksi Indonesia, platform ini fleksibel untuk properti, energi, pendidikan, digital marketing, HR, legal, dan 12+ sektor lainnya. Knowledge Base, persona, dan Mini Apps bisa dikustomisasi sepenuhnya." },
+            ].map((item, i) => (
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className="border rounded-xl px-4 overflow-hidden"
+                className="border rounded-xl px-4 overflow-hidden bg-background"
                 data-testid={`faq-item-${i}`}
               >
                 <AccordionTrigger className="text-sm font-semibold text-left py-4 hover:no-underline">
@@ -454,8 +573,30 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-muted/30 border-t py-10 px-4">
+      {/* ── ACTION: Final CTA Banner ── */}
+      <section className="py-14 px-4 border-t bg-muted/20">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Siap Mulai? Setup &lt; 30 Menit.</h2>
+          <p className="text-muted-foreground mb-6 max-w-lg mx-auto text-sm leading-relaxed">
+            Bergabung dengan ratusan kontraktor, konsultan, dan bisnis Indonesia yang sudah menggunakan Gustafta. Mulai gratis, upgrade kapan pun Anda butuh.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href={isAuthenticated ? "/dashboard" : "/auth"} onClick={handleStartNowClick}>
+              <Button size="lg" className="gap-2 font-bold px-8" data-testid="button-final-cta-start">
+                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
+              </Button>
+            </Link>
+            <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("Final CTA")}>
+              <Button size="lg" variant="outline" className="gap-2 font-semibold px-8" data-testid="button-final-cta-wa">
+                <Smartphone className="w-4 h-4" /> Tanya via WhatsApp
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t py-10 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
@@ -466,16 +607,15 @@ export default function Landing() {
                 <span className="font-bold text-lg">Gustafta</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4 max-w-xs leading-relaxed">
-                Platform AI Chatbot Builder terdalam untuk Jasa Konstruksi Indonesia. 971+ agent spesialis, 131 hub orchestrator, siap pakai.
+                Platform AI Chatbot Builder terdalam untuk Jasa Konstruksi Indonesia. 971+ agent spesialis, 131 hub orchestrator, siap pakai tanpa coding.
               </p>
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
                   <Smartphone className="w-4 h-4" /> Hubungi Kami:
                 </div>
                 <a
                   href="https://wa.me/6281287941900"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
                   data-testid="link-footer-wa-1"
                   onClick={() => handleWAClick("Footer")}
@@ -485,8 +625,7 @@ export default function Landing() {
                 </a>
                 <a
                   href="https://wa.me/6282299417818"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
                   data-testid="link-footer-wa-2"
                   onClick={() => handleWAClick("Footer")}
@@ -508,7 +647,7 @@ export default function Landing() {
             </div>
 
             <div>
-              <p className="font-semibold text-sm mb-3">Produk</p>
+              <p className="font-semibold text-sm mb-3">Produk Unggulan</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/tendera-claw" className="hover:text-foreground transition-colors">TenderaClaw</Link></li>
                 <li><Link href="/sbu-claw" className="hover:text-foreground transition-colors">SBUClaw</Link></li>
@@ -519,12 +658,13 @@ export default function Landing() {
           </div>
 
           <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <p className="text-sm text-muted-foreground">© 2026 Gustafta. All rights reserved.</p>
               <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground bg-muted/40">
                 <CreditCard className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
                 <span className="font-semibold text-foreground/80">Scalev.id</span>
-                <span className="text-[10px] bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded font-medium">Aman</span>
+                <span className="ml-1 text-muted-foreground">— Pembayaran aman & terenkripsi</span>
+                <span className="text-[10px] bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded font-medium">SSL</span>
               </div>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
