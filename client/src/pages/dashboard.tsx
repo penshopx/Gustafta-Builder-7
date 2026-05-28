@@ -5,7 +5,7 @@ import {
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
-  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon
+  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon, Landmark
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1297,6 +1297,13 @@ export default function Dashboard() {
                       <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KeuanganClaw (BUJK)</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/pajak-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-pajak-claw">
+                      <Landmark className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PajakClaw (Advisor)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
                     </div>
                   </Link>
                   <Link href="/tendera-claw">
@@ -2731,6 +2738,12 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-emerald-600 dark:text-emerald-400">
                     <TrendingUp className="w-4 h-4" />
                     KeuanganClaw (BUJK)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/pajak-claw">
+                  <DropdownMenuItem className="gap-2 text-amber-600 dark:text-amber-400">
+                    <Landmark className="w-4 h-4" />
+                    PajakClaw (Advisor)
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/tendera-claw">
