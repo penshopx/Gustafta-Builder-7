@@ -44,7 +44,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Chatbot Templates & Gustafta Store**: Public marketplace with payment integration.
 - **Gustafta Apps Feature Access System**: Plan-gated. Tiers: `free`(0) `starter`(1) `profesional`(2) `bisnis`(3) `enterprise`(4). Source: `shared/feature-plans.ts`. Hook: `use-feature-access.ts`. Gate: `feature-gate.tsx`. Admin activates via `POST /api/subscriptions/activate/:id`.
 
-## MultiClaw Suite (42 halaman)
+## MultiClaw Suite (43 halaman)
 Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesional". SSE streaming, sub-agent panel dots, legend strip, 6 sample prompts.
 
 | Rute | Nama | Agen | Hub ID | Theme | Sub-agent IDs |
@@ -118,6 +118,7 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/haccp-claw` | HACCPClaw — HACCP, BPOM & Sertifikasi Halal Indonesia | 8 | 1254 | green | 1246–1253 |
 | `/lkpm-claw` | LKPMClaw — LKPM & Penanaman Modal BKPM Indonesia | 7 | 1262 | teal | 1255–1261 |
 | `/pub-lkut-claw` | PUB-LKUTClaw — Pengembangan Usaha Berkelanjutan & LKUT BUJK (Permen PUPR 7/2024) | 8 | 1281 | sky | 1273–1280 |
+| `/esimpan-claw` | ESIMPANClaw — Input Pengalaman BUJK & Tenaga Kerja Konstruksi di E-SIMPAN | 9 | 1458 | blue | 1450–1457·1475 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`
@@ -143,6 +144,7 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 - **KontrakClaw (1927)**: KT-FIDIC·PEMERINTAH·KLAIM·DISPUTE·SUBKON·ASURANSI·KOMERSIAL. FIDIC 1999/2017·Perpres 16/2018·UU Arbitrase 30/1999·BANI·SCL Protocol 2017.
 - **K3ManClaw (1935)**: K3M-SMKK·HAZID·PTW·CSMS·INSIDEN·KEBAKARAN·AUDIT. PP 50/2012·PermenPUPR 10/2021·ISO 45001:2018·NFPA 10/13/72·OSHA 1926.
 - **IBTUClaw (1953)**: TU-REGISTRAR·SENTINEL·IAA·PG·EXAM·COMMS·AUDIT. IBO DP/MYP/PYP/CP·IBIS·DAP·Academic Integrity Policy 2023·IBO Standards & Practices 2020.
+- **ESIMPANClaw (1458)**: AKUN·BUJK·TKK·IMPORT·DOKUMEN·DATA·SUBMIT·PANDUAN·EVALUASI. v1.1 — simpan.pu.go.id · PP 5/2021 · SE PUPR 21/2021 · Permen 8/2022 · Nota Dinas PA0106/B/Dk/2026/48. Sub-agents: 1450–1457·1475.
 - **EBTSolarClaw (1068)**: SOL-SIZING·PPA·PERIZINAN·EPC·GRID·OM·BESS·AGRIVOLT. Permen ESDM 2/2023·Permen ESDM 26/2021·Perpres 112/2022·SNI 8172:2017·IEC 61215/61730·IEEE 1547·IEC 62116·NFPA 855·PLN Grid Code. Route: `/ebt-solar-claw`.
 - **GeologiClaw (1077)**: GEO-REGIONAL·EKSPLORASI·GEOFISIKA·PEMBORAN·SUMBERDAYA·ALTERASI·GEOTEKNIK·HIDRO. JORC 2012·KCMI 2017·PERHAPI·AusIMM·UU 3/2020·PP 96/2021·Hoek-Brown·RMR Bieniawski·Q-system Barton·PP 22/2021. Route: `/geologi-claw`.
 - **OffshoreSafetyClaw (1086)**: OFF-SMK3·OPERASI·DRILLING·MARINE·PROSAFETY·LINGKUNGAN·INTEGRITY·REGULASI. UU 22/2001·SKK Migas PTK 006/036·Permen ESDM 18/2018·MARPOL 73/78·SOLAS·API RP 2A/2SIM·IEC 61511·IWCF/IADC·ISM Code·OSHA PSM·IMCA. Route: `/offshore-safety-claw`.

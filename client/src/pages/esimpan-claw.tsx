@@ -12,16 +12,17 @@ interface SubAgentStatus { agentId: number; role: string; status: "waiting"|"run
 interface Message { role: "user"|"assistant"; content: string; isStreaming?: boolean; subAgents?: SubAgentStatus[]; orchestrationMs?: number; }
 
 const ROLE_META: Record<string, { icon: string; label: string; color: string; desc: string }> = {
-  "AKUN":    { icon: "🔑", label: "AKUN",    color: "bg-blue-500/20 text-blue-300 border-blue-500/30",    desc: "Registrasi & Login" },
-  "BUJK":    { icon: "🏢", label: "BUJK",    color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30", desc: "Input SBU" },
-  "TKK":     { icon: "👷", label: "TKK",     color: "bg-sky-500/20 text-sky-300 border-sky-500/30",       desc: "Tenaga Kerja" },
-  "IMPORT":  { icon: "📥", label: "IMPORT",  color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",    desc: "Import SIKI" },
-  "DOKUMEN": { icon: "📄", label: "DOKUMEN", color: "bg-blue-600/20 text-blue-200 border-blue-600/30",    desc: "Upload Dokumen" },
-  "DATA":    { icon: "📊", label: "DATA",    color: "bg-indigo-600/20 text-indigo-200 border-indigo-600/30", desc: "KBLI 2020 & Kontrak" },
-  "SUBMIT":  { icon: "✅", label: "SUBMIT",  color: "bg-teal-500/20 text-teal-300 border-teal-500/30",    desc: "Aksi # Submit" },
-  "PANDUAN": { icon: "📚", label: "PANDUAN", color: "bg-slate-500/20 text-slate-300 border-slate-500/30", desc: "FAQ & Troubleshoot" },
+  "AKUN":     { icon: "🔑", label: "AKUN",     color: "bg-blue-500/20 text-blue-300 border-blue-500/30",     desc: "Registrasi & Login" },
+  "BUJK":     { icon: "🏢", label: "BUJK",     color: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30", desc: "Input SBU" },
+  "TKK":      { icon: "👷", label: "TKK",      color: "bg-sky-500/20 text-sky-300 border-sky-500/30",        desc: "Tenaga Kerja" },
+  "IMPORT":   { icon: "📥", label: "IMPORT",   color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",     desc: "Import SIKI" },
+  "DOKUMEN":  { icon: "📄", label: "DOKUMEN",  color: "bg-blue-600/20 text-blue-200 border-blue-600/30",     desc: "Upload Dokumen" },
+  "DATA":     { icon: "📊", label: "DATA",     color: "bg-indigo-600/20 text-indigo-200 border-indigo-600/30", desc: "KBLI 2020 & Kontrak" },
+  "SUBMIT":   { icon: "✅", label: "SUBMIT",   color: "bg-teal-500/20 text-teal-300 border-teal-500/30",     desc: "Aksi # Submit" },
+  "PANDUAN":  { icon: "📚", label: "PANDUAN",  color: "bg-slate-500/20 text-slate-300 border-slate-500/30",  desc: "FAQ & Troubleshoot" },
+  "EVALUASI": { icon: "🏆", label: "EVALUASI", color: "bg-amber-500/20 text-amber-300 border-amber-500/30",  desc: "Evaluasi Pengadaan" },
 };
-const AGENT_ROLES = ["AKUN","BUJK","TKK","IMPORT","DOKUMEN","DATA","SUBMIT","PANDUAN"];
+const AGENT_ROLES = ["AKUN","BUJK","TKK","IMPORT","DOKUMEN","DATA","SUBMIT","PANDUAN","EVALUASI"];
 
 function getRoleMeta(role: string) { return ROLE_META[role] ?? { icon: "🔧", label: role, color: "bg-white/10 text-white/60 border-white/20", desc: "Spesialis" }; }
 function statusDot(s: SubAgentStatus["status"]) {
@@ -65,19 +66,20 @@ const SAMPLE_PROMPTS = [
   { icon: "🏢", text: "Saya punya SBU konstruksi, bagaimana cara input pengalaman proyek di SIMPAN termasuk KBLI 2020?" },
   { icon: "👷", text: "Saya tenaga kerja tanpa SKK, bisa daftar SIMPAN? Data apa yang perlu disiapkan?" },
   { icon: "📥", text: "Bagaimana cara import pengalaman dari SIKI ke SIMPAN dan apa yang perlu dilengkapi setelah import?" },
-  { icon: "📊", text: "Nilai kontrak tidak bisa saya input di SIMPAN — apa yang salah dan bagaimana cara mengatasinya?" },
   { icon: "✅", text: "Pengalaman sudah terinput tapi belum di-submit — apa langkah Submit di kolom Aksi # dan aturannya?" },
+  { icon: "🏆", text: "Bagaimana cara mencantumkan Nomor Registrasi SIMPAN di SPSE saat ikut tender, dan bagaimana Pokja mengevaluasinya?" },
 ];
 
 const SPEC_CARDS = [
-  { role: "AKUN",    icon: "🔑", label: "Akun",    desc: "Registrasi & Login",  color: "border-blue-600/30 bg-blue-950/20" },
-  { role: "BUJK",    icon: "🏢", label: "BUJK",    desc: "Input SBU",           color: "border-indigo-600/30 bg-indigo-950/20" },
-  { role: "TKK",     icon: "👷", label: "TKK",     desc: "Tenaga Kerja",        color: "border-sky-600/30 bg-sky-950/20" },
-  { role: "IMPORT",  icon: "📥", label: "Import",  desc: "Import SIKI",         color: "border-cyan-600/30 bg-cyan-950/20" },
-  { role: "DOKUMEN", icon: "📄", label: "Dokumen", desc: "Upload PDF",          color: "border-blue-700/30 bg-blue-900/20" },
-  { role: "DATA",    icon: "📊", label: "Data",    desc: "KBLI 2020 & KSO",    color: "border-indigo-700/30 bg-indigo-900/20" },
-  { role: "SUBMIT",  icon: "✅", label: "Submit",  desc: "Aksi # Finalisasi",  color: "border-teal-600/30 bg-teal-950/20" },
-  { role: "PANDUAN", icon: "📚", label: "Panduan", desc: "FAQ & Troubleshoot",  color: "border-slate-600/30 bg-slate-900/20" },
+  { role: "AKUN",     icon: "🔑", label: "Akun",     desc: "Registrasi & Login",  color: "border-blue-600/30 bg-blue-950/20" },
+  { role: "BUJK",     icon: "🏢", label: "BUJK",     desc: "Input SBU",           color: "border-indigo-600/30 bg-indigo-950/20" },
+  { role: "TKK",      icon: "👷", label: "TKK",      desc: "Tenaga Kerja",        color: "border-sky-600/30 bg-sky-950/20" },
+  { role: "IMPORT",   icon: "📥", label: "Import",   desc: "Import SIKI",         color: "border-cyan-600/30 bg-cyan-950/20" },
+  { role: "DOKUMEN",  icon: "📄", label: "Dokumen",  desc: "Upload PDF",          color: "border-blue-700/30 bg-blue-900/20" },
+  { role: "DATA",     icon: "📊", label: "Data",     desc: "KBLI 2020 & KSO",    color: "border-indigo-700/30 bg-indigo-900/20" },
+  { role: "SUBMIT",   icon: "✅", label: "Submit",   desc: "Aksi # Finalisasi",  color: "border-teal-600/30 bg-teal-950/20" },
+  { role: "PANDUAN",  icon: "📚", label: "Panduan",  desc: "FAQ & Troubleshoot",  color: "border-slate-600/30 bg-slate-900/20" },
+  { role: "EVALUASI", icon: "🏆", label: "Evaluasi", desc: "Evaluasi Pengadaan",  color: "border-amber-600/30 bg-amber-950/20" },
 ];
 
 export default function EsimpanClawChat() {
@@ -159,10 +161,10 @@ export default function EsimpanClawChat() {
         <div className="w-9 h-9 rounded-full bg-blue-900/60 border border-blue-600/40 flex items-center justify-center text-lg">📋</div>
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-sm">ESIMPANClaw — Input Pengalaman BUJK & Tenaga Kerja Konstruksi</div>
-          <div className="text-xs text-white/40 flex items-center gap-1"><Zap className="h-2.5 w-2.5 text-blue-400"/><span>8 Spesialis: Akun · BUJK · TKK · Import SIKI · Dokumen · Data · Submit · Panduan</span></div>
+          <div className="text-xs text-white/40 flex items-center gap-1"><Zap className="h-2.5 w-2.5 text-blue-400"/><span>9 Spesialis: Akun · BUJK · TKK · Import SIKI · Dokumen · Data · Submit · Panduan · Evaluasi</span></div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs border-blue-600/40 text-blue-300 hidden sm:flex">ESIMPANClaw · 8 Spesialis</Badge>
+          <Badge variant="outline" className="text-xs border-blue-600/40 text-blue-300 hidden sm:flex">ESIMPANClaw · 9 Spesialis</Badge>
           {isLoading&&<Loader2 className="h-4 w-4 animate-spin text-white/40"/>}
           {ready&&<div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"/>}
         </div>
@@ -170,7 +172,7 @@ export default function EsimpanClawChat() {
 
       {/* Agent strip */}
       <div className="shrink-0 border-b border-white/5 px-3 py-2 flex items-center gap-1 overflow-x-auto bg-blue-950/30">
-        <span className="text-xs text-white/30 shrink-0 mr-1">8 Spesialis:</span>
+        <span className="text-xs text-white/30 shrink-0 mr-1">9 Spesialis:</span>
         {AGENT_ROLES.map(role=>{const m=getRoleMeta(role);return(
           <div key={role} className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded border shrink-0 ${m.color}`}>
             <span>{m.icon}</span><span className="font-mono font-bold text-[10px]">{m.label}</span>
@@ -186,11 +188,11 @@ export default function EsimpanClawChat() {
             <div>
               <div className="font-semibold text-xl mb-1 bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">ESIMPANClaw — Input Pengalaman di simpan.pu.go.id</div>
               <p className="text-sm text-white/50 max-w-2xl leading-relaxed">
-                Panduan lengkap E-SIMPAN untuk <strong className="text-white/70">BUJK (SBU holder)</strong> dan <strong className="text-white/70">Tenaga Kerja Konstruksi</strong> dengan <strong className="text-white/70">8 spesialis paralel</strong> — registrasi 3 jalur, input pengalaman BUJK & TKK, import SIKI, dokumen wajib, data teknis KBLI 2020, submit & finalisasi data.
+                Panduan lengkap E-SIMPAN untuk <strong className="text-white/70">BUJK (SBU holder)</strong> dan <strong className="text-white/70">Tenaga Kerja Konstruksi</strong> dengan <strong className="text-white/70">9 spesialis paralel</strong> — registrasi 3 jalur, input pengalaman BUJK & TKK, import SIKI, dokumen wajib, data teknis KBLI 2020, submit & finalisasi, hingga evaluasi pengadaan & Nomor Registrasi SPSE.
               </p>
               <div className="text-xs text-white/25 mt-2">simpan.pu.go.id · LPJK · PP 5/2021 · SE PUPR 21/2021 · Permen 8/2022</div>
             </div>
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 w-full max-w-3xl">
+            <div className="grid grid-cols-3 sm:grid-cols-9 gap-1.5 w-full max-w-3xl">
               {SPEC_CARDS.map(c=>(
                 <button key={c.role} onClick={()=>sendMessage(`Jelaskan keahlian spesialis ${c.label} dalam ESIMPANClaw — topik yang dicakup, panduan, dan contoh kasus input pengalaman di E-SIMPAN.`)} disabled={!ready||streaming} className={`flex flex-col items-center gap-1 px-2 py-2.5 rounded-lg border text-center transition-all hover:scale-105 disabled:opacity-40 cursor-pointer ${c.color}`} data-testid={`card-${c.role.toLowerCase()}`}>
                   <span className="text-lg">{c.icon}</span>
@@ -224,7 +226,7 @@ export default function EsimpanClawChat() {
             {streaming?<Loader2 className="h-4 w-4 animate-spin"/>:<Send className="h-4 w-4"/>}
           </Button>
         </div>
-        <div className="text-center mt-2 text-xs text-white/20">ESIMPANClaw · 8 Spesialis · simpan.pu.go.id · LPJK · PP 5/2021 · SE PUPR 21/2021</div>
+        <div className="text-center mt-2 text-xs text-white/20">ESIMPANClaw · 9 Spesialis · simpan.pu.go.id · LPJK · PP 5/2021 · SE PUPR 21/2021 · Nota Dinas PA0106/B/Dk/2026/48</div>
       </div>
     </div>
   );

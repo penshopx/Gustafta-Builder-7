@@ -13119,7 +13119,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
-  // GET /api/esimpan-claw/orchestrator — ESIMPANClaw 8-Agent Input Pengalaman BUJK & TKK
+  // GET /api/esimpan-claw/orchestrator — ESIMPANClaw 9-Agent Input Pengalaman BUJK & TKK (v1.1 + materi evaluasi pengadaan)
   app.get("/api/esimpan-claw/orchestrator", async (_req, res) => {
     try {
       const { agents: agentsTable } = await import("@shared/schema");
