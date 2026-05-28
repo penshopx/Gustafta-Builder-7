@@ -8,6 +8,8 @@
  */
 
 import { storage } from "./storage";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 function log(msg: string) { console.log(`${new Date().toLocaleTimeString()} [express] ${msg}`); }
 const LOG = "[Seed TerasLPJK1]";
@@ -468,6 +470,10 @@ export async function seedTerasLpjk1() {
   }
 
   log(`${LOG} Seeding 5 sub-agents + orchestrator (v1.0 — TERAS LPJK #1, 26 Mei 2026)...`);
+
+  // Reset sequence agar tidak konflik dengan explicit-ID inserts dari seed lain
+  await db.execute(sql`SELECT setval('agents_id_seq', COALESCE((SELECT MAX(id) FROM agents), 0), true)`);
+  log(`${LOG} Sequence reset ke MAX(id) = ${(await db.execute(sql`SELECT MAX(id) as m FROM agents`))[0]?.m ?? '?'}`);
 
   const subAgentIds: number[] = [];
 
