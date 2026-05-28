@@ -1376,6 +1376,13 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
                     </div>
                   </Link>
+                  <Link href="/pub-lkut-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-sky-700 dark:text-sky-400 hover:bg-sky-500/10 border border-sky-500/20 mb-1" data-testid="nav-shortcut-pub-lkut">
+                      <TrendingUp className="w-4 h-4 text-sky-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PUB-LKUTClaw (Kegiatan Usaha)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-sky-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/iso-claw-9001">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-iso-9001">
                       <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
@@ -2783,6 +2790,12 @@ export default function Dashboard() {
                   <DropdownMenuItem className="gap-2 text-teal-600 dark:text-teal-400">
                     <BarChart3 className="w-4 h-4" />
                     LKUTClaw (BUJK)
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/pub-lkut-claw">
+                  <DropdownMenuItem className="gap-2 text-sky-600 dark:text-sky-400">
+                    <TrendingUp className="w-4 h-4" />
+                    PUB-LKUTClaw (Kegiatan Usaha)
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/iso-claw-9001">
