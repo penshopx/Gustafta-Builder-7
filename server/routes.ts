@@ -12389,7 +12389,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("1368");
+      let agent = await storage.getAgentBySlug("ai-tutor-coordinator");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -12462,7 +12462,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("1404");
+      let agent = await storage.getAgentBySlug("sbuclaw-orchestrator");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -12821,7 +12821,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("1458");
+      let agent = await storage.getAgentBySlug("panduan-sbu");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -12830,7 +12830,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
-      if (!agent) return res.status(404).json({ error: "PanduanSBU agent belum ditemukan. Pastikan agen ID 1458 ada di database." });
+      if (!agent) return res.status(404).json({ error: "PanduanSBU agent belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -13086,7 +13086,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("1448");
+      let agent = await storage.getAgentBySlug("skema-claw-orchestrator");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -13095,7 +13095,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
-      if (!agent) return res.status(404).json({ error: "SkemaClaw Orchestrator belum ditemukan. Pastikan agen ID 1448 ada di database." });
+      if (!agent) return res.status(404).json({ error: "SkemaClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -13205,7 +13205,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("1281");
+      let agent = await storage.getAgentBySlug("konstra-claw-orchestrator");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)

@@ -3,3 +3,4 @@
 - [Audit endpoints must inspect prompt content](audit-prompt-content.md) — name+ID match is insufficient; chat persona lives in systemPrompt. Audit must keyword-check the prompt or silent corruption goes unseen.
 - [Seed early-return guards](seed-early-return-guards.md) — "skip if slug exists" lets stale-prompt agents persist forever; guard MUST check a unique prompt marker too.
 - [Seed anti-marker check](seed-anti-marker-check.md) — positive marker alone is insufficient; a merged prompt can keep the marker yet serve the wrong persona. Check anti-markers from neighboring seeds too.
+- [Production vs dev agent ID drift](prod-dev-id-drift.md) — prod DB IDs diverge from dev; all orchestrator routes MUST use slug lookup first, never hardcoded IDs. Sequence can lag behind explicit-ID inserts — add setval reset before bulk creates.
