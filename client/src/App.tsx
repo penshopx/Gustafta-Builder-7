@@ -110,6 +110,7 @@ import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
 import SkemaClawChat from "@/pages/skema-claw";
 import SimpkClawChat from "@/pages/simpk-claw";
+import EsimpanClawChat from "@/pages/esimpan-claw";
 import PanduanSBUChat from "@/pages/panduan-sbu";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
@@ -863,6 +864,15 @@ function Router() {
             highlights={["Panduan akun SIMPK — daftar, aktivasi, status Approval→Aktif","Klasifikasi SDPK — subvarian, varian, jenis peralatan konstruksi","Dokumen K3 — SLO, surat pernyataan, masa berlaku, foto alat","Troubleshooting lengkap — FAQ, kendala upload, status anggota"]}
             icon={<HardHat className="h-12 w-12 text-amber-400" />}
           ><SimpkClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/esimpan-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="ESIMPANClaw — Input Pengalaman BUJK & Tenaga Kerja Konstruksi"
+            description="8 spesialis paralel: registrasi akun (3 jalur: SKK via LSP, TK tanpa SKK, SIKI Client/SBU), input pengalaman BUJK, input pengalaman TKK, import dari SIKI/E-Monitoring/SPSE, dokumen wajib (kontrak/BAST/RAB/addendum/KSO), data teknis KBLI 2020 & nilai kontrak, submit & kolom Aksi # (edit/hapus/submit), FAQ & troubleshooting lengkap."
+            highlights={["Registrasi 3 jalur — SKK via LSP, TK tanpa SKK, SIKI Client (SKA/SBU)","Input BUJK — KBLI 2020, 9 tahun terakhir, konversi SE 21/2021","Import SIKI — pengalaman sebelum 2021 wajib dari referensi SIKI","Submit & Aksi # — data tidak bisa diedit setelah submit"]}
+            icon={<BookOpen className="h-12 w-12 text-blue-400" />}
+          ><EsimpanClawChat /></PremiumPageGuard>
         )} />
         <Route path="/panduan-sbu" component={() => (
           <PremiumPageGuard

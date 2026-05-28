@@ -165,6 +165,7 @@ import * as M_sbuClaw from "./seed-sbuclaw";
 import * as M_aiTutor from "./seed-ai-tutor";
 import * as M_skemaClaw from "./seed-skema-claw";
 import * as M_simpkClaw from "./seed-simpk-claw";
+import * as M_esimpanClaw from "./seed-esimpan-claw";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -254,6 +255,7 @@ const seedModuleRegistry: Record<string, any> = {
   "./seed-ai-tutor": M_aiTutor,
   "./seed-skema-claw": M_skemaClaw,
   "./seed-simpk-claw": M_simpkClaw,
+  "./seed-esimpan-claw": M_esimpanClaw,
 };
 
 // Push DB schema on startup in production (build time has no DB access)
@@ -1838,6 +1840,7 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
       try { await M_aiTutor.seedAiTutor(); } catch (err) { log("[Seed AI Tutor] Error: " + (err as Error).message); }
       try { await M_skemaClaw.seedSkemaClaw(); } catch (err) { log("[Seed SkemaClaw] Error: " + (err as Error).message); }
       try { await M_simpkClaw.seedSimpkClaw(); } catch (err) { log("[Seed SIMPKClaw] Error: " + (err as Error).message); }
+      try { await M_esimpanClaw.seedEsimpanClaw(); } catch (err) { log("[Seed ESIMPANClaw] Error: " + (err as Error).message); }
 
       startScheduler();
     },
