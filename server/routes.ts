@@ -13125,7 +13125,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
       const rows = await db.select().from(agentsTable)
-        .where(ilike(agentsTable.systemPrompt, "%ESIMPAN_CLAW_ORCHESTRATOR_v1.0%"))
+        .where(ilike(agentsTable.systemPrompt, "%ESIMPAN_CLAW_ORCHESTRATOR_v1.%"))
         .limit(1);
       if (!rows.length) return res.status(404).json({ error: "ESIMPANClaw Orchestrator belum ditemukan." });
       const agent = await storage.getAgent(String(rows[0].id));
