@@ -1636,6 +1636,13 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
                     </div>
                   </Link>
+                  <Link href="/simpk-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-simpk-claw">
+                      <HardHat className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SIMPKClaw (Peralatan)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/abu-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-slate-700 dark:text-slate-400 hover:bg-slate-500/10 border border-slate-500/20 mb-1" data-testid="nav-shortcut-abu-claw">
                       <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />

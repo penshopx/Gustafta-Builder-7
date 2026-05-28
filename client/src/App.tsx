@@ -109,6 +109,7 @@ import MigasClawChat from "@/pages/migas-claw";
 import DevPropertiClawChat from "@/pages/dev-properti-claw";
 import EstateCareClaw from "@/pages/estate-care-claw";
 import SkemaClawChat from "@/pages/skema-claw";
+import SimpkClawChat from "@/pages/simpk-claw";
 import PanduanSBUChat from "@/pages/panduan-sbu";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
@@ -853,6 +854,15 @@ function Router() {
             highlights={["Konversi 349.239 SBU — peta jalan KBLI 2020 ke KBLI 2025","4 Kriteria Penilaian Kumulatif — K1/K2/K3/Menengah/Besar","Alur sertifikasi LSBU 10 tahap — PKS, surveilans, QR Code SBU","Mode: Konsultasi · Audit · Simulasi · Ujian · Debat · Strategis"]}
             icon={<Scale className="h-12 w-12 text-blue-400" />}
           ><SkemaClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/simpk-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="SIMPKClaw — Registrasi Sumber Daya Peralatan Konstruksi"
+            description="8 spesialis bekerja paralel: akun & aktivasi SIMPK, klasifikasi jenis SDPK (subvarian/varian), data teknis peralatan (merk, model, nomor seri, kapasitas), lokasi & status Draft/Publish, dokumen kepemilikan (faktur/BPKB/surat pernyataan), persyaratan K3 (SLO, foto plat nama, foto alat), pengelolaan data (edit/hapus/profil), dan panduan lengkap & troubleshooting simpk.pu.go.id."
+            highlights={["Panduan akun SIMPK — daftar, aktivasi, status Approval→Aktif","Klasifikasi SDPK — subvarian, varian, jenis peralatan konstruksi","Dokumen K3 — SLO, surat pernyataan, masa berlaku, foto alat","Troubleshooting lengkap — FAQ, kendala upload, status anggota"]}
+            icon={<HardHat className="h-12 w-12 text-amber-400" />}
+          ><SimpkClawChat /></PremiumPageGuard>
         )} />
         <Route path="/panduan-sbu" component={() => (
           <PremiumPageGuard

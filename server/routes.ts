@@ -13102,6 +13102,23 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/simpk-claw/orchestrator — SIMPKClaw 8-Agent Registrasi SDPK di SIMPK
+  app.get("/api/simpk-claw/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+      const rows = await db.select().from(agentsTable)
+        .where(ilike(agentsTable.systemPrompt, "%SIMPK_CLAW_ORCHESTRATOR_v1.0%"))
+        .limit(1);
+      if (!rows.length) return res.status(404).json({ error: "SIMPKClaw Orchestrator belum ditemukan." });
+      const agent = await storage.getAgent(String(rows[0].id));
+      if (!agent) return res.status(404).json({ error: "SIMPKClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/migas-claw/orchestrator — MigasClaw 9-Agent Kompetensi & Perizinan Energi
   app.get("/api/migas-claw/orchestrator", async (_req, res) => {
     try {
