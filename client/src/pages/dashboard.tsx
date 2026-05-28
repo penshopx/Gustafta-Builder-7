@@ -1657,6 +1657,20 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
                     </div>
                   </Link>
+                  <Link href="/lkpm-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-lkpm-claw">
+                      <Landmark className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">LKPMClaw (Penanaman Modal)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/oss-claw">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-oss-claw">
+                      <Landmark className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">OSSClaw (NIB & Perizinan)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/abu-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-slate-700 dark:text-slate-400 hover:bg-slate-500/10 border border-slate-500/20 mb-1" data-testid="nav-shortcut-abu-claw">
                       <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
@@ -1672,10 +1686,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/panduan-askom">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-2" data-testid="nav-shortcut-panduan-askom">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-panduan-askom">
                       <BookOpen className="w-4 h-4 text-teal-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PanduanASKOM (Uji SKK)</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/teras-lpjk-1">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-teras-lpjk-1">
+                      <GraduationCap className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TerasLPJK#1 (SKK & LSP)</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
                     </div>
                   </Link>
                   {/* ── ETLO & Pendidikan ── */}

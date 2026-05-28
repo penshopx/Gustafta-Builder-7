@@ -44,7 +44,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Chatbot Templates & Gustafta Store**: Public marketplace with payment integration.
 - **Gustafta Apps Feature Access System**: Plan-gated. Tiers: `free`(0) `starter`(1) `profesional`(2) `bisnis`(3) `enterprise`(4). Source: `shared/feature-plans.ts`. Hook: `use-feature-access.ts`. Gate: `feature-gate.tsx`. Admin activates via `POST /api/subscriptions/activate/:id`.
 
-## MultiClaw Suite (43 halaman)
+## MultiClaw Suite (45 halaman)
 Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesional". SSE streaming, sub-agent panel dots, legend strip, 6 sample prompts.
 
 | Rute | Nama | Agen | Hub ID | Theme | Sub-agent IDs |
@@ -119,6 +119,8 @@ Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesi
 | `/lkpm-claw` | LKPMClaw — LKPM & Penanaman Modal BKPM Indonesia | 7 | 1262 | teal | 1255–1261 |
 | `/pub-lkut-claw` | PUB-LKUTClaw — Pengembangan Usaha Berkelanjutan & LKUT BUJK (Permen PUPR 7/2024) | 8 | 1281 | sky | 1273–1280 |
 | `/esimpan-claw` | ESIMPANClaw — Input Pengalaman BUJK & Tenaga Kerja Konstruksi di E-SIMPAN | 9 | 1458 | blue | 1450–1457·1475 |
+| `/oss-claw` | OSSClaw — AI Konsultan OSS-RBA, NIB & Perizinan Berusaha Indonesia | 8 | 1514 | emerald | 1506–1513 |
+| `/teras-lpjk-1` | TerasLPJK#1 — Sharing Knowledge Tata Kelola Sertifikasi Kompetensi Kerja Konstruksi | 5 | 1520 | indigo | 1515–1519 |
 
 ### Endpoint pattern
 `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`

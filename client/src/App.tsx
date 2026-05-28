@@ -111,6 +111,8 @@ import EstateCareClaw from "@/pages/estate-care-claw";
 import SkemaClawChat from "@/pages/skema-claw";
 import SimpkClawChat from "@/pages/simpk-claw";
 import EsimpanClawChat from "@/pages/esimpan-claw";
+import OssClawChat from "@/pages/oss-claw";
+import TerasLpjk1Chat from "@/pages/teras-lpjk1";
 import PanduanSBUChat from "@/pages/panduan-sbu";
 import EduCounselChat from "@/pages/edu-counsel-chat";
 import SkkCoachLanding from "@/pages/skk-coach-landing";
@@ -873,6 +875,24 @@ function Router() {
             highlights={["Registrasi 3 jalur — SKK via LSP, TK tanpa SKK, SIKI Client (SKA/SBU)","Input BUJK — KBLI 2020, 9 tahun terakhir, data periods A/B/C","Submit & Aksi # — Nomor Registrasi SIMPAN muncul setelah submit","Evaluasi Pengadaan — cara cantumkan No. Registrasi di SPSE & aturan Pokja"]}
             icon={<BookOpen className="h-12 w-12 text-blue-400" />}
           ><EsimpanClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/oss-claw" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="OSSClaw — AI Konsultan OSS-RBA, NIB & Perizinan Berusaha Indonesia"
+            description="8 spesialis paralel: pendaftaran NIB & akun OSS-RBA, pemilihan KBLI 2020, penentuan tingkat risiko (rendah/menengah/tinggi), izin usaha & sertifikat standar, perizinan sektoral K/L (PU/ESDM/KLHK), perubahan data NIB & KBLI, LKPM & pelaporan investasi, hingga FAQ & troubleshooting OSS."
+            highlights={["NIB & Akun OSS-RBA — daftar, jenis badan usaha, cek status","KBLI 2020 — pemilihan kode konstruksi, multi-KBLI, konversi","Tingkat Risiko RBA — 4 level, kewajiban izin, SBU untuk BUJK","LKPM — kewajiban, periode TW, cara lapor, sanksi"]}
+            icon={<Landmark className="h-12 w-12 text-emerald-400" />}
+          ><OssClawChat /></PremiumPageGuard>
+        )} />
+        <Route path="/teras-lpjk-1" component={() => (
+          <PremiumPageGuard
+            feature="advanced_ai_tools" requiredPlan="profesional"
+            title="TerasLPJK#1 — Sharing Knowledge Tata Kelola Sertifikasi SKK Konstruksi"
+            description="5 spesialis paralel (1 per materi TERAS LPJK #1, 26 Mei 2026): isu strategis nasional & peran LPJK, urgensi & kredibilitas SKK, alur permohonan SKK baru/freshgraduate/perpanjangan, pencatatan asosiasi & KTA, hingga registrasi LPPK & rekomendasi lisensi LSP bidang konstruksi."
+            highlights={["Isu Strategis — ICOR < 6, target PU, transformasi LPJK","Urgensi SKK — 3 pilar integritas, paradigma baru vs lama","Alur SKK — baru, freshgraduate (jenjang 7), perpanjangan + SKPK","LSP & LPPK — rekomendasi lisensi, registrasi LPPK, kewajiban akreditasi KAN"]}
+            icon={<GraduationCap className="h-12 w-12 text-indigo-400" />}
+          ><TerasLpjk1Chat /></PremiumPageGuard>
         )} />
         <Route path="/panduan-sbu" component={() => (
           <PremiumPageGuard

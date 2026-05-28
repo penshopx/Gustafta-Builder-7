@@ -13136,6 +13136,40 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     }
   });
 
+  // GET /api/oss-claw/orchestrator — OSSClaw 8-Agent OSS-RBA, NIB & Perizinan Berusaha Indonesia
+  app.get("/api/oss-claw/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+      const rows = await db.select().from(agentsTable)
+        .where(ilike(agentsTable.systemPrompt, "%OSS_CLAW_ORCHESTRATOR_v1.%"))
+        .limit(1);
+      if (!rows.length) return res.status(404).json({ error: "OSSClaw Orchestrator belum ditemukan." });
+      const agent = await storage.getAgent(String(rows[0].id));
+      if (!agent) return res.status(404).json({ error: "OSSClaw Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /api/teras-lpjk-1/orchestrator — TerasLPJK#1 5-Agent Sharing Knowledge Sertifikasi SKK
+  app.get("/api/teras-lpjk-1/orchestrator", async (_req, res) => {
+    try {
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+      const rows = await db.select().from(agentsTable)
+        .where(ilike(agentsTable.systemPrompt, "%TERAS_LPJK1_ORCHESTRATOR_v1.%"))
+        .limit(1);
+      if (!rows.length) return res.status(404).json({ error: "TerasLPJK#1 Orchestrator belum ditemukan." });
+      const agent = await storage.getAgent(String(rows[0].id));
+      if (!agent) return res.status(404).json({ error: "TerasLPJK#1 Orchestrator tidak ditemukan." });
+      res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /api/migas-claw/orchestrator — MigasClaw 9-Agent Kompetensi & Perizinan Energi
   app.get("/api/migas-claw/orchestrator", async (_req, res) => {
     try {
