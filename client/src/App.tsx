@@ -41,6 +41,7 @@ import StorePage from "@/pages/store";
 import StoreAccess from "@/pages/store-access";
 import TestTracker from "@/pages/test-tracker";
 import HubAudit from "@/pages/hub-audit";
+import AgentLanding from "@/pages/agent-landing";
 import ChaesaPage from "@/pages/chaesa";
 import PlatformSales from "@/pages/platform-sales";
 import EducationPage from "@/pages/education";
@@ -233,6 +234,7 @@ function Router() {
       <Route path="/store/access/:token" component={StoreAccess} />
       <Route path="/test-tracker" component={TestTracker} />
       <Route path="/hub-audit" component={HubAudit} />
+      <Route path="/landing/:agentId" component={AgentLanding} />
       <Route path="/chaesa" component={ChaesaPage} />
       <Route path="/platform" component={PlatformSales} />
       <Route path="/education" component={EducationPage} />

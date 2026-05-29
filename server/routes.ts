@@ -13520,15 +13520,19 @@ Return JSON format:
       if (!agent) {
         return res.status(404).json({ error: "Landing page not found" });
       }
+      const slug = (agent as any).slug || slugify(agent.name);
       res.json({
         id: agent.id,
+        slug,
         name: agent.name,
+        tagline: (agent as any).tagline || "",
         description: agent.description,
         avatar: agent.avatar,
+        category: agent.category || "",
         landingPageEnabled: agent.landingPageEnabled,
         landingHeroHeadline: agent.landingHeroHeadline,
         landingHeroSubheadline: agent.landingHeroSubheadline,
-        landingHeroCtaText: agent.landingHeroCtaText,
+        landingHeroCtaText: agent.landingHeroCtaText || "Mulai Sekarang",
         landingPainPoints: agent.landingPainPoints,
         landingSolutionText: agent.landingSolutionText,
         landingBenefits: agent.landingBenefits,
@@ -13540,7 +13544,10 @@ Return JSON format:
         productFeatures: agent.productFeatures,
         conversionOffers: agent.conversionOffers,
         monthlyPrice: agent.monthlyPrice,
+        whatsappCta: (agent as any).whatsappCta || "",
+        calendlyUrl: (agent as any).calendlyUrl || "",
         metaPixelId: agent.metaPixelId || "",
+        chatUrl: `${getServerBaseUrl(req)}/chatbot/${slug}`,
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch landing page" });
