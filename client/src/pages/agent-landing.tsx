@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   CheckCircle2, MessageSquare, Phone, Calendar, Star, ChevronDown, ChevronUp,
-  Zap, Shield, Award, ArrowRight, Bot, Sparkles, AlertCircle
+  Zap, Shield, Award, ArrowRight, Bot, Sparkles, AlertCircle, UserPlus,
+  CreditCard, Rocket, Lock, BadgeCheck
 } from "lucide-react";
 
 interface LandingData {
@@ -341,42 +342,169 @@ export default function AgentLanding() {
         </section>
       )}
 
-      {/* ── OFFERS / PRICING ─────────────────────────── */}
-      {(offers.length > 0 || price) && (
-        <section className="py-16 bg-indigo-700 text-white">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-2">Pilihan Paket</h2>
-              {price && <p className="text-indigo-200">Mulai dari <span className="text-white font-bold text-2xl">{price}</span>/bulan</p>}
+      {/* ── CARA BERLANGGANAN ────────────────────────── */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-1.5 text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full text-xs font-medium mb-3">
+              <Rocket className="w-3.5 h-3.5" />
+              Cara Memulai
             </div>
-            {offers.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {offers.map((o, i) => {
-                  const title = typeof o === "string" ? o : o.title;
-                  const desc = typeof o === "string" ? "" : o.description;
-                  const value = typeof o === "string" ? "" : o.value;
-                  return (
-                    <div key={i} className="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-5">
-                      <h3 className="font-semibold text-lg mb-1">{title}</h3>
-                      {value && <div className="text-2xl font-bold text-indigo-200 mb-2">{value}</div>}
-                      {desc && <p className="text-white/70 text-sm">{desc}</p>}
-                    </div>
-                  );
-                })}
+            <h2 className="text-3xl font-bold text-gray-800">3 Langkah Mudah untuk Memulai</h2>
+            <p className="text-gray-500 mt-2">Dari daftar hingga langsung chat dengan AI — hanya dalam beberapa menit</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { icon: UserPlus, step: "1", title: "Daftar Akun Gratis", desc: "Buat akun Gustafta Anda dalam 30 detik. Tidak perlu kartu kredit untuk mulai.", color: "bg-indigo-600" },
+              { icon: CreditCard, step: "2", title: "Pilih & Aktifkan Paket", desc: "Pilih paket yang sesuai kebutuhan Anda. Pembayaran mudah via transfer atau dompet digital.", color: "bg-violet-600" },
+              { icon: Rocket, step: "3", title: "Langsung Gunakan AI", desc: "Akses penuh ke chatbot AI ini beserta semua fitur premium. Langsung produktif hari ini.", color: "bg-emerald-600" },
+            ].map(({ icon: Icon, step, title, desc, color }) => (
+              <div key={step} className="relative flex flex-col items-center text-center">
+                <div className={`w-14 h-14 rounded-2xl ${color} flex items-center justify-center mb-4 shadow-lg`}>
+                  <Icon className="w-7 h-7 text-white" />
+                </div>
+                <div className="absolute -top-2 -right-2 md:right-auto md:-right-2 w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">
+                  {step}
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-2">{title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
               </div>
-            ) : null}
-            <div className="text-center mt-8">
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRICING / UPGRADE MEMBER ─────────────────── */}
+      <section className="py-16 bg-gradient-to-br from-gray-900 to-indigo-950 text-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-1.5 bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-xs font-medium mb-3">
+              <BadgeCheck className="w-3.5 h-3.5" />
+              Paket & Harga
+            </div>
+            <h2 className="text-3xl font-bold mb-2">Pilih Paket yang Tepat</h2>
+            <p className="text-white/60">Investasi terjangkau untuk efisiensi kerja yang nyata</p>
+          </div>
+
+          <div className={`grid gap-6 ${offers.length > 0 ? "md:grid-cols-" + Math.min(offers.length + 1, 3) : "md:grid-cols-2"} justify-center`}>
+            {/* Free Trial Card */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col">
+              <div className="mb-4">
+                <div className="text-xs font-medium text-white/50 uppercase tracking-wide mb-1">Coba Dulu</div>
+                <div className="text-2xl font-bold">Gratis</div>
+                <div className="text-white/50 text-sm mt-1">Akses demo terbatas</div>
+              </div>
+              <ul className="space-y-2 mb-6 flex-1">
+                {["Coba chat langsung", "Lihat contoh respons AI", "Tidak perlu kartu kredit"].map((f, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
               <button
                 onClick={handleCta}
-                className="inline-flex items-center gap-2 bg-white text-indigo-700 font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
-                data-testid="btn-offers-cta"
+                className="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 rounded-xl transition-colors text-sm"
+                data-testid="btn-try-free"
               >
-                {ctaText} <ArrowRight className="w-4 h-4" />
+                Coba Sekarang
               </button>
             </div>
+
+            {/* Main Paid Plan */}
+            <div className="bg-indigo-600 border-2 border-indigo-400 rounded-2xl p-6 flex flex-col relative overflow-hidden shadow-2xl shadow-indigo-900/50">
+              <div className="absolute top-4 right-4">
+                <span className="bg-amber-400 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">POPULER</span>
+              </div>
+              <div className="mb-4">
+                <div className="text-xs font-medium text-indigo-200 uppercase tracking-wide mb-1">Akses Penuh</div>
+                <div className="flex items-end gap-1">
+                  <div className="text-3xl font-bold">{price || "Custom"}</div>
+                  {price && <div className="text-indigo-200 text-sm mb-1">/bulan</div>}
+                </div>
+                <div className="text-indigo-200 text-sm mt-1">Semua fitur tidak terbatas</div>
+              </div>
+              <ul className="space-y-2 mb-6 flex-1">
+                {[
+                  "Chat tidak terbatas 24/7",
+                  "Semua fitur premium aktif",
+                  "Prioritas respons AI",
+                  "Update konten reguler",
+                  ...(guarantees.length > 0 ? guarantees.slice(0, 2) : ["Dukungan teknis"]),
+                ].map((f, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-white">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => window.open(`${window.location.origin}/register`, "_blank")}
+                className="w-full bg-white text-indigo-700 font-bold py-3 rounded-xl hover:bg-indigo-50 transition-colors text-sm shadow-lg"
+                data-testid="btn-upgrade-member"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Daftar & Aktifkan Akses
+                </span>
+              </button>
+              {data.whatsappCta && (
+                <button
+                  onClick={handleWhatsapp}
+                  className="w-full mt-2 text-indigo-200 hover:text-white text-xs py-2 transition-colors"
+                  data-testid="btn-pricing-wa"
+                >
+                  Tanya via WhatsApp dulu →
+                </button>
+              )}
+            </div>
+
+            {/* Custom/Enterprise if offers exist */}
+            {offers.length > 0 && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col">
+                <div className="mb-4">
+                  <div className="text-xs font-medium text-white/50 uppercase tracking-wide mb-1">Enterprise</div>
+                  <div className="text-2xl font-bold">Custom</div>
+                  <div className="text-white/50 text-sm mt-1">Untuk tim & organisasi</div>
+                </div>
+                <ul className="space-y-2 mb-6 flex-1">
+                  {offers.slice(0, 3).map((o: any, i: number) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-white/70">
+                      <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                      {typeof o === "string" ? o : o.title}
+                    </li>
+                  ))}
+                  <li className="flex items-center gap-2 text-sm text-white/70">
+                    <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                    SLA & dedicated support
+                  </li>
+                </ul>
+                <button
+                  onClick={data.whatsappCta ? handleWhatsapp : handleCta}
+                  className="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 rounded-xl transition-colors text-sm"
+                  data-testid="btn-enterprise-contact"
+                >
+                  Hubungi Kami
+                </button>
+              </div>
+            )}
           </div>
-        </section>
-      )}
+
+          {/* Trust badges */}
+          <div className="flex flex-wrap justify-center gap-6 mt-10 pt-8 border-t border-white/10">
+            {[
+              { icon: Lock, text: "Pembayaran Aman" },
+              { icon: Shield, text: "Data Terproteksi" },
+              { icon: BadgeCheck, text: "Bergaransi" },
+            ].map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-2 text-white/50 text-xs">
+                <Icon className="w-4 h-4" />
+                {text}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────── */}
       {testimonials.length > 0 && (
