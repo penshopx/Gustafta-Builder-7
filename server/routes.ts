@@ -13547,7 +13547,7 @@ Return JSON format:
         whatsappCta: (agent as any).whatsappCta || "",
         calendlyUrl: (agent as any).calendlyUrl || "",
         metaPixelId: agent.metaPixelId || "",
-        chatUrl: `${getServerBaseUrl(req)}/chatbot/${slug}`,
+        chatUrl: `${getServerBaseUrl(req)}/chat/${slug}`,
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch landing page" });
