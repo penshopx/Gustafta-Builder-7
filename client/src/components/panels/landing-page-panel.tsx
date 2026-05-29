@@ -107,7 +107,7 @@ export function LandingPagePanel({ agent }: { agent: any }) {
     mutationFn: () =>
       apiRequest("POST", `/api/agents/${agent.id}/landing-page/generate`, {
         style: lpStyle, colorScheme: lpColor,
-      }).then((r) => r.json()),
+      }),
     onSuccess: (data: any) => {
       setGeneratedHtml(data.html || "");
       setPreviewMode("preview");
@@ -118,7 +118,7 @@ export function LandingPagePanel({ agent }: { agent: any }) {
 
   const generateKitMutation = useMutation({
     mutationFn: () =>
-      apiRequest("POST", `/api/agents/${agent.id}/marketing-kit/generate`, {}).then((r) => r.json()),
+      apiRequest("POST", `/api/agents/${agent.id}/marketing-kit/generate`, {}),
     onSuccess: (data: any) => {
       setKitData(data.kit || null);
       toast({ title: "Marketing Kit siap!", description: "Semua konten marketing sudah terbuat." });
