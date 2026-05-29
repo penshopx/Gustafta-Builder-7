@@ -204,6 +204,8 @@ export default function Dashboard() {
   const [showArchived, setShowArchived] = useState(false);
   const [premiumGroupOpen, setPremiumGroupOpen] = useState(true);
   const [biasaGroupOpen, setBiasaGroupOpen] = useState(true);
+  const [shortcutBiasaOpen, setShortcutBiasaOpen] = useState(true);
+  const [shortcutPremiumOpen, setShortcutPremiumOpen] = useState(false);
   
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -1209,7 +1211,17 @@ export default function Dashboard() {
                     <span>Kembali ke Series</span>
                   </button>
                   {/* AI Chatbot Shortcuts */}
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 pt-1 pb-0.5">AI Chatbot</div>
+                  <button
+                    className="w-full flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors mb-1"
+                    onClick={() => setShortcutBiasaOpen(v => !v)}
+                    data-testid="toggle-shortcut-biasa-group"
+                  >
+                    {shortcutBiasaOpen ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
+                    <MessageSquare className="w-3 h-3 shrink-0" />
+                    <span className="flex-1 text-left">AI Chatbot Biasa</span>
+                  </button>
+                  {shortcutBiasaOpen && (
+                    <div className="mb-1 animate-group-open">
                   <Link href="/brain-project">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-brain-project">
                       <Brain className="w-4 h-4 text-amber-500 shrink-0" />
@@ -1252,6 +1264,19 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
                     </div>
                   </Link>
+                    </div>
+                  )}
+                  <button
+                    className="w-full flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 transition-colors mb-1"
+                    onClick={() => setShortcutPremiumOpen(v => !v)}
+                    data-testid="toggle-shortcut-premium-group"
+                  >
+                    {shortcutPremiumOpen ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
+                    <Crown className="w-3 h-3 shrink-0" />
+                    <span className="flex-1 text-left">AI Chatbot Premium</span>
+                  </button>
+                  {shortcutPremiumOpen && (
+                    <div className="mb-1 animate-group-open">
                   <Link href="/sbu-claw">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-2" data-testid="nav-shortcut-sbu-claw">
                       <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
@@ -1812,6 +1837,8 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
                     </div>
                   </Link>
+                    </div>
+                  )}
                   {orchestratorHub ? (
                     <div
                       className={cn(
