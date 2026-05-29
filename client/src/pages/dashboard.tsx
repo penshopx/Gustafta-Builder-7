@@ -2032,6 +2032,7 @@ export default function Dashboard() {
                   {/* === AI Chatbot Biasa === */}
                   {(() => {
                     const regularToolboxes = toolboxes.filter((tb: any) => !tb.hasOrchestrator);
+                    if (regularToolboxes.length === 0) return null;
                     return (
                       <>
                         <button
@@ -2046,9 +2047,7 @@ export default function Dashboard() {
                         </button>
                         {biasaGroupOpen && (
                           <div className="mb-2 animate-group-open">
-                            {regularToolboxes.length === 0 ? (
-                              <div className="py-2 text-sm text-muted-foreground text-center">Belum ada Chatbot</div>
-                            ) : (
+                            {(
                               regularToolboxes.map((tb: any) => (
                                 <div
                                   key={tb.id}
