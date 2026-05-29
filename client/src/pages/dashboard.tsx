@@ -202,6 +202,8 @@ export default function Dashboard() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importLoading, setImportLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [premiumGroupOpen, setPremiumGroupOpen] = useState(true);
+  const [biasaGroupOpen, setBiasaGroupOpen] = useState(true);
   
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -1931,103 +1933,137 @@ export default function Dashboard() {
                 <>
                   <button
                     onClick={() => navigateToLevel('bigIdeas')}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors mb-1"
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors mb-2"
                     data-testid="button-back-to-bigideas"
                   >
                     <ArrowLeft className="w-3 h-3" />
                     <span>Kembali ke Modul</span>
                   </button>
+
+                  {/* === AI Chatbot Premium === */}
                   {(() => {
                     const orchToolboxes = toolboxes.filter((tb: any) => tb.hasOrchestrator);
-                    return orchToolboxes.length > 0 ? (
+                    return (
                       <>
-                        {orchToolboxes.map((orchTb: any) => (
-                          <div
-                            key={orchTb.id}
-                            className={cn(
-                              "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors mb-1 border border-purple-500/30",
-                              "bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/15"
-                            )}
-                            onClick={() => handleToolboxDrillDown(orchTb)}
-                            data-testid={`nav-modul-orchestrator-${orchTb.id}`}
-                          >
-                            <Network className="w-4 h-4 text-purple-500 shrink-0" />
-                            <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
-                              <span className="whitespace-nowrap block">{orchTb.name}</span>
-                              <span className="text-[10px] text-purple-500/70 whitespace-nowrap">Orkestrator Modul</span>
-                            </div>
-                            <div className="flex items-center gap-0.5 shrink-0">
-                              <div className="invisible group-hover:visible flex items-center gap-0.5">
-                                <Button variant="ghost" size="icon" className="h-5 w-5"
-                                  onClick={(e) => { e.stopPropagation(); handleEditToolbox(orchTb); }}
-                                  data-testid={`button-edit-modul-orch-${orchTb.id}`}
+                        <button
+                          className="w-full flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 transition-colors mb-1"
+                          onClick={() => setPremiumGroupOpen(v => !v)}
+                          data-testid="toggle-premium-group"
+                        >
+                          {premiumGroupOpen ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
+                          <Crown className="w-3 h-3 shrink-0" />
+                          <span className="flex-1 text-left">AI Chatbot Premium</span>
+                          <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4 shrink-0">{orchToolboxes.length}</Badge>
+                        </button>
+                        {premiumGroupOpen && (
+                          <div className="mb-2 animate-group-open">
+                            {orchToolboxes.length === 0 ? (
+                              <button
+                                onClick={() => setModulOrchDialogOpen(true)}
+                                className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors mb-1 border border-dashed border-purple-500/30"
+                                data-testid="button-create-modul-orch"
+                              >
+                                <Network className="w-4 h-4" />
+                                <span>Buat Orkestrator Modul</span>
+                              </button>
+                            ) : (
+                              orchToolboxes.map((orchTb: any) => (
+                                <div
+                                  key={orchTb.id}
+                                  className={cn(
+                                    "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors mb-1 border border-purple-500/30",
+                                    "bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/15"
+                                  )}
+                                  onClick={() => handleToolboxDrillDown(orchTb)}
+                                  data-testid={`nav-modul-orchestrator-${orchTb.id}`}
                                 >
-                                  <Pencil className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                            </div>
+                                  <Network className="w-4 h-4 text-purple-500 shrink-0" />
+                                  <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
+                                    <span className="whitespace-nowrap block">{orchTb.name}</span>
+                                    <span className="text-[10px] text-purple-500/70 whitespace-nowrap">Multi-Agen</span>
+                                  </div>
+                                  <div className="flex items-center gap-0.5 shrink-0">
+                                    <div className="invisible group-hover:visible flex items-center gap-0.5">
+                                      <Button variant="ghost" size="icon" className="h-5 w-5"
+                                        onClick={(e) => { e.stopPropagation(); handleEditToolbox(orchTb); }}
+                                        data-testid={`button-edit-modul-orch-${orchTb.id}`}
+                                      >
+                                        <Pencil className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                                  </div>
+                                </div>
+                              ))
+                            )}
                           </div>
-                        ))}
-                        <div className="mb-1" />
+                        )}
                       </>
-                    ) : (
-                      <button
-                        onClick={() => setModulOrchDialogOpen(true)}
-                        className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-purple-500/70 hover:text-purple-600 hover:bg-purple-500/10 transition-colors mb-2 border border-dashed border-purple-500/30"
-                        data-testid="button-create-modul-orch"
-                      >
-                        <Network className="w-4 h-4" />
-                        <span>Buat Orkestrator Modul</span>
-                      </button>
                     );
                   })()}
-                  <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground px-2 py-1">Chatbot</div>
-                  {toolboxes.filter((tb: any) => !tb.hasOrchestrator).length === 0 ? (
-                    <div className="py-3 text-sm text-muted-foreground text-center">
-                      Belum ada Chatbot
-                    </div>
-                  ) : (
-                    toolboxes.filter((tb: any) => !tb.hasOrchestrator).map((tb: any) => (
-                      <div
-                        key={tb.id}
-                        className={cn(
-                          "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors",
-                          tb.isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                        )}
-                        onClick={() => handleToolboxDrillDown(tb)}
-                        data-testid={`nav-toolbox-${tb.id}`}
-                      >
-                        <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
-                        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide"><span className="whitespace-nowrap">{tb.name}</span></div>
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          <div className="invisible group-hover:visible flex items-center gap-0.5">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5"
-                              onClick={(e) => { e.stopPropagation(); handleEditToolbox(tb); }}
-                              data-testid={`button-edit-toolbox-${tb.id}`}
-                            >
-                              <Pencil className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5 text-destructive"
-                              onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(tb); }}
-                              data-testid={`button-delete-toolbox-${tb.id}`}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
+
+                  {/* === AI Chatbot Biasa === */}
+                  {(() => {
+                    const regularToolboxes = toolboxes.filter((tb: any) => !tb.hasOrchestrator);
+                    return (
+                      <>
+                        <button
+                          className="w-full flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors mb-1"
+                          onClick={() => setBiasaGroupOpen(v => !v)}
+                          data-testid="toggle-biasa-group"
+                        >
+                          {biasaGroupOpen ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
+                          <MessageSquare className="w-3 h-3 shrink-0" />
+                          <span className="flex-1 text-left">AI Chatbot Biasa</span>
+                          <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4 shrink-0">{regularToolboxes.length}</Badge>
+                        </button>
+                        {biasaGroupOpen && (
+                          <div className="mb-2 animate-group-open">
+                            {regularToolboxes.length === 0 ? (
+                              <div className="py-2 text-sm text-muted-foreground text-center">Belum ada Chatbot</div>
+                            ) : (
+                              regularToolboxes.map((tb: any) => (
+                                <div
+                                  key={tb.id}
+                                  className={cn(
+                                    "group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors mb-1",
+                                    tb.isActive
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                                  )}
+                                  onClick={() => handleToolboxDrillDown(tb)}
+                                  data-testid={`nav-toolbox-${tb.id}`}
+                                >
+                                  <Wrench className="w-4 h-4 text-blue-500 shrink-0" />
+                                  <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
+                                    <span className="whitespace-nowrap">{tb.name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-0.5 shrink-0">
+                                    <div className="invisible group-hover:visible flex items-center gap-0.5">
+                                      <Button variant="ghost" size="icon" className="h-5 w-5"
+                                        onClick={(e) => { e.stopPropagation(); handleEditToolbox(tb); }}
+                                        data-testid={`button-edit-toolbox-${tb.id}`}
+                                      >
+                                        <Pencil className="w-3 h-3" />
+                                      </Button>
+                                      <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive"
+                                        onClick={(e) => { e.stopPropagation(); setDeleteToolboxConfirm(tb); }}
+                                        data-testid={`button-delete-toolbox-${tb.id}`}
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                                  </div>
+                                </div>
+                              ))
+                            )}
                           </div>
-                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                        </div>
-                      </div>
-                    ))
-                  )}
+                        )}
+                      </>
+                    );
+                  })()}
+
                   <button
                     onClick={() => setToolboxDialogOpen(true)}
                     className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
@@ -2678,7 +2714,11 @@ export default function Dashboard() {
               <ChatConsolePanel key={currentAgent.id} agent={currentAgent} />
             </div>
           )}
-          {activeNav === "chat" ? (currentAgent ? null : renderPanel()) : renderPanel()}
+          {activeNav === "chat" ? (currentAgent ? null : renderPanel()) : (
+            <div key={`${currentAgent?.id ?? 'none'}-${activeNav}`} className="animate-panel-in">
+              {renderPanel()}
+            </div>
+          )}
         </div>
 
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-40">

@@ -295,3 +295,19 @@
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-panel-in {
+  animation: panel-in 0.18s ease-out;
+}
+
+@keyframes group-open {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-group-open {
+  animation: group-open 0.14s ease-out;
+}
