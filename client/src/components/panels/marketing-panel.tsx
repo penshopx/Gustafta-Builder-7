@@ -126,7 +126,7 @@ function AiToolCard({ tool, agent }: { tool: AiTool; agent: any }) {
       apiRequest("POST", `/api/agents/${agent.id}/marketing/generate`, {
         tool: tool.id,
         ...optValues,
-      }).then((r) => r.json()),
+      }),
     onSuccess: (data: any) => {
       setResult(data.content || "");
       setExpanded(true);
@@ -494,7 +494,7 @@ function StorytellingTab({ agent }: { agent: any }) {
       apiRequest("POST", `/api/agents/${agent.id}/storytelling/generate`, {
         product: activeProduct,
         framework: activeFramework,
-      }).then(r => r.json()),
+      }),
     onSuccess: (data: any) => {
       setStoryText(data.content || "");
       toast({ title: "Cerita berhasil dibuat!", description: "Simpan ke perpustakaan untuk digunakan kembali" });
@@ -959,7 +959,7 @@ function WaEmailTab({ agent }: { agent: any }) {
       apiRequest("POST", `/api/agents/${agent.id}/marketing/generate`, {
         tool: "email-sequence",
         tone: seqType,
-      }).then(r => r.json()),
+      }),
     onSuccess: (data: any) => {
       const raw: string = data.content || "";
       // Parse the raw output into steps
