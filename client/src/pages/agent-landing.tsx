@@ -439,7 +439,7 @@ export default function AgentLanding() {
                 ))}
               </ul>
               <button
-                onClick={() => window.open(`${window.location.origin}/register`, "_blank")}
+                onClick={() => window.open(`${window.location.origin}/login?mode=register`, "_blank")}
                 className="w-full bg-white text-indigo-700 font-bold py-3 rounded-xl hover:bg-indigo-50 transition-colors text-sm shadow-lg"
                 data-testid="btn-upgrade-member"
               >

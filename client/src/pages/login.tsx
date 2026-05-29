@@ -15,7 +15,8 @@ type Mode = "choose" | "login" | "register" | "verify";
 export default function LoginPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [mode, setMode] = useState<Mode>("login");
+  const initialMode: Mode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "register" ? "register" : "login";
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
