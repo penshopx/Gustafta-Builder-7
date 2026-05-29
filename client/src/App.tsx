@@ -40,6 +40,7 @@ import TemplatesPage from "@/pages/templates";
 import StorePage from "@/pages/store";
 import StoreAccess from "@/pages/store-access";
 import TestTracker from "@/pages/test-tracker";
+import HubAudit from "@/pages/hub-audit";
 import ChaesaPage from "@/pages/chaesa";
 import PlatformSales from "@/pages/platform-sales";
 import EducationPage from "@/pages/education";
@@ -231,6 +232,7 @@ function Router() {
       <Route path="/gustafta-store" component={StorePage} />
       <Route path="/store/access/:token" component={StoreAccess} />
       <Route path="/test-tracker" component={TestTracker} />
+      <Route path="/hub-audit" component={HubAudit} />
       <Route path="/chaesa" component={ChaesaPage} />
       <Route path="/platform" component={PlatformSales} />
       <Route path="/education" component={EducationPage} />

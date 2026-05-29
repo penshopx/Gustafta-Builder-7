@@ -17534,5 +17534,134 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
     });
   }
 
+  // ─── HUB AUDIT ────────────────────────────────────────────────────────────
+  // GET /api/admin/hub-audit — daftar Hub agents yang agenticSubAgents-nya kosong
+  app.get("/api/admin/hub-audit", isAuthenticated, async (_req: any, res: any) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT 
+          a.id as hub_id, a.name as hub_name, a.slug as hub_slug,
+          a.toolbox_id, t.name as toolbox_name, t.series_id, t.big_idea_id,
+          t.is_orchestrator as toolbox_is_orch,
+          LENGTH(COALESCE(a.system_prompt,'')) as prompt_len,
+          LEFT(COALESCE(a.system_prompt,''), 120) as prompt_preview,
+          COALESCE(a.agentic_sub_agents::text, '[]') as agentic_sub_agents_raw
+        FROM agents a
+        LEFT JOIN toolboxes t ON t.id = a.toolbox_id
+        WHERE a.is_orchestrator = true
+          AND (a.agentic_sub_agents IS NULL OR a.agentic_sub_agents::text = '[]' OR a.agentic_sub_agents::text = 'null')
+        ORDER BY a.id ASC
+      `);
+
+      // For each hub, find candidate sub-agents (agents in same series, excluding the hub itself)
+      const hubs = result.rows as any[];
+      const enriched = await Promise.all(hubs.map(async (hub: any) => {
+        if (!hub.series_id) return { ...hub, candidates: [] };
+        const candidates = await db.execute(sql`
+          SELECT a.id as agent_id, a.name as agent_name, a.is_orchestrator,
+                 t.name as toolbox_name, t.id as toolbox_id
+          FROM agents a
+          JOIN toolboxes t ON t.id = a.toolbox_id
+          WHERE t.series_id = ${hub.series_id}
+            AND a.id != ${hub.hub_id}
+          ORDER BY t.id ASC, a.id ASC
+        `);
+        return { ...hub, candidates: candidates.rows };
+      }));
+
+      res.json(enriched);
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // POST /api/admin/hub-audit/:id/auto-connect — isi agenticSubAgents dari sibling agents
+  app.post("/api/admin/hub-audit/:id/auto-connect", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const hubId = parseInt(req.params.id);
+      const { candidateIds } = req.body as { candidateIds: number[] };
+      if (!candidateIds?.length) return res.status(400).json({ error: "candidateIds wajib diisi" });
+
+      // Fetch the candidate agents
+      const candidatesResult = await db.execute(sql`
+        SELECT id, name FROM agents WHERE id = ANY(${candidateIds}::int[])
+      `);
+      const candidates = candidatesResult.rows as any[];
+
+      // Build agenticSubAgents JSON
+      const agenticSubAgents = candidates.map((c: any) => {
+        const role = c.name
+          .replace(/Hub|HUB/g, '')
+          .replace(/[^A-Za-z0-9 ]/g, '')
+          .trim()
+          .split(' ')
+          .map((w: string) => w.slice(0, 4).toUpperCase())
+          .join('-')
+          .slice(0, 20);
+        return { role, agentId: c.id, description: c.name };
+      });
+
+      await db.execute(sql`
+        UPDATE agents SET agentic_sub_agents = ${JSON.stringify(agenticSubAgents)}::jsonb
+        WHERE id = ${hubId}
+      `);
+
+      res.json({ ok: true, agenticSubAgents });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // POST /api/admin/hub-audit/:id/generate-prompt — AI-generate system prompt Hub
+  app.post("/api/admin/hub-audit/:id/generate-prompt", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const hubId = parseInt(req.params.id);
+      const { hubName, subAgentNames, existingPrompt } = req.body as {
+        hubName: string; subAgentNames: string[]; existingPrompt: string;
+      };
+
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const subList = subAgentNames.map((n: string, i: number) => `${i + 1}. ${n}`).join('\n');
+      const systemMsg = `Kamu adalah penulis system prompt untuk AI orchestrator Hub. 
+Tulis dalam Bahasa Indonesia yang formal dan profesional.
+Hub ini akan mengkoordinasi beberapa sub-agen spesialis.`;
+
+      const userMsg = `Nama Hub: ${hubName}
+Sub-agen yang dikoordinasi:
+${subList}
+
+${existingPrompt ? `Prompt yang sudah ada (perbaiki jika perlu):\n${existingPrompt.slice(0, 800)}\n` : ''}
+
+Tulis system prompt lengkap untuk Hub ini yang mencakup:
+1. Identitas dan peran Hub sebagai orkestrator
+2. Cara menentukan sub-agen mana yang paling relevan
+3. Format respons dan handover ke sub-agen
+4. Panduan fallback jika tidak ada sub-agen yang cocok
+Maksimal 600 kata.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemMsg },
+          { role: "user", content: userMsg }
+        ],
+        max_tokens: 1200,
+        temperature: 0.7
+      });
+
+      const generatedPrompt = completion.choices[0].message.content || '';
+      res.json({ ok: true, prompt: generatedPrompt });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // PATCH /api/admin/hub-audit/:id/save-prompt — simpan generated prompt ke DB
+  app.patch("/api/admin/hub-audit/:id/save-prompt", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const hubId = parseInt(req.params.id);
+      const { prompt } = req.body as { prompt: string };
+      if (!prompt) return res.status(400).json({ error: "prompt wajib diisi" });
+      await db.execute(sql`UPDATE agents SET system_prompt = ${prompt} WHERE id = ${hubId}`);
+      res.json({ ok: true });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   return httpServer;
 }
