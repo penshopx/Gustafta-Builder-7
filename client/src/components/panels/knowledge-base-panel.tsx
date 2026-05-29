@@ -2292,7 +2292,7 @@ export function KnowledgeBasePanel({ agent }: KnowledgeBasePanelProps) {
       ) : (
         <div className="space-y-3">
           {filteredItems.map((item) => {
-            const Icon = typeIcons[item.type];
+            const Icon = typeIcons[item.type] ?? FileText;
             return (
               <Card key={item.id} className="group">
                 <CardContent className="p-4">
