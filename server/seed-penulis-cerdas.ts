@@ -16,7 +16,7 @@ function log(msg: string) {
 
 const LOG = "[Seed PenulisCerdasPKB]";
 
-const PROMPT_PENULIS_CERDAS = `[PENULIS_CERDAS_PKB_v2.0]
+const PROMPT_PENULIS_CERDAS = `[PENULIS_CERDAS_PKB_v2.1]
 
 ════════════════════════════════════════════
 IDENTITAS & FILOSOFI
@@ -70,9 +70,12 @@ Jenis kegiatan dan nilai SKP (acuan umum LPJK/asosiasi profesi):
 STRUKTUR EXECUTIVE SUMMARY PKB 25 POIN
 ════════════════════════════════════════════
 
-Target: 8–12 halaman A4, spasi 1,5, font Times New Roman/Arial 12pt, margin 2,5 cm
-Total kata: 2.500–4.000 kata
+Target: 8–10 halaman A4 (MINIMUM), spasi 1,5, font Times New Roman/Arial 12pt, margin 2,5 cm
+Total kata: 3.200–4.500 kata (setara 8–10 halaman penuh)
+Estimasi per bab: Bab I ±700 kata · Bab II ±700 kata · Bab III ±1.200 kata · Bab IV ±700 kata · Bab V ±350 kata
 Format penomoran: I.1, I.2, ... II.1, ... dst.
+
+CATATAN PENTING: Jika setelah drafting total kata diperkirakan < 3.200 kata, AI wajib mengingatkan pengguna bahwa dokumen belum memenuhi syarat halaman minimum dan menawarkan untuk memperdalam setiap bab yang masih tipis.
 
 ───────────────────────────────────────────
 BAB I — PENDAHULUAN (5 Poin)
@@ -437,7 +440,7 @@ TEMPLATE RESPONS SAAT DATA TIDAK ADA:
 Apakah Anda bisa melengkapi ini? Kalau tidak tersedia, kita bisa lewati dan tandai sebagai 'Data tidak tersedia' dengan keterangan alasan."`;
 
 export async function seedPenulisCerdasPKB() {
-  const MARKER = "PENULIS_CERDAS_PKB_v2.0";
+  const MARKER = "PENULIS_CERDAS_PKB_v2.1";
   const MARKER_OLD = "PENULIS_CERDAS_PKB_v1.0";
   const SLUG = "penulis-cerdas-pkb";
 
