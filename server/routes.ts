@@ -18432,5 +18432,109 @@ PENTING: Kembalikan HANYA JSON valid, format:
     }
   });
 
+  // ─── CertTracker: Biro Jasa Client & Certificate Management ─────────────────
+  app.get("/api/cert-tracker/clients", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjClients } = await import("../shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      const result = await db.select().from(bjClients).where(eq(bjClients.userId, String(userId))).orderBy(desc(bjClients.createdAt));
+      res.json(result);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/cert-tracker/clients", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjClients } = await import("../shared/schema");
+      const [row] = await db.insert(bjClients).values({ ...req.body, userId: String(userId) }).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.put("/api/cert-tracker/clients/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjClients } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const { id, createdAt, updatedAt, ...body } = req.body;
+      const [row] = await db.update(bjClients)
+        .set({ ...body, updatedAt: new Date() })
+        .where(and(eq(bjClients.id, Number(req.params.id)), eq(bjClients.userId, String(userId))))
+        .returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.delete("/api/cert-tracker/clients/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjClients, bjCertificates } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const clientId = Number(req.params.id);
+      // delete associated certs first
+      await db.delete(bjCertificates).where(eq(bjCertificates.clientId, clientId));
+      await db.delete(bjClients).where(and(eq(bjClients.id, clientId), eq(bjClients.userId, String(userId))));
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get("/api/cert-tracker/certificates", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjClients, bjCertificates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      // Join via clientId → userId scope
+      const clients = await db.select({ id: bjClients.id }).from(bjClients).where(eq(bjClients.userId, String(userId)));
+      if (!clients.length) return res.json([]);
+      const clientIds = clients.map(c => c.id);
+      const { inArray } = await import("drizzle-orm");
+      const certs = await db.select().from(bjCertificates).where(inArray(bjCertificates.clientId, clientIds));
+      res.json(certs);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/cert-tracker/certificates", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { bjCertificates } = await import("../shared/schema");
+      const { id, createdAt, updatedAt, ...body } = req.body;
+      const [row] = await db.insert(bjCertificates).values(body).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.put("/api/cert-tracker/certificates/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { bjCertificates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const { id, createdAt, updatedAt, ...body } = req.body;
+      const [row] = await db.update(bjCertificates)
+        .set({ ...body, updatedAt: new Date() })
+        .where(eq(bjCertificates.id, Number(req.params.id)))
+        .returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.delete("/api/cert-tracker/certificates/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { bjCertificates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      await db.delete(bjCertificates).where(eq(bjCertificates.id, Number(req.params.id)));
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   return httpServer;
 }

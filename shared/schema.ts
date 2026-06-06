@@ -2049,3 +2049,41 @@ export const materialPrices = pgTable("material_prices", {
 export const insertMaterialPriceSchema = createInsertSchema(materialPrices).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertMaterialPrice = z.infer<typeof insertMaterialPriceSchema>;
 export type MaterialPrice = typeof materialPrices.$inferSelect;
+
+// ─── CertTracker: Biro Jasa Client & Certificate Management ──────────────────
+
+export const bjClients = pgTable("bj_clients", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  companyName: text("company_name").notNull(),
+  picName: text("pic_name").default(""),
+  phone: text("phone").default(""),
+  email: text("email").default(""),
+  address: text("address").default(""),
+  notes: text("notes").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const bjCertificates = pgTable("bj_certificates", {
+  id: serial("id").primaryKey(),
+  clientId: integer("client_id").notNull(),
+  certType: text("cert_type").notNull(),
+  subType: text("sub_type").default(""),
+  certNumber: text("cert_number").default(""),
+  issuer: text("issuer").default(""),
+  issuedDate: text("issued_date").default(""),
+  expiryDate: text("expiry_date").notNull(),
+  holderName: text("holder_name").default(""),
+  notes: text("notes").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBjClientSchema = createInsertSchema(bjClients).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertBjClient = z.infer<typeof insertBjClientSchema>;
+export type BjClient = typeof bjClients.$inferSelect;
+
+export const insertBjCertificateSchema = createInsertSchema(bjCertificates).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertBjCertificate = z.infer<typeof insertBjCertificateSchema>;
+export type BjCertificate = typeof bjCertificates.$inferSelect;
