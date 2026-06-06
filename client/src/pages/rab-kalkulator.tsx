@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calculator, Download, Loader2, RefreshCw, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Calculator, Download, FileText, Loader2, RefreshCw, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 
 interface RabItem {
@@ -34,6 +34,119 @@ const CONTOH_CATATAN = [
 
 function formatRupiah(val: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
+}
+
+async function downloadPDF(result: RabResult) {
+  const { default: jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 14;
+  let y = margin;
+
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("RENCANA ANGGARAN BIAYA (RAB)", margin, y);
+  y += 7;
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  doc.text(result.proyek_estimasi, margin, y);
+  y += 5;
+  doc.text(result.catatan_analisis, margin, y);
+  y += 7;
+
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, y, pageW - margin, y);
+  y += 5;
+
+  const colWidths = [12, 80, 18, 18, 40, 42];
+  const headers = ["No", "Uraian Pekerjaan", "Satuan", "Volume", "Harga Satuan (Rp)", "Jumlah (Rp)"];
+  const colX = colWidths.reduce<number[]>((acc, w, i) => [...acc, (acc[i - 1] ?? margin) + (i === 0 ? 0 : colWidths[i - 1])], []);
+
+  doc.setFillColor(245, 158, 11);
+  doc.rect(margin, y, pageW - margin * 2, 7, "F");
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  headers.forEach((h, i) => doc.text(h, colX[i] + 2, y + 5));
+  y += 9;
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(40, 40, 40);
+  result.items.forEach((item, idx) => {
+    if (y > 175) { doc.addPage(); y = margin; }
+    if (idx % 2 === 0) { doc.setFillColor(250, 250, 250); doc.rect(margin, y - 1, pageW - margin * 2, 7, "F"); }
+    doc.text(String(item.no), colX[0] + 2, y + 4);
+    doc.text(doc.splitTextToSize(item.uraian, colWidths[1] - 3)[0], colX[1] + 2, y + 4);
+    doc.text(item.satuan, colX[2] + 2, y + 4);
+    doc.text(item.volume.toLocaleString("id-ID"), colX[3] + 2, y + 4);
+    doc.text(new Intl.NumberFormat("id-ID").format(item.harga_satuan), colX[4] + 2, y + 4);
+    doc.text(new Intl.NumberFormat("id-ID").format(item.jumlah), colX[5] + 2, y + 4);
+    y += 7;
+  });
+
+  y += 3;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, y, pageW - margin, y);
+  y += 5;
+
+  const totals = [
+    ["Sub Total", result.total],
+    ["PPN 11%", result.ppn_10],
+  ];
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(80, 80, 80);
+  totals.forEach(([label, val]) => {
+    doc.text(String(label), pageW - margin - 80, y + 4);
+    doc.text(new Intl.NumberFormat("id-ID").format(Number(val)), pageW - margin - 2, y + 4, { align: "right" });
+    y += 7;
+  });
+
+  doc.setFillColor(245, 158, 11);
+  doc.rect(pageW - margin - 100, y - 1, 100, 9, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 0, 0);
+  doc.text("GRAND TOTAL", pageW - margin - 98, y + 5);
+  doc.text("Rp " + new Intl.NumberFormat("id-ID").format(result.grand_total), pageW - margin - 2, y + 5, { align: "right" });
+  y += 14;
+
+  if (result.asumsi.length > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(60, 100, 180);
+    doc.text("Asumsi Kalkulasi:", margin, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    result.asumsi.forEach(a => {
+      if (y > 185) { doc.addPage(); y = margin; }
+      doc.text("• " + a, margin + 2, y);
+      y += 5;
+    });
+    y += 3;
+  }
+
+  if (result.peringatan.length > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(180, 80, 40);
+    doc.text("Peringatan:", margin, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    result.peringatan.forEach(p => {
+      if (y > 185) { doc.addPage(); y = margin; }
+      doc.text("• " + p, margin + 2, y);
+      y += 5;
+    });
+  }
+
+  doc.setFontSize(7);
+  doc.setTextColor(160, 160, 160);
+  doc.text("Dihasilkan oleh Gustafta AI · Estimasi berdasarkan AHSP umum · Verifikasi dengan HSP daerah setempat", margin, doc.internal.pageSize.getHeight() - 8);
+
+  doc.save(`RAB_Estimasi_${Date.now()}.pdf`);
 }
 
 function downloadCSV(result: RabResult) {
@@ -201,15 +314,26 @@ export default function RabKalkulator() {
                     <h2 className="text-base font-semibold text-white">{result.proyek_estimasi}</h2>
                     <p className="text-xs text-white/40 mt-0.5">{result.catatan_analisis}</p>
                   </div>
-                  <Button
-                    onClick={() => downloadCSV(result)}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 border-white/15 text-white/70 hover:text-white shrink-0"
-                    data-testid="button-download-csv"
-                  >
-                    <Download className="h-3.5 w-3.5" /> CSV
-                  </Button>
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      onClick={() => downloadPDF(result)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 border-amber-500/30 text-amber-400 hover:text-amber-300 hover:border-amber-400/50"
+                      data-testid="button-download-pdf"
+                    >
+                      <FileText className="h-3.5 w-3.5" /> PDF
+                    </Button>
+                    <Button
+                      onClick={() => downloadCSV(result)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 border-white/15 text-white/70 hover:text-white"
+                      data-testid="button-download-csv"
+                    >
+                      <Download className="h-3.5 w-3.5" /> CSV
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="border border-white/8 rounded-xl overflow-hidden">

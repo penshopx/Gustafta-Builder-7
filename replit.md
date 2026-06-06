@@ -26,8 +26,10 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Rakit Tim Agen (Trilogi)**: `client/src/pages/tutor-builder.tsx` (route `/tutor-builder`)
 - **Trilogi OpenClaw Chat**: `client/src/pages/trilogi-chat.tsx` (route `/trilogi-chat/:orchestratorId`)
 - **Test Tracker**: `client/src/pages/test-tracker.tsx` (route `/test-tracker`) — 6 tab: Tender + Federation + Pilot + KONSTRA + AI Tutor + SBUClaw
-- **RAB Kalkulator Otomatis**: `client/src/pages/rab-kalkulator.tsx` (route `/rab-kalkulator`) — GPT-4o JSON → tabel terstruktur + CSV export. Backend: `POST /api/tools/rab-kalkulator`.
+- **RAB Kalkulator Otomatis**: `client/src/pages/rab-kalkulator.tsx` (route `/rab-kalkulator`) — GPT-4o JSON → tabel terstruktur + CSV export + PDF export (jsPDF). Backend: `POST /api/tools/rab-kalkulator`.
 - **AI Vision K3 Inspector**: `client/src/pages/k3-vision.tsx` (route `/k3-vision`) — upload foto → GPT-4o Vision → laporan temuan K3 + skor kepatuhan. Backend: `POST /api/tools/k3-vision`.
+- **AI Tools Hub**: `client/src/pages/ai-tools-hub.tsx` (route `/ai-tools`) — directory semua AI tools standalone + penjelasan Model Router.
+- **Model Router**: `server/lib/model-router.ts` — utility `chooseModel(task)` + `callWithRouter()` untuk intelligent LLM routing: GPT-4o (orchestration/vision), DeepSeek (math/RAB), Gemini (large docs), Qwen (data extraction).
 
 ## Architecture decisions
 - **5-Level Modular Hierarchy**: Agents organized Master → Series HUB → Sub-HUB → Specialist → Deep Specialist.

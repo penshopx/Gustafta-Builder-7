@@ -1272,10 +1272,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/k3-vision">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-red-700 dark:text-red-400 hover:bg-red-500/10 border border-red-500/20 mb-2" data-testid="nav-shortcut-k3-vision">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-red-700 dark:text-red-400 hover:bg-red-500/10 border border-red-500/20 mb-1" data-testid="nav-shortcut-k3-vision">
                       <ShieldAlert className="w-4 h-4 text-red-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">AI Vision K3 Inspector</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-red-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/ai-tools">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-violet-700 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 mb-2" data-testid="nav-shortcut-ai-tools-hub">
+                      <Wrench className="w-4 h-4 text-violet-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">AI Tools Hub</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
                     </div>
                   </Link>
                     </div>

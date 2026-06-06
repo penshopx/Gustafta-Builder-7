@@ -162,6 +162,7 @@ import ProductTour from "@/pages/product-tour";
 import NotFound from "@/pages/not-found";
 import RabKalkulator from "@/pages/rab-kalkulator";
 import K3Vision from "@/pages/k3-vision";
+import AiToolsHub from "@/pages/ai-tools-hub";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
@@ -1106,6 +1107,7 @@ function Router() {
         <Route path="/product-tour" component={ProductTour} />
         <Route path="/rab-kalkulator" component={RabKalkulator} />
         <Route path="/k3-vision" component={K3Vision} />
+        <Route path="/ai-tools" component={AiToolsHub} />
       <Route component={NotFound} />
     </Switch>
   );
