@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
-  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target
+  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake
 } from "lucide-react";
 
 interface Tool {
@@ -71,6 +71,17 @@ const TOOLS: Tool[] = [
     badgeColor: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
     label: "TenderMate — Pipeline Tender",
     desc: "Track dan kelola pipeline tender klien biro jasa dari teridentifikasi → penawaran → menang. Hitung win rate dan total nilai kontrak.",
+    tag: "Biro Jasa",
+    model: "PostgreSQL",
+  },
+  {
+    href: "/client-hub",
+    icon: <Handshake className="h-6 w-6" />,
+    iconBg: "bg-violet-500/10",
+    iconColor: "text-violet-400",
+    badgeColor: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+    label: "ClientHub — Manajemen Klien Biro Jasa",
+    desc: "CRM mini untuk biro jasa: catat riwayat komunikasi, atur follow-up dengan deadline & prioritas, pantau status klien (Prospek/Aktif/Tidak Aktif).",
     tag: "Biro Jasa",
     model: "PostgreSQL",
   },

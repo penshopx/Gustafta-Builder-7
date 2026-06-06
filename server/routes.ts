@@ -18432,6 +18432,111 @@ PENTING: Kembalikan HANYA JSON valid, format:
     }
   });
 
+  // ─── ClientHub: Aktivitas & Follow-up per Klien Biro Jasa ────────────────────
+  app.get("/api/client-hub/activities", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjActivities } = await import("../shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      const result = await db.select().from(bjActivities)
+        .where(eq(bjActivities.userId, String(userId)))
+        .orderBy(desc(bjActivities.createdAt));
+      res.json(result);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/client-hub/activities", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjActivities } = await import("../shared/schema");
+      const { id, createdAt, ...body } = req.body;
+      const [row] = await db.insert(bjActivities).values({ ...body, userId: String(userId) }).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.put("/api/client-hub/activities/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjActivities } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const { id, createdAt, ...body } = req.body;
+      const [row] = await db.update(bjActivities).set(body)
+        .where(and(eq(bjActivities.id, Number(req.params.id)), eq(bjActivities.userId, String(userId))))
+        .returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.delete("/api/client-hub/activities/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjActivities } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      await db.delete(bjActivities)
+        .where(and(eq(bjActivities.id, Number(req.params.id)), eq(bjActivities.userId, String(userId))));
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get("/api/client-hub/followups", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjFollowups } = await import("../shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      const result = await db.select().from(bjFollowups)
+        .where(eq(bjFollowups.userId, String(userId)))
+        .orderBy(desc(bjFollowups.createdAt));
+      res.json(result);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/client-hub/followups", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjFollowups } = await import("../shared/schema");
+      const { id, createdAt, updatedAt, ...body } = req.body;
+      const [row] = await db.insert(bjFollowups).values({ ...body, userId: String(userId) }).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.put("/api/client-hub/followups/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjFollowups } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const { id, createdAt, updatedAt, ...body } = req.body;
+      const [row] = await db.update(bjFollowups).set({ ...body, updatedAt: new Date() })
+        .where(and(eq(bjFollowups.id, Number(req.params.id)), eq(bjFollowups.userId, String(userId))))
+        .returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.delete("/api/client-hub/followups/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjFollowups } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      await db.delete(bjFollowups)
+        .where(and(eq(bjFollowups.id, Number(req.params.id)), eq(bjFollowups.userId, String(userId))));
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   // ─── TenderMate: Pipeline Tender Biro Jasa ───────────────────────────────────
   app.get("/api/tender-mate/tenders", isAuthenticated, async (req: any, res: any) => {
     try {

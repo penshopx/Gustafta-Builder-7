@@ -1301,10 +1301,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/tender-mate">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-tender-mate">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-1" data-testid="nav-shortcut-tender-mate">
                       <Target className="w-4 h-4 text-indigo-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TenderMate — Pipeline Tender</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/client-hub">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-violet-700 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 mb-2" data-testid="nav-shortcut-client-hub">
+                      <Handshake className="w-4 h-4 text-violet-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ClientHub — Manajemen Klien</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
                     </div>
                   </Link>
                     </div>

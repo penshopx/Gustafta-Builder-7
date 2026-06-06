@@ -2061,6 +2061,8 @@ export const bjClients = pgTable("bj_clients", {
   email: text("email").default(""),
   address: text("address").default(""),
   notes: text("notes").default(""),
+  status: text("status").default("aktif"),
+  contractValue: text("contract_value").default(""),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -2113,3 +2115,35 @@ export const bjTenders = pgTable("bj_tenders", {
 export const insertBjTenderSchema = createInsertSchema(bjTenders).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertBjTender = z.infer<typeof insertBjTenderSchema>;
 export type BjTender = typeof bjTenders.$inferSelect;
+
+// ─── ClientHub: Aktivitas & Follow-up per Klien ───────────────────────────────
+
+export const bjActivities = pgTable("bj_activities", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  clientId: integer("client_id").notNull(),
+  type: text("type").default("catatan"),
+  date: text("date").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const bjFollowups = pgTable("bj_followups", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  clientId: integer("client_id").notNull(),
+  task: text("task").notNull(),
+  dueDate: text("due_date").default(""),
+  priority: text("priority").default("normal"),
+  isDone: boolean("is_done").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBjActivitySchema = createInsertSchema(bjActivities).omit({ id: true, createdAt: true });
+export type InsertBjActivity = z.infer<typeof insertBjActivitySchema>;
+export type BjActivity = typeof bjActivities.$inferSelect;
+
+export const insertBjFollowupSchema = createInsertSchema(bjFollowups).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertBjFollowup = z.infer<typeof insertBjFollowupSchema>;
+export type BjFollowup = typeof bjFollowups.$inferSelect;
