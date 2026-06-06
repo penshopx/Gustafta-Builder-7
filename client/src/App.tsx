@@ -168,6 +168,7 @@ import DocuGen from "@/pages/docu-gen";
 import TenderMate from "@/pages/tender-mate";
 import ClientHub from "@/pages/client-hub";
 import LaporanBJ from "@/pages/laporan-bj";
+import MlmAdmin from "@/pages/mlm-admin";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
@@ -1118,6 +1119,7 @@ function Router() {
         <Route path="/tender-mate" component={TenderMate} />
         <Route path="/client-hub" component={ClientHub} />
         <Route path="/laporan-bj" component={LaporanBJ} />
+        <Route path="/mlm-admin" component={MlmAdmin} />
       <Route component={NotFound} />
     </Switch>
   );

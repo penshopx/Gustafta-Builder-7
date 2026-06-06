@@ -11712,6 +11712,206 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
 
   // ==================== Affiliate Routes (Protected) ====================
 
+  // ─── MLM Commission Rate defaults seed ──────────────────────────────────────
+  (async () => {
+    try {
+      const { db } = await import("../db");
+      const { mlmCommissionRates } = await import("../shared/schema");
+      const { count } = await import("drizzle-orm");
+      const [{ value }] = await db.select({ value: count() }).from(mlmCommissionRates);
+      if (Number(value) === 0) {
+        await db.insert(mlmCommissionRates).values([
+          { mlmLevel: 1, commissionType: "license",   rate: 2 },
+          { mlmLevel: 2, commissionType: "license",   rate: 8 },
+          { mlmLevel: 3, commissionType: "license",   rate: 20 },
+          { mlmLevel: 1, commissionType: "recurring", rate: 2 },
+          { mlmLevel: 2, commissionType: "recurring", rate: 4 },
+          { mlmLevel: 3, commissionType: "recurring", rate: 4 },
+        ]);
+      }
+    } catch (_) {}
+  })();
+
+  // ─── MLM: Commission Rates config ────────────────────────────────────────────
+  app.get("/api/mlm/rates", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { mlmCommissionRates } = await import("../shared/schema");
+      const rows = await db.select().from(mlmCommissionRates);
+      res.json(rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.put("/api/mlm/rates/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { mlmCommissionRates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const [row] = await db.update(mlmCommissionRates)
+        .set({ rate: Number(req.body.rate), updatedAt: new Date() })
+        .where(eq(mlmCommissionRates.id, Number(req.params.id)))
+        .returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ─── MLM: Affiliates CRUD ─────────────────────────────────────────────────
+  app.get("/api/mlm/affiliates", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { affiliates } = await import("../shared/schema");
+      const { asc } = await import("drizzle-orm");
+      const rows = await db.select().from(affiliates).orderBy(asc(affiliates.mlmLevel), asc(affiliates.id));
+      res.json(rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/mlm/affiliates", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { affiliates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const { id, createdAt, ...body } = req.body;
+      // Validate parent level logic
+      if (body.parentId) {
+        const [parent] = await db.select().from(affiliates).where(eq(affiliates.id, Number(body.parentId)));
+        if (!parent) return res.status(400).json({ error: "Parent affiliate not found" });
+        if (Number(body.mlmLevel) !== parent.mlmLevel! + 1)
+          return res.status(400).json({ error: `Level harus ${parent.mlmLevel! + 1} (satu di bawah upline)` });
+      } else {
+        if (Number(body.mlmLevel) !== 1) return res.status(400).json({ error: "Tanpa upline hanya bisa Level 1 (Pusat)" });
+      }
+      // Unique code check
+      const [existing] = await db.select().from(affiliates).where(eq(affiliates.code, body.code));
+      if (existing) return res.status(400).json({ error: "Kode referral sudah dipakai" });
+      const [row] = await db.insert(affiliates).values(body).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.put("/api/mlm/affiliates/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { affiliates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const { id, createdAt, ...body } = req.body;
+      const [row] = await db.update(affiliates).set(body).where(eq(affiliates.id, Number(req.params.id))).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.delete("/api/mlm/affiliates/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { affiliates, mlmCommissions } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      await db.delete(affiliates).where(eq(affiliates.id, Number(req.params.id)));
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ─── MLM: Commission Ledger ────────────────────────────────────────────────
+  app.get("/api/mlm/commissions", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { mlmCommissions } = await import("../shared/schema");
+      const { desc } = await import("drizzle-orm");
+      const rows = await db.select().from(mlmCommissions).orderBy(desc(mlmCommissions.createdAt));
+      res.json(rows);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // POST: record a commission event (called on payment confirmation)
+  // Body: { affiliateCode, grossAmount, transactionType: "license"|"recurring", transactionRef, userId }
+  app.post("/api/mlm/commissions/record", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { affiliates, mlmCommissions, mlmCommissionRates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+
+      const { affiliateCode, grossAmount, transactionType, transactionRef, userId, notes } = req.body;
+      if (!affiliateCode || !grossAmount || !transactionType) return res.status(400).json({ error: "Missing required fields" });
+
+      // Find direct affiliate (L3/L2/L1)
+      const [directAffiliate] = await db.select().from(affiliates).where(eq(affiliates.code, affiliateCode));
+      if (!directAffiliate) return res.status(404).json({ error: "Affiliate not found" });
+
+      // Build upline chain up to L1
+      const chain: typeof directAffiliate[] = [directAffiliate];
+      let current = directAffiliate;
+      while (current.parentId) {
+        const [parent] = await db.select().from(affiliates).where(eq(affiliates.id, current.parentId));
+        if (!parent) break;
+        chain.push(parent);
+        current = parent;
+      }
+
+      // Get rates
+      const rates = await db.select().from(mlmCommissionRates);
+      const getRate = (level: number, type: string) =>
+        rates.find(r => r.mlmLevel === level && r.commissionType === type)?.rate ?? 0;
+
+      const created: any[] = [];
+      for (const aff of chain) {
+        const rate = getRate(aff.mlmLevel!, transactionType);
+        if (rate <= 0) continue;
+        const commissionAmount = Math.round((grossAmount * rate) / 100);
+        const [comm] = await db.insert(mlmCommissions).values({
+          affiliateId: aff.id,
+          sourceAffiliateId: directAffiliate.id,
+          userId: userId ?? null,
+          transactionType,
+          transactionRef: transactionRef ?? "",
+          grossAmount: Number(grossAmount),
+          commissionRate: rate,
+          commissionAmount,
+          mlmLevel: aff.mlmLevel!,
+          status: "pending",
+          notes: notes ?? "",
+        }).returning();
+        created.push(comm);
+
+        // Update affiliate earnings totals
+        const earnField = transactionType === "license" ? "totalEarningsLicense" : "totalEarningsRecurring";
+        await db.update(affiliates).set({
+          totalEarnings: (aff.totalEarnings ?? 0) + commissionAmount,
+          ...(transactionType === "license"
+            ? { totalEarningsLicense: (aff.totalEarningsLicense ?? 0) + commissionAmount }
+            : { totalEarningsRecurring: (aff.totalEarningsRecurring ?? 0) + commissionAmount }),
+          totalReferrals: transactionType === "license" ? (aff.totalReferrals ?? 0) + 1 : (aff.totalReferrals ?? 0),
+        }).where(eq(affiliates.id, aff.id));
+      }
+
+      res.json({ ok: true, commissions: created });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // PATCH: update commission status (approve/paid/cancel)
+  app.patch("/api/mlm/commissions/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { mlmCommissions } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const patch: any = { status: req.body.status };
+      if (req.body.status === "paid") patch.paidAt = new Date();
+      const [row] = await db.update(mlmCommissions).set(patch).where(eq(mlmCommissions.id, Number(req.params.id))).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ─── MLM: Public validate affiliate code ──────────────────────────────────
+  app.get("/api/mlm/validate/:code", async (req: any, res: any) => {
+    try {
+      const { db } = await import("../db");
+      const { affiliates } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const [aff] = await db.select().from(affiliates).where(eq(affiliates.code, req.params.code));
+      if (!aff || !aff.isActive) return res.status(404).json({ valid: false });
+      const LEVEL_LABEL: Record<number, string> = { 1: "Pusat", 2: "Provinsi", 3: "Kab/Kota" };
+      res.json({ valid: true, name: aff.name, level: aff.mlmLevel, levelLabel: LEVEL_LABEL[aff.mlmLevel ?? 3], region: aff.region });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   app.get("/api/affiliates", isAuthenticated, async (req, res) => {
     try {
       const allAffiliates = await storage.getAffiliates();

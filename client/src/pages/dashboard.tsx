@@ -6,7 +6,7 @@ import {
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
   Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon, Landmark, Calculator,
-  FileSignature
+  FileSignature, GitBranch
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1315,10 +1315,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/laporan-bj">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 mb-2" data-testid="nav-shortcut-laporan-bj">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 mb-1" data-testid="nav-shortcut-laporan-bj">
                       <BarChart3 className="w-4 h-4 text-rose-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">LaporanBJ — Laporan Bisnis</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/mlm-admin">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-purple-700 dark:text-purple-400 hover:bg-purple-500/10 border border-purple-500/20 mb-2" data-testid="nav-shortcut-mlm-admin">
+                      <GitBranch className="w-4 h-4 text-purple-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">MLM — Jaringan Afiliasi 3 Level</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-purple-500/50" />
                     </div>
                   </Link>
                     </div>

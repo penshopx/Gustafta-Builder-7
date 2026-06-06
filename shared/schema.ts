@@ -379,20 +379,63 @@ export const clientSubscriptions = pgTable("client_subscriptions", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Affiliates/Partners Table
+// Affiliates/Partners Table — MLM 3-Level (Pusat L1 / Provinsi L2 / Kab-Kota L3)
 export const affiliates = pgTable("affiliates", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   phone: text("phone").default(""),
   code: text("code").notNull(),
-  commissionRate: real("commission_rate").default(10),
+  // MLM hierarchy
+  mlmLevel: integer("mlm_level").default(3),          // 1=Pusat, 2=Provinsi, 3=Kab/Kota
+  parentId: integer("parent_id"),                     // upline affiliate id
+  region: text("region").default(""),                 // nama wilayah (provinsi/kab-kota)
+  // Legacy single rate (kept for compat)
+  commissionRate: real("commission_rate").default(20),
+  // Earnings breakdown
+  totalEarningsLicense: integer("total_earnings_license").default(0),  // komisi dari lisensi
+  totalEarningsRecurring: integer("total_earnings_recurring").default(0), // komisi dari berlangganan
   totalEarnings: integer("total_earnings").default(0),
   totalReferrals: integer("total_referrals").default(0),
   payoutInfo: text("payout_info").default(""),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// MLM Commission Rate Config (per level, per type)
+export const mlmCommissionRates = pgTable("mlm_commission_rates", {
+  id: serial("id").primaryKey(),
+  mlmLevel: integer("mlm_level").notNull(),           // 1, 2, or 3
+  commissionType: text("commission_type").notNull(),  // "license" | "recurring"
+  rate: real("rate").notNull(),                       // percentage, e.g. 20.0
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// MLM Commission Ledger — tracks every commission event
+export const mlmCommissions = pgTable("mlm_commissions", {
+  id: serial("id").primaryKey(),
+  affiliateId: integer("affiliate_id").notNull(),     // who earns
+  sourceAffiliateId: integer("source_affiliate_id"),  // who triggered (direct referrer)
+  userId: varchar("user_id", { length: 255 }),        // the customer
+  transactionType: text("transaction_type").notNull(),// "license" | "recurring"
+  transactionRef: text("transaction_ref").default(""),// order id / subscription id
+  grossAmount: integer("gross_amount").notNull(),     // original transaction amount
+  commissionRate: real("commission_rate").notNull(),  // rate applied
+  commissionAmount: integer("commission_amount").notNull(), // earned amount
+  mlmLevel: integer("mlm_level").notNull(),           // level at time of commission
+  status: text("status").default("pending"),          // pending | approved | paid | cancelled
+  notes: text("notes").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  paidAt: timestamp("paid_at"),
+});
+
+export const insertAffiliateMLMSchema = createInsertSchema(affiliates).omit({ id: true, createdAt: true });
+export type InsertAffiliateMLM = z.infer<typeof insertAffiliateMLMSchema>;
+export type AffiliateMLM = typeof affiliates.$inferSelect;
+
+export const insertMlmCommissionSchema = createInsertSchema(mlmCommissions).omit({ id: true, createdAt: true });
+export type InsertMlmCommission = z.infer<typeof insertMlmCommissionSchema>;
+export type MlmCommission = typeof mlmCommissions.$inferSelect;
 
 // Subscriptions Table (builder-side platform subscriptions)
 export const subscriptionsTable = pgTable("subscriptions_new", {
