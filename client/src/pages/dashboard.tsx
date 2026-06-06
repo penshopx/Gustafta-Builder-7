@@ -1321,6 +1321,13 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
                     </div>
                   </Link>
+                  <Link href="/tenderbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-1" data-testid="nav-shortcut-tenderbot">
+                      <Target className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TenderBot — AI Intelijen Tender BUJK</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/mlm-admin">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-purple-700 dark:text-purple-400 hover:bg-purple-500/10 border border-purple-500/20 mb-2" data-testid="nav-shortcut-mlm-admin">
                       <GitBranch className="w-4 h-4 text-purple-500 shrink-0" />
