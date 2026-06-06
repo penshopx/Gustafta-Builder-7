@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
-  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake
+  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3
 } from "lucide-react";
 
 interface Tool {
@@ -84,6 +84,17 @@ const TOOLS: Tool[] = [
     desc: "CRM mini untuk biro jasa: catat riwayat komunikasi, atur follow-up dengan deadline & prioritas, pantau status klien (Prospek/Aktif/Tidak Aktif).",
     tag: "Biro Jasa",
     model: "PostgreSQL",
+  },
+  {
+    href: "/laporan-bj",
+    icon: <BarChart3 className="h-6 w-6" />,
+    iconBg: "bg-rose-500/10",
+    iconColor: "text-rose-400",
+    badgeColor: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+    label: "LaporanBJ — Laporan Bisnis Biro Jasa",
+    desc: "Dashboard laporan agregat seluruh data BirojasaOS: ringkasan klien, sertifikat expiring, pipeline tender, follow-up pending, dan export PDF profesional.",
+    tag: "Biro Jasa",
+    model: "Export PDF",
   },
 ];
 

@@ -167,6 +167,7 @@ import CertTracker from "@/pages/cert-tracker";
 import DocuGen from "@/pages/docu-gen";
 import TenderMate from "@/pages/tender-mate";
 import ClientHub from "@/pages/client-hub";
+import LaporanBJ from "@/pages/laporan-bj";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
@@ -1116,6 +1117,7 @@ function Router() {
         <Route path="/docu-gen" component={DocuGen} />
         <Route path="/tender-mate" component={TenderMate} />
         <Route path="/client-hub" component={ClientHub} />
+        <Route path="/laporan-bj" component={LaporanBJ} />
       <Route component={NotFound} />
     </Switch>
   );
