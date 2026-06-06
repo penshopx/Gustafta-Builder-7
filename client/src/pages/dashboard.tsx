@@ -5,7 +5,8 @@ import {
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
-  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon, Landmark, Calculator
+  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon, Landmark, Calculator,
+  FileSignature
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -1286,10 +1287,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/cert-tracker">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-2" data-testid="nav-shortcut-cert-tracker">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-cert-tracker">
                       <Shield className="w-4 h-4 text-emerald-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">CertTracker Biro Jasa</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/docu-gen">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-2" data-testid="nav-shortcut-docu-gen">
+                      <FileSignature className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">DocuGen — Pembuat Surat AI</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
                     </div>
                   </Link>
                     </div>

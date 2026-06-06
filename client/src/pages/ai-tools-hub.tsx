@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
-  Zap, Brain, Eye, FileText, Wrench
+  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield
 } from "lucide-react";
 
 interface Tool {
@@ -40,6 +40,28 @@ const TOOLS: Tool[] = [
     desc: "Upload foto lapangan konstruksi — GPT-4o Vision menganalisis potensi pelanggaran K3, memberikan skor kepatuhan, dan rekomendasi tindakan segera.",
     tag: "Inspeksi K3",
     model: "GPT-4o Vision",
+  },
+  {
+    href: "/docu-gen",
+    icon: <FileSignature className="h-6 w-6" />,
+    iconBg: "bg-blue-500/10",
+    iconColor: "text-blue-400",
+    badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    label: "DocuGen — AI Document Generator",
+    desc: "Pilih klien dan jenis dokumen — AI menghasilkan Surat Kuasa, Permohonan SBU, Pakta Integritas, Perjanjian Layanan, dan 5 jenis surat lain dalam bahasa Indonesia formal.",
+    tag: "Biro Jasa",
+    model: "GPT-4o",
+  },
+  {
+    href: "/cert-tracker",
+    icon: <Shield className="h-6 w-6" />,
+    iconBg: "bg-emerald-500/10",
+    iconColor: "text-emerald-400",
+    badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    label: "CertTracker — Monitor Sertifikat BUJK",
+    desc: "Kelola sertifikat SBU, SKK, ISO, CSMS, dan dokumen perizinan klien biro jasa. Alert otomatis H-90/H-30 sebelum expired.",
+    tag: "Biro Jasa",
+    model: "PostgreSQL",
   },
 ];
 

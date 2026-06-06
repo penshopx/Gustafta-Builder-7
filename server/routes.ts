@@ -18432,6 +18432,60 @@ PENTING: Kembalikan HANYA JSON valid, format:
     }
   });
 
+  // ─── DocuGen: AI Document Generator for Biro Jasa ────────────────────────────
+  app.post("/api/docu-gen/generate", async (req: any, res: any) => {
+    try {
+      const { companyName, docTypeId, fields } = req.body;
+      if (!companyName || !docTypeId || !fields) {
+        return res.status(400).json({ error: "companyName, docTypeId, dan fields diperlukan" });
+      }
+
+      const systemPrompt = `Kamu adalah asisten profesional biro jasa konstruksi Indonesia yang ahli dalam menyusun dokumen formal dan surat resmi.
+Tugasmu adalah menghasilkan dokumen dalam BAHASA INDONESIA FORMAL yang siap pakai.
+Format dokumen: teks biasa (plain text), gunakan spasi dan baris baru untuk tata letak — JANGAN gunakan markdown/asterisk/tanda bintang.
+Dokumen harus terstruktur dengan baik, menggunakan bahasa baku Indonesia yang sopan dan formal.
+Sertakan semua elemen standar dokumen Indonesia: kop/judul, nomor surat (buat nomor contoh), tanggal, pihak-pihak, isi, tanda tangan, dll.`;
+
+      const docLabels: Record<string, string> = {
+        surat_kuasa: "SURAT KUASA",
+        permohonan_sbu: "SURAT PERMOHONAN PENERBITAN SERTIFIKAT BADAN USAHA (SBU)",
+        permohonan_skk: "SURAT PERMOHONAN SERTIFIKAT KOMPETENSI KERJA (SKK)",
+        cover_letter: "SURAT PENGANTAR / COVER LETTER",
+        pakta_integritas: "PAKTA INTEGRITAS",
+        pernyataan_kebenaran: "SURAT PERNYATAAN KEBENARAN DOKUMEN",
+        pengantar_dokumen: "SURAT PENGANTAR DOKUMEN",
+        perjanjian_biro_jasa: "PERJANJIAN LAYANAN BIRO JASA",
+      };
+
+      const userPrompt = `Buatkan ${docLabels[docTypeId] || "DOKUMEN RESMI"} untuk:
+Nama Perusahaan: ${companyName}
+Jenis Dokumen: ${docLabels[docTypeId] || docTypeId}
+
+Detail yang diberikan:
+${Object.entries(fields).map(([k, v]) => `- ${k}: ${v}`).join("\n")}
+
+Hasilkan dokumen lengkap yang siap ditandatangani. Gunakan format surat Indonesia yang benar (nomor surat, perihal, tujuan, isi, penutup, tanda tangan). Jangan tambahkan penjelasan — langsung isi dokumennya saja.`;
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 2000,
+        temperature: 0.3,
+      });
+
+      const document = completion.choices[0]?.message?.content ?? "";
+      res.json({ document });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ─── CertTracker: Biro Jasa Client & Certificate Management ─────────────────
   app.get("/api/cert-tracker/clients", isAuthenticated, async (req: any, res: any) => {
     try {
