@@ -172,6 +172,12 @@ import MlmAdmin from "@/pages/mlm-admin";
 import TenderBotPage from "@/pages/tenderbot";
 import SertifikasiBotPage from "@/pages/sertifikasibot";
 import ProyekBotPage from "@/pages/proyekbot";
+import PerijinanBotPage from "@/pages/perijinanbot";
+import KontraktorBotPage from "@/pages/kontraktorbot";
+import KonsultanBotPage from "@/pages/konsultanbot";
+import OwnerBotPage from "@/pages/ownerbot";
+import BoheerBotPage from "@/pages/boheerbot";
+import SupplierBotPage from "@/pages/supplierbot";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
@@ -1126,6 +1132,12 @@ function Router() {
         <Route path="/tenderbot" component={TenderBotPage} />
         <Route path="/sertifikasibot" component={SertifikasiBotPage} />
         <Route path="/proyekbot" component={ProyekBotPage} />
+        <Route path="/perijinanbot" component={PerijinanBotPage} />
+        <Route path="/kontraktorbot" component={KontraktorBotPage} />
+        <Route path="/konsultanbot" component={KonsultanBotPage} />
+        <Route path="/ownerbot" component={OwnerBotPage} />
+        <Route path="/boheerbot" component={BoheerBotPage} />
+        <Route path="/supplierbot" component={SupplierBotPage} />
       <Route component={NotFound} />
     </Switch>
   );

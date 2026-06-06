@@ -5,7 +5,7 @@ import {
   Lightbulb, Wrench, Sparkles, User, PanelLeftClose, PanelLeft, Menu, Home, X, Palette, Network, Brain, Blocks,
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
-  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon, Landmark, Calculator,
+  Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon, Landmark, Calculator, Package,
   FileSignature, GitBranch
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
@@ -1319,6 +1319,48 @@ export default function Dashboard() {
                       <BarChart3 className="w-4 h-4 text-rose-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">LaporanBJ — Laporan Bisnis</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/boheerbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-orange-700 dark:text-orange-400 hover:bg-orange-500/10 border border-orange-500/20 mb-1" data-testid="nav-shortcut-boheerbot">
+                      <Wrench className="w-4 h-4 text-orange-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">BoheerBot — AI Subkontraktor & Klaim Termin</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/supplierbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-teal-700 dark:text-teal-400 hover:bg-teal-500/10 border border-teal-500/20 mb-1" data-testid="nav-shortcut-supplierbot">
+                      <Package className="w-4 h-4 text-teal-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SupplierBot — AI Material & Supply Chain</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-teal-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/ownerbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-violet-700 dark:text-violet-400 hover:bg-violet-500/10 border border-violet-500/20 mb-1" data-testid="nav-shortcut-ownerbot">
+                      <Building2 className="w-4 h-4 text-violet-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">OwnerBot — AI Developer & Pemilik Proyek</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-violet-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/konsultanbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 mb-1" data-testid="nav-shortcut-konsultanbot">
+                      <Pencil className="w-4 h-4 text-rose-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KonsultanBot — AI DED, MK & Jasa Konsultansi</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/kontraktorbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border border-amber-500/20 mb-1" data-testid="nav-shortcut-kontraktorbot">
+                      <HardHat className="w-4 h-4 text-amber-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">KontraktorBot — AI QS, RAB & Estimasi Biaya</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/perijinanbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20 mb-1" data-testid="nav-shortcut-perijinanbot">
+                      <Globe className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">PerijinanBot — AI Konsultan OSS-RBA & NIB</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-emerald-500/50" />
                     </div>
                   </Link>
                   <Link href="/proyekbot">
