@@ -32,6 +32,9 @@ export default defineConfig({
     emptyOutDir: true,
     target: "esnext",
   },
+  optimizeDeps: {
+    exclude: ["jspdf", "canvg"],
+  },
   server: {
     fs: {
       strict: true,
