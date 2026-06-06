@@ -11851,9 +11851,34 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const getRate = (level: number, type: string) =>
         rates.find(r => r.mlmLevel === level && r.commissionType === type)?.rate ?? 0;
 
+      // Build level → affiliate map & present level set
+      const presentLevels = new Set(chain.map(a => a.mlmLevel!));
+      const levelToAff = new Map(chain.map(a => [a.mlmLevel!, a]));
+
+      // Compute effective rate per affiliate in chain with ROLLUP logic:
+      //   Missing L3 → L3 rate absorbed by L2 (if present) or L1
+      //   Missing L2 AND L3 → L2+L3 rates absorbed by L1
+      const effectiveRate = new Map<number, number>(); // affiliateId → effective %
+      for (const aff of chain) {
+        effectiveRate.set(aff.id, getRate(aff.mlmLevel!, transactionType));
+      }
+      // Process missing levels bottom-up (L3 first, then L2)
+      for (const missingLvl of [3, 2]) {
+        if (!presentLevels.has(missingLvl)) {
+          const missedRate = getRate(missingLvl, transactionType);
+          // Find nearest present level ABOVE the missing one (lower number)
+          const absorbingLvl = [missingLvl - 1, missingLvl - 2]
+            .find(l => l >= 1 && presentLevels.has(l));
+          if (absorbingLvl !== undefined) {
+            const absorbAff = levelToAff.get(absorbingLvl)!;
+            effectiveRate.set(absorbAff.id, (effectiveRate.get(absorbAff.id) ?? 0) + missedRate);
+          }
+        }
+      }
+
       const created: any[] = [];
       for (const aff of chain) {
-        const rate = getRate(aff.mlmLevel!, transactionType);
+        const rate = effectiveRate.get(aff.id) ?? 0;
         if (rate <= 0) continue;
         const commissionAmount = Math.round((grossAmount * rate) / 100);
         const [comm] = await db.insert(mlmCommissions).values({
@@ -11867,12 +11892,11 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
           commissionAmount,
           mlmLevel: aff.mlmLevel!,
           status: "pending",
-          notes: notes ?? "",
+          notes: notes ?? `Rollup: level hadir=${[...presentLevels].sort().join(",")}`,
         }).returning();
         created.push(comm);
 
         // Update affiliate earnings totals
-        const earnField = transactionType === "license" ? "totalEarningsLicense" : "totalEarningsRecurring";
         await db.update(affiliates).set({
           totalEarnings: (aff.totalEarnings ?? 0) + commissionAmount,
           ...(transactionType === "license"
@@ -11882,7 +11906,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         }).where(eq(affiliates.id, aff.id));
       }
 
-      res.json({ ok: true, commissions: created });
+      res.json({ ok: true, commissions: created, rollup: { presentLevels: [...presentLevels].sort() } });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 

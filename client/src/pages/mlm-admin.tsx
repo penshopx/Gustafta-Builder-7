@@ -300,11 +300,12 @@ function RecordCommissionModal({ open, onClose, affiliates, onSave }: {
             </div>
           </div>
 
-          {/* Commission preview */}
+          {/* Commission preview with rollup logic */}
           {selectedAff && form.grossAmount && (
             <div className="bg-slate-800/60 rounded-lg p-3 border border-slate-700/50">
               <div className="text-xs text-slate-400 mb-2 font-semibold">Preview Distribusi Komisi</div>
               {(() => {
+                // Build upline chain
                 const chain: Affiliate[] = [selectedAff];
                 let cur = selectedAff;
                 while (cur.parentId) {
@@ -314,20 +315,61 @@ function RecordCommissionModal({ open, onClose, affiliates, onSave }: {
                   cur = p;
                 }
                 const gross = Number(form.grossAmount);
-                return chain.map(aff => {
-                  const rate = RATES[form.transactionType]?.[aff.mlmLevel] ?? 0;
-                  const amount = Math.round((gross * rate) / 100);
-                  const cfg = LEVEL_CONFIG[aff.mlmLevel];
-                  return (
-                    <div key={aff.id} className="flex justify-between items-center py-1 border-b border-slate-700/30 last:border-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${cfg.color} ${cfg.bg}`}>{cfg.label}</span>
-                        <span className="text-xs text-slate-300">{aff.name}</span>
+                const type = form.transactionType;
+                const presentLevels = new Set(chain.map(a => a.mlmLevel));
+
+                // Compute effective rates with rollup
+                const effRate = new Map<number, number>();
+                chain.forEach(a => effRate.set(a.id, RATES[type]?.[a.mlmLevel] ?? 0));
+                // Missing L3 → absorbed by L2 or L1; Missing L2 → absorbed by L1
+                for (const missingLvl of [3, 2]) {
+                  if (!presentLevels.has(missingLvl)) {
+                    const missedRate = RATES[type]?.[missingLvl] ?? 0;
+                    const absorbLvl = [missingLvl - 1, missingLvl - 2].find(l => l >= 1 && presentLevels.has(l));
+                    if (absorbLvl !== undefined) {
+                      const absAff = chain.find(a => a.mlmLevel === absorbLvl)!;
+                      effRate.set(absAff.id, (effRate.get(absAff.id) ?? 0) + missedRate);
+                    }
+                  }
+                }
+
+                const missingLabels: string[] = [];
+                if (!presentLevels.has(3)) missingLabels.push("Kab/Kota");
+                if (!presentLevels.has(2)) missingLabels.push("Provinsi");
+
+                return (
+                  <>
+                    {missingLabels.length > 0 && (
+                      <div className="text-[10px] text-amber-400/80 mb-2 flex items-center gap-1">
+                        <span>⚠️</span>
+                        <span>Rollup aktif — {missingLabels.join(" & ")} tidak ada, komisinya dialihkan ke level atasnya.</span>
                       </div>
-                      <span className="text-xs font-semibold text-emerald-400">{rate}% = {rupiah(amount)}</span>
-                    </div>
-                  );
-                });
+                    )}
+                    {chain.map(aff => {
+                      const rate = effRate.get(aff.id) ?? 0;
+                      const baseRate = RATES[type]?.[aff.mlmLevel] ?? 0;
+                      const absorbed = rate - baseRate;
+                      const amount = Math.round((gross * rate) / 100);
+                      const cfg = LEVEL_CONFIG[aff.mlmLevel];
+                      return (
+                        <div key={aff.id} className="flex justify-between items-center py-1.5 border-b border-slate-700/30 last:border-0">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${cfg.color} ${cfg.bg}`}>{cfg.label}</span>
+                            <span className="text-xs text-slate-300 truncate">{aff.name}</span>
+                          </div>
+                          <div className="text-right shrink-0 ml-2">
+                            <span className="text-xs font-semibold text-emerald-400">
+                              {rate}% = {rupiah(amount)}
+                            </span>
+                            {absorbed > 0 && (
+                              <div className="text-[10px] text-amber-400/70">(termasuk +{absorbed}% rollup)</div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                );
               })()}
             </div>
           )}
