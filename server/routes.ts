@@ -17840,5 +17840,174 @@ Maksimal 600 kata.`;
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // POST /api/tools/rab-kalkulator — Kalkulator RAB Otomatis (GPT-4o)
+  app.post("/api/tools/rab-kalkulator", async (req: any, res: any) => {
+    try {
+      const { catatan } = req.body as { catatan: string };
+      if (!catatan || catatan.trim().length < 10) {
+        return res.status(400).json({ message: "Catatan pekerjaan terlalu singkat (min. 10 karakter)" });
+      }
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const systemPrompt = `Anda adalah Ahli Estimator Biaya Konstruksi Indonesia. Tugas Anda menganalisis catatan pekerjaan lapangan yang berantakan dan menghasilkan Rencana Anggaran Biaya (RAB) terstruktur.
+
+INSTRUKSI:
+1. Identifikasi setiap item pekerjaan dari catatan
+2. Hitung volume berdasarkan dimensi yang disebutkan
+3. Tentukan satuan yang tepat (m2, m3, m', unit, ls)
+4. Estimasi harga satuan berdasarkan AHSP PermenPUPR 1/2022 dan harga pasar umum Indonesia 2024
+5. Hitung jumlah = volume × harga_satuan
+6. Tambahkan item overhead & profit 10% jika tidak disebutkan
+7. Berikan peringatan jika ada asumsi besar yang perlu diverifikasi
+
+PENTING: Kembalikan HANYA JSON valid tanpa markdown code block, dengan format persis:
+{
+  "proyek_estimasi": "Deskripsi singkat jenis pekerjaan",
+  "catatan_analisis": "Keterangan singkat tentang analisis yang dilakukan",
+  "items": [
+    {
+      "no": 1,
+      "uraian": "Nama item pekerjaan",
+      "satuan": "m2",
+      "volume": 50.0,
+      "harga_satuan": 150000,
+      "jumlah": 7500000,
+      "keterangan": "Asumsi atau catatan tambahan"
+    }
+  ],
+  "total": 7500000,
+  "ppn_10": 825000,
+  "grand_total": 8325000,
+  "asumsi": ["Asumsi 1", "Asumsi 2"],
+  "peringatan": ["Peringatan 1 jika ada"]
+}`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Analisis catatan berikut dan buat RAB:\n\n${catatan}` }
+        ],
+        max_tokens: 3000,
+        temperature: 0.2,
+        response_format: { type: "json_object" }
+      });
+
+      const raw = completion.choices[0].message.content || "{}";
+      let data: any;
+      try { data = JSON.parse(raw); } catch { return res.status(500).json({ message: "Gagal parsing hasil AI" }); }
+
+      if (!data.items || !Array.isArray(data.items)) {
+        return res.status(500).json({ message: "Format hasil AI tidak valid" });
+      }
+
+      // Recalculate totals to ensure accuracy
+      const total = data.items.reduce((s: number, i: any) => s + (Number(i.jumlah) || 0), 0);
+      const ppn = Math.round(total * 0.11);
+      data.total = total;
+      data.ppn_10 = ppn;
+      data.grand_total = total + ppn;
+      if (!data.asumsi) data.asumsi = [];
+      if (!data.peringatan) data.peringatan = [];
+
+      res.json(data);
+    } catch (err: any) {
+      console.error("[RAB Kalkulator]", err.message);
+      res.status(500).json({ message: err.message || "Terjadi kesalahan internal" });
+    }
+  });
+
+  // POST /api/tools/k3-vision — AI Vision K3 Inspector (GPT-4o Vision)
+  app.post("/api/tools/k3-vision", async (req: any, res: any) => {
+    try {
+      const { imageBase64, catatan } = req.body as { imageBase64: string; catatan?: string };
+      if (!imageBase64) return res.status(400).json({ message: "imageBase64 wajib diisi" });
+      if (imageBase64.length > 7 * 1024 * 1024) {
+        return res.status(400).json({ message: "Ukuran gambar terlalu besar (maks. 5 MB)" });
+      }
+
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const systemPrompt = `Anda adalah Ahli K3 Konstruksi Indonesia bersertifikat AK3U dengan pengalaman 20+ tahun. Anda menganalisis foto lapangan untuk mendeteksi potensi bahaya dan pelanggaran K3.
+
+REGULASI ACUAN:
+- PP No. 50/2012 tentang SMK3
+- PermenPUPR No. 10/2021 tentang SMKK
+- PermenPUPR No. 21/2019 tentang CSMS
+- ISO 45001:2018
+- NFPA 10/13/72
+- OSHA 29 CFR 1926 (Konstruksi)
+
+TUGAS: Analisis foto lapangan dan identifikasi:
+1. Jenis lokasi/pekerjaan yang terlihat
+2. Temuan bahaya/pelanggaran K3 dengan tingkat keparahan
+3. Tindakan perbaikan segera
+4. Poin positif yang sudah diterapkan
+
+KODE TEMUAN: K3-APD (Alat Pelindung Diri), K3-SKF (Scaffolding & Formwork), K3-ELK (Kelistrikan), K3-HHK (Housekeeping), K3-KBR (Kebakaran), K3-GLI (Galian & Tanah), K3-MRK (Material & Rigging), K3-LAL (Lalu Lintas Proyek), K3-LIN (Lingkungan), K3-UMM (Umum)
+
+TINGKAT KEPARAHAN:
+- KRITIS: Bahaya langsung kematian, hentikan pekerjaan
+- TINGGI: Risiko cedera serius, perbaiki dalam 24 jam  
+- SEDANG: Risiko cedera ringan, perbaiki dalam 1 minggu
+- RENDAH: Ketidaksesuaian administratif/minor
+
+PENTING: Kembalikan HANYA JSON valid, format:
+{
+  "lokasi_estimasi": "Jenis lokasi berdasarkan foto",
+  "jenis_pekerjaan": "Jenis pekerjaan yang sedang berlangsung",
+  "ringkasan": "Ringkasan kondisi K3 secara umum (2-3 kalimat)",
+  "skor_kepatuhan": 75,
+  "temuan": [
+    {
+      "kode": "K3-APD",
+      "kategori": "Nama Kategori",
+      "deskripsi": "Deskripsi detail temuan",
+      "tingkat": "TINGGI",
+      "regulasi": "Pasal/regulasi yang dilanggar",
+      "rekomendasi": "Tindakan perbaikan yang harus dilakukan"
+    }
+  ],
+  "tindakan_segera": ["Tindakan 1 yang harus dilakukan segera"],
+  "poin_positif": ["Hal baik yang sudah diterapkan"],
+  "catatan_inspektur": "Catatan profesional tambahan dari inspektur"
+}`;
+
+      const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
+      const userContent: any[] = [
+        { type: "text", text: catatan ? `Konteks tambahan dari pelapor: ${catatan}\n\nAnalisis foto lapangan berikut untuk inspeksi K3:` : "Analisis foto lapangan berikut untuk inspeksi K3:" },
+        { type: "image_url", image_url: { url: imageUrl, detail: "high" } }
+      ];
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userContent }
+        ],
+        max_tokens: 2500,
+        temperature: 0.3,
+        response_format: { type: "json_object" }
+      });
+
+      const raw = completion.choices[0].message.content || "{}";
+      let data: any;
+      try { data = JSON.parse(raw); } catch { return res.status(500).json({ message: "Gagal parsing hasil AI" }); }
+
+      if (!data.temuan || !Array.isArray(data.temuan)) data.temuan = [];
+      if (!data.tindakan_segera || !Array.isArray(data.tindakan_segera)) data.tindakan_segera = [];
+      if (!data.poin_positif || !Array.isArray(data.poin_positif)) data.poin_positif = [];
+      if (typeof data.skor_kepatuhan !== "number") data.skor_kepatuhan = 70;
+      data.skor_kepatuhan = Math.max(0, Math.min(100, data.skor_kepatuhan));
+
+      res.json(data);
+    } catch (err: any) {
+      console.error("[K3 Vision]", err.message);
+      res.status(500).json({ message: err.message || "Terjadi kesalahan internal" });
+    }
+  });
+
   return httpServer;
 }

@@ -160,6 +160,8 @@ import LmsCourse from "@/pages/lms-course";
 import LmsLesson from "@/pages/lms-lesson";
 import ProductTour from "@/pages/product-tour";
 import NotFound from "@/pages/not-found";
+import RabKalkulator from "@/pages/rab-kalkulator";
+import K3Vision from "@/pages/k3-vision";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
@@ -1102,6 +1104,8 @@ function Router() {
         <Route path="/lms/course/:id/lesson/:lessonId" component={LmsLesson} />
         <Route path="/lms/course/:id" component={LmsCourse} />
         <Route path="/product-tour" component={ProductTour} />
+        <Route path="/rab-kalkulator" component={RabKalkulator} />
+        <Route path="/k3-vision" component={K3Vision} />
       <Route component={NotFound} />
     </Switch>
   );
