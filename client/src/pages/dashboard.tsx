@@ -1321,6 +1321,20 @@ export default function Dashboard() {
                       <ChevronRight className="w-3.5 h-3.5 text-rose-500/50" />
                     </div>
                   </Link>
+                  <Link href="/proyekbot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-500/10 border border-slate-500/20 mb-1" data-testid="nav-shortcut-proyekbot">
+                      <Construction className="w-4 h-4 text-slate-400 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">ProyekBot — AI Manajemen Proyek Konstruksi</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/sertifikasibot">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-sertifikasibot">
+                      <Award className="w-4 h-4 text-blue-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">SertifikasiBot — AI Konsultan SBU/SKK BUJK</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
                   <Link href="/tenderbot">
                     <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-1" data-testid="nav-shortcut-tenderbot">
                       <Target className="w-4 h-4 text-indigo-500 shrink-0" />

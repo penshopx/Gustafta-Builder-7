@@ -170,6 +170,8 @@ import ClientHub from "@/pages/client-hub";
 import LaporanBJ from "@/pages/laporan-bj";
 import MlmAdmin from "@/pages/mlm-admin";
 import TenderBotPage from "@/pages/tenderbot";
+import SertifikasiBotPage from "@/pages/sertifikasibot";
+import ProyekBotPage from "@/pages/proyekbot";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
@@ -1122,6 +1124,8 @@ function Router() {
         <Route path="/laporan-bj" component={LaporanBJ} />
         <Route path="/mlm-admin" component={MlmAdmin} />
         <Route path="/tenderbot" component={TenderBotPage} />
+        <Route path="/sertifikasibot" component={SertifikasiBotPage} />
+        <Route path="/proyekbot" component={ProyekBotPage} />
       <Route component={NotFound} />
     </Switch>
   );
