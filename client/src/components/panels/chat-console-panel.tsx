@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageSquare, Send, Trash2, Bot, User, Shield, CheckCircle2, Lock, XCircle, ChevronDown, ChevronRight, Activity, Layers, AlertTriangle } from "lucide-react";
+import { MessageSquare, Send, Trash2, Bot, User, Shield, CheckCircle2, Lock, XCircle, ChevronDown, ChevronRight, Activity, Layers, AlertTriangle, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -142,6 +142,35 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
     });
   };
 
+  const handleExportChat = () => {
+    if (messages.length === 0) return;
+    const lines: string[] = [
+      `EKSPOR CHAT — ${agent.name}`,
+      `Diekspor: ${new Date().toLocaleString("id-ID")}`,
+      "═".repeat(60),
+      "",
+    ];
+    for (const msg of messages) {
+      const sender = msg.role === "user" ? "Anda" : agent.name;
+      const time = new Date(msg.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      lines.push(`[${time}] ${sender}:`);
+      lines.push(msg.content);
+      lines.push("");
+    }
+    lines.push("═".repeat(60));
+    lines.push(`Total: ${messages.length} pesan`);
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-${agent.slug || agent.id}-${new Date().toISOString().slice(0, 10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: "Ekspor Berhasil", description: "Chat diunduh sebagai file .txt" });
+  };
+
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     e.target.style.height = "auto";
@@ -172,17 +201,28 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
             Uji percakapan dan lihat OpenClaw bekerja secara real-time
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleClear}
-          disabled={messages.length === 0}
-          data-testid="button-clear-history"
-          className="shrink-0"
-        >
-          <Trash2 className="w-4 h-4 md:mr-2" />
-          <span className="hidden md:inline">Hapus Riwayat</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportChat}
+            disabled={messages.length === 0}
+            data-testid="button-export-chat"
+          >
+            <Download className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Ekspor</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClear}
+            disabled={messages.length === 0}
+            data-testid="button-clear-history"
+          >
+            <Trash2 className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Hapus Riwayat</span>
+          </Button>
+        </div>
       </div>
 
       <Card className="flex-1 flex flex-col min-h-0">

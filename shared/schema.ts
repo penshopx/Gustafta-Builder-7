@@ -1292,7 +1292,9 @@ export const miniAppTypeSchema = z.enum([
   "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report",
   "social_media_copy", "sales_script", "cashflow_report", "customer_feedback",
   // Kreator Hub — Content Creator Toolkit
-  "content_calendar", "video_script", "brand_deal_proposal", "content_analytics"
+  "content_calendar", "video_script", "brand_deal_proposal", "content_analytics",
+  // Ekosistem Kompetensi — Penulis Cerdas & PKB
+  "executive_summary_pkb", "penulis_cerdas"
 ]);
 export type MiniAppType = z.infer<typeof miniAppTypeSchema>;
 

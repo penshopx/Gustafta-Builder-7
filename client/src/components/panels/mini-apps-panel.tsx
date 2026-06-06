@@ -69,6 +69,9 @@ const miniAppTypeLabels: Record<MiniAppType, string> = {
   video_script: "Script YouTube & Podcast Generator",
   brand_deal_proposal: "Proposal Brand Deal & Media Kit",
   content_analytics: "Laporan Performa Konten & Pertumbuhan",
+  // Ekosistem Kompetensi
+  executive_summary_pkb: "Executive Summary PKB — 25 Poin SKP",
+  penulis_cerdas: "Penulis Cerdas — Dokumen Profesional AI",
 };
 
 const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
@@ -122,6 +125,9 @@ const miniAppTypeIcons: Record<MiniAppType, typeof CheckSquare> = {
   video_script: Clapperboard,
   brand_deal_proposal: Award,
   content_analytics: TrendingUp,
+  // Ekosistem Kompetensi
+  executive_summary_pkb: GraduationCap,
+  penulis_cerdas: PenLine,
 };
 
 const miniAppTypeDescriptions: Record<MiniAppType, string> = {
@@ -175,9 +181,13 @@ const miniAppTypeDescriptions: Record<MiniAppType, string> = {
   video_script: "Script YouTube/Podcast lengkap: hook 5 detik, opening, segmen isi, outro, CTA — dari konteks niche & audience Anda (AI-powered)",
   brand_deal_proposal: "Proposal kolaborasi brand + media kit: profil kreator, audience insight, rate card, paket kerjasama, cara kontak (AI-powered)",
   content_analytics: "Laporan performa konten: top konten, engagement rate, tren pertumbuhan, rekomendasi strategi bulan berikutnya (AI-powered)",
+  // Ekosistem Kompetensi
+  executive_summary_pkb: "Generator Executive Summary PKB 25 Poin — susun dokumen 8-10 halaman siap klaim SKP dari catatan pelatihan/kegiatan Anda (AI-powered, Dialog Sokratik)",
+  penulis_cerdas: "Penulis Cerdas — AI menulis dokumen profesional bab per bab dari bahan mentah Anda: tidak mengarang, tidak ghostwriting, dialog terstruktur (AI-powered)",
 };
 
-const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback", "content_calendar", "video_script", "brand_deal_proposal", "content_analytics"];
+const AI_MINI_APP_TYPES: MiniAppType[] = ["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback", "content_calendar", "video_script", "brand_deal_proposal", "content_analytics", "executive_summary_pkb", "penulis_cerdas"];
+const PKB_APP_TYPES: MiniAppType[] = ["executive_summary_pkb", "penulis_cerdas"];
 const BEKERJA_APP_TYPES: MiniAppType[] = ["meeting_notes", "contract_drafter", "rab_estimator", "kpi_report"];
 const BERUSAHA_APP_TYPES: MiniAppType[] = ["social_media_copy", "sales_script", "cashflow_report", "customer_feedback"];
 const KREATOR_APP_TYPES: MiniAppType[] = ["content_calendar", "video_script", "brand_deal_proposal", "content_analytics"];
@@ -780,6 +790,31 @@ const DEFAULT_MINI_APP_CONFIGS: Partial<Record<MiniAppType, { name: string; desc
       metrics: ["total_reach", "engagement_rate", "follower_growth", "top_konten", "tren_platform"],
       output_sections: ["ringkasan_eksekutif", "scorecard_platform", "top_5_konten", "analisis_tren", "konten_underperform", "rekomendasi_strategi"],
       guardrails: { data_driven: true, no_hallucination: true, mark_estimated_as: "ESTIMASI" },
+    },
+  },
+  // Ekosistem Kompetensi
+  executive_summary_pkb: {
+    name: "Executive Summary PKB — 25 Poin SKP",
+    description: "Generator Executive Summary PKB 25 Poin untuk klaim SKP — dialog Sokratik, berbasis data nyata.",
+    config: {
+      mode: "executive_summary_pkb",
+      nama_kegiatan: "[NAMA KEGIATAN PKB — isi sebelum generate]",
+      nama_peserta: "[NAMA PESERTA]",
+      institusi: "[INSTITUSI/LEMBAGA]",
+      tahun: new Date().getFullYear().toString(),
+      target_skp: 25,
+      bab_structure: ["Pendahuluan", "Deskripsi Kegiatan", "Pokok-Pokok Materi", "Manfaat & Rencana Implementasi", "Penutup & Refleksi"],
+      guardrails: { no_hallucination: true, mark_missing_as: "MASUKKAN DATA", no_ghostwriting: true },
+    },
+  },
+  penulis_cerdas: {
+    name: "Penulis Cerdas — Dokumen Profesional AI",
+    description: "AI menyusun dokumen profesional dari bahan mentah Anda — dialog Sokratik, bukan ghostwriting.",
+    config: {
+      mode: "penulis_cerdas",
+      approach: "socratic_dialogue",
+      guardrails: { no_hallucination: true, mark_missing_as: "MASUKKAN DATA", mark_assumption_as: "ASUMSI", no_ghostwriting: true },
+      output_note: "Semua konten bersumber dari data Otak Proyek atau jawaban dialog pengguna.",
     },
   },
 };
@@ -1387,6 +1422,54 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                 >
                   <div className="w-8 h-8 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
                     <BIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium leading-tight line-clamp-2">{miniAppTypeLabels[type]}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">{miniAppTypeDescriptions[type]}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Kompetensi & PKB Hub */}
+      <Card className="border-teal-200 dark:border-teal-800 bg-teal-50/30 dark:bg-teal-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center">
+              <GraduationCap className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm">Kompetensi & PKB — Penulis Cerdas</h3>
+              <p className="text-xs text-muted-foreground">Executive Summary PKB 25 Poin & Penulis Cerdas dokumen profesional — dialog Sokratik, bukan ghostwriting</p>
+            </div>
+            <Badge variant="outline" className="ml-auto text-xs border-teal-300 text-teal-700 dark:text-teal-400 shrink-0">2 Tools</Badge>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {PKB_APP_TYPES.map((type) => {
+              const PIcon = miniAppTypeIcons[type] || GraduationCap;
+              const cfg = DEFAULT_MINI_APP_CONFIGS[type];
+              return (
+                <div
+                  key={type}
+                  className="flex items-start gap-2.5 p-3 rounded-lg border border-teal-100 dark:border-teal-900 bg-white dark:bg-background hover:border-teal-300 dark:hover:border-teal-700 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    const defaults = (cfg || {}) as any;
+                    setNewApp({
+                      name: defaults.name || miniAppTypeLabels[type],
+                      description: defaults.description || miniAppTypeDescriptions[type],
+                      type,
+                      config: defaults.config || {},
+                      icon: "app",
+                    });
+                    setCreateDialogOpen(true);
+                  }}
+                  data-testid={`pkb-app-card-${type}`}
+                >
+                  <div className="w-8 h-8 rounded-md bg-teal-500/10 flex items-center justify-center shrink-0 group-hover:bg-teal-500/20 transition-colors">
+                    <PIcon className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium leading-tight line-clamp-2">{miniAppTypeLabels[type]}</p>

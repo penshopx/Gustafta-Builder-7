@@ -168,6 +168,7 @@ import * as M_simpkClaw from "./seed-simpk-claw";
 import * as M_esimpanClaw from "./seed-esimpan-claw";
 import * as M_ossClaw from "./seed-oss-claw";
 import * as M_terasLpjk1 from "./seed-teras-lpjk1";
+import * as M_penulisCerdasPkb from "./seed-penulis-cerdas";
 
 const seedModuleRegistry: Record<string, any> = {
   "./seed-knowledge-base": M_knowledgeBase,
@@ -1847,6 +1848,7 @@ Data yang belum tersedia akan saya estimasi dengan standar industri dan ditandai
       try { await M_esimpanClaw.seedEsimpanClaw(); } catch (err) { log("[Seed ESIMPANClaw] Error: " + (err as Error).message); }
       try { await M_ossClaw.seedOssClaw(); } catch (err) { log("[Seed OSSClaw] Error: " + (err as Error).message); }
       try { await M_terasLpjk1.seedTerasLpjk1(); } catch (err) { log("[Seed TerasLPJK1] Error: " + (err as Error).message); }
+      try { await M_penulisCerdasPkb.seedPenulisCerdasPKB(); } catch (err) { log("[Seed PenulisCerdasPKB] Error: " + (err as Error).message); }
 
       startScheduler();
     },

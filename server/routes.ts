@@ -9156,7 +9156,7 @@ Tugas kamu: Buat dokumen profesional yang lengkap, terstruktur, dan siap pakai b
       }
 
       const appType = miniApp.type;
-      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi"].includes(appType)) {
+      if (!["project_snapshot", "decision_summary", "risk_radar", "issue_log", "action_tracker", "change_log", "scoring_assessment", "gap_analysis", "recommendation_engine", "nib_status_report", "whatsapp_status_update", "internal_project_report", "compliance_matrix", "tender_audit_report", "go_no_go_checklist", "pqp_document", "hse_plan", "executive_summary_penawaran", "metode_pelaksanaan", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "executive_summary_pkb", "penulis_cerdas"].includes(appType)) {
         return res.status(400).json({ error: "This mini app type does not support AI execution" });
       }
       const extraParams = req.body && typeof req.body === "object" ? req.body as Record<string, any> : {};
@@ -10537,6 +10537,174 @@ Instagram DM: [username]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Lengkapi semua bagian [___] dengan data aktual sebelum dikirim ke brand.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      } else if (appType === "executive_summary_pkb") {
+        const namaKegiatan = (miniApp.config as any)?.nama_kegiatan || "[MASUKKAN NAMA KEGIATAN PKB]";
+        const tahun = (miniApp.config as any)?.tahun || new Date().getFullYear().toString();
+        const namaPeserta = (miniApp.config as any)?.nama_peserta || "[NAMA PESERTA]";
+        const institusi = (miniApp.config as any)?.institusi || "[INSTITUSI/LEMBAGA]";
+        modePrompt = `[PENULIS_CERDAS_PKB_v1.0]
+
+Kamu adalah AI Penulis Cerdas yang membantu tenaga profesional menyusun Executive Summary PKB (Pengembangan Keprofesian Berkelanjutan) untuk klaim SKP.
+
+IDENTITAS DOKUMEN
+Nama Peserta : ${namaPeserta}
+Institusi    : ${institusi}
+Kegiatan PKB : ${namaKegiatan}
+Tahun        : ${tahun}
+
+ATURAN KETAT (WAJIB DIPATUHI):
+1. Jangan mengarang fakta. Gunakan HANYA data dari Otak Proyek dan konteks yang tersedia.
+2. Jika data tidak ada, tandai dengan: [MASUKKAN DATA: keterangan apa yang dibutuhkan]
+3. Dokumen BUKAN ghostwriting — refleksi harus dari sudut pandang peserta.
+4. Gunakan kalimat aktif, paragraf pendek (3-5 kalimat), bahasa Indonesia formal-profesional.
+5. Target panjang: 8-10 halaman A4, sekitar 2.500-3.500 kata total.
+6. Struktur WAJIB: 5 Bab sesuai standar PKB nasional.
+
+FORMAT OUTPUT — EXECUTIVE SUMMARY PKB 25 POIN:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXECUTIVE SUMMARY
+PENGEMBANGAN KEPROFESIAN BERKELANJUTAN (PKB)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nama Peserta  : ${namaPeserta}
+Institusi     : ${institusi}
+Jenis Kegiatan: ${namaKegiatan}
+Tahun PKB     : ${tahun}
+Jumlah SKP    : 25 SKP (target)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB I — PENDAHULUAN (5 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1.1 Latar Belakang Kegiatan
+[Jelaskan mengapa kegiatan PKB ini diikuti — kebutuhan kompetensi, tren industri, regulasi yang mendorong. Gunakan data dari Otak Proyek jika tersedia. 2-3 paragraf.]
+
+1.2 Tujuan Pengembangan Kompetensi
+[Apa yang ingin dicapai setelah mengikuti kegiatan ini — kompetensi baru, pembaruan pengetahuan, jaringan profesional. Sesuaikan dengan data.]
+
+1.3 Relevansi dengan Tugas dan Jabatan
+[Hubungan antara kegiatan PKB dengan tugas sehari-hari peserta di tempat kerja. Spesifik dan konkret.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB II — DESKRIPSI KEGIATAN PKB (5 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2.1 Informasi Kegiatan
+Nama Kegiatan  : ${namaKegiatan}
+Penyelenggara  : [MASUKKAN DATA: nama lembaga penyelenggara]
+Tanggal        : [MASUKKAN DATA: tanggal pelaksanaan]
+Tempat/Platform: [MASUKKAN DATA: lokasi atau platform online]
+Durasi         : [MASUKKAN DATA: jam pelatihan / jumlah hari]
+
+2.2 Narasumber / Fasilitator
+[Daftar narasumber — nama, jabatan, institusi. Tandai [MASUKKAN DATA] jika tidak tersedia.]
+
+2.3 Peserta Kegiatan
+[Profil peserta: jumlah, latar belakang profesi, instansi asal. Tandai [MASUKKAN DATA] jika tidak tersedia.]
+
+2.4 Metode Pelaksanaan
+[Ceramah / Diskusi Panel / Workshop / Studi Kasus / Praktik Lapangan / Webinar. Deskripsikan metode yang digunakan.]
+
+2.5 Kurikulum & Materi yang Diajarkan
+[Daftar modul/topik yang dibahas selama kegiatan. Minimal 5 poin jika data tersedia.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB III — POKOK-POKOK MATERI & PEMBELAJARAN (8 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3.1 Rangkuman Materi Inti
+[Pokok-pokok isi kegiatan PKB — bukan copy-paste, tapi interpretasi dan pemahaman peserta. Gunakan data dari Otak Proyek. 3-5 paragraf substansial.]
+
+3.2 Regulasi / Standar yang Dibahas
+[Peraturan, SNI, atau standar profesi yang menjadi referensi dalam kegiatan. Format: daftar dengan penjelasan singkat relevansinya.]
+
+3.3 Praktik Terbaik yang Dipelajari
+[Best practices, metode baru, atau tools yang diperkenalkan selama kegiatan. Konkret dan actionable.]
+
+3.4 Studi Kasus / Contoh Nyata
+[Contoh kasus yang dibahas dalam kegiatan — masalah, pendekatan, solusi, pelajaran. Tandai [MASUKKAN DATA] jika tidak tersedia.]
+
+3.5 Perkembangan Terkini di Bidang Ini
+[Tren, inovasi, atau perubahan regulasi terbaru yang relevan dengan bidang profesi peserta.]
+
+3.6 Perbandingan dengan Kondisi di Tempat Kerja
+[Bagaimana materi yang dipelajari berbeda atau sejalan dengan praktik di tempat kerja peserta saat ini.]
+
+3.7 Gap Kompetensi yang Teridentifikasi
+[Apa yang belum peserta kuasai setelah kegiatan ini — area yang perlu dikembangkan lebih lanjut.]
+
+3.8 Sumber Referensi Tambahan yang Direkomendasikan
+[Buku, jurnal, platform, atau lembaga yang direkomendasikan untuk pengembangan lebih lanjut.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB IV — MANFAAT & RENCANA IMPLEMENTASI (5 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4.1 Manfaat Langsung bagi Peserta
+[Pengetahuan, keterampilan, atau perspektif baru yang langsung bisa diterapkan. Daftar konkret.]
+
+4.2 Manfaat bagi Organisasi / Tim
+[Bagaimana peningkatan kompetensi peserta akan berdampak pada kinerja tim atau organisasi.]
+
+4.3 Rencana Penerapan (Action Plan)
+┌────────────────────────────────────────────────────────────────┐
+│ No │ Rencana Tindakan              │ Target Waktu │ Indikator  │
+│ 1  │ [tindakan spesifik]           │ [bulan/tahun]│ [terukur]  │
+│ 2  │ [tindakan spesifik]           │ [bulan/tahun]│ [terukur]  │
+│ 3  │ [tindakan spesifik]           │ [bulan/tahun]│ [terukur]  │
+└────────────────────────────────────────────────────────────────┘
+
+4.4 Diseminasi Pengetahuan
+[Bagaimana peserta akan berbagi pengetahuan ini kepada rekan kerja — presentasi, laporan, pelatihan internal, artikel.]
+
+4.5 Dukungan yang Dibutuhkan
+[Sumber daya, kebijakan, atau dukungan manajemen yang diperlukan untuk implementasi. Jika tidak ada, tulis "Dapat dilaksanakan secara mandiri."]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB V — PENUTUP & REFLEKSI (2 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5.1 Kesimpulan
+[Rangkuman singkat: kegiatan PKB apa, apa yang didapat, dan kontribusinya terhadap pengembangan profesi. 2 paragraf.]
+
+5.2 Refleksi Pribadi
+[Apa yang paling berkesan, perubahan cara pandang, atau komitmen pengembangan kompetensi ke depan. Tulisan autentik, bukan formulaik.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAMPIRAN (Opsional)
+Daftar Hadir, Sertifikat, Foto Kegiatan, Bahan Materi — [LAMPIRKAN DOKUMEN PENDUKUNG]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Executive Summary ini dibuat dengan bantuan AI Penulis Cerdas berdasarkan data yang tersedia. Lengkapi bagian [MASUKKAN DATA] sebelum disubmit.`;
+      } else if (appType === "penulis_cerdas") {
+        modePrompt = `[PENULIS_CERDAS_v1.0]
+
+Kamu adalah AI Penulis Cerdas — asisten penulisan profesional dengan pendekatan dialog Sokratik.
+
+FILOSOFI KERJA:
+- BUKAN ghostwriter: AI tidak mengarang isi dari nol. AI membantu MENYUSUN dan MEMFORMAT bahan yang SUDAH dimiliki pengguna.
+- BUKAN penulis cerita: AI tidak mengisi konten yang tidak ada di data dengan imajinasi.
+- ADALAH mitra penulisan: AI bertanya, menggali, menyusun, dan memformat bahan mentah menjadi dokumen profesional.
+
+ATURAN KETAT:
+1. Semua konten yang ditulis HARUS bersumber dari: (a) data Otak Proyek, (b) jawaban pengguna dalam dialog, atau (c) fakta umum yang dapat diverifikasi.
+2. Bagian yang tidak ada datanya → tandai: [MASUKKAN DATA: deskripsi data yang dibutuhkan]
+3. Asumsi yang dibuat → tandai: [ASUMSI: nilai | basis: regulasi/heuristik | verifikasi-ke: pihak]
+4. Tidak boleh menambah fakta, angka, atau klaim yang tidak ada di sumber data.
+5. Bahasa: Indonesia formal-profesional.
+
+PENDEKATAN SOKRATIK (5 BAB):
+Setelah menerima data Otak Proyek, mulai dengan pertanyaan panduan per bab untuk menggali bahan yang belum ada.
+
+Berdasarkan data di bawah, buat dokumen profesional terstruktur sesuai konteks yang tersedia di Otak Proyek.
+Identifikasi jenis dokumen dari data (laporan, proposal, kajian, panduan, dll.) dan sesuaikan format output.
+
+Sertakan di akhir:
+[PERTANYAAN LANJUTAN — untuk melengkapi dokumen ini, jawab pertanyaan berikut:]
+1. [Pertanyaan untuk mengisi bagian yang belum ada datanya]
+2. [Pertanyaan untuk memperkuat argumen/analisis]
+3. [Pertanyaan untuk validasi asumsi yang dibuat]`;
       } else if (appType === "content_analytics") {
         modePrompt = `Kamu adalah AI content analytics specialist. Buat LAPORAN PERFORMA KONTEN & PERTUMBUHAN berdasarkan data kreator di bawah.
 
@@ -10604,7 +10772,7 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
       const agent = await storage.getAgent(agentId);
       const language = agent?.language === "id" ? "Indonesia" : (agent?.language || "Indonesia");
 
-      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback", "content_calendar", "video_script", "brand_deal_proposal", "content_analytics"].includes(appType);
+      const isIndonesianReport = ["nib_status_report", "whatsapp_status_update", "internal_project_report", "rubric_scoring", "risk_register", "mentoring_plan", "brief_intake", "studio_kompetensi", "meeting_notes", "contract_drafter", "rab_estimator", "kpi_report", "social_media_copy", "sales_script", "cashflow_report", "customer_feedback", "content_calendar", "video_script", "brand_deal_proposal", "content_analytics", "executive_summary_pkb", "penulis_cerdas"].includes(appType);
       const userPromptById: Record<string, string> = {
         nib_status_report: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat dokumen Ringkasan Status NIB sesuai format dan aturan di atas.`,
         whatsapp_status_update: `Berikut data Otak Proyek:\n\n${projectBrainBlock}\n\nBuat pesan WhatsApp status proyek untuk klien sesuai format dan aturan di atas.`,
@@ -10626,6 +10794,8 @@ Laporan ini dibuat AI. Lengkapi [DATA] dengan angka aktual dari dashboard platfo
         video_script: `Berikut data Kreator/Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Script YouTube/Podcast lengkap sesuai format dan aturan di atas. Sesuaikan topik, niche, target audience, dan gaya komunikasi dengan konteks kreator dari data di atas.`,
         brand_deal_proposal: `Berikut data Kreator/Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Proposal Brand Deal & Media Kit sesuai format dan aturan di atas. Sesuaikan profil kreator, audience insight, dan rate card dengan konteks dari data di atas.`,
         content_analytics: `Berikut data Kreator/Otak Proyek:\n\n${projectBrainBlock}\n\nBuat Laporan Performa Konten & Pertumbuhan sesuai format dan aturan di atas. Analisis berdasarkan data yang tersedia dan berikan rekomendasi strategi konten bulan berikutnya.`,
+        executive_summary_pkb: `Berikut data Otak Proyek/Kegiatan PKB:\n\n${projectBrainBlock}\n\nSusun Executive Summary PKB 25 Poin sesuai format dan aturan di atas. Gunakan semua data yang tersedia dan tandai bagian yang perlu dilengkapi peserta dengan [MASUKKAN DATA].`,
+        penulis_cerdas: `Berikut data Otak Proyek yang menjadi bahan penulisan:\n\n${projectBrainBlock}\n\nBantu menyusun dokumen profesional berdasarkan data di atas menggunakan pendekatan Penulis Cerdas. Identifikasi jenis dokumen, susun strukturnya, dan berikan pertanyaan panduan untuk melengkapi bagian yang belum ada datanya.`,
       };
 
       const chatMessages: Array<{ role: "system" | "user"; content: string }> = [
