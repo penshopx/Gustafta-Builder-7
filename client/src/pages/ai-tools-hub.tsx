@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
-  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield
+  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target
 } from "lucide-react";
 
 interface Tool {
@@ -60,6 +60,17 @@ const TOOLS: Tool[] = [
     badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
     label: "CertTracker — Monitor Sertifikat BUJK",
     desc: "Kelola sertifikat SBU, SKK, ISO, CSMS, dan dokumen perizinan klien biro jasa. Alert otomatis H-90/H-30 sebelum expired.",
+    tag: "Biro Jasa",
+    model: "PostgreSQL",
+  },
+  {
+    href: "/tender-mate",
+    icon: <Target className="h-6 w-6" />,
+    iconBg: "bg-indigo-500/10",
+    iconColor: "text-indigo-400",
+    badgeColor: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+    label: "TenderMate — Pipeline Tender",
+    desc: "Track dan kelola pipeline tender klien biro jasa dari teridentifikasi → penawaran → menang. Hitung win rate dan total nilai kontrak.",
     tag: "Biro Jasa",
     model: "PostgreSQL",
   },

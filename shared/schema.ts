@@ -2087,3 +2087,29 @@ export type BjClient = typeof bjClients.$inferSelect;
 export const insertBjCertificateSchema = createInsertSchema(bjCertificates).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertBjCertificate = z.infer<typeof insertBjCertificateSchema>;
 export type BjCertificate = typeof bjCertificates.$inferSelect;
+
+// ─── TenderMate: Pipeline Tender Biro Jasa ───────────────────────────────────
+
+export const bjTenders = pgTable("bj_tenders", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  clientId: integer("client_id"),
+  tenderName: text("tender_name").notNull(),
+  instansi: text("instansi").default(""),
+  paguAnggaran: text("pagu_anggaran").default(""),
+  lokasi: text("lokasi").default(""),
+  kategori: text("kategori").default(""),
+  metodePengadaan: text("metode_pengadaan").default(""),
+  tanggalTender: text("tanggal_tender").default(""),
+  deadlinePenawaran: text("deadline_penawaran").default(""),
+  status: text("status").default("teridentifikasi"),
+  nilaiKontrak: text("nilai_kontrak").default(""),
+  sumberInfo: text("sumber_info").default(""),
+  notes: text("notes").default(""),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBjTenderSchema = createInsertSchema(bjTenders).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertBjTender = z.infer<typeof insertBjTenderSchema>;
+export type BjTender = typeof bjTenders.$inferSelect;

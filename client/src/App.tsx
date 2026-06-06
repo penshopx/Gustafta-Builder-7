@@ -165,6 +165,7 @@ import K3Vision from "@/pages/k3-vision";
 import AiToolsHub from "@/pages/ai-tools-hub";
 import CertTracker from "@/pages/cert-tracker";
 import DocuGen from "@/pages/docu-gen";
+import TenderMate from "@/pages/tender-mate";
 import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
@@ -1112,6 +1113,7 @@ function Router() {
         <Route path="/ai-tools" component={AiToolsHub} />
         <Route path="/cert-tracker" component={CertTracker} />
         <Route path="/docu-gen" component={DocuGen} />
+        <Route path="/tender-mate" component={TenderMate} />
       <Route component={NotFound} />
     </Switch>
   );

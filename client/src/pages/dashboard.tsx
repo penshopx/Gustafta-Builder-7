@@ -1294,10 +1294,17 @@ export default function Dashboard() {
                     </div>
                   </Link>
                   <Link href="/docu-gen">
-                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-2" data-testid="nav-shortcut-docu-gen">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-blue-700 dark:text-blue-400 hover:bg-blue-500/10 border border-blue-500/20 mb-1" data-testid="nav-shortcut-docu-gen">
                       <FileSignature className="w-4 h-4 text-blue-500 shrink-0" />
                       <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">DocuGen — Pembuat Surat AI</span></div>
                       <ChevronRight className="w-3.5 h-3.5 text-blue-500/50" />
+                    </div>
+                  </Link>
+                  <Link href="/tender-mate">
+                    <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer transition-colors text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/10 border border-indigo-500/20 mb-2" data-testid="nav-shortcut-tender-mate">
+                      <Target className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div className="flex-1 min-w-0"><span className="whitespace-nowrap text-xs font-medium">TenderMate — Pipeline Tender</span></div>
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-500/50" />
                     </div>
                   </Link>
                     </div>

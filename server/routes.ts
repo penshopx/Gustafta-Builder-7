@@ -18432,6 +18432,60 @@ PENTING: Kembalikan HANYA JSON valid, format:
     }
   });
 
+  // ─── TenderMate: Pipeline Tender Biro Jasa ───────────────────────────────────
+  app.get("/api/tender-mate/tenders", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjTenders } = await import("../shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      const result = await db.select().from(bjTenders)
+        .where(eq(bjTenders.userId, String(userId)))
+        .orderBy(desc(bjTenders.createdAt));
+      res.json(result);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/tender-mate/tenders", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ error: "Unauthorized" });
+      const { db } = await import("../db");
+      const { bjTenders } = await import("../shared/schema");
+      const { id, createdAt, updatedAt, ...body } = req.body;
+      const [row] = await db.insert(bjTenders).values({ ...body, userId: String(userId) }).returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.put("/api/tender-mate/tenders/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjTenders } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      const { id, createdAt, updatedAt, ...body } = req.body;
+      const [row] = await db.update(bjTenders)
+        .set({ ...body, updatedAt: new Date() })
+        .where(and(eq(bjTenders.id, Number(req.params.id)), eq(bjTenders.userId, String(userId))))
+        .returning();
+      res.json(row);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.delete("/api/tender-mate/tenders/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { db } = await import("../db");
+      const { bjTenders } = await import("../shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      await db.delete(bjTenders)
+        .where(and(eq(bjTenders.id, Number(req.params.id)), eq(bjTenders.userId, String(userId))));
+      res.json({ ok: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   // ─── DocuGen: AI Document Generator for Biro Jasa ────────────────────────────
   app.post("/api/docu-gen/generate", async (req: any, res: any) => {
     try {
