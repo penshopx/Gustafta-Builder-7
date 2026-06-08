@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase, LayoutList
+  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin
 } from "lucide-react";
 
 interface Tool {
@@ -127,6 +127,17 @@ const KOMPETENSI_TOOLS = [
     badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
     label: "Generator Dokumen SKK — Surat Pernyataan, Keterangan & Pengantar",
     desc: "Generate 3 jenis surat resmi untuk aplikasi SKK: Surat Pernyataan Pengalaman Kerja (bermaterai), Surat Keterangan Kerja dari perusahaan, dan Surat Pengantar ke LSP.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/jalur-sertifikasi",
+    icon: <MapPin className="h-6 w-6" />,
+    iconBg: "bg-orange-500/10",
+    iconColor: "text-orange-400",
+    badgeColor: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+    label: "Rekomendasi Jalur Sertifikasi SKK — Roadmap Karir",
+    desc: "Input profil (profesi, bidang, pengalaman, target karir) → AI buat roadmap sertifikasi multi-tahun: urutan SKK, timeline, prasyarat, estimasi biaya, dan dampak karir tiap tahap.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
   },

@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -149,6 +149,19 @@ const TOOLS = [
     bg: "bg-sky-500/5",
     badge: "Gelombang 3",
     badgeColor: "text-sky-400 border-sky-400/30",
+    live: true,
+  },
+  {
+    href: "/jalur-sertifikasi",
+    icon: MapPin,
+    label: "Rekomendasi Jalur Sertifikasi SKK",
+    sublabel: "Roadmap multi-tahun · biaya · timeline · karir",
+    desc: "Input profil + target karir → AI rancang roadmap sertifikasi SKK optimal: urutan SKK per tahun, prasyarat, estimasi biaya kumulatif, dan dampak karir setiap langkah.",
+    color: "text-orange-400",
+    borderColor: "border-orange-500/30",
+    bg: "bg-orange-500/5",
+    badge: "Gelombang 3",
+    badgeColor: "text-orange-400 border-orange-400/30",
     live: true,
   },
   {

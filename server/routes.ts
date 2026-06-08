@@ -19666,6 +19666,68 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: JALUR SERTIFIKASI SKK ====================
+  app.post("/api/tools/jalur-sertifikasi", async (req: any, res: any) => {
+    try {
+      const { profesi, bidang, pengalaman, pendidikan, skkSudahPunya, targetKarir, horizon } = req.body;
+      if (!profesi || !bidang || !targetKarir) return res.status(400).json({ error: "Profesi, bidang, dan target karir wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const prompt = `Anda adalah konsultan sertifikasi konstruksi Indonesia berpengalaman. Buat roadmap sertifikasi SKK yang optimal berdasarkan profil berikut:
+
+Profil kandidat:
+- Profesi saat ini: ${profesi}
+- Bidang keahlian: ${bidang}
+- Pengalaman kerja: ${pengalaman}
+- Pendidikan terakhir: ${pendidikan}
+- SKK yang sudah dimiliki: ${skkSudahPunya || "Belum ada"}
+- Target karir: ${targetKarir}
+- Horizon perencanaan: ${horizon}
+
+Buat roadmap sertifikasi SKK yang realistis dan optimal. Kembalikan JSON PERSIS struktur ini:
+{
+  "profilRingkas": "1 kalimat ringkasan profil kandidat",
+  "targetKarir": "${targetKarir}",
+  "totalEstimasiBiaya": "estimasi total biaya sertifikasi dalam format 'Rp X–Y juta'",
+  "totalTahun": "total waktu dalam format 'X–Y tahun'",
+  "ringkasanStrategi": "2-3 kalimat strategi jalur sertifikasi yang dipilih dan mengapa ini optimal untuk profil ini",
+  "langkah": [
+    {
+      "tahap": 1,
+      "tahunTarget": "Tahun 1–2 (atau lebih spesifik)",
+      "skkYangDiperoleh": "nama SKK lengkap dengan level (misal: Ahli K3 Konstruksi — Muda)",
+      "kkniLevel": "KKNI Level X",
+      "prasyarat": "syarat pengalaman dan pendidikan minimum untuk SKK ini",
+      "alasan": "2 kalimat mengapa SKK ini menjadi langkah yang tepat di tahap ini",
+      "estimasiBiaya": "Rp X–Y juta",
+      "estimasiWaktuPersiapan": "X bulan persiapan",
+      "manfaatKarir": "dampak konkret pada karir setelah mendapat SKK ini",
+      "prioritas": "Wajib" atau "Sangat Direkomendasikan" atau "Opsional"
+    }
+  ],
+  "keuntunganJalurIni": ["3-4 keunggulan spesifik jalur yang dirancang ini"],
+  "peringatanPenting": ["2-3 hal yang perlu diperhatikan / risiko dalam menjalankan roadmap ini"],
+  "tipUmum": "1-2 kalimat tips praktis menjalankan roadmap sertifikasi ini dengan sukses"
+}
+
+Buat 3-5 langkah sertifikasi yang logis dan berurutan. Sesuaikan dengan regulasi LPJK/BNSP (syarat pengalaman per level KKNI: Muda=2th, Madya=5th, Utama=10th), realita biaya pasar Indonesia 2024-2025, dan tujuan karir kandidat.`;
+
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+        max_tokens: 2500,
+      });
+      const data = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+      return res.json(data);
+    } catch (e: any) {
+      console.error("jalur-sertifikasi error:", e);
+      res.status(500).json({ error: "Gagal membuat roadmap. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: ANALISIS UNIT SKKNI ====================
   app.post("/api/tools/analisis-skkni", async (req: any, res: any) => {
     try {
