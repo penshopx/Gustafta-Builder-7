@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -149,6 +149,19 @@ const TOOLS = [
     bg: "bg-sky-500/5",
     badge: "Gelombang 3",
     badgeColor: "text-sky-400 border-sky-400/30",
+    live: true,
+  },
+  {
+    href: "/tracker-skk",
+    icon: Briefcase,
+    label: "Tracker Portofolio SKK",
+    sublabel: "Dashboard semua SKK Anda · aktif/expired/segera",
+    desc: "Simpan semua sertifikat SKK dalam satu dashboard — status aktif/akan expired/sudah expired, countdown hari, progress bar masa berlaku, dan akses cepat panduan perpanjangan.",
+    color: "text-teal-400",
+    borderColor: "border-teal-500/30",
+    bg: "bg-teal-500/5",
+    badge: "Gelombang 3",
+    badgeColor: "text-teal-400 border-teal-400/30",
     live: true,
   },
   {

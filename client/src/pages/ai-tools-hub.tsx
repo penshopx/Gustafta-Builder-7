@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare
+  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase
 } from "lucide-react";
 
 interface Tool {
@@ -129,6 +129,17 @@ const KOMPETENSI_TOOLS = [
     desc: "Generate 3 jenis surat resmi untuk aplikasi SKK: Surat Pernyataan Pengalaman Kerja (bermaterai), Surat Keterangan Kerja dari perusahaan, dan Surat Pengantar ke LSP.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
+  },
+  {
+    href: "/tracker-skk",
+    icon: <Briefcase className="h-6 w-6" />,
+    iconBg: "bg-teal-500/10",
+    iconColor: "text-teal-400",
+    badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+    label: "Tracker Portofolio SKK — Dashboard Semua Sertifikat",
+    desc: "Dashboard personal: simpan semua SKK, status aktif/segera/expired otomatis, countdown hari, progress bar masa berlaku, export/import JSON backup. Tanpa login.",
+    tag: "Kompetensi",
+    model: "Lokal (tanpa AI)",
   },
   {
     href: "/simulator-wawancara",
