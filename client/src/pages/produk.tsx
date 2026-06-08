@@ -297,7 +297,7 @@ const FITUR_LANJUTAN = [
       { hub: "🟣 Kreator", items: ["Editorial Calendar", "Script YouTube/Podcast", "Proposal Brand Deal", "Laporan Performa Konten"] },
       { hub: "🟢 Bekerja", items: ["AI Notulis Rapat", "Drafter Kontrak/SPK/NDA", "RAB & Estimasi Biaya", "Laporan KPI Tim"] },
       { hub: "🟠 Berusaha", items: ["AI Copywriter Medsos", "Sales Script & Objection Handling", "Laporan Cashflow", "NPS & Survey Kepuasan"] },
-      { hub: "🔵 AI Analytics", items: ["Risk Register Builder", "Gap Analysis", "Scoring & Assessment", "Recommendation Engine"] },
+      { hub: "🎓 Kompetensi PKB", items: ["Executive Summary PKB (25 poin SKP)", "Penulis Cerdas — dokumen bab per bab", "Input: E-SIMPAN + YouTube + lapangan", "Studio Kompetensi & Rubrik 0–3"] },
     ],
   },
   {
@@ -307,12 +307,12 @@ const FITUR_LANJUTAN = [
     border: "border-blue-200 dark:border-blue-800",
     bg: "bg-blue-50/40 dark:bg-blue-950/20",
     badgeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    desc: "AI menghasilkan dokumen profesional lengkap dari knowledge base chatbot Anda — bukan template kosong.",
+    desc: "AI menghasilkan dokumen profesional dari knowledge base & data proyek — bukan template kosong.",
     groups: [
-      { hub: "📘 eBook Generator", items: ["Buku panduan kompetensi otomatis", "Diekspor ke HTML/PDF", "Dari KB chatbot → buku siap cetak", "Termasuk daftar isi & indeks"] },
-      { hub: "🎓 eCourse Builder", items: ["Kurikulum microlearning dari KB", "Modul + kuis otomatis", "Sertifikat digital (PDF)", "Target peserta, learning outcomes"] },
-      { hub: "📄 Docgen Mini Apps", items: ["HSE Plan & PQP Tender", "Compliance Matrix", "Metode Pelaksanaan", "Executive Summary Penawaran"] },
-      { hub: "✍️ Penulis Cerdas", items: ["AI tulis dokumen bab per bab", "Input bahan mentah → output profesional", "PKB/SKP 25 poin", "Kontrak, proposal, laporan"] },
+      { hub: "📘 eBook & eCourse", items: ["Buku panduan kompetensi dari KB", "eCourse microlearning + kuis", "Sertifikat digital (PDF)", "Ekspor HTML/PDF siap cetak"] },
+      { hub: "📄 Dokumen Tender/Proyek", items: ["HSE Plan & PQP Tender", "Compliance Matrix & Audit", "Metode Pelaksanaan", "Executive Summary Penawaran"] },
+      { hub: "🎓 Ekosistem Kompetensi PKB", items: ["Executive Summary PKB 25 poin SKP", "Input: proyek E-SIMPAN + pelatihan + YouTube", "Penulis Cerdas: dokumen bab per bab", "Klaim SKP ke LPJK"] },
+      { hub: "✍️ Dokumen Legal & Bisnis", items: ["Drafter Kontrak/SPK/NDA/MoU", "Laporan kinerja & KPI tim", "Proposal & media kit", "Surat resmi industri Indonesia"] },
     ],
   },
   {
