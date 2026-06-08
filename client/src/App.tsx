@@ -192,6 +192,11 @@ import KalkulatorCPD from "@/pages/kalkulator-cpd";
 import EvaluasiPortofolio from "@/pages/evaluasi-portofolio";
 import GeneratorCVSKK from "@/pages/generator-cv-skk";
 import MateriBelajarSKK from "@/pages/materi-belajar-skk";
+import CheckerKesiapanAsesmen from "@/pages/checker-kesiapan-asesmen";
+import PanduanPemilihanLSP from "@/pages/panduan-pemilihan-lsp";
+import KalkulatorManfaatSKKBUJK from "@/pages/kalkulator-manfaat-skk-bujk";
+import GeneratorPortofolioSKK from "@/pages/generator-portofolio-skk";
+import GeneratorSertifikatPengalaman from "@/pages/generator-sertifikat-pengalaman";
 import PetaUnitKompetensi from "@/pages/peta-unit-kompetensi";
 import AsistenBandingSKK from "@/pages/asisten-banding-skk";
 import KalkulatorUpahSKK from "@/pages/kalkulator-upah-skk";
@@ -1190,6 +1195,11 @@ function Router() {
         <Route path="/evaluasi-portofolio" component={EvaluasiPortofolio} />
         <Route path="/generator-cv-skk" component={GeneratorCVSKK} />
         <Route path="/materi-belajar-skk" component={MateriBelajarSKK} />
+        <Route path="/checker-kesiapan-asesmen" component={CheckerKesiapanAsesmen} />
+        <Route path="/panduan-pemilihan-lsp" component={PanduanPemilihanLSP} />
+        <Route path="/kalkulator-manfaat-skk-bujk" component={KalkulatorManfaatSKKBUJK} />
+        <Route path="/generator-portofolio-skk" component={GeneratorPortofolioSKK} />
+        <Route path="/generator-sertifikat-pengalaman" component={GeneratorSertifikatPengalaman} />
         <Route path="/peta-unit-kompetensi" component={PetaUnitKompetensi} />
         <Route path="/asisten-banding-skk" component={AsistenBandingSKK} />
         <Route path="/kalkulator-upah-skk" component={KalkulatorUpahSKK} />

@@ -19666,6 +19666,191 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS G7: CHECKER KESIAPAN ASESMEN ====================
+  app.post("/api/tools/checker-kesiapan-asesmen", async (req: any, res: any) => {
+    try {
+      const { jabatan, dokumenDimiliki, dokumenBelumAda } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi SKK BNSP Indonesia. Analisis kesiapan dokumen asesmen untuk jabatan: "${jabatan}".
+
+Dokumen sudah dimiliki: ${JSON.stringify(dokumenDimiliki)}
+Dokumen belum ada: ${JSON.stringify(dokumenBelumAda)}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "skorKesiapan": <0-100 berdasarkan kelengkapan dan relevansi dokumen untuk jabatan ini>,
+  "statusKesiapan": "Siap Asesmen" (80+) atau "Hampir Siap" (60-79) atau "Perlu Melengkapi" (40-59) atau "Belum Siap" (<40),
+  "dokumenLengkap": ["dokumen yang sudah ada dan relevan untuk jabatan ${jabatan}"],
+  "dokumenKurang": [
+    {
+      "dokumen": "nama dokumen yang kurang",
+      "alasan": "mengapa dokumen ini kritis untuk asesmen ${jabatan}",
+      "caraMendapatkan": "langkah konkret cara mendapatkan/membuat dokumen ini"
+    }
+  ],
+  "dokumenOpsional": [
+    { "dokumen": "dokumen tambahan yang memperkuat", "manfaat": "manfaat jika ada" }
+  ],
+  "rekomendasiPrioritas": ["3-5 tindakan prioritas berurutan yang harus dilakukan sebelum asesmen"],
+  "estimasiWaktuMelengkapi": "estimasi waktu untuk melengkapi semua kekurangan",
+  "tipsFinalisasi": ["3-4 tips finalisasi persiapan spesifik untuk jabatan ${jabatan}"]
+}
+
+Fokus pada dokumen yang paling kritis untuk jabatan ${jabatan}. Hanya flag kekurangan yang benar-benar akan menjadi masalah saat asesmen.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 2000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("checker-kesiapan error:", e); res.status(500).json({ error: "Gagal menganalisis kesiapan." }); }
+  });
+
+  // ==================== AI TOOLS G7: PANDUAN PEMILIHAN LSP ====================
+  app.post("/api/tools/panduan-pemilihan-lsp", async (req: any, res: any) => {
+    try {
+      const { jabatan, prioritas } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi konstruksi Indonesia yang ahli tentang ekosistem LSP/BNSP.
+
+Jabatan SKK: ${jabatan}
+Prioritas kandidat: ${prioritas?.join(", ") || "tidak disebutkan"}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "ringkasanPanduan": "ringkasan panduan 2 kalimat yang spesifik untuk jabatan ini",
+  "tipologiLSP": [
+    {
+      "tipe": "nama tipe LSP",
+      "contoh": "contoh LSP nyata Indonesia",
+      "keunggulan": "keunggulan utama",
+      "kelemahan": "kelemahan utama",
+      "cocokUntuk": "siapa yang cocok memilih LSP tipe ini"
+    }
+  ],
+  "caraMenemukanLSP": [
+    { "langkah": "langkah singkat", "detail": "cara konkret melakukan langkah ini", "tips": "tips praktis" }
+  ],
+  "checklistVerifikasiLSP": [
+    {
+      "kriteria": "kriteria yang harus dicek",
+      "cara": "cara memverifikasi kriteria ini",
+      "bendaRed": true/false (true jika ini red flag — LSP yang tidak memenuhi harus dihindari)
+    }
+  ],
+  "estimasiBiaya": [
+    { "komponenBiaya": "nama komponen biaya", "rentang": "Rp X – Y juta", "catatan": "catatan penting" }
+  ],
+  "tipsNegosiasiJadwal": ["4-5 tips negosiasi jadwal dan biaya dengan LSP"],
+  "pertanyaanKepadaLSP": ["6-8 pertanyaan yang harus ditanyakan sebelum memilih LSP"],
+  "peringatanUmum": ["3-4 tanda bahaya LSP yang harus diwaspadai di Indonesia"]
+}
+
+Buat 3 tipologi LSP yang relevan, 4-5 langkah menemukan, 6-7 checklist verifikasi (2-3 bendaRed), 3-4 komponen biaya. Berikan informasi yang konkret dan actionable.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-pemilihan-lsp error:", e); res.status(500).json({ error: "Gagal generate panduan." }); }
+  });
+
+  // ==================== AI TOOLS G7: GENERATOR PORTOFOLIO SKK ====================
+  app.post("/api/tools/generator-portofolio-skk", async (req: any, res: any) => {
+    try {
+      const { jabatan, namaLengkap, proyekList } = req.body;
+      if (!jabatan || !namaLengkap) return res.status(400).json({ error: "Jabatan dan nama wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi BNSP yang ahli membuat portofolio SKK profesional.
+
+Jabatan target: ${jabatan}
+Nama: ${namaLengkap}
+Proyek: ${JSON.stringify(proyekList)}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "namaLengkap": "${namaLengkap}",
+  "ringkasanProfil": "ringkasan profil profesional 2-3 kalimat yang kuat dan relevan untuk ${jabatan}",
+  "kompetensiUtama": ["6-8 kompetensi utama yang relevan berdasarkan pengalaman proyek"],
+  "proyekDetail": [
+    {
+      "namaProyek": "nama proyek",
+      "jabatan": "jabatan di proyek",
+      "nilaiKontrak": "nilai kontrak",
+      "durasi": "durasi",
+      "pemilik": "pemilik proyek",
+      "uraianTugas": ["4-5 uraian tugas konkret dan spesifik sesuai jabatan ${jabatan}"],
+      "hasilCapaian": "capaian terukur yang bisa diverifikasi",
+      "unitKompetensiYangDibuktikan": ["2-3 kode/nama unit kompetensi SKKNI yang dibuktikan proyek ini"]
+    }
+  ],
+  "kalimatPenutup": "kalimat penutup portofolio yang profesional",
+  "formatAPL02": "draft isian APL-02 (Asesmen Mandiri) berformat: untuk setiap unit kompetensi utama ${jabatan}, cantumkan pernyataan mandiri: Saya kompeten dalam [unit] karena [bukti dari proyek]. Buat 4-5 unit kompetensi.",
+  "saranPenguatan": ["3-4 saran untuk memperkuat portofolio sebelum diserahkan ke LSP"]
+}`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-portofolio-skk error:", e); res.status(500).json({ error: "Gagal generate portofolio." }); }
+  });
+
+  // ==================== AI TOOLS G7: GENERATOR SERTIFIKAT PENGALAMAN ====================
+  app.post("/api/tools/generator-sertifikat-pengalaman", async (req: any, res: any) => {
+    try {
+      const { jabatan, namaLengkap, perusahaan, proyekList } = req.body;
+      if (!jabatan || !namaLengkap) return res.status(400).json({ error: "Jabatan dan nama wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const proyekStr = proyekList?.map((p: any) => `${p.namaProyek} (${p.jabatanDiProyek}, ${p.periodeAwal}–${p.periodeAkhir}, nilai: ${p.nilaiKontrak || "N/A"}, pemberi kerja: ${p.pemberiKerja || "N/A"}, lokasi: ${p.lokasiProyek || "N/A"})`).join("; ");
+      const prompt = `Anda adalah ahli hukum konstruksi Indonesia yang membuat surat resmi untuk keperluan sertifikasi SKK BNSP.
+
+Nama: ${namaLengkap}
+Perusahaan: ${perusahaan || "[NAMA PERUSAHAAN]"}
+Jabatan SKK target: ${jabatan}
+Proyek: ${proyekStr}
+
+Kembalikan JSON PERSIS dengan 3 dokumen surat formal:
+{
+  "jabatan": "${jabatan}",
+  "namaLengkap": "${namaLengkap}",
+  "dokumenList": [
+    {
+      "tipe": "Surat Pernyataan Pengalaman",
+      "konten": "SURAT PERNYATAAN PENGALAMAN KERJA\n\nYang bertanda tangan di bawah ini:\n\nNama: ${namaLengkap}\n...[isi lengkap surat pernyataan bermaterai tentang pengalaman kerja, mencantumkan semua proyek, jabatan, dan durasi, diakhiri dengan tanda tangan di atas materai]\n\n...",
+      "instruksi": "Cetak, tempel materai Rp 10.000 pada kolom tanda tangan, dan tandatangani di atasnya"
+    },
+    {
+      "tipe": "Surat Keterangan Kerja",
+      "konten": "SURAT KETERANGAN\nNo: [NOMOR SURAT]\n\n...[isi surat keterangan dari perusahaan yang menerangkan pengalaman kerja kandidat, format resmi dari pimpinan perusahaan]\n\n...",
+      "instruksi": "Minta pimpinan/HRD perusahaan menandatangani dan membubuhkan stempel resmi perusahaan"
+    },
+    {
+      "tipe": "Surat Pengantar LSP",
+      "konten": "SURAT PENGANTAR\n\nKepada Yth.\nKetua LSP [NAMA LSP]\ndi Tempat\n\n...[isi surat pengantar formal untuk mendaftar asesmen SKK ${jabatan}, menyebutkan ringkasan pengalaman dan dokumen yang disertakan]\n\nHormat kami,\n\n[Tanda Tangan]\n${namaLengkap}\n[NIK/No. KTP]",
+      "instruksi": "Tandatangani sendiri sebagai pemohon asesmen SKK"
+    }
+  ],
+  "catatanPenting": ["4-5 catatan penting tentang penggunaan dokumen ini untuk keperluan SKK"]
+}
+
+Buat surat yang LENGKAP, FORMAL, dan SIAP PAKAI. Cantumkan semua proyek dari data yang diberikan. Gunakan bahasa formal Indonesia yang baku.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-sertifikat-pengalaman error:", e); res.status(500).json({ error: "Gagal generate dokumen." }); }
+  });
+
   // ==================== AI TOOLS: PETA UNIT KOMPETENSI ====================
   app.post("/api/tools/peta-unit-kompetensi", async (req: any, res: any) => {
     try {
