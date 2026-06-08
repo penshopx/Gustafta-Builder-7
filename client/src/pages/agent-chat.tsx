@@ -133,6 +133,8 @@ const SLASH_COMMANDS = [
   { group: "Gambar Teknis", cmd: "/mep", emoji: "⚙️", label: "Analisis MEP", desc: "Baca gambar Mekanikal/Elektrikal/Plumbing", prefix: "Analisis gambar MEP (Mekanikal/Elektrikal/Plumbing) berikut. Identifikasi sistem, jalur, ukuran, dan spesifikasi:\n\n/mep\n" },
   { group: "Gambar Teknis", cmd: "/shopdrw", emoji: "📐", label: "Review Shop Drawing", desc: "Review shop drawing siap fabrikasi", prefix: "Review shop drawing berikut untuk kelengkapan dokumen, kebenaran teknis, dan kesiapan fabrikasi/konstruksi:\n\n/shopdrw\n" },
   { group: "Gambar Teknis", cmd: "/as-built", emoji: "📍", label: "Analisis As-Built", desc: "Baca gambar kondisi terbangun (as-built)", prefix: "Analisis as-built drawing berikut. Identifikasi kondisi aktual, perubahan dari rencana awal, dan kelengkapan dokumentasi:\n\n/as-built\n" },
+  // 🎨 Generate Gambar AI
+  { group: "Buat Gambar", cmd: "/gambar", emoji: "🎨", label: "Generate Gambar (DALL-E)", desc: "Buat gambar AI dari deskripsi teks", prefix: "/gambar " },
 ];
 
 // ── Quick Actions (Notion AI style) ─────────────────────────────────────────
@@ -382,6 +384,7 @@ export default function AgentChat() {
   const [guestMessageCount, setGuestMessageCount] = useState(0);
   const [showUpgradeWall, setShowUpgradeWall] = useState(false);
   const [dataMasterInjected, setDataMasterInjected] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
 
   // Per-chatbot trial tracking (localStorage)
@@ -601,6 +604,73 @@ export default function AgentChat() {
     URL.revokeObjectURL(url);
   };
 
+  const exportChatPdf = async () => {
+    if (messages.length === 0) return;
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
+      const pageW = doc.internal.pageSize.getWidth();
+      const margin = 15;
+      const maxW = pageW - margin * 2;
+      let y = 20;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text(`Percakapan: ${config?.name || "AI Assistant"}`, margin, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      doc.text(`Diekspor: ${new Date().toLocaleString("id-ID")}`, margin, y);
+      y += 8;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, y, pageW - margin, y);
+      y += 6;
+
+      for (const m of messages) {
+        const sender = m.role === "user" ? "Anda" : (config?.name || "AI");
+        const time = m.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+        const isUser = m.role === "user";
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(isUser ? 30 : 79, isUser ? 30 : 70, isUser ? 30 : 229);
+        doc.text(`${isUser ? "👤" : "🤖"} ${sender} — ${time}`, margin, y);
+        y += 5;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(50, 50, 50);
+
+        const cleanText = m.content
+          .replace(/\*\*(.*?)\*\*/g, "$1")
+          .replace(/\*(.*?)\*/g, "$1")
+          .replace(/#{1,6}\s/g, "")
+          .replace(/!\[.*?\]\(.*?\)/g, "[gambar]")
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+
+        const lines = doc.splitTextToSize(cleanText, maxW);
+        for (const line of lines) {
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(line, margin, y);
+          y += 5;
+        }
+        y += 4;
+        doc.setDrawColor(235, 235, 235);
+        doc.line(margin, y - 2, pageW - margin, y - 2);
+        y += 3;
+        if (y > 270) { doc.addPage(); y = 20; }
+      }
+
+      doc.save(`chat-${config?.name || "ai"}-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    }
+  };
+
   const copyFullChat = async () => {
     if (messages.length === 0) return;
     const text = buildChatText("txt");
@@ -727,6 +797,23 @@ export default function AgentChat() {
         if (res.ok) {
           const data = await res.json();
           uploaded.push(data);
+
+          // Auto-transcribe audio files
+          if (data.category === "audio") {
+            try {
+              const tFormData = new FormData();
+              tFormData.append("file", file);
+              const tRes = await fetch("/api/chat/transcribe", { method: "POST", body: tFormData });
+              if (tRes.ok) {
+                const tData = await tRes.json();
+                if (tData.transcript) {
+                  setInput(prev => prev ? `${prev}\n\n${tData.transcript}` : tData.transcript);
+                }
+              }
+            } catch {
+              // transcription optional — continue silently
+            }
+          }
         }
       } catch (err) {
         console.error("Upload failed:", err);
@@ -1006,6 +1093,42 @@ export default function AgentChat() {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
+
+    // ── DALL-E image generation intercept ──────────────────────────────────────
+    const gambarMatch = displayContent.match(/^\/gambar\s+(.+)/i);
+    if (gambarMatch) {
+      const imagePrompt = gambarMatch[1].trim();
+      setIsGeneratingImage(true);
+      try {
+        const genRes = await fetch("/api/chat/generate-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: imagePrompt }),
+        });
+        const genData = await genRes.json();
+        if (!genRes.ok) throw new Error(genData.error || "Gagal generate");
+        const aiMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: `🎨 **Gambar AI berhasil dibuat!**\n\n> Prompt: ${imagePrompt}${genData.revisedPrompt && genData.revisedPrompt !== imagePrompt ? `\n> *(DALL-E revised: ${genData.revisedPrompt})*` : ""}\n\n![Generated Image](${genData.imageUrl})`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiMsg]);
+      } catch (err: any) {
+        const errMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: `❌ Gagal membuat gambar: ${err.message}`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, errMsg]);
+      } finally {
+        setIsGeneratingImage(false);
+        setIsTyping(false);
+      }
+      return;
+    }
+    // ── End DALL-E intercept ───────────────────────────────────────────────────
 
     try {
       const resolvedAgentId = config.agentId || params.agentId;
@@ -2062,6 +2185,10 @@ export default function AgentChat() {
                   <DropdownMenuItem onClick={exportChatMarkdown}>
                     <FileCode2 className="w-3.5 h-3.5 mr-2" />
                     Unduh sebagai .MD
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportChatPdf}>
+                    <FileOutput className="w-3.5 h-3.5 mr-2 text-red-500" />
+                    Unduh sebagai .PDF
                   </DropdownMenuItem>
                   {pinnedIds.size > 0 && (
                     <DropdownMenuItem onClick={exportPinnedMessages}>

@@ -163,6 +163,7 @@ import ProductTour from "@/pages/product-tour";
 import NotFound from "@/pages/not-found";
 import RabKalkulator from "@/pages/rab-kalkulator";
 import K3Vision from "@/pages/k3-vision";
+import PkbBuilder from "@/pages/pkb-builder";
 import AiToolsHub from "@/pages/ai-tools-hub";
 import CertTracker from "@/pages/cert-tracker";
 import DocuGen from "@/pages/docu-gen";
@@ -1124,6 +1125,7 @@ function Router() {
         <Route path="/product-tour" component={ProductTour} />
         <Route path="/rab-kalkulator" component={RabKalkulator} />
         <Route path="/k3-vision" component={K3Vision} />
+        <Route path="/pkb-builder" component={PkbBuilder} />
         <Route path="/ai-tools" component={AiToolsHub} />
         <Route path="/cert-tracker" component={CertTracker} />
         <Route path="/docu-gen" component={DocuGen} />

@@ -2884,6 +2884,22 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     }
   });
 
+  // Audio file transcription for chat
+  app.post("/api/chat/transcribe", upload.single("file"), async (req: any, res: any) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "No file" });
+      const { speechToText } = await import("./replit_integrations/audio/client");
+      const ext = path.extname(req.file.originalname).toLowerCase().replace(".", "") as any;
+      const validExts = ["mp3", "wav", "webm", "ogg", "m4a", "flac"];
+      if (!validExts.includes(ext)) return res.status(400).json({ error: "Format audio tidak didukung" });
+      const transcript = await speechToText(req.file.buffer, ext);
+      res.json({ transcript: transcript || "" });
+    } catch (e: any) {
+      console.error("Transcribe error:", e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // Export table data to Excel/CSV
   app.post("/api/chat/export", async (req, res) => {
     try {
@@ -18980,6 +18996,301 @@ Hasilkan dokumen lengkap yang siap ditandatangani. Gunakan format surat Indonesi
       await db.delete(bjCertificates).where(eq(bjCertificates.id, Number(req.params.id)));
       res.json({ ok: true });
     } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ── PKB Builder: Extract data from E-SIMPAN screenshots ─────────────────────
+  app.post("/api/pkb-builder/extract", async (req: any, res: any) => {
+    try {
+      const multer = (await import("multer")).default;
+      const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
+      upload.array("screenshots", 5)(req, res, async (err: any) => {
+        if (err) return res.status(400).json({ error: err.message });
+        const files = (req.files as Express.Multer.File[]) || [];
+        if (!files.length) return res.status(400).json({ error: "Tidak ada screenshot yang dikirim" });
+
+        const OpenAI = (await import("openai")).default;
+        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+        const imageContents = files.map(f => ({
+          type: "image_url" as const,
+          image_url: { url: `data:${f.mimetype};base64,${f.buffer.toString("base64")}`, detail: "high" as const },
+        }));
+
+        const systemPrompt = `Kamu adalah AI ekstraksi data dari screenshot sistem E-SIMPAN (simpan.pu.go.id) milik Kementerian PUPR Indonesia.
+Tugasmu: baca screenshot dan ekstrak data proyek konstruksi yang tersedia.
+Kembalikan HANYA JSON valid dengan field berikut (kosongkan string "" jika tidak ditemukan):
+{
+  "namaPeserta": "",
+  "nomorSKK": "",
+  "jabatanKerja": "",
+  "institusi": "",
+  "namaProyek": "",
+  "nilaiKontrak": "",
+  "lokasiProyek": "",
+  "tahunProyek": "",
+  "posisiDiProyek": "",
+  "durasiKeterlibatan": "",
+  "deskripsiSingkat": "",
+  "namaKegiatan": "",
+  "penyelenggara": "",
+  "tanggalKegiatan": "",
+  "durasiKegiatan": ""
+}
+Jangan tambahkan penjelasan apapun. Hanya JSON.`;
+
+        const response = await client.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: [{ type: "text", text: "Ekstrak semua data proyek dari screenshot E-SIMPAN ini:" }, ...imageContents] },
+          ],
+          max_tokens: 1000,
+        });
+
+        const raw = response.choices[0]?.message?.content || "{}";
+        let data: Record<string, string> = {};
+        try {
+          const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+          data = JSON.parse(cleaned);
+        } catch {
+          data = {};
+        }
+
+        res.json({ data, screenshotCount: files.length });
+      });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── PKB Builder: Generate Executive Summary PKB (streaming) ──────────────────
+  app.post("/api/pkb-builder/generate", async (req: any, res: any) => {
+    try {
+      const { data } = req.body as { data: Record<string, string> };
+      if (!data) return res.status(400).json({ error: "Data tidak ditemukan" });
+
+      const OpenAI = (await import("openai")).default;
+      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const namaPeserta = data.namaPeserta || "[NAMA PESERTA]";
+      const institusi = data.institusi || "[INSTITUSI/LEMBAGA]";
+      const namaKegiatan = data.namaKegiatan || data.namaProyek || "[MASUKKAN NAMA KEGIATAN PKB]";
+      const tahun = data.tahunProyek || new Date().getFullYear().toString();
+
+      const systemPrompt = `[PENULIS_CERDAS_PKB_v1.0]
+
+Kamu adalah AI Penulis Cerdas yang membantu tenaga profesional menyusun Executive Summary PKB (Pengembangan Keprofesian Berkelanjutan) untuk klaim SKP.
+
+IDENTITAS DOKUMEN
+Nama Peserta : ${namaPeserta}
+Institusi    : ${institusi}
+Kegiatan PKB : ${namaKegiatan}
+Tahun        : ${tahun}
+
+ATURAN KETAT (WAJIB DIPATUHI):
+1. Jangan mengarang fakta. Gunakan HANYA data dari konteks yang tersedia.
+2. Jika data tidak ada, tandai dengan: [MASUKKAN DATA: keterangan apa yang dibutuhkan]
+3. Dokumen BUKAN ghostwriting — refleksi harus dari sudut pandang peserta.
+4. Gunakan kalimat aktif, paragraf pendek (3-5 kalimat), bahasa Indonesia formal-profesional.
+5. Target panjang: 8-10 halaman A4, sekitar 2.500-3.500 kata total.
+6. Struktur WAJIB: 5 Bab sesuai standar PKB nasional.
+
+FORMAT OUTPUT — EXECUTIVE SUMMARY PKB 25 POIN:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXECUTIVE SUMMARY
+PENGEMBANGAN KEPROFESIAN BERKELANJUTAN (PKB)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Nama Peserta  : ${namaPeserta}
+Institusi     : ${institusi}
+Jenis Kegiatan: ${namaKegiatan}
+Tahun PKB     : ${tahun}
+Jumlah SKP    : 25 SKP (target)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB I — PENDAHULUAN (5 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1.1 Latar Belakang Kegiatan
+[Jelaskan mengapa kegiatan PKB ini diikuti — 2-3 paragraf.]
+
+1.2 Tujuan Pengembangan Kompetensi
+[Apa yang ingin dicapai setelah mengikuti kegiatan ini.]
+
+1.3 Relevansi dengan Tugas dan Jabatan
+[Hubungan antara kegiatan PKB dengan tugas sehari-hari.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB II — DESKRIPSI KEGIATAN PKB (5 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2.1 Informasi Kegiatan
+Nama Kegiatan  : ${namaKegiatan}
+Penyelenggara  : ${data.penyelenggara || "[MASUKKAN DATA: nama lembaga penyelenggara]"}
+Tanggal        : ${data.tanggalKegiatan || "[MASUKKAN DATA: tanggal pelaksanaan]"}
+Tempat/Platform: [MASUKKAN DATA: lokasi atau platform online]
+Durasi         : ${data.durasiKegiatan || "[MASUKKAN DATA: jam pelatihan / jumlah hari]"}
+
+2.2 Narasumber / Fasilitator
+[Daftar narasumber — tandai [MASUKKAN DATA] jika tidak tersedia.]
+
+2.3 Peserta Kegiatan
+[Profil peserta — tandai [MASUKKAN DATA] jika tidak tersedia.]
+
+2.4 Metode Pelaksanaan
+[Deskripsikan metode yang digunakan — sesuaikan dengan ${data.sumberBelajar || "jenis kegiatan"}.]
+
+2.5 Kurikulum & Materi yang Diajarkan
+[Daftar modul/topik yang dibahas. Minimal 5 poin jika data tersedia.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB III — POKOK-POKOK MATERI & PEMBELAJARAN (8 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3.1 Rangkuman Materi Inti
+[Elaborasikan pokok-pokok isi kegiatan — 3-5 paragraf substansial berdasarkan konteks proyek: ${data.namaProyek || ""} ${data.deskripsiSingkat || ""}]
+
+3.2 Regulasi / Standar yang Dibahas
+[Peraturan, SNI, atau standar profesi yang relevan dengan bidang ${data.jabatanKerja || "profesi peserta"}.]
+
+3.3 Praktik Terbaik yang Dipelajari
+[Best practices, metode baru, atau tools yang dipelajari.]
+
+3.4 Studi Kasus / Contoh Nyata
+[Contoh kasus konkret — jika dari proyek, gunakan data: ${data.namaProyek || ""} di ${data.lokasiProyek || ""}.]
+
+3.5 Perkembangan Terkini di Bidang Ini
+[Tren, inovasi, atau perubahan regulasi terbaru yang relevan.]
+
+3.6 Perbandingan dengan Kondisi di Tempat Kerja
+[Bagaimana materi yang dipelajari berbeda atau sejalan dengan praktik di ${data.institusi || "tempat kerja peserta"}.]
+
+3.7 Gap Kompetensi yang Teridentifikasi
+[Area yang perlu dikembangkan lebih lanjut setelah kegiatan ini.]
+
+3.8 Sumber Referensi Tambahan
+[Buku, jurnal, platform, atau lembaga yang direkomendasikan.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB IV — MANFAAT & RENCANA IMPLEMENTASI (5 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4.1 Manfaat Langsung bagi Peserta
+[Pengetahuan/keterampilan baru yang langsung bisa diterapkan. Daftar konkret.]
+
+4.2 Manfaat bagi Organisasi / Tim
+[Dampak pada kinerja tim atau organisasi ${data.institusi || ""}.]
+
+4.3 Rencana Penerapan (Action Plan)
+┌────────────────────────────────────────────────────────────────┐
+│ No │ Rencana Tindakan              │ Target Waktu │ Indikator  │
+│ 1  │ [tindakan spesifik]           │ [bulan/tahun]│ [terukur]  │
+│ 2  │ [tindakan spesifik]           │ [bulan/tahun]│ [terukur]  │
+│ 3  │ [tindakan spesifik]           │ [bulan/tahun]│ [terukur]  │
+└────────────────────────────────────────────────────────────────┘
+
+4.4 Diseminasi Pengetahuan
+[Bagaimana peserta akan berbagi pengetahuan ini kepada rekan kerja.]
+
+4.5 Dukungan yang Dibutuhkan
+[Sumber daya atau dukungan manajemen yang diperlukan.]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BAB V — PENUTUP & REFLEKSI (2 Poin)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5.1 Kesimpulan
+[Rangkuman singkat: kegiatan PKB apa, apa yang didapat, dan kontribusinya. 2 paragraf.]
+
+5.2 Refleksi Pribadi
+[CATATAN UNTUK PESERTA: Bagian ini HARUS ditulis sendiri — apa yang paling berkesan, perubahan cara pandang, komitmen ke depan. Tulisan autentik, bukan formulaik. Saya tulis kerangkanya:]
+[Tuliskan pengalaman paling berkesan Anda selama mengikuti kegiatan ini dan komitmen pengembangan profesi Anda ke depan...]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAMPIRAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Lampiran 1: Screenshot Rekaman Proyek E-SIMPAN (terlampir)
+${data.nomorSKK ? `Lampiran 2: Sertifikat SKK Nomor ${data.nomorSKK}` : "Lampiran 2: Sertifikat / Bukti Keikutsertaan [LAMPIRKAN]"}
+Lampiran 3: Dokumentasi Kegiatan [LAMPIRKAN JIKA ADA]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+      const userMessage = `Data proyek dan kegiatan PKB:
+
+Nama Peserta     : ${namaPeserta}
+Jabatan SKK      : ${data.jabatanKerja || "[MASUKKAN DATA]"}
+Nomor SKK        : ${data.nomorSKK || "[MASUKKAN DATA]"}
+Institusi        : ${institusi}
+
+DATA PROYEK E-SIMPAN:
+Nama Proyek      : ${data.namaProyek || "[MASUKKAN DATA]"}
+Nilai Kontrak    : ${data.nilaiKontrak || "[MASUKKAN DATA]"}
+Lokasi           : ${data.lokasiProyek || "[MASUKKAN DATA]"}
+Tahun            : ${tahun}
+Posisi           : ${data.posisiDiProyek || "[MASUKKAN DATA]"}
+Durasi           : ${data.durasiKeterlibatan || "[MASUKKAN DATA]"}
+Deskripsi        : ${data.deskripsiSingkat || "[MASUKKAN DATA]"}
+
+KEGIATAN PKB:
+Jenis/Sumber     : ${data.sumberBelajar || "Pengalaman Lapangan"}
+Nama Kegiatan    : ${namaKegiatan}
+Penyelenggara    : ${data.penyelenggara || "[MASUKKAN DATA]"}
+Tanggal          : ${data.tanggalKegiatan || "[MASUKKAN DATA]"}
+Durasi           : ${data.durasiKegiatan || "[MASUKKAN DATA]"}
+
+Susun Executive Summary PKB 25 Poin sesuai format dan struktur di atas. Tulis lengkap semua bab. Gunakan semua data yang tersedia dan tandai bagian yang perlu dilengkapi peserta dengan [MASUKKAN DATA: keterangan].`;
+
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      const stream = await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage },
+        ],
+        max_tokens: 4000,
+        stream: true,
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        if (content) {
+          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        }
+      }
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── Image Generation (DALL-E 3) ──────────────────────────────────────────────
+  app.post("/api/chat/generate-image", async (req: any, res: any) => {
+    try {
+      const { prompt } = req.body as { prompt: string };
+      if (!prompt?.trim()) return res.status(400).json({ error: "Prompt kosong" });
+
+      const OpenAI = (await import("openai")).default;
+      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const response = await client.images.generate({
+        model: "dall-e-3",
+        prompt: prompt.trim(),
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+      });
+
+      const imageUrl = response.data?.[0]?.url;
+      if (!imageUrl) return res.status(500).json({ error: "Gagal generate gambar" });
+
+      res.json({ imageUrl, revisedPrompt: response.data?.[0]?.revised_prompt });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   });
 
   return httpServer;
