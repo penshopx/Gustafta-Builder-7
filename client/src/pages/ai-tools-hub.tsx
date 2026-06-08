@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
-  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3
+  Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
+  Award, GraduationCap, BookOpen
 } from "lucide-react";
 
 interface Tool {
@@ -17,6 +18,64 @@ interface Tool {
   tag: string;
   model: string;
 }
+
+const KOMPETENSI_TOOLS = [
+  {
+    href: "/kompetensi-hub",
+    icon: <BookOpen className="h-6 w-6" />,
+    iconBg: "bg-blue-500/10",
+    iconColor: "text-blue-400",
+    badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    label: "Kompetensi Hub — Pusat Sertifikasi SKK",
+    desc: "Landing page ekosistem kompetensi: diagnostik gap, mock asesmen, e-sertifikat, dan roadmap Gelombang 1–3 menuju 2030.",
+    tag: "Hub",
+    model: "Multi-tool",
+  },
+  {
+    href: "/diagnostik-kompetensi",
+    icon: <Brain className="h-6 w-6" />,
+    iconBg: "bg-indigo-500/10",
+    iconColor: "text-indigo-400",
+    badgeColor: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+    label: "Diagnostik Kompetensi SKK",
+    desc: "Isi profil pendidikan & pengalaman — AI menilai level KKNI saat ini, mengidentifikasi gap, dan menyusun jalur pembelajaran menuju target SKK.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/mock-asesmen",
+    icon: <Target className="h-6 w-6" />,
+    iconBg: "bg-violet-500/10",
+    iconColor: "text-violet-400",
+    badgeColor: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+    label: "Mock Asesmen SKK — Simulasi Uji BNSP",
+    desc: "Pilih domain SKK (K3, Sipil, MEP, QS, dll.) — AI menghasilkan 5 soal simulasi (3 pengetahuan + 2 skenario) dengan penilaian dan penjelasan.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/sertifikat-digital",
+    icon: <Award className="h-6 w-6" />,
+    iconBg: "bg-amber-500/10",
+    iconColor: "text-amber-400",
+    badgeColor: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    label: "SERTIVA — E-Sertifikat Digital + QR",
+    desc: "Terbitkan sertifikat digital terverifikasi untuk peserta bimtek, pelatihan, atau uji kompetensi. Setiap sertifikat punya QR verifikasi publik.",
+    tag: "Kompetensi",
+    model: "QR + PostgreSQL",
+  },
+  {
+    href: "/persiapan-asesmen",
+    icon: <GraduationCap className="h-6 w-6" />,
+    iconBg: "bg-teal-500/10",
+    iconColor: "text-teal-400",
+    badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+    label: "Persiapan Asesmen SKK — Paket Lengkap",
+    desc: "Pilih jabatan SKK & jalur sertifikasi — AI menghasilkan checklist dokumen, unit SKKNI prioritas, tips asesor, dan estimasi biaya.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+];
 
 const TOOLS: Tool[] = [
   {
@@ -165,29 +224,67 @@ export default function AiToolsHub() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          {TOOLS.map((tool) => (
-            <Link key={tool.href} href={tool.href}>
-              <div className="group cursor-pointer border border-white/8 hover:border-white/20 rounded-2xl p-5 bg-white/2 hover:bg-white/4 transition-all">
-                <div className="flex items-start gap-4">
-                  <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${tool.iconBg} border border-white/8 flex items-center justify-center ${tool.iconColor}`}>
-                    {tool.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-semibold text-white group-hover:text-white/90">{tool.label}</h3>
+        {/* Ekosistem Kompetensi Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <GraduationCap className="h-4 w-4 text-blue-400" />
+            <h2 className="text-sm font-semibold text-white">Ekosistem Kompetensi SKK — Gelombang 1</h2>
+            <Badge className="bg-blue-500/15 text-blue-400 border-blue-500/30 text-[10px]">Baru 2026</Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {KOMPETENSI_TOOLS.map((tool) => (
+              <Link key={tool.href} href={tool.href}>
+                <div className="group cursor-pointer border border-white/8 hover:border-blue-500/30 rounded-2xl p-4 bg-white/2 hover:bg-blue-500/5 transition-all">
+                  <div className="flex items-start gap-3">
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-xl ${tool.iconBg} border border-white/8 flex items-center justify-center ${tool.iconColor}`}>
+                      {tool.icon}
                     </div>
-                    <p className="text-xs text-white/45 leading-relaxed mb-3">{tool.desc}</p>
-                    <div className="flex items-center gap-2">
-                      <Badge className={`text-[10px] px-2 py-0.5 border ${tool.badgeColor}`}>{tool.tag}</Badge>
-                      <span className="text-[10px] text-white/30">via {tool.model}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold text-white group-hover:text-white/90 mb-0.5">{tool.label}</h3>
+                      <p className="text-xs text-white/45 leading-relaxed mb-2">{tool.desc}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`text-[10px] px-2 py-0.5 border ${tool.badgeColor}`}>{tool.tag}</Badge>
+                        <span className="text-[10px] text-white/30">via {tool.model}</span>
+                      </div>
                     </div>
+                    <ChevronRight className="h-4 w-4 text-white/25 group-hover:text-white/50 shrink-0 mt-1 transition-colors" />
                   </div>
-                  <ChevronRight className="h-4 w-4 text-white/25 group-hover:text-white/50 shrink-0 mt-1 transition-colors" />
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* General AI Tools Section */}
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-4">
+            <Wrench className="h-4 w-4 text-violet-400" />
+            <h2 className="text-sm font-semibold text-white">Tools Konstruksi & Biro Jasa</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {TOOLS.map((tool) => (
+              <Link key={tool.href} href={tool.href}>
+                <div className="group cursor-pointer border border-white/8 hover:border-white/20 rounded-2xl p-5 bg-white/2 hover:bg-white/4 transition-all">
+                  <div className="flex items-start gap-4">
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${tool.iconBg} border border-white/8 flex items-center justify-center ${tool.iconColor}`}>
+                      {tool.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-sm font-semibold text-white group-hover:text-white/90">{tool.label}</h3>
+                      </div>
+                      <p className="text-xs text-white/45 leading-relaxed mb-3">{tool.desc}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`text-[10px] px-2 py-0.5 border ${tool.badgeColor}`}>{tool.tag}</Badge>
+                        <span className="text-[10px] text-white/30">via {tool.model}</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-white/25 group-hover:text-white/50 shrink-0 mt-1 transition-colors" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="border border-white/8 rounded-2xl p-5 bg-white/2">

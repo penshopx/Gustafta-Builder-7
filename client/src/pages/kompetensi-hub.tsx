@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2 } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -71,6 +71,19 @@ const TOOLS = [
     bg: "bg-violet-500/5",
     badge: "Gelombang 1",
     badgeColor: "text-violet-400 border-violet-400/30",
+    live: true,
+  },
+  {
+    href: "/persiapan-asesmen",
+    icon: ClipboardList,
+    label: "Persiapan Asesmen SKK",
+    sublabel: "Paket Dokumen + Tips Asesor",
+    desc: "Generate checklist dokumen, unit kompetensi prioritas, tips wawancara asesor, dan estimasi biaya sertifikasi.",
+    color: "text-teal-400",
+    borderColor: "border-teal-500/30",
+    bg: "bg-teal-500/5",
+    badge: "Gelombang 1",
+    badgeColor: "text-teal-400 border-teal-400/30",
     live: true,
   },
   {

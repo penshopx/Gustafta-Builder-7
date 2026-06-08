@@ -14,7 +14,7 @@ import {
   CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
   UserCheck, AlertCircle, RefreshCw, Crown, UserCog, Wrench, Scale, Database,
   ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle, Loader2,
-  Link2, Zap, Globe, BookOpen
+  Link2, Zap, Globe, BookOpen, GraduationCap
 } from "lucide-react";
 
 // ---- Types ----
@@ -1806,6 +1806,31 @@ export default function AdminPage() {
                     <Button asChild variant="outline" size="sm" className="shrink-0 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
                       <a href="/admin/kb-hub">Buka KB Hub →</a>
                     </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* ── Kompetensi Hub Shortcut ── */}
+              <Card className="border-blue-500/30 bg-blue-500/5">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-blue-500/15 p-2">
+                        <GraduationCap className="h-5 w-5 text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Ekosistem Kompetensi SKK — Gelombang 1</p>
+                        <p className="text-xs text-muted-foreground">SERTIVA · Diagnostik Gap · Mock Asesmen · Persiapan Asesmen SKK</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Button asChild variant="outline" size="sm" className="border-blue-500/40 text-blue-400 hover:bg-blue-500/10">
+                        <a href="/kompetensi-hub">Kompetensi Hub →</a>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="border-blue-500/40 text-blue-400 hover:bg-blue-500/10">
+                        <a href="/ai-tools">AI Tools Hub →</a>
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

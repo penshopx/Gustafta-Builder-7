@@ -19666,6 +19666,80 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: PERSIAPAN ASESMEN SKK ====================
+  app.post("/api/tools/persiapan-asesmen", async (req: any, res: any) => {
+    try {
+      const { position, path = "reguler" } = req.body;
+      if (!position) return res.status(400).json({ error: "Jabatan tidak boleh kosong." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi SKK BNSP Indonesia yang sangat berpengalaman.
+
+Buat PAKET PERSIAPAN LENGKAP untuk asesmen SKK berikut:
+- Jabatan: "${position}"
+- Jalur: "${path}" (reguler = portofolio+wawancara+observasi | rpl = pengakuan pengalaman | bimtek = pelatihan+uji)
+
+Kembalikan JSON SAJA (tanpa markdown) dengan format persis:
+{
+  "position": "${position}",
+  "path": "${path}",
+  "timeline": "estimasi waktu dari daftar hingga sertifikat terbit",
+  "costEstimate": "estimasi biaya total (range)",
+  "successRate": "tingkat kelulusan rata-rata jalur ini",
+  "documents": [
+    {
+      "category": "nama kategori (Administrasi Pribadi / Portofolio Kompetensi / dll.)",
+      "items": [
+        {
+          "doc": "nama dokumen",
+          "format": "PDF/asli/fotokopi/dll.",
+          "notes": "keterangan singkat cara mendapatkan/mengisi",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "studyUnits": [
+    {
+      "kode": "kode unit SKKNI, contoh: F.410100.001.01",
+      "nama": "nama unit kompetensi",
+      "elemen": ["elemen kompetensi 1", "elemen kompetensi 2"],
+      "referensi": "SKKNI/SNI/Permen yang relevan",
+      "bobot": "tinggi|sedang|rendah"
+    }
+  ],
+  "assessorTips": [
+    {
+      "phase": "nama fase (Persiapan Dokumen / Wawancara / Observasi / Pasca-Asesmen)",
+      "tips": ["tip 1", "tip 2", "tip 3"]
+    }
+  ],
+  "commonMistakes": [
+    "kesalahan umum yang sering membuat peserta tidak lulus 1",
+    "kesalahan umum 2"
+  ]
+}
+
+Pastikan:
+- Dokumen sesuai persyaratan BNSP/LPJK terkini (APL-01, APL-02, CV format BNSP, logbook, dll.)
+- Unit kompetensi berdasarkan SKKNI yang berlaku untuk jabatan tersebut
+- Tips praktis dan spesifik, bukan generik`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("persiapan-asesmen error:", e);
+      res.status(500).json({ error: "Gagal membuat paket persiapan. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: MOCK ASESMEN SKK ====================
   app.post("/api/tools/mock-asesmen", async (req: any, res: any) => {
     try {
