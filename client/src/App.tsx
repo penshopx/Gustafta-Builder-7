@@ -172,6 +172,11 @@ import TenderMate from "@/pages/tender-mate";
 import ClientHub from "@/pages/client-hub";
 import LaporanBJ from "@/pages/laporan-bj";
 import MlmAdmin from "@/pages/mlm-admin";
+import SertifikatDigital from "@/pages/sertifikat-digital";
+import VerifySertifikat from "@/pages/verify-sertifikat";
+import DiagnostikKompetensi from "@/pages/diagnostik-kompetensi";
+import MockAsesmen from "@/pages/mock-asesmen";
+import KompetensiHub from "@/pages/kompetensi-hub";
 import TenderBotPage from "@/pages/tenderbot";
 import SertifikasiBotPage from "@/pages/sertifikasibot";
 import ProyekBotPage from "@/pages/proyekbot";
@@ -1135,6 +1140,11 @@ function Router() {
         <Route path="/client-hub" component={ClientHub} />
         <Route path="/laporan-bj" component={LaporanBJ} />
         <Route path="/mlm-admin" component={MlmAdmin} />
+        <Route path="/sertifikat-digital" component={SertifikatDigital} />
+        <Route path="/verify/:token" component={VerifySertifikat} />
+        <Route path="/diagnostik-kompetensi" component={DiagnostikKompetensi} />
+        <Route path="/mock-asesmen" component={MockAsesmen} />
+        <Route path="/kompetensi-hub" component={KompetensiHub} />
         <Route path="/tenderbot" component={TenderBotPage} />
         <Route path="/sertifikasibot" component={SertifikasiBotPage} />
         <Route path="/proyekbot" component={ProyekBotPage} />

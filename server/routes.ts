@@ -19538,5 +19538,180 @@ Susun Executive Summary PKB 25 Poin sesuai format dan struktur di atas. Tulis le
     }
   });
 
+  // ==================== SERTIVA: DIGITAL CERTIFICATES ====================
+  app.get("/api/verify-sertifikat/:token", async (req: any, res: any) => {
+    try {
+      const { token } = req.params;
+      const result = await db.execute(sqlExpr`
+        SELECT id, verify_token, title, recipient_name, recipient_title, issued_by, issued_by_title,
+          competency_domain, competency_unit, level, description, template, status,
+          issued_at, expires_at
+        FROM digital_certificates WHERE verify_token = ${token} LIMIT 1
+      `);
+      if (!result.rows.length) return res.status(404).json({ error: "not found" });
+      const row = result.rows[0] as any;
+      res.json({
+        id: row.id, verifyToken: row.verify_token, title: row.title,
+        recipientName: row.recipient_name, recipientTitle: row.recipient_title ?? "",
+        issuedBy: row.issued_by, issuedByTitle: row.issued_by_title ?? "",
+        competencyDomain: row.competency_domain ?? "", competencyUnit: row.competency_unit ?? "",
+        level: row.level ?? "", description: row.description ?? "",
+        template: row.template ?? "standard", status: row.status ?? "active",
+        issuedAt: row.issued_at, expiresAt: row.expires_at ?? null,
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get("/api/sertifikat-digital", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.id ?? req.user?.claims?.sub;
+      const result = await db.execute(sqlExpr`
+        SELECT id, verify_token, title, recipient_name, recipient_title, issued_by, issued_by_title,
+          competency_domain, competency_unit, level, description, template, status,
+          issued_at, expires_at, created_at
+        FROM digital_certificates WHERE user_id = ${userId} ORDER BY created_at DESC
+      `);
+      const certs = (result.rows as any[]).map(r => ({
+        id: r.id, verifyToken: r.verify_token, title: r.title,
+        recipientName: r.recipient_name, recipientTitle: r.recipient_title ?? "",
+        issuedBy: r.issued_by, issuedByTitle: r.issued_by_title ?? "",
+        competencyDomain: r.competency_domain ?? "", competencyUnit: r.competency_unit ?? "",
+        level: r.level ?? "", description: r.description ?? "",
+        template: r.template ?? "standard", status: r.status ?? "active",
+        issuedAt: r.issued_at, expiresAt: r.expires_at ?? null, createdAt: r.created_at,
+      }));
+      res.json({ certs });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.post("/api/sertifikat-digital", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.id ?? req.user?.claims?.sub;
+      const { title, recipientName, recipientTitle = "", issuedBy, issuedByTitle = "",
+        competencyDomain = "", competencyUnit = "", level = "", description = "",
+        template = "standard", expiresAt } = req.body;
+      if (!title || !recipientName || !issuedBy) return res.status(400).json({ error: "title, recipientName, dan issuedBy wajib diisi." });
+      const crypto = await import("crypto");
+      const verifyToken = crypto.randomUUID().replace(/-/g, "") + crypto.randomBytes(8).toString("hex");
+      const expiry = expiresAt ? new Date(expiresAt) : null;
+      await db.execute(sqlExpr`
+        INSERT INTO digital_certificates
+          (user_id, verify_token, title, recipient_name, recipient_title, issued_by, issued_by_title,
+           competency_domain, competency_unit, level, description, template, status, issued_at, expires_at, created_at)
+        VALUES
+          (${userId}, ${verifyToken}, ${title}, ${recipientName}, ${recipientTitle}, ${issuedBy}, ${issuedByTitle},
+           ${competencyDomain}, ${competencyUnit}, ${level}, ${description}, ${template}, 'active', NOW(), ${expiry}, NOW())
+      `);
+      res.json({ success: true, verifyToken });
+    } catch (e: any) { console.error("sertifikat create error:", e); res.status(500).json({ error: e.message }); }
+  });
+
+  app.delete("/api/sertifikat-digital/:id", isAuthenticated, async (req: any, res: any) => {
+    try {
+      const userId = req.user?.id ?? req.user?.claims?.sub;
+      const id = parseInt(req.params.id);
+      await db.execute(sqlExpr`DELETE FROM digital_certificates WHERE id = ${id} AND user_id = ${userId}`);
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // ==================== AI TOOLS: DIAGNOSTIK KOMPETENSI ====================
+  app.post("/api/tools/diagnostik-kompetensi", async (req: any, res: any) => {
+    try {
+      const { education, fieldOfStudy, yearsExperience, currentRole, keyProjects, targetDomain, targetLevel } = req.body;
+      if (!education || !targetDomain || !targetLevel) return res.status(400).json({ error: "Data tidak lengkap." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah DIAGNOSTIK AI — pakar SKKNI, KKNI, dan regulasi BNSP Indonesia.
+
+PROFIL KANDIDAT:
+- Pendidikan: ${education}, ${fieldOfStudy}
+- Pengalaman: ${yearsExperience} di bidang konstruksi
+- Jabatan/Peran: ${currentRole}
+- Proyek utama: ${keyProjects || "-"}
+- Target SKK: ${targetDomain}
+- Target Jenjang: ${targetLevel}
+
+Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format persis:
+{
+  "currentKKNI": "estimasi level KKNI/SKKNI saat ini berdasarkan profil",
+  "eligibleLevel": "level yang realistis dituju saat ini",
+  "readinessScore": 0-100 (angka saja),
+  "gapSummary": "1-2 kalimat ringkasan gap",
+  "strengths": ["3-5 kekuatan yang sudah dimiliki"],
+  "gaps": [
+    {"item": "gap spesifik 1", "severity": "tinggi|sedang|rendah"},
+    {"item": "gap spesifik 2", "severity": "tinggi|sedang|rendah"}
+  ],
+  "learningPath": [
+    {"step": 1, "action": "tindakan spesifik", "resource": "sumber/referensi"},
+    {"step": 2, "action": "tindakan spesifik", "resource": "sumber/referensi"},
+    {"step": 3, "action": "tindakan spesifik", "resource": "sumber/referensi"}
+  ],
+  "recommendation": "1 paragraf rekomendasi akhir yang personal dan actionable"
+}`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("diagnostik-kompetensi error:", e);
+      res.status(500).json({ error: "Gagal menganalisis profil. Coba lagi." });
+    }
+  });
+
+  // ==================== AI TOOLS: MOCK ASESMEN SKK ====================
+  app.post("/api/tools/mock-asesmen", async (req: any, res: any) => {
+    try {
+      const { domain } = req.body;
+      if (!domain) return res.status(400).json({ error: "Domain tidak boleh kosong." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah ASES.AI — penguji kompetensi SKK BNSP Indonesia yang ahli.
+
+Buat 5 soal latihan untuk domain: "${domain}"
+- 3 soal pengetahuan (konsep, regulasi, standar)
+- 2 soal skenario lapangan (situasi nyata, keputusan teknis)
+
+Kembalikan JSON SAJA (tanpa markdown) dengan format persis:
+{
+  "domain": "${domain}",
+  "totalQuestions": 5,
+  "questions": [
+    {
+      "no": 1,
+      "type": "pengetahuan",
+      "question": "teks soal lengkap",
+      "options": ["A. pilihan A", "B. pilihan B", "C. pilihan C", "D. pilihan D"],
+      "correctIndex": 0,
+      "explanation": "penjelasan mengapa jawaban benar, referensi regulasi/SKKNI",
+      "reference": "SKKNI/PP/Permen yang relevan"
+    }
+  ]
+}
+
+Pastikan soal relevan dengan SKKNI dan standar BNSP. Options berisi 4 pilihan (index 0-3). correctIndex adalah index dari jawaban benar.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("mock-asesmen error:", e);
+      res.status(500).json({ error: "Gagal membuat soal. Coba lagi." });
+    }
+  });
+
   return httpServer;
 }

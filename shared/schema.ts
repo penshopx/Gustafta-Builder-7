@@ -2190,3 +2190,28 @@ export type BjActivity = typeof bjActivities.$inferSelect;
 export const insertBjFollowupSchema = createInsertSchema(bjFollowups).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertBjFollowup = z.infer<typeof insertBjFollowupSchema>;
 export type BjFollowup = typeof bjFollowups.$inferSelect;
+
+// ─── SERTIVA: Digital Certificates ──────────────────────────────────────────
+export const digitalCertificates = pgTable("digital_certificates", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  verifyToken: varchar("verify_token", { length: 64 }).notNull().unique(),
+  title: text("title").notNull(),
+  recipientName: text("recipient_name").notNull(),
+  recipientTitle: text("recipient_title").default(""),
+  issuedBy: text("issued_by").notNull(),
+  issuedByTitle: text("issued_by_title").default(""),
+  competencyDomain: text("competency_domain").default(""),
+  competencyUnit: text("competency_unit").default(""),
+  level: text("level").default(""),
+  description: text("description").default(""),
+  template: text("template").default("standard"),
+  status: text("status").default("active"),
+  issuedAt: timestamp("issued_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertDigitalCertificateSchema = createInsertSchema(digitalCertificates).omit({ id: true, createdAt: true });
+export type InsertDigitalCertificate = z.infer<typeof insertDigitalCertificateSchema>;
+export type DigitalCertificate = typeof digitalCertificates.$inferSelect;
