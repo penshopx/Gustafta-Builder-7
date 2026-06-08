@@ -19666,6 +19666,88 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: PERPANJANGAN SKK ====================
+  app.post("/api/tools/perpanjangan-skk", async (req: any, res: any) => {
+    try {
+      const { jabatan, tanggalTerbit, nomorSkk = "" } = req.body;
+      if (!jabatan || !tanggalTerbit) return res.status(400).json({ error: "Jabatan dan tanggal terbit wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const terbit = new Date(tanggalTerbit);
+      const expired = new Date(terbit);
+      expired.setFullYear(expired.getFullYear() + 3);
+      const today = new Date();
+      const sisaHari = Math.ceil((expired.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      let status: string;
+      if (sisaHari < 0) status = "sudah_expired";
+      else if (sisaHari < 60) status = "mendesak";
+      else if (sisaHari < 180) status = "akan_expired";
+      else status = "aktif_aman";
+      const tanggalTerbitStr = terbit.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      const tanggalExpiredStr = expired.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      const prompt = `Anda adalah konsultan sertifikasi SKK Indonesia yang ahli tentang proses perpanjangan Sertifikat Kompetensi Kerja (SKK) BNSP/LSP.
+
+Data SKK:
+- Jabatan: "${jabatan}"
+- Nomor SKK: "${nomorSkk || "tidak diisi"}"
+- Tanggal terbit: ${tanggalTerbitStr}
+- Tanggal expired: ${tanggalExpiredStr}
+- Sisa hari berlaku: ${sisaHari} hari (negatif = sudah expired)
+- Status otomatis: ${status}
+
+Kembalikan JSON SAJA (tanpa markdown) persis format:
+{
+  "jabatanSkk": "${jabatan}",
+  "tanggalTerbit": "${tanggalTerbitStr}",
+  "tanggalExpired": "${tanggalExpiredStr}",
+  "masaBerlaku": "3 tahun (sesuai ketentuan BNSP)",
+  "sisaHari": ${sisaHari},
+  "status": "${status}",
+  "statusLabel": "label deskriptif sesuai status",
+  "rekomendasiMulai": "rekomendasi kapan harus mulai proses (cth: 'Mulai sekarang — mendesak!' atau 'Mulai 6 bulan sebelum expired')",
+  "jalurPerpanjangan": [
+    {
+      "nama": "nama jalur (cth: Asesmen Ulang, Pembaruan via Diklat, Portofolio/RPL)",
+      "cocokUntuk": "siapa yang cocok menggunakan jalur ini",
+      "prosedur": ["langkah 1", "langkah 2", "langkah 3", "langkah 4"],
+      "estimasiWaktu": "cth: 1-2 bulan",
+      "estimasiBiaya": "cth: Rp 1,5-3 juta",
+      "kelebihan": "keunggulan jalur ini"
+    }
+  ],
+  "dokumenUmum": [
+    "daftar dokumen yang umumnya dibutuhkan untuk perpanjangan SKK ini"
+  ],
+  "risikoTidakDiperpanjang": [
+    "risiko nyata jika tidak diperpanjang (relevan untuk ${jabatan} khususnya)"
+  ],
+  "tipsPersiapan": [
+    "tips praktis persiapan perpanjangan SKK ${jabatan}"
+  ],
+  "catatanPenting": "catatan penting khusus untuk ${jabatan} terkait perpanjangan"
+}
+
+Penting:
+- jalurPerpanjangan harus 2-3 jalur yang realistis untuk "${jabatan}"
+- dokumenUmum: 5-8 dokumen spesifik yang dibutuhkan
+- risikoTidakDiperpanjang: relevan untuk profesi konstruksi Indonesia (tender, SBU, dll.)
+- rekomendasiMulai: berdasarkan sisaHari=${sisaHari}, berikan saran timing spesifik
+- Jika sudah expired: jalur asesmen baru (bukan perpanjangan) harus disebutkan`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.15,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("perpanjangan-skk error:", e);
+      res.status(500).json({ error: "Gagal memuat panduan. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: GENERATOR DOKUMEN SKK ====================
   app.post("/api/tools/generator-dokumen-skk", async (req: any, res: any) => {
     try {

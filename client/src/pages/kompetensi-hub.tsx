@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -149,6 +149,19 @@ const TOOLS = [
     bg: "bg-sky-500/5",
     badge: "Gelombang 3",
     badgeColor: "text-sky-400 border-sky-400/30",
+    live: true,
+  },
+  {
+    href: "/perpanjangan-skk",
+    icon: RefreshCw,
+    label: "Panduan Perpanjangan SKK",
+    sublabel: "Status aktif · Jalur perpanjangan · Timeline",
+    desc: "Input jabatan SKK + tanggal terbit → status real-time (sisa hari), 3 jalur perpanjangan (asesmen ulang / portofolio / diklat), dokumen, biaya, dan risiko jika tidak diperpanjang.",
+    color: "text-indigo-400",
+    borderColor: "border-indigo-500/30",
+    bg: "bg-indigo-500/5",
+    badge: "Gelombang 3",
+    badgeColor: "text-indigo-400 border-indigo-400/30",
     live: true,
   },
   {

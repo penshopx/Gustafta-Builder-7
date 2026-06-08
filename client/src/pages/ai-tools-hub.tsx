@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2
+  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw
 } from "lucide-react";
 
 interface Tool {
@@ -127,6 +127,17 @@ const KOMPETENSI_TOOLS = [
     badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
     label: "Generator Dokumen SKK — Surat Pernyataan, Keterangan & Pengantar",
     desc: "Generate 3 jenis surat resmi untuk aplikasi SKK: Surat Pernyataan Pengalaman Kerja (bermaterai), Surat Keterangan Kerja dari perusahaan, dan Surat Pengantar ke LSP.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/perpanjangan-skk",
+    icon: <RefreshCw className="h-6 w-6" />,
+    iconBg: "bg-indigo-500/10",
+    iconColor: "text-indigo-400",
+    badgeColor: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+    label: "Panduan Perpanjangan SKK — Status, Jalur & Timeline",
+    desc: "Input jabatan SKK + tanggal terbit → status real-time sisa hari aktif, 3 jalur perpanjangan (asesmen ulang / portofolio / diklat pembaruan), dokumen, estimasi biaya, dan risiko.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
   },
