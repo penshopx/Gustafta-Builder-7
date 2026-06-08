@@ -165,6 +165,7 @@ import RabKalkulator from "@/pages/rab-kalkulator";
 import K3Vision from "@/pages/k3-vision";
 import PkbBuilder from "@/pages/pkb-builder";
 import AiToolsHub from "@/pages/ai-tools-hub";
+import KbHub from "@/pages/kb-hub";
 import CertTracker from "@/pages/cert-tracker";
 import DocuGen from "@/pages/docu-gen";
 import TenderMate from "@/pages/tender-mate";
@@ -237,6 +238,7 @@ function Router() {
       <Route path="/packs/:packId" component={TenderWizard} />
       <Route path="/domains" component={DomainsPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/admin/kb-hub" component={KbHub} />
       <Route path="/account" component={AccountPage} />
       <Route path="/mini-app/:slug" component={MiniAppPublic} />
       <Route path="/legal" component={LegalLanding} />

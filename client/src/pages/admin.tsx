@@ -14,7 +14,7 @@ import {
   CheckCircle2, XCircle, Shield, ArrowLeft, Copy,
   UserCheck, AlertCircle, RefreshCw, Crown, UserCog, Wrench, Scale, Database,
   ShoppingBag, Plus, ExternalLink, Package, Trash2, Pencil, MessageCircle, Loader2,
-  Link2, Zap, Globe
+  Link2, Zap, Globe, BookOpen
 } from "lucide-react";
 
 // ---- Types ----
@@ -1789,6 +1789,26 @@ export default function AdminPage() {
           {/* ========== TOOLS TAB ========== */}
           <TabsContent value="tools" className="mt-4">
             <div className="space-y-4">
+
+              {/* ── KB Hub Shortcut ── */}
+              <Card className="border-emerald-500/30 bg-emerald-500/5">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-emerald-500/15 p-2">
+                        <BookOpen className="h-5 w-5 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">KB Hub — Knowledge Base Global</p>
+                        <p className="text-xs text-muted-foreground">Lihat cakupan KB semua agen, tambah cepat, & seed massal</p>
+                      </div>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="shrink-0 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                      <a href="/admin/kb-hub">Buka KB Hub →</a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* ── URL Delivery Setting ── */}
               <ProdUrlCard appUrl={appUrl} isDevUrl={isDevUrl} onSaved={(u) => setAppUrl(u)} />

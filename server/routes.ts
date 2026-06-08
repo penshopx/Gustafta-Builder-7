@@ -14660,6 +14660,182 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
+  // ==================== ADMIN: KB HUB ====================
+  app.get("/api/admin/kb-hub/stats", isAuthenticated, requireAdmin, async (_req: any, res: any) => {
+    try {
+      const result = await db.execute(sqlExpr`
+        SELECT
+          (SELECT COUNT(*)::int FROM agents WHERE is_active = true) AS total_agents,
+          COUNT(DISTINCT kb.agent_id)::int AS agents_with_kb,
+          COUNT(*)::int AS total_entries,
+          COUNT(*) FILTER (WHERE kb.knowledge_layer = 'foundational')::int AS foundational,
+          COUNT(*) FILTER (WHERE kb.knowledge_layer = 'operational')::int AS operational,
+          COUNT(*) FILTER (WHERE kb.knowledge_layer = 'compliance')::int AS compliance,
+          COUNT(*) FILTER (WHERE kb.knowledge_layer = 'tactical')::int AS tactical,
+          COUNT(*) FILTER (WHERE kb.type = 'file')::int AS file_type,
+          COUNT(*) FILTER (WHERE kb.type = 'url')::int AS url_type,
+          COUNT(*) FILTER (WHERE kb.type = 'text')::int AS text_type
+        FROM knowledge_bases kb
+      `);
+      res.json(result.rows[0]);
+    } catch (error: any) {
+      console.error("KB hub stats error:", error);
+      res.status(500).json({ error: "Gagal mengambil statistik KB." });
+    }
+  });
+
+  app.get("/api/admin/kb-hub/agents", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { search, filter, page = "1", limit = "50" } = req.query;
+      const pageNum = Math.max(1, parseInt(page as string));
+      const limitNum = Math.min(200, Math.max(1, parseInt(limit as string)));
+      const offset = (pageNum - 1) * limitNum;
+      const searchStr = search ? `%${String(search).replace(/[%_]/g, "\\$&")}%` : null;
+
+      const cteResult = await db.execute(sqlExpr`
+        WITH agent_kb AS (
+          SELECT a.id, a.name, a.slug, a.behavior_preset, a.category, a.is_active,
+            COUNT(kb.id)::int AS kb_count,
+            COUNT(kb.id) FILTER (WHERE kb.knowledge_layer = 'foundational')::int AS foundational,
+            COUNT(kb.id) FILTER (WHERE kb.knowledge_layer = 'operational')::int AS operational,
+            COUNT(kb.id) FILTER (WHERE kb.knowledge_layer = 'compliance')::int AS compliance,
+            COUNT(kb.id) FILTER (WHERE kb.knowledge_layer = 'tactical')::int AS tactical,
+            COUNT(kb.id) FILTER (WHERE kb.type = 'file')::int AS file_entries,
+            STRING_AGG(DISTINCT kb.knowledge_layer, ', ') AS layers,
+            MAX(kb.created_at) AS last_kb_at
+          FROM agents a
+          LEFT JOIN knowledge_bases kb ON kb.agent_id = a.id
+          WHERE a.is_active = true
+          GROUP BY a.id, a.name, a.slug, a.behavior_preset, a.category, a.is_active
+        )
+        SELECT * FROM agent_kb
+        WHERE 1=1
+          ${filter === "no_kb" ? sqlExpr`AND kb_count = 0` : filter === "has_kb" ? sqlExpr`AND kb_count > 0` : sqlExpr``}
+          ${searchStr ? sqlExpr`AND (name ILIKE ${searchStr} OR slug ILIKE ${searchStr})` : sqlExpr``}
+        ORDER BY kb_count ASC, id ASC
+        LIMIT ${limitNum} OFFSET ${offset}
+      `);
+
+      const countResult = await db.execute(sqlExpr`
+        SELECT COUNT(*)::int AS total FROM agents WHERE is_active = true
+      `);
+
+      res.json({ agents: cteResult.rows, total: (countResult.rows[0] as any).total });
+    } catch (error: any) {
+      console.error("KB hub agents error:", error);
+      res.status(500).json({ error: "Gagal mengambil data agen." });
+    }
+  });
+
+  app.post("/api/admin/kb-hub/bulk-seed", isAuthenticated, requireAdmin, async (_req: any, res: any) => {
+    try {
+      const agentsResult = await db.execute(sqlExpr`
+        SELECT a.id, a.name, a.behavior_preset, a.description, a.system_prompt,
+          a.expertise, a.domain_charter, a.quality_bar, a.risk_compliance,
+          a.product_summary, a.big_idea_id
+        FROM agents a
+        WHERE a.is_active = true
+          AND NOT EXISTS (SELECT 1 FROM knowledge_bases kb WHERE kb.agent_id = a.id)
+        ORDER BY a.id
+        LIMIT 100
+      `);
+      const agents = agentsResult.rows as any[];
+
+      if (agents.length === 0) {
+        return res.json({ inserted: 0, message: "Semua agen sudah punya KB." });
+      }
+
+      const entries: any[] = [];
+      for (const agent of agents) {
+        const name = (agent.name || "").toLowerCase();
+        let domainLabel = "Regulasi Umum Industri Jasa Konstruksi Indonesia";
+        let regulasi = "UU 2/2017 Jasa Konstruksi; PP 22/2020 jo PP 14/2021; Permen PUPR 6/2021";
+        let sourceUrl = "https://jdih.pu.go.id";
+        let taxonomyId = 5;
+
+        if (name.includes("tender") || name.includes("pengadaan")) {
+          domainLabel = "Strategi & Persiapan Tender Konstruksi"; regulasi = "Perpres 12/2021; Perlem LKPP 12/2021"; sourceUrl = "https://lkpp.go.id"; taxonomyId = 22;
+        } else if (name.includes("kontrak") || name.includes("fidic") || name.includes("klaim")) {
+          domainLabel = "Kontrak & Perjanjian Konstruksi"; regulasi = "FIDIC Red Book; KUHPerdata; UU 2/2017"; sourceUrl = "https://fidic.org"; taxonomyId = 2;
+        } else if (name.includes("k3") || name.includes("smk3") || name.includes("safety")) {
+          domainLabel = "SMK3 PP 50/2012 & ISO 45001"; regulasi = "PP 50/2012; ISO 45001:2018; UU 1/1970"; sourceUrl = "https://kemnaker.go.id"; taxonomyId = 39;
+        } else if (name.includes("sbu") || name.includes("subklasifikasi")) {
+          domainLabel = "SBU Kontraktor Konstruksi"; regulasi = "Permen PUPR 6/2021; PerLem LPJK 2/2022"; sourceUrl = "https://lpjk.pu.go.id"; taxonomyId = 12;
+        } else if (name.includes("skk") || name.includes("kompetensi") || name.includes("sertifikasi")) {
+          domainLabel = "SKK Jenjang Tenaga Ahli Konstruksi"; regulasi = "Permen PUPR 6/2021; SKKNI; KKNI"; sourceUrl = "https://lpjk.pu.go.id"; taxonomyId = 17;
+        } else if (name.includes("iso") || name.includes("mutu") || name.includes("qms")) {
+          domainLabel = "Sistem Manajemen Mutu ISO 9001:2015"; regulasi = "ISO 9001:2015; SNI ISO 9001:2015"; sourceUrl = "https://bsn.go.id"; taxonomyId = 37;
+        } else if (name.includes("lingkungan") || name.includes("amdal")) {
+          domainLabel = "ISO 14001 & AMDAL Konstruksi"; regulasi = "ISO 14001:2015; PP 22/2021 AMDAL"; sourceUrl = "https://menlhk.go.id"; taxonomyId = 38;
+        } else if (name.includes("elektrikal") || name.includes("mep") || name.includes("listrik")) {
+          domainLabel = "Jasa Konstruksi Ketenagalistrikan"; regulasi = "UU 30/2009; Permen ESDM 26/2021; PUIL"; sourceUrl = "https://esdm.go.id"; taxonomyId = 15;
+        }
+
+        const desc = (agent.description || "").substring(0, 400);
+        const productSummary = (agent.product_summary || agent.description || "").substring(0, 400);
+        const domainCharter = (agent.domain_charter || "").substring(0, 500);
+
+        entries.push(
+          { agent_id: agent.id, name: `Regulasi & Standar — ${agent.name.substring(0, 80)}`, type: "text",
+            content: `# Dasar Regulasi — ${agent.name}\n\n## Domain\n${domainLabel}\n\n## Regulasi Utama\n${regulasi}\n\n## Deskripsi\n${desc}`,
+            knowledge_layer: "foundational", taxonomy_id: taxonomyId, source_authority: regulasi.split(";")[0], source_url: sourceUrl },
+          { agent_id: agent.id, name: `SOP & Prosedur — ${agent.name.substring(0, 80)}`, type: "text",
+            content: `# SOP & Prosedur — ${agent.name}\n\n## Cara Kerja\n${productSummary}\n\n## Panduan Penggunaan\n- Ajukan pertanyaan spesifik dengan konteks proyek\n- Sertakan data numerik bila relevan\n- Minta referensi regulasi yang berlaku`,
+            knowledge_layer: "operational", taxonomy_id: taxonomyId, source_authority: agent.name.substring(0, 80), source_url: null },
+          { agent_id: agent.id, name: `Guardrails & Compliance — ${agent.name.substring(0, 80)}`, type: "text",
+            content: `# Guardrails — ${agent.name}\n\n${domainCharter ? `## Domain Charter\n${domainCharter}\n\n` : ""}## Prinsip Kepatuhan\n- Saran mengacu regulasi berlaku di Indonesia\n- Tidak menggantikan konsultasi profesional bersertifikat\n- Referensi: JDIH PUPR, LPJK, OSS-RBA`,
+            knowledge_layer: "compliance", taxonomy_id: taxonomyId, source_authority: "Domain Charter", source_url: null }
+        );
+      }
+
+      if (entries.length === 0) return res.json({ inserted: 0 });
+
+      for (const e of entries) {
+        await storage.createKnowledgeBase({
+          agentId: String(e.agent_id),
+          name: e.name,
+          type: e.type,
+          content: e.content,
+          description: e.name,
+          knowledgeLayer: e.knowledge_layer,
+          taxonomyId: e.taxonomy_id,
+          sourceAuthority: e.source_authority,
+          sourceUrl: e.source_url,
+          status: "active",
+          isShared: false,
+        } as any);
+      }
+
+      res.json({ inserted: entries.length, agents: agents.length });
+    } catch (error: any) {
+      console.error("KB hub bulk seed error:", error);
+      res.status(500).json({ error: "Gagal seeding KB massal." });
+    }
+  });
+
+  app.post("/api/admin/kb-hub/quick-add", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { agentId, name, content, knowledgeLayer = "operational" } = req.body;
+      if (!agentId || !name || !content) return res.status(400).json({ error: "agentId, name, dan content wajib diisi." });
+      const created = await storage.createKnowledgeBase({
+        agentId: String(parseInt(agentId)),
+        name: String(name).substring(0, 120),
+        type: "text",
+        content: String(content),
+        description: String(name).substring(0, 120),
+        knowledgeLayer: String(knowledgeLayer),
+        taxonomyId: 5,
+        sourceAuthority: "Manual",
+        status: "active",
+        isShared: false,
+      } as any);
+      res.json({ success: true, id: created.id });
+    } catch (error: any) {
+      console.error("KB quick-add error:", error);
+      res.status(500).json({ error: "Gagal menambahkan KB." });
+    }
+  });
+
   // ==================== ADMIN: USER MANAGEMENT ====================
   app.get("/api/admin/users", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
