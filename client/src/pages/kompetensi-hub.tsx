@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -149,6 +149,19 @@ const TOOLS = [
     bg: "bg-sky-500/5",
     badge: "Gelombang 3",
     badgeColor: "text-sky-400 border-sky-400/30",
+    live: true,
+  },
+  {
+    href: "/simulator-wawancara",
+    icon: MessageSquare,
+    label: "Simulator Wawancara Asesmen",
+    sublabel: "AI asesor BNSP · 4 putaran · skor & feedback",
+    desc: "AI berperan sebagai asesor BNSP sungguhan — ajukan 4 pertanyaan wawancara kompetensi situasional, beri feedback per jawaban, dan predikat akhir Kompeten/Belum Kompeten.",
+    color: "text-rose-400",
+    borderColor: "border-rose-500/30",
+    bg: "bg-rose-500/5",
+    badge: "Gelombang 3",
+    badgeColor: "text-rose-400 border-rose-400/30",
     live: true,
   },
   {

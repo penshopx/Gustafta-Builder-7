@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw
+  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare
 } from "lucide-react";
 
 interface Tool {
@@ -127,6 +127,17 @@ const KOMPETENSI_TOOLS = [
     badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
     label: "Generator Dokumen SKK — Surat Pernyataan, Keterangan & Pengantar",
     desc: "Generate 3 jenis surat resmi untuk aplikasi SKK: Surat Pernyataan Pengalaman Kerja (bermaterai), Surat Keterangan Kerja dari perusahaan, dan Surat Pengantar ke LSP.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/simulator-wawancara",
+    icon: <MessageSquare className="h-6 w-6" />,
+    iconBg: "bg-rose-500/10",
+    iconColor: "text-rose-400",
+    badgeColor: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+    label: "Simulator Wawancara Asesmen — AI Asesor BNSP Interaktif",
+    desc: "AI berperan sebagai asesor BNSP: ajukan 4 pertanyaan kompetensi situasional, beri feedback + skor per jawaban (1–4), predikat akhir Kompeten/Bersyarat/Belum Kompeten.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
   },

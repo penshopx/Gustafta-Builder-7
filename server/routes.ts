@@ -19666,6 +19666,139 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: SIMULATOR WAWANCARA ASESMEN ====================
+  app.post("/api/tools/simulator-wawancara", async (req: any, res: any) => {
+    try {
+      const { action, jabatan, fokus, pengalaman, rounds = [], currentRoundNum } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan SKK wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const TOTAL_ROUNDS = 4;
+
+      if (action === "start") {
+        const prompt = `Anda adalah asesor BNSP berpengalaman yang sedang melakukan wawancara asesmen kompetensi untuk jabatan "${jabatan}".
+Fokus area: "${fokus}".
+Latar belakang kandidat: "${pengalaman || "tidak diisi"}".
+
+Buat pertanyaan pembuka wawancara asesmen (Pertanyaan 1 dari ${TOTAL_ROUNDS}).
+Pertanyaan harus:
+- Terkait unit kompetensi inti untuk "${jabatan}"
+- Menggali pengalaman nyata kandidat dengan situasi konkret (gunakan format STAR: Situation, Task, Action, Result)
+- Spesifik dan relevan dengan industri konstruksi Indonesia
+- Membuka kesempatan kandidat menunjukkan kompetensinya secara mendalam
+
+Kembalikan JSON SAJA:
+{
+  "pertanyaan": "pertanyaan wawancara yang jelas dan spesifik",
+  "unitKompetensi": "nama singkat unit kompetensi yang dinilai (maks 5 kata)"
+}`;
+        const c = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.6,
+          response_format: { type: "json_object" },
+        });
+        const data = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+        return res.json({ pertanyaan: data.pertanyaan, unitKompetensi: data.unitKompetensi });
+      }
+
+      if (action === "answer" || action === "finish") {
+        const currentRound = rounds.find((r: any) => r.roundNum === currentRoundNum);
+        if (!currentRound) return res.status(400).json({ error: "Round tidak ditemukan." });
+
+        // Build history for context
+        const history = rounds.filter((r: any) => r.roundNum < currentRoundNum && r.jawabanUser);
+        const historyText = history.map((r: any) =>
+          `P${r.roundNum} [${r.unitKompetensi}]: "${r.pertanyaan}"\nJawaban: "${r.jawabanUser}"`
+        ).join("\n\n");
+
+        const feedbackPrompt = `Anda adalah asesor BNSP untuk jabatan "${jabatan}". Evaluasi jawaban wawancara kompetensi berikut.
+
+Pertanyaan (unit: ${currentRound.unitKompetensi}): "${currentRound.pertanyaan}"
+Jawaban kandidat: "${currentRound.jawabanUser}"
+
+${historyText ? `Riwayat pertanyaan sebelumnya:\n${historyText}\n` : ""}
+
+Beri feedback asesor yang konstruktif dan kembalikan JSON SAJA:
+{
+  "feedback": "evaluasi 2-3 kalimat: apa yang sudah baik, apa yang perlu diperdalam, apakah jawaban menunjukkan kompetensi di level yang dibutuhkan untuk ${jabatan}",
+  "skor": <1-4: 4=sangat kompeten, 3=kompeten, 2=cukup kompeten, 1=belum kompeten>,
+  "aspekKuat": ["aspek kuat dalam jawaban (maks 3 item singkat)"],
+  "aspekLemah": ["aspek yang perlu diperkuat (maks 2 item singkat)"]${action === "finish" ? `,
+  "finalResult": {
+    "skorTotal": <total semua skor termasuk yang baru ini>,
+    "predikat": "${currentRoundNum === TOTAL_ROUNDS ? 'Kompeten|Kompeten Bersyarat|Belum Kompeten' : 'Kompeten'}",
+    "ringkasan": "2-3 kalimat ringkasan performa keseluruhan wawancara",
+    "kekuatan": ["kekuatan utama kandidat (3-4 item)"],
+    "areaImprovement": ["area yang perlu ditingkatkan (2-3 item)"],
+    "rekomendasiPersiapan": ["rekomendasi konkret untuk persiapan asesmen sesungguhnya (3-4 item)"],
+    "hasilPerRound": [${rounds.map((r: any) => `{"roundNum": ${r.roundNum}, "unitKompetensi": "${r.unitKompetensi}", "skor": ${r.skor || 0}, "label": "${SKOR_CONFIG_LABELS[r.skor] || 'Belum dinilai'}"}`).join(", ")}, {"roundNum": ${currentRoundNum}, "unitKompetensi": "${currentRound.unitKompetensi}", "skor": <skor pertanyaan ini>, "label": "<label skornya>"}]
+  }` : ""}
+}`;
+
+        const SKOR_CONFIG_LABELS: Record<number, string> = { 4: "Sangat Baik", 3: "Baik", 2: "Cukup", 1: "Perlu Peningkatan" };
+
+        let nextQuestion = null;
+        if (action === "answer") {
+          const usedUnits = rounds.map((r: any) => r.unitKompetensi).filter(Boolean);
+          const nextPrompt = `Anda asesor BNSP untuk "${jabatan}". Buat pertanyaan wawancara ke-${currentRoundNum + 1} dari ${TOTAL_ROUNDS}.
+Unit kompetensi yang sudah ditanyakan: ${usedUnits.join(", ")}.
+Fokus: "${fokus}".
+Buat pertanyaan dari unit kompetensi BERBEDA yang belum ditanyakan, semakin mendalam/teknis.
+Kembalikan JSON: {"pertanyaan": "...", "unitKompetensi": "..."}`;
+          const nq = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: nextPrompt }],
+            temperature: 0.6,
+            response_format: { type: "json_object" },
+          });
+          nextQuestion = JSON.parse(nq.choices[0]?.message?.content ?? "{}");
+        }
+
+        const fc = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: feedbackPrompt }],
+          temperature: 0.3,
+          response_format: { type: "json_object" },
+        });
+        const feedbackData = JSON.parse(fc.choices[0]?.message?.content ?? "{}");
+
+        const response: any = {
+          feedback: feedbackData.feedback,
+          skor: feedbackData.skor,
+          aspekKuat: feedbackData.aspekKuat,
+          aspekLemah: feedbackData.aspekLemah,
+        };
+
+        if (action === "finish") {
+          if (feedbackData.finalResult) {
+            const allScores = [...rounds.filter((r: any) => r.skor).map((r: any) => r.skor), feedbackData.skor];
+            const avg = allScores.reduce((a: number, b: number) => a + b, 0) / TOTAL_ROUNDS;
+            feedbackData.finalResult.predikat = avg >= 3 ? "Kompeten" : avg >= 2 ? "Kompeten Bersyarat" : "Belum Kompeten";
+            // Fix hasilPerRound last item skor
+            if (feedbackData.finalResult.hasilPerRound) {
+              const last = feedbackData.finalResult.hasilPerRound[feedbackData.finalResult.hasilPerRound.length - 1];
+              if (last) { last.skor = feedbackData.skor; last.label = SKOR_CONFIG_LABELS[feedbackData.skor] || "Baik"; }
+            }
+          }
+          response.finalResult = feedbackData.finalResult;
+        } else {
+          response.nextRoundNum = currentRoundNum + 1;
+          response.nextPertanyaan = nextQuestion?.pertanyaan;
+          response.nextUnitKompetensi = nextQuestion?.unitKompetensi;
+        }
+
+        return res.json(response);
+      }
+
+      res.status(400).json({ error: "Action tidak valid." });
+    } catch (e: any) {
+      console.error("simulator-wawancara error:", e);
+      res.status(500).json({ error: "Gagal memproses sesi. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: PERPANJANGAN SKK ====================
   app.post("/api/tools/perpanjangan-skk", async (req: any, res: any) => {
     try {
