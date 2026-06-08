@@ -192,6 +192,11 @@ import KalkulatorCPD from "@/pages/kalkulator-cpd";
 import EvaluasiPortofolio from "@/pages/evaluasi-portofolio";
 import GeneratorCVSKK from "@/pages/generator-cv-skk";
 import MateriBelajarSKK from "@/pages/materi-belajar-skk";
+import PetaUnitKompetensi from "@/pages/peta-unit-kompetensi";
+import AsistenBandingSKK from "@/pages/asisten-banding-skk";
+import KalkulatorUpahSKK from "@/pages/kalkulator-upah-skk";
+import PanduanSIKISKK from "@/pages/panduan-siki-skk";
+import RencanaKarirSKK from "@/pages/rencana-karir-skk";
 import SimulatorUjiKompetensi from "@/pages/simulator-uji-kompetensi";
 import LaporanProyekBNSP from "@/pages/laporan-proyek-bnsp";
 import AnalisisProyekSKK from "@/pages/analisis-proyek-skk";
@@ -1185,6 +1190,11 @@ function Router() {
         <Route path="/evaluasi-portofolio" component={EvaluasiPortofolio} />
         <Route path="/generator-cv-skk" component={GeneratorCVSKK} />
         <Route path="/materi-belajar-skk" component={MateriBelajarSKK} />
+        <Route path="/peta-unit-kompetensi" component={PetaUnitKompetensi} />
+        <Route path="/asisten-banding-skk" component={AsistenBandingSKK} />
+        <Route path="/kalkulator-upah-skk" component={KalkulatorUpahSKK} />
+        <Route path="/panduan-siki-skk" component={PanduanSIKISKK} />
+        <Route path="/rencana-karir-skk" component={RencanaKarirSKK} />
         <Route path="/simulator-uji-kompetensi" component={SimulatorUjiKompetensi} />
         <Route path="/laporan-proyek-bnsp" component={LaporanProyekBNSP} />
         <Route path="/analisis-proyek-skk" component={AnalisisProyekSKK} />

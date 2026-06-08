@@ -19666,6 +19666,221 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: PETA UNIT KOMPETENSI ====================
+  app.post("/api/tools/peta-unit-kompetensi", async (req: any, res: any) => {
+    try {
+      const { jabatan } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah pakar SKKNI dan asesor BNSP Indonesia. Buat peta kompetensi lengkap untuk jabatan SKK: "${jabatan}".
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "totalUnit": <jumlah unit>,
+  "ringkasan": "gambaran umum kompetensi yang diuji (2-3 kalimat)",
+  "kategoriBesar": ["kategori-kategori utama unit kompetensi"],
+  "unitList": [
+    {
+      "kode": "kode unit (cth: K3K.01.001.01)",
+      "namaUnit": "nama unit kompetensi",
+      "deskripsiUnit": "deskripsi singkat unit (1 kalimat)",
+      "kategori": "kategori unit (cth: Kompetensi Inti, Kompetensi Pilihan, K3, Manajemen)",
+      "bobotDalamAsesmen": "Kritis" atau "Penting" atau "Pendukung",
+      "elemenKompetensi": [
+        {
+          "nomor": 1,
+          "namaElemen": "nama elemen",
+          "deskripsi": "deskripsi elemen singkat",
+          "kuk": [
+            {
+              "kode": "1.1",
+              "kriteria": "Kriteria Unjuk Kerja yang spesifik dan dapat diukur",
+              "jenisUji": "Tulis" atau "Lisan" atau "Observasi" atau "Demonstrasi" atau "Portofolio"
+            }
+          ]
+        }
+      ],
+      "persyaratanBukti": ["jenis bukti yang dibutuhkan untuk unit ini"]
+    }
+  ],
+  "tipsAsesmen": ["5-6 tips persiapan asesmen khusus untuk jabatan ${jabatan}"]
+}
+
+Buat 5-7 unit kompetensi yang representatif dan realistis sesuai SKKNI. Setiap unit punya 2-3 elemen, tiap elemen punya 3-4 KUK. Pastikan realistis dan relevan.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("peta-unit-kompetensi error:", e); res.status(500).json({ error: "Gagal memuat peta kompetensi." }); }
+  });
+
+  // ==================== AI TOOLS: ASISTEN BANDING SKK ====================
+  app.post("/api/tools/asisten-banding-skk", async (req: any, res: any) => {
+    try {
+      const { jabatan, unitTidakLulus, alasanPenguji, konteksnya } = req.body;
+      if (!jabatan || !unitTidakLulus) return res.status(400).json({ error: "Jabatan dan unit tidak lulus wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi BNSP Indonesia yang membantu kandidat yang tidak lulus asesmen SKK.
+
+Data:
+- Jabatan: ${jabatan}
+- Unit tidak lulus: ${unitTidakLulus}
+- Catatan penguji: ${alasanPenguji || "tidak disebutkan"}
+- Konteks: ${konteksnya || "tidak ada"}
+
+Kembalikan JSON PERSIS:
+{
+  "ringkasanSituasi": "analisis situasi 1-2 kalimat berdasarkan data yang diberikan",
+  "pesanSemangat": "pesan positif dan semangat yang realistis dan tidak klise (1-2 kalimat)",
+  "hakBanding": "penjelasan hak banding kandidat yang tidak lulus asesmen SKK menurut regulasi BNSP",
+  "prosedurBanding": [
+    { "langkah": "nama langkah", "detail": "penjelasan konkret cara melakukan", "batas": "batas waktu/deadline jika ada" }
+  ],
+  "suratBanding": "draft surat banding formal yang profesional, lengkap dengan pembuka, isi (alasan banding, unit yang dipersengketakan, bukti pendukung yang akan diajukan), dan penutup. Gunakan bahasa formal Indonesia.",
+  "strategiRemedial": [
+    {
+      "unit": "nama unit kompetensi yang tidak lulus",
+      "gap": "apa yang kemungkinan menjadi kekurangan berdasarkan catatan penguji",
+      "cara": "cara konkret memperbaiki dan mengisi gap tersebut",
+      "buktiTambahan": "jenis bukti tambahan yang perlu disiapkan untuk asesmen ulang"
+    }
+  ],
+  "rencanaPersiapanUlang": [
+    { "minggu": "Minggu ke-1 sampai ke-2", "aktivitas": ["3-4 aktivitas persiapan konkret"] }
+  ],
+  "dokumenTambahan": ["daftar dokumen tambahan yang perlu disiapkan sebelum asesmen ulang"]
+}
+
+Buat 3-4 langkah prosedur, 1 surat banding lengkap dan formal, analisis strategiRemedial per unit tidak lulus, 3-4 minggu rencana. Surat banding harus siap pakai (hanya perlu isi nama/tanggal).`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("asisten-banding-skk error:", e); res.status(500).json({ error: "Gagal generate panduan banding." }); }
+  });
+
+  // ==================== AI TOOLS: PANDUAN SIKI-SKK ====================
+  app.post("/api/tools/panduan-siki-skk", async (req: any, res: any) => {
+    try {
+      const { jabatan, statusPendaftar } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi konstruksi Indonesia yang ahli sistem digital LPJK/BNSP.
+
+Jabatan SKK: ${jabatan}
+Status pendaftar: ${statusPendaftar}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "statusPendaftar": "${statusPendaftar}",
+  "ringkasan": "ringkasan panduan registrasi untuk status ini (2-3 kalimat)",
+  "tahapanRegistrasi": [
+    {
+      "nomor": 1,
+      "judul": "nama tahap",
+      "deskripsi": "deskripsi singkat tahap",
+      "langkahDetail": ["langkah-langkah konkret yang perlu dilakukan"],
+      "dokumenDibutuhkan": ["dokumen yang perlu diupload di tahap ini"],
+      "catatan": "catatan penting/peringatan untuk tahap ini (atau kosong)"
+    }
+  ],
+  "sistemTerkait": [
+    {
+      "nama": "nama sistem digital",
+      "url": "URL sistem (cth: siki.pu.go.id)",
+      "fungsi": "fungsi utama sistem untuk pemegang SKK",
+      "caraMasuk": "cara login/akses ke sistem ini"
+    }
+  ],
+  "masalahUmum": [
+    { "masalah": "masalah teknis/prosedural yang sering terjadi", "solusi": "cara mengatasinya" }
+  ],
+  "faq": [
+    { "pertanyaan": "pertanyaan yang sering diajukan tentang registrasi SKK digital", "jawaban": "jawaban yang jelas dan praktis" }
+  ],
+  "tipsVerifikasi": ["3-4 tips untuk memverifikasi bahwa SKK sudah terdaftar dengan benar"]
+}
+
+Buat 4-6 tahapan sesuai status ${statusPendaftar}, 3-4 sistem digital LPJK/BNSP yang relevan, 4-5 masalah umum, 5-6 FAQ. Gunakan pengetahuan terkini tentang sistem SIKI-SKK, SiKA-SKK, e-SKK LPJK Indonesia.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 2800,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-siki-skk error:", e); res.status(500).json({ error: "Gagal generate panduan." }); }
+  });
+
+  // ==================== AI TOOLS: RENCANA KARIR SKK ====================
+  app.post("/api/tools/rencana-karir-skk", async (req: any, res: any) => {
+    try {
+      const { jabatanSekarang, jabatanTarget, timeline, pengalamanTahun, informasiTambahan } = req.body;
+      if (!jabatanSekarang || !jabatanTarget) return res.status(400).json({ error: "Posisi sekarang dan target wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah career coach spesialis konstruksi dan sertifikasi SKK Indonesia. Buat rencana pengembangan karir SKK yang realistis dan terstruktur.
+
+Data:
+- Posisi sekarang: ${jabatanSekarang}
+- Target: ${jabatanTarget}
+- Timeline: ${timeline}
+- Pengalaman: ${pengalamanTahun} tahun
+- Info tambahan: ${informasiTambahan || "tidak ada"}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatanSekarang": "${jabatanSekarang}",
+  "jabatanTarget": "${jabatanTarget}",
+  "timeline": "${timeline}",
+  "skoreKesiapan": <0-100, berdasarkan pengalaman dan gap antara posisi sekarang dan target>,
+  "tingkatKesiapan": "Siap" (80+) atau "Hampir Siap" (60-79) atau "Perlu Persiapan" (40-59) atau "Butuh Waktu" (<40),
+  "ringkasanRencana": "ringkasan rencana 2-3 kalimat yang realistis dan motivatif",
+  "pesanMotivasi": "pesan motivasi personal yang spesifik untuk situasi ini (1-2 kalimat, bukan klise)",
+  "milestones": [
+    {
+      "waktu": "misal: Bulan 1-3",
+      "judul": "nama milestone",
+      "deskripsi": "apa yang dicapai di milestone ini",
+      "aksi": ["3-4 aksi konkret yang perlu dilakukan"],
+      "hasil": "hasil terukur yang diharapkan"
+    }
+  ],
+  "kebutuhanCPD": [
+    {
+      "kategori": "kategori CPD (cth: Teknis Konstruksi, K3, Manajemen, Hukum Konstruksi)",
+      "jam": <jumlah jam CPD yang direkomendasikan>,
+      "contohKegiatan": ["2-3 contoh kegiatan konkret"]
+    }
+  ],
+  "kebutuhanPelatihan": [
+    {
+      "pelatihan": "nama pelatihan",
+      "tujuan": "mengapa pelatihan ini penting",
+      "estimasiBiaya": "estimasi biaya (cth: Rp 1–3 juta)",
+      "prioritas": "Wajib" atau "Disarankan"
+    }
+  ],
+  "hambatanPotensial": [
+    { "hambatan": "hambatan realistis yang mungkin dihadapi", "solusi": "cara mengatasinya" }
+  ],
+  "indikatorSukses": ["4-5 indikator konkret bahwa rencana berjalan dengan baik"]
+}
+
+Buat 4-5 milestones realistis sesuai ${timeline}, 3-4 kategori CPD, 4-5 pelatihan, 3-4 hambatan. Sesuaikan dengan gap antara ${jabatanSekarang} dan ${jabatanTarget}.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("rencana-karir-skk error:", e); res.status(500).json({ error: "Gagal generate rencana karir." }); }
+  });
+
   // ==================== AI TOOLS: SIMULATOR UJI KOMPETENSI (soal) ====================
   app.post("/api/tools/simulator-uji-kompetensi/soal", async (req: any, res: any) => {
     try {
