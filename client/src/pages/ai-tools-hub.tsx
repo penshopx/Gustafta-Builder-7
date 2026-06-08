@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase
+  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase, LayoutList
 } from "lucide-react";
 
 interface Tool {
@@ -127,6 +127,17 @@ const KOMPETENSI_TOOLS = [
     badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
     label: "Generator Dokumen SKK — Surat Pernyataan, Keterangan & Pengantar",
     desc: "Generate 3 jenis surat resmi untuk aplikasi SKK: Surat Pernyataan Pengalaman Kerja (bermaterai), Surat Keterangan Kerja dari perusahaan, dan Surat Pengantar ke LSP.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/analisis-skkni",
+    icon: <LayoutList className="h-6 w-6" />,
+    iconBg: "bg-sky-500/10",
+    iconColor: "text-sky-400",
+    badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+    label: "Analisis Unit SKKNI — Breakdown Kompetensi Lengkap",
+    desc: "AI breakdown unit kompetensi, elemen, KUK, metode asesmen per unit, contoh bukti portofolio, dan tips asesmen. Panduan belajar sebelum Simulator Wawancara.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
   },

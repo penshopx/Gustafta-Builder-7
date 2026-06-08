@@ -19666,6 +19666,61 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: ANALISIS UNIT SKKNI ====================
+  app.post("/api/tools/analisis-skkni", async (req: any, res: any) => {
+    try {
+      const { jabatan } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan SKK wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const prompt = `Anda adalah ahli sertifikasi BNSP dan SKKNI untuk jasa konstruksi Indonesia. Buat analisis lengkap unit kompetensi untuk jabatan SKK: "${jabatan}".
+
+Kembalikan JSON dengan struktur PERSIS seperti ini (JANGAN tambah field lain):
+{
+  "jabatan": "${jabatan}",
+  "kkniLevel": "level KKNI (misal: Level 7)",
+  "totalUnit": <jumlah total unit>,
+  "ringkasanSkema": "2-3 kalimat penjelasan skema sertifikasi ini, fungsi jabatan, dan konteks industri",
+  "unitKompetensi": [
+    {
+      "kodeUnit": "kode unit format XXX.XX.XXX.X.X.X.XX",
+      "namaUnit": "nama unit kompetensi",
+      "jenis": "Inti" atau "Pilihan" atau "Umum",
+      "deskripsi": "1-2 kalimat deskripsi cakupan unit ini",
+      "elemenKompetensi": [
+        {
+          "nama": "nama elemen kompetensi",
+          "kuk": ["kriteria unjuk kerja 1", "kriteria unjuk kerja 2", "kriteria unjuk kerja 3"]
+        }
+      ],
+      "metodeAsesmen": ["Wawancara", "Portofolio", "Tes Tertulis", "Observasi", atau "Demonstrasi" — pilih yang relevan],
+      "contohBukti": ["contoh dokumen/bukti portofolio yang relevan untuk unit ini (3-4 contoh spesifik)"],
+      "tipAsesmen": "1 kalimat tip praktis menghadapi asesmen untuk unit ini"
+    }
+  ],
+  "strategiUmum": [
+    "4-5 strategi persiapan asesmen yang spesifik dan actionable untuk jabatan ini"
+  ]
+}
+
+Buat 5-7 unit kompetensi yang paling representatif (mix inti dan pilihan/umum). Setiap unit harus punya 2-3 elemen kompetensi, masing-masing 2-3 KUK. Contoh bukti harus spesifik dan relevan dengan industri konstruksi Indonesia.`;
+
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+        max_tokens: 3000,
+      });
+      const data = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+      return res.json(data);
+    } catch (e: any) {
+      console.error("analisis-skkni error:", e);
+      res.status(500).json({ error: "Gagal menganalisis SKKNI. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: SIMULATOR WAWANCARA ASESMEN ====================
   app.post("/api/tools/simulator-wawancara", async (req: any, res: any) => {
     try {

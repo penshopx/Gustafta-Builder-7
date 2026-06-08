@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -144,6 +144,19 @@ const TOOLS = [
     label: "Generator Dokumen SKK",
     sublabel: "Surat Pernyataan · Keterangan Kerja · Pengantar LSP",
     desc: "Generate 3 jenis surat resmi aplikasi SKK: surat pernyataan pengalaman kerja (bermaterai), surat keterangan kerja, dan surat pengantar ke LSP — siap cetak.",
+    color: "text-sky-400",
+    borderColor: "border-sky-500/30",
+    bg: "bg-sky-500/5",
+    badge: "Gelombang 3",
+    badgeColor: "text-sky-400 border-sky-400/30",
+    live: true,
+  },
+  {
+    href: "/analisis-skkni",
+    icon: LayoutList,
+    label: "Analisis Unit SKKNI",
+    sublabel: "Unit kompetensi · elemen · KUK · bukti portofolio",
+    desc: "Pilih jabatan SKK → AI breakdown semua unit kompetensi (inti/pilihan/umum), elemen, KUK, metode asesmen per unit, contoh bukti portofolio, dan tips menghadapi asesmen.",
     color: "text-sky-400",
     borderColor: "border-sky-500/30",
     bg: "bg-sky-500/5",

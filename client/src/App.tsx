@@ -186,6 +186,7 @@ import GeneratorDokumenSKK from "@/pages/generator-dokumen-skk";
 import PerpanjanganSKK from "@/pages/perpanjangan-skk";
 import SimulatorWawancara from "@/pages/simulator-wawancara";
 import TrackerSKK from "@/pages/tracker-skk";
+import AnalisisSKKNI from "@/pages/analisis-skkni";
 import TenderBotPage from "@/pages/tenderbot";
 import SertifikasiBotPage from "@/pages/sertifikasibot";
 import ProyekBotPage from "@/pages/proyekbot";
@@ -1163,6 +1164,7 @@ function Router() {
         <Route path="/perpanjangan-skk" component={PerpanjanganSKK} />
         <Route path="/simulator-wawancara" component={SimulatorWawancara} />
         <Route path="/tracker-skk" component={TrackerSKK} />
+        <Route path="/analisis-skkni" component={AnalisisSKKNI} />
         <Route path="/tenderbot" component={TenderBotPage} />
         <Route path="/sertifikasibot" component={SertifikasiBotPage} />
         <Route path="/proyekbot" component={ProyekBotPage} />
