@@ -282,6 +282,15 @@ const openai = new OpenAI({
 
 // Gemini client — used as primary LLM for document generation
 // In production: uses real GEMINI_API_KEY (direct Google v1 API)
+// ── Default model — cost-optimized fallback chain ────────────────────────────
+// Priority: Qwen Turbo (cheapest) → DeepSeek Chat → gpt-4o-mini
+// Vision always uses gpt-4o regardless.
+function defaultModel(): string {
+  if (process.env.QWEN_API_KEY)     return "qwen-turbo";
+  if (process.env.DEEPSEEK_API_KEY) return "deepseek-chat";
+  return "gpt-4o-mini";
+}
+
 // In dev: uses Replit's modelfarm proxy (localhost) if no real key present
 const realGeminiKey = process.env.GEMINI_API_KEY;
 const proxyGeminiKey = process.env.AI_INTEGRATIONS_GEMINI_API_KEY;
@@ -2626,7 +2635,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       chatMessages.push({ role: "user", content: parsed.data.content });
       
       // Determine which AI model and client to use
-      const agentModel = agent.aiModel || "gpt-4o-mini";
+      const agentModel = agent.aiModel || defaultModel();
       const temperature = Math.max(0, Math.min(2, agent.temperature ?? 0.7));
       const maxTokens = Math.max(100, Math.min(4096, agent.maxTokens ?? 1024));
       
@@ -3505,7 +3514,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
       // ─────────────────────────────────────────────────────────────────────────
 
-      let agentModel = agent.aiModel || "gpt-4o-mini";
+      let agentModel = agent.aiModel || defaultModel();
       if (hasVisionContent && !agentModel.startsWith("gpt-4o")) {
         agentModel = "gpt-4o";
       }
@@ -4911,7 +4920,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       }
     } catch {}
 
-    const agentModel = subAgent.aiModel || "gpt-4o-mini";
+    const agentModel = subAgent.aiModel || defaultModel();
     const temperature = Math.max(0, Math.min(2, subAgent.temperature ?? 0.7));
     // Minimum 1500 tokens for sub-agents to produce meaningful specialist output
     const maxTokens = Math.max(1500, Math.min(3000, subAgent.maxTokens ?? 1500));
