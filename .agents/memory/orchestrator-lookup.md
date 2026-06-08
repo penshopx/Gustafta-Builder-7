@@ -7,21 +7,31 @@ description: How to resolve orchestrator agents safely when IDs drift over time
 
 When an `/api/{name}-claw/orchestrator` route hardcodes `storage.getAgent("<id>")`, it eventually breaks: agent IDs in `replit.md` drift when the DB is reseeded or rows are deleted/recreated, and the route silently returns whichever unrelated agent now occupies that ID.
 
-**Rule:** orchestrator routes must resolve via multi-strategy fallback: **slug → ID (validated by name keyword) → name word-boundary → optional systemPrompt marker**. Use the `findOrchestratorAgent()` helper in `server/routes.ts`.
+**Rule:** orchestrator routes must resolve via slug-first: `storage.getAgentBySlug("slug")` → if null, try systemPrompt marker → if null, try name keyword. Use `findOrchestratorAgent()` helper in `server/routes.ts` for complex cases.
 
-**CRITICAL — promptMarker gates EVERY step.** When the helper is called with a `promptMarker`, that marker must be validated on the agent returned by the slug, ID, and name-keyword steps — NOT only as a step-4 fallback. Otherwise the slug step happily returns an agent whose name is correct but whose `system_prompt` was overwritten by an unrelated seed (prod EduCounsel: slug `educounsel-orchestrator` → agent 682 named "EDUCOUNSEL-ORCHESTRATOR" but prompt body was "HUB Regulasi Jasa Konstruksi…"). The chat endpoint then serves the wrong persona invisibly — name+avatar look right in the header, but every reply is off-topic. With strict gating, the name step should also scan multiple candidates (limit ~10, ordered by id) and pick the one whose prompt has the marker; the step-4 marker-only scan remains the last-resort rescue path.
+**CRITICAL — fallback chains only fire on NULL.** If a wrong agent exists at the hardcoded ID, `getAgent("id")` returns that wrong agent (not null), and every fallback in the `if (!agent)` chain is silently skipped. The route serves the wrong persona with no error. Confirmed in prod: 9 routes were returning completely unrelated agents because old IDs were occupied by different agents after DB drift. The fix: replace `getAgent("hardcoded-id")` primary with `getAgentBySlug("correct-slug")` primary.
 
-**Why:** in prod we observed routes returning wildly wrong agents (e.g. `/bg-claw` → "RG-ASESOR — Simulasi Wawancara") because ID 1033 was reassigned. Slug stays stable.
+**Known corrected routes (post-fix correct IDs):**
+- `tendera-claw` → slug `tendera-orchestrator` → ID 653
+- `konstra-tender-claw` → slug `konstra-tender-orchestrator` → ID 642
+- `smk3-claw` → slug `hub-ims-smk3-terintegrasi` → ID 297
+- `lkut-claw` → slug `lkut-hub` → ID 292
+- `safira-claw` → slug `safira-claw-orchestrator` → name fallback "Safira" → ID 657 (BRAIN-SAFIRA)
+- `smap-claw` → slug `smap-orchestrator-hub-multi-agent-anti-penyuapan` → ID 262
+- `pancek-claw` → slug `pancek-orchestrator-hub-multi-agent-smap-nasional-pancek` → ID 271
+- `dev-properti-claw` → slug `hub-devproperti-pro-v1` → ID 565
+- `estate-care-claw` → slug `hub-estatecare-pro-v1` → ID 576
+
+**Why:** in prod we observed routes returning wildly wrong agents (e.g. `/tendera-claw` → "AGENT-AKADEMIK" which is an EducounselClaw sub-agent) because ID 663 was occupied by an unrelated agent after reseed. Slug stays stable; numeric IDs do not.
 
 **How to apply:**
-- New orchestrator route → call helper with `slug` (pattern: `{route-base}-orchestrator`) plus a **single unique** `nameKeyword` (e.g. `"BGClaw"`, not `"Bangunan Gedung"` — generic keywords falsely match unrelated agents).
-- Word-boundary regex matters: `\\m{kw}\\M` is needed so `"IMClaw"` doesn't match `"BIMClaw"`. Plain `ilike '%kw%'` is unsafe for short prefixes that are substrings of other orchestrator names.
-- If 404 is genuinely correct (orchestrator doesn't exist), let it 404 loudly — never fall back to "first agent that loosely matches", that's how silent bugs happen.
+- New orchestrator route → use `getAgentBySlug("slug")` as primary. Never lead with `getAgent("hardcoded-id")`.
+- Slug pattern: `{route-base}-orchestrator` (e.g. `ko-claw-orchestrator`, `kk-claw-orchestrator`) with exceptions for legacy hubs (e.g. `hub-ims-smk3-terintegrasi`, `hub-devproperti-pro-v1`).
+- Fallback chain: slug → systemPrompt marker ilike → name keyword ilike → 404.
+- If 404 is genuinely correct (orchestrator not yet seeded), let it 404 loudly — never fall back to "first agent that loosely matches".
 
 # Audit endpoint must mirror runtime, not lookup-by-ID
 
-The audit endpoint at `/api/admin/audit-orchestrators` used to do `SELECT WHERE id = expected_id` and call MISMATCH if the name didn't fit. That gave false positives for ~half the MultiClaw routes because their handlers already used slug-first lookup and worked fine in prod — only the ID-position was occupied by something else.
+The audit endpoint at `/api/admin/audit-orchestrators` uses `findOrchestratorAgent()` (slug+name fallback), so it reports the same agent that chat endpoints actually use. Differentiate `OK` (ID matches expected) from `DEGRADED` (resolved via fallback at different ID — means `replit.md` is stale but page works) from `MISMATCH`/`MISSING`.
 
-**Rule:** audit must use the same lookup strategy the route handler uses. Differentiate `OK` (ID matches) from `DEGRADED` (resolved via fallback at a different ID — means `replit.md` is stale but page works) from `MISMATCH` / `MISSING`.
-
-**Why:** previously the audit reported 51/66 broken; reality was ~8 truly broken. A noisy audit causes wasted reseed work and erodes trust in the dashboard.
+**Why:** previously audit reported 51/66 broken; reality was ~9 truly broken. Noisy audits cause wasted reseed work.
