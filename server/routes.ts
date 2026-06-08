@@ -19666,6 +19666,171 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: SYARAT PERSONEL BUJK ====================
+  app.post("/api/tools/syarat-personel-bujk", async (req: any, res: any) => {
+    try {
+      const { klasifikasi, kualifikasi, namaPerusahaan = "", mode = "lihat", personelAda = "" } = req.body;
+      if (!klasifikasi || !kualifikasi) return res.status(400).json({ error: "Klasifikasi dan kualifikasi wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan regulasi konstruksi Indonesia dengan keahlian mendalam Permen PUPR No. 6 Tahun 2025 tentang Sertifikasi Kompetensi Kerja Konstruksi dan PP 14 Tahun 2021 tentang BUJK.
+
+Data BUJK:
+- Klasifikasi: "${klasifikasi}"
+- Kualifikasi/Grade: "${kualifikasi}"
+- Nama Perusahaan: "${namaPerusahaan || "tidak diisi"}"
+- Mode: "${mode}" (lihat = tampilkan syarat saja | cek = compliance check)
+- Personel SKK yang sudah dimiliki: "${personelAda || "tidak diisi"}"
+
+Kembalikan JSON SAJA (tanpa markdown) persis format:
+{
+  "klasifikasi": "${klasifikasi}",
+  "kualifikasi": "${kualifikasi}",
+  "namaPerusahaan": "${namaPerusahaan}",
+  "dasarHukum": "referensi pasal/lampiran Permen PUPR 6/2025 yang relevan",
+  "syaratPersonel": [
+    {
+      "jabatan": "nama jabatan (cth: Penanggung Jawab Teknik / PJT)",
+      "levelSkk": "level SKK yang dibutuhkan (cth: Ahli Madya)",
+      "jumlah": 1,
+      "wajib": true,
+      "keterangan": "penjelasan singkat mengapa diperlukan dan syarat spesifik"
+    }
+  ],
+  "syaratLain": ["syarat non-personel lain (modal kerja, pengalaman badan usaha, dll.)"],
+  "complianceCheck": ${mode === "cek" && personelAda ? `[
+    {
+      "jabatan": "nama jabatan dari syarat",
+      "levelSkk": "level SKK",
+      "status": "ada|kurang|tidak_ada",
+      "jumlahAda": 0,
+      "jumlahDibutuhkan": 1,
+      "catatan": "penjelasan status"
+    }
+  ]` : "null"},
+  "skorKepatuhan": ${mode === "cek" && personelAda ? "<0-100 berdasarkan berapa % syarat terpenuhi>" : "null"},
+  "statusKepatuhan": ${mode === "cek" && personelAda ? `"lulus|perlu_perbaikan|tidak_lulus"` : "null"},
+  "risikoKetidakpatuhan": ${mode === "cek" && personelAda ? '["risiko 1", "risiko 2"]' : "[]"},
+  "rekomendasiGap": ${mode === "cek" && personelAda ? '["rekomendasi 1", "rekomendasi 2"]' : "[]"},
+  "estimasiBiayaGap": ${mode === "cek" && personelAda ? '"estimasi biaya sertifikasi untuk menutup gap"' : "null"},
+  "kesimpulan": "narasi singkat 2-3 kalimat tentang situasi BUJK dan langkah selanjutnya"
+}
+
+Aturan:
+- Syarat personel harus sesuai Permen PUPR 6/2025 dan PP 14/2021 untuk klasifikasi+kualifikasi ini
+- Untuk compliance check: bandingkan personelAda dengan syarat, tentukan status ada/kurang/tidak_ada per jabatan
+- skorKepatuhan: 100% = semua syarat terpenuhi; lulus >= 90%; perlu_perbaikan 60-89%; tidak_lulus < 60%
+- Fokus pada PJT (Penanggung Jawab Teknik), PJK (Penanggung Jawab Keuangan jika ada), dan Tenaga Ahli minimum`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.15,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("syarat-personel-bujk error:", e);
+      res.status(500).json({ error: "Gagal menganalisis. Coba lagi." });
+    }
+  });
+
+  // ==================== AI TOOLS: ROI KARIR SKK ====================
+  app.post("/api/tools/roi-karir-skk", async (req: any, res: any) => {
+    try {
+      const { jabatan, gaji, targetSkk, wilayah, perusahaan } = req.body;
+      if (!jabatan || !targetSkk || !wilayah || !perusahaan) {
+        return res.status(400).json({ error: "Semua field wajib diisi." });
+      }
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const gajiJuta = Math.round((gaji || 8000000) / 1_000_000);
+      const prompt = `Anda adalah konsultan karir dan HR konstruksi Indonesia yang sangat berpengalaman, dengan pengetahuan mendalam tentang standar gaji tenaga ahli bersertifikat SKK di Indonesia.
+
+Data:
+- Jabatan saat ini: "${jabatan}"
+- Gaji saat ini: Rp ${gajiJuta} juta/bulan
+- Target SKK: "${targetSkk}"
+- Wilayah kerja: "${wilayah}"
+- Jenis perusahaan: "${perusahaan}"
+
+Hitung ROI sertifikasi SKK dan kembalikan JSON SAJA (tanpa markdown) persis format ini:
+{
+  "inputSummary": {
+    "jabatan": "${jabatan}",
+    "gajiSaatIni": ${gaji},
+    "targetSkk": "${targetSkk}",
+    "wilayah": "${wilayah}",
+    "perusahaan": "${perusahaan}"
+  },
+  "biayaSertifikasi": {
+    "pendaftaran": <angka dalam rupiah, misal 2500000>,
+    "bimtek": <angka dalam rupiah, 0 jika jalur RPL>,
+    "administrasi": <angka dalam rupiah>,
+    "total": <total semua biaya>
+  },
+  "hasilSetelahSkk": {
+    "gajiMinimum": <estimasi gaji minimum setelah SKK dalam rupiah>,
+    "gajiMaksimum": <estimasi gaji maksimum setelah SKK dalam rupiah>,
+    "rataRata": <rata-rata realistis>,
+    "persentaseKenaikan": <persen kenaikan dari gaji saat ini, bulat>,
+    "tambahanBulanan": <selisih gaji baru - gaji lama>
+  },
+  "breakevenBulan": <berapa bulan untuk balik modal biaya sertifikasi>,
+  "proyeksi5Tahun": [
+    {
+      "tahun": 1,
+      "gajiEstimasi": <gaji bulanan estimasi tahun pertama setelah SKK>,
+      "kumulatifSelisih": <total kumulatif tambahan penghasilan vs tanpa SKK sejak bulan 1>,
+      "milestone": "string singkat atau kosong jika tidak ada milestone"
+    },
+    { "tahun": 2, ... },
+    { "tahun": 3, ... },
+    { "tahun": 4, ... },
+    { "tahun": 5, ... }
+  ],
+  "totalROI5Tahun": <total tambahan penghasilan kumulatif 5 tahun dibanding tanpa SKK>,
+  "roiPersentase": <(totalROI5Tahun / biayaSertifikasi.total * 100) dibulatkan>,
+  "benefitNonFinansial": [
+    "benefit 1 (cth: syarat wajib PJK/PJT BUJK)",
+    "benefit 2",
+    "benefit 3",
+    "benefit 4"
+  ],
+  "skklanjutan": [
+    {
+      "jabatan": "SKK lanjutan yang paling logis",
+      "potensiKenaikan": "cth: +15-25% gaji",
+      "estimasiWaktu": "cth: 3-4 tahun lagi"
+    }
+  ],
+  "kesimpulan": "narasi 2-3 kalimat: apakah sertifikasi ini worth it untuk profil ini, mengapa, dan saran tindakan"
+}
+
+Penting:
+- Gaji realistis sesuai standar pasar konstruksi Indonesia ${new Date().getFullYear()} untuk wilayah "${wilayah}"
+- Biaya sertifikasi realistis untuk "${targetSkk}" via BNSP/LSP terakreditasi
+- proyeksi5Tahun harus menunjukkan pertumbuhan (asumsi kenaikan gaji 5-8%/tahun + promosi)
+- breakevenBulan harus konsisten: biaya.total / hasilSetelahSkk.tambahanBulanan
+- totalROI5Tahun = kumulatifSelisih tahun ke-5 (sudah dikurangi biaya sertifikasi)`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("roi-karir-skk error:", e);
+      res.status(500).json({ error: "Gagal menghitung ROI. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: GENERATOR APL-02 ====================
   app.post("/api/tools/generator-apl02", async (req: any, res: any) => {
     try {

@@ -1820,7 +1820,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium">Ekosistem Kompetensi SKK — Gelombang 1</p>
-                        <p className="text-xs text-muted-foreground">SERTIVA · Diagnostik Gap · Mock Asesmen · Persiapan Asesmen SKK</p>
+                        <p className="text-xs text-muted-foreground">G1: SERTIVA · Diagnostik · Mock Asesmen · Persiapan &nbsp;|&nbsp; G2: Cek Kelayakan · APL-02 · ROI Karir SKK</p>
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">

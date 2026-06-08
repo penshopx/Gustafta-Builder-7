@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen, Search
+  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2
 } from "lucide-react";
 
 interface Tool {
@@ -95,6 +95,28 @@ const KOMPETENSI_TOOLS = [
     label: "Generator APL-02 — Formulir Asesmen Mandiri SKK",
     desc: "Ceritakan pengalaman kerja → AI pre-fills seluruh APL-02 per unit SKKNI: klaim K/BK, konfidensitas diri, jenis bukti, dan dokumen pendukung.",
     tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/roi-karir-skk",
+    icon: <TrendingUp className="h-6 w-6" />,
+    iconBg: "bg-emerald-500/10",
+    iconColor: "text-emerald-400",
+    badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    label: "ROI & Karir SKK — Kenaikan Gaji & Proyeksi 5 Tahun",
+    desc: "Input jabatan + gaji + target SKK → estimasi kenaikan gaji, rincian biaya sertifikasi, breakeven bulan, ROI 5 tahun + roadmap SKK lanjutan.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/syarat-personel-bujk",
+    icon: <Building2 className="h-6 w-6" />,
+    iconBg: "bg-orange-500/10",
+    iconColor: "text-orange-400",
+    badgeColor: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+    label: "Syarat Personel & Compliance BUJK",
+    desc: "Pilih klasifikasi + grade BUJK → lihat syarat PJT/PJK/Tenaga Ahli per Permen PUPR 6/2025, atau cek compliance personel yang sudah ada + gap analysis.",
+    tag: "BUJK",
     model: "GPT-4o-mini",
   },
 ];

@@ -180,6 +180,8 @@ import KompetensiHub from "@/pages/kompetensi-hub";
 import PersiapanAsesmen from "@/pages/persiapan-asesmen";
 import CekKelayakanSKK from "@/pages/cek-kelayakan-skk";
 import GeneratorAPL02 from "@/pages/generator-apl02";
+import ROIKarirSKK from "@/pages/roi-karir-skk";
+import SyaratPersonelBUJK from "@/pages/syarat-personel-bujk";
 import TenderBotPage from "@/pages/tenderbot";
 import SertifikasiBotPage from "@/pages/sertifikasibot";
 import ProyekBotPage from "@/pages/proyekbot";
@@ -1151,6 +1153,8 @@ function Router() {
         <Route path="/persiapan-asesmen" component={PersiapanAsesmen} />
         <Route path="/cek-kelayakan-skk" component={CekKelayakanSKK} />
         <Route path="/generator-apl02" component={GeneratorAPL02} />
+        <Route path="/roi-karir-skk" component={ROIKarirSKK} />
+        <Route path="/syarat-personel-bujk" component={SyaratPersonelBUJK} />
         <Route path="/tenderbot" component={TenderBotPage} />
         <Route path="/sertifikasibot" component={SertifikasiBotPage} />
         <Route path="/proyekbot" component={ProyekBotPage} />

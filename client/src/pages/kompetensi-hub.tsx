@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -110,6 +110,32 @@ const TOOLS = [
     bg: "bg-blue-500/5",
     badge: "Gelombang 2",
     badgeColor: "text-blue-400 border-blue-400/30",
+    live: true,
+  },
+  {
+    href: "/roi-karir-skk",
+    icon: DollarSign,
+    label: "ROI & Karir SKK",
+    sublabel: "Berapa kenaikan gaji & kapan balik modal?",
+    desc: "Input jabatan + gaji + target SKK → proyeksi kenaikan gaji, breakeven biaya sertifikasi, ROI 5 tahun, dan roadmap SKK lanjutan.",
+    color: "text-emerald-400",
+    borderColor: "border-emerald-500/30",
+    bg: "bg-emerald-500/5",
+    badge: "Gelombang 2",
+    badgeColor: "text-emerald-400 border-emerald-400/30",
+    live: true,
+  },
+  {
+    href: "/syarat-personel-bujk",
+    icon: Building2,
+    label: "Syarat Personel & Compliance BUJK",
+    sublabel: "Permen PUPR 6/2025 — PJT/PJK/Tenaga Ahli",
+    desc: "Pilih klasifikasi + grade BUJK → lihat syarat personel SKK wajib, atau input personel yang ada untuk compliance check + gap analysis.",
+    color: "text-orange-400",
+    borderColor: "border-orange-500/30",
+    bg: "bg-orange-500/5",
+    badge: "Gelombang 2",
+    badgeColor: "text-orange-400 border-orange-400/30",
     live: true,
   },
   {
