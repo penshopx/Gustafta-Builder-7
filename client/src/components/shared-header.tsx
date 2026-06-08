@@ -176,7 +176,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/packs", label: "Paket Series Modul", icon: Package },
     { href: "/store", label: "Store", icon: ShoppingBag },
     { href: "/lms", label: "Learning Center", icon: GraduationCap },
-    { href: "/pricing", label: "Paket Berlangganan", icon: BarChart3 },
+    { href: "/produk", label: "Produk & Harga", icon: BarChart3 },
     { href: "/panduan", label: "Panduan", icon: BookOpen },
     { href: "/profil", label: "Profil GAIA", icon: Sparkles },
   ];
