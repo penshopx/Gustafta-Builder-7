@@ -129,7 +129,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
     monthlyFee: 999000,
     maxAgents: 200,
     maxSeries: 10,
-    maxMiniAppTypes: 33,
+    maxMiniAppTypes: 45,
     maxMessagesPerMonth: 5000,
     maxCustomDomains: 3,
     color: "#8b5cf6",

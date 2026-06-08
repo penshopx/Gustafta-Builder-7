@@ -13,7 +13,9 @@ import {
   MessageSquare, Globe, Shield, Headphones, Users, Star,
   ArrowRight, Sparkles, Crown, Wrench, BookOpen, BarChart3,
   HardHat, Target, Award, Pencil, Layers, Briefcase,
-  Phone, ExternalLink,
+  Phone, ExternalLink, Plus, CreditCard, FileText, GraduationCap,
+  Mic, PenLine, Calculator, Megaphone, ScrollText, LayoutGrid,
+  AlertTriangle, TrendingUp, Lightbulb, ClipboardList, BadgePlus,
 } from "lucide-react";
 
 // ─── Types & Data ─────────────────────────────────────────────────────────────
@@ -239,6 +241,112 @@ const MODUL_PACKAGES = [
   },
 ];
 
+const KREDIT_EKSTRA = [
+  {
+    label: "Pack S",
+    pesan: "500 pesan",
+    price: "Rp 49.000",
+    perPesan: "Rp 98/pesan",
+    color: "text-blue-500",
+    border: "border-blue-200 dark:border-blue-800",
+    bg: "bg-blue-50/50 dark:bg-blue-950/20",
+    badge: "",
+  },
+  {
+    label: "Pack M",
+    pesan: "1.500 pesan",
+    price: "Rp 129.000",
+    perPesan: "Rp 86/pesan",
+    color: "text-indigo-500",
+    border: "border-indigo-200 dark:border-indigo-800",
+    bg: "bg-indigo-50/50 dark:bg-indigo-950/20",
+    badge: "PALING LAKU",
+  },
+  {
+    label: "Pack L",
+    pesan: "3.000 pesan",
+    price: "Rp 229.000",
+    perPesan: "Rp 76/pesan",
+    color: "text-violet-500",
+    border: "border-violet-200 dark:border-violet-800",
+    bg: "bg-violet-50/50 dark:bg-violet-950/20",
+    badge: "",
+  },
+  {
+    label: "Pack XL",
+    pesan: "5.000 pesan",
+    price: "Rp 349.000",
+    perPesan: "Rp 70/pesan",
+    color: "text-purple-500",
+    border: "border-purple-200 dark:border-purple-800",
+    bg: "bg-purple-50/50 dark:bg-purple-950/20",
+    badge: "TERBAIK",
+  },
+];
+
+const FITUR_LANJUTAN = [
+  {
+    icon: LayoutGrid,
+    title: "Mini Apps (45 tipe)",
+    color: "text-violet-500",
+    border: "border-violet-200 dark:border-violet-800",
+    bg: "bg-violet-50/40 dark:bg-violet-950/20",
+    badgeColor: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+    desc: "Tools produktivitas AI yang tertanam di dalam chatbot Anda. Satu klik → output siap pakai.",
+    groups: [
+      { hub: "🟣 Kreator", items: ["Editorial Calendar", "Script YouTube/Podcast", "Proposal Brand Deal", "Laporan Performa Konten"] },
+      { hub: "🟢 Bekerja", items: ["AI Notulis Rapat", "Drafter Kontrak/SPK/NDA", "RAB & Estimasi Biaya", "Laporan KPI Tim"] },
+      { hub: "🟠 Berusaha", items: ["AI Copywriter Medsos", "Sales Script & Objection Handling", "Laporan Cashflow", "NPS & Survey Kepuasan"] },
+      { hub: "🔵 AI Analytics", items: ["Risk Register Builder", "Gap Analysis", "Scoring & Assessment", "Recommendation Engine"] },
+    ],
+  },
+  {
+    icon: FileText,
+    title: "Generator Dokumen",
+    color: "text-blue-500",
+    border: "border-blue-200 dark:border-blue-800",
+    bg: "bg-blue-50/40 dark:bg-blue-950/20",
+    badgeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+    desc: "AI menghasilkan dokumen profesional lengkap dari knowledge base chatbot Anda — bukan template kosong.",
+    groups: [
+      { hub: "📘 eBook Generator", items: ["Buku panduan kompetensi otomatis", "Diekspor ke HTML/PDF", "Dari KB chatbot → buku siap cetak", "Termasuk daftar isi & indeks"] },
+      { hub: "🎓 eCourse Builder", items: ["Kurikulum microlearning dari KB", "Modul + kuis otomatis", "Sertifikat digital (PDF)", "Target peserta, learning outcomes"] },
+      { hub: "📄 Docgen Mini Apps", items: ["HSE Plan & PQP Tender", "Compliance Matrix", "Metode Pelaksanaan", "Executive Summary Penawaran"] },
+      { hub: "✍️ Penulis Cerdas", items: ["AI tulis dokumen bab per bab", "Input bahan mentah → output profesional", "PKB/SKP 25 poin", "Kontrak, proposal, laporan"] },
+    ],
+  },
+  {
+    icon: GraduationCap,
+    title: "E-Course & LMS",
+    color: "text-emerald-500",
+    border: "border-emerald-200 dark:border-emerald-800",
+    bg: "bg-emerald-50/40 dark:bg-emerald-950/20",
+    badgeColor: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+    desc: "Ubah chatbot Anda menjadi platform belajar interaktif — termasuk kuis, sertifikat, dan progress peserta.",
+    groups: [
+      { hub: "📚 Modul Belajar", items: ["Konten dari KB chatbot", "Urutan materi otomatis", "Multi-topik per chatbot", "Progress peserta real-time"] },
+      { hub: "📝 Evaluasi", items: ["Kuis otomatis per modul", "Skor & leaderboard", "Sertifikat digital PDF", "Rekap nilai peserta"] },
+      { hub: "👨‍🏫 Tutor Adaptif", items: ["AI Tutor 8 agen spesialis", "Mode: Teori/Latihan/Tryout", "Gamifikasi & poin", "Dashboard orang tua"] },
+      { hub: "🏫 Admin LMS", items: ["Kelola kelas & peserta", "Absensi & jadwal", "Laporan progress kelas", "Notifikasi otomatis"] },
+    ],
+  },
+  {
+    icon: Mic,
+    title: "Studio Podcast & Audio",
+    color: "text-rose-500",
+    border: "border-rose-200 dark:border-rose-800",
+    bg: "bg-rose-50/40 dark:bg-rose-950/20",
+    badgeColor: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+    desc: "Produksi konten audio profesional dengan bantuan AI — dari rekaman ke distribusi.",
+    groups: [
+      { hub: "🎙️ Produksi", items: ["Transkrip otomatis", "Clean-up & cut points", "Show notes lengkap", "Snippet medsos"] },
+      { hub: "📝 Konten", items: ["Script YouTube/Podcast AI", "Hook 5 detik (3 variasi)", "Narasi & storytelling", "CTA & outro"] },
+      { hub: "📢 Distribusi", items: ["Konten ke semua platform", "Jadwal posting otomatis", "Analytics performa", "Media kit kreator"] },
+      { hub: "🤖 Studio AI", items: ["Orchestrator 4 agen pasca-rekaman", "AI Narator & Pencerita", "Tone of voice adaptif", "A/B testing hook"] },
+    ],
+  },
+];
+
 const CHATBOT_SHOWCASE = [
   { icon: HardHat, name: "KontraktorBot", desc: "QS, RAB & Estimasi Biaya", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/20", tag: "Konstruksi" },
   { icon: Target, name: "TenderBot", desc: "AI Tender BUJK & Monitor SIRUP", color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-950/20", tag: "Konstruksi" },
@@ -374,7 +482,91 @@ function BisnisPaket() {
       <div className="max-w-3xl mx-auto bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-xs text-amber-700 dark:text-amber-400">
         <strong>Batas pesan:</strong> Dihitung dari total interaksi dengan AI di semua chatbot Anda per bulan.
         Kuota habis → chat dihentikan sementara hingga bulan berikutnya atau upgrade.
-        Butuh lebih? Hubungi kami untuk Add-On pesan tambahan.
+      </div>
+
+      {/* ── Kredit Ekstra ─────────────────────────────────────────────────── */}
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center gap-2 mb-1">
+          <BadgePlus className="w-4 h-4 text-indigo-500"/>
+          <span className="text-sm font-bold text-gray-900 dark:text-white">Kredit Pesan Ekstra</span>
+          <Badge className="text-[10px] bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Top-Up</Badge>
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 ml-6">
+          Kuota bulanan habis sebelum waktunya? Top-up kapan saja — kredit langsung aktif, tidak kadaluarsa.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {KREDIT_EKSTRA.map((pack, i) => (
+            <div key={i} className={`relative rounded-xl border ${pack.border} ${pack.bg} p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow`}>
+              {pack.badge && (
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full shadow ${pack.badge === "PALING LAKU" ? "bg-indigo-600 text-white" : "bg-purple-600 text-white"}`}>
+                    {pack.badge}
+                  </span>
+                </div>
+              )}
+              <div className={`text-xs font-semibold ${pack.color} mb-1`}>{pack.label}</div>
+              <div className={`text-lg font-bold ${pack.color}`}>{pack.pesan}</div>
+              <div className="text-base font-bold text-gray-900 dark:text-white mt-1">{pack.price}</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">{pack.perPesan}</div>
+              <a href="https://wa.me/6281234567890?text=Halo%20Gustafta%2C%20saya%20ingin%20top-up%20kredit%20pesan" target="_blank" rel="noopener noreferrer" className="mt-3 w-full">
+                <Button size="sm" variant="outline" className={`w-full text-[11px] h-7 border-current ${pack.color}`}>
+                  Beli <Plus className="w-3 h-3 ml-1"/>
+                </Button>
+              </a>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 text-[11px] text-gray-400 text-center">
+          Kredit berlaku di semua paket (Starter, Profesional, Bisnis) · Tidak kadaluarsa · Bisa akumulasi
+        </div>
+      </div>
+
+      {/* ── Fitur Lanjutan ────────────────────────────────────────────────── */}
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-6">
+          <Badge className="mb-2 bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">Platform Features</Badge>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Fitur Lanjutan Platform Gustafta</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Di luar chatbot biasa — ini tools produktivitas yang terintegrasi langsung di platform Anda.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {FITUR_LANJUTAN.map((fitur, i) => (
+            <div key={i} className={`rounded-2xl border ${fitur.border} ${fitur.bg} p-5 flex flex-col gap-3`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${fitur.bg} border ${fitur.border}`}>
+                  <fitur.icon className={`w-5 h-5 ${fitur.color}`}/>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">{fitur.title}</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{fitur.desc}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {fitur.groups.map((group, j) => (
+                  <div key={j} className="bg-white/60 dark:bg-black/10 rounded-lg p-2.5 border border-white/80 dark:border-white/5">
+                    <div className="text-[10px] font-semibold text-gray-600 dark:text-gray-400 mb-1.5">{group.hub}</div>
+                    <ul className="space-y-0.5">
+                      {group.items.map((item, k) => (
+                        <li key={k} className="text-[10px] text-gray-600 dark:text-gray-400 flex items-start gap-1">
+                          <Check className={`w-2.5 h-2.5 shrink-0 mt-0.5 ${fitur.color}`}/>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <div className="text-[10px] text-gray-400 flex items-center gap-1">
+                <Shield className="w-3 h-3"/>
+                {i === 0 ? "Tersedia mulai Starter (5 tipe) · Profesional (15 tipe) · Bisnis (45 tipe)"
+                 : i === 1 ? "Generator Dokumen tersedia di Profesional ke atas"
+                 : i === 2 ? "E-Course tersedia di Profesional ke atas · LMS di semua paket"
+                 : "Studio Podcast tersedia di Bisnis ke atas"}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
