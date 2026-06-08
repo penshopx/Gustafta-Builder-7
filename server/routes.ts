@@ -19666,6 +19666,145 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: GENERATOR APL-02 ====================
+  app.post("/api/tools/generator-apl02", async (req: any, res: any) => {
+    try {
+      const { jabatan, namaAsesi = "", lembaga = "", pengalaman } = req.body;
+      if (!jabatan || !pengalaman) return res.status(400).json({ error: "Jabatan dan pengalaman wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const today = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+      const prompt = `Anda adalah konsultan sertifikasi BNSP Indonesia yang sangat berpengalaman dalam mengisi Formulir APL-02 (Asesmen Mandiri).
+
+Data Asesi:
+- Jabatan SKK: "${jabatan}"
+- Nama: "${namaAsesi || "tidak diisi"}"
+- Lembaga/Perusahaan: "${lembaga || "tidak diisi"}"
+- Deskripsi Pengalaman Kerja:
+"${pengalaman}"
+
+Buat APL-02 Asesmen Mandiri lengkap dan kembalikan JSON SAJA (tanpa markdown) dengan format persis:
+{
+  "jabatan": "${jabatan}",
+  "namaAsesi": "${namaAsesi}",
+  "lembaga": "${lembaga}",
+  "tanggal": "${today}",
+  "totalUnit": <jumlah unit kompetensi>,
+  "unitKompeten": <jumlah unit yang diklaim K>,
+  "unitBelumKompeten": <jumlah unit BK>,
+  "ringkasanKelayakan": "narasi 2-3 kalimat tentang kesiapan asesi berdasarkan pengalaman yang dideskripsikan",
+  "units": [
+    {
+      "kodeUnit": "kode SKKNI misal M.71IGP00.001.2",
+      "namaUnit": "nama unit kompetensi lengkap",
+      "klaimKompetensi": "K",
+      "konfidensitasDiri": 3,
+      "jenisBukti": ["Hasil kerja (portofolio proyek)", "Laporan/dokumen teknis"],
+      "deskripsiKonteks": "kalimat spesifik mengaitkan pengalaman asesi dengan unit ini",
+      "rekomendasiDokumen": "dokumen konkret yang harus disiapkan"
+    }
+  ],
+  "catatanUmum": "saran singkat untuk meningkatkan kesiapan asesmen"
+}
+
+Aturan penting:
+- Gunakan unit kompetensi SKKNI yang BENAR untuk jabatan "${jabatan}" (bukan unit generik)
+- klaimKompetensi: "K" jika pengalaman asesi relevan dengan unit ini, "BK" jika tidak ada evidence
+- konfidensitasDiri 1-4: 1=tidak yakin, 2=cukup yakin, 3=yakin, 4=sangat yakin — sesuaikan dengan kedalaman pengalaman
+- jenisBukti: pilih 1-3 jenis yang paling relevan dari: ["Hasil kerja (portofolio proyek)", "Sertifikat pelatihan", "Surat keterangan kerja", "Laporan/dokumen teknis", "Testimoni atasan/klien", "Foto dokumentasi lapangan"]
+- deskripsiKonteks: spesifik dan langsung referensikan pengalaman yang disebutkan asesi
+- Sertakan SEMUA unit kompetensi yang relevan untuk jabatan ini (biasanya 8-15 unit)`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("generator-apl02 error:", e);
+      res.status(500).json({ error: "Gagal membuat APL-02. Coba lagi." });
+    }
+  });
+
+  // ==================== AI TOOLS: CEK KELAYAKAN SKK ====================
+  app.post("/api/tools/cek-kelayakan-skk", async (req: any, res: any) => {
+    try {
+      const { pendidikan, pengalaman, bidang, skk_existing = "" } = req.body;
+      if (!pendidikan || !bidang) return res.status(400).json({ error: "Pendidikan dan bidang wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi SKK BNSP Indonesia yang ahli dalam regulasi PP 14/2021, Permen PUPR 6/2025, dan SKKNI konstruksi.
+
+Profil pengguna:
+- Pendidikan: ${pendidikan}
+- Pengalaman kerja relevan: ${pengalaman} tahun
+- Bidang utama: ${bidang}
+- SKK yang sudah dimiliki: ${skk_existing || "belum ada"}
+
+Analisis kelayakan SKK dan kembalikan JSON SAJA (tanpa markdown) persis format ini:
+{
+  "profil": {
+    "pendidikan": "${pendidikan}",
+    "pengalaman": ${pengalaman},
+    "bidang": "${bidang}"
+  },
+  "totalEligible": <angka>,
+  "totalSegera": <angka>,
+  "ringkasan": "narasi singkat 1-2 kalimat tentang posisi kompetensi saat ini",
+  "eligible": [
+    {
+      "jabatan": "nama jabatan SKK lengkap",
+      "level": "Muda|Madya|Utama|Teknisi/Analis|Operator",
+      "klasifikasi": "klasifikasi sub-bidang (cth: Bangunan Gedung, Jalan, K3, dll.)",
+      "jalurTerbaik": "Reguler|RPL|Bimtek+Uji",
+      "persentaseKesiapan": <70-100>,
+      "catatan": "catatan singkat mengapa eligible dan syarat tambahan jika ada"
+    }
+  ],
+  "segera": [
+    {
+      "jabatan": "nama jabatan SKK",
+      "level": "Muda|Madya|Utama",
+      "kurang": "apa yang masih kurang (cth: butuh 2 tahun pengalaman lagi, atau butuh S1)",
+      "estimasiWaktu": "cth: 1 tahun, 2 tahun"
+    }
+  ],
+  "prioritas": [
+    {
+      "urutan": 1,
+      "jabatan": "nama jabatan SKK",
+      "alasan": "alasan strategis mengapa harus diambil dulu"
+    }
+  ]
+}
+
+Aturan penting:
+- Eligible = memenuhi syarat pendidikan + pengalaman per regulasi BNSP/LPJK
+- Segera = kurang 1-3 tahun pengalaman ATAU satu level pendidikan
+- Prioritas maksimal 5 jabatan (yang paling marketable dan realistis)
+- Fokus pada bidang "${bidang}" dan bidang terkait langsung
+- Jangan duplikasi jabatan yang sudah dimiliki (${skk_existing})
+- Berikan setidaknya 3-6 jabatan eligible jika memungkinkan`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      });
+      const content = completion.choices[0]?.message?.content ?? "{}";
+      const result = JSON.parse(content);
+      res.json(result);
+    } catch (e: any) {
+      console.error("cek-kelayakan-skk error:", e);
+      res.status(500).json({ error: "Gagal menganalisis kelayakan. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: PERSIAPAN ASESMEN SKK ====================
   app.post("/api/tools/persiapan-asesmen", async (req: any, res: any) => {
     try {

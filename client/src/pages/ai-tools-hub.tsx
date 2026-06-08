@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen
+  Award, GraduationCap, BookOpen, Search
 } from "lucide-react";
 
 interface Tool {
@@ -72,6 +72,28 @@ const KOMPETENSI_TOOLS = [
     badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
     label: "Persiapan Asesmen SKK — Paket Lengkap",
     desc: "Pilih jabatan SKK & jalur sertifikasi — AI menghasilkan checklist dokumen, unit SKKNI prioritas, tips asesor, dan estimasi biaya.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/cek-kelayakan-skk",
+    icon: <Target className="h-6 w-6" />,
+    iconBg: "bg-violet-500/10",
+    iconColor: "text-violet-400",
+    badgeColor: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+    label: "Cek Kelayakan SKK — SKK Apa yang Bisa Saya Ambil?",
+    desc: "Input pendidikan + tahun pengalaman + bidang → AI menampilkan semua jabatan SKK eligible sekarang + yang bisa dicapai 1-2 tahun + urutan prioritas.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/generator-apl02",
+    icon: <FileText className="h-6 w-6" />,
+    iconBg: "bg-blue-500/10",
+    iconColor: "text-blue-400",
+    badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    label: "Generator APL-02 — Formulir Asesmen Mandiri SKK",
+    desc: "Ceritakan pengalaman kerja → AI pre-fills seluruh APL-02 per unit SKKNI: klaim K/BK, konfidensitas diri, jenis bukti, dan dokumen pendukung.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
   },

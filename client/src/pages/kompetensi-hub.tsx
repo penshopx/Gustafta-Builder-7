@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -84,6 +84,32 @@ const TOOLS = [
     bg: "bg-teal-500/5",
     badge: "Gelombang 1",
     badgeColor: "text-teal-400 border-teal-400/30",
+    live: true,
+  },
+  {
+    href: "/cek-kelayakan-skk",
+    icon: Search,
+    label: "Cek Kelayakan SKK",
+    sublabel: "SKK apa yang bisa diambil sekarang?",
+    desc: "Input pendidikan + pengalaman → AI menampilkan semua jabatan SKK eligible sekarang, yang bisa dicapai 1-2 tahun, dan urutan prioritas strategis.",
+    color: "text-violet-400",
+    borderColor: "border-violet-500/30",
+    bg: "bg-violet-500/5",
+    badge: "Gelombang 2",
+    badgeColor: "text-violet-400 border-violet-400/30",
+    live: true,
+  },
+  {
+    href: "/generator-apl02",
+    icon: FileText,
+    label: "Generator APL-02 Asesmen Mandiri",
+    sublabel: "Formulir SKK otomatis dari pengalamanmu",
+    desc: "Ceritakan pengalaman kerja → AI pre-fills seluruh APL-02 (klaim K/BK, konfidensitas, jenis bukti, dokumen pendukung) per unit SKKNI.",
+    color: "text-blue-400",
+    borderColor: "border-blue-500/30",
+    bg: "bg-blue-500/5",
+    badge: "Gelombang 2",
+    badgeColor: "text-blue-400 border-blue-400/30",
     live: true,
   },
   {
