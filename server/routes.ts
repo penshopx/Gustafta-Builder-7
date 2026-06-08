@@ -12997,8 +12997,26 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/tendera-claw/orchestrator — TenderaClaw 10-Agent AI Tender BUJK
   app.get("/api/tendera-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("663");
-      if (!agent) return res.status(404).json({ error: "TenderaClaw Orchestrator tidak ditemukan. Pastikan agen ID 663 ada di database." });
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgentBySlug("tendera-orchestrator");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%TENDERA_v1%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%TENDERA-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "TenderaClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
@@ -13056,8 +13074,19 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/konstra-tender-claw/orchestrator — KonstraTenderClaw 4-Agent SIRUP/LKPP Monitor
   app.get("/api/konstra-tender-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("652");
-      if (!agent) return res.status(404).json({ error: "KonstraTenderClaw Orchestrator tidak ditemukan. Pastikan agen ID 652 ada di database." });
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgentBySlug("konstra-tender-orchestrator");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%KONSTRA-TENDER-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "KonstraTenderClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
@@ -13074,8 +13103,26 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/safira-claw/orchestrator — SafiraClaw SKK K3 Konstruksi Coach
   app.get("/api/safira-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("501");
-      if (!agent) return res.status(404).json({ error: "SafiraClaw Orchestrator tidak ditemukan. Pastikan agen ID 501 ada di database." });
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgentBySlug("safira-claw-orchestrator");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%SAFIRA_ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%Safira%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "SafiraClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
@@ -13113,8 +13160,19 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/smk3-claw/orchestrator — SMK3Claw Multi-Agent IMS & SMK3 Terintegrasi
   app.get("/api/smk3-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("307");
-      if (!agent) return res.status(404).json({ error: "SMK3Claw Orchestrator tidak ditemukan. Pastikan agen ID 307 ada di database." });
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgentBySlug("hub-ims-smk3-terintegrasi");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%HUB IMS%SMK3%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "SMK3Claw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -13124,8 +13182,19 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/lkut-claw/orchestrator — LKUTClaw Multi-Agent LKUT BUJK
   app.get("/api/lkut-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("302");
-      if (!agent) return res.status(404).json({ error: "LKUTClaw Orchestrator tidak ditemukan. Pastikan agen ID 302 ada di database." });
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgentBySlug("lkut-hub");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%LKUT Hub%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "LKUTClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -13138,7 +13207,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("272");
+      let agent = await storage.getAgentBySlug("smap-orchestrator-hub-multi-agent-anti-penyuapan");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -13154,7 +13223,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
-      if (!agent) return res.status(404).json({ error: "SMAPClaw Orchestrator belum ditemukan. Pastikan agen ID 272 ada di database." });
+      if (!agent) return res.status(404).json({ error: "SMAPClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -13167,7 +13236,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("281");
+      let agent = await storage.getAgentBySlug("pancek-orchestrator-hub-multi-agent-smap-nasional-pancek");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -13183,7 +13252,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
-      if (!agent) return res.status(404).json({ error: "PanCEKClaw Orchestrator belum ditemukan. Pastikan agen ID 281 ada di database." });
+      if (!agent) return res.status(404).json({ error: "PanCEKClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -13196,7 +13265,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("575");
+      let agent = await storage.getAgentBySlug("hub-devproperti-pro-v1");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -13205,7 +13274,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
-      if (!agent) return res.status(404).json({ error: "DevPropertiClaw Orchestrator tidak ditemukan. Pastikan agen ID 575 ada di database." });
+      if (!agent) return res.status(404).json({ error: "DevPropertiClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -13218,7 +13287,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("586");
+      let agent = await storage.getAgentBySlug("hub-estatecare-pro-v1");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -13227,7 +13296,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
-      if (!agent) return res.status(404).json({ error: "EstateCareClaw Orchestrator tidak ditemukan. Pastikan agen ID 586 ada di database." });
+      if (!agent) return res.status(404).json({ error: "EstateCareClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
