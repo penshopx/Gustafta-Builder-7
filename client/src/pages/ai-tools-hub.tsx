@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
-  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin
+  Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, FileCheck
 } from "lucide-react";
 
 interface Tool {
@@ -127,6 +127,28 @@ const KOMPETENSI_TOOLS = [
     badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
     label: "Generator Dokumen SKK — Surat Pernyataan, Keterangan & Pengantar",
     desc: "Generate 3 jenis surat resmi untuk aplikasi SKK: Surat Pernyataan Pengalaman Kerja (bermaterai), Surat Keterangan Kerja dari perusahaan, dan Surat Pengantar ke LSP.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/kalkulator-cpd",
+    icon: <Calculator className="h-6 w-6" />,
+    iconBg: "bg-teal-500/10",
+    iconColor: "text-teal-400",
+    badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+    label: "Kalkulator Poin CPD SKK — Hitung Poin Perpanjangan",
+    desc: "Kalkulator CPD berbasis regulasi LPJK: input aktivitas (diklat, seminar, proyek, publikasi, organisasi) → total poin, status perpanjangan, dan saran aktivitas tambahan. Tanpa AI — instan.",
+    tag: "Kompetensi",
+    model: "Lokal (tanpa AI)",
+  },
+  {
+    href: "/evaluasi-portofolio",
+    icon: <FileCheck className="h-6 w-6" />,
+    iconBg: "bg-violet-500/10",
+    iconColor: "text-violet-400",
+    badgeColor: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+    label: "Evaluasi Kesiapan Portofolio SKK — AI Reviewer",
+    desc: "Input detail proyek → AI evaluasi kesiapan portofolio RPL: skor 5 kriteria (bintang 1–5), kekuatan/kelemahan, daftar dokumen yang kurang, dan rekomendasi perbaikan sebelum daftar asesmen.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
   },

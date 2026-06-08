@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, Calculator, FileCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -149,6 +149,32 @@ const TOOLS = [
     bg: "bg-sky-500/5",
     badge: "Gelombang 3",
     badgeColor: "text-sky-400 border-sky-400/30",
+    live: true,
+  },
+  {
+    href: "/kalkulator-cpd",
+    icon: Calculator,
+    label: "Kalkulator Poin CPD SKK",
+    sublabel: "Hitung poin CPD · status perpanjangan · gap analysis",
+    desc: "Tambahkan aktivitas CPD (diklat, seminar, proyek, publikasi, organisasi) → kalkulator otomatis hitung total poin, status cukup/kurang, dan saran aktivitas tambahan untuk mencapai 30 poin minimum.",
+    color: "text-teal-400",
+    borderColor: "border-teal-500/30",
+    bg: "bg-teal-500/5",
+    badge: "Gelombang 3",
+    badgeColor: "text-teal-400 border-teal-400/30",
+    live: true,
+  },
+  {
+    href: "/evaluasi-portofolio",
+    icon: FileCheck,
+    label: "Evaluasi Kesiapan Portofolio SKK",
+    sublabel: "AI evaluasi bukti portofolio · skor 5 kriteria · rekomendasi",
+    desc: "Input pengalaman proyek → AI evaluasi kesiapan portofolio untuk jalur RPL: skor per 5 kriteria (relevansi, kompleksitas, kesesuaian level, dokumen, kejelasan peran), dokumen yang kurang, dan rekomendasi perbaikan.",
+    color: "text-violet-400",
+    borderColor: "border-violet-500/30",
+    bg: "bg-violet-500/5",
+    badge: "Gelombang 3",
+    badgeColor: "text-violet-400 border-violet-400/30",
     live: true,
   },
   {

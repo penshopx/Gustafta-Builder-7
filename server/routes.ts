@@ -19666,6 +19666,76 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: EVALUASI KESIAPAN PORTOFOLIO ====================
+  app.post("/api/tools/evaluasi-portofolio", async (req: any, res: any) => {
+    try {
+      const { jabatan, jalur, tahunPengalaman, pendidikan, proyekList, dokumenDimiliki } = req.body;
+      if (!jabatan || !proyekList?.length) return res.status(400).json({ error: "Jabatan dan pengalaman proyek wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const proyekText = proyekList.map((p: any, i: number) =>
+        `Proyek ${i+1}: "${p.namaProjek}" | Peran: ${p.peran} | Nilai: ${p.nilaiKontrak || "tidak disebutkan"} | Tahun: ${p.tahun || "tidak disebutkan"} | Deskripsi: ${p.deskripsiPekerjaan || "tidak disebutkan"}`
+      ).join("\n");
+
+      const prompt = `Anda adalah asesor BNSP senior yang mengevaluasi kesiapan portofolio/RPL kandidat untuk SKK.
+
+Data kandidat:
+- Jabatan SKK yang dituju: ${jabatan}
+- Jalur asesmen: ${jalur}
+- Total pengalaman kerja: ${tahunPengalaman}
+- Pendidikan: ${pendidikan || "tidak disebutkan"}
+- Dokumen yang sudah dimiliki: ${dokumenDimiliki || "tidak disebutkan"}
+
+Pengalaman proyek:
+${proyekText}
+
+Evaluasi kesiapan portofolio dan kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "skorKeseluruhan": <0-100>,
+  "predikat": "Sangat Siap" atau "Siap" atau "Perlu Persiapan" atau "Belum Siap",
+  "ringkasan": "2-3 kalimat penilaian menyeluruh kesiapan portofolio untuk jalur ${jalur}",
+  "kriteria": [
+    {
+      "nama": "nama kriteria evaluasi",
+      "skor": <1-5>,
+      "label": "label skor (Sangat Baik/Baik/Cukup/Kurang/Sangat Kurang)",
+      "komentar": "1 kalimat evaluasi spesifik untuk kriteria ini berdasarkan data yang diberikan",
+      "rekomendasi": "1 kalimat rekomendasi perbaikan (kosong jika sudah sangat baik)"
+    }
+  ],
+  "kekuatanPortofolio": ["3-4 kekuatan spesifik dari portofolio ini"],
+  "kelemahanPortofolio": ["2-3 kelemahan atau gap yang teridentifikasi"],
+  "dokumenYangKurang": ["daftar dokumen wajib yang kemungkinan belum ada/kurang (spesifik untuk ${jabatan})"],
+  "rekomendasiPerbaikan": ["3-4 rekomendasi konkret untuk memperkuat portofolio sebelum asesmen"],
+  "estimasiKesiapan": "estimasi waktu yang dibutuhkan untuk siap asesmen jika ikuti rekomendasi (cth: '1-2 bulan dengan persiapan intensif')"
+}
+
+Kriteria evaluasi yang harus dinilai (5 kriteria):
+1. Relevansi Pengalaman (seberapa relevan pengalaman dengan unit kompetensi ${jabatan})
+2. Kedalaman & Kompleksitas Proyek (nilai, skala, kompleksitas proyek)
+3. Kesesuaian Pengalaman vs Syarat Level (memenuhi syarat tahun pengalaman untuk level ini)
+4. Kelengkapan Dokumen (berdasarkan dokumen yang disebutkan vs yang dibutuhkan)
+5. Kejelasan Peran & Tanggung Jawab (seberapa jelas peran kandidat dalam tiap proyek)
+
+Berikan evaluasi yang jujur, konstruktif, dan spesifik berdasarkan regulasi BNSP Indonesia.`;
+
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+        max_tokens: 2000,
+      });
+      const data = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+      return res.json(data);
+    } catch (e: any) {
+      console.error("evaluasi-portofolio error:", e);
+      res.status(500).json({ error: "Gagal mengevaluasi portofolio. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: JALUR SERTIFIKASI SKK ====================
   app.post("/api/tools/jalur-sertifikasi", async (req: any, res: any) => {
     try {

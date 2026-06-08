@@ -188,6 +188,8 @@ import SimulatorWawancara from "@/pages/simulator-wawancara";
 import TrackerSKK from "@/pages/tracker-skk";
 import AnalisisSKKNI from "@/pages/analisis-skkni";
 import JalurSertifikasi from "@/pages/jalur-sertifikasi";
+import KalkulatorCPD from "@/pages/kalkulator-cpd";
+import EvaluasiPortofolio from "@/pages/evaluasi-portofolio";
 import TenderBotPage from "@/pages/tenderbot";
 import SertifikasiBotPage from "@/pages/sertifikasibot";
 import ProyekBotPage from "@/pages/proyekbot";
@@ -1167,6 +1169,8 @@ function Router() {
         <Route path="/tracker-skk" component={TrackerSKK} />
         <Route path="/analisis-skkni" component={AnalisisSKKNI} />
         <Route path="/jalur-sertifikasi" component={JalurSertifikasi} />
+        <Route path="/kalkulator-cpd" component={KalkulatorCPD} />
+        <Route path="/evaluasi-portofolio" component={EvaluasiPortofolio} />
         <Route path="/tenderbot" component={TenderBotPage} />
         <Route path="/sertifikasibot" component={SertifikasiBotPage} />
         <Route path="/proyekbot" component={ProyekBotPage} />
