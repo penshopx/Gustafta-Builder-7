@@ -119,6 +119,17 @@ const KOMPETENSI_TOOLS = [
     tag: "BUJK",
     model: "GPT-4o-mini",
   },
+  {
+    href: "/generator-dokumen-skk",
+    icon: <FileText className="h-6 w-6" />,
+    iconBg: "bg-sky-500/10",
+    iconColor: "text-sky-400",
+    badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+    label: "Generator Dokumen SKK — Surat Pernyataan, Keterangan & Pengantar",
+    desc: "Generate 3 jenis surat resmi untuk aplikasi SKK: Surat Pernyataan Pengalaman Kerja (bermaterai), Surat Keterangan Kerja dari perusahaan, dan Surat Pengantar ke LSP.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
 ];
 
 const TOOLS: Tool[] = [

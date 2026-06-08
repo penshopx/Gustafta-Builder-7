@@ -19666,6 +19666,115 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: GENERATOR DOKUMEN SKK ====================
+  app.post("/api/tools/generator-dokumen-skk", async (req: any, res: any) => {
+    try {
+      const {
+        docType, namaPemohon, nik, jabatanSkk, namaPerusahaan, jabatanPemohon, kotaTanggal,
+        namaAtasan, jabatanAtasan, mulaiKerja, akhirKerja,
+        namaLsp, namaInstansi, penanggungJawab, jabatanPJ,
+        proyek = []
+      } = req.body;
+      if (!namaPemohon || !jabatanSkk) return res.status(400).json({ error: "Nama dan jabatan SKK wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const tanggal = kotaTanggal || `Jakarta, ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`;
+      let prompt = "";
+      if (docType === "pernyataan") {
+        const proyekList = proyek.map((p: any, i: number) =>
+          `${i + 1}. Nama: ${p.nama || "-"}, Lokasi: ${p.lokasi || "-"}, Tahun: ${p.tahun || "-"}, Peran: ${p.peran || "-"}, Nilai Kontrak: ${p.nilaiKontrak || "-"}`
+        ).join("\n");
+        prompt = `Buat SURAT PERNYATAAN PENGALAMAN KERJA untuk pengajuan SKK di BNSP/LSP. Format resmi bahasa Indonesia, ditulis dari sudut pandang orang pertama (saya yang menyatakan).
+
+Data:
+- Nama: ${namaPemohon}
+- NIK: ${nik || "-"}
+- Jabatan SKK yang diajukan: ${jabatanSkk}
+- Perusahaan/Instansi: ${namaPerusahaan || "-"}
+- Jabatan saat ini: ${jabatanPemohon || "-"}
+- Tanggal surat: ${tanggal}
+- Riwayat proyek relevan:
+${proyekList || "Tidak disebutkan (buat placeholder umum)"}
+
+Format surat:
+1. Kop: SURAT PERNYATAAN (tanpa kop surat instansi, ini surat pribadi)
+2. Pembuka: saya yang bertanda tangan di bawah ini...
+3. Isi: menyatakan dengan sesungguhnya bahwa saya memiliki pengalaman kerja di bidang [jabatan SKK] selama [hitung dari proyek], dengan rincian proyek:
+4. Sebutkan setiap proyek dengan format tabel sederhana (no., nama proyek, lokasi, tahun, peran/jabatan)
+5. Penutup: pernyataan bahwa semua info benar dan bersedia bertanggung jawab
+6. Tanda tangan: kota tanggal, Yang Menyatakan, [nama lengkap], di atas materai Rp 10.000
+7. Sertakan keterangan: Tembusan - Arsip
+
+Tulis langsung isi surat, jangan ada penjelasan tambahan. Format harus siap cetak.`;
+      } else if (docType === "keterangan") {
+        const proyekList = proyek.map((p: any, i: number) =>
+          `${i + 1}. ${p.nama || "-"} | ${p.lokasi || "-"} | ${p.tahun || "-"} | ${p.peran || "-"}`
+        ).join("\n");
+        prompt = `Buat SURAT KETERANGAN KERJA dari perusahaan/instansi untuk keperluan pengajuan SKK karyawan.
+
+Data:
+- Nama karyawan: ${namaPemohon}
+- NIK: ${nik || "-"}
+- Jabatan SKK yang diajukan: ${jabatanSkk}
+- Nama perusahaan: ${namaPerusahaan || "PT. [nama perusahaan]"}
+- Jabatan karyawan: ${jabatanPemohon || "-"}
+- Mulai kerja: ${mulaiKerja || "-"}
+- Sampai: ${akhirKerja || "sekarang"}
+- Nama atasan/penandatangan: ${namaAtasan || "[Nama Pejabat]"}
+- Jabatan penandatangan: ${jabatanAtasan || "[Jabatan]"}
+- Tanggal: ${tanggal}
+- Riwayat proyek:
+${proyekList || "Tidak disebutkan"}
+
+Format:
+1. Kop surat formal perusahaan (teks, bukan logo) dengan nama perusahaan, alamat placeholder
+2. Nomor surat: [No. Surat]/${namaPerusahaan ? namaPerusahaan.split(" ")[0].toUpperCase() : "INST"}/VI/${new Date().getFullYear()}
+3. Judul: SURAT KETERANGAN KERJA
+4. Isi: menerangkan bahwa nama karyawan adalah benar karyawan aktif, jabatan, sejak kapan, dan telah terlibat dalam proyek-proyek berikut
+5. Sebutkan proyek dengan format yang rapi
+6. Pernyataan: karyawan diijinkan mengikuti sertifikasi SKK
+7. Tanda tangan: kota tanggal, Hormat kami, nama perusahaan, nama penandatangan, jabatan
+
+Tulis langsung isi surat, siap cetak.`;
+      } else {
+        prompt = `Buat SURAT PENGANTAR dari instansi/BUJK ke LSP untuk mengajukan karyawan mengikuti asesmen SKK.
+
+Data:
+- Nama asesi/pemohon: ${namaPemohon}
+- Jabatan SKK yang diajukan: ${jabatanSkk}
+- Nama LSP tujuan: ${namaLsp || "LSP [Nama LSP]"}
+- Nama instansi pengirim: ${namaInstansi || namaPerusahaan || "[Nama Instansi]"}
+- Nama penandatangan: ${penanggungJawab || namaAtasan || "[Nama]"}
+- Jabatan penandatangan: ${jabatanPJ || jabatanAtasan || "[Jabatan]"}
+- Jabatan saat ini: ${jabatanPemohon || "-"}
+- Tanggal: ${tanggal}
+
+Format:
+1. Kop surat formal instansi
+2. Nomor surat formal
+3. Hal: Permohonan Asesmen Kompetensi SKK
+4. Kepada Yth: Ketua ${namaLsp || "LSP [Nama LSP]"}, di tempat
+5. Isi: merujuk UU Jasa Konstruksi dan Permen PUPR 6/2025, instansi mengajukan nama karyawan untuk mengikuti asesmen SKK jabatan [jabatan SKK], guna memenuhi syarat personel BUJK
+6. Pernyataan dukungan dan kesiapan perusahaan memfasilitasi proses
+7. Penutup formal
+8. Tanda tangan: nama, jabatan, instansi
+9. Tembusan jika relevan
+
+Tulis langsung isi surat, siap cetak.`;
+      }
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+      });
+      const dokumen = completion.choices[0]?.message?.content ?? "";
+      res.json({ dokumen });
+    } catch (e: any) {
+      console.error("generator-dokumen-skk error:", e);
+      res.status(500).json({ error: "Gagal generate dokumen. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: SYARAT PERSONEL BUJK ====================
   app.post("/api/tools/syarat-personel-bujk", async (req: any, res: any) => {
     try {
