@@ -19666,6 +19666,290 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS: PANDUAN APL-01 ====================
+  app.post("/api/tools/panduan-apl01", async (req: any, res: any) => {
+    try {
+      const { jabatan, jalur, pertanyaanKhusus } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan SKK wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan asesmen BNSP Indonesia. Buat panduan lengkap pengisian formulir APL-01 untuk jabatan SKK: "${jabatan}", jalur: "${jalur}".
+${pertanyaanKhusus ? `Pertanyaan/kendala khusus kandidat: ${pertanyaanKhusus}` : ""}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "jalur": "${jalur}",
+  "overview": "2-3 kalimat penjelasan APL-01, fungsinya, dan hal paling penting yang harus diperhatikan saat mengisinya untuk ${jabatan} jalur ${jalur}",
+  "dokumenPendukung": [
+    {
+      "nama": "nama dokumen",
+      "wajib": true/false,
+      "keterangan": "keterangan singkat kenapa dibutuhkan dan bagaimana memperolehnya"
+    }
+  ],
+  "seksi": [
+    {
+      "nomor": "nomor seksi (cth: A, B, 1, 2)",
+      "judul": "judul seksi APL-01",
+      "tujuan": "tujuan dari seksi ini (1 kalimat)",
+      "petunjukPengisian": ["3-5 petunjuk konkret cara mengisi seksi ini"],
+      "contohIsi": "contoh isian yang benar untuk seksi ini (1-2 kalimat contoh)",
+      "kesalahanUmum": ["2 kesalahan yang sering dilakukan kandidat di seksi ini"],
+      "tipsPenting": ["1-2 tips penting untuk seksi ini"]
+    }
+  ],
+  "checklist": [
+    {
+      "item": "item checklist yang harus dicek sebelum submit",
+      "kritikal": true/false
+    }
+  ],
+  "peringatanUmum": ["2-3 peringatan umum yang berlaku untuk semua jalur dan jabatan APL-01"]
+}
+
+Buat 5-7 seksi APL-01 yang umum (identitas, pendidikan, pengalaman kerja, unit kompetensi, dokumen pendukung, dll.), 6-8 dokumen pendukung, 8-10 item checklist (3-4 kritikal). Sesuaikan dengan spesifik jabatan ${jabatan} dan jalur ${jalur}.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) {
+      console.error("panduan-apl01 error:", e);
+      res.status(500).json({ error: "Gagal generate panduan. Coba lagi." });
+    }
+  });
+
+  // ==================== AI TOOLS: GENERATOR CV SKK ====================
+  app.post("/api/tools/generator-cv-skk", async (req: any, res: any) => {
+    try {
+      const { nama, jabatanTarget, bidang, tahunPengalaman, pendidikan, skkDimiliki, organisasi, proyekList } = req.body;
+      if (!nama || !jabatanTarget || !proyekList?.length) return res.status(400).json({ error: "Nama, jabatan target, dan proyek wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const proyekText = proyekList.map((p: any, i: number) =>
+        `Proyek ${i+1}: ${p.nama} | Klien: ${p.klien || "-"} | Nilai: ${p.nilai || "-"} | Tahun: ${p.tahun || "-"} | Peran: ${p.peran} | Deskripsi: ${p.deskripsi || "-"}`
+      ).join("\n");
+      const prompt = `Anda adalah konsultan HR konstruksi Indonesia. Buat CV kompetensi profesional untuk aplikasi SKK BNSP dan dokumen tender.
+
+Data:
+- Nama: ${nama}
+- Jabatan SKK target: ${jabatanTarget}
+- Bidang: ${bidang || "-"}
+- Pengalaman: ${tahunPengalaman}
+- Pendidikan: ${pendidikan || "-"}
+- SKK/Sertifikasi: ${skkDimiliki || "-"}
+- Organisasi: ${organisasi || "-"}
+- Proyek:
+${proyekText}
+
+Kembalikan JSON PERSIS:
+{
+  "namaLengkap": "${nama}",
+  "profilProfesional": "paragraf 3-4 kalimat profil profesional yang kuat, menonjolkan keahlian spesifik untuk ${jabatanTarget}, tone formal dan percaya diri",
+  "kompetensiUtama": ["8-10 kompetensi teknis dan manajerial yang relevan dengan ${jabatanTarget}, format singkat (3-5 kata per item)"],
+  "pengalamanProyekFormatted": [
+    {
+      "nama": "nama proyek",
+      "klien": "nama klien",
+      "nilai": "nilai kontrak",
+      "tahun": "tahun",
+      "peran": "jabatan/peran yang diformulasikan secara profesional",
+      "kontribusiKompetensi": ["3-4 bullet point yang menunjukkan kompetensi spesifik untuk ${jabatanTarget}, mulai dengan kata kerja aktif (Mengembangkan, Memimpin, Memastikan, dll.)"]
+    }
+  ],
+  "kualifikasi": ["list pendidikan, SKK, sertifikasi, dan keanggotaan organisasi yang relevan — formulasikan secara profesional"],
+  "kalimatPenutup": "1 kalimat penutup yang menyatakan kesiapan dan komitmen profesional",
+  "tipsCV": ["3-4 tips spesifik untuk mengoptimalkan CV ini untuk aplikasi ${jabatanTarget} dan dokumen tender konstruksi Indonesia"]
+}`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+        max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) {
+      console.error("generator-cv-skk error:", e);
+      res.status(500).json({ error: "Gagal generate CV. Coba lagi." });
+    }
+  });
+
+  // ==================== AI TOOLS: PLANNER SKK BUJK ====================
+  app.post("/api/tools/planner-skk-bujk", async (req: any, res: any) => {
+    try {
+      const { namaPerusahaan, subklasifikasi, kualifikasi, skkDimiliki } = req.body;
+      if (!subklasifikasi?.length) return res.status(400).json({ error: "Minimal 1 subklasifikasi wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const skkText = skkDimiliki?.length > 0
+        ? skkDimiliki.map((s: any) => `${s.jabatan} — ${s.level}: ${s.jumlah} orang`).join(", ")
+        : "belum ada data";
+      const prompt = `Anda adalah konsultan BUJK Indonesia dan ahli regulasi konstruksi (PP 5/2021, Permen PUPR 6/2021). Analisis kebutuhan SKK untuk BUJK berdasarkan subklasifikasi SBU.
+
+Data BUJK:
+- Nama: ${namaPerusahaan || "tidak disebutkan"}
+- Kualifikasi: ${kualifikasi}
+- Subklasifikasi SBU: ${subklasifikasi.join(", ")}
+- SKK yang sudah dimiliki: ${skkText}
+
+Kembalikan JSON PERSIS:
+{
+  "ringkasan": "2-3 kalimat ringkasan kebutuhan SKK untuk BUJK ini",
+  "statusKepatuhan": "Lengkap" atau "Hampir Lengkap" atau "Perlu Perhatian" atau "Tidak Memenuhi",
+  "skkWajib": [
+    {
+      "jabatan": "nama jabatan SKK",
+      "level": "Muda/Madya/Utama",
+      "jumlahMinimum": <angka>,
+      "regulasi": "dasar hukum singkat",
+      "status": "Ada" atau "Kurang" atau "Tidak Ada",
+      "kekurangan": <jumlah yang masih kurang, 0 jika ada>
+    }
+  ],
+  "gapAnalisis": ["2-3 gap utama yang teridentifikasi"],
+  "rencanaRekrutmen": [
+    {
+      "prioritas": "Tinggi/Sedang/Rendah",
+      "jabatan": "jabatan SKK",
+      "level": "level",
+      "jumlah": <jumlah yang perlu direkrut/disertifikasi>,
+      "estimasiBiaya": "estimasi biaya sertifikasi (cth: Rp 5–8 juta/orang)",
+      "waktuTarget": "rekomendasi waktu (cth: 1–3 bulan)"
+    }
+  ],
+  "estimasiBiayaTotal": "total estimasi biaya sertifikasi semua gap (cth: Rp 15–25 juta)",
+  "timelinePersiapan": "estimasi waktu untuk memenuhi semua syarat (cth: 3–6 bulan)",
+  "risikoJikaTidakDilengkapi": ["3 risiko konkret jika SKK tidak dilengkapi"],
+  "rekomendasiSegera": ["3 langkah yang harus dilakukan segera"]
+}
+
+Analisis berdasarkan Permen PUPR No. 6 Tahun 2021, PP 14/2021, dan regulasi terkait. Status SKK disesuaikan dengan data yang dimiliki.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("planner-skk-bujk error:", e); res.status(500).json({ error: "Gagal menganalisis. Coba lagi." }); }
+  });
+
+  // ==================== AI TOOLS: CHECKER SKK PROYEK ====================
+  app.post("/api/tools/checker-skk-proyek", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, nilaiProyek, sumberDana, lokasi, kualifikasiBUJK, skkBUJK } = req.body;
+      if (!jenisProyek || !nilaiProyek) return res.status(400).json({ error: "Jenis proyek dan nilai wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const skkText = skkBUJK?.length > 0
+        ? skkBUJK.map((s: any) => `${s.jabatan} — ${s.level}: ${s.jumlah} orang`).join(", ")
+        : "tidak disebutkan";
+      const prompt = `Anda adalah auditor konstruksi Indonesia. Cek kepatuhan SKK BUJK untuk mengerjakan proyek spesifik berdasarkan regulasi terkini.
+
+Data proyek:
+- Jenis: ${jenisProyek}
+- Nilai kontrak: ${nilaiProyek}
+- Sumber dana: ${sumberDana || "tidak disebutkan"}
+- Lokasi: ${lokasi || "tidak disebutkan"}
+- Kualifikasi BUJK: ${kualifikasiBUJK}
+- SKK yang dimiliki BUJK: ${skkText}
+
+Kembalikan JSON PERSIS:
+{
+  "statusKepatuhan": "Memenuhi Syarat" atau "Hampir Memenuhi" atau "Tidak Memenuhi" atau "Perlu Verifikasi",
+  "skorKepatuhan": <0-100>,
+  "ringkasan": "2-3 kalimat status kepatuhan SKK untuk proyek ini",
+  "syaratSKKProyek": [
+    {
+      "jabatan": "jabatan SKK yang dibutuhkan",
+      "level": "Muda/Madya/Utama",
+      "jumlahDibutuhkan": <angka>,
+      "dasar": "dasar regulasi (cth: Permen PUPR 6/2021 Pasal XX)",
+      "status": "Terpenuhi" atau "Kurang" atau "Tidak Ada",
+      "kekurangan": <jumlah kekurangan>
+    }
+  ],
+  "kewajiban": [
+    {
+      "kewajiban": "kewajiban administratif/regulasi",
+      "status": "OK" atau "Perlu Cek" atau "Tidak Terpenuhi",
+      "catatan": "catatan singkat"
+    }
+  ],
+  "tindakanDiperlukan": ["3-4 tindakan konkret yang harus dilakukan"],
+  "peringatanRegulasi": ["1-2 peringatan regulasi penting yang perlu diperhatikan (jika ada)"],
+  "rekomendasiFinal": "1 kalimat rekomendasi final apakah BUJK siap mengambil proyek ini"
+}
+
+Gunakan: PP 14/2021, Permen PUPR 6/2021, Perpres 12/2021 (pengadaan), dan regulasi K3 konstruksi.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 2000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("checker-skk-proyek error:", e); res.status(500).json({ error: "Gagal mengecek. Coba lagi." }); }
+  });
+
+  // ==================== AI TOOLS: MATERI BELAJAR SKK ====================
+  app.post("/api/tools/materi-belajar-skk", async (req: any, res: any) => {
+    try {
+      const { jabatan, waktu, fokusKhusus } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan SKK wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah instruktur sertifikasi BNSP dan pakar pendidikan konstruksi Indonesia. Buat panduan belajar lengkap untuk jabatan SKK: "${jabatan}".
+
+Waktu persiapan: ${waktu}
+Fokus khusus dari kandidat: ${fokusKhusus || "tidak ada"}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "ringkasanPersiapan": "2-3 kalimat overview strategi persiapan untuk ${jabatan} dalam waktu ${waktu}",
+  "totalEstimasiJam": "total jam belajar yang direkomendasikan (cth: '40–60 jam')",
+  "rencanaBelajar": [
+    {
+      "minggu": "Minggu 1" atau "Hari 1–3" (sesuaikan dengan ${waktu}),
+      "fokus": "topik fokus minggu/periode ini",
+      "aktivitas": ["4-5 aktivitas belajar konkret yang harus dilakukan di periode ini"]
+    }
+  ],
+  "topikBelajar": [
+    {
+      "topik": "nama topik",
+      "prioritas": "Wajib" atau "Penting" atau "Tambahan",
+      "estimasiJam": "X jam",
+      "poinKunci": ["4-5 konsep/poin kunci yang harus dikuasai dari topik ini"],
+      "regulasiTerkait": ["nama regulasi/SNI/Permen yang relevan (maks 3)"]
+    }
+  ],
+  "referensiUtama": [
+    {
+      "jenis": "SNI" atau "Peraturan" atau "Buku" atau "Online" atau "Modul",
+      "judul": "judul dokumen/buku/sumber",
+      "keterangan": "keterangan singkat isi dan relevansinya",
+      "aksesibilitas": "Gratis" atau "Berbayar" atau "Perpustakaan"
+    }
+  ],
+  "tipsAsesmen": ["4-5 tips praktis menghadapi asesmen ${jabatan}"],
+  "kesalahanUmum": ["3-4 kesalahan umum kandidat saat asesmen ${jabatan} dan cara menghindarinya"]
+}
+
+Buat 5-7 topik belajar (mix wajib/penting/tambahan), 6-8 referensi (mix SNI/Peraturan/Buku/Online), rencana belajar 3-5 periode. Semua referensi harus nyata dan relevan untuk konstruksi Indonesia.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+        max_tokens: 3000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) {
+      console.error("materi-belajar-skk error:", e);
+      res.status(500).json({ error: "Gagal generate materi. Coba lagi." });
+    }
+  });
+
   // ==================== AI TOOLS: EVALUASI KESIAPAN PORTOFOLIO ====================
   app.post("/api/tools/evaluasi-portofolio", async (req: any, res: any) => {
     try {

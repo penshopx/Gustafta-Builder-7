@@ -190,6 +190,12 @@ import AnalisisSKKNI from "@/pages/analisis-skkni";
 import JalurSertifikasi from "@/pages/jalur-sertifikasi";
 import KalkulatorCPD from "@/pages/kalkulator-cpd";
 import EvaluasiPortofolio from "@/pages/evaluasi-portofolio";
+import GeneratorCVSKK from "@/pages/generator-cv-skk";
+import MateriBelajarSKK from "@/pages/materi-belajar-skk";
+import PlannerSKKBUJK from "@/pages/planner-skk-bujk";
+import CheckerSKKProyek from "@/pages/checker-skk-proyek";
+import PanduanAPL01 from "@/pages/panduan-apl01";
+import BiayaTimSKK from "@/pages/biaya-tim-skk";
 import TenderBotPage from "@/pages/tenderbot";
 import SertifikasiBotPage from "@/pages/sertifikasibot";
 import ProyekBotPage from "@/pages/proyekbot";
@@ -1171,6 +1177,12 @@ function Router() {
         <Route path="/jalur-sertifikasi" component={JalurSertifikasi} />
         <Route path="/kalkulator-cpd" component={KalkulatorCPD} />
         <Route path="/evaluasi-portofolio" component={EvaluasiPortofolio} />
+        <Route path="/generator-cv-skk" component={GeneratorCVSKK} />
+        <Route path="/materi-belajar-skk" component={MateriBelajarSKK} />
+        <Route path="/planner-skk-bujk" component={PlannerSKKBUJK} />
+        <Route path="/checker-skk-proyek" component={CheckerSKKProyek} />
+        <Route path="/panduan-apl01" component={PanduanAPL01} />
+        <Route path="/biaya-tim-skk" component={BiayaTimSKK} />
         <Route path="/tenderbot" component={TenderBotPage} />
         <Route path="/sertifikasibot" component={SertifikasiBotPage} />
         <Route path="/proyekbot" component={ProyekBotPage} />
