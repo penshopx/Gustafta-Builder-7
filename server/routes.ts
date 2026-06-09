@@ -25553,5 +25553,154 @@ Hasilkan JSON valid dan profesional.`;
     } catch (e: any) { console.error("bast-konstruksi error:", e); res.status(500).json({ error: "Gagal generate BAST." }); }
   });
 
+  // ==================== G27: GENERATOR JADWAL PELAKSANAAN ====================
+  app.post("/api/tools/generator-jadwal-pelaksanaan", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, durasiKontrak, metode, namaProyek, catatanKhusus } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah project planner konstruksi berpengalaman 20 tahun. Buat jadwal pelaksanaan proyek yang realistis dan terstruktur.
+
+Jenis Proyek: ${jenisProyek}
+Durasi Kontrak: ${durasiKontrak}
+Metode Pengerjaan: ${metode}
+Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+Catatan Khusus: ${catatanKhusus || "-"}
+
+Hasilkan JSON:
+{
+  "judulProyek": "Judul jadwal proyek",
+  "totalMinggu": <total minggu sesuai durasi kontrak>,
+  "itemJadwal": [
+    {
+      "nomor": "1.0",
+      "namaItem": "Nama item pekerjaan",
+      "kategori": "Persiapan|Sipil|Struktur|Arsitektur|MEP|Finishing|Commissioning|Administrasi",
+      "durasiHari": <integer>,
+      "startMinggu": <integer, minggu mulai>,
+      "endMinggu": <integer, minggu selesai>,
+      "bobot": <number, persen bobot pekerjaan — semua harus total 100>,
+      "predecessor": "nomor item predecessor atau kosong",
+      "milestone": <true/false>,
+      "keterangan": "keterangan singkat"
+    }
+  ],
+  "milestone": [
+    { "minggu": <integer>, "nama": "Nama milestone", "keterangan": "Keterangan" }
+  ],
+  "kurvaS": [<array number — bobot kumulatif per minggu, panjang = totalMinggu, nilai akhir 100>],
+  "catatanPenting": ["catatan 1", "catatan 2"],
+  "asumssi": ["asumsi 1", "asumsi 2"]
+}
+
+Buat 15-25 item pekerjaan yang logis untuk ${jenisProyek}. Bobot semua item harus total 100%. Kurva S harus dimulai dari sekitar 5-10% di minggu pertama dan mencapai tepat 100 di minggu terakhir (bentuk S). Hasilkan JSON valid.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 3000 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("jadwal-pelaksanaan error:", e); res.status(500).json({ error: "Gagal generate jadwal pelaksanaan." }); }
+  });
+
+  // ==================== G27: PANDUAN PBG IMB ====================
+  app.post("/api/tools/panduan-pbg-imb", async (req: any, res: any) => {
+    try {
+      const { jenisBangunan, statusLahan, wilayah, luasLantai, jumlahLantai } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah konsultan perizinan bangunan berpengalaman 15 tahun, ahli PP 16/2021 tentang Peraturan Pelaksanaan UU Cipta Kerja di bidang bangunan gedung.
+
+Jenis Bangunan: ${jenisBangunan}
+Status Lahan: ${statusLahan}
+Wilayah: ${wilayah}
+Luas Lantai Total: ${luasLantai || "belum ditentukan"} m²
+Jumlah Lantai: ${jumlahLantai || "belum ditentukan"}
+
+Hasilkan panduan PBG (Persetujuan Bangunan Gedung) dalam JSON:
+{
+  "judulPanduan": "Panduan PBG: [Jenis Bangunan] di [Wilayah]",
+  "dasarHukum": ["UU No. 28/2002", "PP No. 16/2021", "Permen PUPR terkait", "Perda lokal"],
+  "perbedaanIMBvsPBG": "Penjelasan singkat perubahan dari IMB ke PBG sesuai UU Cipta Kerja",
+  "estimasiWaktu": "X–Y hari kerja",
+  "biayaRetribusi": "Estimasi retribusi atau cara menghitungnya",
+  "tahapan": [
+    {
+      "urutan": 1,
+      "nama": "Nama tahap",
+      "deskripsi": "Deskripsi 1-2 kalimat",
+      "durasi": "X hari kerja",
+      "dokumen": ["dokumen 1", "dokumen 2"],
+      "instansi": "Nama instansi",
+      "referensiPasal": "Pasal X PP 16/2021"
+    }
+  ],
+  "dokumenTeknis": [
+    { "nama": "Nama dokumen", "keterangan": "Keterangan", "wajib": true }
+  ],
+  "syaratKhusus": ["syarat khusus 1", "syarat khusus 2"],
+  "kesalahanUmum": [
+    { "kesalahan": "Deskripsi kesalahan", "akibat": "Akibat kesalahan" }
+  ],
+  "tips": ["tips 1", "tips 2"]
+}
+
+Buat 5-8 tahapan, 8-12 dokumen teknis, 4-6 syarat khusus, 5 kesalahan umum, 5 tips. Sesuaikan dengan jenis bangunan dan wilayah. Hasilkan JSON valid.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 2500 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("panduan-pbg-imb error:", e); res.status(500).json({ error: "Gagal generate panduan PBG." }); }
+  });
+
+  // ==================== G27: GENERATOR LAPORAN AUDIT K3 ====================
+  app.post("/api/tools/generator-laporan-audit-k3", async (req: any, res: any) => {
+    try {
+      const { jenisAudit, jenisProyek, skalaTemuan, namaProyek, periodeAudit } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah lead auditor K3 bersertifikat ISO 45001 dan ahli PP 50/2012 dengan pengalaman 20 tahun di proyek konstruksi.
+
+Jenis Audit: ${jenisAudit}
+Jenis Proyek: ${jenisProyek}
+Skala Temuan: ${skalaTemuan}
+Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+Periode Audit: ${periodeAudit || new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+
+Hasilkan laporan audit K3 formal dalam JSON:
+{
+  "nomorLaporan": "AUDIT-K3/[kode]/[bulan-tahun]",
+  "tanggal": "tanggal hari ini format Indonesia",
+  "judulLaporan": "Laporan Audit Internal K3: [Jenis Audit] — [Nama Proyek]",
+  "auditor": "Tim Auditor Internal K3 / Nama jabatan auditor lead",
+  "auditee": "Kepala Proyek / Tim Pelaksana",
+  "lingkupAudit": "Deskripsi lingkup audit 1 kalimat",
+  "ringkasanEksekutif": "Ringkasan 3-4 kalimat tentang kondisi K3 proyek, temuan utama, dan rekomendasi strategis",
+  "skorKepatuhan": <integer 0-100 sesuai skala temuan>,
+  "statusKeseluruhan": "Baik / Cukup / Perlu Perbaikan / Kritis",
+  "elemen": [
+    { "elemen": "Nama elemen SMK3/ISO 45001", "status": "Sesuai|Perlu Perbaikan|Tidak Sesuai", "persentase": <0-100> }
+  ],
+  "temuanUtama": [
+    {
+      "nomor": "F-001",
+      "klausul": "Klausul ISO 45001:2018 / Elemen PP 50/2012",
+      "lokasi": "Area/lokasi temuan",
+      "deskripsiTemuan": "Deskripsi temuan konkret dan spesifik",
+      "tingkat": "Critical|Major|Minor|OFI",
+      "rekomendasi": "Rekomendasi tindakan perbaikan spesifik",
+      "deadline": "X hari / tanggal estimasi",
+      "picJabatan": "Jabatan PIC"
+    }
+  ],
+  "positifFindings": ["good practice 1", "good practice 2"],
+  "rekomendasiStrategis": ["rekomendasi strategis 1", "rekomendasi 2"],
+  "rencanaFollowUp": "Rencana tindak lanjut dan jadwal verifikasi penutupan temuan",
+  "penutup": "Paragraf penutup formal laporan"
+}
+
+Sesuaikan jumlah dan tingkat temuan dengan skala: "${skalaTemuan}". Buat 6-8 elemen penilaian, 4-8 temuan utama, 3-5 good practice, 3-5 rekomendasi strategis. Hasilkan JSON valid dan profesional.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 3000 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("laporan-audit-k3 error:", e); res.status(500).json({ error: "Gagal generate laporan audit K3." }); }
+  });
+
   return httpServer;
 }

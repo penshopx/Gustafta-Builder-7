@@ -12,7 +12,7 @@ import {
   FileBarChart, ArrowUpFromLine, ClipboardSignature, TrendingDown,
   ShieldCheck, Flame, AlertTriangle, Users2,
   Scale, Gauge, Activity, Calendar, Cylinder, Mic,
-  Grid3x3, Globe, Recycle, FileBarChart2, Layers2, ShoppingCart
+  Grid3x3, Globe, Recycle, FileBarChart2, Layers2, ShoppingCart, CalendarDays
 } from "lucide-react";
 
 interface Tool {
@@ -927,6 +927,39 @@ const KOMPETENSI_TOOLS = [
     badgeColor: "bg-violet-500/15 text-violet-400 border-violet-500/30",
     label: "Generator Berita Acara Serah Terima (BAST) Konstruksi",
     desc: "Pilih jenis BAST (PHO/FHO/Termin/Aset/Sub-Kontraktor), jenis proyek, sumber anggaran → AI generate BAST formal: para pihak, dasar, daftar pemeriksaan + status, temuan, kewajiban masa pemeliharaan, daftar dokumen, pernyataan penerimaan, kolom tanda tangan.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/generator-jadwal-pelaksanaan",
+    icon: <CalendarDays className="h-6 w-6" />,
+    iconBg: "bg-blue-500/10",
+    iconColor: "text-blue-400",
+    badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    label: "Generator Jadwal Pelaksanaan Proyek",
+    desc: "Pilih jenis proyek, durasi kontrak, metode pengerjaan → AI generate jadwal induk: item pekerjaan per kategori, durasi hari, minggu mulai–selesai, bobot %, predecessor, milestone, Kurva S kumulatif, catatan & asumsi. Dapat disalin ke Excel.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/panduan-pbg-imb",
+    icon: <Building2 className="h-6 w-6" />,
+    iconBg: "bg-emerald-500/10",
+    iconColor: "text-emerald-400",
+    badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    label: "Panduan Persetujuan Bangunan Gedung (PBG) / IMB",
+    desc: "Pilih jenis bangunan, status lahan, wilayah → AI generate panduan PBG: perbedaan IMB vs PBG (PP 16/2021), tahapan step-by-step (instansi + dokumen + pasal), daftar dokumen teknis wajib/opsional, retribusi, kesalahan umum, tips.",
+    tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/generator-laporan-audit-k3",
+    icon: <ShieldCheck className="h-6 w-6" />,
+    iconBg: "bg-teal-500/10",
+    iconColor: "text-teal-400",
+    badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+    label: "Generator Laporan Audit Internal K3",
+    desc: "Pilih jenis audit K3 (rutin/ISO 45001/PP 50/CSMS), jenis proyek, skala temuan → AI generate laporan audit K3 formal: skor kepatuhan, temuan Critical/Major/Minor/OFI (+ klausul + rekomendasi + PIC + deadline), good practice, rekomendasi strategis, follow-up.",
     tag: "Kompetensi",
     model: "GPT-4o-mini",
   },

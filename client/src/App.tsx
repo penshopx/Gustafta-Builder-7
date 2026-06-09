@@ -291,6 +291,11 @@ import PanduanPBJKonstruksi from "@/pages/panduan-pbj-konstruksi";
 import GeneratorNCRReport from "@/pages/generator-ncr-report";
 import SimulatorTesToriSKK from "@/pages/simulator-tes-teori-skk";
 import GeneratorBASTKonstruksi from "@/pages/generator-bast-konstruksi";
+import KalkulatorKebutuhanBeton from "@/pages/kalkulator-kebutuhan-beton";
+import GeneratorJadwalPelaksanaan from "@/pages/generator-jadwal-pelaksanaan";
+import PanduanPBGIMB from "@/pages/panduan-pbg-imb";
+import GeneratorLaporanAuditK3 from "@/pages/generator-laporan-audit-k3";
+import KalkulatorProduktivitasAlat from "@/pages/kalkulator-produktivitas-alat";
 import KalkulatorUpahSKK from "@/pages/kalkulator-upah-skk";
 import PanduanSIKISKK from "@/pages/panduan-siki-skk";
 import RencanaKarirSKK from "@/pages/rencana-karir-skk";
@@ -1408,6 +1413,11 @@ function Router() {
         <Route path="/generator-ncr-report" component={GeneratorNCRReport} />
         <Route path="/simulator-tes-teori-skk" component={SimulatorTesToriSKK} />
         <Route path="/generator-bast-konstruksi" component={GeneratorBASTKonstruksi} />
+        <Route path="/kalkulator-kebutuhan-beton" component={KalkulatorKebutuhanBeton} />
+        <Route path="/generator-jadwal-pelaksanaan" component={GeneratorJadwalPelaksanaan} />
+        <Route path="/panduan-pbg-imb" component={PanduanPBGIMB} />
+        <Route path="/generator-laporan-audit-k3" component={GeneratorLaporanAuditK3} />
+        <Route path="/kalkulator-produktivitas-alat" component={KalkulatorProduktivitasAlat} />
       <Route component={NotFound} />
     </Switch>
   );
