@@ -19895,6 +19895,203 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G13: GENERATOR KONTRAK SEDERHANA ====================
+  app.post("/api/tools/generator-kontrak-sederhana", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, namaProyek, nilaiKontrak, metodeBayar, durasiHari, matauang } = req.body;
+      const prompt = `Kamu adalah konsultan hukum konstruksi berpengalaman. Buat DRAFT KONTRAK SEDERHANA untuk:
+- Jenis Pekerjaan: ${jenisPekerjaan}
+- Proyek: ${namaProyek}
+- Nilai Kontrak: ${nilaiKontrak || "sesuai kesepakatan"}
+- Mata Uang: ${matauang}
+- Metode Pembayaran: ${metodeBayar}
+- Durasi: ${durasiHari} hari kalender
+
+Buat draft kontrak profesional dengan pasal-pasal yang komprehensif namun tetap sederhana untuk pekerjaan konstruksi/subkontrak. Mengacu pada KUH Perdata dan praktik kontrak konstruksi Indonesia.
+
+Respond JSON:
+{
+  "judulKontrak": "SURAT PERJANJIAN KERJA SAMA [JENIS]",
+  "nomorKontrak": "No. PKS-[XXX]/[BULAN]/[TAHUN]",
+  "ringkasanKontrak": "ringkasan singkat isi kontrak (1-2 kalimat)",
+  "pasal": [
+    {"nomor": "1", "judul": "PARA PIHAK", "isi": "Teks lengkap pasal dengan placeholder [NAMA PIHAK I] dll"},
+    {"nomor": "2", "judul": "LINGKUP PEKERJAAN", "isi": "..."},
+    {"nomor": "3", "judul": "NILAI KONTRAK DAN PEMBAYARAN", "isi": "..."},
+    {"nomor": "4", "judul": "JANGKA WAKTU PELAKSANAAN", "isi": "..."},
+    {"nomor": "5", "judul": "HAK DAN KEWAJIBAN PARA PIHAK", "isi": "..."},
+    {"nomor": "6", "judul": "KETERLAMBATAN DAN DENDA", "isi": "..."},
+    {"nomor": "7", "judul": "JAMINAN DAN GARANSI", "isi": "..."},
+    {"nomor": "8", "judul": "KESELAMATAN KERJA (K3)", "isi": "..."},
+    {"nomor": "9", "judul": "PENYELESAIAN PERSELISIHAN", "isi": "..."},
+    {"nomor": "10", "judul": "PEMUTUSAN KONTRAK", "isi": "..."},
+    {"nomor": "11", "judul": "KETENTUAN LAIN-LAIN", "isi": "..."},
+    {"nomor": "12", "judul": "PENUTUP DAN TANDA TANGAN", "isi": "..."}
+  ],
+  "lampiranList": ["lampiran yang disarankan"],
+  "catatanHukum": "catatan penting tentang aspek hukum yang perlu diperhatikan (2-3 kalimat)"
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-kontrak-sederhana error:", e); res.status(500).json({ error: "Gagal generate kontrak." }); }
+  });
+
+  // ==================== G13: PANDUAN KUALIFIKASI TENDER ====================
+  app.post("/api/tools/panduan-kualifikasi-tender", async (req: any, res: any) => {
+    try {
+      const { jenisPengadaan, metodePQ, klasifikasi, subkualifikasi, pengalamanTahun, nilaiPaket } = req.body;
+      const prompt = `Kamu adalah konsultan pengadaan / tender specialist konstruksi Indonesia. Analisis persyaratan kualifikasi dan buat panduan lengkap untuk:
+- Jenis Pengadaan: ${jenisPengadaan}
+- Metode Kualifikasi: ${metodePQ}
+- Klasifikasi SBU: ${klasifikasi}
+- Subkualifikasi: ${subkualifikasi}
+- Pengalaman Perusahaan: ${pengalamanTahun} tahun
+- Estimasi Nilai Paket: ${nilaiPaket || "belum ditentukan"}
+
+Mengacu pada Perpres 12/2021, Permen PUPR No. 6/2021, Permen PUPR No. 8/2022, dan regulasi pengadaan konstruksi Indonesia terkini.
+
+Respond JSON:
+{
+  "ringkasan": "ringkasan status kualifikasi BUJK ini (1-2 kalimat)",
+  "skor": number (0-100, kesiapan kualifikasi),
+  "predikat": "Siap Ikut Tender|Perlu Persiapan|Perlu Perbaikan Signifikan",
+  "gapList": [
+    {"persyaratan": "nama persyaratan", "status": "Terpenuhi|Perlu Perhatian|Kritis", "catatan": "penjelasan", "saran": "saran perbaikan jika tidak terpenuhi"}
+  ],
+  "persyaratanWajib": ["persyaratan wajib 1", "persyaratan 2"],
+  "strategiPemenangan": ["strategi 1", "strategi 2", ...],
+  "dokumenDisiapkan": [
+    {"dokumen": "nama dokumen", "tips": "tips penyiapan dokumen"}
+  ],
+  "referensiRegulasi": ["Perpres 12/2021 Pasal X", ...]
+}
+
+Gap list min 8 item (campuran Terpenuhi/Perlu Perhatian/Kritis). Dokumen min 10. Strategi min 5.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-kualifikasi-tender error:", e); res.status(500).json({ error: "Gagal analisis kualifikasi." }); }
+  });
+
+  // ==================== G13: GENERATOR LAPORAN MINGGUAN ====================
+  app.post("/api/tools/generator-laporan-mingguan", async (req: any, res: any) => {
+    try {
+      const { namaProyek, jenisProyek, periode, progressFisik, progressRencana, cuaca, kendala } = req.body;
+      const deviasi = progressFisik - progressRencana;
+      const prompt = `Kamu adalah Site Manager / Manajer Proyek konstruksi berpengalaman. Buat LAPORAN MINGGUAN PROYEK formal untuk:
+- Nama Proyek: ${namaProyek}
+- Jenis Proyek: ${jenisProyek}
+- Periode: ${periode}
+- Progress Fisik Aktual: ${progressFisik}%
+- Progress Rencana: ${progressRencana}%
+- Deviasi: ${deviasi >= 0 ? "+" : ""}${deviasi}%
+- Kondisi Cuaca: ${cuaca}
+- Kendala: ${kendala || "tidak ada kendala signifikan"}
+
+Buat laporan mingguan profesional yang informatif dan akurat.
+
+Respond JSON:
+{
+  "judulLaporan": "LAPORAN MINGGUAN KEMAJUAN PROYEK",
+  "nomor": "No. LM-[XXX]/${periode}",
+  "periodeMingguan": "${periode} — [tanggal range]",
+  "ringkasan": "ringkasan eksekutif 1 kalimat status proyek",
+  "bagian": {
+    "statusProyek": "narasi status proyek minggu ini — progress, perkembangan utama",
+    "realisasiPekerjaan": "rincian pekerjaan yang diselesaikan minggu ini (dengan estimasi volume/kuantitas)",
+    "isu_risiko": "isu dan risiko yang diidentifikasi + tindakan mitigasi",
+    "rencanaMingguDepan": "rencana pekerjaan minggu depan (min 5 item terperinci)",
+    "isu_pembayaran": "status pembayaran, termin yang sudah/belum dicairkan",
+    "catatan_direksi": "hal-hal penting yang perlu diputuskan atau diketahui oleh Direksi/Owner"
+  },
+  "tabelProgress": [
+    {"aktivitas": "nama aktivitas", "target": "target %", "realisasi": "realisasi %", "deviasi": "+X%/-X%"}
+  ],
+  "isu_kritis": ["isu kritis yang perlu tindakan segera" atau array kosong jika tidak ada]
+}
+
+Tabel progress min 5 aktivitas. Isu kritis hanya jika deviasi negatif besar atau ada kendala serius.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-laporan-mingguan error:", e); res.status(500).json({ error: "Gagal generate laporan." }); }
+  });
+
+  // ==================== G13: SIMULATOR PCM — START ====================
+  app.post("/api/tools/simulator-pcm/start", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, peran, topikFokus } = req.body;
+      const topikStr = Array.isArray(topikFokus) ? topikFokus.join(", ") : topikFokus;
+      const prompt = `Kamu adalah Fasilitator Pre-Construction Meeting (PCM) berpengalaman. Pimpin PCM untuk:
+- Jenis Proyek: ${jenisProyek}
+- Peran User: ${peran}
+- Topik yang akan dibahas: ${topikStr}
+
+Mulai PCM dengan:
+1. Salam pembuka formal sebagai fasilitator
+2. Menjelaskan agenda PCM hari ini
+3. Memperkenalkan peserta rapat (Owner/PPK, Kontraktor, Konsultan MK, K3)
+4. Langsung masuk ke topik pertama dengan pertanyaan/arahan ke user
+
+Respond JSON: {"sessionId": "pcm-${Date.now()}", "pembuka": "pembuka PCM lengkap sebagai fasilitator (3-4 paragraf)"}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-pcm start error:", e); res.status(500).json({ error: "Gagal memulai PCM." }); }
+  });
+
+  // ==================== G13: SIMULATOR PCM — RESPOND ====================
+  app.post("/api/tools/simulator-pcm/respond", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, peran, topikFokus, pendapatUser, messageCount } = req.body;
+      const topikStr = Array.isArray(topikFokus) ? topikFokus.join(", ") : topikFokus;
+      const isSelesai = messageCount >= 14;
+      const prompt = `Kamu Fasilitator PCM untuk proyek ${jenisProyek}. User berperan sebagai ${peran}.
+Topik PCM: ${topikStr}. Pesan ke-${messageCount} dalam sesi.
+
+Pendapat/pernyataan user: "${pendapatUser}"
+
+${isSelesai ? `Tutup rapat PCM dan buat notulensi ringkas.` : `Lanjutkan facilitasi PCM — tanggapi, tambah kontribusi peserta lain (Owner/Konsultan), dan lanjut ke topik berikutnya jika perlu.`}
+
+Respond JSON:
+{
+  "responFasilitator": "respon fasilitator PCM (2-3 paragraf)",
+  "aksi": "aksi/agenda yang sedang diproses (cth: 'Membahas Metode Konstruksi')",
+  "selesai": ${isSelesai}${isSelesai ? `,
+  "poinDisepakati": ["poin kesepakatan 1", "poin 2", ...],
+  "tindakLanjut": ["tindak lanjut 1", "tindak lanjut 2", ...],
+  "evaluasi": "evaluasi singkat partisipasi user dalam PCM"` : ""}
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-pcm respond error:", e); res.status(500).json({ error: "Gagal merespons." }); }
+  });
+
   // ==================== G12: GENERATOR BAPRO ====================
   app.post("/api/tools/generator-bapro", async (req: any, res: any) => {
     try {
