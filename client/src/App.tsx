@@ -202,6 +202,11 @@ import KalkulatorProduktivitasTK from "@/pages/kalkulator-produktivitas-tk";
 import PanduanSertifikasiMigas from "@/pages/panduan-sertifikasi-migas";
 import GeneratorNotulensi from "@/pages/generator-notulensi";
 import SimulatorSidangK3 from "@/pages/simulator-sidang-k3";
+import GeneratorSuratKuasa from "@/pages/generator-surat-kuasa";
+import KalkulatorMaterialBeton from "@/pages/kalkulator-material-beton";
+import PanduanManajemenRisiko from "@/pages/panduan-manajemen-risiko";
+import GeneratorPaktaIntegritas from "@/pages/generator-pakta-integritas";
+import SimulatorKlarifikasiTender from "@/pages/simulator-klarifikasi-tender";
 import GeneratorChecklistSerahTerima from "@/pages/generator-checklist-serah-terima";
 import KalkulatorCashflowProyek from "@/pages/kalkulator-cashflow-proyek";
 import PanduanTKDN from "@/pages/panduan-tkdn";
@@ -1248,6 +1253,11 @@ function Router() {
         <Route path="/panduan-sertifikasi-migas" component={PanduanSertifikasiMigas} />
         <Route path="/generator-notulensi" component={GeneratorNotulensi} />
         <Route path="/simulator-sidang-k3" component={SimulatorSidangK3} />
+        <Route path="/generator-surat-kuasa" component={GeneratorSuratKuasa} />
+        <Route path="/kalkulator-material-beton" component={KalkulatorMaterialBeton} />
+        <Route path="/panduan-manajemen-risiko" component={PanduanManajemenRisiko} />
+        <Route path="/generator-pakta-integritas" component={GeneratorPaktaIntegritas} />
+        <Route path="/simulator-klarifikasi-tender" component={SimulatorKlarifikasiTender} />
         <Route path="/generator-checklist-serah-terima" component={GeneratorChecklistSerahTerima} />
         <Route path="/kalkulator-cashflow-proyek" component={KalkulatorCashflowProyek} />
         <Route path="/panduan-tkdn" component={PanduanTKDN} />

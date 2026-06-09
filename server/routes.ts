@@ -19895,6 +19895,185 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G17: GENERATOR SURAT KUASA ====================
+  app.post("/api/tools/generator-surat-kuasa", async (req: any, res: any) => {
+    try {
+      const { jenisSK, pemberiNama, pemberiJabatan, pemberiPerusahaan, penerimaKuasaNama, penerimaKuasaJabatan, penerimaKuasaKTP, keperluan, kotaTanggal, bahasa } = req.body;
+      const prompt = `Kamu adalah konsultan hukum kontrak konstruksi. Buat SURAT KUASA formal untuk keperluan:
+- Jenis/Keperluan: ${jenisSK}
+- Pemberi Kuasa: ${pemberiNama}, ${pemberiJabatan || "Pimpinan"}, ${pemberiPerusahaan || "Perusahaan"}
+- Penerima Kuasa: ${penerimaKuasaNama}, ${penerimaKuasaJabatan || "Staf"}, KTP: ${penerimaKuasaKTP || "sesuai identitas"}
+- Keperluan Spesifik: ${keperluan || "sesuai jenis surat kuasa"}
+- Kota & Tanggal: ${kotaTanggal || "[Kota], [Tanggal]"}
+- Gaya Bahasa: ${bahasa}
+
+Respond JSON:
+{
+  "judul": "SURAT KUASA",
+  "nomorSurat": "No. [001/SK/${new Date().getFullYear()}]",
+  "tanggal": "${kotaTanggal || ""}",
+  "isiSurat": "isi surat kuasa lengkap dalam satu blok teks — mulai dari 'Yang bertanda tangan di bawah ini...' hingga kolom tanda tangan. Format profesional, formal, lengkap dengan identitas kedua belah pihak, lingkup kuasa, batas waktu, dan ketentuan. Akhiri dengan tempat tanda tangan pemberi dan penerima kuasa.",
+  "ketentuanTambahan": ["ketentuan 1 yang perlu diperhatikan", "ketentuan 2", "ketentuan 3"],
+  "catatan": "catatan hukum atau instruksi penggunaan (jika ada)"
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-surat-kuasa error:", e); res.status(500).json({ error: "Gagal generate surat kuasa." }); }
+  });
+
+  // ==================== G17: PANDUAN MANAJEMEN RISIKO ====================
+  app.post("/api/tools/panduan-manajemen-risiko", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, fase, nilaiProyek, kategoriDipilih } = req.body;
+      const katStr = Array.isArray(kategoriDipilih) ? kategoriDipilih.join(", ") : kategoriDipilih;
+      const prompt = `Kamu adalah Risk Manager proyek konstruksi bersertifikat PMP dan ISO 31000. Buat RISK REGISTER & RENCANA MANAJEMEN RISIKO untuk:
+- Jenis Proyek: ${jenisProyek}
+- Fase Proyek: ${fase}
+- Nilai Proyek: ${nilaiProyek || "tidak disebutkan"}
+- Kategori Risiko: ${katStr}
+
+Respond JSON:
+{
+  "ringkasan": "ringkasan profil risiko proyek ini berdasarkan jenis dan fase (2-3 kalimat)",
+  "risikoUtama": [
+    {
+      "id": "R-01",
+      "risiko": "nama/deskripsi risiko",
+      "penyebab": "akar penyebab risiko",
+      "dampak": "dampak jika risiko terjadi (biaya/waktu/kualitas/K3)",
+      "kemungkinan": 3,
+      "dampakNilai": 4,
+      "levelRisiko": "Sangat Tinggi|Tinggi|Sedang|Rendah",
+      "warna": "Sangat Tinggi|Tinggi|Sedang|Rendah",
+      "penanggungjawab": "jabatan PIC",
+      "mitigasi": ["tindakan mitigasi 1", "tindakan 2", "tindakan 3"],
+      "kontingensi": "rencana kontingensi jika mitigasi gagal"
+    }
+  ],
+  "matriks": [
+    [{"baris": "Sangat Sering", "kolom": "Tidak Berarti", "nilai": "5", "warna": "Sedang"}, {"kolom": "Minor", "nilai": "10", "warna": "Tinggi"}, {"kolom": "Sedang", "nilai": "15", "warna": "Sangat Tinggi"}, {"kolom": "Mayor", "nilai": "20", "warna": "Sangat Tinggi"}, {"kolom": "Katastropik", "nilai": "25", "warna": "Sangat Tinggi"}],
+    [{"nilai": "4", "warna": "Rendah"}, {"nilai": "8", "warna": "Sedang"}, {"nilai": "12", "warna": "Tinggi"}, {"nilai": "16", "warna": "Sangat Tinggi"}, {"nilai": "20", "warna": "Sangat Tinggi"}],
+    [{"nilai": "3", "warna": "Rendah"}, {"nilai": "6", "warna": "Sedang"}, {"nilai": "9", "warna": "Sedang"}, {"nilai": "12", "warna": "Tinggi"}, {"nilai": "15", "warna": "Sangat Tinggi"}],
+    [{"nilai": "2", "warna": "Rendah"}, {"nilai": "4", "warna": "Rendah"}, {"nilai": "6", "warna": "Sedang"}, {"nilai": "8", "warna": "Sedang"}, {"nilai": "10", "warna": "Tinggi"}],
+    [{"nilai": "1", "warna": "Rendah"}, {"nilai": "2", "warna": "Rendah"}, {"nilai": "3", "warna": "Rendah"}, {"nilai": "4", "warna": "Rendah"}, {"nilai": "5", "warna": "Sedang"}]
+  ],
+  "prosedurEskalasi": ["langkah eskalasi 1", "langkah 2", "langkah 3", "langkah 4", "langkah 5"],
+  "reviewSchedule": "jadwal review risiko yang direkomendasikan (1-2 kalimat)",
+  "tips": ["tip 1", "tip 2", "tip 3", "tip 4"]
+}
+Buat min 8 risiko yang relevan dengan jenis & fase proyek tersebut. Kemungkinan & dampak antara 1-5.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-manajemen-risiko error:", e); res.status(500).json({ error: "Gagal generate risk register." }); }
+  });
+
+  // ==================== G17: GENERATOR PAKTA INTEGRITAS ====================
+  app.post("/api/tools/generator-pakta-integritas", async (req: any, res: any) => {
+    try {
+      const { jenisPakta, namaOrganisasi, namaProyek, pihakPenandatangan, kotaTanggal, nilaiProyek } = req.body;
+      const prompt = `Kamu adalah konsultan hukum dan tata kelola perusahaan (GCG). Buat PAKTA INTEGRITAS resmi untuk:
+- Jenis Pakta: ${jenisPakta}
+- Organisasi: ${namaOrganisasi}
+- Proyek: ${namaProyek || ""}
+- Penandatangan: ${pihakPenandatangan || "Pimpinan Perusahaan"}
+- Tanggal: ${kotaTanggal || ""}
+- Nilai Proyek: ${nilaiProyek || ""}
+
+Mengacu pada: UU No.31/1999 jo UU No.20/2001 (Tipikor), Perpres No.16/2018, UU No.11/2020, Peraturan KPK, ISO 37001:2016 (jika relevan), PP No.60/2008 (SPIP).
+
+Respond JSON:
+{
+  "judul": "PAKTA INTEGRITAS [sesuai jenis]",
+  "nomorDokumen": "No. PI-[kode]-${new Date().getFullYear()}",
+  "isiPakta": "isi pakta integritas lengkap dan formal — mulai dari pernyataan pembuka, butir-butir komitmen (minimal 7 butir), pernyataan kesanggupan menerima sanksi, baris tanda tangan. Format profesional dan sesuai regulasi Indonesia.",
+  "klausulKhusus": ["klausul khusus 1 sesuai jenis pakta", "klausul 2", "klausul 3"],
+  "sanksiLanggar": ["sanksi 1 jika melanggar pakta ini", "sanksi 2", "sanksi 3", "sanksi 4"],
+  "catatan": "catatan hukum, instruksi penyimpanan dokumen, atau informasi penting lainnya"
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-pakta-integritas error:", e); res.status(500).json({ error: "Gagal generate pakta integritas." }); }
+  });
+
+  // ==================== G17: SIMULATOR KLARIFIKASI TENDER — START ====================
+  app.post("/api/tools/simulator-klarifikasi-tender/start", async (req: any, res: any) => {
+    try {
+      const { jenisTender, posisi, nilaiPenawaran, namaProyek } = req.body;
+      const prompt = `Kamu adalah Ketua Panitia Pokja Pemilihan dalam proses tender konstruksi. Mulai sesi klarifikasi teknis untuk:
+- Pekerjaan: ${namaProyek}
+- Jenis Tender: ${jenisTender}
+- Pihak yang Diklarifikasi: ${posisi} dari perusahaan peserta tender
+- Nilai Penawaran: ${nilaiPenawaran || "tidak disebutkan"}
+
+Buka sesi klarifikasi dengan:
+1. Perkenalan formal sebagai Pokja Pemilihan
+2. Penjelasan tujuan klarifikasi (bukan negosiasi, hanya untuk konfirmasi teknis)
+3. Sebutkan 3 area yang akan diklarifikasi (metode pelaksanaan, jadwal, personel/K3)
+4. Pertanyaan klarifikasi pertama tentang metode pelaksanaan pekerjaan utama
+
+Respond JSON: {"pembuka": "pembukaan sesi klarifikasi formal (3-4 paragraf resmi)"}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-klarifikasi-tender start error:", e); res.status(500).json({ error: "Gagal memulai simulasi." }); }
+  });
+
+  // ==================== G17: SIMULATOR KLARIFIKASI TENDER — RESPOND ====================
+  app.post("/api/tools/simulator-klarifikasi-tender/respond", async (req: any, res: any) => {
+    try {
+      const { jenisTender, posisi, nilaiPenawaran, namaProyek, jawaban, messageCount } = req.body;
+      const isSelesai = messageCount >= 10;
+      const prompt = `Kamu adalah Ketua Pokja Pemilihan mengevaluasi klarifikasi tender ${namaProyek} (${jenisTender}). Ini jawaban ke-${messageCount} dari ${posisi}.
+
+Jawaban peserta: "${jawaban}"
+
+${isSelesai ? `Ini jawaban terakhir. Tutup sesi klarifikasi dan berikan evaluasi final.` : `Nilai kualitas jawaban, lanjutkan ke pertanyaan klarifikasi berikutnya (gilir area: jadwal/personel/K3/harga satuan/pengalaman/metodologi). Ajukan 1 pertanyaan spesifik dan tajam.`}
+
+Respond JSON:
+{
+  "respons": "respons pokja (2-3 paragraf — penilaian singkat atas jawaban + pertanyaan baru atau penutup)",
+  "label": "topik klarifikasi saat ini",
+  "selesai": ${isSelesai}${isSelesai ? `,
+  "evaluasi": {
+    "nilai": skor 0-100,
+    "predikat": "Lolos Klarifikasi|Perlu Penjelasan Tambahan|Tidak Memenuhi Syarat",
+    "kekuatan": ["kekuatan jawaban 1", "kekuatan 2", "kekuatan 3"],
+    "kelemahan": ["area yang perlu diperkuat 1", "area 2"],
+    "saran": "saran untuk meningkatkan kualitas presentasi klarifikasi tender"
+  }` : ""}
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-klarifikasi-tender respond error:", e); res.status(500).json({ error: "Gagal merespons." }); }
+  });
+
   // ==================== G16: GENERATOR CHECKLIST SERAH TERIMA ====================
   app.post("/api/tools/generator-checklist-serah-terima", async (req: any, res: any) => {
     try {
