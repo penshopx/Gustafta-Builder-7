@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, Calculator, FileCheck, Layers, Monitor, CheckSquare, Building, ScrollText, FileBadge, HardHat, ArrowRightLeft, ShieldAlert, Clock, Gavel, BadgeCheck, FileSignature } from "lucide-react";
+import { useState } from "react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, Calculator, FileCheck, Layers, Monitor, CheckSquare, Building, ScrollText, FileBadge, HardHat, ArrowRightLeft, ShieldAlert, Clock, Gavel, BadgeCheck, FileSignature, FileEdit, ClipboardCheck, AlertOctagon, Umbrella, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -214,6 +215,72 @@ const TOOLS = [
     bg: "bg-red-500/5",
     badge: "Gelombang 10",
     badgeColor: "text-red-400 border-red-400/30",
+    live: true,
+  },
+  // ===== GELOMBANG 11 =====
+  {
+    href: "/generator-surat-penawaran",
+    icon: FileEdit,
+    label: "Generator Surat Penawaran",
+    sublabel: "Draft teknis & harga untuk tender konstruksi",
+    desc: "Pilih jenis pekerjaan + nama paket → AI generate surat penawaran teknis & harga lengkap format tender konstruksi Indonesia: pembuka, data penawaran, lingkup, harga, jangka waktu, syarat pembayaran, keunggulan, penutup + lampiran.",
+    color: "text-violet-400",
+    borderColor: "border-violet-500/30",
+    bg: "bg-violet-500/5",
+    badge: "Gelombang 11",
+    badgeColor: "text-violet-400 border-violet-400/30",
+    live: true,
+  },
+  {
+    href: "/kalkulator-eskalasi-harga",
+    icon: TrendingUp,
+    label: "Kalkulator Eskalasi Harga Material",
+    sublabel: "Hitung dampak IHK & estimasi klaim CCO addendum",
+    desc: "Input indeks harga konstruksi BPS awal vs akhir per material + volume → hitung eskalasi bruto dan klaim bersih berdasarkan klausul persentase (Perpres 12/2021 Pasal 57–58). Update real-time, tanpa AI.",
+    color: "text-orange-400",
+    borderColor: "border-orange-500/30",
+    bg: "bg-orange-500/5",
+    badge: "Gelombang 11",
+    badgeColor: "text-orange-400 border-orange-400/30",
+    live: true,
+  },
+  {
+    href: "/panduan-audit-mutu-iso",
+    icon: ClipboardCheck,
+    label: "Panduan Audit Mutu Internal ISO",
+    sublabel: "Pertanyaan audit per klausul · checklist · format laporan",
+    desc: "Pilih standar (ISO 9001, 14001, 45001, IMS) + jenis audit → AI generate panduan per klausul: pertanyaan audit, bukti yang dicari, tembuan, risiko potensial, checklist persiapan, tips auditor, dan format laporan sesuai standar.",
+    color: "text-blue-400",
+    borderColor: "border-blue-500/30",
+    bg: "bg-blue-500/5",
+    badge: "Gelombang 11",
+    badgeColor: "text-blue-400 border-blue-400/30",
+    live: true,
+  },
+  {
+    href: "/generator-laporan-insiden",
+    icon: AlertOctagon,
+    label: "Generator Laporan Insiden K3",
+    sublabel: "Draft laporan KK/PAK sesuai Permenaker No. 8/2020",
+    desc: "Pilih jenis insiden (KK luka ringan/berat/fatal, near miss, kebakaran, dll) + tipe pekerjaan → AI generate laporan insiden formal: kronologi, penyebab langsung & dasar, tindakan darurat, rekomendasi pencegahan + kewajiban pelaporan legal.",
+    color: "text-red-400",
+    borderColor: "border-red-500/30",
+    bg: "bg-red-500/5",
+    badge: "Gelombang 11",
+    badgeColor: "text-red-400 border-red-400/30",
+    live: true,
+  },
+  {
+    href: "/asisten-klaim-car",
+    icon: Umbrella,
+    label: "Asisten Klaim Asuransi CAR",
+    sublabel: "Panduan klaim Construction All Risk step-by-step",
+    desc: "Pilih jenis klaim CAR (kerusakan material, alat berat, kebakaran, TPL, dll) → AI generate panduan klaim: langkah+batas waktu, dokumen wajib + urgensi, klausul polis relevan, pengecualian yang sering ditolak, dan tips negosiasi dengan insurer.",
+    color: "text-amber-400",
+    borderColor: "border-amber-500/30",
+    bg: "bg-amber-500/5",
+    badge: "Gelombang 11",
+    badgeColor: "text-amber-400 border-amber-400/30",
     live: true,
   },
   {
@@ -759,6 +826,18 @@ const STATS = [
 ];
 
 export default function KompetensiHub() {
+  const [search, setSearch] = useState("");
+  const [filterWave, setFilterWave] = useState("Semua");
+
+  const waves = ["Semua", ...Array.from(new Set(TOOLS.map(t => t.badge)))];
+
+  const filtered = TOOLS.filter(t => {
+    const matchWave = filterWave === "Semua" || t.badge === filterWave;
+    const q = search.toLowerCase();
+    const matchSearch = !q || t.label.toLowerCase().includes(q) || t.sublabel.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
+    return matchWave && matchSearch;
+  });
+
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Hero */}
@@ -805,17 +884,56 @@ export default function KompetensiHub() {
 
       {/* Tools Grid */}
       <div className="max-w-4xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold text-white">Tools Kompetensi</h2>
-            <p className="text-slate-400 text-sm">Tersedia sekarang — gratis untuk digunakan</p>
+            <p className="text-slate-400 text-sm">{TOOLS.length} tools tersedia · gratis digunakan</p>
           </div>
           <Button asChild variant="ghost" size="sm" className="text-slate-400 hover:text-white text-xs">
             <Link href="/ai-tools">Lihat Semua AI Tools <ChevronRight className="h-3.5 w-3.5 ml-1" /></Link>
           </Button>
         </div>
+
+        {/* Search + Filter */}
+        <div className="space-y-3 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Cari tools... (cth: JSA, SKK, ISO, tender, K3)"
+              className="w-full rounded-xl border border-white/10 bg-white/3 pl-10 pr-9 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500/40"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            {waves.map(w => (
+              <button key={w} onClick={() => setFilterWave(w)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all border ${
+                  filterWave === w
+                    ? "bg-blue-600 border-blue-500 text-white"
+                    : "border-white/10 text-slate-400 hover:text-white bg-white/3"
+                }`}>
+                {w === "Semua" ? `Semua (${TOOLS.length})` : w}
+              </button>
+            ))}
+          </div>
+          {(search || filterWave !== "Semua") && (
+            <p className="text-xs text-slate-500">
+              {filtered.length === 0 ? "Tidak ada tools yang cocok" : `${filtered.length} tools ditemukan`}
+              {(search || filterWave !== "Semua") && (
+                <button onClick={() => { setSearch(""); setFilterWave("Semua"); }} className="ml-2 text-blue-400 hover:text-blue-300">Reset filter</button>
+              )}
+            </p>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-          {TOOLS.map((t, i) => (
+          {filtered.map((t, i) => (
             <Link key={i} href={t.href}>
               <div className={`group rounded-2xl border ${t.borderColor} ${t.bg} p-5 hover:bg-white/5 transition-all cursor-pointer h-full`}>
                 <div className="flex items-start justify-between gap-2 mb-3">
@@ -833,6 +951,13 @@ export default function KompetensiHub() {
               </div>
             </Link>
           ))}
+          {filtered.length === 0 && (
+            <div className="col-span-3 rounded-2xl border border-dashed border-white/10 p-10 text-center">
+              <Search className="h-8 w-8 text-slate-700 mx-auto mb-2" />
+              <p className="text-slate-400 text-sm">Tidak ada tools yang cocok dengan pencarian</p>
+              <button onClick={() => { setSearch(""); setFilterWave("Semua"); }} className="text-blue-400 text-xs mt-2 hover:text-blue-300">Reset filter</button>
+            </div>
+          )}
         </div>
 
         {/* Roadmap 2026-2030 */}

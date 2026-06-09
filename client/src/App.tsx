@@ -197,6 +197,11 @@ import GeneratorBASTProyek from "@/pages/generator-bast-proyek";
 import PanduanIUJKSBU from "@/pages/panduan-iujk-sbu";
 import GeneratorRMK from "@/pages/generator-rmk";
 import SimulatorCSMS from "@/pages/simulator-csms";
+import GeneratorSuratPenawaran from "@/pages/generator-surat-penawaran";
+import KalkulatorEskalasiHarga from "@/pages/kalkulator-eskalasi-harga";
+import PanduanAuditMutuISO from "@/pages/panduan-audit-mutu-iso";
+import GeneratorLaporanInsiden from "@/pages/generator-laporan-insiden";
+import AsistenKlaimCAR from "@/pages/asisten-klaim-car";
 import PanduanMutasiSKK from "@/pages/panduan-mutasi-skk";
 import GeneratorJSA from "@/pages/generator-jsa";
 import KalkulatorJamKerjaProyek from "@/pages/kalkulator-jam-kerja-proyek";
@@ -1214,6 +1219,11 @@ function Router() {
         <Route path="/panduan-iujk-sbu" component={PanduanIUJKSBU} />
         <Route path="/generator-rmk" component={GeneratorRMK} />
         <Route path="/simulator-csms" component={SimulatorCSMS} />
+        <Route path="/generator-surat-penawaran" component={GeneratorSuratPenawaran} />
+        <Route path="/kalkulator-eskalasi-harga" component={KalkulatorEskalasiHarga} />
+        <Route path="/panduan-audit-mutu-iso" component={PanduanAuditMutuISO} />
+        <Route path="/generator-laporan-insiden" component={GeneratorLaporanInsiden} />
+        <Route path="/asisten-klaim-car" component={AsistenKlaimCAR} />
         <Route path="/panduan-mutasi-skk" component={PanduanMutasiSKK} />
         <Route path="/generator-jsa" component={GeneratorJSA} />
         <Route path="/kalkulator-jam-kerja-proyek" component={KalkulatorJamKerjaProyek} />

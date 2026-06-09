@@ -19895,6 +19895,194 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G11: GENERATOR SURAT PENAWARAN ====================
+  app.post("/api/tools/generator-surat-penawaran", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, jenisPengadaan, namaProyek, namaOwner, nilaiEstimasi, keunggulanPerusahaan } = req.body;
+      const prompt = `Kamu adalah konsultan pengadaan konstruksi senior. Buat draft SURAT PENAWARAN TEKNIS DAN HARGA untuk:
+- Jenis Pekerjaan: ${jenisPekerjaan}
+- Jenis Pengadaan: ${jenisPengadaan}
+- Nama Paket/Proyek: ${namaProyek}
+- Instansi/Owner: ${namaOwner || "tidak disebutkan"}
+- Estimasi Nilai: ${nilaiEstimasi || "belum ditentukan"}
+- Keunggulan Perusahaan: ${keunggulanPerusahaan || "tidak disebutkan"}
+
+Buat draft surat penawaran lengkap dan profesional sesuai format umum tender konstruksi Indonesia.
+
+Respond dengan JSON:
+{
+  "judulSurat": "string",
+  "nomorSurat": "No. [XXX]/SP/[BULAN-ROMAWI]/[TAHUN]",
+  "tanggal": "string (tanggal hari ini)",
+  "kop": "string (kop surat singkat — nama perusahaan placeholder)",
+  "perihal": "string",
+  "isiSurat": {
+    "pembuka": "paragraf pembuka salam + identitas perusahaan",
+    "dataPenawaran": "tabel data singkat: nama paket, nilai penawaran, dll",
+    "lingkupPekerjaan": "deskripsi singkat lingkup pekerjaan yang ditawarkan",
+    "hargaPenawaran": "pernyataan harga + breakdown singkat",
+    "jangkaWaktu": "pernyataan jangka waktu pelaksanaan",
+    "syaratPembayaran": "usulan syarat pembayaran",
+    "keunggulan": "pernyataan keunggulan perusahaan (2-3 poin)",
+    "penutup": "paragraf penutup + tanda tangan placeholder"
+  },
+  "lampiran": ["item lampiran 1", "item lampiran 2", ...],
+  "catatanTeknis": ["catatan penting sebelum mengirim 1", "catatan 2", ...]
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-surat-penawaran error:", e); res.status(500).json({ error: "Gagal generate surat penawaran." }); }
+  });
+
+  // ==================== G11: PANDUAN AUDIT MUTU ISO ====================
+  app.post("/api/tools/panduan-audit-mutu-iso", async (req: any, res: any) => {
+    try {
+      const { standar, jenisAudit, ruangLingkup } = req.body;
+      const prompt = `Kamu adalah Lead Auditor ISO berpengalaman. Buat PANDUAN AUDIT INTERNAL lengkap per klausul untuk:
+- Standar: ${standar}
+- Jenis Audit: ${jenisAudit}
+- Ruang Lingkup: ${ruangLingkup}
+
+Sesuaikan pertanyaan audit dengan konteks konstruksi Indonesia (kontraktor/konsultan BUJK).
+
+Respond dengan JSON:
+{
+  "standar": "${standar}",
+  "jenisAudit": "${jenisAudit}",
+  "ringkasan": "ringkasan singkat pendekatan audit (1 kalimat)",
+  "durasiRekomendasiHari": number,
+  "totalKlausulDiaudit": number,
+  "klausulList": [
+    {
+      "klausul": "4.1",
+      "judul": "Memahami Organisasi dan Konteksnya",
+      "pertanyaan": ["pertanyaan 1", "pertanyaan 2", "pertanyaan 3"],
+      "buktiyangDicari": ["dokumen/rekaman 1", "dokumen 2"],
+      "tembuan": "nama jabatan yang harus diaudit",
+      "risikoPotensial": "risiko nonkonformitas yang umum"
+    }
+  ],
+  "checklistPersiapan": [
+    {"item": "item persiapan", "status": "Wajib"},
+    {"item": "item disarankan", "status": "Disarankan"}
+  ],
+  "tipsAuditor": ["tip 1", "tip 2", ...],
+  "formatLaporan": ["elemen laporan 1", "elemen laporan 2", ...]
+}
+
+Sertakan minimal 6 klausul yang relevan dengan standar tersebut.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-audit-mutu-iso error:", e); res.status(500).json({ error: "Gagal generate panduan audit." }); }
+  });
+
+  // ==================== G11: GENERATOR LAPORAN INSIDEN K3 ====================
+  app.post("/api/tools/generator-laporan-insiden", async (req: any, res: any) => {
+    try {
+      const { jenisInsiden, tipePekerjaan, lokasiProyek, deskripsiSingkat } = req.body;
+      const prompt = `Kamu adalah Ahli K3 Konstruksi senior. Buat DRAFT LAPORAN INSIDEN K3 formal sesuai format Permenaker No. 8/2020 dan OHSAS 18001:
+- Jenis Insiden: ${jenisInsiden}
+- Tipe Pekerjaan: ${tipePekerjaan}
+- Lokasi Proyek: ${lokasiProyek || "tidak disebutkan"}
+- Deskripsi Kejadian: ${deskripsiSingkat || "sesuaikan dengan jenis insiden"}
+
+Tentukan kategori keparahan berdasarkan jenis insiden. Buat laporan yang lengkap, formal, dan siap dilaporkan.
+
+Respond dengan JSON:
+{
+  "judulLaporan": "string",
+  "nomorLaporan": "No. LAP-KK-[XXX]/[BULAN]/[TAHUN]",
+  "tanggal": "string",
+  "ringkasanInsiden": "1-2 kalimat ringkasan",
+  "kategoriKeparahan": "Ringan|Sedang|Berat|Fatal",
+  "bagianLaporan": {
+    "dataPelapor": "Pelapor: [Jabatan], Tanggal lapor: [tanggal], Lokasi: [lokasi proyek]...",
+    "kronologiKejadian": "narasi kronologi kejadian secara berurutan",
+    "korban": "data korban (nama/NIP placeholder, jabatan, pengalaman, dll)",
+    "penyebabLangsung": "faktor penyebab langsung (unsafe act + unsafe condition)",
+    "penyebabDasar": "root cause analysis (faktor manusia, metode, material, lingkungan)",
+    "tindakanDarurat": "tindakan pertolongan pertama dan darurat yang dilakukan",
+    "tindakanPerbaikan": "tindakan perbaikan segera yang harus dilakukan",
+    "rekomendasiPencegahan": "rekomendasi pencegahan berulang (min 3 poin)",
+    "kesimpulan": "kesimpulan dan pernyataan tanda tangan"
+  },
+  "kewajibanalLegal": ["kewajiban pelaporan 1", "kewajiban 2", ...],
+  "dokumenPendukung": ["dokumen 1", "dokumen 2", ...]
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-laporan-insiden error:", e); res.status(500).json({ error: "Gagal generate laporan insiden." }); }
+  });
+
+  // ==================== G11: ASISTEN KLAIM ASURANSI CAR ====================
+  app.post("/api/tools/asisten-klaim-car", async (req: any, res: any) => {
+    try {
+      const { jenisKlaim, nilaiProyek, namaProyek, deskripsiKejadian } = req.body;
+      const prompt = `Kamu adalah konsultan asuransi konstruksi (CAR/EAR) berpengalaman. Buat PANDUAN KLAIM ASURANSI CAR lengkap untuk:
+- Jenis Klaim: ${jenisKlaim}
+- Nilai Proyek: ${nilaiProyek}
+- Nama Proyek: ${namaProyek || "tidak disebutkan"}
+- Deskripsi Kejadian: ${deskripsiKejadian || "sesuaikan dengan jenis klaim"}
+
+Berikan panduan praktis yang komprehensif untuk membantu kontraktor mengajukan klaim CAR yang kuat.
+
+Respond dengan JSON:
+{
+  "jenisKlaim": "${jenisKlaim}",
+  "ringkasan": "ringkasan strategi klaim (1-2 kalimat)",
+  "tingkatKesulitan": "Mudah|Sedang|Rumit",
+  "estimasiWaktu": "estimasi total waktu proses klaim (cth: 30–60 hari)",
+  "langkahKlaim": [
+    {
+      "urutan": 1,
+      "langkah": "judul langkah",
+      "detail": "penjelasan detail langkah",
+      "batasWaktu": "batas waktu (cth: 1x24 jam)",
+      "dokumenDiperlukan": ["dokumen 1", "dokumen 2"]
+    }
+  ],
+  "dokumenWajib": [
+    {
+      "dokumen": "nama dokumen",
+      "keterangan": "keterangan singkat",
+      "urgensi": "Segera|1 minggu|Sebelum survei"
+    }
+  ],
+  "klausulPolisYangRelevan": ["klausul 1", "klausul 2", ...],
+  "pengecualianUmum": ["pengecualian 1", "pengecualian 2", ...],
+  "tipsNegosiasiKlaim": ["tip 1", "tip 2", ...],
+  "kontak": "panduan siapa yang harus dihubungi"
+}
+
+Sertakan min 5 langkah klaim dan 8 dokumen wajib.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("asisten-klaim-car error:", e); res.status(500).json({ error: "Gagal generate panduan klaim." }); }
+  });
+
   app.post("/api/tools/simulator-csms/answer", async (req: any, res: any) => {
     try {
       const { jenisEvaluasi, profilPerusahaan, riwayat, pertanyaanKe, totalPertanyaan } = req.body;
