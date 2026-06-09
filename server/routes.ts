@@ -24648,6 +24648,220 @@ Balas hanya JSON valid.`;
     }
   });
 
+  // ==================== G24: GENERATOR HIRADC ====================
+  app.post("/api/tools/generator-hiradc", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, standar, konteks } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah Ahli K3 Konstruksi bersertifikat (Ahli K3 Utama) dengan pengalaman 15 tahun. Buat HIRADC (Hazard Identification, Risk Assessment, Determining Controls) yang lengkap dan detail.
+
+Jenis Pekerjaan: ${jenisPekerjaan}
+Standar Acuan: ${standar}
+Konteks Proyek: ${konteks || "proyek konstruksi umum"}
+
+Hasilkan JSON:
+{
+  "judul": "HIRADC — [Jenis Pekerjaan]",
+  "nomorDokumen": "HIRADC-[kode singkat]-[tahun]",
+  "lingkupPekerjaan": "Deskripsi 2 kalimat lingkup pekerjaan",
+  "jenisHazardYangAda": ["daftar 4-6 jenis hazard yang relevan"],
+  "risiko": [
+    {
+      "no": 1,
+      "aktivitas": "Sub-aktivitas spesifik (kata kerja + objek)",
+      "bahaya": "Bahaya spesifik yang teridentifikasi",
+      "jenisHazard": "Fisik/Kimia/Biologi/Ergonomi/Psikologi/Mekanik",
+      "dampak": "Dampak potensial (cidera/penyakit/kerusakan)",
+      "kemungkinan": 1-5,
+      "keparahan": 1-5,
+      "risiko": kemungkinan*keparahan,
+      "level": "Rendah/Sedang/Tinggi/Ekstrem",
+      "pengendalian": "Hierarki pengendalian: Eliminasi/Substitusi/Rekayasa/Administratif/APD — jelaskan konkret",
+      "pic": "Jabatan penanggung jawab",
+      "targetSelesai": "Sebelum/Saat/Sepanjang pekerjaan"
+    }
+  ],
+  "rekapRisiko": [
+    { "level": "Ekstrem", "jumlah": 0, "warna": "red" },
+    { "level": "Tinggi", "jumlah": 0, "warna": "orange" },
+    { "level": "Sedang", "jumlah": 0, "warna": "yellow" },
+    { "level": "Rendah", "jumlah": 0, "warna": "green" }
+  ],
+  "catatan": "Catatan penting reviewer atau asumsi (1-2 kalimat)"
+}
+
+Buat minimal 10-14 baris risiko yang realistis dan spesifik. Level: Rendah (1-5), Sedang (6-9), Tinggi (10-15), Ekstrem (16-25). Isi jumlah rekapRisiko sesuai hasil. Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 4000 });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) { console.error("generator-hiradc error:", e); res.status(500).json({ error: "Gagal generate HIRADC. Coba lagi." }); }
+  });
+
+  // ==================== G24: PANDUAN OSS PERIZINAN ====================
+  app.post("/api/tools/panduan-oss-perizinan", async (req: any, res: any) => {
+    try {
+      const { jenisPerizinan, bentukBU, kbli, namaPerusahaan } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah konsultan perizinan usaha konstruksi yang ahli di sistem OSS-RBA Indonesia (oss.go.id). Buat panduan lengkap dan praktis untuk perizinan berikut.
+
+Jenis Perizinan: ${jenisPerizinan}
+Bentuk Badan Usaha: ${bentukBU}
+KBLI Utama: ${kbli}
+Nama Perusahaan: ${namaPerusahaan || "PT [Nama Perusahaan]"}
+
+Hasilkan JSON:
+{
+  "judul": "Panduan Perizinan: [jenis perizinan]",
+  "ringkasan": "Ringkasan 2-3 kalimat tentang perizinan ini dan pentingnya bagi BUJK",
+  "prasyarat": ["4-6 prasyarat wajib sebelum memulai proses"],
+  "tahapan": [
+    {
+      "nomor": 1,
+      "nama": "Nama tahapan",
+      "platform": "oss.go.id / LPJK.go.id / Dinas setempat / dll",
+      "deskripsi": "Penjelasan 2-3 kalimat apa yang dilakukan di tahap ini",
+      "dokumen": ["dokumen yang dibutuhkan di tahap ini"],
+      "estimasiWaktu": "X hari kerja",
+      "tips": "Tip praktis untuk tahap ini (boleh kosong)"
+    }
+  ],
+  "dokumenDibutuhkan": [
+    { "kategori": "Dokumen Pendirian Perusahaan", "dokumen": ["list dokumen"] },
+    { "kategori": "Dokumen Teknis", "dokumen": ["list dokumen"] },
+    { "kategori": "Dokumen Perpajakan", "dokumen": ["list dokumen"] }
+  ],
+  "checklistVerifikasi": [
+    { "item": "Item yang harus diverifikasi sebelum submit", "keterangan": "Detail/cara verifikasi" }
+  ],
+  "masalahUmum": [
+    { "masalah": "Masalah yang sering terjadi", "solusi": "Solusi praktis" }
+  ],
+  "kontakDukungan": ["Kontak/link dukungan resmi yang relevan"]
+}
+
+Buat 5-7 tahapan yang realistis dan spesifik untuk ${bentukBU}. Sertakan minimal 5 item checklistVerifikasi dan 4 masalahUmum. Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 4000 });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) { console.error("panduan-oss-perizinan error:", e); res.status(500).json({ error: "Gagal generate panduan perizinan. Coba lagi." }); }
+  });
+
+  // ==================== G24: GENERATOR SPK KONTRAK ====================
+  app.post("/api/tools/generator-spk-kontrak", async (req: any, res: any) => {
+    try {
+      const { jenisDok, namaProyek, nilaiKontrak, durasiPekerjaan, sumberDana, konteks } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah ahli hukum kontrak konstruksi dan pengadaan pemerintah. Buat template dokumen kontrak/perjanjian konstruksi yang formal dan lengkap sesuai regulasi Indonesia.
+
+Jenis Dokumen: ${jenisDok}
+Nama Proyek/Pekerjaan: ${namaProyek}
+Nilai Kontrak: ${nilaiKontrak || "Sesuai penawaran"}
+Durasi Pekerjaan: ${durasiPekerjaan} hari kalender
+Sumber Dana: ${sumberDana}
+Kondisi Khusus: ${konteks || "tidak ada kondisi khusus"}
+
+Hasilkan JSON:
+{
+  "nomorDokumen": "Nomor dokumen formal (cth: SPK-001/PROJ/VI/2025)",
+  "judul": "Judul dokumen resmi uppercase",
+  "pembukaan": "Paragraf pembukaan formal yang menyebutkan dasar hukum dan tujuan perjanjian (3-4 kalimat)",
+  "pihak": [
+    { "posisi": "PIHAK PERTAMA", "nama": "[Nama Pejabat/Direktur]", "jabatan": "Jabatan formal", "perusahaan": "Nama Perusahaan/Instansi" },
+    { "posisi": "PIHAK KEDUA", "nama": "[Nama Direktur Kontraktor]", "jabatan": "Direktur Utama", "perusahaan": "PT [Nama Kontraktor]" }
+  ],
+  "pasal": [
+    {
+      "nomorPasal": 1,
+      "judul": "RUANG LINGKUP PEKERJAAN",
+      "isi": "Isi pasal formal 3-5 ayat yang lengkap dan spesifik"
+    }
+  ],
+  "penutup": "Paragraf penutup formal tentang penandatanganan dan berlakunya dokumen (2-3 kalimat)",
+  "klausulKhusus": ["klausul atau hal khusus yang perlu diperhatikan dari dokumen ini"],
+  "lampiranWajib": ["daftar lampiran yang harus dilampirkan bersama dokumen ini"]
+}
+
+Buat 8-12 pasal yang relevan dengan jenis dokumen. Pasal harus mencakup: ruang lingkup, nilai/harga, jadwal, pembayaran, perubahan pekerjaan, jaminan mutu, keselamatan kerja, force majeure, penalti/denda, pemutusan kontrak, penyelesaian perselisihan, penutup. Isi setiap pasal formal dan spesifik dalam bahasa Indonesia baku. Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 5000 });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) { console.error("generator-spk-kontrak error:", e); res.status(500).json({ error: "Gagal generate kontrak. Coba lagi." }); }
+  });
+
+  // ==================== G24: SIMULATOR AUDIT ISO ====================
+  app.post("/api/tools/simulator-audit-iso", async (req: any, res: any) => {
+    try {
+      const { action, standar, jenisAudit, nomorPertanyaan, pertanyaan, jawaban, riwayat } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      if (action === "start") {
+        const prompt = `Kamu adalah Lead Auditor ${standar.split("—")[0].trim()} bersertifikat internasional, berpengalaman 12 tahun. Mulai sesi ${jenisAudit} untuk perusahaan konstruksi.
+
+Standar: ${standar}
+Jenis Audit: ${jenisAudit}
+
+Hasilkan JSON:
+{
+  "pembukaan": "Pesan pembuka auditor yang profesional dan tegas (2-3 kalimat): perkenalan diri, standar yang diaudit, dan tujuan audit hari ini",
+  "pertanyaan": "Pertanyaan audit pertama yang spesifik tentang klausul kritis standar ini — langsung dan konkret, sebutkan klausul yang diuji"
+}
+Balas hanya JSON valid.`;
+        const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 800 });
+        const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+        return res.json({ pembukaan: data.pembukaan, pertanyaan: data.pertanyaan });
+      }
+
+      if (action === "next" || action === "finish") {
+        const riwayatStr = (riwayat || []).map((r: any, i: number) => `P${i+1}: ${r.p}\nJ${i+1}: ${r.j}`).join("\n\n");
+        const prompt = `Kamu adalah Lead Auditor ${standar.split("—")[0].trim()} bersertifikat internasional.
+
+Standar: ${standar}
+Jenis Audit: ${jenisAudit}
+Pertanyaan ke-${nomorPertanyaan}: ${pertanyaan}
+Jawaban Auditee: ${jawaban}
+
+Hasilkan JSON untuk evaluasi jawaban dan${action === "finish" ? " rekap akhir audit" : " pertanyaan berikutnya"}:
+{
+  "feedback": {
+    "temuan": "Evaluasi jawaban: apa yang baik, apa yang kurang, ketidaksesuaian jika ada (2-3 kalimat)",
+    "level": "Conformance|Minor NCR|Major NCR|OFI",
+    "skor": 0-20,
+    "referensiKlausul": "Klausul X.Y.Z — nama klausul"
+  }${action === "finish" ? `,
+  "hasilAudit": {
+    "skor": 0-100,
+    "status": "Direkomendasikan untuk Sertifikasi|Perlu Tindakan Koreksi|Tidak Direkomendasikan",
+    "rekapTemuan": [
+      { "level": "Conformance", "jumlah": 0 },
+      { "level": "OFI", "jumlah": 0 },
+      { "level": "Minor NCR", "jumlah": 0 },
+      { "level": "Major NCR", "jumlah": 0 }
+    ],
+    "ringkasan": "Ringkasan hasil audit 2-3 kalimat",
+    "kekuatan": ["3-4 poin kekuatan yang ditemukan"],
+    "temuan": ["3-4 temuan yang perlu ditindaklanjuti"],
+    "rekomendasi": ["3-4 rekomendasi tindakan koreksi konkret"]
+  }` : `,
+  "pertanyaanBerikutnya": "Pertanyaan audit ke-${(nomorPertanyaan||1)+1} yang berbeda klausul dari pertanyaan sebelumnya — spesifik dan langsung"`}
+}
+
+Riwayat sesi:
+${riwayatStr}
+
+Evaluasi dengan objektif. Level: Conformance (jawaban memadai+bukti ada), OFI (bisa ditingkatkan), Minor NCR (ketidaksesuaian parsial), Major NCR (ketidaksesuaian sistemik/tidak ada bukti). Balas hanya JSON valid.`;
+        const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 1500 });
+        const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+        return res.json(data);
+      }
+
+      res.status(400).json({ error: "Action tidak dikenal." });
+    } catch (e: any) { console.error("simulator-audit-iso error:", e); res.status(500).json({ error: "Gagal. Coba lagi." }); }
+  });
+
   // ==================== G22: GENERATOR ITP ====================
   app.post("/api/tools/generator-itp", async (req: any, res: any) => {
     try {

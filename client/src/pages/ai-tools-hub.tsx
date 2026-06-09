@@ -12,7 +12,7 @@ import {
   FileBarChart, ArrowUpFromLine, ClipboardSignature, TrendingDown,
   ShieldCheck, Flame, AlertTriangle, Users2,
   Scale, Gauge, Activity, Calendar, Cylinder, Mic,
-  Grid3x3
+  Grid3x3, Globe
 } from "lucide-react";
 
 interface Tool {
@@ -532,6 +532,50 @@ const KOMPETENSI_TOOLS = [
     label: "Simulator Wawancara Teknis SKK",
     desc: "Pilih bidang SKK (12 bidang: MK, pelaksana gedung/jalan, QS, Ahli K3, Ahli Struktur, Geoteknik, MEP, Manpro, Lingkungan, Ahli Jalan, Irigasi) dan jenjang (4–9) → AI asesor BNSP ajukan 5 pertanyaan teknis berbasis SKKNI. Jawab setiap pertanyaan → feedback skor bintang + poin perbaikan. Predikat Kompeten/Belum + rekomendasi.",
     tag: "Kompetensi",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/generator-hiradc",
+    icon: <AlertTriangle className="h-6 w-6" />,
+    iconBg: "bg-amber-500/10",
+    iconColor: "text-amber-400",
+    badgeColor: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    label: "Generator HIRADC — Identifikasi Bahaya & Penilaian Risiko",
+    desc: "Pilih jenis pekerjaan (galian, struktur beton, bekisting, baja/erection, confined space, kerja ketinggian, alat berat, demolisi, kelistrikan, dll) + standar acuan (PP 50/2012, ISO 45001, OHSAS, Permen PUPR) → AI generate HIRADC lengkap: aktivitas, bahaya, dampak, nilai K×S, level risiko (Rendah/Sedang/Tinggi/Ekstrem), pengendalian Hirarki, PIC. Salin ke Excel (TSV).",
+    tag: "K3",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/panduan-oss-perizinan",
+    icon: <Globe className="h-6 w-6" />,
+    iconBg: "bg-emerald-500/10",
+    iconColor: "text-emerald-400",
+    badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    label: "Panduan OSS-RBA & Perizinan Usaha Konstruksi",
+    desc: "Pilih jenis perizinan (NIB, SBU jasa konstruksi, IUJK perpanjangan, LKUT, SIUJK nasional, PB UMKU, izin lingkungan, PBG/IMB), bentuk badan usaha (PT/CV/Firma/Koperasi/BUMD), kode KBLI → AI generate panduan OSS-RBA: prasyarat, tahapan step-by-step + platform + estimasi waktu, daftar dokumen, checklist verifikasi, masalah umum+solusi, kontak dukungan.",
+    tag: "Perizinan",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/generator-spk-kontrak",
+    icon: <ScrollText className="h-6 w-6" />,
+    iconBg: "bg-rose-500/10",
+    iconColor: "text-rose-400",
+    badgeColor: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+    label: "Generator SPK & Kontrak Konstruksi",
+    desc: "Pilih jenis dokumen (SPK, kontrak lumpsum/unit price, MOU, perjanjian subkontrak/konsultansi/sewa alat/pengadaan/JO, addendum), nama proyek, nilai kontrak, durasi, sumber dana, kondisi khusus → AI generate dokumen formal per pasal: pembukaan, para pihak, tiap pasal (ruang lingkup, nilai, pembayaran, penalti, force majeure, penyelesaian sengketa), klausul khusus, lampiran wajib.",
+    tag: "Kontrak",
+    model: "GPT-4o-mini",
+  },
+  {
+    href: "/simulator-audit-iso",
+    icon: <ClipboardCheck className="h-6 w-6" />,
+    iconBg: "bg-sky-500/10",
+    iconColor: "text-sky-400",
+    badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+    label: "Simulator Audit Internal ISO",
+    desc: "Pilih standar ISO (9001 SMM, 14001 SML, 45001 SMK3, 37001 anti-penyuapan) dan jenis audit (internal, sertifikasi awal/penuh, surveillance, re-sertifikasi) → Lead Auditor AI ajukan 5 pertanyaan per klausul nyata. Setiap jawaban dinilai: Conformance/OFI/Minor NCR/Major NCR + referensi klausul + poin improvement. Rekap temuan + status kelulusan.",
+    tag: "ISO",
     model: "GPT-4o-mini",
   },
   {

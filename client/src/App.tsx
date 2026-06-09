@@ -231,6 +231,11 @@ import KalkulatorCatBangunan from "@/pages/kalkulator-cat-bangunan";
 import GeneratorRKK from "@/pages/generator-rkk";
 import PanduanCSMS from "@/pages/panduan-csms";
 import SimulatorTeknisKKK from "@/pages/simulator-teknis-skk";
+import KalkulatorBebanStruktur from "@/pages/kalkulator-beban-struktur";
+import GeneratorHIRADC from "@/pages/generator-hiradc";
+import PanduanOSSPerizinan from "@/pages/panduan-oss-perizinan";
+import GeneratorSPKKontrak from "@/pages/generator-spk-kontrak";
+import SimulatorAuditISO from "@/pages/simulator-audit-iso";
 import GeneratorSuratKuasa from "@/pages/generator-surat-kuasa";
 import KalkulatorMaterialBeton from "@/pages/kalkulator-material-beton";
 import PanduanManajemenRisiko from "@/pages/panduan-manajemen-risiko";
@@ -1311,6 +1316,11 @@ function Router() {
         <Route path="/generator-rkk" component={GeneratorRKK} />
         <Route path="/panduan-csms" component={PanduanCSMS} />
         <Route path="/simulator-teknis-skk" component={SimulatorTeknisKKK} />
+        <Route path="/kalkulator-beban-struktur" component={KalkulatorBebanStruktur} />
+        <Route path="/generator-hiradc" component={GeneratorHIRADC} />
+        <Route path="/panduan-oss-perizinan" component={PanduanOSSPerizinan} />
+        <Route path="/generator-spk-kontrak" component={GeneratorSPKKontrak} />
+        <Route path="/simulator-audit-iso" component={SimulatorAuditISO} />
         <Route path="/generator-surat-kuasa" component={GeneratorSuratKuasa} />
         <Route path="/kalkulator-material-beton" component={KalkulatorMaterialBeton} />
         <Route path="/panduan-manajemen-risiko" component={PanduanManajemenRisiko} />
