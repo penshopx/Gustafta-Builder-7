@@ -24433,5 +24433,259 @@ Pastikan soal relevan dengan SKKNI dan standar BNSP. Options berisi 4 pilihan (i
     }
   });
 
+  // ==================== G22: GENERATOR ITP ====================
+  app.post("/api/tools/generator-itp", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, namaProyek, kontraktor, standarAcuan } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah QC Manager konstruksi berpengalaman 20 tahun. Buat Inspection Test Plan (ITP) lengkap dan formal.
+
+Jenis Pekerjaan: ${jenisPekerjaan}
+Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+Kontraktor: ${kontraktor || "PT Kontraktor"}
+Standar Acuan: ${standarAcuan || "SNI & Spesifikasi Teknis Kontrak"}
+
+Hasilkan JSON dengan struktur:
+{
+  "judulITP": "Judul ITP formal lengkap",
+  "nomorITP": "ITP-[kode singkat pekerjaan]-001",
+  "klausulMutu": "Klausul ISO 9001:2015 terkait (cth: 8.5.1, 8.6)",
+  "deskripsi": "Deskripsi singkat tujuan ITP ini",
+  "items": [
+    {
+      "no": 1,
+      "aktivitas": "Nama aktivitas/item inspeksi",
+      "referensi": "SNI/ACI/standar acuan",
+      "dokumenVerifikasi": "Dokumen yang harus ada/disiapkan",
+      "levelKontraktor": "H atau W atau R atau M",
+      "levelMK": "H atau W atau R atau M",
+      "levelOwner": "H atau W atau R atau M",
+      "frekuensi": "Setiap batch/100% visual/dst",
+      "batasPenerimaan": "Parameter & nilai batas",
+      "catatan": "Catatan tambahan singkat atau kosong"
+    }
+  ],
+  "dokumenTerkait": ["daftar 5-8 dokumen terkait"],
+  "catatanUmum": "Catatan umum penggunaan ITP ini (2-3 kalimat)"
+}
+
+Buat 8-12 item ITP yang relevan dan komprehensif untuk jenis pekerjaan tersebut. Level H=Hold Point, W=Witness, R=Review, M=Monitor. Balas hanya JSON valid.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+      });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) {
+      console.error("generator-itp error:", e);
+      res.status(500).json({ error: "Gagal generate ITP. Coba lagi." });
+    }
+  });
+
+  // ==================== G22: PANDUAN TENDER BUJK ====================
+  app.post("/api/tools/panduan-tender-bujk", async (req: any, res: any) => {
+    try {
+      const { jenisTender, nilaiPekerjaan, klasifikasiBUJK, kondisiKhusus } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah konsultan pengadaan konstruksi berpengalaman di Indonesia. Buat panduan proses tender BUJK yang komprehensif.
+
+Jenis Tender: ${jenisTender}
+Nilai Pekerjaan: ${nilaiPekerjaan}
+Klasifikasi BUJK/SBU: ${klasifikasiBUJK || "Umum"}
+Kondisi Khusus: ${kondisiKhusus || "Tidak ada"}
+
+Hasilkan JSON:
+{
+  "judul": "Judul panduan tender formal",
+  "ringkasan": "Ringkasan 2-3 kalimat tentang proses tender ini",
+  "dasarHukum": ["daftar 5-7 regulasi: Perpres, Permen, dll yang relevan"],
+  "prasyaratPeserta": ["daftar 6-8 prasyarat peserta tender"],
+  "tahapan": [
+    {
+      "tahap": "Nama tahapan",
+      "deskripsi": "Penjelasan 2-3 kalimat apa yang dilakukan",
+      "dokumenDibutuhkan": ["2-4 dokumen spesifik untuk tahap ini"],
+      "tipsPenting": "1 tips penting atau strategi untuk tahap ini",
+      "waktu": "estimasi durasi (cth: 3-5 hari)"
+    }
+  ],
+  "dokumenAdministrasi": ["daftar 8-10 dokumen administrasi"],
+  "dokumenTeknis": ["daftar 6-8 dokumen teknis"],
+  "strategiPemenangan": ["5-7 strategi konkret untuk memenangkan tender"],
+  "kesalahanUmum": [
+    { "kesalahan": "deskripsi kesalahan umum", "solusi": "cara menghindari/mengatasinya" }
+  ],
+  "totalEstimasiWaktu": "Total estimasi waktu proses (cth: 30-45 hari)"
+}
+
+Buat 6-8 tahapan lengkap dan 5-6 kesalahan umum. Balas hanya JSON valid.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) {
+      console.error("panduan-tender-bujk error:", e);
+      res.status(500).json({ error: "Gagal generate panduan tender. Coba lagi." });
+    }
+  });
+
+  // ==================== G22: GENERATOR LAPORAN HARIAN ====================
+  app.post("/api/tools/generator-laporan-harian", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, namaProyek, tanggalLaporan, kondisiCuaca, kegiatanHariIni, progressKumulatif, masalah } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah Site Manager konstruksi berpengalaman. Buat laporan harian proyek konstruksi yang formal dan lengkap.
+
+Jenis Proyek: ${jenisProyek}
+Nama Proyek: ${namaProyek}
+Tanggal: ${tanggalLaporan}
+Kondisi Cuaca: ${kondisiCuaca}
+Kegiatan Hari Ini: ${kegiatanHariIni}
+Progress Kumulatif: ${progressKumulatif || "belum disebutkan"}
+Masalah/Kendala: ${masalah || "tidak ada"}
+
+Hasilkan JSON:
+{
+  "nomorLaporan": "LH-[kode proyek singkat]-[tanggal DDMMYY]",
+  "judulLaporan": "Judul laporan harian formal",
+  "ringkasanProgress": "Ringkasan 2-3 kalimat tentang progress hari ini",
+  "progressKumulatif": "progress % atau deskripsi singkat",
+  "kegiatanHariIni": [
+    {
+      "uraian": "Uraian kegiatan spesifik",
+      "volume": "angka volume",
+      "satuan": "m2/m3/unit/titik/dll",
+      "bobot": "% bobot terhadap kontrak",
+      "keterangan": "lokasi/as/zona atau keterangan singkat"
+    }
+  ],
+  "personelHariIni": [
+    { "jabatan": "jabatan", "jumlah": 5, "pekerjaan": "uraian pekerjaan singkat" }
+  ],
+  "peralatanDigunakan": [
+    { "nama": "nama alat", "jumlah": 1, "kondisi": "Baik atau Rusak Ringan" }
+  ],
+  "materialDiterima": [
+    { "material": "nama material", "volume": "angka", "satuan": "satuan", "supplier": "nama supplier" }
+  ],
+  "masalahKendala": ["daftar masalah jika ada, atau array kosong []"],
+  "rencanaEsokHari": ["3-5 rencana kegiatan esok hari"],
+  "instruksiDireksiMK": "instruksi dari direksi/MK jika ada, atau string kosong",
+  "catatanK3": "catatan K3 hari ini: APD, kondisi lapangan, insiden (jika ada)"
+}
+
+Buat 3-5 item kegiatan, 4-6 jabatan personel, 2-4 peralatan. Balas hanya JSON valid.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) {
+      console.error("generator-laporan-harian error:", e);
+      res.status(500).json({ error: "Gagal generate laporan harian. Coba lagi." });
+    }
+  });
+
+  // ==================== G22: SIMULATOR K3 KONSTRUKSI ====================
+  app.post("/api/tools/simulator-k3", async (req: any, res: any) => {
+    try {
+      const { action, topik, level, totalSoal, nomorSoal, soal, jawaban, opsiJawaban, riwayat } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      if (action === "start") {
+        const prompt = `Kamu adalah instruktur K3 Konstruksi bersertifikat AK3 Umum dan ISO 45001 Lead Auditor. Buat soal pertama untuk quiz K3 konstruksi.
+
+Topik: ${topik}
+Level Kompetensi: ${level}
+Total Soal: ${totalSoal}
+
+Hasilkan JSON:
+{
+  "intro": "Pengantar quiz singkat 2 kalimat (sebutkan topik dan level kompetensi)",
+  "soal": "Teks soal pilihan ganda berbasis kasus nyata di lapangan konstruksi. Deskripsikan skenario spesifik dulu (2-3 kalimat), kemudian ajukan pertanyaan.",
+  "opsiJawaban": ["teks opsi A lengkap", "teks opsi B lengkap", "teks opsi C lengkap", "teks opsi D lengkap"]
+}
+
+Soal harus: (1) berbasis situasi lapangan nyata, (2) sesuai level kompetensi ${level}, (3) mengacu regulasi Indonesia (Permenaker/PP 50/2012/SMK3/ISO 45001). Balas hanya JSON valid.`;
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.6,
+          response_format: { type: "json_object" },
+        });
+        const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+        res.json(data);
+        return;
+      }
+
+      if (action === "answer" || action === "finish") {
+        const prompt = `Kamu adalah instruktur K3 Konstruksi bersertifikat. Evaluasi jawaban peserta dan (jika bukan soal terakhir) buat soal berikutnya.
+
+Topik: ${topik}
+Level: ${level}
+Soal No. ${nomorSoal}: ${soal}
+Opsi: ${JSON.stringify(opsiJawaban)}
+Jawaban Peserta: ${jawaban}
+Riwayat: ${JSON.stringify(riwayat || [])}
+
+${action === "finish" ? `Ini adalah soal terakhir (${nomorSoal}/${totalSoal}). Buat juga hasil akhir.` : `Soal selanjutnya adalah no. ${nomorSoal + 1} dari ${totalSoal}. Buat soal baru yang BERBEDA topik/aspek dari soal sebelumnya.`}
+
+Hasilkan JSON:
+{
+  "evaluasi": {
+    "benar": true atau false,
+    "skor": 1-5 (5=sangat tepat, 4=benar, 3=sebagian benar, 2=kurang tepat, 1=salah),
+    "penjelasan": "Penjelasan mengapa jawaban benar/salah + apa yang seharusnya dilakukan (2-3 kalimat)",
+    "referensi": "Regulasi/standar acuan: Permenaker No. X / PP 50/2012 / ISO 45001 klausul X",
+    "jawabanBenar": "A atau B atau C atau D"
+  }${action !== "finish" ? `,
+  "soalBerikutnya": "Teks soal berikutnya berbasis kasus nyata (situasi dulu, lalu pertanyaan)",
+  "opsiBerikutnya": ["opsi A", "opsi B", "opsi C", "opsi D"]` : `,
+  "hasilAkhir": {
+    "skor": 0-100,
+    "totalBenar": 0-${totalSoal},
+    "predikat": "Sangat Kompeten / Kompeten / Cukup Kompeten / Perlu Peningkatan",
+    "ringkasan": "Ringkasan performa 2-3 kalimat",
+    "topikLemah": ["topik yang perlu dipelajari lagi, atau array kosong"],
+    "rekomendasiPelatihan": ["2-3 rekomendasi pelatihan/sertifikasi K3 lanjutan"]
+  }`}
+}
+Balas hanya JSON valid.`;
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.4,
+          response_format: { type: "json_object" },
+        });
+        const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+        res.json(data);
+        return;
+      }
+
+      res.status(400).json({ error: "Action tidak dikenal." });
+    } catch (e: any) {
+      console.error("simulator-k3 error:", e);
+      res.status(500).json({ error: "Gagal. Coba lagi." });
+    }
+  });
+
   return httpServer;
 }
