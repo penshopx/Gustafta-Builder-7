@@ -227,6 +227,10 @@ import GeneratorITP from "@/pages/generator-itp";
 import PanduanTenderBUJK from "@/pages/panduan-tender-bujk";
 import GeneratorLaporanHarian from "@/pages/generator-laporan-harian";
 import SimulatorK3Konstruksi from "@/pages/simulator-k3-konstruksi";
+import KalkulatorCatBangunan from "@/pages/kalkulator-cat-bangunan";
+import GeneratorRKK from "@/pages/generator-rkk";
+import PanduanCSMS from "@/pages/panduan-csms";
+import SimulatorTeknisKKK from "@/pages/simulator-teknis-skk";
 import GeneratorSuratKuasa from "@/pages/generator-surat-kuasa";
 import KalkulatorMaterialBeton from "@/pages/kalkulator-material-beton";
 import PanduanManajemenRisiko from "@/pages/panduan-manajemen-risiko";
@@ -1303,6 +1307,10 @@ function Router() {
         <Route path="/panduan-tender-bujk" component={PanduanTenderBUJK} />
         <Route path="/generator-laporan-harian" component={GeneratorLaporanHarian} />
         <Route path="/simulator-k3-konstruksi" component={SimulatorK3Konstruksi} />
+        <Route path="/kalkulator-cat-bangunan" component={KalkulatorCatBangunan} />
+        <Route path="/generator-rkk" component={GeneratorRKK} />
+        <Route path="/panduan-csms" component={PanduanCSMS} />
+        <Route path="/simulator-teknis-skk" component={SimulatorTeknisKKK} />
         <Route path="/generator-surat-kuasa" component={GeneratorSuratKuasa} />
         <Route path="/kalkulator-material-beton" component={KalkulatorMaterialBeton} />
         <Route path="/panduan-manajemen-risiko" component={PanduanManajemenRisiko} />

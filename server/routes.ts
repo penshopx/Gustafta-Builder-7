@@ -24433,6 +24433,221 @@ Pastikan soal relevan dengan SKKNI dan standar BNSP. Options berisi 4 pilihan (i
     }
   });
 
+  // ==================== G23: GENERATOR RKK ====================
+  app.post("/api/tools/generator-rkk", async (req: any, res: any) => {
+    try {
+      const { jenisKontrak, namaProyek, nilaiKontrak, risikoLevel, jumlahPekerja } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah HSE Manager dan konsultan K3 Konstruksi berpengalaman 20 tahun. Buat Rencana Keselamatan Konstruksi (RKK) sesuai Permen PUPR No. 10/2021 dan Permenaker No. 5/1996.
+
+Jenis Kontrak: ${jenisKontrak}
+Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+Nilai Kontrak: ${nilaiKontrak || "tidak disebutkan"}
+Level Risiko: ${risikoLevel}
+Jumlah Pekerja: ${jumlahPekerja || "50"} orang
+
+Hasilkan JSON:
+{
+  "judulRKK": "Judul RKK formal",
+  "nomorRKK": "RKK-[kode singkat]-001",
+  "dasarHukum": ["6-8 regulasi: Permen PUPR 10/2021, Permenaker 5/1996, PP 50/2012, UU 1/1970, dll"],
+  "kebijakan": "Pernyataan kebijakan K3 formal 3-4 kalimat",
+  "sasaranK3": ["5-6 sasaran K3 proyek yang terukur (SMART)"],
+  "identifikasiRisiko": [
+    {
+      "pekerjaan": "Jenis pekerjaan",
+      "bahaya": "Potensi bahaya",
+      "risiko": "Tingkat risiko (Tinggi/Sedang/Rendah)",
+      "pengendalian": "Tindakan pengendalian risiko",
+      "picFrekuensi": "PIC & frekuensi pemantauan"
+    }
+  ],
+  "rencanaKeselamatan": [
+    {
+      "program": "Nama program",
+      "kegiatan": "Kegiatan konkret",
+      "target": "Target terukur",
+      "waktu": "Waktu pelaksanaan",
+      "picAnggaran": "PIC & estimasi anggaran"
+    }
+  ],
+  "apd": [
+    {
+      "item": "Nama APD/perlengkapan",
+      "standar": "Standar SNI/ANSI/ISO",
+      "jumlah": "jumlah unit",
+      "periode": "Periode penggantian"
+    }
+  ],
+  "komunikasiK3": ["5-6 program komunikasi: toolbox meeting, safety induction, dll"],
+  "emergencyResponse": ["5-7 poin: prosedur darurat, nomor emergency, titik kumpul, dll"],
+  "dokumenWajib": ["10-12 dokumen K3 wajib yang harus tersedia di proyek"]
+}
+
+Buat 6-8 item HIRADC, 5-6 program keselamatan, 8-10 item APD. Balas hanya JSON valid.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+      });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) {
+      console.error("generator-rkk error:", e);
+      res.status(500).json({ error: "Gagal generate RKK. Coba lagi." });
+    }
+  });
+
+  // ==================== G23: PANDUAN CSMS ====================
+  app.post("/api/tools/panduan-csms", async (req: any, res: any) => {
+    try {
+      const { levelCSMS, jenisPekerjaan, namaPerusahaan, konteksKhusus } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah HSE Auditor CSMS berpengalaman di industri migas dan konstruksi Indonesia. Buat panduan persiapan audit CSMS yang komprehensif.
+
+Level CSMS: ${levelCSMS}
+Jenis Pekerjaan/Sektor: ${jenisPekerjaan}
+Nama Perusahaan: ${namaPerusahaan || "PT Kontraktor"}
+Konteks Khusus: ${konteksKhusus || "tidak ada"}
+
+Hasilkan JSON:
+{
+  "judul": "Judul panduan persiapan audit CSMS formal",
+  "ringkasan": "Ringkasan 2-3 kalimat",
+  "elemenCSMS": [
+    {
+      "elemen": "Nama elemen CSMS",
+      "subElemen": ["3-4 sub-elemen"],
+      "targetSkor": "Target skor (cth: ≥80%)",
+      "buktiWajib": ["3-4 dokumen/bukti wajib"]
+    }
+  ],
+  "dokumenWajib": [
+    {
+      "kategori": "Kategori dokumen",
+      "dokumen": ["4-6 dokumen spesifik"]
+    }
+  ],
+  "checklistPreAudit": [
+    {
+      "kategori": "Kategori",
+      "item": "Item yang harus disiapkan",
+      "status": "Wajib atau Disarankan"
+    }
+  ],
+  "strategiAudit": ["5-7 strategi & tips menghadapi audit CSMS"],
+  "pertanyaanUmumAuditor": [
+    {
+      "pertanyaan": "Pertanyaan yang sering diajukan auditor",
+      "jawabanSampel": "Contoh jawaban yang baik"
+    }
+  ],
+  "kesalahanUmum": [
+    {
+      "kesalahan": "Kesalahan umum kontraktor",
+      "dampak": "Dampak terhadap skor/kelulusan",
+      "solusi": "Cara menghindari/mengatasinya"
+    }
+  ]
+}
+
+Buat 5-6 elemen CSMS, 3-4 kategori dokumen, 12-15 checklist, 6-8 pertanyaan auditor, 4-5 kesalahan umum. Balas hanya JSON valid.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+      res.json({ hasil: data });
+    } catch (e: any) {
+      console.error("panduan-csms error:", e);
+      res.status(500).json({ error: "Gagal generate panduan CSMS. Coba lagi." });
+    }
+  });
+
+  // ==================== G23: SIMULATOR WAWANCARA TEKNIS SKK ====================
+  app.post("/api/tools/simulator-teknis-skk", async (req: any, res: any) => {
+    try {
+      const { action, bidang, jenjang, nomorPertanyaan, pertanyaan, jawaban, totalPertanyaan, riwayat } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      if (action === "start") {
+        const prompt = `Kamu adalah asesor BNSP berpengalaman untuk uji kompetensi SKK konstruksi. Mulai sesi wawancara teknis.
+
+Bidang SKK: ${bidang}
+Jenjang: ${jenjang}
+
+Hasilkan JSON:
+{
+  "intro": "Pembukaan wawancara formal 2-3 kalimat: perkenalan asesor, tujuan uji, bidang yang diuji",
+  "pertanyaan": "Pertanyaan teknis pertama yang spesifik, berbasis unit kompetensi SKKNI untuk bidang dan jenjang ini. Pertanyaan harus: (1) berbasis kasus/skenario nyata di lapangan, (2) sesuai jenjang kompetensi, (3) tidak bisa dijawab ya/tidak"
+}
+Balas hanya JSON valid.`;
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.5,
+          response_format: { type: "json_object" },
+        });
+        const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+        res.json(data);
+        return;
+      }
+
+      if (action === "next" || action === "finish") {
+        const prompt = `Kamu adalah asesor BNSP. Evaluasi jawaban peserta untuk pertanyaan teknis SKK, kemudian ${action === "finish" ? "buat penilaian akhir" : "ajukan pertanyaan berikutnya"}.
+
+Bidang SKK: ${bidang}
+Jenjang: ${jenjang}
+Pertanyaan No. ${nomorPertanyaan}: ${pertanyaan}
+Jawaban Peserta: ${jawaban}
+Riwayat: ${JSON.stringify(riwayat || [])}
+
+Hasilkan JSON:
+{
+  "feedback": {
+    "skor": 1-5,
+    "feedback": "Evaluasi jawaban: apa yang sudah benar dan apa yang kurang (2-3 kalimat)",
+    "poin": "1 poin teknis penting yang perlu diperhatikan atau diperdalam"
+  }${action !== "finish" ? `,
+  "pertanyaanBerikutnya": "Pertanyaan teknis berikutnya yang BERBEDA aspek dari sebelumnya, berbasis unit kompetensi SKKNI, skenario lapangan nyata"` : `,
+  "hasilAkhir": {
+    "nilaiTotal": 0-100,
+    "predikat": "Kompeten / Cukup Kompeten / Belum Kompeten",
+    "ringkasan": "Ringkasan performa keseluruhan 2-3 kalimat",
+    "kekuatan": ["2-3 poin kekuatan peserta"],
+    "perluDiperkuat": ["2-3 area yang perlu diperdalam"],
+    "rekomendasi": ["2-3 rekomendasi: modul/unit kompetensi yang perlu dipelajari, pelatihan lanjutan, dll"]
+  }`}
+}
+Balas hanya JSON valid.`;
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.4,
+          response_format: { type: "json_object" },
+        });
+        const data = JSON.parse(completion.choices[0]?.message?.content ?? "{}");
+        res.json(data);
+        return;
+      }
+
+      res.status(400).json({ error: "Action tidak dikenal." });
+    } catch (e: any) {
+      console.error("simulator-teknis-skk error:", e);
+      res.status(500).json({ error: "Gagal. Coba lagi." });
+    }
+  });
+
   // ==================== G22: GENERATOR ITP ====================
   app.post("/api/tools/generator-itp", async (req: any, res: any) => {
     try {

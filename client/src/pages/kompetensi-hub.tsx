@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { useState } from "react";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, Calculator, FileCheck, Layers, Monitor, CheckSquare, Building, ScrollText, FileBadge, HardHat, ArrowRightLeft, ShieldAlert, Clock, Gavel, BadgeCheck, FileSignature, FileEdit, ClipboardCheck, AlertOctagon, Umbrella, X, FileBarChart, Users2, ArrowUpFromLine, ClipboardSignature, Handshake, TrendingDown, ShieldCheck, Flame, AlertTriangle, Scale, Gauge, Activity, Calendar, Cylinder, Mic, Grid3x3, Layers2 } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, Calculator, FileCheck, Layers, Monitor, CheckSquare, Building, ScrollText, FileBadge, HardHat, ArrowRightLeft, ShieldAlert, Clock, Gavel, BadgeCheck, FileSignature, FileEdit, ClipboardCheck, AlertOctagon, Umbrella, X, FileBarChart, Users2, ArrowUpFromLine, ClipboardSignature, Handshake, TrendingDown, ShieldCheck, Flame, AlertTriangle, Scale, Gauge, Activity, Calendar, Cylinder, Mic, Grid3x3, Layers2, Paintbrush } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -606,6 +606,58 @@ const TOOLS = [
     bg: "bg-amber-500/5",
     badge: "Gelombang 22",
     badgeColor: "text-amber-400 border-amber-400/30",
+    live: true,
+  },
+  {
+    href: "/kalkulator-cat-bangunan",
+    icon: Paintbrush,
+    label: "Kalkulator Kebutuhan Cat Bangunan",
+    sublabel: "Hitung volume cat, kaleng, primer, dan estimasi biaya per jenis permukaan",
+    desc: "Tambah area (dinding bata/beton, plafon gypsum/kayu, kusen kayu, pagar besi, lantai beton, kolom) dengan luas, jenis cat, dan jumlah lapis → hitung otomatis: volume total (liter +10% wastage), kaleng 5L, kebutuhan primer per permukaan, estimasi biaya. Tabel detail toggle per area.",
+    color: "text-teal-400",
+    borderColor: "border-teal-500/30",
+    bg: "bg-teal-500/5",
+    badge: "Gelombang 23",
+    badgeColor: "text-teal-400 border-teal-400/30",
+    live: true,
+  },
+  {
+    href: "/generator-rkk",
+    icon: ShieldCheck,
+    label: "Generator RKK — Rencana Keselamatan Konstruksi",
+    sublabel: "Buat RKK formal sesuai Permen PUPR 10/2021 & Permenaker 5/1996",
+    desc: "Pilih jenis kontrak (8 tipe), nilai kontrak, level risiko, jumlah pekerja → AI generate RKK lengkap: kebijakan K3, sasaran, identifikasi bahaya & pengendalian risiko (HIRADC), program keselamatan, daftar APD, komunikasi K3, emergency response plan, dan dokumen wajib. Accordion per seksi.",
+    color: "text-blue-400",
+    borderColor: "border-blue-500/30",
+    bg: "bg-blue-500/5",
+    badge: "Gelombang 23",
+    badgeColor: "text-blue-400 border-blue-400/30",
+    live: true,
+  },
+  {
+    href: "/panduan-csms",
+    icon: ShieldAlert,
+    label: "Panduan Persiapan Audit CSMS",
+    sublabel: "Persiapan audit Contractor Safety Management System Level 1/2/3",
+    desc: "Pilih level CSMS (1/2/3), jenis pekerjaan/sektor (sipil umum, migas onshore/offshore, ketenagalistrikan, petrokimia, pertambangan), dan klien/owner → AI generate panduan komprehensif: elemen & sub-elemen CSMS, dokumen wajib per kategori, checklist pre-audit, 6–8 pertanyaan auditor + contoh jawaban, strategi, kesalahan umum.",
+    color: "text-orange-400",
+    borderColor: "border-orange-500/30",
+    bg: "bg-orange-500/5",
+    badge: "Gelombang 23",
+    badgeColor: "text-orange-400 border-orange-400/30",
+    live: true,
+  },
+  {
+    href: "/simulator-teknis-skk",
+    icon: GraduationCap,
+    label: "Simulator Wawancara Teknis SKK",
+    sublabel: "Simulasi uji wawancara teknis SKK oleh asesor BNSP — 5 pertanyaan + feedback",
+    desc: "Pilih bidang SKK (12 bidang: MK, pelaksana gedung/jalan, QS, Ahli K3, Ahli Struktur, Geoteknik, MEP, Manpro, Lingkungan, Ahli Jalan, Irigasi) dan jenjang (4–9) → AI generate pertanyaan teknis berbasis SKKNI + unit kompetensi. Jawab tiap pertanyaan → feedback skor bintang + poin perbaikan. Predikat Kompeten/Belum + rekomendasi.",
+    color: "text-violet-400",
+    borderColor: "border-violet-500/30",
+    bg: "bg-violet-500/5",
+    badge: "Gelombang 23",
+    badgeColor: "text-violet-400 border-violet-400/30",
     live: true,
   },
   {
