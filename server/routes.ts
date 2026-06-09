@@ -19895,6 +19895,225 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G15: SIMULATOR NEGOSIASI HARGA — START ====================
+  app.post("/api/tools/simulator-negosiasi-harga/start", async (req: any, res: any) => {
+    try {
+      const { posisi, lawan, jenisKontrak, nilaiAwal, targetDiskon, namaProyek } = req.body;
+      const prompt = `Kamu adalah lawan negosiasi harga kontrak konstruksi yang berpengalaman. Buka sesi negosiasi untuk:
+- Proyek: ${namaProyek}
+- Jenis Kontrak: ${jenisKontrak}
+- Nilai Penawaran User: ${nilaiAwal}
+- Posisi User: ${posisi}
+- Kamu berperan sebagai: ${lawan}
+- Target penekanan harga owner/klien: ${targetDiskon}%
+
+Buka negosiasi dengan:
+1. Perkenalan posisi dan tujuan negosiasi
+2. Respons awal terhadap nilai penawaran (terlalu tinggi / perlu justifikasi)
+3. Tuntutan/permintaan pertama sebagai ${lawan}
+4. Minta penjelasan dari ${posisi}
+
+Respond JSON: {"pembuka": "dialog pembuka negosiasi (2-3 paragraf formal tapi tegas)"}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-negosiasi-harga start error:", e); res.status(500).json({ error: "Gagal memulai negosiasi." }); }
+  });
+
+  // ==================== G15: SIMULATOR NEGOSIASI HARGA — RESPOND ====================
+  app.post("/api/tools/simulator-negosiasi-harga/respond", async (req: any, res: any) => {
+    try {
+      const { posisi, lawan, jenisKontrak, nilaiAwal, targetDiskon, namaProyek, tawaran, messageCount } = req.body;
+      const isSelesai = messageCount >= 10;
+      const prompt = `Kamu adalah ${lawan} dalam negosiasi harga kontrak ${jenisKontrak} untuk proyek ${namaProyek}. Nilai awal penawaran ${posisi}: ${nilaiAwal}. Target penekanan: ${targetDiskon}%.
+Ini putaran ke-${messageCount}.
+
+Pernyataan/tawaran dari ${posisi}: "${tawaran}"
+
+${isSelesai ? `Ini putaran terakhir. Buat penutup negosiasi dan kesimpulan final.` : `Tanggapi dengan: counter-offer atau counter-argumen, permintaan data pendukung, atau tawaran kompromi. Tetap tegas namun profesional.`}
+
+Respond JSON:
+{
+  "respons": "dialog respons ${lawan} (2-3 paragraf)",
+  "label": "fase negosiasi saat ini (cth: Penawaran Balik / Permintaan Justifikasi / Titik Temu)",
+  "selesai": ${isSelesai}${isSelesai ? `,
+  "hasil": {
+    "nilaiDisepakati": "nilai kontrak yang disepakati atau 'Belum tercapai kesepakatan'",
+    "diskon": "persentase/nominal penekanan dari nilai awal",
+    "kondisi": ["kondisi tambahan yang disepakati 1", "kondisi 2", "kondisi 3"],
+    "evaluasi": "evaluasi singkat kemampuan negosiasi user"
+  }` : ""}
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-negosiasi-harga respond error:", e); res.status(500).json({ error: "Gagal merespons." }); }
+  });
+
+  // ==================== G15: PANDUAN SERTIFIKASI MIGAS ====================
+  app.post("/api/tools/panduan-sertifikasi-migas", async (req: any, res: any) => {
+    try {
+      const { jabatan, pengalaman, subsektor, pendidikan } = req.body;
+      const subsektorStr = Array.isArray(subsektor) ? subsektor.join(", ") : subsektor;
+      const prompt = `Kamu adalah konsultan sertifikasi tenaga ahli migas Indonesia berpengalaman. Buat PANDUAN SERTIFIKASI untuk:
+- Jabatan Target: ${jabatan}
+- Pengalaman Migas: ${pengalaman}
+- Subsektor: ${subsektorStr}
+- Latar Pendidikan: ${pendidikan}
+
+Mengacu pada: Permen ESDM No. 9 Tahun 2021 (SKK Migas), PP No. 23 Tahun 2010, KKNI bidang Migas, SNI sertifikasi kompetensi BNSP.
+
+Respond JSON:
+{
+  "ringkasan": "ringkasan kebutuhan sertifikasi untuk profil ini (2-3 kalimat)",
+  "estimasiWaktu": "estimasi total waktu proses",
+  "jalurSertifikasi": [
+    {"nama": "Nama Jalur Sertifikasi", "deskripsi": "penjelasan jalur", "regulasi": "regulasi dasar"}
+  ],
+  "persyaratan": [
+    {"kategori": "Dokumen Administrasi|Pengalaman Kerja|Pendidikan|Kompetensi Teknis", "items": ["persyaratan 1", "..."]}
+  ],
+  "prosedur": [
+    {"urutan": 1, "langkah": "nama langkah", "estimasiWaktu": "X minggu/bulan", "keterangan": "penjelasan detail"}
+  ],
+  "lembagaPenguji": [
+    {"nama": "nama lembaga", "jenis": "SKK Migas|BNSP|LSP|Asosiasi", "layanan": ["layanan 1", "..."]}
+  ],
+  "estimasiBiaya": [
+    {"komponen": "komponen biaya", "kisaran": "Rp X.XXX.XXX – Y.YYY.YYY"}
+  ],
+  "tips": ["tip 1 kelulusan", "tip 2", "tip 3", "tip 4"]
+}
+Min: jalur 3, persyaratan 4 kategori, prosedur 6 langkah, lembaga 3, biaya 5 komponen, tips 4.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-sertifikasi-migas error:", e); res.status(500).json({ error: "Gagal generate panduan." }); }
+  });
+
+  // ==================== G15: GENERATOR NOTULENSI ====================
+  app.post("/api/tools/generator-notulensi", async (req: any, res: any) => {
+    try {
+      const { jenisRapat, tanggal, tempat, dipimpin, notulis, peserta, agenda, poinDiskusi } = req.body;
+      const prompt = `Kamu adalah sekretaris/notulis profesional proyek konstruksi. Susun NOTULENSI RAPAT RESMI dari poin-poin diskusi berikut:
+
+Jenis Rapat: ${jenisRapat}
+Tanggal: ${tanggal || "sesuai konteks"}
+Tempat: ${tempat || "tidak disebutkan"}
+Dipimpin: ${dipimpin || "Pimpinan Rapat"}
+Notulis: ${notulis || "Notulis"}
+Peserta disebutkan: ${peserta || "sesuai konteks"}
+Agenda: ${agenda}
+
+Poin-Poin Diskusi:
+${poinDiskusi}
+
+Respond JSON:
+{
+  "header": {
+    "judul": "NOTULENSI ${jenisRapat || "RAPAT"}",
+    "tanggal": "${tanggal || "tanggal rapat"}",
+    "tempat": "${tempat || "tempat rapat"}",
+    "dipimpin": "${dipimpin || "Pimpinan Rapat"}",
+    "notulis": "${notulis || "Notulis"}"
+  },
+  "peserta": ["peserta 1 dengan jabatan", "peserta 2", "..."],
+  "agendaDibahas": [
+    {"agenda": "judul agenda", "pembahasan": "pembahasan rinci 2-3 kalimat", "kesimpulan": "kesimpulan poin ini"}
+  ],
+  "keputusan": ["keputusan rapat 1", "keputusan 2", "..."],
+  "actionItem": [
+    {"no": 1, "kegiatan": "deskripsi kegiatan yang harus dilakukan", "penanggungJawab": "nama/jabatan PIC", "target": "tanggal/deadline", "status": "Open"}
+  ],
+  "halLainnya": "hal lain yang perlu dicatat (jika ada, jika tidak kosongkan)",
+  "penutup": "kalimat penutup rapat formal"
+}
+Pastikan: peserta min 3, agenda dibahas sesuai poin diskusi, keputusan min 3, action item min 4.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-notulensi error:", e); res.status(500).json({ error: "Gagal generate notulensi." }); }
+  });
+
+  // ==================== G15: SIMULATOR SIDANG K3 — START ====================
+  app.post("/api/tools/simulator-sidang-k3/start", async (req: any, res: any) => {
+    try {
+      const { posisi, jenisPerlanggaran, tingkat, namaProyek } = req.body;
+      const prompt = `Kamu adalah Ketua Majelis Sidang K3/HSE yang berwenang dan tegas. Buka sidang pelanggaran K3:
+- Proyek: ${namaProyek}
+- Teradu / Pihak yang Diperiksa: ${posisi}
+- Jenis Pelanggaran: ${jenisPerlanggaran}
+- Tingkat Pelanggaran: ${tingkat}
+
+Buka sidang resmi dengan:
+1. Pembukaan formal sidang (waktu, tempat, agenda sidang)
+2. Hadirkan majelis (Ketua + 2 Anggota — ahli K3 & legal)
+3. Bacakan kronologi pelanggaran dan dasar hukum (Permenaker No.5/1996, PP 50/2012, UU K3 No.1/1970)
+4. Minta ${posisi} menyampaikan pembelaan/klarifikasi
+
+Respond JSON: {"pembuka": "pembukaan sidang K3 resmi dan formal (3-4 paragraf)"}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.5,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-sidang-k3 start error:", e); res.status(500).json({ error: "Gagal memulai sidang." }); }
+  });
+
+  // ==================== G15: SIMULATOR SIDANG K3 — RESPOND ====================
+  app.post("/api/tools/simulator-sidang-k3/respond", async (req: any, res: any) => {
+    try {
+      const { posisi, jenisPerlanggaran, tingkat, namaProyek, pernyataan, messageCount } = req.body;
+      const isSelesai = messageCount >= 10;
+      const prompt = `Kamu adalah Ketua Majelis Sidang K3 untuk kasus: ${jenisPerlanggaran} tingkat ${tingkat} di proyek ${namaProyek}. Teradu: ${posisi}.
+Ini pertanyaan/pernyataan ke-${messageCount}.
+
+Pernyataan/pembelaan dari ${posisi}: "${pernyataan}"
+
+${isSelesai ? "Ini pernyataan terakhir. Majelis bermusyawarah dan bacakan vonis final." : "Tanggapi pembelaan: ajukan pertanyaan kritis, hadirkan saksi/bukti dari majelis, atau minta klarifikasi lebih lanjut. Anggota majelis boleh menimpali."}
+
+Respond JSON:
+{
+  "respons": "respons ketua + anggota majelis (2-3 paragraf formal dan tegas)",
+  "label": "fase sidang (cth: Pemeriksaan Bukti / Pembelaan / Musyawarah Majelis / Pembacaan Vonis)",
+  "selesai": ${isSelesai}${isSelesai ? `,
+  "vonis": {
+    "putusan": "putusan resmi majelis sidang K3",
+    "sanksi": ["sanksi 1 yang dijatuhkan", "sanksi 2", "sanksi 3"],
+    "rekomendasi": ["rekomendasi perbaikan 1", "rekomendasi 2", "rekomendasi 3"],
+    "pelajaran": "pelajaran utama kasus ini untuk pencegahan di masa depan"
+  }` : ""}
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.5,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-sidang-k3 respond error:", e); res.status(500).json({ error: "Gagal merespons." }); }
+  });
+
   // ==================== G14: GENERATOR SURAT TEGURAN ====================
   app.post("/api/tools/generator-surat-teguran", async (req: any, res: any) => {
     try {
