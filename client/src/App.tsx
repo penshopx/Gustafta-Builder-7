@@ -286,6 +286,11 @@ import PanduanLimbahKonstruksi from "@/pages/panduan-limbah-konstruksi";
 import GeneratorLaporanKemajuan from "@/pages/generator-laporan-kemajuan";
 import KalkulatorCutFill from "@/pages/kalkulator-cut-fill";
 import PanduanSMK3Perusahaan from "@/pages/panduan-smk3-perusahaan";
+import KalkulatorDimensiKolomBalok from "@/pages/kalkulator-dimensi-kolom-balok";
+import PanduanPBJKonstruksi from "@/pages/panduan-pbj-konstruksi";
+import GeneratorNCRReport from "@/pages/generator-ncr-report";
+import SimulatorTesToriSKK from "@/pages/simulator-tes-teori-skk";
+import GeneratorBASTKonstruksi from "@/pages/generator-bast-konstruksi";
 import KalkulatorUpahSKK from "@/pages/kalkulator-upah-skk";
 import PanduanSIKISKK from "@/pages/panduan-siki-skk";
 import RencanaKarirSKK from "@/pages/rencana-karir-skk";
@@ -1398,6 +1403,11 @@ function Router() {
         <Route path="/generator-laporan-kemajuan" component={GeneratorLaporanKemajuan} />
         <Route path="/kalkulator-cut-fill" component={KalkulatorCutFill} />
         <Route path="/panduan-smk3-perusahaan" component={PanduanSMK3Perusahaan} />
+        <Route path="/kalkulator-dimensi-kolom-balok" component={KalkulatorDimensiKolomBalok} />
+        <Route path="/panduan-pbj-konstruksi" component={PanduanPBJKonstruksi} />
+        <Route path="/generator-ncr-report" component={GeneratorNCRReport} />
+        <Route path="/simulator-tes-teori-skk" component={SimulatorTesToriSKK} />
+        <Route path="/generator-bast-konstruksi" component={GeneratorBASTKonstruksi} />
       <Route component={NotFound} />
     </Switch>
   );

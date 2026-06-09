@@ -25334,5 +25334,224 @@ Balas hanya JSON valid.`;
     } catch (e: any) { console.error("smk3-perusahaan error:", e); res.status(500).json({ error: "Gagal generate panduan SMK3." }); }
   });
 
+  // ==================== G26: PANDUAN PBJ KONSTRUKSI ====================
+  app.post("/api/tools/panduan-pbj-konstruksi", async (req: any, res: any) => {
+    try {
+      const { jenisPengadaan, sumberDana, nilaiPagu, konteks } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah Ahli Pengadaan Barang/Jasa Pemerintah (PBJP) bersertifikat dan konsultan pengadaan konstruksi berpengalaman 20 tahun. Generate panduan pengadaan konstruksi yang komprehensif dan akurat.
+
+Jenis Pengadaan: ${jenisPengadaan}
+Sumber Dana: ${sumberDana}
+Nilai Pagu: ${nilaiPagu}
+Konteks: ${konteks || "Tidak ada konteks khusus"}
+
+Hasilkan JSON dengan struktur:
+{
+  "judulPanduan": "Judul panduan spesifik",
+  "metodePengadaan": "Nama metode yang tepat (Tender/Seleksi/Penunjukan Langsung/Pengadaan Langsung/E-Purchasing)",
+  "dasarHukum": ["Perpres 12/2021", "Perlem LKPP relevan", "regulasi teknis lain"],
+  "alasanMetode": "Alasan pemilihan metode berdasarkan nilai dan jenis",
+  "tahapPengadaan": [
+    {
+      "urutan": 1,
+      "nama": "Nama tahap",
+      "deskripsi": "Deskripsi 1-2 kalimat",
+      "durasi": "X hari kerja",
+      "dokumen": ["dokumen yang dihasilkan/dibutuhkan"],
+      "pihakBerwenang": "PPK/Pokja Pemilihan/Pejabat PBJ",
+      "referensiPasal": "Pasal X Perpres 12/2021"
+    }
+  ],
+  "dokumenPengadaan": [
+    {
+      "nama": "Nama dokumen",
+      "isi": ["Komponen isi utama"],
+      "pihakPembuat": "PPK/Pokja/Penyedia"
+    }
+  ],
+  "syaratPenyedia": [
+    {
+      "kategori": "Kualifikasi Teknis/Administrasi/Keuangan",
+      "syarat": ["syarat spesifik sesuai nilai dan jenis"]
+    }
+  ],
+  "evaluasiPenawaran": ["Metode evaluasi: sistem gugur/nilai/kualitas, bobot administrasi/teknis/harga"],
+  "kesalahanUmum": [
+    {
+      "kesalahan": "Kesalahan yang sering terjadi",
+      "dampak": "Dampak: gugur/sanksi/audit",
+      "pencegahan": "Langkah pencegahan konkret"
+    }
+  ],
+  "jadwalEstimasi": "Total estimasi waktu proses",
+  "catatanPenting": ["catatan khusus untuk konteks ini"]
+}
+Hasilkan JSON valid, komprehensif, sesuai regulasi terbaru 2024-2025.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 3000 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("pbj-konstruksi error:", e); res.status(500).json({ error: "Gagal generate panduan PBJ." }); }
+  });
+
+  // ==================== G26: GENERATOR NCR REPORT ====================
+  app.post("/api/tools/generator-ncr-report", async (req: any, res: any) => {
+    try {
+      const { jenisTemuan, standarAcuan, lokasiPekerjaan, deskripsiSingkat } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const tanggalHari = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+      const prompt = `Kamu adalah Lead Auditor ISO 9001/ISO 45001/CSMS dengan pengalaman 15 tahun dalam audit konstruksi. Generate NCR/CAR Report formal yang profesional dan sesuai standar audit internasional.
+
+Jenis Temuan: ${jenisTemuan}
+Standar Acuan: ${standarAcuan}
+Lokasi: ${lokasiPekerjaan || "Area konstruksi proyek"}
+Deskripsi: ${deskripsiSingkat || "Ketidaksesuaian ditemukan saat inspeksi rutin"}
+Tanggal Hari Ini: ${tanggalHari}
+
+Hasilkan JSON NCR Report formal:
+{
+  "nomorNCR": "NCR-[tahun]-[bulan]-[nomor 3 digit]",
+  "tanggalTemuan": "${tanggalHari}",
+  "judulNCR": "Judul NCR singkat dan spesifik",
+  "jenisKetidaksesuaian": "NCR Major / NCR Minor / OFI / Observation",
+  "standar": "${standarAcuan}",
+  "klausulDilanggar": "Klausul/pasal/elemen spesifik yang dilanggar",
+  "deskripsiTemuan": "Deskripsi rinci 3-4 kalimat tentang apa yang ditemukan",
+  "buktiObjektif": ["4-5 bukti objektif konkret dan terukur"],
+  "lokasiTemuan": "Lokasi spesifik temuan",
+  "picAuditee": "Jabatan yang bertanggung jawab (bukan nama orang)",
+  "picAuditor": "Lead Auditor / Quality Inspector",
+  "dampakPotensial": "Dampak jika tidak ditangani (struktural/keselamatan/mutu/kontraktual)",
+  "analisisAkarMasalah": {
+    "metode": "5-Why Analysis / Fishbone Diagram",
+    "hasilAnalisis": ["5-6 poin hasil analisis akar masalah secara bertingkat"]
+  },
+  "tindakanPerbaikan": [
+    {
+      "tindakan": "Tindakan konkret dan terukur",
+      "penanggungjawab": "Jabatan PIC",
+      "deadline": "X hari kerja / tanggal estimasi"
+    }
+  ],
+  "tindakanPencegahan": ["4-5 tindakan sistemik untuk mencegah terulang"],
+  "verifikasi": [
+    {
+      "item": "Item yang diverifikasi",
+      "metode": "Metode verifikasi (inspeksi/uji/audit ulang/dokumen)",
+      "batas": "Batas waktu verifikasi"
+    }
+  ],
+  "statusNCR": "OPEN — Menunggu Tindakan Perbaikan",
+  "catatanPenting": ["catatan penting untuk penanganan NCR ini"]
+}
+Hasilkan JSON valid dan profesional.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 2500 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("ncr-report error:", e); res.status(500).json({ error: "Gagal generate NCR Report." }); }
+  });
+
+  // ==================== G26: SIMULATOR TES TEORI SKK ====================
+  app.post("/api/tools/simulator-tes-teori-skk", async (req: any, res: any) => {
+    try {
+      const { jabatan, topik, jumlahSoal } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah penyusun soal ujian teori SKK (Sertifikat Kompetensi Kerja) Konstruksi yang berpengalaman. Buat bank soal pilihan ganda yang akurat, relevan, dan bervariasi tingkat kesulitan untuk ujian SKK.
+
+Jabatan: ${jabatan}
+Topik: ${topik}
+Jumlah Soal: ${jumlahSoal}
+
+Hasilkan JSON:
+{
+  "soalList": [
+    {
+      "nomor": 1,
+      "pertanyaan": "Pertanyaan jelas dan spesifik sesuai kompetensi jabatan",
+      "pilihan": {
+        "a": "Pilihan A",
+        "b": "Pilihan B",
+        "c": "Pilihan C",
+        "d": "Pilihan D"
+      },
+      "kunciJawaban": "a/b/c/d",
+      "penjelasan": "Penjelasan singkat mengapa jawaban ini benar, referensi regulasi/standar jika ada",
+      "topik": "Sub-topik soal ini",
+      "tingkatKesulitan": "Mudah/Sedang/Sulit"
+    }
+  ]
+}
+
+ATURAN SOAL:
+- Buat tepat ${jumlahSoal} soal
+- Setiap soal harus relevan langsung dengan tugas dan tanggung jawab jabatan ${jabatan}
+- Topik: ${topik === "Semua topik (campuran)" ? "Variasikan: K3, teknik, regulasi, metode kerja, administrasi, alat" : topik}
+- Tingkat kesulitan: campurkan Mudah (30%), Sedang (50%), Sulit (20%)
+- Pilihan jawaban harus plausibel — jangan terlalu obvious
+- Kunci jawaban distribusi: jangan semua A atau B — variasikan
+- Penjelasan singkat tapi informatif (1-2 kalimat + referensi SNI/Perlem/PP jika relevan)
+- Hindari pertanyaan trivial atau terlalu umum
+Hasilkan JSON valid dengan tepat ${jumlahSoal} soal.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 4000 });
+      const data = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ soalList: data.soalList || [] });
+    } catch (e: any) { console.error("simulator-tes-teori-skk error:", e); res.status(500).json({ error: "Gagal generate soal ujian." }); }
+  });
+
+  // ==================== G26: GENERATOR BAST KONSTRUKSI ====================
+  app.post("/api/tools/generator-bast-konstruksi", async (req: any, res: any) => {
+    try {
+      const { jenisBAST, jenisProyek, namaProyek, nilaiKontrak, sumberAnggaran, keterangan } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const tanggalHari = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+      const prompt = `Kamu adalah konsultan MK (Manajemen Konstruksi) dan ahli administrasi kontrak konstruksi berpengalaman 20 tahun. Generate Berita Acara Serah Terima (BAST) konstruksi yang formal, lengkap, dan sah secara hukum.
+
+Jenis BAST: ${jenisBAST}
+Jenis Proyek: ${jenisProyek}
+Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+Nilai Kontrak: ${nilaiKontrak ? `Rp ${nilaiKontrak}` : "sesuai kontrak"}
+Sumber Anggaran: ${sumberAnggaran}
+Keterangan Tambahan: ${keterangan || "Tidak ada"}
+Tanggal: ${tanggalHari}
+
+Hasilkan JSON BAST formal:
+{
+  "nomorBAST": "BAST-[kode proyek]-[bulan]-[tahun]",
+  "tanggal": "${tanggalHari}",
+  "judulBAST": "BERITA ACARA SERAH TERIMA — [jenis singkat]",
+  "pihakYangMenyerahkan": "Jabatan + Perusahaan (contoh: Direktur Utama PT Kontraktor Utama)",
+  "pihakYangMenerima": "Jabatan + Instansi (contoh: PPK Satker Kementerian PUPR / Direktur PT Owner)",
+  "dasar": ["Kontrak nomor dan tanggal", "regulasi terkait sesuai sumber dana"],
+  "uraianPekerjaan": "Deskripsi singkat pekerjaan yang diserahterimakan",
+  "nilaiKontrak": "${nilaiKontrak ? `Rp ${nilaiKontrak}` : "sesuai kontrak"}",
+  "realisasiPekerjaan": "100% selesai / persentase parsial",
+  "daftarPemeriksaan": [
+    {
+      "item": "Item yang diperiksa (spesifik sesuai jenis proyek)",
+      "kondisi": "Kondisi aktual",
+      "keterangan": "Catatan atau pengukuran",
+      "status": "Sesuai"
+    }
+  ],
+  "catatanTemuan": ["temuan minor jika ada, atau kosong array []"],
+  "kewajibanMasaPemeliharaan": ["kewajiban spesifik selama masa pemeliharaan sesuai kontrak"],
+  "dokumenYangDiserahkan": ["As-Built Drawing", "Manual O&M", "sertifikat material", "dokumen lain sesuai jenis proyek"],
+  "pernyataanPenerimaan": "Kalimat formal penerimaan pekerjaan oleh Pihak II",
+  "syaratDanKetentuan": ["syarat pasca serah terima"],
+  "penutup": "Paragraf penutup formal BAST"
+}
+
+Buat daftar pemeriksaan 8-12 item yang spesifik untuk ${jenisProyek}. Status: "Sesuai", "Perlu Perbaikan", atau "N/A".
+Hasilkan JSON valid dan profesional.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 2500 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("bast-konstruksi error:", e); res.status(500).json({ error: "Gagal generate BAST." }); }
+  });
+
   return httpServer;
 }
