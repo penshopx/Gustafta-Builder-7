@@ -212,6 +212,11 @@ import GeneratorJadwalMobilisasi from "@/pages/generator-jadwal-mobilisasi";
 import PanduanCSMSKontraktor from "@/pages/panduan-csms-kontraktor";
 import GeneratorLaporanAudit from "@/pages/generator-laporan-audit";
 import SimulatorForemanK3 from "@/pages/simulator-foreman-k3";
+import KalkulatorBetonReadymix from "@/pages/kalkulator-beton-readymix";
+import GeneratorMethodStatement from "@/pages/generator-method-statement";
+import GeneratorWorkPermit from "@/pages/generator-work-permit";
+import GeneratorRisalahRapat from "@/pages/generator-risalah-rapat";
+import SimulatorWawancaraSKK from "@/pages/simulator-wawancara-skk";
 import GeneratorSuratKuasa from "@/pages/generator-surat-kuasa";
 import KalkulatorMaterialBeton from "@/pages/kalkulator-material-beton";
 import PanduanManajemenRisiko from "@/pages/panduan-manajemen-risiko";
@@ -1273,6 +1278,11 @@ function Router() {
         <Route path="/panduan-csms-kontraktor" component={PanduanCSMSKontraktor} />
         <Route path="/generator-laporan-audit" component={GeneratorLaporanAudit} />
         <Route path="/simulator-foreman-k3" component={SimulatorForemanK3} />
+        <Route path="/kalkulator-beton-readymix" component={KalkulatorBetonReadymix} />
+        <Route path="/generator-method-statement" component={GeneratorMethodStatement} />
+        <Route path="/generator-work-permit" component={GeneratorWorkPermit} />
+        <Route path="/generator-risalah-rapat" component={GeneratorRisalahRapat} />
+        <Route path="/simulator-wawancara-skk" component={SimulatorWawancaraSKK} />
         <Route path="/generator-surat-kuasa" component={GeneratorSuratKuasa} />
         <Route path="/kalkulator-material-beton" component={KalkulatorMaterialBeton} />
         <Route path="/panduan-manajemen-risiko" component={PanduanManajemenRisiko} />

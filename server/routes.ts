@@ -20380,6 +20380,256 @@ JSON:
     } catch (e: any) { console.error("simulator-foreman-k3 error:", e); res.status(500).json({ error: "Gagal memproses sesi simulator." }); }
   });
 
+  // ==================== G20: GENERATOR METHOD STATEMENT ====================
+  app.post("/api/tools/method-statement", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, namaProyek, lokasi, volume, durasi, risikoLevel, spesifikasi } = req.body;
+      const prompt = `Kamu adalah Senior Construction Manager / Method Engineer berpengalaman >15 tahun. Buat METHOD STATEMENT (Metode Kerja) formal untuk:
+- Jenis Pekerjaan: ${jenisPekerjaan}
+- Nama Proyek: ${namaProyek}
+- Lokasi: ${lokasi || "Indonesia"}
+- Volume/Kuantitas: ${volume || "sesuai kontrak"}
+- Durasi Pelaksanaan: ${durasi || "sesuai jadwal proyek"}
+- Level Risiko Site: ${risikoLevel}
+- Spesifikasi Khusus: ${spesifikasi || "standar SNI"}
+
+Buat method statement FORMAL dan KOMPREHENSIF dalam format JSON:
+{
+  "judul": "Method Statement: ${jenisPekerjaan} — [nama proyek singkat]",
+  "lingkupPekerjaan": "deskripsi 3–4 kalimat lingkup pekerjaan yang akan dilaksanakan",
+  "tujuanDanAcuan": [
+    "tujuan 1: memastikan kualitas pekerjaan sesuai spesifikasi",
+    "acuan: SNI/Permen PUPR/standar relevan (sebutkan nomor spesifik)",
+    "4–6 item tujuan dan referensi regulasi spesifik"
+  ],
+  "personelDanPeralatan": [
+    {"jabatan": "Project Manager", "tugas": "koordinasi dan pengawasan keseluruhan"},
+    {"jabatan": "Site Engineer", "tugas": "pengawasan teknis dan shop drawing"},
+    sesuaikan 6–10 personel + alat berat/alat kerja kritis untuk jenis pekerjaan ini
+  ],
+  "tahapanPekerjaan": [
+    {"urutan": 1, "aktivitas": "nama aktivitas", "durasi": "X hari/jam", "pic": "jabatan PIC", "catatan": "catatan teknis penting, syarat, atau persyaratan khusus"},
+    buat 8–12 tahapan BERURUTAN dan LOGIS sesuai jenis pekerjaan
+  ],
+  "k3DanLingkungan": [
+    "identifikasi bahaya spesifik pekerjaan ini",
+    "APD wajib yang relevan",
+    "prosedur keselamatan spesifik",
+    "pengelolaan limbah/dampak lingkungan",
+    8–10 poin K3 dan lingkungan yang RELEVAN dengan jenis pekerjaan ini
+  ],
+  "qcDanInspeksi": [
+    {"tahap": "nama tahap inspeksi", "parameter": "parameter yang diukur", "alat": "alat ukur/uji", "frekuensi": "setiap X unit/hari/dll"},
+    buat 5–7 checkpoint QC sesuai jenis pekerjaan
+  ],
+  "contingency": [
+    "skenario risiko 1 — tindakan mitigasi/respons",
+    "skenario risiko 2 — tindakan mitigasi/respons",
+    5–7 contingency plan untuk risiko spesifik pekerjaan ini
+  ],
+  "kesimpulan": "pernyataan komitmen pelaksanaan 2–3 kalimat"
+}
+Sesuaikan SEMUA isi dengan jenis pekerjaan spesifik. Buat REALISTIS dan dapat langsung digunakan di lapangan.`;
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      res.json({ hasil: JSON.parse(completion.choices[0].message.content || "{}") });
+    } catch (e: any) { console.error("method-statement error:", e); res.status(500).json({ error: "Gagal generate method statement." }); }
+  });
+
+  // ==================== G20: GENERATOR WORK PERMIT & JSA ====================
+  app.post("/api/tools/work-permit", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, namaProyek, lokasi, tanggal, pelaksana, tipeOutput, kondisiKhusus } = req.body;
+      const prompt = `Kamu adalah HSE Manager / Safety Officer senior bersertifikat K3 Umum KEMNAKER. Buat WORK PERMIT (Izin Kerja) dan JSA formal untuk:
+- Jenis Pekerjaan Berisiko: ${jenisPekerjaan}
+- Nama Proyek: ${namaProyek}
+- Lokasi/Area Kerja: ${lokasi || "site proyek"}
+- Tanggal Kerja: ${tanggal || "sesuai rencana"}
+- Pelaksana: ${pelaksana || "tim kontraktor"}
+- Tipe Output: ${tipeOutput}
+- Kondisi Khusus: ${kondisiKhusus || "kondisi normal"}
+
+Buat dalam format JSON:
+{
+  "judul": "Izin Kerja — ${jenisPekerjaan}",
+  "nomorPermit": "WP-[tahun]-[nomor unik 3 digit]",
+  "lingkupPekerjaan": "deskripsi 2–3 kalimat pekerjaan yang akan dilaksanakan",
+  "persyaratanIzin": [
+    "syarat 1: inspeksi area kerja sebelum mulai",
+    "syarat 2: briefing K3 kepada seluruh pekerja",
+    8–10 persyaratan SPESIFIK untuk jenis pekerjaan ini (bukan umum)
+  ],
+  "apd": [
+    "APD wajib 1 spesifikasi teknis (cth: Harness full body EN 361 + lanyard double hook)",
+    "APD wajib 2",
+    6–10 APD SPESIFIK untuk jenis pekerjaan ini
+  ],
+  "jsaSteps": [
+    {
+      "langkah": "nama langkah kerja",
+      "bahaya": ["bahaya fisik/kimia/ergonomi/dll yang spesifik"],
+      "risikoAwal": "Tinggi/Sedang/Rendah/Ekstrim",
+      "pengendalian": ["tindakan pengendalian hierarki: eliminasi/substitusi/engineering/admin/APD"],
+      "risikoSisa": "Sedang/Rendah",
+      "pic": "jabatan yang bertanggung jawab"
+    },
+    buat 6–8 langkah JSA yang LOGIS dan BERURUTAN untuk jenis pekerjaan ini
+  ],
+  "emergencyProcedure": [
+    "hubungi nomor darurat: HSE Officer ext. 119 / ambulance 118 / pemadam 113",
+    "prosedur evakuasi spesifik untuk area kerja ini",
+    6–8 prosedur darurat yang RELEVAN dengan jenis pekerjaan
+  ],
+  "persetujuan": [
+    {"jabatan": "Pemohon / Supervisor", "kewenangan": "Mengajukan & bertanggung jawab pekerjaan"},
+    {"jabatan": "HSE Officer", "kewenangan": "Verifikasi risiko & persyaratan K3"},
+    {"jabatan": "Site Manager", "kewenangan": "Menyetujui izin kerja"},
+    tambahkan jabatan approval lain yang relevan (max 5)
+  ],
+  "validitasIzin": "tanggal dan jam mulai s/d berakhir yang realistis",
+  "catatanKhusus": "catatan kondisi khusus atau persyaratan tambahan yang spesifik"
+}
+Buat REALISTIS dan sesuai standar industri Indonesia (Permenaker 9/2016 untuk working at height, Kepmen 187 untuk B3, dll).`;
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      res.json({ hasil: JSON.parse(completion.choices[0].message.content || "{}") });
+    } catch (e: any) { console.error("work-permit error:", e); res.status(500).json({ error: "Gagal generate work permit." }); }
+  });
+
+  // ==================== G20: GENERATOR RISALAH RAPAT ====================
+  app.post("/api/tools/risalah-rapat", async (req: any, res: any) => {
+    try {
+      const { jenisRapat, namaProyek, tanggal, tempat, peserta, agendaList, konteks } = req.body;
+      const agendaItems = (agendaList || "").split("\n").filter((a: string) => a.trim()).map((a: string, i: number) => `${i + 1}. ${a.trim()}`).join("\n");
+      const prompt = `Kamu adalah Notulis Profesional yang berpengalaman dalam rapat-rapat proyek konstruksi Indonesia. Buat RISALAH RAPAT formal untuk:
+- Jenis Rapat: ${jenisRapat}
+- Nama Proyek: ${namaProyek}
+- Tanggal: ${tanggal || "sesuai tanggal rapat"}
+- Tempat: ${tempat || "Direksi Keet"}
+- Peserta: ${peserta || "Tim Proyek"}
+- Agenda Rapat:
+${agendaItems || "1. Koordinasi umum proyek"}
+- Konteks / Isu yang Dibahas: ${konteks || "koordinasi rutin proyek"}
+
+Buat RISALAH RAPAT lengkap dalam format JSON:
+{
+  "judulRapat": "${jenisRapat} — ${namaProyek}",
+  "ringkasan": "ringkasan 1 kalimat hasil rapat",
+  "pembukaanRapat": "narasi pembukaan rapat: dibuka oleh siapa, jam berapa, agenda utama yang akan dibahas (2–3 kalimat formal)",
+  "notulensiPerAgenda": [
+    {
+      "agenda": "judul agenda persis dari daftar di atas",
+      "pembahasan": "narasi pembahasan 2–3 kalimat — apa yang dibahas, masalah yang muncul, informasi yang disampaikan",
+      "keputusan": "keputusan/kesepakatan yang diambil dalam rapat untuk agenda ini (kalimat tegas)"
+    },
+    buat untuk SETIAP agenda yang ada di daftar, sesuaikan dengan konteks yang diberikan
+  ],
+  "actionItems": [
+    {"no": 1, "kegiatan": "nama tindakan yang harus dilakukan", "pic": "nama/jabatan yang bertanggung jawab", "deadline": "tanggal atau waktu deadline", "status": "Open"},
+    buat 5–8 action items KONKRET dan terukur berdasarkan pembahasan agenda
+  ],
+  "penutup": "narasi penutup: jam penutupan, ucapan terima kasih, pengingat rapat berikutnya (2 kalimat formal)",
+  "distribusiKepada": ["Owner/MK", "Project Manager", "Site Manager", "QS", "HSE", sesuaikan dengan peserta yang disebutkan]
+}
+Buat FORMAL, PROFESIONAL, dan sesuai standar notulensi rapat proyek konstruksi Indonesia.`;
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      res.json({ hasil: JSON.parse(completion.choices[0].message.content || "{}") });
+    } catch (e: any) { console.error("risalah-rapat error:", e); res.status(500).json({ error: "Gagal generate risalah rapat." }); }
+  });
+
+  // ==================== G20: SIMULATOR WAWANCARA SKK ====================
+  app.post("/api/tools/wawancara-skk", async (req: any, res: any) => {
+    try {
+      const { action, jabatan, fokus, totalSoal, nomorSoal, pertanyaan, jawaban, riwayat } = req.body;
+
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+
+      if (action === "start") {
+        const prompt = `Kamu adalah Asesor SKK berlisensi BNSP yang berpengalaman melakukan asesmen kompetensi tenaga konstruksi Indonesia. Kamu akan menguji kandidat untuk: ${jabatan}. Fokus topik: ${fokus}.
+
+Siapkan sesi wawancara dan buat pertanyaan PERTAMA. Respond JSON:
+{
+  "intro": "sambutan formal assesor 2–3 kalimat: perkenalan, tujuan asesmen, jabatan yang diuji, aturan wawancara (jawab berdasarkan pengalaman & pengetahuan, tidak ada jawaban mutlak benar/salah)",
+  "pertanyaan": {
+    "nomor": 1,
+    "pertanyaan": "pertanyaan situasional yang SPESIFIK dan RELEVAN untuk ${jabatan} — berbasis kasus nyata lapangan atau skenario pekerjaan",
+    "konteks": "konteks situasi (opsional, bisa kosong string): misalnya 'Bayangkan Anda sebagai [jabatan] di proyek pembangunan gedung 8 lantai di Jakarta...'",
+    "unitKompetensi": "nama unit kompetensi SKKNI yang diuji (cth: 'Merencanakan Pekerjaan Konstruksi')"
+  }
+}`;
+        const completion = await client.chat.completions.create({
+          model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+          response_format: { type: "json_object" }, max_tokens: 800,
+        });
+        return res.json(JSON.parse(completion.choices[0].message.content || "{}"));
+      }
+
+      if (action === "answer" || action === "finish") {
+        const riwayatText = (riwayat || []).map((r: any) => `Soal ${r.nomor}: "${r.pertanyaan}" | Jawaban: "${r.jawaban}" | Skor: ${r.skor}/4`).join("\n");
+        const evalPrompt = `Kamu adalah Asesor SKK berlisensi BNSP. Sedang menguji: ${jabatan}.
+
+Pertanyaan yang diajukan (Soal ${nomorSoal}/${totalSoal}):
+"${pertanyaan?.pertanyaan}"
+Unit Kompetensi: ${pertanyaan?.unitKompetensi}
+
+Jawaban kandidat:
+"${jawaban}"
+
+Riwayat soal sebelumnya:
+${riwayatText || "(ini soal pertama)"}
+
+${action === "finish" ? `Ini adalah soal TERAKHIR. Selain evaluasi, buat juga hasilAkhir.` : `Buat juga pertanyaan berikutnya (soal ${(nomorSoal || 1) + 1}/${totalSoal}).`}
+
+Respond JSON:
+{
+  "evaluasi": {
+    "skor": [1-4, dimana: 1=Tidak Kompeten, 2=Kurang Kompeten, 3=Cukup Kompeten, 4=Sangat Kompeten],
+    "predikat": "Sangat Kompeten / Cukup Kompeten / Kurang Kompeten / Tidak Kompeten",
+    "kelebihan": "apa yang baik dari jawaban ini (1 kalimat, kosong jika skor 1)",
+    "kekurangan": "apa yang kurang/perlu diperbaiki (1 kalimat, kosong jika skor 4)",
+    "jawabanIdeal": "jawaban ideal komprehensif 2–3 kalimat berbasis SKKNI dan praktik terbaik",
+    "referensi": "referensi regulasi/standar relevan (SNI/Permen/SKKNI)"
+  }${action === "finish" ? `,
+  "hasilAkhir": {
+    "totalSkor": [rata-rata skor semua soal termasuk soal ini, 1 desimal],
+    "predikat": "Kompeten / Kompeten Bersyarat / Belum Kompeten",
+    "ringkasan": "ringkasan 2–3 kalimat hasil keseluruhan asesmen, spesifik untuk ${jabatan}",
+    "rekomendasiPengembangan": ["3–4 rekomendasi konkret pengembangan kompetensi"],
+    "unitKompetensiKuat": ["2–3 unit kompetensi yang sudah baik berdasarkan jawaban"],
+    "unitKompetensiPerluPerbaikan": ["2–3 unit kompetensi yang perlu ditingkatkan"]
+  }` : `,
+  "pertanyaanBerikutnya": {
+    "nomor": ${(nomorSoal || 1) + 1},
+    "pertanyaan": "pertanyaan situasional BERBEDA dari sebelumnya untuk ${jabatan} — fokus: ${fokus}",
+    "konteks": "konteks situasi spesifik (bisa kosong string)",
+    "unitKompetensi": "nama unit kompetensi SKKNI yang berbeda dari soal sebelumnya"
+  }`}
+}`;
+        const completion = await client.chat.completions.create({
+          model: "gpt-4o-mini", messages: [{ role: "user", content: evalPrompt }],
+          response_format: { type: "json_object" }, max_tokens: 1200,
+        });
+        return res.json(JSON.parse(completion.choices[0].message.content || "{}"));
+      }
+
+      res.status(400).json({ error: "Action tidak valid." });
+    } catch (e: any) { console.error("wawancara-skk error:", e); res.status(500).json({ error: "Gagal memproses sesi wawancara." }); }
+  });
+
   // ==================== G17: GENERATOR SURAT KUASA ====================
   app.post("/api/tools/generator-surat-kuasa", async (req: any, res: any) => {
     try {
