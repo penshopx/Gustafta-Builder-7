@@ -19666,6 +19666,151 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS G8: PANDUAN FRESH GRADUATE SKK ====================
+  app.post("/api/tools/panduan-fresh-graduate-skk", async (req: any, res: any) => {
+    try {
+      const { jurusan, ipk, pengalaman } = req.body;
+      if (!jurusan) return res.status(400).json({ error: "Jurusan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan karir konstruksi Indonesia yang ahli membantu fresh graduate meraih SKK pertama.
+
+Profil: Jurusan ${jurusan}, IPK ${ipk}, Pengalaman: ${pengalaman}
+
+Kembalikan JSON PERSIS:
+{
+  "jurusan": "${jurusan}",
+  "ringkasan": "ringkasan 2 kalimat: peluang dan jalur realistis untuk profil ini",
+  "jabatanYangRealistis": [
+    {
+      "jabatan": "nama jabatan SKK yang realistis untuk profil ini",
+      "alasan": "mengapa jabatan ini cocok dan realistis untuk lulusan ${jurusan} dengan pengalaman ${pengalaman}",
+      "persyaratanMinimal": "persyaratan pendidikan dan pengalaman minimal sesuai regulasi BNSP/LPJK",
+      "jalurCepat": "cara konkret fresh graduate bisa memenuhi persyaratan menggunakan RPL atau magang",
+      "estimasiWaktu": "estimasi waktu dari sekarang hingga dapat sertifikat"
+    }
+  ],
+  "strategiRPL": [
+    { "tips": "strategi RPL konkret untuk profil ini", "contoh": "contoh bukti atau dokumen yang bisa digunakan" }
+  ],
+  "langkahPertama": [
+    { "langkah": "nama langkah", "detail": "apa yang harus dilakukan secara konkret", "waktu": "estimasi waktu langkah ini" }
+  ],
+  "kesalahanUmum": ["5-6 kesalahan umum fresh graduate dalam mengejar SKK pertama — konkret dan actionable"],
+  "motivasi": "1 kalimat motivasi spesifik untuk jurusan ${jurusan} yang ingin berkarir di konstruksi"
+}
+
+Berikan 3 jabatan yang paling realistis dan reachable. Strategi RPL harus konkret memanfaatkan magang/KP. Langkah pertama harus 5-6 langkah berurutan.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-fresh-graduate error:", e); res.status(500).json({ error: "Gagal generate panduan." }); }
+  });
+
+  // ==================== AI TOOLS G8: PANDUAN SKK JASA KONSULTANSI ====================
+  app.post("/api/tools/panduan-skk-jasa-konsultansi", async (req: any, res: any) => {
+    try {
+      const { bidang, skala } = req.body;
+      if (!bidang) return res.status(400).json({ error: "Bidang wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan regulasi konstruksi Indonesia yang ahli tentang persyaratan SKK untuk BUJK jasa konsultansi.
+
+Bidang: ${bidang}
+Skala: ${skala}
+
+Kembalikan JSON PERSIS:
+{
+  "bidang": "${bidang}",
+  "skala": "${skala}",
+  "ringkasan": "ringkasan 2 kalimat persyaratan SKK untuk bidang dan skala ini",
+  "jabatanSKKWajib": [
+    {
+      "jabatan": "nama jabatan SKK yang wajib dimiliki",
+      "jumlahMinimal": 1,
+      "alasan": "mengapa jabatan ini wajib untuk ${bidang} skala ${skala}",
+      "alternatif": "jika ada jabatan SKK alternatif yang bisa menggantikan"
+    }
+  ],
+  "jabatanSKKDisarankan": [
+    { "jabatan": "nama jabatan yang disarankan (tidak wajib)", "manfaat": "manfaat konkret jika dimiliki" }
+  ],
+  "persyaratanBUJK": [
+    {
+      "persyaratan": "nama persyaratan",
+      "detail": "penjelasan detail persyaratan ini untuk ${bidang}",
+      "dokumen": "dokumen yang dibutuhkan untuk membuktikan persyaratan ini"
+    }
+  ],
+  "tipsJasaKonsultansi": ["6-7 tips spesifik untuk membangun dan mempertahankan kualifikasi SKK di bidang konsultansi"],
+  "perbedaanDenganKontraktor": ["4-5 perbedaan kunci persyaratan SKK jasa konsultansi vs kontraktor"],
+  "estimasiBiayaSetup": [
+    { "komponen": "nama komponen biaya", "estimasi": "Rp X–Y juta", "catatan": "catatan" }
+  ]
+}
+
+Berikan 2-3 jabatan wajib, 3-4 yang disarankan, 4-5 persyaratan BUJK, dan 3-4 komponen biaya setup.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-konsultansi error:", e); res.status(500).json({ error: "Gagal generate panduan." }); }
+  });
+
+  // ==================== AI TOOLS G8: GENERATOR SOP K3 PROYEK ====================
+  app.post("/api/tools/generator-sop-k3-proyek", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, aktivitas, skala, namaProyek } = req.body;
+      if (!jenisProyek || !aktivitas?.length) return res.status(400).json({ error: "Jenis proyek dan aktivitas wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah Ahli K3 Konstruksi Utama yang membuat SOP K3 profesional untuk proyek konstruksi Indonesia.
+
+Jenis Proyek: ${jenisProyek}
+Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+Skala: ${skala}
+Aktivitas berisiko tinggi yang harus dicakup: ${aktivitas.join(", ")}
+
+Kembalikan JSON PERSIS:
+{
+  "judulSOP": "judul SOP K3 yang spesifik",
+  "jenisProyek": "${jenisProyek}",
+  "nomorDokumen": "SOP-K3-001/[TAHUN]",
+  "tanggalEfektif": "[tanggal berlaku]",
+  "ringkasan": "ringkasan singkat isi SOP",
+  "ruangLingkup": "ruang lingkup penerapan SOP ini",
+  "definisi": [{ "istilah": "singkatan/istilah", "arti": "definisi" }],
+  "seksiList": [
+    {
+      "nomor": "1.0",
+      "judul": "judul seksi (satu per aktivitas berisiko + seksi umum)",
+      "tujuan": "tujuan seksi ini",
+      "prosedur": [
+        {
+          "langkah": "langkah prosedur yang konkret dan operasional",
+          "penanggungJawab": "HSE Officer / Site Manager / Mandor / dll",
+          "alat": "APD atau alat yang wajib digunakan"
+        }
+      ],
+      "formulirTerkait": ["nama formulir K3 yang harus diisi"]
+    }
+  ],
+  "indikatorKepatuhan": ["4-5 indikator yang menunjukkan SOP dijalankan dengan benar"],
+  "referensiRegulasi": ["regulasi K3 Indonesia yang relevan — PP, Permen, SNI, standar lain"]
+}
+
+Buat seksi untuk SETIAP aktivitas yang diminta plus 1 seksi umum. Setiap seksi harus punya 4-6 langkah prosedur konkret. Referensi regulasi harus nyata (Permenaker, PP 50/2012, SNI, dll). 4-5 definisi penting.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 4000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-sop-k3 error:", e); res.status(500).json({ error: "Gagal generate SOP." }); }
+  });
+
   // ==================== AI TOOLS G7: CHECKER KESIAPAN ASESMEN ====================
   app.post("/api/tools/checker-kesiapan-asesmen", async (req: any, res: any) => {
     try {

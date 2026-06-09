@@ -192,6 +192,11 @@ import KalkulatorCPD from "@/pages/kalkulator-cpd";
 import EvaluasiPortofolio from "@/pages/evaluasi-portofolio";
 import GeneratorCVSKK from "@/pages/generator-cv-skk";
 import MateriBelajarSKK from "@/pages/materi-belajar-skk";
+import EstimatorBiayaSertifikasi from "@/pages/estimator-biaya-sertifikasi";
+import PanduanFreshGraduateSKK from "@/pages/panduan-fresh-graduate-skk";
+import TrackerCPDMandiri from "@/pages/tracker-cpd-mandiri";
+import PanduanSKKJasaKonsultansi from "@/pages/panduan-skk-jasa-konsultansi";
+import GeneratorSOPK3Proyek from "@/pages/generator-sop-k3-proyek";
 import CheckerKesiapanAsesmen from "@/pages/checker-kesiapan-asesmen";
 import PanduanPemilihanLSP from "@/pages/panduan-pemilihan-lsp";
 import KalkulatorManfaatSKKBUJK from "@/pages/kalkulator-manfaat-skk-bujk";
@@ -1195,6 +1200,11 @@ function Router() {
         <Route path="/evaluasi-portofolio" component={EvaluasiPortofolio} />
         <Route path="/generator-cv-skk" component={GeneratorCVSKK} />
         <Route path="/materi-belajar-skk" component={MateriBelajarSKK} />
+        <Route path="/estimator-biaya-sertifikasi" component={EstimatorBiayaSertifikasi} />
+        <Route path="/panduan-fresh-graduate-skk" component={PanduanFreshGraduateSKK} />
+        <Route path="/tracker-cpd-mandiri" component={TrackerCPDMandiri} />
+        <Route path="/panduan-skk-jasa-konsultansi" component={PanduanSKKJasaKonsultansi} />
+        <Route path="/generator-sop-k3-proyek" component={GeneratorSOPK3Proyek} />
         <Route path="/checker-kesiapan-asesmen" component={CheckerKesiapanAsesmen} />
         <Route path="/panduan-pemilihan-lsp" component={PanduanPemilihanLSP} />
         <Route path="/kalkulator-manfaat-skk-bujk" component={KalkulatorManfaatSKKBUJK} />
