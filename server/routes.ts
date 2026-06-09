@@ -19895,6 +19895,201 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G14: GENERATOR SURAT TEGURAN ====================
+  app.post("/api/tools/generator-surat-teguran", async (req: any, res: any) => {
+    try {
+      const { tipeTeguran, penerima, namaProyek, alasan, hariKeterlambatan, dendaInfo } = req.body;
+      const alasanStr = Array.isArray(alasan) ? alasan.join(", ") : alasan;
+      const prompt = `Kamu adalah Legal Officer / Contract Manager konstruksi berpengalaman. Buat SURAT TEGURAN RESMI dengan detail:
+- Tingkat Teguran: ${tipeTeguran}
+- Penerima: ${penerima}
+- Nama Proyek: ${namaProyek}
+- Alasan / Pelanggaran: ${alasanStr}
+- Hari Keterlambatan: ${hariKeterlambatan} hari
+- Info Denda: ${dendaInfo || "sesuai kontrak"}
+
+Buat surat teguran formal yang tegas, profesional, dan berdasarkan hukum (KUH Perdata, UUJK No.2/2017).
+
+Respond JSON:
+{
+  "nomor": "No. ST-[XXX]/[BULAN]/[TAHUN]",
+  "perihal": "Surat Teguran [Ke-N] atas [Pelanggaran]",
+  "isi": [
+    "Paragraf pembuka formal",
+    "Paragraf menjelaskan pelanggaran / keterlambatan secara spesifik",
+    "Paragraf mengutip klausul kontrak yang dilanggar",
+    "Paragraf denda / konsekuensi finansial yang sudah/akan dikenakan",
+    "Paragraf pernyataan ketegasan"
+  ],
+  "tuntutan": [
+    "tuntutan/instruksi spesifik yang harus dipenuhi (min 4 item)",
+  ],
+  "konsekuensi": "pernyataan konsekuensi jika teguran tidak ditindaklanjuti dalam batas waktu",
+  "penutup": "paragraf penutup formal surat",
+  "catatan": "catatan penting untuk legal/admin (opsional)"
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-surat-teguran error:", e); res.status(500).json({ error: "Gagal generate surat teguran." }); }
+  });
+
+  // ==================== G14: PANDUAN SMKK ====================
+  app.post("/api/tools/panduan-smkk", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, risiko, anggaran, durasiProyek } = req.body;
+      const risikoStr = Array.isArray(risiko) ? risiko.join(", ") : (risiko || "risiko umum konstruksi");
+      const prompt = `Kamu adalah ahli K3 Konstruksi / HSE Manager berpengalaman. Buat PANDUAN PENYUSUNAN SMKK untuk:
+- Jenis Proyek: ${jenisProyek}
+- Risiko K3 Utama: ${risikoStr}
+- Anggaran Proyek: ${anggaran}
+- Durasi Proyek: ${durasiProyek} bulan
+
+Mengacu pada Permen PUPR No. 10 Tahun 2021, SE Menteri PUPR No. 11/SE/M/2019, SNI ISO 45001:2018.
+
+Respond JSON:
+{
+  "ringkasan": "ringkasan kebutuhan SMKK untuk proyek ini (1-2 kalimat)",
+  "anggaranK3": "estimasi anggaran K3 yang disarankan (% dari nilai kontrak + penjelasan)",
+  "komponenSMKK": [
+    {
+      "nama": "Nama Komponen SMKK",
+      "deskripsi": "penjelasan komponen",
+      "dokumen": ["dokumen yang harus dibuat", ...],
+      "regulasi": "referensi pasal/ayat regulasi"
+    }
+  ],
+  "rencanaK3": [
+    {"elemen": "elemen", "kegiatan": "kegiatan K3", "penanggungJawab": "PIC", "jadwal": "kapan"}
+  ],
+  "hirarki": [
+    {"langkah": "Eliminasi / Substitusi / Engineering / dll", "contoh": "contoh penerapan untuk proyek ini"}
+  ],
+  "strukturOrganisasi": ["jabatan K3 yang diperlukan"],
+  "referensi": ["regulasi referensi"]
+}
+Komponen min 6, rencana K3 min 8, hirarki 5 langkah (Eliminasi → APD).`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-smkk error:", e); res.status(500).json({ error: "Gagal generate panduan SMKK." }); }
+  });
+
+  // ==================== G14: GENERATOR JSA ====================
+  app.post("/api/tools/generator-jsa", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, kondisi, jumlahPekerja, risikoAwal, lokasiProyek } = req.body;
+      const prompt = `Kamu adalah HSE Officer / Safety Inspector konstruksi berpengalaman. Buat JOB SAFETY ANALYSIS (JSA) / HIRARC lengkap untuk:
+- Jenis Pekerjaan: ${jenisPekerjaan}
+- Kondisi Lingkungan: ${kondisi}
+- Jumlah Pekerja: ${jumlahPekerja} orang
+- Level Risiko Awal: ${risikoAwal}
+- Lokasi: ${lokasiProyek || "proyek konstruksi"}
+
+Mengacu pada SMKK (Permen PUPR 10/2021), SNI ISO 45001:2018, dan praktik K3 konstruksi terbaik.
+
+Respond JSON:
+{
+  "judulJSA": "JOB SAFETY ANALYSIS — [JENIS PEKERJAAN]",
+  "nomorJSA": "No. JSA-[XXX]/[BULAN]/[TAHUN]",
+  "lingkupPekerjaan": "deskripsi singkat lingkup pekerjaan dan kondisi",
+  "steps": [
+    {
+      "langkahKerja": "nama langkah/tahapan kerja",
+      "bahaya": ["bahaya 1", "bahaya 2", "bahaya 3"],
+      "risikoLevel": "Rendah|Sedang|Tinggi|Sangat Tinggi",
+      "pengendalian": [
+        {"tipe": "Eliminasi|Substitusi|Engineering|Administratif|APD", "uraian": "penjelasan pengendalian"}
+      ],
+      "APD": ["APD spesifik untuk langkah ini"]
+    }
+  ],
+  "APDUmum": ["APD wajib umum seluruh pekerjaan"],
+  "prosedurDarurat": "prosedur tanggap darurat jika terjadi kecelakaan (2-3 kalimat)",
+  "tanda_tangan": ["Dibuat Oleh (HSE Officer)", "Diperiksa (Site Manager)", "Disetujui (PM/Kontraktor)"]
+}
+Steps min 6 langkah kerja (urutan dari mobilisasi hingga demobilisasi). Setiap step min 2 bahaya dan 2 pengendalian.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-jsa error:", e); res.status(500).json({ error: "Gagal generate JSA." }); }
+  });
+
+  // ==================== G14: SIMULATOR RAPAT EVALUASI — START ====================
+  app.post("/api/tools/simulator-rapat-evaluasi/start", async (req: any, res: any) => {
+    try {
+      const { jenisRapat, peran, isu, namaProyek } = req.body;
+      const isuStr = Array.isArray(isu) ? isu.join(", ") : isu;
+      const prompt = `Kamu adalah Moderator Rapat Evaluasi Proyek Konstruksi yang berpengalaman. Buka rapat untuk:
+- Jenis Rapat: ${jenisRapat}
+- Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+- Peserta User: ${peran}
+- Agenda / Isu: ${isuStr}
+
+Buka rapat dengan:
+1. Pembukaan formal sebagai moderator
+2. Perkenalkan peserta (wakil owner, kontraktor, konsultan, K3)
+3. Bacakan agenda rapat
+4. Langsung minta laporan/progress dari user
+
+Respond JSON: {"pembuka": "pembuka rapat lengkap (3-4 paragraf formal namun to-the-point)"}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-rapat-evaluasi start error:", e); res.status(500).json({ error: "Gagal memulai rapat." }); }
+  });
+
+  // ==================== G14: SIMULATOR RAPAT EVALUASI — RESPOND ====================
+  app.post("/api/tools/simulator-rapat-evaluasi/respond", async (req: any, res: any) => {
+    try {
+      const { jenisRapat, peran, isu, namaProyek, pendapat, messageCount } = req.body;
+      const isuStr = Array.isArray(isu) ? isu.join(", ") : isu;
+      const isSelesai = messageCount >= 12;
+      const prompt = `Kamu moderator ${jenisRapat} untuk proyek ${namaProyek || "konstruksi"}. User berperan sebagai ${peran}. Agenda: ${isuStr}.
+Ini pesan ke-${messageCount} dalam sesi rapat.
+
+Pernyataan/laporan user: "${pendapat}"
+
+${isSelesai ? "Tutup rapat, buat notulensi, dan action item." : "Lanjutkan rapat — tanggapi laporan user, minta klarifikasi, libatkan peserta lain (owner/konsultan/K3 berbicara), dan bahas isu agenda selanjutnya."}
+
+Respond JSON:
+{
+  "respons": "respons moderator + dialog peserta lain (2-3 paragraf)",
+  "label": "agenda yang sedang dibahas",
+  "selesai": ${isSelesai}${isSelesai ? `,
+  "keputusan": ["keputusan rapat 1", ...],
+  "actionItem": ["action item: [siapa] akan [apa] sebelum [kapan]", ...],
+  "nilaiEvaluasi": "evaluasi singkat partisipasi user dalam rapat"` : ""}
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-rapat-evaluasi respond error:", e); res.status(500).json({ error: "Gagal merespons." }); }
+  });
+
   // ==================== G13: GENERATOR KONTRAK SEDERHANA ====================
   app.post("/api/tools/generator-kontrak-sederhana", async (req: any, res: any) => {
     try {
@@ -20544,53 +20739,6 @@ Berikan analisis yang realistis. Jika jabatan sangat berbeda, tingkat kesulitan 
       });
       return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
     } catch (e: any) { console.error("panduan-mutasi error:", e); res.status(500).json({ error: "Gagal menganalisis mutasi SKK." }); }
-  });
-
-  // ==================== AI TOOLS G9: GENERATOR JSA ====================
-  app.post("/api/tools/generator-jsa", async (req: any, res: any) => {
-    try {
-      const { jenisPekerjaan, lingkungan, namaProyek } = req.body;
-      if (!jenisPekerjaan) return res.status(400).json({ error: "Jenis pekerjaan wajib diisi." });
-      const { OpenAI } = await import("openai");
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const prompt = `Anda adalah Ahli K3 Konstruksi Utama yang membuat Job Safety Analysis (JSA) profesional untuk proyek konstruksi Indonesia.
-
-Jenis Pekerjaan: ${jenisPekerjaan}
-Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
-Kondisi Lingkungan: ${lingkungan?.join(", ") || "Normal"}
-
-Kembalikan JSON PERSIS:
-{
-  "judulJSA": "JSA — [judul spesifik untuk pekerjaan ini]",
-  "jenisPekerjaan": "${jenisPekerjaan}",
-  "tanggalDibuat": "[tanggal hari ini]",
-  "nomorJSA": "JSA-[nomor]/[tahun]",
-  "deskripsiPekerjaan": "deskripsi singkat ruang lingkup pekerjaan ini",
-  "bahayaList": [
-    {
-      "langkahPekerjaan": "nama langkah/tahapan pekerjaan yang spesifik",
-      "bahayaPotensial": ["bahaya 1", "bahaya 2", "bahaya 3"],
-      "levelRisiko": "Kritis" atau "Tinggi" atau "Sedang" atau "Rendah",
-      "pengendalian": [
-        { "tipe": "Eliminasi" atau "Substitusi" atau "Engineering" atau "Administratif" atau "APD", "tindakan": "tindakan pengendalian konkret" }
-      ],
-      "apd": ["APD spesifik yang wajib digunakan untuk langkah ini"],
-      "penanggungJawab": "jabatan yang bertanggung jawab"
-    }
-  ],
-  "apiumum": ["APD umum yang wajib selama seluruh pekerjaan berlangsung"],
-  "instruksiKhusus": ["3-4 instruksi keselamatan khusus untuk pekerjaan ini"],
-  "tindakanDarurat": ["4-5 langkah tindakan darurat jika terjadi kecelakaan"],
-  "referensiStandar": ["standar/regulasi K3 yang relevan — Permenaker, PP, SNI"]
-}
-
-Buat 5-7 langkah pekerjaan dengan detail bahaya dan pengendalian yang realistis. Gunakan hierarki pengendalian HIRARC. Setiap langkah minimal 2-3 pengendalian dari berbagai tipe.`;
-      const c = await openai.chat.completions.create({
-        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
-        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 3500,
-      });
-      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
-    } catch (e: any) { console.error("generator-jsa error:", e); res.status(500).json({ error: "Gagal generate JSA." }); }
   });
 
   // ==================== AI TOOLS G9: PANDUAN SKK PENGADAAN ====================

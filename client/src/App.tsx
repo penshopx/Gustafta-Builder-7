@@ -197,6 +197,10 @@ import GeneratorBASTProyek from "@/pages/generator-bast-proyek";
 import PanduanIUJKSBU from "@/pages/panduan-iujk-sbu";
 import GeneratorRMK from "@/pages/generator-rmk";
 import SimulatorCSMS from "@/pages/simulator-csms";
+import GeneratorSuratTeguran from "@/pages/generator-surat-teguran";
+import KalkulatorBEPProyek from "@/pages/kalkulator-bep-proyek";
+import PanduanSMKK from "@/pages/panduan-smkk";
+import SimulatorRapatEvaluasi from "@/pages/simulator-rapat-evaluasi";
 import GeneratorKontrakSederhana from "@/pages/generator-kontrak-sederhana";
 import KalkulatorDepresiasiAlat from "@/pages/kalkulator-depresiasi-alat";
 import PanduanKualifikasiTender from "@/pages/panduan-kualifikasi-tender";
@@ -1229,6 +1233,11 @@ function Router() {
         <Route path="/panduan-iujk-sbu" component={PanduanIUJKSBU} />
         <Route path="/generator-rmk" component={GeneratorRMK} />
         <Route path="/simulator-csms" component={SimulatorCSMS} />
+        <Route path="/generator-surat-teguran" component={GeneratorSuratTeguran} />
+        <Route path="/kalkulator-bep-proyek" component={KalkulatorBEPProyek} />
+        <Route path="/panduan-smkk" component={PanduanSMKK} />
+        <Route path="/generator-jsa" component={GeneratorJSA} />
+        <Route path="/simulator-rapat-evaluasi" component={SimulatorRapatEvaluasi} />
         <Route path="/generator-kontrak-sederhana" component={GeneratorKontrakSederhana} />
         <Route path="/kalkulator-depresiasi-alat" component={KalkulatorDepresiasiAlat} />
         <Route path="/panduan-kualifikasi-tender" component={PanduanKualifikasiTender} />
@@ -1245,7 +1254,6 @@ function Router() {
         <Route path="/generator-laporan-insiden" component={GeneratorLaporanInsiden} />
         <Route path="/asisten-klaim-car" component={AsistenKlaimCAR} />
         <Route path="/panduan-mutasi-skk" component={PanduanMutasiSKK} />
-        <Route path="/generator-jsa" component={GeneratorJSA} />
         <Route path="/kalkulator-jam-kerja-proyek" component={KalkulatorJamKerjaProyek} />
         <Route path="/panduan-skk-pengadaan" component={PanduanSKKPengadaan} />
         <Route path="/estimator-biaya-sertifikasi" component={EstimatorBiayaSertifikasi} />
