@@ -19895,6 +19895,198 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G12: GENERATOR BAPRO ====================
+  app.post("/api/tools/generator-bapro", async (req: any, res: any) => {
+    try {
+      const { namaProyek, jenisKontrak, periode, persenFisik, nilaiKontrak, kendala } = req.body;
+      const prompt = `Kamu adalah Site Manager / Quantity Surveyor senior. Buat BERITA ACARA KEMAJUAN PEKERJAAN (BAPRO) formal untuk:
+- Nama Proyek: ${namaProyek}
+- Jenis Kontrak: ${jenisKontrak}
+- Periode Laporan: ${periode}
+- Kemajuan Fisik: ${persenFisik}%
+- Nilai Kontrak: ${nilaiKontrak || "belum disebutkan"}
+- Kendala: ${kendala || "tidak ada kendala signifikan"}
+
+Buat BAPRO lengkap dan profesional sesuai format kontrak konstruksi Indonesia.
+
+Respond dengan JSON:
+{
+  "judul": "BERITA ACARA KEMAJUAN PEKERJAAN",
+  "nomor": "No. BAPRO-[XXX]/[BULAN]/[TAHUN]",
+  "tanggal": "string",
+  "periode": "${periode}",
+  "ringkasan": "ringkasan singkat kemajuan (1-2 kalimat)",
+  "bagian": {
+    "dataPekerjaan": "data kontrak, nilai, tanggal mulai, tanggal selesai (format tabel teks)",
+    "kemajuanFisik": "narasi kemajuan fisik ${persenFisik}% — pekerjaan yang sudah selesai, sedang berjalan",
+    "rincianPekerjaan": "rincian pekerjaan yang dilaksanakan dalam periode ini (bullet points)",
+    "statusPembayaran": "status termin dan pembayaran",
+    "kendalaDanSolusi": "kendala yang dihadapi dan solusi yang diambil",
+    "rencanaMingguDepan": "rencana pekerjaan periode berikutnya (min 3 item)",
+    "penutup": "pernyataan kebenaran laporan + placeholder tanda tangan PPK dan Penyedia"
+  },
+  "tabelKemajuan": [
+    {"item": "nama item pekerjaan", "bobot": "bobot %", "realisasi": "realisasi %", "keterangan": "keterangan singkat"}
+  ],
+  "dokumenLampiran": ["lampiran 1", "lampiran 2", ...]
+}
+
+Tabel kemajuan minimal 5 item pekerjaan utama yang relevan.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-bapro error:", e); res.status(500).json({ error: "Gagal generate BAPRO." }); }
+  });
+
+  // ==================== G12: PANDUAN K3 KETINGGIAN ====================
+  app.post("/api/tools/panduan-k3-ketinggian", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, ketinggian } = req.body;
+      const prompt = `Kamu adalah Ahli K3 Konstruksi / Safety Officer senior. Buat PANDUAN K3 PEKERJAAN KETINGGIAN lengkap untuk:
+- Jenis Pekerjaan: ${jenisPekerjaan}
+- Rentang Ketinggian: ${ketinggian}
+
+Mengacu pada Permenaker No. 9/2016, SNI 7659-2021, OHSAS 18001, dan standar CSMS konstruksi Indonesia.
+
+Respond dengan JSON:
+{
+  "jenisPekerjaan": "${jenisPekerjaan}",
+  "ketinggian": "${ketinggian}",
+  "ringkasanRisiko": "ringkasan profil risiko pekerjaan ini (1 kalimat)",
+  "persyaratanAPD": [
+    {"item": "nama APD", "standar": "standar/SNI yang berlaku", "catatan": "catatan penggunaan spesifik"}
+  ],
+  "prosedurKerja": ["langkah prosedur aman 1", "langkah 2", ...],
+  "risikoUtama": [
+    {"bahaya": "nama bahaya", "level": "Kritis|Tinggi|Sedang", "pengendalian": ["pengendalian 1", "pengendalian 2"]}
+  ],
+  "persyaratanLegal": ["regulasi 1", "regulasi 2", ...],
+  "checklistSebelumKerja": ["item checklist 1", "item 2", ...],
+  "prosedurDarurat": ["langkah darurat 1", "langkah 2", ...],
+  "referensi": ["referensi 1", "referensi 2"]
+}
+
+APD min 6 item, prosedur kerja min 8 langkah, risiko utama min 5, checklist min 10 item, prosedur darurat min 6 langkah.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-k3-ketinggian error:", e); res.status(500).json({ error: "Gagal generate panduan K3." }); }
+  });
+
+  // ==================== G12: GENERATOR CHECKLIST STA ====================
+  app.post("/api/tools/generator-checklist-sta", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, tahapanSTA, fokusKhusus } = req.body;
+      const prompt = `Kamu adalah Quantity Surveyor / Konsultan MK senior. Buat CHECKLIST SERAH TERIMA AKHIR (${tahapanSTA}) lengkap untuk:
+- Jenis Proyek: ${jenisProyek}
+- Tahapan: ${tahapanSTA}
+- Fokus Khusus: ${fokusKhusus || "standar"}
+
+Mengacu pada persyaratan kontrak konstruksi Indonesia, Permen PUPR, dan standar teknis yang berlaku.
+
+Respond dengan JSON:
+{
+  "judulChecklist": "CHECKLIST SERAH TERIMA — [judul singkat]",
+  "jenisProyek": "${jenisProyek}",
+  "tahapanSTA": "${tahapanSTA}",
+  "ringkasan": "penjelasan singkat tujuan checklist ini",
+  "totalItemWajib": number,
+  "totalItemOpsional": number,
+  "grupChecklist": [
+    {
+      "kategori": "nama kategori",
+      "icon": "emoji relevan",
+      "items": [
+        {"item": "item yang diperiksa", "kriteria": "kriteria kelulusan", "status": "Wajib|Opsional", "referensi": "regulasi/SNI jika ada"}
+      ]
+    }
+  ],
+  "dokumenSerahTerima": [
+    {"dokumen": "nama dokumen", "tujuan": "keterangan singkat", "urgensi": "Wajib|Disarankan"}
+  ],
+  "catatanPenting": ["catatan 1", "catatan 2", ...]
+}
+
+Min 6 grup checklist, setiap grup min 5 item. Total item wajib min 30. Dokumen serah terima min 12.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-checklist-sta error:", e); res.status(500).json({ error: "Gagal generate checklist." }); }
+  });
+
+  // ==================== G12: SIMULATOR NEGOSIASI KONTRAK — START ====================
+  app.post("/api/tools/simulator-negosiasi-kontrak/start", async (req: any, res: any) => {
+    try {
+      const { jenisKontrak, peranUser, topik } = req.body;
+      const lamanPrompt = `Kamu adalah negosiator kontrak konstruksi berpengalaman yang berperan sebagai PIHAK LAWAN dalam simulasi negosiasi.
+Konteks: ${jenisKontrak} | Topik: ${topik} | User berperan sebagai: ${peranUser}
+Kamu berperan sebagai pihak YANG BERLAWANAN dengan user — jika user kontraktor, kamu PPK/Owner.
+
+Buka simulasi negosiasi dengan:
+1. Menyatakan posisi awal pihakmu terkait ${topik} yang terasa tidak adil bagi user
+2. Berikan argumen yuridis dan bisnis yang kuat untuk posisimu
+3. Tunjukkan bahwa kamu tidak mudah mengalah
+
+Respond JSON: {"pembuka": "kalimat pembuka negosiasi oleh lawan (2-3 paragraf, realistis dan tegas)", "tip": "tip singkat untuk user tentang strategi menghadapi argumen ini"}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: lamanPrompt }],
+        temperature: 0.7,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-negosiasi start error:", e); res.status(500).json({ error: "Gagal memulai simulasi." }); }
+  });
+
+  // ==================== G12: SIMULATOR NEGOSIASI KONTRAK — RESPOND ====================
+  app.post("/api/tools/simulator-negosiasi-kontrak/respond", async (req: any, res: any) => {
+    try {
+      const { jenisKontrak, peranUser, topik, argumenUser, ronde, historiChat } = req.body;
+      const isSelesai = ronde >= 5;
+      const prompt = `Kamu negosiator konstruksi berpengalaman (pihak lawan user) dalam simulasi ${topik} — ${jenisKontrak}.
+
+Ronde: ${ronde}/5. Argumen user: "${argumenUser}"
+
+${isSelesai ? `Ini ronde terakhir. Berikan respon penutup dan evaluasi performa negosiasi user.` : `Berikan respon balik yang realistis — bisa mengalah sedikit atau mempertahankan posisi tergantung kualitas argumen user.`}
+
+Nilai argumen user 0-25 (kekuatan yuridis, logika bisnis, strategi).
+
+Respond JSON:
+{
+  "responLawan": "respon negosiasi pihak lawan (realistis, 2 paragraf)",
+  "skorRonde": number (0-25),
+  "tipRonde": "tip singkat untuk user",
+  "selesai": ${isSelesai}${isSelesai ? `,
+  "skorAkhir": number (0-100, total dari semua ronde),
+  "predikat": "Negosiator Andal|Negosiator Kompeten|Negosiator Pemula|Perlu Banyak Latihan",
+  "evaluasi": "evaluasi 2-3 kalimat performa keseluruhan",
+  "tipsKunci": ["tip negosiasi kunci 1", "tip 2", "tip 3"]` : ""}
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-negosiasi respond error:", e); res.status(500).json({ error: "Gagal memproses respon." }); }
+  });
+
   // ==================== G11: GENERATOR SURAT PENAWARAN ====================
   app.post("/api/tools/generator-surat-penawaran", async (req: any, res: any) => {
     try {

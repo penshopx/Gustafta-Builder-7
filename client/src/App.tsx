@@ -197,6 +197,11 @@ import GeneratorBASTProyek from "@/pages/generator-bast-proyek";
 import PanduanIUJKSBU from "@/pages/panduan-iujk-sbu";
 import GeneratorRMK from "@/pages/generator-rmk";
 import SimulatorCSMS from "@/pages/simulator-csms";
+import GeneratorBAPRO from "@/pages/generator-bapro";
+import KalkulatorKompensasiPHK from "@/pages/kalkulator-kompensasi-phk";
+import PanduanK3Ketinggian from "@/pages/panduan-k3-ketinggian";
+import GeneratorChecklistSTA from "@/pages/generator-checklist-sta";
+import SimulatorNegosiasiKontrak from "@/pages/simulator-negosiasi-kontrak";
 import GeneratorSuratPenawaran from "@/pages/generator-surat-penawaran";
 import KalkulatorEskalasiHarga from "@/pages/kalkulator-eskalasi-harga";
 import PanduanAuditMutuISO from "@/pages/panduan-audit-mutu-iso";
@@ -1219,6 +1224,11 @@ function Router() {
         <Route path="/panduan-iujk-sbu" component={PanduanIUJKSBU} />
         <Route path="/generator-rmk" component={GeneratorRMK} />
         <Route path="/simulator-csms" component={SimulatorCSMS} />
+        <Route path="/generator-bapro" component={GeneratorBAPRO} />
+        <Route path="/kalkulator-kompensasi-phk" component={KalkulatorKompensasiPHK} />
+        <Route path="/panduan-k3-ketinggian" component={PanduanK3Ketinggian} />
+        <Route path="/generator-checklist-sta" component={GeneratorChecklistSTA} />
+        <Route path="/simulator-negosiasi-kontrak" component={SimulatorNegosiasiKontrak} />
         <Route path="/generator-surat-penawaran" component={GeneratorSuratPenawaran} />
         <Route path="/kalkulator-eskalasi-harga" component={KalkulatorEskalasiHarga} />
         <Route path="/panduan-audit-mutu-iso" component={PanduanAuditMutuISO} />
