@@ -19666,6 +19666,137 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS G9: PANDUAN MUTASI SKK ====================
+  app.post("/api/tools/panduan-mutasi-skk", async (req: any, res: any) => {
+    try {
+      const { jabatanAsal, jabatanTujuan } = req.body;
+      if (!jabatanAsal || !jabatanTujuan) return res.status(400).json({ error: "Jabatan asal dan tujuan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan sertifikasi BNSP Indonesia yang ahli analisis gap kompetensi SKK.
+
+Jabatan asal: ${jabatanAsal}
+Jabatan tujuan: ${jabatanTujuan}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatanAsal": "${jabatanAsal}",
+  "jabatanTujuan": "${jabatanTujuan}",
+  "ringkasan": "ringkasan 2 kalimat: apakah mutasi ini logis dan berapa besar gapnya",
+  "tingkatKesulitan": "Mudah" atau "Sedang" atau "Sulit",
+  "estimasiWaktu": "estimasi total waktu untuk melakukan mutasi/alih profesi ini",
+  "unitKompetensiDiakui": [
+    { "unit": "nama unit kompetensi dari jabatan asal yang masih relevan di jabatan tujuan", "alasan": "mengapa unit ini diakui/relevan" }
+  ],
+  "unitKompetensiPerluDitambah": [
+    { "unit": "nama unit kompetensi baru yang harus dipenuhi", "caraMendapatkan": "cara konkret memperoleh kompetensi ini", "estimasiWaktu": "waktu yang dibutuhkan" }
+  ],
+  "gapDokumen": [
+    { "dokumen": "nama dokumen", "status": "Bisa dipakai" atau "Perlu diperbarui" atau "Perlu baru", "catatan": "penjelasan singkat" }
+  ],
+  "langkahMutasi": [
+    { "langkah": "nama langkah", "detail": "langkah konkret yang harus dilakukan", "waktu": "estimasi waktu" }
+  ],
+  "keuntunganMutasi": ["3-4 keuntungan berpindah ke jabatan tujuan"],
+  "risikoYangPerluDipertimbangkan": ["3-4 risiko atau hal yang perlu dipikirkan sebelum mutasi"]
+}
+
+Berikan analisis yang realistis. Jika jabatan sangat berbeda, tingkat kesulitan Sulit. Jika satu bidang/naik level, Mudah/Sedang.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-mutasi error:", e); res.status(500).json({ error: "Gagal menganalisis mutasi SKK." }); }
+  });
+
+  // ==================== AI TOOLS G9: GENERATOR JSA ====================
+  app.post("/api/tools/generator-jsa", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, lingkungan, namaProyek } = req.body;
+      if (!jenisPekerjaan) return res.status(400).json({ error: "Jenis pekerjaan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah Ahli K3 Konstruksi Utama yang membuat Job Safety Analysis (JSA) profesional untuk proyek konstruksi Indonesia.
+
+Jenis Pekerjaan: ${jenisPekerjaan}
+Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+Kondisi Lingkungan: ${lingkungan?.join(", ") || "Normal"}
+
+Kembalikan JSON PERSIS:
+{
+  "judulJSA": "JSA — [judul spesifik untuk pekerjaan ini]",
+  "jenisPekerjaan": "${jenisPekerjaan}",
+  "tanggalDibuat": "[tanggal hari ini]",
+  "nomorJSA": "JSA-[nomor]/[tahun]",
+  "deskripsiPekerjaan": "deskripsi singkat ruang lingkup pekerjaan ini",
+  "bahayaList": [
+    {
+      "langkahPekerjaan": "nama langkah/tahapan pekerjaan yang spesifik",
+      "bahayaPotensial": ["bahaya 1", "bahaya 2", "bahaya 3"],
+      "levelRisiko": "Kritis" atau "Tinggi" atau "Sedang" atau "Rendah",
+      "pengendalian": [
+        { "tipe": "Eliminasi" atau "Substitusi" atau "Engineering" atau "Administratif" atau "APD", "tindakan": "tindakan pengendalian konkret" }
+      ],
+      "apd": ["APD spesifik yang wajib digunakan untuk langkah ini"],
+      "penanggungJawab": "jabatan yang bertanggung jawab"
+    }
+  ],
+  "apiumum": ["APD umum yang wajib selama seluruh pekerjaan berlangsung"],
+  "instruksiKhusus": ["3-4 instruksi keselamatan khusus untuk pekerjaan ini"],
+  "tindakanDarurat": ["4-5 langkah tindakan darurat jika terjadi kecelakaan"],
+  "referensiStandar": ["standar/regulasi K3 yang relevan — Permenaker, PP, SNI"]
+}
+
+Buat 5-7 langkah pekerjaan dengan detail bahaya dan pengendalian yang realistis. Gunakan hierarki pengendalian HIRARC. Setiap langkah minimal 2-3 pengendalian dari berbagai tipe.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-jsa error:", e); res.status(500).json({ error: "Gagal generate JSA." }); }
+  });
+
+  // ==================== AI TOOLS G9: PANDUAN SKK PENGADAAN ====================
+  app.post("/api/tools/panduan-skk-pengadaan", async (req: any, res: any) => {
+    try {
+      const { jabatan, nilaiKontrak } = req.body;
+      if (!jabatan) return res.status(400).json({ error: "Jabatan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan hukum pengadaan dan jasa konstruksi Indonesia yang ahli tentang persyaratan kompetensi aparatur pengadaan.
+
+Jabatan: ${jabatan}
+Nilai Kontrak: ${nilaiKontrak}
+
+Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "nilaiKontrak": "${nilaiKontrak}",
+  "ringkasan": "ringkasan 2 kalimat persyaratan kompetensi untuk ${jabatan} pada kontrak ${nilaiKontrak}",
+  "skk_wajib": [
+    { "jabatan": "nama SKK/sertifikasi yang wajib", "jenjang": "jenjang/level", "alasan": "mengapa wajib", "regulasiAcuan": "regulasi yang mewajibkan" }
+  ],
+  "skk_disarankan": [
+    { "jabatan": "nama SKK/sertifikasi yang disarankan", "manfaat": "manfaat konkret memiliki sertifikasi ini" }
+  ],
+  "konsekuensiTanpaSKK": ["3-4 konsekuensi hukum/administratif jika tidak memiliki kompetensi yang disyaratkan"],
+  "langkahMempersiapkan": [
+    { "langkah": "nama langkah", "detail": "detail langkah konkret" }
+  ],
+  "regulasiReferensi": ["regulasi lengkap yang relevan — UU, PP, Perpres, Perlem LKPP, Permen PUPR"],
+  "tipsKepatuhan": ["5-6 tips praktis untuk memastikan kepatuhan kompetensi di unit kerja pengadaan"]
+}
+
+Fokus pada regulasi Indonesia terbaru: UU 2/2017, PP 14/2021, Perpres 12/2021, Perlem LKPP, Permen PUPR terkait. Berikan regulasi yang akurat dan spesifik.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-pengadaan error:", e); res.status(500).json({ error: "Gagal generate panduan." }); }
+  });
+
   // ==================== AI TOOLS G8: PANDUAN FRESH GRADUATE SKK ====================
   app.post("/api/tools/panduan-fresh-graduate-skk", async (req: any, res: any) => {
     try {

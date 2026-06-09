@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, Calculator, FileCheck, Layers, Monitor, CheckSquare, Building, ScrollText, FileBadge, HardHat } from "lucide-react";
+import { Award, Brain, Target, TrendingUp, ChevronRight, Sparkles, GraduationCap, Shield, BarChart3, Zap, BookOpen, Users, Building2, CheckCircle2, ClipboardList, Search, FileText, DollarSign, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, Calculator, FileCheck, Layers, Monitor, CheckSquare, Building, ScrollText, FileBadge, HardHat, ArrowRightLeft, ShieldAlert, Clock, Gavel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -149,6 +149,58 @@ const TOOLS = [
     bg: "bg-sky-500/5",
     badge: "Gelombang 3",
     badgeColor: "text-sky-400 border-sky-400/30",
+    live: true,
+  },
+  {
+    href: "/panduan-mutasi-skk",
+    icon: ArrowRightLeft,
+    label: "Panduan Mutasi / Alih Profesi SKK",
+    sublabel: "Gap unit kompetensi · dokumen yang masih berlaku · langkah mutasi",
+    desc: "Pilih jabatan asal dan jabatan tujuan → AI analisis gap unit kompetensi, unit yang masih diakui, dokumen yang bisa dipakai ulang, langkah step-by-step mutasi, keuntungan, dan risiko yang perlu dipertimbangkan.",
+    color: "text-orange-400",
+    borderColor: "border-orange-500/30",
+    bg: "bg-orange-500/5",
+    badge: "Gelombang 9",
+    badgeColor: "text-orange-400 border-orange-400/30",
+    live: true,
+  },
+  {
+    href: "/generator-jsa",
+    icon: ShieldAlert,
+    label: "Generator JSA — Job Safety Analysis",
+    sublabel: "Bahaya potensial · HIRARC · pengendalian hierarki · APD",
+    desc: "Pilih jenis pekerjaan konstruksi + kondisi lingkungan → AI generate draft JSA per langkah pekerjaan: identifikasi bahaya, penilaian risiko (Kritis/Tinggi/Sedang/Rendah), pengendalian HIRARC 5 tipe, APD spesifik, dan prosedur darurat.",
+    color: "text-amber-400",
+    borderColor: "border-amber-500/30",
+    bg: "bg-amber-500/5",
+    badge: "Gelombang 9",
+    badgeColor: "text-amber-400 border-amber-400/30",
+    live: true,
+  },
+  {
+    href: "/kalkulator-jam-kerja-proyek",
+    icon: Clock,
+    label: "Kalkulator Jam Kerja & Fatigue Risk",
+    sublabel: "Monitor jam kerja · deteksi kelelahan · rekomendasi rotasi",
+    desc: "Input data pekerja proyek: jam kerja per minggu, hari berturut tanpa libur, shift malam → kalkulator otomatis deteksi level risiko (Aman/Waspada/Berbahaya/Kritis) sesuai PP 35/2021, visualisasi bar per pekerja. Tanpa AI.",
+    color: "text-teal-400",
+    borderColor: "border-teal-500/30",
+    bg: "bg-teal-500/5",
+    badge: "Gelombang 9",
+    badgeColor: "text-teal-400 border-teal-400/30",
+    live: true,
+  },
+  {
+    href: "/panduan-skk-pengadaan",
+    icon: Gavel,
+    label: "Panduan SKK untuk Pengadaan Konstruksi",
+    sublabel: "PPK · PPTK · PP · Pokja · PPHP — SKK wajib + konsekuensi",
+    desc: "Pilih jabatan pengadaan + nilai kontrak → AI jelaskan SKK wajib berdasarkan UU Jasa Konstruksi dan regulasi LKPP, konsekuensi tanpa kompetensi, langkah mempersiapkan diri, dan referensi regulasi lengkap.",
+    color: "text-slate-300",
+    borderColor: "border-slate-500/30",
+    bg: "bg-slate-500/5",
+    badge: "Gelombang 9",
+    badgeColor: "text-slate-300 border-slate-500/30",
     live: true,
   },
   {
