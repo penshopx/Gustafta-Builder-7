@@ -19895,6 +19895,229 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G16: GENERATOR CHECKLIST SERAH TERIMA ====================
+  app.post("/api/tools/generator-checklist-serah-terima", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, jenisST, lingkup, nilaiKontrak, pemilik, kontraktor } = req.body;
+      const lingkupStr = Array.isArray(lingkup) ? lingkup.join(", ") : lingkup;
+      const prompt = `Kamu adalah pengawas serah terima proyek konstruksi berpengalaman. Buat CHECKLIST SERAH TERIMA PROYEK lengkap untuk:
+- Jenis Proyek: ${jenisProyek}
+- Jenis Serah Terima: ${jenisST}
+- Lingkup Pekerjaan: ${lingkupStr}
+- Nilai Kontrak: ${nilaiKontrak || "tidak disebutkan"}
+- Pemilik: ${pemilik || "Pemberi Kerja"}
+- Kontraktor: ${kontraktor || "Kontraktor Pelaksana"}
+
+Mengacu pada: Permen PUPR No. 22/2018, Permen PUPR No. 14/2020, AHSP 2022, SNI konstruksi terkait.
+
+Respond JSON:
+{
+  "judul": "CHECKLIST SERAH TERIMA ${jenisST} — ${jenisProyek}",
+  "nomorChecklist": "CST-${jenisST.substring(0,3).toUpperCase()}-001",
+  "jenisSerahTerima": "${jenisST}",
+  "lingkupChecklist": "${lingkupStr}",
+  "sections": [
+    {
+      "judul": "nama seksi (cth: Kelengkapan Dokumen Kontrak)",
+      "items": [
+        {
+          "kode": "A.01",
+          "item": "deskripsi item checklist",
+          "standar": "standar penerimaan / kriteria yang harus dipenuhi",
+          "status": "Wajib|Dianjurkan|Opsional"
+        }
+      ],
+      "catatan": "catatan khusus seksi ini (jika ada)"
+    }
+  ],
+  "dokumenPendamping": ["dokumen 1 yang harus dilampirkan", "dokumen 2", "..."],
+  "prosedurTindakLanjut": "prosedur jika ada item tidak terpenuhi saat PHO/FHO",
+  "catatan": "catatan umum (jika ada)"
+}
+Buat min: 6 section, masing-masing min 4-8 item. Section wajib ada: Kelengkapan Dokumen, Kualitas Pekerjaan Fisik, K3 & Lingkungan, Uji Fungsi/Commissioning (jika MEP), As-Built Drawing & Manual. Dokumen pendamping min 8.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-checklist-serah-terima error:", e); res.status(500).json({ error: "Gagal generate checklist." }); }
+  });
+
+  // ==================== G16: PANDUAN TKDN ====================
+  app.post("/api/tools/panduan-tkdn", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, skalaProyek, sumberKomponen, sumberPendanaan } = req.body;
+      const sumberStr = Array.isArray(sumberKomponen) ? sumberKomponen.join(", ") : sumberKomponen;
+      const prompt = `Kamu adalah konsultan TKDN (Tingkat Komponen Dalam Negeri) berpengalaman. Buat PANDUAN TKDN untuk:
+- Jenis Pekerjaan/Produk: ${jenisPekerjaan}
+- Skala Proyek: ${skalaProyek}
+- Sumber Komponen: ${sumberStr}
+- Sumber Pendanaan: ${sumberPendanaan}
+
+Mengacu pada: Perpres No.16/2018 (Pengadaan Barang/Jasa), Perpres No.12/2021, Permen Perindustrian No.05/2017, PMK TKDN, SE LKPP tentang TKDN.
+
+Respond JSON:
+{
+  "ringkasan": "ringkasan ketentuan TKDN untuk profil ini (2-3 kalimat)",
+  "nilaiTKDNMinimal": "X% atau 'Tidak Diwajibkan' + penjelasan singkat",
+  "komponenTKDN": [
+    {"komponen": "nama komponen", "definisi": "definisi singkat", "bobotMaksimal": "X%", "cara": "cara menghitung komponen ini"}
+  ],
+  "formulaPerhitungan": [
+    {"nama": "nama formula", "formula": "rumus matematis", "keterangan": "penjelasan variabel"}
+  ],
+  "dokumenWajib": [
+    {"nama": "nama dokumen", "deskripsi": "isi dan fungsi dokumen", "penyedia": "siapa yang menerbitkan"}
+  ],
+  "prosedurVerifikasi": [
+    {"langkah": 1, "uraian": "uraian langkah", "instansi": "instansi yang terlibat"}
+  ],
+  "sanksi": ["sanksi 1 pelanggaran TKDN", "sanksi 2", "sanksi 3"],
+  "tips": ["tip 1", "tip 2", "tip 3", "tip 4"],
+  "regulasi": ["regulasi 1 (no dan tahun)", "regulasi 2", "regulasi 3", "regulasi 4"]
+}
+Min: komponen 4, formula 2, dokumen 5, prosedur 5, sanksi 3, tips 4, regulasi 4.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-tkdn error:", e); res.status(500).json({ error: "Gagal generate panduan TKDN." }); }
+  });
+
+  // ==================== G16: GENERATOR LAPORAN HSE BULANAN ====================
+  app.post("/api/tools/generator-laporan-hse", async (req: any, res: any) => {
+    try {
+      const { namaProyek, periode, hseOfficer, manHours, jumlahPekerja, insiden, hampirCelaka, jumlahInspeksi, temuanTotal, temuanKritis, programK3, kondisiUmum } = req.body;
+      const mhNum = parseFloat(manHours) || 0;
+      const insidenNum = parseInt(insiden) || 0;
+      const frVal = mhNum > 0 ? ((insidenNum / mhNum) * 1000000).toFixed(2) : "0.00";
+      const prompt = `Kamu adalah HSE Manager konstruksi berpengalaman. Buat LAPORAN HSE BULANAN resmi dan profesional berdasarkan data berikut:
+
+Proyek: ${namaProyek}
+Periode: ${periode}
+HSE Officer: ${hseOfficer || "HSE Officer"}
+Man-Hours Total: ${manHours}
+Jumlah Tenaga Kerja: ${jumlahPekerja || "tidak disebutkan"}
+Kecelakaan Kerja (LTI): ${insiden}
+Near Miss / Hampir Celaka: ${hampirCelaka}
+Jumlah Inspeksi K3: ${jumlahInspeksi || "tidak disebutkan"}
+Total Temuan: ${temuanTotal || "tidak disebutkan"}
+Temuan Kritis: ${temuanKritis}
+Frequency Rate (FR): ${frVal} per juta jam kerja
+Program K3 Bulan Ini: ${programK3 || "tidak disebutkan"}
+Kondisi/Isu Umum: ${kondisiUmum || "tidak ada catatan khusus"}
+
+Respond JSON:
+{
+  "header": {
+    "namaProyek": "${namaProyek}",
+    "periode": "${periode}",
+    "hseOfficer": "${hseOfficer || "HSE Officer"}",
+    "manHours": ${mhNum}
+  },
+  "ringkasanKinerja": "ringkasan kinerja K3 bulan ini (3-4 kalimat profesional)",
+  "statistikK3": [
+    {"label": "Frequency Rate (FR)", "nilai": "${frVal}", "satuan": "per 1jt jam kerja", "trend": "Nihil Kecelakaan|↑ dari bulan lalu|↓ dari bulan lalu"},
+    {"label": "LTI (Lost Time Injury)", "nilai": "${insiden}", "satuan": "kasus", "trend": "..."},
+    {"label": "Near Miss", "nilai": "${hampirCelaka}", "satuan": "kasus", "trend": "..."},
+    {"label": "Total Temuan Inspeksi", "nilai": "${temuanTotal || 0}", "satuan": "temuan", "trend": "..."},
+    {"label": "Temuan Kritis", "nilai": "${temuanKritis}", "satuan": "temuan", "trend": "..."},
+    {"label": "Man-Hours Aman", "nilai": "${manHours}", "satuan": "jam kerja", "trend": "..."}
+  ],
+  "insidenDetail": [
+    {"jenis": "jenis insiden", "jumlah": 0, "kronologi": "kronologi singkat", "tindakLanjut": "tindak lanjut yang diambil"}
+  ],
+  "inspeksiHasil": [
+    {"area": "area/lokasi inspeksi", "temuan": 0, "kategori": "Kritis|Sedang|Minor", "status": "Open|Closed|In Progress"}
+  ],
+  "programK3": [
+    {"program": "nama program", "realisasi": "realisasi (cth: 4x)", "status": "Terlaksana|Parsial|Belum", "catatan": "catatan (jika ada)"}
+  ],
+  "analisisRisiko": "analisis risiko utama bulan ini dan faktor penyebab (2-3 kalimat)",
+  "rekomendasi": ["rekomendasi 1", "rekomendasi 2", "rekomendasi 3", "rekomendasi 4", "rekomendasi 5"],
+  "targetBulanDepan": ["target 1", "target 2", "target 3", "target 4"],
+  "penutup": "kalimat penutup laporan HSE formal"
+}
+Jika insiden = 0, buat statistik nihil kecelakaan dengan penekanan Zero Accident. Inspeksi min 3 area. Program min 4 item.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-laporan-hse error:", e); res.status(500).json({ error: "Gagal generate laporan HSE." }); }
+  });
+
+  // ==================== G16: SIMULATOR ASESMEN SKK — START ====================
+  app.post("/api/tools/simulator-asesmen-skk/start", async (req: any, res: any) => {
+    try {
+      const { skema, namaPeserta, pengalaman } = req.body;
+      const prompt = `Kamu adalah Asesor Kompetensi bersertifikat BNSP dari LSP Konstruksi Indonesia. Mulai sesi asesmen kompetensi untuk:
+- Skema Sertifikasi: ${skema}
+- Peserta: ${namaPeserta || "Peserta Asesmen"}
+- Pengalaman: ${pengalaman}
+
+Buka sesi asesmen dengan:
+1. Perkenalan formal sebagai asesor (nama: Asesor Kompetensi, LSP Konstruksi)
+2. Penjelasan singkat proses asesmen (wawancara + portofolio + observasi verbal)
+3. Penjelasan unit kompetensi yang akan dinilai (sebutkan 3-4 UK utama dari skema ${skema})
+4. Pertanyaan pembuka: minta peserta memperkenalkan diri dan pengalaman kerja relevan
+
+Respond JSON: {"pembuka": "pembukaan asesmen formal (3-4 paragraf profesional)"}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-asesmen-skk start error:", e); res.status(500).json({ error: "Gagal memulai asesmen." }); }
+  });
+
+  // ==================== G16: SIMULATOR ASESMEN SKK — RESPOND ====================
+  app.post("/api/tools/simulator-asesmen-skk/respond", async (req: any, res: any) => {
+    try {
+      const { skema, namaPeserta, pengalaman, jawaban, messageCount } = req.body;
+      const isSelesai = messageCount >= 12;
+      const prompt = `Kamu adalah Asesor Kompetensi BNSP menilai ${skema} untuk peserta dengan pengalaman ${pengalaman}. Ini pertanyaan ke-${messageCount}.
+
+Jawaban peserta: "${jawaban}"
+
+${isSelesai ? `Ini jawaban terakhir. Tutup sesi asesmen dan berikan penilaian final komprehensif.` : `Berdasarkan jawaban, lanjutkan dengan: menilai kualitas jawaban, menggali lebih dalam jika perlu, atau beralih ke unit kompetensi berikutnya. Ajukan 1 pertanyaan baru yang relevan dengan skema ${skema}.`}
+
+Respond JSON:
+{
+  "respons": "respons asesor (2-3 paragraf — penilaian + pertanyaan lanjutan atau penutup)",
+  "label": "fase asesmen (cth: Uji Pengetahuan / Verifikasi Portofolio / Uji Keterampilan / Penilaian Final)",
+  "selesai": ${isSelesai}${isSelesai ? `,
+  "nilai": {
+    "skor": nilai antara 0-100,
+    "predikat": "Kompeten|Belum Kompeten|Kompeten dengan Syarat",
+    "ukKompeten": ["Unit Kompetensi 1 yang dikuasai", "UK 2", "UK 3"],
+    "ukBelumKompeten": ["UK yang perlu ditingkatkan (jika ada)"],
+    "umpanBalik": "umpan balik terperinci untuk peserta (2-3 kalimat)",
+    "rekomendasi": "rekomendasi pengembangan kompetensi selanjutnya"
+  }` : ""}
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-asesmen-skk respond error:", e); res.status(500).json({ error: "Gagal merespons." }); }
+  });
+
   // ==================== G15: SIMULATOR NEGOSIASI HARGA — START ====================
   app.post("/api/tools/simulator-negosiasi-harga/start", async (req: any, res: any) => {
     try {

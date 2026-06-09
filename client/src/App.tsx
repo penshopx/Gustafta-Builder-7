@@ -202,6 +202,11 @@ import KalkulatorProduktivitasTK from "@/pages/kalkulator-produktivitas-tk";
 import PanduanSertifikasiMigas from "@/pages/panduan-sertifikasi-migas";
 import GeneratorNotulensi from "@/pages/generator-notulensi";
 import SimulatorSidangK3 from "@/pages/simulator-sidang-k3";
+import GeneratorChecklistSerahTerima from "@/pages/generator-checklist-serah-terima";
+import KalkulatorCashflowProyek from "@/pages/kalkulator-cashflow-proyek";
+import PanduanTKDN from "@/pages/panduan-tkdn";
+import GeneratorLaporanHSE from "@/pages/generator-laporan-hse";
+import SimulatorAsesmenSKK from "@/pages/simulator-asesmen-skk";
 import GeneratorSuratTeguran from "@/pages/generator-surat-teguran";
 import KalkulatorBEPProyek from "@/pages/kalkulator-bep-proyek";
 import PanduanSMKK from "@/pages/panduan-smkk";
@@ -1243,6 +1248,11 @@ function Router() {
         <Route path="/panduan-sertifikasi-migas" component={PanduanSertifikasiMigas} />
         <Route path="/generator-notulensi" component={GeneratorNotulensi} />
         <Route path="/simulator-sidang-k3" component={SimulatorSidangK3} />
+        <Route path="/generator-checklist-serah-terima" component={GeneratorChecklistSerahTerima} />
+        <Route path="/kalkulator-cashflow-proyek" component={KalkulatorCashflowProyek} />
+        <Route path="/panduan-tkdn" component={PanduanTKDN} />
+        <Route path="/generator-laporan-hse" component={GeneratorLaporanHSE} />
+        <Route path="/simulator-asesmen-skk" component={SimulatorAsesmenSKK} />
         <Route path="/generator-surat-teguran" component={GeneratorSuratTeguran} />
         <Route path="/kalkulator-bep-proyek" component={KalkulatorBEPProyek} />
         <Route path="/panduan-smkk" component={PanduanSMKK} />
