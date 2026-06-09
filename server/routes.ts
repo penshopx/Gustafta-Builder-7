@@ -19895,6 +19895,192 @@ Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertany
   });
 
   // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  // ==================== G18: GENERATOR RKS ====================
+  app.post("/api/tools/generator-rks", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, namaProyek, standar, tingkat, nilaiPekerjaan, seksiFokus } = req.body;
+      const seksiStr = Array.isArray(seksiFokus) && seksiFokus.length > 0 ? seksiFokus.join(", ") : "semua seksi standar";
+      const prompt = `Kamu adalah konsultan spesifikasi teknis konstruksi berpengalaman. Buat RENCANA KERJA DAN SYARAT (RKS) / Spesifikasi Teknis untuk:
+- Jenis Pekerjaan: ${jenisPekerjaan}
+- Nama Proyek: ${namaProyek || "Proyek Konstruksi"}
+- Standar Referensi: ${standar}
+- Tingkat Detail: ${tingkat}
+- Nilai Pekerjaan: ${nilaiPekerjaan || "tidak disebutkan"}
+- Seksi Khusus Difokuskan: ${seksiStr}
+
+Respond JSON:
+{
+  "judulRKS": "RENCANA KERJA DAN SYARAT (RKS) — ${jenisPekerjaan.toUpperCase()}",
+  "nomorDokumen": "RKS-[KODE]-${new Date().getFullYear()}",
+  "bab": [
+    {
+      "nomor": "I",
+      "judul": "LINGKUP PEKERJAAN",
+      "isi": "isi bab lengkap dalam format dokumen teknis — jelas, terstruktur, sesuai standar ${standar}"
+    },
+    {
+      "nomor": "II",
+      "judul": "STANDAR DAN REFERENSI",
+      "isi": "daftar standar dan regulasi yang berlaku: SNI, ASTM, AASHTO, Permen PUPR, dll"
+    },
+    {
+      "nomor": "III",
+      "judul": "PERSYARATAN MATERIAL DAN BAHAN",
+      "isi": "spesifikasi material: mutu minimum, uji penerimaan, penyimpanan, handling"
+    },
+    {
+      "nomor": "IV",
+      "judul": "PERALATAN DAN TENAGA KERJA",
+      "isi": "persyaratan peralatan & kualifikasi tenaga kerja"
+    },
+    {
+      "nomor": "V",
+      "judul": "METODE PELAKSANAAN",
+      "isi": "prosedur pelaksanaan step by step — persiapan, pelaksanaan, penyelesaian"
+    },
+    {
+      "nomor": "VI",
+      "judul": "PENGENDALIAN MUTU DAN PENGUJIAN",
+      "isi": "kriteria penerimaan, frekuensi pengujian, metode QC, dokumentasi"
+    },
+    {
+      "nomor": "VII",
+      "judul": "KESELAMATAN KERJA (K3)",
+      "isi": "persyaratan K3 spesifik untuk pekerjaan ini, APD wajib, prosedur keselamatan"
+    }
+  ],
+  "lampiran": ["Lampiran 1: Daftar SNI yang dirujuk", "Lampiran 2: Formulir Pemeriksaan", "Lampiran 3: ..."],
+  "catatan": "catatan penggunaan dokumen ini (jika ada)"
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-rks error:", e); res.status(500).json({ error: "Gagal generate RKS." }); }
+  });
+
+  // ==================== G18: PANDUAN ISO 9001 ====================
+  app.post("/api/tools/panduan-iso-9001", async (req: any, res: any) => {
+    try {
+      const { skalaPer, jenisKonstruksi, statusSMM, targetSertif, fokusKlausul } = req.body;
+      const fokusStr = Array.isArray(fokusKlausul) && fokusKlausul.length > 0 ? fokusKlausul.join(", ") : "semua klausul";
+      const prompt = `Kamu adalah konsultan SMM ISO 9001:2015 berpengalaman di industri konstruksi. Buat PANDUAN IMPLEMENTASI ISO 9001:2015 untuk:
+- Jenis Perusahaan: ${jenisKonstruksi}
+- Skala: ${skalaPer}
+- Status SMM Saat Ini: ${statusSMM}
+- Target Sertifikasi: ${targetSertif || "tidak disebutkan"}
+- Fokus Klausul: ${fokusStr}
+
+Respond JSON:
+{
+  "ringkasan": "ringkasan profil & tantangan implementasi ISO 9001:2015 untuk profil ini (2-3 kalimat)",
+  "klausulUtama": [
+    {
+      "klausul": "4.1",
+      "judul": "Memahami Konteks Organisasi",
+      "persyaratan": "persyaratan utama klausul ini",
+      "implementasi": ["langkah implementasi 1", "langkah 2", "langkah 3", "langkah 4"],
+      "dokumenWajib": ["dokumen/rekaman wajib 1", "dokumen 2"],
+      "indikatorKesesuaian": "tanda bahwa klausul ini sudah terpenuhi"
+    }
+  ],
+  "roadmapImplementasi": [
+    {
+      "fase": "nama fase",
+      "durasi": "X minggu/bulan",
+      "aktivitas": ["aktivitas 1", "aktivitas 2", "aktivitas 3"],
+      "output": "deliverable/output fase ini"
+    }
+  ],
+  "dokumenSistem": ["daftar dokumen sistem mutu yang wajib dibuat (min 15 dokumen)"],
+  "biayaEstimasi": "estimasi biaya sertifikasi ISO 9001 untuk skala ${skalaPer} (audit eksternal, konsultan, training)",
+  "tipsSukses": ["tip 1", "tip 2", "tip 3", "tip 4", "tip 5"]
+}
+Buat min 5 klausul (pilih yang paling relevan & penting untuk ${jenisKonstruksi}). Roadmap min 4 fase. Dokumen sistem min 15 item.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-iso-9001 error:", e); res.status(500).json({ error: "Gagal generate panduan ISO 9001." }); }
+  });
+
+  // ==================== G18: GENERATOR BERITA ACARA ====================
+  app.post("/api/tools/generator-berita-acara", async (req: any, res: any) => {
+    try {
+      const { jenisBA, namaProyek, pihakPertama, pihakKedua, tanggal, lokasi, nomorKontrak, nilaiProgress, konteksKhusus } = req.body;
+      const prompt = `Kamu adalah konsultan kontrak konstruksi dan dokumen legal proyek. Buat BERITA ACARA resmi untuk:
+- Jenis Berita Acara: ${jenisBA}
+- Nama Proyek: ${namaProyek}
+- Pihak Pertama (Pemberi Kerja): ${pihakPertama || "Pemberi Kerja"}
+- Pihak Kedua (Kontraktor): ${pihakKedua || "Kontraktor"}
+- Nomor Kontrak: ${nomorKontrak || "[Nomor Kontrak]"}
+- Tanggal: ${tanggal || "[Tanggal]"}
+- Nilai / Progres: ${nilaiProgress || "tidak disebutkan"}
+- Konteks Khusus: ${konteksKhusus || "tidak ada catatan khusus"}
+
+Respond JSON:
+{
+  "judul": "BERITA ACARA ${jenisBA.toUpperCase()}",
+  "nomorBA": "No. BA-[KODE]/${new Date().getFullYear()}",
+  "isiBA": "isi berita acara lengkap dalam format dokumen legal/formal — narasi profesional dari awal sampai selesai, termasuk: dasar hukum/kontrak, uraian hal yang disepakati, pernyataan kesepakatan, pernyataan keabsahan, dan kolom tanda tangan. Gunakan format berita acara resmi Indonesia.",
+  "pihakYangMenandatangani": ["Pihak Pertama: ${pihakPertama || "Pemberi Kerja"}", "Pihak Kedua: ${pihakKedua || "Kontraktor"}", "Konsultan Pengawas (jika ada)"],
+  "lampiran": ["Lampiran 1 yang relevan dengan jenis BA ini", "Lampiran 2", "Lampiran 3"],
+  "catatan": "catatan penting atau instruksi pengarsipan"
+}`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-berita-acara error:", e); res.status(500).json({ error: "Gagal generate berita acara." }); }
+  });
+
+  // ==================== G18: SIMULATOR UJIAN TEORI SKK — GENERATE SOAL ====================
+  app.post("/api/tools/simulator-ujian-teori-skk/generate", async (req: any, res: any) => {
+    try {
+      const { bidang, jumlahSoal } = req.body;
+      const n = Math.min(parseInt(jumlahSoal) || 20, 40);
+      const prompt = `Kamu adalah penyusun soal ujian kompetensi SKK LPJK yang berpengalaman. Buat ${n} soal pilihan ganda (A/B/C/D) untuk ujian teori:
+Bidang & Level: ${bidang}
+
+Soal harus mencakup: konsep teknis, regulasi (SNI/Permen PUPR/UU Jasa Konstruksi), prosedur kerja, K3, manajemen, dan pemecahan masalah. Variasikan tingkat kesulitan (40% mudah, 40% sedang, 20% sulit).
+
+Respond JSON:
+{
+  "soal": [
+    {
+      "nomor": 1,
+      "pertanyaan": "teks pertanyaan yang jelas dan spesifik",
+      "pilihan": ["A. teks pilihan A", "B. teks pilihan B", "C. teks pilihan C", "D. teks pilihan D"],
+      "kunciJawaban": "A|B|C|D",
+      "penjelasan": "penjelasan mengapa jawaban tersebut benar, dan mengapa pilihan lain kurang tepat (2-3 kalimat)",
+      "referensi": "SNI/regulasi/standar yang relevan"
+    }
+  ]
+}
+Pastikan semua ${n} soal unik, relevan dengan ${bidang}, dan kunci jawaban terdistribusi (A/B/C/D tidak monoton).`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.5,
+        max_tokens: 6000,
+        response_format: { type: "json_object" },
+      });
+      res.json(JSON.parse(completion.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-ujian-teori-skk error:", e); res.status(500).json({ error: "Gagal generate soal ujian." }); }
+  });
+
   // ==================== G17: GENERATOR SURAT KUASA ====================
   app.post("/api/tools/generator-surat-kuasa", async (req: any, res: any) => {
     try {

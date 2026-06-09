@@ -202,6 +202,11 @@ import KalkulatorProduktivitasTK from "@/pages/kalkulator-produktivitas-tk";
 import PanduanSertifikasiMigas from "@/pages/panduan-sertifikasi-migas";
 import GeneratorNotulensi from "@/pages/generator-notulensi";
 import SimulatorSidangK3 from "@/pages/simulator-sidang-k3";
+import GeneratorRKS from "@/pages/generator-rks";
+import KalkulatorAHSP from "@/pages/kalkulator-ahsp";
+import PanduanISO9001 from "@/pages/panduan-iso-9001";
+import GeneratorBeritaAcara from "@/pages/generator-berita-acara";
+import SimulatorUjianTeoriSKK from "@/pages/simulator-ujian-teori-skk";
 import GeneratorSuratKuasa from "@/pages/generator-surat-kuasa";
 import KalkulatorMaterialBeton from "@/pages/kalkulator-material-beton";
 import PanduanManajemenRisiko from "@/pages/panduan-manajemen-risiko";
@@ -1253,6 +1258,11 @@ function Router() {
         <Route path="/panduan-sertifikasi-migas" component={PanduanSertifikasiMigas} />
         <Route path="/generator-notulensi" component={GeneratorNotulensi} />
         <Route path="/simulator-sidang-k3" component={SimulatorSidangK3} />
+        <Route path="/generator-rks" component={GeneratorRKS} />
+        <Route path="/kalkulator-ahsp" component={KalkulatorAHSP} />
+        <Route path="/panduan-iso-9001" component={PanduanISO9001} />
+        <Route path="/generator-berita-acara" component={GeneratorBeritaAcara} />
+        <Route path="/simulator-ujian-teori-skk" component={SimulatorUjianTeoriSKK} />
         <Route path="/generator-surat-kuasa" component={GeneratorSuratKuasa} />
         <Route path="/kalkulator-material-beton" component={KalkulatorMaterialBeton} />
         <Route path="/panduan-manajemen-risiko" component={PanduanManajemenRisiko} />
