@@ -217,6 +217,11 @@ import GeneratorMethodStatement from "@/pages/generator-method-statement";
 import GeneratorWorkPermit from "@/pages/generator-work-permit";
 import GeneratorRisalahRapat from "@/pages/generator-risalah-rapat";
 import SimulatorWawancaraSKK from "@/pages/simulator-wawancara-skk";
+import KalkulatorTulangan from "@/pages/kalkulator-tulangan";
+import GeneratorSPK from "@/pages/generator-spk";
+import PanduanPBGSLF from "@/pages/panduan-pbg-slf";
+import GeneratorKurvaS from "@/pages/generator-kurva-s";
+import SimulatorNCRHandling from "@/pages/simulator-ncr-handling";
 import GeneratorSuratKuasa from "@/pages/generator-surat-kuasa";
 import KalkulatorMaterialBeton from "@/pages/kalkulator-material-beton";
 import PanduanManajemenRisiko from "@/pages/panduan-manajemen-risiko";
@@ -1283,6 +1288,11 @@ function Router() {
         <Route path="/generator-work-permit" component={GeneratorWorkPermit} />
         <Route path="/generator-risalah-rapat" component={GeneratorRisalahRapat} />
         <Route path="/simulator-wawancara-skk" component={SimulatorWawancaraSKK} />
+        <Route path="/kalkulator-tulangan" component={KalkulatorTulangan} />
+        <Route path="/generator-spk" component={GeneratorSPK} />
+        <Route path="/panduan-pbg-slf" component={PanduanPBGSLF} />
+        <Route path="/generator-kurva-s" component={GeneratorKurvaS} />
+        <Route path="/simulator-ncr-handling" component={SimulatorNCRHandling} />
         <Route path="/generator-surat-kuasa" component={GeneratorSuratKuasa} />
         <Route path="/kalkulator-material-beton" component={KalkulatorMaterialBeton} />
         <Route path="/panduan-manajemen-risiko" component={PanduanManajemenRisiko} />

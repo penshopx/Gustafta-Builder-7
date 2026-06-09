@@ -20630,6 +20630,245 @@ Respond JSON:
     } catch (e: any) { console.error("wawancara-skk error:", e); res.status(500).json({ error: "Gagal memproses sesi wawancara." }); }
   });
 
+  // ==================== G21: GENERATOR SPK ====================
+  app.post("/api/tools/generator-spk", async (req: any, res: any) => {
+    try {
+      const { tipeSPK, namaProyek, namaPemberiKerja, namaPenerima, lingkupPekerjaan, nilaiKontrak, durasiPekerjaan, tanggalMulai, metodeBayar, retensi } = req.body;
+      if (!namaProyek || !lingkupPekerjaan) return res.status(400).json({ error: "Nama proyek dan lingkup pekerjaan wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const tahun = new Date().getFullYear();
+      const bulan = String(new Date().getMonth() + 1).padStart(2, "0");
+      const nomorRand = Math.floor(Math.random() * 900) + 100;
+      const prompt = `Kamu adalah legal drafter kontrak konstruksi Indonesia berpengalaman 20 tahun. Buat Surat Perintah Kerja (SPK) formal untuk konteks:
+
+Tipe SPK: ${tipeSPK}
+Nama Proyek: ${namaProyek}
+Pemberi Kerja: ${namaPemberiKerja || "PT [Pemberi Kerja]"}
+Penerima SPK: ${namaPenerima || "[Penerima SPK]"}
+Nilai SPK: ${nilaiKontrak || "sesuai penawaran yang telah disetujui"}
+Durasi: ${durasiPekerjaan || "sesuai jadwal yang disepakati"}
+Tanggal Mulai: ${tanggalMulai || "sesuai kesepakatan"}
+Metode Pembayaran: ${metodeBayar}
+Retensi: ${retensi}%
+Lingkup Pekerjaan: ${lingkupPekerjaan}
+
+Hasilkan JSON dengan struktur:
+{
+  "nomorSPK": "SPK/${nomorRand}/${bulan}/${tahun}",
+  "judul": "SURAT PERINTAH KERJA [nomor dan judul singkat sesuai tipe]",
+  "narasiLingkupPekerjaan": "Narasi formal 3-4 kalimat menjelaskan lingkup, lokasi, standar acuan (SNI/Permen/SSUK terkait)",
+  "ketentuanUmum": ["5-7 ketentuan umum: waktu pelaksanaan, koordinasi, sub-pelimpahan, dll"],
+  "ketentuanTeknis": ["5-7 ketentuan teknis spesifik sesuai tipe SPK: material, standar mutu, shop drawing, inspeksi, dll"],
+  "ketentuanK3": ["4-5 ketentuan K3: APD, JSA, izin kerja, pelaporan kecelakaan, kepatuhan SMK3/Permenaker"],
+  "ketentuanPembayaran": "Paragraf lengkap tentang mekanisme pembayaran, termin, retensi ${retensi}%, dokumen tagihan yang dibutuhkan",
+  "sanksiDanDenda": ["3-4 sanksi: denda keterlambatan (0,1%/hari maks 5%), pemutusan sepihak, klaim kerusakan"],
+  "ketentuanPengakhiran": ["3-4 kondisi pengakhiran SPK: penyelesaian pekerjaan, wanprestasi, force majeure, pemutusan sepihak"],
+  "ketentuanLainnya": ["3-4 ketentuan: penyelesaian sengketa (BANI/pengadilan setempat), hukum yang berlaku, addendum, kerahasiaan"],
+  "pasal_tandatangan": "Kalimat penutup: 'SPK ini dibuat dalam 2 rangkap, masing-masing bermaterai cukup dan mempunyai kekuatan hukum yang sama...'"
+}
+Balas hanya dengan JSON valid, tidak ada teks lain.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 2000 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("generator-spk error:", e); res.status(500).json({ error: "Gagal membuat SPK." }); }
+  });
+
+  // ==================== G21: PANDUAN PBG & SLF ====================
+  app.post("/api/tools/panduan-pbg-slf", async (req: any, res: any) => {
+    try {
+      const { jenisPermohonan, lokasiPeruntukan, luasBangunan, jumlahLantai, kondisiSite } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah konsultan perizinan bangunan gedung Indonesia berpengalaman, ahli PP 16/2021 dan Permen PUPR 12/2021. Buat panduan perizinan komprehensif untuk:
+
+Jenis Permohonan: ${jenisPermohonan}
+Lokasi: ${lokasiPeruntukan}
+Luas Bangunan: ${luasBangunan || "tidak disebutkan"}
+Jumlah Lantai: ${jumlahLantai || "tidak disebutkan"}
+Kondisi Khusus: ${kondisiSite || "tidak ada"}
+
+Hasilkan JSON:
+{
+  "judul": "Panduan [jenis permohonan singkat] — [lokasi]",
+  "ringkasan": "2-3 kalimat ringkasan proses, regulasi utama, dan estimasi waktu keseluruhan",
+  "dasarHukum": ["5-7 regulasi: UU, PP, Permen PUPR, Permen Dalam Negeri, SNI terkait"],
+  "prasyarat": ["5-7 prasyarat sebelum mengajukan: dokumen tanah, kesesuaian RDTR/RTRW, batas sempadan, KDB/KLB, dll"],
+  "tahapan": [
+    {
+      "tahap": "Nama tahap singkat",
+      "kegiatan": "Uraian singkat kegiatan",
+      "dokumenDibutuhkan": ["3-5 dokumen spesifik"],
+      "instansi": "Nama instansi pelaksana (DPMPTSP/Dinas PUPR/dll)",
+      "estimasiWaktu": "X hari kerja / X minggu",
+      "catatan": "Catatan penting atau risiko di tahap ini (boleh kosong)"
+    }
+  ],
+  "dokumenLengkap": ["12-16 dokumen lengkap: IMB lama/SPPT PBB/gambar arsitek/perhitungan struktur/dll"],
+  "biayaRetribusi": "Penjelasan estimasi retribusi: rumus 0,X% × standar harga per m² × luas × koefisien, contoh angka untuk DKI/daerah lain",
+  "tipsPercepatan": ["5-6 tips: paralel urus dokumen, konsultasi pra-permohonan, gunakan OSS-RBA, cek perda RDTR dulu, dll"],
+  "masalahUmum": [
+    {"masalah": "Masalah yang sering terjadi", "solusi": "Solusi konkret"},
+    {"masalah": "...", "solusi": "..."},
+    {"masalah": "...", "solusi": "..."},
+    {"masalah": "...", "solusi": "..."},
+    {"masalah": "...", "solusi": "..."}
+  ],
+  "totalEstimasiWaktu": "X–Y bulan (range realistis)"
+}
+Buat 6-8 tahapan yang logis dan realistis. Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 2500 });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("panduan-pbg-slf error:", e); res.status(500).json({ error: "Gagal membuat panduan PBG/SLF." }); }
+  });
+
+  // ==================== G21: GENERATOR KURVA S ====================
+  app.post("/api/tools/kurva-s", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, namaProyek, durasiTotal, satuanWaktu, nilaiKontrak, catatanKhusus } = req.body;
+      if (!namaProyek) return res.status(400).json({ error: "Nama proyek wajib diisi." });
+      const durasi = Math.min(parseInt(durasiTotal) || 12, 24);
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah manajer proyek konstruksi Indonesia berpengalaman. Buat data Kurva S rencana untuk:
+
+Jenis Proyek: ${jenisProyek}
+Nama Proyek: ${namaProyek}
+Durasi: ${durasi} ${satuanWaktu}
+Nilai Kontrak: ${nilaiKontrak || "tidak disebutkan"}
+Catatan Khusus: ${catatanKhusus || "tidak ada"}
+
+Buat item pekerjaan yang realistis sesuai jenis proyek dengan distribusi S-curve (lambat di awal, cepat di tengah, melambat di akhir).
+
+Hasilkan JSON:
+{
+  "judulProyek": "Kurva S Rencana — ${namaProyek}",
+  "periodePelaporan": "${satuanWaktu}",
+  "itemPekerjaan": [
+    {
+      "no": 1,
+      "uraian": "Nama item pekerjaan",
+      "bobot": 5.5,
+      "distribusi": [array of ${durasi} numbers, each representing % bobot pada periode itu, total = bobot item ini, boleh 0 jika pekerjaan belum/sudah selesai]
+    }
+  ],
+  "kumulatifRencana": [array of ${durasi} numbers — kumulatif % semua item per periode, harus mulai mendekati 0 dan berakhir tepat 100],
+  "milestoneKritis": [
+    {"periode": N, "label": "Nama milestone", "kumulatif": XX.XX}
+  ],
+  "catatanPerencanaan": "Penjelasan 3-4 kalimat tentang pola distribusi, asumsi produktivitas, risiko jadwal, dan rekomendasi monitoring"
+}
+
+ATURAN PENTING:
+- Total semua bobot item = TEPAT 100.00
+- Distribusi tiap item: array tepat ${durasi} elemen, sum = bobot item tersebut, boleh nilai 0
+- kumulatifRencana: array tepat ${durasi} elemen, nilai terakhir = TEPAT 100.00
+- Buat 8-12 item pekerjaan yang relevan untuk ${jenisProyek}
+- 3-5 milestone kritis dengan nama bermakna (Mobilisasi Selesai, Struktur Atas Selesai, Finishing Selesai, PHO, dll)
+- Distribusi mengikuti kurva S: lambat-cepat-lambat
+Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 3000 });
+      const raw = JSON.parse(completion.choices[0].message.content || "{}");
+      // Normalize: ensure kumulatifRencana has exactly `durasi` elements
+      if (raw.kumulatifRencana && raw.kumulatifRencana.length !== durasi) {
+        const k = raw.kumulatifRencana;
+        if (k.length < durasi) { while (raw.kumulatifRencana.length < durasi) raw.kumulatifRencana.push(100); }
+        else { raw.kumulatifRencana = k.slice(0, durasi); }
+      }
+      if (raw.itemPekerjaan) {
+        raw.itemPekerjaan = raw.itemPekerjaan.map((item: any) => {
+          const d = Array.isArray(item.distribusi) ? item.distribusi : [];
+          while (d.length < durasi) d.push(0);
+          item.distribusi = d.slice(0, durasi);
+          return item;
+        });
+      }
+      return res.json({ hasil: raw });
+    } catch (e: any) { console.error("kurva-s error:", e); res.status(500).json({ error: "Gagal membuat Kurva S." }); }
+  });
+
+  // ==================== G21: SIMULATOR NCR HANDLING ====================
+  app.post("/api/tools/simulator-ncr", async (req: any, res: any) => {
+    try {
+      const { action, jenisTemuan, standarAcuan, jabatanAuditee, totalSoal, nomorSoal, skenario, pertanyaan, jawaban, riwayat } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      if (action === "start") {
+        const prompt = `Kamu adalah lead auditor ISO/CSMS berpengalaman 15 tahun. Buat skenario NCR nyata dan pertanyaan pertama untuk sesi simulasi penanganan NCR.
+
+Jenis Temuan: ${jenisTemuan}
+Standar Acuan: ${standarAcuan}
+Jabatan Auditee: ${jabatanAuditee}
+Total Soal: ${totalSoal}
+
+Hasilkan JSON:
+{
+  "intro": "Pesan pembuka auditor (2-3 kalimat, profesional, tegas, sebutkan konteks audit)",
+  "skenario": {
+    "judulNCR": "Judul NCR formal singkat",
+    "deskripsiTemuan": "Deskripsi 2-3 kalimat tentang apa yang ditemukan auditor",
+    "klausulAcuan": "Klausul/pasal/elemen standar yang dilanggar",
+    "buktiObjektif": ["3-4 bukti objektif konkret yang ditemukan auditor"],
+    "tingkatKeparahan": "NCR Major / NCR Minor / OFI"
+  },
+  "pertanyaan": "Pertanyaan pertama auditor tentang akar masalah (langsung dan spesifik)",
+  "konteks": "Konteks tambahan opsional (boleh kosong)"
+}
+Balas hanya JSON valid.`;
+        const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 800 });
+        return res.json(JSON.parse(completion.choices[0].message.content || "{}"));
+      }
+
+      if (action === "answer" || action === "finish") {
+        const riwayatStr = (riwayat || []).map((r: any, i: number) => `Soal ${i+1}: ${r.pertanyaan}\nJawaban: ${r.jawaban}\nSkor: ${r.skor}/5`).join("\n\n");
+        const isLast = action === "finish";
+        const prompt = `Kamu adalah lead auditor ISO/CSMS yang sedang mengevaluasi auditee.
+
+Konteks Skenario NCR: ${JSON.stringify(skenario)}
+Standar Acuan: ${standarAcuan}
+Jabatan Auditee: ${jabatanAuditee}
+Soal ${nomorSoal}/${totalSoal}: ${pertanyaan}
+Jawaban Auditee: ${jawaban}
+${riwayatStr ? `\nRiwayat sebelumnya:\n${riwayatStr}` : ""}
+
+Evaluasi jawaban dan${isLast ? " buat hasil akhir" : " buat pertanyaan berikutnya"}.
+
+Hasilkan JSON:
+{
+  "evaluasi": {
+    "skor": [1-5 integer],
+    "aspekBaik": "Apa yang benar/baik dari jawaban (boleh kosong jika sangat buruk)",
+    "aspekKurang": "Apa yang kurang/salah (boleh kosong jika sempurna)",
+    "jawabanIdeal": "Jawaban ideal lengkap sesuai standar ${standarAcuan}",
+    "referensi": "Klausul/pasal spesifik yang relevan"
+  }${isLast ? `,
+  "hasilAkhir": {
+    "totalSkor": [rata-rata skor semua soal],
+    "predikat": "Sangat Kompeten (≥4.5) / Cukup Kompeten (≥3.0) / Perlu Peningkatan (<3.0)",
+    "ringkasan": "2-3 kalimat ringkasan performa secara keseluruhan",
+    "kekuatan": ["3 kekuatan utama yang ditunjukkan"],
+    "areaPerbaikan": ["3 area yang perlu ditingkatkan"],
+    "rekomendasiPelatihan": ["3 rekomendasi pelatihan/referensi spesifik"]
+  }` : `,
+  "pertanyaanBerikutnya": "Pertanyaan ke-${(nomorSoal || 1) + 1} yang lebih dalam (${
+    nomorSoal === 1 ? "tentang rencana tindakan korektif" :
+    nomorSoal === 2 ? "tentang tindakan preventif agar tidak terulang" :
+    nomorSoal === 3 ? "tentang kelengkapan dokumentasi dan rekaman bukti" :
+    "tentang komunikasi ke manajemen dan timeline penutupan NCR"
+  })",
+  "konteksBerikutnya": "Konteks tambahan opsional"`}
+}
+Balas hanya JSON valid.`;
+        const completion = await openai.chat.completions.create({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }], response_format: { type: "json_object" }, max_tokens: 1200 });
+        return res.json(JSON.parse(completion.choices[0].message.content || "{}"));
+      }
+
+      res.status(400).json({ error: "Action tidak valid." });
+    } catch (e: any) { console.error("simulator-ncr error:", e); res.status(500).json({ error: "Gagal memproses sesi NCR." }); }
+  });
+
   // ==================== G17: GENERATOR SURAT KUASA ====================
   app.post("/api/tools/generator-surat-kuasa", async (req: any, res: any) => {
     try {
