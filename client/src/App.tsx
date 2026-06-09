@@ -192,6 +192,11 @@ import KalkulatorCPD from "@/pages/kalkulator-cpd";
 import EvaluasiPortofolio from "@/pages/evaluasi-portofolio";
 import GeneratorCVSKK from "@/pages/generator-cv-skk";
 import MateriBelajarSKK from "@/pages/materi-belajar-skk";
+import ValidatorKlaimUK from "@/pages/validator-klaim-uk";
+import GeneratorBASTProyek from "@/pages/generator-bast-proyek";
+import PanduanIUJKSBU from "@/pages/panduan-iujk-sbu";
+import GeneratorRMK from "@/pages/generator-rmk";
+import SimulatorCSMS from "@/pages/simulator-csms";
 import PanduanMutasiSKK from "@/pages/panduan-mutasi-skk";
 import GeneratorJSA from "@/pages/generator-jsa";
 import KalkulatorJamKerjaProyek from "@/pages/kalkulator-jam-kerja-proyek";
@@ -1204,6 +1209,11 @@ function Router() {
         <Route path="/evaluasi-portofolio" component={EvaluasiPortofolio} />
         <Route path="/generator-cv-skk" component={GeneratorCVSKK} />
         <Route path="/materi-belajar-skk" component={MateriBelajarSKK} />
+        <Route path="/validator-klaim-uk" component={ValidatorKlaimUK} />
+        <Route path="/generator-bast-proyek" component={GeneratorBASTProyek} />
+        <Route path="/panduan-iujk-sbu" component={PanduanIUJKSBU} />
+        <Route path="/generator-rmk" component={GeneratorRMK} />
+        <Route path="/simulator-csms" component={SimulatorCSMS} />
         <Route path="/panduan-mutasi-skk" component={PanduanMutasiSKK} />
         <Route path="/generator-jsa" component={GeneratorJSA} />
         <Route path="/kalkulator-jam-kerja-proyek" component={KalkulatorJamKerjaProyek} />

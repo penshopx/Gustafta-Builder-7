@@ -19666,6 +19666,265 @@ Analisis profil ini dan kembalikan JSON SAJA (tanpa markdown) dengan format pers
     }
   });
 
+  // ==================== AI TOOLS G10: VALIDATOR KLAIM UK ====================
+  app.post("/api/tools/validator-klaim-uk", async (req: any, res: any) => {
+    try {
+      const { jabatan, klaimList } = req.body;
+      if (!jabatan || !klaimList?.length) return res.status(400).json({ error: "Jabatan dan klaim wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const klaimText = klaimList.map((k: any, i: number) => `Unit ${i+1}: ${k.namaUnit}\nPengalaman: ${k.deskripsiPengalaman}\nBukti: ${k.buktiYangDimiliki || "tidak disebutkan"}`).join("\n\n");
+      const prompt = `Anda adalah asesor BNSP senior yang menilai kekuatan klaim unit kompetensi SKK.
+
+Jabatan yang Dituju: ${jabatan}
+Klaim Unit Kompetensi:
+${klaimText}
+
+Evaluasi setiap klaim secara kritis seperti asesor sungguhan. Kembalikan JSON PERSIS:
+{
+  "jabatan": "${jabatan}",
+  "ringkasan": "ringkasan penilaian keseluruhan kesiapan kandidat",
+  "skorKeseluruhan": [0-100, angka saja],
+  "unitValidasi": [
+    {
+      "namaUnit": "nama unit yang diklaim",
+      "status": "Kuat" atau "Cukup" atau "Lemah" atau "Tidak Cukup",
+      "skor": [0-100],
+      "analisis": "analisis objektif: apakah pengalaman yang dideskripsikan cukup membuktikan kompetensi unit ini",
+      "buktiYangDiperlukan": "bukti dokumen spesifik yang akan diminta asesor untuk unit ini",
+      "saranPerkuatan": "saran konkret untuk memperkuat klaim unit ini"
+    }
+  ],
+  "kesiapanAsesmen": "1 kalimat: apakah kandidat sudah siap mendaftar asesmen atau perlu persiapan dulu",
+  "prioritasPerbaikan": ["3-4 hal prioritas yang harus diperbaiki sebelum mendaftar asesmen"],
+  "rekomendasiDokumen": ["dokumen-dokumen pendukung yang sebaiknya disiapkan"]
+}
+
+Skor Kuat: 80-100, Cukup: 60-79, Lemah: 40-59, Tidak Cukup: 0-39. Bersikap tegas dan objektif.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("validator-klaim-uk error:", e); res.status(500).json({ error: "Gagal memvalidasi klaim." }); }
+  });
+
+  // ==================== AI TOOLS G10: GENERATOR BAST PROYEK ====================
+  app.post("/api/tools/generator-bast-proyek", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, jenisSerahTerima, namaProyek, nilaiKontrak } = req.body;
+      if (!jenisProyek || !namaProyek) return res.status(400).json({ error: "Jenis proyek dan nama proyek wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan hukum konstruksi Indonesia yang membuat Berita Acara Serah Terima (BAST) proyek.
+
+Jenis Proyek: ${jenisProyek}
+Nama Proyek: ${namaProyek}
+Jenis Serah Terima: ${jenisSerahTerima}
+Nilai Kontrak: ${nilaiKontrak || "tercantum dalam kontrak"}
+
+Kembalikan JSON PERSIS:
+{
+  "judulDokumen": "BERITA ACARA SERAH TERIMA [jenis yang relevan]",
+  "nomorDokumen": "BAST-[nomor]/[tahun]",
+  "jenisSerahTerima": "${jenisSerahTerima}",
+  "tanggalDokumen": "[tanggal hari ini]",
+  "isiDokumen": {
+    "pembukaanLegal": "paragraf pembukaan formal dengan dasar hukum (UU 2/2017, kontrak, dll)",
+    "identitasPihakPenyerah": { "uraian": "uraian pihak penyerah", "isiKosong": "PIHAK PERTAMA (Penyedia Jasa / Kontraktor):\nNama Perusahaan : _______________\nDiwakili oleh    : _______________\nJabatan          : _______________\nAlamat           : _______________" },
+    "identitasPihakPenerima": { "uraian": "uraian pihak penerima", "isiKosong": "PIHAK KEDUA (Pengguna Jasa / PPK):\nNama             : _______________\nJabatan          : _______________\nInstansi         : _______________\nAlamat           : _______________" },
+    "deskripsiPekerjaan": "uraian formal pekerjaan yang diserahterimakan",
+    "nilaiKontrak": "klausul nilai kontrak formal",
+    "pernyataanSelesai": "pernyataan formal bahwa pekerjaan telah diselesaikan",
+    "kondisiPenyerahan": "kondisi dan kelengkapan pada saat penyerahan",
+    "masaPemeliharaan": "ketentuan masa pemeliharaan",
+    "kewajibankMasaPemeliharaan": "kewajiban kontraktor selama masa pemeliharaan",
+    "klausulPerselisihan": "klausul penyelesaian perselisihan",
+    "penutup": "paragraf penutup dan ruang tanda tangan"
+  },
+  "checklistKelengkapan": [
+    { "dokumen": "nama dokumen lampiran", "keterangan": "keterangan singkat", "wajib": true atau false }
+  ],
+  "catatanPenting": ["5-6 catatan penting yang harus diperhatikan dalam proses serah terima ini"]
+}
+
+Buat dokumen yang formal dan profesional menggunakan bahasa hukum Indonesia yang tepat. Checklist harus 8-10 item dokumen lampiran yang relevan.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-bast error:", e); res.status(500).json({ error: "Gagal generate BAST." }); }
+  });
+
+  // ==================== AI TOOLS G10: PANDUAN IUJK SBU ====================
+  app.post("/api/tools/panduan-iujk-sbu", async (req: any, res: any) => {
+    try {
+      const { klasifikasi, kualifikasi, kondisi } = req.body;
+      if (!klasifikasi) return res.status(400).json({ error: "Klasifikasi wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan perizinan konstruksi Indonesia yang ahli dalam proses SBU (Sertifikat Badan Usaha) dan IUJK di OSS-RBA.
+
+Klasifikasi: ${klasifikasi}
+Kualifikasi: ${kualifikasi}
+Kondisi: ${kondisi}
+
+Kembalikan JSON PERSIS:
+{
+  "klasifikasi": "${klasifikasi}",
+  "kualifikasi": "${kualifikasi}",
+  "kondisi": "${kondisi}",
+  "ringkasan": "ringkasan singkat proses dan persyaratan utama untuk kondisi ini",
+  "persyaratanSKK": [
+    { "jabatan": "nama jabatan SKK yang dibutuhkan", "jumlah": 1, "keterangan": "keterangan mengapa jabatan ini dibutuhkan dan di jenjang berapa" }
+  ],
+  "persyaratanDokumen": [
+    { "dokumen": "nama dokumen", "keterangan": "keterangan dan cara mendapatkannya", "wajib": true atau false }
+  ],
+  "langkahPendaftaran": [
+    { "langkah": "nama langkah", "platform": "OSS-RBA / SIKI / offline / lainnya", "detail": "langkah konkret apa yang dilakukan", "estimasiWaktu": "estimasi waktu", "biaya": "estimasi biaya jika ada" }
+  ],
+  "syaratModalMinimal": "persyaratan modal dasar minimal untuk kualifikasi ${kualifikasi}",
+  "masaBerlaku": "masa berlaku SBU dan ketentuan perpanjangannya",
+  "tipsProses": ["5-6 tips praktis yang mempercepat atau memperlancar proses"],
+  "kesalahanUmum": ["4-5 kesalahan yang sering menyebabkan penolakan atau penundaan proses SBU"]
+}
+
+Berikan langkah-langkah yang realistis dan spesifik sesuai kondisi ${kondisi}. Referensikan Permen PUPR No. 6/2021 (SBU), OSS-RBA, dan regulasi terkini.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.3, response_format: { type: "json_object" }, max_tokens: 2500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("panduan-iujk-sbu error:", e); res.status(500).json({ error: "Gagal generate panduan." }); }
+  });
+
+  // ==================== AI TOOLS G10: GENERATOR RMK ====================
+  app.post("/api/tools/generator-rmk", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, namaProyek, peran, durasi, nilaiKontrak } = req.body;
+      if (!jenisProyek || !namaProyek) return res.status(400).json({ error: "Jenis dan nama proyek wajib diisi." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah konsultan manajemen mutu konstruksi Indonesia yang membuat Rencana Mutu Kontrak (RMK).
+
+Jenis Proyek: ${jenisProyek}
+Nama Proyek: ${namaProyek}
+Peran Penyusun: ${peran}
+Durasi: ${durasi}
+Nilai Kontrak: ${nilaiKontrak || "sesuai kontrak"}
+
+Kembalikan JSON PERSIS:
+{
+  "judulRMK": "RENCANA MUTU KONTRAK (RMK) — ${namaProyek}",
+  "nomorDokumen": "RMK-[nomor]/[tahun]",
+  "tanggal": "[tanggal hari ini]",
+  "ringkasan": "ringkasan tujuan dan ruang lingkup RMK ini",
+  "babList": [
+    {
+      "bab": "BAB I",
+      "judul": "PENDAHULUAN",
+      "isi": ["1.1 Latar Belakang\n[isi]", "1.2 Tujuan RMK\n[isi]", "1.3 Ruang Lingkup\n[isi]"]
+    },
+    {
+      "bab": "BAB II",
+      "judul": "INFORMASI KEGIATAN",
+      "isi": ["2.1 Data Proyek\n[isi]", "2.2 Organisasi Proyek\n[isi]"]
+    },
+    {
+      "bab": "BAB III",
+      "judul": "PERSYARATAN TEKNIS DAN ADMINISTRASI",
+      "isi": ["3.1 Persyaratan Teknis\n[isi]", "3.2 Persyaratan Administratif\n[isi]"]
+    },
+    {
+      "bab": "BAB IV",
+      "judul": "METODE PELAKSANAAN",
+      "isi": ["4.1 Uraian Metode\n[isi]", "4.2 Tahapan Pekerjaan\n[isi]"]
+    },
+    {
+      "bab": "BAB V",
+      "judul": "PENGENDALIAN MUTU",
+      "isi": ["5.1 Pengendalian Material\n[isi]", "5.2 Pengendalian Proses\n[isi]", "5.3 Inspeksi & Pengujian\n[isi]"]
+    },
+    {
+      "bab": "BAB VI",
+      "judul": "K3 DAN LINGKUNGAN",
+      "isi": ["6.1 Pengelolaan K3\n[isi]", "6.2 Pengelolaan Lingkungan\n[isi]"]
+    },
+    {
+      "bab": "BAB VII",
+      "judul": "PELAPORAN DAN DOKUMENTASI",
+      "isi": ["7.1 Sistem Pelaporan\n[isi]", "7.2 Dokumentasi Proyek\n[isi]"]
+    }
+  ],
+  "indikatorMutu": ["6-8 indikator mutu spesifik yang harus dipenuhi untuk proyek ${jenisProyek}"],
+  "jadwalPeninjauan": "frekuensi dan mekanisme peninjauan RMK selama pelaksanaan proyek",
+  "catatanKontraktor": ["3-4 catatan penting khusus untuk peran ${peran}"]
+}
+
+Isi setiap sub-bab dengan konten spesifik untuk ${jenisProyek} oleh ${peran}. Konten harus substansif dan langsung bisa digunakan sebagai draft.`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.4, response_format: { type: "json_object" }, max_tokens: 4000,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("generator-rmk error:", e); res.status(500).json({ error: "Gagal generate RMK." }); }
+  });
+
+  // ==================== AI TOOLS G10: SIMULATOR CSMS — START ====================
+  app.post("/api/tools/simulator-csms/start", async (req: any, res: any) => {
+    try {
+      const { jenisEvaluasi, profilPerusahaan } = req.body;
+      if (!jenisEvaluasi) return res.status(400).json({ error: "Jenis evaluasi wajib dipilih." });
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Anda adalah auditor K3 senior yang melakukan ${jenisEvaluasi} terhadap ${profilPerusahaan}.
+
+Mulai sesi dengan memperkenalkan diri secara singkat sebagai auditor, lalu langsung ajukan pertanyaan pertama yang KRITIS dan spesifik tentang sistem manajemen K3 perusahaan.
+
+Pertanyaan pertama harus realistis dan sering muncul di ${jenisEvaluasi} yang nyata. Gunakan bahasa profesional Indonesia. Jangan terlalu panjang — maks 3 kalimat perkenalan + 1 pertanyaan.
+
+Kembalikan JSON: { "pertanyaanPertama": "teks pertanyaan pertama", "totalPertanyaan": 6 }`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.6, response_format: { type: "json_object" }, max_tokens: 400,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-csms start error:", e); res.status(500).json({ error: "Gagal memulai sesi." }); }
+  });
+
+  // ==================== AI TOOLS G10: SIMULATOR CSMS — ANSWER ====================
+  app.post("/api/tools/simulator-csms/answer", async (req: any, res: any) => {
+    try {
+      const { jenisEvaluasi, profilPerusahaan, riwayat, pertanyaanKe, totalPertanyaan } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const selesai = pertanyaanKe >= totalPertanyaan;
+      const riwayatText = riwayat.map((m: any) => `${m.role === "user" ? "KONTRAKTOR" : "AUDITOR"}: ${m.content}`).join("\n\n");
+      const prompt = `Anda adalah auditor K3 senior yang melakukan ${jenisEvaluasi}.
+
+Riwayat sesi:
+${riwayatText}
+
+Jawaban terakhir dari kontraktor (${profilPerusahaan}) adalah untuk pertanyaan ke-${pertanyaanKe} dari ${totalPertanyaan}.
+
+${selesai ? "Ini adalah pertanyaan terakhir. Berikan penilaian akhir dan skor keseluruhan." : "Evaluasi jawaban dan ajukan pertanyaan berikutnya."}
+
+Kembalikan JSON:
+{
+  "skor": [0-10 untuk jawaban ini],
+  "feedback": "feedback singkat 2-3 kalimat: apa yang bagus, apa yang kurang, apa yang seharusnya disebutkan",
+  ${selesai ? `"selesai": true, "skorAkhir": [0-100 skor keseluruhan semua jawaban], "pertanyaanBerikut": ""` : `"selesai": false, "pertanyaanBerikut": "pertanyaan berikutnya yang relevan dan kritis"`}
+}`;
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        temperature: 0.5, response_format: { type: "json_object" }, max_tokens: 500,
+      });
+      return res.json(JSON.parse(c.choices[0]?.message?.content ?? "{}"));
+    } catch (e: any) { console.error("simulator-csms answer error:", e); res.status(500).json({ error: "Gagal memproses jawaban." }); }
+  });
+
   // ==================== AI TOOLS G9: PANDUAN MUTASI SKK ====================
   app.post("/api/tools/panduan-mutasi-skk", async (req: any, res: any) => {
     try {
