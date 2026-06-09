@@ -25116,5 +25116,223 @@ Balas hanya JSON valid.`;
     }
   });
 
+  // ==================== G25: GENERATOR SOP PEKERJAAN ====================
+  app.post("/api/tools/generator-sop-pekerjaan", async (req: any, res: any) => {
+    try {
+      const { jenisPekerjaan, standar, levelResiko, konteks } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah HSE Manager berpengalaman 20 tahun di konstruksi. Buat SOP pekerjaan konstruksi yang komprehensif dan realistis.
+
+Jenis Pekerjaan: ${jenisPekerjaan}
+Standar Acuan: ${standar}
+Level Risiko: ${levelResiko}
+Konteks Khusus: ${konteks || "Standar"}
+
+Hasilkan JSON:
+{
+  "nomorDokumen": "SOP/K3/[kode]/[tahun]",
+  "judul": "SOP [nama pekerjaan] sesuai standar",
+  "revisiKe": "00",
+  "tujuan": "Tujuan SOP 1 kalimat",
+  "ruangLingkup": "Ruang lingkup 1 kalimat",
+  "referensi": ["3-5 regulasi/standar yang relevan"],
+  "definisi": ["3-5 definisi istilah teknis"],
+  "APDWajib": ["8-12 item APD wajib yang spesifik"],
+  "langkah": [
+    {
+      "nomor": 1,
+      "fase": "Persiapan",
+      "aktivitas": "Aktivitas spesifik yang dilakukan",
+      "pelaksana": "Jabatan/posisi pelaksana",
+      "alat": ["alat/bahan yang digunakan"],
+      "hazard": "Bahaya/risiko yang harus diwaspadai",
+      "pengendalian": "Tindakan pengendalian yang harus dilakukan",
+      "verifikasi": "Cara memverifikasi langkah ini sudah dilakukan"
+    }
+  ],
+  "kondisiDarurat": [
+    {"kondisi": "Jenis keadaan darurat", "tindakan": "Langkah penanganan"}
+  ],
+  "catatanKhusus": ["3-5 catatan penting lainnya"]
+}
+
+Buat minimal 12-16 langkah total, dibagi ke fase: Persiapan (3-4 langkah), Pelaksanaan (6-8 langkah), Penyelesaian (2-3 langkah), Darurat (1-2 langkah).
+Setiap langkah harus spesifik, realistis, dan langsung bisa diterapkan di lapangan.
+Kondisi darurat minimal 3 jenis.
+Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("sop-pekerjaan error:", e); res.status(500).json({ error: "Gagal generate SOP." }); }
+  });
+
+  // ==================== G25: PANDUAN LIMBAH KONSTRUKSI ====================
+  app.post("/api/tools/panduan-limbah-konstruksi", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, skala, konteks } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah konsultan lingkungan hidup berpengalaman di konstruksi Indonesia. Buat panduan pengelolaan limbah konstruksi yang komprehensif.
+
+Jenis Proyek: ${jenisProyek}
+Skala Proyek: ${skala}
+Konteks Khusus: ${konteks || "Standar"}
+
+Hasilkan JSON:
+{
+  "judul": "Panduan Pengelolaan Limbah Konstruksi: [nama proyek]",
+  "ringkasan": "Ringkasan konteks dan kewajiban pengelolaan limbah (2-3 kalimat)",
+  "regulasiUtama": ["5-7 regulasi utama PP 22/2021, PermenLHK, dll"],
+  "kategoriLimbah": [
+    {
+      "nama": "Nama kategori limbah",
+      "jenisB3": true/false,
+      "contoh": ["3-5 contoh konkret limbah"],
+      "regulasi": "Regulasi spesifik yang mengatur",
+      "caraPengelolaan": "Cara pengelolaan yang benar",
+      "tempoPenyimpanan": "Batas waktu penyimpanan (misal: maks 90 hari)",
+      "dokumenWajib": ["dokumen yang wajib ada"],
+      "vendorTipikal": "Jenis vendor/fasilitas yang menangani"
+    }
+  ],
+  "prosedurB3": ["8-12 langkah prosedur penanganan limbah B3 berurutan"],
+  "checklistPengelolaan": [
+    {"item": "Item checklist", "frekuensi": "Harian/Mingguan/Bulanan", "picJabatan": "Jabatan PIC"}
+  ],
+  "manifesWajib": ["6-10 dokumen/manifest wajib"],
+  "dendaPelanggaran": [
+    {"pelanggaran": "Jenis pelanggaran", "sanksi": "Sanksi pidana/denda sesuai regulasi"}
+  ],
+  "kontakInstansi": ["5-8 instansi terkait dan cara menghubungi"]
+}
+
+Buat minimal 5 kategori limbah (campuran B3 dan non-B3). Checklist minimal 10 item.
+Denda pelanggaran harus mengacu pada regulasi yang nyata.
+Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("limbah-konstruksi error:", e); res.status(500).json({ error: "Gagal generate panduan limbah." }); }
+  });
+
+  // ==================== G25: GENERATOR LAPORAN KEMAJUAN ====================
+  app.post("/api/tools/generator-laporan-kemajuan", async (req: any, res: any) => {
+    try {
+      const { jenisLaporan, namaProyek, periode, nilaiKontrak, statusProyek, konteks } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah Project Manager konstruksi berpengalaman. Buat laporan kemajuan proyek yang profesional dan realistis.
+
+Jenis Laporan: ${jenisLaporan}
+Nama Proyek: ${namaProyek}
+Periode: ${periode || "Periode berjalan"}
+Nilai Kontrak: ${nilaiKontrak || "Tidak disebutkan"}
+Status Proyek: ${statusProyek}
+Kendala/Konteks: ${konteks || "Tidak ada kendala khusus"}
+
+Hasilkan JSON (angka progress dalam persen, HARUS konsisten dengan status proyek):
+{
+  "nomorLaporan": "LKP/[kode]/[nomor]/[tahun]",
+  "judulLaporan": "Laporan Kemajuan Pekerjaan: [nama proyek]",
+  "periodeCaption": "Periode: [periode]",
+  "ringkasanEksekutif": "Ringkasan eksekutif 2-3 kalimat status proyek",
+  "deviasiBobotRencana": angka_persen_rencana,
+  "deviasiRealisasi": angka_persen_realisasi,
+  "deviasi": selisih_realisasi_minus_rencana,
+  "statusTrafik": "Hijau/Kuning/Merah",
+  "kemajuanPekerjaan": [
+    {
+      "paket": "Nama paket pekerjaan",
+      "bobotRencana": angka,
+      "realisasi": angka,
+      "deviasi": angka,
+      "status": "On Track/Ahead/Delayed",
+      "keterangan": "Keterangan singkat"
+    }
+  ],
+  "kendalaUtama": [
+    {"kendala": "Deskripsi kendala", "dampak": "Dampak terhadap proyek", "tindakan": "Rencana tindakan", "picJabatan": "Site Manager/PM/dll", "deadline": "Target penyelesaian"}
+  ],
+  "pencapaianMingguIni": ["5-7 pencapaian konkret periode ini"],
+  "rencanaMingguDepan": ["5-7 rencana konkret periode berikutnya"],
+  "isu": [],
+  "fotoDanDokumen": ["5-7 foto/dokumen yang perlu dilampirkan"],
+  "penutup": "Paragraf penutup laporan"
+}
+
+kemajuanPekerjaan minimal 6 paket pekerjaan. kendalaUtama minimal 2-3 kendala jika status delayed/critical.
+statusTrafik: Hijau=on schedule, Kuning=slightly delayed, Merah=critical delay.
+Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("laporan-kemajuan error:", e); res.status(500).json({ error: "Gagal generate laporan kemajuan." }); }
+  });
+
+  // ==================== G25: PANDUAN SMK3 PERUSAHAAN ====================
+  app.post("/api/tools/panduan-smk3-perusahaan", async (req: any, res: any) => {
+    try {
+      const { skala, bidang, target, kondisi } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Kamu adalah konsultan SMK3 dan ISO 45001 berpengalaman 15 tahun. Buat panduan implementasi SMK3 yang komprehensif dan realistis.
+
+Skala Perusahaan: ${skala}
+Bidang Usaha: ${bidang}
+Target Sertifikasi: ${target}
+Kondisi Saat Ini: ${kondisi || "Belum ada sistem SMK3"}
+
+Hasilkan JSON:
+{
+  "judul": "Panduan Implementasi SMK3: [bidang usaha]",
+  "ringkasan": "Ringkasan konteks dan pentingnya SMK3 (2-3 kalimat)",
+  "elemenUtama": [
+    {
+      "nomor": "1",
+      "nama": "Nama elemen SMK3",
+      "subElemen": ["3-5 sub-elemen"],
+      "dokumenWajib": ["3-5 dokumen yang harus dibuat"],
+      "catatanImplementasi": "Tips implementasi praktis"
+    }
+  ],
+  "jalurSertifikasi": [
+    {"tahap": 1, "nama": "Nama tahap", "deskripsi": "Deskripsi tahap", "durasi": "X bulan"}
+  ],
+  "checklistKesiapan": [
+    {"kategori": "Kategori", "item": "Item checklist kesiapan", "bobot": "Wajib/Disarankan"}
+  ],
+  "sumberDayaDibutuhkan": [
+    {"posisi": "Jabatan", "kualifikasi": "Kualifikasi/sertifikasi yang diperlukan", "jumlah": "X orang"}
+  ],
+  "jadwalImplementasi": [
+    {"bulan": "Bulan 1-2", "kegiatan": ["3-5 kegiatan"]}
+  ],
+  "biayaEstimasi": "Estimasi biaya total implementasi dalam range (Rp X - Y Juta)"
+}
+
+elemenUtama: sesuaikan dengan PP 50/2012 (12 elemen) atau ISO 45001 (10 klausul).
+jalurSertifikasi: 4-6 tahap yang realistis.
+checklistKesiapan: minimal 15 item.
+jadwalImplementasi: 6-12 bulan tergantung skala.
+Balas hanya JSON valid.`;
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      const hasil = JSON.parse(completion.choices[0].message.content || "{}");
+      return res.json({ hasil });
+    } catch (e: any) { console.error("smk3-perusahaan error:", e); res.status(500).json({ error: "Gagal generate panduan SMK3." }); }
+  });
+
   return httpServer;
 }

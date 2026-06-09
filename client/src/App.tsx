@@ -281,6 +281,11 @@ import GeneratorPortofolioSKK from "@/pages/generator-portofolio-skk";
 import GeneratorSertifikatPengalaman from "@/pages/generator-sertifikat-pengalaman";
 import PetaUnitKompetensi from "@/pages/peta-unit-kompetensi";
 import AsistenBandingSKK from "@/pages/asisten-banding-skk";
+import GeneratorSOPPekerjaan from "@/pages/generator-sop-pekerjaan";
+import PanduanLimbahKonstruksi from "@/pages/panduan-limbah-konstruksi";
+import GeneratorLaporanKemajuan from "@/pages/generator-laporan-kemajuan";
+import KalkulatorCutFill from "@/pages/kalkulator-cut-fill";
+import PanduanSMK3Perusahaan from "@/pages/panduan-smk3-perusahaan";
 import KalkulatorUpahSKK from "@/pages/kalkulator-upah-skk";
 import PanduanSIKISKK from "@/pages/panduan-siki-skk";
 import RencanaKarirSKK from "@/pages/rencana-karir-skk";
@@ -1388,6 +1393,11 @@ function Router() {
         <Route path="/ownerbot" component={OwnerBotPage} />
         <Route path="/boheerbot" component={BoheerBotPage} />
         <Route path="/supplierbot" component={SupplierBotPage} />
+        <Route path="/generator-sop-pekerjaan" component={GeneratorSOPPekerjaan} />
+        <Route path="/panduan-limbah-konstruksi" component={PanduanLimbahKonstruksi} />
+        <Route path="/generator-laporan-kemajuan" component={GeneratorLaporanKemajuan} />
+        <Route path="/kalkulator-cut-fill" component={KalkulatorCutFill} />
+        <Route path="/panduan-smk3-perusahaan" component={PanduanSMK3Perusahaan} />
       <Route component={NotFound} />
     </Switch>
   );
