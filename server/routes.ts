@@ -20081,6 +20081,305 @@ Pastikan semua ${n} soal unik, relevan dengan ${bidang}, dan kunci jawaban terdi
     } catch (e: any) { console.error("simulator-ujian-teori-skk error:", e); res.status(500).json({ error: "Gagal generate soal ujian." }); }
   });
 
+  // ==================== G19: GENERATOR JADWAL MOBILISASI ====================
+  app.post("/api/tools/generator-jadwal-mobilisasi", async (req: any, res: any) => {
+    try {
+      const { jenisProyek, namaProyek, nilaiKontrak, durasiKontrak, lokasiProyek, spesifikasiKhusus } = req.body;
+      const prompt = `Kamu adalah Manajer Proyek Konstruksi senior berpengalaman. Buat JADWAL MOBILISASI PROYEK lengkap untuk:
+- Jenis Proyek: ${jenisProyek}
+- Nama Proyek: ${namaProyek}
+- Nilai Kontrak: ${nilaiKontrak || "sesuai kontrak"}
+- Durasi Kontrak: ${durasiKontrak} hari kalender
+- Lokasi: ${lokasiProyek || "Indonesia"}
+- Persyaratan Khusus: ${spesifikasiKhusus || "standar"}
+
+Buat jadwal mobilisasi REALISTIS dan DETAIL dalam format JSON:
+{
+  "judulProyek": "Jadwal Mobilisasi — [nama proyek singkat]",
+  "durasi": "Periode mobilisasi: Minggu 1–4 dari total [durasiKontrak] hari",
+  "ringkasan": "ringkasan 2 kalimat konteks mobilisasi proyek ini",
+  "personelKunci": [
+    {"jabatan": "Project Manager", "jumlah": 1, "waktuMobilisasi": "Hari 1–3"},
+    {"jabatan": "Site Manager", "jumlah": 1, "waktuMobilisasi": "Hari 1–5"},
+    {"jabatan": "Engineer Struktur", "jumlah": 2, "waktuMobilisasi": "Minggu 1"},
+    {"jabatan": "Safety Officer", "jumlah": 1, "waktuMobilisasi": "Hari 1"},
+    {"jabatan": "QC Engineer", "jumlah": 1, "waktuMobilisasi": "Minggu 1–2"},
+    {"jabatan": "Surveyor", "jumlah": 2, "waktuMobilisasi": "Hari 1–3"},
+    {"jabatan": "Logistik & Pengadaan", "jumlah": 1, "waktuMobilisasi": "Hari 1"},
+    sesuaikan dengan jenis proyek
+  ],
+  "alatUtama": [
+    {"nama": "Excavator 20T", "kapasitas": "0.8 m³ bucket", "waktuMobilisasi": "Minggu 1", "durasi": "2 bulan"},
+    sesuaikan 6–10 alat utama dengan jenis proyek
+  ],
+  "tahapan": [
+    {
+      "minggu": "Minggu 1 — Mobilisasi Awal",
+      "aktivitas": [
+        {"nama": "SMPP (Site Management & Pre-Planning)", "durasi": "3 hari", "pic": "PM + SM", "keterangan": "Review kontrak, survey lapangan, koordinasi owner"},
+        3–5 aktivitas lain
+      ]
+    },
+    {
+      "minggu": "Minggu 2 — Setup Fasilitas",
+      "aktivitas": [3–5 aktivitas]
+    },
+    {
+      "minggu": "Minggu 3 — Mobilisasi Personel & Alat",
+      "aktivitas": [3–5 aktivitas]
+    },
+    {
+      "minggu": "Minggu 4 — Persiapan Konstruksi",
+      "aktivitas": [3–4 aktivitas, termasuk start konstruksi awal]
+    }
+  ],
+  "risikoMobilisasi": ["5–7 risiko realistis"],
+  "catatanPenting": "catatan penting terkait standar / regulasi mobilisasi"
+}
+
+Sesuaikan semua dengan JENIS PROYEK yang diminta. Berikan data yang realistis dan berbasis praktik industri konstruksi Indonesia.`;
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3000,
+      });
+      const data = JSON.parse(completion.choices[0].message.content || "{}");
+      res.json(data);
+    } catch (e: any) { console.error("generator-jadwal-mobilisasi error:", e); res.status(500).json({ error: "Gagal generate jadwal mobilisasi." }); }
+  });
+
+  // ==================== G19: PANDUAN CSMS KONTRAKTOR ====================
+  app.post("/api/tools/panduan-csms-kontraktor", async (req: any, res: any) => {
+    try {
+      const { tipeOwner, kategoriCSMS, skalaPekerjaan, kondisiExisting } = req.body;
+      const prompt = `Kamu adalah konsultan HSE dan CSMS specialist berpengalaman di industri konstruksi Indonesia. Buat PANDUAN CSMS lengkap untuk:
+- Tipe Owner: ${tipeOwner}
+- Kategori / Fase CSMS: ${kategoriCSMS}
+- Skala Pekerjaan: ${skalaPekerjaan || "menengah"}
+- Kondisi SMK3/CSMS Existing: ${kondisiExisting || "baru memulai"}
+
+Buat panduan dalam format JSON:
+{
+  "judulPanduan": "Panduan CSMS [tipeOwner] — [kategoriCSMS]",
+  "konteks": "penjelasan konteks dan pentingnya CSMS untuk situasi ini (2–3 kalimat)",
+  "elemenCSMS": [
+    {
+      "elemen": "1. Kepemimpinan & Kebijakan K3",
+      "persyaratan": ["3–4 persyaratan spesifik"],
+      "dokumen": ["3–4 dokumen yang harus disiapkan"],
+      "nilaiBobot": "15%",
+      "tipikalNilai": "12–14/15"
+    },
+    buat 6–8 elemen CSMS sesuai standar owner yang diminta
+  ],
+  "checklistKesiapan": [
+    {"kategori": "Dokumen Kebijakan", "items": ["5–7 checklist item"]},
+    {"kategori": "SDM & Kompetensi", "items": ["4–6 item"]},
+    {"kategori": "Prosedur & SOP", "items": ["5–7 item"]},
+    {"kategori": "Rekaman & Bukti", "items": ["4–6 item"]}
+  ],
+  "dokumenWajib": ["10–15 dokumen wajib"],
+  "jadwalPersiapan": [
+    {"fase": "Fase 1 — Analisis Gap", "durasi": "1–2 minggu", "aktivitas": ["3–4 aktivitas"]},
+    {"fase": "Fase 2 — Penyusunan Dokumen", "durasi": "3–4 minggu", "aktivitas": ["3–4 aktivitas"]},
+    {"fase": "Fase 3 — Implementasi & Pelatihan", "durasi": "2–3 minggu", "aktivitas": ["3–4 aktivitas"]},
+    {"fase": "Fase 4 — Uji Coba & Submit", "durasi": "1 minggu", "aktivitas": ["2–3 aktivitas"]}
+  ],
+  "tipsNilaiTinggi": ["7–10 tips konkret untuk raih nilai CSMS tinggi"],
+  "risikoGagal": ["5 risiko gagal CSMS yang sering terjadi"],
+  "catatanRegulasi": "referensi regulasi: Permen ESDM, SK Menaker, standar SKK Migas, persyaratan CSMS owner terkait"
+}
+
+Berikan panduan REALISTIS berbasis praktik CSMS di industri Indonesia. Sesuaikan elemen dengan owner yang diminta (SKK Migas/Pertamina/PLN berbeda standarnya).`;
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      const data = JSON.parse(completion.choices[0].message.content || "{}");
+      res.json(data);
+    } catch (e: any) { console.error("panduan-csms-kontraktor error:", e); res.status(500).json({ error: "Gagal generate panduan CSMS." }); }
+  });
+
+  // ==================== G19: GENERATOR LAPORAN AUDIT INTERNAL ====================
+  app.post("/api/tools/generator-laporan-audit", async (req: any, res: any) => {
+    try {
+      const { standarAudit, tipeAudit, scopeArea, namaOrganisasi, tanggalAudit, auditorUtama, kondisiTemuan } = req.body;
+      const prompt = `Kamu adalah Lead Auditor bersertifikat ISO berpengalaman. Buat LAPORAN AUDIT INTERNAL formal untuk:
+- Standar: ${standarAudit}
+- Tipe Audit: ${tipeAudit}
+- Scope: ${scopeArea || "seluruh organisasi"}
+- Organisasi: ${namaOrganisasi || "PT Konstruksi Indonesia"}
+- Tanggal Audit: ${tanggalAudit || "Juni 2026"}
+- Auditor: ${auditorUtama || "Tim Internal Audit"}
+- Konteks: ${kondisiTemuan || "audit rutin tahunan"}
+
+Buat laporan audit dalam format JSON:
+{
+  "judulLaporan": "Laporan Audit Internal [standar] — [namaOrganisasi]",
+  "nomorLaporan": "LAI-[singkatan standar]-[bulan/tahun]/[nomor urut]",
+  "ringkasanEksekutif": "2–3 kalimat ringkasan hasil audit secara keseluruhan",
+  "hasilPerKlausul": [
+    {"klausul": "4.1 Konteks Organisasi", "status": "Conform / Minor NC / Major NC / OFI", "catatan": "catatan singkat"},
+    buat 8–12 klausul sesuai standar yang diminta
+  ],
+  "temuan": [
+    {
+      "klausul": "8.5.2",
+      "deskripsi": "deskripsi temuan yang jelas dan spesifik",
+      "bukti": "bukti objektif: dokumen/rekaman/observasi yang ditemukan",
+      "kategori": "Major NC" | "Minor NC" | "OFI" | "Positif",
+      "rekomendasi": "tindakan korektif / perbaikan yang disarankan"
+    },
+    buat 5–8 temuan realistis campuran NC/OFI/Positif
+  ],
+  "statistik": {
+    "totalTemuan": angka,
+    "majorNC": angka,
+    "minorNC": angka,
+    "ofi": angka,
+    "positif": angka
+  },
+  "kesimpulan": "2–3 kalimat kesimpulan audit termasuk rekomendasi sertifikasi/tidak",
+  "rekomendasiTindakLanjut": ["5–8 rekomendasi tindak lanjut konkret dengan target penyelesaian"],
+  "catatanAuditor": "catatan penting auditor tentang batasan audit atau hal perlu diperhatikan"
+}
+
+Buat temuan yang REALISTIS dan SPESIFIK sesuai standar dan industri konstruksi Indonesia.`;
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, max_tokens: 3500,
+      });
+      const data = JSON.parse(completion.choices[0].message.content || "{}");
+      res.json(data);
+    } catch (e: any) { console.error("generator-laporan-audit error:", e); res.status(500).json({ error: "Gagal generate laporan audit." }); }
+  });
+
+  // ==================== G19: SIMULATOR FOREMAN K3 ====================
+  app.post("/api/tools/simulator-foreman-k3", async (req: any, res: any) => {
+    try {
+      const { action, jabatan, topik, pengalaman, rounds, currentRoundNum } = req.body;
+      const openai = (await import("openai")).default;
+      const client = new openai({ apiKey: process.env.OPENAI_API_KEY });
+
+      if (action === "start") {
+        const prompt = `Kamu adalah penguji kompetensi lapangan yang berpengalaman untuk jabatan konstruksi.
+
+Jabatan yang diuji: ${jabatan}
+Fokus topik: ${topik}
+Pengalaman peserta: ${pengalaman || "tidak disebutkan"}
+
+Buat PERTANYAAN PERTAMA yang menguji kompetensi lapangan untuk jabatan ini. Pertanyaan harus:
+- Berupa SITUASI NYATA di lapangan (bukan teori abstrak)
+- Spesifik untuk jabatan dan topik yang diminta
+- Menguji kemampuan pengambilan keputusan dan penanganan masalah
+- Cukup menantang tapi tidak impossible
+
+Jawab dalam JSON:
+{
+  "pertanyaan": "pertanyaan situasi lapangan (2–3 kalimat)",
+  "topik": "sub-topik yang diuji (contoh: 'Penanganan Kecelakaan Kerja', 'Metode Bekisting', dst)"
+}`;
+        const completion = await client.chat.completions.create({
+          model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }],
+          response_format: { type: "json_object" }, max_tokens: 400,
+        });
+        const data = JSON.parse(completion.choices[0].message.content || "{}");
+        return res.json(data);
+      }
+
+      if (action === "answer" || action === "finish") {
+        const roundAnswered = rounds?.find((r: any) => r.num === currentRoundNum);
+        if (!roundAnswered) return res.status(400).json({ error: "Data round tidak ditemukan." });
+
+        const feedbackPrompt = `Kamu adalah penguji kompetensi lapangan berpengalaman.
+
+Jabatan: ${jabatan}
+Topik pertanyaan: ${roundAnswered.topik}
+Pertanyaan: ${roundAnswered.pertanyaan}
+Jawaban peserta: ${roundAnswered.jawaban}
+
+Evaluasi jawaban dan berikan feedback dalam JSON:
+{
+  "feedback": "evaluasi 2–3 kalimat — apa yang baik dan apa yang kurang dari jawaban",
+  "skor": 1-4 (1=perlu pelatihan, 2=perlu bimbingan, 3=kompeten, 4=sangat kompeten),
+  "poin": ["1–3 poin kunci yang diuji dalam pertanyaan ini"],
+  "koreksi": "koreksi atau tambahan informasi teknis penting (1–2 kalimat, atau null jika jawaban sudah bagus)"
+}`;
+
+        const feedbackCompletion = await client.chat.completions.create({
+          model: "gpt-4o-mini", messages: [{ role: "user", content: feedbackPrompt }],
+          response_format: { type: "json_object" }, max_tokens: 600,
+        });
+        const feedbackData = JSON.parse(feedbackCompletion.choices[0].message.content || "{}");
+
+        if (action === "finish") {
+          const allRounds = rounds.map((r: any) => `P${r.num} [${r.topik}]: "${r.pertanyaan}" → Jawaban: "${r.jawaban}" (skor: ${r.num === currentRoundNum ? feedbackData.skor : r.skor})`).join("\n");
+          const finalPrompt = `Kamu adalah penguji kompetensi lapangan.
+
+Jabatan: ${jabatan}
+Semua pertanyaan & jawaban:
+${allRounds}
+
+Buat hasil akhir penilaian dalam JSON:
+{
+  "finalResult": {
+    "skorTotal": rata-rata skor (1-4, 1 desimal),
+    "predikat": "Kompeten" | "Kompeten Bersyarat" | "Belum Kompeten",
+    "ringkasan": "2–3 kalimat ringkasan kemampuan keseluruhan",
+    "kekuatan": ["3–4 kekuatan yang terlihat"],
+    "perbaikan": ["3–4 area yang perlu ditingkatkan"],
+    "rekomendasi": ["3–5 rekomendasi pengembangan konkret"],
+    "hasilPerRound": [
+      {"num": 1, "topik": "topik P1", "skor": skor P1, "label": "Sangat Kompeten/Kompeten/Perlu Bimbingan/Perlu Pelatihan"},
+      untuk semua 5 round
+    ]
+  }
+}
+
+Predikat: rata ≥3.0 = Kompeten, 2.0–2.9 = Kompeten Bersyarat, <2.0 = Belum Kompeten`;
+          const finalCompletion = await client.chat.completions.create({
+            model: "gpt-4o-mini", messages: [{ role: "user", content: finalPrompt }],
+            response_format: { type: "json_object" }, max_tokens: 1000,
+          });
+          const finalData = JSON.parse(finalCompletion.choices[0].message.content || "{}");
+          return res.json({ ...feedbackData, ...finalData });
+        }
+
+        // Generate next question
+        const nextRoundNum = currentRoundNum + 1;
+        const usedTopics = rounds.filter((r: any) => r.topik).map((r: any) => r.topik).join(", ");
+        const nextPrompt = `Kamu adalah penguji kompetensi lapangan berpengalaman.
+
+Jabatan: ${jabatan}
+Fokus topik: ${topik}
+Topik yang sudah diuji: ${usedTopics}
+Ini pertanyaan ke-${nextRoundNum} dari 5.
+
+Buat PERTANYAAN BARU yang BERBEDA dari topik sebelumnya untuk menguji aspek kompetensi lapangan yang belum diuji. Situasi nyata, spesifik, menantang.
+
+JSON:
+{
+  "nextNum": ${nextRoundNum},
+  "nextPertanyaan": "pertanyaan situasi lapangan (2–3 kalimat)",
+  "nextTopik": "sub-topik baru yang diuji"
+}`;
+        const nextCompletion = await client.chat.completions.create({
+          model: "gpt-4o-mini", messages: [{ role: "user", content: nextPrompt }],
+          response_format: { type: "json_object" }, max_tokens: 400,
+        });
+        const nextData = JSON.parse(nextCompletion.choices[0].message.content || "{}");
+        return res.json({ ...feedbackData, ...nextData });
+      }
+
+      res.status(400).json({ error: "Action tidak valid." });
+    } catch (e: any) { console.error("simulator-foreman-k3 error:", e); res.status(500).json({ error: "Gagal memproses sesi simulator." }); }
+  });
+
   // ==================== G17: GENERATOR SURAT KUASA ====================
   app.post("/api/tools/generator-surat-kuasa", async (req: any, res: any) => {
     try {

@@ -207,6 +207,11 @@ import KalkulatorAHSP from "@/pages/kalkulator-ahsp";
 import PanduanISO9001 from "@/pages/panduan-iso-9001";
 import GeneratorBeritaAcara from "@/pages/generator-berita-acara";
 import SimulatorUjianTeoriSKK from "@/pages/simulator-ujian-teori-skk";
+import KalkulatorVolumeGalian from "@/pages/kalkulator-volume-galian";
+import GeneratorJadwalMobilisasi from "@/pages/generator-jadwal-mobilisasi";
+import PanduanCSMSKontraktor from "@/pages/panduan-csms-kontraktor";
+import GeneratorLaporanAudit from "@/pages/generator-laporan-audit";
+import SimulatorForemanK3 from "@/pages/simulator-foreman-k3";
 import GeneratorSuratKuasa from "@/pages/generator-surat-kuasa";
 import KalkulatorMaterialBeton from "@/pages/kalkulator-material-beton";
 import PanduanManajemenRisiko from "@/pages/panduan-manajemen-risiko";
@@ -1263,6 +1268,11 @@ function Router() {
         <Route path="/panduan-iso-9001" component={PanduanISO9001} />
         <Route path="/generator-berita-acara" component={GeneratorBeritaAcara} />
         <Route path="/simulator-ujian-teori-skk" component={SimulatorUjianTeoriSKK} />
+        <Route path="/kalkulator-volume-galian" component={KalkulatorVolumeGalian} />
+        <Route path="/generator-jadwal-mobilisasi" component={GeneratorJadwalMobilisasi} />
+        <Route path="/panduan-csms-kontraktor" component={PanduanCSMSKontraktor} />
+        <Route path="/generator-laporan-audit" component={GeneratorLaporanAudit} />
+        <Route path="/simulator-foreman-k3" component={SimulatorForemanK3} />
         <Route path="/generator-surat-kuasa" component={GeneratorSuratKuasa} />
         <Route path="/kalkulator-material-beton" component={KalkulatorMaterialBeton} />
         <Route path="/panduan-manajemen-risiko" component={PanduanManajemenRisiko} />
