@@ -696,6 +696,14 @@ export default function AdminPage() {
                 Panduan Delivery
               </Button>
             </Link>
+            {isSuperAdmin && (
+              <Link href="/multiclaw-admin">
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs hidden sm:flex border-violet-500/40 text-violet-500 hover:bg-violet-500/10" data-testid="button-multiclaw-admin-header">
+                  <Wrench className="h-3.5 w-3.5" />
+                  MultiClaw Admin
+                </Button>
+              </Link>
+            )}
             {isSuperAdmin ? <Crown className="h-4 w-4 text-purple-500" /> : <Shield className="h-4 w-4 text-primary" />}
             <span className="text-sm font-medium hidden sm:block">{meData.user?.email}</span>
           </div>
@@ -1789,6 +1797,31 @@ export default function AdminPage() {
           {/* ========== TOOLS TAB ========== */}
           <TabsContent value="tools" className="mt-4">
             <div className="space-y-4">
+
+              {/* ── MultiClaw Admin Shortcut ── */}
+              <Card className="border-violet-500/30 bg-violet-500/5">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-violet-500/15 p-2">
+                        <Wrench className="h-5 w-5 text-violet-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">MultiClaw Admin — Kelola 45+ Claw Tools</p>
+                        <p className="text-xs text-muted-foreground">Edit system prompt, upload KB regulasi, konfigurasi RAG, dan kelola semua agen Claw dari satu tempat</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Button asChild variant="outline" size="sm" className="border-violet-500/40 text-violet-400 hover:bg-violet-500/10">
+                        <Link href="/multiclaw-admin">Buka MultiClaw Admin →</Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm" className="border-violet-500/40 text-violet-400 hover:bg-violet-500/10">
+                        <Link href="/panduan-input-data">Panduan Input Data →</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* ── KB Hub Shortcut ── */}
               <Card className="border-emerald-500/30 bg-emerald-500/5">
