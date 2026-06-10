@@ -117,11 +117,11 @@ export function ChaesaWidget() {
   };
 
   const QUICK_PROMPTS = [
-    "Berapa harga paket Gustafta & cara berlangganan?",
-    "Bagaimana cara daftar akun dan mulai buat chatbot?",
-    "MultiClaw itu apa? Ada berapa tools AI-nya?",
-    "SBUClaw bisa bantu proses SBU Konstruksi bagaimana?",
-    "Mini Apps 45 tipe itu untuk apa saja?",
+    "Berapa harga paket & cara mulai pakai Gustafta?",
+    "Fitur MultiClaw 45+ tools itu apa saja?",
+    "Saya kontraktor — tools apa yang paling cocok untuk saya?",
+    "Untuk belajar & persiapan SKK/SBU, Gustafta bisa bantu apa?",
+    "Cara otomatisasi CS & lead generation bisnis saya?",
     "Cara hubungkan chatbot ke WhatsApp atau website?",
   ];
 

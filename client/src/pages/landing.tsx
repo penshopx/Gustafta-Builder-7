@@ -160,7 +160,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Sparkles className="h-4 w-4" />
-            971+ Agent AI Spesialis · 131 Hub Orchestrator · Siap Pakai
+            1350+ Agent AI Spesialis · 131 Hub Orchestrator · 45 MultiClaw Tools · Siap Pakai
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
@@ -208,9 +208,9 @@ export default function Landing() {
       <div className="border-y bg-muted/30 py-8 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { value: "971+", label: "Agent AI Spesialis" },
+            { value: "1350+", label: "Agent AI Spesialis" },
             { value: "131", label: "Hub Orchestrator" },
-            { value: "45", label: "Tipe Mini App" },
+            { value: "45+", label: "MultiClaw AI Tools" },
             { value: "24/7", label: "AI Selalu Aktif" },
           ].map((s) => (
             <div key={s.label}>
@@ -292,7 +292,7 @@ export default function Landing() {
             <h2 className="text-2xl md:text-3xl font-bold">Kenalkan Gustafta — Platform AI Chatbot Builder</h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-sm leading-relaxed">
               Satu platform untuk membangun chatbot AI yang benar-benar memahami konteks bisnis Anda.
-              Bukan chatbot template kosong — tapi 971+ agent spesialis yang sudah dilatih khusus untuk konstruksi, tender, K3, SKK, marketing, dan lebih dari 20 domain lainnya.
+              Bukan chatbot template kosong — tapi 1350+ agent spesialis yang sudah dilatih khusus untuk konstruksi, tender, K3, SKK, energi, properti, marketing, HR, dan 20+ domain lainnya.
             </p>
           </div>
 
@@ -302,7 +302,7 @@ export default function Landing() {
               { icon: Globe, title: "Custom Domain", desc: "Pasang bot.perusahaan.com. Branding profesional, bukan link chatbot biasa.", color: "text-blue-500", bg: "bg-blue-500/10" },
               { icon: BookOpen, title: "Knowledge Base 7 Tipe", desc: "PDF, URL, YouTube, video, audio — AI transkripsi dan RAG secara otomatis.", color: "text-violet-500", bg: "bg-violet-500/10" },
               { icon: Plug, title: "Multi-Channel", desc: "WhatsApp, Telegram, web widget, REST API — satu chatbot, semua channel sekaligus.", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-              { icon: Zap, title: "Agentic AI + 131 Orchestrator", desc: "Routing otomatis ke specialist: Tender, K3, SKK/SBU, Hukum, Marketing, dan 20+ domain lain.", color: "text-orange-500", bg: "bg-orange-500/10" },
+              { icon: Zap, title: "45+ MultiClaw AI Tools", desc: "Suite lengkap: TenderaClaw, SBUClaw, KonstraClaw, BrainClaw, SafiraClaw, dan 40+ tools spesialis siap pakai.", color: "text-orange-500", bg: "bg-orange-500/10" },
               { icon: Shield, title: "Aman & Privat", desc: "Token per chatbot, mode publik/privat, enkripsi end-to-end, OAuth Replit Identity.", color: "text-slate-500", bg: "bg-slate-500/10" },
             ].map((f) => {
               const FIcon = f.icon;
@@ -512,7 +512,7 @@ export default function Landing() {
             {[
               { plan: "Starter", price: "199rb", badge: null, features: ["3 chatbot", "Knowledge Base 7 tipe", "Multi-Channel (WA, TG, Web)", "REST API akses"] },
               { plan: "Profesional", price: "499rb", badge: "TERPOPULER", features: ["20 chatbot", "Custom Domain", "Analytics & Reporting", "Agentic AI + Orchestrator"] },
-              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "971+ agent spesialis", "Priority support", "Semua fitur lengkap"] },
+              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "1350+ agent spesialis", "45+ MultiClaw AI Tools", "Priority support"] },
             ].map((plan) => (
               <div
                 key={plan.plan}
@@ -571,7 +571,7 @@ export default function Landing() {
             {[
               { q: "Apakah perlu keahlian coding untuk mulai?", a: "Tidak sama sekali. Semua konfigurasi dilakukan lewat antarmuka visual — Knowledge Base, persona AI, Custom Domain, Tender Wizard — tanpa menulis satu baris kode pun. Rata-rata user mulai aktif dalam 30 menit setelah daftar." },
               { q: "Channel apa saja yang didukung?", a: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget (iframe & floating button), Custom Domain (bot.perusahaan.com), dan REST API untuk integrasi custom. Semua bisa diaktifkan dari satu dashboard tanpa biaya tambahan." },
-              { q: "Apa itu 971+ agent AI spesialis?", a: "Gustafta memiliki ratusan agent AI yang sudah dikonfigurasi dan dilatih untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, ISO, hukum perdata, marketing, HR, dan lebih banyak lagi. Tinggal aktifkan, tidak perlu training dari nol." },
+              { q: "Apa itu 1350+ agent AI spesialis?", a: "Gustafta memiliki lebih dari 1350 agent AI yang sudah dikonfigurasi dan dilatih untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, ISO, energi, properti, hukum, marketing, HR, dan lebih banyak lagi. Plus 45+ MultiClaw AI Tools yang siap pakai langsung, tanpa training dari nol." },
               { q: "Apa itu Orchestrator Multi-Agent?", a: "Orchestrator adalah sistem routing cerdas yang menganalisis setiap pesan user dan mengarahkannya ke specialist yang paling tepat secara otomatis. Misalnya: pertanyaan tender → Specialist Tender, pertanyaan SKK → Specialist Sertifikasi. Ada 131 hub orchestrator siap pakai, dan Anda bisa buat custom sendiri." },
               { q: "Bagaimana keamanan data saya?", a: "Data terenkripsi, akses berbasis token per chatbot, mode publik/privat yang bisa dikontrol, dan autentikasi via OAuth Replit Identity. Anda punya kontrol penuh atas siapa yang bisa mengakses chatbot dan data Knowledge Base Anda." },
               { q: "Bisa digunakan untuk bisnis di luar konstruksi?", a: "Ya. Meskipun Gustafta paling dalam untuk Jasa Konstruksi Indonesia, platform ini fleksibel untuk properti, energi, pendidikan, digital marketing, HR, legal, dan 12+ sektor lainnya. Knowledge Base, persona, dan Mini Apps bisa dikustomisasi sepenuhnya." },
@@ -628,7 +628,7 @@ export default function Landing() {
                 <span className="font-bold text-lg">Gustafta</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4 max-w-xs leading-relaxed">
-                Platform AI Chatbot Builder terdalam untuk Jasa Konstruksi Indonesia. 971+ agent spesialis, 131 hub orchestrator, siap pakai tanpa coding.
+                Platform AI Chatbot Builder terdalam untuk Indonesia. 1350+ agent spesialis, 131 hub orchestrator, 45+ MultiClaw AI Tools — siap pakai tanpa coding.
               </p>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
@@ -661,19 +661,23 @@ export default function Landing() {
               <p className="font-semibold text-sm mb-3">Platform</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/packs" className="hover:text-foreground transition-colors" onClick={handlePricingClick}>Paket Harga</Link></li>
+                <li><Link href="/ai-tools" className="hover:text-foreground transition-colors">AI Tools Hub</Link></li>
                 <li><Link href="/gustafta-store" className="hover:text-foreground transition-colors">Template Store</Link></li>
-                <li><Link href="/documentation" className="hover:text-foreground transition-colors">Dokumentasi</Link></li>
+                <li><Link href="/education" className="hover:text-foreground transition-colors">Education Platform</Link></li>
                 <li><Link href="/legal" className="hover:text-foreground transition-colors">LexCom Legal AI</Link></li>
+                <li><Link href="/documentation" className="hover:text-foreground transition-colors">Dokumentasi</Link></li>
               </ul>
             </div>
 
             <div>
-              <p className="font-semibold text-sm mb-3">Produk Unggulan</p>
+              <p className="font-semibold text-sm mb-3">MultiClaw Tools</p>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/tendera-claw" className="hover:text-foreground transition-colors">TenderaClaw</Link></li>
                 <li><Link href="/sbu-claw" className="hover:text-foreground transition-colors">SBUClaw</Link></li>
                 <li><Link href="/konstra-claw" className="hover:text-foreground transition-colors">KonstraClaw</Link></li>
                 <li><Link href="/brain-claw" className="hover:text-foreground transition-colors">BrainClaw</Link></li>
+                <li><Link href="/safira-claw" className="hover:text-foreground transition-colors">SafiraClaw</Link></li>
+                <li><Link href="/ai-tools" className="hover:text-foreground transition-colors font-medium text-primary">Lihat 45+ Tools →</Link></li>
               </ul>
             </div>
           </div>
