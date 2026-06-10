@@ -1556,6 +1556,29 @@ export default function AiToolsHub() {
           </div>
         </div>
 
+        {/* MultiClaw Banner */}
+        <Link href="/multiclaw">
+          <div className="group mb-8 relative overflow-hidden border border-blue-500/20 hover:border-blue-500/40 rounded-2xl p-5 bg-gradient-to-r from-blue-500/8 to-violet-500/8 hover:from-blue-500/12 hover:to-violet-500/12 transition-all cursor-pointer">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center shrink-0">
+                  <Zap className="h-6 w-6 text-blue-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="text-sm font-bold text-white">MultiClaw Suite — 80 Chatbot AI Premium</h3>
+                    <Badge className="bg-blue-500/15 text-blue-300 border-blue-500/25 text-[10px]">Multi-Agen</Badge>
+                  </div>
+                  <p className="text-xs text-white/45">Konstruksi · K3 · Energi · HR · Bisnis · Pendidikan — setiap Claw mengoperasikan tim AI spesialis secara paralel.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-blue-400 shrink-0 text-xs font-medium group-hover:gap-2 transition-all">
+                Lihat Semua <ChevronRight className="h-4 w-4" />
+              </div>
+            </div>
+          </div>
+        </Link>
+
         {/* General AI Tools Section */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-4">
