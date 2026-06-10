@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import MultiClawConfigModal from "@/components/multiclaw-config-modal";
 import {
   ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle,
   HardHat, ChevronDown, ChevronUp, BookOpen, ClipboardCheck,
@@ -222,6 +223,7 @@ export default function SafiraClawChat() {
         </div>
         <div className="text-center mt-2 text-xs text-white/20">SafiraClaw v1 · SKKNI 333/2020 · KTL · ASS · AK3 · SPE · SMK · OpenClaw L4</div>
       </div>
+      <MultiClawConfigModal agentSlug="safira-claw-orchestrator" agentName="SafiraClaw — SKK K3 Konstruksi" />
     </div>
   );
 }

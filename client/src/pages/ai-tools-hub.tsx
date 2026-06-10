@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight,
+  ArrowLeft, Calculator, ShieldAlert, Sparkles, ChevronRight, Settings,
   Zap, Brain, Eye, FileText, Wrench, FileSignature, Shield, Target, Handshake, BarChart3,
   Award, GraduationCap, BookOpen, Search, TrendingUp, Building2, RefreshCw, MessageSquare, Briefcase, LayoutList, MapPin, FileCheck,
   Users, CheckCircle2, Layers, Monitor, DollarSign,
@@ -1502,6 +1502,12 @@ export default function AiToolsHub() {
           </Button>
         </Link>
         <div className="flex-1" />
+        <Link href="/multiclaw-admin">
+          <Button variant="ghost" size="sm" className="text-white/50 hover:text-white gap-1.5 text-xs">
+            <Settings className="h-3.5 w-3.5" />
+            Admin MultiClaw
+          </Button>
+        </Link>
         <Badge className="bg-violet-500/15 text-violet-400 border-violet-500/30 gap-1.5">
           <Wrench className="h-3.5 w-3.5" />
           AI Tools Hub
