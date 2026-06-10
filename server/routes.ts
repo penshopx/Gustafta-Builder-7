@@ -13094,8 +13094,26 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
   // GET /api/csms-claw/orchestrator — CSMSClaw 12-Agent CSMS Indonesia
   app.get("/api/csms-claw/orchestrator", async (_req, res) => {
     try {
-      let agent = await storage.getAgent("69");
-      if (!agent) return res.status(404).json({ error: "CSMSClaw Orchestrator tidak ditemukan. Pastikan agen ID 69 ada di database." });
+      const { agents: agentsTable } = await import("@shared/schema");
+      const { ilike } = await import("drizzle-orm");
+
+      let agent = await storage.getAgentBySlug("csms-claw-orchestrator");
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.systemPrompt, "%CSMS-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) {
+        const rows = await db.select().from(agentsTable)
+          .where(ilike(agentsTable.name, "%CSMS-ASSISTANT-ORCHESTRATOR%"))
+          .limit(1);
+        if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
+      }
+
+      if (!agent) return res.status(404).json({ error: "CSMSClaw Orchestrator tidak ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline });
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
@@ -13664,7 +13682,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
       const { agents: agentsTable } = await import("@shared/schema");
       const { ilike } = await import("drizzle-orm");
 
-      let agent = await storage.getAgent("564");
+      let agent = await storage.getAgentBySlug("migas-claw-orchestrator");
 
       if (!agent) {
         const rows = await db.select().from(agentsTable)
@@ -13680,7 +13698,7 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
         if (rows.length > 0) agent = await storage.getAgent(String(rows[0].id));
       }
 
-      if (!agent) return res.status(404).json({ error: "MigasClaw Orchestrator belum ditemukan. Pastikan agen ID 564 ada di database." });
+      if (!agent) return res.status(404).json({ error: "MigasClaw Orchestrator belum ditemukan." });
       res.json({ id: agent.id, name: (agent as any).name, tagline: (agent as any).tagline, avatar: (agent as any).avatar });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
