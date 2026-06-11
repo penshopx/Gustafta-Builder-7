@@ -163,6 +163,12 @@ export default function MultiClawAdmin() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [savedOk, setSavedOk] = useState(false);
 
+  // ── Sub-Agents editable state ──
+  interface SubAgentRow { role: string; agentId: number | string; description: string; }
+  const [editSubAgents, setEditSubAgents] = useState<SubAgentRow[]>([]);
+  const [savingSubAgents, setSavingSubAgents] = useState(false);
+  const [savedSubAgentsOk, setSavedSubAgentsOk] = useState(false);
+
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const { toast } = useToast();
@@ -188,6 +194,7 @@ export default function MultiClawAdmin() {
       setEditMaxTokens(a.maxTokens ?? 2000);
       setEditChunkSize(a.ragChunkSize ?? 800);
       setEditChunkOverlap(a.ragChunkOverlap ?? 200);
+      setEditSubAgents(Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.map((s: any) => ({ role: s.role || "", agentId: s.agentId ?? "", description: s.description || "" })) : []);
       loadKB(a.id);
     } catch { setAgentError("Gagal memuat agent."); }
     finally { setLoadingAgent(false); }
@@ -269,6 +276,31 @@ export default function MultiClawAdmin() {
       else throw new Error();
     } catch { toast({ title: "Gagal simpan. Pastikan sudah login.", variant: "destructive" }); }
     finally { setSavingSettings(false); }
+  }
+
+  async function saveSubAgents() {
+    if (!agent) return;
+    const valid = editSubAgents.filter(s => s.role.trim() && String(s.agentId).trim());
+    setSavingSubAgents(true); setSavedSubAgentsOk(false);
+    try {
+      const payload = valid.map(s => ({ role: s.role.trim(), agentId: Number(s.agentId), description: s.description.trim() }));
+      const r = await fetch(`/api/agents/${agent.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agenticSubAgents: payload }) });
+      if (r.ok) { toast({ title: `Sub-agents tersimpan ✓ (${payload.length} agen)` }); setSavedSubAgentsOk(true); setAgent({ ...agent, agenticSubAgents: payload }); setTimeout(() => setSavedSubAgentsOk(false), 3000); }
+      else throw new Error();
+    } catch { toast({ title: "Gagal simpan sub-agents.", variant: "destructive" }); }
+    finally { setSavingSubAgents(false); }
+  }
+
+  function addSubAgentRow() {
+    setEditSubAgents(prev => [...prev, { role: "", agentId: "", description: "" }]);
+  }
+
+  function removeSubAgentRow(i: number) {
+    setEditSubAgents(prev => prev.filter((_, idx) => idx !== i));
+  }
+
+  function updateSubAgentRow(i: number, field: keyof SubAgentRow, value: string) {
+    setEditSubAgents(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
   }
 
   const selectedInfo = CLAW_REGISTRY.find(c => c.slug === selectedSlug);
@@ -549,33 +581,90 @@ export default function MultiClawAdmin() {
                     {/* ── Sub-Agents Tab ── */}
                     {tab === "subagents" && (
                       <div className="max-w-2xl space-y-4">
-                        <div>
-                          <h3 className="text-white font-semibold">Sub-Agents Konfigurasi</h3>
-                          <p className="text-slate-400 text-xs">Daftar agen spesialis yang dipanggil oleh orchestrator ini secara paralel</p>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-white font-semibold">Sub-Agents Konfigurasi</h3>
+                            <p className="text-slate-400 text-xs">Edit, tambah, atau hapus agen spesialis yang dipanggil paralel oleh orchestrator ini</p>
+                          </div>
+                          <Badge className="bg-blue-500/15 text-blue-400 border-blue-500/30 shrink-0">{editSubAgents.length} agen</Badge>
                         </div>
-                        {!agent.agenticSubAgents ? (
-                          <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6 text-center text-slate-500 text-sm">Tidak ada sub-agent yang dikonfigurasi untuk Claw ini.</div>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-blue-500/15 text-blue-400 border-blue-500/30">{Array.isArray(agent.agenticSubAgents) ? agent.agenticSubAgents.length : "?"} sub-agent</Badge>
+
+                        {/* Header row */}
+                        {editSubAgents.length > 0 && (
+                          <div className="grid grid-cols-[80px_90px_1fr_32px] gap-2 px-1">
+                            <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Role/Kode</span>
+                            <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Agent ID</span>
+                            <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Deskripsi</span>
+                            <span />
+                          </div>
+                        )}
+
+                        {/* Editable rows */}
+                        <div className="space-y-2">
+                          {editSubAgents.map((sa, i) => (
+                            <div key={i} className="grid grid-cols-[80px_90px_1fr_32px] gap-2 items-start bg-slate-800/60 border border-slate-700/40 rounded-lg px-3 py-2.5">
+                              <input
+                                value={sa.role}
+                                onChange={e => updateSubAgentRow(i, "role", e.target.value)}
+                                placeholder="MAPPER"
+                                className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-blue-500"
+                              />
+                              <input
+                                value={String(sa.agentId)}
+                                onChange={e => updateSubAgentRow(i, "agentId", e.target.value)}
+                                placeholder="1175"
+                                type="number"
+                                className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500"
+                              />
+                              <input
+                                value={sa.description}
+                                onChange={e => updateSubAgentRow(i, "description", e.target.value)}
+                                placeholder="Deskripsi tugas agen spesialis ini..."
+                                className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500"
+                              />
+                              <button
+                                onClick={() => removeSubAgentRow(i)}
+                                className="flex items-center justify-center h-7 w-7 rounded text-slate-500 hover:text-red-400 hover:bg-red-900/20 transition-colors mt-0.5"
+                                title="Hapus baris"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
                             </div>
-                            <div className="space-y-2">
-                              {(Array.isArray(agent.agenticSubAgents) ? agent.agenticSubAgents : []).map((sa: any, i: number) => (
-                                <div key={i} className="bg-slate-800/60 border border-slate-700/40 rounded-lg px-4 py-3">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="bg-slate-700 text-slate-200 text-xs font-mono px-2 py-0.5 rounded">[{sa.role}]</span>
-                                    <span className="text-slate-400 text-xs">ID: {sa.agentId}</span>
-                                  </div>
-                                  <p className="text-slate-300 text-xs">{sa.description}</p>
-                                </div>
-                              ))}
+                          ))}
+
+                          {editSubAgents.length === 0 && (
+                            <div className="bg-slate-800/40 border border-slate-700/50 border-dashed rounded-xl p-6 text-center text-slate-500 text-sm">
+                              Belum ada sub-agent. Klik "+ Tambah Sub-Agent" untuk menambahkan.
                             </div>
-                            <div className="bg-slate-800/40 rounded-lg p-3">
-                              <div className="text-xs text-slate-400 font-medium mb-1">JSON Raw</div>
-                              <pre className="text-xs text-slate-400 font-mono overflow-x-auto">{JSON.stringify(agent.agenticSubAgents, null, 2)}</pre>
-                            </div>
-                          </>
+                          )}
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={addSubAgentRow}
+                            className="border-slate-600 text-slate-300 hover:text-white hover:border-slate-400 gap-1.5 text-xs"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Tambah Sub-Agent
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={saveSubAgents}
+                            disabled={savingSubAgents}
+                            className={`gap-1.5 text-xs ${savedSubAgentsOk ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"} text-white ml-auto`}
+                          >
+                            {savingSubAgents ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Menyimpan...</> : savedSubAgentsOk ? <><CheckCircle2 className="h-3.5 w-3.5" />Tersimpan!</> : "Simpan Sub-Agents"}
+                          </Button>
+                        </div>
+
+                        {/* JSON preview */}
+                        {editSubAgents.length > 0 && (
+                          <div className="bg-slate-800/40 rounded-lg p-3">
+                            <div className="text-xs text-slate-400 font-medium mb-1.5">Preview JSON</div>
+                            <pre className="text-xs text-slate-400 font-mono overflow-x-auto max-h-40">{JSON.stringify(editSubAgents.map(s => ({ role: s.role, agentId: Number(s.agentId) || s.agentId, description: s.description })), null, 2)}</pre>
+                          </div>
                         )}
                       </div>
                     )}
