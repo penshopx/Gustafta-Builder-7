@@ -566,7 +566,7 @@ export default function MultiClawAdmin() {
                                   <div className="flex items-center gap-2 mb-1">
                                     <span className="bg-slate-700 text-slate-200 text-xs font-mono px-2 py-0.5 rounded">[{sa.role}]</span>
                                     <span className="text-slate-400 text-xs">Agent ID: {sa.agentId}</span>
-                                    <Link href={`/agent/${sa.agentId}`}><span className="text-blue-400 text-xs hover:text-blue-300">→ Buka</span></Link>
+                                    <Link href={`/chat/${sa.agentId}`}><span className="text-blue-400 text-xs hover:text-blue-300">→ Buka</span></Link>
                                   </div>
                                   <p className="text-slate-300 text-xs">{sa.description}</p>
                                 </div>
