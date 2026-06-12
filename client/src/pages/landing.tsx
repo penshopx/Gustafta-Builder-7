@@ -17,13 +17,14 @@ import {
   TrendingUp, Users, CreditCard, Smartphone, ChevronRight,
   FileText, ClipboardCheck, BarChart3, HardHat, Layers,
   MessageSquare, Lock, HeartHandshake, Award, RefreshCw,
-  Clapperboard, PenLine, Video, Megaphone,
+  Clapperboard, PenLine, Video, Megaphone, Phone,
+  BadgeCheck, Lightbulb, Target, DollarSign,
 } from "lucide-react";
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
-  const [activePersona, setActivePersona] = useState<"belajar" | "bekerja" | "berusaha" | "kreator">("bekerja");
+  const [activePersona, setActivePersona] = useState<"bekerja" | "berusaha" | "belajar" | "kreator">("bekerja");
   const [promoCountdown, setPromoCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -53,64 +54,48 @@ export default function Landing() {
   const handlePacksClick = () => trackInitiateCheckout({ content_name: "Packs Page", value: 999000, currency: "IDR" });
 
   const personas = {
-    belajar: {
-      icon: GraduationCap,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/30",
-      label: "Belajar",
-      tagline: "AI Tutor & BIMTEK 24/7",
-      desc: "AI tutor per mata pelajaran, simulasi ujian SKK/UTBK, bank soal adaptif, dan bimbingan BNSP — tersedia kapan saja tanpa terikat jadwal.",
-      useCases: [
-        { icon: GraduationCap, title: "Simulasi Ujian SKK & UTBK", desc: "Latihan soal yang mengoreksi, menjelaskan, dan memberi saran belajar personal." },
-        { icon: Brain, title: "Tutor Konstruksi & Teknik Sipil", desc: "Pembahasan materi SKKNI, Permen PUPR, SNI dari dokumen asli — tanya jawab langsung." },
-        { icon: Users, title: "BIMTEK & Onboarding Karyawan", desc: "Modul terstruktur, quiz evaluasi, progress tracking, dan sertifikat otomatis." },
-        { icon: BookOpen, title: "E-Learning Sertifikasi BNSP", desc: "Persiapan uji kompetensi LSP, bank soal adaptif, dan analisis kelemahan per unit kompetensi." },
-      ],
-    },
     bekerja: {
-      icon: Briefcase,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/30",
-      label: "Bekerja",
-      tagline: "Asisten Profesional & Tender LPSE",
-      desc: "Analisis tender LPSE otomatis, drafter dokumen teknis, notulis rapat, dan konsultan K3 yang siap kerja kapan saja dari mana saja.",
+      icon: Briefcase, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/30",
+      label: "Profesional & Kontraktor", tagline: "Asisten Tender, Dokumen & Regulasi PUPR",
+      desc: "Analisis tender LPSE otomatis, drafter dokumen teknis, konsultan K3 regulasi, notulis rapat — asisten profesional yang tidak pernah tidur.",
       useCases: [
         { icon: ClipboardCheck, title: "Asisten Tender LPSE", desc: "Checklist 30+ item, gap analysis, SCORECARD Win Probability, draft dokumen sesuai Perpres 46/2025." },
-        { icon: FileText, title: "Draft Dokumen & Kontrak", desc: "Proposal teknis, SPK, SMKK plan, risk assessment, NDA, MoU — draf pertama dalam menit." },
-        { icon: HardHat, title: "Konsultan K3 & Regulasi PUPR", desc: "Tanya Permen PUPR, SMK3, PP 50/2012, PermenPUPR 10/2021 — jawaban akurat berbasis regulasi." },
-        { icon: MessageSquare, title: "Notulis Rapat & Knowledge Base Tim", desc: "Transkripsi audio/video otomatis, ringkasan rapat, dan pusat pengetahuan teknis yang bisa diakses via WA." },
+        { icon: FileText, title: "Draft Dokumen & Kontrak", desc: "Proposal teknis, SPK, SMKK plan, risk assessment, NDA — draf pertama siap dalam menit." },
+        { icon: HardHat, title: "Konsultan K3 & Regulasi PUPR", desc: "Tanya Permen PUPR, SMK3, PP 50/2012 — jawaban akurat berbasis regulasi resmi." },
+        { icon: MessageSquare, title: "Notulis Rapat AI", desc: "Transkripsi otomatis, ringkasan keputusan, dan pusat pengetahuan teknis tim." },
       ],
     },
     berusaha: {
-      icon: Store,
-      color: "text-orange-500",
-      bg: "bg-orange-500/10",
-      border: "border-orange-500/30",
-      label: "Berusaha",
-      tagline: "CS Otomatis & Lead Generation",
-      desc: "Jawab 80%+ pertanyaan pelanggan otomatis, tangkap leads 24/7, kirim broadcast WhatsApp, dan tingkatkan konversi tanpa tambah tim.",
+      icon: Store, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/30",
+      label: "Pengusaha & Bisnis", tagline: "CS Otomatis & Lead Generation 24/7",
+      desc: "Jawab 80%+ pertanyaan pelanggan otomatis, tangkap leads, kirim broadcast, tingkatkan konversi tanpa tambah tim CS.",
       useCases: [
-        { icon: MessageSquare, title: "Customer Service WhatsApp Otomatis", desc: "Jawab FAQ, tracking order, dan eskalasi ke CS manusia — 24/7 tanpa gaji tambahan." },
-        { icon: TrendingUp, title: "Lead Generation & Follow-Up", desc: "Tangkap prospek, kualifikasi leads, kirim notifikasi ke sales — bahkan saat toko tutup." },
+        { icon: MessageSquare, title: "Customer Service WA Otomatis", desc: "Jawab FAQ, tracking order, eskalasi ke CS manusia — 24/7 tanpa gaji tambahan." },
+        { icon: TrendingUp, title: "Lead Generation & Follow-Up", desc: "Tangkap prospek, kualifikasi leads, notifikasi ke sales — bahkan saat toko tutup." },
         { icon: Sparkles, title: "Konten & Copywriting AI", desc: "Caption IG/TikTok, artikel blog, script iklan, email marketing — siap publish berbasis produk Anda." },
-        { icon: BarChart3, title: "Analis Bisnis & Cashflow", desc: "Laporan keuangan sederhana, proyeksi omset, alert anomali pengeluaran — tanpa akuntan tambahan." },
+        { icon: BarChart3, title: "Analis Bisnis & Cashflow", desc: "Laporan keuangan, proyeksi omset, alert anomali — tanpa akuntan tambahan." },
+      ],
+    },
+    belajar: {
+      icon: GraduationCap, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/30",
+      label: "Pelajar & Peserta Sertifikasi", tagline: "AI Tutor & Simulasi Ujian 24/7",
+      desc: "Simulasi ujian SKK/UTBK adaptif, bank soal cerdas, BIMTEK tanpa jadwal, persiapan uji kompetensi BNSP dari mana saja.",
+      useCases: [
+        { icon: GraduationCap, title: "Simulasi Ujian SKK & UTBK", desc: "Soal adaptif yang mengoreksi, menjelaskan, dan memberi saran belajar personal." },
+        { icon: Brain, title: "Tutor Konstruksi & Teknik Sipil", desc: "Pembahasan SKKNI, Permen PUPR, SNI dari dokumen asli — tanya jawab langsung." },
+        { icon: Users, title: "BIMTEK & Onboarding Karyawan", desc: "Modul terstruktur, quiz evaluasi, progress tracking, sertifikat otomatis." },
+        { icon: BookOpen, title: "E-Learning Sertifikasi BNSP", desc: "Persiapan uji kompetensi LSP, bank soal adaptif, analisis kelemahan per unit." },
       ],
     },
     kreator: {
-      icon: Clapperboard,
-      color: "text-violet-500",
-      bg: "bg-violet-500/10",
-      border: "border-violet-500/30",
-      label: "Kreator",
-      tagline: "AI Manajer Konten & Script Writer",
-      desc: "Dari editorial calendar bulanan, script YouTube & Podcast, proposal brand deal, hingga laporan performa — AI bantu kreator fokus berkreasi, bukan tenggelam di pekerjaan administratif.",
+      icon: Clapperboard, color: "text-violet-500", bg: "bg-violet-500/10", border: "border-violet-500/30",
+      label: "Kreator & Penulis", tagline: "AI Manajer Konten & Script Writer",
+      desc: "Editorial calendar, script YouTube, proposal brand deal, laporan performa — fokus berkreasi, bukan tenggelam di pekerjaan administratif.",
       useCases: [
-        { icon: PenLine, title: "Editorial Calendar & Ide Konten", desc: "Rencanakan konten sebulan penuh: tema mingguan, content pillars, jadwal per platform, dikustomisasi sesuai niche." },
-        { icon: Video, title: "Script YouTube & Podcast AI", desc: "Hook 5 detik yang kuat, opening, segmen isi, outro, CTA — script lengkap terasa natural saat dibacakan." },
-        { icon: Megaphone, title: "Proposal Brand Deal & Media Kit", desc: "Profil kreator, audience insight, rate card, deliverables & SLA — media kit profesional siap kirim ke brand dalam menit." },
-        { icon: MessageSquare, title: "Chatbot Kreator Pribadi", desc: "Bangun chatbot berisi semua konten, koleksi video, e-book, dan pengetahuan Anda — followers bisa tanya 24/7." },
+        { icon: PenLine, title: "Editorial Calendar & Ide Konten", desc: "Rencanakan konten sebulan penuh: tema, content pillars, jadwal per platform." },
+        { icon: Video, title: "Script YouTube & Podcast AI", desc: "Hook 5 detik kuat, opening, segmen isi, outro, CTA — script lengkap, natural saat dibacakan." },
+        { icon: Megaphone, title: "Proposal Brand Deal & Media Kit", desc: "Profil kreator, audience insight, rate card — media kit profesional siap kirim ke brand." },
+        { icon: MessageSquare, title: "Chatbot Kreator Pribadi", desc: "Followers bisa tanya konten, koleksi video, e-book, dan pengetahuan Anda 24/7." },
       ],
     },
   };
@@ -118,16 +103,20 @@ export default function Landing() {
   const p = personas[activePersona];
   const PersonaIcon = p.icon;
 
+  const SCALEV_BUNDLE = "https://scalev.id/p/LINK_CHECKOUT_SCALEV_ANDA";
+  const SCALEV_BUKU1 = "https://scalev.id/p/LINK_CHECKOUT_BUKU_1_SCALEV_ANDA";
+  const WA_URL = "https://wa.me/6281234567890?text=Halo%20Gustafta%2C%20saya%20mau%20tanya%20tentang%20Trilogi%20%26%20Gustafta%20Builder";
+
   return (
-    <div className="min-h-screen bg-background" data-testid="page-landing">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-200" data-testid="page-landing">
       <SharedHeader />
 
-      {/* ── ATTENTION: Promo Banner ── */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white py-2.5 px-4">
+      {/* ── STICKY PROMO BANNER ── */}
+      <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white py-2.5 px-4 sticky top-[57px] z-40">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Flame className="w-4 h-4 animate-bounce" />
-            Promo Paket Bisnis — Harga naik 2× per 1 Juli 2026
+            Early Bird Trilogi + Gustafta Builder — Harga naik per 1 Juli 2026
           </div>
           <div className="flex items-center gap-1 text-xs font-mono">
             {[
@@ -143,176 +132,226 @@ export default function Landing() {
               </span>
             ))}
           </div>
-          <Link href="/packs" onClick={handlePacksClick}>
-            <button className="bg-white text-red-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors" data-testid="button-promo-cta">
+          <a href={SCALEV_BUNDLE} target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("promo-banner")}>
+            <button className="bg-white text-red-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors whitespace-nowrap" data-testid="button-promo-cta">
               Kunci Harga Sekarang →
             </button>
-          </Link>
+          </a>
         </div>
       </div>
 
-      {/* ── ATTENTION: Hero ── */}
-      <section className="relative overflow-hidden py-16 md:py-24 px-4">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
-        <div className="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      {/* ══════════════════════════════════════════════
+          HERO — PAIN HEADLINE (3 detik pertama)
+      ══════════════════════════════════════════════ */}
+      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 text-white py-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <span className="bg-blue-950/60 text-blue-100 text-sm font-semibold px-4 py-1.5 rounded-full mb-6 inline-block border border-blue-400/30">
+            🚀 Untuk Karyawan, Profesional &amp; Calon Pensiunan
+          </span>
 
-        <div className="max-w-4xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-            <Sparkles className="h-4 w-4" />
-            1350+ Agent AI Spesialis · 131 Hub Orchestrator · 45 MultiClaw Tools · Siap Pakai
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
-            Buat Chatbot AI Cerdas untuk
-            <br className="hidden md:block" />
-            <span className="text-primary"> Belajar</span>
-            <span className="text-muted-foreground">, </span>
-            <span className="text-primary">Bekerja</span>
-            <span className="text-muted-foreground">, </span>
-            <span className="text-orange-500">Berusaha</span>
-            <span className="text-muted-foreground"> &amp; </span>
-            <span className="text-violet-500">Kreator</span>
-            <span className="block text-2xl sm:text-3xl md:text-4xl mt-1 text-muted-foreground font-semibold">— Tanpa Coding</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 leading-tight" data-testid="text-hero-title">
+            Kerja 15 Tahun,<br className="hidden sm:block" />
+            Tapi Tabungan Cuma Cukup <span className="text-orange-400 underline decoration-wavy decoration-orange-400/50">6 Bulan?</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Dari <strong className="text-foreground">Asisten Tender LPSE</strong>, AI Tutor SKK, Customer Service otomatis, hingga Script Writer —
-            bangun chatbot AI dalam <strong className="text-foreground">30 menit tanpa coding</strong>. Sudah dipakai ratusan kontraktor, konsultan, dan bisnis Indonesia.
+          <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Masalahnya <strong className="text-white">BUKAN</strong> kamu kurang pintar atau kurang kerja keras.
+            Masalahnya, keahlianmu selama ini cuma <strong className="text-orange-300">"MONOLOG"</strong> — berbicara satu arah ke perusahaan.
+            Begitu perusahaan berhenti mendengar (PHK atau pensiun), <strong className="text-white">penghasilan ikut berhenti</strong>.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <a href={SCALEV_BUNDLE} target="_blank" rel="noopener noreferrer"
+              onClick={() => { handleWAClick("hero-primary"); handlePacksClick(); }}
+              className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 text-white text-base font-bold py-4 px-8 rounded-xl shadow-2xl transition-all transform hover:scale-105 active:scale-95"
+              data-testid="button-hero-ebook">
+              🔥 Ya, Saya Mau Amankan Slot Early Bird
+            </a>
             <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
-              <Button size="lg" className="w-full sm:w-auto gap-2 text-base font-bold px-8 py-6" data-testid="button-hero-start">
+              <button className="inline-flex items-center justify-center gap-2 border-2 border-white/40 hover:border-white text-white text-base font-semibold py-4 px-8 rounded-xl transition-all hover:bg-white/10"
+                data-testid="button-hero-platform">
                 <Rocket className="w-5 h-5" />
-                Mulai Sekarang — Gratis
-                <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
-            <Link href="/packs" onClick={handlePricingClick}>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base font-semibold px-8 py-6" data-testid="button-hero-pricing">
-                <Package className="w-5 h-5" />
-                Lihat Paket Harga
-              </Button>
+                Coba Platform Gratis
+              </button>
             </Link>
           </div>
 
-          <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
-            Mulai dari Rp 199.000/bulan · Tanpa kartu kredit · Setup &lt; 30 menit
+          <p className="text-sm text-blue-200 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <span>✅ Garansi 7 Hari Uang Kembali</span>
+            <span className="opacity-40">|</span>
+            <span>🔒 Checkout Aman via Scalev</span>
+            <span className="opacity-40">|</span>
+            <span>📦 Akses Seumur Hidup</span>
           </p>
         </div>
       </section>
 
-      {/* ── Stats Bar ── */}
-      <div className="border-y bg-muted/30 py-8 px-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: "1350+", label: "Agent AI Spesialis" },
-            { value: "131", label: "Hub Orchestrator" },
-            { value: "45+", label: "MultiClaw AI Tools" },
-            { value: "24/7", label: "AI Selalu Aktif" },
-          ].map((s) => (
-            <div key={s.label}>
-              <div className="text-3xl font-extrabold text-primary mb-1">{s.value}</div>
-              <div className="text-sm text-muted-foreground">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── PROBLEM: Pain Points ── */}
-      <section className="py-16 px-4">
+      {/* ══════════════════════════════════════════════
+          PROBLEM — "Hamster di Roda Putar"
+      ══════════════════════════════════════════════ */}
+      <section className="py-16 px-4 bg-white dark:bg-gray-950">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Masalah yang Anda Hadapi</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Apakah Ini Terasa Familiar?</h2>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-sm">
-              Ribuan profesional dan bisnis di Indonesia menghadapi masalah ini setiap hari.
-            </p>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-10">
+            Pernah Merasa Seperti Hamster di Roda Putar?
+          </h2>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            {[
-              { icon: Clock, problem: "Tim CS kewalahan menjawab pertanyaan yang sama berulang-ulang, jam kerja habis hanya untuk FAQ" },
-              { icon: AlertTriangle, problem: "Dokumen tender dikerjakan manual berhari-hari, padahal deadline mepet dan checklist puluhan item" },
-              { icon: TrendingUp, problem: "Leads masuk di luar jam kerja tapi tidak ada yang merespons — prospek pergi ke kompetitor" },
-              { icon: Users, problem: "Pengetahuan perusahaan tersebar di mana-mana, tim baru butuh berminggu-minggu untuk onboarding" },
-            ].map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <div key={i} className="flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10 p-4">
-                  <div className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Icon className="w-5 h-5 text-red-500" />
-                  </div>
-                  <p className="text-sm text-foreground leading-relaxed">{item.problem}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── AGITATION: Consequences ── */}
-      <section className="py-12 px-4 bg-muted/20">
-        <div className="max-w-3xl mx-auto">
-          <div className="rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 p-6 md:p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
-              <p className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Sementara Itu...</p>
-            </div>
-            <h3 className="text-xl md:text-2xl font-bold mb-3">
-              Kompetitor Anda Sudah Menggunakan AI untuk Pekerjaan Ini
-            </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-              Kontraktor yang pakai AI Tender Assistant menyelesaikan analisis dokumen 3× lebih cepat dan win rate-nya naik 40%.
-              Bisnis dengan CS otomatis 24/7 tidak pernah kehilangan leads lagi. Tim yang punya Knowledge Base AI onboarding karyawan baru dalam 2 hari, bukan 2 minggu.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
               {[
-                { label: "3× lebih cepat", sub: "analisis dokumen tender" },
-                { label: "80%+ pertanyaan", sub: "dijawab otomatis tanpa CS manual" },
-                { label: "Win rate naik 40%", sub: "dengan SCORECARD AI" },
-              ].map((stat) => (
-                <div key={stat.label} className="flex-1 bg-background rounded-lg p-3 text-center border border-border/50">
-                  <div className="font-bold text-primary text-sm">{stat.label}</div>
-                  <div className="text-xs text-muted-foreground">{stat.sub}</div>
+                "Gaji cuma numpang lewat. Bayar cicilan, SPP anak, biaya orang tua — langsung habis tanpa sisa.",
+                "Tiap ada rumor PHK atau restrukturisasi, jantung langsung dag-dig-dug. Padahal sudah kerja puluhan tahun.",
+                "Mendekati pensiun, tapi bayangan \"berhenti kerja = berhenti penghasilan\" bikin malam tak bisa tidur.",
+                "Pengen punya side income, tapi mikir: \"Saya gaptek, masa harus belajar coding atau jualan online dari nol?\"",
+              ].map((text, i) => (
+                <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30">
+                  <span className="text-red-500 text-xl mt-0.5 flex-shrink-0">❌</span>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{text}</p>
                 </div>
               ))}
             </div>
+
+            <div className="bg-red-600 text-white p-7 rounded-2xl shadow-xl flex flex-col justify-center">
+              <p className="text-xl font-extrabold mb-3">STOP. Itu bukan salahmu.</p>
+              <p className="text-red-100 leading-relaxed text-sm mb-4">
+                Selama ini kamu <strong className="text-white">membangun rumah di atas pasir</strong>.
+                Keahlian dan pengalamanmu hanya "berbicara" satu arah ke satu tempat kerja.
+                Saat tempat itu berhenti mendengar, <strong className="text-white">penghasilanmu mati suri</strong>.
+              </p>
+              <p className="text-white font-bold text-base">
+                Saatnya beralih dari <span className="bg-white/20 px-1.5 py-0.5 rounded">MONOLOG</span> ke <span className="bg-orange-400 text-white px-1.5 py-0.5 rounded">DIALOG</span> — penghasilan yang terus mengalir meski kamu sedang tidur.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── SOLUTION: Intro ── */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Solusinya</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Kenalkan Gustafta — Platform AI Chatbot Builder</h2>
-            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-sm leading-relaxed">
-              Satu platform untuk membangun chatbot AI yang benar-benar memahami konteks bisnis Anda.
-              Bukan chatbot template kosong — tapi 1350+ agent spesialis yang sudah dilatih khusus untuk konstruksi, tender, K3, SKK, energi, properti, marketing, HR, dan 20+ domain lainnya.
-            </p>
+      {/* ══════════════════════════════════════════════
+          SOLUTION — Trilogi + Meta-Case
+      ══════════════════════════════════════════════ */}
+      <section className="py-16 px-4 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Solusinya</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Ubah Pengalaman Kerjamu Jadi <span className="text-blue-600">"Mesin Uang" 24/7</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-3xl mx-auto text-sm leading-relaxed mb-10">
+            Ebook <strong className="text-gray-800 dark:text-white">Trilogi: Dari Monolog ke Dialog</strong> memandu Anda menjadi seorang <em>Orchestrator</em>.
+            Anda tidak perlu coding. Cukup <strong className="text-gray-800 dark:text-white">pimpin 6 Agen AI MultiClaw</strong> — Researcher, Narrator, Designer,
+            Case Builder, Futurist, Editor — untuk bekerja atas nama keahlian Anda, 24 jam sehari.
+          </p>
+
+          {/* 3 Buku */}
+          <div className="grid sm:grid-cols-3 gap-4 mb-10">
+            {[
+              { n: "I", title: "Belajar", sub: "Pahami cara kerja AI dan bagaimana merakit chatbot spesialis dari pengalaman Anda", color: "from-blue-600 to-blue-500" },
+              { n: "II", title: "Bekerja", sub: "Praktik langsung: rakit asisten AI pertama Anda dan dapatkan klien/pengguna pertama", color: "from-emerald-600 to-emerald-500" },
+              { n: "III", title: "Berkarya", sub: "Skalakan: dari 1 asisten jadi ekosistem chatbot dengan penghasilan subscription", color: "from-orange-600 to-orange-500" },
+            ].map((b) => (
+              <div key={b.n} className={`bg-gradient-to-br ${b.color} text-white rounded-2xl p-5 shadow-lg text-left`}>
+                <div className="text-xs font-bold opacity-70 mb-1">BUKU {b.n}</div>
+                <div className="text-xl font-extrabold mb-2">{b.title}</div>
+                <p className="text-sm text-white/80 leading-relaxed">{b.sub}</p>
+              </div>
+            ))}
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {/* META-CASE Box */}
+          <div className="bg-blue-950 text-white p-8 rounded-2xl shadow-2xl max-w-3xl mx-auto border border-blue-700/40">
+            <div className="flex items-center gap-2 mb-4">
+              <Lightbulb className="w-6 h-6 text-yellow-400 flex-shrink-0" />
+              <h3 className="text-lg font-extrabold">META-CASE: Bukti Nyata Metode Ini Bekerja</h3>
+            </div>
+            <p className="text-blue-100 leading-relaxed text-sm">
+              Ebook Trilogi yang sedang Anda baca ini <strong className="text-white">DITULIS menggunakan metode yang sama</strong> yang diajarkan di dalamnya.
+              Proses riset, narasi, pengecekan fakta, hingga desain struktur bab — semuanya dieksekusi oleh Tim 6-Agen AI MultiClaw, dipimpin oleh satu <em>Orchestrator</em> (manusia).
+            </p>
+            <p className="text-blue-200 text-sm mt-3">
+              <strong className="text-white">Jadi jika Anda bertanya: "Ini beneran works?"</strong><br />
+              Jawabannya: Anda sedang memegang buktinya.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          SOCIAL PROOF — Testimoni Relatable
+      ══════════════════════════════════════════════ */}
+      <section className="py-16 px-4 bg-white dark:bg-gray-950">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2 text-center">Bukan Teori</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-10">
+            Kisah Nyata dari Orang-Orang Seperti Anda
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* Testimoni personal/relatable */}
             {[
-              { icon: Brain, title: "Otak Proyek", desc: "Pusatkan semua data bisnis. AI jawab berdasarkan konteks nyata, bukan jawaban generik.", color: "text-amber-500", bg: "bg-amber-500/10" },
-              { icon: Globe, title: "Custom Domain", desc: "Pasang bot.perusahaan.com. Branding profesional, bukan link chatbot biasa.", color: "text-blue-500", bg: "bg-blue-500/10" },
-              { icon: BookOpen, title: "Knowledge Base 7 Tipe", desc: "PDF, URL, YouTube, video, audio — AI transkripsi dan RAG secara otomatis.", color: "text-violet-500", bg: "bg-violet-500/10" },
-              { icon: Plug, title: "Multi-Channel", desc: "WhatsApp, Telegram, web widget, REST API — satu chatbot, semua channel sekaligus.", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-              { icon: Zap, title: "45+ MultiClaw AI Tools", desc: "Suite lengkap: TenderaClaw, SBUClaw, KonstraClaw, BrainClaw, SafiraClaw, dan 40+ tools spesialis siap pakai.", color: "text-orange-500", bg: "bg-orange-500/10" },
-              { icon: Shield, title: "Aman & Privat", desc: "Token per chatbot, mode publik/privat, enkripsi end-to-end, OAuth Replit Identity.", color: "text-slate-500", bg: "bg-slate-500/10" },
-            ].map((f) => {
-              const FIcon = f.icon;
-              return (
-                <div key={f.title} className={`rounded-xl border p-5 hover:shadow-md transition-shadow ${f.bg}`} data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center mb-3 shadow-sm border border-border/30">
-                    <FIcon className={`w-5 h-5 ${f.color}`} />
+              {
+                quote: "Dulu saya panik tiap denger rumor restructuring. Tapi setelah baca Buku I, saya rakit 'Asisten Admin AI' dari pengalaman 20 tahun saya di kantor. Sekarang saya punya 50 klien UKM subscription Rp 100rb/bulan. Side income Rp 5 juta/bulan. Kalau di-PHK pun, saya nggak panik lagi.",
+                name: "Bu Sari", age: "48 tahun", role: "Staf Admin, Bekasi", bg: "bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-800/30",
+              },
+              {
+                quote: "Saya kira masa tua bakal jadi beban anak. Uang pensiun cuma cukup 2 tahun. Tapi setelah coba metode ini, saya rakit 'Tutor AI untuk Siswa SMA' dari pengalaman 30 tahun mengajar. Sekarang ada 200 subscriber, Rp 10 juta/bulan. Pensiun bukan lagi momok, tapi berkah.",
+                name: "Pak Hartono", age: "62 tahun", role: "Pensiunan Guru, Surabaya", bg: "bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800/30",
+              },
+            ].map((t, i) => (
+              <div key={i} className={`p-6 rounded-2xl border ${t.bg} relative`}>
+                <div className="text-4xl text-gray-300 dark:text-gray-600 font-serif leading-none mb-2">"</div>
+                <p className="text-gray-700 dark:text-gray-300 italic text-sm leading-relaxed mb-4">{t.quote}</p>
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    {t.name.split(" ").map(w => w[0]).join("").slice(0,2)}
                   </div>
-                  <h3 className="font-bold text-sm mb-1.5">{f.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.age} · {t.role}</p>
+                  </div>
+                  <div className="ml-auto flex gap-0.5">
+                    {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Testimoni B2B profesional */}
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              { name: "Budi Santoso", role: "Direktur Teknik, PT Bangun Nusa Konstruksi", avatar: "BS", text: "TenderaClaw menghemat 2–3 hari kerja per tender. Win rate naik signifikan dalam 3 bulan.", tag: "Kontraktor BUJK" },
+              { name: "Retno Ayu", role: "Kepala Divisi Sertifikasi, LSP Konstruksi", avatar: "RA", text: "Simulasi asesmen SKKNI via AI sangat membantu peserta. Kelulusan jauh lebih konsisten.", tag: "Sertifikasi LSP" },
+              { name: "Agus Prasetyo", role: "CEO, PT Graha Mandiri Consultant", avatar: "AP", text: "SCORECARD Win Probability dari BrainClaw — return on investment-nya jelas dan terukur.", tag: "Konsultan MK" },
+            ].map((t) => (
+              <div key={t.name} className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm" data-testid={`card-testimonial-${t.avatar.toLowerCase()}`}>
+                <div className="flex items-center gap-0.5 mb-3">
+                  {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 italic">"{t.text}"</p>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-bold flex-shrink-0">{t.avatar}</div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold truncate text-gray-900 dark:text-white">{t.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{t.role}</p>
+                  </div>
+                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex-shrink-0">{t.tag}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Trust badges */}
+          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: Users, value: "1350+", label: "Agent AI Spesialis" },
+              { icon: Target, value: "131", label: "Hub Orchestrator" },
+              { icon: Zap, value: "45+", label: "MultiClaw AI Tools" },
+              { icon: BadgeCheck, value: "24/7", label: "AI Selalu Aktif" },
+            ].map((s) => {
+              const SIcon = s.icon;
+              return (
+                <div key={s.label} className="flex flex-col items-center p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                  <SIcon className="w-6 h-6 text-blue-600 mb-2" />
+                  <div className="text-2xl font-extrabold text-blue-600 mb-0.5">{s.value}</div>
+                  <div className="text-xs text-gray-500 text-center">{s.label}</div>
                 </div>
               );
             })}
@@ -320,69 +359,57 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── INTEREST: Cara Kerja ── */}
-      <section className="py-16 px-4 bg-muted/20">
+      {/* ══════════════════════════════════════════════
+          INTEREST — Cara Kerja Platform
+      ══════════════════════════════════════════════ */}
+      <section className="py-16 px-4 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Cara Kerja</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Dari Daftar Sampai Chatbot Aktif: &lt; 30 Menit</h2>
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Cara Kerja</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              Dari Nol ke Chatbot AI Aktif: <span className="text-blue-600">&lt; 30 Menit</span>
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">Tidak perlu coding. Tidak perlu server. Tidak perlu tim IT.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
             {[
-              { n: "1", title: "Buat Hierarki Chatbot", desc: "Buat Series, Modul, dan Chatbot sesuai struktur bisnis Anda.", time: "±10 mnt", bullets: ["Buat Series sebagai payung ekosistem", "Tambah Modul & Chatbot spesialis", "Aktifkan Orchestrator routing (opsional)"] },
-              { n: "2", title: "Isi Knowledge Base", desc: "Upload sumber pengetahuan — PDF, URL, YouTube, video, atau audio.", time: "±10–15 mnt", bullets: ["Upload PDF/DOCX/Excel atau paste URL", "YouTube → transkripsi otomatis AI", "Video/audio → RAG background"] },
-              { n: "3", title: "Konfigurasi & Deploy", desc: "Atur persona, Otak Proyek, dan pasang custom domain opsional.", time: "±5–7 mnt", bullets: ["Isi Otak Proyek dengan data bisnis", "Atur persona & conversation starters", "Custom Domain: CNAME setup otomatis"] },
-              { n: "4", title: "Mulai Layani Pengguna", desc: "Hubungkan ke WhatsApp, embed web widget, atau share link langsung.", time: "±3–5 mnt", bullets: ["Connect WhatsApp / Telegram / Web", "Test 5 pertanyaan kunci via console", "Pantau analytics real-time"] },
+              { n: "1", title: "Buat Chatbot", desc: "Pilih template atau mulai dari nol. Isi persona dan keahlian chatbot Anda.", time: "±5 mnt", color: "bg-blue-600" },
+              { n: "2", title: "Isi Knowledge Base", desc: "Upload PDF, paste URL, atau input teks dokumen regulasi/SOP Anda.", time: "±10 mnt", color: "bg-emerald-600" },
+              { n: "3", title: "Konfigurasi & Test", desc: "Atur model AI, ragTopK, greeting, dan prompt cepat untuk segmen target.", time: "±7 mnt", color: "bg-orange-600" },
+              { n: "4", title: "Deploy & Layani", desc: "Share link, embed di website, atau connect ke WhatsApp/Telegram.", time: "±3 mnt", color: "bg-violet-600" },
             ].map((s, i) => (
-              <div key={s.n} className="relative">
-                {i < 3 && (
-                  <div className="hidden md:block absolute top-5 left-full w-full h-px bg-gradient-to-r from-primary/30 to-transparent -translate-x-4 z-0" />
-                )}
-                <div className="relative bg-background rounded-xl border p-5 hover:shadow-md transition-shadow h-full">
-                  <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-base font-bold mx-auto mb-3">
-                    {s.n}
-                  </div>
-                  <div className="text-[10px] font-semibold text-primary text-center mb-1">{s.time}</div>
-                  <h3 className="font-bold text-sm mb-1.5 text-center">{s.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed mb-3 text-center">{s.desc}</p>
-                  <ul className="space-y-1">
-                    {s.bullets.map((b) => (
-                      <li key={b} className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
-                        <Check className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" /> {b}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <div key={s.n} className="relative bg-white dark:bg-gray-950 rounded-xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow">
+                {i < 3 && <div className="hidden md:block absolute top-6 left-full w-6 text-gray-300 dark:text-gray-700 text-xs font-bold z-10 text-center">→</div>}
+                <div className={`w-10 h-10 ${s.color} text-white rounded-full flex items-center justify-center text-base font-bold mx-auto mb-3`}>{s.n}</div>
+                <div className="text-[10px] font-semibold text-center text-gray-400 mb-1">{s.time}</div>
+                <h3 className="font-bold text-sm mb-1.5 text-center text-gray-900 dark:text-white">{s.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-center">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── DESIRE: Untuk Siapa (Persona Tabs) ── */}
-      <section className="py-16 px-4">
+      {/* ══════════════════════════════════════════════
+          DESIRE — Persona Tabs (Untuk Siapa)
+      ══════════════════════════════════════════════ */}
+      <section className="py-16 px-4 bg-white dark:bg-gray-950">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Untuk Siapa?</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Satu Platform, Banyak Kegunaan</h2>
-            <p className="text-muted-foreground mt-2 text-sm">Pilih peran Anda dan lihat bagaimana Gustafta bekerja untuk Anda.</p>
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Untuk Siapa?</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Satu Platform, Cocok untuk Semua Profesi</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">Pilih peran Anda dan lihat bagaimana Gustafta bekerja untuk situasi Anda.</p>
           </div>
 
           <div className="flex justify-center gap-2 mb-6 flex-wrap">
-            {(["belajar", "bekerja", "berusaha", "kreator"] as const).map((key) => {
+            {(["bekerja", "berusaha", "belajar", "kreator"] as const).map((key) => {
               const tab = personas[key];
               const TabIcon = tab.icon;
               return (
-                <button
-                  key={key}
-                  onClick={() => setActivePersona(key)}
+                <button key={key} onClick={() => setActivePersona(key)}
                   data-testid={`tab-persona-${key}`}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold border-2 transition-all ${
-                    activePersona === key
-                      ? `${tab.bg} ${tab.color} ${tab.border}`
-                      : "bg-background border-border text-muted-foreground hover:border-primary/30"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border-2 transition-all ${activePersona === key ? `${tab.bg} ${tab.color} ${tab.border}` : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-blue-300"}`}
                 >
                   <TabIcon className="w-4 h-4" /> {tab.label}
                 </button>
@@ -392,26 +419,26 @@ export default function Landing() {
 
           <div className={`rounded-2xl border-2 ${p.border} ${p.bg} p-6 md:p-8`}>
             <div className="flex items-start gap-4 mb-6">
-              <div className={`w-12 h-12 rounded-xl bg-background border ${p.border} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+              <div className={`w-12 h-12 rounded-xl bg-white dark:bg-gray-900 border ${p.border} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                 <PersonaIcon className={`w-6 h-6 ${p.color}`} />
               </div>
               <div>
                 <p className={`text-xs font-bold uppercase tracking-wide ${p.color} mb-1`}>{p.label}</p>
-                <h3 className="text-lg font-bold mb-1">{p.tagline}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+                <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-white">{p.tagline}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{p.desc}</p>
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               {p.useCases.map((uc) => {
                 const UCIcon = uc.icon;
                 return (
-                  <div key={uc.title} className="flex items-start gap-3 bg-background/70 rounded-xl p-3.5 border border-border/50">
-                    <div className={`w-8 h-8 rounded-lg bg-background border border-border/30 flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                  <div key={uc.title} className="flex items-start gap-3 bg-white/70 dark:bg-gray-900/70 rounded-xl p-3.5 border border-gray-200/60 dark:border-gray-700/40">
+                    <div className={`w-8 h-8 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center flex-shrink-0 shadow-sm`}>
                       <UCIcon className={`w-4 h-4 ${p.color}`} />
                     </div>
                     <div>
-                      <p className="text-xs font-bold mb-0.5">{uc.title}</p>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed">{uc.desc}</p>
+                      <p className="text-xs font-bold mb-0.5 text-gray-900 dark:text-white">{uc.title}</p>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">{uc.desc}</p>
                     </div>
                   </div>
                 );
@@ -420,7 +447,7 @@ export default function Landing() {
             <div className="mt-5 flex justify-end">
               <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
                 <button className={`flex items-center gap-2 text-sm font-semibold ${p.color} hover:underline`} data-testid={`button-persona-cta-${activePersona}`}>
-                  Mulai untuk {p.label} <ChevronRight className="w-4 h-4" />
+                  Mulai Sekarang <ChevronRight className="w-4 h-4" />
                 </button>
               </Link>
             </div>
@@ -428,279 +455,214 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── DESIRE: Testimoni ── */}
-      <section className="py-16 px-4 bg-muted/20">
+      {/* ══════════════════════════════════════════════
+          ACTION — PRICING
+      ══════════════════════════════════════════════ */}
+      <section id="pricing" className="py-16 px-4 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Testimoni</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Dipercaya Ratusan Profesional Indonesia</h2>
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Investasi</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              Pilih Jalan Anda Menuju <span className="text-orange-500">Dialog</span>
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">Investasi leher ke atas untuk ketenangan finansial jangka panjang.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              {
-                name: "Budi Santoso",
-                role: "Direktur Teknik, PT Bangun Nusa Konstruksi",
-                avatar: "BS",
-                text: "TenderaClaw menghemat 2–3 hari kerja per tender. Checklist 30+ item langsung muncul, gap analysis akurat, draft dokumen tinggal edit. Win rate naik signifikan.",
-                tag: "Kontraktor BUJK",
-              },
-              {
-                name: "Retno Ayu",
-                role: "Kepala Divisi Sertifikasi, LSP Konstruksi",
-                avatar: "RA",
-                text: "Simulasi asesmen SKKNI via AI sangat membantu peserta kami. Peserta yang latihan pakai Gustafta kelulusannya jauh lebih konsisten dibanding batch sebelumnya.",
-                tag: "Sertifikasi LSP",
-              },
-              {
-                name: "Agus Prasetyo",
-                role: "CEO, PT Graha Mandiri Consultant",
-                avatar: "AP",
-                text: "SCORECARD Win Probability dari BrainClaw membantu kami milih tender yang layak. Win rate naik 40% dalam 3 bulan — return on investment-nya jelas dan terukur.",
-                tag: "Konsultan MK",
-              },
-            ].map((t) => (
-              <div key={t.name} className="rounded-xl border bg-background p-5 shadow-sm" data-testid={`card-testimonial-${t.avatar.toLowerCase()}`}>
-                <div className="flex items-center gap-0.5 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">"{t.text}"</p>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">
-                    {t.avatar}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold truncate">{t.name}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{t.role}</p>
-                  </div>
-                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary flex-shrink-0">{t.tag}</span>
-                </div>
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Card 1: Trilogi Ebook Bundle */}
+            <div className="relative bg-white dark:bg-gray-950 rounded-2xl shadow-2xl border-2 border-orange-500 overflow-hidden">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-orange-500 text-white text-xs font-extrabold py-1.5 px-5 rounded-full shadow whitespace-nowrap">
+                PALING LARIS 🔥
               </div>
-            ))}
-          </div>
-
-          {/* Trust Badges */}
-          <div className="flex flex-wrap justify-center gap-4 mt-8">
-            {[
-              { icon: Lock, label: "Data Terenkripsi" },
-              { icon: RefreshCw, label: "99.9% Uptime" },
-              { icon: HeartHandshake, label: "Support 24/7" },
-              { icon: Award, label: "Multi-Sektor" },
-            ].map(({ icon: TIcon, label }) => (
-              <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-full border bg-background text-sm text-muted-foreground">
-                <TIcon className="w-4 h-4 text-primary" /> {label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── ACTION: Pricing CTA ── */}
-      <section className="py-16 px-4 bg-gradient-to-br from-primary to-violet-600 text-white">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full mb-6">
-            <Flame className="w-3.5 h-3.5" /> Promo aktif — harga naik 2× per 1 Juli 2026
-          </div>
-          <h2 className="text-2xl md:text-4xl font-extrabold mb-3">Mulai dari Rp 199.000/bulan</h2>
-          <p className="text-white/75 text-base md:text-lg mb-8 max-w-xl mx-auto">
-            Semua paket sudah termasuk Agentic AI, 131 Orchestrator Multi-Agent, Knowledge Base 7 tipe, dan Multi-Channel. Tanpa biaya setup. Cancel kapan saja.
-          </p>
-
-          <div className="grid sm:grid-cols-3 gap-4 mb-8 text-left">
-            {[
-              { plan: "Starter", price: "199rb", badge: null, features: ["3 chatbot", "Knowledge Base 7 tipe", "Multi-Channel (WA, TG, Web)", "REST API akses"] },
-              { plan: "Profesional", price: "499rb", badge: "TERPOPULER", features: ["20 chatbot", "Custom Domain", "Analytics & Reporting", "Agentic AI + Orchestrator"] },
-              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "1350+ agent spesialis", "45+ MultiClaw AI Tools", "Priority support"] },
-            ].map((plan) => (
-              <div
-                key={plan.plan}
-                className={`rounded-xl border-2 p-4 bg-white/5 relative ${plan.badge ? "border-amber-300" : "border-white/20"}`}
-                data-testid={`card-pricing-${plan.plan.toLowerCase()}`}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-gray-900 text-[10px] font-bold px-3 py-0.5 rounded-full">
-                    {plan.badge}
-                  </div>
-                )}
-                <div className="text-base font-bold mb-0.5">{plan.plan}</div>
-                <div className="text-2xl font-extrabold mb-3">
-                  Rp {plan.price}<span className="text-sm font-normal opacity-70">/bln</span>
-                </div>
-                <ul className="space-y-1.5">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-1.5 text-xs text-white/80">
-                      <Check className="w-3.5 h-3.5 text-green-300 flex-shrink-0" /> {f}
+              <div className="p-7 pt-10">
+                <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mb-1">BUNDLE TRILOGI LENGKAP</h3>
+                <p className="text-gray-500 text-xs mb-5">Buku I + II + III · Belajar → Bekerja → Berkarya</p>
+                <div className="text-4xl font-extrabold text-orange-600 mb-1">Rp 499.000</div>
+                <div className="text-gray-400 text-sm line-through mb-6">Normal: Rp 945.000 <span className="text-orange-500 no-underline font-semibold">(Hemat 47%)</span></div>
+                <ul className="space-y-2.5 mb-7 text-sm text-gray-700 dark:text-gray-300">
+                  {[
+                    "Buku I, II, III (PDF + Flipbook Interaktif)",
+                    "Prompt Pack MultiClaw (50+ prompt siap pakai)",
+                    "Template Tim 6-Agen AI (import 1 klik)",
+                    "🎁 BONUS: 1 Bulan Gustafta Builder GRATIS",
+                    "🔄 Update gratis selamanya",
+                    "🛡️ Garansi 7 hari uang kembali",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />{item}
                     </li>
                   ))}
                 </ul>
+                <a href={SCALEV_BUNDLE} target="_blank" rel="noopener noreferrer"
+                  onClick={() => { handleWAClick("pricing-bundle"); handlePacksClick(); }}
+                  className="block w-full text-center bg-orange-600 hover:bg-orange-500 text-white text-base font-extrabold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-95"
+                  data-testid="button-pricing-bundle">
+                  AMANKAN BUNDLE SEKARANG →
+                </a>
+                <p className="text-xs text-gray-400 mt-3 text-center">⏰ Early Bird hanya sampai 30 Juni 2026</p>
               </div>
-            ))}
+            </div>
+
+            {/* Card 2: Gustafta Builder Platform */}
+            <div className="bg-white dark:bg-gray-950 rounded-2xl shadow-lg border border-blue-200 dark:border-blue-800/40 overflow-hidden">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-500 p-5 text-white">
+                <h3 className="text-lg font-extrabold mb-1">GUSTAFTA BUILDER</h3>
+                <p className="text-blue-100 text-xs">Platform SaaS — Bangun chatbot AI sendiri</p>
+              </div>
+              <div className="p-7">
+                <div className="text-3xl font-extrabold text-blue-600 mb-1">Mulai Rp 199.000<span className="text-base font-normal text-gray-400">/bulan</span></div>
+                <div className="text-gray-400 text-sm mb-5">Atau coba gratis tanpa kartu kredit</div>
+                <ul className="space-y-2.5 mb-7 text-sm text-gray-700 dark:text-gray-300">
+                  {[
+                    "1350+ Agent AI spesialis siap pakai",
+                    "45+ MultiClaw Tools premium",
+                    "Knowledge Base 7 tipe (PDF, URL, YouTube...)",
+                    "Multi-channel: WA, Telegram, Web Widget",
+                    "Custom domain & branding",
+                    "Analytics & laporan percakapan",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />{item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
+                  <button className="w-full bg-blue-600 hover:bg-blue-500 text-white text-base font-bold py-4 rounded-xl shadow transition-all transform hover:scale-[1.02]"
+                    data-testid="button-pricing-platform">
+                    Mulai Gratis Sekarang →
+                  </button>
+                </Link>
+                <Link href="/packs" onClick={handlePricingClick}>
+                  <button className="w-full mt-2 text-center text-sm text-blue-600 hover:text-blue-500 font-semibold py-2" data-testid="button-pricing-detail">
+                    Lihat Detail Paket Harga →
+                  </button>
+                </Link>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold gap-2 px-8" data-testid="button-pricing-cta-start">
-                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
-              </Button>
-            </Link>
-            <Link href="/packs" onClick={handlePricingClick}>
-              <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 hover:text-white font-semibold px-8" data-testid="button-pricing-cta-plans">
-                Bandingkan Semua Paket →
-              </Button>
-            </Link>
+          {/* Mulai buku 1 saja */}
+          <div className="text-center mt-8">
+            <p className="text-gray-500 text-sm mb-2">Belum siap bundle? Mulai dari yang dasar dulu:</p>
+            <a href={SCALEV_BUKU1} target="_blank" rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-500 font-semibold underline text-sm"
+              data-testid="link-buku1">
+              Ambil Buku I Saja (Early Bird Rp 245.000) →
+            </a>
           </div>
-
-          <p className="text-white/50 text-xs mt-4 flex items-center justify-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Tanpa kartu kredit · Cancel kapan saja · Support via WhatsApp
-          </p>
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <section className="py-16 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">FAQ</p>
-            <h2 className="text-2xl md:text-3xl font-bold">Pertanyaan yang Sering Ditanya</h2>
-          </div>
-
-          <Accordion type="single" collapsible defaultValue="item-0" className="space-y-2">
+      {/* ══════════════════════════════════════════════
+          FAQ — Objection Busting
+      ══════════════════════════════════════════════ */}
+      <section className="py-16 px-4 bg-white dark:bg-gray-950">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2 text-center">FAQ</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-10">
+            Pertanyaan yang Sering Muncul
+          </h2>
+          <Accordion type="single" collapsible className="space-y-3">
             {[
-              { q: "Apakah perlu keahlian coding untuk mulai?", a: "Tidak sama sekali. Semua konfigurasi dilakukan lewat antarmuka visual — Knowledge Base, persona AI, Custom Domain, Tender Wizard — tanpa menulis satu baris kode pun. Rata-rata user mulai aktif dalam 30 menit setelah daftar." },
-              { q: "Channel apa saja yang didukung?", a: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget (iframe & floating button), Custom Domain (bot.perusahaan.com), dan REST API untuk integrasi custom. Semua bisa diaktifkan dari satu dashboard tanpa biaya tambahan." },
-              { q: "Apa itu 1350+ agent AI spesialis?", a: "Gustafta memiliki lebih dari 1350 agent AI yang sudah dikonfigurasi dan dilatih untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, ISO, energi, properti, hukum, marketing, HR, dan lebih banyak lagi. Plus 45+ MultiClaw AI Tools yang siap pakai langsung, tanpa training dari nol." },
-              { q: "Apa itu Orchestrator Multi-Agent?", a: "Orchestrator adalah sistem routing cerdas yang menganalisis setiap pesan user dan mengarahkannya ke specialist yang paling tepat secara otomatis. Misalnya: pertanyaan tender → Specialist Tender, pertanyaan SKK → Specialist Sertifikasi. Ada 131 hub orchestrator siap pakai, dan Anda bisa buat custom sendiri." },
-              { q: "Bagaimana keamanan data saya?", a: "Data terenkripsi, akses berbasis token per chatbot, mode publik/privat yang bisa dikontrol, dan autentikasi via OAuth Replit Identity. Anda punya kontrol penuh atas siapa yang bisa mengakses chatbot dan data Knowledge Base Anda." },
-              { q: "Bisa digunakan untuk bisnis di luar konstruksi?", a: "Ya. Meskipun Gustafta paling dalam untuk Jasa Konstruksi Indonesia, platform ini fleksibel untuk properti, energi, pendidikan, digital marketing, HR, legal, dan 12+ sektor lainnya. Knowledge Base, persona, dan Mini Apps bisa dikustomisasi sepenuhnya." },
+              {
+                q: "🤔 \"Saya sudah tua, masa harus belajar teknologi baru?\"",
+                a: "Justru ini keunggulan Anda! Pengalaman 10–20 tahun yang Anda miliki adalah aset yang tidak dipunya generasi muda. Gustafta adalah alat no-code. Tidak ada coding, tidak ada server. Jika Anda bisa isi formulir online dan kirim email, Anda bisa melakukannya."
+              },
+              {
+                q: "🤔 \"Saya terancam PHK, tidak punya banyak waktu untuk belajar hal baru\"",
+                a: "Justru karena itulah ini DARURAT. Buku ini dirancang untuk orang sibuk. Setiap bab bisa dibaca 15–20 menit. Total cukup 20–25 jam dalam 1–3 bulan untuk membangun fondasi 'sekoci' finansial Anda. Mulai sekarang adalah keputusan terbaik."
+              },
+              {
+                q: "🤔 \"Apa bedanya dengan chatbot biasa yang bisa saya buat di platform lain?\"",
+                a: "Gustafta bukan sekedar chatbot biasa. Di dalamnya sudah ada 1350+ agent AI spesialis yang sudah dilatih untuk domain spesifik (konstruksi, hukum, K3, tender, SKK, energi, dll). Plus 45+ MultiClaw Tools dengan sistem Multi-Agent Orchestration — hasilnya jauh lebih akurat dan kontekstual."
+              },
+              {
+                q: "🤔 \"Bagaimana jika saya tidak puas setelah beli?\"",
+                a: "Kami percaya pada metode ini. Coba 7 hari, praktik minimal satu latihan dari Buku I. Jika tidak ada manfaat yang Anda rasakan, hubungi kami dan uang kembali 100%. Tanpa pertanyaan, tanpa drama."
+              },
+              {
+                q: "🤔 \"Apakah saya perlu langganan bulanan untuk menggunakan ebook?\"",
+                a: "Tidak. Ebook Trilogi adalah pembelian sekali bayar dengan akses seumur hidup dan update gratis. Gustafta Builder Platform adalah produk terpisah (berlangganan bulanan). Anda bisa mulai dari ebook dulu, lalu gunakan bonus 1 bulan Gustafta Builder GRATIS yang disertakan di bundle."
+              },
             ].map((item, i) => (
-              <AccordionItem
-                key={i}
-                value={`item-${i}`}
-                className="border rounded-xl px-4 overflow-hidden bg-background"
-                data-testid={`faq-item-${i}`}
-              >
-                <AccordionTrigger className="text-sm font-semibold text-left py-4 hover:no-underline">
-                  {item.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-4">
-                  {item.a}
-                </AccordionContent>
+              <AccordionItem key={i} value={`faq-${i}`} className="border border-gray-200 dark:border-gray-800 rounded-xl px-4">
+                <AccordionTrigger className="text-sm font-semibold text-gray-900 dark:text-white hover:no-underline py-4 text-left">{item.q}</AccordionTrigger>
+                <AccordionContent className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed pb-4">{item.a}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
         </div>
       </section>
 
-      {/* ── ACTION: Final CTA Banner ── */}
-      <section className="py-14 px-4 border-t bg-muted/20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">Siap Mulai? Setup &lt; 30 Menit.</h2>
-          <p className="text-muted-foreground mb-6 max-w-lg mx-auto text-sm leading-relaxed">
-            Bergabung dengan ratusan kontraktor, konsultan, dan bisnis Indonesia yang sudah menggunakan Gustafta. Mulai gratis, upgrade kapan pun Anda butuh.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
-              <Button size="lg" className="gap-2 font-bold px-8" data-testid="button-final-cta-start">
-                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
-              </Button>
-            </Link>
-            <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("Final CTA")}>
-              <Button size="lg" variant="outline" className="gap-2 font-semibold px-8" data-testid="button-final-cta-wa">
-                <Smartphone className="w-4 h-4" /> Tanya via WhatsApp
-              </Button>
-            </a>
+      {/* ══════════════════════════════════════════════
+          FINAL CTA — Urgency Close
+      ══════════════════════════════════════════════ */}
+      <section className="py-16 px-4 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-extrabold mb-4">
+            Dua Pilihan di Depan Anda
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-4 mb-8 text-left">
+            <div className="bg-red-900/40 border border-red-500/40 rounded-xl p-4">
+              <p className="font-bold text-red-300 mb-2">❌ Tidak melakukan apa-apa</p>
+              <p className="text-sm text-red-200/80 leading-relaxed">Tetap di roda hamster. Tetap khawatir soal PHK. Tetap bergantung pada satu sumber penghasilan. 5 tahun lagi situasinya tidak berubah.</p>
+            </div>
+            <div className="bg-green-900/40 border border-green-400/40 rounded-xl p-4">
+              <p className="font-bold text-green-300 mb-2">✅ Ambil langkah hari ini</p>
+              <p className="text-sm text-green-200/80 leading-relaxed">Mulai ubah keahlian jadi chatbot AI. 3 bulan lagi punya side income pertama. 6 bulan lagi punya penghasilan yang tidak bergantung satu bos.</p>
+            </div>
           </div>
+          <a href={SCALEV_BUNDLE} target="_blank" rel="noopener noreferrer"
+            onClick={() => { handleWAClick("final-cta"); handlePacksClick(); }}
+            className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 text-white text-lg font-extrabold py-5 px-10 rounded-2xl shadow-2xl transition-all transform hover:scale-105 active:scale-95 mb-4"
+            data-testid="button-final-cta">
+            🔥 Ya, Saya Mau Mulai Sekarang
+          </a>
+          <p className="text-sm text-blue-200">✅ Garansi 7 Hari Uang Kembali &nbsp;|&nbsp; ⏰ Early Bird habis 30 Juni 2026</p>
         </div>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t py-10 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <span className="font-bold text-lg">Gustafta</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4 max-w-xs leading-relaxed">
-                Platform AI Chatbot Builder terdalam untuk Indonesia. 1350+ agent spesialis, 131 hub orchestrator, 45+ MultiClaw AI Tools — siap pakai tanpa coding.
-              </p>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                  <Smartphone className="w-4 h-4" /> Hubungi Kami:
-                </div>
-                <a
-                  href="https://wa.me/6281287941900"
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
-                  data-testid="link-footer-wa-1"
-                  onClick={() => handleWAClick("Footer")}
-                >
-                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                  081287941900
-                </a>
-                <a
-                  href="https://wa.me/6282299417818"
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
-                  data-testid="link-footer-wa-2"
-                  onClick={() => handleWAClick("Footer")}
-                >
-                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                  082299417818
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <p className="font-semibold text-sm mb-3">Platform</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/packs" className="hover:text-foreground transition-colors" onClick={handlePricingClick}>Paket Harga</Link></li>
-                <li><Link href="/ai-tools" className="hover:text-foreground transition-colors">AI Tools Hub</Link></li>
-                <li><Link href="/gustafta-store" className="hover:text-foreground transition-colors">Template Store</Link></li>
-                <li><Link href="/education" className="hover:text-foreground transition-colors">Education Platform</Link></li>
-                <li><Link href="/legal" className="hover:text-foreground transition-colors">LexCom Legal AI</Link></li>
-                <li><Link href="/documentation" className="hover:text-foreground transition-colors">Dokumentasi</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="font-semibold text-sm mb-3">MultiClaw Tools</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/tendera-claw" className="hover:text-foreground transition-colors">TenderaClaw</Link></li>
-                <li><Link href="/sbu-claw" className="hover:text-foreground transition-colors">SBUClaw</Link></li>
-                <li><Link href="/konstra-claw" className="hover:text-foreground transition-colors">KonstraClaw</Link></li>
-                <li><Link href="/brain-claw" className="hover:text-foreground transition-colors">BrainClaw</Link></li>
-                <li><Link href="/safira-claw" className="hover:text-foreground transition-colors">SafiraClaw</Link></li>
-                <li><Link href="/ai-tools" className="hover:text-foreground transition-colors font-medium text-primary">Lihat 45+ Tools →</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-sm text-muted-foreground">© 2026 Gustafta. All rights reserved.</p>
-              <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-1.5 text-xs text-muted-foreground bg-muted/40">
-                <CreditCard className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                <span className="font-semibold text-foreground/80">Scalev.id</span>
-                <span className="ml-1 text-muted-foreground">— Pembayaran aman & terenkripsi</span>
-                <span className="text-[10px] bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded font-medium">SSL</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Link href="/documentation" className="hover:text-foreground">Privacy</Link>
-              <Link href="/documentation" className="hover:text-foreground">Terms</Link>
-            </div>
-          </div>
-        </div>
+      <footer className="bg-gray-950 text-gray-500 py-8 px-4 text-center text-sm">
+        <p className="mb-1 text-gray-400">© 2026 Gustafta — WordPress-nya Ekosistem Kompetensi Indonesia.</p>
+        <p className="text-xs">Butuh bantuan? <a href={WA_URL} target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("footer")} className="text-green-400 hover:text-green-300 underline">Hubungi kami via WhatsApp</a></p>
       </footer>
 
-      {gustaftaAssistant && <ChatPopup agent={gustaftaAssistant} />}
+      {/* ══════════════════════════════════════════════
+          STICKY FLOATING CTA — WhatsApp + Beli
+          (selalu terlihat saat scroll di HP)
+      ══════════════════════════════════════════════ */}
+      {/* WhatsApp Float */}
+      <a href={WA_URL} target="_blank" rel="noopener noreferrer"
+        onClick={() => handleWAClick("floating-wa")}
+        className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-400 text-white p-4 rounded-full shadow-2xl flex items-center gap-2 z-50 transition-all transform hover:scale-110 active:scale-95"
+        data-testid="button-floating-wa">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+        </svg>
+        <span className="font-bold text-sm hidden md:inline">Tanya via WhatsApp</span>
+      </a>
+
+      {/* Mobile sticky bottom bar CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 px-4 py-3 flex gap-3 shadow-2xl">
+        <a href={SCALEV_BUNDLE} target="_blank" rel="noopener noreferrer"
+          onClick={() => { handleWAClick("mobile-sticky"); handlePacksClick(); }}
+          className="flex-1 bg-orange-500 hover:bg-orange-400 text-white text-sm font-bold py-3 rounded-xl text-center transition-all active:scale-95"
+          data-testid="button-mobile-sticky-buy">
+          🔥 Early Bird Rp 499.000
+        </a>
+        <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
+          <button className="px-4 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-3 rounded-xl transition-all active:scale-95"
+            data-testid="button-mobile-sticky-try">
+            Coba Gratis
+          </button>
+        </Link>
+      </div>
+
+      {/* Chat Popup */}
+      {gustaftaAssistant && (
+        <ChatPopup agent={gustaftaAssistant} />
+      )}
     </div>
   );
 }
