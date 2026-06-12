@@ -15,7 +15,7 @@ import mockupDevices from "@assets/1781288755_1781288818548.jpg";
 
 const SCALEV_BUNDLE = "https://wuryanto.myscalev.com";
 const SCALEV_BUKU1  = "https://wuryanto.myscalev.com";
-const WA_URL        = "https://wa.me/6281234567890?text=Halo%20Gustafta%2C%20saya%20mau%20tanya%20tentang%20Trilogi%20Dari%20Monolog%20ke%20Dialog";
+const WA_URL        = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20mau%20tanya%20tentang%20Trilogi%20Dari%20Monolog%20ke%20Dialog";
 
 export default function TrilogiLanding() {
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
