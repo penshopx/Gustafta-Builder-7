@@ -7,6 +7,7 @@ import {
   ArrowLeft, Search, Settings, BookOpen, Sliders, Users, Loader2,
   Trash2, Plus, RefreshCw, CheckCircle2, Upload, ChevronRight,
   FileText, Globe, AlertCircle, ExternalLink, Database, Zap,
+  MessageSquare, ToggleLeft, ToggleRight, X,
 } from "lucide-react";
 
 // ─── Registry ────────────────────────────────────────────────────────────────
@@ -112,7 +113,8 @@ interface AgentData {
   id: number; name: string; slug: string; model: string;
   temperature: number; maxTokens: number; systemPrompt: string;
   isEnabled: boolean; agenticSubAgents: any; ragChunkSize: number;
-  ragChunkOverlap: number; tagline: string;
+  ragChunkOverlap: number; ragTopK: number; tagline: string;
+  greetingMessage: string; conversationStarters: string[];
 }
 
 interface KBEntry { id: number; name: string; type: string; processingStatus: string; knowledgeLayer: string; createdAt: string; }
@@ -136,7 +138,7 @@ export default function MultiClawAdmin() {
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("Semua");
   const [selectedSlug, setSelectedSlug] = useState(initSlug);
-  const [tab, setTab] = useState<"kb" | "prompt" | "model" | "subagents">("kb");
+  const [tab, setTab] = useState<"kb" | "prompt" | "model" | "subagents" | "persona">("kb");
 
   const [agent, setAgent] = useState<AgentData | null>(null);
   const [loadingAgent, setLoadingAgent] = useState(false);
@@ -160,8 +162,16 @@ export default function MultiClawAdmin() {
   const [editMaxTokens, setEditMaxTokens] = useState(2000);
   const [editChunkSize, setEditChunkSize] = useState(800);
   const [editChunkOverlap, setEditChunkOverlap] = useState(200);
+  const [editRagTopK, setEditRagTopK] = useState(5);
   const [savingSettings, setSavingSettings] = useState(false);
   const [savedOk, setSavedOk] = useState(false);
+
+  // ── Persona state ──
+  const [editGreeting, setEditGreeting] = useState("");
+  const [editStarters, setEditStarters] = useState<string[]>([]);
+  const [editIsEnabled, setEditIsEnabled] = useState(true);
+  const [savingPersona, setSavingPersona] = useState(false);
+  const [savedPersonaOk, setSavedPersonaOk] = useState(false);
 
   // ── Sub-Agents editable state ──
   interface SubAgentRow { role: string; agentId: number | string; description: string; }
@@ -194,6 +204,10 @@ export default function MultiClawAdmin() {
       setEditMaxTokens(a.maxTokens ?? 2000);
       setEditChunkSize(a.ragChunkSize ?? 800);
       setEditChunkOverlap(a.ragChunkOverlap ?? 200);
+      setEditRagTopK(a.ragTopK ?? 5);
+      setEditGreeting(a.greetingMessage || "");
+      setEditStarters(Array.isArray(a.conversationStarters) ? a.conversationStarters : []);
+      setEditIsEnabled(a.isEnabled !== false);
       setEditSubAgents(Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.map((s: any) => ({ role: s.role || "", agentId: s.agentId ?? "", description: s.description || "" })) : []);
       loadKB(a.id);
     } catch { setAgentError("Gagal memuat agent."); }
@@ -271,7 +285,7 @@ export default function MultiClawAdmin() {
     if (!agent) return;
     setSavingSettings(true); setSavedOk(false);
     try {
-      const r = await fetch(`/api/agents/${agent.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ systemPrompt: editPrompt, aiModel: editModel, temperature: editTemp, maxTokens: editMaxTokens, ragChunkSize: editChunkSize, ragChunkOverlap: editChunkOverlap }) });
+      const r = await fetch(`/api/agents/${agent.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ systemPrompt: editPrompt, aiModel: editModel, temperature: editTemp, maxTokens: editMaxTokens, ragChunkSize: editChunkSize, ragChunkOverlap: editChunkOverlap, ragTopK: editRagTopK }) });
       if (r.ok) { toast({ title: "Pengaturan tersimpan ✓" }); setSavedOk(true); setTimeout(() => setSavedOk(false), 3000); }
       else throw new Error();
     } catch { toast({ title: "Gagal simpan. Pastikan sudah login.", variant: "destructive" }); }
@@ -289,6 +303,22 @@ export default function MultiClawAdmin() {
       else throw new Error();
     } catch { toast({ title: "Gagal simpan sub-agents.", variant: "destructive" }); }
     finally { setSavingSubAgents(false); }
+  }
+
+  async function savePersona() {
+    if (!agent) return;
+    setSavingPersona(true); setSavedPersonaOk(false);
+    try {
+      const validStarters = editStarters.filter(s => s.trim());
+      const r = await fetch(`/api/agents/${agent.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ greetingMessage: editGreeting, conversationStarters: validStarters, isEnabled: editIsEnabled }) });
+      if (r.ok) {
+        toast({ title: "Persona tersimpan ✓" });
+        setSavedPersonaOk(true);
+        setAgent({ ...agent, greetingMessage: editGreeting, conversationStarters: validStarters, isEnabled: editIsEnabled });
+        setTimeout(() => setSavedPersonaOk(false), 3000);
+      } else throw new Error();
+    } catch { toast({ title: "Gagal simpan persona.", variant: "destructive" }); }
+    finally { setSavingPersona(false); }
   }
 
   function addSubAgentRow() {
@@ -393,14 +423,15 @@ export default function MultiClawAdmin() {
               {/* Tabs */}
               {agent && !agentError && (
                 <>
-                  <div className="flex border-b border-slate-800 shrink-0 bg-slate-900/20">
+                  <div className="flex border-b border-slate-800 shrink-0 bg-slate-900/20 overflow-x-auto">
                     {[
                       { k: "kb", label: "Knowledge Base", icon: <Database className="h-3.5 w-3.5" /> },
                       { k: "prompt", label: "System Prompt", icon: <FileText className="h-3.5 w-3.5" /> },
                       { k: "model", label: "Model & RAG", icon: <Sliders className="h-3.5 w-3.5" /> },
+                      { k: "persona", label: "Persona & UX", icon: <MessageSquare className="h-3.5 w-3.5" /> },
                       { k: "subagents", label: "Sub-Agents", icon: <Users className="h-3.5 w-3.5" /> },
                     ].map(t => (
-                      <button key={t.k} onClick={() => setTab(t.k as any)} className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors ${tab === t.k ? "text-blue-400 border-b-2 border-blue-400 bg-blue-500/5" : "text-slate-400 hover:text-slate-200"}`}>
+                      <button key={t.k} onClick={() => setTab(t.k as any)} className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors whitespace-nowrap ${tab === t.k ? "text-blue-400 border-b-2 border-blue-400 bg-blue-500/5" : "text-slate-400 hover:text-slate-200"}`}>
                         {t.icon}{t.label}
                       </button>
                     ))}
@@ -571,9 +602,126 @@ export default function MultiClawAdmin() {
                               <p className="text-xs text-slate-500 mt-0.5">Default: 200. Overlap antar chunk.</p>
                             </div>
                           </div>
+                          <div className="mt-4">
+                            <label className="text-xs text-slate-400 mb-1 block">Top-K Chunks (ragTopK)</label>
+                            <div className="flex items-center gap-3">
+                              <input type="range" min="1" max="20" step="1" className="flex-1 accent-blue-500" value={editRagTopK} onChange={e => setEditRagTopK(Number(e.target.value))} />
+                              <span className="text-white text-sm font-mono w-6 text-center">{editRagTopK}</span>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-0.5">Jumlah chunk KB yang diambil per query. Default: 5. Naikan ke 8–12 untuk topik luas & KB tebal; turunkan ke 3 untuk presisi tinggi.</p>
+                          </div>
                         </div>
                         <Button onClick={saveSettings} disabled={savingSettings} className={`w-full ${savedOk ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"} text-white`}>
                           {savingSettings ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menyimpan...</> : savedOk ? <><CheckCircle2 className="h-4 w-4 mr-2" />Tersimpan!</> : "Simpan Pengaturan"}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* ── Persona & UX Tab ── */}
+                    {tab === "persona" && (
+                      <div className="max-w-2xl space-y-6">
+                        <div>
+                          <h3 className="text-white font-semibold">Persona & Pengalaman Pengguna</h3>
+                          <p className="text-slate-400 text-xs">Atur pesan sambutan, tombol prompt cepat, dan status aktif Claw — fondasi "Monolog → Dialog".</p>
+                        </div>
+
+                        {/* Status Toggle */}
+                        <div className="bg-slate-800/60 border border-slate-700/40 rounded-xl p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-sm text-slate-200 font-medium">Status Claw</div>
+                              <p className="text-xs text-slate-500 mt-0.5">Nonaktifkan untuk maintenance tanpa menghapus konfigurasi</p>
+                            </div>
+                            <button
+                              onClick={() => setEditIsEnabled(!editIsEnabled)}
+                              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${editIsEnabled ? "bg-green-600/20 text-green-400 border border-green-500/30 hover:bg-green-600/30" : "bg-slate-700 text-slate-400 border border-slate-600 hover:bg-slate-600"}`}
+                            >
+                              {editIsEnabled
+                                ? <><ToggleRight className="h-4 w-4" /> Aktif</>
+                                : <><ToggleLeft className="h-4 w-4" /> Nonaktif</>}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Greeting Message */}
+                        <div>
+                          <label className="text-sm text-slate-300 font-medium mb-1.5 block">Pesan Pembuka (Greeting)</label>
+                          <p className="text-xs text-slate-500 mb-2">Pesan pertama yang muncul saat pengguna membuka chat. Buat ringkas, hangat, dan langsung ke nilai utama Claw ini.</p>
+                          <textarea
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-500 resize-none focus:outline-none focus:border-blue-500"
+                            rows={4}
+                            placeholder={`Contoh:\nHalo! Saya ${selectedInfo?.name ?? "Claw"} — asisten AI untuk ${selectedInfo?.tagline ?? "konsultasi spesialis"}.\n\nSilakan ajukan pertanyaan Anda atau pilih topik di bawah:`}
+                            value={editGreeting}
+                            onChange={e => setEditGreeting(e.target.value)}
+                          />
+                          <p className="text-xs text-slate-500 mt-1">{editGreeting.length} karakter</p>
+                        </div>
+
+                        {/* Conversation Starters */}
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div>
+                              <label className="text-sm text-slate-300 font-medium">Prompt Cepat (Conversation Starters)</label>
+                              <p className="text-xs text-slate-500 mt-0.5">Tombol prompt yang muncul di awal chat. Maksimal 6 tombol. Dirancang untuk mengubah pembaca pasif menjadi pengguna aktif.</p>
+                            </div>
+                            {editStarters.length < 6 && (
+                              <button
+                                onClick={() => setEditStarters(prev => [...prev, ""])}
+                                className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors shrink-0"
+                              >
+                                <Plus className="h-3.5 w-3.5" /> Tambah
+                              </button>
+                            )}
+                          </div>
+
+                          {editStarters.length === 0 ? (
+                            <div className="bg-slate-800/40 border border-slate-700/50 border-dashed rounded-xl p-5 text-center">
+                              <MessageSquare className="h-7 w-7 text-slate-600 mx-auto mb-2" />
+                              <p className="text-slate-500 text-sm">Belum ada prompt cepat.</p>
+                              <p className="text-xs text-slate-600 mt-0.5">Tambahkan 3–6 pertanyaan pemantik yang paling sering ditanyakan pengguna segmen Anda.</p>
+                              <button
+                                onClick={() => setEditStarters([""])}
+                                className="mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                              >
+                                + Tambah prompt pertama
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {editStarters.map((s, i) => (
+                                <div key={i} className="flex items-center gap-2">
+                                  <span className="text-xs text-slate-600 font-mono w-4 shrink-0">{i + 1}</span>
+                                  <input
+                                    value={s}
+                                    onChange={e => setEditStarters(prev => prev.map((v, idx) => idx === i ? e.target.value : v))}
+                                    placeholder={`Contoh: Bagaimana cara mengurus ${selectedInfo?.tagline?.split(" ")[0] ?? "SBU"}?`}
+                                    className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                                  />
+                                  <button
+                                    onClick={() => setEditStarters(prev => prev.filter((_, idx) => idx !== i))}
+                                    className="text-slate-600 hover:text-red-400 transition-colors p-1 shrink-0"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {editStarters.length > 0 && (
+                            <div className="mt-3 p-3 bg-slate-800/40 rounded-lg">
+                              <p className="text-xs text-slate-500 mb-2 font-medium">Preview tombol:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {editStarters.filter(s => s.trim()).map((s, i) => (
+                                  <span key={i} className="bg-slate-700 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg border border-slate-600 max-w-[220px] truncate">{s}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <Button onClick={savePersona} disabled={savingPersona} className={`w-full ${savedPersonaOk ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"} text-white`}>
+                          {savingPersona ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Menyimpan...</> : savedPersonaOk ? <><CheckCircle2 className="h-4 w-4 mr-2" />Tersimpan!</> : "Simpan Persona & UX"}
                         </Button>
                       </div>
                     )}
