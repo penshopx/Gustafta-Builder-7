@@ -15,7 +15,7 @@ const CLAW_REGISTRY = [
   { href: "/sbu-claw", slug: "sbuclaw-orchestrator", name: "SBUClaw", tagline: "SBU Konstruksi Permen PU 6/2025", cat: "SBU & Sertifikasi", color: "amber" },
   { href: "/skema-claw", slug: "skema-claw-orchestrator", name: "SkemaClaw", tagline: "Sertifikasi BUJK Permen PU 6/2025", cat: "SBU & Sertifikasi", color: "blue" },
   { href: "/lkut-claw", slug: "lkut-hub", name: "LKUTClaw", tagline: "LKUT BUJK", cat: "SBU & Sertifikasi", color: "cyan" },
-  { href: "/abu-claw", slug: "abu-lsbu-orchestrator-v1.0", name: "ABUClaw", tagline: "Konsultan ABU & LSBU", cat: "SBU & Sertifikasi", color: "slate" },
+  { href: "/abu-claw", slug: "hub-konsultan-abu-lsbu", name: "ABUClaw", tagline: "Konsultan ABU & LSBU", cat: "SBU & Sertifikasi", color: "slate" },
   { href: "/panduan-sbu", slug: "panduan-sbu", name: "PanduanSBU", tagline: "Tanya Jawab SBU", cat: "SBU & Sertifikasi", color: "emerald" },
   // SKK & Kompetensi
   { href: "/manprojak-claw", slug: "manprojakclaw-orchestrator", name: "ManprojakClaw", tagline: "SKK Manajemen Pelaksanaan", cat: "SKK & Kompetensi", color: "indigo" },
@@ -25,7 +25,7 @@ const CLAW_REGISTRY = [
   { href: "/jalanjembatan-claw", slug: "jalanjembatanklaw-orchestrator", name: "JalanJembatanClaw", tagline: "SKK Sipil (Jalan & Jembatan)", cat: "SKK & Kompetensi", color: "yellow" },
   { href: "/tatalingkungan-claw", slug: "tatalingkunganklaw-orchestrator", name: "TataLingkunganClaw", tagline: "SKK Tata Lingkungan", cat: "SKK & Kompetensi", color: "green" },
   { href: "/elektrikal-claw", slug: "elektrikalclaw-orchestrator", name: "ElektrikalClaw", tagline: "SKK Klasifikasi Elektrikal", cat: "SKK & Kompetensi", color: "blue" },
-  { href: "/panduan-askom", slug: "panduan-askom-id-1460", name: "PanduanASKOM", tagline: "Tanya Jawab SKK", cat: "SKK & Kompetensi", color: "teal" },
+  { href: "/panduan-askom", slug: "panduanaskom", name: "PanduanASKOM", tagline: "Tanya Jawab SKK", cat: "SKK & Kompetensi", color: "teal" },
   // Teknik Konstruksi
   { href: "/bg-claw", slug: "bg-claw-orchestrator", name: "BGClaw", tagline: "Bangunan Gedung", cat: "Teknik Konstruksi", color: "stone" },
   { href: "/bs-claw", slug: "bs-claw-orchestrator", name: "BSClaw", tagline: "Bangunan Sipil", cat: "Teknik Konstruksi", color: "sky" },
@@ -43,7 +43,7 @@ const CLAW_REGISTRY = [
   { href: "/safira-claw", slug: "safira-claw-orchestrator", name: "SafiraClaw", tagline: "SKK K3 Konstruksi", cat: "K3 & Keselamatan", color: "red" },
   { href: "/smk3-claw", slug: "hub-ims-smk3-terintegrasi", name: "SMK3Claw", tagline: "IMS & SMK3 Terintegrasi", cat: "K3 & Keselamatan", color: "orange" },
   { href: "/k3man-claw", slug: "k3manclaw-orchestrator", name: "K3ManClaw", tagline: "Manajemen K3 Konstruksi & SKK", cat: "K3 & Keselamatan", color: "orange" },
-  { href: "/csms-claw", slug: "csms-orchestrator", name: "CSMSClaw", tagline: "Contractor Safety Management", cat: "K3 & Keselamatan", color: "amber" },
+  { href: "/csms-claw", slug: "csms-claw-orchestrator", name: "CSMSClaw", tagline: "Contractor Safety Management", cat: "K3 & Keselamatan", color: "amber" },
   { href: "/offshore-safety-claw", slug: "offshore-safety-claw-orchestrator", name: "OffshoreSafetyClaw", tagline: "K3 & Operasi Migas Offshore", cat: "K3 & Keselamatan", color: "slate" },
   { href: "/lingkungan-claw", slug: "lingkunganclaw-orchestrator", name: "LingkunganClaw", tagline: "AI Konsultan Lingkungan Hidup", cat: "K3 & Keselamatan", color: "teal" },
   // Manajemen Proyek & Kontrak
@@ -56,11 +56,11 @@ const CLAW_REGISTRY = [
   { href: "/pjbu-claw", slug: "pjbu-claw-orchestrator", name: "PJBUClaw", tagline: "Personel Manajerial BUJK", cat: "Perizinan & Regulasi", color: "indigo" },
   { href: "/keuangan-claw", slug: "keuangan-claw-orchestrator", name: "KeuanganClaw", tagline: "Keuangan BUJK", cat: "Perizinan & Regulasi", color: "emerald" },
   { href: "/lkpm-claw", slug: "lkpm-claw-orchestrator", name: "LKPMClaw", tagline: "LKPM & Penanaman Modal BKPM", cat: "Perizinan & Regulasi", color: "teal" },
-  { href: "/oss-claw", slug: "oss-claw-orchestrator-v1", name: "OSSClaw", tagline: "OSS-RBA, NIB & Perizinan", cat: "Perizinan & Regulasi", color: "emerald" },
+  { href: "/oss-claw", slug: "oss-claw-orchestrator", name: "OSSClaw", tagline: "OSS-RBA, NIB & Perizinan", cat: "Perizinan & Regulasi", color: "emerald" },
   { href: "/pub-lkut-claw", slug: "pub-lkut-claw-orchestrator", name: "PUB-LKUTClaw", tagline: "Pengembangan Usaha & LKUT", cat: "Perizinan & Regulasi", color: "sky" },
-  { href: "/esimpan-claw", slug: "esimpan-claw-orchestrator-v1", name: "ESIMPANClaw", tagline: "Input Pengalaman di E-SIMPAN", cat: "Perizinan & Regulasi", color: "blue" },
+  { href: "/esimpan-claw", slug: "esimpan-claw-orch", name: "ESIMPANClaw", tagline: "Input Pengalaman di E-SIMPAN", cat: "Perizinan & Regulasi", color: "blue" },
   { href: "/nspk-navigator-claw", slug: "nspk-navigator-claw-orchestrator", name: "NSPKNavigatorClaw", tagline: "Panduan NSPK & Standar Teknis", cat: "Perizinan & Regulasi", color: "blue" },
-  { href: "/teras-lpjk-1", slug: "teras-lpjk1-orchestrator-v1", name: "TerasLPJK#1", tagline: "Sharing Knowledge SKK", cat: "Perizinan & Regulasi", color: "indigo" },
+  { href: "/teras-lpjk-1", slug: "teras-lpjk1-orchestrator", name: "TerasLPJK#1", tagline: "Sharing Knowledge SKK", cat: "Perizinan & Regulasi", color: "indigo" },
   // Sistem Manajemen
   { href: "/smap-claw", slug: "smap-orchestrator-hub-multi-agent-anti-penyuapan", name: "SMAPClaw", tagline: "ISO 37001 Anti-Penyuapan", cat: "Sistem Manajemen", color: "teal" },
   { href: "/pancek-claw", slug: "pancek-orchestrator-hub-multi-agent-smap-nasional-pancek", name: "PanCEKClaw", tagline: "KPK & Anti Korupsi", cat: "Sistem Manajemen", color: "red" },
@@ -72,7 +72,7 @@ const CLAW_REGISTRY = [
   { href: "/dev-properti-claw", slug: "hub-devproperti-pro-v1", name: "DevPropertiClaw", tagline: "Developer Real Estate", cat: "Properti & Real Estate", color: "violet" },
   { href: "/estate-care-claw", slug: "hub-estatecare-pro-v1", name: "EstateCareClaw", tagline: "Konsultan Properti Konsumen", cat: "Properti & Real Estate", color: "emerald" },
   // Energi & Industri
-  { href: "/migas-claw", slug: "migas-orchestrator-v1.0", name: "MigasClaw", tagline: "Kompetensi & Perizinan Energi", cat: "Energi & Industri", color: "orange" },
+  { href: "/migas-claw", slug: "migas-claw-orchestrator", name: "MigasClaw", tagline: "Kompetensi & Perizinan Energi", cat: "Energi & Industri", color: "orange" },
   { href: "/energi-claw", slug: "energi-claw-orchestrator", name: "EnergiClaw", tagline: "Konsultan Energi & EBT", cat: "Energi & Industri", color: "orange" },
   { href: "/ebt-solar-claw", slug: "ebt-solar-claw-orchestrator", name: "EBTSolarClaw", tagline: "PLTS & Energi Surya", cat: "Energi & Industri", color: "yellow" },
   { href: "/transisi-energi-claw", slug: "transisi-energi-claw-orchestrator", name: "TransisiEnergiClaw", tagline: "Konsultan Transisi Energi", cat: "Energi & Industri", color: "green" },
