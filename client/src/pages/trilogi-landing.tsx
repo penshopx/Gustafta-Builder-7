@@ -9,6 +9,9 @@ import {
   Flame, Check, Star, Lightbulb, Users, Zap, Target, BadgeCheck,
   BookOpen, Brain, GraduationCap, Briefcase, ChevronRight,
 } from "lucide-react";
+import coverFlat from "@assets/Monolog-_cover_1781287565935.jpg";
+import cover3D from "@assets/Buku_3D_1781288556255.png";
+import mockupDevices from "@assets/1781288755_1781288818548.jpg";
 
 const SCALEV_BUNDLE = "https://scalev.id/p/LINK_CHECKOUT_SCALEV_ANDA";
 const SCALEV_BUKU1  = "https://scalev.id/p/LINK_CHECKOUT_BUKU_1_SCALEV_ANDA";
@@ -78,48 +81,70 @@ export default function TrilogiLanding() {
       </nav>
 
       {/* ══════════════════════════════════════════════
-          HERO — PAIN HEADLINE
+          HERO — PAIN HEADLINE + 3D Book Cover
       ══════════════════════════════════════════════ */}
-      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 text-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="bg-blue-950/60 text-blue-100 text-sm font-semibold px-4 py-1.5 rounded-full mb-6 inline-block border border-blue-400/30">
-            🚀 Untuk Karyawan, Profesional &amp; Calon Pensiunan
-          </span>
+      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 text-white py-16 md:py-20 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 leading-tight" data-testid="text-trilogi-hero">
-            Kerja 15 Tahun,<br className="hidden sm:block" />
-            Tapi Tabungan Cuma Cukup{" "}
-            <span className="text-orange-400 underline decoration-wavy decoration-orange-400/50">6 Bulan?</span>
-          </h1>
+            {/* LEFT — Teks & CTA */}
+            <div>
+              <span className="bg-blue-950/60 text-blue-100 text-sm font-semibold px-4 py-1.5 rounded-full mb-6 inline-block border border-blue-400/30">
+                🚀 Untuk Karyawan, Profesional &amp; Calon Pensiunan
+              </span>
 
-          <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Masalahnya <strong className="text-white">BUKAN</strong> kamu kurang pintar atau kurang kerja keras.
-            Masalahnya, keahlianmu selama ini cuma <strong className="text-orange-300">"MONOLOG"</strong> — berbicara
-            satu arah ke perusahaan. Begitu perusahaan berhenti mendengar (PHK atau pensiun),{" "}
-            <strong className="text-white">penghasilan ikut berhenti</strong>.
-          </p>
+              <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-extrabold mb-5 leading-tight" data-testid="text-trilogi-hero">
+                Kerja 15 Tahun,<br />
+                Tapi Tabungan Cuma Cukup{" "}
+                <span className="text-orange-400 underline decoration-wavy decoration-orange-400/50">6 Bulan?</span>
+              </h1>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <a href={SCALEV_BUNDLE} target="_blank" rel="noopener noreferrer" onClick={handleBundleClick}
-              className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 text-white text-base font-bold py-4 px-8 rounded-xl shadow-2xl transition-all transform hover:scale-105 active:scale-95"
-              data-testid="button-hero-bundle">
-              🔥 Ya, Saya Mau Amankan Slot Early Bird
-            </a>
-            <a href={WA_URL} target="_blank" rel="noopener noreferrer"
-              onClick={() => trackContact()}
-              className="inline-flex items-center justify-center gap-2 border-2 border-white/40 hover:border-white text-white text-base font-semibold py-4 px-8 rounded-xl transition-all hover:bg-white/10"
-              data-testid="button-hero-wa">
-              Tanya via WhatsApp
-            </a>
+              <p className="text-base md:text-lg text-blue-100 mb-8 leading-relaxed">
+                Masalahnya <strong className="text-white">BUKAN</strong> kamu kurang pintar.
+                Masalahnya, keahlianmu selama ini cuma <strong className="text-orange-300">"MONOLOG"</strong> — satu arah ke perusahaan.
+                Begitu perusahaan berhenti mendengar,{" "}
+                <strong className="text-white">penghasilan ikut berhenti</strong>.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 mb-5">
+                <a href={SCALEV_BUNDLE} target="_blank" rel="noopener noreferrer" onClick={handleBundleClick}
+                  className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 text-white text-base font-bold py-4 px-7 rounded-xl shadow-2xl transition-all transform hover:scale-105 active:scale-95"
+                  data-testid="button-hero-bundle">
+                  🔥 Amankan Slot Early Bird
+                </a>
+                <a href={WA_URL} target="_blank" rel="noopener noreferrer"
+                  onClick={() => trackContact()}
+                  className="inline-flex items-center justify-center gap-2 border-2 border-white/40 hover:border-white text-white text-base font-semibold py-4 px-7 rounded-xl transition-all hover:bg-white/10"
+                  data-testid="button-hero-wa">
+                  Tanya via WhatsApp
+                </a>
+              </div>
+
+              <p className="text-xs text-blue-200 flex flex-wrap gap-x-3 gap-y-1">
+                <span>✅ Garansi 7 Hari Uang Kembali</span>
+                <span>🔒 Checkout Aman via Scalev</span>
+                <span>📦 Akses Seumur Hidup</span>
+              </p>
+            </div>
+
+            {/* RIGHT — 3D Book Cover */}
+            <div className="flex items-center justify-center md:justify-end">
+              <div className="relative">
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-orange-400/20 blur-3xl rounded-full scale-110" />
+                <img
+                  src={cover3D}
+                  alt="Ebook Dari Monolog ke Dialog — cover 3D"
+                  className="relative w-64 sm:w-72 md:w-80 drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                />
+                {/* Badge early bird */}
+                <div className="absolute -top-3 -right-3 bg-orange-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-lg rotate-6 border-2 border-white">
+                  Early Bird 🔥
+                </div>
+              </div>
+            </div>
+
           </div>
-
-          <p className="text-sm text-blue-200 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <span>✅ Garansi 7 Hari Uang Kembali</span>
-            <span className="opacity-40">|</span>
-            <span>🔒 Checkout Aman via Scalev</span>
-            <span className="opacity-40">|</span>
-            <span>📦 Akses Seumur Hidup</span>
-          </p>
         </div>
       </section>
 
@@ -196,6 +221,16 @@ export default function TrilogiLanding() {
                 <p className="text-sm text-white/80 leading-relaxed">{b.sub}</p>
               </div>
             ))}
+          </div>
+
+          {/* Multi-device mockup */}
+          <div className="max-w-2xl mx-auto mb-10">
+            <img
+              src={mockupDevices}
+              alt="Trilogi Dari Monolog ke Dialog — tersedia di tablet, HP, dan buku fisik"
+              className="w-full rounded-2xl shadow-xl"
+            />
+            <p className="text-xs text-gray-500 text-center mt-2">Tersedia dalam format PDF, Flipbook Interaktif, dan dapat dicetak</p>
           </div>
 
           {/* META-CASE */}
@@ -316,18 +351,33 @@ export default function TrilogiLanding() {
           <p className="text-gray-500 mb-10 text-sm">Investasi leher ke atas untuk ketenangan finansial selamanya.</p>
 
           {/* Bundle Card */}
-          <div className="relative bg-white rounded-2xl shadow-2xl border-2 border-orange-500 overflow-visible max-w-xl mx-auto mb-8">
+          <div className="relative bg-white rounded-2xl shadow-2xl border-2 border-orange-500 overflow-visible max-w-2xl mx-auto mb-8">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-orange-500 text-white text-xs font-extrabold py-1.5 px-6 rounded-full shadow-lg whitespace-nowrap">
               PALING LARIS 🔥
             </div>
             <div className="p-8 md:p-10 pt-10">
-              <h3 className="text-xl font-extrabold text-gray-900 mb-1">BUNDLE LENGKAP TRILOGI</h3>
-              <p className="text-gray-500 text-xs mb-6">Buku I + II + III · Belajar → Bekerja → Berkarya</p>
 
-              <div className="text-5xl font-extrabold text-orange-600 mb-1">Rp 499.000</div>
-              <div className="text-gray-400 text-sm line-through mb-8">
-                Normal: Rp 945.000{" "}
-                <span className="text-orange-500 no-underline font-semibold">(Hemat 47%)</span>
+              {/* 2-col: cover + detail */}
+              <div className="flex flex-col sm:flex-row gap-6 items-start mb-6">
+                {/* Cover flat */}
+                <div className="flex-shrink-0 mx-auto sm:mx-0">
+                  <img
+                    src={coverFlat}
+                    alt="Cover Ebook Dari Monolog ke Dialog"
+                    className="w-36 sm:w-40 rounded-xl shadow-lg border border-gray-100"
+                  />
+                </div>
+
+                {/* Title + price */}
+                <div className="text-left flex-1">
+                  <h3 className="text-xl font-extrabold text-gray-900 mb-1">BUNDLE LENGKAP TRILOGI</h3>
+                  <p className="text-gray-500 text-xs mb-4">Buku I + II + III · Belajar → Bekerja → Berkarya</p>
+                  <div className="text-4xl font-extrabold text-orange-600 mb-1">Rp 499.000</div>
+                  <div className="text-gray-400 text-sm">
+                    <span className="line-through">Rp 945.000</span>{" "}
+                    <span className="text-orange-500 font-semibold no-underline">Hemat 47%</span>
+                  </div>
+                </div>
               </div>
 
               <ul className="text-left space-y-3 mb-8 text-sm text-gray-700">
