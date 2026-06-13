@@ -1,15 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MessageContent } from "@/lib/format-message";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle, ChevronDown, ChevronUp, Paperclip, Copy, Check, ThumbsUp, ThumbsDown, X, FileText, Image as ImageIcon } from "lucide-react";
 import { Link } from "wouter";
 
 interface SubAgentStatus { agentId: number; role: string; status: "waiting"|"running"|"done"|"error"; elapsed?: number; }
-interface Message { role: "user"|"assistant"; content: string; isStreaming?: boolean; subAgents?: SubAgentStatus[]; orchestrationMs?: number; }
+interface ChatAttachment { fileName: string; fileUrl: string; category: string; mimeType?: string; fileSize?: number; previewUrl?: string; }
+interface Message { role: "user"|"assistant"; content: string; isStreaming?: boolean; subAgents?: SubAgentStatus[]; orchestrationMs?: number; attachments?: ChatAttachment[]; }
 
 const ROLE_META: Record<string, { icon: string; label: string; color: string; desc: string }> = {
   "SKEMA-KUALIFIKASI":  { icon: "🏗️", label: "KUALIFIKASI",  color: "bg-blue-500/20 text-blue-300 border-blue-500/30",       desc: "K1–B2" },
@@ -17,7 +17,7 @@ const ROLE_META: Record<string, { icon: string; label: string; color: string; de
   "SKEMA-SUBKLAS":      { icon: "🗂️", label: "SUBKLAS",       color: "bg-violet-500/20 text-violet-300 border-violet-500/30", desc: "BG/BS/IM/KO/KK" },
   "SKEMA-PERSYARATAN":  { icon: "📋", label: "PERSYARATAN",   color: "bg-blue-600/20 text-blue-200 border-blue-600/30",       desc: "TKK & Modal" },
   "SKEMA-PERPANJANGAN": { icon: "🔄", label: "PERPANJANGAN",  color: "bg-sky-500/20 text-sky-300 border-sky-500/30",          desc: "Renewal SBU" },
-  "SKEMA-NAIKKELAS":    { icon: "📈", label: "NAIK KELAS",    color: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",       desc: "Upgrade Kualifikasi" },
+  "SKEMA-NAIKKELAS":    { icon: "📈", label: "NAIK KELAS",    color: "bg-cyan-500/20 text-cyan-300 border-sky-500/30",        desc: "Upgrade Kualifikasi" },
   "SKEMA-OSS":          { icon: "🏛️", label: "OSS-RBA",       color: "bg-teal-500/20 text-teal-300 border-teal-500/30",       desc: "NIB & Perizinan" },
   "SKEMA-MONITORING":   { icon: "🔍", label: "MONITORING",    color: "bg-slate-500/20 text-slate-300 border-slate-500/30",    desc: "Kepatuhan & LKUT" },
   "SKEMA-STRATEGI":     { icon: "🎯", label: "STRATEGI",      color: "bg-purple-500/20 text-purple-300 border-purple-500/30", desc: "Portofolio SBU" },
@@ -47,15 +47,65 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
     </div>
   );
 }
-function ChatMessage({ msg }: { msg: Message }) {
-  if (msg.role==="user") return <div className="flex justify-end mb-4"><div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-2.5 bg-blue-950/60 border border-blue-800/30 text-white text-sm">{msg.content}</div></div>;
+
+function AttachmentChip({ att }: { att: ChatAttachment }) {
+  const isImage = att.category === "image";
   return (
-    <div className="flex gap-3 mb-4">
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/10 border border-white/20 text-xs text-white/70 max-w-[160px]">
+      {isImage && att.previewUrl
+        ? <img src={att.previewUrl} className="h-5 w-5 rounded object-cover shrink-0" alt=""/>
+        : isImage
+          ? <ImageIcon className="h-3.5 w-3.5 text-blue-400 shrink-0"/>
+          : <FileText className="h-3.5 w-3.5 text-slate-400 shrink-0"/>
+      }
+      <span className="truncate">{att.fileName}</span>
+    </div>
+  );
+}
+
+function MessageActions({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+  const [feedback, setFeedback] = useState<"up"|"down"|null>(null);
+
+  function copy() {
+    navigator.clipboard.writeText(content).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false), 2000); });
+  }
+  return (
+    <div className="flex items-center gap-0.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <button onClick={copy} className="flex items-center gap-1 px-2 py-1 rounded text-[11px] text-white/40 hover:text-white/70 hover:bg-white/8 transition-all" title="Salin" data-testid="button-copy-message">
+        {copied ? <><Check className="h-3 w-3 text-green-400"/><span className="text-green-400">Disalin!</span></> : <><Copy className="h-3 w-3"/><span>Salin</span></>}
+      </button>
+      <button onClick={()=>setFeedback(f=>f==="up"?null:"up")} className={`p-1.5 rounded transition-all ${feedback==="up"?"text-blue-400 bg-blue-900/40":"text-white/30 hover:text-white/60 hover:bg-white/8"}`} title="Respons bagus" data-testid="button-thumbs-up">
+        <ThumbsUp className="h-3 w-3"/>
+      </button>
+      <button onClick={()=>setFeedback(f=>f==="down"?null:"down")} className={`p-1.5 rounded transition-all ${feedback==="down"?"text-red-400 bg-red-900/40":"text-white/30 hover:text-white/60 hover:bg-white/8"}`} title="Perlu perbaikan" data-testid="button-thumbs-down">
+        <ThumbsDown className="h-3 w-3"/>
+      </button>
+    </div>
+  );
+}
+
+function ChatMessage({ msg }: { msg: Message }) {
+  if (msg.role==="user") return (
+    <div className="flex justify-end mb-4">
+      <div className="max-w-[85%] flex flex-col items-end gap-1.5">
+        {msg.attachments && msg.attachments.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 justify-end">
+            {msg.attachments.map((att, i) => <AttachmentChip key={i} att={att}/>)}
+          </div>
+        )}
+        {msg.content && <div className="rounded-2xl rounded-tr-sm px-4 py-2.5 bg-blue-950/60 border border-blue-800/30 text-white text-sm whitespace-pre-wrap">{msg.content}</div>}
+      </div>
+    </div>
+  );
+  return (
+    <div className="flex gap-3 mb-4 group">
       <div className="w-8 h-8 rounded-full bg-blue-900/60 border border-blue-600/40 flex items-center justify-center text-base shrink-0 mt-0.5">🏆</div>
       <div className="flex-1 min-w-0">
         {msg.subAgents&&msg.subAgents.length>0&&<SubAgentPanel agents={msg.subAgents}/>}
         <div className="mt-2" style={{wordBreak:"break-word"}}>{msg.isStreaming&&!msg.content?<span className="animate-pulse text-white/60">▋</span>:<MessageContent text={msg.content} className="text-sm text-white/90 leading-relaxed"/>}</div>
         {msg.orchestrationMs&&msg.subAgents&&msg.subAgents.length>0&&!msg.isStreaming&&<div className="flex items-center gap-1 text-xs text-white/25 mt-1"><Zap className="h-2.5 w-2.5"/><span>{msg.subAgents.length} spesialis paralel · {(msg.orchestrationMs/1000).toFixed(1)}s</span></div>}
+        {!msg.isStreaming && msg.content && <MessageActions content={msg.content}/>}
       </div>
     </div>
   );
@@ -83,12 +133,15 @@ const SPEC_CARDS = [
 ];
 
 export default function SkemaClawChat() {
-  const [messages, setMessages]   = useState<Message[]>([]);
-  const [input, setInput]         = useState("");
-  const [streaming, setStreaming] = useState(false);
-  const [agentId, setAgentId]     = useState<number|null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef  = useRef<HTMLInputElement>(null);
+  const [messages, setMessages]     = useState<Message[]>([]);
+  const [input, setInput]           = useState("");
+  const [streaming, setStreaming]   = useState(false);
+  const [agentId, setAgentId]       = useState<number|null>(null);
+  const [pendingFiles, setPendingFiles] = useState<ChatAttachment[]>([]);
+  const [uploading, setUploading]   = useState(false);
+  const scrollRef  = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: agentData, isLoading } = useQuery<{ id: number }>({
     queryKey: ["/api/skema-claw/orchestrator"],
@@ -104,15 +157,57 @@ export default function SkemaClawChat() {
   useEffect(()=>{ if(agentData?.id) setAgentId(agentData.id); },[agentData]);
   useEffect(()=>{ if(scrollRef.current) scrollRef.current.scrollTop=scrollRef.current.scrollHeight; },[messages]);
 
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }, []);
+
+  useEffect(() => { autoResize(); }, [input, autoResize]);
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      const uploaded: ChatAttachment[] = [];
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        const r = await fetch("/api/chat/upload", { method: "POST", body: fd });
+        if (!r.ok) continue;
+        const data = await r.json();
+        const att: ChatAttachment = { ...data };
+        if (data.category === "image") {
+          att.previewUrl = URL.createObjectURL(file);
+        }
+        uploaded.push(att);
+      }
+      setPendingFiles(prev => [...prev, ...uploaded]);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function removeFile(idx: number) {
+    setPendingFiles(prev => prev.filter((_, i) => i !== idx));
+  }
+
   async function sendMessage(text: string) {
-    if (!text.trim()||streaming||!agentId) return;
-    setInput(""); setStreaming(true);
-    setMessages(prev=>[...prev,{role:"user",content:text}]);
+    if ((!text.trim() && pendingFiles.length === 0) || streaming || !agentId) return;
+    const attachments = [...pendingFiles];
+    setInput(""); setPendingFiles([]); setStreaming(true);
+    if (textareaRef.current) { textareaRef.current.style.height = "auto"; }
+    setMessages(prev=>[...prev,{role:"user",content:text,attachments:attachments.length?attachments:undefined}]);
     setMessages(prev=>[...prev,{role:"assistant",content:"",isStreaming:true,subAgents:[]}]);
     const history = messages.map(m=>({role:m.role,content:m.content}));
     const orchStart = Date.now();
     try {
-      const res = await fetch("/api/messages/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({agentId:String(agentId),role:"user",content:text,conversationHistory:history})});
+      const body: any = { agentId: String(agentId), role:"user", content: text, conversationHistory: history };
+      if (attachments.length > 0) body.attachments = attachments;
+      const res = await fetch("/api/messages/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
       if(!res.body) throw new Error("No stream");
       const reader = res.body.getReader(); const decoder = new TextDecoder();
       let buffer="", fullContent=""; const subAgentMap = new Map<number,SubAgentStatus>();
@@ -148,11 +243,13 @@ export default function SkemaClawChat() {
     } catch {
       setMessages(prev=>{const u=[...prev];const l=u[u.length-1];if(l.role==="assistant")u[u.length-1]={...l,content:"Maaf, terjadi kesalahan. Silakan coba lagi.",isStreaming:false};return u;});
     } finally {
-      setStreaming(false); inputRef.current?.focus();
+      setStreaming(false); textareaRef.current?.focus();
     }
   }
 
   const ready = !isLoading && agentId !== null;
+  const canSend = ready && !streaming && (input.trim().length > 0 || pendingFiles.length > 0);
+
   return (
     <div className="flex flex-col h-screen bg-[#020617] text-white">
       {/* Header */}
@@ -218,15 +315,71 @@ export default function SkemaClawChat() {
         )}
       </ScrollArea>
 
-      {/* Input */}
-      <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-blue-950/40">
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage(input);}}} placeholder={ready?"Tanya: kualifikasi BUJK, SBU baru, subklasifikasi, perpanjangan, naik kelas, OSS-RBA, monitoring LKUT...":"Menghubungkan ke SkemaClaw…"} disabled={!ready||streaming} className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-blue-500/40 text-sm h-10" data-testid="input-message"/>
-          <Button onClick={()=>sendMessage(input)} disabled={!ready||streaming||!input.trim()} className="bg-blue-800 hover:bg-blue-700 text-white h-10 px-4 shrink-0" data-testid="button-send">
-            {streaming?<Loader2 className="h-4 w-4 animate-spin"/>:<Send className="h-4 w-4"/>}
-          </Button>
+      {/* Input area */}
+      <div className="shrink-0 border-t border-white/10 px-4 pt-3 pb-2 bg-blue-950/40">
+        <div className="max-w-3xl mx-auto">
+          {/* Attachment previews */}
+          {pendingFiles.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {pendingFiles.map((att, idx) => (
+                <div key={idx} className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-white/10 border border-white/20 text-xs text-white/70 max-w-[180px] group/chip">
+                  {att.category === "image" && att.previewUrl
+                    ? <img src={att.previewUrl} className="h-6 w-6 rounded object-cover shrink-0" alt=""/>
+                    : att.category === "image"
+                      ? <ImageIcon className="h-4 w-4 text-blue-400 shrink-0"/>
+                      : <FileText className="h-4 w-4 text-slate-400 shrink-0"/>
+                  }
+                  <span className="truncate flex-1">{att.fileName}</span>
+                  <button onClick={()=>removeFile(idx)} className="text-white/30 hover:text-white/80 shrink-0 ml-0.5" data-testid={`button-remove-attachment-${idx}`}>
+                    <X className="h-3 w-3"/>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Input row */}
+          <div className="flex items-end gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all">
+            {/* File upload button */}
+            <button
+              onClick={()=>fileInputRef.current?.click()}
+              disabled={!ready||streaming||uploading}
+              className="shrink-0 mb-0.5 p-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 disabled:opacity-30 transition-all"
+              title="Lampirkan file (gambar, PDF, dokumen)"
+              data-testid="button-attach-file"
+            >
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin"/> : <Paperclip className="h-4 w-4"/>}
+            </button>
+            <input ref={fileInputRef} type="file" multiple accept="image/*,.pdf,.doc,.docx,.txt,.xlsx,.csv" className="hidden" onChange={handleFileSelect}/>
+
+            {/* Textarea */}
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={e=>{ setInput(e.target.value); }}
+              onKeyDown={e=>{
+                if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); sendMessage(input); }
+              }}
+              placeholder={ready?"Tanya: kualifikasi BUJK, SBU baru, subklasifikasi... (Enter kirim · Shift+Enter baris baru)":"Menghubungkan ke SkemaClaw…"}
+              disabled={!ready||streaming}
+              rows={1}
+              className="flex-1 bg-transparent border-0 outline-none resize-none text-white placeholder:text-white/30 text-sm leading-relaxed py-0.5 max-h-[160px] overflow-y-auto"
+              data-testid="input-message"
+            />
+
+            {/* Send button */}
+            <button
+              onClick={()=>sendMessage(input)}
+              disabled={!canSend}
+              className={`shrink-0 mb-0.5 p-1.5 rounded-lg transition-all ${canSend?"bg-blue-700 hover:bg-blue-600 text-white":"text-white/20 cursor-not-allowed"}`}
+              data-testid="button-send"
+            >
+              {streaming?<Loader2 className="h-4 w-4 animate-spin"/>:<Send className="h-4 w-4"/>}
+            </button>
+          </div>
+
+          <div className="text-center mt-1.5 text-[10px] text-white/15">SkemaClaw · 9 Spesialis · Permen PU 6/2025 · Enter untuk kirim · Shift+Enter baris baru</div>
         </div>
-        <div className="text-center mt-2 text-xs text-white/20">SkemaClaw · 9 Spesialis · Permen PU 6/2025 · UU 2/2017 jo UU 6/2023 · PP 5/2021 OSS-RBA · SIJK Terintegrasi</div>
       </div>
     </div>
   );
