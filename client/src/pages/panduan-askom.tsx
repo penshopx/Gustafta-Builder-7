@@ -255,5 +255,6 @@ export default function PanduanAskomChat() {
         showClear={messages.length > 0}
         onClear={() => setMessages([])}
       />
+    </div>
   );
 }

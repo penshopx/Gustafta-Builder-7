@@ -11,7 +11,7 @@ import {
   UserCheck, Layers, ShieldCheck,
 } from "lucide-react";
 import { Link } from "wouter";
-import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
+import { ChatInputBar, ChatAttachment } from "@/components/chat-input-bar";
 
 interface SubAgentStatus {
   agentId: number; role: string;
@@ -79,7 +79,7 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
 function ChatMessage({ msg }: { msg: Message }) {
   if (msg.role === "user") return <div className="flex justify-end mb-4"><div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-2.5 bg-red-900/70 text-white text-sm">{msg.content}</div></div>;
   return (
-    <div className="flex gap-3 mb-4 group">
+    <div className="flex gap-3 mb-4">
       <div className="w-8 h-8 rounded-full bg-red-900/60 border border-red-700/40 flex items-center justify-center text-base shrink-0 mt-0.5">⛑️</div>
       <div className="flex-1 min-w-0">
         {msg.subAgents && msg.subAgents.length > 0 && <SubAgentPanel agents={msg.subAgents} />}
@@ -125,14 +125,13 @@ export default function SafiraClawChat() {
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
 
   async function sendMessage(text: string, files: ChatAttachment[] = []) {
-    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
-    setInput(""); setStreaming(true);
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return; setStreaming(true);
     setMessages(prev => [...prev, { role: "user", content: text }]);
     setMessages(prev => [...prev, { role: "assistant", content: "", isStreaming: true, subAgents: [] }]);
     const history = messages.map(m => ({ role: m.role, content: m.content }));
     const orchStart = Date.now();
     try {
-      const res = await fetch("/api/messages/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history }) });
+      const res = await fetch("/api/messages/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history }, ...(files.length ? { attachments: files } : {})) });
       if (!res.body) throw new Error("No stream");
       const reader = res.body.getReader(); const decoder = new TextDecoder();
       let buffer = "", fullContent = "";
@@ -156,7 +155,7 @@ export default function SafiraClawChat() {
       const orchMs = Date.now()-orchStart;
       setMessages(prev => { const u=[...prev]; const l=u[u.length-1]; if(l.role==="assistant") u[u.length-1]={...l,isStreaming:false,subAgents:Array.from(subAgentMap.values()),orchestrationMs:orchMs}; return u; });
     } catch { setMessages(prev => { const u=[...prev]; const l=u[u.length-1]; if(l.role==="assistant") u[u.length-1]={...l,content:"Maaf, terjadi kesalahan. Silakan coba lagi.",isStreaming:false}; return u; }); }
-    finally { setStreaming(false); // input focus handled by ChatInputBar }
+    finally { setStreaming(false); inputRef.current?.focus(); }
   }
 
   const ready = !agentLoading && agentId !== null;
@@ -210,6 +209,7 @@ export default function SafiraClawChat() {
           </div>
         ) : <div>{messages.map((msg, i) => <ChatMessage key={i} msg={msg} />)}</div>}
       </ScrollArea>
+
       <ChatInputBar
         onSend={sendMessage}
         disabled={!ready || streaming}

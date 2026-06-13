@@ -256,5 +256,6 @@ export default function PanduanSBUChat() {
         showClear={messages.length > 0}
         onClear={() => setMessages([])}
       />
+    </div>
   );
 }

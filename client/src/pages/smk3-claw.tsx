@@ -10,7 +10,7 @@ import {
   HardHat, BarChart2, FileText, Layers, Activity,
 } from "lucide-react";
 import { Link } from "wouter";
-import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
+import { ChatInputBar, ChatAttachment } from "@/components/chat-input-bar";
 
 interface SubAgentStatus {
   agentId: number;
@@ -97,7 +97,7 @@ function ChatMessage({ msg }: { msg: Message }) {
     );
   }
   return (
-    <div className="flex gap-3 mb-4 group">
+    <div className="flex gap-3 mb-4">
       <div className="w-8 h-8 rounded-full bg-orange-900/60 border border-orange-700/40 flex items-center justify-center text-base shrink-0 mt-0.5">🦺</div>
       <div className="flex-1 min-w-0">
         {msg.subAgents && msg.subAgents.length > 0 && <SubAgentPanel agents={msg.subAgents} />}
@@ -147,8 +147,7 @@ export default function Smk3ClawChat() {
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
 
   async function sendMessage(text: string, files: ChatAttachment[] = []) {
-    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
-    setInput(""); setStreaming(true);
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return; setStreaming(true);
     const userMsg: Message = { role: "user", content: text, attachments: files.length ? files : undefined };
     setMessages(prev => [...prev, userMsg]);
     const assistantMsg: Message = { role: "assistant", content: "", isStreaming: true, subAgents: [] };
@@ -158,7 +157,7 @@ export default function Smk3ClawChat() {
     try {
       const res = await fetch("/api/messages/stream", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history , ...(files.length ? { attachments: files } : {})}),
+        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history }, ...(files.length ? { attachments: files } : {})),
       });
       if (!res.body) throw new Error("No stream");
       const reader = res.body.getReader();
@@ -199,7 +198,7 @@ export default function Smk3ClawChat() {
       setMessages(prev => { const u=[...prev]; const l=u[u.length-1]; if(l.role==="assistant") u[u.length-1]={...l,isStreaming:false,subAgents:Array.from(subAgentMap.values()),orchestrationMs:orchMs}; return u; });
     } catch {
       setMessages(prev => { const u=[...prev]; const l=u[u.length-1]; if(l.role==="assistant") u[u.length-1]={...l,content:"Maaf, terjadi kesalahan. Silakan coba lagi.",isStreaming:false}; return u; });
-    } finally { setStreaming(false); // input focus handled by ChatInputBar }
+    } finally { setStreaming(false); inputRef.current?.focus(); }
   }
 
   const ready = !agentLoading && agentId !== null;
@@ -268,6 +267,7 @@ export default function Smk3ClawChat() {
           <div>{messages.map((msg, i) => <ChatMessage key={i} msg={msg} />)}</div>
         )}
       </ScrollArea>
+
       <ChatInputBar
         onSend={sendMessage}
         disabled={!ready || streaming}
