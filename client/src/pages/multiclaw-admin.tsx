@@ -153,6 +153,7 @@ export default function MultiClawAdmin() {
   const [kbContent, setKbContent] = useState("");
   const [kbUrl, setKbUrl] = useState("");
   const [kbLayer, setKbLayer] = useState("operational");
+  const [propagateToSubAgents, setPropagateToSubAgents] = useState(true);
   const [addingKB, setAddingKB] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -226,13 +227,37 @@ export default function MultiClawAdmin() {
     } catch { } finally { setLoadingKB(false); }
   }
 
+  async function propagateKBToSubAgents(kbPayload: { name: string; type: string; content: string; fileUrl?: string }) {
+    const subIds = editSubAgents
+      .map(s => Number(s.agentId))
+      .filter(id => !isNaN(id) && id > 0);
+    if (subIds.length === 0) return 0;
+    const results = await Promise.allSettled(
+      subIds.map(id =>
+        fetch("/api/knowledge-base", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId: id, name: kbPayload.name, type: kbPayload.type, content: kbPayload.content, fileUrl: kbPayload.fileUrl, knowledgeLayer: kbLayer }),
+        })
+      )
+    );
+    return results.filter(r => r.status === "fulfilled" && (r.value as Response).ok).length;
+  }
+
   async function addKBText() {
     if (!agent || !kbName.trim() || !kbContent.trim()) return;
     setAddingKB(true);
     try {
       const r = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: kbName, type: "text", content: kbContent, knowledgeLayer: kbLayer }) });
-      if (r.ok) { toast({ title: "KB berhasil ditambahkan ✓" }); setKbName(""); setKbContent(""); setAddMode(null); loadKB(agent.id); }
-      else { const e = await r.json(); throw new Error(e.error); }
+      if (r.status === 401) throw new Error("Harap login terlebih dahulu untuk menambah KB");
+      if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || "Gagal menyimpan"); }
+      let msg = "KB berhasil ditambahkan ✓";
+      if (propagateToSubAgents && editSubAgents.length > 0) {
+        const n = await propagateKBToSubAgents({ name: kbName, type: "text", content: kbContent });
+        msg = `KB tersimpan ✓ · disebarkan ke ${n}/${editSubAgents.length} sub-agent`;
+      }
+      toast({ title: msg });
+      setKbName(""); setKbContent(""); setAddMode(null); loadKB(agent.id);
     } catch (e: any) { toast({ title: `Gagal: ${e.message}`, variant: "destructive" }); }
     finally { setAddingKB(false); }
   }
@@ -242,9 +267,16 @@ export default function MultiClawAdmin() {
     setAddingKB(true);
     try {
       const r = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: kbName, type: "url", content: kbUrl, knowledgeLayer: kbLayer }) });
-      if (r.ok) { toast({ title: "URL KB ditambahkan ✓" }); setKbName(""); setKbUrl(""); setAddMode(null); loadKB(agent.id); }
-      else throw new Error();
-    } catch { toast({ title: "Gagal menambah URL KB", variant: "destructive" }); }
+      if (r.status === 401) throw new Error("Harap login terlebih dahulu untuk menambah KB");
+      if (!r.ok) throw new Error("Gagal menyimpan URL");
+      let msg = "URL KB ditambahkan ✓";
+      if (propagateToSubAgents && editSubAgents.length > 0) {
+        const n = await propagateKBToSubAgents({ name: kbName, type: "url", content: kbUrl });
+        msg = `URL KB tersimpan ✓ · disebarkan ke ${n}/${editSubAgents.length} sub-agent`;
+      }
+      toast({ title: msg });
+      setKbName(""); setKbUrl(""); setAddMode(null); loadKB(agent.id);
+    } catch (e: any) { toast({ title: `Gagal: ${e.message}`, variant: "destructive" }); }
     finally { setAddingKB(false); }
   }
 
@@ -254,11 +286,19 @@ export default function MultiClawAdmin() {
     try {
       const fd = new FormData(); fd.append("file", file);
       const r1 = await fetch("/api/knowledge-base/upload", { method: "POST", body: fd });
+      if (r1.status === 401) throw new Error("Harap login terlebih dahulu untuk upload KB");
       if (!r1.ok) throw new Error("Upload gagal");
       const { fileUrl, fileName } = await r1.json();
-      const r2 = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: fileName || file.name, type: "file", content: "", fileUrl, knowledgeLayer: kbLayer }) });
-      if (r2.ok) { toast({ title: `File "${file.name}" berhasil diupload ✓` }); loadKB(agent.id); }
-      else throw new Error();
+      const name = fileName || file.name;
+      const r2 = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name, type: "file", content: "", fileUrl, knowledgeLayer: kbLayer }) });
+      if (!r2.ok) throw new Error("Gagal menyimpan metadata file");
+      let msg = `File "${file.name}" berhasil diupload ✓`;
+      if (propagateToSubAgents && editSubAgents.length > 0) {
+        const n = await propagateKBToSubAgents({ name, type: "file", content: "", fileUrl });
+        msg = `File diupload ✓ · disebarkan ke ${n}/${editSubAgents.length} sub-agent`;
+      }
+      toast({ title: msg });
+      loadKB(agent.id);
     } catch (e: any) { toast({ title: `Gagal upload: ${e.message}`, variant: "destructive" }); }
     finally { setUploadingFile(false); if (fileRef.current) fileRef.current.value = ""; }
   }
@@ -484,13 +524,33 @@ export default function MultiClawAdmin() {
 
                         {/* Add KB Section */}
                         <div className="border-t border-slate-700/50 pt-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs text-slate-400 font-medium">Layer:</span>
-                            <select className="bg-slate-800 border border-slate-700 rounded text-xs text-white px-2 py-1" value={kbLayer} onChange={e => setKbLayer(e.target.value)}>
-                              <option value="operational">Operational (default)</option>
-                              <option value="core">Core (prioritas tinggi)</option>
-                            </select>
+                          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-slate-400 font-medium">Layer:</span>
+                              <select className="bg-slate-800 border border-slate-700 rounded text-xs text-white px-2 py-1" value={kbLayer} onChange={e => setKbLayer(e.target.value)}>
+                                <option value="operational">Operational (default)</option>
+                                <option value="core">Core (prioritas tinggi)</option>
+                              </select>
+                            </div>
+                            {editSubAgents.length > 0 && (
+                              <label className="flex items-center gap-1.5 cursor-pointer group">
+                                <input
+                                  type="checkbox"
+                                  checked={propagateToSubAgents}
+                                  onChange={e => setPropagateToSubAgents(e.target.checked)}
+                                  className="accent-blue-500 w-3.5 h-3.5"
+                                />
+                                <span className="text-xs text-slate-400 group-hover:text-slate-200 transition-colors">
+                                  Sebar ke {editSubAgents.length} sub-agent
+                                </span>
+                              </label>
+                            )}
                           </div>
+                          {propagateToSubAgents && editSubAgents.length > 0 && (
+                            <div className="mb-3 bg-blue-500/8 border border-blue-500/20 rounded-lg px-3 py-2 text-xs text-blue-300">
+                              ℹ KB akan disimpan di orchestrator <strong>dan</strong> disebarkan ke {editSubAgents.length} sub-agent secara otomatis — semua agen dalam suite akan memiliki akses ke dokumen ini.
+                            </div>
+                          )}
                           {!addMode && (
                             <div className="grid grid-cols-3 gap-2">
                               <button onClick={() => setAddMode("text")} className="bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-lg p-3 text-center text-sm text-slate-300 transition-colors">

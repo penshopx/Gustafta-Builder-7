@@ -3373,6 +3373,24 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           }
           // ─────────────────────────────────────────────────────────────────────
 
+          // ── Fetch orchestrator custom KB to share with all sub-agents ────────
+          let orchestratorKbContext = "";
+          try {
+            const orchKbs = await storage.getKnowledgeBases(String(agent.id));
+            const SEEDED_PREFIXES = ["Regulasi & Standar", "SOP & Prosedur", "Guardrails & Compliance"];
+            const customOrchKbs = orchKbs.filter(kb =>
+              !SEEDED_PREFIXES.some(p => kb.name.startsWith(p))
+            );
+            if (customOrchKbs.length > 0) {
+              orchestratorKbContext = customOrchKbs
+                .map(kb => `[KB Bersama — ${kb.name}]: ${kb.content}`)
+                .join("\n\n");
+            }
+          } catch (e) {
+            console.warn("[ORCHESTRATOR_KB] Failed to fetch:", e);
+          }
+          // ─────────────────────────────────────────────────────────────────────
+
           // ── Phase 2: Dispatch selected sub-agents in parallel ─────────────────
           const subAgentResults = await Promise.allSettled(
             selectedCandidates.map(async (subCfg) => {
@@ -3390,6 +3408,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
               const rawResult = await callAgentInternal(
                 subAgentIdStr, callMessage, convHistory, 25000,
                 wantsJson ? { type: "json_object" } : undefined,
+                orchestratorKbContext || undefined,
               );
               const durationMs = Date.now() - t0;
 
@@ -4908,6 +4927,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>,
     timeoutMs: number = 25000,
     responseFormat?: { type: "json_object" },
+    orchestratorKbContext?: string,
   ): Promise<string> {
     const subAgent = await storage.getAgent(agentId);
     if (!subAgent) return `[Sub-agent ${agentId} tidak ditemukan]`;
@@ -4922,6 +4942,13 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         const kbs = await storage.getKnowledgeBases(agentId);
         knowledgeContext = kbs.map(kb => `[${kb.name}]: ${kb.content}`).join("\n\n");
       }
+    }
+
+    // Merge orchestrator KB context (custom KB shared with all sub-agents)
+    if (orchestratorKbContext) {
+      knowledgeContext = knowledgeContext
+        ? `${orchestratorKbContext}\n\n${knowledgeContext}`
+        : orchestratorKbContext;
     }
 
     let systemPrompt = buildFinalSystemPrompt(subAgent);
