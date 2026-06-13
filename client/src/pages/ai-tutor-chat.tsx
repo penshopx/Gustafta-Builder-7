@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -10,6 +9,7 @@ import {
   Trophy, Heart, PenLine, Users, Star,
 } from "lucide-react";
 import { Link } from "wouter";
+import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,6 +27,7 @@ interface Message {
   isStreaming?: boolean;
   subAgents?: SubAgentStatus[];
   orchestrationMs?: number;
+  attachments?: ChatAttachment[];
 }
 
 // ─── Agent Metadata ───────────────────────────────────────────────────────────
@@ -177,7 +178,7 @@ function ChatMessage({ msg }: { msg: Message }) {
   }
 
   return (
-    <div className="flex gap-3 mb-4">
+    <div className="flex gap-3 mb-4 group">
       <div className="w-8 h-8 rounded-full bg-indigo-900/60 border border-indigo-700/40 flex items-center justify-center text-base shrink-0 mt-0.5">
         🎓
       </div>
@@ -237,11 +238,9 @@ const SAMPLE_PROMPTS = [
 
 export default function AiTutorChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: agentData, isLoading: agentLoading } = useQuery<{
     id: number;
@@ -268,12 +267,11 @@ export default function AiTutorChat() {
     }
   }, [messages]);
 
-  async function sendMessage(text: string) {
-    if (!text.trim() || streaming || !agentId) return;
-    setInput("");
+  async function sendMessage(text: string, files: ChatAttachment[] = []) {
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
     setStreaming(true);
 
-    const userMsg: Message = { role: "user", content: text };
+    const userMsg: Message = { role: "user", content: text, attachments: files.length ? files : undefined };
     setMessages(prev => [...prev, userMsg]);
 
     const assistantMsg: Message = {
@@ -291,7 +289,7 @@ export default function AiTutorChat() {
       const res = await fetch("/api/messages/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history }),
+        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history , ...(files.length ? { attachments: files } : {})}),
       });
 
       if (!res.body) throw new Error("No stream");
@@ -404,7 +402,7 @@ export default function AiTutorChat() {
       });
     } finally {
       setStreaming(false);
-      inputRef.current?.focus();
+      // input focus handled by ChatInputBar
     }
   }
 
@@ -534,35 +532,15 @@ export default function AiTutorChat() {
       </ScrollArea>
 
       {/* Input */}
-      <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-[#0c0c1a]/80">
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-            placeholder={
-              ready
-                ? "Tanya konsep, minta soal latihan, tryout, atau cerita tentang kondisi belajarmu…"
-                : "Menghubungkan ke AI Tutor Coordinator…"
-            }
-            disabled={!ready || streaming}
-            className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-indigo-500/40 text-sm h-10"
-            data-testid="input-message"
-          />
-          <Button
-            onClick={() => sendMessage(input)}
-            disabled={!ready || streaming || !input.trim()}
-            className="bg-indigo-700 hover:bg-indigo-600 text-white h-10 px-4 shrink-0"
-            data-testid="button-send"
-          >
-            {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </div>
-        <div className="text-center mt-2 text-xs text-white/20">
-          TutorCoordinator v1 · Theory · Diagnostic · Drill · Tryout · Gamify · Mentor · Literacy · Parent · ABD-7
-        </div>
-      </div>
+      <ChatInputBar
+        onSend={sendMessage}
+        disabled={!ready || streaming}
+        streaming={streaming}
+        placeholder={ready ? "Ketik pesan…" : "Memuat…"}
+        footerText=""
+        showClear={messages.length > 0}
+        onClear={() => setMessages([])}
+      />
 
     </div>
   );

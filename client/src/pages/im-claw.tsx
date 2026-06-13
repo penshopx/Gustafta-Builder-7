@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MessageContent } from "@/lib/format-message";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -11,6 +10,7 @@ import {
   Factory, ArrowUpDown, Plug, Wrench,
 } from "lucide-react";
 import { Link } from "wouter";
+import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 interface SubAgentStatus {
   agentId: number; role: string;
@@ -20,6 +20,7 @@ interface SubAgentStatus {
 interface Message {
   role: "user" | "assistant"; content: string;
   isStreaming?: boolean; subAgents?: SubAgentStatus[]; orchestrationMs?: number;
+  attachments?: ChatAttachment[];
 }
 
 const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: string; code: string; desc: string }> = {
@@ -91,7 +92,7 @@ function ChatMessage({ msg }: { msg: Message }) {
     </div>
   );
   return (
-    <div className="flex gap-3 mb-4">
+    <div className="flex gap-3 mb-4 group">
       <div className="w-8 h-8 rounded-full bg-emerald-900/60 border border-emerald-700/40 flex items-center justify-center text-base shrink-0 mt-0.5">⚙️</div>
       <div className="flex-1 min-w-0">
         {msg.subAgents && msg.subAgents.length > 0 && <SubAgentPanel agents={msg.subAgents} />}
@@ -132,11 +133,9 @@ const IM_CARDS = [
 
 export default function ImClawChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: agentData, isLoading: agentLoading } = useQuery<{ id: number; name: string }>({
     queryKey: ["/api/im-claw/orchestrator"],
@@ -151,8 +150,8 @@ export default function ImClawChat() {
   useEffect(() => { if (agentData?.id) setAgentId(agentData.id); }, [agentData]);
   useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [messages]);
 
-  async function sendMessage(text: string) {
-    if (!text.trim() || streaming || !agentId) return;
+  async function sendMessage(text: string, files: ChatAttachment[] = []) {
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
     setInput(""); setStreaming(true);
     setMessages(prev => [...prev, { role: "user", content: text }]);
     setMessages(prev => [...prev, { role: "assistant", content: "", isStreaming: true, subAgents: [] }]);
@@ -201,7 +200,7 @@ export default function ImClawChat() {
     } catch {
       setMessages(prev => { const u=[...prev]; const l=u[u.length-1]; if(l.role==="assistant") u[u.length-1]={...l,content:"Maaf, terjadi kesalahan. Silakan coba lagi.",isStreaming:false}; return u; });
     } finally {
-      setStreaming(false); inputRef.current?.focus();
+      setStreaming(false); // input focus handled by ChatInputBar
     }
   }
 

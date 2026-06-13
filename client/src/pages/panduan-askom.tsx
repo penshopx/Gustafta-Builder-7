@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MessageContent } from "@/lib/format-message";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -10,11 +9,13 @@ import {
   UserCheck, FileText, Award, HelpCircle, BookOpen, Scale,
 } from "lucide-react";
 import { Link } from "wouter";
+import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   isStreaming?: boolean;
+  attachments?: ChatAttachment[];
 }
 
 const QUICK_QUESTIONS = [
@@ -48,7 +49,7 @@ function ChatMessage({ msg }: { msg: Message }) {
     );
   }
   return (
-    <div className="flex gap-3 mb-4">
+    <div className="flex gap-3 mb-4 group">
       <div className="w-8 h-8 rounded-full bg-teal-800/50 border border-teal-600/40 flex items-center justify-center text-base shrink-0 mt-0.5">
         🎓
       </div>
@@ -65,11 +66,9 @@ function ChatMessage({ msg }: { msg: Message }) {
 
 export default function PanduanAskomChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: agentData, isLoading: agentLoading } = useQuery<{ id: number; name: string }>({
     queryKey: ["/api/panduan-askom/agent"],
@@ -86,9 +85,8 @@ export default function PanduanAskomChat() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  async function sendMessage(text: string) {
-    if (!text.trim() || streaming || !agentId) return;
-    setInput("");
+  async function sendMessage(text: string, files: ChatAttachment[] = []) {
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
     setStreaming(true);
     setMessages(prev => [...prev, { role: "user", content: text }]);
     setMessages(prev => [...prev, { role: "assistant", content: "", isStreaming: true }]);
@@ -147,7 +145,7 @@ export default function PanduanAskomChat() {
       });
     } finally {
       setStreaming(false);
-      inputRef.current?.focus();
+      // input focus handled by ChatInputBar
     }
   }
 
@@ -248,31 +246,14 @@ export default function PanduanAskomChat() {
           </div>
         )}
       </ScrollArea>
-
-      <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-[#060f0f]/80">
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-            placeholder={ready ? "Tanya tentang ASKOM, SKK, uji kompetensi, RPL, atau biaya sertifikasi…" : "Menghubungkan…"}
-            disabled={!ready || streaming}
-            className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-teal-500/40 text-sm h-10"
-            data-testid="input-message"
-          />
-          <Button
-            onClick={() => sendMessage(input)}
-            disabled={!ready || streaming || !input.trim()}
-            className="bg-teal-800 hover:bg-teal-700 text-white h-10 px-4 shrink-0"
-            data-testid="button-send">
-            {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </div>
-        <p className="text-center mt-2 text-xs text-white/20">
-          PanduanASKOM · Informasi uji kompetensi berbasis BNSP & SKKNI 333/2020 · Bukan pengganti keputusan resmi LSP/BNSP
-        </p>
-      </div>
-    </div>
+      <ChatInputBar
+        onSend={sendMessage}
+        disabled={!ready || streaming}
+        streaming={streaming}
+        placeholder={ready ? "Tanya tentang ASKOM, SKK, uji kompetensi, RPL, atau biaya sertifikasi…" : "Memuat…"}
+        footerText=""
+        showClear={messages.length > 0}
+        onClear={() => setMessages([])}
+      />
   );
 }

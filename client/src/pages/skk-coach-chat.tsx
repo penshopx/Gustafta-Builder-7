@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { MessageContent } from "@/lib/format-message";
+import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 interface SubAgentStatus {
   agentId: number;
@@ -26,6 +26,7 @@ interface Message {
   isStreaming?: boolean;
   subAgents?: SubAgentStatus[];
   orchestrationMs?: number;
+  attachments?: ChatAttachment[];
 }
 
 const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: string; code: string }> = {
@@ -144,7 +145,7 @@ function ChatMessage({ msg }: { msg: Message }) {
     );
   }
   return (
-    <div className="flex justify-start mb-4">
+    <div className="flex justify-start mb-4 group">
       <div className="max-w-[90%] space-y-1">
         <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-white/8 border border-white/10 text-sm text-white/90 leading-relaxed">
           {msg.isStreaming && !msg.content ? (
@@ -178,11 +179,9 @@ const SAMPLE_PROMPTS = [
 
 export default function SkkCoachChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: agentData, isLoading: agentLoading } = useQuery<{
     id: number;
@@ -209,12 +208,11 @@ export default function SkkCoachChat() {
     }
   }, [messages]);
 
-  async function sendMessage(text: string) {
-    if (!text.trim() || streaming || !agentId) return;
-    setInput("");
+  async function sendMessage(text: string, files: ChatAttachment[] = []) {
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
     setStreaming(true);
 
-    const userMsg: Message = { role: "user", content: text };
+    const userMsg: Message = { role: "user", content: text, attachments: files.length ? files : undefined };
     setMessages(prev => [...prev, userMsg]);
     const assistantMsg: Message = { role: "assistant", content: "", isStreaming: true, subAgents: [] };
     setMessages(prev => [...prev, assistantMsg]);
@@ -226,7 +224,7 @@ export default function SkkCoachChat() {
       const res = await fetch("/api/messages/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history }),
+        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history , ...(files.length ? { attachments: files } : {})}),
       });
 
       if (!res.body) throw new Error("No stream");
@@ -314,7 +312,7 @@ export default function SkkCoachChat() {
       });
     } finally {
       setStreaming(false);
-      inputRef.current?.focus();
+      // input focus handled by ChatInputBar
     }
   }
 
@@ -433,41 +431,15 @@ export default function SkkCoachChat() {
           </div>
         )}
       </ScrollArea>
-
-      <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-[#040c06]/80">
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-            placeholder={ready ? "Tanya tentang SKK, KKNI, jabatan kerja, atau perpanjangan…" : "Memuat SKK Coach…"}
-            disabled={!ready || streaming}
-            className="flex-1 bg-white/5 border-white/15 text-white placeholder:text-white/30 focus:border-emerald-500/50"
-            data-testid="input-chat"
-          />
-          <Button
-            onClick={() => sendMessage(input)}
-            disabled={!ready || streaming || !input.trim()}
-            className="bg-emerald-700 hover:bg-emerald-600 text-white border-0"
-            data-testid="button-send"
-          >
-            {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </div>
-        <div className="flex items-center justify-center gap-4 mt-2">
-          <span className="text-[10px] text-white/20">SKK Coach · Permen PUPR 9/2023 · ABD v1.1 · OpenClaw L4</span>
-          {messages.length > 0 && (
-            <button
-              onClick={() => setMessages([])}
-              className="text-[10px] text-white/20 hover:text-white/50 transition-colors"
-              data-testid="button-clear-chat"
-            >
-              Bersihkan chat
-            </button>
-          )}
-        </div>
-      </div>
+      <ChatInputBar
+        onSend={sendMessage}
+        disabled={!ready || streaming}
+        streaming={streaming}
+        placeholder={ready ? "Tanya tentang SKK, KKNI, jabatan kerja, atau perpanjangan…" : "Memuat…"}
+        footerText="SKK Coach · Permen PUPR 9/2023 · ABD v1.1 · OpenClaw L4"
+        showClear={messages.length > 0}
+        onClear={() => setMessages([])}
+      />
     </div>
   );
 }

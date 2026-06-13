@@ -2,14 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MessageContent } from "@/lib/format-message";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Send, Loader2, Zap, CheckCircle2, Clock, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "wouter";
+import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 interface SubAgentStatus { agentId: number; role: string; status: "waiting"|"running"|"done"|"error"; elapsed?: number; }
-interface Message { role: "user"|"assistant"; content: string; isStreaming?: boolean; subAgents?: SubAgentStatus[]; orchestrationMs?: number; }
+interface Message { role: "user"|"assistant"; content: string; isStreaming?: boolean; subAgents?: SubAgentStatus[]; orchestrationMs?: number;
+  attachments?: ChatAttachment[];
+}
 
 const ROLE_META: Record<string, { icon: string; label: string; color: string; desc: string }> = {
   "REK-STRATEGI":  { icon: "🗺️", label: "STRATEGI",  color: "bg-teal-600/20 text-teal-300 border-teal-600/30",     desc: "Workforce Plan" },
@@ -47,7 +49,7 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
 function ChatMessage({ msg }: { msg: Message }) {
   if (msg.role==="user") return <div className="flex justify-end mb-4"><div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-2.5 bg-teal-950/50 border border-teal-700/30 text-white text-sm">{msg.content}</div></div>;
   return (
-    <div className="flex gap-3 mb-4">
+    <div className="flex gap-3 mb-4 group">
       <div className="w-8 h-8 rounded-full bg-teal-800/60 border border-teal-600/40 flex items-center justify-center text-base shrink-0 mt-0.5">👥</div>
       <div className="flex-1 min-w-0">
         {msg.subAgents&&msg.subAgents.length>0&&<SubAgentPanel agents={msg.subAgents}/>}
@@ -77,15 +79,13 @@ const SPEC_CARDS = [
 ];
 export default function RekrutmenClawChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number|null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { data: agentData, isLoading } = useQuery<{ id: number }>({ queryKey: ["/api/rekrutmen-claw/orchestrator"], queryFn: async()=>{const r=await fetch("/api/rekrutmen-claw/orchestrator");if(!r.ok)throw new Error("Not found");return r.json();}, retry:3, retryDelay:2000 });
   useEffect(()=>{if(agentData?.id)setAgentId(agentData.id);},[agentData]);
   useEffect(()=>{if(scrollRef.current)scrollRef.current.scrollTop=scrollRef.current.scrollHeight;},[messages]);
-  async function sendMessage(text: string) {
+  async function sendMessage(text: string, files: ChatAttachment[] = []) {
     if (!text.trim()||streaming||!agentId) return;
     setInput(""); setStreaming(true);
     setMessages(prev=>[...prev,{role:"user",content:text}]);
@@ -110,7 +110,7 @@ export default function RekrutmenClawChat() {
       const orchMs=Date.now()-orchStart;
       setMessages(prev=>{const u=[...prev];const l=u[u.length-1];if(l.role==="assistant")u[u.length-1]={...l,isStreaming:false,subAgents:Array.from(subAgentMap.values()),orchestrationMs:orchMs};return u;});
     }catch{setMessages(prev=>{const u=[...prev];const l=u[u.length-1];if(l.role==="assistant")u[u.length-1]={...l,content:"Maaf, terjadi kesalahan. Silakan coba lagi.",isStreaming:false};return u;});}
-    finally{setStreaming(false);inputRef.current?.focus();}
+    finally{setStreaming(false);// input focus handled by ChatInputBar}
   }
   const ready=!isLoading&&agentId!==null;
   return (
@@ -160,15 +160,15 @@ export default function RekrutmenClawChat() {
           <div className="max-w-3xl mx-auto">{messages.map((msg,i)=><ChatMessage key={i} msg={msg}/>)}</div>
         )}
       </ScrollArea>
-      <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-[#020d0d]/80">
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage(input);}}} placeholder={ready?"Tanya: sourcing kandidat, interview guide, onboarding, employer branding, PKWT, ATS Indonesia...":"Menghubungkan ke RekrutmenClaw…"} disabled={!ready||streaming} className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-teal-500/40 text-sm h-10" data-testid="input-message"/>
-          <Button onClick={()=>sendMessage(input)} disabled={!ready||streaming||!input.trim()} className="bg-teal-700 hover:bg-teal-600 text-white h-10 px-4 shrink-0" data-testid="button-send">
-            {streaming?<Loader2 className="h-4 w-4 animate-spin"/>:<Send className="h-4 w-4"/>}
-          </Button>
-        </div>
-        <div className="text-center mt-2 text-xs text-white/20">RekrutmenClaw · 8 Spesialis · Talent Acquisition · PKWT PP35/2021 · Employer Branding · ATS Indonesia</div>
-      </div>
+      <ChatInputBar
+        onSend={sendMessage}
+        disabled={!ready || streaming}
+        streaming={streaming}
+        placeholder={ready ? "Ketik pesan…" : "Memuat…"}
+        footerText=""
+        showClear={messages.length > 0}
+        onClear={() => setMessages([])}
+      />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,6 +28,7 @@ import {
   Brain,
 } from "lucide-react";
 import { Link } from "wouter";
+import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 interface SubAgentStatus {
   agentId: number;
@@ -52,6 +52,7 @@ interface Message {
   subAgents?: SubAgentStatus[];
   sirupFetch?: SirupFetch;
   orchestrationMs?: number;
+  attachments?: ChatAttachment[];
 }
 
 const ROLE_META: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
@@ -277,13 +278,11 @@ function loadBujkProfile(): string | null {
 
 export default function TenderAiChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number | null>(null);
   const [bujkProfile, setBujkProfile] = useState<string | null>(null);
   const [profileInjected, setProfileInjected] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setBujkProfile(loadBujkProfile());
@@ -315,12 +314,11 @@ export default function TenderAiChat() {
     }
   }, [messages]);
 
-  async function sendMessage(text: string) {
-    if (!text.trim() || streaming || !agentId) return;
-    setInput("");
+  async function sendMessage(text: string, files: ChatAttachment[] = []) {
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
     setStreaming(true);
 
-    const userMsg: Message = { role: "user", content: text };
+    const userMsg: Message = { role: "user", content: text, attachments: files.length ? files : undefined };
     setMessages((prev) => [...prev, userMsg]);
 
     const assistantMsg: Message = {
@@ -459,7 +457,7 @@ export default function TenderAiChat() {
       });
     } finally {
       setStreaming(false);
-      inputRef.current?.focus();
+      // input focus handled by ChatInputBar
     }
   }
 
@@ -655,53 +653,15 @@ export default function TenderAiChat() {
       </ScrollArea>
 
       {/* Input */}
-      <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-[#0b1020]/80">
-        <div className="flex gap-2">
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage(input);
-              }
-            }}
-            placeholder={
-              ready
-                ? "Tanya soal tender BUJK, eligibility SBU/SKK, win probability, atau draft sanggah..."
-                : "Menginisialisasi TENDERA..."
-            }
-            disabled={!ready || streaming}
-            className="bg-white/5 border-white/20 text-white placeholder:text-white/30 focus:border-blue-500/50"
-            data-testid="input-chat"
-          />
-          <Button
-            onClick={() => sendMessage(input)}
-            disabled={!ready || streaming || !input.trim()}
-            className="bg-blue-700 hover:bg-blue-600 text-white shrink-0"
-            data-testid="button-send"
-          >
-            {streaming ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-        <div className="flex items-center justify-between mt-2 px-1">
-          <span className="text-xs text-white/30">
-            {streaming
-              ? "🟡 MultiClaw paralel aktif..."
-              : ready
-              ? "🟢 Siap · SIRUP LKPP real-time · Win Probability 7D"
-              : "🔴 Menginisialisasi..."}
-          </span>
-          <span className="text-xs text-white/20">
-            ABD v1.1 · Perpres 12/2021 · FIDIC 2017
-          </span>
-        </div>
-      </div>
+      <ChatInputBar
+        onSend={sendMessage}
+        disabled={!ready || streaming}
+        streaming={streaming}
+        placeholder={ready ? "Ketik pesan…" : "Memuat…"}
+        footerText=""
+        showClear={messages.length > 0}
+        onClear={() => setMessages([])}
+      />
     </div>
   );
 }

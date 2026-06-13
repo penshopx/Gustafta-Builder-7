@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -10,6 +9,7 @@ import {
   DollarSign, ClipboardList, Search, Globe, Scale, Lock, Star, Database,
 } from "lucide-react";
 import { Link } from "wouter";
+import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,6 +28,7 @@ interface Message {
   subAgents?: SubAgentStatus[];
   orchestrationMs?: number;
   dataMasterInjected?: boolean;
+  attachments?: ChatAttachment[];
 }
 
 // ─── Agent Metadata ───────────────────────────────────────────────────────────
@@ -190,7 +191,7 @@ function ChatMessage({ msg }: { msg: Message }) {
   }
 
   return (
-    <div className="flex justify-start mb-4">
+    <div className="flex justify-start mb-4 group">
       <div className="max-w-[90%] space-y-1">
         <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-white/8 border border-white/10 text-sm text-white/90 leading-relaxed whitespace-pre-wrap">
           {msg.isStreaming && !msg.content ? (
@@ -234,11 +235,9 @@ const SAMPLE_PROMPTS = [
 
 export default function SbuClawChat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [agentId, setAgentId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: agentData, isLoading: agentLoading } = useQuery<{
     id: number;
@@ -265,12 +264,11 @@ export default function SbuClawChat() {
     }
   }, [messages]);
 
-  async function sendMessage(text: string) {
-    if (!text.trim() || streaming || !agentId) return;
-    setInput("");
+  async function sendMessage(text: string, files: ChatAttachment[] = []) {
+    if ((!text.trim() && files.length === 0) || streaming || !agentId) return;
     setStreaming(true);
 
-    const userMsg: Message = { role: "user", content: text };
+    const userMsg: Message = { role: "user", content: text, attachments: files.length ? files : undefined };
     setMessages(prev => [...prev, userMsg]);
 
     const assistantMsg: Message = {
@@ -288,7 +286,7 @@ export default function SbuClawChat() {
       const res = await fetch("/api/messages/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history }),
+        body: JSON.stringify({ agentId: String(agentId), role: "user", content: text, conversationHistory: history , ...(files.length ? { attachments: files } : {})}),
       });
 
       if (!res.body) throw new Error("No stream");
@@ -409,7 +407,7 @@ export default function SbuClawChat() {
       });
     } finally {
       setStreaming(false);
-      inputRef.current?.focus();
+      // input focus handled by ChatInputBar
     }
   }
 
@@ -543,35 +541,15 @@ export default function SbuClawChat() {
       </ScrollArea>
 
       {/* Input */}
-      <div className="shrink-0 border-t border-white/10 px-4 py-3 bg-[#130e00]/80">
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-            placeholder={
-              ready
-                ? "Tanya soal SBU, kualifikasi, dokumen, SKK, biaya, OSS-RBA, atau regulasi Permen PU 6/2025…"
-                : "Menghubungkan ke SBUCLAW-ORCHESTRATOR…"
-            }
-            disabled={!ready || streaming}
-            className="flex-1 bg-white/5 border-white/20 text-white placeholder:text-white/30 focus-visible:ring-amber-500/40 text-sm h-10"
-            data-testid="input-message"
-          />
-          <Button
-            onClick={() => sendMessage(input)}
-            disabled={!ready || streaming || !input.trim()}
-            className="bg-amber-700 hover:bg-amber-600 text-white h-10 px-4 shrink-0"
-            data-testid="button-send"
-          >
-            {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </Button>
-        </div>
-        <div className="text-center mt-2 text-xs text-white/20">
-          SBUCLAW-ORCHESTRATOR v1 · 10 Agen Spesialis · Permen PU 6/2025 · ABD-7
-        </div>
-      </div>
+      <ChatInputBar
+        onSend={sendMessage}
+        disabled={!ready || streaming}
+        streaming={streaming}
+        placeholder={ready ? "Ketik pesan…" : "Memuat…"}
+        footerText=""
+        showClear={messages.length > 0}
+        onClear={() => setMessages([])}
+      />
 
     </div>
   );
