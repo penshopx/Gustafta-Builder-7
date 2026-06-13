@@ -3373,18 +3373,36 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           }
           // ─────────────────────────────────────────────────────────────────────
 
-          // ── Fetch orchestrator custom KB to share with all sub-agents ────────
+          // ── Fetch orchestrator KB + RAG chunks → shared context for all sub-agents ─
           let orchestratorKbContext = "";
           try {
-            const orchKbs = await storage.getKnowledgeBases(String(agent.id));
+            const orchAgentId = String(agent.id);
             const SEEDED_PREFIXES = ["Regulasi & Standar", "SOP & Prosedur", "Guardrails & Compliance"];
-            const customOrchKbs = orchKbs.filter(kb =>
-              !SEEDED_PREFIXES.some(p => kb.name.startsWith(p))
-            );
-            if (customOrchKbs.length > 0) {
-              orchestratorKbContext = customOrchKbs
-                .map(kb => `[KB Bersama — ${kb.name}]: ${kb.content}`)
-                .join("\n\n");
+
+            // Priority 1: RAG chunks (covers PDF/file uploads where content is empty)
+            // Chunk metadata stores source name in metadata.sourceName (set by rag-service.ts)
+            const orchChunks = await storage.getChunksByAgent(orchAgentId);
+            const orchChunksCustom = orchChunks.filter((c: any) => {
+              const name = (c.metadata?.sourceName || "");
+              return !SEEDED_PREFIXES.some(p => name.startsWith(p));
+            });
+            if (orchChunksCustom.length > 0) {
+              const topK = Math.min(8, agent.ragTopK ?? 5);
+              orchestratorKbContext = await searchKnowledgeBase(userContent, orchChunksCustom, topK);
+            }
+
+            // Priority 2: text-type KB entries (fallback when no chunks exist)
+            if (!orchestratorKbContext) {
+              const orchKbs = await storage.getKnowledgeBases(orchAgentId);
+              const customTextKbs = orchKbs.filter(kb =>
+                !SEEDED_PREFIXES.some(p => kb.name.startsWith(p)) &&
+                kb.type === "text" && kb.content?.trim()
+              );
+              if (customTextKbs.length > 0) {
+                orchestratorKbContext = customTextKbs
+                  .map(kb => `[KB Bersama — ${kb.name}]: ${kb.content}`)
+                  .join("\n\n");
+              }
             }
           } catch (e) {
             console.warn("[ORCHESTRATOR_KB] Failed to fetch:", e);
