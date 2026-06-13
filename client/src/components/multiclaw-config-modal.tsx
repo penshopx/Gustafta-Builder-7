@@ -121,15 +121,17 @@ export default function MultiClawConfigModal({ agentSlug, agentName }: MultiClaw
     if (!agent || !kbName.trim() || !kbUrl.trim()) return;
     setAddingKB(true);
     try {
-      const r = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: kbName, type: "url", content: kbUrl, knowledgeLayer: "operational" }) });
+      const isYT = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)/.test(kbUrl);
+      const urlType = isYT ? "youtube" : "url";
+      const r = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: kbName, type: urlType, content: kbUrl, knowledgeLayer: "operational" }) });
       if (r.status === 401) throw new Error("Harap login terlebih dahulu");
       if (!r.ok) throw new Error("Gagal menyimpan URL");
       const subCount = Array.isArray(agent.agenticSubAgents) ? agent.agenticSubAgents.length : 0;
       if (subCount > 0) {
-        const n = await propagateKBToSubAgents({ name: kbName, type: "url", content: kbUrl });
-        toast({ title: `URL KB tersimpan ✓ · disebarkan ke ${n}/${subCount} sub-agent` });
+        const n = await propagateKBToSubAgents({ name: kbName, type: urlType, content: kbUrl });
+        toast({ title: `${isYT ? "YouTube" : "URL"} KB tersimpan ✓ · disebarkan ke ${n}/${subCount} sub-agent` });
       } else {
-        toast({ title: "URL KB berhasil ditambahkan ✓" });
+        toast({ title: isYT ? "YouTube KB ditambahkan — mengekstrak transcript... ✓" : "URL KB berhasil ditambahkan ✓" });
       }
       setKbName(""); setKbUrl(""); setAddMode(null); loadKB(agent.id);
     } catch (e: any) { toast({ title: `Gagal: ${e.message}`, variant: "destructive" }); }

@@ -21,6 +21,7 @@ import {
   insertMiniAppResultSchema,
   insertAffiliateSchema,
   miniAppTypeSchema,
+  knowledgeBases,
   type Agent,
   type MiniApp,
   type MiniAppType,
@@ -1887,14 +1888,18 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
           const kbType = parsed.data.type as string;
           const rawContent = parsed.data.content || "";
 
+          const isYouTubeUrl = (u: string) =>
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)/.test(u);
+
           if (!textContent) {
-            if (kbType === "youtube") {
+            if (kbType === "youtube" || (kbType === "url" && isYouTubeUrl(rawContent))) {
               console.log(`[KB] Extracting YouTube transcript: ${rawContent}`);
               const extracted = await extractYouTubeContent(rawContent);
               textContent = extracted.content;
               await storage.updateKnowledgeBase(kb.id, {
                 extractedText: textContent,
                 name: parsed.data.name || extracted.title,
+                type: "youtube",
               });
             } else if (kbType === "cloud_drive") {
               console.log(`[KB] Extracting Cloud Drive content: ${rawContent}`);
@@ -2060,12 +2065,10 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
   // Reprocess knowledge base for RAG (manual trigger)
   app.post("/api/knowledge-base/:id/reprocess", isAuthenticated, async (req, res) => {
     try {
-      const kbs = await storage.getKnowledgeBases("0");
-      const allKbs = await storage.getKnowledgeBases(req.body.agentId || "0");
-      let kb: any = null;
-      for (const k of allKbs) {
-        if (k.id === req.params.id) { kb = k; break; }
-      }
+      // Look up KB directly by ID — do not rely on req.body.agentId (frontend may omit it)
+      const kbId = parseInt(req.params.id);
+      const [kbRow] = await db.select().from(knowledgeBases).where(eq(knowledgeBases.id, kbId));
+      const kb: any = kbRow ? { ...kbRow, id: String(kbRow.id), agentId: String(kbRow.agentId) } : null;
       if (!kb) {
         return res.status(404).json({ error: "Knowledge base not found" });
       }
@@ -2075,7 +2078,18 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
 
       try {
         await storage.deleteChunksByKnowledgeBase(kb.id);
-        const textContent = kb.extractedText || kb.content || "";
+        const isYouTubeUrl = (u: string) =>
+          /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)/.test(u);
+        let textContent = kb.extractedText || "";
+        // Re-extract YouTube transcript if needed (handles old entries saved as type="url")
+        if (!textContent && (kb.type === "youtube" || (kb.type === "url" && isYouTubeUrl(kb.content || "")))) {
+          console.log(`[RAG] Reprocess: re-extracting YouTube transcript for "${kb.name}"`);
+          const extracted = await extractYouTubeContent(kb.content || "");
+          textContent = extracted.content;
+          await storage.updateKnowledgeBase(kb.id, { extractedText: textContent, type: "youtube" });
+        } else if (!textContent) {
+          textContent = kb.content || "";
+        }
         const agentForRag = await storage.getAgent(kb.agentId);
         const chunks = await processKnowledgeBaseForRAG(
           parseInt(kb.id), parseInt(kb.agentId), textContent, kb.name,
