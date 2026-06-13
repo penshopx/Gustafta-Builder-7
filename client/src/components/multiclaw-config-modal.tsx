@@ -82,14 +82,38 @@ export default function MultiClawConfigModal({ agentSlug, agentName }: MultiClaw
     if (agent) loadKB(agent.id);
   }, [agent]);
 
+  async function propagateKBToSubAgents(payload: { name: string; type: string; content: string; fileUrl?: string }) {
+    const subAgents = Array.isArray(agent?.agenticSubAgents) ? agent!.agenticSubAgents : [];
+    const subIds = subAgents.map((s: any) => Number(s.agentId)).filter((id: number) => !isNaN(id) && id > 0);
+    if (subIds.length === 0) return 0;
+    const results = await Promise.allSettled(
+      subIds.map((id: number) =>
+        fetch("/api/knowledge-base", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId: id, name: payload.name, type: payload.type, content: payload.content, fileUrl: payload.fileUrl, knowledgeLayer: "operational" }),
+        })
+      )
+    );
+    return results.filter(r => r.status === "fulfilled" && (r.value as Response).ok).length;
+  }
+
   async function addKBText() {
     if (!agent || !kbName.trim() || !kbContent.trim()) return;
     setAddingKB(true);
     try {
       const r = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: kbName, type: "text", content: kbContent, knowledgeLayer: "operational" }) });
-      if (r.ok) { toast({ title: "KB berhasil ditambahkan" }); setKbName(""); setKbContent(""); setAddMode(null); loadKB(agent.id); }
-      else throw new Error();
-    } catch { toast({ title: "Gagal menambah KB", variant: "destructive" }); }
+      if (r.status === 401) throw new Error("Harap login terlebih dahulu");
+      if (!r.ok) throw new Error("Gagal menyimpan");
+      const subCount = Array.isArray(agent.agenticSubAgents) ? agent.agenticSubAgents.length : 0;
+      if (subCount > 0) {
+        const n = await propagateKBToSubAgents({ name: kbName, type: "text", content: kbContent });
+        toast({ title: `KB tersimpan ✓ · disebarkan ke ${n}/${subCount} sub-agent` });
+      } else {
+        toast({ title: "KB berhasil ditambahkan ✓" });
+      }
+      setKbName(""); setKbContent(""); setAddMode(null); loadKB(agent.id);
+    } catch (e: any) { toast({ title: `Gagal: ${e.message}`, variant: "destructive" }); }
     finally { setAddingKB(false); }
   }
 
@@ -98,9 +122,17 @@ export default function MultiClawConfigModal({ agentSlug, agentName }: MultiClaw
     setAddingKB(true);
     try {
       const r = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: kbName, type: "url", content: kbUrl, knowledgeLayer: "operational" }) });
-      if (r.ok) { toast({ title: "URL KB berhasil ditambahkan" }); setKbName(""); setKbUrl(""); setAddMode(null); loadKB(agent.id); }
-      else throw new Error();
-    } catch { toast({ title: "Gagal menambah URL KB", variant: "destructive" }); }
+      if (r.status === 401) throw new Error("Harap login terlebih dahulu");
+      if (!r.ok) throw new Error("Gagal menyimpan URL");
+      const subCount = Array.isArray(agent.agenticSubAgents) ? agent.agenticSubAgents.length : 0;
+      if (subCount > 0) {
+        const n = await propagateKBToSubAgents({ name: kbName, type: "url", content: kbUrl });
+        toast({ title: `URL KB tersimpan ✓ · disebarkan ke ${n}/${subCount} sub-agent` });
+      } else {
+        toast({ title: "URL KB berhasil ditambahkan ✓" });
+      }
+      setKbName(""); setKbUrl(""); setAddMode(null); loadKB(agent.id);
+    } catch (e: any) { toast({ title: `Gagal: ${e.message}`, variant: "destructive" }); }
     finally { setAddingKB(false); }
   }
 
@@ -110,12 +142,21 @@ export default function MultiClawConfigModal({ agentSlug, agentName }: MultiClaw
     try {
       const fd = new FormData(); fd.append("file", file);
       const r1 = await fetch("/api/knowledge-base/upload", { method: "POST", body: fd });
-      if (!r1.ok) throw new Error();
+      if (r1.status === 401) throw new Error("Harap login terlebih dahulu");
+      if (!r1.ok) throw new Error("Upload gagal");
       const { fileUrl, fileName } = await r1.json();
-      const r2 = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name: fileName || file.name, type: "file", content: "", fileUrl, knowledgeLayer: "operational" }) });
-      if (r2.ok) { toast({ title: "File KB berhasil diupload" }); loadKB(agent.id); }
-      else throw new Error();
-    } catch { toast({ title: "Gagal upload file", variant: "destructive" }); }
+      const name = fileName || file.name;
+      const r2 = await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ agentId: agent.id, name, type: "file", content: "", fileUrl, knowledgeLayer: "operational" }) });
+      if (!r2.ok) throw new Error("Gagal menyimpan metadata file");
+      const subCount = Array.isArray(agent.agenticSubAgents) ? agent.agenticSubAgents.length : 0;
+      if (subCount > 0) {
+        const n = await propagateKBToSubAgents({ name, type: "file", content: "", fileUrl });
+        toast({ title: `File diupload ✓ · disebarkan ke ${n}/${subCount} sub-agent` });
+      } else {
+        toast({ title: `File "${file.name}" berhasil diupload ✓` });
+      }
+      loadKB(agent.id);
+    } catch (e: any) { toast({ title: `Gagal upload: ${e.message}`, variant: "destructive" }); }
     finally { setUploadingFile(false); }
   }
 
