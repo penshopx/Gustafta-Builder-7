@@ -37,6 +37,7 @@ import AccountPage from "@/pages/account";
 import MiniAppPublic from "@/pages/mini-app-public";
 import LegalLanding from "@/pages/legal-landing";
 import TrilogiLanding from "@/pages/trilogi-landing";
+import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
 import StorePage from "@/pages/store";
@@ -384,6 +385,7 @@ function Router() {
       <Route path="/mini-app/:slug" component={MiniAppPublic} />
       <Route path="/legal" component={LegalLanding} />
       <Route path="/trilogi" component={TrilogiLanding} />
+      <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
           <PremiumPageGuard
             feature="advanced_ai_tools" requiredPlan="profesional"
