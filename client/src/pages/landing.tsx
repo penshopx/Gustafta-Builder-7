@@ -879,7 +879,7 @@ export default function Landing() {
                   </div>
                   <p className="text-xs font-bold mb-1">Bangun chatbot untuk klien</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Chatbot custom, knowledge base, multi-channel (WA, Telegram, Web). Cocok untuk memulai jasa chatbot pertama Anda.
+                    Chatbot custom, knowledge base 7 tipe, multi-channel (WA, Telegram, Web). Cocok untuk jasa chatbot umum — FAQ, CS, panduan produk.
                   </p>
                 </div>
                 <div className="bg-white dark:bg-emerald-950/30 rounded-xl p-5 border-2 border-emerald-400 dark:border-emerald-600 relative">
@@ -888,11 +888,11 @@ export default function Landing() {
                   </div>
                   <div className="flex items-center gap-2 mb-2 mt-1">
                     <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wide">Profesional</span>
-                    <span className="text-sm font-black text-foreground">Rp 299.000<span className="text-xs font-normal text-muted-foreground">/3 bln</span></span>
+                    <span className="text-sm font-black text-foreground">Rp 499.000<span className="text-xs font-normal text-muted-foreground">/bln</span></span>
                   </div>
                   <p className="text-xs font-bold mb-1">+ Akses 45 MultiClaw AI Tools</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    TenderaClaw, SBUClaw, KonstraClaw, SafiraClaw — suite lengkap untuk klien konstruksi & bisnis. Nilai jual lebih tinggi.
+                    TenderaClaw, SBUClaw, KonstraClaw, SafiraClaw + Custom Domain. Suite lengkap untuk klien konstruksi & bisnis. Nilai jual lebih tinggi.
                   </p>
                 </div>
               </div>
