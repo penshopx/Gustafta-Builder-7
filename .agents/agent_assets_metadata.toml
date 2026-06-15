@@ -58,16 +58,16 @@ title = "🎬 Gustafta Promo — Video Gabungan (30 detik)"
 id = "_-Vpd_nJwOhPuBivD-GK3"
 uri = "file://attached_assets/generated_videos/gustafta-promo-problem.mp4"
 type = "video"
-title = "Video 1 — Sebelum Gustafta (Masalah)"
+title = "Video 1 — Masalah (flat design desk, malam, no people)"
 
 [[outputs]]
 id = "OMFjOVmczWl6jSRsStB3T"
 uri = "file://attached_assets/generated_videos/gustafta-promo-monolog-to-dialog.mp4"
 type = "video"
-title = "Video 2 — Dari Monolog ke Dialog (Transformasi)"
+title = "Video 2 — Monolog → Dialog (animated infographic)"
 
 [[outputs]]
 id = "znDxQ7U75LMTJgcQy-EPh"
 uri = "file://attached_assets/generated_videos/gustafta-promo-solution.mp4"
 type = "video"
-title = "Video 3 — Sesudah Gustafta (Solusi)"
+title = "Video 3 — Solusi (AI brain + orbiting agents)"
