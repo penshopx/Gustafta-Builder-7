@@ -47,3 +47,9 @@ id = "BtQsCy2brkqaLG3hPLIn6"
 uri = "file://attached_assets/generated_videos/gustafta-logo-cta.mp4"
 type = "video"
 title = "Clip 4 — Logo/CTA: Brand Reveal (6 dtk)"
+
+[[outputs]]
+id = "yE8sBaI4jnuRFvI8277j3"
+uri = "file://attached_assets/generated_videos/gustafta-promo-combined.mp4"
+type = "video"
+title = "🎬 Gustafta Promo — Video Gabungan (30 detik)"
