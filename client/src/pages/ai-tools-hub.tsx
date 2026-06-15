@@ -1080,7 +1080,7 @@ const KOMPETENSI_TOOLS = [
     iconColor: "text-orange-400",
     badgeColor: "bg-orange-500/15 text-orange-400 border-orange-500/30",
     label: "Kalkulator Manfaat SKK BUJK — Poin, SBU, Kapasitas Tender",
-    desc: "Input komposisi tenaga SKK → kalkulator real-time: total poin SKK, estimasi kualifikasi SBU (K2/M1/M2/B1/B2), nilai proyek maksimal, jumlah klasifikasi tercakup, status K3 compliance, estimasi biaya gaji. Tanpa AI.",
+    desc: "Input komposisi tenaga SKK → kalkulator real-time: total poin SKK, estimasi kualifikasi SBU (K2/M1/M/B1/B2), nilai proyek maksimal, jumlah klasifikasi tercakup, status K3 compliance, estimasi biaya gaji. Tanpa AI.",
     tag: "Kompetensi",
     model: "Lokal (tanpa AI)",
   },

@@ -294,7 +294,7 @@ export default function Landing() {
                   <span className="text-xs font-mono text-muted-foreground bg-muted px-2.5 py-1 rounded-full">☕ Pukul 01.30 · Meja Kerja, Bandung</span>
                 </div>
                 <p className="text-base md:text-lg leading-relaxed text-foreground mb-3">
-                  <strong>Mas Dian</strong> butuh satu jawaban: berapa SKK yang wajib dimiliki untuk kualifikasi M2 bidang Sipil?
+                  <strong>Mas Dian</strong> butuh satu jawaban: berapa SKK yang wajib dimiliki untuk kualifikasi M bidang Sipil?
                   Ia sudah buka <strong>6 PDF berbeda</strong> — tiga Permen PUPR, dua SE LPJK, dan satu dokumen dari asosiasi.
                 </p>
                 <p className="text-base leading-relaxed text-foreground mb-3">
@@ -747,6 +747,147 @@ export default function Landing() {
                   Mulai untuk {p.label} <ChevronRight className="w-4 h-4" />
                 </button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PELUANG: Segmen Pasar ── */}
+      <section className="py-20 px-4 bg-gradient-to-b from-background to-muted/20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Bukan Hanya untuk Perusahaan</p>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight">
+              Gustafta Adalah Peluang —<br className="hidden md:block" />
+              <span className="text-primary">untuk Semua yang Mau Bergerak</span>
+            </h2>
+            <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+              AI bukan cuma alat perusahaan besar. Di tangan yang tepat,
+              Gustafta bisa jadi sumber penghasilan baru, mesin efisiensi tim,
+              atau bahkan titik awal karier mandiri Anda.
+            </p>
+          </div>
+
+          {/* Segment 1: Karyawan → Penghasilan Tambahan */}
+          <div className="rounded-2xl border-2 border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-900/10 p-7 md:p-10 mb-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl -translate-y-16 translate-x-16" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Untuk Karyawan Aktif</p>
+                  <h3 className="text-lg md:text-xl font-bold">Punya Gaji Tetap? Tambah Penghasilan dengan AI.</h3>
+                </div>
+              </div>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
+                Karyawan konstruksi, konsultan, atau profesional apapun — Anda sudah punya keahlian domain.
+                Gustafta mengubah keahlian itu jadi produk digital yang bisa dijual.
+                Bangun chatbot AI spesialis di bidang Anda, tawarkan ke klien, dan terima bayaran — tanpa perlu keluar dari pekerjaan utama.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {[
+                  { icon: "💼", title: "Jadi Reseller Gustafta", desc: "Jual akses Gustafta ke BUJK, LSP, atau institusi di sekitar Anda. Komisi langsung tanpa kelola server." },
+                  { icon: "🤖", title: "Bangun Chatbot untuk Klien", desc: "Buat chatbot K3, tender, atau SBU untuk perusahaan konstruksi. Tarif Rp 2–10 juta per proyek chatbot." },
+                  { icon: "📦", title: "Jual Template & Prompt", desc: "Kemas pengetahuan Anda jadi template AI. Upload ke Gustafta Store, passive income dari download." },
+                ].map((item) => (
+                  <div key={item.title} className="bg-white dark:bg-amber-950/30 rounded-xl p-4 border border-amber-200 dark:border-amber-800/40">
+                    <div className="text-2xl mb-2">{item.icon}</div>
+                    <p className="text-sm font-bold mb-1">{item.title}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Segment 2: Perusahaan → Efisiensi & Produktivitas */}
+          <div className="rounded-2xl border-2 border-blue-200 dark:border-blue-900/50 bg-blue-50/60 dark:bg-blue-900/10 p-7 md:p-10 mb-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl -translate-y-16 translate-x-16" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Untuk Tim & Perusahaan</p>
+                  <h3 className="text-lg md:text-xl font-bold">1 Langganan. Seluruh Tim Lebih Produktif.</h3>
+                </div>
+              </div>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
+                Staf estimasi, drafter, admin tender, HRD, manajer proyek — semua punya AI-nya sendiri.
+                Tugas yang dulu makan 3 jam bisa selesai 20 menit. Dokumen yang dulu harus tunggu 2 hari bisa
+                di-generate dalam hitungan menit. Efisiensi bukan lagi keuntungan, tapi keharusan.
+              </p>
+              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+                {[
+                  { stat: "60–80%", label: "Pengurangan waktu analisis dokumen tender" },
+                  { stat: "3×", label: "Kecepatan draft laporan teknis & K3" },
+                  { stat: "24/7", label: "CS otomatis tanpa karyawan tambahan" },
+                  { stat: "0", label: "Biaya training ulang — AI selalu update" },
+                ].map((s) => (
+                  <div key={s.label} className="bg-white dark:bg-blue-950/30 rounded-xl p-4 border border-blue-200 dark:border-blue-800/40 text-center">
+                    <p className="text-2xl font-black text-blue-600 dark:text-blue-400 mb-1">{s.stat}</p>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground italic">
+                * Estimasi berdasarkan rata-rata pengguna aktif Gustafta di sektor konstruksi dan konsultansi Indonesia.
+              </p>
+            </div>
+          </div>
+
+          {/* Segment 3: Pencari Kerja / PHK → Usaha Mandiri */}
+          <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/60 dark:bg-emerald-900/10 p-7 md:p-10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl -translate-y-16 translate-x-16" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <Rocket className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Untuk Pencari Kerja & Yang Kena PHK</p>
+                  <h3 className="text-lg md:text-xl font-bold">Tidak Ada Lowongan? Buka Usaha Sendiri dengan AI.</h3>
+                </div>
+              </div>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
+                Kehilangan pekerjaan bukan akhir — bisa jadi titik balik.
+                Di era AI, seseorang dengan pengetahuan domain + alat yang tepat bisa bersaing dengan perusahaan besar.
+                Gustafta memberi Anda alat itu. Mulai sebagai konsultan AI freelance,
+                bangun chatbot spesialis, atau buka jasa "digitalisasi pengetahuan" untuk UMKM dan instansi di kota Anda.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-4 mb-6">
+                {[
+                  { icon: "🎯", title: "Konsultan AI Freelance", desc: "Bantu BUJK, kontraktor kecil, atau klinik membangun chatbot AI mereka. Modal: laptop + akun Gustafta." },
+                  { icon: "🏪", title: "Buka Jasa Chatbot Spesialis", desc: "Fokus satu niche: K3, tender, properti, atau pendidikan. Klien datang karena Anda spesialis, bukan generalis." },
+                  { icon: "📚", title: "Jual Pengetahuan Anda", desc: "Punya pengalaman 10 tahun di lapangan? Kemas jadi AI knowledge base. Orang bayar untuk akses ke keahlian Anda." },
+                ].map((item) => (
+                  <div key={item.title} className="bg-white dark:bg-emerald-950/30 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800/40">
+                    <div className="text-2xl mb-2">{item.icon}</div>
+                    <p className="text-sm font-bold mb-1">{item.title}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-emerald-950/40 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800/40">
+                <div className="flex-1">
+                  <p className="font-bold text-sm mb-1">Mulai tanpa modal besar.</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Paket Starter Rp 99.000/bulan. Tidak ada biaya setup, tidak ada biaya server.
+                    Dalam 30 menit, Anda sudah punya chatbot AI pertama yang siap ditawarkan ke klien.
+                  </p>
+                </div>
+                <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
+                  <button
+                    className="flex-shrink-0 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-colors whitespace-nowrap"
+                    data-testid="button-peluang-mulai-cta"
+                  >
+                    Mulai Sekarang →
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
