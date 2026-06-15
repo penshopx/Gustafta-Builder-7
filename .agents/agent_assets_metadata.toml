@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "o56wVie7ExZegkonwZIv5"
@@ -24,3 +23,27 @@ id = "BOJn6v6h35Os54_CB5ALy"
 uri = "file://attached_assets/generated_images/modern_futuristic_illustration_of_e5a3.png"
 type = "image"
 title = "generated_image"
+
+[[outputs]]
+id = "jJ7MXrCMvntrSqUlRzf9w"
+uri = "file://attached_assets/generated_videos/gustafta-hero-ai-network.mp4"
+type = "video"
+title = "Clip 1 — Hero: Jaringan AI Neural (8 dtk)"
+
+[[outputs]]
+id = "ceWdmiUsWcIZp0Z723TGb"
+uri = "file://attached_assets/generated_videos/gustafta-multiclaw-agents.mp4"
+type = "video"
+title = "Clip 2 — MultiClaw: Agen Paralel (8 dtk)"
+
+[[outputs]]
+id = "POrRDXEiBs6LH2n-IVi8X"
+uri = "file://attached_assets/generated_videos/gustafta-business-results.mp4"
+type = "video"
+title = "Clip 3 — Bisnis: Dashboard AI (8 dtk)"
+
+[[outputs]]
+id = "BtQsCy2brkqaLG3hPLIn6"
+uri = "file://attached_assets/generated_videos/gustafta-logo-cta.mp4"
+type = "video"
+title = "Clip 4 — Logo/CTA: Brand Reveal (6 dtk)"
