@@ -17,7 +17,8 @@ import {
   TrendingUp, Users, CreditCard, Smartphone, ChevronRight,
   FileText, ClipboardCheck, BarChart3, HardHat, Layers,
   MessageSquare, Lock, HeartHandshake, Award, RefreshCw,
-  Clapperboard, PenLine, Video, Megaphone,
+  Clapperboard, PenLine, Video, Megaphone, Network, GitBranch,
+  ScanSearch, Cpu, Repeat2, LayoutGrid, Activity,
 } from "lucide-react";
 
 export default function Landing() {
@@ -316,6 +317,200 @@ export default function Landing() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── STORY: Agentic AI vs Chatbot Biasa ── */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Cara Gustafta Bekerja</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              Bukan Sekadar Chatbot.{" "}
+              <span className="text-primary">Ini Agentic AI.</span>
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-xl mx-auto leading-relaxed">
+              Chatbot biasa menunggu pertanyaan lalu menjawab. Agentic AI Gustafta
+              <strong className="text-foreground"> merencanakan, mengeksekusi, memverifikasi, dan berulang</strong> —
+              seperti tim ahli yang bekerja untuk Anda, bukan sekadar asisten yang menunggu perintah.
+            </p>
+          </div>
+
+          {/* Comparison: Biasa vs Agentic */}
+          <div className="grid md:grid-cols-2 gap-5 mb-16">
+            <div className="rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <X className="w-4 h-4 text-red-500" />
+                </div>
+                <p className="font-bold text-sm text-red-600 dark:text-red-400">Chatbot Biasa</p>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  "Menunggu pertanyaan, menjawab, selesai",
+                  "Tidak tahu konteks bisnis Anda",
+                  "Satu pertanyaan = satu jawaban generik",
+                  "Tidak bisa bertindak atau menghubungkan informasi",
+                  "Jika tidak tahu, berhenti atau hallucinate",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <X className="w-3.5 h-3.5 text-red-400 flex-shrink-0 mt-0.5" /> {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-8 translate-x-8" />
+              <div className="flex items-center gap-2 mb-4 relative">
+                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <p className="font-bold text-sm text-primary">Agentic AI Gustafta</p>
+              </div>
+              <ul className="space-y-2.5 relative">
+                {[
+                  "Mendeteksi kebutuhan eksplisit DAN implisit Anda",
+                  "Konteks dari Knowledge Base, Project Brain & Memori",
+                  "Rencana multi-langkah, eksekusi bertahap, koreksi mandiri",
+                  "Routing otomatis ke specialist paling relevan",
+                  "Fallback terstruktur + transparansi asumsi",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-2 text-xs text-foreground">
+                    <Check className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" /> {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* OpenClaw Flow */}
+          <div className="mb-16">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold mb-3">
+                <Cpu className="w-3.5 h-3.5" /> OpenClaw — Mesin Penalaran Agentic
+              </div>
+              <h3 className="text-lg font-bold">6-Langkah yang Terjadi di Balik Setiap Jawaban</h3>
+              <p className="text-muted-foreground text-xs mt-1 max-w-lg mx-auto">
+                Setiap pesan yang masuk ke Gustafta melewati pipeline OpenClaw — penalaran berlapis yang membuat jawaban selalu relevan, terstruktur, dan actionable.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+              {[
+                { n: "01", icon: MessageSquare, label: "INPUT", desc: "Tangkap pesan + konteks percakapan", color: "text-blue-500", bg: "bg-blue-500/10" },
+                { n: "02", icon: ScanSearch, label: "CONTEXT GRAB", desc: "Ambil KB, Project Brain, Memori user", color: "text-violet-500", bg: "bg-violet-500/10" },
+                { n: "03", icon: Brain, label: "MULTI-LAYER REASON", desc: "Analisis teknis, bisnis, dan UX sekaligus", color: "text-amber-500", bg: "bg-amber-500/10" },
+                { n: "04", icon: Zap, label: "TOOL INVOKE", desc: "Aktifkan fitur/specialist yang tepat", color: "text-orange-500", bg: "bg-orange-500/10" },
+                { n: "05", icon: Layers, label: "SYNTHESIZE", desc: "Integrasikan semua jadi jawaban kohesif", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                { n: "06", icon: Repeat2, label: "LOOP", desc: "Tawarkan iterasi & langkah lanjutan", color: "text-primary", bg: "bg-primary/10" },
+              ].map((s, i) => {
+                const SIcon = s.icon;
+                return (
+                  <div key={s.n} className="relative flex flex-col items-center">
+                    {i < 5 && (
+                      <div className="hidden md:block absolute top-5 left-[calc(50%+20px)] right-[-50%] h-px bg-gradient-to-r from-border to-transparent z-0" />
+                    )}
+                    <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center mb-2 relative z-10 border border-border/30`}>
+                      <SIcon className={`w-4 h-4 ${s.color}`} />
+                    </div>
+                    <p className={`text-[10px] font-bold ${s.color} mb-0.5 text-center`}>{s.label}</p>
+                    <p className="text-[9px] text-muted-foreground text-center leading-tight">{s.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* MultiClaw Section */}
+          <div className="rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-gradient-to-br from-amber-50/80 to-orange-50/40 dark:from-amber-900/20 dark:to-orange-900/10 p-6 md:p-8">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <Network className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-extrabold text-lg text-amber-700 dark:text-amber-400">MultiClaw Suite</p>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400">45+ TOOLS</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Bayangkan kamu dapat dokumen tender 200 halaman jam 9 malam, deadline besok pagi.
+                  Kamu ketik ke <strong className="text-foreground">TenderaClaw</strong> — dalam hitungan detik,{" "}
+                  <strong className="text-foreground">10 agen AI bekerja paralel</strong>: satu cek syarat SBU/SKK,
+                  satu hitung win probability, satu draft surat penawaran, satu flag risiko tersembunyi.
+                  Dalam 3 menit kamu punya briefing lengkap yang biasanya butuh 2 hari kerja tim 3 orang.
+                </p>
+              </div>
+            </div>
+
+            {/* Parallel Agent Diagram */}
+            <div className="bg-background/60 rounded-xl border border-border/40 p-4 mb-5">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 text-center">Cara Kerja MultiClaw — Paralel Setiap Saat</p>
+              <div className="flex flex-col items-center gap-2">
+                <div className="bg-primary/10 border border-primary/30 rounded-lg px-4 py-2 text-xs font-bold text-primary text-center">
+                  📝 Pertanyaan Anda
+                </div>
+                <div className="w-px h-4 bg-primary/30" />
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-2 text-xs font-bold text-amber-700 dark:text-amber-400 text-center">
+                  🧠 Orchestrator — analisis & dispatch paralel
+                </div>
+                <div className="relative w-full flex justify-center">
+                  <div className="absolute top-0 left-1/2 w-px h-4 bg-amber-500/30" />
+                </div>
+                <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                  {[
+                    { label: "Agen 1", sub: "Syarat SBU/SKK", color: "blue" },
+                    { label: "Agen 2", sub: "Win Probability", color: "emerald" },
+                    { label: "Agen 3", sub: "Draft Dokumen", color: "violet" },
+                    { label: "Agen 4–10", sub: "Spesialis lainnya", color: "orange" },
+                  ].map((a) => (
+                    <div key={a.label} className={`rounded-lg border border-border/50 bg-background/80 p-2 text-center`}>
+                      <p className="text-[10px] font-bold text-foreground">{a.label}</p>
+                      <p className="text-[9px] text-muted-foreground">{a.sub}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="w-px h-4 bg-emerald-500/30" />
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-4 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 text-center">
+                  ✅ Satu jawaban komprehensif — sintesis semua specialist
+                </div>
+              </div>
+            </div>
+
+            {/* MultiClaw tools grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+              {[
+                { name: "TenderaClaw", sub: "10 agen · Tender LPSE", href: "/tendera-claw", color: "text-indigo-600" },
+                { name: "SBUClaw", sub: "10 agen · SBU Konstruksi", href: "/sbu-claw", color: "text-amber-600" },
+                { name: "BrainClaw", sub: "6 agen · Intelijen Proyek", href: "/brain-claw", color: "text-cyan-600" },
+                { name: "KonstraClaw", sub: "9 agen · Manajemen Proyek", href: "/konstra-claw", color: "text-slate-600" },
+                { name: "SafiraClaw", sub: "5 agen · K3 Konstruksi", href: "/safira-claw", color: "text-red-600" },
+                { name: "SMAPClaw", sub: "8 agen · ISO 37001 Anti-Suap", href: "/smap-claw", color: "text-teal-600" },
+                { name: "SkemaClaw", sub: "9 agen · Sertifikasi BUJK", href: "/skema-claw", color: "text-blue-600" },
+                { name: "+38 Tools Lagi", sub: "Konstruksi · Energi · HR · Digital", href: "/ai-tools", color: "text-primary font-bold" },
+              ].map((t) => (
+                <a
+                  key={t.name}
+                  href={t.href}
+                  className="rounded-lg border border-border/60 bg-background hover:border-primary/40 hover:shadow-sm transition-all p-3 group"
+                  data-testid={`link-multiclaw-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  <p className={`text-xs font-bold mb-0.5 ${t.color} group-hover:underline`}>{t.name}</p>
+                  <p className="text-[9px] text-muted-foreground leading-tight">{t.sub}</p>
+                </a>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                Semua MultiClaw tools memerlukan paket <span className="font-semibold text-foreground">Profesional</span> ke atas.
+              </p>
+              <Link href="/ai-tools">
+                <button className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline" data-testid="link-multiclaw-all">
+                  Lihat 45+ Tools <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

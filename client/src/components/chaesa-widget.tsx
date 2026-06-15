@@ -117,12 +117,12 @@ export function ChaesaWidget() {
   };
 
   const QUICK_PROMPTS = [
-    "Berapa harga paket & cara mulai pakai Gustafta?",
-    "Fitur MultiClaw 45+ tools itu apa saja?",
-    "Saya kontraktor — tools apa yang paling cocok untuk saya?",
-    "Untuk belajar & persiapan SKK/SBU, Gustafta bisa bantu apa?",
-    "Cara otomatisasi CS & lead generation bisnis saya?",
-    "Cara hubungkan chatbot ke WhatsApp atau website?",
+    { emoji: "🤖", text: "Apa bedanya Agentic AI Gustafta dengan chatbot biasa?" },
+    { emoji: "⚡", text: "Tunjukkan cara kerja MultiClaw — apa itu dan kapan digunakan?" },
+    { emoji: "🧭", text: "Saya mau mulai dari nol — harus dari mana dulu?" },
+    { emoji: "🏗️", text: "Saya kontraktor/konsultan konstruksi — tools paling cocok apa?" },
+    { emoji: "💡", text: "Jelaskan OpenClaw — apa bedanya dengan chatbot lain?" },
+    { emoji: "💳", text: "Harga paket Gustafta & cara berlangganan?" },
   ];
 
   return (
@@ -159,21 +159,29 @@ export function ChaesaWidget() {
 
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
               {messages.length === 0 && (
-                <div className="text-center py-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Bot className="w-6 h-6 text-primary" />
+                <div className="py-3">
+                  <div className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-primary/5 border border-primary/10">
+                    <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-foreground font-semibold text-xs">Halo! Saya Gustafta Helpdesk 👋</p>
+                      <p className="text-muted-foreground text-[10px] leading-snug mt-0.5">
+                        Saya bukan chatbot biasa — saya Agentic AI yang proaktif menggali kebutuhan Anda. Tanyakan apa saja tentang Gustafta!
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-foreground font-medium text-sm mb-1">Gustafta Help Desk</p>
-                  <p className="text-muted-foreground text-xs mb-4">Tanyakan tentang fitur, cara pakai, atau harga platform Gustafta</p>
-                  <div className="space-y-2">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">Mulai dengan pertanyaan ini:</p>
+                  <div className="space-y-1.5">
                     {QUICK_PROMPTS.map((p, i) => (
                       <button
                         key={i}
-                        onClick={() => sendMessage(p)}
-                        className="w-full p-2.5 rounded-lg border border-border hover:border-primary/40 bg-background hover:bg-primary/5 text-left text-xs text-muted-foreground hover:text-foreground transition-all"
+                        onClick={() => sendMessage(p.text)}
+                        className="w-full p-2.5 rounded-lg border border-border hover:border-primary/40 bg-background hover:bg-primary/5 text-left transition-all flex items-start gap-2 group"
                         data-testid={`helpdesk-starter-${i}`}
                       >
-                        {p}
+                        <span className="text-sm flex-shrink-0 mt-0.5">{p.emoji}</span>
+                        <span className="text-[11px] text-muted-foreground group-hover:text-foreground leading-snug">{p.text}</span>
                       </button>
                     ))}
                   </div>
@@ -211,7 +219,7 @@ export function ChaesaWidget() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={helpdeskAgent ? "Tanya tentang Gustafta..." : "Memuat..."}
+                  placeholder={helpdeskAgent ? "Tanya apa saja tentang Gustafta..." : "Memuat..."}
                   className="resize-none text-xs min-h-[36px] max-h-24 py-2"
                   rows={1}
                   disabled={isStreaming || !helpdeskAgent}
