@@ -871,38 +871,49 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
-              <div className="grid sm:grid-cols-2 gap-4 mb-0">
-                <div className="bg-white dark:bg-emerald-950/30 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800/40">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full uppercase tracking-wide">Starter</span>
-                    <span className="text-sm font-black text-foreground">Rp 199.000<span className="text-xs font-normal text-muted-foreground">/bln</span></span>
+              {/* Growth path */}
+              <div className="bg-white dark:bg-emerald-950/30 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800/40 mb-3">
+                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-3 uppercase tracking-wide">Jalur Tumbuh yang Terbukti</p>
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+                  {/* Step 1 */}
+                  <div className="flex-1 bg-slate-50 dark:bg-slate-900/40 rounded-lg p-3.5 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-5 h-5 rounded-full bg-slate-400 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">1</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Mulai</span>
+                      <span className="ml-auto text-sm font-black">Rp 199rb<span className="text-[10px] font-normal text-muted-foreground">/bln</span></span>
+                    </div>
+                    <p className="text-xs font-bold mb-1">Starter — Chatbot + Multi-Agent</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Chatbot custom + Knowledge Base 7 tipe + Orchestrator Multi-Agent (7 Specialist). Cukup kuat untuk klien pertama — FAQ, CS, panduan teknis.
+                    </p>
                   </div>
-                  <p className="text-xs font-bold mb-1">Bangun chatbot untuk klien</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Chatbot custom, knowledge base 7 tipe, multi-channel (WA, Telegram, Web). Cocok untuk jasa chatbot umum — FAQ, CS, panduan produk.
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-emerald-950/30 rounded-xl p-5 border-2 border-emerald-400 dark:border-emerald-600 relative">
-                  <div className="absolute -top-2.5 left-4">
-                    <span className="text-[10px] font-bold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full uppercase tracking-wide">Direkomendasikan</span>
+                  {/* Arrow */}
+                  <div className="hidden sm:flex items-center text-emerald-400 font-bold text-lg">→</div>
+                  <div className="sm:hidden flex justify-center text-emerald-400 font-bold text-lg">↓</div>
+                  {/* Step 2 */}
+                  <div className="flex-1 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3.5 border-2 border-emerald-300 dark:border-emerald-700 relative">
+                    <div className="absolute -top-2.5 left-3">
+                      <span className="text-[9px] font-bold bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase">Setelah dapat klien</span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-2 mt-1">
+                      <span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">2</span>
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Upgrade</span>
+                      <span className="ml-auto text-sm font-black">Rp 499rb<span className="text-[10px] font-normal text-muted-foreground">/bln</span></span>
+                    </div>
+                    <p className="text-xs font-bold mb-1">Profesional — + 45 MultiClaw Tools</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Buka akses TenderaClaw, SBUClaw, SafiraClaw + Custom Domain. 1 proyek klien konstruksi saja sudah menutupi biaya berbulan-bulan.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 mb-2 mt-1">
-                    <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wide">Profesional</span>
-                    <span className="text-sm font-black text-foreground">Rp 499.000<span className="text-xs font-normal text-muted-foreground">/bln</span></span>
-                  </div>
-                  <p className="text-xs font-bold mb-1">+ Akses 45 MultiClaw AI Tools</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    TenderaClaw, SBUClaw, KonstraClaw, SafiraClaw + Custom Domain. Suite lengkap untuk klien konstruksi & bisnis. Nilai jual lebih tinggi.
-                  </p>
                 </div>
               </div>
-              <div className="flex justify-end mt-3">
+              <div className="flex justify-end">
                 <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
                   <button
                     className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-colors"
                     data-testid="button-peluang-mulai-cta"
                   >
-                    Mulai Sekarang →
+                    Mulai dari Starter →
                   </button>
                 </Link>
               </div>
