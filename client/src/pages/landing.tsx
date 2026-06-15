@@ -871,17 +871,35 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
-              <div className="flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-emerald-950/40 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800/40">
-                <div className="flex-1">
-                  <p className="font-bold text-sm mb-1">Mulai tanpa modal besar.</p>
+              <div className="grid sm:grid-cols-2 gap-4 mb-0">
+                <div className="bg-white dark:bg-emerald-950/30 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800/40">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full uppercase tracking-wide">Starter</span>
+                    <span className="text-sm font-black text-foreground">Rp 199.000<span className="text-xs font-normal text-muted-foreground">/bln</span></span>
+                  </div>
+                  <p className="text-xs font-bold mb-1">Bangun chatbot untuk klien</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Paket Starter Rp 199.000/bulan. Tidak ada biaya setup, tidak ada biaya server.
-                    Dalam 30 menit, Anda sudah punya chatbot AI pertama yang siap ditawarkan ke klien.
+                    Chatbot custom, knowledge base, multi-channel (WA, Telegram, Web). Cocok untuk memulai jasa chatbot pertama Anda.
                   </p>
                 </div>
+                <div className="bg-white dark:bg-emerald-950/30 rounded-xl p-5 border-2 border-emerald-400 dark:border-emerald-600 relative">
+                  <div className="absolute -top-2.5 left-4">
+                    <span className="text-[10px] font-bold bg-emerald-500 text-white px-2.5 py-0.5 rounded-full uppercase tracking-wide">Direkomendasikan</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2 mt-1">
+                    <span className="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-wide">Profesional</span>
+                    <span className="text-sm font-black text-foreground">Rp 299.000<span className="text-xs font-normal text-muted-foreground">/3 bln</span></span>
+                  </div>
+                  <p className="text-xs font-bold mb-1">+ Akses 45 MultiClaw AI Tools</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    TenderaClaw, SBUClaw, KonstraClaw, SafiraClaw — suite lengkap untuk klien konstruksi & bisnis. Nilai jual lebih tinggi.
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end mt-3">
                 <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
                   <button
-                    className="flex-shrink-0 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-colors whitespace-nowrap"
+                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-colors"
                     data-testid="button-peluang-mulai-cta"
                   >
                     Mulai Sekarang →
