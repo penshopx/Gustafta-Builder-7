@@ -875,7 +875,7 @@ export default function Landing() {
                 <div className="flex-1">
                   <p className="font-bold text-sm mb-1">Mulai tanpa modal besar.</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Paket Starter Rp 99.000/bulan. Tidak ada biaya setup, tidak ada biaya server.
+                    Paket Starter Rp 199.000/bulan. Tidak ada biaya setup, tidak ada biaya server.
                     Dalam 30 menit, Anda sudah punya chatbot AI pertama yang siap ditawarkan ke klien.
                   </p>
                 </div>
