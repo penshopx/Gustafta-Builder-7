@@ -71,3 +71,27 @@ id = "znDxQ7U75LMTJgcQy-EPh"
 uri = "file://attached_assets/generated_videos/gustafta-promo-solution.mp4"
 type = "video"
 title = "Video 3 — Solusi (AI brain + orbiting agents)"
+
+[[outputs]]
+id = "U1OF9xP-63QOjSeozVx5n"
+uri = "file://attached_assets/generated_videos/gustafta-platform-overview.mp4"
+type = "video"
+title = "1 — Platform Gustafta (Overview)"
+
+[[outputs]]
+id = "knNASafWor4VgRP25Bcyf"
+uri = "file://attached_assets/generated_videos/gustafta-monolog-to-dialog.mp4"
+type = "video"
+title = "2 — Monolog → Dialog"
+
+[[outputs]]
+id = "fpBCQWpkW2QxSwCJGf0Iy"
+uri = "file://attached_assets/generated_videos/gustafta-multiclaw-suite.mp4"
+type = "video"
+title = "3 — MultiClaw Suite"
+
+[[outputs]]
+id = "FfDV2MjVlQeYN7leS1sRb"
+uri = "file://attached_assets/generated_videos/gustafta-business-opportunity.mp4"
+type = "video"
+title = "4 — Peluang Usaha"

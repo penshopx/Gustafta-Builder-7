@@ -997,75 +997,148 @@ export default function Landing() {
           <div className="text-center mb-12">
             <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Lihat Gustafta Beraksi</p>
             <h2 className="text-2xl md:text-3xl font-bold mb-3">
-              Dari Masalah ke Solusi — dalam Hitungan Menit
+              Video Animasi & Promosi
             </h2>
             <p className="text-muted-foreground text-sm max-w-xl mx-auto leading-relaxed">
-              Tiga video nyata: bagaimana profesional Indonesia beralih dari bekerja sendirian menjadi punya tim AI yang selalu siap.
+              Bebas diunduh dan digunakan untuk promosi — Instagram, LinkedIn, WhatsApp broadcast, atau presentasi.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5 mb-8">
-            {[
-              {
-                src: "/videos/gustafta-promo-problem.mp4",
-                title: "Sebelum Gustafta",
-                desc: "Sendirian di tengah tumpukan dokumen. Tengah malam. Deadline besok.",
-                badge: "Masalah",
-                badgeColor: "bg-red-500",
-              },
-              {
-                src: "/videos/gustafta-promo-monolog-to-dialog.mp4",
-                title: "Dari Monolog ke Dialog",
-                desc: "Belajar & bekerja sendirian vs. punya lawan bicara AI yang benar-benar membantu.",
-                badge: "Transformasi",
-                badgeColor: "bg-amber-500",
-              },
-              {
-                src: "/videos/gustafta-promo-solution.mp4",
-                title: "Sesudah Gustafta",
-                desc: "Profesional percaya diri. Tim AI siap kerja. Hasil terukur.",
-                badge: "Solusi",
-                badgeColor: "bg-emerald-500",
-              },
-            ].map((v) => (
-              <div key={v.title} className="rounded-2xl border bg-background overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
-                <div className="relative aspect-video bg-slate-900 overflow-hidden">
-                  <video
-                    src={v.src}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <span className={`absolute top-3 left-3 text-[10px] font-bold text-white px-2.5 py-1 rounded-full ${v.badgeColor}`}>
-                    {v.badge}
-                  </span>
+          {/* Grup 1: Seri Animasi (4 video baru) */}
+          <div className="mb-3">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-5 h-[2px] bg-primary inline-block rounded" />
+              Seri Animasi — Cerita & Konsep
+            </p>
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+              {[
+                {
+                  src: "/videos/gustafta-platform-overview.mp4",
+                  title: "Platform Gustafta",
+                  desc: "Apa itu Gustafta, fitur utama, dan ekosistem AI-nya.",
+                  badge: "Overview",
+                  badgeColor: "bg-violet-500",
+                  dl: "/videos/gustafta-platform-overview.mp4",
+                },
+                {
+                  src: "/videos/gustafta-monolog-to-dialog.mp4",
+                  title: "Monolog → Dialog",
+                  desc: "Bekerja sendirian vs. punya lawan bicara AI yang selalu siap.",
+                  badge: "Transformasi",
+                  badgeColor: "bg-amber-500",
+                  dl: "/videos/gustafta-monolog-to-dialog.mp4",
+                },
+                {
+                  src: "/videos/gustafta-multiclaw-suite.mp4",
+                  title: "MultiClaw Suite",
+                  desc: "45 AI tools spesialis: TenderaClaw, SBUClaw, SafiraClaw & lebih.",
+                  badge: "MultiClaw",
+                  badgeColor: "bg-indigo-500",
+                  dl: "/videos/gustafta-multiclaw-suite.mp4",
+                },
+                {
+                  src: "/videos/gustafta-business-opportunity.mp4",
+                  title: "Peluang Usaha",
+                  desc: "Tiga jalur: penghasilan tambahan, efisiensi tim, dan usaha mandiri.",
+                  badge: "Peluang",
+                  badgeColor: "bg-emerald-500",
+                  dl: "/videos/gustafta-business-opportunity.mp4",
+                },
+              ].map((v) => (
+                <div key={v.title} className="rounded-2xl border bg-background overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
+                  <div className="relative aspect-video bg-slate-900 overflow-hidden">
+                    <video src={v.src} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <span className={`absolute top-2 left-2 text-[9px] font-bold text-white px-2 py-0.5 rounded-full ${v.badgeColor}`}>{v.badge}</span>
+                    <a
+                      href={v.dl}
+                      download
+                      className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-full"
+                      data-testid={`link-dl-anim-${v.badge.toLowerCase()}`}
+                    >↓ Unduh</a>
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-bold text-xs mb-0.5">{v.title}</h3>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-sm mb-1">{v.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{v.desc}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Download CTA for external promo */}
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground mb-3">Video bebas diunduh untuk keperluan promosi</p>
-            <div className="flex flex-wrap justify-center gap-3">
+          {/* Grup 2: Video Promosi Singkat (3 video lama) */}
+          <div className="mb-8">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-5 h-[2px] bg-primary inline-block rounded" />
+              Seri Ilustrasi — Problem · Transformasi · Solusi
+            </p>
+            <div className="grid md:grid-cols-3 gap-4">
               {[
-                { label: "Video: Masalah", href: "/videos/gustafta-promo-problem.mp4" },
-                { label: "Video: Transformasi", href: "/videos/gustafta-promo-monolog-to-dialog.mp4" },
-                { label: "Video: Solusi", href: "/videos/gustafta-promo-solution.mp4" },
+                {
+                  src: "/videos/gustafta-promo-problem.mp4",
+                  title: "Sebelum Gustafta",
+                  desc: "Desk tengah malam, dokumen menumpuk, sendirian.",
+                  badge: "Masalah",
+                  badgeColor: "bg-red-500",
+                  dl: "/videos/gustafta-promo-problem.mp4",
+                },
+                {
+                  src: "/videos/gustafta-promo-monolog-to-dialog.mp4",
+                  title: "Dari Monolog ke Dialog",
+                  desc: "Satu arah vs. dua arah — visualisasi ilustrasi.",
+                  badge: "Transformasi",
+                  badgeColor: "bg-amber-500",
+                  dl: "/videos/gustafta-promo-monolog-to-dialog.mp4",
+                },
+                {
+                  src: "/videos/gustafta-promo-solution.mp4",
+                  title: "Sesudah Gustafta",
+                  desc: "AI brain + agen-agen aktif mengorbit, siap bekerja.",
+                  badge: "Solusi",
+                  badgeColor: "bg-emerald-500",
+                  dl: "/videos/gustafta-promo-solution.mp4",
+                },
+              ].map((v) => (
+                <div key={v.title} className="rounded-2xl border bg-background overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
+                  <div className="relative aspect-video bg-slate-900 overflow-hidden">
+                    <video src={v.src} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <span className={`absolute top-2 left-2 text-[9px] font-bold text-white px-2 py-0.5 rounded-full ${v.badgeColor}`}>{v.badge}</span>
+                    <a
+                      href={v.dl}
+                      download
+                      className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-full"
+                      data-testid={`link-dl-promo-${v.badge.toLowerCase()}`}
+                    >↓ Unduh</a>
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-bold text-xs mb-0.5">{v.title}</h3>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Unduh semua */}
+          <div className="text-center border-t pt-6">
+            <p className="text-xs text-muted-foreground mb-3">Semua video bebas diunduh untuk keperluan promosi</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                { label: "Platform Overview", href: "/videos/gustafta-platform-overview.mp4" },
+                { label: "Monolog→Dialog", href: "/videos/gustafta-monolog-to-dialog.mp4" },
+                { label: "MultiClaw Suite", href: "/videos/gustafta-multiclaw-suite.mp4" },
+                { label: "Peluang Usaha", href: "/videos/gustafta-business-opportunity.mp4" },
+                { label: "Masalah", href: "/videos/gustafta-promo-problem.mp4" },
+                { label: "Transformasi", href: "/videos/gustafta-promo-monolog-to-dialog.mp4" },
+                { label: "Solusi", href: "/videos/gustafta-promo-solution.mp4" },
               ].map((dl) => (
                 <a
                   key={dl.label}
                   href={dl.href}
                   download
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary border border-primary/30 px-4 py-2 rounded-full hover:bg-primary/5 transition-colors"
-                  data-testid={`link-download-video-${dl.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary border border-primary/30 px-3 py-1.5 rounded-full hover:bg-primary/5 transition-colors"
+                  data-testid={`link-download-all-${dl.label.toLowerCase().replace(/[\s→]+/g, "-")}`}
                 >
                   ↓ {dl.label}
                 </a>
