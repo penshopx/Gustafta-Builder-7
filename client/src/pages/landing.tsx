@@ -222,6 +222,135 @@ export default function Landing() {
         </div>
       </div>
 
+      {/* ── STORYTELLING: Tiga Adegan ── */}
+      <section className="py-20 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/20 to-transparent dark:via-slate-900/40" />
+        <div className="max-w-4xl mx-auto relative">
+
+          {/* Opening hook */}
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Sebelum Kita Bicara Solusi</p>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight">
+              Kenali Dulu{" "}
+              <span className="text-red-500">Masalahnya.</span>
+            </h2>
+            <p className="text-muted-foreground max-w-xl mx-auto text-base leading-relaxed">
+              Tiga adegan nyata. Tiga orang berbeda. Satu masalah yang sama — dan mungkin salah satunya adalah Anda.
+            </p>
+          </div>
+
+          {/* Three scenes */}
+          <div className="space-y-5 mb-14">
+
+            {/* Scene 1: Kontraktor & Tender */}
+            <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-background overflow-hidden group hover:shadow-lg transition-shadow">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 to-indigo-700" />
+              <div className="p-6 md:p-8 pl-8 md:pl-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-mono text-muted-foreground bg-muted px-2.5 py-1 rounded-full">🌙 Pukul 23.47 · Kantor Kontraktor, Bekasi</span>
+                </div>
+                <p className="text-base md:text-lg leading-relaxed text-foreground mb-3">
+                  <strong>Pak Budi</strong> membuka dokumen tender ke-9 minggu ini. <strong>PDF 214 halaman.</strong> Deadline besok jam 08.00.
+                  Ia harus cek 30+ syarat kelengkapan, hitung estimasi harga, analisis risiko tersembunyi, draft surat penawaran.
+                </p>
+                <p className="text-base leading-relaxed text-foreground mb-3">
+                  Ia buka tiga tab browser: PermenPUPR 6/2021, database SBU, dan spreadsheet lama dari tender bulan lalu.
+                  Ia tidak yakin mana yang masih berlaku. Ia ingin bertanya ke konsultan — tapi jam segini?
+                </p>
+                <p className="text-lg font-semibold text-muted-foreground italic border-l-4 border-indigo-300 pl-4">
+                  "Pak Budi bekerja sendirian. Dalam satu arah. Tanpa lawan bicara."
+                </p>
+              </div>
+            </div>
+
+            {/* Scene 2: Pemilik Usaha & WhatsApp */}
+            <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-background overflow-hidden group hover:shadow-lg transition-shadow">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-orange-500 to-rose-600" />
+              <div className="p-6 md:p-8 pl-8 md:pl-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-mono text-muted-foreground bg-muted px-2.5 py-1 rounded-full">📱 Pukul 22.18 · Rumah Bu Sari, Surabaya</span>
+                </div>
+                <p className="text-base md:text-lg leading-relaxed text-foreground mb-3">
+                  Notifikasi WhatsApp berbunyi. Lagi, dan lagi. <strong>9 pesan masuk dalam 20 menit</strong> dari calon klien yang baru saja
+                  lihat portofolio Bu Sari di Instagram. Pertanyaan soal harga, SBU, jadwal, dan contoh proyek.
+                </p>
+                <p className="text-base leading-relaxed text-foreground mb-3">
+                  Bu Sari sudah tidur. Tim CS juga sudah tidur. Tidak ada autoresponder. Tidak ada yang jaga.
+                </p>
+                <p className="text-sm text-muted-foreground mb-3 font-medium">
+                  Keesokan paginya, ketika ia membalas — klien itu sudah menandatangani kontrak dengan kompetitor yang membalas dalam 5 menit.
+                </p>
+                <p className="text-lg font-semibold text-muted-foreground italic border-l-4 border-orange-300 pl-4">
+                  "Leads tidak menunggu. Tapi tidak ada yang bisa menjaga 24 jam."
+                </p>
+              </div>
+            </div>
+
+            {/* Scene 3: Profesional & Regulasi */}
+            <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-background overflow-hidden group hover:shadow-lg transition-shadow">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-500 to-teal-600" />
+              <div className="p-6 md:p-8 pl-8 md:pl-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-mono text-muted-foreground bg-muted px-2.5 py-1 rounded-full">☕ Pukul 01.30 · Meja Kerja, Bandung</span>
+                </div>
+                <p className="text-base md:text-lg leading-relaxed text-foreground mb-3">
+                  <strong>Mas Dian</strong> butuh satu jawaban: berapa SKK yang wajib dimiliki untuk kualifikasi M2 bidang Sipil?
+                  Ia sudah buka <strong>6 PDF berbeda</strong> — tiga Permen PUPR, dua SE LPJK, dan satu dokumen dari asosiasi.
+                </p>
+                <p className="text-base leading-relaxed text-foreground mb-3">
+                  Setiap dokumen menjawab sebagian. Tidak ada yang menjawab utuh. Ia tidak tahu mana yang terbaru, mana yang sudah
+                  direvisi, dan mana yang saling bertentangan.
+                </p>
+                <p className="text-lg font-semibold text-muted-foreground italic border-l-4 border-emerald-300 pl-4">
+                  "Informasinya ada. Tapi tidak ada yang membantu Mas Dian berpikir."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* The insight — monolog ke dialog */}
+          <div className="relative rounded-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900" />
+            <div className="relative p-8 md:p-12 text-white text-center">
+              <p className="text-lg md:text-xl text-slate-300 leading-relaxed mb-6 max-w-2xl mx-auto">
+                Tiga adegan. Tiga orang berbeda. Satu pola yang sama:
+              </p>
+              <p className="text-2xl md:text-3xl font-bold mb-4 leading-tight">
+                Kita punya lebih banyak akses informasi dari generasi mana pun sebelumnya.
+                <br className="hidden md:block" />
+                <span className="text-red-400"> Tapi kita masih bekerja dalam satu arah — sendirian.</span>
+              </p>
+              <p className="text-slate-400 text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
+                Buku, PDF, YouTube, kursus online — semuanya <strong className="text-white">berbicara ke Anda</strong>.
+                Tidak ada yang <strong className="text-white">berdialog bersama Anda</strong>.
+                Itulah arsitektur lama yang sudah berusia 500 tahun: <span className="text-red-400 font-semibold">MONOLOG</span>.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 mb-8">
+                <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-6 py-4 text-center w-full sm:w-auto">
+                  <p className="text-3xl mb-1">📄</p>
+                  <p className="text-sm font-bold text-red-400 mb-1">MONOLOG — Lama</p>
+                  <p className="text-xs text-slate-400">Dokumen bicara. Anda membaca sendirian.<br />Tidak ada yang menjawab pertanyaan lanjutan.</p>
+                </div>
+                <div className="hidden sm:block">
+                  <ArrowRight className="w-8 h-8 text-primary animate-pulse" />
+                </div>
+                <div className="rounded-xl border border-primary/40 bg-primary/10 px-6 py-4 text-center w-full sm:w-auto">
+                  <p className="text-3xl mb-1">💬</p>
+                  <p className="text-sm font-bold text-primary mb-1">DIALOG — Gustafta</p>
+                  <p className="text-xs text-slate-400">AI yang mendengar, menjawab, menanyai balik.<br />Bukan asisten — tapi lawan bicara profesional.</p>
+                </div>
+              </div>
+
+              <p className="text-base md:text-xl font-semibold text-white">
+                Gustafta membangun arsitektur baru itu —
+                <span className="text-primary"> dari monolog ke dialog.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── PROBLEM: Pain Points ── */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
@@ -688,6 +817,90 @@ export default function Landing() {
                 <TIcon className="w-4 h-4 text-primary" /> {label}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── VIDEO PROMO ── */}
+      <section className="py-20 px-4 bg-muted/10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Lihat Gustafta Beraksi</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              Dari Masalah ke Solusi — dalam Hitungan Menit
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-xl mx-auto leading-relaxed">
+              Tiga video nyata: bagaimana profesional Indonesia beralih dari bekerja sendirian menjadi punya tim AI yang selalu siap.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5 mb-8">
+            {[
+              {
+                src: "/videos/gustafta-promo-problem.mp4",
+                title: "Sebelum Gustafta",
+                desc: "Sendirian di tengah tumpukan dokumen. Tengah malam. Deadline besok.",
+                badge: "Masalah",
+                badgeColor: "bg-red-500",
+              },
+              {
+                src: "/videos/gustafta-promo-monolog-to-dialog.mp4",
+                title: "Dari Monolog ke Dialog",
+                desc: "Belajar & bekerja sendirian vs. punya lawan bicara AI yang benar-benar membantu.",
+                badge: "Transformasi",
+                badgeColor: "bg-amber-500",
+              },
+              {
+                src: "/videos/gustafta-promo-solution.mp4",
+                title: "Sesudah Gustafta",
+                desc: "Profesional percaya diri. Tim AI siap kerja. Hasil terukur.",
+                badge: "Solusi",
+                badgeColor: "bg-emerald-500",
+              },
+            ].map((v) => (
+              <div key={v.title} className="rounded-2xl border bg-background overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
+                <div className="relative aspect-video bg-slate-900 overflow-hidden">
+                  <video
+                    src={v.src}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <span className={`absolute top-3 left-3 text-[10px] font-bold text-white px-2.5 py-1 rounded-full ${v.badgeColor}`}>
+                    {v.badge}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-sm mb-1">{v.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{v.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Download CTA for external promo */}
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-3">Video bebas diunduh untuk keperluan promosi</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {[
+                { label: "Video: Masalah", href: "/videos/gustafta-promo-problem.mp4" },
+                { label: "Video: Transformasi", href: "/videos/gustafta-promo-monolog-to-dialog.mp4" },
+                { label: "Video: Solusi", href: "/videos/gustafta-promo-solution.mp4" },
+              ].map((dl) => (
+                <a
+                  key={dl.label}
+                  href={dl.href}
+                  download
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary border border-primary/30 px-4 py-2 rounded-full hover:bg-primary/5 transition-colors"
+                  data-testid={`link-download-video-${dl.label.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  ↓ {dl.label}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </section>
