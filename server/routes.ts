@@ -96,6 +96,16 @@ function optionalAuth(req: any, res: any, next: any) {
   next();
 }
 
+function optionalAuthWithEmail(req: any, res: any, next: any) {
+  if (req.session?.emailUser?.id && !req.user) {
+    req.user = {
+      claims: { sub: req.session.emailUser.id },
+      emailUser: req.session.emailUser,
+    };
+  }
+  next();
+}
+
 function getGuestFingerprint(req: any, agentId: string): string {
   const ip = req.headers["x-forwarded-for"] || req.ip || "unknown";
   const ua = req.headers["user-agent"] || "unknown";
@@ -6882,7 +6892,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   });
 
   // ==================== eCourse Export ====================
-  app.get("/api/agents/:id/export/ecourse", isAuthenticated, async (req: any, res) => {
+  app.get("/api/agents/:id/export/ecourse", optionalAuthWithEmail, async (req: any, res) => {
     try {
       const agentId = req.params.id as string;
       const agent = await storage.getAgent(agentId);
@@ -6890,6 +6900,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       const auth = assertCanPreviewAgentPrompt(req, agent);
       const isOwnerOrAdmin = auth.ok;
+
+      if (!isOwnerOrAdmin && !agent.isPublic) {
+        return res.status(403).json({ error: "Forbidden: agen ini tidak publik" });
+      }
+
       const safeAgent = isOwnerOrAdmin ? agent : { ...agent, systemPrompt: "" };
 
       const knowledgeBases = await storage.getKnowledgeBases(agentId);
