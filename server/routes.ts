@@ -32,7 +32,7 @@ import fs from "fs";
 import { createRequire } from "module";
 import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
-import { subscriptionPlans, type SubscriptionPlanKey } from "./lib/mayar";
+import { subscriptionPlans, type SubscriptionPlanKey, createPaymentLink, parseWebhookPayload, buildChatbotDescription, parseChatbotAgentId, verifyMayarSignature } from "./lib/mayar";
 import { isAuthenticated, invalidateUserActiveCache } from "./replit_integrations/auth";
 import { textToSpeech } from "./replit_integrations/audio/client";
 import {
@@ -15524,6 +15524,125 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
       console.error("[Scalev Webhook] Error:", err?.message);
       // Always return 200 to Scalev to prevent retries for our processing errors
       res.status(200).json({ received: true, error: err?.message });
+    }
+  });
+
+  // ── Mayar Webhook ────────────────────────────────────────────────────────────
+  app.post("/api/webhooks/mayar", async (req: any, res: any) => {
+    try {
+      const rawBody: string = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+      const payload = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+      console.log("[Mayar Webhook]", JSON.stringify(payload).slice(0, 500));
+
+      // Verify signature if MAYAR_WEBHOOK_SECRET is set
+      const webhookSecret = process.env.MAYAR_WEBHOOK_SECRET;
+      if (webhookSecret) {
+        const signature = req.headers["x-mayar-signature"] as string || "";
+        const valid = await verifyMayarSignature(rawBody, signature, webhookSecret);
+        if (!valid) {
+          console.warn("[Mayar Webhook] Invalid signature — rejected");
+          return res.status(401).json({ error: "Invalid signature" });
+        }
+      }
+
+      const parsed = parseWebhookPayload(payload);
+      const { event, id: transactionId, status, customerEmail, customerName, customerPhone, description, amount } = parsed;
+
+      // Only process confirmed payments
+      const isPaid = status === "paid" || status === "completed" || event === "payment.paid" || event === "invoice.paid";
+      if (!isPaid) {
+        console.log(`[Mayar Webhook] Skipping event=${event} status=${status}`);
+        return res.status(200).json({ received: true, skipped: true });
+      }
+
+      if (!customerEmail) {
+        console.warn("[Mayar Webhook] No customer email in payload");
+        return res.status(200).json({ received: true, error: "no_email" });
+      }
+
+      const genUUID = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+      const subEnd = new Date(); subEnd.setDate(subEnd.getDate() + 30);
+
+      // --- Case 1: Chatbot product payment (description contains CHATBOT_AKSES-{agentId}) ---
+      const chatbotAgentId = parseChatbotAgentId(description || "");
+      if (chatbotAgentId) {
+        const accessToken = genUUID();
+        await storage.createClientSubscription({
+          agentId: String(chatbotAgentId),
+          customerName: customerName || "Customer",
+          customerEmail,
+          customerPhone: customerPhone || "",
+          plan: "mayar",
+          status: "active",
+          amount: Math.round(amount),
+          accessToken,
+          startDate: new Date(),
+          endDate: subEnd,
+        } as any);
+        console.log(`[Mayar Webhook] Chatbot #${chatbotAgentId} access created for ${customerEmail}`);
+        return res.status(200).json({ received: true, type: "chatbot", agentId: chatbotAgentId });
+      }
+
+      // --- Case 2: Gustafta platform subscription (matched by mayarOrderId = transactionId) ---
+      if (transactionId) {
+        const sub = await storage.getSubscriptionByMayarOrderId(transactionId);
+        if (sub && sub.status === "pending") {
+          const { PLAN_CONFIGS } = await import("@shared/feature-plans");
+          const planDuration = (PLAN_CONFIGS as any)[sub.plan]?.durationDays ?? subscriptionPlans[sub.plan as SubscriptionPlanKey]?.duration ?? 30;
+          const now = new Date();
+          const endDate = new Date(now.getTime() + planDuration * 24 * 60 * 60 * 1000);
+          await (storage as any).updateSubscription?.(sub.id, {
+            status: "active",
+            startDate: now,
+            endDate,
+            amount: Math.round(amount) || sub.amount,
+          });
+          console.log(`[Mayar Webhook] Platform sub #${sub.id} activated for ${customerEmail} (plan: ${sub.plan})`);
+          return res.status(200).json({ received: true, type: "platform_subscription", subscriptionId: sub.id });
+        }
+      }
+
+      console.log(`[Mayar Webhook] No matching record for transactionId=${transactionId} email=${customerEmail}`);
+      res.status(200).json({ received: true, type: "unmatched" });
+    } catch (err: any) {
+      console.error("[Mayar Webhook] Error:", err?.message);
+      res.status(200).json({ received: true, error: err?.message });
+    }
+  });
+
+  // ── Admin: Generate Mayar Payment Link for a chatbot ────────────────────────
+  app.post("/api/mayar/create-chatbot-link", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const apiKey = process.env.MAYAR_API_KEY;
+      if (!apiKey) {
+        return res.status(503).json({ error: "MAYAR_API_KEY belum dikonfigurasi. Masukkan API key Mayar di Secrets." });
+      }
+
+      const { agentId, agentName, amount, customerName, customerEmail, customerPhone, redirectUrl } = req.body;
+      if (!agentId || !amount || !agentName) {
+        return res.status(400).json({ error: "agentId, agentName, dan amount wajib diisi." });
+      }
+
+      const description = buildChatbotDescription(agentId, agentName);
+
+      const result = await createPaymentLink(apiKey, {
+        name: customerName || "Pembelian Chatbot",
+        email: customerEmail || "customer@example.com",
+        mobile: customerPhone || "",
+        amount: parseInt(String(amount)),
+        description,
+        redirectUrl: redirectUrl || "",
+      });
+
+      res.json({
+        paymentUrl: result.data?.link,
+        transactionId: result.data?.id,
+        description,
+        amount: result.data?.amount,
+      });
+    } catch (err: any) {
+      console.error("[Mayar create-chatbot-link]", err?.message);
+      res.status(500).json({ error: err?.message || "Gagal membuat link Mayar." });
     }
   });
 

@@ -123,3 +123,29 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount);
 }
+
+// Encode agentId into description so webhook can identify which chatbot to unlock
+export function buildChatbotDescription(agentId: number | string, agentName: string): string {
+  return `CHATBOT_AKSES-${agentId}-${agentName.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30)}`;
+}
+
+// Parse agentId from description — returns null if not a chatbot payment
+export function parseChatbotAgentId(description: string): number | null {
+  const match = description.match(/CHATBOT_AKSES-(\d+)/);
+  return match ? parseInt(match[1]) : null;
+}
+
+// Verify Mayar webhook HMAC-SHA256 signature
+export async function verifyMayarSignature(
+  rawBody: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  try {
+    const { createHmac } = await import("crypto");
+    const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
+    return expected === signature;
+  } catch {
+    return false;
+  }
+}

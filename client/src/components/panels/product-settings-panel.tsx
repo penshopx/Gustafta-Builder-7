@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingBag, Globe, DollarSign, Shield, Tag, Copy, ExternalLink, Check, Plus, Trash2, Target, Lightbulb, CreditCard, Link2 } from "lucide-react";
+import { ShoppingBag, Globe, DollarSign, Shield, Tag, Copy, ExternalLink, Check, Plus, Trash2, Target, Lightbulb, CreditCard, Link2, Zap, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,35 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
   const [newFeature, setNewFeature] = useState("");
   const [copiedMarketplace, setCopiedMarketplace] = useState(false);
   const [copiedChat, setCopiedChat] = useState(false);
+  const [generatingMayar, setGeneratingMayar] = useState(false);
+
+  const generateMayarLinkMutation = useMutation({
+    mutationFn: async () => {
+      if (!settings.monthlyPrice || settings.monthlyPrice <= 0) throw new Error("Isi harga dulu sebelum generate link.");
+      const res = await apiRequest("POST", "/api/mayar/create-chatbot-link", {
+        agentId: agent.id,
+        agentName: agent.name,
+        amount: settings.monthlyPrice,
+      });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      if (data.paymentUrl) {
+        set("paymentUrl", data.paymentUrl);
+        toast({ title: "✅ Link Mayar berhasil dibuat!", description: "Link sudah otomatis terisi. Klik Simpan untuk menyimpan." });
+      } else {
+        toast({ title: "Gagal", description: data.error || "Tidak ada link dari Mayar.", variant: "destructive" });
+      }
+    },
+    onError: (err: any) => {
+      const msg = err?.message || "Gagal generate link Mayar.";
+      if (msg.includes("MAYAR_API_KEY")) {
+        toast({ title: "API Key Mayar belum diset", description: "Masukkan MAYAR_API_KEY di Secrets / Environment Variables.", variant: "destructive" });
+      } else {
+        toast({ title: "Gagal", description: msg, variant: "destructive" });
+      }
+    },
+  });
 
   useEffect(() => {
     setSettings({
@@ -290,26 +319,39 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5">
                     <Link2 className="w-3.5 h-3.5 text-primary" />
-                    Link Pembayaran (Scalev / Midtrans / Flip / dll)
+                    Link Pembayaran
                   </Label>
-                  <Input
-                    value={settings.paymentUrl}
-                    onChange={(e) => set("paymentUrl", e.target.value)}
-                    placeholder="https://pay.scalev.id/checkout/..."
-                    data-testid="input-payment-url"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={settings.paymentUrl}
+                      onChange={(e) => set("paymentUrl", e.target.value)}
+                      placeholder="https://mayar.id/checkout/... atau tempel link manual"
+                      data-testid="input-payment-url"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0 gap-1.5 text-xs border-green-500 text-green-700 hover:bg-green-50 dark:border-green-600 dark:text-green-400 dark:hover:bg-green-950/30"
+                      onClick={() => generateMayarLinkMutation.mutate()}
+                      disabled={generateMayarLinkMutation.isPending || !settings.monthlyPrice}
+                      data-testid="button-generate-mayar-link"
+                      title="Generate link pembayaran Mayar otomatis dari harga di atas"
+                    >
+                      {generateMayarLinkMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                      Generate Mayar
+                    </Button>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Link ini akan tampil sebagai tombol "Bayar Sekarang" di upgrade wall chatbot.
-                    Setelah customer bayar via Scalev, mereka bisa ambil akses dengan email di halaman chatbot.
+                    Tempel link manual dari Scalev / Midtrans / dll, <strong>atau</strong> klik <em>Generate Mayar</em> untuk buat link otomatis via Mayar.id (butuh MAYAR_API_KEY di Secrets).
                   </p>
                   {settings.paymentUrl && (
-                    <div className="flex gap-2">
-                      <a href={settings.paymentUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button type="button" variant="outline" size="sm" className="w-full gap-1.5 text-xs">
-                          <ExternalLink className="w-3.5 h-3.5" /> Test Link Pembayaran
-                        </Button>
-                      </a>
-                    </div>
+                    <a href={settings.paymentUrl} target="_blank" rel="noopener noreferrer">
+                      <Button type="button" variant="outline" size="sm" className="gap-1.5 text-xs">
+                        <ExternalLink className="w-3.5 h-3.5" /> Test Link Pembayaran
+                      </Button>
+                    </a>
                   )}
                 </div>
               )}
@@ -341,17 +383,20 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
               )}
 
               {settings.monthlyPrice > 0 && (
-                <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3 space-y-1.5">
-                  <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5" /> Alur Penjualan Premium
+                <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-green-800 dark:text-green-300 flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5" /> Alur Penjualan via Mayar.id
                   </p>
-                  <ol className="text-xs text-amber-700 dark:text-amber-400 space-y-1 list-decimal list-inside">
-                    <li>Admin buat produk di Scalev → salin link checkout → tempel di kolom di atas</li>
-                    <li>Admin buat Scalev Mapping di Admin Panel (type: chatbot, agentId: ID chatbot ini)</li>
-                    <li>Customer klik "Bayar Sekarang" di chatbot → redirect ke Scalev → bayar</li>
-                    <li>Scalev kirim webhook → sistem otomatis aktifkan akses 30 hari</li>
-                    <li>Customer kembali ke chatbot → klik "Sudah bayar?" → masukkan email → langsung chat</li>
+                  <ol className="text-xs text-green-700 dark:text-green-400 space-y-1 list-decimal list-inside">
+                    <li>Isi harga di atas → klik <strong>Generate Mayar</strong> → link otomatis terisi</li>
+                    <li>Klik <strong>Simpan Perubahan</strong> agar link tersimpan ke chatbot</li>
+                    <li>Customer klik "Bayar Sekarang" di chatbot → redirect ke Mayar → bayar</li>
+                    <li>Mayar kirim webhook ke <code className="bg-green-100 dark:bg-green-900/40 px-1 rounded">/api/webhooks/mayar</code> → akses aktif otomatis 30 hari</li>
+                    <li>Customer kembali ke chatbot → "Sudah bayar?" → masukkan email → langsung chat</li>
                   </ol>
+                  <p className="text-xs text-green-600 dark:text-green-500 pt-1 border-t border-green-200 dark:border-green-800">
+                    Butuh: <strong>MAYAR_API_KEY</strong> + <strong>MAYAR_WEBHOOK_SECRET</strong> di Secrets, dan set webhook URL di dashboard Mayar.id
+                  </p>
                 </div>
               )}
             </CardContent>
