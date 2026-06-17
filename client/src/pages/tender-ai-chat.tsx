@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -212,6 +213,10 @@ function SubAgentPanel({
 
 function MessageBubble({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
+  const { fields: brainFields, cleanContent } = !isUser
+    ? parseBrainUpdates(msg.content)
+    : { fields: [], cleanContent: msg.content };
+
   return (
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
       {!isUser && (
@@ -230,8 +235,9 @@ function MessageBubble({ msg }: { msg: Message }) {
               : "bg-white/5 text-white/90 border border-white/10"
           }`}
         >
-          {msg.content || (msg.isStreaming ? <span className="animate-pulse">▋</span> : "")}
+          {cleanContent || (msg.isStreaming ? <span className="animate-pulse">▋</span> : "")}
         </div>
+        {!isUser && <BrainChip fields={brainFields} />}
         {!isUser && msg.orchestrationMs && (
           <div className="flex items-center gap-1 text-xs text-white/30 px-1">
             <Zap className="h-2.5 w-2.5" />

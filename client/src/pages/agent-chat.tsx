@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 import { MessageContent as SharedMessageContent } from "@/lib/format-message";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 
 interface UploadedFile {
   fileName: string;
@@ -2515,6 +2516,9 @@ export default function AgentChat() {
             <div className="py-3 sm:py-4 space-y-3 sm:space-y-4 max-w-2xl mx-auto">
               {messages.map((message) => {
                 const isSearchMatch = searchOpen && searchQuery.trim() && message.content.toLowerCase().includes(searchQuery.toLowerCase());
+                const { fields: brainFields, cleanContent: cleanMsgContent } = message.role === "assistant"
+                  ? parseBrainUpdates(message.content)
+                  : { fields: [], cleanContent: message.content };
                 return (
                 <div
                   key={message.id}
@@ -2603,8 +2607,9 @@ export default function AgentChat() {
                       )}
                       {message.role === "user"
                         ? <span className="text-sm">{message.content}</span>
-                        : formatMessageContent(message.content)}
+                        : formatMessageContent(cleanMsgContent)}
                     </div>
+                    {message.role === "assistant" && <BrainChip fields={brainFields} />}
                     <div className="flex items-center gap-1.5 px-1">
                       <span className="text-[10px] text-muted-foreground">
                         {message.timestamp.toLocaleTimeString([], {

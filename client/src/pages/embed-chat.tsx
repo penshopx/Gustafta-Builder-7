@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useParams, useSearch } from "wouter";
 import { cn } from "@/lib/utils";
 import { MessageContent } from "@/lib/format-message";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 
 interface Message {
   id: string;
@@ -242,37 +243,44 @@ export default function EmbedChat() {
             </div>
           )}
 
-          {messages.map((message) => (
-            <div key={message.id} className={cn("flex gap-3", message.role === "user" && "flex-row-reverse")}>
-              <Avatar className="w-8 h-8 shrink-0">
-                {message.role === "assistant" && avatar ? (
-                  <AvatarImage src={avatar} alt={name} className="object-cover" />
-                ) : null}
-                <AvatarFallback
-                  className="text-xs"
-                  style={message.role === "assistant" ? { backgroundColor: `${color}20`, color } : {}}
-                >
-                  {message.role === "user" ? <User className="w-4 h-4" /> : name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col gap-1 max-w-[80%]">
-                <span className={cn("text-[10px] text-muted-foreground", message.role === "user" && "text-right")}>
-                  {message.role === "user" ? "Anda" : name}
-                </span>
-                <div
-                  className={cn(
-                    "rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words",
-                    message.role === "user"
-                      ? "rounded-tr-sm text-white"
-                      : "bg-muted rounded-tl-sm"
-                  )}
-                  style={message.role === "user" ? { backgroundColor: color } : {}}
-                >
-                  {message.role === "user" ? message.content : <MessageContent text={message.content} />}
+          {messages.map((message) => {
+            const isUser = message.role === "user";
+            const { fields: brainFields, cleanContent } = !isUser
+              ? parseBrainUpdates(message.content)
+              : { fields: [], cleanContent: message.content };
+            return (
+              <div key={message.id} className={cn("flex gap-3", isUser && "flex-row-reverse")}>
+                <Avatar className="w-8 h-8 shrink-0">
+                  {!isUser && avatar ? (
+                    <AvatarImage src={avatar} alt={name} className="object-cover" />
+                  ) : null}
+                  <AvatarFallback
+                    className="text-xs"
+                    style={!isUser ? { backgroundColor: `${color}20`, color } : {}}
+                  >
+                    {isUser ? <User className="w-4 h-4" /> : name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-1 max-w-[80%]">
+                  <span className={cn("text-[10px] text-muted-foreground", isUser && "text-right")}>
+                    {isUser ? "Anda" : name}
+                  </span>
+                  <div
+                    className={cn(
+                      "rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap break-words",
+                      isUser
+                        ? "rounded-tr-sm text-white"
+                        : "bg-muted rounded-tl-sm"
+                    )}
+                    style={isUser ? { backgroundColor: color } : {}}
+                  >
+                    {isUser ? message.content : <MessageContent text={cleanContent} />}
+                  </div>
+                  {!isUser && <BrainChip fields={brainFields} />}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {isLoading && (
             <div className="flex gap-3">

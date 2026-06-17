@@ -10,6 +10,7 @@ import { Scale, Send, Loader2, ArrowLeft, Plus, Trash2, Bot, User, ChevronRight,
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageContent } from "@/lib/format-message";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 
@@ -1101,13 +1102,18 @@ export default function LegalChat() {
             </div>
           )}
 
-          {messages.map(msg => (
+          {messages.map(msg => {
+            const isUser = msg.role === "user";
+            const { fields: brainFields, cleanContent } = !isUser
+              ? parseBrainUpdates(msg.content)
+              : { fields: [], cleanContent: msg.content };
+            return (
             <div
               key={msg.id}
-              className={cn("flex gap-3", msg.role === "user" ? "justify-end" : "justify-start")}
+              className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}
               data-testid={`message-${msg.id}`}
             >
-              {msg.role === "assistant" && (
+              {!isUser && (
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-sm"
                   style={{ background: `${getAgentColor(msg.agentId)}22`, border: `1px solid ${getAgentColor(msg.agentId)}44` }}
@@ -1115,8 +1121,8 @@ export default function LegalChat() {
                   {agentEmoji(msg.agentId)}
                 </div>
               )}
-              <div className={cn("max-w-[80%] group", msg.role === "user" ? "items-end" : "items-start", "flex flex-col gap-1")}>
-                {msg.role === "assistant" && msg.agentId && msg.agentId !== "auto" && (
+              <div className={cn("max-w-[80%] group", isUser ? "items-end" : "items-start", "flex flex-col gap-1")}>
+                {!isUser && msg.agentId && msg.agentId !== "auto" && (
                   <div className="text-xs text-white/40 ml-1">
                     {allAgents.find(a => a.id === msg.agentId)?.name || msg.agentId}
                   </div>
@@ -1124,20 +1130,20 @@ export default function LegalChat() {
                 <div
                   className={cn(
                     "rounded-2xl px-4 py-3 text-sm",
-                    msg.role === "user"
+                    isUser
                       ? "text-white rounded-tr-sm"
                       : "text-white/90 rounded-tl-sm border border-white/10"
                   )}
                   style={
-                    msg.role === "user"
+                    isUser
                       ? { background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }
                       : { background: "#111827" }
                   }
                 >
-                  {msg.role === "user" ? (
+                  {isUser ? (
                     <p className="whitespace-pre-wrap">{msg.content}</p>
-                  ) : msg.content ? (
-                    <MessageContent text={msg.content} className="text-sm" />
+                  ) : cleanContent ? (
+                    <MessageContent text={cleanContent} className="text-sm" />
                   ) : (
                     <div className="flex items-center gap-2 text-white/40">
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -1145,6 +1151,7 @@ export default function LegalChat() {
                     </div>
                   )}
                 </div>
+                <BrainChip fields={brainFields} />
                 {msg.role === "assistant" && msg.content && (
                   <div className="flex items-center gap-1 ml-1 opacity-0 group-hover:opacity-100 transition-all">
                     <button
@@ -1212,7 +1219,8 @@ export default function LegalChat() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="p-4 border-t border-white/10" style={{ background: "#080d1a" }}>

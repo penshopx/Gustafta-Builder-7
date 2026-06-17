@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMessages, useSendMessage } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
 import { MessageContent } from "@/lib/format-message";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 import type { Agent, Message } from "@shared/schema";
 
 interface ChatPopupProps {
@@ -228,6 +229,9 @@ export function ChatPopup({ agent }: ChatPopupProps) {
 
 function ChatBubble({ message, agentName, agentAvatar }: { message: Message; agentName: string; agentAvatar?: string }) {
   const isUser = message.role === "user";
+  const { fields: brainFields, cleanContent } = !isUser
+    ? parseBrainUpdates(message.content)
+    : { fields: [], cleanContent: message.content };
 
   return (
     <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
@@ -256,8 +260,9 @@ function ChatBubble({ message, agentName, agentAvatar }: { message: Message; age
               : "bg-muted rounded-tl-sm"
           )}
         >
-          {isUser ? message.content : <MessageContent text={message.content} />}
+          {isUser ? message.content : <MessageContent text={cleanContent} />}
         </div>
+        {!isUser && <BrainChip fields={brainFields} />}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMessages, useSendMessage } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
 import { MessageContent } from "@/lib/format-message";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 import type { Agent, Message } from "@shared/schema";
 
 interface TrialChatProps {
@@ -159,6 +160,9 @@ export function TrialChat({ agent }: TrialChatProps) {
 
 function TrialMessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
+  const { fields: brainFields, cleanContent } = !isUser
+    ? parseBrainUpdates(message.content)
+    : { fields: [], cleanContent: message.content };
 
   return (
     <div className={cn("flex gap-2", isUser && "flex-row-reverse")}>
@@ -167,13 +171,16 @@ function TrialMessageBubble({ message }: { message: Message }) {
           {isUser ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
         </AvatarFallback>
       </Avatar>
-      <div
-        className={cn(
-          "max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs break-words",
-          isUser ? "bg-primary text-primary-foreground whitespace-pre-wrap" : "bg-muted"
-        )}
-      >
-        {isUser ? message.content : <MessageContent text={message.content} className="text-xs space-y-1" />}
+      <div className="flex flex-col gap-1 min-w-0">
+        <div
+          className={cn(
+            "max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs break-words",
+            isUser ? "bg-primary text-primary-foreground whitespace-pre-wrap" : "bg-muted"
+          )}
+        >
+          {isUser ? message.content : <MessageContent text={cleanContent} className="text-xs space-y-1" />}
+        </div>
+        {!isUser && <BrainChip fields={brainFields} />}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -185,6 +186,9 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
 
 function ChatMessage({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
+  const { fields: brainFields, cleanContent } = !isUser
+    ? parseBrainUpdates(msg.content)
+    : { fields: [], cleanContent: msg.content };
 
   if (isUser) {
     return (
@@ -205,8 +209,9 @@ function ChatMessage({ msg }: { msg: Message }) {
               <Loader2 className="h-3 w-3 animate-spin" />
               <span className="text-xs">Mengkoordinasikan 11 agen EduCounsel…</span>
             </span>
-          ) : msg.content}
+          ) : cleanContent}
         </div>
+        <BrainChip fields={brainFields} />
         {msg.subAgents && msg.subAgents.length > 0 && (
           <SubAgentPanel agents={msg.subAgents} />
         )}

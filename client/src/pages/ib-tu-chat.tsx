@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -156,6 +157,9 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
 
 function ChatMessage({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
+  const { fields: brainFields, cleanContent } = !isUser
+    ? parseBrainUpdates(msg.content)
+    : { fields: [], cleanContent: msg.content };
 
   if (isUser) {
     return (
@@ -180,8 +184,9 @@ function ChatMessage({ msg }: { msg: Message }) {
           className="mt-2 text-sm text-white/90 leading-relaxed whitespace-pre-wrap"
           style={{ wordBreak: "break-word" }}
         >
-          {msg.content || (msg.isStreaming ? <span className="animate-pulse">▋</span> : "")}
+          {cleanContent || (msg.isStreaming ? <span className="animate-pulse">▋</span> : "")}
         </div>
+        <BrainChip fields={brainFields} />
         {!isUser && msg.orchestrationMs && msg.subAgents && msg.subAgents.length > 0 && (
           <div className="flex items-center gap-1 text-xs text-white/30 px-1 mt-1">
             <Zap className="h-2.5 w-2.5" />

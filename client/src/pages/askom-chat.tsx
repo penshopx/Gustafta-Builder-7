@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { MessageContent } from "@/lib/format-message";
+import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
 import { ChatInputBar, MessageActions, AttachmentRow, ChatAttachment } from "@/components/chat-input-bar";
 
 interface SubAgentStatus {
@@ -153,6 +154,10 @@ function SubAgentPanel({ agents }: { agents: SubAgentStatus[] }) {
 
 function ChatMessage({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
+  const { fields: brainFields, cleanContent } = !isUser
+    ? parseBrainUpdates(msg.content)
+    : { fields: [], cleanContent: msg.content };
+
   if (isUser) {
     return (
       <div className="flex justify-end mb-4">
@@ -171,8 +176,9 @@ function ChatMessage({ msg }: { msg: Message }) {
               <Loader2 className="h-3 w-3 animate-spin" />
               <span className="text-xs">Mengkoordinasikan 8 agen ASKOM…</span>
             </span>
-          ) : <MessageContent text={msg.content} className="text-sm" />}
+          ) : <MessageContent text={cleanContent} className="text-sm" />}
         </div>
+        <BrainChip fields={brainFields} />
         {msg.subAgents && msg.subAgents.length > 0 && (
           <SubAgentPanel agents={msg.subAgents} />
         )}
