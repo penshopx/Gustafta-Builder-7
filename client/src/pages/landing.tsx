@@ -1150,7 +1150,7 @@ export default function Landing() {
 
       {/* ── ACTION: Pricing CTA ── */}
       <section className="py-16 px-4 bg-gradient-to-br from-primary to-violet-600 text-white">
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full mb-6">
             <Flame className="w-3.5 h-3.5" /> Promo aktif — harga naik 2× per 1 Juli 2026
           </div>
@@ -1159,11 +1159,64 @@ export default function Landing() {
             Semua paket sudah termasuk Agentic AI, 131 Orchestrator Multi-Agent, Knowledge Base 7 tipe, dan Multi-Channel. Tanpa biaya setup. Cancel kapan saja.
           </p>
 
-          <div className="grid sm:grid-cols-3 gap-4 mb-8 text-left">
+          {/* Klarifikasi Istilah */}
+          <div className="grid sm:grid-cols-3 gap-3 mb-7 text-left">
             {[
-              { plan: "Starter", price: "199rb", badge: null, features: ["3 chatbot", "Knowledge Base 7 tipe", "Multi-Channel (WA, TG, Web)", "REST API akses"] },
-              { plan: "Profesional", price: "499rb", badge: "TERPOPULER", features: ["20 chatbot", "Custom Domain", "Analytics & Reporting", "Agentic AI + Orchestrator"] },
-              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "1350+ agent spesialis", "80+ MultiClaw AI Tools", "Priority support"] },
+              {
+                icon: "🤖",
+                term: "Agen",
+                desc: "Konfigurasi AI — otak chatbot: persona, Knowledge Base, instruksi, model LLM. Tersimpan di akun Anda.",
+              },
+              {
+                icon: "💬",
+                term: "Chatbot",
+                desc: "Agen yang sudah aktif & terhubung ke channel (WhatsApp, Telegram, web widget). Agen yang sudah \"online\".",
+              },
+              {
+                icon: "📦",
+                term: "Template Agen",
+                desc: "Konfigurasi agen siap pakai dari Gustafta Store — dibeli sekali, di-install ke slot akun Anda, lalu bisa dikustomisasi.",
+              },
+            ].map((item) => (
+              <div key={item.term} className="rounded-xl bg-white/10 border border-white/20 p-3.5">
+                <div className="text-xl mb-1.5">{item.icon}</div>
+                <p className="font-bold text-sm mb-1">{item.term}</p>
+                <p className="text-[11px] text-white/70 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Paket Langganan */}
+          <p className="text-xs text-white/50 uppercase tracking-widest font-bold mb-3 text-left">Paket Langganan — Slot & Akses Platform</p>
+          <div className="grid sm:grid-cols-3 gap-4 mb-5 text-left">
+            {[
+              {
+                plan: "Starter", price: "199rb", badge: null,
+                features: [
+                  "10 slot agen/chatbot sendiri",
+                  "Knowledge Base 7 tipe",
+                  "Multi-Channel (WA, Telegram, Web)",
+                  "Bisa install template dari Store",
+                ],
+              },
+              {
+                plan: "Profesional", price: "499rb", badge: "TERPOPULER",
+                features: [
+                  "50 slot agen/chatbot sendiri",
+                  "Custom Domain",
+                  "80+ MultiClaw AI Tools",
+                  "Bisa install template dari Store",
+                ],
+              },
+              {
+                plan: "Bisnis", price: "999rb", badge: null,
+                features: [
+                  "200 slot agen/chatbot sendiri",
+                  "White-label (hapus branding Gustafta)",
+                  "Priority Support WhatsApp",
+                  "Bisa install template dari Store",
+                ],
+              },
             ].map((plan) => (
               <div
                 key={plan.plan}
@@ -1188,6 +1241,23 @@ export default function Landing() {
                 </ul>
               </div>
             ))}
+          </div>
+
+          {/* Template Store — terpisah dari langganan */}
+          <div className="rounded-xl border border-white/25 bg-white/8 p-4 mb-7 text-left flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="text-3xl flex-shrink-0">📦</div>
+            <div className="flex-1">
+              <p className="font-bold text-sm mb-0.5">Gustafta Store — Template Agen Siap Pakai</p>
+              <p className="text-[11px] text-white/70 leading-relaxed">
+                Beli template chatbot yang sudah dikonfigurasi penuh (persona + KB + instruksi) — bayar sekali, langsung install ke slot akun Anda.
+                Tersedia mulai Rp 299.000/template. <strong className="text-white">Terpisah dari langganan bulanan</strong> — bisa dibeli pengguna paket apapun selama masih ada slot kosong.
+              </p>
+            </div>
+            <Link href="/store" className="flex-shrink-0">
+              <Button size="sm" variant="outline" className="text-xs font-bold border-white/30 text-white hover:bg-white/10 whitespace-nowrap" data-testid="button-pricing-browse-store">
+                Lihat Store →
+              </Button>
+            </Link>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
