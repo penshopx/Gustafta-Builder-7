@@ -378,10 +378,11 @@ export default function AdminPage() {
     type: string;
     agentId: number | null;
     bigIdeaId: number | null;
+    agentIds: number[] | null;
     label: string;
     createdAt: string;
   }
-  const [scalevForm, setScalevForm] = useState({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+  const [scalevForm, setScalevForm] = useState({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", agentIds: "", label: "" });
   const [showScalevForm, setShowScalevForm] = useState(false);
   const [scalevEditId, setScalevEditId] = useState<number | null>(null);
 
@@ -406,7 +407,7 @@ export default function AdminPage() {
     mutationFn: (data: any) => apiRequest("POST", "/api/admin/scalev-mappings", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/scalev-mappings"] });
-      setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+      setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", agentIds: "", label: "" });
       setShowScalevForm(false);
       setScalevEditId(null);
       toast({ title: "Mapping berhasil disimpan." });
@@ -418,7 +419,7 @@ export default function AdminPage() {
     mutationFn: ({ id, data }: { id: number; data: any }) => apiRequest("PATCH", `/api/admin/scalev-mappings/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/scalev-mappings"] });
-      setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+      setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", agentIds: "", label: "" });
       setShowScalevForm(false);
       setScalevEditId(null);
       toast({ title: "Mapping diperbarui." });
@@ -1614,7 +1615,7 @@ export default function AdminPage() {
                       </Button>
                       <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white gap-1"
                         onClick={() => {
-                          setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", label: "" });
+                          setScalevForm({ scalevProductName: "", type: "chatbot", agentId: "", bigIdeaId: "", agentIds: "", label: "" });
                           setScalevEditId(null);
                           setShowScalevForm(!showScalevForm);
                         }}
@@ -1657,12 +1658,13 @@ export default function AdminPage() {
                           <label className="text-xs font-medium mb-1 block text-muted-foreground">Tipe Akses *</label>
                           <select
                             value={scalevForm.type}
-                            onChange={(e) => setScalevForm(f => ({ ...f, type: e.target.value }))}
+                            onChange={(e) => setScalevForm(f => ({ ...f, type: e.target.value, agentId: "", bigIdeaId: "", agentIds: "" }))}
                             className="w-full h-9 px-3 text-sm rounded-md border border-input bg-background"
                             data-testid="select-scalev-type"
                           >
-                            <option value="chatbot">Chatbot (Store Access)</option>
+                            <option value="chatbot">Chatbot (1 chatbot)</option>
                             <option value="modul">Modul (Email Access)</option>
+                            <option value="bundle">Bundle (beberapa chatbot sekaligus)</option>
                           </select>
                         </div>
                         {scalevForm.type === "chatbot" ? (
@@ -1677,7 +1679,7 @@ export default function AdminPage() {
                             />
                             <p className="text-xs text-muted-foreground mt-1">ID agent chatbot yang dibeli customer</p>
                           </div>
-                        ) : (
+                        ) : scalevForm.type === "modul" ? (
                           <div>
                             <label className="text-xs font-medium mb-1 block text-muted-foreground">Big Idea ID Modul</label>
                             <Input
@@ -1688,6 +1690,20 @@ export default function AdminPage() {
                               data-testid="input-scalev-big-idea-id"
                             />
                             <p className="text-xs text-muted-foreground mt-1">ID modul yang diakses customer</p>
+                          </div>
+                        ) : (
+                          <div className="sm:col-span-2">
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Agent IDs (dipisah koma) *</label>
+                            <Input
+                              value={scalevForm.agentIds}
+                              onChange={(e) => setScalevForm(f => ({ ...f, agentIds: e.target.value }))}
+                              placeholder="mis. 24, 31, 45, 67"
+                              data-testid="input-scalev-agent-ids"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Masukkan semua Agent ID chatbot yang termasuk dalam paket bundle ini (pisah dengan koma).
+                              Customer yang bayar 1 produk ini akan otomatis dapat akses ke <strong>semua chatbot</strong> tersebut.
+                            </p>
                           </div>
                         )}
                       </div>
@@ -1738,12 +1754,17 @@ export default function AdminPage() {
                               <td className="py-2 px-2 font-mono text-xs text-orange-600 dark:text-orange-400">{m.scalevProductName}</td>
                               <td className="py-2 px-2 text-xs">{m.label || "—"}</td>
                               <td className="py-2 px-2">
-                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${m.type === "chatbot" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" : "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"}`}>
-                                  {m.type === "chatbot" ? "Chatbot" : "Modul"}
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  m.type === "chatbot" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                                  : m.type === "bundle" ? "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"
+                                  : "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"}`}>
+                                  {m.type === "chatbot" ? "Chatbot" : m.type === "bundle" ? `Bundle (${m.agentIds?.length ?? 0} chatbot)` : "Modul"}
                                 </span>
                               </td>
                               <td className="py-2 px-2 text-xs text-muted-foreground">
-                                {m.type === "chatbot" ? `Agent #${m.agentId ?? "—"}` : `Modul #${m.bigIdeaId ?? "—"}`}
+                                {m.type === "chatbot" ? `Agent #${m.agentId ?? "—"}`
+                                  : m.type === "bundle" ? `[${(m.agentIds ?? []).join(", ")}]`
+                                  : `Modul #${m.bigIdeaId ?? "—"}`}
                               </td>
                               <td className="py-2 px-2 text-right">
                                 <div className="flex gap-1 justify-end">
@@ -1753,6 +1774,7 @@ export default function AdminPage() {
                                       type: m.type,
                                       agentId: m.agentId ? String(m.agentId) : "",
                                       bigIdeaId: m.bigIdeaId ? String(m.bigIdeaId) : "",
+                                      agentIds: m.agentIds ? m.agentIds.join(", ") : "",
                                       label: m.label,
                                     });
                                     setScalevEditId(m.id);

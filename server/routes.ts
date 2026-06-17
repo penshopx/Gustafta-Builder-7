@@ -15316,15 +15316,23 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
 
   app.post("/api/admin/scalev-mappings", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
-      const { scalevProductName, type, agentId, bigIdeaId, label } = req.body;
+      const { scalevProductName, type, agentId, bigIdeaId, agentIds, label } = req.body;
       if (!scalevProductName) return res.status(400).json({ error: "scalevProductName wajib diisi." });
+      // Parse agentIds for bundle type
+      let parsedAgentIds: number[] | null = null;
+      if (type === "bundle" && agentIds) {
+        parsedAgentIds = (Array.isArray(agentIds) ? agentIds : String(agentIds).split(","))
+          .map((id: any) => parseInt(String(id).trim()))
+          .filter((id: number) => !isNaN(id) && id > 0);
+      }
       const mapping = await storage.createScalevMapping({
         scalevProductName: scalevProductName.trim(),
         type: type || "chatbot",
         agentId: agentId ? parseInt(agentId) : null,
         bigIdeaId: bigIdeaId ? parseInt(bigIdeaId) : null,
+        agentIds: parsedAgentIds,
         label: label || scalevProductName,
-      });
+      } as any);
       res.json(mapping);
     } catch (err: any) {
       res.status(500).json({ error: "Gagal membuat mapping." });
@@ -15334,12 +15342,21 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
   app.patch("/api/admin/scalev-mappings/:id", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
       const { id } = req.params;
-      const { scalevProductName, type, agentId, bigIdeaId, label } = req.body;
+      const { scalevProductName, type, agentId, bigIdeaId, agentIds, label } = req.body;
       const updates: any = {};
       if (scalevProductName !== undefined) updates.scalevProductName = scalevProductName.trim();
       if (type !== undefined) updates.type = type;
       if (agentId !== undefined) updates.agentId = agentId ? parseInt(agentId) : null;
       if (bigIdeaId !== undefined) updates.bigIdeaId = bigIdeaId ? parseInt(bigIdeaId) : null;
+      if (agentIds !== undefined) {
+        if (type === "bundle" && agentIds) {
+          updates.agentIds = (Array.isArray(agentIds) ? agentIds : String(agentIds).split(","))
+            .map((i: any) => parseInt(String(i).trim()))
+            .filter((i: number) => !isNaN(i) && i > 0);
+        } else {
+          updates.agentIds = null;
+        }
+      }
       if (label !== undefined) updates.label = label;
       const updated = await storage.updateScalevMapping(parseInt(id), updates);
       if (!updated) return res.status(404).json({ error: "Mapping tidak ditemukan." });
@@ -15460,6 +15477,32 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
           } as any);
           const accessUrl = `${baseUrl}/modul/${matchedMapping.bigIdeaId}?email=${encodeURIComponent(customerEmail)}`;
           console.log(`[Scalev] Modul access created for ${customerEmail}: ${accessUrl}`);
+        } else if (matchedMapping.type === "bundle" && (matchedMapping as any).agentIds?.length) {
+          // Create clientSubscription for EACH agent in the bundle
+          const bundleAgentIds: number[] = (matchedMapping as any).agentIds;
+          const subEnd = new Date(); subEnd.setDate(subEnd.getDate() + 30);
+          const created: number[] = [];
+          for (const aid of bundleAgentIds) {
+            try {
+              const subToken = genUUID();
+              await storage.createClientSubscription({
+                agentId: String(aid),
+                customerName: customerName || "Customer",
+                customerEmail: customerEmail,
+                customerPhone: customerPhone,
+                plan: "scalev_bundle",
+                status: "active",
+                amount: Math.round(grossRevenue / bundleAgentIds.length),
+                accessToken: subToken,
+                startDate: new Date(),
+                endDate: subEnd,
+              } as any);
+              created.push(aid);
+            } catch (err: any) {
+              console.error(`[Scalev Bundle] Failed for agent ${aid}:`, err?.message);
+            }
+          }
+          console.log(`[Scalev Bundle] Created ${created.length}/${bundleAgentIds.length} subscriptions for ${customerEmail}: agents [${created.join(", ")}]`);
         }
       } else {
         // No mapping found — create a generic store order as placeholder (productId=0)

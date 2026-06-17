@@ -1901,9 +1901,10 @@ export type StoreOrder = typeof storeOrders.$inferSelect;
 export const scalevMappings = pgTable("scalev_mappings", {
   id: serial("id").primaryKey(),
   scalevProductName: text("scalev_product_name").notNull(),
-  type: text("type").notNull().default("chatbot"), // "chatbot" | "modul"
+  type: text("type").notNull().default("chatbot"), // "chatbot" | "modul" | "bundle"
   agentId: integer("agent_id"),
   bigIdeaId: integer("big_idea_id"),
+  agentIds: jsonb("agent_ids").$type<number[]>(), // for "bundle" type
   label: text("label").notNull().default(""),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
