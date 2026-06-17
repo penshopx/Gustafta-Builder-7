@@ -211,7 +211,7 @@ export default function Landing() {
           {[
             { value: "1350+", label: "Agent AI Spesialis" },
             { value: "131", label: "Hub Orchestrator" },
-            { value: "45+", label: "MultiClaw AI Tools" },
+            { value: "80+", label: "MultiClaw AI Tools" },
             { value: "24/7", label: "AI Selalu Aktif" },
           ].map((s) => (
             <div key={s.label}>
@@ -560,7 +560,7 @@ export default function Landing() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <p className="font-extrabold text-lg text-amber-700 dark:text-amber-400">MultiClaw Suite</p>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400">45+ TOOLS</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400">80+ TOOLS</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Bayangkan kamu dapat dokumen tender 200 halaman jam 9 malam, deadline besok pagi.
@@ -636,7 +636,7 @@ export default function Landing() {
               </p>
               <Link href="/ai-tools">
                 <button className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline" data-testid="link-multiclaw-all">
-                  Lihat 45+ Tools <ChevronRight className="w-3.5 h-3.5" />
+                  Lihat 80+ Tools <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </Link>
             </div>
