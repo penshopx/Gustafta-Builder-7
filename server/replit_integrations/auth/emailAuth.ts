@@ -6,6 +6,34 @@ import { users, emailVerifications } from "@shared/models/auth";
 import { eq, and, gt } from "drizzle-orm";
 import { authStorage } from "./storage";
 import { agents } from "@shared/schema";
+import rateLimit from "express-rate-limit";
+
+const isProduction = process.env.NODE_ENV === "production";
+
+// Rate limiters — prevent brute force on auth endpoints
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 5,                    // maks 5 percobaan registrasi per IP per 15 menit
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Terlalu banyak percobaan. Coba lagi dalam 15 menit." },
+});
+
+const otpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 menit
+  max: 10,                   // maks 10 percobaan verifikasi OTP per IP per 10 menit
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Terlalu banyak percobaan. Coba lagi dalam 10 menit." },
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 10,                   // maks 10 percobaan login per IP per 15 menit
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Terlalu banyak percobaan login. Coba lagi dalam 15 menit." },
+});
 
 async function seedSampleAgentForEmailUser(userId: string, firstName: string | null | undefined) {
   try {
@@ -83,7 +111,7 @@ async function sendVerificationEmail(email: string, code: string, firstName: str
 
 export function registerEmailAuthRoutes(app: Express): void {
   // ── REGISTER: Step 1 — send OTP ─────────────────────────────────────────────
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/auth/register", registerLimiter, async (req, res) => {
     try {
       const { email, password, firstName, lastName } = req.body;
       if (!email || !password || !firstName) {
@@ -133,6 +161,12 @@ export function registerEmailAuthRoutes(app: Express): void {
 
       const emailSent = await sendVerificationEmail(email, code, firstName);
 
+      if (!emailSent && isProduction) {
+        return res.status(503).json({
+          error: "Layanan email belum dikonfigurasi. Hubungi administrator.",
+        });
+      }
+
       res.json({
         success: true,
         message: emailSent
@@ -147,7 +181,7 @@ export function registerEmailAuthRoutes(app: Express): void {
   });
 
   // ── REGISTER: Step 2 — verify OTP ───────────────────────────────────────────
-  app.post("/api/auth/verify-email", async (req: any, res) => {
+  app.post("/api/auth/verify-email", otpLimiter, async (req: any, res) => {
     try {
       const { email, code } = req.body;
       if (!email || !code) {
@@ -223,7 +257,7 @@ export function registerEmailAuthRoutes(app: Express): void {
   });
 
   // ── RESEND OTP ───────────────────────────────────────────────────────────────
-  app.post("/api/auth/resend-otp", async (req, res) => {
+  app.post("/api/auth/resend-otp", otpLimiter, async (req, res) => {
     try {
       const { email } = req.body;
       if (!email) return res.status(400).json({ error: "Email wajib diisi." });
@@ -238,6 +272,13 @@ export function registerEmailAuthRoutes(app: Express): void {
       await db.insert(emailVerifications).values({ id: randomUUID(), email, code, expiresAt });
 
       const emailSent = await sendVerificationEmail(email, code, userRow.firstName || "");
+
+      if (!emailSent && isProduction) {
+        return res.status(503).json({
+          error: "Layanan email belum dikonfigurasi. Hubungi administrator.",
+        });
+      }
+
       res.json({
         success: true,
         message: emailSent ? "Kode OTP baru telah dikirim." : "Kode OTP baru dibuat.",
@@ -250,7 +291,7 @@ export function registerEmailAuthRoutes(app: Express): void {
   });
 
   // ── LOGIN with email + password ──────────────────────────────────────────────
-  app.post("/api/auth/login-email", async (req: any, res) => {
+  app.post("/api/auth/login-email", loginLimiter, async (req: any, res) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
