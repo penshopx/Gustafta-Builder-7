@@ -1660,7 +1660,7 @@ export async function registerRoutes(
   });
 
   // Seed Gustafta Helpdesk and Dokumentender chatbots
-  app.post("/api/agents/seed-knowledge-base", async (_req, res) => {
+  app.post("/api/agents/seed-knowledge-base", isAuthenticated, async (_req, res) => {
     try {
       const existingAgents = await storage.getAgents();
       const createdAgents: any[] = [];
@@ -8259,17 +8259,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
       const providedRaw = req.header("x-bootstrap-token") || "";
       const provided = providedRaw.trim();
       if (!provided || provided !== expected) {
-        return res.status(401).json({
-          error: "Token tidak valid",
-          debug: {
-            providedLength: provided.length,
-            expectedLength: expected.length,
-            providedFirst3: provided.slice(0, 3),
-            providedLast3: provided.slice(-3),
-            expectedFirst3: expected.slice(0, 3),
-            expectedLast3: expected.slice(-3),
-          }
-        });
+        return res.status(401).json({ error: "Token tidak valid" });
       }
       const email = String((req.body?.email || "")).trim().toLowerCase();
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
