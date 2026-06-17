@@ -299,6 +299,7 @@ import GeneratorJadwalPelaksanaan from "@/pages/generator-jadwal-pelaksanaan";
 import PanduanPBGIMB from "@/pages/panduan-pbg-imb";
 import GeneratorLaporanAuditK3 from "@/pages/generator-laporan-audit-k3";
 import KalkulatorProduktivitasAlat from "@/pages/kalkulator-produktivitas-alat";
+import DocGenerator from "@/pages/doc-generator";
 import MultiClawAdmin from "@/pages/multiclaw-admin";
 import MultiClawDirectory from "@/pages/multiclaw-directory";
 import KalkulatorUpahSKK from "@/pages/kalkulator-upah-skk";
@@ -1426,6 +1427,7 @@ function Router() {
         <Route path="/panduan-pbg-imb" component={PanduanPBGIMB} />
         <Route path="/generator-laporan-audit-k3" component={GeneratorLaporanAuditK3} />
         <Route path="/kalkulator-produktivitas-alat" component={KalkulatorProduktivitasAlat} />
+        <Route path="/doc-generator" component={DocGenerator} />
         <Route path="/multiclaw-admin" component={MultiClawAdmin} />
         <Route path="/multiclaw" component={MultiClawDirectory} />
       <Route component={NotFound} />

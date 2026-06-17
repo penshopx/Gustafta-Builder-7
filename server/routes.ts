@@ -78,6 +78,44 @@ async function parsePdfBuffer(buffer: Buffer): Promise<string> {
   return result.pages.map((p) => p.text).join("\n");
 }
 
+function buildActionGuide(agent: any): string {
+  const chatStyle = String((agent as any).chatStyle ?? (agent as any).chat_style ?? "direktif").toLowerCase();
+
+  const styleExamples: Record<string, string[]> = {
+    direktif: [
+      "  [SUGGEST_ACTION:document|surat_permohonan|Buat Surat Permohonan|Generate surat resmi dari diskusi ini]",
+      "  [SUGGEST_ACTION:document|laporan_audit|Buat Laporan Audit|Dokumentasikan temuan sebagai laporan formal]",
+    ],
+    coach: [
+      "  [SUGGEST_ACTION:document|rencana_belajar|Buat Rencana Belajar|Rancang program belajar terstruktur dari diskusi ini]",
+      "  [SUGGEST_ACTION:miniapp|scoring_assessment|Mulai Assessment|Ukur pemahaman dengan kuis kompetensi]",
+    ],
+    kolaboratif: [
+      "  [SUGGEST_ACTION:document|proposal_teknis|Buat Proposal Teknis|Generate proposal dari hasil diskusi ini]",
+      "  [SUGGEST_ACTION:miniapp|project_snapshot|Project Snapshot|Rangkum status proyek saat ini]",
+    ],
+    socratic: [
+      "  [SUGGEST_ACTION:miniapp|scoring_assessment|Uji Pemahaman|Kerjakan soal latihan terkait topik ini]",
+      "  [SUGGEST_ACTION:document|rencana_belajar|Rencana Belajar|Susun rencana belajar mandiri]",
+    ],
+    fasilitator: [
+      "  [SUGGEST_ACTION:miniapp|meeting_notes|Buat Notulen|Rekam poin diskusi kunci]",
+      "  [SUGGEST_ACTION:document|laporan_kemajuan|Laporan Kemajuan|Dokumentasikan progress sesi ini]",
+    ],
+  };
+
+  const examples = styleExamples[chatStyle] ?? styleExamples["direktif"];
+
+  return `\n\nFITUR TINDAK LANJUT (Gustafta Action):
+Jika responmu menghasilkan rekomendasi konkret yang bisa langsung ditindaklanjuti dengan dokumen nyata atau alat praktis, kamu BOLEH (tidak wajib) menyertakan 1-2 saran aksi di AKHIR responmu menggunakan format:
+${examples.join("\n")}
+Format: [SUGGEST_ACTION:category|type|label|deskripsi_singkat]
+- category: document (generate dokumen) | miniapp (buka mini app interaktif) | tool (alat khusus)
+- type: id template dokumen atau mini app (contoh: surat_permohonan, laporan_k3, proposal_teknis, rencana_belajar, laporan_audit, notulen_rapat, rab_sederhana, checklist_iso, executive_summary, assessment_skk, laporan_kemajuan, surat_penawaran)
+- Gunakan HANYA jika benar-benar relevan. Jangan sisipkan di setiap respons.
+- Tag ini diproses sistem sebagai tombol interaktif dan TIDAK ditampilkan sebagai teks biasa ke pengguna.`;
+}
+
 const guestMessageTracker = new Map<string, { count: number; lastReset: string }>();
 
 async function isPublicAgent(agentId: string | number): Promise<boolean> {
@@ -2635,6 +2673,8 @@ Jika kamu kesulitan memberikan jawaban yang lengkap, tidak memiliki informasi ya
 Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendapatkan jawaban yang lebih lengkap dan layanan pembuatan dokumen yang lebih efektif.
 Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
 
+      systemPrompt += buildActionGuide(agent);
+
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
 
       // Log final assembled prompt (gated by DEBUG_PROMPT env)
@@ -3209,6 +3249,8 @@ Jika kamu kesulitan memberikan jawaban yang lengkap, tidak memiliki informasi ya
 - Analisis yang lebih komprehensif
 Maka rekomendasikan pengguna untuk mengakses chat.dokumentender.com untuk mendapatkan jawaban yang lebih lengkap dan layanan pembuatan dokumen yang lebih efektif.
 Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembuatan dokumen, Anda bisa mengakses chat.dokumentender.com"`;
+
+      systemPrompt += buildActionGuide(agent);
 
       systemPrompt += `\n\nRespons dalam bahasa ${agent.language === "id" ? "Indonesia" : agent.language || "Indonesia"}.`;
 
@@ -19017,6 +19059,79 @@ PENTING: Kembalikan HANYA JSON valid, format:
     } catch (err: any) {
       console.error("[K3 Vision]", err.message);
       res.status(500).json({ message: err.message || "Terjadi kesalahan internal" });
+    }
+  });
+
+  // POST /api/doc-generator/generate — Universal Document Generator (streaming)
+  app.post("/api/doc-generator/generate", async (req: any, res: any) => {
+    const { templateId, templateName, promptHint, fields, chatContext } = req.body as {
+      templateId: string;
+      templateName: string;
+      promptHint: string;
+      fields: Record<string, string>;
+      chatContext?: string;
+    };
+
+    if (!templateId || !fields) {
+      return res.status(400).json({ message: "templateId dan fields wajib diisi" });
+    }
+
+    const fieldLines = Object.entries(fields)
+      .filter(([, v]) => v && String(v).trim())
+      .map(([k, v]) => `- ${k}: ${String(v).trim()}`)
+      .join("\n");
+
+    const userPrompt = `Buat ${promptHint || templateName} yang lengkap dan profesional berdasarkan informasi berikut:
+
+${fieldLines}${chatContext ? `\n\nKonteks tambahan dari percakapan AI:\n${chatContext}` : ""}
+
+Instruksi pembuatan dokumen:
+- Format menggunakan Markdown yang rapi dengan heading yang sesuai
+- Untuk surat resmi: sertakan header/kop surat (placeholder), nomor surat, tanggal, alamat tujuan, salam pembuka, isi yang lengkap, penutup, dan tanda tangan
+- Untuk laporan: sertakan executive summary, detail temuan/isi, dan rekomendasi/kesimpulan
+- Untuk checklist: gunakan format tabel Markdown dengan kolom yang jelas (No | Item | Status | Keterangan)
+- Untuk RAB: gunakan tabel dengan kolom No. | Item Pekerjaan | Volume | Satuan | Harga Satuan (Rp) | Total (Rp)
+- Untuk notulen: sertakan identitas rapat, daftar hadir, pembahasan per agenda, keputusan, dan action items
+- Gunakan bahasa Indonesia formal dan profesional
+- Dokumen harus komprehensif, siap digunakan, dan sesuai standar profesi Indonesia
+- Jangan biarkan bagian yang kosong tanpa isi — isi dengan konten yang relevan dan masuk akal`;
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders();
+
+    try {
+      const { OpenAI } = await import("openai");
+      const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const stream = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Kamu adalah asisten profesional Indonesia yang menghasilkan dokumen bisnis dan teknis berkualitas tinggi. Buat dokumen yang lengkap, profesional, dan siap digunakan tanpa membutuhkan banyak revisi. Gunakan bahasa Indonesia formal yang tepat.",
+          },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 3500,
+        stream: true,
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content ?? "";
+        if (content) {
+          res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
+        }
+      }
+
+      res.write("data: [DONE]\n\n");
+      res.end();
+    } catch (err: any) {
+      console.error("[DocGenerator]", err.message);
+      res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+      res.end();
     }
   });
 

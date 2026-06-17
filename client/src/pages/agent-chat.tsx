@@ -11,6 +11,7 @@ import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 import { MessageContent as SharedMessageContent } from "@/lib/format-message";
 import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
+import { parseActionSuggestions, ActionChips } from "@/lib/action-utils";
 import { getChatStyle } from "@/lib/chat-styles";
 
 interface UploadedFile {
@@ -2529,9 +2530,12 @@ export default function AgentChat() {
             <div className="py-3 sm:py-4 space-y-3 sm:space-y-4 max-w-2xl mx-auto">
               {messages.map((message) => {
                 const isSearchMatch = searchOpen && searchQuery.trim() && message.content.toLowerCase().includes(searchQuery.toLowerCase());
-                const { fields: brainFields, cleanContent: cleanMsgContent } = message.role === "assistant"
+                const { fields: brainFields, cleanContent: brainClean } = message.role === "assistant"
                   ? parseBrainUpdates(message.content)
                   : { fields: [], cleanContent: message.content };
+                const { actions: actionSuggestions, cleanContent: cleanMsgContent } = message.role === "assistant"
+                  ? parseActionSuggestions(brainClean)
+                  : { actions: [], cleanContent: brainClean };
                 return (
                 <div
                   key={message.id}
@@ -2623,6 +2627,7 @@ export default function AgentChat() {
                         : formatMessageContent(cleanMsgContent)}
                     </div>
                     {message.role === "assistant" && <BrainChip fields={brainFields} />}
+                    {message.role === "assistant" && <ActionChips actions={actionSuggestions} conversationContext={message.content} messageId={message.id} />}
                     <div className="flex items-center gap-1.5 px-1">
                       <span className="text-[10px] text-muted-foreground">
                         {message.timestamp.toLocaleTimeString([], {
