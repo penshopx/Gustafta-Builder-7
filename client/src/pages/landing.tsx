@@ -922,6 +922,153 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── MONETISASI: Jual Chatbot dengan Payment Gateway ── */}
+      <section className="py-20 px-4 bg-gradient-to-b from-muted/10 to-background">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Monetisasi Chatbot Anda</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              Bangun Chatbot. Jual ke Klien.{" "}
+              <span className="text-emerald-600">Terima Bayaran Otomatis.</span>
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-xl mx-auto leading-relaxed">
+              Gustafta bukan hanya untuk dipakai sendiri. Platform ini memberi Anda infrastruktur lengkap
+              untuk menjual akses chatbot AI kepada klien — dengan payment gateway, webhook otomatis,
+              dan aktivasi akses tanpa konfirmasi manual.
+            </p>
+          </div>
+
+          {/* Flow diagram */}
+          <div className="bg-background rounded-2xl border p-6 mb-8 shadow-sm">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-5 text-center">Alur Penjualan Chatbot — Otomatis 100%</p>
+            <div className="flex flex-col md:flex-row items-center gap-2 justify-between">
+              {[
+                { step: "1", icon: "🤖", label: "Buat Chatbot", sub: "Konfigurasi AI, knowledge base, persona" },
+                { step: "2", icon: "🔗", label: "Generate Link Bayar", sub: "Satu klik dari panel Product Settings" },
+                { step: "3", icon: "📤", label: "Bagikan ke Klien", sub: "Via WhatsApp, email, atau website" },
+                { step: "4", icon: "💳", label: "Klien Bayar", sub: "Transfer bank, QRIS, e-wallet, kartu kredit" },
+                { step: "5", icon: "⚡", label: "Akses Aktif Otomatis", sub: "Webhook → aktivasi instan, tanpa manual" },
+              ].map((item, i) => (
+                <div key={item.step} className="flex md:flex-col items-center gap-3 md:gap-2 flex-1">
+                  <div className="flex md:flex-col items-center gap-2 md:gap-1 flex-1 md:text-center">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center flex-shrink-0 text-lg">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold">{item.label}</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">{item.sub}</p>
+                    </div>
+                  </div>
+                  {i < 4 && <div className="hidden md:block text-muted-foreground/40 text-lg font-bold flex-shrink-0">→</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Payment gateway cards */}
+          <div className="grid md:grid-cols-2 gap-5 mb-8">
+            {/* Mayar */}
+            <div className="rounded-2xl border-2 border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/10 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-xl">💙</div>
+                <div>
+                  <p className="font-extrabold text-sm">Mayar.id</p>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300">PAYMENT GATEWAY UTAMA</span>
+                </div>
+              </div>
+              <ul className="space-y-2 mb-4">
+                {[
+                  "Transfer bank, QRIS, e-wallet, kartu kredit",
+                  "Generate link bayar 1 klik dari panel chatbot",
+                  "Webhook otomatis → akses aktif instan",
+                  "Deskripsi produk terenkode dengan Agent ID",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-xs text-foreground/80">
+                    <Check className="w-3.5 h-3.5 text-blue-500 flex-shrink-0 mt-0.5" /> {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="rounded-lg bg-blue-500/10 border border-blue-200 dark:border-blue-800 px-3 py-2 text-[11px] text-blue-700 dark:text-blue-300">
+                <strong>Cara pakai:</strong> Product Settings → klik "Generate Mayar" → bagikan link ke klien
+              </div>
+            </div>
+
+            {/* Scalev */}
+            <div className="rounded-2xl border-2 border-orange-200 dark:border-orange-900/50 bg-orange-50/50 dark:bg-orange-900/10 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center text-xl">🧡</div>
+                <div>
+                  <p className="font-extrabold text-sm">Scalev.id</p>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">SUDAH AKTIF</span>
+                </div>
+              </div>
+              <ul className="space-y-2 mb-4">
+                {[
+                  "Mapping produk ke chatbot spesifik",
+                  "Mendukung modul, chatbot, atau bundle",
+                  "Webhook otomatis → aktivasi akses klien",
+                  "Cocok untuk ekosistem yang sudah pakai Scalev",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-xs text-foreground/80">
+                    <Check className="w-3.5 h-3.5 text-orange-500 flex-shrink-0 mt-0.5" /> {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="rounded-lg bg-orange-500/10 border border-orange-200 dark:border-orange-800 px-3 py-2 text-[11px] text-orange-700 dark:text-orange-300">
+                <strong>Setup:</strong> Admin Panel → tab Scalev → buat mapping produk → webhook aktif
+              </div>
+            </div>
+          </div>
+
+          {/* Bundle feature highlight */}
+          <div className="rounded-2xl border-2 border-violet-200 dark:border-violet-900/50 bg-violet-50/50 dark:bg-violet-900/10 p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center text-2xl flex-shrink-0">📦</div>
+              <div>
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <p className="font-extrabold text-sm text-violet-700 dark:text-violet-400">Fitur Bundle — 1 Bayar, Banyak Chatbot</p>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-700 dark:text-violet-300">NEW</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Jual <strong className="text-foreground">paket bundling</strong> beberapa chatbot sekaligus dalam satu harga.
+                  Klien bayar sekali → akses ke semua chatbot dalam bundle aktif otomatis.
+                  Cocok untuk paket "Konstruksi Lengkap" (TenderaClaw + SBUClaw + SafiraClaw), paket HR, paket energi, dll.
+                </p>
+                <div className="grid sm:grid-cols-3 gap-3">
+                  {[
+                    { label: "Paket Konstruksi", items: "TenderaClaw + SBUClaw + SafiraClaw", color: "amber" },
+                    { label: "Paket HR", items: "RekrutmenClaw + PenilaianKinerjaClaw + LDKompetensiClaw", color: "blue" },
+                    { label: "Paket Custom", items: "Pilih chatbot apapun dari 1350+ agent", color: "emerald" },
+                  ].map((pkg) => (
+                    <div key={pkg.label} className="bg-background rounded-xl border p-3">
+                      <p className="text-[10px] font-bold mb-1">{pkg.label}</p>
+                      <p className="text-[9px] text-muted-foreground leading-relaxed">{pkg.items}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Meta Pixel */}
+          <div className="rounded-xl border bg-background p-5 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center text-xl flex-shrink-0">📊</div>
+            <div>
+              <p className="font-bold text-sm mb-1">Meta Pixel — Track Konversi Iklan Facebook & Instagram</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                Pasang Meta Pixel ID Anda untuk track seluruh funnel iklan — dari klik iklan sampai pembayaran klien.
+                Optimalkan budget Meta Ads berdasarkan data konversi nyata, bukan asumsi.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {["PageView otomatis", "ViewContent tracking", "Purchase event", "Kompatibel dengan Mayar & Scalev"].map((t) => (
+                  <span key={t} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">{t}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── DESIRE: Testimoni ── */}
       <section className="py-16 px-4 bg-muted/20">
         <div className="max-w-4xl mx-auto">

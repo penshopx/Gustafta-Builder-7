@@ -1665,14 +1665,24 @@ export async function registerRoutes(
       const existingAgents = await storage.getAgents();
       const createdAgents: any[] = [];
       
-      // Create Gustafta Helpdesk
-      const helpdeskExists = existingAgents.some(
+      // Create or update Gustafta Helpdesk
+      const helpdeskExisting = existingAgents.find(
         agent => agent.name === "Gustafta Helpdesk" || agent.name === "Gustafta Assistant"
       );
-      if (!helpdeskExists) {
-        const { gustaftaKnowledgeBaseAgent } = await import("./seed-knowledge-base");
+      const { gustaftaKnowledgeBaseAgent } = await import("./seed-knowledge-base");
+      const VERSION_MARKER = "HELPDESK_v2_PAYMENT_INTEGRATION";
+      if (!helpdeskExisting) {
         const helpdesk = await storage.createAgent(gustaftaKnowledgeBaseAgent as any);
         createdAgents.push(helpdesk);
+      } else if (!((helpdeskExisting.systemPrompt || "") as string).includes(VERSION_MARKER)) {
+        // Prompt outdated — update to latest version
+        await storage.updateAgent(String(helpdeskExisting.id), {
+          systemPrompt: (gustaftaKnowledgeBaseAgent as any).systemPrompt,
+          greetingMessage: (gustaftaKnowledgeBaseAgent as any).greetingMessage,
+          conversationStarters: (gustaftaKnowledgeBaseAgent as any).conversationStarters,
+          personality: (gustaftaKnowledgeBaseAgent as any).personality,
+        } as any);
+        createdAgents.push({ ...helpdeskExisting, updated: true });
       }
       
       const dokumentenderExists = existingAgents.some(
