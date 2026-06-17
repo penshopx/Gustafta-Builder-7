@@ -97,7 +97,7 @@ async function sendVerificationEmail(email: string, code: string, firstName: str
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "Gustafta", email: "noreply@gustafta.my.id" },
+        sender: { name: "Gustafta", email: "af0ae9001@smtp-brevo.com" },
         to: [{ email, name: firstName }],
         subject: "Kode Verifikasi Gustafta",
         htmlContent: html,
