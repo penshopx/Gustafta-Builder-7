@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingBag, Globe, DollarSign, Shield, Tag, Copy, ExternalLink, Check, Plus, Trash2, Target, Lightbulb } from "lucide-react";
+import { ShoppingBag, Globe, DollarSign, Shield, Tag, Copy, ExternalLink, Check, Plus, Trash2, Target, Lightbulb, CreditCard, Link2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
     productTargetUser: agent.productTargetUser || "",
     productProblem: agent.productProblem || "",
     monthlyPrice: agent.monthlyPrice ?? 0,
+    paymentUrl: agent.paymentUrl || "",
     trialEnabled: agent.trialEnabled ?? true,
     trialDays: agent.trialDays ?? 7,
     messageQuotaDaily: agent.messageQuotaDaily ?? 50,
@@ -51,6 +52,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
       productTargetUser: agent.productTargetUser || "",
       productProblem: agent.productProblem || "",
       monthlyPrice: agent.monthlyPrice ?? 0,
+      paymentUrl: agent.paymentUrl || "",
       trialEnabled: agent.trialEnabled ?? true,
       trialDays: agent.trialDays ?? 7,
       messageQuotaDaily: agent.messageQuotaDaily ?? 50,
@@ -265,7 +267,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                Pengaturan Harga
+                Pengaturan Harga & Pembayaran
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -277,12 +279,40 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                   onChange={(e) => setSettings({ ...settings, monthlyPrice: parseInt(e.target.value) || 0 })}
                   placeholder="0"
                   min={0}
-                 
+                  data-testid="input-monthly-price"
                 />
                 <p className="text-xs text-muted-foreground">
                   Harga saat ini: {formatCurrency(settings.monthlyPrice)}
                 </p>
               </div>
+
+              {settings.monthlyPrice > 0 && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <Link2 className="w-3.5 h-3.5 text-primary" />
+                    Link Pembayaran (Scalev / Midtrans / Flip / dll)
+                  </Label>
+                  <Input
+                    value={settings.paymentUrl}
+                    onChange={(e) => set("paymentUrl", e.target.value)}
+                    placeholder="https://pay.scalev.id/checkout/..."
+                    data-testid="input-payment-url"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Link ini akan tampil sebagai tombol "Bayar Sekarang" di upgrade wall chatbot.
+                    Setelah customer bayar via Scalev, mereka bisa ambil akses dengan email di halaman chatbot.
+                  </p>
+                  {settings.paymentUrl && (
+                    <div className="flex gap-2">
+                      <a href={settings.paymentUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
+                        <Button type="button" variant="outline" size="sm" className="w-full gap-1.5 text-xs">
+                          <ExternalLink className="w-3.5 h-3.5" /> Test Link Pembayaran
+                        </Button>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex items-center justify-between gap-2">
                 <div className="space-y-0.5">
@@ -292,7 +322,7 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                 <Switch
                   checked={settings.trialEnabled}
                   onCheckedChange={(checked) => setSettings({ ...settings, trialEnabled: checked })}
-                 
+                  data-testid="switch-trial-enabled"
                 />
               </div>
 
@@ -305,8 +335,23 @@ export function ProductSettingsPanel({ agent }: { agent: any }) {
                     onChange={(e) => setSettings({ ...settings, trialDays: parseInt(e.target.value) || 0 })}
                     placeholder="7"
                     min={1}
-                   
+                    data-testid="input-trial-days"
                   />
+                </div>
+              )}
+
+              {settings.monthlyPrice > 0 && (
+                <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5" /> Alur Penjualan Premium
+                  </p>
+                  <ol className="text-xs text-amber-700 dark:text-amber-400 space-y-1 list-decimal list-inside">
+                    <li>Admin buat produk di Scalev → salin link checkout → tempel di kolom di atas</li>
+                    <li>Admin buat Scalev Mapping di Admin Panel (type: chatbot, agentId: ID chatbot ini)</li>
+                    <li>Customer klik "Bayar Sekarang" di chatbot → redirect ke Scalev → bayar</li>
+                    <li>Scalev kirim webhook → sistem otomatis aktifkan akses 30 hari</li>
+                    <li>Customer kembali ke chatbot → klik "Sudah bayar?" → masukkan email → langsung chat</li>
+                  </ol>
                 </div>
               )}
             </CardContent>

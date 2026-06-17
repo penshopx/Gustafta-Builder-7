@@ -8447,6 +8447,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
         language: agent.language || "id",
         contextQuestions: agent.contextQuestions || [],
         metaPixelId: agent.metaPixelId || "",
+        paymentUrl: (agent as any).paymentUrl || "",
       });
     } catch (error) {
       console.error("Chat config error:", error);
@@ -11601,6 +11602,39 @@ Jika informasi tidak ditemukan, isi dengan string kosong "".
     } catch (error) {
       console.error("Subscribe error:", error);
       res.status(500).json({ error: "Failed to create subscription" });
+    }
+  });
+
+  // Customer retrieves their active token by email (after paying via external link like Scalev)
+  app.post("/api/products/:agentId/token-by-email", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: "Email wajib diisi." });
+
+      const agent = await storage.getAgent(req.params.agentId as string);
+      if (!agent) return res.status(404).json({ error: "Chatbot tidak ditemukan." });
+
+      const subscription = await storage.getClientSubscriptionByEmail(req.params.agentId as string, email.trim().toLowerCase());
+      if (!subscription) {
+        return res.status(404).json({ error: "Tidak ada langganan aktif untuk email ini. Pastikan email yang Anda masukkan sama dengan yang digunakan saat pembayaran." });
+      }
+      if (subscription.status !== "active") {
+        return res.status(403).json({ error: `Langganan Anda berstatus "${subscription.status}". Hubungi admin untuk mengaktifkan.` });
+      }
+      if (subscription.endDate && new Date(subscription.endDate) < new Date()) {
+        await storage.updateClientSubscription(subscription.id, { status: "expired" });
+        return res.status(403).json({ error: "Langganan Anda sudah berakhir. Silakan perpanjang." });
+      }
+
+      res.json({
+        accessToken: subscription.accessToken,
+        customerName: subscription.customerName,
+        plan: subscription.plan,
+        endDate: subscription.endDate,
+      });
+    } catch (error) {
+      console.error("Token-by-email error:", error);
+      res.status(500).json({ error: "Gagal mengambil token." });
     }
   });
 

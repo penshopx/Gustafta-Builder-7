@@ -183,6 +183,7 @@ export const agents = pgTable("agents", {
   messageQuotaMonthly: integer("message_quota_monthly").default(1000),
   guestMessageLimit: integer("guest_message_limit").default(10),
   requireRegistration: boolean("require_registration").default(false),
+  paymentUrl: text("payment_url").default(""),
   brandingName: text("branding_name").default(""),
   brandingLogo: text("branding_logo").default(""),
   contextQuestions: jsonb("context_questions").default([]),

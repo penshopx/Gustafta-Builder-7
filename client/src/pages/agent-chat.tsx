@@ -76,6 +76,7 @@ interface AgentConfig {
   chatStyle?: string;
   contextQuestions?: ContextQuestion[];
   metaPixelId?: string;
+  paymentUrl?: string;
 }
 
 function injectMetaPixel(pixelId: string) {
@@ -430,6 +431,10 @@ export default function AgentChat() {
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [voucherMessage, setVoucherMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [showClaimAccess, setShowClaimAccess] = useState(false);
+  const [claimEmail, setClaimEmail] = useState("");
+  const [claimLoading, setClaimLoading] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
   const [projectContext, setProjectContext] = useState<Record<string, string>>({});
   const [showContextForm, setShowContextForm] = useState(false);
   const [contextCompleted, setContextCompleted] = useState(false);
@@ -731,6 +736,33 @@ export default function AgentChat() {
       console.error("Registration failed:", err);
     }
     setRegistering(false);
+  };
+
+  const handleClaimAccessByEmail = async () => {
+    if (!claimEmail.trim()) return;
+    setClaimLoading(true);
+    setClaimError(null);
+    try {
+      const res = await fetch(`/api/products/${params.agentId}/token-by-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: claimEmail.trim().toLowerCase() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.accessToken) {
+        setClientToken(data.accessToken);
+        setClientInfo({ name: data.customerName, email: claimEmail.trim().toLowerCase(), plan: data.plan });
+        localStorage.setItem(`gustafta_client_${params.agentId}`, data.accessToken);
+        setShowUpgradeWall(false);
+        setShowClaimAccess(false);
+        setClaimEmail("");
+      } else {
+        setClaimError(data.error || "Gagal mengambil akses.");
+      }
+    } catch {
+      setClaimError("Gagal menghubungi server. Coba lagi.");
+    }
+    setClaimLoading(false);
   };
 
   const handleVoucherRedeem = async () => {
@@ -1934,7 +1966,7 @@ export default function AgentChat() {
               </div>
 
               {config && config.monthlyPrice > 0 && (
-                <div className="rounded-md border p-4 space-y-2">
+                <div className="rounded-md border p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-sm">Paket Bulanan</span>
                     <span className="font-semibold" style={{ color }}>
@@ -1951,11 +1983,65 @@ export default function AgentChat() {
                       {config.messageQuotaMonthly} pesan/bulan
                     </li>
                   </ul>
+                  {config.paymentUrl && (
+                    <a href={config.paymentUrl} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full gap-2 font-semibold" style={{ backgroundColor: color, color: "#fff" }} data-testid="button-pay-scalev">
+                        <ExternalLink className="w-4 h-4" />
+                        Bayar Sekarang
+                      </Button>
+                    </a>
+                  )}
                 </div>
               )}
 
               {!clientToken ? (
                 <div className="space-y-3">
+                  {/* If paymentUrl exists, show "Sudah bayar?" email claim first */}
+                  {config?.paymentUrl && (
+                    <div className="rounded-lg border border-dashed p-3 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => { setShowClaimAccess(s => !s); setClaimError(null); }}
+                        className="w-full text-sm font-medium text-center flex items-center justify-center gap-1.5"
+                        style={{ color }}
+                        data-testid="button-toggle-claim-access"
+                      >
+                        <Check className="w-4 h-4" />
+                        Sudah bayar? Ambil akses di sini
+                      </button>
+                      {showClaimAccess && (
+                        <div className="space-y-2 pt-1">
+                          <input
+                            type="email"
+                            value={claimEmail}
+                            onChange={(e) => setClaimEmail(e.target.value)}
+                            placeholder="Masukkan email yang digunakan saat bayar"
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            data-testid="input-claim-email"
+                          />
+                          {claimError && (
+                            <p className="text-xs text-destructive">{claimError}</p>
+                          )}
+                          <Button
+                            onClick={handleClaimAccessByEmail}
+                            disabled={!claimEmail.trim() || claimLoading}
+                            className="w-full"
+                            data-testid="button-claim-access"
+                          >
+                            {claimLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                            Ambil Akses
+                          </Button>
+                          <p className="text-xs text-muted-foreground text-center">
+                            Gunakan email yang sama persis saat Anda melakukan pembayaran.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* If no paymentUrl, show regular registration form */}
+                  {!config?.paymentUrl && (
+                    <>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium">Nama</label>
                     <input
@@ -2001,6 +2087,31 @@ export default function AgentChat() {
                     {registering ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                     {config?.trialEnabled ? `Mulai Trial ${config.trialDays} Hari` : "Daftar & Lanjutkan"}
                   </Button>
+                    </>
+                  )}
+
+                  {/* Always show trial/free registration if trial is enabled AND paymentUrl exists */}
+                  {config?.paymentUrl && config?.trialEnabled && (
+                    <div className="border-t pt-3 space-y-2">
+                      <p className="text-xs text-muted-foreground text-center">Belum siap berlangganan? Coba gratis dulu</p>
+                      <div className="space-y-1.5">
+                        <input type="text" value={regName} onChange={(e) => setRegName(e.target.value)} placeholder="Nama lengkap" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" data-testid="input-upgrade-name" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="email@contoh.com" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" data-testid="input-upgrade-email" />
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={async () => { await handleClientRegister(); setShowUpgradeWall(false); }}
+                        disabled={!regName || !regEmail || registering}
+                        className="w-full"
+                        data-testid="button-upgrade-trial"
+                      >
+                        {registering ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                        Mulai Trial {config.trialDays} Hari Gratis
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-3">
