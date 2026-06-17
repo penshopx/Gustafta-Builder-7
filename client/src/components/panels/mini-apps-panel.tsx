@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMiniApps, useCreateMiniApp, useUpdateMiniApp, useDeleteMiniApp, useMiniAppResults, useCreateMiniAppResult, useRunAIMiniApp, useAutoGenerateMiniApps } from "@/hooks/use-mini-apps";
+import { useActiveProjectBrainInstance } from "@/hooks/use-project-brain";
 import type { Agent, MiniApp, MiniAppType, MiniAppResult } from "@shared/schema";
 
 interface MiniAppsPanelProps {
@@ -838,9 +839,15 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
   const agentId = String(agent.id);
 
   const { data: miniApps = [], isLoading } = useMiniApps(agentId);
+  const { data: activeBrain } = useActiveProjectBrainInstance(agentId);
   const createMiniApp = useCreateMiniApp();
   const updateMiniApp = useUpdateMiniApp();
   const deleteMiniApp = useDeleteMiniApp();
+
+  // Hitung berapa banyak data poin dari Project Brain yang sudah terisi chatbot
+  const brainValues = activeBrain?.values as Record<string, any> | undefined;
+  const brainDataCount = brainValues ? Object.values(brainValues).filter(v => v !== null && v !== "" && v !== undefined).length : 0;
+  const hasBrainData = brainDataCount > 0;
 
   const createMiniAppResult = useCreateMiniAppResult();
   const runAIMiniApp = useRunAIMiniApp();
@@ -1530,6 +1537,62 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
         </CardContent>
       </Card>
 
+      {/* ── Banner Status Project Brain → Mini Apps ── */}
+      <div
+        className={`rounded-xl border p-4 flex items-start gap-3 ${
+          hasBrainData
+            ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
+            : activeBrain
+            ? "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800"
+            : "bg-muted/40 border-muted"
+        }`}
+        data-testid="banner-project-brain-status"
+      >
+        <div className={`text-2xl flex-shrink-0 mt-0.5`}>
+          {hasBrainData ? "✅" : activeBrain ? "⚡" : "💡"}
+        </div>
+        <div className="flex-1 min-w-0">
+          {hasBrainData ? (
+            <>
+              <p className="font-semibold text-sm text-emerald-800 dark:text-emerald-300 mb-0.5">
+                {brainDataCount} data poin dari chatbot tersedia — Mini Apps siap dijalankan
+              </p>
+              <p className="text-[11px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                Project Brain aktif: <strong>{activeBrain?.name}</strong>. Chatbot Anda sudah mengekstrak data ke memori terstruktur.
+                Klik <strong>Lihat Detail → Jalankan</strong> pada mini app di bawah untuk langsung menghasilkan dokumen/output.
+              </p>
+            </>
+          ) : activeBrain ? (
+            <>
+              <p className="font-semibold text-sm text-amber-800 dark:text-amber-300 mb-0.5">
+                Project Brain aktif, belum ada data dari chatbot
+              </p>
+              <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                Chat dengan agen Anda — agen akan otomatis mengekstrak data ke Project Brain saat percakapan berlangsung.
+                Data yang terkumpul akan langsung mengisi Mini Apps dan Document Generator.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="font-semibold text-sm text-foreground/70 mb-0.5">
+                Belum ada Project Brain aktif
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Aktifkan Project Brain di tab <strong>Otak Proyek</strong> — agen akan otomatis mengisi data dari percakapan
+                dan Mini Apps dapat langsung menggunakannya untuk generate dokumen & output.
+              </p>
+            </>
+          )}
+        </div>
+        {hasBrainData && (
+          <div className="flex-shrink-0">
+            <span className="inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-2 py-1 rounded-full">
+              ● SIAP
+            </span>
+          </div>
+        )}
+      </div>
+
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -1566,9 +1629,16 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-medium truncate">{app.name}</h4>
-                        <Badge variant="secondary" className="text-xs mt-0.5">
-                          {miniAppTypeLabels[app.type as MiniAppType] || app.type}
-                        </Badge>
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">
+                            {miniAppTypeLabels[app.type as MiniAppType] || app.type}
+                          </Badge>
+                          {hasBrainData && (
+                            <span className="inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full" data-testid={`badge-brain-ready-${app.id}`}>
+                              ✓ Data Siap
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
@@ -1626,14 +1696,13 @@ export function MiniAppsPanel({ agent }: MiniAppsPanelProps) {
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{app.description}</p>
                   )}
                   <Button
-                    variant="outline"
+                    variant={hasBrainData ? "default" : "outline"}
                     size="sm"
-                    className="w-full"
+                    className={`w-full ${hasBrainData ? "bg-emerald-600 hover:bg-emerald-700 text-white border-0" : ""}`}
                     onClick={() => handleViewDetail(app)}
-                   
                   >
                     <Play className="w-3 h-3 mr-1" />
-                    Lihat Detail
+                    {hasBrainData ? "Jalankan — Data Siap" : "Lihat Detail"}
                   </Button>
                 </CardContent>
               </Card>
