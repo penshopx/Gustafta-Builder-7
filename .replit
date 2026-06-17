@@ -57,6 +57,8 @@ expertMode = true
 ADMIN_USER_IDS = "58349984,58848919,59024982"
 SUPERADMIN_EMAILS = "penshopx@gmail.com"
 ADMIN_EMAILS = "tutip98@outlook.com"
+SMTP_HOST = "smtp-relay.brevo.com"
+SMTP_PORT = "587"
 
 [postMerge]
 path = "scripts/post-merge.sh"
