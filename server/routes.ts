@@ -4778,12 +4778,12 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       // Prefer slug in URLs — cleaner for sharing to customers
       const agentRef = agentSlug || resolvedAgentId;
-      const chatUrl = agentRef ? `${baseUrl}/chatbot/${agentRef}` : null;
+      const chatUrl = agentRef ? `${baseUrl}/bot/${agentRef}` : null;
       const embedCode = agentRef
         ? `<iframe src="${baseUrl}/embed/${agentRef}" width="100%" height="600" frameborder="0" allow="microphone"></iframe>`
         : null;
       const widgetScript = agentRef
-        ? `<script src="${baseUrl}/widget.js" data-agent="${agentRef}" data-color="#6366f1" async></script>`
+        ? `<!-- Gustafta Chat Widget -->\n<script src="${baseUrl}/widget/loader.js" data-agent-id="${agentRef}" async></script>`
         : null;
 
       res.json({
@@ -15199,6 +15199,7 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     try {
       const rows = await db.select().from(clientSubscriptions)
         .orderBy(desc(clientSubscriptions.createdAt));
+
       // Attach bigIdea names
       const biIds = Array.from(new Set(rows.map(r => r.bigIdeaId).filter(Boolean))) as number[];
       let biMap: Record<number, string> = {};
@@ -15206,25 +15207,44 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
         const biRows = await db.select({ id: bigIdeasTable.id, name: bigIdeasTable.name }).from(bigIdeasTable).where(sqlExpr`${bigIdeasTable.id} = ANY(${biIds})`);
         for (const bi of biRows) biMap[bi.id] = bi.name;
       }
-      const result = rows.map(r => ({
-        id: r.id,
-        bigIdeaId: r.bigIdeaId,
-        bigIdeaName: r.bigIdeaId ? (biMap[r.bigIdeaId] || `Modul #${r.bigIdeaId}`) : "—",
-        customerName: r.customerName,
-        customerEmail: r.customerEmail,
-        customerPhone: r.customerPhone,
-        plan: r.plan,
-        status: r.status,
-        amount: r.amount,
-        accessToken: r.accessToken,
-        startDate: r.startDate,
-        endDate: r.endDate,
-        createdAt: r.createdAt,
-      }));
+
+      // Attach agent names for chatbot subscriptions
+      const agentIds = Array.from(new Set(rows.map(r => (r as any).agentId).filter(v => v && v !== "0")));
+      let agentMap: Record<string, string> = {};
+      if (agentIds.length > 0) {
+        const agentRows = await db.select({ id: agentsTable.id, name: agentsTable.name }).from(agentsTable).where(sqlExpr`${agentsTable.id}::text = ANY(${agentIds})`);
+        for (const a of agentRows) agentMap[String(a.id)] = a.name;
+      }
+
+      const result = rows.map(r => {
+        const anyR = r as any;
+        const agentIdStr = anyR.agentId && anyR.agentId !== "0" ? String(anyR.agentId) : null;
+        return {
+          id: r.id,
+          bigIdeaId: r.bigIdeaId,
+          agentId: agentIdStr,
+          productName: r.bigIdeaId
+            ? (biMap[r.bigIdeaId] || `Modul #${r.bigIdeaId}`)
+            : agentIdStr
+            ? (agentMap[agentIdStr] || `Chatbot #${agentIdStr}`)
+            : "—",
+          productType: r.bigIdeaId ? "modul" : agentIdStr ? "chatbot" : "—",
+          customerName: r.customerName,
+          customerEmail: r.customerEmail,
+          customerPhone: r.customerPhone,
+          plan: r.plan,
+          status: r.status,
+          amount: r.amount,
+          accessToken: r.accessToken,
+          startDate: r.startDate,
+          endDate: r.endDate,
+          createdAt: r.createdAt,
+        };
+      });
       res.json(result);
     } catch (error: any) {
       console.error("Admin modul-subs error:", error);
-      res.status(500).json({ error: "Gagal mengambil data subscriber modul." });
+      res.status(500).json({ error: "Gagal mengambil data subscriber." });
     }
   });
 
@@ -15354,7 +15374,7 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
 
       if (matchedMapping) {
         if (matchedMapping.type === "chatbot" && matchedMapping.agentId) {
-          // Create store order for chatbot access
+          // Create store order for chatbot access (for embed delivery)
           await storage.createStoreOrder({
             productId: matchedMapping.agentId,
             customerName: customerName || "Customer",
@@ -15366,7 +15386,29 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
             status: "paid",
           });
           const accessUrl = `${baseUrl}/store/access/${accessToken}`;
-          console.log(`[Scalev] Chatbot access created for ${customerEmail}: ${accessUrl}`);
+          console.log(`[Scalev] Chatbot store order created for ${customerEmail}: ${accessUrl}`);
+
+          // ALSO create a clientSubscription (active, 30 days) so requireRegistration chatbots grant chat access
+          try {
+            const subToken = genUUID();
+            const subStart = new Date();
+            const subEnd = new Date(); subEnd.setDate(subEnd.getDate() + 30);
+            await storage.createClientSubscription({
+              agentId: String(matchedMapping.agentId),
+              customerName: customerName || "Customer",
+              customerEmail: customerEmail,
+              customerPhone: customerPhone,
+              plan: "scalev",
+              status: "active",
+              amount: Math.round(grossRevenue),
+              accessToken: subToken,
+              startDate: subStart,
+              endDate: subEnd,
+            } as any);
+            console.log(`[Scalev] Chatbot clientSubscription created for ${customerEmail}`);
+          } catch (subErr: any) {
+            console.error(`[Scalev] Failed to create clientSubscription for chatbot:`, subErr?.message);
+          }
         } else if (matchedMapping.type === "modul" && matchedMapping.bigIdeaId) {
           // Create modul subscription
           const subToken = genUUID();

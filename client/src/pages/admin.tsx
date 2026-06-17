@@ -28,7 +28,9 @@ interface AdminMeData {
 interface ModulSub {
   id: number;
   bigIdeaId: number | null;
-  bigIdeaName: string;
+  agentId: string | null;
+  productName: string;
+  productType: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string | null;
@@ -1192,10 +1194,10 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-base flex items-center gap-2">
-                      <Package className="h-4 w-4" /> Subscriber Paket Modul
+                      <Package className="h-4 w-4" /> Subscriber Modul & Chatbot Premium
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Kelola pelanggan yang berlangganan Paket Series/Modul
+                      Kelola pelanggan yang berlangganan Paket Series/Modul atau Chatbot Premium
                     </p>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => refetchModulSubs()} data-testid="button-refresh-modul-subs">
@@ -1218,7 +1220,7 @@ export default function AdminPage() {
                       <thead>
                         <tr className="border-b text-xs text-muted-foreground">
                           <th className="text-left py-2 pr-3 font-medium">Nama / Email</th>
-                          <th className="text-left py-2 pr-3 font-medium">Modul</th>
+                          <th className="text-left py-2 pr-3 font-medium">Produk</th>
                           <th className="text-left py-2 pr-3 font-medium">Paket</th>
                           <th className="text-left py-2 pr-3 font-medium">Status</th>
                           <th className="text-left py-2 pr-3 font-medium">Berakhir</th>
@@ -1236,15 +1238,26 @@ export default function AdminPage() {
                               )}
                             </td>
                             <td className="py-2.5 pr-3">
-                              <p className="text-xs font-medium truncate max-w-[120px]">{sub.bigIdeaName}</p>
+                              <p className="text-xs font-medium truncate max-w-[120px]">{sub.productName}</p>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground capitalize">{sub.productType}</span>
                               {sub.bigIdeaId && (
                                 <a
                                   href={`/modul/${sub.bigIdeaId}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                                  className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5"
                                 >
-                                  <ExternalLink className="h-2.5 w-2.5" /> Buka
+                                  <ExternalLink className="h-2.5 w-2.5" /> Buka Modul
+                                </a>
+                              )}
+                              {sub.agentId && (
+                                <a
+                                  href={`/bot/${sub.agentId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5"
+                                >
+                                  <ExternalLink className="h-2.5 w-2.5" /> Buka Chatbot
                                 </a>
                               )}
                             </td>
@@ -1271,7 +1284,7 @@ export default function AdminPage() {
                                 >
                                   <Pencil className="h-3 w-3" />
                                 </Button>
-                                {sub.status === "active" && sub.bigIdeaId && (
+                                {sub.status === "active" && (sub.bigIdeaId || sub.agentId) && (
                                   <Button
                                     size="sm"
                                     className="h-7 text-xs px-2 bg-green-600 hover:bg-green-700 text-white"
@@ -2106,7 +2119,7 @@ export default function AdminPage() {
               <div className="bg-muted/50 rounded-lg p-3 text-sm">
                 <p className="font-medium">{modulSubDialog.sub.customerName}</p>
                 <p className="text-xs text-muted-foreground">{modulSubDialog.sub.customerEmail}</p>
-                <p className="text-xs text-muted-foreground">Modul: {modulSubDialog.sub.bigIdeaName}</p>
+                <p className="text-xs text-muted-foreground">{modulSubDialog.sub.productType === "chatbot" ? "Chatbot" : "Modul"}: {modulSubDialog.sub.productName}</p>
                 <p className="text-xs text-muted-foreground">Paket: {modulSubDialog.sub.plan}</p>
               </div>
               <div>
@@ -2173,11 +2186,31 @@ export default function AdminPage() {
           </DialogHeader>
           {modulWaDialog.sub && (() => {
             const sub = modulWaDialog.sub!;
-            const accessLink = `${appUrl}/modul/${sub.bigIdeaId}?email=${encodeURIComponent(sub.customerEmail)}`;
-            const planMap: Record<string, string> = { trial: "Trial", monthly: "Bulanan", yearly: "Tahunan", lifetime: "Seumur Hidup" };
-            const msg = `Halo ${sub.customerName}! 👋
+            const isChatbot = sub.productType === "chatbot";
+            const accessLink = isChatbot
+              ? `${appUrl}/bot/${sub.agentId}`
+              : `${appUrl}/modul/${sub.bigIdeaId}?email=${encodeURIComponent(sub.customerEmail)}`;
+            const planMap: Record<string, string> = { trial: "Trial", monthly: "Bulanan", yearly: "Tahunan", lifetime: "Seumur Hidup", scalev: "Scalev" };
+            const msg = isChatbot
+              ? `Halo ${sub.customerName}! 👋
 
-Akses Paket Modul *${sub.bigIdeaName}* Anda sudah *AKTIF* 🎉
+Akses *Chatbot AI ${sub.productName}* Anda sudah *AKTIF* 🎉
+
+Klik link di bawah untuk langsung chat:
+${accessLink}
+
+Paket: *${planMap[sub.plan] ?? sub.plan}*${sub.endDate ? `\nAktif hingga: ${new Date(sub.endDate).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}` : ""}
+
+💡 Simpan link di atas agar mudah dibuka kapan saja!
+
+Butuh bantuan? Hubungi kami:
+📱 WA: 081287941900 / 082299417818
+
+Selamat menggunakan! 🚀
+— Tim Gustafta`
+              : `Halo ${sub.customerName}! 👋
+
+Akses Paket Modul *${sub.productName}* Anda sudah *AKTIF* 🎉
 
 Klik link di bawah untuk langsung masuk:
 ${accessLink}
@@ -2197,7 +2230,7 @@ Selamat menggunakan! 🚀
                 <div className="bg-muted/50 rounded-lg p-3 text-sm">
                   <p className="font-medium">{sub.customerName}</p>
                   <p className="text-xs text-muted-foreground">{sub.customerEmail}</p>
-                  <p className="text-xs text-muted-foreground">Modul: {sub.bigIdeaName}</p>
+                  <p className="text-xs text-muted-foreground">{isChatbot ? "Chatbot" : "Modul"}: {sub.productName}</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase mb-1.5">Link Akses</p>
