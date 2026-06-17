@@ -50,7 +50,7 @@ export default function WidgetDemo() {
 <script src="${shareBaseUrl}/widget/loader.js" data-agent-id="${agentRef}"></script>
 <!-- End Widget -->`;
 
-  const publicChatUrl = `${shareBaseUrl}/chatbot/${agentRef}`;
+  const publicChatUrl = `${shareBaseUrl}/bot/${agentRef}`;
 
   useEffect(() => {
     if (!agentId) return;

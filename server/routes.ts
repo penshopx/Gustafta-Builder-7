@@ -8651,7 +8651,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
 
   // Serve dynamic widget loader script
   app.get("/widget/loader.js", (req, res) => {
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const baseUrl = getServerBaseUrl(req);
     
     const loaderScript = `
 (function() {

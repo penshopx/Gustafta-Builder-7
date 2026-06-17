@@ -328,7 +328,7 @@ import { ChaesaWidget } from "@/components/chaesa-widget";
 import { MultiClawProvider } from "@/contexts/multiclaw-context";
 import { ProfileCompletionGuard } from "@/components/profile-completion-guard";
 
-const WIDGET_EXCLUDED_PATHS = ["/legal", "/embed/", "/chaesa", "/demo/"];
+const WIDGET_EXCLUDED_PATHS = ["/legal", "/embed/", "/chaesa", "/demo/", "/bot/", "/chat/", "/chatbot/", "/modul/", "/m/", "/mini-app/"];
 
 function MarketplaceRedirect() {
   const { toast } = useToast();

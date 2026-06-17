@@ -124,16 +124,19 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
     return prodUrl || window.location.origin;
   };
 
+  // Prefer slug over numeric ID for stable links (slug is preserved across re-seeds; ID can drift)
+  const agentRef = (agent as any).slug || agent.id;
+
   // Dynamic embed code - just a loader script that fetches config from backend
   const generateDynamicEmbedCode = () => {
     return `<!-- Gustafta Chat Widget (Dynamic) -->
-<script src="${getBaseUrl()}/widget/loader.js" data-agent-id="${agent.id}"></script>
+<script src="${getBaseUrl()}/widget/loader.js" data-agent-id="${agentRef}"></script>
 <!-- End Gustafta Chat Widget -->`;
   };
 
   const [chatLinkCopied, setChatLinkCopied] = useState(false);
 
-  const getPublicChatUrl = () => `${getBaseUrl()}/bot/${agent.id}`;
+  const getPublicChatUrl = () => `${getBaseUrl()}/bot/${agentRef}`;
 
   const copyEmbedCode = () => {
     navigator.clipboard.writeText(generateDynamicEmbedCode());
@@ -429,7 +432,7 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
             <CardContent className="space-y-3">
               <div className="flex gap-2 items-center">
                 <Input
-                  value={`${getBaseUrl()}/demo/${agent.id}`}
+                  value={`${getBaseUrl()}/demo/${agentRef}`}
                   readOnly
                   className="text-sm font-mono"
                   data-testid="input-demo-link"
@@ -438,14 +441,14 @@ export function WidgetPanel({ agent, bigIdeaId }: WidgetPanelProps) {
                   size="icon"
                   variant="outline"
                   onClick={() => {
-                    navigator.clipboard.writeText(`${getBaseUrl()}/demo/${agent.id}`);
+                    navigator.clipboard.writeText(`${getBaseUrl()}/demo/${agentRef}`);
                     toast({ title: "Disalin!", description: "Link demo berhasil disalin" });
                   }}
                   data-testid="button-copy-demo-link"
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
-                <a href={`/demo/${agent.id}`} target="_blank" rel="noopener noreferrer">
+                <a href={`/demo/${agentRef}`} target="_blank" rel="noopener noreferrer">
                   <Button size="icon" variant="outline" data-testid="button-open-demo">
                     <ExternalLink className="w-4 h-4" />
                   </Button>
