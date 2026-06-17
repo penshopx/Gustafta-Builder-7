@@ -1537,6 +1537,169 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── HIERARKI MEMBANGUN CHATBOT ── */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Panduan Membangun</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Hierarki Merakit Chatbot di Gustafta</h2>
+            <p className="text-muted-foreground text-sm max-w-xl mx-auto">
+              Chatbot yang terstruktur lebih mudah dikembangkan, dikelola, dan dimonetisasi.
+              Ikuti 5 lapisan ini sebagai pedoman saat membangun.
+            </p>
+          </div>
+
+          {/* 5 Lapisan Hierarki */}
+          <div className="space-y-3 mb-10">
+            {[
+              {
+                no: "01",
+                label: "Domain / Sektor",
+                color: "bg-violet-500",
+                textColor: "text-violet-600 dark:text-violet-400",
+                borderColor: "border-violet-200 dark:border-violet-800",
+                bgCard: "bg-violet-50 dark:bg-violet-950/30",
+                icon: "🏢",
+                desc: "Bidang bisnis utama Anda — titik paling atas.",
+                contoh: "Konstruksi · Pendidikan · Hukum · Kesehatan · Properti",
+                tip: "Satu domain bisa punya banyak series. Tentukan domain dulu sebelum apapun.",
+              },
+              {
+                no: "02",
+                label: "Series",
+                color: "bg-blue-500",
+                textColor: "text-blue-600 dark:text-blue-400",
+                borderColor: "border-blue-200 dark:border-blue-800",
+                bgCard: "bg-blue-50 dark:bg-blue-950/30",
+                icon: "📚",
+                desc: "Lini produk atau layanan dalam satu domain.",
+                contoh: "\"Layanan SBU Konstruksi\" · \"Kursus SKK Online\" · \"Legal Consulting\"",
+                tip: "Series = merek/produk Anda. Satu akun bisa kelola beberapa series sekaligus.",
+              },
+              {
+                no: "03",
+                label: "Modul",
+                color: "bg-emerald-500",
+                textColor: "text-emerald-600 dark:text-emerald-400",
+                borderColor: "border-emerald-200 dark:border-emerald-800",
+                bgCard: "bg-emerald-50 dark:bg-emerald-950/30",
+                icon: "📦",
+                desc: "Paket topik spesifik dalam satu series.",
+                contoh: "\"Modul Tender LPSE\" · \"Modul K3 Konstruksi\" · \"Modul Kontrak & Klaim\"",
+                tip: "Tiap modul idealnya punya satu chatbot fokus. Jangan satu chatbot untuk semua topik.",
+              },
+              {
+                no: "04",
+                label: "Agen / Chatbot",
+                color: "bg-amber-500",
+                textColor: "text-amber-600 dark:text-amber-400",
+                borderColor: "border-amber-200 dark:border-amber-800",
+                bgCard: "bg-amber-50 dark:bg-amber-950/30",
+                icon: "🤖",
+                desc: "Chatbot individual yang melayani satu modul — bisa tunggal, OpenClaw, atau MultiClaw.",
+                contoh: "Agen Tender (tunggal) · Agen SBU Hub (orchestrator) · Agen CS WA (tunggal)",
+                tip: "Pilih level agen sesuai kebutuhan: tunggal untuk topik sederhana, orchestrator untuk topik kompleks multi-perspektif.",
+              },
+              {
+                no: "05",
+                label: "Alat Bantu",
+                color: "bg-rose-500",
+                textColor: "text-rose-600 dark:text-rose-400",
+                borderColor: "border-rose-200 dark:border-rose-800",
+                bgCard: "bg-rose-50 dark:bg-rose-950/30",
+                icon: "🛠️",
+                desc: "Mini Apps yang memperkuat kemampuan agen — bisa diaktifkan per chatbot.",
+                contoh: "RAB Kalkulator · K3 Vision Inspector · Dokumen Generator · Quiz Builder · 41 tipe lainnya",
+                tip: "Alat bantu bukan chatbot baru — mereka fitur tambahan yang melekat pada agen di level 04.",
+              },
+            ].map((layer) => (
+              <div
+                key={layer.no}
+                className={`rounded-xl border ${layer.borderColor} ${layer.bgCard} p-4 flex gap-4 items-start`}
+                data-testid={`card-hierarchy-${layer.no}`}
+              >
+                <div className={`w-10 h-10 rounded-lg ${layer.color} flex items-center justify-center text-white text-xs font-black flex-shrink-0`}>
+                  {layer.no}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className="text-lg">{layer.icon}</span>
+                    <span className={`font-bold text-sm ${layer.textColor}`}>{layer.label}</span>
+                    <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">Lapisan {layer.no}</span>
+                  </div>
+                  <p className="text-sm text-foreground/80 mb-1">{layer.desc}</p>
+                  <p className="text-[11px] text-muted-foreground mb-1.5">
+                    <span className="font-semibold">Contoh:</span> {layer.contoh}
+                  </p>
+                  <p className="text-[11px] text-primary/80 font-medium">💡 {layer.tip}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Level Kemampuan Agen */}
+          <div className="rounded-2xl border bg-card p-6 mb-6">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-4">Level Kemampuan Agen (Lapisan 04)</p>
+            <div className="grid sm:grid-cols-5 gap-2">
+              {[
+                { lv: "L1", name: "Master", desc: "Koordinasi semua domain & series", color: "bg-violet-600 text-white" },
+                { lv: "L2", name: "Series HUB", desc: "Orchestrator satu lini produk", color: "bg-blue-500 text-white" },
+                { lv: "L3", name: "OpenClaw", desc: "Spesialis satu domain — bisa berdiri sendiri", color: "bg-emerald-500 text-white" },
+                { lv: "L4", name: "Specialist", desc: "Ahli satu topik sempit", color: "bg-amber-400 text-amber-900" },
+                { lv: "L5", name: "Deep Spec.", desc: "Ahli sub-topik sangat spesifik", color: "bg-rose-400 text-white" },
+              ].map((lv) => (
+                <div key={lv.lv} className="text-center" data-testid={`card-agent-level-${lv.lv.toLowerCase()}`}>
+                  <div className={`rounded-lg ${lv.color} px-2 py-2 mb-1.5`}>
+                    <p className="text-xs font-black">{lv.lv}</p>
+                    <p className="text-[11px] font-bold">{lv.name}</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-tight">{lv.desc}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-3 text-[11px] text-muted-foreground">
+              <div className="flex items-start gap-2">
+                <span className="text-base">🚀</span>
+                <span><strong className="text-foreground">Baru mulai?</strong> Mulai dari L3 (OpenClaw) — satu agen spesialis untuk satu domain. Sudah bagus untuk klien pertama.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-base">⚡</span>
+                <span><strong className="text-foreground">Sudah punya 3+ agen?</strong> Buat L2 Series HUB sebagai orchestrator yang routing ke agen-agen Anda.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Alur Praktis Merakit */}
+          <div className="rounded-xl border bg-gradient-to-r from-primary/5 to-violet-500/5 p-5">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Alur Merakit Chatbot — Langkah demi Langkah</p>
+            <div className="flex flex-wrap gap-2 items-center text-sm font-medium">
+              {[
+                { step: "1", text: "Tentukan Domain" },
+                { step: "→" },
+                { step: "2", text: "Buat Series" },
+                { step: "→" },
+                { step: "3", text: "Rancang Modul" },
+                { step: "→" },
+                { step: "4", text: "Buat Agen per Modul" },
+                { step: "→" },
+                { step: "5", text: "Aktifkan Alat Bantu" },
+                { step: "→" },
+                { step: "6", text: "Deploy ke Channel" },
+              ].map((item, i) =>
+                item.text ? (
+                  <span key={i} className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 text-xs">
+                    <span className="w-4 h-4 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">{item.step}</span>
+                    {item.text}
+                  </span>
+                ) : (
+                  <span key={i} className="text-muted-foreground text-xs">{item.step}</span>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <section className="py-16 px-4">
         <div className="max-w-2xl mx-auto">
