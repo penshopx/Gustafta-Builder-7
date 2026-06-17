@@ -1210,6 +1210,148 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── LEVEL TEKNOLOGI: MultiClaw vs OpenClaw ── */}
+      <section className="py-12 px-4 bg-muted/20 border-t border-b">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Teknologi di Balik Layar</p>
+            <h2 className="text-xl md:text-2xl font-bold mb-2">MultiClaw & OpenClaw — Posisi Gustafta</h2>
+            <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Istilah ini sedang tren di komunitas AI developer. Berikut penjelasan jujur tentang apa yang Gustafta sudah terapkan dan di level berapa.
+            </p>
+          </div>
+
+          {/* Dua kolom: MultiClaw & OpenClaw */}
+          <div className="grid md:grid-cols-2 gap-5 mb-7">
+            {/* MultiClaw */}
+            <div className="rounded-2xl border bg-background p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-8 h-8 rounded-full bg-indigo-500/15 flex items-center justify-center text-indigo-500 font-black text-sm">M</span>
+                <div>
+                  <p className="font-bold text-sm">MultiClaw di Gustafta</p>
+                  <p className="text-[11px] text-muted-foreground">Suite 45 Orchestrator Spesialis</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                MultiClaw Gustafta bukan software yang perlu diinstal. Ini adalah <strong>45+ halaman AI tools siap pakai</strong> — TenderaClaw, SBUClaw, SafiraClaw, KeuanganClaw, dst. Setiap "Claw" adalah orchestrator yang mengkoordinasi tim agen spesialis di balik layar, secara paralel, lalu mensintesis hasilnya. User hanya perlu ketik pertanyaan.
+              </p>
+              {/* Level bar MultiClaw */}
+              <div className="space-y-2">
+                <div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>Orchestrasi & Koordinasi Agen</span><span className="font-bold text-indigo-500">Level 4 / 5</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-indigo-500" style={{width:"80%"}} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>Kedalaman Domain (Konstruksi / Regulasi)</span><span className="font-bold text-indigo-500">Level 5 / 5</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-indigo-500" style={{width:"100%"}} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>Kemudahan Pakai (Zero Install)</span><span className="font-bold text-indigo-500">Level 5 / 5</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-indigo-500" style={{width:"100%"}} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* OpenClaw */}
+            <div className="rounded-2xl border bg-background p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-8 h-8 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-500 font-black text-sm">O</span>
+                <div>
+                  <p className="font-bold text-sm">OpenClaw di Gustafta</p>
+                  <p className="text-[11px] text-muted-foreground">Trilogi OpenClaw — Agentic Chat Cloud</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                OpenClaw open-source versi umum dirancang <strong>berjalan di server lokal</strong> — bisa eksekusi kode, kelola file, browsing web, otonom tanpa prompt. Gustafta menerapkan konsep yang sama tapi <strong>cloud-hosted, tanpa instalasi</strong>: orchestrator memanggil sub-agen secara dinamis, hasil di-aggregate via streaming. Gustafta tidak mengeksekusi kode lokal, tapi kekuatannya ada di 1350+ agen berpengetahuan domain.
+              </p>
+              {/* Level bar OpenClaw */}
+              <div className="space-y-2">
+                <div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>Otonomi Agen (tanpa prompt manusia)</span><span className="font-bold text-amber-500">Level 3 / 5</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-amber-500" style={{width:"60%"}} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>Eksekusi Kode / File / Browser Lokal</span><span className="font-bold text-red-400">Level 0 / 5</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-red-400" style={{width:"0%"}} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                    <span>SaaS Cloud — Zero Install, Multi-tenant</span><span className="font-bold text-emerald-500">Level 5 / 5</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-500" style={{width:"100%"}} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabel perbandingan Gustafta vs Local OpenClaw */}
+          <div className="rounded-2xl border bg-background overflow-hidden shadow-sm">
+            <div className="px-5 py-3 border-b bg-muted/30">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Gustafta vs. OpenClaw Local Server — Perbandingan Kemampuan</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left px-4 py-2.5 text-muted-foreground font-medium w-2/5">Kemampuan</th>
+                    <th className="text-center px-3 py-2.5 font-bold text-primary">Gustafta (Cloud)</th>
+                    <th className="text-center px-3 py-2.5 text-muted-foreground font-medium">OpenClaw Lokal</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {[
+                    ["Zero Install — langsung di browser", "✅ Ya", "❌ Harus instal"],
+                    ["Multi-agent paralel + synthesis", "✅ Level 4", "✅ Level 4–5"],
+                    ["Domain spesialis Indonesia (konstruksi, regulasi, tender)", "✅ 1350+ agen", "⚙ Perlu konfigurasi manual"],
+                    ["Eksekusi kode lokal / shell command", "❌ Tidak", "✅ Ya"],
+                    ["Manajemen file lokal (baca/tulis folder)", "❌ Tidak", "✅ Ya"],
+                    ["Browsing web otonom", "❌ Tidak", "✅ Ya"],
+                    ["Berjalan otomatis tanpa prompt manusia", "❌ Tidak", "✅ Ya (proaktif)"],
+                    ["SaaS multi-tenant (banyak user bersamaan)", "✅ Ya", "❌ Tidak (local-first)"],
+                    ["Biaya setup untuk user akhir", "Rp 0 — browser only", "Tinggi — server + devops"],
+                    ["Level Otonomi Agen (1–5)", "★★★☆☆ Level 3", "★★★★☆ Level 4–5"],
+                    ["Level Kedalaman Domain (1–5)", "★★★★★ Level 5", "★★☆☆☆ Level 2"],
+                  ].map(([cap, g, o]) => (
+                    <tr key={cap} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-2.5 text-muted-foreground">{cap}</td>
+                      <td className="px-3 py-2.5 text-center font-semibold text-primary">{g}</td>
+                      <td className="px-3 py-2.5 text-center text-muted-foreground">{o}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-5 py-3 bg-muted/10 border-t">
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">Kesimpulan:</span> Gustafta unggul di domain expertise dan kemudahan pakai. OpenClaw lokal unggul di otonomi eksekusi. Untuk profesional Indonesia yang butuh jawaban cerdas tanpa ribet setup server — Gustafta adalah pilihan yang tepat.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <section className="py-16 px-4">
         <div className="max-w-2xl mx-auto">
@@ -1226,6 +1368,8 @@ export default function Landing() {
               { q: "Apa itu Orchestrator Multi-Agent?", a: "Orchestrator adalah sistem routing cerdas yang menganalisis setiap pesan user dan mengarahkannya ke specialist yang paling tepat secara otomatis. Misalnya: pertanyaan tender → Specialist Tender, pertanyaan SKK → Specialist Sertifikasi. Ada 131 hub orchestrator siap pakai, dan Anda bisa buat custom sendiri." },
               { q: "Bagaimana keamanan data saya?", a: "Data terenkripsi, akses berbasis token per chatbot, mode publik/privat yang bisa dikontrol, dan autentikasi via OAuth Replit Identity. Anda punya kontrol penuh atas siapa yang bisa mengakses chatbot dan data Knowledge Base Anda." },
               { q: "Bisa digunakan untuk bisnis di luar konstruksi?", a: "Ya. Meskipun Gustafta paling dalam untuk Jasa Konstruksi Indonesia, platform ini fleksibel untuk properti, energi, pendidikan, digital marketing, HR, legal, dan 12+ sektor lainnya. Knowledge Base, persona, dan Mini Apps bisa dikustomisasi sepenuhnya." },
+              { q: "Apa itu MultiClaw di Gustafta? Apakah perlu instalasi?", a: "MultiClaw Gustafta adalah suite 45+ AI tools spesialis yang berjalan 100% di cloud — tidak perlu instalasi apapun. Berbeda dengan MultiClaw open-source yang butuh server sendiri, MultiClaw Gustafta langsung bisa dipakai di browser. Setiap 'Claw' (TenderaClaw, SBUClaw, dll.) adalah orchestrator yang mengelola tim agen AI spesialis secara paralel di balik layar." },
+              { q: "Apa bedanya OpenClaw Gustafta dengan OpenClaw lokal yang diinstal di server?", a: "OpenClaw lokal (open-source) bisa eksekusi kode, kelola file, dan browsing web secara otonom — ia adalah 'pekerja otonom' di server Anda. OpenClaw Gustafta (fitur Trilogi Agentic Chat) menerapkan konsep yang sama tapi cloud-hosted: orchestrator memanggil sub-agen secara dinamis dan mensintesis hasilnya. Kelebihan Gustafta: zero install, 1350+ agen berpengetahuan domain Indonesia, dan bisa dipakai oleh siapapun tanpa setup teknis." },
             ].map((item, i) => (
               <AccordionItem
                 key={i}
