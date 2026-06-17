@@ -6972,9 +6972,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
 
       const html = buildEcourseHtml({ agent: safeAgent, knowledgeBases, miniApps, series, bigIdea, toolbox });
       const safeName = (agent.name || "ecourse").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      const inline = String(req.query.inline || "") !== "1";
+      const asDownload = String(req.query.download || "") === "1";
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="${safeName}-ecourse.html"`);
+      if (asDownload) {
+        res.setHeader("Content-Disposition", `attachment; filename="${safeName}-ecourse.html"`);
+      }
       return res.send(html);
     } catch (err: any) {
       console.error("[/api/agents/:id/export/ecourse]", err);
