@@ -161,7 +161,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Sparkles className="h-4 w-4" />
-            1350+ Agent AI Spesialis · 131 Hub Orchestrator · 80+ MultiClaw Tools · Siap Pakai
+            Ratusan AI Spesialis · 30+ Sektor Industri · 80+ AI Tools Siap Pakai · Tanpa Coding
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
@@ -209,9 +209,9 @@ export default function Landing() {
       <div className="border-y bg-muted/30 py-8 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { value: "1350+", label: "Agent AI Spesialis" },
-            { value: "131", label: "Hub Orchestrator" },
-            { value: "80+", label: "MultiClaw AI Tools" },
+            { value: "1350+", label: "Agen AI Tersedia" },
+            { value: "30+", label: "Sektor Industri" },
+            { value: "80+", label: "AI Tools Siap Pakai" },
             { value: "24/7", label: "AI Selalu Aktif" },
           ].map((s) => (
             <div key={s.label}>
@@ -432,7 +432,7 @@ export default function Landing() {
               { icon: Globe, title: "Custom Domain", desc: "Pasang bot.perusahaan.com. Branding profesional, bukan link chatbot biasa.", color: "text-blue-500", bg: "bg-blue-500/10" },
               { icon: BookOpen, title: "Knowledge Base 7 Tipe", desc: "PDF, URL, YouTube, video, audio — AI transkripsi dan RAG secara otomatis.", color: "text-violet-500", bg: "bg-violet-500/10" },
               { icon: Plug, title: "Multi-Channel", desc: "WhatsApp, Telegram, web widget, REST API — satu chatbot, semua channel sekaligus.", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-              { icon: Zap, title: "80+ MultiClaw AI Tools", desc: "Suite lengkap: TenderaClaw, SBUClaw, KonstraClaw, BrainClaw, SafiraClaw, dan 75+ tools spesialis siap pakai — dan terus bertambah.", color: "text-orange-500", bg: "bg-orange-500/10" },
+              { icon: Zap, title: "80+ AI Tools Spesialis", desc: "Suite lengkap untuk konstruksi, tender, K3, energi, properti, HR, marketing, dan 8+ sektor lainnya — siap pakai tanpa instalasi, terus bertambah.", color: "text-orange-500", bg: "bg-orange-500/10" },
               { icon: Shield, title: "Aman & Privat", desc: "Token per chatbot, mode publik/privat, enkripsi end-to-end, OAuth Replit Identity.", color: "text-slate-500", bg: "bg-slate-500/10" },
             ].map((f) => {
               const FIcon = f.icon;
@@ -606,27 +606,26 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* MultiClaw tools grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+            {/* Industry category tags */}
+            <div className="flex flex-wrap gap-2 mb-5">
               {[
-                { name: "TenderaClaw", sub: "10 agen · Tender LPSE", href: "/tendera-claw", color: "text-indigo-600" },
-                { name: "SBUClaw", sub: "10 agen · SBU Konstruksi", href: "/sbu-claw", color: "text-amber-600" },
-                { name: "BrainClaw", sub: "6 agen · Intelijen Proyek", href: "/brain-claw", color: "text-cyan-600" },
-                { name: "KonstraClaw", sub: "9 agen · Manajemen Proyek", href: "/konstra-claw", color: "text-slate-600" },
-                { name: "SafiraClaw", sub: "5 agen · K3 Konstruksi", href: "/safira-claw", color: "text-red-600" },
-                { name: "SMAPClaw", sub: "8 agen · ISO 37001 Anti-Suap", href: "/smap-claw", color: "text-teal-600" },
-                { name: "SkemaClaw", sub: "9 agen · Sertifikasi BUJK", href: "/skema-claw", color: "text-blue-600" },
-                { name: "+38 Tools Lagi", sub: "Konstruksi · Energi · HR · Digital", href: "/ai-tools", color: "text-primary font-bold" },
-              ].map((t) => (
-                <a
-                  key={t.name}
-                  href={t.href}
-                  className="rounded-lg border border-border/60 bg-background hover:border-primary/40 hover:shadow-sm transition-all p-3 group"
-                  data-testid={`link-multiclaw-${t.name.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  <p className={`text-xs font-bold mb-0.5 ${t.color} group-hover:underline`}>{t.name}</p>
-                  <p className="text-[9px] text-muted-foreground leading-tight">{t.sub}</p>
-                </a>
+                { label: "Sertifikasi & Izin BUJK", color: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20" },
+                { label: "Tender & Pengadaan", color: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20" },
+                { label: "SKK & Kompetensi", color: "bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/20" },
+                { label: "K3, HSE & IMS", color: "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20" },
+                { label: "ISO & Kepatuhan", color: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20" },
+                { label: "Teknik & Konsultansi", color: "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20" },
+                { label: "Energi & Pertambangan", color: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20" },
+                { label: "Properti & Real Estate", color: "bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20" },
+                { label: "Bisnis, HR & Operasional", color: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20" },
+                { label: "Pendidikan & Sertifikasi", color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20" },
+                { label: "Regulasi & Hukum", color: "bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-500/20" },
+                { label: "Perizinan & Investasi", color: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/20" },
+                { label: "Manajemen Proyek", color: "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20" },
+              ].map((cat) => (
+                <span key={cat.label} className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border ${cat.color}`}>
+                  {cat.label}
+                </span>
               ))}
             </div>
 
@@ -1178,7 +1177,7 @@ export default function Landing() {
                 {
                   src: "/videos/gustafta-multiclaw-suite.mp4",
                   title: "MultiClaw Suite",
-                  desc: "45 AI tools spesialis: TenderaClaw, SBUClaw, SafiraClaw & lebih.",
+                  desc: "80+ AI tools spesialis: TenderaClaw, SBUClaw, SafiraClaw & lebih.",
                   badge: "MultiClaw",
                   badgeColor: "bg-indigo-500",
                   dl: "/videos/gustafta-multiclaw-suite.mp4",
@@ -1542,310 +1541,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── LEVEL TEKNOLOGI: MultiClaw vs OpenClaw ── */}
-      <section className="py-12 px-4 bg-muted/20 border-t border-b">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Teknologi di Balik Layar</p>
-            <h2 className="text-xl md:text-2xl font-bold mb-2">MultiClaw & OpenClaw — Posisi Gustafta</h2>
-            <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-              Istilah ini sedang tren di komunitas AI developer. Berikut penjelasan jujur tentang apa yang Gustafta sudah terapkan dan di level berapa.
-            </p>
-          </div>
-
-          {/* Dua kolom: MultiClaw & OpenClaw */}
-          <div className="grid md:grid-cols-2 gap-5 mb-7">
-            {/* MultiClaw */}
-            <div className="rounded-2xl border bg-background p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-8 h-8 rounded-full bg-indigo-500/15 flex items-center justify-center text-indigo-500 font-black text-sm">M</span>
-                <div>
-                  <p className="font-bold text-sm">MultiClaw di Gustafta</p>
-                  <p className="text-[11px] text-muted-foreground">Suite 45 Orchestrator Spesialis</p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                MultiClaw Gustafta bukan software yang perlu diinstal. Ini adalah <strong>45+ halaman AI tools siap pakai</strong> — TenderaClaw, SBUClaw, SafiraClaw, KeuanganClaw, dst. Setiap "Claw" adalah orchestrator yang mengkoordinasi tim agen spesialis di balik layar, secara paralel, lalu mensintesis hasilnya. User hanya perlu ketik pertanyaan.
-              </p>
-              {/* Level bar MultiClaw */}
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>Orchestrasi & Koordinasi Agen</span><span className="font-bold text-indigo-500">Level 4 / 5</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-indigo-500" style={{width:"80%"}} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>Kedalaman Domain (Konstruksi / Regulasi)</span><span className="font-bold text-indigo-500">Level 5 / 5</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-indigo-500" style={{width:"100%"}} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>Kemudahan Pakai (Zero Install)</span><span className="font-bold text-indigo-500">Level 5 / 5</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-indigo-500" style={{width:"100%"}} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* OpenClaw */}
-            <div className="rounded-2xl border bg-background p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-8 h-8 rounded-full bg-violet-500/15 flex items-center justify-center text-violet-500 font-black text-sm">O</span>
-                <div>
-                  <p className="font-bold text-sm">OpenClaw di Gustafta</p>
-                  <p className="text-[11px] text-muted-foreground">Trilogi OpenClaw — Agentic Chat Cloud</p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                OpenClaw open-source versi umum dirancang <strong>berjalan di server lokal</strong> — bisa eksekusi kode, kelola file, browsing web, otonom tanpa prompt. Gustafta menerapkan konsep yang sama tapi <strong>cloud-hosted, tanpa instalasi</strong>: orchestrator memanggil sub-agen secara dinamis, hasil di-aggregate via streaming. Gustafta tidak mengeksekusi kode lokal, tapi kekuatannya ada di 1350+ agen berpengetahuan domain.
-              </p>
-              {/* Level bar OpenClaw */}
-              <div className="space-y-2">
-                <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>Otonomi Agen (tanpa prompt manusia)</span><span className="font-bold text-amber-500">Level 3 / 5</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-amber-500" style={{width:"60%"}} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>Eksekusi Kode / File / Browser Lokal</span><span className="font-bold text-red-400">Level 0 / 5</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-red-400" style={{width:"0%"}} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>SaaS Cloud — Zero Install, Multi-tenant</span><span className="font-bold text-emerald-500">Level 5 / 5</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-emerald-500" style={{width:"100%"}} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabel perbandingan Gustafta vs Local OpenClaw */}
-          <div className="rounded-2xl border bg-background overflow-hidden shadow-sm">
-            <div className="px-5 py-3 border-b bg-muted/30">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Gustafta vs. OpenClaw Local Server — Perbandingan Kemampuan</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left px-4 py-2.5 text-muted-foreground font-medium w-2/5">Kemampuan</th>
-                    <th className="text-center px-3 py-2.5 font-bold text-primary">Gustafta (Cloud)</th>
-                    <th className="text-center px-3 py-2.5 text-muted-foreground font-medium">OpenClaw Lokal</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {[
-                    ["Zero Install — langsung di browser", "✅ Ya", "❌ Harus instal"],
-                    ["Multi-agent paralel + synthesis", "✅ Level 4", "✅ Level 4–5"],
-                    ["Domain spesialis Indonesia (konstruksi, regulasi, tender)", "✅ 1350+ agen", "⚙ Perlu konfigurasi manual"],
-                    ["Eksekusi kode lokal / shell command", "❌ Tidak", "✅ Ya"],
-                    ["Manajemen file lokal (baca/tulis folder)", "❌ Tidak", "✅ Ya"],
-                    ["Browsing web otonom", "❌ Tidak", "✅ Ya"],
-                    ["Berjalan otomatis tanpa prompt manusia", "❌ Tidak", "✅ Ya (proaktif)"],
-                    ["SaaS multi-tenant (banyak user bersamaan)", "✅ Ya", "❌ Tidak (local-first)"],
-                    ["Biaya setup untuk user akhir", "Rp 0 — browser only", "Tinggi — server + devops"],
-                    ["Level Otonomi Agen (1–5)", "★★★☆☆ Level 3", "★★★★☆ Level 4–5"],
-                    ["Level Kedalaman Domain (1–5)", "★★★★★ Level 5", "★★☆☆☆ Level 2"],
-                  ].map(([cap, g, o]) => (
-                    <tr key={cap} className="hover:bg-muted/20 transition-colors">
-                      <td className="px-4 py-2.5 text-muted-foreground">{cap}</td>
-                      <td className="px-3 py-2.5 text-center font-semibold text-primary">{g}</td>
-                      <td className="px-3 py-2.5 text-center text-muted-foreground">{o}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="px-5 py-3 bg-muted/10 border-t">
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                <span className="font-semibold text-foreground">Kesimpulan:</span> Gustafta unggul di domain expertise dan kemudahan pakai. OpenClaw lokal unggul di otonomi eksekusi. Untuk profesional Indonesia yang butuh jawaban cerdas tanpa ribet setup server — Gustafta adalah pilihan yang tepat.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── HIERARKI MEMBANGUN CHATBOT ── */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Panduan Membangun</p>
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">Hierarki Merakit Chatbot di Gustafta</h2>
-            <p className="text-muted-foreground text-sm max-w-xl mx-auto">
-              Chatbot yang terstruktur lebih mudah dikembangkan, dikelola, dan dimonetisasi.
-              Ikuti 5 lapisan ini sebagai pedoman saat membangun.
-            </p>
-          </div>
-
-          {/* 5 Lapisan Hierarki */}
-          <div className="space-y-3 mb-10">
-            {[
-              {
-                no: "01",
-                label: "Domain / Sektor",
-                color: "bg-violet-500",
-                textColor: "text-violet-600 dark:text-violet-400",
-                borderColor: "border-violet-200 dark:border-violet-800",
-                bgCard: "bg-violet-50 dark:bg-violet-950/30",
-                icon: "🏢",
-                desc: "Bidang bisnis utama Anda — titik paling atas.",
-                contoh: "Konstruksi · Pendidikan · Hukum · Kesehatan · Properti",
-                tip: "Satu domain bisa punya banyak series. Tentukan domain dulu sebelum apapun.",
-              },
-              {
-                no: "02",
-                label: "Series",
-                color: "bg-blue-500",
-                textColor: "text-blue-600 dark:text-blue-400",
-                borderColor: "border-blue-200 dark:border-blue-800",
-                bgCard: "bg-blue-50 dark:bg-blue-950/30",
-                icon: "📚",
-                desc: "Lini produk atau layanan dalam satu domain.",
-                contoh: "\"Layanan SBU Konstruksi\" · \"Kursus SKK Online\" · \"Legal Consulting\"",
-                tip: "Series = merek/produk Anda. Satu akun bisa kelola beberapa series sekaligus.",
-              },
-              {
-                no: "03",
-                label: "Modul",
-                color: "bg-emerald-500",
-                textColor: "text-emerald-600 dark:text-emerald-400",
-                borderColor: "border-emerald-200 dark:border-emerald-800",
-                bgCard: "bg-emerald-50 dark:bg-emerald-950/30",
-                icon: "📦",
-                desc: "Paket topik spesifik dalam satu series.",
-                contoh: "\"Modul Tender LPSE\" · \"Modul K3 Konstruksi\" · \"Modul Kontrak & Klaim\"",
-                tip: "Tiap modul idealnya punya satu chatbot fokus. Jangan satu chatbot untuk semua topik.",
-              },
-              {
-                no: "04",
-                label: "Agen / Chatbot",
-                color: "bg-amber-500",
-                textColor: "text-amber-600 dark:text-amber-400",
-                borderColor: "border-amber-200 dark:border-amber-800",
-                bgCard: "bg-amber-50 dark:bg-amber-950/30",
-                icon: "🤖",
-                desc: "Chatbot individual yang melayani satu modul — bisa tunggal, OpenClaw, atau MultiClaw.",
-                contoh: "Agen Tender (tunggal) · Agen SBU Hub (orchestrator) · Agen CS WA (tunggal)",
-                tip: "Pilih level agen sesuai kebutuhan: tunggal untuk topik sederhana, orchestrator untuk topik kompleks multi-perspektif.",
-              },
-              {
-                no: "05",
-                label: "Alat Bantu",
-                color: "bg-rose-500",
-                textColor: "text-rose-600 dark:text-rose-400",
-                borderColor: "border-rose-200 dark:border-rose-800",
-                bgCard: "bg-rose-50 dark:bg-rose-950/30",
-                icon: "🛠️",
-                desc: "Mini Apps yang memperkuat kemampuan agen — bisa diaktifkan per chatbot.",
-                contoh: "RAB Kalkulator · K3 Vision Inspector · Dokumen Generator · Quiz Builder · 41 tipe lainnya",
-                tip: "Alat bantu bukan chatbot baru — mereka fitur tambahan yang melekat pada agen di level 04.",
-              },
-            ].map((layer) => (
-              <div
-                key={layer.no}
-                className={`rounded-xl border ${layer.borderColor} ${layer.bgCard} p-4 flex gap-4 items-start`}
-                data-testid={`card-hierarchy-${layer.no}`}
-              >
-                <div className={`w-10 h-10 rounded-lg ${layer.color} flex items-center justify-center text-white text-xs font-black flex-shrink-0`}>
-                  {layer.no}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="text-lg">{layer.icon}</span>
-                    <span className={`font-bold text-sm ${layer.textColor}`}>{layer.label}</span>
-                    <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">Lapisan {layer.no}</span>
-                  </div>
-                  <p className="text-sm text-foreground/80 mb-1">{layer.desc}</p>
-                  <p className="text-[11px] text-muted-foreground mb-1.5">
-                    <span className="font-semibold">Contoh:</span> {layer.contoh}
-                  </p>
-                  <p className="text-[11px] text-primary/80 font-medium">💡 {layer.tip}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Level Kemampuan Agen */}
-          <div className="rounded-2xl border bg-card p-6 mb-6">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-4">Level Kemampuan Agen (Lapisan 04)</p>
-            <div className="grid sm:grid-cols-5 gap-2">
-              {[
-                { lv: "L1", name: "Master", desc: "Koordinasi semua domain & series", color: "bg-violet-600 text-white" },
-                { lv: "L2", name: "Series HUB", desc: "Orchestrator satu lini produk", color: "bg-blue-500 text-white" },
-                { lv: "L3", name: "OpenClaw", desc: "Spesialis satu domain — bisa berdiri sendiri", color: "bg-emerald-500 text-white" },
-                { lv: "L4", name: "Specialist", desc: "Ahli satu topik sempit", color: "bg-amber-400 text-amber-900" },
-                { lv: "L5", name: "Deep Spec.", desc: "Ahli sub-topik sangat spesifik", color: "bg-rose-400 text-white" },
-              ].map((lv) => (
-                <div key={lv.lv} className="text-center" data-testid={`card-agent-level-${lv.lv.toLowerCase()}`}>
-                  <div className={`rounded-lg ${lv.color} px-2 py-2 mb-1.5`}>
-                    <p className="text-xs font-black">{lv.lv}</p>
-                    <p className="text-[11px] font-bold">{lv.name}</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground leading-tight">{lv.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t flex flex-col sm:flex-row gap-3 text-[11px] text-muted-foreground">
-              <div className="flex items-start gap-2">
-                <span className="text-base">🚀</span>
-                <span><strong className="text-foreground">Baru mulai?</strong> Mulai dari L3 (OpenClaw) — satu agen spesialis untuk satu domain. Sudah bagus untuk klien pertama.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-base">⚡</span>
-                <span><strong className="text-foreground">Sudah punya 3+ agen?</strong> Buat L2 Series HUB sebagai orchestrator yang routing ke agen-agen Anda.</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Alur Praktis Merakit */}
-          <div className="rounded-xl border bg-gradient-to-r from-primary/5 to-violet-500/5 p-5">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">Alur Merakit Chatbot — Langkah demi Langkah</p>
-            <div className="flex flex-wrap gap-2 items-center text-sm font-medium">
-              {[
-                { step: "1", text: "Tentukan Domain" },
-                { step: "→" },
-                { step: "2", text: "Buat Series" },
-                { step: "→" },
-                { step: "3", text: "Rancang Modul" },
-                { step: "→" },
-                { step: "4", text: "Buat Agen per Modul" },
-                { step: "→" },
-                { step: "5", text: "Aktifkan Alat Bantu" },
-                { step: "→" },
-                { step: "6", text: "Deploy ke Channel" },
-              ].map((item, i) =>
-                item.text ? (
-                  <span key={i} className="flex items-center gap-1.5 bg-background border rounded-lg px-3 py-1.5 text-xs">
-                    <span className="w-4 h-4 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center flex-shrink-0">{item.step}</span>
-                    {item.text}
-                  </span>
-                ) : (
-                  <span key={i} className="text-muted-foreground text-xs">{item.step}</span>
-                )
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── FAQ ── */}
       <section className="py-16 px-4">
@@ -1967,7 +1662,7 @@ export default function Landing() {
                 <li><Link href="/konstra-claw" className="hover:text-foreground transition-colors">KonstraClaw</Link></li>
                 <li><Link href="/brain-claw" className="hover:text-foreground transition-colors">BrainClaw</Link></li>
                 <li><Link href="/safira-claw" className="hover:text-foreground transition-colors">SafiraClaw</Link></li>
-                <li><Link href="/ai-tools" className="hover:text-foreground transition-colors font-medium text-primary">Lihat 45+ Tools →</Link></li>
+                <li><Link href="/ai-tools" className="hover:text-foreground transition-colors font-medium text-primary">Lihat 80+ Tools →</Link></li>
               </ul>
             </div>
           </div>
