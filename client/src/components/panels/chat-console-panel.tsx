@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageSquare, Send, Trash2, Bot, User, Shield, CheckCircle2, Lock, XCircle, ChevronDown, ChevronRight, Activity, Layers, AlertTriangle, Download } from "lucide-react";
+import { MessageSquare, Send, Trash2, Bot, User, Shield, CheckCircle2, Lock, XCircle, ChevronDown, ChevronRight, Activity, Layers, AlertTriangle, Download, Brain, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -477,8 +477,33 @@ export function ChatConsolePanel({ agent }: ChatConsolePanelProps) {
   );
 }
 
+const BRAIN_TAG_REGEX = /\[UPDATE_BRAIN:([\w_]+)\]\s*([\s\S]*?)\s*\[\/UPDATE_BRAIN\]/g;
+
+function parseBrainUpdates(content: string): { fields: string[]; cleanContent: string } {
+  const fields: string[] = [];
+  const cleanContent = content.replace(BRAIN_TAG_REGEX, (_, key) => {
+    fields.push(key);
+    return "";
+  }).replace(/\n{3,}/g, "\n\n").trim();
+  return { fields, cleanContent };
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  project_name: "Nama Proyek", project_type: "Tipe Proyek", project_stage: "Tahap",
+  location: "Lokasi", owner_client: "Owner/Client", budget: "Anggaran",
+  decision_summary: "Keputusan", issue_type: "Isu", risk_level: "Risiko",
+  timeline: "Timeline", next_action: "Langkah Berikut", structural_system: "Sistem Struktur",
+  construction_method: "Metode Konstruksi", concrete_grade: "Mutu Beton",
+};
+
 function MessageBubble({ message, agentName, agentAvatar }: { message: Message; agentName: string; agentAvatar?: string }) {
   const isUser = message.role === "user";
+
+  const { fields: brainFields, cleanContent } = !isUser
+    ? parseBrainUpdates(message.content)
+    : { fields: [], cleanContent: message.content };
+
+  const displayContent = !isUser && brainFields.length > 0 ? cleanContent : message.content;
 
   return (
     <div className={cn("flex gap-3", isUser && "flex-row-reverse")} data-testid={`message-bubble-${message.id}`}>
@@ -500,8 +525,28 @@ function MessageBubble({ message, agentName, agentAvatar }: { message: Message; 
             isUser ? "bg-primary text-primary-foreground whitespace-pre-wrap" : "bg-muted"
           )}
         >
-          {isUser ? message.content : <MessageContent text={message.content} />}
+          {isUser ? displayContent : <MessageContent text={displayContent} />}
         </div>
+
+        {/* Brain Data Chip — muncul kalau agen mengekstrak data ke Project Brain */}
+        {!isUser && brainFields.length > 0 && (
+          <div className="mt-1.5 flex flex-wrap gap-1.5" data-testid={`brain-chip-${message.id}`}>
+            <div className="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+              <Brain className="w-3 h-3 flex-shrink-0" />
+              <span>{brainFields.length} data dikirim ke Project Brain</span>
+              <span className="text-emerald-500 dark:text-emerald-600 mx-0.5">·</span>
+              <span className="font-normal">
+                {brainFields.slice(0, 3).map(f => FIELD_LABELS[f] || f).join(", ")}
+                {brainFields.length > 3 ? ` +${brainFields.length - 3} lainnya` : ""}
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-1 bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full cursor-default">
+              <Zap className="w-2.5 h-2.5 flex-shrink-0" />
+              Buka Mini Apps → Jalankan
+            </div>
+          </div>
+        )}
+
         <div className="text-xs text-muted-foreground mt-1">
           {new Date(message.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
         </div>
