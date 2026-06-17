@@ -101,6 +101,7 @@ export const agents = pgTable("agents", {
   avatar: text("avatar").default(""),
   tagline: text("tagline").default(""),
   philosophy: text("philosophy").default(""),
+  chatStyle: text("chat_style").default("direktif"),
   offTopicHandling: text("off_topic_handling").default("politely_redirect"),
   offTopicResponse: text("off_topic_response").default(""),
   systemPrompt: text("system_prompt").default("You are a helpful assistant."),
@@ -686,6 +687,7 @@ export const insertAgentSchema = z.object({
   storeInteractionSignals: z.boolean().optional().default(false),
   sourcePriority: z.array(z.string()).optional().default(["System Prompt", "Knowledge Engine", "Riwayat percakapan", "Mini Apps", "Integrations", "Sumber eksternal"]),
   // Enhanced Persona fields for stronger AI personality
+  chatStyle: z.enum(["socratic", "direktif", "kolaboratif", "coach", "fasilitator"]).optional().default("direktif"),
   personality: z.string().optional().default(""),
   expertise: z.array(z.string()).optional().default([]),
   communicationStyle: z.string().optional().default("friendly"),

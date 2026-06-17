@@ -8401,6 +8401,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
         communicationStyle: agent.communicationStyle || "friendly",
         toneOfVoice: agent.toneOfVoice || "professional",
         responseStyle: (agent as any).responseStyle || "balanced",
+        chatStyle: (agent as any).chatStyle || "direktif",
         language: agent.language || "id",
         contextQuestions: agent.contextQuestions || [],
         metaPixelId: agent.metaPixelId || "",
@@ -8595,6 +8596,7 @@ Balas dengan JSON dengan struktur PERSIS ini:
         messageQuotaDaily: agent.messageQuotaDaily ?? 50,
         messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
         guestMessageLimit: agent.guestMessageLimit ?? 10,
+        chatStyle: (agent as any).chatStyle || "direktif",
         contextQuestions: agent.contextQuestions || [],
       };
       

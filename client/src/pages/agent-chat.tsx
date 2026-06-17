@@ -11,6 +11,7 @@ import { useParams } from "wouter";
 import { cn } from "@/lib/utils";
 import { MessageContent as SharedMessageContent } from "@/lib/format-message";
 import { parseBrainUpdates, BrainChip } from "@/lib/brain-utils";
+import { getChatStyle } from "@/lib/chat-styles";
 
 interface UploadedFile {
   fileName: string;
@@ -71,6 +72,7 @@ interface AgentConfig {
   toneOfVoice: string;
   responseStyle: string;
   language: string;
+  chatStyle?: string;
   contextQuestions?: ContextQuestion[];
   metaPixelId?: string;
 }
@@ -2114,9 +2116,20 @@ export default function AgentChat() {
             <h1 className="text-white font-semibold text-sm sm:text-base truncate">
               {config.name}
             </h1>
-            <p className="text-white/60 text-[10px] sm:text-xs truncate max-w-[180px] sm:max-w-none">
-              {config.tagline || "Online"}
-            </p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <p className="text-white/60 text-[10px] sm:text-xs truncate max-w-[140px] sm:max-w-none">
+                {config.tagline || "Online"}
+              </p>
+              {config.chatStyle && (() => {
+                const cs = getChatStyle(config.chatStyle);
+                return (
+                  <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${cs.badgeBg} ${cs.badgeText} shrink-0`}>
+                    <span>{cs.emoji}</span>
+                    <span>{cs.label}</span>
+                  </span>
+                );
+              })()}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">

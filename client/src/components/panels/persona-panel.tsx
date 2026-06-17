@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info, CheckCircle2, TriangleAlert, Zap } from "lucide-react";
+import { Bot, Save, Sparkles, MessageCircle, AlertCircle, Globe, Key, Shield, Plus, X, Cpu, Settings2, Eye, EyeOff, Camera, Upload, ClipboardList, Trash2, Scale, BookOpen, FileText, Gavel, FileCheck, Info, CheckCircle2, TriangleAlert, Zap, MessagesSquare } from "lucide-react";
+import { CHAT_STYLES, CHAT_STYLE_KEYS, type ChatStyleKey } from "@/lib/chat-styles";
 import { AgentPresentationExport } from "@/components/agent-presentation-export";
 import { AiConfigFill } from "@/components/ai-config-fill";
 import { AiFieldRegen } from "@/components/ai-field-regen";
@@ -117,6 +118,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
     contextQuestions: (agent as any).contextQuestions || [],
     responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced" | "custom",
     customResponseStyle: (agent as any).customResponseStyle || "",
+    chatStyle: ((agent as any).chatStyle || "direktif") as ChatStyleKey,
   });
 
   const [newStarter, setNewStarter] = useState("");
@@ -163,6 +165,7 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
       contextQuestions: (agent as any).contextQuestions || [],
       responseStyle: ((agent as any).responseStyle || "balanced") as "creative" | "structured" | "balanced" | "custom",
       customResponseStyle: (agent as any).customResponseStyle || "",
+      chatStyle: ((agent as any).chatStyle || "direktif") as ChatStyleKey,
     });
     setLexcomApplied(false);
     setAppliedAgentSources([]);
@@ -767,6 +770,53 @@ export function PersonaPanel({ agent }: PersonaPanelProps) {
           <CardDescription>Cara chatbot berinteraksi dan berkomunikasi dengan pengguna</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Chat Style Selector */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <MessagesSquare className="w-3.5 h-3.5 text-primary" />
+              Karakter Dialog
+            </Label>
+            <p className="text-xs text-muted-foreground">Pilih gaya interaksi chatbot — mempengaruhi cara bot merespons dan membangun dialog</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-1">
+              {CHAT_STYLE_KEYS.map((key) => {
+                const style = CHAT_STYLES[key];
+                const isSelected = formData.chatStyle === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setFormData({ ...formData, chatStyle: key });
+                      autoSaveField("chatStyle", key);
+                    }}
+                    data-testid={`button-chat-style-${key}`}
+                    className={`
+                      relative text-left rounded-lg border-2 p-3 transition-all cursor-pointer
+                      ${isSelected
+                        ? `${style.borderClass} ${style.bgClass}`
+                        : "border-border bg-background hover:border-muted-foreground/40 hover:bg-muted/30"
+                      }
+                    `}
+                  >
+                    {isSelected && (
+                      <span className={`absolute top-2 right-2 w-2 h-2 rounded-full ${style.dotClass}`} />
+                    )}
+                    <div className="text-lg mb-1">{style.emoji}</div>
+                    <div className={`font-semibold text-sm ${isSelected ? style.textClass : ""}`}>
+                      {style.label}
+                    </div>
+                    <div className={`text-[10px] font-medium mb-1 ${isSelected ? style.textClass : "text-muted-foreground"}`}>
+                      {style.tagline}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">
+                      {style.description}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-1">
               <Label htmlFor="philosophy">Filosofi Komunikasi</Label>
