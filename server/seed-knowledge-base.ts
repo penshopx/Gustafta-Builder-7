@@ -104,7 +104,7 @@ Jawab dengan akurat, teknis namun mudah dipahami, dalam bahasa Indonesia.`,
 export const gustaftaKnowledgeBaseAgent: SeedAgentData = {
   name: "Gustafta Helpdesk",
   tagline: "Asisten Agentic resmi platform Gustafta — selalu siap bantu!",
-  description: "Customer service dan technical support resmi Gustafta. Interaktif, akrab, profesional. Menjelaskan fitur, cara kerja, harga, hierarki 5-level, Custom Domain, KB lanjutan, dan semua hal tentang platform secara terbuka dan jujur menggunakan metodologi Agentic + Multi-Agent + OpenClaw.",
+  description: "Customer service dan technical support resmi Gustafta. Interaktif, akrab, profesional. Menjelaskan fitur, cara kerja, harga, paket, Custom Domain, Knowledge Base, dan semua hal tentang platform secara terbuka dan jujur.",
   category: "services",
   subcategory: "customer_support",
   
@@ -236,57 +236,52 @@ Gustafta adalah **platform pembuatan chatbot AI multi-tenant berbasis cloud**, d
 - Performa tergantung ketersediaan API pihak ketiga (OpenAI, Anthropic, dll)
 
 ═══════════════════════════════════════════════════════════
-## BAGIAN 2: HIERARKI 5 LEVEL (INTI ARSITEKTUR)
+## BAGIAN 2: CARA MENGORGANISIR CHATBOT DI GUSTAFTA
 ═══════════════════════════════════════════════════════════
 
-Gustafta menggunakan sistem hierarki berbasis tujuan yang unik. Ini adalah DNA platform.
+Gustafta menggunakan sistem hierarki berbasis tujuan yang memungkinkan kamu membangun ekosistem chatbot dari yang sederhana hingga sangat kompleks.
 
-### Struktur Lengkap:
+### Struktur Organisasi Chatbot di Gustafta:
 
 [Kode]
-📦 SERIES (Level 1) — Payung strategis
-  └─ 🎯 CORE (Level 2) — Sudut pandang/modul tematik
-       ├─ 🔮 BIG IDEA (Level 3) — Orkestrator (opsional, lintas Core)
-       └─ 🧰 TOOLBOX (Level 4) — Chatbot spesialis per area
-            └─ 🤖 AGENT (Level 5) — Unit tugas mikro spesifik
+📦 SERIES — Ekosistem / topik besar
+  └─ 🎯 CORE — Modul tematik dalam series
+       ├─ 🔮 ORKESTRATOR — Chatbot koordinator (opsional)
+       └─ 🧰 CHATBOT SPESIALIS — Chatbot per area keahlian
+            └─ 🤖 SUB-AGEN — Kemampuan spesifik dalam chatbot
 [/Kode]
 
-**SERIES** (Level 1):
+**SERIES**:
 - Payung besar seluruh ekosistem chatbot
 - Contoh: "Regulasi Jasa Konstruksi Indonesia", "CIVILPRO Sipil", "ISO Management"
 - Ditampilkan di halaman publik /series sebagai katalog
-- Setiap series punya nama, slug, tagline, deskripsi, cover image
+- Setiap series punya nama, tagline, deskripsi, cover image
 
-**CORE** (Level 2):
+**CORE**:
 - Sudut pandang atau modul tematik dalam sebuah Series
 - Contoh: "Kepatuhan & Compliance", "Pengembangan Bisnis", "Manajemen Risiko"
 - Beberapa Core di dalam 1 Series saling melengkapi dan tidak tumpang tindih
 
-**BIG IDEA** (Level 3) — Orkestrator Hub:
-- Chatbot koordinator utama yang berada langsung di bawah Series (BUKAN di dalam Core manapun)
-- Bertugas sebagai "pintu masuk" ekosistem — memetakan user, mem-profil kebutuhan, mengarahkan ke Toolbox tepat
-- 1 Series hanya boleh punya 1 Big Idea
-- Knowledge base Big Idea berisi: peta ekosistem, rulebook routing, template handoff summary
-- Analogi: Big Idea = Direktur Operasional yang mengkoordinasi semua divisi
+**ORKESTRATOR**:
+- Chatbot koordinator yang menjadi "pintu masuk" ekosistem
+- Memetakan user, mengenali kebutuhan, lalu mengarahkan ke chatbot spesialis yang tepat
+- 1 Series hanya boleh punya 1 Orkestrator
 - Dibuat via tombol khusus "Buat Orkestrator" (warna ungu) di dashboard
 
-**TOOLBOX** (Level 4) — Chatbot Spesialis:
+**CHATBOT SPESIALIS**:
 - Chatbot yang menangani satu area operasional spesifik
 - Selalu berada di dalam sebuah Core
-- sortOrder menunjukkan urutan eksekusi berdasarkan prasyarat
-- Contoh: "1. Perijinan Usaha Dasar", "2. SKK Tenaga Ahli", "3. SBU Perusahaan"
-- Bisa berdiri sendiri sebagai chatbot publik di /bot/:id
+- Contoh: "Perijinan Usaha Dasar", "SKK Tenaga Ahli", "SBU Perusahaan"
+- Bisa berdiri sendiri sebagai chatbot publik
 
-**AGENT** (Level 5) — Unit Tugas Mikro:
-- Modul tugas spesifik di dalam Toolbox
-- Menangani satu topik atau kemampuan sangat spesifik
+**SUB-AGEN**:
+- Kemampuan atau modul spesifik di dalam satu chatbot
 - Contoh: "Panduan Dokumen SKK", "Kalkulator SBU Kualifikasi", "Checker KBLI"
-- Bisa diaktifkan satu per satu, urutan ditentukan sortOrder
+- Bisa diaktifkan satu per satu sesuai kebutuhan
 
 ### Prinsip Hierarki:
-- Vertikal: Sinkron dari abstrak (Series) ke konkret (Agent)
-- Horizontal: Antar Core saling melengkapi; antar Toolbox berurutan logis sesuai prasyarat
-- Tidak boleh melompat level (Agent tidak langsung di bawah Core)
+- Dari umum ke spesifik: Series → Core → Orkestrator/Chatbot → Sub-agen
+- Antar Core saling melengkapi; antar Chatbot Spesialis berurutan logis sesuai kebutuhan pengguna
 
 ### Contoh Ekosistem Nyata:
 [Kode]
@@ -807,16 +802,16 @@ A: Login → buka halaman Onboarding → pilih paket → klik tombol → diarahk
 **Q: Apakah ada batasan jumlah pesan chatbot?**
 A: Tergantung paket. Free Trial dibatasi. Semua paket berbayar mendapat kuota pesan AI yang jauh lebih besar. Detail kuota bisa dilihat di halaman Onboarding.
 
-**Q: Apa perbedaan Series, Core, Big Idea, Toolbox, dan Agent?**
+**Q: Apa perbedaan Series, Core, Orkestrator, Chatbot Spesialis, dan Sub-agen?**
 A: 
-- Series (L1) = Payung ekosistem besar
-- Core (L2) = Modul tematik dalam Series
-- Big Idea (L3) = Orkestrator hub, routing lintas Core
-- Toolbox (L4) = Chatbot spesialis per area
-- Agent (L5) = Unit tugas mikro dalam Toolbox
+- Series = Payung ekosistem besar (misal: "Regulasi Konstruksi")
+- Core = Modul tematik dalam Series (misal: "Kepatuhan", "Pengembangan Bisnis")
+- Orkestrator = Chatbot koordinator yang mengarahkan user ke chatbot yang tepat
+- Chatbot Spesialis = Chatbot yang ahli di satu area spesifik
+- Sub-agen = Kemampuan atau modul khusus di dalam satu chatbot
 
-**Q: Kapan perlu Orkestrator (Big Idea)?**
-A: Ketika kamu punya 3+ Toolbox. Orkestrator membuat sistem terasa terpadu — user tidak perlu tahu chatbot mana yang menangani; cukup tanya di Big Idea dan akan diarahkan otomatis.
+**Q: Kapan perlu Orkestrator?**
+A: Ketika kamu punya 3+ chatbot spesialis dalam satu ekosistem. Orkestrator membuat sistem terasa terpadu — user tidak perlu tahu chatbot mana yang menangani; cukup tanya di Orkestrator dan akan diarahkan otomatis ke yang paling tepat.
 
 **Q: Apa itu Orchestrator Multi-Agent?**
 A: Fitur routing cerdas di dalam satu chatbot. Setiap pesan user dianalisis AI classifier (DeepSeek) yang memilih specialist terbaik dari 7 domain konstruksi bawaan (Tender, SKK/SBU, Hukum, K3, Marketing, dll) + custom specialist yang Anda tambahkan sendiri. Hasilnya: chatbot satu bisa menjawab semua domain seperti tim spesialis, tanpa perpindahan chatbot.
@@ -1005,11 +1000,11 @@ Trilogi Builder memungkinkan pengguna merakit "tim agen AI" dari 12 blueprint ya
 |--------|-----|------|--------|
 | EduCounsel AI | /edu-counsel | 11 | Konseling sekolah SMA |
 | SBUClaw | /sbu-claw | 10 | SBU Konstruksi |
-| KONSTRA | /trilogi-chat/1281 | 9 | Manajemen proyek konstruksi |
+| KONSTRA | /konstra-claw | 9 | Manajemen proyek konstruksi |
 | AI Tutor | /ai-tutor | 9 | Bimbingan belajar adaptif |
 | Trilogi Builder | /tutor-builder | 12 blueprint | Dialog/Kolaborasi/Kreasi |
 
-Semua sistem menggunakan Inter-Agent API v2 (OpenClaw L4), streaming SSE real-time, ABD v1.1 Anti-Blocking Doctrine, dan terintegrasi penuh dalam ekosistem Gustafta.
+Semua sistem menggunakan AI multi-agen dengan streaming real-time dan terintegrasi penuh dalam ekosistem Gustafta.
 
 ═══════════════════════════════════════════════════════════
 ## BAGIAN 10: PANDUAN LAYANAN
