@@ -161,7 +161,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Sparkles className="h-4 w-4" />
-            1350+ Agent AI Spesialis · 131 Hub Orchestrator · 45 MultiClaw Tools · Siap Pakai
+            1350+ Agent AI Spesialis · 131 Hub Orchestrator · 80+ MultiClaw Tools · Siap Pakai
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
@@ -432,7 +432,7 @@ export default function Landing() {
               { icon: Globe, title: "Custom Domain", desc: "Pasang bot.perusahaan.com. Branding profesional, bukan link chatbot biasa.", color: "text-blue-500", bg: "bg-blue-500/10" },
               { icon: BookOpen, title: "Knowledge Base 7 Tipe", desc: "PDF, URL, YouTube, video, audio — AI transkripsi dan RAG secara otomatis.", color: "text-violet-500", bg: "bg-violet-500/10" },
               { icon: Plug, title: "Multi-Channel", desc: "WhatsApp, Telegram, web widget, REST API — satu chatbot, semua channel sekaligus.", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-              { icon: Zap, title: "45+ MultiClaw AI Tools", desc: "Suite lengkap: TenderaClaw, SBUClaw, KonstraClaw, BrainClaw, SafiraClaw, dan 40+ tools spesialis siap pakai.", color: "text-orange-500", bg: "bg-orange-500/10" },
+              { icon: Zap, title: "80+ MultiClaw AI Tools", desc: "Suite lengkap: TenderaClaw, SBUClaw, KonstraClaw, BrainClaw, SafiraClaw, dan 75+ tools spesialis siap pakai — dan terus bertambah.", color: "text-orange-500", bg: "bg-orange-500/10" },
               { icon: Shield, title: "Aman & Privat", desc: "Token per chatbot, mode publik/privat, enkripsi end-to-end, OAuth Replit Identity.", color: "text-slate-500", bg: "bg-slate-500/10" },
             ].map((f) => {
               const FIcon = f.icon;
@@ -900,7 +900,7 @@ export default function Landing() {
                       <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Upgrade</span>
                       <span className="ml-auto text-sm font-black">Rp 499rb<span className="text-[10px] font-normal text-muted-foreground">/bln</span></span>
                     </div>
-                    <p className="text-xs font-bold mb-1">Profesional — + 45 MultiClaw Tools</p>
+                    <p className="text-xs font-bold mb-1">Profesional — + 80 MultiClaw Tools</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
                       Buka akses TenderaClaw, SBUClaw, SafiraClaw + Custom Domain. 1 proyek klien konstruksi saja sudah menutupi biaya berbulan-bulan.
                     </p>
@@ -1163,7 +1163,7 @@ export default function Landing() {
             {[
               { plan: "Starter", price: "199rb", badge: null, features: ["3 chatbot", "Knowledge Base 7 tipe", "Multi-Channel (WA, TG, Web)", "REST API akses"] },
               { plan: "Profesional", price: "499rb", badge: "TERPOPULER", features: ["20 chatbot", "Custom Domain", "Analytics & Reporting", "Agentic AI + Orchestrator"] },
-              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "1350+ agent spesialis", "45+ MultiClaw AI Tools", "Priority support"] },
+              { plan: "Bisnis", price: "999rb", badge: null, features: ["Unlimited chatbot", "1350+ agent spesialis", "80+ MultiClaw AI Tools", "Priority support"] },
             ].map((plan) => (
               <div
                 key={plan.plan}
@@ -1207,6 +1207,121 @@ export default function Landing() {
             <CheckCircle2 className="w-3.5 h-3.5" />
             Tanpa kartu kredit · Cancel kapan saja · Support via WhatsApp
           </p>
+        </div>
+      </section>
+
+      {/* ── MULTICLAW DIRECTORY ── */}
+      <section className="py-16 px-4 bg-background border-t">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Suite Premium</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">80+ MultiClaw AI Tools — Siap Pakai</h2>
+            <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed mb-4">
+              Setiap "Claw" adalah tim agen AI spesialis yang bekerja paralel untuk domain tertentu. Tidak perlu setup — langsung buka dan tanya.
+            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Daftar Claw terus bertambah setiap bulan — Ikuti update terbaru
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              {
+                label: "Sertifikasi & Izin Usaha BUJK", color: "amber",
+                items: ["SBUClaw","LKUTClaw","PUB-LKUTClaw","PJBUClaw","KeuanganClaw","PajakClaw","ABUClaw","PanduanSBU","SkemaClaw","SIMPKClaw"],
+              },
+              {
+                label: "Tender & Pengadaan", color: "indigo",
+                items: ["TenderaClaw","KonstraTenderClaw","BGClaw","BSClaw","IMClaw","KOClaw","KKClaw"],
+              },
+              {
+                label: "SKK & Kompetensi TKK", color: "teal",
+                items: ["PanduanASKOM","TerasLPJK#1","ManprojakClaw","ArsitekturClaw","SurveiPemetaanClaw","GeoteknikClaw","JalanJembatanClaw","TataLingkunganClaw","ElektrikalClaw","SafiraClaw"],
+              },
+              {
+                label: "K3, HSE & IMS", color: "red",
+                items: ["CSMSClaw","SMK3Claw","K3Claw","K3ManClaw","OffshoreSafetyClaw"],
+              },
+              {
+                label: "ISO & Kepatuhan", color: "blue",
+                items: ["ISOClaw 9001","ISOClaw 14001","SMAPClaw","PanCEKClaw","NspkNavigatorClaw"],
+              },
+              {
+                label: "Teknik & Konsultansi", color: "sky",
+                items: ["SipilClaw","MEPClaw","LingkunganClaw","BIMClaw","DesainClaw","QSClaw","PengawasClaw","KontrakClaw","SiteOpsClaw"],
+              },
+              {
+                label: "Perizinan & Investasi", color: "cyan",
+                items: ["ESIMPANClaw","LKPMClaw","OSSClaw"],
+              },
+              {
+                label: "Energi & Pertambangan", color: "orange",
+                items: ["KetenagalistrikanClaw","EnergiClaw","EbtSolarClaw","TransisiEnergiClaw","MigasClaw","PertambanganClaw","GeologiClaw","TransmisiClaw"],
+              },
+              {
+                label: "Properti & Real Estate", color: "violet",
+                items: ["DevPropertiClaw","EstateCareClaw"],
+              },
+              {
+                label: "Manajemen Proyek Konstruksi", color: "slate",
+                items: ["KonstraClaw","BrainClaw"],
+              },
+              {
+                label: "Pendidikan & Sertifikasi ETLO", color: "emerald",
+                items: ["EducounselClaw","IBTUClaw","ETLOAcademyClaw","ETLOBizDevClaw","TutorTeknikClaw","RisetSkripsiClaw"],
+              },
+              {
+                label: "Bisnis, HR & Operasional", color: "rose",
+                items: ["DigitalMarketingClaw","CrmSalesClaw","BrandContentClaw","EcommerceClaw","RekrutmenClaw","LdKompetensiClaw","PenilaianKinerjaClaw","HubunganIndustrialClaw","ESGClaw","LeanOpExClaw","SupplyChainClaw","Industri40Claw"],
+              },
+              {
+                label: "Regulasi, Hukum & Keamanan", color: "gray",
+                items: ["KorporasiClaw","CybersecurityClaw","HACCPClaw"],
+              },
+            ].map((cat) => {
+              const colorMap: Record<string, {badge: string, label: string}> = {
+                amber:   { badge: "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300", label: "text-amber-600 dark:text-amber-400 border-amber-500/20" },
+                indigo:  { badge: "bg-indigo-500/10 border-indigo-500/30 text-indigo-700 dark:text-indigo-300", label: "text-indigo-600 dark:text-indigo-400 border-indigo-500/20" },
+                teal:    { badge: "bg-teal-500/10 border-teal-500/30 text-teal-700 dark:text-teal-300", label: "text-teal-600 dark:text-teal-400 border-teal-500/20" },
+                red:     { badge: "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-300", label: "text-red-600 dark:text-red-400 border-red-500/20" },
+                blue:    { badge: "bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300", label: "text-blue-600 dark:text-blue-400 border-blue-500/20" },
+                sky:     { badge: "bg-sky-500/10 border-sky-500/30 text-sky-700 dark:text-sky-300", label: "text-sky-600 dark:text-sky-400 border-sky-500/20" },
+                cyan:    { badge: "bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-300", label: "text-cyan-600 dark:text-cyan-400 border-cyan-500/20" },
+                orange:  { badge: "bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-300", label: "text-orange-600 dark:text-orange-400 border-orange-500/20" },
+                violet:  { badge: "bg-violet-500/10 border-violet-500/30 text-violet-700 dark:text-violet-300", label: "text-violet-600 dark:text-violet-400 border-violet-500/20" },
+                slate:   { badge: "bg-slate-500/10 border-slate-500/30 text-slate-700 dark:text-slate-300", label: "text-slate-600 dark:text-slate-400 border-slate-500/20" },
+                emerald: { badge: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300", label: "text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+                rose:    { badge: "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300", label: "text-rose-600 dark:text-rose-400 border-rose-500/20" },
+                gray:    { badge: "bg-gray-500/10 border-gray-500/30 text-gray-700 dark:text-gray-300", label: "text-gray-600 dark:text-gray-400 border-gray-500/20" },
+              };
+              const c = colorMap[cat.color];
+              return (
+                <div key={cat.label} data-testid={`claw-category-${cat.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 border-b pb-1.5 ${c.label}`}>{cat.label} <span className="font-normal normal-case text-muted-foreground">({cat.items.length})</span></p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cat.items.map((name) => (
+                      <span key={name} className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${c.badge}`}>
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-dashed border-primary/30 bg-primary/5 px-5 py-4">
+            <div>
+              <p className="font-bold text-sm mb-0.5">Punya kebutuhan domain spesifik?</p>
+              <p className="text-xs text-muted-foreground">Claw baru ditambahkan setiap bulan. Hubungi kami jika domain Anda belum tersedia.</p>
+            </div>
+            <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" data-testid="link-request-claw-wa">
+              <Button size="sm" variant="outline" className="gap-2 whitespace-nowrap text-xs font-bold border-primary/30 hover:bg-primary/10">
+                <Smartphone className="w-3.5 h-3.5" /> Request Claw Baru
+              </Button>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -1364,11 +1479,11 @@ export default function Landing() {
             {[
               { q: "Apakah perlu keahlian coding untuk mulai?", a: "Tidak sama sekali. Semua konfigurasi dilakukan lewat antarmuka visual — Knowledge Base, persona AI, Custom Domain, Tender Wizard — tanpa menulis satu baris kode pun. Rata-rata user mulai aktif dalam 30 menit setelah daftar." },
               { q: "Channel apa saja yang didukung?", a: "WhatsApp (Fonnte/Cloud API), Telegram, Web Widget (iframe & floating button), Custom Domain (bot.perusahaan.com), dan REST API untuk integrasi custom. Semua bisa diaktifkan dari satu dashboard tanpa biaya tambahan." },
-              { q: "Apa itu 1350+ agent AI spesialis?", a: "Gustafta memiliki lebih dari 1350 agent AI yang sudah dikonfigurasi dan dilatih untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, ISO, energi, properti, hukum, marketing, HR, dan lebih banyak lagi. Plus 45+ MultiClaw AI Tools yang siap pakai langsung, tanpa training dari nol." },
+              { q: "Apa itu 1350+ agent AI spesialis?", a: "Gustafta memiliki lebih dari 1350 agent AI yang sudah dikonfigurasi dan dilatih untuk domain spesifik — regulasi konstruksi, tender LPSE, K3, SKK/SBU, ISO, energi, properti, hukum, marketing, HR, dan lebih banyak lagi. Plus 80+ MultiClaw AI Tools yang siap pakai langsung, tanpa training dari nol. Daftar Claw terus bertambah setiap bulan." },
               { q: "Apa itu Orchestrator Multi-Agent?", a: "Orchestrator adalah sistem routing cerdas yang menganalisis setiap pesan user dan mengarahkannya ke specialist yang paling tepat secara otomatis. Misalnya: pertanyaan tender → Specialist Tender, pertanyaan SKK → Specialist Sertifikasi. Ada 131 hub orchestrator siap pakai, dan Anda bisa buat custom sendiri." },
               { q: "Bagaimana keamanan data saya?", a: "Data terenkripsi, akses berbasis token per chatbot, mode publik/privat yang bisa dikontrol, dan autentikasi via OAuth Replit Identity. Anda punya kontrol penuh atas siapa yang bisa mengakses chatbot dan data Knowledge Base Anda." },
               { q: "Bisa digunakan untuk bisnis di luar konstruksi?", a: "Ya. Meskipun Gustafta paling dalam untuk Jasa Konstruksi Indonesia, platform ini fleksibel untuk properti, energi, pendidikan, digital marketing, HR, legal, dan 12+ sektor lainnya. Knowledge Base, persona, dan Mini Apps bisa dikustomisasi sepenuhnya." },
-              { q: "Apa itu MultiClaw di Gustafta? Apakah perlu instalasi?", a: "MultiClaw Gustafta adalah suite 45+ AI tools spesialis yang berjalan 100% di cloud — tidak perlu instalasi apapun. Berbeda dengan MultiClaw open-source yang butuh server sendiri, MultiClaw Gustafta langsung bisa dipakai di browser. Setiap 'Claw' (TenderaClaw, SBUClaw, dll.) adalah orchestrator yang mengelola tim agen AI spesialis secara paralel di balik layar." },
+              { q: "Apa itu MultiClaw di Gustafta? Apakah perlu instalasi?", a: "MultiClaw Gustafta adalah suite 80+ AI tools spesialis yang berjalan 100% di cloud — tidak perlu instalasi apapun. Berbeda dengan MultiClaw open-source yang butuh server sendiri, MultiClaw Gustafta langsung bisa dipakai di browser. Setiap 'Claw' (TenderaClaw, SBUClaw, dll.) adalah orchestrator yang mengelola tim agen AI spesialis secara paralel di balik layar. Daftar Claw terus bertambah setiap bulan." },
               { q: "Apa bedanya OpenClaw Gustafta dengan OpenClaw lokal yang diinstal di server?", a: "OpenClaw lokal (open-source) bisa eksekusi kode, kelola file, dan browsing web secara otonom — ia adalah 'pekerja otonom' di server Anda. OpenClaw Gustafta (fitur Trilogi Agentic Chat) menerapkan konsep yang sama tapi cloud-hosted: orchestrator memanggil sub-agen secara dinamis dan mensintesis hasilnya. Kelebihan Gustafta: zero install, 1350+ agen berpengetahuan domain Indonesia, dan bisa dipakai oleh siapapun tanpa setup teknis." },
             ].map((item, i) => (
               <AccordionItem
@@ -1423,7 +1538,7 @@ export default function Landing() {
                 <span className="font-bold text-lg">Gustafta</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4 max-w-xs leading-relaxed">
-                Platform AI Chatbot Builder terdalam untuk Indonesia. 1350+ agent spesialis, 131 hub orchestrator, 45+ MultiClaw AI Tools — siap pakai tanpa coding.
+                Platform AI Chatbot Builder terdalam untuk Indonesia. 1350+ agent spesialis, 131 hub orchestrator, 80+ MultiClaw AI Tools — siap pakai tanpa coding.
               </p>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
