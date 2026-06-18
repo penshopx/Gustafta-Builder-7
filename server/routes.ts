@@ -322,7 +322,7 @@ if (process.env.AI_INTEGRATIONS_OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OP
   openaiBaseURL = undefined;
 }
 if (!openaiApiKey) {
-  console.warn("[WARNING] No OpenAI API key found - AI chat will not work");
+  console.warn("[WARNING] No OpenAI API key found - AI chat will not work. Set OPENAI_API_KEY or use Replit AI Integrations.");
 }
 const openai = new OpenAI({
   apiKey: openaiApiKey || "missing-key",
