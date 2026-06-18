@@ -59,7 +59,7 @@ SUPERADMIN_EMAILS = "penshopx@gmail.com"
 ADMIN_EMAILS = "tutip98@outlook.com"
 SMTP_HOST = "smtp-relay.brevo.com"
 SMTP_PORT = "587"
-BREVO_SENDER_EMAIL = "noreply@gustafta.com"
+BREVO_SENDER_EMAIL = "noreply@gustafta.my.id"
 
 [postMerge]
 path = "scripts/post-merge.sh"
