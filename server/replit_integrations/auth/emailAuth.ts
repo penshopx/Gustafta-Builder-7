@@ -77,18 +77,50 @@ async function sendVerificationEmail(email: string, code: string, firstName: str
     console.log(`[EmailAuth] Email not configured — OTP for ${email}: ${code}`);
     return false;
   }
+  // Use custom sender domain (must be verified in Brevo dashboard).
+  // Set BREVO_SENDER_EMAIL env var to override (e.g. noreply@gustafta.com).
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || "noreply@gustafta.com";
+
   try {
-    const html = `
-      <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;background:#f9f9f9;border-radius:12px">
-        <h2 style="color:#6366f1;margin-bottom:8px">Verifikasi Email Anda</h2>
-        <p>Halo <b>${firstName}</b>! Gunakan kode berikut untuk menyelesaikan registrasi:</p>
-        <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#111;text-align:center;padding:24px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;margin:24px 0">
-          ${code}
-        </div>
-        <p style="color:#666;font-size:14px">Kode berlaku selama <b>10 menit</b>. Jangan bagikan kode ini kepada siapapun.</p>
-        <p style="color:#999;font-size:12px">Jika kamu tidak mendaftar di Gustafta, abaikan email ini.</p>
-      </div>
-    `;
+    const html = `<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f3f4f6">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:32px 0">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;padding:40px;font-family:Arial,sans-serif;color:#111">
+        <tr><td>
+          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#6366f1">Gustafta</p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">
+          <p style="font-size:16px;margin:0 0 8px">Halo <b>${firstName}</b>,</p>
+          <p style="font-size:15px;color:#374151;margin:0 0 24px">Gunakan kode berikut untuk menyelesaikan pendaftaran akun Gustafta kamu:</p>
+          <div style="font-size:40px;font-weight:700;letter-spacing:10px;color:#111;text-align:center;padding:24px 16px;background:#f9fafb;border-radius:8px;border:2px solid #e5e7eb;margin:0 0 24px">
+            ${code}
+          </div>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 8px">Kode ini berlaku selama <b>10 menit</b>.</p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 24px">Jangan bagikan kode ini kepada siapapun, termasuk tim Gustafta.</p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 16px">
+          <p style="font-size:12px;color:#9ca3af;margin:0">Jika kamu tidak mendaftar di Gustafta, abaikan email ini — tidak ada tindakan yang diperlukan.</p>
+          <p style="font-size:12px;color:#9ca3af;margin:8px 0 0">© 2025 Gustafta. Seluruh hak dilindungi.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+    const textContent = `Halo ${firstName},
+
+Kode verifikasi Gustafta kamu:
+
+  ${code}
+
+Kode berlaku 10 menit. Jangan bagikan kepada siapapun.
+
+Jika kamu tidak mendaftar di Gustafta, abaikan email ini.
+
+— Tim Gustafta`;
+
     const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
@@ -97,10 +129,13 @@ async function sendVerificationEmail(email: string, code: string, firstName: str
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "Gustafta", email: "af0ae9001@smtp-brevo.com" },
+        sender: { name: "Gustafta", email: senderEmail },
+        replyTo: { name: "Gustafta Support", email: "support@gustafta.com" },
         to: [{ email, name: firstName }],
-        subject: "Kode Verifikasi Gustafta",
+        subject: "Kode Verifikasi Akun Gustafta Anda",
         htmlContent: html,
+        textContent,
+        tags: ["otp", "transactional"],
       }),
     });
     if (!resp.ok) {
@@ -108,6 +143,7 @@ async function sendVerificationEmail(email: string, code: string, firstName: str
       console.error("[EmailAuth] Brevo API error:", resp.status, errBody);
       return false;
     }
+    console.log(`[EmailAuth] OTP sent to ${email} via ${senderEmail}`);
     return true;
   } catch (err) {
     console.error("[EmailAuth] Failed to send email:", err);
