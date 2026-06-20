@@ -528,6 +528,31 @@ export async function registerRoutes(
     } catch { /* non-critical */ }
   })();
 
+  // Block public access to attached_assets/ — these are dev/admin files, not for public
+  app.use("/attached_assets", (_req, res) => {
+    res.status(403).json({ error: "Forbidden" });
+  });
+
+  // ==================== Sanitize Helpers ====================
+  // Strip sensitive fields before returning agent data to public/user endpoints.
+  // Fields removed: systemPrompt, agenticSubAgents, accessToken, customApiKey,
+  // customBaseUrl, customModelName — these are the "brains" and credentials of agents.
+  function sanitizeAgentForPublic(agent: any): any {
+    if (!agent) return agent;
+    const {
+      systemPrompt: _sp,
+      agenticSubAgents: _sa,
+      accessToken: _at,
+      customApiKey: _cak,
+      customBaseUrl: _cbu,
+      customModelName: _cmn,
+      orchestratorConfig: _oc,
+      agenticConfig: _ac,
+      ...safe
+    } = agent;
+    return safe;
+  }
+
   // Serve uploaded files with proper MIME types
   app.use("/uploads", (req, res, next) => {
     const filePath = path.join(uploadDir, req.path);
@@ -696,15 +721,15 @@ export async function registerRoutes(
 
       const buildToolbox = (tb: any) => {
         const agents = agentsByToolbox.get(tb.id) || [];
+        // Only return public-safe fields — internal config (purpose, capabilities,
+        // limitations) is stripped to prevent exposing architecture to competitors.
         return {
           id: String(tb.id), bigIdeaId: tb.bigIdeaId ? String(tb.bigIdeaId) : undefined,
           seriesId: tb.seriesId ? String(tb.seriesId) : undefined,
           isOrchestrator: tb.isOrchestrator || false, name: tb.name,
-          description: tb.description || "", purpose: tb.purpose || "",
-          capabilities: (tb.capabilities as string[]) || [],
-          limitations: (tb.limitations as string[]) || [],
+          description: tb.description || "",
           sortOrder: tb.sortOrder || 0, isActive: tb.isActive || false,
-          createdAt: tb.createdAt.toISOString(), agents,
+          agents,
         };
       };
 
@@ -1227,7 +1252,7 @@ export async function registerRoutes(
       if (!gustaftaHelpdesk) {
         return res.status(404).json({ error: "Gustafta Helpdesk not found" });
       }
-      res.json(gustaftaHelpdesk);
+      res.json(sanitizeAgentForPublic(gustaftaHelpdesk));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch Gustafta Helpdesk" });
     }
@@ -1241,7 +1266,7 @@ export async function registerRoutes(
       if (!dokumentender) {
         return res.status(404).json({ error: "Dokumentender Assistant not found" });
       }
-      res.json(dokumentender);
+      res.json(sanitizeAgentForPublic(dokumentender));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch Dokumentender Assistant" });
     }
@@ -2901,7 +2926,15 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         } catch (e) { console.error("Failed to update Project Brain:", e); }
       }
 
-      const cleanAiResponse = aiResponseContent.replace(saveMemRegex, "").replace(delMemRegex, "").replace(updateBrainRegex, "").trim();
+      // Also strip SUGGEST_ACTION tags from stored content (frontend parses them from the stream;
+      // we don't want raw internal tags persisted in the messages table)
+      const suggestActionRegex = /\[\s*SUGGEST_ACTION\s*:[^\]]*\]/gi;
+      const cleanAiResponse = aiResponseContent
+        .replace(saveMemRegex, "")
+        .replace(delMemRegex, "")
+        .replace(updateBrainRegex, "")
+        .replace(suggestActionRegex, "")
+        .trim();
 
       // Save AI response (without memory tags)
       const aiMessage = await storage.createMessage({
@@ -3946,7 +3979,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           } catch (ubErr) { console.error("Failed to update Project Brain (stream):", ubErr); }
         }
 
-        cleanContent = cleanContent.replace(saveMemoryRegex, "").replace(deleteMemoryRegex, "").replace(updateBrainStreamRegex, "").trim();
+        // Also strip SUGGEST_ACTION tags from stored content (frontend parses from live stream chunks)
+        const suggestActionStreamRegex = /\[\s*SUGGEST_ACTION\s*:[^\]]*\]/gi;
+        cleanContent = cleanContent
+          .replace(saveMemoryRegex, "")
+          .replace(deleteMemoryRegex, "")
+          .replace(updateBrainStreamRegex, "")
+          .replace(suggestActionStreamRegex, "")
+          .trim();
 
         // Save the complete AI response (without memory tags)
         const aiMessage = await storage.createMessage({
