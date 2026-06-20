@@ -1454,13 +1454,13 @@ export default function Landing() {
           </div>
 
           {/* Row 1: Cover + G01 (portrait) + G06 (pre-order) */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 items-stretch">
-            <img src="/images/trilogi-cover.png" alt="Trilogi Gustafta — Cover" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full h-64 md:h-80" />
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 h-64 md:h-80">
-              <img src="/images/g01.png" alt="Trilogi Gustafta — Book Cover Portrait" className="object-cover object-top w-full h-full" />
-              <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <img src="/images/trilogi-cover.png" alt="Trilogi Gustafta — Cover" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300">
+              <img src="/images/g01.png" alt="Trilogi Gustafta — Book Cover Portrait" className="object-cover w-full" />
+              <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent" />
             </div>
-            <img src="/images/g06.png" alt="Peluncuran Buku Trilogi Gustafta" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full h-64 md:h-80" />
+            <img src="/images/g06.png" alt="Peluncuran Buku Trilogi Gustafta" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
           </div>
 
           {/* Row 2: G14 infographic (landscape) full width */}
