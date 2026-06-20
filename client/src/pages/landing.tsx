@@ -1458,7 +1458,7 @@ export default function Landing() {
             <img src="/images/trilogi-cover.png" alt="Trilogi Gustafta — Cover" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300">
               <img src="/images/g01.png" alt="Trilogi Gustafta — Book Cover Portrait" className="object-cover w-full" />
-              <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-slate-900 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent" />
             </div>
             <img src="/images/g06.png" alt="Peluncuran Buku Trilogi Gustafta" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
           </div>
@@ -1475,7 +1475,7 @@ export default function Landing() {
             </div>
             <div className="md:col-span-2 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40 relative">
               <img src="/images/trilogi-gemini.png" alt="Trilogi Gustafta — Tahap Dialog Kolaborasi Kreasi" className="w-full object-cover" />
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-900 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent" />
             </div>
           </div>
 
