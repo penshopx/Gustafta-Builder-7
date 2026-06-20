@@ -301,7 +301,7 @@ const PRODUCTS: Product[] = [
         who: "admin",
         label: "Berikan akses dashboard ke customer (opsional)",
         detail: "Jika customer perlu kelola sendiri: undang customer untuk registrasi, lalu ubah role menjadi 'admin' di Admin Panel → Tab Users → klik nama → ubah role.",
-        warning: "Untuk paket white-label, pastikan branding dan custom domain sudah dikonfigurasi sebelum serah terima.",
+        tip: "Pastikan custom domain sudah aktif sebelum serah terima jika customer menggunakan domain sendiri.",
       },
       {
         who: "admin",

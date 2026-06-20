@@ -312,15 +312,6 @@ const INCOME_STREAMS = [
     desc: "Tawarkan layanan pembuatan dokumen profesional (proposal, kontrak, laporan) yang dibantu AI dalam hitungan menit.",
     example: "Contoh: 20 dokumen/bulan × Rp 250.000 = Rp 5.000.000 pendapatan jasa",
   },
-  {
-    icon: Users,
-    title: "Reseller & White-label",
-    color: "text-violet-500",
-    bg: "bg-violet-500/10",
-    border: "border-violet-500/20",
-    desc: "Paket Bisnis & Enterprise sudah include white-label. Branding platform Anda sendiri, jual ke klien dengan margin bebas.",
-    example: "Contoh: Reseller 5 klien @Rp 3jt/bln = Rp 15jt gross, modal Rp 999rb/bln",
-  },
 ];
 
 export default function PlatformSalesPage() {

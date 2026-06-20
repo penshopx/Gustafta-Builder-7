@@ -27,7 +27,6 @@ const FEATURE_ICONS: Record<string, typeof Check> = {
   doc_generator: FileText,
   podcast: Mic,
   custom_domain: Globe,
-  white_label: Shield,
   priority_support: Headphones,
   api_access: Rocket,
 };
@@ -40,7 +39,6 @@ const FEATURE_NAMES: Record<string, string> = {
   doc_generator: "Document Generator",
   podcast: "Podcast",
   custom_domain: "Custom Domain",
-  white_label: "White-label",
   priority_support: "Priority Support",
   api_access: "API Access",
 };

@@ -1,6 +1,6 @@
 /**
  * Gustafta Builder — Halaman Produk
- * 4 jalur produk: Paket Bisnis, Paket Modul, Paket Chatbot, Paket Whitelabel
+ * 3 jalur produk: Paket Bisnis, Paket Modul, Paket Chatbot
  */
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -12,7 +12,7 @@ import {
   Bot, Blocks, Package, Building2, ChevronRight, Check, Zap,
   MessageSquare, Globe, Shield, Headphones, Users, Star,
   ArrowRight, Sparkles, Crown, Wrench, BookOpen, BarChart3,
-  HardHat, Target, Award, Pencil, Layers, Briefcase,
+  HardHat, Target, Award, Pencil, Layers,
   Phone, ExternalLink, Plus, CreditCard, FileText, GraduationCap,
   Mic, PenLine, Calculator, Megaphone, ScrollText, LayoutGrid,
   AlertTriangle, TrendingUp, Lightbulb, ClipboardList, BadgePlus,
@@ -359,13 +359,12 @@ const CHATBOT_SHOWCASE = [
 ];
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
-type Tab = "bisnis" | "modul" | "chatbot" | "whitelabel";
+type Tab = "bisnis" | "modul" | "chatbot";
 
 const TABS: { id: Tab; label: string; icon: typeof Bot; color: string }[] = [
-  { id: "bisnis",     label: "Paket Bisnis",    icon: Zap,       color: "indigo" },
-  { id: "modul",      label: "Paket Modul",     icon: Wrench,    color: "violet" },
-  { id: "chatbot",    label: "Paket Chatbot",   icon: Bot,       color: "blue" },
-  { id: "whitelabel", label: "Paket Whitelabel",icon: Shield,    color: "amber" },
+  { id: "bisnis",   label: "Paket Bisnis",  icon: Zap,    color: "indigo" },
+  { id: "modul",    label: "Paket Modul",   icon: Wrench, color: "violet" },
+  { id: "chatbot",  label: "Paket Chatbot", icon: Bot,    color: "blue"   },
 ];
 
 // ─── Sections ─────────────────────────────────────────────────────────────────
@@ -708,113 +707,20 @@ function ChatbotPaket() {
   );
 }
 
-function WhitelabelPaket() {
-  return (
-    <div className="space-y-8">
-      <div className="text-center max-w-2xl mx-auto">
-        <Badge className="mb-3 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Paket Whitelabel</Badge>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Platform chatbot dengan merek Anda</h2>
-        <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed">
-          Dapatkan aplikasi Gustafta dengan logo, nama, dan domain Anda sendiri.
-          Cocok untuk perusahaan yang ingin menjual layanan chatbot ke klien mereka.
-        </p>
-      </div>
-
-      {/* What's included */}
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-amber-500"/>
-            <div className="text-sm font-bold text-gray-900 dark:text-white">Yang Anda Dapatkan</div>
-          </div>
-          <ul className="space-y-2">
-            {[
-              "Aplikasi chatbot builder dengan logo & nama Anda",
-              "Domain/subdomain custom (app.merekanda.com)",
-              "1 chatbot aktif: MerawatRumahBot (default)",
-              "Builder untuk tambah chatbot sendiri",
-              "Dashboard admin untuk kelola user & bot",
-              "Branding penuh — tidak ada logo Gustafta",
-              "Onboarding & training tim Anda",
-              "Dedicated support 3 bulan",
-            ].map((f, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-gray-700 dark:text-gray-300">
-                <Check className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5"/>
-                {f}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="space-y-4">
-          {/* Default bot info */}
-          <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Bot className="w-4 h-4 text-green-600"/>
-              <div className="text-xs font-bold text-green-800 dark:text-green-300">Bot Default: MerawatRumahBot</div>
-            </div>
-            <p className="text-[11px] text-green-700 dark:text-green-400 leading-relaxed">
-              Satu-satunya chatbot yang aktif di versi whitelabel kosong. Membantu pemilik rumah
-              dengan tips perawatan rumah, renovasi, dan rekomendasi material. Berfungsi sebagai
-              demo & proof-of-concept untuk calon klien Anda.
-            </p>
-          </div>
-
-          {/* Use cases */}
-          <div className="bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 rounded-xl p-4">
-            <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Cocok untuk:</div>
-            <ul className="space-y-1.5">
-              {[
-                { icon: Building2, text: "Perusahaan teknologi yang jual solusi AI ke klien" },
-                { icon: Briefcase, text: "Konsultan digital yang ingin platform sendiri" },
-                { icon: Users,     text: "Agensi marketing yang bundel chatbot ke layanannya" },
-                { icon: Globe,     text: "Perusahaan yang butuh internal chatbot hub bermerek" },
-              ].map((u, i) => (
-                <li key={i} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                  <u.icon className="w-3.5 h-3.5 text-amber-500 shrink-0"/>
-                  {u.text}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Pricing */}
-          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-xl p-4 text-center">
-            <div className="text-xs text-amber-600 dark:text-amber-400 mb-1">Harga Whitelabel</div>
-            <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">Custom</div>
-            <div className="text-[10px] text-gray-500 mt-1 mb-3">Tergantung kebutuhan, jumlah user & modul</div>
-            <a href="https://wa.me/6281234567890?text=Halo%2C%20saya%20tertarik%20Paket%20Whitelabel%20Gustafta" target="_blank" rel="noopener noreferrer">
-              <Button size="sm" className="bg-amber-600 hover:bg-amber-500 text-white text-xs h-8 w-full">
-                Hubungi Tim Kami <ExternalLink className="w-3 h-3 ml-1"/>
-              </Button>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Expand note */}
-      <div className="max-w-3xl mx-auto bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-xs text-gray-500 dark:text-gray-400 text-center">
-        Ingin menambah bot premium di platform whitelabel Anda? Kombinasikan dengan <strong>Paket Modul</strong> atau <strong>Paket Chatbot</strong> untuk memperluas kemampuan aplikasi.
-      </div>
-    </div>
-  );
-}
-
 // ─── Comparison table ─────────────────────────────────────────────────────────
 function KomparasiTable() {
   const rows = [
-    { label: "Buat chatbot sendiri",   bisnis: true,   modul: false,  chatbot: false, wl: true  },
-    { label: "Bot dibuatkan tim ahli", bisnis: false,  modul: true,   chatbot: true,  wl: false },
-    { label: "Bot siap pakai (jadi)",  bisnis: false,  modul: false,  chatbot: true,  wl: true  },
-    { label: "Branding sendiri",       bisnis: false,  modul: false,  chatbot: false, wl: true  },
-    { label: "Akses semua fitur Gustafta", bisnis: true, modul: false, chatbot: false, wl: true },
-    { label: "One-time payment",       bisnis: false,  modul: true,   chatbot: true,  wl: false },
-    { label: "Subscription bulanan",   bisnis: true,   modul: false,  chatbot: false, wl: true  },
-    { label: "Cocok untuk pemula",     bisnis: true,   modul: true,   chatbot: true,  wl: false },
+    { label: "Buat chatbot sendiri",      bisnis: true,  modul: false, chatbot: false },
+    { label: "Bot dibuatkan tim ahli",    bisnis: false, modul: true,  chatbot: true  },
+    { label: "Bot siap pakai (jadi)",     bisnis: false, modul: false, chatbot: true  },
+    { label: "Akses semua fitur Gustafta",bisnis: true,  modul: false, chatbot: false },
+    { label: "One-time payment",          bisnis: false, modul: true,  chatbot: true  },
+    { label: "Subscription bulanan",      bisnis: true,  modul: false, chatbot: false },
+    { label: "Cocok untuk pemula",        bisnis: true,  modul: true,  chatbot: true  },
   ];
 
   return (
-    <div className="max-w-3xl mx-auto mt-12">
+    <div className="max-w-2xl mx-auto mt-12">
       <div className="text-sm font-bold text-center text-gray-800 dark:text-white mb-4">Perbandingan Cepat</div>
       <div className="rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden">
         <table className="w-full text-xs">
@@ -824,14 +730,13 @@ function KomparasiTable() {
               <th className="text-center px-3 py-2.5 text-indigo-500 font-semibold">Bisnis</th>
               <th className="text-center px-3 py-2.5 text-violet-500 font-semibold">Modul</th>
               <th className="text-center px-3 py-2.5 text-blue-500 font-semibold">Chatbot</th>
-              <th className="text-center px-3 py-2.5 text-amber-500 font-semibold">Whitelabel</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row, i) => (
               <tr key={i} className={i % 2 === 0 ? "bg-white dark:bg-slate-950" : "bg-gray-50/60 dark:bg-slate-900/40"}>
                 <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{row.label}</td>
-                {[row.bisnis, row.modul, row.chatbot, row.wl].map((v, j) => (
+                {[row.bisnis, row.modul, row.chatbot].map((v, j) => (
                   <td key={j} className="text-center px-3 py-2">
                     {v
                       ? <Check className="w-3.5 h-3.5 text-green-500 mx-auto"/>
@@ -852,10 +757,9 @@ export default function ProdukPage() {
   const [activeTab, setActiveTab] = useState<Tab>("bisnis");
 
   const TAB_ACTIVE: Record<Tab, string> = {
-    bisnis:     "bg-indigo-600 text-white shadow-md",
-    modul:      "bg-violet-600 text-white shadow-md",
-    chatbot:    "bg-blue-600 text-white shadow-md",
-    whitelabel: "bg-amber-600 text-white shadow-md",
+    bisnis:  "bg-indigo-600 text-white shadow-md",
+    modul:   "bg-violet-600 text-white shadow-md",
+    chatbot: "bg-blue-600 text-white shadow-md",
   };
 
   return (
@@ -868,11 +772,11 @@ export default function ProdukPage() {
           Gustafta Builder
         </Badge>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-          4 Cara Pakai Gustafta
+          3 Cara Pakai Gustafta
         </h1>
         <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
           Pilih jalur yang sesuai kebutuhan Anda — bangun sendiri, minta dibuatkan,
-          aktifkan yang sudah jadi, atau gunakan dengan merek Anda sendiri.
+          atau aktifkan chatbot yang sudah jadi.
         </p>
       </section>
 
@@ -896,10 +800,9 @@ export default function ProdukPage() {
 
       {/* Content */}
       <section className="py-10 px-4">
-        {activeTab === "bisnis"     && <BisnisPaket/>}
-        {activeTab === "modul"      && <ModulPaket/>}
-        {activeTab === "chatbot"    && <ChatbotPaket/>}
-        {activeTab === "whitelabel" && <WhitelabelPaket/>}
+        {activeTab === "bisnis"  && <BisnisPaket/>}
+        {activeTab === "modul"   && <ModulPaket/>}
+        {activeTab === "chatbot" && <ChatbotPaket/>}
 
         <KomparasiTable/>
       </section>

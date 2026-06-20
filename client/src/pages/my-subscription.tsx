@@ -26,7 +26,6 @@ const FEATURE_ICONS: Record<FeatureKey, typeof Check> = {
   doc_generator: FileText,
   podcast: Mic,
   custom_domain: Globe,
-  white_label: Shield,
   priority_support: Headphones,
   api_access: Cpu,
   ai_tools: Bot,
