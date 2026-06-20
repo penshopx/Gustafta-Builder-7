@@ -1378,6 +1378,8 @@ export async function registerRoutes(
       const isOwner = (agent as any).userId === userId;
 
       if (!isAdminUser && !isOwner) {
+        const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+        console.warn(`[ADMIN_DENIED] 403 not-owner-or-admin | userId=${userId} | ip=${ip} | path=${req.path}`);
         return res.status(403).json({ error: "Forbidden" });
       }
 
@@ -1646,6 +1648,8 @@ export async function registerRoutes(
       const dbRole2 = await getDbRole(req);
       const isAdminForPrompt = adminIds2.includes(userId2) || dbRole2 === "admin" || dbRole2 === "superadmin";
       if (!isAdminForPrompt) {
+        const _ip2 = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+        console.warn(`[ADMIN_DENIED] 403 preview-prompt | userId=${userId2} | ip=${_ip2} | path=${req.path}`);
         return res.status(403).json({ error: "Forbidden: hanya admin yang bisa melihat system prompt" });
       }
       const prompt = buildFinalSystemPrompt(agent);
@@ -2428,14 +2432,75 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
     }
   });
 
+  // ─── ADMIN ENDPOINT AUDIT ──────────────────────────────────────────────────
+  // All admin-protected endpoints in this file and their protection mechanism.
+  // Failed access is logged as: [ADMIN_DENIED] <status> | userId=<id> | ip=<ip> | path=<path>
+  //
+  // ── Middleware-protected (requireAdmin / requireSuperAdmin) ──
+  //   POST   /api/subscriptions/activate/:id          requireAdmin
+  //   POST   /api/tender-document-catalog              isAuthenticated + async isAdminRequest() (double-check)
+  //   DELETE /api/tender-document-catalog/:code        isAuthenticated + async isAdminRequest() (double-check)
+  //   GET    /api/admin/audit-orchestrators            requireSuperAdmin
+  //   POST   /api/admin/set-prod-url                   requireAdmin
+  //   GET    /api/admin/stats                          requireAdmin
+  //   GET    /api/admin/kb-hub/stats                   requireAdmin
+  //   GET    /api/admin/kb-hub/agents                  requireAdmin
+  //   POST   /api/admin/kb-hub/bulk-seed               requireAdmin
+  //   POST   /api/admin/kb-hub/quick-add               requireAdmin
+  //   GET    /api/admin/users                          requireAdmin
+  //   PATCH  /api/admin/users/:userId/toggle           requireAdmin
+  //   PATCH  /api/admin/users/:userId/role             requireSuperAdmin
+  //   GET    /api/admin/admins                         requireSuperAdmin
+  //   PATCH  /api/admin/admins/:userId/toggle          requireSuperAdmin
+  //   GET    /api/admin/subscriptions                  requireAdmin
+  //   GET    /api/admin/trial-requests                 requireAdmin
+  //   POST   /api/admin/trial-requests/:id/approve     requireAdmin
+  //   POST   /api/admin/trial-requests/:id/reject      requireAdmin
+  //   PATCH  /api/admin/subscriptions/:id              requireAdmin
+  //   GET    /api/admin/modul-subs                     requireAdmin
+  //   PATCH  /api/admin/modul-subs/:id                 requireAdmin
+  //   GET    /api/admin/scalev-mappings                requireAdmin
+  //   POST   /api/admin/scalev-mappings                requireAdmin
+  //   PATCH  /api/admin/scalev-mappings/:id            requireAdmin
+  //   DELETE /api/admin/scalev-mappings/:id            requireAdmin
+  //   GET    /api/admin/brevo-stats                    requireAdmin
+  //   POST   /api/admin/seed-lexcom                    requireAdmin
+  //   GET    /api/admin/agents/status                  requireAdmin
+  //   POST   /api/admin/agents/kb-research/run         requireAdmin
+  //   POST   /api/admin/agents/field-audit/run         requireAdmin
+  //   POST   /api/admin/agents/bulk-fill/run           requireAdmin
+  //   POST   /api/admin/agents/kb-research/retry       requireAdmin
+  //   POST   /api/admin/agents/bulk-fill/retry         requireAdmin
+  //   GET    /api/admin/hub-audit                      requireAdmin
+  //   POST   /api/admin/hub-audit/:id/auto-connect     requireAdmin
+  //   POST   /api/admin/hub-audit/:id/generate-prompt  requireAdmin
+  //   PATCH  /api/admin/hub-audit/:id/save-prompt      requireAdmin
+  //
+  // ── Mixed owner-or-admin gates (inline, with [ADMIN_DENIED] logging) ──
+  //   GET    /api/agents/:id                           owner OR admin (DB role + ADMIN_USER_IDS)
+  //   GET    /api/agents/:id/preview-prompt            admin-only (DB role + ADMIN_USER_IDS)
+  //   POST   /api/store/order/manual                   admin-only (ADMIN_USER_IDS + SUPERADMIN_EMAILS + DB role)
+  //   POST   /api/admin/seed-lexcom (inner)            series-owner OR admin (DB role + ADMIN_USER_IDS)
+  //   DELETE /api/chatbot-templates/:id                template-owner OR admin (ADMIN_USER_IDS)
+  // ─────────────────────────────────────────────────────────────────────────
+
   // Helper admin-only — katalog ini referensi global (bukan per-user), jadi mutasi
   // dibatasi ke admin via env ADMIN_USER_IDS. Reuse pola dari assertCanPreviewAgentPrompt.
-  function isAdminRequest(req: any): { ok: true } | { ok: false; status: number; error: string } {
+  // Double-check: ADMIN_USER_IDS env list + DB role (admin/superadmin).
+  async function isAdminRequest(req: any): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
     const userId = req.user?.claims?.sub || (req.user as any)?.id;
-    if (!userId) return { ok: false, status: 401, error: "Unauthorized" };
+    if (!userId) {
+      const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+      console.warn(`[ADMIN_DENIED] unauthenticated | ip=${ip} | path=${req.path}`);
+      return { ok: false, status: 401, error: "Unauthorized" };
+    }
     const adminIds = (process.env.ADMIN_USER_IDS || "")
       .split(",").map((s: string) => s.trim()).filter(Boolean);
-    if (!adminIds.includes(userId)) {
+    const dbRole = await getDbRole(req);
+    const isAdmin = adminIds.includes(userId) || dbRole === "admin" || dbRole === "superadmin";
+    if (!isAdmin) {
+      const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+      console.warn(`[ADMIN_DENIED] 403 | userId=${userId} | ip=${ip} | path=${req.path}`);
       return { ok: false, status: 403, error: "Forbidden: hanya admin yang boleh ubah katalog dokumen tender" };
     }
     return { ok: true };
@@ -2443,7 +2508,7 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
 
   app.post("/api/tender-document-catalog", isAuthenticated, async (req, res) => {
     try {
-      const adminCheck = isAdminRequest(req);
+      const adminCheck = await isAdminRequest(req);
       if (!adminCheck.ok) return res.status(adminCheck.status).json({ error: adminCheck.error });
       const { insertTenderDocumentCatalogSchema } = await import("@shared/schema");
       const parsed = insertTenderDocumentCatalogSchema.safeParse(req.body);
@@ -2459,7 +2524,7 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
 
   app.delete("/api/tender-document-catalog/:code", isAuthenticated, async (req, res) => {
     try {
-      const adminCheck = isAdminRequest(req);
+      const adminCheck = await isAdminRequest(req);
       if (!adminCheck.ok) return res.status(adminCheck.status).json({ error: adminCheck.error });
       const ok = await storage.deleteTenderDocumentCatalog(req.params.code as string);
       if (!ok) return res.status(404).json({ error: "Document not found" });
@@ -4551,14 +4616,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     });
 
   // Admin: Aktifkan subscription setelah transfer dikonfirmasi
-  app.post("/api/subscriptions/activate/:id", isAuthenticated, async (req: any, res) => {
+  // Double-check: requireAdmin middleware (ADMIN_USER_IDS env + DB role) + inline log
+  app.post("/api/subscriptions/activate/:id", isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      // Only admins can activate
-      const userId = req.user?.claims?.sub;
-      const adminCheck = await (storage as any).getUserById?.(userId);
-      if (!adminCheck || (adminCheck.role !== "superadmin" && adminCheck.role !== "admin")) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
 
       const subscription = await (storage as any).getSubscriptionById?.(req.params.id) ?? null;
       if (!subscription) {
@@ -5070,7 +5130,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       const dbRole = userRows[0]?.role;
       const dbEmail = userRows[0]?.email;
       const isAdminCheck = adminIds.includes(userId) || superAdminEmails.includes(dbEmail || "") || dbRole === "admin" || dbRole === "superadmin";
-      if (!isAdminCheck) return res.status(403).json({ error: "Admin only" });
+      if (!isAdminCheck) {
+        const _ipOrd = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+        console.warn(`[ADMIN_DENIED] 403 store-order-manual | userId=${userId} | ip=${_ipOrd} | path=${req.path}`);
+        return res.status(403).json({ error: "Admin only" });
+      }
 
       const { agentId, name, email, phone } = req.body;
       if (!name || !email || !agentId) {
@@ -8251,12 +8315,8 @@ Balas dengan JSON dengan struktur PERSIS ini:
 
   // Audit: cek apakah agent orchestrator di DB sesuai dengan yang di-expect per replit.md
   // Akses: superadmin only
-  app.get("/api/admin/audit-orchestrators", isAuthenticated, async (req: any, res: any) => {
+  app.get("/api/admin/audit-orchestrators", isAuthenticated, requireSuperAdmin, async (req: any, res: any) => {
     try {
-      const role = await getDbRole(req);
-      if (role !== "superadmin") {
-        return res.status(403).json({ error: "Hanya superadmin", currentRole: role });
-      }
 
       // (route, expectedId, expectedNameKeywords) — dari replit.md MultiClaw table
       const EXPECTED: Array<{ route: string; id: number; keywords: string[] }> = [
@@ -14900,17 +14960,41 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     return role === "superadmin";
   }
 
+  function getClientIp(req: any): string {
+    return (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim()
+      || req.socket?.remoteAddress
+      || "unknown";
+  }
+
   async function requireAdmin(req: any, res: any, next: any) {
-    if (!req.user) return res.status(401).json({ error: "Tidak terautentikasi" });
+    if (!req.user) {
+      const ip = getClientIp(req);
+      console.warn(`[ADMIN_DENIED] unauthenticated | ip=${ip} | path=${req.path}`);
+      return res.status(401).json({ error: "Tidak terautentikasi" });
+    }
     const ok = await checkIsAdmin(req);
-    if (!ok) return res.status(403).json({ error: "Akses ditolak. Hanya admin yang dapat mengakses ini." });
+    if (!ok) {
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || "unknown";
+      const ip = getClientIp(req);
+      console.warn(`[ADMIN_DENIED] 403 | userId=${userId} | ip=${ip} | path=${req.path}`);
+      return res.status(403).json({ error: "Akses ditolak. Hanya admin yang dapat mengakses ini." });
+    }
     next();
   }
 
   async function requireSuperAdmin(req: any, res: any, next: any) {
-    if (!req.user) return res.status(401).json({ error: "Tidak terautentikasi" });
+    if (!req.user) {
+      const ip = getClientIp(req);
+      console.warn(`[ADMIN_DENIED] unauthenticated | ip=${ip} | path=${req.path}`);
+      return res.status(401).json({ error: "Tidak terautentikasi" });
+    }
     const ok = await checkIsSuperAdmin(req);
-    if (!ok) return res.status(403).json({ error: "Akses ditolak. Hanya Super Admin yang dapat melakukan ini." });
+    if (!ok) {
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || "unknown";
+      const ip = getClientIp(req);
+      console.warn(`[ADMIN_DENIED] 403 superadmin-required | userId=${userId} | ip=${ip} | path=${req.path}`);
+      return res.status(403).json({ error: "Akses ditolak. Hanya Super Admin yang dapat melakukan ini." });
+    }
     next();
   }
 
@@ -16007,8 +16091,12 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
         return res.status(404).json({ error: "Series tidak ditemukan." });
       }
       if (String(series.userId) !== String(userId)) {
-        const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((id: string) => id.trim());
-        if (!adminIds.includes(String(userId))) {
+        const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((id: string) => id.trim()).filter(Boolean);
+        const _dbRoleSeed = await getDbRole(req);
+        const _isAdminSeed = adminIds.includes(String(userId)) || _dbRoleSeed === "admin" || _dbRoleSeed === "superadmin";
+        if (!_isAdminSeed) {
+          const _ipSeed = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+          console.warn(`[ADMIN_DENIED] 403 seed-lexcom-series | userId=${userId} | ip=${_ipSeed} | path=${req.path}`);
           return res.status(403).json({ error: "Tidak memiliki akses ke series ini." });
         }
       }
@@ -16925,8 +17013,10 @@ Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.
       const template = await storage.getChatbotTemplate(parseInt(req.params.id));
       if (!template) return res.status(404).json({ error: "Template tidak ditemukan" });
       const userId = req.user?.claims?.sub || "";
-      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim());
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
       if (template.createdByUserId !== userId && !adminIds.includes(userId)) {
+        const _ipTpl = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+        console.warn(`[ADMIN_DENIED] 403 chatbot-template-delete | userId=${userId} | ip=${_ipTpl} | path=${req.path}`);
         return res.status(403).json({ error: "Tidak ada akses" });
       }
       await storage.deleteChatbotTemplate(template.id);
@@ -16994,12 +17084,12 @@ Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.
   };
 
   // GET /api/admin/agents/status — get status of both jobs
-  app.get("/api/admin/agents/status", isAuthenticated, async (_req, res) => {
+  app.get("/api/admin/agents/status", isAuthenticated, requireAdmin, async (_req, res) => {
     res.json(agentJobs);
   });
 
   // POST /api/admin/agents/kb-research/run — start KB Research Agent
-  app.post("/api/admin/agents/kb-research/run", isAuthenticated, async (req: any, res) => {
+  app.post("/api/admin/agents/kb-research/run", isAuthenticated, requireAdmin, async (req: any, res) => {
     const job = agentJobs["kb-research"];
     if (job.status === "running") {
       return res.status(409).json({ error: "Job sudah berjalan" });
@@ -17180,7 +17270,7 @@ Format output JSON HARUS:
   });
 
   // POST /api/admin/agents/field-audit/run — start Field Audit Agent
-  app.post("/api/admin/agents/field-audit/run", isAuthenticated, async (req: any, res) => {
+  app.post("/api/admin/agents/field-audit/run", isAuthenticated, requireAdmin, async (req: any, res) => {
     const job = agentJobs["field-audit"];
     if (job.status === "running") {
       return res.status(409).json({ error: "Job sudah berjalan" });
@@ -17342,7 +17432,7 @@ Format output JSON HARUS:
   });
 
   // POST /api/admin/agents/bulk-fill/run — isi semua field kosong dengan AI
-  app.post("/api/admin/agents/bulk-fill/run", isAuthenticated, async (req: any, res) => {
+  app.post("/api/admin/agents/bulk-fill/run", isAuthenticated, requireAdmin, async (req: any, res) => {
     const job = agentJobs["bulk-fill"];
     if (job.status === "running") {
       return res.status(409).json({ error: "Job sudah berjalan" });
@@ -17511,7 +17601,7 @@ Hasilkan JSON valid dengan SEMUA field di atas terisi penuh. Jangan kosongkan sa
   });
 
   // POST /api/admin/agents/kb-research/retry — ulangi hanya agen yang gagal
-  app.post("/api/admin/agents/kb-research/retry", isAuthenticated, async (_req, res) => {
+  app.post("/api/admin/agents/kb-research/retry", isAuthenticated, requireAdmin, async (_req, res) => {
     const job = agentJobs["kb-research"];
     if (job.status === "running") return res.status(409).json({ error: "Job sedang berjalan" });
 
@@ -17673,7 +17763,7 @@ Format: { "foundational": { "name": "...", "content": "...", "description": "...
   });
 
   // POST /api/admin/agents/bulk-fill/retry — ulangi hanya agen yang error
-  app.post("/api/admin/agents/bulk-fill/retry", isAuthenticated, async (_req, res) => {
+  app.post("/api/admin/agents/bulk-fill/retry", isAuthenticated, requireAdmin, async (_req, res) => {
     const job = agentJobs["bulk-fill"];
     if (job.status === "running") return res.status(409).json({ error: "Job sedang berjalan" });
 
@@ -18927,7 +19017,7 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
 
   // ─── HUB AUDIT ────────────────────────────────────────────────────────────
   // GET /api/admin/hub-audit — daftar Hub agents yang agenticSubAgents-nya kosong
-  app.get("/api/admin/hub-audit", isAuthenticated, async (_req: any, res: any) => {
+  app.get("/api/admin/hub-audit", isAuthenticated, requireAdmin, async (_req: any, res: any) => {
     try {
       const result = await db.execute(sql`
         SELECT 
@@ -18965,7 +19055,7 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
   });
 
   // POST /api/admin/hub-audit/:id/auto-connect — isi agenticSubAgents dari sibling agents
-  app.post("/api/admin/hub-audit/:id/auto-connect", isAuthenticated, async (req: any, res: any) => {
+  app.post("/api/admin/hub-audit/:id/auto-connect", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
       const hubId = parseInt(req.params.id);
       const { candidateIds } = req.body as { candidateIds: number[] };
@@ -19000,7 +19090,7 @@ Mulai dengan: "Selamat datang di Pipeline Konten! Kita di tahap mana — baru pu
   });
 
   // POST /api/admin/hub-audit/:id/generate-prompt — AI-generate system prompt Hub
-  app.post("/api/admin/hub-audit/:id/generate-prompt", isAuthenticated, async (req: any, res: any) => {
+  app.post("/api/admin/hub-audit/:id/generate-prompt", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
       const hubId = parseInt(req.params.id);
       const { hubName, subAgentNames, existingPrompt } = req.body as {
@@ -19044,7 +19134,7 @@ Maksimal 600 kata.`;
   });
 
   // PATCH /api/admin/hub-audit/:id/save-prompt — simpan generated prompt ke DB
-  app.patch("/api/admin/hub-audit/:id/save-prompt", isAuthenticated, async (req: any, res: any) => {
+  app.patch("/api/admin/hub-audit/:id/save-prompt", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
       const hubId = parseInt(req.params.id);
       const { prompt } = req.body as { prompt: string };
