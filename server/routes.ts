@@ -1328,22 +1328,33 @@ export async function registerRoutes(
     }
   });
 
-  // Get archived agents only
+  // Get archived agents — non-admin responses sanitized
   app.get("/api/agents/archived", isAuthenticated, async (req, res) => {
     try {
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const role = await getDbRole(req);
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const isAdminUser = role === "admin" || role === "superadmin" || adminIds.includes(userId);
+
       const agents = await storage.getAgents();
-      const archived = agents.filter((a: any) => a.archived);
+      let archived = agents.filter((a: any) => a.archived);
+      if (!isAdminUser) archived = archived.map(sanitizeAgentForPublic);
       res.json(archived);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch archived agents" });
     }
   });
 
-  // Get active agent
-  app.get("/api/agents/active", isAuthenticated, async (_req, res) => {
+  // Get active agent — non-admin response sanitized
+  app.get("/api/agents/active", isAuthenticated, async (req, res) => {
     try {
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const role = await getDbRole(req);
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const isAdminUser = role === "admin" || role === "superadmin" || adminIds.includes(userId);
+
       const agent = await storage.getActiveAgent();
-      res.json(agent);
+      res.json(isAdminUser ? agent : sanitizeAgentForPublic(agent));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch active agent" });
     }
@@ -1482,7 +1493,11 @@ export async function registerRoutes(
       
       const agent = await storage.createAgent(parsed.data);
       await storage.setActiveAgent(String(agent.id));
-      res.status(201).json(agent);
+      const userId3 = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const adminIds3 = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const dbRole3 = await getDbRole(req);
+      const isAdminCreate = dbRole3 === "admin" || dbRole3 === "superadmin" || adminIds3.includes(userId3);
+      res.status(201).json(isAdminCreate ? agent : sanitizeAgentForPublic(agent));
     } catch (error) {
       console.error("Agent creation error:", error);
       res.status(500).json({ error: "Failed to create agent", details: error instanceof Error ? error.message : String(error) });
@@ -1499,7 +1514,11 @@ export async function registerRoutes(
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
-      res.json(agent);
+      const userId4 = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const adminIds4 = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const dbRole4 = await getDbRole(req);
+      const isAdminUpdate = dbRole4 === "admin" || dbRole4 === "superadmin" || adminIds4.includes(userId4);
+      res.json(isAdminUpdate ? agent : sanitizeAgentForPublic(agent));
     } catch (error) {
       res.status(500).json({ error: "Failed to update agent" });
     }
@@ -1643,7 +1662,11 @@ export async function registerRoutes(
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
-      res.json(agent);
+      const userId5 = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const adminIds5 = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const dbRole5 = await getDbRole(req);
+      const isAdminActivate = dbRole5 === "admin" || dbRole5 === "superadmin" || adminIds5.includes(userId5);
+      res.json(isAdminActivate ? agent : sanitizeAgentForPublic(agent));
     } catch (error) {
       res.status(500).json({ error: "Failed to activate agent" });
     }
@@ -6498,7 +6521,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       };
 
       const agent = await storage.createAgent(agentData as any);
-      res.status(201).json(agent);
+      const _roleT = await getDbRole(req); const _uidT = (req.user as any)?.claims?.sub || (req.user as any)?.id || ""; const _aidsT = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean); const _isAdmT = _roleT === "admin" || _roleT === "superadmin" || _aidsT.includes(_uidT);
+      res.status(201).json(_isAdmT ? agent : sanitizeAgentForPublic(agent));
     } catch (error) {
       res.status(500).json({ error: "Failed to create agent from template" });
     }
@@ -6656,7 +6680,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         }
       }
 
-      res.status(201).json(agent);
+      const _roleI = await getDbRole(req); const _uidI = (req.user as any)?.claims?.sub || (req.user as any)?.id || ""; const _aidsI = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean); const _isAdmI = _roleI === "admin" || _roleI === "superadmin" || _aidsI.includes(_uidI);
+      res.status(201).json(_isAdmI ? agent : sanitizeAgentForPublic(agent));
     } catch (error) {
       res.status(500).json({ error: "Failed to import agent" });
     }
@@ -16718,7 +16743,8 @@ Min 300 kata. Bahasa Indonesia profesional. Sitasi regulasi spesifik domain ini.
       }
 
       await storage.incrementTemplateUsage(template.id);
-      res.status(201).json(agent);
+      const _roleCT = await getDbRole(req); const _uidCT = (req.user as any)?.claims?.sub || (req.user as any)?.id || ""; const _aidsCT = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean); const _isAdmCT = _roleCT === "admin" || _roleCT === "superadmin" || _aidsCT.includes(_uidCT);
+      res.status(201).json(_isAdmCT ? agent : sanitizeAgentForPublic(agent));
     } catch (err) {
       console.error("[/api/chatbot-templates/:id/use]", err);
       res.status(500).json({ error: "Gagal membuat agent dari template" });
