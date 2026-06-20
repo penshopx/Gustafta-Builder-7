@@ -202,8 +202,8 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <Link href="/">
             <div className="flex items-center gap-3 cursor-pointer shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-                <Bot className="h-6 w-6 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-md shadow-primary/20 border border-border">
+                <img src="/logo-gustafta.png" alt="Gustafta" className="h-9 w-9 object-contain" />
               </div>
               <div className="flex flex-col leading-tight">
                 <span className="text-xl font-bold tracking-tight">Gustafta</span>

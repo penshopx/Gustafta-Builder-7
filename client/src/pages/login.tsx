@@ -142,8 +142,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       {/* Logo */}
       <a href="/" className="flex items-center gap-2 mb-8">
-        <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center">
-          <Sparkles className="h-5 w-5 text-white" />
+        <div className="h-9 w-9 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-sm border border-border">
+          <img src="/logo-gustafta.png" alt="Gustafta" className="h-8 w-8 object-contain" />
         </div>
         <span className="text-xl font-bold">Gustafta</span>
       </a>
