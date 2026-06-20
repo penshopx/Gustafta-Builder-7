@@ -1679,7 +1679,8 @@ export async function registerRoutes(
       if (!agent) return res.status(404).json({ error: "Agent not found" });
       const newEnabled = !(agent.isEnabled !== false);
       const updated = await storage.updateAgent(req.params.id as string, { isEnabled: newEnabled } as any);
-      res.json({ isEnabled: newEnabled, agent: updated });
+      const _rTE = await getDbRole(req); const _uTE = (req.user as any)?.claims?.sub || (req.user as any)?.id || ""; const _aTE = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean); const _iATE = _rTE === "admin" || _rTE === "superadmin" || _aTE.includes(_uTE);
+      res.json({ isEnabled: newEnabled, agent: _iATE ? updated : sanitizeAgentForPublic(updated) });
     } catch (error) {
       res.status(500).json({ error: "Failed to toggle agent status" });
     }
@@ -1696,7 +1697,8 @@ export async function registerRoutes(
         archived: nowArchived,
         archivedAt: nowArchived ? new Date() : null,
       } as any);
-      res.json({ archived: nowArchived, agent: updated });
+      const _rAR = await getDbRole(req); const _uAR = (req.user as any)?.claims?.sub || (req.user as any)?.id || ""; const _aAR = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean); const _iAAR = _rAR === "admin" || _rAR === "superadmin" || _aAR.includes(_uAR);
+      res.json({ archived: nowArchived, agent: _iAAR ? updated : sanitizeAgentForPublic(updated) });
     } catch (error) {
       res.status(500).json({ error: "Failed to toggle archive status" });
     }
@@ -1707,7 +1709,8 @@ export async function registerRoutes(
       const { folderName } = req.body;
       const updated = await storage.updateAgent(req.params.id as string, { folderName: folderName || null } as any);
       if (!updated) return res.status(404).json({ error: "Agent not found" });
-      res.json(updated);
+      const _rFO = await getDbRole(req); const _uFO = (req.user as any)?.claims?.sub || (req.user as any)?.id || ""; const _aFO = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean); const _iAFO = _rFO === "admin" || _rFO === "superadmin" || _aFO.includes(_uFO);
+      res.json(_iAFO ? updated : sanitizeAgentForPublic(updated));
     } catch (error) {
       res.status(500).json({ error: "Failed to update folder" });
     }
