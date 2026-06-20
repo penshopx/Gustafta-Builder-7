@@ -199,10 +199,10 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
       <header className={`border-b ${transparent ? "bg-background/80" : "bg-background/95"} backdrop-blur`}>
 
         {/* ── Baris 1: Logo + Aksi Kanan ── */}
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-2">
+        <div className="container mx-auto px-4 h-28 flex items-center justify-between gap-2">
           <Link href="/">
             <div className="flex items-center gap-3 cursor-pointer shrink-0">
-              <img src="/logo-gustafta.png" alt="Gustafta" className="h-16 w-16 object-contain" />
+              <img src="/logo-gustafta.png" alt="Gustafta" className="h-24 w-24 object-contain" />
               <span className="text-[40px] font-black tracking-tight leading-none">GUSTAFTA</span>
             </div>
           </Link>
