@@ -188,6 +188,25 @@ export default function Profil() {
         </div>
       </section>
 
+      {/* ============ VISUAL: Dari Monolog ke Dialog ============ */}
+      <section className="py-0">
+        <div className="relative overflow-hidden">
+          <img
+            src="/images/g07.png"
+            alt="Dari Monolog ke Dialog — Transformasi Cara Belajar dengan AI"
+            className="w-full object-cover max-h-[420px]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 via-transparent to-transparent flex items-center">
+            <div className="container mx-auto px-8 md:px-16">
+              <p className="text-white text-2xl md:text-3xl font-bold max-w-sm leading-snug drop-shadow">
+                Dari Monolog<br />ke Dialog
+              </p>
+              <p className="text-white/80 text-sm mt-2 max-w-xs">Teknologi AI yang memerdekakan cara berpikir dan berkreasi.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ============ GAIA METHOD PIPELINE ============ */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">
@@ -224,6 +243,20 @@ export default function Profil() {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ VISUAL: Platform in Action ============ */}
+      <section className="py-10 bg-muted/20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="rounded-2xl overflow-hidden shadow-lg border hover:shadow-xl transition-shadow">
+              <img src="/images/g03.png" alt="AI Professional — Platform Gustafta dalam Aksi" className="w-full object-cover" />
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-lg border hover:shadow-xl transition-shadow">
+              <img src="/images/g04.png" alt="AI Builder Studio — Workflow Automation Dashboard" className="w-full object-cover" />
+            </div>
           </div>
         </div>
       </section>
@@ -339,6 +372,15 @@ export default function Profil() {
                 </ul>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ VISUAL: Trilogi Learning Journey ============ */}
+      <section className="py-10">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="rounded-2xl overflow-hidden shadow-xl border">
+            <img src="/images/g14.png" alt="Trilogi Gustafta — Perjalanan Belajar AI: Dialog, Kolaborasi, Kreasi" className="w-full object-cover" />
           </div>
         </div>
       </section>
