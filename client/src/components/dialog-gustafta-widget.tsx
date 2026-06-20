@@ -256,27 +256,28 @@ export function DialogGustaftaWidget() {
         {/* Floating Button */}
         <div className="relative">
           {!isOpen && (
-            <span className="absolute inset-0 w-14 h-14 rounded-full bg-cyan-400/30 animate-ping pointer-events-none" style={{ animationDuration: "2.5s" }} />
+            <span className="absolute inset-0 w-14 h-14 rounded-full bg-cyan-400/20 animate-ping pointer-events-none" style={{ animationDuration: "3s" }} />
           )}
           <button
             onClick={() => setIsOpen(!isOpen)}
+            style={{ background: "linear-gradient(145deg, #0c2340 0%, #0e3a6e 40%, #0a2550 100%)" }}
             className={cn(
-              "relative w-14 h-14 rounded-full shadow-xl transition-all duration-200 flex items-center justify-center",
-              "bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-900",
-              "hover:scale-105 active:scale-95"
+              "relative w-14 h-14 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center",
+              "ring-1 ring-cyan-500/30",
+              "hover:scale-105 hover:ring-cyan-400/60 active:scale-95"
             )}
             title="Dialog Gustafta — Teman Berpikir"
           >
             {isOpen ? (
-              <X className="w-6 h-6 text-white" />
+              <X className="w-6 h-6 text-cyan-300" />
             ) : (
-              <img src="/logo-gustafta.png" alt="Dialog Gustafta" className="w-10 h-10 object-contain" />
+              <img src="/logo-gustafta-nobg.png" alt="Dialog Gustafta" className="w-11 h-11 object-contain drop-shadow-[0_0_6px_rgba(34,211,238,0.4)]" />
             )}
           </button>
 
-          {/* Label hover */}
+          {/* Label */}
           {!isOpen && (
-            <div className="absolute bottom-1 left-16 bg-gradient-to-r from-cyan-600 to-blue-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap shadow-lg pointer-events-none">
+            <div className="absolute bottom-1 left-16 bg-[#0e3a6e]/90 border border-cyan-500/30 text-cyan-200 text-[10px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap shadow-lg pointer-events-none backdrop-blur-sm">
               Dialog Gustafta
             </div>
           )}
