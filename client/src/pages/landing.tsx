@@ -1456,7 +1456,10 @@ export default function Landing() {
           {/* Row 1: Cover + G01 (portrait) + G06 (pre-order) */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
             <img src="/images/trilogi-cover.png" alt="Trilogi Gustafta — Cover" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
-            <img src="/images/g01.png" alt="Trilogi Gustafta — Book Cover Portrait" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300">
+              <img src="/images/g01.png" alt="Trilogi Gustafta — Book Cover Portrait" className="object-cover w-full" />
+              <div className="absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-slate-900 to-transparent" />
+            </div>
             <img src="/images/g06.png" alt="Peluncuran Buku Trilogi Gustafta" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
           </div>
 
@@ -1470,8 +1473,9 @@ export default function Landing() {
             <div className="md:col-span-3 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
               <img src="/images/g15.png" alt="Trilogi Gustafta — 3 Tahap AI" className="w-full object-cover" />
             </div>
-            <div className="md:col-span-2 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
+            <div className="md:col-span-2 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40 relative">
               <img src="/images/trilogi-gemini.png" alt="Trilogi Gustafta — Tahap Dialog Kolaborasi Kreasi" className="w-full object-cover" />
+              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-900 to-transparent" />
             </div>
           </div>
 
