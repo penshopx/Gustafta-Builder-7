@@ -785,15 +785,17 @@ export async function registerRoutes(
 
         if (totalAgents === 0) continue;
 
-        // Public marketplace response: series-level card DTO only.
-        // No nested bigIdeas / cores / toolboxes / agents — those reveal internal
-        // organizational structure and are considered internal IP.
+        // Public marketplace response: strictly minimal card DTO only.
+        // Includes only fields needed to render the series card in the marketplace UI.
+        // Internal fields (counts, descriptions, status booleans, ordering) are excluded.
         result.push({
-          id: String(s.id), name: s.name, slug: s.slug,
-          description: s.description || "", tagline: s.tagline || "",
-          category: s.category || "", color: s.color || "#6366f1",
-          isPublic: s.isPublic || false, isActive: s.isActive || false,
-          sortOrder: s.sortOrder || 0,
+          id: String(s.id),
+          name: s.name,
+          slug: s.slug,
+          tagline: s.tagline || "",
+          avatar: (s as any).avatar || "",
+          category: s.category || "",
+          color: s.color || "#6366f1",
         });
       }
 
@@ -1302,12 +1304,16 @@ export async function registerRoutes(
       const userId = (req.user as any)?.claims?.sub || "";
       const role = await getDbRole(req);
       const isAdmin = role === "admin" || role === "superadmin";
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const isAdminUser = isAdmin || adminIds.includes(userId);
 
       let agents = await storage.getAgents(toolboxId);
 
-      // Non-admins only see their own agents
-      if (!isAdmin && userId) {
-        agents = agents.filter((a: any) => a.userId === userId);
+      if (!isAdminUser && userId) {
+        // Non-admins only see their own agents, with sensitive fields stripped
+        agents = agents
+          .filter((a: any) => a.userId === userId)
+          .map(sanitizeAgentForPublic);
       }
 
       if (!includeArchived) {
@@ -1340,13 +1346,22 @@ export async function registerRoutes(
     }
   });
 
-  // Get single agent
+  // Get single agent — full data for owner or admin only; 403 for anyone else.
   app.get("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id as string);
-      if (!agent) {
-        return res.status(404).json({ error: "Agent not found" });
+      if (!agent) return res.status(404).json({ error: "Agent not found" });
+
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const role = await getDbRole(req);
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const isAdminUser = role === "admin" || role === "superadmin" || adminIds.includes(userId);
+      const isOwner = (agent as any).userId === userId;
+
+      if (!isAdminUser && !isOwner) {
+        return res.status(403).json({ error: "Forbidden" });
       }
+
       res.json(agent);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch agent" });
@@ -2887,9 +2902,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         aiResponseContent = completion.choices[0]?.message?.content || "Maaf, saya tidak dapat merespons saat ini.";
       }
       
-      // Process memory tags from AI response
-      const saveMemRegex = new RegExp("\\[SAVE_MEMORY:(memory|note)\\]\\s*([\\s\\S]*?)\\s*\\[\\/SAVE_MEMORY\\]", "g");
-      const delMemRegex = new RegExp("\\[DELETE_MEMORY\\]\\s*([\\s\\S]*?)\\s*\\[\\/DELETE_MEMORY\\]", "g");
+      // Process memory tags from AI response — whitespace-tolerant, case-insensitive patterns
+      const saveMemRegex = new RegExp("\\[\\s*SAVE_MEMORY\\s*:\\s*(memory|note)\\s*\\]\\s*([\\s\\S]*?)\\s*\\[\\/\\s*SAVE_MEMORY\\s*\\]", "gi");
+      const delMemRegex = new RegExp("\\[\\s*DELETE_MEMORY\\s*\\]\\s*([\\s\\S]*?)\\s*\\[\\/\\s*DELETE_MEMORY\\s*\\]", "gi");
       
       let smMatch;
       while ((smMatch = saveMemRegex.exec(aiResponseContent)) !== null) {
@@ -2916,8 +2931,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         } catch (e) { console.error("Failed to delete memory:", e); }
       }
       
-      // Process Project Brain update tags from AI response
-      const updateBrainRegex = new RegExp("\\[UPDATE_BRAIN:([\\w_]+)\\]\\s*([\\s\\S]*?)\\s*\\[\\/UPDATE_BRAIN\\]", "g");
+      // Process Project Brain update tags from AI response — whitespace-tolerant, case-insensitive
+      const updateBrainRegex = new RegExp("\\[\\s*UPDATE_BRAIN\\s*:([\\w_]+)\\]\\s*([\\s\\S]*?)\\s*\\[\\/\\s*UPDATE_BRAIN\\s*\\]", "gi");
       let ubMatch;
       while ((ubMatch = updateBrainRegex.exec(aiResponseContent)) !== null) {
         try {
@@ -3925,17 +3940,19 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         }
 
         // Streaming tag filter — strips ALL internal control tags from live SSE chunks
-        // before they reach the client. Matching is case-insensitive.
+        // before reaching the client. Uses regex for case-insensitive + whitespace-tolerant
+        // matching (handles variants like "[ SAVE_MEMORY : note ]" or "[ Update_Brain:key ]").
         //
-        // Block tags  [OPENER...]...[/CLOSER]  — strip opener-to-closer (multi-token).
-        // Inline tags [TAG:...]                — strip opener-to-next-] (single bracket).
+        // Block tags: [TAG...]...[/TAG] — strip from opener to closer (multi-token).
+        // Inline tags: [TAG:...]        — strip opener to next "]" (single bracket).
         const SS_BLOCK = [
-          { lo: "[save_memory:",    cl: "[/save_memory]"  },
-          { lo: "[delete_memory]",  cl: "[/delete_memory]" },
-          { lo: "[update_brain:",   cl: "[/update_brain]"  },
+          { rx: /\[\s*save_memory\s*:\s*(memory|note)/i,  clRx: /\[\/\s*save_memory\s*\]/i  },
+          { rx: /\[\s*delete_memory\s*\]/i,               clRx: /\[\/\s*delete_memory\s*\]/i },
+          { rx: /\[\s*update_brain\s*:\s*[\w_]+/i,        clRx: /\[\/\s*update_brain\s*\]/i  },
         ];
-        const SS_INLINE = ["[suggest_action:"];
-        const SS_ALL_OPENERS = [...SS_BLOCK.map(b => b.lo), ...SS_INLINE];
+        const SS_INLINE_RX = /\[\s*suggest_action\s*:/i;
+        // Partial-opener guard: if buffer tail looks like the start of a tag, hold it back
+        const SS_PARTIAL_TAIL_RX = /\[\s*[a-zA-Z_]*\s*$/;
         let _sBuf = "";
 
         function _flushStreamBuf(isFinal: boolean): string {
@@ -3943,58 +3960,58 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           let progress = true;
           while (progress) {
             progress = false;
-            const lo = _sBuf.toLowerCase();
 
-            // ── Pass 1: find earliest *complete* tag (block or inline) ──────────────
-            let earliest: { opIdx: number; endIdx: number } | null = null;
-            for (const { lo: opLo, cl } of SS_BLOCK) {
-              const opIdx = lo.indexOf(opLo);
-              if (opIdx === -1) continue;
-              const clIdx = lo.indexOf(cl, opIdx);
-              if (clIdx !== -1) {
-                const endIdx = clIdx + cl.length;
-                if (!earliest || opIdx < earliest.opIdx) earliest = { opIdx, endIdx };
+            // ── Compute all opener matches for this iteration ──────────────────────
+            interface SMatch { opIdx: number; endIdx: number; hasCloser: boolean }
+            const allMatches: SMatch[] = [];
+
+            for (const { rx, clRx } of SS_BLOCK) {
+              const opM = rx.exec(_sBuf);
+              if (!opM) continue;
+              // Find the opening bracket for this match (walk back from match to '[')
+              const brOpen = _sBuf.lastIndexOf("[", opM.index);
+              const opIdx = brOpen !== -1 ? brOpen : opM.index;
+              const tail = _sBuf.slice(opM.index + opM[0].length);
+              const clM = clRx.exec(tail);
+              if (clM) {
+                allMatches.push({ opIdx, endIdx: opM.index + opM[0].length + clM.index + clM[0].length, hasCloser: true });
+              } else {
+                allMatches.push({ opIdx, endIdx: -1, hasCloser: false });
               }
             }
-            for (const opLo of SS_INLINE) {
-              const opIdx = lo.indexOf(opLo);
-              if (opIdx === -1) continue;
-              const clIdx = _sBuf.indexOf("]", opIdx + opLo.length);
-              if (clIdx !== -1) {
-                if (!earliest || opIdx < earliest.opIdx) earliest = { opIdx, endIdx: clIdx + 1 };
-              }
+            const inlineM = SS_INLINE_RX.exec(_sBuf);
+            if (inlineM) {
+              const brOpen = _sBuf.lastIndexOf("[", inlineM.index);
+              const opIdx = brOpen !== -1 ? brOpen : inlineM.index;
+              const clIdx = _sBuf.indexOf("]", inlineM.index + inlineM[0].length);
+              allMatches.push({ opIdx, endIdx: clIdx !== -1 ? clIdx + 1 : -1, hasCloser: clIdx !== -1 });
             }
-            if (earliest) {
+
+            // ── Pass 1: strip earliest *complete* tag ──────────────────────────────
+            const complete = allMatches.filter(m => m.hasCloser);
+            if (complete.length > 0) {
+              const earliest = complete.reduce((a, b) => a.opIdx <= b.opIdx ? a : b);
               out += _sBuf.slice(0, earliest.opIdx);
               _sBuf = _sBuf.slice(earliest.endIdx);
               progress = true;
               continue;
             }
 
-            // ── Pass 2: incomplete tag (opener found, closer not yet received) ──────
-            let partialStart = -1;
-            for (const opLo of SS_ALL_OPENERS) {
-              const opIdx = lo.indexOf(opLo);
-              if (opIdx !== -1 && (partialStart === -1 || opIdx < partialStart)) {
-                partialStart = opIdx;
-              }
-            }
-            if (partialStart !== -1) {
-              out += _sBuf.slice(0, partialStart);
-              _sBuf = isFinal ? "" : _sBuf.slice(partialStart);
+            // ── Pass 2: hold back from earliest opener (closer not received yet) ──
+            if (allMatches.length > 0) {
+              const earliest = allMatches.reduce((a, b) => a.opIdx <= b.opIdx ? a : b);
+              out += _sBuf.slice(0, earliest.opIdx);
+              _sBuf = isFinal ? "" : _sBuf.slice(earliest.opIdx);
               break;
             }
 
-            // ── Pass 3: no opener in buffer — guard against partial opener at tail ──
+            // ── Pass 3: guard partial opener at buffer tail (cross-chunk boundary) ─
             if (!isFinal) {
-              for (const opLo of SS_ALL_OPENERS) {
-                for (let pLen = Math.min(opLo.length - 1, _sBuf.length); pLen >= 2; pLen--) {
-                  if (lo.endsWith(opLo.slice(0, pLen))) {
-                    out += _sBuf.slice(0, _sBuf.length - pLen);
-                    _sBuf = _sBuf.slice(-pLen);
-                    return out;
-                  }
-                }
+              const tailM = SS_PARTIAL_TAIL_RX.exec(_sBuf);
+              if (tailM && tailM.index !== undefined) {
+                out += _sBuf.slice(0, tailM.index);
+                _sBuf = _sBuf.slice(tailM.index);
+                return out;
               }
             }
 
