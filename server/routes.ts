@@ -828,12 +828,15 @@ export async function registerRoutes(
       if (!s) return res.status(404).json({ error: "Series not found" });
       if (!s.isPublic || !s.isActive) return res.status(404).json({ error: "Series not found" });
 
-      // Return only public-facing card fields — no nested hierarchy
+      // Strictly minimal card DTO — only what the UI needs to render the series card
       res.json({
-        id: String(s.id), name: s.name, slug: s.slug,
-        description: s.description || "", tagline: s.tagline || "",
-        category: s.category || "", color: s.color || "#6366f1",
-        isPublic: s.isPublic, isActive: s.isActive,
+        id: String(s.id),
+        name: s.name,
+        slug: s.slug,
+        tagline: s.tagline || "",
+        avatar: (s as any).avatar || "",
+        category: s.category || "",
+        color: s.color || "#6366f1",
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch series" });
@@ -1346,7 +1349,11 @@ export async function registerRoutes(
     }
   });
 
-  // Get single agent — full data for owner or admin only; 403 for anyone else.
+  // Get single agent.
+  // Admin/superadmin → full data.
+  // Owner (non-admin) → sanitized data (systemPrompt and internal config stripped).
+  // Anyone else → 403.
+  // systemPrompt is intentionally not exposed to owners to protect platform IP.
   app.get("/api/agents/:id", isAuthenticated, async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id as string);
@@ -1362,7 +1369,8 @@ export async function registerRoutes(
         return res.status(403).json({ error: "Forbidden" });
       }
 
-      res.json(agent);
+      // Admin gets full data; owner gets data without sensitive internal fields
+      res.json(isAdminUser ? agent : sanitizeAgentForPublic(agent));
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch agent" });
     }
@@ -1611,12 +1619,14 @@ export async function registerRoutes(
     try {
       const agent = await storage.getAgent(req.params.id as string);
       if (!agent) return res.status(404).json({ error: "Agent not found" });
-      // Admin-only — reuse the shared isAdminRequest() helper (ADMIN_USER_IDS + DB role).
-      // Function declaration is hoisted so this call is safe even though isAdminRequest
-      // is declared later in the same registerRoutes() scope.
-      const adminCheck = isAdminRequest(req);
-      if (!adminCheck.ok) {
-        return res.status(adminCheck.status).json({ error: "Forbidden: hanya admin yang bisa melihat system prompt" });
+      // Admin-only: check both ADMIN_USER_IDS env list AND DB role admin/superadmin.
+      // isAdminRequest() covers the env list; getDbRole() covers DB-based roles.
+      const userId2 = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const adminIds2 = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const dbRole2 = await getDbRole(req);
+      const isAdminForPrompt = adminIds2.includes(userId2) || dbRole2 === "admin" || dbRole2 === "superadmin";
+      if (!isAdminForPrompt) {
+        return res.status(403).json({ error: "Forbidden: hanya admin yang bisa melihat system prompt" });
       }
       const prompt = buildFinalSystemPrompt(agent);
       res.json({ prompt, length: prompt.length });
@@ -4038,10 +4048,10 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         const finalFlush = _flushStreamBuf(true);
         if (finalFlush) res.write(`data: ${JSON.stringify({ type: "chunk", content: finalFlush })}\n\n`);
         
-        // Process memory tags from AI response
+        // Process memory tags from AI response — whitespace-tolerant, case-insensitive
         let cleanContent = fullContent || "Maaf, saya tidak dapat merespons saat ini.";
-        const saveMemoryRegex = new RegExp("\\[SAVE_MEMORY:(memory|note)\\]\\s*([\\s\\S]*?)\\s*\\[\\/SAVE_MEMORY\\]", "g");
-        const deleteMemoryRegex = new RegExp("\\[DELETE_MEMORY\\]\\s*([\\s\\S]*?)\\s*\\[\\/DELETE_MEMORY\\]", "g");
+        const saveMemoryRegex = new RegExp("\\[\\s*SAVE_MEMORY\\s*:\\s*(memory|note)\\s*\\]\\s*([\\s\\S]*?)\\s*\\[\\/\\s*SAVE_MEMORY\\s*\\]", "gi");
+        const deleteMemoryRegex = new RegExp("\\[\\s*DELETE_MEMORY\\s*\\]\\s*([\\s\\S]*?)\\s*\\[\\/\\s*DELETE_MEMORY\\s*\\]", "gi");
         
         let memMatch;
         while ((memMatch = saveMemoryRegex.exec(fullContent)) !== null) {
@@ -4072,8 +4082,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           }
         }
         
-        // Process Project Brain update tags from stream response
-        const updateBrainStreamRegex = new RegExp("\\[UPDATE_BRAIN:([\\w_]+)\\]\\s*([\\s\\S]*?)\\s*\\[\\/UPDATE_BRAIN\\]", "g");
+        // Process Project Brain update tags from stream response — whitespace-tolerant, case-insensitive
+        const updateBrainStreamRegex = new RegExp("\\[\\s*UPDATE_BRAIN\\s*:([\\w_]+)\\]\\s*([\\s\\S]*?)\\s*\\[\\/\\s*UPDATE_BRAIN\\s*\\]", "gi");
         let ubStreamMatch;
         while ((ubStreamMatch = updateBrainStreamRegex.exec(fullContent)) !== null) {
           try {
