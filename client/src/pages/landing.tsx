@@ -9,6 +9,7 @@ import {
   trackInitiateCheckout, trackCustomEvent,
 } from "@/hooks/use-meta-pixel";
 import { ChatPopup } from "@/components/chat-popup";
+import { DialogGustaftaWidget } from "@/components/dialog-gustafta-widget";
 import { SharedHeader } from "@/components/shared-header";
 import {
   Bot, Sparkles, Globe, Shield, BookOpen, ArrowRight, Check, X,
@@ -1686,6 +1687,7 @@ export default function Landing() {
       </footer>
 
       {gustaftaAssistant && <ChatPopup agent={gustaftaAssistant} />}
+      {gustaftaAssistant && <DialogGustaftaWidget agent={gustaftaAssistant} />}
     </div>
   );
 }
