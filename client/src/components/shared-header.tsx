@@ -202,7 +202,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
         <div className="container mx-auto px-4 h-28 flex items-center justify-between gap-2">
           <Link href="/">
             <div className="flex items-center gap-3 cursor-pointer shrink-0">
-              <img src="/logo-gustafta.png" alt="Gustafta" className="h-24 w-24 object-contain" />
+              <img src="/logo-gustafta.png" alt="Gustafta" className="h-[67px] w-[67px] object-contain" />
               <span className="text-[40px] font-black tracking-tight leading-none bg-gradient-to-r from-cyan-400 via-blue-500 to-blue-900 bg-clip-text text-transparent">GUSTAFTA</span>
             </div>
           </Link>
