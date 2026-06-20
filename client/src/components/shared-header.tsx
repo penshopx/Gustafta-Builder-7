@@ -206,7 +206,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                 <img src="/logo-gustafta.png" alt="Gustafta" className="h-9 w-9 object-contain" />
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-xl font-bold tracking-tight">Gustafta</span>
+                <span className="text-xl font-bold tracking-tight">GUSTAFTA</span>
                 <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">AI Builder</span>
               </div>
             </div>
