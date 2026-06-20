@@ -203,6 +203,17 @@ export default function Landing() {
             <CheckCircle2 className="w-4 h-4 text-green-500" />
             Mulai dari Rp 199.000/bulan · Tanpa kartu kredit · Setup &lt; 30 menit
           </p>
+
+          {/* Hero illustration */}
+          <div className="mt-12 relative max-w-4xl mx-auto">
+            <img
+              src="/images/g03.png"
+              alt="AI Collaboration in Business"
+              className="w-full rounded-2xl shadow-2xl object-cover object-top"
+              style={{ maxHeight: "380px" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent rounded-2xl" />
+          </div>
         </div>
       </section>
 
@@ -306,6 +317,22 @@ export default function Landing() {
                   "Informasinya ada. Tapi tidak ada yang membantu Mas Dian berpikir."
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* G07 — Dari Monolog ke Dialog visual */}
+          <div className="mb-8 rounded-2xl overflow-hidden relative shadow-lg">
+            <img
+              src="/images/g07.png"
+              alt="Dari Monolog ke Dialog — AI bekerja bersama"
+              className="w-full object-cover object-center"
+              style={{ maxHeight: "260px" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4 text-center">
+              <span className="inline-block bg-primary/90 text-white text-xs font-bold px-3 py-1 rounded-full">
+                Dari MONOLOG ke DIALOG
+              </span>
             </div>
           </div>
 
@@ -639,6 +666,57 @@ export default function Landing() {
                   Lihat 80+ Tools <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PLATFORM VISUALS: Ekosistem & Orkestrasi ── */}
+      <section className="py-16 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Di Balik Platform</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Visualisasi Sistem AI Gustafta</h2>
+            <p className="text-muted-foreground text-sm max-w-xl mx-auto">Dari chatbot builder berbasis no-code hingga AI orchestration hub dengan ratusan agen spesialis.</p>
+          </div>
+
+          {/* Row 1: G20 (Orchestration Hub) full width */}
+          <div className="mb-6 rounded-2xl overflow-hidden shadow-lg border">
+            <img src="/images/g20.png" alt="AI Orchestration Hub — Gustafta Multi-Agent System" className="w-full object-cover" />
+          </div>
+
+          {/* Row 2: G18 + G02 side by side */}
+          <div className="grid md:grid-cols-2 gap-4 mb-4">
+            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
+              <img src="/images/g18.png" alt="No Code Build Anything — Platform Gustafta" className="w-full object-cover" />
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
+              <img src="/images/g02.png" alt="Multi-Agent Collaboration System" className="w-full object-cover" />
+            </div>
+          </div>
+
+          {/* Row 3: G04 + G19 + G05 three column */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
+              <img src="/images/g04.png" alt="AI Builder Studio — Workflow Automation" className="w-full object-cover" />
+              <div className="p-3 bg-background">
+                <p className="text-xs font-bold">AI Builder Studio</p>
+                <p className="text-[11px] text-muted-foreground">Bangun workflow AI tanpa coding</p>
+              </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
+              <img src="/images/g19.png" alt="No-Code Platform — Drag & Drop" className="w-full object-cover" />
+              <div className="p-3 bg-background">
+                <p className="text-xs font-bold">No-Code Platform</p>
+                <p className="text-[11px] text-muted-foreground">Drag & drop komponen AI</p>
+              </div>
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
+              <img src="/images/g05.png" alt="Ekosistem Agen AI Gustafta" className="w-full object-cover" />
+              <div className="p-3 bg-background">
+                <p className="text-xs font-bold">Ekosistem Agen</p>
+                <p className="text-[11px] text-muted-foreground">Ratusan agen spesialis saling terhubung</p>
+              </div>
             </div>
           </div>
         </div>
@@ -1362,66 +1440,73 @@ export default function Landing() {
       </section>
 
       {/* ── TRILOGI GUSTAFTA BANNER ── */}
-      <section className="py-16 px-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white overflow-hidden relative">
+      <section className="py-20 px-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white overflow-hidden relative">
         <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #3b82f6 0%, transparent 60%), radial-gradient(circle at 80% 50%, #0ea5e9 0%, transparent 60%)" }} />
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-10">
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Header */}
+          <div className="text-center mb-12">
             <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-3">Gustafta Publishing</span>
-            <h2 className="text-2xl md:text-4xl font-extrabold mb-3">
-              Trilogi Gustafta
-            </h2>
-            <p className="text-blue-200 text-sm md:text-base max-w-xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-4">Trilogi Gustafta</h2>
+            <p className="text-blue-200 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
               <em>Dari Monolog ke Dialog</em> — perjalanan transformasi cara berpikir, bekerja, dan berkarya di era AI.
             </p>
+            <p className="text-blue-300/70 text-sm mt-2">Oleh: Prof. Dr. Sudarwan Danim, dkk. · Buku Pendidikan & Kepemimpinan</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 items-center">
-            <div className="flex gap-3">
-              <img
-                src="/trilogi-poster-1.png"
-                alt="Trilogi Gustafta Poster"
-                className="w-1/2 rounded-2xl shadow-2xl shadow-blue-900/50 hover:scale-105 transition-transform duration-300 object-cover"
-              />
-              <img
-                src="/trilogi-poster-2.png"
-                alt="Trilogi Gustafta Poster Alt"
-                className="w-1/2 rounded-2xl shadow-2xl shadow-blue-900/50 hover:scale-105 transition-transform duration-300 object-cover opacity-90"
-              />
+
+          {/* Row 1: Cover + G01 (portrait) + G06 (pre-order) */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <img src="/images/trilogi-cover.png" alt="Trilogi Gustafta — Cover" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
+            <img src="/images/g01.png" alt="Trilogi Gustafta — Book Cover Portrait" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
+            <img src="/images/g06.png" alt="Peluncuran Buku Trilogi Gustafta" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
+          </div>
+
+          {/* Row 2: G14 infographic (landscape) full width */}
+          <div className="mb-6 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
+            <img src="/images/g14.png" alt="Trilogi Gustafta — Perjalanan Belajar AI 3 Tahap" className="w-full object-cover" />
+          </div>
+
+          {/* Row 3: G15 + Gemini (vertical) side by side */}
+          <div className="grid md:grid-cols-5 gap-4 mb-8 items-start">
+            <div className="md:col-span-3 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
+              <img src="/images/g15.png" alt="Trilogi Gustafta — 3 Tahap AI" className="w-full object-cover" />
             </div>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">💬</span>
-                <div>
-                  <p className="font-bold text-sm">Dialog</p>
-                  <p className="text-blue-300 text-xs">Dari instruksi satu arah ke percakapan yang menggali potensi.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🤝</span>
-                <div>
-                  <p className="font-bold text-sm">Kolaborasi</p>
-                  <p className="text-blue-300 text-xs">Manusia dan AI bekerja bersama, saling melengkapi.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">💡</span>
-                <div>
-                  <p className="font-bold text-sm">Kreasi</p>
-                  <p className="text-blue-300 text-xs">Mengubah ide menjadi produk nyata yang berdampak.</p>
-                </div>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-3">
-                <a
-                  href="https://trilogi.gustafta.my.id"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold text-sm px-5 py-2.5 rounded-full transition-colors"
-                  data-testid="link-trilogi-cta"
-                >
-                  Dapatkan Bukunya →
-                </a>
-                <span className="inline-flex items-center text-blue-300 text-xs self-center">trilogi.gustafta.my.id</span>
-              </div>
+            <div className="md:col-span-2 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
+              <img src="/images/trilogi-gemini.png" alt="Trilogi Gustafta — Tahap Dialog Kolaborasi Kreasi" className="w-full object-cover" />
             </div>
+          </div>
+
+          {/* Row 4: G21 + poster-1 + poster-2 */}
+          <div className="grid grid-cols-3 gap-4 mb-10">
+            <img src="/images/g21.png" alt="Trilogi Gustafta — Poster Peluncuran" className="rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 object-cover w-full" />
+            <img src="/trilogi-poster-1.png" alt="Trilogi Gustafta Poster 1" className="rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 object-cover w-full opacity-90" />
+            <img src="/trilogi-poster-2.png" alt="Trilogi Gustafta Poster 2" className="rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 object-cover w-full opacity-90" />
+          </div>
+
+          {/* 3 pillar points + CTA */}
+          <div className="grid md:grid-cols-3 gap-5 mb-8">
+            {[
+              { icon: "💬", title: "Dialog", desc: "Dari instruksi satu arah ke percakapan mendalam yang menggali potensi terbaik." },
+              { icon: "🤝", title: "Kolaborasi", desc: "Manusia dan AI bekerja bersama, saling melengkapi dalam setiap langkah." },
+              { icon: "💡", title: "Kreasi", desc: "Mengubah ide menjadi produk nyata yang berdampak dan berkelanjutan." },
+            ].map((p) => (
+              <div key={p.title} className="rounded-xl border border-blue-700/40 bg-blue-900/30 p-5 text-center">
+                <div className="text-3xl mb-3">{p.icon}</div>
+                <p className="font-extrabold text-sm mb-2">{p.title}</p>
+                <p className="text-blue-300 text-xs leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <a
+              href="https://trilogi.gustafta.my.id"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-full transition-colors shadow-lg shadow-cyan-500/30"
+              data-testid="link-trilogi-cta"
+            >
+              Dapatkan Bukunya — trilogi.gustafta.my.id →
+            </a>
           </div>
         </div>
       </section>
