@@ -680,43 +680,18 @@ export default function Landing() {
             <p className="text-muted-foreground text-sm max-w-xl mx-auto">Dari chatbot builder berbasis no-code hingga AI orchestration hub dengan ratusan agen spesialis.</p>
           </div>
 
-          {/* Row 1: G20 (Orchestration Hub) full width */}
-          <div className="mb-6 rounded-2xl overflow-hidden shadow-lg border">
+          {/* G20 (Orchestration Hub) full width */}
+          <div className="mb-4 rounded-2xl overflow-hidden shadow-lg border">
             <img src="/images/g20.png" alt="AI Orchestration Hub — Gustafta Multi-Agent System" className="w-full object-cover" />
           </div>
 
-          {/* Row 2: G18 + G02 side by side */}
-          <div className="grid md:grid-cols-2 gap-4 mb-4">
+          {/* G18 + G04 side by side */}
+          <div className="grid md:grid-cols-2 gap-4">
             <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
               <img src="/images/g18.png" alt="No Code Build Anything — Platform Gustafta" className="w-full object-cover" />
             </div>
             <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
-              <img src="/images/g02.png" alt="Multi-Agent Collaboration System" className="w-full object-cover" />
-            </div>
-          </div>
-
-          {/* Row 3: G04 + G19 + G05 three column */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
               <img src="/images/g04.png" alt="AI Builder Studio — Workflow Automation" className="w-full object-cover" />
-              <div className="p-3 bg-background">
-                <p className="text-xs font-bold">AI Builder Studio</p>
-                <p className="text-[11px] text-muted-foreground">Bangun workflow AI tanpa coding</p>
-              </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
-              <img src="/images/g19.png" alt="No-Code Platform — Drag & Drop" className="w-full object-cover" />
-              <div className="p-3 bg-background">
-                <p className="text-xs font-bold">No-Code Platform</p>
-                <p className="text-[11px] text-muted-foreground">Drag & drop komponen AI</p>
-              </div>
-            </div>
-            <div className="rounded-2xl overflow-hidden shadow-md border hover:shadow-lg transition-shadow">
-              <img src="/images/g05.png" alt="Ekosistem Agen AI Gustafta" className="w-full object-cover" />
-              <div className="p-3 bg-background">
-                <p className="text-xs font-bold">Ekosistem Agen</p>
-                <p className="text-[11px] text-muted-foreground">Ratusan agen spesialis saling terhubung</p>
-              </div>
             </div>
           </div>
         </div>
@@ -1354,11 +1329,8 @@ export default function Landing() {
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-3">
               {[
                 { src: "/videos/g08.mp4", title: "Klip G08", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g08.mp4" },
-                { src: "/videos/g09.mp4", title: "Klip G09", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g09.mp4" },
                 { src: "/videos/g10.mp4", title: "Klip G10", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g10.mp4" },
-                { src: "/videos/g11.mp4", title: "Klip G11", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g11.mp4" },
                 { src: "/videos/g12.mp4", title: "Klip G12", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g12.mp4" },
-                { src: "/videos/g13.mp4", title: "Klip G13", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g13.mp4" },
               ].map((v) => (
                 <div key={v.src} className="rounded-2xl border bg-background overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
                   <div className="relative aspect-video bg-slate-900 overflow-hidden">
@@ -1453,37 +1425,20 @@ export default function Landing() {
             <p className="text-blue-300/70 text-sm mt-2">Oleh: Prof. Dr. Sudarwan Danim, dkk. · Buku Pendidikan & Kepemimpinan</p>
           </div>
 
-          {/* Row 1: Cover + G01 (portrait) + G06 (pre-order) */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-            <img src="/images/trilogi-cover.png" alt="Trilogi Gustafta — Cover" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300">
-              <img src="/images/g01.png" alt="Trilogi Gustafta — Book Cover Portrait" className="object-cover w-full" />
-              <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent" />
-            </div>
+          {/* Row 1: G06 + G21 poster */}
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
             <img src="/images/g06.png" alt="Peluncuran Buku Trilogi Gustafta" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
+            <img src="/images/g21.png" alt="Trilogi Gustafta — Poster Peluncuran" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
           </div>
 
-          {/* Row 2: G14 infographic (landscape) full width */}
+          {/* Row 2: G14 infographic full width */}
           <div className="mb-6 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
             <img src="/images/g14.png" alt="Trilogi Gustafta — Perjalanan Belajar AI 3 Tahap" className="w-full object-cover" />
           </div>
 
-          {/* Row 3: G15 + Gemini (vertical) side by side */}
-          <div className="grid md:grid-cols-5 gap-4 mb-8 items-start">
-            <div className="md:col-span-3 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
-              <img src="/images/g15.png" alt="Trilogi Gustafta — 3 Tahap AI" className="w-full object-cover" />
-            </div>
-            <div className="md:col-span-2 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40 relative">
-              <img src="/images/trilogi-gemini.png" alt="Trilogi Gustafta — Tahap Dialog Kolaborasi Kreasi" className="w-full object-cover" />
-              <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent" />
-            </div>
-          </div>
-
-          {/* Row 4: G21 + poster-1 + poster-2 */}
-          <div className="grid grid-cols-3 gap-4 mb-10">
-            <img src="/images/g21.png" alt="Trilogi Gustafta — Poster Peluncuran" className="rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 object-cover w-full" />
-            <img src="/trilogi-poster-1.png" alt="Trilogi Gustafta Poster 1" className="rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 object-cover w-full opacity-90" />
-            <img src="/trilogi-poster-2.png" alt="Trilogi Gustafta Poster 2" className="rounded-2xl shadow-xl hover:scale-105 transition-transform duration-300 object-cover w-full opacity-90" />
+          {/* Row 3: poster-1 */}
+          <div className="mb-10 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
+            <img src="/trilogi-poster-1.png" alt="Trilogi Gustafta Poster" className="w-full object-cover" />
           </div>
 
           {/* 3 pillar points + CTA */}
