@@ -532,6 +532,9 @@ export async function registerRoutes(
   app.use("/attached_assets", (_req, res) => {
     res.status(403).json({ error: "Forbidden" });
   });
+  app.use("/public/attached_assets", (_req, res) => {
+    res.status(403).json({ error: "Forbidden" });
+  });
 
   // ==================== Sanitize Helpers ====================
   // Strip sensitive fields before returning agent data to public/user endpoints.
@@ -782,14 +785,13 @@ export async function registerRoutes(
 
         if (totalAgents === 0) continue;
 
+        // Only expose public-safe card data — internal counts and full nested hierarchy
+        // would reveal the system's internal organization to competitors.
         result.push({
           id: String(s.id), name: s.name, slug: s.slug, description: s.description || "",
           tagline: s.tagline || "", category: s.category || "", color: s.color || "#6366f1",
           isPublic: s.isPublic || false, isActive: s.isActive || false,
-          sortOrder: s.sortOrder || 0, totalAgents,
-          totalBigIdeas: allBigIdeas.filter(bi => bi.seriesId === s.id).length,
-          totalToolboxes: activeToolboxes.filter(tb => tb.seriesId === s.id || allBigIdeas.find(bi => bi.seriesId === s.id && bi.id === tb.bigIdeaId)).length,
-          totalCores: allCores.filter(c => c.seriesId === s.id).length,
+          sortOrder: s.sortOrder || 0,
           bigIdeas: ungroupedBigIdeas,
           cores,
           orchestratorToolboxes,
@@ -815,7 +817,8 @@ export async function registerRoutes(
     }
   });
 
-  // Public: Get series detail with full hierarchy
+  // Public: Get series detail — returns minimal safe hierarchy.
+  // Full toolbox internals (capabilities, limitations, purpose) are stripped.
   app.get("/api/series/public/:idOrSlug", async (req, res) => {
     try {
       const param = req.params.idOrSlug as string;
@@ -830,7 +833,31 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Series not found" });
       }
       const hierarchy = await storage.getSeriesWithHierarchy(s.id);
-      res.json(hierarchy);
+      if (!hierarchy) return res.status(404).json({ error: "Series not found" });
+
+      // Strip internal toolbox fields from hierarchy before sending to public
+      function sanitizeToolbox(tb: any) {
+        const { purpose: _p, capabilities: _c, limitations: _l, createdAt: _ca, ...safeTb } = tb;
+        if (safeTb.agents) {
+          safeTb.agents = safeTb.agents.map((a: any) => sanitizeAgentForPublic(a));
+        }
+        return safeTb;
+      }
+      function sanitizeBigIdea(bi: any) {
+        const safe = { ...bi };
+        if (safe.toolboxes) safe.toolboxes = safe.toolboxes.map(sanitizeToolbox);
+        return safe;
+      }
+      const sanitized = {
+        ...hierarchy,
+        bigIdeas: (hierarchy as any).bigIdeas?.map(sanitizeBigIdea) ?? [],
+        cores: (hierarchy as any).cores?.map((c: any) => ({
+          ...c,
+          bigIdeas: c.bigIdeas?.map(sanitizeBigIdea) ?? [],
+        })) ?? [],
+      };
+
+      res.json(sanitized);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch series" });
     }
@@ -1586,17 +1613,20 @@ export async function registerRoutes(
     }
   });
 
-  // Preview prompt AI FINAL (PERSONA + 7 field Kebijakan Agen) untuk dashboard.
-  // Hanya pemilik agen (atau admin) yang boleh melihat. Ini dipakai oleh tombol
-  // "Pratinjau Prompt AI" di panel Persona/Kebijakan Agen agar builder bisa
-  // mengecek hasil suntikan Brand Voice / Domain Charter / Quality Bar tanpa
-  // harus mengaktifkan env DEBUG_PROMPT di server.
+  // Preview prompt AI FINAL — HANYA ADMIN.
+  // System prompt adalah "otak" agent yang bersifat rahasia bisnis.
+  // Pemilik agent (non-admin) tidak boleh melihat prompt mentah karena bisa berisi
+  // instruksi internal atau IP yang tidak boleh bocor ke kompetitor via akun builder.
   app.get("/api/agents/:id/preview-prompt", isAuthenticated, async (req, res) => {
     try {
       const agent = await storage.getAgent(req.params.id as string);
       if (!agent) return res.status(404).json({ error: "Agent not found" });
-      const auth = assertCanPreviewAgentPrompt(req, agent);
-      if (!auth.ok) return res.status(auth.status).json({ error: auth.error });
+      // Admin-only: hanya ADMIN_USER_IDS yang boleh melihat full system prompt
+      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
+      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      if (!adminIds.includes(userId)) {
+        return res.status(403).json({ error: "Forbidden: hanya admin yang bisa melihat system prompt" });
+      }
       const prompt = buildFinalSystemPrompt(agent);
       res.json({ prompt, length: prompt.length });
     } catch (error) {
@@ -3918,6 +3948,73 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           throw lastAttemptError || new Error("All AI providers failed to create stream");
         }
 
+        // Streaming tag filter — strip server-processing tags (SAVE_MEMORY, DELETE_MEMORY,
+        // UPDATE_BRAIN) from live chunks before they reach the client.
+        // SUGGEST_ACTION is intentionally preserved for frontend action-button rendering.
+        const STREAM_STRIP: Array<[string, string]> = [
+          ["[SAVE_MEMORY:", "[/SAVE_MEMORY]"],
+          ["[DELETE_MEMORY]", "[/DELETE_MEMORY]"],
+          ["[UPDATE_BRAIN:", "[/UPDATE_BRAIN]"],
+        ];
+        let _sBuf = "";
+
+        function _flushStreamBuf(isFinal: boolean): string {
+          let out = "";
+          let progress = true;
+          while (progress) {
+            progress = false;
+            // Find earliest complete tag block
+            let earliest: { opIdx: number; clIdx: number; closer: string } | null = null;
+            for (const [opener, closer] of STREAM_STRIP) {
+              const opIdx = _sBuf.indexOf(opener);
+              if (opIdx === -1) continue;
+              const clIdx = _sBuf.indexOf(closer, opIdx);
+              if (clIdx !== -1 && (!earliest || opIdx < earliest.opIdx)) {
+                earliest = { opIdx, clIdx, closer };
+              }
+            }
+            if (earliest) {
+              out += _sBuf.slice(0, earliest.opIdx);
+              _sBuf = _sBuf.slice(earliest.clIdx + earliest.closer.length);
+              progress = true;
+              continue;
+            }
+            // No complete tags — check for openers without closers
+            let partialStart = -1;
+            for (const [opener] of STREAM_STRIP) {
+              const opIdx = _sBuf.indexOf(opener);
+              if (opIdx !== -1 && (partialStart === -1 || opIdx < partialStart)) {
+                partialStart = opIdx;
+              }
+            }
+            if (partialStart !== -1) {
+              if (isFinal) {
+                out += _sBuf.slice(0, partialStart);
+                _sBuf = "";
+              } else {
+                out += _sBuf.slice(0, partialStart);
+                _sBuf = _sBuf.slice(partialStart);
+              }
+              break;
+            }
+            // No openers at all — guard against partial opener at buffer tail
+            if (!isFinal) {
+              for (const [opener] of STREAM_STRIP) {
+                for (let pLen = Math.min(opener.length - 1, _sBuf.length); pLen >= 2; pLen--) {
+                  if (_sBuf.endsWith(opener.slice(0, pLen))) {
+                    out += _sBuf.slice(0, _sBuf.length - pLen);
+                    _sBuf = _sBuf.slice(-pLen);
+                    return out;
+                  }
+                }
+              }
+            }
+            out += _sBuf;
+            _sBuf = "";
+          }
+          return out;
+        }
+
         for await (const chunk of aiStream) {
           if (!isClientConnected) {
             cleanup();
@@ -3925,9 +4022,14 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           }
           if (chunk.content) {
             fullContent += chunk.content;
-            res.write(`data: ${JSON.stringify({ type: "chunk", content: chunk.content })}\n\n`);
+            _sBuf += chunk.content;
+            const toWrite = _flushStreamBuf(false);
+            if (toWrite) res.write(`data: ${JSON.stringify({ type: "chunk", content: toWrite })}\n\n`);
           }
         }
+        // Flush remaining buffer (stream ended)
+        const finalFlush = _flushStreamBuf(true);
+        if (finalFlush) res.write(`data: ${JSON.stringify({ type: "chunk", content: finalFlush })}\n\n`);
         
         // Process memory tags from AI response
         let cleanContent = fullContent || "Maaf, saya tidak dapat merespons saat ini.";
@@ -8452,6 +8554,9 @@ Balas dengan JSON dengan struktur PERSIS ini:
         .filter((i: any) => i.isEnabled)
         .map((i: any) => ({ type: i.type, name: i.name }));
 
+      // Chat config — only fields needed to render the chat UI.
+      // Sensitive fields (systemPrompt, agenticSubAgents, personality, philosophy,
+      // quota internals) are intentionally excluded.
       res.json({
         agentId: agent.id,
         name: agent.name,
@@ -8461,8 +8566,6 @@ Balas dengan JSON dengan struktur PERSIS ini:
         greetingMessage: agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
         welcomeMessage: agent.widgetWelcomeMessage || agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
         conversationStarters: agent.conversationStarters || [],
-        personality: agent.personality || "",
-        philosophy: agent.philosophy || "",
         category: agent.category || "",
         subcategory: agent.subcategory || "",
         color: agent.widgetColor || "#6366f1",
@@ -8476,20 +8579,13 @@ Balas dengan JSON dengan struktur PERSIS ini:
         isPublic: agent.isPublic,
         channels: enabledChannels,
         requireRegistration: agent.requireRegistration ?? false,
-        monthlyPrice: agent.monthlyPrice ?? 0,
         trialEnabled: agent.trialEnabled ?? true,
         trialDays: agent.trialDays ?? 7,
-        messageQuotaDaily: agent.messageQuotaDaily ?? 50,
-        messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
         guestMessageLimit: agent.guestMessageLimit ?? 10,
-        communicationStyle: agent.communicationStyle || "friendly",
-        toneOfVoice: agent.toneOfVoice || "professional",
-        responseStyle: (agent as any).responseStyle || "balanced",
         chatStyle: (agent as any).chatStyle || "direktif",
         language: agent.language || "id",
         contextQuestions: agent.contextQuestions || [],
         metaPixelId: agent.metaPixelId || "",
-        paymentUrl: (agent as any).paymentUrl || "",
       });
     } catch (error) {
       console.error("Chat config error:", error);
@@ -8651,6 +8747,8 @@ Balas dengan JSON dengan struktur PERSIS ini:
         } catch (_e) { /* non-critical */ }
       }
 
+      // Widget config — only fields needed to render the embed widget.
+      // personality, philosophy, quota details, and monetization are excluded.
       const widgetConfig = {
         agentId: agent.id,
         name: agent.name,
@@ -8660,8 +8758,6 @@ Balas dengan JSON dengan struktur PERSIS ini:
         greetingMessage: agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
         welcomeMessage: agent.widgetWelcomeMessage || agent.greetingMessage || "Halo! Ada yang bisa saya bantu?",
         conversationStarters: agent.conversationStarters || [],
-        personality: agent.personality || "",
-        philosophy: agent.philosophy || "",
         category: agent.category || "",
         subcategory: agent.subcategory || "",
         color: agent.widgetColor || "#6366f1",
@@ -8675,11 +8771,8 @@ Balas dengan JSON dengan struktur PERSIS ini:
         isPublic: agent.isPublic,
         channels: enabledChannels,
         requireRegistration: agent.requireRegistration ?? false,
-        monthlyPrice: agent.monthlyPrice ?? 0,
         trialEnabled: agent.trialEnabled ?? true,
         trialDays: agent.trialDays ?? 7,
-        messageQuotaDaily: agent.messageQuotaDaily ?? 50,
-        messageQuotaMonthly: agent.messageQuotaMonthly ?? 1000,
         guestMessageLimit: agent.guestMessageLimit ?? 10,
         chatStyle: (agent as any).chatStyle || "direktif",
         contextQuestions: agent.contextQuestions || [],
