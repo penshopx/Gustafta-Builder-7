@@ -1267,6 +1267,64 @@ export default function Landing() {
             </div>
           </div>
 
+          {/* Grup 3: Seri Terbaru (G08–G13) */}
+          <div className="mb-3">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-5 h-[2px] bg-primary inline-block rounded" />
+              Seri Terbaru — Fitur & Ekosistem
+            </p>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mb-3">
+              {[
+                { src: "/videos/g08.mp4", title: "Klip G08", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g08.mp4" },
+                { src: "/videos/g09.mp4", title: "Klip G09", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g09.mp4" },
+                { src: "/videos/g10.mp4", title: "Klip G10", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g10.mp4" },
+                { src: "/videos/g11.mp4", title: "Klip G11", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g11.mp4" },
+                { src: "/videos/g12.mp4", title: "Klip G12", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g12.mp4" },
+                { src: "/videos/g13.mp4", title: "Klip G13", desc: "Video animasi promosi Gustafta.", badge: "Baru", badgeColor: "bg-cyan-500", dl: "/videos/g13.mp4" },
+              ].map((v) => (
+                <div key={v.src} className="rounded-2xl border bg-background overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
+                  <div className="relative aspect-video bg-slate-900 overflow-hidden">
+                    <video src={v.src} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <span className={`absolute top-2 left-2 text-[9px] font-bold text-white px-2 py-0.5 rounded-full ${v.badgeColor}`}>{v.badge}</span>
+                    <a href={v.dl} download className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">↓ Unduh</a>
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-bold text-xs mb-0.5">{v.title}</h3>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Grup 4: Seri Trilogi Gustafta (G23–G24) */}
+          <div className="mb-8">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-5 h-[2px] bg-primary inline-block rounded" />
+              Seri Trilogi Gustafta — Dari Monolog ke Dialog
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {[
+                { src: "/videos/g23.mp4", title: "Trilogi Gustafta #1", desc: "Video promosi peluncuran buku Trilogi Gustafta.", badge: "Trilogi", badgeColor: "bg-blue-600", dl: "/videos/g23.mp4" },
+                { src: "/videos/g24.mp4", title: "Trilogi Gustafta #2", desc: "Video promosi peluncuran buku Trilogi Gustafta.", badge: "Trilogi", badgeColor: "bg-blue-600", dl: "/videos/g24.mp4" },
+              ].map((v) => (
+                <div key={v.src} className="rounded-2xl border bg-background overflow-hidden shadow-sm hover:shadow-lg transition-shadow group">
+                  <div className="relative aspect-video bg-slate-900 overflow-hidden">
+                    <video src={v.src} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <span className={`absolute top-2 left-2 text-[9px] font-bold text-white px-2 py-0.5 rounded-full ${v.badgeColor}`}>{v.badge}</span>
+                    <a href={v.dl} download className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">↓ Unduh</a>
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-bold text-xs mb-0.5">{v.title}</h3>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{v.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Unduh semua */}
           <div className="text-center border-t pt-6">
             <p className="text-xs text-muted-foreground mb-3">Semua video bebas diunduh untuk keperluan promosi</p>
@@ -1279,6 +1337,14 @@ export default function Landing() {
                 { label: "Masalah", href: "/videos/gustafta-promo-problem.mp4" },
                 { label: "Transformasi", href: "/videos/gustafta-promo-monolog-to-dialog.mp4" },
                 { label: "Solusi", href: "/videos/gustafta-promo-solution.mp4" },
+                { label: "G08", href: "/videos/g08.mp4" },
+                { label: "G09", href: "/videos/g09.mp4" },
+                { label: "G10", href: "/videos/g10.mp4" },
+                { label: "G11", href: "/videos/g11.mp4" },
+                { label: "G12", href: "/videos/g12.mp4" },
+                { label: "G13", href: "/videos/g13.mp4" },
+                { label: "Trilogi #1", href: "/videos/g23.mp4" },
+                { label: "Trilogi #2", href: "/videos/g24.mp4" },
               ].map((dl) => (
                 <a
                   key={dl.label}
@@ -1290,6 +1356,71 @@ export default function Landing() {
                   ↓ {dl.label}
                 </a>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRILOGI GUSTAFTA BANNER ── */}
+      <section className="py-16 px-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white overflow-hidden relative">
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #3b82f6 0%, transparent 60%), radial-gradient(circle at 80% 50%, #0ea5e9 0%, transparent 60%)" }} />
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="text-center mb-10">
+            <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-3">Gustafta Publishing</span>
+            <h2 className="text-2xl md:text-4xl font-extrabold mb-3">
+              Trilogi Gustafta
+            </h2>
+            <p className="text-blue-200 text-sm md:text-base max-w-xl mx-auto">
+              <em>Dari Monolog ke Dialog</em> — perjalanan transformasi cara berpikir, bekerja, dan berkarya di era AI.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 items-center">
+            <div className="flex gap-3">
+              <img
+                src="/trilogi-poster-1.png"
+                alt="Trilogi Gustafta Poster"
+                className="w-1/2 rounded-2xl shadow-2xl shadow-blue-900/50 hover:scale-105 transition-transform duration-300 object-cover"
+              />
+              <img
+                src="/trilogi-poster-2.png"
+                alt="Trilogi Gustafta Poster Alt"
+                className="w-1/2 rounded-2xl shadow-2xl shadow-blue-900/50 hover:scale-105 transition-transform duration-300 object-cover opacity-90"
+              />
+            </div>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">💬</span>
+                <div>
+                  <p className="font-bold text-sm">Dialog</p>
+                  <p className="text-blue-300 text-xs">Dari instruksi satu arah ke percakapan yang menggali potensi.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🤝</span>
+                <div>
+                  <p className="font-bold text-sm">Kolaborasi</p>
+                  <p className="text-blue-300 text-xs">Manusia dan AI bekerja bersama, saling melengkapi.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">💡</span>
+                <div>
+                  <p className="font-bold text-sm">Kreasi</p>
+                  <p className="text-blue-300 text-xs">Mengubah ide menjadi produk nyata yang berdampak.</p>
+                </div>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-3">
+                <a
+                  href="https://trilogi.gustafta.my.id"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold text-sm px-5 py-2.5 rounded-full transition-colors"
+                  data-testid="link-trilogi-cta"
+                >
+                  Dapatkan Bukunya →
+                </a>
+                <span className="inline-flex items-center text-blue-300 text-xs self-center">trilogi.gustafta.my.id</span>
+              </div>
             </div>
           </div>
         </div>
