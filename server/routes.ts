@@ -47,6 +47,7 @@ import { buildFinalSystemPrompt } from "./lib/build-final-system-prompt";
 import { getDefaultPoliciesForSeries, type AgentPolicySet } from "./lib/agent-policies";
 import { importDocumentToProposal, mergeProposalIntoAgent, type ApplyMode } from "./lib/document-importer";
 import { buildEbookMarkdown, buildEbookHtml, stripMarkdownToPlainText, buildEbookTables } from "./lib/ebook-generator";
+import { chatIpRateLimiter, chatAgentIdRateLimiter } from "./lib/rate-limiter";
 import * as XLSX from "xlsx";
 import { buildChaesaExport } from "./lib/chaesa-exporter";
 import { buildEcourseHtml } from "./lib/ecourse-generator";
@@ -2650,7 +2651,7 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
   });
 
   // Send message and get AI response
-  app.post("/api/messages", async (req, res) => {
+  app.post("/api/messages", chatIpRateLimiter, chatAgentIdRateLimiter, async (req, res) => {
     try {
       const parsed = insertMessageSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -3122,7 +3123,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
   const ownerMonthlyUsage = new Map<string, { month: string; count: number }>();
 
   // Streaming message endpoint for real-time AI responses
-  app.post("/api/messages/stream", async (req, res) => {
+  app.post("/api/messages/stream", chatIpRateLimiter, chatAgentIdRateLimiter, async (req, res) => {
     try {
       const parsed = insertMessageSchema.safeParse(req.body);
       if (!parsed.success) {
