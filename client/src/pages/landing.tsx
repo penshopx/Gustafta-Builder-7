@@ -1687,7 +1687,7 @@ export default function Landing() {
       </footer>
 
       {gustaftaAssistant && <ChatPopup agent={gustaftaAssistant} />}
-      {gustaftaAssistant && <DialogGustaftaWidget agent={gustaftaAssistant} />}
+      <DialogGustaftaWidget />
     </div>
   );
 }
