@@ -56,10 +56,11 @@ export function DialogGustaftaWidget() {
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setLoading(true);
     try {
+      const newUserCount = newMessages.filter((m) => m.role === "user").length;
       const res = await fetch("/api/dialog-gustafta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages, userMessageCount: newUserCount }),
       });
       const data = await res.json();
       setMessages([...newMessages, { role: "assistant", content: data.reply || "Maaf, ada gangguan sebentar." }]);

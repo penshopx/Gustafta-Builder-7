@@ -26357,7 +26357,7 @@ Sesuaikan jumlah dan tingkat temuan dengan skala: "${skalaTemuan}". Buat 6-8 ele
   // ─── Dialog Gustafta: Teman Berpikir Coach ─────────────────────────────────
   app.post("/api/dialog-gustafta", async (req: any, res: any) => {
     try {
-      const { messages = [] } = req.body;
+      const { messages = [], userMessageCount = 0 } = req.body;
       if (!Array.isArray(messages) || messages.length === 0) {
         return res.status(400).json({ error: "messages required" });
       }
@@ -26381,9 +26381,6 @@ TAHAPAN DIALOG:
 
 JIKA BELUM TUNTAS:
 Katakan dengan hangat: "Diskusi kita belum selesai ya — tapi sudah ada gambaran yang menarik! Mari kita sambung lagi, potensimu layak dieksplorasi lebih dalam."
-
-SOFT UPSELL (lakukan setelah 5-7 pesan, SEKALI saja, dengan halus):
-Ketika user mulai antusias dan dialog mengalir, sebutkan bahwa untuk dialog yang lebih intensif dan mendalam, ada Paket Trilogi Gustafta — ebook + prompt premium + berlangganan 1 bulan, tersedia di trilogi.gustafta.my.id dengan promo bebas biaya lisensi. Sampaikan ini sebagai "kabar baik" bukan paksaan, lalu lanjutkan dialog.
 
 GAYA BAHASA:
 - Hangat, cerdas, dan mendorong
@@ -26410,7 +26407,19 @@ LARANGAN:
         temperature: 0.85,
       });
 
-      const reply = completion.choices[0]?.message?.content || "Maaf, ada gangguan sebentar. Coba lagi ya!";
+      let reply = completion.choices[0]?.message?.content || "Maaf, ada gangguan sebentar. Coba lagi ya!";
+
+      // Soft upsell: ditambahkan programatically setiap kelipatan 7 pertanyaan
+      const count = typeof userMessageCount === "number" ? userMessageCount : 0;
+      if (count > 0 && count % 7 === 0) {
+        const cycle = Math.floor(count / 7);
+        const upsellNotes = [
+          "\n\n_Oh ya, kalau mau mendalami topik ini lebih jauh — ada **eBook Trilogi Gustafta** yang cukup relevan buat konteks kamu. Bisa dicek di [trilogi.gustafta.my.id](https://trilogi.gustafta.my.id) 😊_",
+          "\n\n_Btw, ide yang kita diskusikan tadi bisa langsung diwujudkan lho! Platform **Gustafta** punya paket berlangganan yang terjangkau untuk bangun chatbot sendiri — cek di [gustafta.my.id](https://gustafta.my.id) kalau tertarik._",
+          "\n\n_Satu langkah konkret yang bisa kamu ambil: eksplorasi lebih dalam lewat **eBook Trilogi Gustafta** (trilogi.gustafta.my.id) atau langsung coba bangun di **platform Gustafta** (gustafta.my.id). Dua jalur berbeda, tapi keduanya menuju ke sana._",
+        ];
+        reply = reply + upsellNotes[(cycle - 1) % upsellNotes.length];
+      }
       return res.json({ reply });
     } catch (e: any) {
       console.error("dialog-gustafta error:", e);
