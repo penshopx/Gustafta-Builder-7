@@ -201,14 +201,9 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
         {/* ── Baris 1: Logo + Aksi Kanan ── */}
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-2">
           <Link href="/">
-            <div className="flex items-center gap-3 cursor-pointer shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center overflow-hidden shadow-md shadow-primary/20 border border-border">
-                <img src="/logo-gustafta.png" alt="Gustafta" className="h-9 w-9 object-contain" />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-xl font-bold tracking-tight">GUSTAFTA</span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">AI Builder</span>
-              </div>
+            <div className="flex items-center gap-2 cursor-pointer shrink-0">
+              <img src="/logo-gustafta.png" alt="Gustafta" className="h-12 w-12 object-contain" />
+              <span className="text-[40px] font-black tracking-tight leading-none">GUSTAFTA</span>
             </div>
           </Link>
 
