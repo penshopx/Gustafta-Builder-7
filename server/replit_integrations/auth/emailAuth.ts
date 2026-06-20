@@ -70,12 +70,15 @@ function generateOTP(): string {
   return String(randomInt(100000, 999999));
 }
 
-// Returns true if email was sent, false if not configured
-async function sendVerificationEmail(email: string, code: string, firstName: string): Promise<boolean> {
+type SendEmailResult =
+  | { sent: true }
+  | { sent: false; reason: "not_configured" | "api_error" | "network_error"; detail?: string };
+
+async function sendVerificationEmail(email: string, code: string, firstName: string): Promise<SendEmailResult> {
   const brevoApiKey = process.env.BREVO_API_KEY;
   if (!brevoApiKey) {
-    console.log(`[EmailAuth] Email not configured — OTP for ${email}: ${code}`);
-    return false;
+    console.log(`[EmailAuth] BREVO_API_KEY not set — OTP for ${email}: ${code}`);
+    return { sent: false, reason: "not_configured" };
   }
   // Use custom sender domain (must be verified in Brevo dashboard).
   // Set BREVO_SENDER_EMAIL env var to override (e.g. noreply@gustafta.com).
@@ -140,15 +143,15 @@ Jika kamu tidak mendaftar di Gustafta, abaikan email ini.
     });
     if (!resp.ok) {
       const errBody = await resp.text();
-      console.error("[EmailAuth] Brevo API error:", resp.status, errBody);
-      return false;
+      console.error(`[EmailAuth] Brevo API error sending to ${email}: HTTP ${resp.status} — ${errBody}`);
+      return { sent: false, reason: "api_error", detail: `HTTP ${resp.status}: ${errBody.slice(0, 300)}` };
     }
-    console.log(`[EmailAuth] OTP sent to ${email} via ${senderEmail}`);
-    return true;
-  } catch (err) {
-    console.error("[EmailAuth] Failed to send email:", err);
-    console.log(`[EmailAuth] OTP fallback for ${email}: ${code}`);
-    return false;
+    console.log(`[EmailAuth] OTP sent to ${email} via Brevo (sender: ${senderEmail})`);
+    return { sent: true };
+  } catch (err: any) {
+    const detail = err?.message || String(err);
+    console.error(`[EmailAuth] Network/send error for ${email}: ${detail}`);
+    return { sent: false, reason: "network_error", detail };
   }
 }
 
@@ -202,20 +205,33 @@ export function registerEmailAuthRoutes(app: Express): void {
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
       await db.insert(emailVerifications).values({ id: randomUUID(), email, code, expiresAt });
 
-      const emailSent = await sendVerificationEmail(email, code, firstName);
+      const emailResult = await sendVerificationEmail(email, code, firstName);
 
-      if (!emailSent && isProduction) {
+      if (!emailResult.sent) {
+        if (emailResult.reason === "not_configured") {
+          if (isProduction) {
+            return res.status(503).json({
+              error: "Layanan email belum dikonfigurasi. Hubungi administrator.",
+            });
+          }
+          // Dev/staging: expose OTP fallback
+          return res.json({
+            success: true,
+            message: "Kode OTP berhasil dibuat. Email belum dikonfigurasi — lihat kode di bawah.",
+            otpFallback: code,
+          });
+        }
+        // api_error or network_error — email IS configured but send failed
+        console.error(`[EmailAuth] Register email send failed (${emailResult.reason}) for ${email}: ${emailResult.detail ?? ""}`);
         return res.status(503).json({
-          error: "Layanan email belum dikonfigurasi. Hubungi administrator.",
+          error: "Email gagal terkirim. Coba lagi dalam beberapa menit, atau hubungi administrator jika masalah berlanjut.",
+          errorCode: emailResult.reason,
         });
       }
 
       res.json({
         success: true,
-        message: emailSent
-          ? "Kode OTP telah dikirim ke email Anda."
-          : "Kode OTP berhasil dibuat. Email belum dikonfigurasi — lihat kode di bawah.",
-        otpFallback: emailSent ? undefined : code,
+        message: "Kode OTP telah dikirim ke email Anda.",
       });
     } catch (err) {
       console.error("[EmailAuth] Register error:", err);
@@ -314,18 +330,32 @@ export function registerEmailAuthRoutes(app: Express): void {
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
       await db.insert(emailVerifications).values({ id: randomUUID(), email, code, expiresAt });
 
-      const emailSent = await sendVerificationEmail(email, code, userRow.firstName || "");
+      const emailResult = await sendVerificationEmail(email, code, userRow.firstName || "");
 
-      if (!emailSent && isProduction) {
+      if (!emailResult.sent) {
+        if (emailResult.reason === "not_configured") {
+          if (isProduction) {
+            return res.status(503).json({
+              error: "Layanan email belum dikonfigurasi. Hubungi administrator.",
+            });
+          }
+          return res.json({
+            success: true,
+            message: "Kode OTP baru dibuat. Email belum dikonfigurasi — lihat kode di bawah.",
+            otpFallback: code,
+          });
+        }
+        // api_error or network_error
+        console.error(`[EmailAuth] Resend email send failed (${emailResult.reason}) for ${email}: ${emailResult.detail ?? ""}`);
         return res.status(503).json({
-          error: "Layanan email belum dikonfigurasi. Hubungi administrator.",
+          error: "Email gagal terkirim. Coba lagi dalam beberapa menit, atau hubungi administrator jika masalah berlanjut.",
+          errorCode: emailResult.reason,
         });
       }
 
       res.json({
         success: true,
-        message: emailSent ? "Kode OTP baru telah dikirim." : "Kode OTP baru dibuat.",
-        otpFallback: emailSent ? undefined : code,
+        message: "Kode OTP baru telah dikirim ke email Anda.",
       });
     } catch (err) {
       console.error("[EmailAuth] Resend error:", err);

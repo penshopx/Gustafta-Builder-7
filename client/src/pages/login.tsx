@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Sparkles, CheckCircle2, LogOut } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Sparkles, CheckCircle2, LogOut, AlertTriangle } from "lucide-react";
 import { trackCompleteRegistration, trackLead } from "@/lib/meta-pixel";
 
 type Mode = "choose" | "login" | "register" | "verify";
@@ -30,6 +30,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
   const [otpFallback, setOtpFallback] = useState<string | undefined>(undefined);
+  const [emailSendError, setEmailSendError] = useState<string | undefined>(undefined);
 
   // Detect existing session so user can switch accounts
   const { data: currentUser } = useQuery<any>({
@@ -89,6 +90,7 @@ export default function LoginPage() {
       const res = await apiRequest("POST", "/api/auth/register", { email, password, firstName, lastName });
       setPendingEmail(email);
       setOtpFallback(res?.otpFallback);
+      setEmailSendError(undefined);
       setMode("verify");
       if (res?.otpFallback) {
         toast({ title: "OTP dibuat", description: "Lihat kode OTP yang tampil di layar (email belum dikonfigurasi)." });
@@ -96,7 +98,17 @@ export default function LoginPage() {
         toast({ title: "Kode OTP dikirim!", description: `Cek email ${email} untuk kode verifikasi.` });
       }
     } catch (err: any) {
-      toast({ title: "Registrasi gagal", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
+      const msg = (err?.message || "").replace(/^\d+: /, "");
+      const isEmailError = msg.toLowerCase().includes("gagal terkirim") || msg.toLowerCase().includes("email");
+      if (isEmailError) {
+        // OTP was created on the server — move to verify screen with error banner
+        setPendingEmail(email);
+        setEmailSendError(msg || "Email gagal terkirim. Coba lagi dalam beberapa menit.");
+        setOtpFallback(undefined);
+        setMode("verify");
+      } else {
+        toast({ title: "Registrasi gagal", description: msg, variant: "destructive" });
+      }
     } finally {
       setLoading(false);
     }
@@ -126,13 +138,15 @@ export default function LoginPage() {
     try {
       const res = await apiRequest("POST", "/api/auth/resend-otp", { email: pendingEmail });
       setOtpFallback(res?.otpFallback);
+      setEmailSendError(undefined);
       if (res?.otpFallback) {
         toast({ title: "OTP baru dibuat", description: "Lihat kode OTP yang tampil di layar." });
       } else {
         toast({ title: "Kode OTP baru dikirim", description: `Cek email ${pendingEmail}.` });
       }
     } catch (err: any) {
-      toast({ title: "Gagal kirim ulang", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
+      const msg = (err?.message || "").replace(/^\d+: /, "");
+      setEmailSendError(msg || "Email gagal terkirim. Coba lagi dalam beberapa menit.");
     } finally {
       setLoading(false);
     }
@@ -393,19 +407,49 @@ export default function LoginPage() {
           {mode === "verify" && (
             <>
               <div className="text-center space-y-2">
-                <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-primary" />
+                <div className={`mx-auto h-12 w-12 rounded-full flex items-center justify-center ${emailSendError ? "bg-destructive/10" : "bg-primary/10"}`}>
+                  {emailSendError
+                    ? <AlertTriangle className="h-6 w-6 text-destructive" />
+                    : <CheckCircle2 className="h-6 w-6 text-primary" />
+                  }
                 </div>
                 <h1 className="text-lg font-bold">Verifikasi Email</h1>
                 <p className="text-sm text-muted-foreground">
                   {otpFallback ? (
                     <>Email server belum dikonfigurasi.</>
+                  ) : emailSendError ? (
+                    <>Akun berhasil dibuat untuk<br /><span className="font-medium text-foreground">{pendingEmail}</span></>
                   ) : (
                     <>Kode OTP dikirim ke<br />
                     <span className="font-medium text-foreground">{pendingEmail}</span></>
                   )}
                 </p>
               </div>
+
+              {/* Email send error banner */}
+              {emailSendError && (
+                <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 space-y-2" data-testid="banner-email-send-error">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                    <div className="space-y-1 min-w-0">
+                      <p className="text-sm font-medium text-destructive">Email gagal terkirim</p>
+                      <p className="text-xs text-muted-foreground">{emailSendError}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-6">
+                    Klik <span className="font-medium">"Kirim ulang kode OTP"</span> di bawah untuk mencoba lagi. Jika masalah berlanjut, hubungi{" "}
+                    <a
+                      href="https://wa.me/6282299417818?text=Halo%2C+email+OTP+saya+gagal+terkirim+di+Gustafta"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline"
+                      data-testid="link-email-error-support"
+                    >
+                      tim support
+                    </a>.
+                  </p>
+                </div>
+              )}
 
               {/* OTP Fallback Display — shown when SMTP not configured */}
               {otpFallback && (
@@ -441,7 +485,7 @@ export default function LoginPage() {
 
               <button
                 className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
-                onClick={() => { setMode("choose"); setOtp(""); setOtpFallback(undefined); }}
+                onClick={() => { setMode("choose"); setOtp(""); setOtpFallback(undefined); setEmailSendError(undefined); }}
               >
                 ← Kembali ke halaman login
               </button>
