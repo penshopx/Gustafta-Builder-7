@@ -785,16 +785,15 @@ export async function registerRoutes(
 
         if (totalAgents === 0) continue;
 
-        // Only expose public-safe card data — internal counts and full nested hierarchy
-        // would reveal the system's internal organization to competitors.
+        // Public marketplace response: series-level card DTO only.
+        // No nested bigIdeas / cores / toolboxes / agents — those reveal internal
+        // organizational structure and are considered internal IP.
         result.push({
-          id: String(s.id), name: s.name, slug: s.slug, description: s.description || "",
-          tagline: s.tagline || "", category: s.category || "", color: s.color || "#6366f1",
+          id: String(s.id), name: s.name, slug: s.slug,
+          description: s.description || "", tagline: s.tagline || "",
+          category: s.category || "", color: s.color || "#6366f1",
           isPublic: s.isPublic || false, isActive: s.isActive || false,
           sortOrder: s.sortOrder || 0,
-          bigIdeas: ungroupedBigIdeas,
-          cores,
-          orchestratorToolboxes,
         });
       }
 
@@ -817,47 +816,23 @@ export async function registerRoutes(
     }
   });
 
-  // Public: Get series detail — returns minimal safe hierarchy.
-  // Full toolbox internals (capabilities, limitations, purpose) are stripped.
+  // Public: Get series card — minimal DTO only (no hierarchy, no internal structure).
+  // Internal organization (bigIdeas/cores/toolboxes/agents) is not exposed here.
   app.get("/api/series/public/:idOrSlug", async (req, res) => {
     try {
       const param = req.params.idOrSlug as string;
       let s = await storage.getSeriesBySlug(param);
-      if (!s) {
-        s = await storage.getSeriesById(param);
-      }
-      if (!s) {
-        return res.status(404).json({ error: "Series not found" });
-      }
-      if (!s.isPublic || !s.isActive) {
-        return res.status(404).json({ error: "Series not found" });
-      }
-      const hierarchy = await storage.getSeriesWithHierarchy(s.id);
-      if (!hierarchy) return res.status(404).json({ error: "Series not found" });
+      if (!s) s = await storage.getSeriesById(param);
+      if (!s) return res.status(404).json({ error: "Series not found" });
+      if (!s.isPublic || !s.isActive) return res.status(404).json({ error: "Series not found" });
 
-      // Strip internal toolbox fields from hierarchy before sending to public
-      function sanitizeToolbox(tb: any) {
-        const { purpose: _p, capabilities: _c, limitations: _l, createdAt: _ca, ...safeTb } = tb;
-        if (safeTb.agents) {
-          safeTb.agents = safeTb.agents.map((a: any) => sanitizeAgentForPublic(a));
-        }
-        return safeTb;
-      }
-      function sanitizeBigIdea(bi: any) {
-        const safe = { ...bi };
-        if (safe.toolboxes) safe.toolboxes = safe.toolboxes.map(sanitizeToolbox);
-        return safe;
-      }
-      const sanitized = {
-        ...hierarchy,
-        bigIdeas: (hierarchy as any).bigIdeas?.map(sanitizeBigIdea) ?? [],
-        cores: (hierarchy as any).cores?.map((c: any) => ({
-          ...c,
-          bigIdeas: c.bigIdeas?.map(sanitizeBigIdea) ?? [],
-        })) ?? [],
-      };
-
-      res.json(sanitized);
+      // Return only public-facing card fields — no nested hierarchy
+      res.json({
+        id: String(s.id), name: s.name, slug: s.slug,
+        description: s.description || "", tagline: s.tagline || "",
+        category: s.category || "", color: s.color || "#6366f1",
+        isPublic: s.isPublic, isActive: s.isActive,
+      });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch series" });
     }
@@ -1621,11 +1596,12 @@ export async function registerRoutes(
     try {
       const agent = await storage.getAgent(req.params.id as string);
       if (!agent) return res.status(404).json({ error: "Agent not found" });
-      // Admin-only: hanya ADMIN_USER_IDS yang boleh melihat full system prompt
-      const userId = (req.user as any)?.claims?.sub || (req.user as any)?.id || "";
-      const adminIds = (process.env.ADMIN_USER_IDS || "").split(",").map((s: string) => s.trim()).filter(Boolean);
-      if (!adminIds.includes(userId)) {
-        return res.status(403).json({ error: "Forbidden: hanya admin yang bisa melihat system prompt" });
+      // Admin-only — reuse the shared isAdminRequest() helper (ADMIN_USER_IDS + DB role).
+      // Function declaration is hoisted so this call is safe even though isAdminRequest
+      // is declared later in the same registerRoutes() scope.
+      const adminCheck = isAdminRequest(req);
+      if (!adminCheck.ok) {
+        return res.status(adminCheck.status).json({ error: "Forbidden: hanya admin yang bisa melihat system prompt" });
       }
       const prompt = buildFinalSystemPrompt(agent);
       res.json({ prompt, length: prompt.length });
@@ -3948,14 +3924,18 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           throw lastAttemptError || new Error("All AI providers failed to create stream");
         }
 
-        // Streaming tag filter — strip server-processing tags (SAVE_MEMORY, DELETE_MEMORY,
-        // UPDATE_BRAIN) from live chunks before they reach the client.
-        // SUGGEST_ACTION is intentionally preserved for frontend action-button rendering.
-        const STREAM_STRIP: Array<[string, string]> = [
-          ["[SAVE_MEMORY:", "[/SAVE_MEMORY]"],
-          ["[DELETE_MEMORY]", "[/DELETE_MEMORY]"],
-          ["[UPDATE_BRAIN:", "[/UPDATE_BRAIN]"],
+        // Streaming tag filter — strips ALL internal control tags from live SSE chunks
+        // before they reach the client. Matching is case-insensitive.
+        //
+        // Block tags  [OPENER...]...[/CLOSER]  — strip opener-to-closer (multi-token).
+        // Inline tags [TAG:...]                — strip opener-to-next-] (single bracket).
+        const SS_BLOCK = [
+          { lo: "[save_memory:",    cl: "[/save_memory]"  },
+          { lo: "[delete_memory]",  cl: "[/delete_memory]" },
+          { lo: "[update_brain:",   cl: "[/update_brain]"  },
         ];
+        const SS_INLINE = ["[suggest_action:"];
+        const SS_ALL_OPENERS = [...SS_BLOCK.map(b => b.lo), ...SS_INLINE];
         let _sBuf = "";
 
         function _flushStreamBuf(isFinal: boolean): string {
@@ -3963,45 +3943,53 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           let progress = true;
           while (progress) {
             progress = false;
-            // Find earliest complete tag block
-            let earliest: { opIdx: number; clIdx: number; closer: string } | null = null;
-            for (const [opener, closer] of STREAM_STRIP) {
-              const opIdx = _sBuf.indexOf(opener);
+            const lo = _sBuf.toLowerCase();
+
+            // ── Pass 1: find earliest *complete* tag (block or inline) ──────────────
+            let earliest: { opIdx: number; endIdx: number } | null = null;
+            for (const { lo: opLo, cl } of SS_BLOCK) {
+              const opIdx = lo.indexOf(opLo);
               if (opIdx === -1) continue;
-              const clIdx = _sBuf.indexOf(closer, opIdx);
-              if (clIdx !== -1 && (!earliest || opIdx < earliest.opIdx)) {
-                earliest = { opIdx, clIdx, closer };
+              const clIdx = lo.indexOf(cl, opIdx);
+              if (clIdx !== -1) {
+                const endIdx = clIdx + cl.length;
+                if (!earliest || opIdx < earliest.opIdx) earliest = { opIdx, endIdx };
+              }
+            }
+            for (const opLo of SS_INLINE) {
+              const opIdx = lo.indexOf(opLo);
+              if (opIdx === -1) continue;
+              const clIdx = _sBuf.indexOf("]", opIdx + opLo.length);
+              if (clIdx !== -1) {
+                if (!earliest || opIdx < earliest.opIdx) earliest = { opIdx, endIdx: clIdx + 1 };
               }
             }
             if (earliest) {
               out += _sBuf.slice(0, earliest.opIdx);
-              _sBuf = _sBuf.slice(earliest.clIdx + earliest.closer.length);
+              _sBuf = _sBuf.slice(earliest.endIdx);
               progress = true;
               continue;
             }
-            // No complete tags — check for openers without closers
+
+            // ── Pass 2: incomplete tag (opener found, closer not yet received) ──────
             let partialStart = -1;
-            for (const [opener] of STREAM_STRIP) {
-              const opIdx = _sBuf.indexOf(opener);
+            for (const opLo of SS_ALL_OPENERS) {
+              const opIdx = lo.indexOf(opLo);
               if (opIdx !== -1 && (partialStart === -1 || opIdx < partialStart)) {
                 partialStart = opIdx;
               }
             }
             if (partialStart !== -1) {
-              if (isFinal) {
-                out += _sBuf.slice(0, partialStart);
-                _sBuf = "";
-              } else {
-                out += _sBuf.slice(0, partialStart);
-                _sBuf = _sBuf.slice(partialStart);
-              }
+              out += _sBuf.slice(0, partialStart);
+              _sBuf = isFinal ? "" : _sBuf.slice(partialStart);
               break;
             }
-            // No openers at all — guard against partial opener at buffer tail
+
+            // ── Pass 3: no opener in buffer — guard against partial opener at tail ──
             if (!isFinal) {
-              for (const [opener] of STREAM_STRIP) {
-                for (let pLen = Math.min(opener.length - 1, _sBuf.length); pLen >= 2; pLen--) {
-                  if (_sBuf.endsWith(opener.slice(0, pLen))) {
+              for (const opLo of SS_ALL_OPENERS) {
+                for (let pLen = Math.min(opLo.length - 1, _sBuf.length); pLen >= 2; pLen--) {
+                  if (lo.endsWith(opLo.slice(0, pLen))) {
                     out += _sBuf.slice(0, _sBuf.length - pLen);
                     _sBuf = _sBuf.slice(-pLen);
                     return out;
@@ -4009,6 +3997,8 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
                 }
               }
             }
+
+            // Fully safe — flush everything
             out += _sBuf;
             _sBuf = "";
           }
@@ -4027,7 +4017,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             if (toWrite) res.write(`data: ${JSON.stringify({ type: "chunk", content: toWrite })}\n\n`);
           }
         }
-        // Flush remaining buffer (stream ended)
+        // Flush any held buffer when the stream ends
         const finalFlush = _flushStreamBuf(true);
         if (finalFlush) res.write(`data: ${JSON.stringify({ type: "chunk", content: finalFlush })}\n\n`);
         
