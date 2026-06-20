@@ -15790,6 +15790,170 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
+  // ── Brevo Email Delivery Webhook ─────────────────────────────────────────────
+  // Register this URL in Brevo Dashboard → Transactional → Webhooks:
+  //   URL: https://<your-domain>/api/webhooks/brevo
+  //   Events: delivered, soft_bounce, hard_bounce, spam, invalid_email, deferred
+  //
+  // In-memory bounce tracker (resets on server restart — for alerting purposes only).
+  // For persistent storage, promote this to a DB table.
+  const _brevoStats = { delivered: 0, bounced: 0, spam: 0, lastAlertAt: 0 };
+  const BREVO_BOUNCE_ALERT_THRESHOLD = 0.2; // alert if >20% bounce rate over a window
+  const BREVO_BOUNCE_ALERT_WINDOW = 60 * 60 * 1000; // 1-hour cooldown between alerts
+
+  function _checkBrevoAlerts() {
+    const total = _brevoStats.delivered + _brevoStats.bounced + _brevoStats.spam;
+    if (total < 10) return; // need at least 10 events before alerting
+    const bounceRate = (_brevoStats.bounced + _brevoStats.spam) / total;
+    const now = Date.now();
+    if (bounceRate > BREVO_BOUNCE_ALERT_THRESHOLD && (now - _brevoStats.lastAlertAt) > BREVO_BOUNCE_ALERT_WINDOW) {
+      _brevoStats.lastAlertAt = now;
+      console.error(
+        `[Brevo ALERT] High bounce/spam rate detected: ${Math.round(bounceRate * 100)}% ` +
+        `(bounced=${_brevoStats.bounced}, spam=${_brevoStats.spam}, delivered=${_brevoStats.delivered}). ` +
+        `Check Brevo dashboard and verify sender domain/reputation.`
+      );
+    }
+  }
+
+  app.post("/api/webhooks/brevo", async (req: any, res: any) => {
+    try {
+      // Optional authenticity check via a shared secret set in Brevo dashboard
+      // (Brevo → Transactional → Webhooks → "Secret" field).
+      // Set BREVO_WEBHOOK_SECRET env var to enable; leave unset to skip.
+      const webhookSecret = process.env.BREVO_WEBHOOK_SECRET;
+      if (webhookSecret) {
+        const incoming = req.headers["x-brevo-webhook-secret"] || req.headers["x-webhook-secret"] || "";
+        if (incoming !== webhookSecret) {
+          console.warn("[Brevo Webhook] Rejected — invalid or missing webhook secret");
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+      }
+
+      // Brevo sends an array of events or a single event object
+      const rawEvents = Array.isArray(req.body) ? req.body : [req.body];
+      let processed = 0;
+      let failed = 0;
+
+      for (const evt of rawEvents) {
+        try {
+          const event: string = evt.event || evt.type || "unknown";
+          const email: string = evt.email || evt.to || "";
+          const messageId: string = evt.messageId || evt["message-id"] || "";
+          const subject: string = evt.subject || "";
+          const reason: string = evt.reason || evt.error || "";
+          const ts: number = evt.ts || evt.timestamp || Math.floor(Date.now() / 1000);
+
+          // Safe tag normalization: Brevo can send `tag` as a plain string ("otp"),
+          // a JSON-encoded string ("[\"otp\"]"), or `tags` as a proper array.
+          // Never JSON.parse an arbitrary string — treat it as a plain tag instead.
+          let tags: string[] = [];
+          if (Array.isArray(evt.tags)) {
+            tags = evt.tags.map(String);
+          } else if (Array.isArray(evt.tag)) {
+            tags = evt.tag.map(String);
+          } else if (typeof evt.tag === "string" && evt.tag.length > 0) {
+            // Attempt JSON parse only when the string looks like a JSON array
+            if (evt.tag.trim().startsWith("[")) {
+              try { tags = JSON.parse(evt.tag); } catch { tags = [evt.tag]; }
+            } else {
+              tags = [evt.tag];
+            }
+          }
+
+          const isOtpEmail = tags.includes("otp") ||
+            subject.toLowerCase().includes("verifikasi") ||
+            subject.toLowerCase().includes("otp");
+
+          switch (event) {
+            case "delivered":
+              _brevoStats.delivered++;
+              console.log(`[Brevo] ✓ DELIVERED — to=${email} messageId=${messageId} tags=[${tags}] ts=${ts}`);
+              break;
+
+            case "hard_bounce":
+              _brevoStats.bounced++;
+              console.error(
+                `[Brevo] ✗ HARD BOUNCE${isOtpEmail ? " [OTP EMAIL]" : ""} — ` +
+                `to=${email} reason="${reason}" messageId=${messageId} ts=${ts}`
+              );
+              if (isOtpEmail) {
+                console.warn(`[Brevo] OTP hard bounce for ${email} — user will not receive verification code. Reason: ${reason || "unknown"}`);
+              }
+              break;
+
+            case "soft_bounce":
+              _brevoStats.bounced++;
+              console.warn(
+                `[Brevo] ~ SOFT BOUNCE${isOtpEmail ? " [OTP EMAIL]" : ""} — ` +
+                `to=${email} reason="${reason}" messageId=${messageId} ts=${ts}`
+              );
+              break;
+
+            case "spam":
+              _brevoStats.spam++;
+              console.error(
+                `[Brevo] ⚠ SPAM REPORT${isOtpEmail ? " [OTP EMAIL]" : ""} — ` +
+                `to=${email} messageId=${messageId} ts=${ts}`
+              );
+              break;
+
+            case "invalid_email":
+              _brevoStats.bounced++;
+              console.error(
+                `[Brevo] ✗ INVALID EMAIL${isOtpEmail ? " [OTP EMAIL]" : ""} — ` +
+                `to=${email} messageId=${messageId} ts=${ts}`
+              );
+              break;
+
+            case "deferred":
+              console.warn(
+                `[Brevo] ~ DEFERRED — to=${email} reason="${reason}" messageId=${messageId} ts=${ts}`
+              );
+              break;
+
+            case "open":
+            case "click":
+            case "unsubscribed":
+              console.log(`[Brevo] ${event} — to=${email} ts=${ts}`);
+              break;
+
+            default:
+              console.log(`[Brevo] Event "${event}" — to=${email} ts=${ts} body=${JSON.stringify(evt).slice(0, 200)}`);
+          }
+
+          _checkBrevoAlerts();
+          processed++;
+        } catch (evtErr: any) {
+          // Isolate per-event failures so one bad payload doesn't drop the rest
+          failed++;
+          console.error(`[Brevo Webhook] Failed to process event: ${evtErr?.message} — payload=${JSON.stringify(evt).slice(0, 200)}`);
+        }
+      }
+
+      res.status(200).json({ received: true, events: rawEvents.length, processed, failed });
+    } catch (err: any) {
+      console.error("[Brevo Webhook] Error processing payload:", err?.message);
+      // Always return 200 to Brevo so it doesn't retry indefinitely
+      res.status(200).json({ received: true, error: err?.message });
+    }
+  });
+
+  // ── Admin: Brevo email delivery stats (current session) ──────────────────────
+  app.get("/api/admin/brevo-stats", isAuthenticated, requireAdmin, async (_req: any, res: any) => {
+    const total = _brevoStats.delivered + _brevoStats.bounced + _brevoStats.spam;
+    const bounceRate = total > 0 ? ((_brevoStats.bounced + _brevoStats.spam) / total) : 0;
+    res.json({
+      delivered: _brevoStats.delivered,
+      bounced: _brevoStats.bounced,
+      spam: _brevoStats.spam,
+      total,
+      bounceRatePct: Math.round(bounceRate * 1000) / 10,
+      alertThresholdPct: Math.round(BREVO_BOUNCE_ALERT_THRESHOLD * 100),
+      note: "Stats are in-memory only and reset on server restart.",
+    });
+  });
+
   // ── Admin: Generate Mayar Payment Link for a chatbot ────────────────────────
   app.post("/api/mayar/create-chatbot-link", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
