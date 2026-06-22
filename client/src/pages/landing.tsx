@@ -198,7 +198,7 @@ export default function Landing() {
 
           <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            Trial 7 hari gratis · Lanjut dari Rp 199.000/bln · Tanpa kartu kredit
+            Trial 7 hari gratis · Mulai dari Rp 445.000 bulan pertama · Tanpa kartu kredit
           </p>
 
           {/* Hero illustration */}
@@ -1351,29 +1351,32 @@ export default function Landing() {
             {[
               {
                 plan: "Starter", price: "199rb", badge: null,
+                firstMonth: "445rb",
                 features: [
                   "10 slot agen/chatbot sendiri",
                   "Knowledge Base 7 tipe",
                   "Multi-Channel (WA, Telegram, Web)",
-                  "Bisa install template dari Store",
+                  "3 ebook Trilogi Gustafta (bulan pertama)",
                 ],
               },
               {
                 plan: "Profesional", price: "499rb", badge: "TERPOPULER",
+                firstMonth: "744rb",
                 features: [
                   "50 slot agen/chatbot sendiri",
-                  "Custom Domain",
-                  "80+ MultiClaw AI Tools",
-                  "Bisa install template dari Store",
+                  "Custom Domain + 80+ MultiClaw",
+                  "E-Course & Document Generator",
+                  "3 ebook Trilogi Gustafta (bulan pertama)",
                 ],
               },
               {
                 plan: "Bisnis", price: "999rb", badge: null,
+                firstMonth: "1,244rb",
                 features: [
-                  "200 slot agen/chatbot sendiri",
-                  "Akses API & Integrasi Custom",
-                  "Priority Support WhatsApp",
-                  "Bisa install template dari Store",
+                  "100 slot shared (2 sub-akun tim)",
+                  "Akses API & Priority Support",
+                  "Semua Mini Apps (45 tipe)",
+                  "3 ebook Trilogi Gustafta (bulan pertama)",
                 ],
               },
             ].map((plan) => (
@@ -1388,8 +1391,12 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-base font-bold mb-0.5">{plan.plan}</div>
-                <div className="text-2xl font-extrabold mb-3">
-                  Rp {plan.price}<span className="text-sm font-normal opacity-70">/bln</span>
+                <div className="mb-1">
+                  <span className="text-2xl font-extrabold">Rp {plan.price}</span>
+                  <span className="text-sm font-normal opacity-70">/bln</span>
+                </div>
+                <div className="text-[10px] text-amber-300 font-semibold mb-3">
+                  Bulan pertama Rp {plan.firstMonth} <span className="opacity-70">(+3 ebook Trilogi)</span>
                 </div>
                 <ul className="space-y-1.5">
                   {plan.features.map((f) => (
