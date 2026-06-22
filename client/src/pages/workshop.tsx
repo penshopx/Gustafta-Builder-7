@@ -63,15 +63,14 @@ const SESI = [
     bg: "bg-emerald-50 dark:bg-emerald-950/20",
     headerBg: "bg-emerald-100/60 dark:bg-emerald-900/30",
     panels: [
-      { name: "Ekosistem Kompetensi", desc: "Executive Summary PKB, klaim SKP ke LPJK" },
-      { name: "Studio Kompetensi", desc: "Rubrik penilaian, portofoli & bukti kompetensi" },
       { name: "Monetisasi", desc: "Setup harga, paket, dan sistem pembayaran chatbot Anda" },
       { name: "Revenue & Klien", desc: "Dashboard pendapatan & manajemen klien aktif" },
       { name: "Afiliasi & Voucher", desc: "Program referral dan diskon untuk klien" },
       { name: "Conversion & Brief Marketing", desc: "Optimasi chatbot sebagai mesin konversi & pemasaran" },
       { name: "Rangkuman Chatbot", desc: "Auto-generate brief & materi pemasaran dari konfigurasi" },
+      { name: "Ekosistem Kompetensi ✦ Preview", desc: "Pengenalan: ebook · chatbot · mini apps · generator dokumen · ecourse — dibahas penuh di program lanjutan" },
     ],
-    output: "Chatbot siap dijual — dengan sistem harga, klien, dan program afiliasi aktif",
+    output: "Chatbot siap dijual — sistem harga, klien & afiliasi aktif. Preview ekosistem kompetensi.",
     chatbotLabel: "Belajar Sesi 3 lewat chatbot khusus Monetisasi & Ekosistem",
   },
 ];
@@ -228,6 +227,57 @@ export default function WorkshopPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Program Lanjutan — Ekosistem Kompetensi */}
+        <div className="rounded-2xl border-2 border-dashed border-emerald-300 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/10 p-6">
+          <div className="flex flex-col sm:flex-row gap-5 items-start">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+              <Blocks className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <div className="text-xs font-bold text-emerald-500 uppercase tracking-wide">Program Lanjutan — Segera Hadir</div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700">Setelah Workshop Builder</span>
+              </div>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">
+                Workshop Ekosistem Kompetensi Gustafta
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                Setelah menguasai Builder, peserta yang ingin masuk ke ekosistem kompetensi bisa lanjut ke program ini.
+                Fokus penuh pada membangun dan mendistribusikan produk kompetensi digital:
+              </p>
+              <div className="grid sm:grid-cols-2 gap-2 mb-4">
+                {[
+                  { icon: "📚", label: "eBook Kompetensi", desc: "Produksi & distribusi ebook berbasis KB chatbot" },
+                  { icon: "🤖", label: "Chatbot Kompetensi", desc: "Chatbot spesifik domain SKK, PKB, dan sertifikasi" },
+                  { icon: "⚡", label: "Mini Apps Domain", desc: "Executive Summary PKB, klaim SKP, rubrik asesor" },
+                  { icon: "📄", label: "Generator Dokumen", desc: "Auto-generate dokumen kompetensi & portofolio" },
+                  { icon: "🎓", label: "eCourse & LMS", desc: "Platform belajar interaktif dari knowledge base" },
+                  { icon: "🏆", label: "Studio Kompetensi", desc: "Rubrik penilaian & bukti kompetensi terstruktur" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-2 bg-white/60 dark:bg-black/10 rounded-lg p-2.5 border border-emerald-100 dark:border-emerald-900">
+                    <span className="text-base leading-none mt-0.5">{item.icon}</span>
+                    <div>
+                      <div className="text-xs font-semibold text-gray-800 dark:text-gray-200">{item.label}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400">{item.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs text-gray-500 dark:text-gray-400 italic">Ekosistem ini sedang dikurasi — jadwal program menyusul.</span>
+                <a
+                  href={`https://wa.me/6282299417818?text=Halo%2C%20saya%20tertarik%20dengan%20Workshop%20Ekosistem%20Kompetensi%20Gustafta`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline underline-offset-2"
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  Daftar minat dulu →
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
