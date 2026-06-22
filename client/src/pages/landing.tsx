@@ -166,21 +166,18 @@ export default function Landing() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
-            Buat Chatbot AI Cerdas untuk
+            Bangun AI Spesialis
             <br className="hidden md:block" />
-            <span className="text-primary"> Belajar</span>
-            <span className="text-muted-foreground">, </span>
-            <span className="text-primary">Bekerja</span>
-            <span className="text-muted-foreground">, </span>
-            <span className="text-orange-500">Berusaha</span>
-            <span className="text-muted-foreground"> &amp; </span>
-            <span className="text-violet-500">Kreator</span>
-            <span className="block text-2xl sm:text-3xl md:text-4xl mt-1 text-muted-foreground font-semibold">— Tanpa Coding</span>
+            untuk <span className="text-primary">Bisnis Anda</span>
+            <span className="block text-xl sm:text-2xl md:text-3xl mt-3 text-muted-foreground font-semibold">
+              Tanpa Coding.{" "}
+              <span className="text-foreground">Dalam 30 Menit.</span>
+            </span>
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Dari <strong className="text-foreground">Asisten Tender LPSE</strong>, AI Tutor SKK, Customer Service otomatis, hingga Script Writer —
-            bangun chatbot AI dalam <strong className="text-foreground">30 menit tanpa coding</strong>. Sudah dipakai ratusan kontraktor, konsultan, dan bisnis Indonesia.
+            Dari <strong className="text-foreground">Asisten Tender LPSE</strong>, AI Tutor SKK, Customer Service 24/7, hingga Konsultan K3 —
+            1350+ AI spesialis siap pakai untuk <strong className="text-foreground">konstruksi, properti, energi, HR, dan 30+ industri</strong> Indonesia.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
@@ -233,6 +230,56 @@ export default function Landing() {
           ))}
         </div>
       </div>
+
+      {/* ── PILIH JALUR ANDA ── */}
+      <section className="py-12 px-4 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Mulai dari Mana?</p>
+            <h2 className="text-xl md:text-2xl font-bold">Pilih Jalur Anda</h2>
+            <p className="text-sm text-muted-foreground mt-1">Gustafta melayani tiga tujuan berbeda — temukan jalur yang tepat untuk Anda.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Link href="/trilogi">
+              <div className="rounded-2xl border-2 border-blue-200 dark:border-blue-800/50 bg-blue-50/60 dark:bg-blue-900/10 p-6 hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer h-full" data-testid="card-jalur-belajar">
+                <div className="text-3xl mb-3">🎓</div>
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">Saya ingin</p>
+                <h3 className="font-extrabold text-lg mb-2">Belajar AI</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">Transformasi cara berpikir dan bekerja di era AI. Untuk guru, profesional, dan pemimpin yang ingin meninggalkan warisan.</p>
+                <div className="flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400">
+                  Trilogi Gustafta <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
+            </Link>
+            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
+              <div className="rounded-2xl border-2 border-primary/50 bg-primary/5 p-6 hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer h-full relative overflow-hidden" data-testid="card-jalur-bangun">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
+                <div className="absolute top-3 right-3">
+                  <span className="text-[9px] font-bold bg-primary text-white px-2 py-0.5 rounded-full">PALING POPULER</span>
+                </div>
+                <div className="text-3xl mb-3 mt-1">🤖</div>
+                <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Saya ingin</p>
+                <h3 className="font-extrabold text-lg mb-2">Membangun Chatbot</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">Buat AI spesialis untuk bisnis Anda. Untuk kontraktor, konsultan, UMKM, dan perusahaan yang butuh efisiensi.</p>
+                <div className="flex items-center gap-1.5 text-sm font-bold text-primary">
+                  Gustafta Builder <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
+            </Link>
+            <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("Pilih Jalur — Menjual")}>
+              <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-900/10 p-6 hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer h-full" data-testid="card-jalur-jual">
+                <div className="text-3xl mb-3">💼</div>
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Saya ingin</p>
+                <h3 className="font-extrabold text-lg mb-2">Menjual Chatbot</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">Bangun dan jual chatbot AI kepada klien. Untuk freelancer, reseller, dan konsultan AI yang mau penghasilan baru.</p>
+                <div className="flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  Program Mitra Gustafta <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* ── STORYTELLING: Tiga Adegan ── */}
       <section className="py-20 px-4 relative overflow-hidden">
@@ -1411,61 +1458,33 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── TRILOGI GUSTAFTA BANNER ── */}
-      <section className="py-20 px-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white overflow-hidden relative">
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #3b82f6 0%, transparent 60%), radial-gradient(circle at 80% 50%, #0ea5e9 0%, transparent 60%)" }} />
-        <div className="max-w-6xl mx-auto relative z-10">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-3">Gustafta Publishing</span>
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-4">Trilogi Gustafta</h2>
-            <p className="text-blue-200 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              <em>Dari Monolog ke Dialog</em> — perjalanan transformasi cara berpikir, bekerja, dan berkarya di era AI.
-            </p>
-            <p className="text-blue-300/70 text-sm mt-2">Oleh: Prof. Dr. Sudarwan Danim, dkk. · Buku Pendidikan & Kepemimpinan</p>
-          </div>
-
-          {/* Row 1: G06 + G21 poster */}
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <img src="/images/g06.png" alt="Peluncuran Buku Trilogi Gustafta" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
-            <img src="/images/g21.png" alt="Trilogi Gustafta — Poster Peluncuran" className="rounded-2xl shadow-2xl shadow-blue-900/60 hover:scale-105 transition-transform duration-300 object-cover w-full" />
-          </div>
-
-          {/* Row 2: G14 infographic full width */}
-          <div className="mb-6 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
-            <img src="/images/g14.png" alt="Trilogi Gustafta — Perjalanan Belajar AI 3 Tahap" className="w-full object-cover" />
-          </div>
-
-          {/* Row 3: poster-1 */}
-          <div className="mb-10 rounded-2xl overflow-hidden shadow-xl border border-blue-800/40">
-            <img src="/trilogi-poster-1.png" alt="Trilogi Gustafta Poster" className="w-full object-cover" />
-          </div>
-
-          {/* 3 pillar points + CTA */}
-          <div className="grid md:grid-cols-3 gap-5 mb-8">
-            {[
-              { icon: "💬", title: "Dialog", desc: "Dari instruksi satu arah ke percakapan mendalam yang menggali potensi terbaik." },
-              { icon: "🤝", title: "Kolaborasi", desc: "Manusia dan AI bekerja bersama, saling melengkapi dalam setiap langkah." },
-              { icon: "💡", title: "Kreasi", desc: "Mengubah ide menjadi produk nyata yang berdampak dan berkelanjutan." },
-            ].map((p) => (
-              <div key={p.title} className="rounded-xl border border-blue-700/40 bg-blue-900/30 p-5 text-center">
-                <div className="text-3xl mb-3">{p.icon}</div>
-                <p className="font-extrabold text-sm mb-2">{p.title}</p>
-                <p className="text-blue-300 text-xs leading-relaxed">{p.desc}</p>
+      {/* ── TRILOGI GUSTAFTA — Compact Card ── */}
+      <section className="py-10 px-4 border-t bg-muted/10">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-2xl border-2 border-blue-200 dark:border-blue-800/40 bg-gradient-to-r from-blue-50 to-slate-50 dark:from-blue-950/30 dark:to-slate-900/30 p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
+            <div className="flex-shrink-0 hidden md:block">
+              <img src="/images/g06.png" alt="Trilogi Gustafta" className="w-36 h-36 object-cover rounded-xl shadow-md" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">Gustafta Publishing</span>
+              <h3 className="text-xl md:text-2xl font-extrabold mb-2">Trilogi Gustafta</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-1">
+                <em className="font-semibold text-foreground">Dari Monolog ke Dialog</em> — buku transformasi cara berpikir, bekerja, dan berkarya di era AI.
+              </p>
+              <p className="text-muted-foreground text-xs mb-4">Oleh: Prof. Dr. Sudarwan Danim, dkk. · Buku Pendidikan & Kepemimpinan</p>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <a href="https://trilogi.gustafta.my.id" target="_blank" rel="noopener noreferrer" data-testid="link-trilogi-cta">
+                  <Button className="gap-2 font-bold bg-blue-600 hover:bg-blue-500 text-white">
+                    Dapatkan Bukunya <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </a>
+                <Link href="/trilogi">
+                  <Button variant="outline" className="gap-2 font-semibold border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950">
+                    Pelajari Lebih Lanjut
+                  </Button>
+                </Link>
               </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <a
-              href="https://trilogi.gustafta.my.id"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-extrabold text-base px-8 py-3.5 rounded-full transition-colors shadow-lg shadow-cyan-500/30"
-              data-testid="link-trilogi-cta"
-            >
-              Dapatkan Bukunya — trilogi.gustafta.my.id →
-            </a>
+            </div>
           </div>
         </div>
       </section>
