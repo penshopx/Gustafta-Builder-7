@@ -367,60 +367,49 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* G07 — Dari Monolog ke Dialog visual */}
-          <div className="mb-8 rounded-2xl overflow-hidden relative shadow-lg">
-            <img
-              src="/images/g07.png"
-              alt="Dari Monolog ke Dialog — AI bekerja bersama"
-              className="w-full object-cover object-center"
-              style={{ maxHeight: "260px" }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4 text-center">
-              <span className="inline-block bg-primary/90 text-white text-xs font-bold px-3 py-1 rounded-full">
-                Dari MONOLOG ke DIALOG
-              </span>
-            </div>
-          </div>
-
-          {/* The insight — monolog ke dialog */}
-          <div className="relative rounded-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900" />
-            <div className="relative p-8 md:p-12 text-white text-center">
-              <p className="text-lg md:text-xl text-slate-300 leading-relaxed mb-6 max-w-2xl mx-auto">
-                Tiga adegan. Tiga orang berbeda. Satu pola yang sama:
-              </p>
-              <p className="text-2xl md:text-3xl font-bold mb-4 leading-tight">
-                Kita punya lebih banyak akses informasi dari generasi mana pun sebelumnya.
-                <br className="hidden md:block" />
-                <span className="text-red-400"> Tapi kita masih bekerja dalam satu arah — sendirian.</span>
-              </p>
-              <p className="text-slate-400 text-base md:text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
-                Buku, PDF, YouTube, kursus online — semuanya <strong className="text-white">berbicara ke Anda</strong>.
-                Tidak ada yang <strong className="text-white">berdialog bersama Anda</strong>.
-                Itulah arsitektur lama yang sudah berusia 500 tahun: <span className="text-red-400 font-semibold">MONOLOG</span>.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8 mb-8">
-                <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-6 py-4 text-center w-full sm:w-auto">
-                  <p className="text-3xl mb-1">📄</p>
-                  <p className="text-sm font-bold text-red-400 mb-1">MONOLOG — Lama</p>
-                  <p className="text-xs text-slate-400">Dokumen bicara. Anda membaca sendirian.<br />Tidak ada yang menjawab pertanyaan lanjutan.</p>
+          {/* Before / After — konkret per karakter */}
+          <div className="rounded-2xl border bg-background overflow-hidden shadow-sm">
+            <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
+              {[
+                {
+                  name: "Pak Budi", role: "Kontraktor Tender",
+                  before: "PDF 214 halaman, 3 tab browser terbuka, deadline besok jam 8 pagi, masih belum yakin syaratnya lengkap.",
+                  after: "Ketik ke TenderaClaw → 3 menit → checklist 30+ item ✓, gap analysis ✓, draft surat penawaran ✓. Win rate naik 40%.",
+                  color: "text-indigo-600 dark:text-indigo-400",
+                  bg: "bg-indigo-500/5",
+                },
+                {
+                  name: "Bu Sari", role: "Pemilik Usaha Konsultan",
+                  before: "9 pesan WhatsApp masuk jam 22.18. Tidak ada yang jaga. Pagi harinya klien sudah tanda tangan dengan kompetitor.",
+                  after: "CS AI 24/7 aktif — calon klien dijawab dalam 5 detik. Leads tidak pernah hilang lagi. Konversi naik 2×.",
+                  color: "text-orange-600 dark:text-orange-400",
+                  bg: "bg-orange-500/5",
+                },
+                {
+                  name: "Mas Dian", role: "Profesional Sertifikasi",
+                  before: "6 PDF berbeda — 3 Permen PUPR, 2 SE LPJK — tidak ada yang menjawab utuh. Mana yang terbaru? Mana yang berlaku?",
+                  after: "Satu pertanyaan ke PanduanASKOM → jawaban lengkap, terstruktur, lengkap referensi regulasi terbaru. Selesai 2 menit.",
+                  color: "text-emerald-600 dark:text-emerald-400",
+                  bg: "bg-emerald-500/5",
+                },
+              ].map((c) => (
+                <div key={c.name} className={`p-6 ${c.bg}`}>
+                  <div className="mb-4">
+                    <p className={`text-xs font-bold uppercase tracking-widest ${c.color} mb-0.5`}>{c.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{c.role}</p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 p-3">
+                      <p className="text-[10px] font-bold text-red-500 uppercase mb-1">❌ Sebelum</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{c.before}</p>
+                    </div>
+                    <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3">
+                      <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase mb-1">✅ Sesudah Gustafta</p>
+                      <p className="text-xs text-foreground leading-relaxed font-medium">{c.after}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="hidden sm:block">
-                  <ArrowRight className="w-8 h-8 text-primary animate-pulse" />
-                </div>
-                <div className="rounded-xl border border-primary/40 bg-primary/10 px-6 py-4 text-center w-full sm:w-auto">
-                  <p className="text-3xl mb-1">💬</p>
-                  <p className="text-sm font-bold text-primary mb-1">DIALOG — Gustafta</p>
-                  <p className="text-xs text-slate-400">AI yang mendengar, menjawab, menanyai balik.<br />Bukan asisten — tapi lawan bicara profesional.</p>
-                </div>
-              </div>
-
-              <p className="text-base md:text-xl font-semibold text-white">
-                Gustafta membangun arsitektur baru itu —
-                <span className="text-primary"> dari monolog ke dialog.</span>
-              </p>
+              ))}
             </div>
           </div>
         </div>
@@ -1169,6 +1158,138 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── ACTION: Pricing CTA ── */}
+      <section className="py-16 px-4 bg-gradient-to-br from-primary to-violet-600 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full mb-6">
+            <Flame className="w-3.5 h-3.5" /> Promo aktif — harga naik 2× per 1 Juli 2026
+          </div>
+          <h2 className="text-2xl md:text-4xl font-extrabold mb-3">Mulai dari Rp 199.000/bulan</h2>
+          <p className="text-white/75 text-base md:text-lg mb-8 max-w-xl mx-auto">
+            Semua paket sudah termasuk Agentic AI, 131 Orchestrator Multi-Agent, Knowledge Base 7 tipe, dan Multi-Channel. Tanpa biaya setup. Cancel kapan saja.
+          </p>
+
+          {/* Klarifikasi Istilah */}
+          <div className="grid sm:grid-cols-3 gap-3 mb-7 text-left">
+            {[
+              {
+                icon: "🤖",
+                term: "Agen",
+                desc: "Konfigurasi AI — otak chatbot: persona, Knowledge Base, instruksi, model LLM. Tersimpan di akun Anda.",
+              },
+              {
+                icon: "💬",
+                term: "Chatbot",
+                desc: "Agen yang sudah aktif & terhubung ke channel (WhatsApp, Telegram, web widget). Agen yang sudah \"online\".",
+              },
+              {
+                icon: "📦",
+                term: "Template Agen",
+                desc: "Konfigurasi agen siap pakai dari Gustafta Store — dibeli sekali, di-install ke slot akun Anda, lalu bisa dikustomisasi.",
+              },
+            ].map((item) => (
+              <div key={item.term} className="rounded-xl bg-white/10 border border-white/20 p-3.5">
+                <div className="text-xl mb-1.5">{item.icon}</div>
+                <p className="font-bold text-sm mb-1">{item.term}</p>
+                <p className="text-[11px] text-white/70 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Paket Langganan */}
+          <p className="text-xs text-white/50 uppercase tracking-widest font-bold mb-3 text-left">Paket Langganan — Slot & Akses Platform</p>
+          <div className="grid sm:grid-cols-3 gap-4 mb-5 text-left">
+            {[
+              {
+                plan: "Starter", price: "199rb", badge: null,
+                features: [
+                  "10 slot agen/chatbot sendiri",
+                  "Knowledge Base 7 tipe",
+                  "Multi-Channel (WA, Telegram, Web)",
+                  "Bisa install template dari Store",
+                ],
+              },
+              {
+                plan: "Profesional", price: "499rb", badge: "TERPOPULER",
+                features: [
+                  "50 slot agen/chatbot sendiri",
+                  "Custom Domain",
+                  "80+ MultiClaw AI Tools",
+                  "Bisa install template dari Store",
+                ],
+              },
+              {
+                plan: "Bisnis", price: "999rb", badge: null,
+                features: [
+                  "200 slot agen/chatbot sendiri",
+                  "White-label (hapus branding Gustafta)",
+                  "Priority Support WhatsApp",
+                  "Bisa install template dari Store",
+                ],
+              },
+            ].map((plan) => (
+              <div
+                key={plan.plan}
+                className={`rounded-xl border-2 p-4 bg-white/5 relative ${plan.badge ? "border-amber-300" : "border-white/20"}`}
+                data-testid={`card-pricing-${plan.plan.toLowerCase()}`}
+              >
+                {plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-gray-900 text-[10px] font-bold px-3 py-0.5 rounded-full">
+                    {plan.badge}
+                  </div>
+                )}
+                <div className="text-base font-bold mb-0.5">{plan.plan}</div>
+                <div className="text-2xl font-extrabold mb-3">
+                  Rp {plan.price}<span className="text-sm font-normal opacity-70">/bln</span>
+                </div>
+                <ul className="space-y-1.5">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-1.5 text-xs text-white/80">
+                      <Check className="w-3.5 h-3.5 text-green-300 flex-shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Template Store — terpisah dari langganan */}
+          <div className="rounded-xl border border-white/25 bg-white/8 p-4 mb-7 text-left flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="text-3xl flex-shrink-0">📦</div>
+            <div className="flex-1">
+              <p className="font-bold text-sm mb-0.5">Gustafta Store — Template Agen Siap Pakai</p>
+              <p className="text-[11px] text-white/70 leading-relaxed">
+                Beli template chatbot yang sudah dikonfigurasi penuh (persona + KB + instruksi) — bayar sekali, langsung install ke slot akun Anda.
+                Tersedia mulai Rp 299.000/template. <strong className="text-white">Terpisah dari langganan bulanan</strong> — bisa dibeli pengguna paket apapun selama masih ada slot kosong.
+              </p>
+            </div>
+            <Link href="/store" className="flex-shrink-0">
+              <Button size="sm" variant="outline" className="text-xs font-bold border-white/30 text-white hover:bg-white/10 whitespace-nowrap" data-testid="button-pricing-browse-store">
+                Lihat Store →
+              </Button>
+            </Link>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold gap-2 px-8" data-testid="button-pricing-cta-start">
+                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
+              </Button>
+            </Link>
+            <Link href="/packs" onClick={handlePricingClick}>
+              <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 hover:text-white font-semibold px-8" data-testid="button-pricing-cta-plans">
+                Bandingkan Semua Paket →
+              </Button>
+            </Link>
+          </div>
+
+          <p className="text-white/50 text-xs mt-4 flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Tanpa kartu kredit · Cancel kapan saja · Support via WhatsApp
+          </p>
+        </div>
+      </section>
+
       {/* ── DESIRE: Testimoni ── */}
       <section className="py-16 px-4 bg-muted/20">
         <div className="max-w-4xl mx-auto">
@@ -1486,138 +1607,6 @@ export default function Landing() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── ACTION: Pricing CTA ── */}
-      <section className="py-16 px-4 bg-gradient-to-br from-primary to-violet-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full mb-6">
-            <Flame className="w-3.5 h-3.5" /> Promo aktif — harga naik 2× per 1 Juli 2026
-          </div>
-          <h2 className="text-2xl md:text-4xl font-extrabold mb-3">Mulai dari Rp 199.000/bulan</h2>
-          <p className="text-white/75 text-base md:text-lg mb-8 max-w-xl mx-auto">
-            Semua paket sudah termasuk Agentic AI, 131 Orchestrator Multi-Agent, Knowledge Base 7 tipe, dan Multi-Channel. Tanpa biaya setup. Cancel kapan saja.
-          </p>
-
-          {/* Klarifikasi Istilah */}
-          <div className="grid sm:grid-cols-3 gap-3 mb-7 text-left">
-            {[
-              {
-                icon: "🤖",
-                term: "Agen",
-                desc: "Konfigurasi AI — otak chatbot: persona, Knowledge Base, instruksi, model LLM. Tersimpan di akun Anda.",
-              },
-              {
-                icon: "💬",
-                term: "Chatbot",
-                desc: "Agen yang sudah aktif & terhubung ke channel (WhatsApp, Telegram, web widget). Agen yang sudah \"online\".",
-              },
-              {
-                icon: "📦",
-                term: "Template Agen",
-                desc: "Konfigurasi agen siap pakai dari Gustafta Store — dibeli sekali, di-install ke slot akun Anda, lalu bisa dikustomisasi.",
-              },
-            ].map((item) => (
-              <div key={item.term} className="rounded-xl bg-white/10 border border-white/20 p-3.5">
-                <div className="text-xl mb-1.5">{item.icon}</div>
-                <p className="font-bold text-sm mb-1">{item.term}</p>
-                <p className="text-[11px] text-white/70 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Paket Langganan */}
-          <p className="text-xs text-white/50 uppercase tracking-widest font-bold mb-3 text-left">Paket Langganan — Slot & Akses Platform</p>
-          <div className="grid sm:grid-cols-3 gap-4 mb-5 text-left">
-            {[
-              {
-                plan: "Starter", price: "199rb", badge: null,
-                features: [
-                  "10 slot agen/chatbot sendiri",
-                  "Knowledge Base 7 tipe",
-                  "Multi-Channel (WA, Telegram, Web)",
-                  "Bisa install template dari Store",
-                ],
-              },
-              {
-                plan: "Profesional", price: "499rb", badge: "TERPOPULER",
-                features: [
-                  "50 slot agen/chatbot sendiri",
-                  "Custom Domain",
-                  "80+ MultiClaw AI Tools",
-                  "Bisa install template dari Store",
-                ],
-              },
-              {
-                plan: "Bisnis", price: "999rb", badge: null,
-                features: [
-                  "200 slot agen/chatbot sendiri",
-                  "White-label (hapus branding Gustafta)",
-                  "Priority Support WhatsApp",
-                  "Bisa install template dari Store",
-                ],
-              },
-            ].map((plan) => (
-              <div
-                key={plan.plan}
-                className={`rounded-xl border-2 p-4 bg-white/5 relative ${plan.badge ? "border-amber-300" : "border-white/20"}`}
-                data-testid={`card-pricing-${plan.plan.toLowerCase()}`}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-gray-900 text-[10px] font-bold px-3 py-0.5 rounded-full">
-                    {plan.badge}
-                  </div>
-                )}
-                <div className="text-base font-bold mb-0.5">{plan.plan}</div>
-                <div className="text-2xl font-extrabold mb-3">
-                  Rp {plan.price}<span className="text-sm font-normal opacity-70">/bln</span>
-                </div>
-                <ul className="space-y-1.5">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-1.5 text-xs text-white/80">
-                      <Check className="w-3.5 h-3.5 text-green-300 flex-shrink-0" /> {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Template Store — terpisah dari langganan */}
-          <div className="rounded-xl border border-white/25 bg-white/8 p-4 mb-7 text-left flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="text-3xl flex-shrink-0">📦</div>
-            <div className="flex-1">
-              <p className="font-bold text-sm mb-0.5">Gustafta Store — Template Agen Siap Pakai</p>
-              <p className="text-[11px] text-white/70 leading-relaxed">
-                Beli template chatbot yang sudah dikonfigurasi penuh (persona + KB + instruksi) — bayar sekali, langsung install ke slot akun Anda.
-                Tersedia mulai Rp 299.000/template. <strong className="text-white">Terpisah dari langganan bulanan</strong> — bisa dibeli pengguna paket apapun selama masih ada slot kosong.
-              </p>
-            </div>
-            <Link href="/store" className="flex-shrink-0">
-              <Button size="sm" variant="outline" className="text-xs font-bold border-white/30 text-white hover:bg-white/10 whitespace-nowrap" data-testid="button-pricing-browse-store">
-                Lihat Store →
-              </Button>
-            </Link>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold gap-2 px-8" data-testid="button-pricing-cta-start">
-                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
-              </Button>
-            </Link>
-            <Link href="/packs" onClick={handlePricingClick}>
-              <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 hover:text-white font-semibold px-8" data-testid="button-pricing-cta-plans">
-                Bandingkan Semua Paket →
-              </Button>
-            </Link>
-          </div>
-
-          <p className="text-white/50 text-xs mt-4 flex items-center justify-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Tanpa kartu kredit · Cancel kapan saja · Support via WhatsApp
-          </p>
         </div>
       </section>
 
