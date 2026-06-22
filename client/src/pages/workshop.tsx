@@ -4,68 +4,83 @@ import { Button } from "@/components/ui/button";
 import {
   GraduationCap, BookOpen, Blocks, Zap, Check, MessageCircle,
   Clock, Users, Award, ChevronRight, Star, Lightbulb, Settings2,
-  FileText, LayoutGrid, ArrowRight,
+  FileText, LayoutGrid, ArrowRight, Bot, Wallet, Brain,
 } from "lucide-react";
 
-const KURIKULUM = [
+const SESI = [
   {
     no: "01",
-    title: "Filosofi Trilogi Gustafta",
-    subtitle: "Fondasi berpikir sebelum membangun",
-    icon: BookOpen,
+    durasi: "2 jam",
+    title: "Fondasi Builder",
+    subtitle: "Dari nol ke chatbot pertama yang live",
+    icon: Settings2,
     color: "text-indigo-500",
     border: "border-indigo-200 dark:border-indigo-800",
     bg: "bg-indigo-50 dark:bg-indigo-950/20",
-    badgeBg: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
-    items: [
-      "Mengapa AI tidak cukup hanya 'pintar' — harus tepat konteks",
-      "Struktur Trilogi: Jilid 1 (Dasar) · Jilid 2 (Konfigurasi) · Jilid 3 (Ekosistem)",
-      "Prinsip prompt engineering yang benar untuk domain spesifik",
-      "Membangun persona AI yang konsisten & profesional",
-      "Kesalahan umum builder pemula & cara menghindarinya",
+    headerBg: "bg-indigo-100/60 dark:bg-indigo-900/30",
+    panels: [
+      { name: "Manajemen Domain", desc: "Struktur & organisasi chatbot dalam platform" },
+      { name: "Persona", desc: "Karakter, tone, dan identitas AI yang konsisten" },
+      { name: "Kebijakan Agen", desc: "Batasan, aturan, dan panduan respons" },
+      { name: "Knowledge Base", desc: "Upload & strukturisasi dokumen sebagai otak chatbot" },
+      { name: "Otak Proyek", desc: "Konteks proyek & memori jangka panjang agen" },
+      { name: "Sistem Agen AI", desc: "Arsitektur & hirarki agen yang efektif" },
+      { name: "Widget & Chat Console", desc: "Deploy chatbot ke website + uji langsung" },
     ],
+    output: "Chatbot pertama Anda live dan bisa dipakai klien",
+    chatbotLabel: "Belajar Sesi 1 lewat chatbot khusus Fondasi Builder",
   },
   {
     no: "02",
-    title: "Konfigurasi Gustafta Builder",
-    subtitle: "Hands-on membangun di platform",
-    icon: Settings2,
+    durasi: "2 jam",
+    title: "Action Tools",
+    subtitle: "Dari yang menjawab ke yang menghasilkan",
+    icon: Blocks,
     color: "text-violet-500",
     border: "border-violet-200 dark:border-violet-800",
     bg: "bg-violet-50 dark:bg-violet-950/20",
-    badgeBg: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-    items: [
-      "Setup agen: system prompt, persona, tone, dan knowledge base",
-      "Konfigurasi multi-agen & orkestrasi Inter-Agent API",
-      "Mengelola knowledge base: upload dokumen, klasifikasi, versi",
-      "Integrasi WhatsApp, Telegram & embed widget ke website",
-      "Mini Apps: mengaktifkan & mengkustomisasi 45 tipe tools",
+    headerBg: "bg-violet-100/60 dark:bg-violet-900/30",
+    panels: [
+      { name: "Agentic AI", desc: "Orkestrasi multi-agen: delegasi tugas ke agen spesialis" },
+      { name: "Mini Apps", desc: "45 tipe tools yang menghasilkan output nyata: dokumen, laporan, kalkulasi" },
+      { name: "Deliverables", desc: "Konfigurasi output terstruktur yang bisa diunduh klien" },
+      { name: "Integrations", desc: "Sambungkan ke WhatsApp, Telegram, dan platform lain" },
+      { name: "Broadcast WA", desc: "Pengiriman pesan massal via WhatsApp dari chatbot" },
+      { name: "Info Tender", desc: "Integrasi data tender & pengadaan otomatis" },
+      { name: "Analytics", desc: "Pantau performa, volume chat, dan efektivitas chatbot" },
     ],
+    output: "Chatbot yang bisa generate dokumen, kalkulasi, dan laporan nyata",
+    chatbotLabel: "Belajar Sesi 2 lewat chatbot khusus Action Tools",
   },
   {
     no: "03",
-    title: "Ekosistem Kompetensi",
-    subtitle: "Dari dialog ke aksi nyata",
-    icon: Blocks,
+    durasi: "2 jam",
+    title: "Monetisasi & Ekosistem",
+    subtitle: "Dari chatbot ke bisnis yang menghasilkan",
+    icon: Wallet,
     color: "text-emerald-500",
     border: "border-emerald-200 dark:border-emerald-800",
     bg: "bg-emerald-50 dark:bg-emerald-950/20",
-    badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-    items: [
-      "Generator Dokumen: kontrak, RAB, laporan, executive summary",
-      "E-Course & LMS: ubah chatbot jadi platform belajar interaktif",
-      "Ekosistem PKB: Executive Summary + klaim SKP ke LPJK",
-      "Store Creator: syarat sertifikasi & cara submit chatbot ke Store",
-      "Model bisnis creator: harga, komisi, dan distribusi produk",
+    headerBg: "bg-emerald-100/60 dark:bg-emerald-900/30",
+    panels: [
+      { name: "Ekosistem Kompetensi", desc: "Executive Summary PKB, klaim SKP ke LPJK" },
+      { name: "Studio Kompetensi", desc: "Rubrik penilaian, portofoli & bukti kompetensi" },
+      { name: "Monetisasi", desc: "Setup harga, paket, dan sistem pembayaran chatbot Anda" },
+      { name: "Revenue & Klien", desc: "Dashboard pendapatan & manajemen klien aktif" },
+      { name: "Afiliasi & Voucher", desc: "Program referral dan diskon untuk klien" },
+      { name: "Conversion & Brief Marketing", desc: "Optimasi chatbot sebagai mesin konversi & pemasaran" },
+      { name: "Rangkuman Chatbot", desc: "Auto-generate brief & materi pemasaran dari konfigurasi" },
     ],
+    output: "Chatbot siap dijual — dengan sistem harga, klien, dan program afiliasi aktif",
+    chatbotLabel: "Belajar Sesi 3 lewat chatbot khusus Monetisasi & Ekosistem",
   },
 ];
 
 const ALUR = [
   { step: "1", label: "Daftar Tunggu", desc: "Masukkan nomor WhatsApp — kami kabari saat slot tersedia", icon: MessageCircle, color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" },
-  { step: "2", label: "Ikuti Workshop", desc: "3 sesi online · 2 jam per sesi · Hari kerja", icon: GraduationCap, color: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
-  { step: "3", label: "Lulus & Sertifikat", desc: "Ujian praktik konfigurasi chatbot nyata di Builder", icon: Award, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
-  { step: "4", label: "Jadi Creator Bersertifikat", desc: "Boleh submit chatbot ke Store Creator Gustafta", icon: Star, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
+  { step: "2", label: "3 Sesi Workshop", desc: "Online · 2 jam/sesi · Hands-on di platform langsung", icon: GraduationCap, color: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
+  { step: "3", label: "Mentoring Implementasi", desc: "Pendampingan aplikasi materi ke domain chatbot Anda sendiri", icon: Brain, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
+  { step: "4", label: "Sertifikat + Creator", desc: "Ujian praktik → lulus → boleh jual chatbot di Store Creator", icon: Award, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
 ];
 
 export default function WorkshopPage() {
@@ -84,9 +99,12 @@ export default function WorkshopPage() {
           Belajar membangun chatbot AI<br className="hidden sm:block" />
           <span className="text-indigo-600 dark:text-indigo-400"> yang benar-benar bekerja</span>
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-4 text-sm sm:text-base leading-relaxed">
-          Workshop resmi Gustafta — dari filosofi Trilogi hingga konfigurasi platform secara hands-on.
-          Lulus workshop = berhak menjadi <strong className="text-gray-900 dark:text-white">Creator Bersertifikat</strong> yang bisa menjual chatbot di Store Creator.
+        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-3 text-sm sm:text-base leading-relaxed">
+          Workshop resmi Gustafta — 3 sesi hands-on menyusuri <strong className="text-gray-900 dark:text-white">setiap panel konfigurasi Builder</strong>.
+          Setiap materi ada chatbot-nya sendiri. Lulus = berhak jadi <strong className="text-gray-900 dark:text-white">Creator Bersertifikat</strong> di Store.
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Ditutup dengan <span className="font-semibold text-amber-600 dark:text-amber-400">sesi mentoring implementasi</span> — Anda didampingi mengaplikasikan materi ke domain chatbot Anda sendiri.
         </p>
 
         {/* Coming soon chip */}
@@ -116,10 +134,10 @@ export default function WorkshopPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           {[
-            { value: "3", label: "Sesi Workshop", sub: "2 jam per sesi" },
-            { value: "3", label: "Pilar Kurikulum", sub: "Trilogi · Builder · Ekosistem" },
-            { value: "45+", label: "Mini Apps", sub: "yang dipelajari langsung" },
-            { value: "✓", label: "Sertifikat Resmi", sub: "dari Gustafta" },
+            { value: "3", label: "Sesi Workshop", sub: "2 jam per sesi · online" },
+            { value: "21+", label: "Panel Konfigurasi", sub: "dipelajari hands-on" },
+            { value: "+", label: "Mentoring", sub: "Implementasi domain Anda" },
+            { value: "✓", label: "Sertifikat Resmi", sub: "Syarat jadi Store Creator" },
           ].map((s, i) => (
             <div key={i} className="rounded-2xl border bg-card p-4 shadow-sm">
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{s.value}</div>
@@ -129,7 +147,7 @@ export default function WorkshopPage() {
           ))}
         </div>
 
-        {/* Alur Workshop */}
+        {/* Alur */}
         <div>
           <div className="text-center mb-8">
             <Badge className="mb-2 bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">Alur Peserta</Badge>
@@ -156,64 +174,107 @@ export default function WorkshopPage() {
           </div>
         </div>
 
-        {/* Kurikulum */}
+        {/* Kurikulum — 3 sesi */}
         <div>
           <div className="text-center mb-8">
             <Badge className="mb-2 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Kurikulum</Badge>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">3 Pilar yang akan Anda kuasai</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Kurikulum lengkap sedang disusun. Topik utama per pilar sudah final.</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">3 Sesi · 6 Jam Hands-On</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-xl mx-auto">
+              Setiap panel konfigurasi dipelajari langsung di Builder. Setiap sesi punya chatbot pendamping — Anda belajar <em>lewat</em> chatbot, bukan dari slide.
+            </p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-5">
-            {KURIKULUM.map((k) => (
-              <div key={k.no} className={`rounded-2xl border ${k.border} ${k.bg} p-5 flex flex-col`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${k.border} bg-white/60 dark:bg-black/10 flex-shrink-0`}>
-                    <k.icon className={`h-5 w-5 ${k.color}`} />
+          <div className="space-y-5">
+            {SESI.map((sesi) => (
+              <div key={sesi.no} className={`rounded-2xl border ${sesi.border} overflow-hidden`}>
+                {/* Header sesi */}
+                <div className={`${sesi.headerBg} px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3`}>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${sesi.border} bg-white/60 dark:bg-black/10 flex-shrink-0`}>
+                      <sesi.icon className={`h-5 w-5 ${sesi.color}`} />
+                    </div>
+                    <div>
+                      <div className={`text-[10px] font-bold uppercase tracking-widest ${sesi.color}`}>
+                        Sesi {sesi.no} · {sesi.durasi}
+                      </div>
+                      <div className="text-base font-bold text-gray-900 dark:text-white leading-tight">{sesi.title}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{sesi.subtitle}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className={`text-[10px] font-bold uppercase tracking-widest ${k.color}`}>Pilar {k.no}</div>
-                    <div className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{k.title}</div>
+                  {/* Chatbot badge */}
+                  <div className="flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-full px-3 py-1.5 self-start sm:self-center">
+                    <Bot className="h-3 w-3 flex-shrink-0" />
+                    <span>{sesi.chatbotLabel}</span>
                   </div>
                 </div>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3 italic">{k.subtitle}</p>
-                <ul className="space-y-1.5 flex-1">
-                  {k.items.map((item, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-xs text-gray-700 dark:text-gray-300">
-                      <Check className={`w-3 h-3 shrink-0 mt-0.5 ${k.color}`} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+
+                {/* Panel list */}
+                <div className={`${sesi.bg} px-5 py-4`}>
+                  <div className="grid sm:grid-cols-2 gap-2 mb-4">
+                    {sesi.panels.map((panel, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <Check className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${sesi.color}`} />
+                        <div>
+                          <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">{panel.name}</span>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400 ml-1.5">{panel.desc}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Output sesi */}
+                  <div className={`flex items-center gap-2 text-xs font-medium ${sesi.color} border-t ${sesi.border} pt-3`}>
+                    <Zap className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span>Output Sesi: <strong>{sesi.output}</strong></span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Mini Apps callout */}
-        <div className="rounded-2xl border border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/20 dark:to-indigo-950/20 p-6">
+        {/* Mentoring callout */}
+        <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 p-6">
           <div className="flex flex-col sm:flex-row gap-5 items-start">
-            <div className="w-12 h-12 rounded-2xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center flex-shrink-0">
-              <LayoutGrid className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0">
+              <Brain className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1">
-              <div className="text-xs font-bold text-violet-500 uppercase tracking-wide mb-1">Yang Membedakan dari Builder Lain</div>
+              <div className="text-xs font-bold text-amber-500 uppercase tracking-wide mb-1">Pasca Workshop</div>
               <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">
-                Anda belajar membangun chatbot yang <em>bertindak</em>, bukan cuma bicara
+                Mentoring Implementasi — AI memandu Anda satu per satu
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
-                Modul Pilar 02 dan 03 langsung hands-on dengan <strong>45 tipe Mini Apps</strong> — Anda belajar
-                cara mengaktifkan Generator Dokumen, Kalkulator RAB, Laporan KPI, dan lainnya di dalam chatbot
-                yang sedang Anda bangun.
+                Setelah 3 sesi, setiap panel konfigurasi punya <strong>chatbot mentoring-nya sendiri</strong>.
+                Anda tinggal bertanya: <em>"Bagaimana cara setup Mini Apps untuk chatbot HR saya?"</em> —
+                chatbot yang sudah tahu konteks materi workshop akan memandu step by step.
               </p>
               <div className="flex flex-wrap gap-2">
-                {["📋 Checklist & Audit", "🧮 Kalkulator RAB", "📄 Generator Dokumen", "📊 Laporan KPI", "🎓 Ekosistem Kompetensi"].map((tag) => (
-                  <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full bg-white/80 dark:bg-black/20 border border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300 font-medium">
+                {[
+                  "🤖 Chatbot Mentor per Panel",
+                  "🎯 Konteks domain Anda sendiri",
+                  "📋 Checklist implementasi per sesi",
+                  "🔄 Tanya kapan saja, tidak terbatas",
+                ].map((tag) => (
+                  <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full bg-white/80 dark:bg-black/20 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300 font-medium">
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Unique selling point */}
+        <div className="max-w-3xl mx-auto rounded-2xl border border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/10 p-6 text-center">
+          <div className="text-2xl mb-3">💡</div>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">
+            Belajar <em>lewat</em> chatbot, bukan dari slide
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Setiap materi workshop punya chatbot pendamping. Anda belajar Knowledge Base
+            <em> lewat chatbot yang mengajarkan Knowledge Base</em>. Belajar Mini Apps
+            <em> lewat chatbot yang mendemonstrasikan Mini Apps</em>. Learning by doing —
+            sekaligus Anda melihat langsung bagaimana produk seharusnya bekerja.
+          </p>
         </div>
 
         {/* Siapa yang cocok */}
@@ -223,10 +284,10 @@ export default function WorkshopPage() {
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             {[
-              { icon: Users, title: "Konsultan & Praktisi", desc: "Yang ingin tambah layanan AI ke klien — bisa jual chatbot siap pakai lewat Store Creator" },
-              { icon: Lightbulb, title: "Builder Mandiri", desc: "Yang sudah punya akun Builder dan ingin memaksimalkan semua fitur — termasuk Mini Apps & Generator Dokumen" },
-              { icon: FileText, title: "Penulis & Kreator Konten", desc: "Yang ingin AI yang menghasilkan dokumen profesional, bukan sekadar menjawab pertanyaan" },
-              { icon: Zap, title: "Operator & Admin Bisnis", desc: "Yang ingin chatbot operasional — bukan coba-coba — dengan konfigurasi yang benar dari awal" },
+              { icon: Users, title: "Konsultan & Praktisi Domain", desc: "Ingin tambah layanan AI ke klien — setelah bersertifikat bisa jual chatbot di Store Creator" },
+              { icon: Lightbulb, title: "Builder yang Sudah Punya Akun", desc: "Sudah berlangganan tapi belum maksimalkan semua panel — ini shortcut menguasai semuanya" },
+              { icon: FileText, title: "Penulis & Kreator Konten", desc: "Ingin chatbot yang menghasilkan dokumen nyata, bukan hanya menjawab pertanyaan" },
+              { icon: Zap, title: "Operator & Admin Bisnis", desc: "Ingin konfigurasi yang benar dari awal — bukan trial and error yang menghabiskan waktu" },
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-3 rounded-xl border bg-card p-4 shadow-sm">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center flex-shrink-0">
