@@ -199,50 +199,100 @@ export default function PacksPage() {
             Berbeda dari Builder DIY — di sini Anda cukup <strong>pilih domain yang dibutuhkan</strong>, tim Gustafta yang mengerjakan. Ada dua model layanan sesuai kebutuhan Anda.
           </p>
 
-          {/* 2 Model Layanan */}
-          <div className="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-7 text-left">
-            <div className="rounded-2xl border-2 border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/30 p-5">
+          <p className="text-sm text-muted-foreground mb-6">
+            Ada <strong>3 model layanan</strong> — pilih sesuai seberapa banyak Anda mau terlibat.
+          </p>
+
+          {/* 3 Model Layanan */}
+          <div className="grid sm:grid-cols-3 gap-4 max-w-5xl mx-auto mb-7 text-left">
+
+            {/* Model A */}
+            <div className="rounded-2xl border-2 border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/30 p-5 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center flex-shrink-0">
                   <PenLine className="h-4 w-4 text-violet-600" />
                 </div>
-                <span className="font-bold text-sm text-violet-700 dark:text-violet-300">Model A — Kami Buatkan Promptnya</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Anda ceritakan kebutuhan domain/bisnis Anda → tim Gustafta merancang system prompt, persona, dan instruksi AI yang tepat → Anda tinggal install sendiri ke akun Builder.
-              </p>
-              <div className="space-y-1">
-                {["Konsultasi kebutuhan domain", "Perancangan system prompt profesional", "Deliverable: file prompt siap install", "Cocok untuk yang sudah punya akun Builder"].map(i => (
-                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Check className="h-3 w-3 text-violet-500 flex-shrink-0" />{i}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Repeat2 className="h-4 w-4 text-primary" />
+                <div>
+                  <span className="font-bold text-xs text-violet-500 uppercase tracking-wide">Model A</span>
+                  <p className="font-bold text-sm text-violet-700 dark:text-violet-300 leading-tight">Kami Buatkan Promptnya</p>
                 </div>
-                <span className="font-bold text-sm text-primary">Model B — Kami Setup Penuh</span>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Anda pesan domain/modul → tim Gustafta mengkonfigurasi seluruh agen AI, knowledge base, dan instruksi → aktif langsung di akun Anda tanpa Anda perlu tahu teknisnya.
+              <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                Anda ceritakan kebutuhan → tim Gustafta rancang system prompt, persona & instruksi AI → <strong>Anda install sendiri</strong> ke akun Builder.
               </p>
-              <div className="space-y-1">
-                {["Konsultasi + perancangan sistem AI", "Konfigurasi penuh agen & knowledge base", "Aktivasi & uji coba bersama", "Termasuk mentoring penggunaan awal"].map(i => (
-                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Check className="h-3 w-3 text-primary flex-shrink-0" />{i}
+              <div className="space-y-1 flex-1">
+                {["Konsultasi kebutuhan domain", "Perancangan system prompt profesional", "Deliverable: file prompt siap install", "Cocok: sudah punya akun Builder"].map(i => (
+                  <div key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                    <Check className="h-3 w-3 text-violet-500 flex-shrink-0 mt-0.5" />{i}
                   </div>
                 ))}
               </div>
+              <div className="mt-4 pt-3 border-t border-violet-200 dark:border-violet-800">
+                <p className="text-[11px] text-violet-600 dark:text-violet-400 font-medium">Anda yang merakit — kami yang rancang promptnya</p>
+              </div>
             </div>
+
+            {/* Model B */}
+            <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/20 p-5 flex flex-col relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-[10px] font-bold px-3 py-0.5 rounded-full whitespace-nowrap">
+                + Prompt Review Gate
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center flex-shrink-0">
+                  <Repeat2 className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                  <span className="font-bold text-xs text-amber-500 uppercase tracking-wide">Model B</span>
+                  <p className="font-bold text-sm text-amber-700 dark:text-amber-300 leading-tight">Anda Buat Prompt, Kami Setup</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                Anda siapkan prompt → tim Gustafta review kelayakan → <strong>lulus: kami rakit</strong> → tidak lulus: feedback + opsi lanjut ke workshop/mentoring.
+              </p>
+              <div className="space-y-1 flex-1">
+                {["Submit prompt Anda untuk direview", "Review tim: 1–2 hari kerja", "Lulus → kami konfigurasi penuh", "Tidak lulus → masuk jalur workshop/mentoring"].map(i => (
+                  <div key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                    <Check className="h-3 w-3 text-amber-500 flex-shrink-0 mt-0.5" />{i}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-amber-200 dark:border-amber-800">
+                <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">Pintu masuk ke workshop jika prompt belum memenuhi syarat</p>
+              </div>
+            </div>
+
+            {/* Model C */}
+            <div className="rounded-2xl border-2 border-primary/50 bg-primary/5 p-5 flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Star className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <span className="font-bold text-xs text-primary/70 uppercase tracking-wide">Model C</span>
+                  <p className="font-bold text-sm text-primary leading-tight">Kami Buat Prompt + Setup Penuh</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                Anda ceritakan kebutuhan → tim Gustafta merancang prompt <strong>sekaligus mengkonfigurasi</strong> seluruh sistem AI → aktif langsung di akun Anda.
+              </p>
+              <div className="space-y-1 flex-1">
+                {["Konsultasi kebutuhan domain", "Perancangan prompt + konfigurasi penuh", "Aktivasi & uji coba bersama", "Mentoring penggunaan awal", "Kontrol penuh dari awal hingga akhir"].map(i => (
+                  <div key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                    <Check className="h-3 w-3 text-primary flex-shrink-0 mt-0.5" />{i}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-primary/20">
+                <p className="text-[11px] text-primary font-medium">Full service — Anda tinggal pakai</p>
+              </div>
+            </div>
+
           </div>
 
           {/* Perbandingan dengan DIY */}
           <div className="max-w-xl mx-auto rounded-xl border border-muted bg-muted/30 p-4 text-left">
             <div className="flex items-center gap-2 mb-1.5">
-              <Star className="h-3.5 w-3.5 text-muted-foreground" />
+              <Zap className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="font-semibold text-xs text-muted-foreground">Mau build sendiri? Pakai Builder DIY</span>
             </div>
             <p className="text-xs text-muted-foreground">Jika Anda ingin admin yang bangun & kelola sendiri, lihat <a href="/produk" className="text-primary underline underline-offset-2">halaman Produk & Layanan →</a></p>

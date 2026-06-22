@@ -211,13 +211,54 @@ export default function Store() {
       {/* Hero */}
       <section className="py-10 px-4 text-center border-b border-gray-200 bg-white">
         <Badge className="mb-3 bg-violet-100 text-violet-700 border-violet-200 hover:bg-violet-100">
-          🏗️ Gustafta Store — Etalase Produk Setup & Instalasi
+          🏪 Store Creator — Marketplace Chatbot Bersertifikat
         </Badge>
         <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-gray-900">
-          Semua Produk Gustafta, Satu Tempat
+          Chatbot dari Mitra Creator Gustafta
         </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto mb-5">
+          Semua chatbot di Store ini dibuat oleh <strong className="text-gray-900">creator bersertifikat Gustafta</strong> — bukan produk Gustafta sendiri. Setiap creator sudah lulus workshop, direview tim, dan dikurasi sebelum boleh tayang.
+        </p>
+
+        {/* Alur Sertifikasi Creator */}
+        <div className="max-w-3xl mx-auto mb-7">
+          <p className="text-xs text-gray-500 font-semibold uppercase tracking-widest mb-3">Alur Menjadi Creator Bersertifikat</p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {[
+              { step: "1", label: "Ikuti Workshop Gustafta Builder", icon: "🎓", color: "bg-blue-50 border-blue-200 text-blue-800" },
+              { step: "→", label: "", icon: "", color: "" },
+              { step: "2", label: "Lulus & Dapat Sertifikat", icon: "📜", color: "bg-green-50 border-green-200 text-green-800" },
+              { step: "→", label: "", icon: "", color: "" },
+              { step: "3", label: "Submit chatbot untuk review tim", icon: "🔍", color: "bg-amber-50 border-amber-200 text-amber-800" },
+              { step: "→", label: "", icon: "", color: "" },
+              { step: "4", label: "Disetujui → Tayang di Store", icon: "✅", color: "bg-violet-50 border-violet-200 text-violet-800" },
+            ].map((s, i) =>
+              s.label ? (
+                <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium ${s.color}`}>
+                  <span>{s.icon}</span>
+                  <span>{s.label}</span>
+                </div>
+              ) : (
+                <span key={i} className="text-gray-400 font-bold text-lg">→</span>
+              )
+            )}
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-gray-500">
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-400 inline-block"></span>Chatbot dikurasi kerapian konfigurasinya</div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>Creator didampingi tim sebelum tayang</div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-violet-400 inline-block"></span>Quality check sebelum publik</div>
+          </div>
+          <div className="mt-4">
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20info%20Workshop%20Gustafta%20Builder%20untuk%20jadi%20Creator" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-300 bg-green-50 text-green-800 text-xs font-semibold hover:bg-green-100 transition-colors">
+              <MessageCircle className="h-3.5 w-3.5" />
+              Tanya info Workshop Gustafta Builder →
+            </a>
+          </div>
+        </div>
+
         <p className="text-gray-600 max-w-xl mx-auto mb-5">
-          Seperti domain dan hosting — produk dari Store dan Paket Berlangganan adalah dua hal yang <strong className="text-gray-900">saling melengkapi dan keduanya wajib</strong>. Gustafta menyediakan keduanya, jadi Anda tidak perlu cari di tempat lain.
+          Seperti domain dan hosting — chatbot dari Store dan Paket Berlangganan adalah dua hal yang <strong className="text-gray-900">saling melengkapi dan keduanya wajib</strong>.
         </p>
 
         {/* Domain-Hosting analogy cards */}
