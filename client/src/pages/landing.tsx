@@ -216,12 +216,11 @@ export default function Landing() {
 
       {/* ── Stats Bar ── */}
       <div className="border-y bg-muted/30 py-8 px-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-6 text-center">
           {[
-            { value: "1350+", label: "Agen AI Tersedia" },
+            { value: "1350+", label: "AI Spesialis Siap Pakai" },
             { value: "30+", label: "Sektor Industri" },
-            { value: "80+", label: "AI Tools Siap Pakai" },
-            { value: "24/7", label: "AI Selalu Aktif" },
+            { value: "< 30 mnt", label: "Setup Pertama" },
           ].map((s) => (
             <div key={s.label}>
               <div className="text-3xl font-extrabold text-primary mb-1">{s.value}</div>
@@ -245,7 +244,7 @@ export default function Landing() {
                 <div className="text-3xl mb-3">🎓</div>
                 <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">Saya ingin</p>
                 <h3 className="font-extrabold text-lg mb-2">Belajar AI</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">Transformasi cara berpikir dan bekerja di era AI. Untuk guru, profesional, dan pemimpin yang ingin meninggalkan warisan.</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">Kuasai cara berpikir dan bekerja di era AI. Untuk guru, profesional, dan pemimpin yang ingin naik level bersama tim.</p>
                 <div className="flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400">
                   Trilogi Gustafta <ChevronRight className="w-4 h-4" />
                 </div>
@@ -1158,6 +1157,156 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── MENGAPA BUKAN CHATGPT? ── */}
+      <section className="py-16 px-4 bg-muted/20 border-t">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Pertanyaan yang Sering Muncul</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              "Saya Sudah Punya ChatGPT.<br className="hidden md:block" />
+              Kenapa Butuh Gustafta?"
+            </h2>
+            <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+              Ini pertanyaan yang tepat. Jawabannya sederhana:
+            </p>
+          </div>
+
+          <div className="rounded-2xl overflow-hidden border">
+            {/* Header */}
+            <div className="grid grid-cols-3 bg-muted/50">
+              <div className="p-3 text-xs font-bold text-muted-foreground uppercase tracking-wider pl-4">Kemampuan</div>
+              <div className="p-3 text-xs font-bold text-center text-muted-foreground uppercase tracking-wider">ChatGPT</div>
+              <div className="p-3 text-xs font-bold text-center text-primary uppercase tracking-wider bg-primary/5">Gustafta</div>
+            </div>
+
+            {[
+              { label: "Spesialisasi industri", chatgpt: "AI umum — semua bidang", gustafta: "1350+ AI spesialis domain" },
+              { label: "Data perusahaan Anda", chatgpt: "❌ Tidak bisa upload KB internal", gustafta: "✅ Knowledge Base 7 tipe" },
+              { label: "Bisa dijual ke klien", chatgpt: "❌ Tidak — akun pribadi", gustafta: "✅ Monetisasi & white-label" },
+              { label: "Terhubung ke WhatsApp", chatgpt: "❌ Tidak ada integrasi WA", gustafta: "✅ WA, Telegram, Web Widget" },
+              { label: "Analisis tender LPSE", chatgpt: "Terbatas — tidak tahu regulasi terbaru", gustafta: "✅ TenderaClaw + 131 Orchestrator" },
+              { label: "Harga", chatgpt: "$20/bln (~Rp 320rb) — per orang", gustafta: "Rp 199rb/bln — untuk tim + klien" },
+            ].map((row, i) => (
+              <div key={row.label} className={`grid grid-cols-3 border-t ${i % 2 === 0 ? "" : "bg-muted/20"}`}>
+                <div className="p-3 text-sm font-medium pl-4">{row.label}</div>
+                <div className="p-3 text-xs text-center text-muted-foreground border-l">{row.chatgpt}</div>
+                <div className="p-3 text-xs text-center font-semibold border-l bg-primary/5 text-foreground">{row.gustafta}</div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-4">
+            ChatGPT bagus untuk brainstorming. Gustafta untuk <strong>bisnis yang butuh AI yang tahu konteks mereka</strong>.
+          </p>
+        </div>
+      </section>
+
+      {/* ── EKOSISTEM GUSTAFTA ── */}
+      <section className="py-16 px-4 border-t">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Satu Perjalanan Utuh</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Ekosistem Gustafta</h2>
+            <p className="text-muted-foreground text-sm max-w-lg mx-auto">
+              Bukan sekadar chatbot builder. Gustafta adalah ekosistem lengkap dari belajar AI sampai menjual AI.
+            </p>
+          </div>
+
+          <div className="relative">
+            {/* Connector line */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 via-primary via-emerald-400 to-amber-400 -translate-x-1/2 hidden md:block" />
+
+            <div className="space-y-4">
+              {[
+                {
+                  step: "01",
+                  icon: "🎓",
+                  color: "blue",
+                  title: "TRILOGI",
+                  sub: "Belajar AI",
+                  desc: "Transformasi mindset. Pahami cara berpikir di era AI sebelum membangun.",
+                  href: "/trilogi",
+                  cta: "Pelajari Trilogi",
+                },
+                {
+                  step: "02",
+                  icon: "🤖",
+                  color: "primary",
+                  title: "BUILDER",
+                  sub: "Bangun AI",
+                  desc: "Buat chatbot AI spesialis untuk bisnis Anda — tanpa coding, dalam 30 menit.",
+                  href: isAuthenticated ? "/dashboard" : "/login",
+                  cta: "Mulai Bangun",
+                },
+                {
+                  step: "03",
+                  icon: "💼",
+                  color: "emerald",
+                  title: "MITRA",
+                  sub: "Jual AI",
+                  desc: "Monetisasi chatbot yang Anda bangun. Jual ke klien, raih penghasilan baru.",
+                  href: "https://wa.me/6281287941900",
+                  cta: "Jadi Mitra",
+                  external: true,
+                },
+                {
+                  step: "04",
+                  icon: "🌟",
+                  color: "amber",
+                  title: "LEGACY",
+                  sub: "Wariskan AI Twin",
+                  desc: "Rekam expertise Anda ke dalam AI — pengetahuan yang bekerja tanpa kehadiran Anda.",
+                  href: isAuthenticated ? "/dashboard" : "/login",
+                  cta: "Bangun Legacy",
+                },
+              ].map((item, idx) => (
+                <div key={item.step} className={`flex gap-4 md:gap-8 items-start ${idx % 2 === 1 ? "md:flex-row-reverse" : ""}`}>
+                  <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-sm border-2 ${
+                    item.color === "blue" ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800" :
+                    item.color === "primary" ? "bg-primary/10 border-primary/30" :
+                    item.color === "emerald" ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800" :
+                    "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800"
+                  } z-10 relative`}>
+                    {item.icon}
+                  </div>
+                  <div className={`flex-1 rounded-2xl border p-4 md:p-5 ${
+                    item.color === "blue" ? "bg-blue-50/50 dark:bg-blue-950/20 border-blue-200/60 dark:border-blue-800/30" :
+                    item.color === "primary" ? "bg-primary/5 border-primary/20" :
+                    item.color === "emerald" ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200/60 dark:border-emerald-800/30" :
+                    "bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-800/30"
+                  }`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                        item.color === "blue" ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300" :
+                        item.color === "primary" ? "bg-primary/15 text-primary" :
+                        item.color === "emerald" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" :
+                        "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
+                      }`}>{item.step}</span>
+                      <span className="font-extrabold text-base">{item.title}</span>
+                      <span className="text-sm text-muted-foreground">— {item.sub}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">{item.desc}</p>
+                    {item.external ? (
+                      <a href={item.href} target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("Ekosistem-" + item.title)}>
+                        <Button size="sm" variant="outline" className="text-xs font-bold gap-1.5">
+                          {item.cta} <ChevronRight className="w-3.5 h-3.5" />
+                        </Button>
+                      </a>
+                    ) : (
+                      <Link href={item.href} onClick={item.title === "BUILDER" || item.title === "LEGACY" ? handleStartNowClick : undefined}>
+                        <Button size="sm" variant="outline" className="text-xs font-bold gap-1.5">
+                          {item.cta} <ChevronRight className="w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── ACTION: Pricing CTA ── */}
       <section className="py-16 px-4 bg-gradient-to-br from-primary to-violet-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
@@ -1610,117 +1759,62 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── MULTICLAW DIRECTORY ── */}
-      <section className="py-16 px-4 bg-background border-t">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
+      {/* ── MULTICLAW TEASER ── */}
+      <section className="py-14 px-4 bg-background border-t">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
             <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Suite Premium</p>
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">80+ MultiClaw AI Tools — Siap Pakai</h2>
-            <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed mb-4">
-              Setiap "Claw" adalah tim agen AI spesialis yang bekerja paralel untuk domain tertentu. Tidak perlu setup — langsung buka dan tanya.
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">80+ MultiClaw AI Tools</h2>
+            <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+              Setiap "Claw" adalah tim AI spesialis yang bekerja paralel. Dari tender LPSE, SBU/SKK, K3, ISO, energi, hingga HR dan marketing — tanpa setup.
             </p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Daftar Claw terus bertambah setiap bulan — Ikuti update terbaru
-            </div>
           </div>
 
-          <div className="space-y-6">
+          {/* 6 Featured Claws */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
             {[
-              {
-                label: "Sertifikasi & Izin Usaha BUJK", color: "amber",
-                items: ["SBUClaw","LKUTClaw","PUB-LKUTClaw","PJBUClaw","KeuanganClaw","PajakClaw","ABUClaw","PanduanSBU","SkemaClaw","SIMPKClaw"],
-              },
-              {
-                label: "Tender & Pengadaan", color: "indigo",
-                items: ["TenderaClaw","KonstraTenderClaw","BGClaw","BSClaw","IMClaw","KOClaw","KKClaw"],
-              },
-              {
-                label: "SKK & Kompetensi TKK", color: "teal",
-                items: ["PanduanASKOM","TerasLPJK#1","ManprojakClaw","ArsitekturClaw","SurveiPemetaanClaw","GeoteknikClaw","JalanJembatanClaw","TataLingkunganClaw","ElektrikalClaw","SafiraClaw"],
-              },
-              {
-                label: "K3, HSE & IMS", color: "red",
-                items: ["CSMSClaw","SMK3Claw","K3Claw","K3ManClaw","OffshoreSafetyClaw"],
-              },
-              {
-                label: "ISO & Kepatuhan", color: "blue",
-                items: ["ISOClaw 9001","ISOClaw 14001","SMAPClaw","PanCEKClaw","NspkNavigatorClaw"],
-              },
-              {
-                label: "Teknik & Konsultansi", color: "sky",
-                items: ["SipilClaw","MEPClaw","LingkunganClaw","BIMClaw","DesainClaw","QSClaw","PengawasClaw","KontrakClaw","SiteOpsClaw"],
-              },
-              {
-                label: "Perizinan & Investasi", color: "cyan",
-                items: ["ESIMPANClaw","LKPMClaw","OSSClaw"],
-              },
-              {
-                label: "Energi & Pertambangan", color: "orange",
-                items: ["KetenagalistrikanClaw","EnergiClaw","EbtSolarClaw","TransisiEnergiClaw","MigasClaw","PertambanganClaw","GeologiClaw","TransmisiClaw"],
-              },
-              {
-                label: "Properti & Real Estate", color: "violet",
-                items: ["DevPropertiClaw","EstateCareClaw"],
-              },
-              {
-                label: "Manajemen Proyek Konstruksi", color: "slate",
-                items: ["KonstraClaw","BrainClaw"],
-              },
-              {
-                label: "Pendidikan & Sertifikasi ETLO", color: "emerald",
-                items: ["EducounselClaw","IBTUClaw","ETLOAcademyClaw","ETLOBizDevClaw","TutorTeknikClaw","RisetSkripsiClaw"],
-              },
-              {
-                label: "Bisnis, HR & Operasional", color: "rose",
-                items: ["DigitalMarketingClaw","CrmSalesClaw","BrandContentClaw","EcommerceClaw","RekrutmenClaw","LdKompetensiClaw","PenilaianKinerjaClaw","HubunganIndustrialClaw","ESGClaw","LeanOpExClaw","SupplyChainClaw","Industri40Claw"],
-              },
-              {
-                label: "Regulasi, Hukum & Keamanan", color: "gray",
-                items: ["KorporasiClaw","CybersecurityClaw","HACCPClaw"],
-              },
-            ].map((cat) => {
-              const colorMap: Record<string, {badge: string, label: string}> = {
-                amber:   { badge: "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300", label: "text-amber-600 dark:text-amber-400 border-amber-500/20" },
-                indigo:  { badge: "bg-indigo-500/10 border-indigo-500/30 text-indigo-700 dark:text-indigo-300", label: "text-indigo-600 dark:text-indigo-400 border-indigo-500/20" },
-                teal:    { badge: "bg-teal-500/10 border-teal-500/30 text-teal-700 dark:text-teal-300", label: "text-teal-600 dark:text-teal-400 border-teal-500/20" },
-                red:     { badge: "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-300", label: "text-red-600 dark:text-red-400 border-red-500/20" },
-                blue:    { badge: "bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300", label: "text-blue-600 dark:text-blue-400 border-blue-500/20" },
-                sky:     { badge: "bg-sky-500/10 border-sky-500/30 text-sky-700 dark:text-sky-300", label: "text-sky-600 dark:text-sky-400 border-sky-500/20" },
-                cyan:    { badge: "bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-300", label: "text-cyan-600 dark:text-cyan-400 border-cyan-500/20" },
-                orange:  { badge: "bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-300", label: "text-orange-600 dark:text-orange-400 border-orange-500/20" },
-                violet:  { badge: "bg-violet-500/10 border-violet-500/30 text-violet-700 dark:text-violet-300", label: "text-violet-600 dark:text-violet-400 border-violet-500/20" },
-                slate:   { badge: "bg-slate-500/10 border-slate-500/30 text-slate-700 dark:text-slate-300", label: "text-slate-600 dark:text-slate-400 border-slate-500/20" },
-                emerald: { badge: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300", label: "text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
-                rose:    { badge: "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300", label: "text-rose-600 dark:text-rose-400 border-rose-500/20" },
-                gray:    { badge: "bg-gray-500/10 border-gray-500/30 text-gray-700 dark:text-gray-300", label: "text-gray-600 dark:text-gray-400 border-gray-500/20" },
+              { name: "TenderaClaw", icon: "📋", desc: "Analisis tender LPSE + win probability", href: "/tendera-claw", color: "indigo" },
+              { name: "SBUClaw", icon: "🏗️", desc: "Sertifikasi SBU Konstruksi", href: "/sbu-claw", color: "amber" },
+              { name: "K3ManClaw", icon: "⛑️", desc: "Manajemen K3 & SMK3", href: "/k3man-claw", color: "red" },
+              { name: "KonstraClaw", icon: "🏢", desc: "Manajemen proyek konstruksi", href: "/konstra-claw", color: "slate" },
+              { name: "BrainClaw", icon: "🧠", desc: "Project intelligence AI", href: "/brain-claw", color: "cyan" },
+              { name: "DigitalMarketingClaw", icon: "📣", desc: "Konsultan digital marketing", href: "/digital-marketing-claw", color: "violet" },
+            ].map((claw) => {
+              const colorMap: Record<string, string> = {
+                indigo: "bg-indigo-50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800/40 hover:border-indigo-400",
+                amber: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/40 hover:border-amber-400",
+                red: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/40 hover:border-red-400",
+                slate: "bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700/40 hover:border-slate-400",
+                cyan: "bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800/40 hover:border-cyan-400",
+                violet: "bg-violet-50 dark:bg-violet-950/30 border-violet-200 dark:border-violet-800/40 hover:border-violet-400",
               };
-              const c = colorMap[cat.color];
               return (
-                <div key={cat.label} data-testid={`claw-category-${cat.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 border-b pb-1.5 ${c.label}`}>{cat.label} <span className="font-normal normal-case text-muted-foreground">({cat.items.length})</span></p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {cat.items.map((name) => (
-                      <span key={name} className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${c.badge}`}>
-                        {name}
-                      </span>
-                    ))}
+                <Link key={claw.name} href={claw.href}>
+                  <div className={`rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer ${colorMap[claw.color]}`} data-testid={`card-claw-featured-${claw.name.toLowerCase()}`}>
+                    <div className="text-2xl mb-2">{claw.icon}</div>
+                    <p className="font-bold text-sm mb-0.5">{claw.name}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{claw.desc}</p>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-dashed border-primary/30 bg-primary/5 px-5 py-4">
-            <div>
-              <p className="font-bold text-sm mb-0.5">Punya kebutuhan domain spesifik?</p>
-              <p className="text-xs text-muted-foreground">Claw baru ditambahkan setiap bulan. Hubungi kami jika domain Anda belum tersedia.</p>
-            </div>
-            <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" data-testid="link-request-claw-wa">
-              <Button size="sm" variant="outline" className="gap-2 whitespace-nowrap text-xs font-bold border-primary/30 hover:bg-primary/10">
-                <Smartphone className="w-3.5 h-3.5" /> Request Claw Baru
+          {/* Domain categories summary */}
+          <div className="flex flex-wrap gap-2 justify-center mb-6">
+            {["Sertifikasi BUJK","Tender & Pengadaan","SKK/Kompetensi","K3 & HSE","ISO & Kepatuhan","Teknik & Konsultansi","Energi","Properti","Pendidikan","Bisnis & HR","Perizinan","Hukum"].map((cat) => (
+              <span key={cat} className="text-[11px] font-semibold px-3 py-1 rounded-full bg-muted border text-muted-foreground">{cat}</span>
+            ))}
+            <span className="text-[11px] font-semibold px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary">+lebih banyak →</span>
+          </div>
+
+          <div className="text-center">
+            <Link href="/multiclaw">
+              <Button size="lg" variant="outline" className="gap-2 font-bold border-primary/40 hover:bg-primary/5" data-testid="button-see-all-claws">
+                <LayoutGrid className="w-4 h-4" /> Lihat Semua 80+ MultiClaw Tools →
               </Button>
-            </a>
+            </Link>
+            <p className="text-xs text-muted-foreground mt-2">Daftar lengkap + akses langsung ke setiap Claw</p>
           </div>
         </div>
       </section>
@@ -1766,14 +1860,14 @@ export default function Landing() {
       {/* ── ACTION: Final CTA Banner ── */}
       <section className="py-14 px-4 border-t bg-muted/20">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">Siap Mulai? Setup &lt; 30 Menit.</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Aktifkan AI Spesialis Anda Dalam 30 Menit</h2>
           <p className="text-muted-foreground mb-6 max-w-lg mx-auto text-sm leading-relaxed">
-            Bergabung dengan ratusan kontraktor, konsultan, dan bisnis Indonesia yang sudah menggunakan Gustafta. Mulai gratis, upgrade kapan pun Anda butuh.
+            Bergabung dengan ratusan kontraktor, konsultan, dan bisnis Indonesia. Daftar gratis, bangun chatbot pertama hari ini, upgrade kapan pun Anda butuh.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
               <Button size="lg" className="gap-2 font-bold px-8" data-testid="button-final-cta-start">
-                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
+                <Rocket className="w-4 h-4" /> Bangun AI Pertama Anda — Gratis
               </Button>
             </Link>
             <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("Final CTA")}>
