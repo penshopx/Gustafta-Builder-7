@@ -1182,7 +1182,7 @@ export default function Landing() {
             {[
               { label: "Spesialisasi industri", chatgpt: "AI umum — semua bidang", gustafta: "1350+ AI spesialis domain" },
               { label: "Data perusahaan Anda", chatgpt: "❌ Tidak bisa upload KB internal", gustafta: "✅ Knowledge Base 7 tipe" },
-              { label: "Bisa dijual ke klien", chatgpt: "❌ Tidak — akun pribadi", gustafta: "✅ Monetisasi & white-label" },
+              { label: "Bisa dijual ke klien", chatgpt: "❌ Tidak — akun pribadi", gustafta: "✅ Monetisasi — jual chatbot ke klien" },
               { label: "Terhubung ke WhatsApp", chatgpt: "❌ Tidak ada integrasi WA", gustafta: "✅ WA, Telegram, Web Widget" },
               { label: "Analisis tender LPSE", chatgpt: "Terbatas — tidak tahu regulasi terbaru", gustafta: "✅ TenderaClaw + 131 Orchestrator" },
               { label: "Harga", chatgpt: "$20/bln (~Rp 320rb) — per orang", gustafta: "Rp 199rb/bln — untuk tim + klien" },
@@ -1371,7 +1371,7 @@ export default function Landing() {
                 plan: "Bisnis", price: "999rb", badge: null,
                 features: [
                   "200 slot agen/chatbot sendiri",
-                  "White-label (hapus branding Gustafta)",
+                  "Akses API & Integrasi Custom",
                   "Priority Support WhatsApp",
                   "Bisa install template dari Store",
                 ],

@@ -167,7 +167,7 @@ const BISNIS_PLANS: BisnisPlan[] = [
     features: [
       "Semua fitur Profesional",
       "Custom Domain (3)",
-      "White-label branding",
+      "Priority Support & Dedicated Manager",
       "Semua Mini Apps (45 tipe)",
       "Priority WhatsApp support",
     ],
