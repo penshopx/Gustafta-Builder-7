@@ -367,9 +367,9 @@ const CHATBOT_SHOWCASE = [
 type Tab = "bisnis" | "modul" | "chatbot";
 
 const TABS: { id: Tab; label: string; icon: typeof Bot; color: string }[] = [
-  { id: "bisnis",   label: "Paket Bisnis",  icon: Zap,    color: "indigo" },
-  { id: "modul",    label: "Paket Modul",   icon: Wrench, color: "violet" },
-  { id: "chatbot",  label: "Paket Chatbot", icon: Bot,    color: "blue"   },
+  { id: "bisnis",   label: "Builder DIY (Langganan)",  icon: Zap,    color: "indigo" },
+  { id: "modul",    label: "Layanan Jasa (Kami Kerjakan)",   icon: Wrench, color: "violet" },
+  { id: "chatbot",  label: "Store Creator (Chatbot Jadi)", icon: Bot,    color: "blue"   },
 ];
 
 // ─── Sections ─────────────────────────────────────────────────────────────────
@@ -580,7 +580,7 @@ function ModulPaket() {
   return (
     <div className="space-y-8">
       <div className="text-center max-w-2xl mx-auto">
-        <Badge className="mb-3 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">Paket Modul</Badge>
+        <Badge className="mb-3 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">Layanan Jasa</Badge>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Minta dibuatkan modul khusus</h2>
         <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed">
           Tim Gustafta membuatkan chatbot sesuai spesifikasi bisnis Anda. Ideal untuk perusahaan yang ingin
@@ -649,7 +649,7 @@ function ChatbotPaket() {
   return (
     <div className="space-y-8">
       <div className="text-center max-w-2xl mx-auto">
-        <Badge className="mb-3 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Paket Chatbot</Badge>
+        <Badge className="mb-3 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Store Creator</Badge>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Aktivasi chatbot siap pakai</h2>
         <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed">
           Pilih chatbot dari koleksi Gustafta yang sudah dibuat dan dioptimalkan oleh tim ahli.
@@ -774,14 +774,17 @@ export default function ProdukPage() {
       {/* Hero */}
       <section className="pt-16 pb-10 px-4 text-center bg-gradient-to-b from-indigo-50/60 to-white dark:from-indigo-950/20 dark:to-slate-950">
         <Badge className="mb-4 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs">
-          Gustafta Builder
+          Produk & Layanan Gustafta
         </Badge>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-          3 Cara Pakai Gustafta
+          Semua Cara Pakai Gustafta
         </h1>
-        <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
-          Pilih jalur yang sesuai kebutuhan Anda — bangun sendiri, minta dibuatkan,
-          atau aktifkan chatbot yang sudah jadi.
+        <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
+          Gustafta punya tiga jalur — pilih sesuai seberapa banyak Anda mau terlibat.
+          <br className="hidden sm:block" />
+          <span className="font-medium text-indigo-600 dark:text-indigo-400">Builder DIY</span> (langganan, Anda yang kelola) ·{" "}
+          <span className="font-medium text-violet-600 dark:text-violet-400">Layanan Jasa</span> (tim kami yang kerjakan) ·{" "}
+          <span className="font-medium text-emerald-600 dark:text-emerald-400">Store Creator</span> (beli chatbot jadi dari mitra)
         </p>
       </section>
 

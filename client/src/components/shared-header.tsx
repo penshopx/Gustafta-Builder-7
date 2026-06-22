@@ -172,12 +172,10 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   });
 
   const navItems = [
-    { href: "/platform", label: "Paket Bisnis AI", icon: TrendingUp },
-    { href: "/packs", label: "Paket Series Modul", icon: Package },
-    { href: "/store", label: "Store", icon: ShoppingBag },
-    { href: "/lms", label: "Learning Center", icon: GraduationCap },
-    { href: "/produk", label: "Produk & Harga", icon: BarChart3 },
-    { href: "/panduan", label: "Panduan", icon: BookOpen },
+    { href: "/produk", label: "Produk & Layanan", icon: BarChart3 },
+    { href: "/packs", label: "Layanan Jasa", icon: Package },
+    { href: "/store", label: "Store Creator", icon: ShoppingBag },
+    { href: "/panduan", label: "Panduan & Belajar", icon: BookOpen },
     { href: "/profil", label: "Profil GAIA", icon: Sparkles },
   ];
 

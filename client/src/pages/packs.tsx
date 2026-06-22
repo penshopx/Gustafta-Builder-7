@@ -186,49 +186,66 @@ export default function PacksPage() {
         <div className="container mx-auto px-4 text-center relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-5">
             <Sparkles className="h-4 w-4" />
-            Paket Series Modul — Done-for-You
+            Layanan Jasa — Done-for-You
             <Zap className="h-4 w-4 text-orange-500" />
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-            Kami yang Setup,{" "}
+            Kami yang Kerjakan,{" "}
             <span className="bg-gradient-to-r from-violet-500 to-primary bg-clip-text text-transparent">
               Anda Langsung Pakai
             </span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-5">
-            Berbeda dengan Paket Bisnis AI (DIY), di sini Anda cukup <strong>pesan modul yang dibutuhkan</strong> — tim Gustafta yang mengkonfigurasi, menginstal, dan mengaktifkan semuanya. Anda tidak perlu tahu teknisnya.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-7">
+            Berbeda dari Builder DIY — di sini Anda cukup <strong>pilih domain yang dibutuhkan</strong>, tim Gustafta yang mengerjakan. Ada dua model layanan sesuai kebutuhan Anda.
           </p>
 
-          {/* Perbandingan jalur */}
-          <div className="grid sm:grid-cols-2 gap-3 max-w-2xl mx-auto mb-5 text-left">
-            <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/20 p-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Crown className="h-3.5 w-3.5 text-violet-600" />
-                <span className="font-semibold text-xs text-violet-700 dark:text-violet-300">Paket Series Modul (halaman ini)</span>
+          {/* 2 Model Layanan */}
+          <div className="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-7 text-left">
+            <div className="rounded-2xl border-2 border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/30 p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center">
+                  <PenLine className="h-4 w-4 text-violet-600" />
+                </div>
+                <span className="font-bold text-sm text-violet-700 dark:text-violet-300">Model A — Kami Buatkan Promptnya</span>
               </div>
-              <p className="text-xs text-muted-foreground">Pesan modul → kami setup → Anda pakai. Cocok untuk yang ingin solusi siap pakai tanpa konfigurasi.</p>
+              <p className="text-sm text-muted-foreground mb-3">
+                Anda ceritakan kebutuhan domain/bisnis Anda → tim Gustafta merancang system prompt, persona, dan instruksi AI yang tepat → Anda tinggal install sendiri ke akun Builder.
+              </p>
+              <div className="space-y-1">
+                {["Konsultasi kebutuhan domain", "Perancangan system prompt profesional", "Deliverable: file prompt siap install", "Cocok untuk yang sudah punya akun Builder"].map(i => (
+                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Check className="h-3 w-3 text-violet-500 flex-shrink-0" />{i}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="rounded-xl border border-muted bg-muted/30 p-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="font-semibold text-xs text-muted-foreground">Paket Bisnis AI (DIY)</span>
+            <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Repeat2 className="h-4 w-4 text-primary" />
+                </div>
+                <span className="font-bold text-sm text-primary">Model B — Kami Setup Penuh</span>
               </div>
-              <p className="text-xs text-muted-foreground">Anda admin yang build & kelola sendiri. <a href="/pricing" className="text-primary underline underline-offset-2">Lihat halaman Paket Bisnis →</a></p>
+              <p className="text-sm text-muted-foreground mb-3">
+                Anda pesan domain/modul → tim Gustafta mengkonfigurasi seluruh agen AI, knowledge base, dan instruksi → aktif langsung di akun Anda tanpa Anda perlu tahu teknisnya.
+              </p>
+              <div className="space-y-1">
+                {["Konsultasi + perancangan sistem AI", "Konfigurasi penuh agen & knowledge base", "Aktivasi & uji coba bersama", "Termasuk mentoring penggunaan awal"].map(i => (
+                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Check className="h-3 w-3 text-primary flex-shrink-0" />{i}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-2">
-            {[
-              "Setup & konfigurasi kami yang handle",
-              "Agen AI fleksibel per orderan",
-              "Tidak perlu tahu teknisnya",
-              "Modul baru terus bertambah",
-            ].map(b => (
-              <div key={b} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
-                {b}
-              </div>
-            ))}
+          {/* Perbandingan dengan DIY */}
+          <div className="max-w-xl mx-auto rounded-xl border border-muted bg-muted/30 p-4 text-left">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Star className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="font-semibold text-xs text-muted-foreground">Mau build sendiri? Pakai Builder DIY</span>
+            </div>
+            <p className="text-xs text-muted-foreground">Jika Anda ingin admin yang bangun & kelola sendiri, lihat <a href="/produk" className="text-primary underline underline-offset-2">halaman Produk & Layanan →</a></p>
           </div>
         </div>
       </section>
