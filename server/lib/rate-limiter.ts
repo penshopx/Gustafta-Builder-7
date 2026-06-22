@@ -1,4 +1,4 @@
-import { rateLimit, type Options } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator, type Options } from "express-rate-limit";
 import type { Request, Response } from "express";
 
 const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || "")
@@ -46,7 +46,7 @@ export const chatIpRateLimiter = rateLimit({
     if (isAuthenticatedUser(req)) return 120;
     return 30;
   },
-  keyGenerator: (req: Request) => req.ip || req.socket?.remoteAddress || "unknown",
+  keyGenerator: (req: Request) => ipKeyGenerator(req),
   skip: (req: Request) => isAdminUser(req),
   standardHeaders: "draft-7",
   legacyHeaders: false,
