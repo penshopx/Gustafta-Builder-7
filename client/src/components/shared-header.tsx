@@ -175,6 +175,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/produk", label: "Produk & Layanan", icon: BarChart3 },
     { href: "/packs", label: "Layanan Jasa", icon: Package },
     { href: "/store", label: "Store Creator", icon: ShoppingBag },
+    { href: "/workshop", label: "Workshop", icon: GraduationCap, badge: "Segera" },
     { href: "/panduan", label: "Panduan & Belajar", icon: BookOpen },
     { href: "/profil", label: "Profil GAIA", icon: Sparkles },
   ];
@@ -365,9 +366,14 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
               <Button
                 variant={isActive(item.href) ? "secondary" : "ghost"}
                 size="sm"
-                className="text-xs px-3 h-8 font-medium"
+                className="text-xs px-3 h-8 font-medium relative"
               >
                 {item.label}
+                {"badge" in item && item.badge && (
+                  <span className="ml-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-400 text-amber-900 leading-none">
+                    {item.badge}
+                  </span>
+                )}
               </Button>
             </Link>
           ))}

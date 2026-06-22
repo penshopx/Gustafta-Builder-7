@@ -30,6 +30,7 @@ import ProductLanding from "@/pages/product-landing";
 import EkosistemLanding from "@/pages/ekosistem-landing";
 import ModulChat from "@/pages/modul-chat";
 import PacksPage from "@/pages/packs";
+import WorkshopPage from "@/pages/workshop";
 import TenderWizard from "@/pages/tender-wizard";
 import DomainsPage from "@/pages/domains";
 import AdminPage from "@/pages/admin";
@@ -400,6 +401,7 @@ function Router() {
         )} />
       <Route path="/templates" component={TemplatesPage} />
       <Route path="/store" component={StorePage} />
+      <Route path="/workshop" component={WorkshopPage} />
       <Route path="/gustafta-store" component={StorePage} />
       <Route path="/store/access/:token" component={StoreAccess} />
       <Route path="/test-tracker" component={TestTracker} />

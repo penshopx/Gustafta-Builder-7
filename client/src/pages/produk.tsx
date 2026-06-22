@@ -525,6 +525,68 @@ function BisnisPaket() {
         </div>
       </div>
 
+      {/* ── Bukan Sekadar Dialog ──────────────────────────────────────────── */}
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-6">
+          <Badge className="mb-2 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+            ✦ Keunggulan Gustafta Builder
+          </Badge>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            Bukan sekadar chatbot yang menjawab
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-2xl mx-auto leading-relaxed">
+            Gustafta Builder punya <strong className="text-gray-800 dark:text-gray-200">Mini Apps</strong> — tools AI yang tertanam langsung di dalam chatbot Anda.
+            AI tidak hanya bicara, tapi <strong className="text-gray-800 dark:text-gray-200">menghasilkan dokumen nyata, kalkulasi, laporan, dan checklist</strong> yang langsung bisa dipakai.
+          </p>
+        </div>
+
+        {/* Comparison strip */}
+        <div className="flex flex-col sm:flex-row gap-3 max-w-3xl mx-auto mb-8">
+          <div className="flex-1 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 p-4 text-center">
+            <div className="text-2xl mb-2">💬</div>
+            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Chatbot Biasa</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Menjawab pertanyaan → selesai di teks</div>
+            <div className="mt-2 text-xs text-gray-400 italic">Output: teks / percakapan</div>
+          </div>
+          <div className="flex items-center justify-center text-2xl font-bold text-gray-300 dark:text-gray-600 rotate-90 sm:rotate-0">→</div>
+          <div className="flex-1 rounded-2xl border-2 border-violet-300 dark:border-violet-600 bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/30 dark:to-indigo-950/30 p-4 text-center shadow-sm">
+            <div className="text-2xl mb-2">⚡</div>
+            <div className="text-xs font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wide mb-1">Gustafta Builder + Mini Apps</div>
+            <div className="text-sm text-gray-700 dark:text-gray-300">Menjawab pertanyaan <strong>+ menghasilkan dokumen, laporan & kalkulasi</strong></div>
+            <div className="mt-2 text-xs text-violet-600 dark:text-violet-400 font-medium">Output: file siap pakai, PDF, tabel, laporan</div>
+          </div>
+        </div>
+
+        {/* Mini apps showcase grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto mb-4">
+          {[
+            { icon: "📋", label: "Checklist & Audit", desc: "Checklist K3, compliance, go/no-go", color: "border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800" },
+            { icon: "🧮", label: "Kalkulator RAB", desc: "Estimasi biaya proyek otomatis", color: "border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800" },
+            { icon: "📄", label: "Generator Dokumen", desc: "Kontrak, SPK, NDA, MoU dalam sekejap", color: "border-violet-200 bg-violet-50 dark:bg-violet-950/20 dark:border-violet-800" },
+            { icon: "📊", label: "Laporan KPI", desc: "Kinerja tim & dashboard manajer", color: "border-indigo-200 bg-indigo-50 dark:bg-indigo-950/20 dark:border-indigo-800" },
+            { icon: "🎯", label: "Risk Assessment", desc: "Identifikasi & scoring risiko proyek", color: "border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800" },
+            { icon: "📝", label: "AI Notulis Rapat", desc: "Ringkas & distribusi notulen otomatis", color: "border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800" },
+            { icon: "📣", label: "AI Copywriter", desc: "Konten medsos, caption, artikel", color: "border-rose-200 bg-rose-50 dark:bg-rose-950/20 dark:border-rose-800" },
+            { icon: "🎓", label: "Ekosistem Kompetensi", desc: "Executive Summary PKB, klaim SKP ke LPJK", color: "border-teal-200 bg-teal-50 dark:bg-teal-950/20 dark:border-teal-800" },
+          ].map((item, i) => (
+            <div key={i} className={`rounded-xl border p-3 ${item.color} flex flex-col gap-1.5`}>
+              <div className="text-xl">{item.icon}</div>
+              <div className="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight">{item.label}</div>
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</div>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-gray-400 mb-2">
+          45 tipe Mini Apps tersedia · Otomatis disarankan AI sesuai domain chatbot Anda
+        </p>
+        <div className="text-center mb-8">
+          <a href="/ai-tools" className="inline-flex items-center gap-1.5 text-xs text-violet-600 dark:text-violet-400 hover:underline underline-offset-2 font-medium">
+            <LayoutGrid className="w-3.5 h-3.5" />
+            Lihat semua AI Tools & Mini Apps →
+          </a>
+        </div>
+      </div>
+
       {/* ── Fitur Lanjutan ────────────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-6">
