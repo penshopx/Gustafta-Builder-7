@@ -184,7 +184,7 @@ export default function Landing() {
             <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
               <Button size="lg" className="w-full sm:w-auto gap-2 text-base font-bold px-8 py-6" data-testid="button-hero-start">
                 <Rocket className="w-5 h-5" />
-                Mulai Sekarang — Gratis
+                Coba Gratis 7 Hari
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
@@ -198,7 +198,7 @@ export default function Landing() {
 
           <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            Mulai dari Rp 199.000/bulan · Tanpa kartu kredit · Setup &lt; 30 menit
+            Trial 7 hari gratis · Lanjut dari Rp 199.000/bln · Tanpa kartu kredit
           </p>
 
           {/* Hero illustration */}
@@ -1422,7 +1422,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold gap-2 px-8" data-testid="button-pricing-cta-start">
-                <Rocket className="w-4 h-4" /> Mulai Sekarang — Gratis
+                <Rocket className="w-4 h-4" /> Mulai Trial 7 Hari — Gratis
               </Button>
             </Link>
             <Link href="/packs" onClick={handlePricingClick}>
@@ -1434,7 +1434,7 @@ export default function Landing() {
 
           <p className="text-white/50 text-xs mt-4 flex items-center justify-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Tanpa kartu kredit · Cancel kapan saja · Support via WhatsApp
+            Trial 7 hari gratis · Tanpa kartu kredit · Cancel kapan saja · Support via WhatsApp
           </p>
         </div>
       </section>
@@ -1861,13 +1861,16 @@ export default function Landing() {
       <section className="py-14 px-4 border-t bg-muted/20">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-3">Aktifkan AI Spesialis Anda Dalam 30 Menit</h2>
-          <p className="text-muted-foreground mb-6 max-w-lg mx-auto text-sm leading-relaxed">
-            Bergabung dengan ratusan kontraktor, konsultan, dan bisnis Indonesia. Daftar gratis, bangun chatbot pertama hari ini, upgrade kapan pun Anda butuh.
+          <p className="text-muted-foreground mb-2 max-w-lg mx-auto text-sm leading-relaxed">
+            Bergabung dengan ratusan kontraktor, konsultan, dan bisnis Indonesia yang sudah menggunakan Gustafta.
+          </p>
+          <p className="text-muted-foreground mb-6 max-w-lg mx-auto text-sm">
+            <span className="font-semibold text-foreground">Trial 7 hari penuh</span> — akses semua fitur Builder, lalu lanjut dari Rp 199.000/bulan. Tidak perlu kartu kredit.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href={isAuthenticated ? "/dashboard" : "/login"} onClick={handleStartNowClick}>
               <Button size="lg" className="gap-2 font-bold px-8" data-testid="button-final-cta-start">
-                <Rocket className="w-4 h-4" /> Bangun AI Pertama Anda — Gratis
+                <Rocket className="w-4 h-4" /> Mulai Trial 7 Hari — Gratis
               </Button>
             </Link>
             <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer" onClick={() => handleWAClick("Final CTA")}>
