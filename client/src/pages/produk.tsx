@@ -413,11 +413,11 @@ function BisnisPaket() {
               {plan.setupFee && (
                 <div className="mt-2 space-y-1">
                   <div className="flex items-center gap-1.5 text-[10px]">
-                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold px-1.5 py-0.5 rounded">Dengan ebook</span>
+                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold px-1.5 py-0.5 rounded">Lisensi Starter Kit</span>
                     <span className="text-gray-500 dark:text-gray-400">Rp 245rb (sekali) → <strong className="text-emerald-600 dark:text-emerald-400">lisensi Rp 0 + 7 hari trial</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px]">
-                    <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold px-1.5 py-0.5 rounded">Tanpa ebook</span>
+                    <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold px-1.5 py-0.5 rounded">Tanpa Starter Kit</span>
                     <span className="text-gray-500 dark:text-gray-400">lisensi Rp 299.000 (sekali), tanpa trial</span>
                   </div>
                 </div>
