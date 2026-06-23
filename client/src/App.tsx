@@ -38,6 +38,9 @@ import AccountPage from "@/pages/account";
 import MiniAppPublic from "@/pages/mini-app-public";
 import LegalLanding from "@/pages/legal-landing";
 import TrilogiLanding from "@/pages/trilogi-landing";
+import MitraPage from "@/pages/mitra";
+import LegacyPage from "@/pages/legacy";
+import BlueprintPage from "@/pages/blueprint";
 import MulticlawPage from "@/pages/multiclaw";
 import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
@@ -389,6 +392,9 @@ function Router() {
       <Route path="/mini-app/:slug" component={MiniAppPublic} />
       <Route path="/legal" component={LegalLanding} />
       <Route path="/trilogi" component={TrilogiLanding} />
+      <Route path="/mitra" component={MitraPage} />
+      <Route path="/legacy" component={LegacyPage} />
+      <Route path="/blueprint" component={BlueprintPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
