@@ -13,8 +13,8 @@ import coverFlat from "@assets/Monolog-_cover_1781287565935.jpg";
 import cover3D from "@assets/Buku_3D_1781288556255.png";
 import mockupDevices from "@assets/1781288755_1781288818548.jpg";
 
-const SCALEV_BUNDLE = "https://wuryanto.myscalev.com";
-const SCALEV_BUKU1  = "https://wuryanto.myscalev.com";
+const SCALEV_BUNDLE = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533206&qty=1";
+const SCALEV_BUKU1  = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533206&qty=1";
 const WA_URL        = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20mau%20tanya%20tentang%20Trilogi%20Dari%20Monolog%20ke%20Dialog";
 
 export default function TrilogiLanding() {
