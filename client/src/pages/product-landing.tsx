@@ -672,7 +672,7 @@ export default function ProductLanding() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {[
-              { icon: BookOpen, label: "eBook Kompetensi", path: "ebook", color: "text-amber-400" },
+              { icon: BookOpen, label: "Panduan Digital", path: "ebook", color: "text-amber-400" },
               { icon: GraduationCap, label: "eCourse Modul", path: "ecourse", color: "text-violet-400" },
               { icon: FileText, label: "Generator Dokumen", path: "docgen", color: "text-blue-400" },
               { icon: MessageSquare, label: "Mini Apps", path: "mini-apps", color: "text-emerald-400" },

@@ -453,7 +453,7 @@ export default function TrilogiLanding() {
                 a: "YouTube memberikan serpihan informasi. Trilogi memberikan sistem yang teruji end-to-end: dari mindset, memilih keahlian, membangun chatbot, hingga mendapatkan klien pertama dan menskalakan penghasilan subscription. Plus template dan prompt pack siap pakai.",
               },
               {
-                q: `🤔 "Apakah saya perlu berlangganan Gustafta setelah beli ebook?"`,
+                q: `🤔 "Apakah saya perlu berlangganan Gustafta setelah aktivasi Starter Kit — Panduan Gustafta?"`,
                 a: "Tidak wajib. Ebook bisa dipelajari sendiri terlebih dahulu. Bundle sudah termasuk BONUS 1 bulan Gustafta Builder gratis agar Anda bisa langsung praktik. Setelah itu, Anda bebas memilih lanjut berlangganan atau tidak.",
               },
               {

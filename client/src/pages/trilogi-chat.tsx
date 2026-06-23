@@ -69,7 +69,7 @@ const ROLE_ICONS: Array<{ match: string[]; icon: React.ReactNode; color: string;
   { match: ["analitik", "analytics", "performa", "data"], icon: <BarChart2 className="h-3 w-3" />, color: "bg-green-500/20 text-green-300 border-green-500/30", code: "ANL" },
   { match: ["pelanggan", "customer", "layanan"], icon: <Users className="h-3 w-3" />, color: "bg-blue-500/20 text-blue-300 border-blue-500/30", code: "PLG" },
   { match: ["strategi", "domain", "profesional", "kurator"], icon: <Target className="h-3 w-3" />, color: "bg-orange-500/20 text-orange-300 border-orange-500/30", code: "STR" },
-  { match: ["buku", "ebook", "penerbitan", "penerbit"], icon: <BookText className="h-3 w-3" />, color: "bg-lime-500/20 text-lime-300 border-lime-500/30", code: "BKU" },
+  { match: ["buku", "ebook", "panduan", "penerbitan", "penerbit"], icon: <BookText className="h-3 w-3" />, color: "bg-lime-500/20 text-lime-300 border-lime-500/30", code: "BKU" },
 ];
 
 function getRoleMeta(role: string) {

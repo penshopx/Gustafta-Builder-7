@@ -68,7 +68,7 @@ const SESI = [
       { name: "Afiliasi & Voucher", desc: "Program referral dan diskon untuk klien" },
       { name: "Conversion & Brief Marketing", desc: "Optimasi chatbot sebagai mesin konversi & pemasaran" },
       { name: "Rangkuman Chatbot", desc: "Auto-generate brief & materi pemasaran dari konfigurasi" },
-      { name: "Ekosistem Kompetensi ✦ Preview", desc: "Pengenalan: ebook · chatbot · mini apps · generator dokumen · ecourse — dibahas penuh di program lanjutan" },
+      { name: "Ekosistem Kompetensi ✦ Preview", desc: "Pengenalan: panduan digital · chatbot · mini apps · generator dokumen · ecourse — dibahas penuh di program lanjutan" },
     ],
     output: "Chatbot siap dijual — sistem harga, klien & afiliasi aktif. Preview ekosistem kompetensi.",
     chatbotLabel: "Belajar Sesi 3 lewat chatbot khusus Monetisasi & Ekosistem",
@@ -250,7 +250,7 @@ export default function WorkshopPage() {
               </p>
               <div className="grid sm:grid-cols-2 gap-2 mb-4">
                 {[
-                  { icon: "📚", label: "eBook Kompetensi", desc: "Produksi & distribusi ebook berbasis KB chatbot" },
+                  { icon: "📚", label: "Panduan Digital", desc: "Produksi & distribusi panduan digital berbasis KB chatbot" },
                   { icon: "🤖", label: "Chatbot Kompetensi", desc: "Chatbot spesifik domain SKK, PKB, dan sertifikasi" },
                   { icon: "⚡", label: "Mini Apps Domain", desc: "Executive Summary PKB, klaim SKP, rubrik asesor" },
                   { icon: "📄", label: "Generator Dokumen", desc: "Auto-generate dokumen kompetensi & portofolio" },

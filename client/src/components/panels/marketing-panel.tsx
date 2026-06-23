@@ -420,7 +420,7 @@ function PlatformToolsTab({ agent }: { agent: any }) {
 // ─── Storytelling Tab ─────────────────────────────────────────────────
 const STORY_PRODUCTS = [
   { id: "chatbot",   label: "Chatbot AI",       emoji: "🤖", color: "from-violet-500 to-purple-600",   ring: "ring-violet-400/50",  bg: "bg-violet-50 dark:bg-violet-950/30",  text: "text-violet-700 dark:text-violet-300" },
-  { id: "ebook",     label: "eBook",             emoji: "📘", color: "from-amber-500 to-orange-600",    ring: "ring-amber-400/50",   bg: "bg-amber-50 dark:bg-amber-950/30",    text: "text-amber-700 dark:text-amber-300" },
+  { id: "ebook",     label: "Panduan Digital",   emoji: "📘", color: "from-amber-500 to-orange-600",    ring: "ring-amber-400/50",   bg: "bg-amber-50 dark:bg-amber-950/30",    text: "text-amber-700 dark:text-amber-300" },
   { id: "ecourse",   label: "eCourse",           emoji: "🎓", color: "from-indigo-500 to-blue-600",     ring: "ring-indigo-400/50",  bg: "bg-indigo-50 dark:bg-indigo-950/30",  text: "text-indigo-700 dark:text-indigo-300" },
   { id: "mini-apps", label: "Mini Apps",         emoji: "⚡", color: "from-emerald-500 to-teal-600",   ring: "ring-emerald-400/50", bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-700 dark:text-emerald-300" },
   { id: "docgen",    label: "Generator Dokumen", emoji: "📄", color: "from-blue-500 to-cyan-600",      ring: "ring-blue-400/50",    bg: "bg-blue-50 dark:bg-blue-950/30",      text: "text-blue-700 dark:text-blue-300" },
@@ -1272,7 +1272,7 @@ function QrCodeTool({ agent }: { agent: any }) {
   const urls: Record<string, { label: string; url: string }> = {
     chatbot: { label: "Chatbot", url: `${window.location.origin}/bot/${agent.id}` },
     ecourse: { label: "Landing eCourse", url: `${window.location.origin}/product/${agent.id}/ecourse` },
-    ebook: { label: "Landing eBook", url: `${window.location.origin}/product/${agent.id}/ebook` },
+    ebook: { label: "Landing Panduan Digital", url: `${window.location.origin}/product/${agent.id}/ebook` },
     docgen: { label: "Landing Generator Dokumen", url: `${window.location.origin}/product/${agent.id}/docgen` },
     miniapps: { label: "Landing Mini Apps", url: `${window.location.origin}/product/${agent.id}/mini-apps` },
     product: { label: "Landing Chatbot", url: `${window.location.origin}/product/${agent.id}` },
@@ -1600,7 +1600,7 @@ function SocialPreviewTool({ agent }: { agent: any }) {
             <SelectItem value="chatbot" className="text-xs">Link Chatbot</SelectItem>
             <SelectItem value="product" className="text-xs">Landing Chatbot</SelectItem>
             <SelectItem value="ecourse" className="text-xs">Landing eCourse</SelectItem>
-            <SelectItem value="ebook" className="text-xs">Landing eBook</SelectItem>
+            <SelectItem value="ebook" className="text-xs">Landing Panduan Digital</SelectItem>
           </SelectContent>
         </Select>
 

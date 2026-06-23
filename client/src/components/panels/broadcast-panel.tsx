@@ -254,13 +254,13 @@ export function BroadcastPanel({ agent }: { agent: any }) {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">Produk Ekosistem tersedia dari MultiClaw Context</p>
                 <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  eBook: <strong>{ekosistemCtx.ebookTitle}</strong> · {ekosistemCtx.docgenCount} template dokumen
+                  Panduan Digital: <strong>{ekosistemCtx.ebookTitle}</strong> · {ekosistemCtx.docgenCount} template dokumen
                 </p>
               </div>
               <Button
                 size="sm" variant="outline"
                 className="h-7 text-[10px] border-emerald-300 text-emerald-700 hover:bg-emerald-100 shrink-0"
-                onClick={() => setBroadcastForm({ ...broadcastForm, messageTemplate: `Halo {{name}},\n\nProduk kompetensi digital kami siap untuk Anda:\n📚 eBook: ${ekosistemCtx.ebookTitle}\n🎓 eCourse: ${ekosistemCtx.ecourseTitle}\n📄 ${ekosistemCtx.docgenCount} Template Dokumen\n\nDapatkan akses sekarang!\n\n[${ekosistemCtx.agentName}]` })}
+                onClick={() => setBroadcastForm({ ...broadcastForm, messageTemplate: `Halo {{name}},\n\nProduk kompetensi digital kami siap untuk Anda:\n📚 Panduan Digital: ${ekosistemCtx.ebookTitle}\n🎓 eCourse: ${ekosistemCtx.ecourseTitle}\n📄 ${ekosistemCtx.docgenCount} Template Dokumen\n\nDapatkan akses sekarang!\n\n[${ekosistemCtx.agentName}]` })}
                 data-testid="button-import-ekosistem-context"
               >
                 <Zap className="w-3 h-3 mr-1" /> Import ke Template

@@ -45,7 +45,7 @@ export default function Landing() {
               </p>
 
               <p className="text-sm md:text-base text-blue-200 mb-8 leading-relaxed max-w-lg">
-                Platform no-code untuk instruktur, asosiasi, LSP, universitas, konsultan, dan individu yang ingin mengubah keahlian menjadi aset digital — ebook, chatbot AI, mini apps, e-course, dan document generator yang hidup 24/7.
+                Platform no-code untuk instruktur, asosiasi, LSP, universitas, konsultan, dan individu yang ingin mengubah keahlian menjadi aset digital — panduan digital, chatbot AI, mini apps, e-course, dan document generator yang hidup 24/7.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -154,7 +154,7 @@ export default function Landing() {
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { icon: GraduationCap, emoji: "🎓", label: "Instruktur & Trainer", desc: "Rakit modul pelatihan, ebook, dan chatbot pendamping untuk peserta Anda." },
+              { icon: GraduationCap, emoji: "🎓", label: "Instruktur & Trainer", desc: "Rakit modul pelatihan, panduan digital, dan chatbot pendamping untuk peserta Anda." },
               { icon: Building2, emoji: "🏛️", label: "Asosiasi Profesi & Badan Usaha", desc: "Bangun ekosistem kompetensi anggota — dari sertifikasi hingga pembelajaran berkelanjutan." },
               { icon: Award, emoji: "📜", label: "Lembaga Sertifikasi (LSP)", desc: "Sediakan simulasi asesmen, bank soal, dan panduan kompetensi yang bisa diakses peserta 24/7." },
               { icon: Users, emoji: "🏫", label: "Universitas & Lembaga Pendidikan", desc: "Digitalisasi materi dosen menjadi ekosistem belajar yang skalabel." },
@@ -604,7 +604,7 @@ export default function Landing() {
               { q: "Apa yang saya miliki setelah merakit?", a: "Ekosistem digital penuh — Anda pemilik data, konten, dan monetisasinya. Gustafta tidak mengunci ekosistem Anda." },
               { q: "Bisakah saya menjual hasil rakitan ke klien?", a: "Bisa. Lewat Template Marketplace dengan revenue sharing 80/20, atau langsung ke klien Anda sendiri lewat layanan yang Anda atur." },
               { q: "Apakah Gustafta hanya untuk sektor konstruksi?", a: "Tidak. 30+ sektor industri sudah didukung — konstruksi, energi, HR, pendidikan, keuangan, dan lainnya. Konstruksi hanya yang paling dalam saat ini." },
-              { q: "Apa bedanya dengan ChatGPT atau platform chatbot lain?", a: "Mereka menjual chatbot. Gustafta menjual platform untuk merakit ekosistem kompetensi Anda sendiri — ebook, chatbot, mini apps, e-course, dan document generator dalam satu sistem yang bisa dimonetisasi." },
+              { q: "Apa bedanya dengan ChatGPT atau platform chatbot lain?", a: "Mereka menjual chatbot. Gustafta menjual platform untuk merakit ekosistem kompetensi Anda sendiri — panduan digital, chatbot, mini apps, e-course, dan document generator dalam satu sistem yang bisa dimonetisasi." },
             ].map((item, i) => (
               <AccordionItem key={i} value={`faq-${i}`} className="border rounded-xl px-4">
                 <AccordionTrigger className="text-sm font-semibold text-gray-900 dark:text-white text-left hover:no-underline py-4">

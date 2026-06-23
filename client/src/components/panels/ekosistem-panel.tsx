@@ -216,7 +216,7 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
       id: "chaesa",
       title: "Chaesa AI Studio",
       subtitle: "Platform eBook & Ekosistem Lanjutan",
-      description: "Transfer chatbot ke Chaesa AI Studio untuk membuat ebook lanjutan, artikel, whitepaper, dan modul pelatihan yang lebih kaya dengan AI prompt generator 24 industri.",
+      description: "Transfer chatbot ke Chaesa AI Studio untuk membuat panduan digital lanjutan, artikel, whitepaper, dan modul pelatihan yang lebih kaya dengan AI prompt generator 24 industri.",
       icon: <BookMarked className="w-6 h-6" />,
       color: "blue",
       badge: "Bridge",
@@ -305,7 +305,7 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
             <span className="text-yellow-300">Ekosistem Digital</span>
           </h1>
           <p className="text-sm opacity-85 max-w-md mb-4">
-            Chatbot adalah fondasi. Transfer kompetensi {agent.name} menjadi ebook, e-course, generator dokumen, dan lebih banyak produk digital yang bekerja 24 jam.
+            Chatbot adalah fondasi. Transfer kompetensi {agent.name} menjadi panduan digital, e-course, generator dokumen, dan lebih banyak produk digital yang bekerja 24 jam.
           </p>
 
           {/* MultiClaw button */}
@@ -464,7 +464,7 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
           </div>
           <div className="flex items-start gap-2">
             <span className="mt-0.5 w-5 h-5 rounded-full bg-blue-500/15 text-blue-600 flex items-center justify-center font-bold text-[10px] flex-shrink-0">4</span>
-            <span><strong className="text-foreground">Bridge ke Chaesa</strong> — Export bundle ke Chaesa AI Studio untuk membuat ebook lanjutan yang lebih kompleks.</span>
+            <span><strong className="text-foreground">Bridge ke Chaesa</strong> — Export bundle ke Chaesa AI Studio untuk membuat panduan digital lanjutan yang lebih kompleks.</span>
           </div>
         </div>
       </div>
@@ -485,7 +485,7 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
           {/* 4 parallel agent cards */}
           <div className="grid grid-cols-2 gap-2">
             {[
-              { id: "ebook-agent", name: "eBook Agent", icon: <BookOpen className="w-4 h-4" />, color: "orange" },
+              { id: "ebook-agent", name: "Panduan Digital Agent", icon: <BookOpen className="w-4 h-4" />, color: "orange" },
               { id: "ecourse-agent", name: "eCourse Agent", icon: <GraduationCap className="w-4 h-4" />, color: "violet" },
               { id: "docgen-agent", name: "DocGen Agent", icon: <FileText className="w-4 h-4" />, color: "emerald" },
               { id: "chaesa-agent", name: "Chaesa Bridge Agent", icon: <BookMarked className="w-4 h-4" />, color: "blue" },
@@ -536,7 +536,7 @@ export function EkosistemPanel({ agent }: EkosistemPanelProps) {
           {mcResult && (
             <Tabs value={mcTab} onValueChange={setMcTab}>
               <TabsList className="grid grid-cols-4 h-8">
-                <TabsTrigger value="ebook-agent" className="text-[10px]">eBook</TabsTrigger>
+                <TabsTrigger value="ebook-agent" className="text-[10px]">Panduan</TabsTrigger>
                 <TabsTrigger value="ecourse-agent" className="text-[10px]">eCourse</TabsTrigger>
                 <TabsTrigger value="docgen-agent" className="text-[10px]">DocGen</TabsTrigger>
                 <TabsTrigger value="chaesa-agent" className="text-[10px]">Chaesa</TabsTrigger>
