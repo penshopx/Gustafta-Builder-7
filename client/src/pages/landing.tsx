@@ -269,27 +269,27 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── POWER USER: DIKLATKERJA ── */}
+      {/* ── PLATFORM BEKERJA ── */}
       <section className="py-16 px-4 bg-blue-50 dark:bg-blue-950/20">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <Badge className="mb-4 bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800">
-                Power User Pertama
+                Platform Bekerja
               </Badge>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                DiklatKerja
+                Satu Tim Kecil. Ratusan Peserta Dilayani Secara Personal.
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                DiklatKerja bukan mitra. Mereka adalah power user yang merakit Program Pengembangan Kompetensi (PKB) mereka sendiri di atas platform Gustafta.
+                Sebuah lembaga pengembangan kompetensi merakit ekosistem Program PKB mereka sendiri di atas platform Gustafta — tanpa tim IT, tanpa coding, dalam hitungan hari.
               </p>
 
               <div className="space-y-3 mb-6">
                 {[
-                  "Chatbot konsultan SMAP implementation",
-                  "Executive Summary generator otomatis",
-                  "Multi-agent: Risk / Audit / Policy Agent",
-                  "Persona-based consulting 24/7",
+                  "Chatbot konsultan implementasi — menjawab 24/7",
+                  "Executive Summary generator otomatis dari data peserta",
+                  "Multi-agent: Risk / Audit / Policy Agent bekerja paralel",
+                  "Persona berbeda untuk setiap segmen peserta",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
                     <Check className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
@@ -298,30 +298,30 @@ export default function Landing() {
                 ))}
               </div>
 
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-6 p-4 rounded-xl bg-white/70 dark:bg-white/5 border border-blue-200 dark:border-blue-800 italic">
-                "Satu tim kecil DiklatKerja mampu melayani ratusan peserta PKB secara personal — 24/7."
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 p-4 rounded-xl bg-white/70 dark:bg-white/5 border border-blue-200 dark:border-blue-800 italic">
+                Ini bukan pilot project. Ini ekosistem yang berjalan setiap hari — melayani peserta secara personal tanpa menambah headcount.
               </p>
 
               <Link href={builderUrl}>
                 <Button className="bg-blue-600 hover:bg-blue-500 text-white gap-2" data-testid="btn-power-user-cta">
-                  Jadi Power User Berikutnya <ChevronRight className="h-4 w-4" />
+                  Rakit Ekosistem Anda Sekarang <ChevronRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
 
             <div className="hidden md:block">
               <div className="rounded-2xl border border-blue-200 dark:border-blue-800 bg-white dark:bg-card p-6 shadow-lg">
-                <div className="text-center mb-4">
+                <div className="text-center mb-5">
                   <div className="text-4xl mb-2">🏆</div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white">DiklatKerja</div>
-                  <div className="text-xs text-gray-500">Program PKB berbasis AI</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">Ekosistem Kompetensi Aktif</div>
+                  <div className="text-xs text-gray-500">Program PKB berbasis Gustafta Builder</div>
                 </div>
                 <div className="space-y-2">
                   {[
                     { label: "Peserta dilayani", value: "200+", icon: "👥" },
                     { label: "Chatbot aktif", value: "12", icon: "🤖" },
                     { label: "Dokumen digenerate", value: "500+", icon: "📄" },
-                    { label: "Jam respons", value: "24/7", icon: "⏱️" },
+                    { label: "Jam operasional", value: "24/7", icon: "⏱️" },
                   ].map((m) => (
                     <div key={m.label} className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-gray-50 dark:bg-muted/20">
                       <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1.5">{m.icon} {m.label}</span>
@@ -329,7 +329,7 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-center text-gray-400 mt-4">Ini bukan simulasi. Platform bekerja.</p>
+                <p className="text-[10px] text-center text-gray-400 mt-4">Angka nyata. Platform bekerja.</p>
               </div>
             </div>
           </div>
