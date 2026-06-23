@@ -26669,9 +26669,9 @@ LARANGAN:
       if (count > 0 && count % 7 === 0) {
         const cycle = Math.floor(count / 7);
         const upsellNotes = [
-          "\n\n_Oh ya, kalau mau mendalami topik ini lebih jauh — ada **eBook Trilogi Gustafta** yang cukup relevan buat konteks kamu. Bisa dicek di [trilogi.gustafta.my.id](https://trilogi.gustafta.my.id) 😊_",
+          "\n\n_Oh ya, kalau mau mendalami topik ini lebih jauh — ada **Starter Kit Gustafta** (panduan digital + lisensi platform + trial 7 hari) yang cocok buat konteks kamu. Bisa dicek di [gustafta.my.id/dialog-gustafta](https://gustafta.my.id/dialog-gustafta) 😊_",
           "\n\n_Btw, ide yang kita diskusikan tadi bisa langsung diwujudkan lho! Platform **Gustafta** punya paket berlangganan yang terjangkau untuk bangun chatbot sendiri — cek di [gustafta.my.id](https://gustafta.my.id) kalau tertarik._",
-          "\n\n_Satu langkah konkret yang bisa kamu ambil: eksplorasi lebih dalam lewat **eBook Trilogi Gustafta** (trilogi.gustafta.my.id) atau langsung coba bangun di **platform Gustafta** (gustafta.my.id). Dua jalur berbeda, tapi keduanya menuju ke sana._",
+          "\n\n_Satu langkah konkret yang bisa kamu ambil: langsung wujudkan ide ini lewat **Starter Kit Gustafta** — lisensi platform + panduan digital + trial 7 hari, atau langsung coba bangun di **platform Gustafta** (gustafta.my.id). Dua jalur berbeda, tapi keduanya menuju ke sana._",
         ];
         reply = reply + upsellNotes[(cycle - 1) % upsellNotes.length];
       }
@@ -26679,6 +26679,94 @@ LARANGAN:
     } catch (e: any) {
       console.error("dialog-gustafta error:", e);
       return res.status(500).json({ error: "Gagal memproses dialog." });
+    }
+  });
+
+  // ─── Dialog Gustafta: Generate Profil Awal (Gate 1) ───────────────────────
+  app.post("/api/dialog-gustafta/profil", async (req: any, res: any) => {
+    try {
+      const { messages = [] } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const safeMessages = (messages as any[])
+        .filter((m: any) => m && typeof m.content === "string" && ["user", "assistant"].includes(m.role))
+        .slice(-20)
+        .map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content.slice(0, 2000) }));
+
+      const prompt = `Berdasarkan percakapan berikut, buat profil awal pengguna dalam format JSON.
+
+Percakapan:
+${safeMessages.map((m: any) => `${m.role === "user" ? "User" : "Dialog"}: ${m.content}`).join("\n")}
+
+Hasilkan JSON dengan format persis:
+{
+  "bidang": "bidang kerja/profesi/sektor user (1 kalimat singkat)",
+  "tantangan": "tantangan utama yang user hadapi (1 kalimat)",
+  "potensi": "potensi unik atau keahlian yang teridentifikasi dari dialog (1 kalimat inspiratif)",
+  "rekomendasiChatbot": "rekomendasi chatbot yang cocok untuk user ini (1 kalimat spesifik)"
+}
+
+Gunakan bahasa Indonesia yang hangat dan menyemangati.`;
+
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 400,
+        temperature: 0.7,
+      });
+
+      const profil = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+      return res.json({ profil });
+    } catch (e: any) {
+      console.error("dialog-gustafta/profil error:", e);
+      return res.status(500).json({ error: "Gagal generate profil." });
+    }
+  });
+
+  // ─── Dialog Gustafta: Generate Blueprint Ekosistem (Gate 2) ───────────────
+  app.post("/api/dialog-gustafta/blueprint", async (req: any, res: any) => {
+    try {
+      const { messages = [] } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const safeMessages = (messages as any[])
+        .filter((m: any) => m && typeof m.content === "string" && ["user", "assistant"].includes(m.role))
+        .slice(-30)
+        .map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content.slice(0, 2000) }));
+
+      const prompt = `Berdasarkan percakapan mendalam berikut, buat Blueprint Ekosistem AI untuk pengguna dalam format JSON.
+
+Percakapan:
+${safeMessages.map((m: any) => `${m.role === "user" ? "User" : "Dialog"}: ${m.content}`).join("\n")}
+
+Hasilkan JSON dengan format persis:
+{
+  "judul": "Judul blueprint yang personal dan inspiratif (contoh: Blueprint Ekosistem AI Konsultan K3)",
+  "ringkasan": "Ringkasan 2-3 kalimat tentang ekosistem AI yang tepat untuk user ini, berdasarkan dialog",
+  "langkahAwal": ["langkah konkret 1", "langkah konkret 2", "langkah konkret 3"],
+  "namaChatbot": "Nama chatbot yang direkomendasikan (kreatif dan relevan)",
+  "persona": "Persona chatbot dalam 1 kalimat (sifat dan gaya komunikasi)",
+  "targetPengguna": "Target pengguna chatbot dalam 1 kalimat spesifik"
+}
+
+Buat blueprint yang terasa personal, didasarkan pada detail nyata dari dialog. Gunakan bahasa Indonesia.`;
+
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 600,
+        temperature: 0.75,
+      });
+
+      const blueprint = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+      return res.json({ blueprint });
+    } catch (e: any) {
+      console.error("dialog-gustafta/blueprint error:", e);
+      return res.status(500).json({ error: "Gagal generate blueprint." });
     }
   });
 

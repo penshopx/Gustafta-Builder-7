@@ -8,7 +8,7 @@ import {
   Rocket, ArrowRight, Check, BookOpen, MessageSquare, Smartphone,
   FileText, GraduationCap, Bot, Users, Building2, Award, Briefcase,
   User, Code2, Settings, Heart, Layers, MessageCircle, ChevronRight,
-  Zap, ShieldCheck, Store, Star,
+  Zap, ShieldCheck, Store, Star, Sparkles,
 } from "lucide-react";
 
 export default function Landing() {
@@ -121,7 +121,7 @@ export default function Landing() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {[
-              { icon: BookOpen, emoji: "📚", label: "Ebook Interaktif", desc: "Pengetahuan terstruktur, diakses kapan saja.", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/20" },
+              { icon: BookOpen, emoji: "📚", label: "Panduan Digital", desc: "Pengetahuan terstruktur, diakses kapan saja.", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/20" },
               { icon: MessageSquare, emoji: "💬", label: "Chatbot AI Spesialis", desc: "Tersegmentasi per sektor, profesi, dan knowledge base.", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/20" },
               { icon: Smartphone, emoji: "📱", label: "Mini Apps", desc: "Kalkulator, checklist, simulator, asesmen — 45+ tipe.", color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/20" },
               { icon: FileText, emoji: "📄", label: "Document Generator", desc: "Surat, kontrak, laporan, proposal — otomatis.", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-950/20" },
@@ -330,6 +330,107 @@ export default function Landing() {
                   ))}
                 </div>
                 <p className="text-[10px] text-center text-gray-400 mt-4">Tanpa tambah tim. Tanpa coding.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── DIALOG GUSTAFTA ── */}
+      <section className="py-16 px-4 bg-gradient-to-br from-[#0a1628] to-[#0d1f3c]">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            {/* Left: Text */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-semibold mb-5">
+                <Sparkles className="h-3.5 w-3.5" />
+                Teman Berpikir AI
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">
+                Belum Tahu Mau Rakit Apa?<br />
+                <span className="text-cyan-300">Dialog Gustafta Bantu Gali Idenya.</span>
+              </h2>
+              <p className="text-sm text-white/70 leading-relaxed mb-6">
+                Ceritakan profesi, keahlian, atau tantangan Anda — Dialog Gustafta menggali potensi tersembunyi dan merancang blueprint ekosistem AI yang tepat, khusus untuk Anda.
+              </p>
+              <div className="space-y-3 mb-7">
+                {[
+                  { step: "1", text: "Cerita bebas soal pekerjaan atau tantangan Anda" },
+                  { step: "G1", text: "Checkpoint pertama: AI tunjukkan Profil Awal Anda" },
+                  { step: "2", text: "Dialog lebih dalam — gali ide konkret" },
+                  { step: "G2", text: "Blueprint ekosistem AI siap — personalisasi untuk Anda" },
+                ].map((s) => (
+                  <div key={s.step} className="flex items-center gap-3">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${s.step.startsWith("G") ? "bg-emerald-500 text-white" : "bg-cyan-500 text-[#0a1628]"}`}>
+                      {s.step}
+                    </div>
+                    <span className="text-sm text-white/80">{s.text}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link href="/dialog-gustafta">
+                  <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white gap-2 font-bold px-6 h-11" data-testid="button-cta-dialog">
+                    <Sparkles className="w-4 h-4" />
+                    Coba Dialog Gustafta
+                  </Button>
+                </Link>
+                <p className="text-xs text-white/40 self-center">Gratis · Tanpa daftar · Dapat di-share</p>
+              </div>
+            </div>
+
+            {/* Right: Visual mockup */}
+            <div className="relative">
+              <div className="rounded-2xl border border-cyan-500/20 bg-white/5 backdrop-blur p-5 space-y-3">
+                {/* Header bar */}
+                <div className="flex items-center gap-2 pb-3 border-b border-white/10">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-700 flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white">DIALOG GUSTAFTA</div>
+                    <div className="text-[10px] text-cyan-300/70">Teman Berpikir · 2-Gate System</div>
+                  </div>
+                  <div className="ml-auto flex items-center gap-1">
+                    <div className="w-4 h-4 rounded-full bg-cyan-500/20 flex items-center justify-center text-[9px] font-bold text-cyan-400">1</div>
+                    <div className="w-10 h-0.5 bg-cyan-500/30" />
+                    <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center text-[9px] font-bold text-emerald-400">2</div>
+                  </div>
+                </div>
+                {/* Mock messages */}
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-500 to-blue-700 shrink-0" />
+                    <div className="bg-white/10 rounded-xl rounded-tl-sm px-3 py-2 text-xs text-white/80 max-w-[85%]">Ceritakan — kamu bekerja di bidang apa, atau ada tantangan apa? 🌟</div>
+                  </div>
+                  <div className="flex gap-2 flex-row-reverse">
+                    <div className="w-5 h-5 rounded-full bg-white/20 shrink-0" />
+                    <div className="bg-gradient-to-br from-cyan-500 to-blue-700 rounded-xl rounded-tr-sm px-3 py-2 text-xs text-white max-w-[85%]">Saya konsultan K3 yang ingin menjangkau lebih banyak klien...</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-500 to-blue-700 shrink-0" />
+                    <div className="bg-white/10 rounded-xl rounded-tl-sm px-3 py-2 text-xs text-white/80 max-w-[85%]">Menarik! Klien yang ingin kamu jangkau itu dari sektor apa?</div>
+                  </div>
+                </div>
+                {/* Gate 1 preview */}
+                <div className="rounded-xl border border-cyan-500/30 bg-cyan-900/20 p-3 text-xs">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <div className="w-4 h-4 rounded-full bg-cyan-500 flex items-center justify-center text-[8px] font-bold text-white">1</div>
+                    <span className="font-bold text-cyan-300">Checkpoint 1 — Profil Awal</span>
+                  </div>
+                  <div className="space-y-1 text-white/60">
+                    <div>🎯 Bidang: <span className="text-white">Konsultansi K3 Konstruksi</span></div>
+                    <div>💡 Potensi: <span className="text-white">Knowledge base K3 yang kuat, siap jadi chatbot</span></div>
+                  </div>
+                  <div className="flex gap-1.5 mt-2">
+                    <div className="flex-1 bg-cyan-500 text-white rounded-lg px-2 py-1 text-center font-semibold text-[10px]">Lanjut ke Blueprint →</div>
+                    <div className="flex-1 bg-white/10 text-white/50 rounded-lg px-2 py-1 text-center text-[10px]">Cukup di sini</div>
+                  </div>
+                </div>
+              </div>
+              {/* Shareable badge */}
+              <div className="absolute -bottom-3 right-4 bg-emerald-900/80 border border-emerald-500/30 rounded-full px-3 py-1 text-[10px] text-emerald-300 font-semibold flex items-center gap-1.5">
+                <Star className="w-3 h-3" /> Dapat di-share · Installable
               </div>
             </div>
           </div>

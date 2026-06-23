@@ -96,15 +96,15 @@ export function DialogGustaftaWidget() {
                   <Sparkles className="w-4 h-4 text-yellow-300" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-yellow-300 uppercase tracking-wider">Promo Terbatas</div>
-                  <div className="text-sm font-bold text-white">Paket Trilogi Gustafta</div>
+                  <div className="text-xs font-bold text-cyan-300 uppercase tracking-wider">Starter Kit</div>
+                  <div className="text-sm font-bold text-white">Starter Kit Gustafta</div>
                 </div>
               </div>
               <ul className="space-y-1.5 mb-3">
                 {[
-                  { icon: BookOpen, text: "eBook Trilogi Gustafta" },
-                  { icon: Star, text: "Prompt Trilogi Premium" },
-                  { icon: Zap, text: "Berlangganan 1 Bulan" },
+                  { icon: BookOpen, text: "3 Panduan Digital Trilogi Gustafta" },
+                  { icon: Star, text: "Lisensi platform seumur hidup" },
+                  { icon: Zap, text: "7 hari trial Starter gratis" },
                 ].map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-2 text-xs text-white/80">
                     <Icon className="w-3.5 h-3.5 text-purple-300 shrink-0" />
@@ -112,16 +112,14 @@ export function DialogGustaftaWidget() {
                   </li>
                 ))}
               </ul>
-              <div className="bg-green-500/20 border border-green-400/30 rounded-lg px-3 py-1.5 mb-3 text-center">
-                <span className="text-green-300 text-xs font-bold">🎁 FREE Biaya Lisensi</span>
+              <div className="bg-emerald-500/20 border border-emerald-400/30 rounded-lg px-3 py-1.5 mb-3 text-center">
+                <span className="text-emerald-300 text-xs font-bold">🎁 Starter Kit — Rp 245.000</span>
               </div>
               <a
-                href="https://trilogi.gustafta.my.id"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all"
+                href="/dialog-gustafta"
+                className="flex items-center justify-center gap-1.5 w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all"
               >
-                Lihat Paket <ChevronRight className="w-3.5 h-3.5" />
+                Buka Dialog Penuh <ChevronRight className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
@@ -212,12 +210,10 @@ export function DialogGustaftaWidget() {
           {!promoDismissed && userMessageCount >= 3 && userMessageCount < PROMO_SHOWN_THRESHOLD && (
             <div className="mx-4 mb-2">
               <a
-                href="https://trilogi.gustafta.my.id"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between gap-2 bg-gradient-to-r from-purple-900/60 to-blue-900/60 border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-white/80 hover:text-white transition-colors"
+                href="/dialog-gustafta"
+                className="flex items-center justify-between gap-2 bg-gradient-to-r from-cyan-900/60 to-blue-900/60 border border-cyan-500/30 rounded-lg px-3 py-2 text-xs text-white/80 hover:text-white transition-colors"
               >
-                <span>✨ Dialog lebih intensif? Cek <strong className="text-purple-300">Paket Trilogi</strong></span>
+                <span>✨ Mau blueprint lengkap? Buka <strong className="text-cyan-300">Dialog Penuh</strong></span>
                 <ChevronRight className="w-3.5 h-3.5 shrink-0" />
               </a>
             </div>

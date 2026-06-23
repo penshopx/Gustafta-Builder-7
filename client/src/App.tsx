@@ -304,6 +304,7 @@ import KalkulatorProduktivitasAlat from "@/pages/kalkulator-produktivitas-alat";
 import DocGenerator from "@/pages/doc-generator";
 import MultiClawAdmin from "@/pages/multiclaw-admin";
 import MultiClawDirectory from "@/pages/multiclaw-directory";
+import DialogGustaftaPage from "@/pages/dialog-gustafta";
 import KalkulatorUpahSKK from "@/pages/kalkulator-upah-skk";
 import PanduanSIKISKK from "@/pages/panduan-siki-skk";
 import RencanaKarirSKK from "@/pages/rencana-karir-skk";
@@ -1434,6 +1435,7 @@ function Router() {
         <Route path="/doc-generator" component={DocGenerator} />
         <Route path="/multiclaw-admin" component={MultiClawAdmin} />
         <Route path="/multiclaw" component={MultiClawDirectory} />
+        <Route path="/dialog-gustafta" component={DialogGustaftaPage} />
       <Route component={NotFound} />
     </Switch>
   );
