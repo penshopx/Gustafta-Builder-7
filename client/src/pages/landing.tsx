@@ -615,16 +615,21 @@ export default function Landing() {
               </div>
               <div className="space-y-2">
                 {[
-                  { name: "Paket PKB Lengkap", price: "Rp 299.000", sold: "48 terjual" },
-                  { name: "Chatbot Sertifikasi Profesi", price: "Rp 199.000", sold: "32 terjual" },
-                  { name: "Modul K3 & SMK3", price: "Rp 149.000", sold: "27 terjual" },
-                  { name: "Asesmen Kompetensi", price: "Rp 249.000", sold: "19 terjual" },
+                  { name: "Paket PKB Lengkap", badge: "🔥 Trending", bar: 92, tier: "Premium" },
+                  { name: "Chatbot Sertifikasi Profesi", badge: "⭐ Favorit", bar: 74, tier: "Standar" },
+                  { name: "Modul K3 & SMK3", badge: "✨ Baru", bar: 58, tier: "Standar" },
+                  { name: "Asesmen Kompetensi", badge: "📈 Naik", bar: 41, tier: "Dasar" },
                 ].map((t) => (
-                  <div key={t.name} className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-gray-50 dark:bg-muted/20 border">
-                    <span className="text-gray-700 dark:text-gray-300">{t.name}</span>
-                    <div className="text-right">
-                      <div className="font-bold text-emerald-600 dark:text-emerald-400">{t.price}</div>
-                      <div className="text-gray-400">{t.sold}</div>
+                  <div key={t.name} className="text-xs p-2.5 rounded-lg bg-gray-50 dark:bg-muted/20 border space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">{t.name}</span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">{t.badge}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                        <div className="h-full rounded-full bg-emerald-400" style={{ width: `${t.bar}%` }} />
+                      </div>
+                      <span className="text-[10px] text-gray-400 shrink-0">{t.tier}</span>
                     </div>
                   </div>
                 ))}
