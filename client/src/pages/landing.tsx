@@ -278,10 +278,10 @@ export default function Landing() {
                 Platform Bekerja
               </Badge>
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                Satu Tim Kecil. Ratusan Peserta Dilayani Secara Personal.
+                Satu Tim Kecil Dapat Melayani Ratusan Peserta Secara Personal.
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                Sebuah lembaga pengembangan kompetensi merakit ekosistem Program PKB mereka sendiri di atas platform Gustafta — tanpa tim IT, tanpa coding, dalam hitungan hari.
+                Sebuah training provider atau lembaga diklat dapat merakit ekosistem kompetensi mereka sendiri di atas platform Gustafta — tanpa tim IT, tanpa coding, dalam hitungan hari.
               </p>
 
               <div className="space-y-3 mb-6">
@@ -313,14 +313,14 @@ export default function Landing() {
               <div className="rounded-2xl border border-blue-200 dark:border-blue-800 bg-white dark:bg-card p-6 shadow-lg">
                 <div className="text-center mb-5">
                   <div className="text-4xl mb-2">🏆</div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white">Ekosistem Kompetensi Aktif</div>
-                  <div className="text-xs text-gray-500">Program PKB berbasis Gustafta Builder</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">Yang Dapat Dirakit</div>
+                  <div className="text-xs text-gray-500">oleh satu training provider atau lembaga diklat</div>
                 </div>
                 <div className="space-y-2">
                   {[
-                    { label: "Peserta dilayani", value: "200+", icon: "👥" },
-                    { label: "Chatbot aktif", value: "12", icon: "🤖" },
-                    { label: "Dokumen digenerate", value: "500+", icon: "📄" },
+                    { label: "Peserta dapat dilayani", value: "Ratusan", icon: "👥" },
+                    { label: "Chatbot spesialis", value: "Banyak", icon: "🤖" },
+                    { label: "Dokumen digenerate", value: "Otomatis", icon: "📄" },
                     { label: "Jam operasional", value: "24/7", icon: "⏱️" },
                   ].map((m) => (
                     <div key={m.label} className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-gray-50 dark:bg-muted/20">
@@ -329,7 +329,7 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-center text-gray-400 mt-4">Angka nyata. Platform bekerja.</p>
+                <p className="text-[10px] text-center text-gray-400 mt-4">Tanpa tambah tim. Tanpa coding.</p>
               </div>
             </div>
           </div>
