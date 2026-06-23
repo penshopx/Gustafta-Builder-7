@@ -162,13 +162,13 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Sparkles className="h-4 w-4" />
-            Ratusan AI Spesialis · 30+ Sektor Industri · 80+ AI Tools Siap Pakai · Tanpa Coding
+            Dari Ide ke AI Twin · 30+ Sektor Industri · Tanpa Coding
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight" data-testid="text-hero-title">
-            Bangun AI Spesialis
+            Ubah Pengetahuan Anda
             <br className="hidden md:block" />
-            untuk <span className="text-primary">Bisnis Anda</span>
+            Menjadi <span className="text-primary">Aset AI</span> yang Bekerja
             <span className="block text-xl sm:text-2xl md:text-3xl mt-3 text-muted-foreground font-semibold">
               Tanpa Coding.{" "}
               <span className="text-foreground">Dalam 30 Menit.</span>
@@ -176,8 +176,9 @@ export default function Landing() {
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Dari <strong className="text-foreground">Asisten Tender LPSE</strong>, AI Tutor SKK, Customer Service 24/7, hingga Konsultan K3 —
-            1350+ AI spesialis siap pakai untuk <strong className="text-foreground">konstruksi, properti, energi, HR, dan 30+ industri</strong> Indonesia.
+            Temukan potensi Anda. Susun blueprint. Bangun AI spesialis dari
+            <strong className="text-foreground"> pengalaman, keahlian, dan pengetahuan</strong> yang selama ini hanya ada di kepala Anda —
+            untuk <strong className="text-foreground">konstruksi, properti, energi, HR, dan 30+ industri</strong> Indonesia.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
@@ -188,10 +189,10 @@ export default function Landing() {
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-            <Link href="/packs" onClick={handlePricingClick}>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base font-semibold px-8 py-6" data-testid="button-hero-pricing">
-                <Package className="w-5 h-5" />
-                Lihat Paket Harga
+            <Link href="/trilogi">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base font-semibold px-8 py-6" data-testid="button-hero-trilogi">
+                <Brain className="w-5 h-5" />
+                Temukan Potensi Saya
               </Button>
             </Link>
           </div>
@@ -229,6 +230,75 @@ export default function Landing() {
           ))}
         </div>
       </div>
+
+      {/* ── PERJALANAN GUSTAFTA ── */}
+      <section className="py-14 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Ekosistem Gustafta</p>
+            <h2 className="text-xl md:text-2xl font-bold">Bukan sekadar chatbot. Ini perjalanan transformasi.</h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl mx-auto">
+              Dari memahami potensi diri hingga mewariskan pengetahuan sebagai aset digital yang terus bekerja.
+            </p>
+          </div>
+
+          {/* Journey flow */}
+          <div className="relative">
+            {/* Connector line desktop */}
+            <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-blue-200 via-violet-200 via-emerald-200 to-amber-200 dark:from-blue-800 dark:via-violet-800 dark:via-emerald-800 dark:to-amber-800 z-0" />
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 relative z-10">
+              {[
+                {
+                  step: "01", emoji: "💬", label: "Dialog",
+                  sub: "Kesadaran", desc: "Temukan siapa Anda, apa keahlian Anda, dan potensi apa yang belum terwujud.",
+                  output: "Profil Potensi", color: "border-blue-200 dark:border-blue-800", bg: "bg-blue-50 dark:bg-blue-950/20", textColor: "text-blue-600 dark:text-blue-400",
+                  link: "/trilogi",
+                },
+                {
+                  step: "02", emoji: "🤝", label: "Kolaborasi",
+                  sub: "Sinergi", desc: "Uji dan matangkan ide bersama AI — model bisnis, prioritas, dan arah yang jelas.",
+                  output: "Strategi & Arah", color: "border-violet-200 dark:border-violet-800", bg: "bg-violet-50 dark:bg-violet-950/20", textColor: "text-violet-600 dark:text-violet-400",
+                  link: "/trilogi",
+                },
+                {
+                  step: "03", emoji: "🗺️", label: "Kreasi",
+                  sub: "Inovasi", desc: "Susun blueprint: produk, persona, knowledge base, dan roadmap monetisasi.",
+                  output: "Blueprint", color: "border-emerald-200 dark:border-emerald-800", bg: "bg-emerald-50 dark:bg-emerald-950/20", textColor: "text-emerald-600 dark:text-emerald-400",
+                  link: "/packs",
+                },
+                {
+                  step: "04", emoji: "⚙️", label: "Builder",
+                  sub: "Sistemisasi", desc: "Wujudkan blueprint menjadi AI spesialis, chatbot, agent, dan mini apps yang hidup.",
+                  output: "AI Twin", color: "border-orange-200 dark:border-orange-800", bg: "bg-orange-50 dark:bg-orange-950/20", textColor: "text-orange-600 dark:text-orange-400",
+                  link: "/produk",
+                },
+                {
+                  step: "05", emoji: "🏛️", label: "Legacy",
+                  sub: "Warisan", desc: "Jual, distribusikan, dan wariskan pengetahuan Anda sebagai aset digital yang terus bekerja.",
+                  output: "Ekosistem", color: "border-amber-200 dark:border-amber-800", bg: "bg-amber-50 dark:bg-amber-950/20", textColor: "text-amber-600 dark:text-amber-400",
+                  link: "/store",
+                },
+              ].map((item) => (
+                <Link key={item.step} href={item.link}>
+                  <div className={`rounded-2xl border ${item.color} ${item.bg} p-4 flex flex-col items-center text-center gap-2 hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer h-full`}>
+                    <div className="text-2xl">{item.emoji}</div>
+                    <div className={`text-[10px] font-bold uppercase tracking-widest ${item.textColor}`}>{item.step}</div>
+                    <div className="text-sm font-bold text-gray-900 dark:text-white leading-tight">{item.label}</div>
+                    <div className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${item.color} ${item.textColor}`}>{item.sub}</div>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed hidden md:block">{item.desc}</p>
+                    <div className={`text-[10px] font-bold mt-auto pt-1 ${item.textColor}`}>→ {item.output}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            Builder ada di tahap ke-4 — bukan tujuan akhir, tapi mesin eksekusi dari perjalanan yang dimulai dari Dialog.
+          </p>
+        </div>
+      </section>
 
       {/* ── PILIH JALUR ANDA ── */}
       <section className="py-12 px-4 bg-muted/30">
