@@ -753,7 +753,7 @@ export default function Landing() {
                   { label: "Store Creator", href: "/store" },
                   { label: "Workshop", href: "/workshop" },
                   { label: "Panduan & Belajar", href: "/trilogi" },
-                  { label: "Profil GAIA", href: "/gaia" },
+                  { label: "Profil GAIA", href: "/profil" },
                 ].map((l) => (
                   <li key={l.label}><Link href={l.href} className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">{l.label}</Link></li>
                 ))}
