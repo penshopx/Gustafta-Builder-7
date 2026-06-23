@@ -344,7 +344,7 @@ export default function Landing() {
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
               Pilih Tier Sesuai Skala Ekosistem Anda
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tanpa biaya setup. Cancel kapan saja.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">+ biaya lisensi Rp 299.000 (sekali) — <span className="text-emerald-600 dark:text-emerald-400 font-medium">gratis jika punya ebook Trilogi</span>. Cancel kapan saja.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -358,21 +358,21 @@ export default function Landing() {
               },
               {
                 emoji: "⚡", tier: "Starter", price: "Rp 199.000", period: "/bulan",
-                note: "Bulan pertama Rp 445.000 (termasuk 3 ebook Trilogi)",
+                note: "✅ Dengan ebook Rp 245rb (sekali) → lisensi Rp 0  |  Tanpa ebook → lisensi Rp 299rb (sekali)",
                 desc: "Mulai bisnis chatbot + dapat 3 ebook Trilogi",
                 features: ["Builder chatbot penuh", "10 bot · 2.000 pesan/bulan", "Mini Apps 5 tipe", "Web widget no-branding", "Email support"],
                 cta: "Pilih Starter", ctaVariant: "outline" as const, highlight: false,
               },
               {
                 emoji: "👑", tier: "Profesional", price: "Rp 499.000", period: "/bulan",
-                note: "Bulan pertama Rp 744.000 (termasuk 3 ebook Trilogi)",
+                note: "✅ Dengan ebook Rp 245rb (sekali) → lisensi Rp 0  |  Tanpa ebook → lisensi Rp 299rb (sekali)",
                 desc: "Ekosistem lengkap + 80 MultiClaw AI Tools",
                 features: ["Semua fitur Starter", "50 bot · 3.000 pesan/bulan", "80+ MultiClaw AI Tools", "Mini Apps 15 tipe", "E-Course & Document Generator", "Custom Domain (1)"],
                 cta: "Pilih Profesional", ctaVariant: "default" as const, highlight: true,
               },
               {
                 emoji: "🏢", tier: "Bisnis", price: "Rp 999.000", period: "/bulan",
-                note: "Bulan pertama Rp 1.244.000 (termasuk 3 ebook Trilogi)",
+                note: "✅ Dengan ebook Rp 245rb (sekali) → lisensi Rp 0  |  Tanpa ebook → lisensi Rp 299rb (sekali)",
                 desc: "Tim 2 akun + 100 slot shared + suite lengkap",
                 features: ["Semua fitur Profesional", "100 slot shared (2 sub-akun)", "Semua Mini Apps (45 tipe)", "Custom Domain (3)", "Priority WA support & Dedicated Manager"],
                 cta: "Pilih Bisnis", ctaVariant: "outline" as const, highlight: false,

@@ -80,7 +80,7 @@ const BISNIS_PLANS: BisnisPlan[] = [
     badgeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
     price: "Rp 199.000",
     priceNote: "/bulan",
-    setupFee: "Bulan pertama Rp 445.000 (termasuk 3 ebook Trilogi)",
+    setupFee: "Dengan ebook Rp 245.000 (sekali) → lisensi Rp 0 · Tanpa ebook → lisensi Rp 299.000 (sekali)",
     color: "text-blue-500",
     borderColor: "border-blue-200 dark:border-blue-800",
     bgColor: "bg-blue-50/50 dark:bg-blue-950/20",
@@ -115,7 +115,7 @@ const BISNIS_PLANS: BisnisPlan[] = [
     badgeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
     price: "Rp 499.000",
     priceNote: "/bulan",
-    setupFee: "Bulan pertama Rp 744.000 (termasuk 3 ebook Trilogi Rp 245rb)",
+    setupFee: "Dengan ebook Rp 245.000 (sekali) → lisensi Rp 0 · Tanpa ebook → lisensi Rp 299.000 (sekali)",
     popular: true,
     color: "text-indigo-500",
     borderColor: "border-indigo-300 dark:border-indigo-700",
@@ -154,7 +154,7 @@ const BISNIS_PLANS: BisnisPlan[] = [
     badgeColor: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
     price: "Rp 999.000",
     priceNote: "/bulan",
-    setupFee: "Bulan pertama Rp 1.244.000 (termasuk 3 ebook Trilogi Rp 245rb)",
+    setupFee: "Dengan ebook Rp 245.000 (sekali) → lisensi Rp 0 · Tanpa ebook → lisensi Rp 299.000 (sekali)",
     color: "text-violet-500",
     borderColor: "border-violet-200 dark:border-violet-800",
     bgColor: "bg-violet-50/50 dark:bg-violet-950/20",
@@ -410,7 +410,18 @@ function BisnisPaket() {
                 <span className={`text-2xl font-bold ${plan.color}`}>{plan.price}</span>
                 <span className="text-xs text-gray-400 ml-1">{plan.priceNote}</span>
               </div>
-              {plan.setupFee && <div className="text-[10px] text-gray-400 mt-0.5">{plan.setupFee} (sekali)</div>}
+              {plan.setupFee && (
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px]">
+                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold px-1.5 py-0.5 rounded">Dengan ebook</span>
+                    <span className="text-gray-500 dark:text-gray-400">Rp 245.000 (sekali) → <strong className="text-emerald-600 dark:text-emerald-400">lisensi Rp 0</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px]">
+                    <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold px-1.5 py-0.5 rounded">Tanpa ebook</span>
+                    <span className="text-gray-500 dark:text-gray-400">lisensi Rp 299.000 (sekali)</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className={`flex-1 ${plan.bgColor} px-5 py-4 flex flex-col gap-4`}>
