@@ -350,28 +350,32 @@ export default function Landing() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                emoji: "🆓", tier: "Explorer", price: "Gratis", period: "",
-                desc: "Mencoba & belajar merakit",
-                features: ["1 ekosistem", "Akses fitur dasar Builder", "Community support"],
-                cta: "Mulai Gratis", ctaVariant: "outline" as const, highlight: false,
+                emoji: "🆓", tier: "Free", price: "Rp 0", period: "",
+                note: "",
+                desc: "Coba & eksplorasi platform",
+                features: ["Akses fitur dasar Builder", "1 chatbot aktif", "Community support"],
+                cta: "Mulai Gratis", ctaVariant: "outline" as const, highlight: false, isEnterprise: false,
               },
               {
-                emoji: "🛠️", tier: "Starter", price: "Rp 445 rb", period: "/bulan",
+                emoji: "🛠️", tier: "Starter", price: "Rp 199.000", period: "/bulan",
+                note: "Bulan pertama Rp 445.000 (termasuk 3 ebook Trilogi)",
                 desc: "Konsultan & instruktur independen",
-                features: ["5 ekosistem", "Semua 6 output digital", "Custom domain", "Email support"],
-                cta: "Pilih Plan", ctaVariant: "outline" as const, highlight: false,
+                features: ["Chatbot spesialis aktif", "Knowledge Base lengkap", "Widget & WhatsApp", "Email support"],
+                cta: "Pilih Starter", ctaVariant: "outline" as const, highlight: false, isEnterprise: false,
               },
               {
-                emoji: "⭐", tier: "Profesional", price: "Rp 699 rb", period: "/bulan",
+                emoji: "⭐", tier: "Profesional", price: "Rp 499.000", period: "/bulan",
+                note: "",
                 desc: "Asosiasi, LSP, perusahaan training",
-                features: ["25 ekosistem", "Agentic AI & Multi-Agent", "Template Marketplace", "Priority support"],
-                cta: "Pilih Plan", ctaVariant: "default" as const, highlight: true,
+                features: ["Semua fitur Starter", "Agentic AI & Multi-Agent", "Mini Apps & Deliverables", "Priority support"],
+                cta: "Pilih Profesional", ctaVariant: "default" as const, highlight: true, isEnterprise: false,
               },
               {
-                emoji: "🏢", tier: "Enterprise", price: "Custom", period: "",
-                desc: "Universitas, korporasi, pemerintah",
-                features: ["Unlimited ekosistem", "White-label", "API access", "Dedicated success manager"],
-                cta: "Hubungi Kami", ctaVariant: "outline" as const, highlight: false,
+                emoji: "🏢", tier: "Bisnis", price: "Rp 999.000", period: "/bulan",
+                note: "",
+                desc: "Tim, asosiasi, korporasi",
+                features: ["Semua fitur Profesional", "Multi-domain & multi-user", "Analytics & broadcast WA", "Dedicated support"],
+                cta: "Pilih Bisnis", ctaVariant: "outline" as const, highlight: false, isEnterprise: false,
               },
             ].map((plan) => (
               <div
@@ -391,6 +395,7 @@ export default function Landing() {
                     <span className="text-xl font-bold text-blue-600 dark:text-blue-400">{plan.price}</span>
                     {plan.period && <span className="text-xs text-gray-500">{plan.period}</span>}
                   </div>
+                  {plan.note && <div className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 leading-tight">{plan.note}</div>}
                   <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">{plan.desc}</div>
                 </div>
 
@@ -403,11 +408,10 @@ export default function Landing() {
                   ))}
                 </ul>
 
-                <Link href={plan.tier === "Enterprise" ? "#" : builderUrl}>
+                <Link href={builderUrl}>
                   <Button
                     variant={plan.ctaVariant}
                     className={`w-full text-xs h-9 ${plan.highlight ? "bg-blue-600 hover:bg-blue-500 text-white" : ""}`}
-                    onClick={plan.tier === "Enterprise" ? () => window.open(waUrl, "_blank") : undefined}
                     data-testid={`btn-pricing-${plan.tier.toLowerCase()}`}
                   >
                     {plan.cta}
@@ -417,8 +421,24 @@ export default function Landing() {
             ))}
           </div>
 
+          {/* Enterprise row */}
+          <div className="mt-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-muted/20 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <span className="text-2xl">🏛️</span>
+              <div>
+                <div className="text-sm font-bold text-gray-900 dark:text-white">Enterprise — Custom</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Universitas, korporasi, pemerintah — unlimited ekosistem, white-label, API access, dedicated success manager</div>
+              </div>
+            </div>
+            <a href={waUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
+              <Button variant="outline" className="text-xs h-9 gap-1.5" data-testid="btn-pricing-enterprise">
+                <MessageCircle className="h-3.5 w-3.5" /> Hubungi Kami
+              </Button>
+            </a>
+          </div>
+
           <div className="text-center mt-6">
-            <Link href="/packs">
+            <Link href="/produk">
               <Button variant="ghost" className="gap-1 text-sm text-blue-600 dark:text-blue-400" data-testid="btn-lihat-perbandingan">
                 Lihat Perbandingan Lengkap <ChevronRight className="h-4 w-4" />
               </Button>
