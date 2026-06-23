@@ -339,12 +339,55 @@ export default function Landing() {
       {/* ── PRICING ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Pricing</p>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
               Pilih Tier Sesuai Skala Ekosistem Anda
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">+ biaya lisensi Rp 299.000 (sekali) — <span className="text-emerald-600 dark:text-emerald-400 font-medium">gratis jika punya ebook Trilogi</span>. Cancel kapan saja.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Semua tier memerlukan lisensi (sekali) — gratis jika punya ebook.</p>
+          </div>
+
+          {/* Jalur Masuk */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            {/* Jalur Ebook — recommended */}
+            <div className="relative rounded-2xl border-2 border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 p-5">
+              <div className="absolute -top-3 left-4">
+                <span className="bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full">✦ JALUR TERBAIK</span>
+              </div>
+              <div className="flex items-start gap-3 mt-1">
+                <span className="text-2xl">📘</span>
+                <div className="flex-1">
+                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-1">Beli Ebook Trilogi dulu</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                    <div className="flex items-center gap-2"><span className="font-bold text-emerald-600 dark:text-emerald-400">Rp 245.000</span><span className="text-gray-400">sekali bayar</span></div>
+                    <div className="flex items-center gap-1.5">✅ <span>7 hari trial Starter <strong>GRATIS</strong></span></div>
+                    <div className="flex items-center gap-1.5">✅ <span>Lisensi platform seumur hidup (Rp 0)</span></div>
+                    <div className="flex items-center gap-1.5">✅ <span>3 ebook panduan ekosistem kompetensi</span></div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-800 text-[11px] text-gray-500 dark:text-gray-400">
+                    Lanjut Starter setelah trial: <strong className="text-gray-700 dark:text-gray-200">Rp 199.000/bln</strong> — total awal <strong className="text-emerald-600 dark:text-emerald-400">Rp 445.000</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Jalur Langsung */}
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-muted/20 p-5">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">⚡</span>
+                <div className="flex-1">
+                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-1">Langsung berlangganan</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                    <div className="flex items-center gap-2"><span className="font-bold text-gray-700 dark:text-gray-200">Rp 299.000</span><span className="text-gray-400">lisensi (sekali)</span></div>
+                    <div className="flex items-center gap-1.5">➕ <span>Starter Rp 199.000/bln</span></div>
+                    <div className="flex items-center gap-1.5 text-gray-400">✗ <span>Tanpa ebook, tanpa trial</span></div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-[11px] text-gray-500 dark:text-gray-400">
+                    Total awal: <strong className="text-gray-700 dark:text-gray-300">Rp 498.000</strong> — lebih mahal Rp 53rb, tanpa ebook
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -352,27 +395,27 @@ export default function Landing() {
               {
                 emoji: "🆓", tier: "Gratis", price: "Rp 0", period: "/bulan",
                 note: "",
-                desc: "Coba platform tanpa biaya",
+                desc: "Eksplorasi awal platform",
                 features: ["Builder chatbot dasar", "3 bot · 50 pesan/bulan", "Web widget embed", "Dashboard analitik"],
                 cta: "Mulai Gratis", ctaVariant: "outline" as const, highlight: false,
               },
               {
                 emoji: "⚡", tier: "Starter", price: "Rp 199.000", period: "/bulan",
-                note: "✅ Dengan ebook Rp 245rb (sekali) → lisensi Rp 0  |  Tanpa ebook → lisensi Rp 299rb (sekali)",
-                desc: "Mulai bisnis chatbot + dapat 3 ebook Trilogi",
+                note: "Lisensi Rp 0 (dengan ebook) atau Rp 299rb (tanpa ebook) — sekali",
+                desc: "Mulai bisnis chatbot + ekosistem penuh",
                 features: ["Builder chatbot penuh", "10 bot · 2.000 pesan/bulan", "Mini Apps 5 tipe", "Web widget no-branding", "Email support"],
                 cta: "Pilih Starter", ctaVariant: "outline" as const, highlight: false,
               },
               {
                 emoji: "👑", tier: "Profesional", price: "Rp 499.000", period: "/bulan",
-                note: "✅ Dengan ebook Rp 245rb (sekali) → lisensi Rp 0  |  Tanpa ebook → lisensi Rp 299rb (sekali)",
+                note: "Lisensi Rp 0 (dengan ebook) atau Rp 299rb (tanpa ebook) — sekali",
                 desc: "Ekosistem lengkap + 80 MultiClaw AI Tools",
                 features: ["Semua fitur Starter", "50 bot · 3.000 pesan/bulan", "80+ MultiClaw AI Tools", "Mini Apps 15 tipe", "E-Course & Document Generator", "Custom Domain (1)"],
                 cta: "Pilih Profesional", ctaVariant: "default" as const, highlight: true,
               },
               {
                 emoji: "🏢", tier: "Bisnis", price: "Rp 999.000", period: "/bulan",
-                note: "✅ Dengan ebook Rp 245rb (sekali) → lisensi Rp 0  |  Tanpa ebook → lisensi Rp 299rb (sekali)",
+                note: "Lisensi Rp 0 (dengan ebook) atau Rp 299rb (tanpa ebook) — sekali",
                 desc: "Tim 2 akun + 100 slot shared + suite lengkap",
                 features: ["Semua fitur Profesional", "100 slot shared (2 sub-akun)", "Semua Mini Apps (45 tipe)", "Custom Domain (3)", "Priority WA support & Dedicated Manager"],
                 cta: "Pilih Bisnis", ctaVariant: "outline" as const, highlight: false,
