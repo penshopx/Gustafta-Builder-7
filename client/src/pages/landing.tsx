@@ -357,18 +357,18 @@ export default function Landing() {
               <div className="flex items-start gap-3 mt-1">
                 <span className="text-2xl">🎫</span>
                 <div className="flex-1">
-                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-1">Aktivasi Lisensi Platform</div>
-                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Lisensi seumur hidup — dibayar sekali, berlaku selamanya</div>
+                  <div className="font-bold text-gray-900 dark:text-white text-sm mb-1">Beli Starter Kit Gustafta</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Paket pembuka ekosistem — bayar sekali, aktif selamanya</div>
                   <div className="text-xs text-gray-600 dark:text-gray-300 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-emerald-600 dark:text-emerald-400 text-base">Rp 245.000</span>
                       <span className="text-[10px] text-gray-400 line-through">Rp 299.000</span>
                       <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded font-semibold">Hemat Rp 54rb</span>
                     </div>
-                    <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-1">Starter Kit — sudah termasuk:</div>
-                    <div className="flex items-center gap-1.5">✅ <span>3 panduan digital Trilogi Ekosistem Kompetensi</span></div>
-                    <div className="flex items-center gap-1.5">✅ <span>7 hari akses penuh Starter (trial)</span></div>
-                    <div className="flex items-center gap-1.5">✅ <span>Lisensi platform Rp 0 — tidak ada biaya lisensi lagi</span></div>
+                    <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-1">Yang Anda dapat:</div>
+                    <div className="flex items-center gap-1.5">✅ <span><strong>Lisensi platform seumur hidup</strong> — tidak perlu bayar lisensi lagi</span></div>
+                    <div className="flex items-center gap-1.5">✅ <span>3 Panduan Digital Trilogi Ekosistem Kompetensi</span></div>
+                    <div className="flex items-center gap-1.5">✅ <span>7 hari akses penuh Starter (trial gratis)</span></div>
                   </div>
                   <div className="mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-800 text-[11px] text-gray-500 dark:text-gray-400">
                     Lanjut berlangganan setelah trial: <strong className="text-gray-700 dark:text-gray-200">+ Rp 199.000/bln</strong>
