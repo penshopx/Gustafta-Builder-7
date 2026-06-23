@@ -26725,6 +26725,49 @@ Gunakan bahasa Indonesia yang hangat dan menyemangati.`;
     }
   });
 
+  // ─── Dialog Gustafta: Generate Gambaran Tajam (Gate 2) ────────────────────
+  app.post("/api/dialog-gustafta/gambaran", async (req: any, res: any) => {
+    try {
+      const { messages = [] } = req.body;
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const safeMessages = (messages as any[])
+        .filter((m: any) => m && typeof m.content === "string" && ["user", "assistant"].includes(m.role))
+        .slice(-30)
+        .map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content.slice(0, 2000) }));
+
+      const prompt = `Berdasarkan percakapan berikut (Stage 1 + Stage 2), buat "Gambaran Tajam" potensi ekosistem AI pengguna dalam format JSON.
+
+Percakapan:
+${safeMessages.map((m: any) => `${m.role === "user" ? "User" : "Dialog"}: ${m.content}`).join("\n")}
+
+Hasilkan JSON:
+{
+  "judul": "Judul gambaran singkat dan kuat (contoh: Ekosistem AI Konsultan Independen)",
+  "ringkasan": "Ringkasan 2-3 kalimat gambaran ekosistem AI yang bisa dibangun user ini",
+  "kekuatan": ["kekuatan 1 yang teridentifikasi dari dialog", "kekuatan 2", "kekuatan 3"],
+  "peluang": "Peluang terbesar yang bisa diambil user ini dengan Gustafta — 1 kalimat spesifik dan menggugah"
+}
+
+Buat terasa personal dan berdasarkan detail nyata dari dialog. Bahasa Indonesia yang hangat dan menginspirasi.`;
+
+      const c = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_tokens: 500,
+        temperature: 0.75,
+      });
+
+      const gambaran = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+      return res.json({ gambaran });
+    } catch (e: any) {
+      console.error("dialog-gustafta/gambaran error:", e);
+      return res.status(500).json({ error: "Gagal generate gambaran." });
+    }
+  });
+
   // ─── Dialog Gustafta: Generate Blueprint Ekosistem (Gate 2) ───────────────
   app.post("/api/dialog-gustafta/blueprint", async (req: any, res: any) => {
     try {
