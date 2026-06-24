@@ -51,6 +51,9 @@ import KonstruksiPage from "@/pages/konstruksi";
 import EnergiPage from "@/pages/energi";
 import TransisiEnergiPage from "@/pages/transisi-energi";
 import TenderPage from "@/pages/tender";
+import LkutPage from "@/pages/lkut";
+import PkbPage from "@/pages/pkb";
+import LkpmPage from "@/pages/lkpm";
 import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
@@ -413,6 +416,9 @@ function Router() {
       <Route path="/energi" component={EnergiPage} />
       <Route path="/transisi-energi" component={TransisiEnergiPage} />
       <Route path="/tender" component={TenderPage} />
+      <Route path="/lkut" component={LkutPage} />
+      <Route path="/pkb" component={PkbPage} />
+      <Route path="/lkpm" component={LkpmPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
