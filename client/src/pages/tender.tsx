@@ -162,7 +162,7 @@ export default function TenderPage() {
                 Dari scouting peluang, eligibility check, kalkulasi win probability,
                 optimasi dokumen penawaran, hingga manajemen kontrak & klaim —
                 seluruh siklus tender Anda didukung AI spesialis yang memahami
-                Perpres 12/2021, FIDIC, dan regulasi pengadaan pemerintah Indonesia.
+                Perpres 28/2025, FIDIC, dan regulasi pengadaan pemerintah Indonesia.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a href={WA_URL} target="_blank" rel="noopener noreferrer">

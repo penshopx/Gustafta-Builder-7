@@ -653,7 +653,7 @@ const KONSTRA_PROMPTS: Record<number, AgentPrompt[]> = {
   ],
   1279: [ // LOGIS — Supply Chain
     { acId: "AC4", label: "Anti-Block", prompt: "Material proyek kami terlambat datang dari supplier. Apa yang harus dilakukan?", tip: "Data sangat minim — bot wajib menjawab dengan SOP contingency procurement" },
-    { acId: "AC5", label: "Sitasi Reg", prompt: "Apa ketentuan pengadaan material lokal untuk proyek konstruksi pemerintah?", tip: "Cek sitasi Perpres No.16/2018 jo No.12/2021 tentang PBJP atau Permen PUPR PBJ" },
+    { acId: "AC5", label: "Sitasi Reg", prompt: "Apa ketentuan pengadaan material lokal untuk proyek konstruksi pemerintah?", tip: "Cek sitasi Perpres 28/2025 tentang PBJP atau Permen PUPR PBJ terkini" },
     { acId: "AC7", label: "Domain Match", prompt: "Proyek jembatan 200m, kebutuhan baja tulangan 500 ton, lead time vendor 45 hari, jadwal proyek 12 bulan. Rancang strategi pengadaan.", tip: "Harus ada jadwal pengadaan, buffer stock recommendation, dan analisis risiko supplier" },
   ],
   1277: [ // ENVIRA — Lingkungan

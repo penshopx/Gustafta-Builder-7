@@ -70,7 +70,7 @@ const TOOLS = [
     title: "Hukum Pengadaan & Regulasi",
     desc: "Interpretasi regulasi pengadaan pemerintah, hak & kewajiban peserta tender, dan penyelesaian sengketa pengadaan.",
     features: [
-      "Interpretasi Perpres 12/2021 & perubahannya",
+      "Interpretasi Perpres 28/2025 (Pengadaan Barang/Jasa Pemerintah)",
       "Hak peserta tender & mekanisme sanggah",
       "Panduan blacklist & cara mengajukan keberatan",
       "Hukum kontrak pengadaan pemerintah (SSKK/SSUK)",

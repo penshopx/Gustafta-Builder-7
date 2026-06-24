@@ -5,3 +5,4 @@
 - [Seed anti-marker check](seed-anti-marker-check.md) — positive marker alone is insufficient; a merged prompt can keep the marker yet serve the wrong persona. Check anti-markers from neighboring seeds too.
 - [Production vs dev agent ID drift](prod-dev-id-drift.md) — prod DB IDs diverge from dev; all orchestrator routes MUST use slug lookup first, never hardcoded IDs. Sequence can lag behind explicit-ID inserts — add setval reset before bulk creates.
 - [jspdf/canvg blank screen](jspdf-canvg-blank.md) — jspdf (dynamic import) → canvg → missing core-js stubs → Vite optimizeDeps crash → blank screen. Fix: `optimizeDeps.exclude: ["jspdf","canvg"]` in vite.config.ts.
+- [Perpres Pengadaan terkini](perpres-pengadaan.md) — Perpres 12/2021 KADALUARSA. Gunakan Perpres 28/2025 untuk semua referensi PBJP.

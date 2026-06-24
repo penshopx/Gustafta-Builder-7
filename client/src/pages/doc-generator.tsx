@@ -87,7 +87,7 @@ const DOC_TEMPLATES: DocTemplate[] = [
       { id: "timeline", label: "Estimasi Waktu Pelaksanaan", type: "text", placeholder: "6 bulan (180 hari kalender)" },
       { id: "nilai_penawaran", label: "Nilai Penawaran (opsional)", type: "text", placeholder: "Rp 2.500.000.000" },
     ],
-    promptHint: "proposal teknis tender profesional sesuai standar Perpres 12/2021 dan Permen PUPR",
+    promptHint: "proposal teknis tender profesional sesuai standar Perpres 28/2025 dan Permen PUPR",
   },
   {
     id: "checklist_iso",
