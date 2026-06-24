@@ -4,8 +4,8 @@ import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Check, ArrowRight, MessageCircle, GraduationCap, Award,
-  BookOpen, Target, Users, Star, Zap, TrendingUp,
-  CalendarCheck, ShieldCheck, BarChart3,
+  BookOpen, Target, Users, Star, TrendingUp,
+  CalendarCheck, ShieldCheck, BarChart3, XCircle, AlertTriangle, Clock,
 } from "lucide-react";
 
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20solusi%20AI%20untuk%20PKB%20Konstruksi";
@@ -25,12 +25,12 @@ const SKK_TRACKS = [
 
 const colorTag: Record<string, string> = {
   indigo: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
-  rose: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+  rose:   "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
   yellow: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  stone: "bg-stone-100 text-stone-700 dark:bg-stone-800/30 dark:text-stone-400",
-  green: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  red: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+  stone:  "bg-stone-100 text-stone-700 dark:bg-stone-800/30 dark:text-stone-400",
+  green:  "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  blue:   "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  red:    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
   orange: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
 };
 
@@ -42,7 +42,7 @@ export default function PkbPage() {
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-pkb">
       <SharedHeader />
 
-      {/* ── HERO ── */}
+      {/* ── A: ATTENTION ── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-violet-700 via-purple-700 to-indigo-800 py-20 md:py-28 px-4">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-1/4 w-72 h-72 rounded-full bg-white blur-3xl" />
@@ -55,15 +55,18 @@ export default function PkbPage() {
                 <GraduationCap className="h-3.5 w-3.5" />
                 AI untuk PKB & Sertifikasi Kompetensi Konstruksi
               </div>
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
-                Tingkatkan Kompetensi,<br />
-                <span className="text-violet-200">Pertahankan SKK Anda</span>
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                SKK Anda 5 Tahun Dibangun,<br />
+                <span className="text-violet-200">Kedaluwarsa karena Salah Persiapan PKB</span>
               </h1>
-              <p className="text-base md:text-lg text-violet-100 mb-8 leading-relaxed">
-                Pengembangan Keprofesian Berkelanjutan (PKB) adalah kewajiban pemegang SKK untuk
-                mempertahankan dan meningkatkan kompetensinya. AI Gustafta memandu perencanaan PKB,
-                simulasi asesmen SKK, dan roadmap karir konstruksi Anda.
+              <p className="text-base text-violet-100 mb-4 leading-relaxed">
+                Banyak tenaga ahli konstruksi kehilangan SKK bukan karena tidak kompeten —
+                tapi karena poin PKB tidak terpenuhi, dokumen portofolio tidak optimal,
+                atau salah memilih skema asesmen di LSP.
               </p>
+              <div className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 mb-6 text-sm text-violet-100">
+                AI Gustafta memandu perencanaan PKB, simulasi asesmen SKK per jabatan & jenjang, dan roadmap karir konstruksi yang terarah.
+              </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a href={WA_URL} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-white text-violet-800 hover:bg-violet-50 font-bold gap-2 px-8 h-12" data-testid="btn-hero-konsultasi">
@@ -95,19 +98,42 @@ export default function PkbPage() {
         </div>
       </section>
 
-      {/* ── APA ITU PKB ── */}
-      <section className="py-14 px-4 bg-violet-50 dark:bg-violet-900/10">
+      {/* ── I: INTEREST — Risiko SKK kedaluwarsa ── */}
+      <section className="py-14 px-4 bg-slate-900 text-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-violet-400 uppercase tracking-widest mb-2">Risiko yang Sering Diremehkan</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Apa yang Terjadi Jika SKK Anda Kedaluwarsa?</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5 mb-8">
+            {[
+              { icon: <AlertTriangle className="h-5 w-5 text-red-400" />, title: "Tidak Bisa Ditugaskan di Proyek", value: "Langsung berlaku", desc: "SKK kedaluwarsa membuat Anda tidak bisa menjadi personel manajerial di proyek yang memerlukan SKK aktif — karir terhenti tiba-tiba." },
+              { icon: <Clock className="h-5 w-5 text-amber-400" />, title: "Proses Perpanjangan Bisa Gagal", value: "Poin PKB kurang", desc: "Jika poin Satuan Kredit Kompetensi (SKK) dari kegiatan PKB tidak terpenuhi, perpanjangan SKK tidak bisa diproses meski Anda ahli di bidangnya." },
+              { icon: <XCircle className="h-5 w-5 text-red-400" />, title: "BUJK Kehilangan Personel Kunci", value: "Dampak ke SBU", desc: "Personel SKK yang tidak aktif bisa membuat BUJK tidak memenuhi persyaratan personel untuk SBU — berisiko ke kualifikasi perusahaan." },
+            ].map((item, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="flex items-center gap-2 mb-2">{item.icon}<span className="text-xs text-gray-400">{item.title}</span></div>
+                <div className="text-xl font-extrabold text-violet-300 mb-2">{item.value}</div>
+                <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-5 text-center">
+            <p className="text-violet-100 font-semibold mb-1">PKB bukan formalitas — ini adalah jalur satu-satunya untuk mempertahankan kompetensi yang sudah Anda bangun bertahun-tahun.</p>
+            <p className="text-gray-400 text-sm max-w-xl mx-auto">AI Gustafta membantu Anda merencanakan PKB secara sistematis, memilih kegiatan yang tepat, dan mempersiapkan asesmen perpanjangan dengan simulasi pertanyaan berbasis SKKNI.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* PKB Explanation */}
+      <section className="py-12 px-4 bg-violet-50 dark:bg-violet-900/10">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white dark:bg-card rounded-2xl border border-violet-200 dark:border-violet-800 p-6 md:p-8">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <Award className="h-5 w-5 text-violet-600" /> Apa itu PKB Konstruksi?
             </h2>
             <p className="text-sm text-gray-600 dark:text-muted-foreground leading-relaxed mb-4">
-              <strong>Pengembangan Keprofesian Berkelanjutan (PKB)</strong> adalah proses pengembangan
-              kompetensi yang wajib dilakukan oleh tenaga kerja konstruksi bersertifikat (pemegang SKK)
-              untuk mempertahankan dan meningkatkan kompetensinya. PKB meliputi kegiatan pendidikan,
-              pelatihan, seminar, karya tulis, dan pekerjaan profesional yang terakumulasi dalam poin
-              Satuan Kredit Kompetensi (SKK) tahunan.
+              <strong>Pengembangan Keprofesian Berkelanjutan (PKB)</strong> adalah proses pengembangan kompetensi wajib bagi pemegang SKK untuk mempertahankan dan meningkatkan kompetensinya. Meliputi pendidikan, pelatihan, seminar, karya tulis, dan pekerjaan profesional yang terakumulasi dalam poin Satuan Kredit Kompetensi (SKK) tahunan.
             </p>
             <div className="grid md:grid-cols-3 gap-4">
               {[
@@ -128,37 +154,40 @@ export default function PkbPage() {
         </div>
       </section>
 
-      {/* ── LAYANAN AI PKB ── */}
+      {/* ── D: DESIRE — AI Tools + SKK Tracks ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
           <p className="text-xs font-bold text-violet-600 uppercase tracking-widest text-center mb-2">Layanan AI</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">
-            AI Tools untuk Perjalanan PKB Anda
-          </h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-3">AI Tools untuk Perjalanan PKB Anda</h2>
+          <p className="text-center text-gray-500 dark:text-muted-foreground text-sm mb-10 max-w-lg mx-auto">Dari tanya jawab SKK hingga simulasi asesmen per jabatan — semua tersedia 24/7.</p>
           <div className="grid md:grid-cols-2 gap-5">
             {[
               {
                 icon: <Target className="h-6 w-6 text-violet-600" />,
                 title: "PanduanASKOM — Tanya Jawab SKK",
-                desc: "Chatbot spesialis untuk menjawab semua pertanyaan seputar SKK: persyaratan per jabatan, alur asesmen, dokumen portofolio, dan interpretasi SKKNI.",
+                masalah: "Pertanyaan tentang persyaratan SKK membutuhkan riset panjang di dokumen SKKNI dan regulasi LPJK",
+                solusi: "PanduanASKOM menjawab semua pertanyaan SKK secara instan — persyaratan, dokumen, dan alur asesmen",
                 features: ["Persyaratan SKK per jabatan & jenjang", "Alur proses asesmen di LSP/BNSP", "Panduan penyusunan portofolio", "Skema SKK per bidang pekerjaan"],
               },
               {
                 icon: <GraduationCap className="h-6 w-6 text-indigo-600" />,
                 title: "ManprojakClaw — SKK Manajemen Konstruksi",
-                desc: "AI spesialis untuk jalur SKK Manajemen Pelaksanaan: Manajer Proyek, Site Manager, dan Pengawas Lapangan. Simulasi uji kompetensi dan panduan persiapan.",
+                masalah: "Persiapan asesmen SKK Manajemen Pelaksanaan memerlukan pemahaman mendalam SKKNI yang kompleks",
+                solusi: "ManprojakClaw mensimulasikan pertanyaan asesmen dan memandu persiapan portofolio Manajer Proyek & Site Manager",
                 features: ["Simulasi pertanyaan asesmen SKK", "Pemetaan unit kompetensi per jabatan", "Panduan portofolio manajemen proyek", "Roadmap karir manajer konstruksi"],
               },
               {
                 icon: <Award className="h-6 w-6 text-rose-600" />,
-                title: "Claw per Spesialisasi",
-                desc: "Setiap bidang memiliki Claw khusus: ArsitekturClaw, SipilClaw, GeoteknikClaw, JalanJembatanClaw, TataLingkunganClaw, ElektrikalClaw, SafiraClaw, PengawasClaw.",
+                title: "Claw per Spesialisasi (8 Bidang)",
+                masalah: "Setiap bidang SKK memiliki SKKNI dan unit kompetensi yang berbeda — sulit dipelajari tanpa panduan khusus",
+                solusi: "ArsitekturClaw, SipilClaw, GeoteknikClaw, JalanJembatanClaw, dan 4 Claw lainnya — masing-masing spesialis di bidangnya",
                 features: ["7 sub-agen per Claw spesialisasi", "Materi uji kompetensi berbasis SKKNI", "Simulasi studi kasus per jabatan", "Update regulasi & persyaratan terbaru"],
               },
               {
                 icon: <BookOpen className="h-6 w-6 text-emerald-600" />,
                 title: "TerasLPJK#1 — Sharing Knowledge SKK",
-                desc: "Platform knowledge sharing seputar sertifikasi SKK: pengalaman praktisi, tips lolos asesmen, dan diskusi regulasi terbaru.",
+                masalah: "Pengalaman praktis tentang proses asesmen SKK sulit ditemukan — banyak info tidak resmi dan tidak akurat",
+                solusi: "TerasLPJK#1 mengumpulkan pengetahuan praktisi berpengalaman: tips lolos asesmen dan update regulasi terbaru dari LPJK",
                 features: ["5 sub-agen pengetahuan sertifikasi", "Tips & trik lolos asesmen SKK", "Update regulasi LPJK terbaru", "Q&A berbasis pengalaman praktisi"],
               },
             ].map((item, i) => (
@@ -167,12 +196,18 @@ export default function PkbPage() {
                   <div className="p-2 bg-white dark:bg-background rounded-xl">{item.icon}</div>
                   <h3 className="font-bold text-gray-900 dark:text-white text-sm leading-tight">{item.title}</h3>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-muted-foreground mb-3 leading-relaxed">{item.desc}</p>
+                <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 px-3 py-2 mb-2">
+                  <p className="text-[10px] font-bold text-red-600 dark:text-red-400 mb-0.5">Masalah:</p>
+                  <p className="text-xs text-red-700 dark:text-red-300">{item.masalah}</p>
+                </div>
+                <div className="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 px-3 py-2 mb-4">
+                  <p className="text-[10px] font-bold text-green-600 dark:text-green-400 mb-0.5">Solusi:</p>
+                  <p className="text-xs text-green-700 dark:text-green-300">{item.solusi}</p>
+                </div>
                 <ul className="space-y-1.5">
                   {item.features.map((f, j) => (
                     <li key={j} className="flex items-start gap-2 text-xs text-gray-700 dark:text-muted-foreground">
-                      <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-                      {f}
+                      <Check className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />{f}
                     </li>
                   ))}
                 </ul>
@@ -182,13 +217,11 @@ export default function PkbPage() {
         </div>
       </section>
 
-      {/* ── JALUR SKK ── */}
+      {/* 8 Jalur SKK */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-bold text-violet-600 uppercase tracking-widest text-center mb-2">Jalur SKK</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">
-            8 Jalur SKK yang Didukung Penuh
-          </h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">8 Jalur SKK yang Didukung Penuh</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {SKK_TRACKS.map((track, i) => (
               <div key={i} className="bg-white dark:bg-card rounded-xl border border-gray-100 dark:border-border p-4" data-testid={`card-track-${i}`}>
@@ -197,8 +230,7 @@ export default function PkbPage() {
                 <ul className="space-y-1">
                   {track.jobs.map((job, j) => (
                     <li key={j} className="text-[11px] text-gray-500 dark:text-muted-foreground flex items-center gap-1.5">
-                      <div className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
-                      {job}
+                      <div className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />{job}
                     </li>
                   ))}
                 </ul>
@@ -208,68 +240,68 @@ export default function PkbPage() {
         </div>
       </section>
 
-      {/* ── UNTUK SIAPA ── */}
+      {/* Untuk Siapa + Testimoni */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-violet-600 uppercase tracking-widest text-center mb-2">Untuk Siapa</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Siapa yang Paling Diuntungkan?</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { icon: <Users className="h-5 w-5 text-violet-500" />, title: "Tenaga Ahli Konstruksi", points: ["Pemegang SKK yang akan perpanjang", "Tenaga ahli muda yang baru lulus", "Profesional yang ingin naik jenjang", "Diaspora yang ingin setara SKK"] },
-              { icon: <GraduationCap className="h-5 w-5 text-blue-500" />, title: "Asesor & Trainer", points: ["Asesor LSP yang ingin update materi", "Trainer sertifikasi SKK", "Fasilitator pelatihan konstruksi", "Pengembang modul kompetensi"] },
-              { icon: <Award className="h-5 w-5 text-amber-500" />, title: "BUJK & Asosiasi", points: ["HR Manager yang urus SKK karyawan", "GAPENSI, INKINDO, HAKI member", "Staf asosiasi yang urus PKB member", "Konsultan manajemen SDM konstruksi"] },
-            ].map((group, i) => (
-              <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-2xl p-5 border border-violet-100 dark:border-violet-800/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-white dark:bg-background rounded-lg">{group.icon}</div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">{group.title}</h3>
-                </div>
-                <ul className="space-y-1.5">
-                  {group.points.map((pt, j) => (
-                    <li key={j} className="flex items-center gap-2 text-xs text-gray-700 dark:text-muted-foreground">
-                      <Check className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
-                      {pt}
-                    </li>
-                  ))}
-                </ul>
+          <div className="grid md:grid-cols-2 gap-12">
+            <div>
+              <p className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-2">Untuk Siapa</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Siapa yang Paling Diuntungkan?</h2>
+              <div className="space-y-3">
+                {[
+                  { icon: <Users className="h-4 w-4 text-violet-500" />, title: "Tenaga Ahli Konstruksi", points: ["Pemegang SKK yang akan perpanjang", "Tenaga ahli muda yang baru lulus", "Profesional yang ingin naik jenjang"] },
+                  { icon: <GraduationCap className="h-4 w-4 text-blue-500" />, title: "Asesor & Trainer", points: ["Asesor LSP yang ingin update materi", "Trainer sertifikasi SKK", "Fasilitator pelatihan konstruksi"] },
+                  { icon: <Award className="h-4 w-4 text-amber-500" />, title: "BUJK & Asosiasi", points: ["HR Manager yang urus SKK karyawan", "GAPENSI, INKINDO, HAKI member", "Staf asosiasi yang urus PKB member"] },
+                ].map((group, i) => (
+                  <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-xl p-4 border border-violet-100 dark:border-violet-800/30">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 bg-white dark:bg-background rounded-lg">{group.icon}</div>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-sm">{group.title}</h3>
+                    </div>
+                    <ul className="space-y-1">
+                      {group.points.map((pt, j) => (
+                        <li key={j} className="flex items-center gap-2 text-xs text-gray-700 dark:text-muted-foreground">
+                          <Check className="h-3 w-3 text-violet-500 flex-shrink-0" />{pt}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-2">Bukti Nyata</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Dari Tenaga Ahli Konstruksi</h2>
+              <div className="space-y-4">
+                {[
+                  { name: "Ir. Bambang H., MT", role: "Site Manager, Kontraktor BUMN", before: "Persiapan perpanjangan SKK dilakukan sendiri, tidak tahu harus mulai dari mana", after: "ManprojakClaw buat roadmap persiapan yang jelas — lulus asesmen pertama kali", text: "Simulasi pertanyaan asesmen-nya sangat mirip dengan ujian sesungguhnya. Saya merasa jauh lebih siap dibanding perpanjangan SKK 5 tahun lalu." },
+                  { name: "Sari N., ST", role: "Ahli K3 Muda Konstruksi", before: "Bingung unit kompetensi mana yang paling penting untuk portofolio K3 Madya", after: "SafiraClaw petakan semua unit kompetensi + panduan portofolio dalam 1 sesi", text: "SafiraClaw membantu saya memahami secara persis apa yang dinilai asesor. Roadmap karir dari K3 Muda ke K3 Madya jadi sangat jelas dan terstruktur." },
+                  { name: "Prof. Dedi A.", role: "Asesor LSP Konstruksi", before: "Peserta asesmen sering tidak tahu apa yang benar-benar diuji per unit kompetensi", after: "PanduanASKOM jadi tools persiapan standar yang direkomendasikan ke peserta", text: "Pertanyaan-pertanyaan yang muncul dari AI sangat relevan dengan SKKNI. Peserta yang pakai PanduanASKOM terlihat jauh lebih siap saat asesmen." },
+                ].map((t, i) => (
+                  <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-xl p-4 border border-violet-100 dark:border-border">
+                    <div className="flex gap-0.5 mb-2">
+                      {[...Array(5)].map((_, j) => <Star key={j} className="h-3 w-3 fill-amber-400 text-amber-400" />)}
+                    </div>
+                    <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
+                    <p className="text-xs text-gray-400 mb-2">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
+                    <p className="text-xs text-gray-700 dark:text-muted-foreground italic mb-2 leading-relaxed">"{t.text}"</p>
+                    <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.role}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── TESTIMONI ── */}
-      <section className="py-16 px-4 bg-violet-50 dark:bg-violet-900/10">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-violet-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Tenaga Ahli Konstruksi</h2>
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              { name: "Ir. Bambang H., MT", role: "Site Manager, Kontraktor BUMN", text: "ManprojakClaw sangat membantu persiapan perpanjangan SKK saya. Simulasi pertanyaan asesmen-nya sangat mirip dengan ujian sesungguhnya." },
-              { name: "Sari N., ST", role: "Ahli K3 Muda Konstruksi", text: "SafiraClaw membantu saya memahami unit kompetensi K3 yang harus dikuasai. Roadmap karir dari K3 Muda ke K3 Madya jadi sangat jelas." },
-              { name: "Prof. Dedi A.", role: "Asesor LSP Konstruksi", text: "PanduanASKOM membantu peserta asesmen saya mempersiapkan diri. Pertanyaan-pertanyaan yang muncul dari AI sangat relevan dengan SKKNI." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-violet-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
+      {/* ── A: ACTION ── */}
       <section className="py-16 px-4 bg-gradient-to-br from-violet-700 via-purple-700 to-indigo-800 text-white text-center">
         <div className="max-w-2xl mx-auto">
           <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-80" />
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">SKK Anda Terlalu Berharga untuk Kedaluwarsa</h2>
-          <p className="text-violet-100 mb-8 leading-relaxed">
-            Rencanakan PKB dengan sistematis dan pertahankan kompetensi konstruksi Anda bersama AI Gustafta.
-          </p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">SKK Anda Terlalu Berharga untuk Kedaluwarsa</h2>
+          <p className="text-violet-100 mb-2">Mulai rencanakan PKB sekarang — jangan tunggu 3 bulan sebelum deadline perpanjangan.</p>
+          <p className="text-violet-200 text-sm mb-8">Simulasi asesmen 24/7 · Panduan portofolio per jabatan · Update regulasi LPJK terbaru</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href={CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="bg-white text-violet-800 hover:bg-violet-50 font-bold gap-2 px-8 h-12" data-testid="btn-cta-bundle">

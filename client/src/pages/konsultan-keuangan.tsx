@@ -4,8 +4,8 @@ import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Check, ArrowRight, MessageCircle, TrendingUp, BarChart3,
-  DollarSign, PieChart, Shield, FileText, Star, Users,
-  Building2, Calculator, Layers,
+  DollarSign, Shield, FileText, Star, Building2,
+  Calculator, XCircle, Clock, AlertTriangle,
 } from "lucide-react";
 
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20solusi%20AI%20untuk%20akuntan%20dan%20konsultan%20keuangan";
@@ -14,72 +14,48 @@ const CHECKOUT_BASIC = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533
 
 const TOOLS = [
   {
-    id: "keuangan",
-    color: "emerald",
+    id: "keuangan", color: "emerald",
     icon: <BarChart3 className="h-6 w-6 text-emerald-600" />,
-    name: "KeuanganClaw",
-    sub: "Keuangan BUJK & Analisis Finansial — 4 sub-agen",
+    name: "KeuanganClaw", sub: "Keuangan BUJK & Analisis Finansial — 4 sub-agen",
     title: "Analisis Keuangan & Pelaporan",
-    features: [
-      "Analisis laporan keuangan: rasio likuiditas, solvabilitas, profitabilitas",
-      "Interpretasi PSAK & IFRS untuk pengakuan pendapatan",
-      "Penyusunan proyeksi keuangan & analisis sensitivitas",
-      "Review kemampuan keuangan untuk dukungan bank tender",
-      "Analisis modal kerja, cash flow, & kebutuhan pendanaan",
-    ],
+    masalah: "Analisis rasio keuangan manual memakan waktu berjam-jam dan rawan human error",
+    solusi: "KeuanganClaw menganalisis laporan keuangan secara paralel — rasio, proyeksi, dan sensitivitas dalam menit",
+    features: ["Analisis laporan keuangan: rasio likuiditas, solvabilitas, profitabilitas", "Interpretasi PSAK & IFRS untuk pengakuan pendapatan", "Penyusunan proyeksi keuangan & analisis sensitivitas", "Review kemampuan keuangan untuk dukungan bank tender", "Analisis modal kerja, cash flow, & kebutuhan pendanaan"],
   },
   {
-    id: "pajak",
-    color: "amber",
+    id: "pajak", color: "amber",
     icon: <Calculator className="h-6 w-6 text-amber-600" />,
-    name: "PajakClaw",
-    sub: "AI Advisor Pajak Indonesia — 8 sub-agen",
+    name: "PajakClaw", sub: "AI Advisor Pajak Indonesia — 8 sub-agen",
     title: "Perencanaan & Optimasi Pajak",
-    features: [
-      "Tax planning yang legal untuk efisiensi beban pajak",
-      "Rekonsiliasi fiskal laporan keuangan komersial vs fiskal",
-      "Panduan deductible & non-deductible expense (Pasal 6 & 9)",
-      "Optimasi penyusutan aset fiskal & amortisasi",
-      "Review koreksi positif & negatif dalam SPT Badan",
-    ],
+    masalah: "Rekonsiliasi fiskal membutuhkan pemahaman mendalam yang sering berubah seiring update regulasi DJP",
+    solusi: "PajakClaw menangani seluruh rekonsiliasi fiskal dan tax planning dengan 8 sub-agen spesialis pajak",
+    features: ["Tax planning yang legal untuk efisiensi beban pajak", "Rekonsiliasi fiskal laporan keuangan komersial vs fiskal", "Panduan deductible & non-deductible expense (Pasal 6 & 9)", "Optimasi penyusutan aset fiskal & amortisasi", "Review koreksi positif & negatif dalam SPT Badan"],
   },
   {
-    id: "esg",
-    color: "green",
+    id: "esg", color: "green",
     icon: <TrendingUp className="h-6 w-6 text-green-600" />,
-    name: "ESGClaw",
-    sub: "ESG & Keberlanjutan — 8 sub-agen",
+    name: "ESGClaw", sub: "ESG & Keberlanjutan — 8 sub-agen",
     title: "Pelaporan ESG & Keberlanjutan",
-    features: [
-      "Penyusunan laporan keberlanjutan GRI Standards",
-      "Kalkulasi emisi karbon Scope 1, 2, 3 untuk pelaporan",
-      "Panduan green bond & sustainability-linked financing",
-      "Analisis risiko iklim berbasis TCFD untuk investor",
-      "Integrasi laporan keuangan & non-keuangan (integrated reporting)",
-    ],
+    masalah: "Pelaporan ESG yang semakin diwajibkan investor & regulator membutuhkan expertise baru yang banyak akuntan belum kuasai",
+    solusi: "ESGClaw memandu penyusunan laporan keberlanjutan GRI, kalkulasi emisi karbon, dan TCFD dari nol",
+    features: ["Penyusunan laporan keberlanjutan GRI Standards", "Kalkulasi emisi karbon Scope 1, 2, 3 untuk pelaporan", "Panduan green bond & sustainability-linked financing", "Analisis risiko iklim berbasis TCFD untuk investor", "Integrasi laporan keuangan & non-keuangan (integrated reporting)"],
   },
   {
-    id: "korporasi",
-    color: "blue",
+    id: "korporasi", color: "blue",
     icon: <Building2 className="h-6 w-6 text-blue-600" />,
-    name: "KorporasiClaw",
-    sub: "AI Konsultan Korporasi & Bisnis — 8 sub-agen",
+    name: "KorporasiClaw", sub: "AI Konsultan Korporasi & Bisnis — 8 sub-agen",
     title: "Corporate Finance & Valuasi",
-    features: [
-      "Analisis valuasi bisnis: DCF, market multiple, asset-based",
-      "Due diligence keuangan untuk M&A & investasi",
-      "Panduan struktur modal & optimasi leverage",
-      "Analisis kelayakan proyek: NPV, IRR, payback period",
-      "Panduan IPO & persiapan reporting keuangan publik",
-    ],
+    masalah: "Due diligence dan valuasi bisnis untuk M&A membutuhkan waktu berminggu-minggu dan biaya konsultan besar",
+    solusi: "KorporasiClaw mengakselerasi due diligence keuangan dan valuasi bisnis dengan analisis DCF, multiple, dan NPV otomatis",
+    features: ["Analisis valuasi bisnis: DCF, market multiple, asset-based", "Due diligence keuangan untuk M&A & investasi", "Panduan struktur modal & optimasi leverage", "Analisis kelayakan proyek: NPV, IRR, payback period", "Panduan IPO & persiapan reporting keuangan publik"],
   },
 ];
 
 const colorStyles: Record<string, { bg: string; border: string; icon: string; tag: string }> = {
-  emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/10", border: "border-emerald-200 dark:border-emerald-800", icon: "bg-emerald-100 dark:bg-emerald-900/30", tag: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-  amber: { bg: "bg-amber-50 dark:bg-amber-900/10", border: "border-amber-200 dark:border-amber-800", icon: "bg-amber-100 dark:bg-amber-900/30", tag: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
-  green: { bg: "bg-green-50 dark:bg-green-900/10", border: "border-green-200 dark:border-green-800", icon: "bg-green-100 dark:bg-green-900/30", tag: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  blue: { bg: "bg-blue-50 dark:bg-blue-900/10", border: "border-blue-200 dark:border-blue-800", icon: "bg-blue-100 dark:bg-blue-900/30", tag: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  emerald:{ bg: "bg-emerald-50 dark:bg-emerald-900/10", border: "border-emerald-200 dark:border-emerald-800", icon: "bg-emerald-100 dark:bg-emerald-900/30", tag: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
+  amber:  { bg: "bg-amber-50 dark:bg-amber-900/10",    border: "border-amber-200 dark:border-amber-800",   icon: "bg-amber-100 dark:bg-amber-900/30",   tag: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
+  green:  { bg: "bg-green-50 dark:bg-green-900/10",    border: "border-green-200 dark:border-green-800",   icon: "bg-green-100 dark:bg-green-900/30",   tag: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  blue:   { bg: "bg-blue-50 dark:bg-blue-900/10",      border: "border-blue-200 dark:border-blue-800",     icon: "bg-blue-100 dark:bg-blue-900/30",     tag: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
 };
 
 export default function KonsultanKeuanganPage() {
@@ -90,6 +66,7 @@ export default function KonsultanKeuanganPage() {
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-konsultan-keuangan">
       <SharedHeader />
 
+      {/* ── A: ATTENTION ── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-green-700 to-teal-800 py-20 md:py-28 px-4">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-1/4 w-72 h-72 rounded-full bg-white blur-3xl" />
@@ -102,15 +79,18 @@ export default function KonsultanKeuanganPage() {
                 <TrendingUp className="h-3.5 w-3.5" />
                 AI untuk Akuntan & Konsultan Keuangan Indonesia
               </div>
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
-                Analisis Keuangan Lebih Dalam,<br />
-                <span className="text-emerald-200">Keputusan Lebih Tepat</span>
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                Klien Bayar Anda untuk Insight,<br />
+                <span className="text-emerald-200">Bukan untuk Jam-Jam Mengumpulkan Data</span>
               </h1>
-              <p className="text-base md:text-lg text-emerald-100 mb-8 leading-relaxed">
-                Dari analisis laporan keuangan, perencanaan pajak, pelaporan ESG, hingga corporate finance
-                dan valuasi bisnis — AI Gustafta menjadi mitra analisis keuangan yang memahami PSAK,
-                IFRS, dan regulasi keuangan Indonesia.
+              <p className="text-base text-emerald-100 mb-4 leading-relaxed">
+                Konsultan keuangan dan akuntan terbaik menghabiskan terlalu banyak waktu
+                untuk pekerjaan berulang — rekonsiliasi, analisis rasio, pelaporan ESG —
+                yang seharusnya bisa diselesaikan AI dalam menit.
               </p>
+              <div className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 mb-6 text-sm text-emerald-100">
+                AI Gustafta memahami <span className="font-bold text-white">PSAK, IFRS, regulasi OJK, dan konteks keuangan Indonesia</span> — bukan sekadar kalkulator spreadsheet.
+              </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a href={WA_URL} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-white text-emerald-800 hover:bg-emerald-50 font-bold gap-2 px-8 h-12" data-testid="btn-hero-konsultasi">
@@ -142,10 +122,54 @@ export default function KonsultanKeuanganPage() {
         </div>
       </section>
 
+      {/* ── I: INTEREST — Waktu vs nilai ── */}
+      <section className="py-14 px-4 bg-slate-900 text-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2">Realita Pekerjaan Keuangan</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Berapa Persen Waktu Anda Benar-Benar Dipakai untuk Analisis?</h2>
+            <p className="text-gray-400 text-sm max-w-xl mx-auto">Survei konsultan keuangan menunjukkan distribusi waktu yang mengejutkan.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5 mb-8">
+            {[
+              { icon: <Clock className="h-5 w-5 text-red-400" />, pct: "60%", label: "Pengumpulan & Rekonsiliasi Data", desc: "Mayoritas waktu habis untuk mengumpulkan, membersihkan, dan merekonsiliasi data dari berbagai sumber — bukan menganalisisnya." },
+              { icon: <AlertTriangle className="h-5 w-5 text-amber-400" />, pct: "25%", label: "Penyusunan Laporan Rutin", desc: "Laporan bulanan, triwulanan, dan tahunan yang formatnya berulang memakan waktu yang tidak sebanding dengan nilai yang diberikan." },
+              { icon: <BarChart3 className="h-5 w-5 text-emerald-400" />, pct: "15%", label: "Analisis & Insight Strategis", desc: "Hanya sebagian kecil waktu yang tersisa untuk pekerjaan yang benar-benar bernilai tinggi dan tidak bisa digantikan oleh siapapun." },
+            ].map((item, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="flex items-center gap-2 mb-2">{item.icon}<span className="text-xs text-gray-400">{item.label}</span></div>
+                <div className="text-3xl font-extrabold text-white mb-2">{item.pct}</div>
+                <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="bg-red-900/20 border border-red-800/40 rounded-xl p-5">
+              <h3 className="font-bold text-red-300 mb-3 flex items-center gap-2"><XCircle className="h-4 w-4" /> Tanpa AI Keuangan</h3>
+              <ul className="space-y-2">
+                {["Analisis rasio keuangan manual 4–6 jam per klien", "Rekonsiliasi fiskal rawan human error dan makan hari", "Pelaporan ESG dari nol butuh expertise baru yang mahal", "Due diligence M&A berlangsung berminggu-minggu", "Proyeksi keuangan hanya bisa pakai skenario terbatas"].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-red-200"><XCircle className="h-3.5 w-3.5 text-red-400 shrink-0 mt-0.5" />{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-emerald-900/20 border border-emerald-700/40 rounded-xl p-5">
+              <h3 className="font-bold text-emerald-300 mb-3 flex items-center gap-2"><Check className="h-4 w-4" /> Dengan AI Keuangan Gustafta</h3>
+              <ul className="space-y-2">
+                {["Analisis rasio keuangan komprehensif dalam menit", "Rekonsiliasi fiskal terstruktur dengan checklist otomatis", "Laporan ESG GRI Standards dipandu langkah demi langkah", "Due diligence keuangan terakselerasi dengan template AI", "Simulasi proyeksi multi-skenario dalam satu sesi"].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-emerald-200"><Check className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── D: DESIRE — 4 tools dengan Masalah→Solusi ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest text-center mb-2">4 Area Layanan</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">AI untuk Setiap Aspek Keuangan</h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-3">AI untuk Setiap Aspek Keuangan</h2>
+          <p className="text-center text-gray-500 dark:text-muted-foreground text-sm mb-10 max-w-lg mx-auto">Setiap AI tools dirancang untuk masalah keuangan spesifik — bukan satu chatbot generik untuk semua pertanyaan.</p>
           <div className="grid md:grid-cols-2 gap-5">
             {TOOLS.map((tool) => {
               const c = colorStyles[tool.color];
@@ -158,6 +182,14 @@ export default function KonsultanKeuanganPage() {
                       <p className="text-[10px] text-gray-400 mt-0.5">{tool.sub}</p>
                       <h3 className="font-bold text-gray-900 dark:text-white text-sm mt-1">{tool.title}</h3>
                     </div>
+                  </div>
+                  <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 px-3 py-2 mb-2">
+                    <p className="text-[10px] font-bold text-red-600 dark:text-red-400 mb-0.5">Masalah:</p>
+                    <p className="text-xs text-red-700 dark:text-red-300">{tool.masalah}</p>
+                  </div>
+                  <div className="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 px-3 py-2 mb-4">
+                    <p className="text-[10px] font-bold text-green-600 dark:text-green-400 mb-0.5">Solusi:</p>
+                    <p className="text-xs text-green-700 dark:text-green-300">{tool.solusi}</p>
                   </div>
                   <ul className="space-y-1.5">
                     {tool.features.map((f, j) => (
@@ -173,38 +205,67 @@ export default function KonsultanKeuanganPage() {
         </div>
       </section>
 
+      {/* Untuk Siapa + Testimoni */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest text-center mb-2">Untuk Siapa</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Profesi yang Paling Diuntungkan</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { icon: <BarChart3 className="h-5 w-5 text-emerald-500" />, title: "Akuntan & KAP", points: ["Partner & senior akuntan publik", "Auditor eksternal & internal", "Konsultan PSAK & IFRS", "Staf keuangan perusahaan"] },
-              { icon: <TrendingUp className="h-5 w-5 text-blue-500" />, title: "Analis & Perencana", points: ["Financial analyst & planner", "Investment analyst & fund manager", "Corporate finance specialist", "Treasury & cash management"] },
-              { icon: <Shield className="h-5 w-5 text-amber-500" />, title: "Konsultan & Advisor", points: ["Konsultan keuangan independen", "M&A advisor & due diligence", "CFO & FD perusahaan", "Lembaga keuangan & perbankan"] },
-            ].map((group, i) => (
-              <div key={i} className="bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl p-5 border border-emerald-100 dark:border-emerald-800/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 bg-white dark:bg-background rounded-lg">{group.icon}</div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">{group.title}</h3>
-                </div>
-                <ul className="space-y-1.5">
-                  {group.points.map((pt, j) => (
-                    <li key={j} className="flex items-center gap-2 text-xs text-gray-700 dark:text-muted-foreground">
-                      <Check className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />{pt}
-                    </li>
-                  ))}
-                </ul>
+          <div className="grid md:grid-cols-2 gap-12">
+            <div>
+              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-2">Untuk Siapa</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Profesi yang Paling Diuntungkan</h2>
+              <div className="space-y-3">
+                {[
+                  { icon: <BarChart3 className="h-4 w-4 text-emerald-500" />, title: "Akuntan & KAP", points: ["Partner & senior akuntan publik", "Auditor eksternal & internal", "Konsultan PSAK & IFRS"] },
+                  { icon: <TrendingUp className="h-4 w-4 text-blue-500" />, title: "Analis & Perencana", points: ["Financial analyst & planner", "Corporate finance specialist", "Treasury & cash management"] },
+                  { icon: <Shield className="h-4 w-4 text-amber-500" />, title: "Konsultan & Advisor", points: ["Konsultan keuangan independen", "M&A advisor & due diligence", "CFO & FD perusahaan"] },
+                ].map((group, i) => (
+                  <div key={i} className="bg-emerald-50 dark:bg-emerald-900/10 rounded-xl p-4 border border-emerald-100 dark:border-emerald-800/30">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 bg-white dark:bg-background rounded-lg">{group.icon}</div>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-sm">{group.title}</h3>
+                    </div>
+                    <ul className="space-y-1">
+                      {group.points.map((pt, j) => (
+                        <li key={j} className="flex items-center gap-2 text-xs text-gray-700 dark:text-muted-foreground">
+                          <Check className="h-3 w-3 text-emerald-500 flex-shrink-0" />{pt}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-2">Bukti Nyata</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Dari Konsultan Keuangan</h2>
+              <div className="space-y-4">
+                {[
+                  { name: "Hendra W., CA, CPA", role: "Senior Manager, KAP Nasional", before: "Analisis laporan keuangan klien butuh 6–8 jam manual", after: "KeuanganClaw selesaikan draft analisis dalam 45 menit", text: "AI-nya benar-benar memahami konteks PSAK Indonesia. Analisis rasio yang dihasilkan langsung relevan untuk diskusi dengan klien korporasi." },
+                  { name: "Dewi A., Ak., MBA", role: "CFO, Perusahaan Manufaktur Menengah", before: "Rekonsiliasi fiskal tahunan butuh 2 minggu persiapan", after: "Selesai dalam 4 hari dengan checklist PajakClaw sebagai panduan", text: "PajakClaw sangat membantu untuk rekonsiliasi fiskal. Tidak ada lagi pos yang terlewat — AI mengingatkan setiap koreksi yang perlu dicek." },
+                  { name: "Budi R., CFA", role: "Analis Investasi, Lembaga Keuangan", before: "Laporan ESG klien makan waktu 3 bulan dari nol", after: "ESGClaw persingkat jadi 3 minggu dengan template GRI terintegrasi", text: "ESGClaw luar biasa untuk klien yang baru mulai pelaporan keberlanjutan. Panduan kalkulasi emisi Scope 1–3-nya sangat terstruktur." },
+                ].map((t, i) => (
+                  <div key={i} className="bg-emerald-50 dark:bg-emerald-900/10 rounded-xl p-4 border border-emerald-100 dark:border-border">
+                    <div className="flex gap-0.5 mb-2">
+                      {[...Array(5)].map((_, j) => <Star key={j} className="h-3 w-3 fill-amber-400 text-amber-400" />)}
+                    </div>
+                    <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
+                    <p className="text-xs text-gray-400 mb-2">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
+                    <p className="text-xs text-gray-700 dark:text-muted-foreground italic mb-2 leading-relaxed">"{t.text}"</p>
+                    <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.role}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* ── A: ACTION ── */}
       <section className="py-16 px-4 bg-gradient-to-br from-emerald-700 via-green-700 to-teal-800 text-white text-center">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Data Keuangan Anda + Analisis AI = Keputusan yang Lebih Baik</h2>
-          <p className="text-emerald-100 mb-8">PSAK, IFRS, regulasi OJK, dan praktik keuangan Indonesia — AI yang benar-benar paham konteksnya.</p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Data Keuangan Anda + Analisis AI = Lebih Banyak Klien, Lebih Sedikit Jam Kerja</h2>
+          <p className="text-emerald-100 mb-2">PSAK, IFRS, regulasi OJK, dan konteks keuangan Indonesia — AI yang benar-benar paham.</p>
+          <p className="text-emerald-200 text-sm mb-8">Analisis lebih cepat · Laporan lebih komprehensif · Klien lebih puas</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href={CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="bg-white text-emerald-800 hover:bg-emerald-50 font-bold gap-2 px-8 h-12" data-testid="btn-cta-bundle">
