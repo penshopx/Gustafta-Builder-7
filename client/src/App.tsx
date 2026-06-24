@@ -57,6 +57,11 @@ import LkpmPage from "@/pages/lkpm";
 import RisetSkripsiPage from "@/pages/riset-skripsi";
 import ContentCreatorPage from "@/pages/content-creator";
 import AcademicCounselorPage from "@/pages/academic-counselor";
+import KonsultanHukumPage from "@/pages/konsultan-hukum";
+import KonsultanPajakPage from "@/pages/konsultan-pajak";
+import KonsultanKeuanganPage from "@/pages/konsultan-keuangan";
+import ExecutiveSummaryPage from "@/pages/executive-summary";
+import BiroJasaSbuPage from "@/pages/biro-jasa-sbu";
 import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
@@ -425,6 +430,11 @@ function Router() {
       <Route path="/riset-skripsi" component={RisetSkripsiPage} />
       <Route path="/content-creator" component={ContentCreatorPage} />
       <Route path="/academic-counselor" component={AcademicCounselorPage} />
+      <Route path="/konsultan-hukum" component={KonsultanHukumPage} />
+      <Route path="/konsultan-pajak" component={KonsultanPajakPage} />
+      <Route path="/konsultan-keuangan" component={KonsultanKeuanganPage} />
+      <Route path="/executive-summary" component={ExecutiveSummaryPage} />
+      <Route path="/biro-jasa-sbu" component={BiroJasaSbuPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
