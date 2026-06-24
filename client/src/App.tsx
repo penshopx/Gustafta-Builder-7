@@ -64,6 +64,11 @@ import ExecutiveSummaryPage from "@/pages/executive-summary";
 import BiroJasaSbuPage from "@/pages/biro-jasa-sbu";
 import BrainProjectPage from "@/pages/brain-project";
 import KonsultanKontrakPage from "@/pages/konsultan-kontrak";
+import LisensiLspBnspPage from "@/pages/lisensi-lsp-bnsp";
+import AkreditasiLpkKanPage from "@/pages/akreditasi-lpk-kan";
+import PaperlessAsesmenPage from "@/pages/paperless-asesmen";
+import ManajemenLspTukPage from "@/pages/manajemen-lsp-tuk";
+import LexKonstruksiSengketaPage from "@/pages/lex-konstruksi-sengketa";
 import KonsultanDokumenProyekPage from "@/pages/konsultan-dokumen-proyek";
 import KonsultanPancekSmapPage from "@/pages/konsultan-pancek-smap";
 import KonsultanIsoSmmPage from "@/pages/konsultan-iso-smm";
@@ -451,6 +456,11 @@ function Router() {
       <Route path="/konsultan-iso-sml" component={KonsultanIsoSmlPage} />
       <Route path="/skk-pedoman-bnsp" component={SkkPedomanBnspPage} />
       <Route path="/pedoman-kan" component={PedomanKanPage} />
+      <Route path="/lisensi-lsp-bnsp" component={LisensiLspBnspPage} />
+      <Route path="/akreditasi-lpk-kan" component={AkreditasiLpkKanPage} />
+      <Route path="/paperless-asesmen" component={PaperlessAsesmenPage} />
+      <Route path="/manajemen-lsp-tuk" component={ManajemenLspTukPage} />
+      <Route path="/lex-konstruksi-sengketa" component={LexKonstruksiSengketaPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
