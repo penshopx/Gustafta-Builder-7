@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   Check, ArrowRight, MessageCircle, Award, Globe,
   ClipboardList, Users, Star, Zap, ShieldCheck,
-  Building2, FileText, TrendingUp, BarChart3,
+  Building2, FileText, TrendingUp, BarChart3, XCircle, Clock,
 } from "lucide-react";
 
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20solusi%20AI%20untuk%20biro%20jasa%20SBU%2C%20SKK%2C%20dan%20OSS";
@@ -14,80 +14,44 @@ const CHECKOUT_BASIC = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533
 
 const SERVICES_AI = [
   {
-    id: "sbu",
-    color: "amber",
+    id: "sbu", color: "amber",
     icon: <Award className="h-6 w-6 text-amber-600" />,
     name: "SBUClaw + SkemaClaw + ESIMPANClaw",
     title: "Sertifikasi SBU BUJK",
     clients: "BUJK yang urus SBU baru, perluasan, & perpanjangan",
-    features: [
-      "Panduan permohonan SBU baru per sub-klasifikasi",
-      "Persyaratan kualifikasi K1/K2/K3/M1/M2/B1/B2/BP per bidang",
-      "Checklist dokumen: akta, NIB, laporan keuangan, personel SKK",
-      "Panduan input pengalaman BUJK di E-SIMPAN LPJK",
-      "Proses pengajuan & review LSBU/LSP",
-      "Troubleshoot penolakan & revisi berkas SBU",
-      "Update persyaratan Permen PUPR No. 6/2025 (SkemaClaw)",
-    ],
+    features: ["Panduan permohonan SBU baru per sub-klasifikasi", "Persyaratan kualifikasi K1/K2/K3/M1/M2/B1/B2/BP per bidang", "Checklist dokumen: akta, NIB, laporan keuangan, personel SKK", "Panduan input pengalaman BUJK di E-SIMPAN LPJK", "Proses pengajuan & review LSBU/LSP", "Troubleshoot penolakan & revisi berkas SBU", "Update persyaratan Permen PUPR No. 6/2025 (SkemaClaw)"],
   },
   {
-    id: "skk",
-    color: "violet",
+    id: "skk", color: "violet",
     icon: <ClipboardList className="h-6 w-6 text-violet-600" />,
     name: "PanduanASKOM + ManprojakClaw + 7 Claw SKK",
     title: "Sertifikasi SKK Tenaga Kerja Konstruksi",
     clients: "TKK yang urus SKK baru, naik jenjang, & perpanjangan",
-    features: [
-      "Panduan lengkap SKK per jabatan & jenjang (Muda/Madya/Utama)",
-      "Persyaratan: pendidikan, pengalaman, & portofolio per skema",
-      "Alur asesmen di LSP LPJK, BNSP, & mitra LSP",
-      "Panduan penyusunan portofolio & curriculum vitae SKK",
-      "Simulasi pertanyaan asesmen per bidang & jabatan",
-      "Interpretasi SKKNI dan unit kompetensi per skema",
-      "Update regulasi SKK terbaru (TerasLPJK#1)",
-    ],
+    features: ["Panduan lengkap SKK per jabatan & jenjang (Muda/Madya/Utama)", "Persyaratan: pendidikan, pengalaman, & portofolio per skema", "Alur asesmen di LSP LPJK, BNSP, & mitra LSP", "Panduan penyusunan portofolio & CV SKK", "Simulasi pertanyaan asesmen per bidang & jabatan", "Interpretasi SKKNI dan unit kompetensi per skema", "Update regulasi SKK terbaru (TerasLPJK#1)"],
   },
   {
-    id: "oss",
-    color: "emerald",
+    id: "oss", color: "emerald",
     icon: <Globe className="h-6 w-6 text-emerald-600" />,
     name: "OSSClaw + LKPMClaw + KorporasiClaw",
     title: "OSS-RBA, KBLI, NIB & Perizinan Berusaha",
     clients: "Pelaku usaha baru, perubahan usaha, & pengurusan LKPM",
-    features: [
-      "Panduan permohonan NIB baru per jenis badan usaha",
-      "Identifikasi KBLI yang tepat untuk kegiatan usaha",
-      "Cek tingkat risiko OSS per KBLI & persyaratan izin",
-      "Panduan Sertifikat Standar & Izin Berusaha per sektor",
-      "Pengisian LKPM triwulan step-by-step (LKPMClaw)",
-      "Update data perusahaan di OSS pasca perubahan akta",
-      "Troubleshoot error di sistem OSS-RBA",
-    ],
+    features: ["Panduan permohonan NIB baru per jenis badan usaha", "Identifikasi KBLI yang tepat untuk kegiatan usaha", "Cek tingkat risiko OSS per KBLI & persyaratan izin", "Panduan Sertifikat Standar & Izin Berusaha per sektor", "Pengisian LKPM triwulan step-by-step (LKPMClaw)", "Update data perusahaan di OSS pasca perubahan akta", "Troubleshoot error di sistem OSS-RBA"],
   },
   {
-    id: "lkut",
-    color: "cyan",
+    id: "lkut", color: "cyan",
     icon: <FileText className="h-6 w-6 text-cyan-600" />,
     name: "LKUTClaw + PUB-LKUTClaw + ESIMPANClaw",
     title: "LKUT BUJK & Pengembangan Usaha",
     clients: "BUJK yang wajib lapor LKUT tahunan ke LPJK",
-    features: [
-      "Panduan pengumpulan data LKUT: kontrak, TKK, & keuangan",
-      "Input dan sinkronisasi data ke E-SIMPAN LPJK",
-      "Checklist kelengkapan LKUT sebelum submit",
-      "Prosedur submit LKUT melalui SIKI LPJK",
-      "Panduan koreksi & revisi jika laporan ditolak",
-      "Analisis tren bisnis dari data LKUT historis (PUB-LKUT)",
-      "Roadmap upgrade kualifikasi berdasarkan profil LKUT",
-    ],
+    features: ["Panduan pengumpulan data LKUT: kontrak, TKK, & keuangan", "Input dan sinkronisasi data ke E-SIMPAN LPJK", "Checklist kelengkapan LKUT sebelum submit", "Prosedur submit LKUT melalui SIKI LPJK", "Panduan koreksi & revisi jika laporan ditolak", "Analisis tren bisnis dari data LKUT historis (PUB-LKUT)", "Roadmap upgrade kualifikasi berdasarkan profil LKUT"],
   },
 ];
 
 const colorStyles: Record<string, { bg: string; border: string; icon: string; tag: string }> = {
-  amber: { bg: "bg-amber-50 dark:bg-amber-900/10", border: "border-amber-200 dark:border-amber-800", icon: "bg-amber-100 dark:bg-amber-900/30", tag: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
+  amber:  { bg: "bg-amber-50 dark:bg-amber-900/10",   border: "border-amber-200 dark:border-amber-800",   icon: "bg-amber-100 dark:bg-amber-900/30",   tag: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
   violet: { bg: "bg-violet-50 dark:bg-violet-900/10", border: "border-violet-200 dark:border-violet-800", icon: "bg-violet-100 dark:bg-violet-900/30", tag: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400" },
-  emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/10", border: "border-emerald-200 dark:border-emerald-800", icon: "bg-emerald-100 dark:bg-emerald-900/30", tag: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-  cyan: { bg: "bg-cyan-50 dark:bg-cyan-900/10", border: "border-cyan-200 dark:border-cyan-800", icon: "bg-cyan-100 dark:bg-cyan-900/30", tag: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400" },
+  emerald:{ bg: "bg-emerald-50 dark:bg-emerald-900/10",border:"border-emerald-200 dark:border-emerald-800",icon:"bg-emerald-100 dark:bg-emerald-900/30", tag:"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
+  cyan:   { bg: "bg-cyan-50 dark:bg-cyan-900/10",     border: "border-cyan-200 dark:border-cyan-800",     icon: "bg-cyan-100 dark:bg-cyan-900/30",     tag: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400" },
 };
 
 export default function BiroJasaSbuPage() {
@@ -98,6 +62,7 @@ export default function BiroJasaSbuPage() {
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-biro-jasa-sbu">
       <SharedHeader />
 
+      {/* ── A: ATTENTION ── */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-700 via-orange-700 to-rose-800 py-20 md:py-28 px-4">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-1/4 w-72 h-72 rounded-full bg-white blur-3xl" />
@@ -108,18 +73,20 @@ export default function BiroJasaSbuPage() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-semibold mb-6">
                 <Award className="h-3.5 w-3.5" />
-                AI untuk Biro Jasa & Fasilitator SBU · SKK · OSS-KBLI-NIB
+                AI untuk Biro Jasa & Fasilitator SBU · SKK · OSS
               </div>
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
-                Layani Klien Lebih Banyak,<br />
-                <span className="text-amber-200">Tanpa Tambah Staf</span>
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                Klien Antre Tapi Staf Anda<br />
+                <span className="text-amber-200">Tidak Bisa Layani Lebih Banyak?</span>
               </h1>
-              <p className="text-base md:text-lg text-orange-100 mb-8 leading-relaxed">
-                Biro jasa SBU, konsultan sertifikasi SKK, dan fasilitator OSS-KBLI-NIB
-                kini bisa melayani lebih banyak klien dengan bantuan AI — tanpa
-                harus merekrut staf tambahan. AI Gustafta menjadi asisten virtual
-                Anda untuk setiap jenis permohonan sertifikasi dan perizinan.
+              <p className="text-base text-orange-100 mb-4 leading-relaxed">
+                Biro jasa SBU, konsultan SKK, dan fasilitator OSS yang tumbuh bukan dengan
+                merekrut staf baru — tapi dengan AI yang menjadi asisten virtual
+                untuk setiap jenis permohonan sertifikasi dan perizinan.
               </p>
+              <div className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 mb-6 text-sm text-amber-100">
+                Biro jasa yang pakai AI Gustafta melayani <span className="font-bold text-white">3× lebih banyak klien</span> dengan staf yang sama — tanpa tambah biaya operasional.
+              </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a href={WA_URL} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" className="bg-white text-amber-800 hover:bg-amber-50 font-bold gap-2 px-8 h-12" data-testid="btn-hero-konsultasi">
@@ -137,8 +104,8 @@ export default function BiroJasaSbuPage() {
               {[
                 { num: "4", label: "Layanan Sertifikasi", sub: "SBU · SKK · OSS · LKUT" },
                 { num: "10+", label: "AI Tools Terintegrasi", sub: "SBUClaw, SkemaClaw, OSSClaw…" },
-                { num: "3x", label: "Kapasitas Layanan", sub: "Lebih banyak klien per staf" },
-                { num: "0", label: "Kesalahan Prosedur", sub: "Checklist AI mencegah error" },
+                { num: "3×", label: "Kapasitas Layanan", sub: "Lebih banyak klien per staf" },
+                { num: "~0", label: "Kesalahan Prosedur", sub: "Checklist AI mencegah error" },
               ].map((stat, i) => (
                 <div key={i} className="bg-white/10 border border-white/20 rounded-2xl p-4 text-white text-center">
                   <div className="text-2xl md:text-3xl font-extrabold">{stat.num}</div>
@@ -151,23 +118,37 @@ export default function BiroJasaSbuPage() {
         </div>
       </section>
 
-      {/* Value Prop untuk Biro Jasa */}
-      <section className="py-14 px-4 bg-amber-50 dark:bg-amber-900/10">
+      {/* ── I: INTEREST — Masalah scaling biro jasa ── */}
+      <section className="py-14 px-4 bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white dark:bg-card rounded-2xl border-2 border-amber-300 dark:border-amber-700 p-6">
-            <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-3 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-amber-600" /> Mengapa Biro Jasa Membutuhkan AI?
-            </h2>
-            <div className="grid md:grid-cols-3 gap-4">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-2">Tantangan Nyata Biro Jasa</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Mengapa Biro Jasa Sulit Tumbuh Tanpa AI?</h2>
+            <p className="text-gray-400 text-sm max-w-xl mx-auto">Setiap biro jasa menghadapi hambatan yang sama persis saat mencoba melayani lebih banyak klien.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5 mb-8">
+            {[
+              { icon: <Clock className="h-5 w-5 text-red-400" />, title: "60% Waktu untuk Pertanyaan Dasar", desc: "Staf menghabiskan sebagian besar hari menjawab 'dokumen apa yang dibutuhkan?' atau 'berapa lama prosesnya?' — pertanyaan yang bisa dijawab AI dalam detik." },
+              { icon: <XCircle className="h-5 w-5 text-red-400" />, title: "Berkas Ditolak karena Kelalaian Kecil", desc: "Persyaratan SBU, SKK, dan OSS kompleks dan sering berubah. Satu dokumen kurang, berkas klien ditolak — reputasi biro jasa taruhannya." },
+              { icon: <Users className="h-5 w-5 text-amber-400" />, title: "Staf Baru Butuh Berbulan-bulan", desc: "Onboarding staf untuk memahami seluruh regulasi SBU, SKK, LKUT, dan OSS bisa memakan waktu 3–6 bulan. Terlalu lama untuk biro jasa yang berkembang cepat." },
+            ].map((item, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="flex items-center gap-2 mb-3">{item.icon}<h3 className="font-bold text-sm">{item.title}</h3></div>
+                <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-5">
+            <div className="grid md:grid-cols-3 gap-4 text-center">
               {[
-                { icon: "⚡", title: "Kecepatan Konsultasi", desc: "Klien tanya persyaratan SBU → AI jawab dalam detik. Staf Anda fokus pada proses yang memerlukan human judgment." },
-                { icon: "📋", title: "Tidak Ada yang Terlewat", desc: "Checklist AI memastikan setiap dokumen, persyaratan, dan prosedur terpenuhi sebelum berkas dikirim." },
-                { icon: "🔄", title: "Regulasi Selalu Update", desc: "Permen PUPR, Perka BKPM, SE LPJK berubah terus. AI Gustafta memantau dan mengintegrasikan perubahan regulasi terbaru." },
+                { icon: "⚡", title: "Kecepatan Konsultasi", desc: "Klien tanya persyaratan SBU → AI jawab dalam detik. Staf fokus pada proses yang memerlukan human judgment." },
+                { icon: "📋", title: "Tidak Ada yang Terlewat", desc: "Checklist AI memastikan setiap dokumen dan persyaratan terpenuhi sebelum berkas dikirim ke LPJK/OSS." },
+                { icon: "🔄", title: "Regulasi Selalu Update", desc: "Permen PUPR, Perka BKPM, SE LPJK berubah terus. AI Gustafta mengintegrasikan perubahan regulasi terbaru." },
               ].map((item, i) => (
-                <div key={i} className="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-                  <div className="text-3xl mb-2">{item.icon}</div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-1">{item.title}</h3>
-                  <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
+                <div key={i} className="p-3">
+                  <div className="text-2xl mb-2">{item.icon}</div>
+                  <h3 className="font-bold text-sm text-amber-200 mb-1">{item.title}</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -175,11 +156,12 @@ export default function BiroJasaSbuPage() {
         </div>
       </section>
 
-      {/* Services */}
+      {/* ── D: DESIRE — Services + Cara penggunaan ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">4 Layanan Utama</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">AI Tools per Jenis Layanan Biro Jasa</h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-3">AI Tools per Jenis Layanan Biro Jasa</h2>
+          <p className="text-center text-gray-500 dark:text-muted-foreground text-sm mb-10 max-w-lg mx-auto">Setiap layanan sudah memiliki AI tools spesifik — bukan satu chatbot generik untuk semua jenis permohonan.</p>
           <div className="grid md:grid-cols-2 gap-5">
             {SERVICES_AI.map((svc) => {
               const c = colorStyles[svc.color];
@@ -211,25 +193,23 @@ export default function BiroJasaSbuPage() {
         </div>
       </section>
 
-      {/* Cara Biro Jasa Pakai */}
+      {/* 3 Cara penggunaan */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Cara Penggunaan</p>
           <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">3 Cara Biro Jasa Menggunakan AI Gustafta</h2>
           <div className="space-y-5">
             {[
-              { icon: "🤖", title: "Chatbot Konsultasi Klien Otomatis", desc: "Deploy chatbot AI di WhatsApp, website, atau Instagram Anda. Klien baru yang tanya 'Berapa biaya SBU?' atau 'Apa saja dokumen SKK?' dijawab AI 24/7 tanpa perlu staf jaga.", highlight: "Hemat 4–6 jam/hari untuk jawab pertanyaan dasar" },
-              { icon: "📋", title: "Asisten Verifikasi Berkas", desc: "Sebelum berkas klien dikirim ke LPJK/BKPM/OSS, gunakan AI untuk verifikasi kelengkapan — AI akan cek semua persyaratan dan flag dokumen yang kurang atau tidak sesuai.", highlight: "Kurangi penolakan berkas hingga 80%" },
-              { icon: "📚", title: "Knowledge Base Regulasi Terkini", desc: "Staf baru atau junior bisa tanya AI tentang persyaratan terbaru sebelum konsultasi dengan klien. AI menjadi 'buku panduan hidup' yang selalu up-to-date untuk seluruh tim.", highlight: "Onboarding staf baru 3x lebih cepat" },
+              { icon: "🤖", title: "Chatbot Konsultasi Klien Otomatis", desc: "Deploy chatbot AI di WhatsApp, website, atau Instagram Anda. Klien yang tanya 'Berapa biaya SBU?' atau 'Dokumen SKK apa saja?' dijawab AI 24/7 tanpa perlu staf jaga.", highlight: "Hemat 4–6 jam/hari untuk jawab pertanyaan dasar" },
+              { icon: "📋", title: "Asisten Verifikasi Berkas Sebelum Submit", desc: "Sebelum berkas klien dikirim ke LPJK/BKPM/OSS, gunakan AI untuk verifikasi kelengkapan — AI akan cek semua persyaratan dan flag dokumen yang kurang atau tidak sesuai format.", highlight: "Kurangi penolakan berkas hingga 80%" },
+              { icon: "📚", title: "Knowledge Base Regulasi untuk Seluruh Tim", desc: "Staf baru atau junior bisa tanya AI tentang persyaratan terbaru sebelum konsultasi dengan klien. AI menjadi 'buku panduan hidup' yang selalu up-to-date untuk seluruh tim.", highlight: "Onboarding staf baru 3× lebih cepat" },
             ].map((item, i) => (
               <div key={i} className="flex gap-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-100 dark:border-amber-800/30">
                 <div className="text-3xl flex-shrink-0">{item.icon}</div>
                 <div>
                   <h3 className="font-bold text-gray-900 dark:text-white mb-1">{item.title}</h3>
                   <p className="text-xs text-gray-600 dark:text-muted-foreground leading-relaxed mb-2">{item.desc}</p>
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                    ✓ {item.highlight}
-                  </span>
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">✓ {item.highlight}</span>
                 </div>
               </div>
             ))}
@@ -240,19 +220,21 @@ export default function BiroJasaSbuPage() {
       {/* Testimoni */}
       <section className="py-16 px-4 bg-amber-50 dark:bg-amber-900/10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Biro Jasa & Fasilitator</h2>
+          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Bukti Nyata</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Biro Jasa & Fasilitator yang Sudah Pakai</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Pak Hendra", role: "Pemilik Biro Jasa SBU, Surabaya", text: "SBUClaw dan ESIMPANClaw membantu staf kami memandu klien input data di E-SIMPAN. Yang biasanya butuh 2 jam pendampingan, sekarang bisa selesai 45 menit karena klien bisa tanya AI dulu." },
-              { name: "Bu Ratna", role: "Konsultan Sertifikasi SKK, Jakarta", text: "PanduanASKOM jadi referensi utama saya sebelum konsultasi dengan klien. Tidak perlu scroll-scroll Permen PUPR — tanya AI langsung dapat jawaban yang relevan." },
-              { name: "Dedi S.", role: "Fasilitator OSS & NIB, Bandung", text: "OSSClaw membantu klien UMKM saya yang bingung KBLI-nya. AI langsung identifikasi KBLI yang tepat dan cek risiko — proses yang dulu butuh 1 jam bisa selesai 15 menit." },
+              { name: "Pak Hendra", role: "Pemilik Biro Jasa SBU, Surabaya", before: "Pendampingan input E-SIMPAN klien butuh 2 jam per klien", after: "Kini 45 menit — klien bisa tanya AI dulu sebelum dibantu staf", text: "SBUClaw dan ESIMPANClaw membantu staf kami memandu klien dengan jauh lebih efisien. Kapasitas kami naik tanpa tambah staf." },
+              { name: "Bu Ratna", role: "Konsultan Sertifikasi SKK, Jakarta", before: "Harus scroll regulasi Permen PUPR sebelum setiap konsultasi", after: "Tanya PanduanASKOM — dapat jawaban relevan dalam 30 detik", text: "PanduanASKOM jadi referensi utama saya. Tidak perlu scroll-scroll Permen PUPR — tanya AI langsung dapat jawaban yang tepat." },
+              { name: "Dedi S.", role: "Fasilitator OSS & NIB, Bandung", before: "Identifikasi KBLI yang tepat butuh waktu 1 jam per klien", after: "OSSClaw identifikasi KBLI + cek risiko dalam 15 menit", text: "OSSClaw membantu klien UMKM saya yang bingung KBLI-nya. Proses yang dulu butuh 1 jam bisa selesai 15 menit sekarang." },
             ].map((t, i) => (
               <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-amber-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
+                <div className="flex gap-0.5 mb-2">
                   {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
                 </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
+                <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
+                <p className="text-xs text-gray-400 mb-3">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
+                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-3 leading-relaxed">"{t.text}"</p>
                 <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
                 <p className="text-xs text-gray-500">{t.role}</p>
               </div>
@@ -261,11 +243,13 @@ export default function BiroJasaSbuPage() {
         </div>
       </section>
 
+      {/* ── A: ACTION ── */}
       <section className="py-16 px-4 bg-gradient-to-br from-amber-700 via-orange-700 to-rose-800 text-white text-center">
         <div className="max-w-2xl mx-auto">
           <Award className="h-12 w-12 mx-auto mb-4 opacity-80" />
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Jadikan AI sebagai Staf Terbaik Biro Jasa Anda</h2>
-          <p className="text-orange-100 mb-8">Tidak pernah libur, tidak pernah lupa persyaratan, dan selalu tersedia untuk klien Anda.</p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Jadikan AI sebagai Staf Terbaik Biro Jasa Anda</h2>
+          <p className="text-orange-100 mb-2">Tidak pernah libur. Tidak pernah lupa persyaratan. Selalu tersedia untuk klien Anda.</p>
+          <p className="text-amber-200 text-sm mb-8">Setup kurang dari 1 hari · Langsung bisa dipakai untuk klien pertama</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href={CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="bg-white text-amber-800 hover:bg-amber-50 font-bold gap-2 px-8 h-12" data-testid="btn-cta-bundle">
