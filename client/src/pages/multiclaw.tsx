@@ -1,152 +1,164 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { SharedHeader } from "@/components/shared-header";
-import { Smartphone, LayoutGrid, ChevronRight } from "lucide-react";
+import { Smartphone, LayoutGrid, ChevronRight, Star, Zap, Crown } from "lucide-react";
 
-const CLAW_CATEGORIES = [
+type PlanTier = "starter" | "profesional" | "bisnis";
+
+const PLAN_BADGE: Record<PlanTier, { label: string; className: string }> = {
+  starter:     { label: "Starter",     className: "bg-blue-500/15 text-blue-600 dark:text-blue-300 border-blue-500/30" },
+  profesional: { label: "Pro",         className: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border-indigo-500/30" },
+  bisnis:      { label: "Bisnis",      className: "bg-violet-500/15 text-violet-600 dark:text-violet-300 border-violet-500/30" },
+};
+
+const CLAW_CATEGORIES: {
+  label: string; color: string; icon: string;
+  items: { name: string; href: string; desc: string; plan: PlanTier }[];
+}[] = [
   {
     label: "Sertifikasi & Izin Usaha BUJK", color: "amber", icon: "🏗️",
     items: [
-      { name: "SBUClaw", href: "/sbu-claw", desc: "Sertifikasi Badan Usaha Konstruksi" },
-      { name: "LKUTClaw", href: "/lkut-claw", desc: "Laporan Keuangan Usaha Tahunan" },
-      { name: "PUB-LKUTClaw", href: "/pub-lkut-claw", desc: "Pengembangan Usaha Berkelanjutan & LKUT" },
-      { name: "PJBUClaw", href: "/pjbu-claw", desc: "Personel Manajerial BUJK" },
-      { name: "KeuanganClaw", href: "/keuangan-claw", desc: "Keuangan & Kesehatan Finansial BUJK" },
-      { name: "PajakClaw", href: "/pajak-claw", desc: "Pajak & Kepatuhan Perpajakan Indonesia" },
-      { name: "ABUClaw", href: "/abu-claw", desc: "Konsultan ABU & LSBU" },
-      { name: "PanduanSBU", href: "/panduan-sbu", desc: "Tanya Jawab SBU — answer machine" },
-      { name: "SkemaClaw", href: "/skema-claw", desc: "Sertifikasi BUJK Permen PU 6/2025" },
+      { name: "SBUClaw",      href: "/sbu-claw",       desc: "Sertifikasi Badan Usaha Konstruksi",          plan: "starter" },
+      { name: "LKUTClaw",     href: "/lkut-claw",      desc: "Laporan Keuangan Usaha Tahunan",              plan: "starter" },
+      { name: "PUB-LKUTClaw", href: "/pub-lkut-claw",  desc: "Pengembangan Usaha Berkelanjutan & LKUT",     plan: "profesional" },
+      { name: "PJBUClaw",     href: "/pjbu-claw",      desc: "Personel Manajerial BUJK",                   plan: "starter" },
+      { name: "KeuanganClaw", href: "/keuangan-claw",  desc: "Keuangan & Kesehatan Finansial BUJK",        plan: "starter" },
+      { name: "PajakClaw",    href: "/pajak-claw",     desc: "Pajak & Kepatuhan Perpajakan Indonesia",      plan: "bisnis" },
+      { name: "ABUClaw",      href: "/abu-claw",       desc: "Konsultan ABU & LSBU",                       plan: "starter" },
+      { name: "PanduanSBU",   href: "/panduan-sbu",    desc: "Tanya Jawab SBU — answer machine",           plan: "starter" },
+      { name: "SkemaClaw",    href: "/skema-claw",     desc: "Sertifikasi BUJK Permen PU 6/2025",          plan: "starter" },
     ],
   },
   {
     label: "Tender & Pengadaan", color: "indigo", icon: "📋",
     items: [
-      { name: "TenderaClaw", href: "/tendera-claw", desc: "Analisis Tender BUJK + Win Probability" },
-      { name: "KonstraTenderClaw", href: "/konstra-tender-claw", desc: "Monitor Tender SIRUP BKAD" },
-      { name: "BGClaw", href: "/bg-claw", desc: "Ruang Lingkup Bangunan Gedung" },
-      { name: "BSClaw", href: "/bs-claw", desc: "Ruang Lingkup Bangunan Sipil" },
-      { name: "IMClaw", href: "/im-claw", desc: "Instalasi Mekanikal-Elektrikal" },
-      { name: "KOClaw", href: "/ko-claw", desc: "Konstruksi Spesialis" },
-      { name: "KKClaw", href: "/kk-claw", desc: "Jasa Konsultansi Konstruksi" },
+      { name: "TenderaClaw",       href: "/tendera-claw",        desc: "Analisis Tender BUJK + Win Probability", plan: "starter" },
+      { name: "KonstraTenderClaw", href: "/konstra-tender-claw", desc: "Monitor Tender SIRUP BKAD",              plan: "starter" },
+      { name: "BGClaw",            href: "/bg-claw",             desc: "Ruang Lingkup Bangunan Gedung",          plan: "profesional" },
+      { name: "BSClaw",            href: "/bs-claw",             desc: "Ruang Lingkup Bangunan Sipil",           plan: "profesional" },
+      { name: "IMClaw",            href: "/im-claw",             desc: "Instalasi Mekanikal-Elektrikal",         plan: "profesional" },
+      { name: "KOClaw",            href: "/ko-claw",             desc: "Konstruksi Spesialis",                   plan: "profesional" },
+      { name: "KKClaw",            href: "/kk-claw",             desc: "Jasa Konsultansi Konstruksi",            plan: "profesional" },
     ],
   },
   {
     label: "SKK & Kompetensi TKK", color: "teal", icon: "🎓",
     items: [
-      { name: "PanduanASKOM", href: "/panduan-askom", desc: "Tanya Jawab SKK — answer machine" },
-      { name: "TerasLPJK#1", href: "/teras-lpjk-1", desc: "Sharing Knowledge Sertifikasi SKK" },
-      { name: "ManprojakClaw", href: "/manprojak-claw", desc: "SKK Manajemen Pelaksanaan Konstruksi" },
-      { name: "ArsitekturClaw", href: "/arsitektur-claw", desc: "SKK Klasifikasi Arsitektur" },
-      { name: "SurveiPemetaanClaw", href: "/surveipemetaan-claw", desc: "SKK Survei & Pemetaan" },
-      { name: "GeoteknikClaw", href: "/geoteknik-claw", desc: "SKK Sipil (Geoteknik)" },
-      { name: "JalanJembatanClaw", href: "/jalanjembatan-claw", desc: "SKK Sipil (Jalan & Jembatan)" },
-      { name: "TataLingkunganClaw", href: "/tatalingkungan-claw", desc: "SKK Tata Lingkungan" },
-      { name: "ElektrikalClaw", href: "/elektrikal-claw", desc: "SKK Klasifikasi Elektrikal" },
-      { name: "SafiraClaw", href: "/safira-claw", desc: "SKK K3 Konstruksi" },
+      { name: "PanduanASKOM",      href: "/panduan-askom",       desc: "Tanya Jawab SKK — answer machine",           plan: "starter" },
+      { name: "TerasLPJK#1",       href: "/teras-lpjk-1",        desc: "Sharing Knowledge Sertifikasi SKK",          plan: "profesional" },
+      { name: "ManprojakClaw",     href: "/manprojak-claw",      desc: "SKK Manajemen Pelaksanaan Konstruksi",       plan: "profesional" },
+      { name: "ArsitekturClaw",    href: "/arsitektur-claw",     desc: "SKK Klasifikasi Arsitektur",                 plan: "profesional" },
+      { name: "SurveiPemetaanClaw",href: "/surveipemetaan-claw", desc: "SKK Survei & Pemetaan",                      plan: "profesional" },
+      { name: "GeoteknikClaw",     href: "/geoteknik-claw",      desc: "SKK Sipil (Geoteknik)",                      plan: "profesional" },
+      { name: "JalanJembatanClaw", href: "/jalanjembatan-claw",  desc: "SKK Sipil (Jalan & Jembatan)",               plan: "profesional" },
+      { name: "TataLingkunganClaw",href: "/tatalingkungan-claw", desc: "SKK Tata Lingkungan",                        plan: "profesional" },
+      { name: "ElektrikalClaw",    href: "/elektrikal-claw",     desc: "SKK Klasifikasi Elektrikal",                 plan: "profesional" },
+      { name: "SafiraClaw",        href: "/safira-claw",         desc: "SKK K3 Konstruksi",                          plan: "profesional" },
     ],
   },
   {
     label: "K3, HSE & IMS", color: "red", icon: "⛑️",
     items: [
-      { name: "CSMSClaw", href: "/csms-claw", desc: "Contractor Safety Management System" },
-      { name: "SMK3Claw", href: "/smk3-claw", desc: "IMS & SMK3 Terintegrasi" },
-      { name: "K3ManClaw", href: "/k3man-claw", desc: "Manajemen K3 Konstruksi & SKK" },
-      { name: "OffshoreSafetyClaw", href: "/offshore-safety-claw", desc: "K3 & Operasi Migas Offshore" },
+      { name: "CSMSClaw",          href: "/csms-claw",           desc: "Contractor Safety Management System", plan: "profesional" },
+      { name: "SMK3Claw",          href: "/smk3-claw",           desc: "IMS & SMK3 Terintegrasi",            plan: "profesional" },
+      { name: "K3ManClaw",         href: "/k3man-claw",          desc: "Manajemen K3 Konstruksi & SKK",      plan: "profesional" },
+      { name: "OffshoreSafetyClaw",href: "/offshore-safety-claw",desc: "K3 & Operasi Migas Offshore",        plan: "bisnis" },
     ],
   },
   {
     label: "ISO & Kepatuhan", color: "blue", icon: "📜",
     items: [
-      { name: "ISOClaw 9001", href: "/iso-claw-9001", desc: "SMM ISO 9001 Jasa Konstruksi" },
-      { name: "ISOClaw 14001", href: "/iso-claw-14001", desc: "SML ISO 14001 Jasa Konstruksi" },
-      { name: "SMAPClaw", href: "/smap-claw", desc: "ISO 37001 Anti-Penyuapan" },
-      { name: "PanCEKClaw", href: "/pancek-claw", desc: "KPK & Kepatuhan Anti-Korupsi" },
-      { name: "NSPKNavigatorClaw", href: "/nspk-navigator-claw", desc: "Panduan NSPK & Standar Teknis" },
-      { name: "HACCPClaw", href: "/haccp-claw", desc: "HACCP, BPOM & Sertifikasi Halal" },
+      { name: "ISOClaw 9001",      href: "/iso-claw-9001",       desc: "SMM ISO 9001 Jasa Konstruksi",      plan: "profesional" },
+      { name: "ISOClaw 14001",     href: "/iso-claw-14001",      desc: "SML ISO 14001 Jasa Konstruksi",     plan: "profesional" },
+      { name: "SMAPClaw",          href: "/smap-claw",           desc: "ISO 37001 Anti-Penyuapan",          plan: "profesional" },
+      { name: "PanCEKClaw",        href: "/pancek-claw",         desc: "KPK & Kepatuhan Anti-Korupsi",      plan: "profesional" },
+      { name: "NSPKNavigatorClaw", href: "/nspk-navigator-claw", desc: "Panduan NSPK & Standar Teknis",     plan: "profesional" },
+      { name: "HACCPClaw",         href: "/haccp-claw",          desc: "HACCP, BPOM & Sertifikasi Halal",   plan: "bisnis" },
     ],
   },
   {
     label: "Teknik & Konsultansi", color: "sky", icon: "🔧",
     items: [
-      { name: "SipilClaw", href: "/sipil-claw", desc: "Konsultan Teknik Sipil" },
-      { name: "MEPClaw", href: "/mep-claw", desc: "Konsultan MEP" },
-      { name: "LingkunganClaw", href: "/lingkungan-claw", desc: "Konsultan Lingkungan Hidup" },
-      { name: "BIMClaw", href: "/bim-claw", desc: "Konsultan BIM & Konstruksi Digital" },
-      { name: "DesainClaw", href: "/desain-claw", desc: "Konsultan Desain Arsitektur" },
-      { name: "QSClaw", href: "/qs-claw", desc: "Quantity Surveying & Estimasi Biaya" },
-      { name: "PengawasClaw", href: "/pengawas-claw", desc: "Pengawas Konstruksi & SKK" },
-      { name: "KontrakClaw", href: "/kontrak-claw", desc: "Manajemen Kontrak & Klaim" },
-      { name: "SiteOpsClaw", href: "/siteops-claw", desc: "Operasional Lapangan" },
+      { name: "SipilClaw",   href: "/sipil-claw",   desc: "Konsultan Teknik Sipil",          plan: "profesional" },
+      { name: "MEPClaw",     href: "/mep-claw",     desc: "Konsultan MEP",                   plan: "profesional" },
+      { name: "LingkunganClaw",href:"/lingkungan-claw",desc:"Konsultan Lingkungan Hidup",    plan: "profesional" },
+      { name: "BIMClaw",     href: "/bim-claw",     desc: "Konsultan BIM & Konstruksi Digital",plan:"profesional"},
+      { name: "DesainClaw",  href: "/desain-claw",  desc: "Konsultan Desain Arsitektur",     plan: "profesional" },
+      { name: "QSClaw",      href: "/qs-claw",      desc: "Quantity Surveying & Estimasi Biaya",plan:"starter" },
+      { name: "PengawasClaw",href: "/pengawas-claw",desc: "Pengawas Konstruksi & SKK",       plan: "starter" },
+      { name: "KontrakClaw", href: "/kontrak-claw", desc: "Manajemen Kontrak & Klaim",       plan: "starter" },
+      { name: "SiteOpsClaw", href: "/siteops-claw", desc: "Operasional Lapangan",            plan: "profesional" },
     ],
   },
   {
     label: "Perizinan & Investasi", color: "cyan", icon: "📑",
     items: [
-      { name: "ESIMPANClaw", href: "/esimpan-claw", desc: "Input Pengalaman BUJK & TKK di E-SIMPAN" },
-      { name: "LKPMClaw", href: "/lkpm-claw", desc: "LKPM & Penanaman Modal BKPM" },
-      { name: "OSSClaw", href: "/oss-claw", desc: "OSS-RBA, NIB & Perizinan" },
+      { name: "ESIMPANClaw", href: "/esimpan-claw", desc: "Input Pengalaman BUJK & TKK di E-SIMPAN", plan: "profesional" },
+      { name: "LKPMClaw",    href: "/lkpm-claw",    desc: "LKPM & Penanaman Modal BKPM",             plan: "profesional" },
+      { name: "OSSClaw",     href: "/oss-claw",     desc: "OSS-RBA, NIB & Perizinan",                plan: "profesional" },
     ],
   },
   {
     label: "Energi & Pertambangan", color: "orange", icon: "⚡",
     items: [
-      { name: "KetenagalistrikanClaw", href: "/ketenagalistrikan-claw", desc: "Konsultan Ketenagalistrikan" },
-      { name: "EnergiClaw", href: "/energi-claw", desc: "Konsultan Energi & EBT" },
-      { name: "EBTSolarClaw", href: "/ebt-solar-claw", desc: "PLTS & Energi Surya" },
-      { name: "TransisiEnergiClaw", href: "/transisi-energi-claw", desc: "Konsultan Transisi Energi" },
-      { name: "MigasClaw", href: "/migas-claw", desc: "Kompetensi & Perizinan Energi Migas" },
-      { name: "PertambanganClaw", href: "/pertambangan-claw", desc: "Konsultan Pertambangan" },
-      { name: "GeologiClaw", href: "/geologi-claw", desc: "Konsultan Geologi & Eksplorasi" },
-      { name: "TransmisiClaw", href: "/transmisi-claw", desc: "Transmisi & Gardu Induk PLN" },
+      { name: "KetenagalistrikanClaw",href:"/ketenagalistrikan-claw",desc:"Konsultan Ketenagalistrikan",    plan: "bisnis" },
+      { name: "EnergiClaw",           href:"/energi-claw",           desc:"Konsultan Energi & EBT",         plan: "bisnis" },
+      { name: "EBTSolarClaw",         href:"/ebt-solar-claw",        desc:"PLTS & Energi Surya",            plan: "bisnis" },
+      { name: "TransisiEnergiClaw",   href:"/transisi-energi-claw",  desc:"Konsultan Transisi Energi",      plan: "bisnis" },
+      { name: "MigasClaw",            href:"/migas-claw",            desc:"Kompetensi & Perizinan Energi Migas",plan:"bisnis"},
+      { name: "PertambanganClaw",     href:"/pertambangan-claw",     desc:"Konsultan Pertambangan",         plan: "bisnis" },
+      { name: "GeologiClaw",          href:"/geologi-claw",          desc:"Konsultan Geologi & Eksplorasi", plan: "bisnis" },
+      { name: "TransmisiClaw",        href:"/transmisi-claw",        desc:"Transmisi & Gardu Induk PLN",    plan: "bisnis" },
     ],
   },
   {
     label: "Properti & Real Estate", color: "violet", icon: "🏠",
     items: [
-      { name: "DevPropertiClaw", href: "/dev-properti-claw", desc: "Developer Real Estate" },
-      { name: "EstateCareClaw", href: "/estate-care-claw", desc: "Konsultan Properti Konsumen" },
+      { name: "DevPropertiClaw",  href: "/dev-properti-claw",  desc: "Developer Real Estate",        plan: "bisnis" },
+      { name: "EstateCareClaw",   href: "/estate-care-claw",   desc: "Konsultan Properti Konsumen",  plan: "bisnis" },
     ],
   },
   {
     label: "Manajemen Proyek Konstruksi", color: "slate", icon: "🏢",
     items: [
-      { name: "KonstraClaw", href: "/konstra-claw", desc: "Manajemen Proyek Konstruksi" },
-      { name: "BrainClaw", href: "/brain-claw", desc: "Project Intelligence AI" },
+      { name: "KonstraClaw", href: "/konstra-claw", desc: "Manajemen Proyek Konstruksi", plan: "profesional" },
+      { name: "BrainClaw",   href: "/brain-claw",   desc: "Project Intelligence AI",    plan: "profesional" },
     ],
   },
   {
     label: "Pendidikan & Sertifikasi", color: "emerald", icon: "📚",
     items: [
-      { name: "EducounselClaw", href: "/educounsel-claw", desc: "Konseling Akademik" },
-      { name: "IBTUClaw", href: "/ibtu-claw", desc: "IB Testing Unit AI" },
-      { name: "ETLOAcademyClaw", href: "/etlo-academy-claw", desc: "Program ETLO Energi & Sertifikasi EBT" },
-      { name: "ETLOBizDevClaw", href: "/etlo-bizdev-claw", desc: "Strategi Bisnis & Pengembangan ETLO" },
-      { name: "TutorTeknikClaw", href: "/tutor-teknik-claw", desc: "AI Tutor Teknik untuk Mahasiswa" },
-      { name: "RisetSkripsiClaw", href: "/riset-skripsi-claw", desc: "Konsultan Riset & Skripsi" },
+      { name: "EducounselClaw",   href: "/educounsel-claw",   desc: "Konseling Akademik",                      plan: "profesional" },
+      { name: "IBTUClaw",         href: "/ibtu-claw",         desc: "IB Testing Unit AI",                      plan: "profesional" },
+      { name: "ETLOAcademyClaw",  href: "/etlo-academy-claw", desc: "Program ETLO Energi & Sertifikasi EBT",   plan: "bisnis" },
+      { name: "ETLOBizDevClaw",   href: "/etlo-bizdev-claw",  desc: "Strategi Bisnis & Pengembangan ETLO",     plan: "bisnis" },
+      { name: "TutorTeknikClaw",  href: "/tutor-teknik-claw", desc: "AI Tutor Teknik untuk Mahasiswa",         plan: "profesional" },
+      { name: "RisetSkripsiClaw", href: "/riset-skripsi-claw",desc: "Konsultan Riset & Skripsi",               plan: "profesional" },
     ],
   },
   {
     label: "Bisnis, HR & Operasional", color: "rose", icon: "💼",
     items: [
-      { name: "DigitalMarketingClaw", href: "/digital-marketing-claw", desc: "Konsultan Digital Marketing" },
-      { name: "CrmSalesClaw", href: "/crm-sales-claw", desc: "Konsultan CRM & Sales" },
-      { name: "BrandContentClaw", href: "/brand-content-claw", desc: "Konsultan Brand & Content" },
-      { name: "EcommerceClaw", href: "/ecommerce-claw", desc: "Konsultan E-Commerce" },
-      { name: "RekrutmenClaw", href: "/rekrutmen-claw", desc: "Konsultan Rekrutmen" },
-      { name: "LdKompetensiClaw", href: "/ld-kompetensi-claw", desc: "Konsultan Learning & Development" },
-      { name: "PenilaianKinerjaClaw", href: "/penilaian-kinerja-claw", desc: "Konsultan Manajemen Kinerja" },
-      { name: "HubunganIndustrialClaw", href: "/hubungan-industrial-claw", desc: "HR & Industrial Relations" },
-      { name: "ESGClaw", href: "/esg-claw", desc: "ESG & Keberlanjutan Indonesia" },
-      { name: "LeanOpExClaw", href: "/lean-opex-claw", desc: "Lean Manufacturing & OpEx" },
-      { name: "SupplyChainClaw", href: "/supply-chain-claw", desc: "Supply Chain & Logistics" },
-      { name: "Industri40Claw", href: "/industri40-claw", desc: "Industri 4.0 & Digital Manufacturing" },
+      { name: "DigitalMarketingClaw",   href: "/digital-marketing-claw",   desc: "Konsultan Digital Marketing",   plan: "bisnis" },
+      { name: "CrmSalesClaw",           href: "/crm-sales-claw",           desc: "Konsultan CRM & Sales",         plan: "bisnis" },
+      { name: "BrandContentClaw",       href: "/brand-content-claw",       desc: "Konsultan Brand & Content",     plan: "bisnis" },
+      { name: "EcommerceClaw",          href: "/ecommerce-claw",           desc: "Konsultan E-Commerce",          plan: "bisnis" },
+      { name: "RekrutmenClaw",          href: "/rekrutmen-claw",           desc: "Konsultan Rekrutmen",           plan: "bisnis" },
+      { name: "LdKompetensiClaw",       href: "/ld-kompetensi-claw",       desc: "Konsultan Learning & Development",plan:"bisnis"},
+      { name: "PenilaianKinerjaClaw",   href: "/penilaian-kinerja-claw",   desc: "Konsultan Manajemen Kinerja",   plan: "bisnis" },
+      { name: "HubunganIndustrialClaw", href: "/hubungan-industrial-claw", desc: "HR & Industrial Relations",     plan: "bisnis" },
+      { name: "ESGClaw",                href: "/esg-claw",                 desc: "ESG & Keberlanjutan Indonesia", plan: "bisnis" },
+      { name: "LeanOpExClaw",           href: "/lean-opex-claw",           desc: "Lean Manufacturing & OpEx",     plan: "bisnis" },
+      { name: "SupplyChainClaw",        href: "/supply-chain-claw",        desc: "Supply Chain & Logistics",      plan: "bisnis" },
+      { name: "Industri40Claw",         href: "/industri40-claw",          desc: "Industri 4.0 & Digital Manufacturing",plan:"bisnis"},
     ],
   },
   {
     label: "Regulasi, Hukum & Keamanan", color: "gray", icon: "⚖️",
     items: [
-      { name: "KorporasiClaw", href: "/korporasi-claw", desc: "Konsultan Korporasi & Bisnis" },
-      { name: "CybersecurityClaw", href: "/cybersecurity-claw", desc: "Cybersecurity & PDP Indonesia" },
+      { name: "KorporasiClaw",    href: "/korporasi-claw",    desc: "Konsultan Korporasi & Bisnis",   plan: "bisnis" },
+      { name: "CybersecurityClaw",href: "/cybersecurity-claw",desc: "Cybersecurity & PDP Indonesia",  plan: "bisnis" },
     ],
   },
 ];
@@ -168,6 +180,8 @@ const COLOR_MAP: Record<string, { badge: string; label: string; card: string }> 
 };
 
 const totalClaws = CLAW_CATEGORIES.reduce((acc, cat) => acc + cat.items.length, 0);
+const starterCount = CLAW_CATEGORIES.flatMap(c => c.items).filter(i => i.plan === "starter").length;
+const proCount = CLAW_CATEGORIES.flatMap(c => c.items).filter(i => i.plan !== "bisnis").length;
 
 export default function MulticlawPage() {
   return (
@@ -186,6 +200,26 @@ export default function MulticlawPage() {
           <p className="text-muted-foreground text-base max-w-xl mx-auto leading-relaxed mb-6">
             Setiap "Claw" adalah tim AI spesialis yang bekerja paralel. Pilih domain Anda, klik, dan langsung tanya — tanpa perlu setup apapun.
           </p>
+
+          {/* Paket info strip */}
+          <div className="flex flex-wrap justify-center gap-3 mb-6">
+            <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-xl px-3 py-2">
+              <Star className="h-3.5 w-3.5 text-blue-500" />
+              <span className="text-xs font-semibold text-blue-600 dark:text-blue-300">Starter</span>
+              <span className="text-xs text-muted-foreground">{starterCount} claw</span>
+            </div>
+            <div className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl px-3 py-2">
+              <Zap className="h-3.5 w-3.5 text-indigo-500" />
+              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-300">Profesional</span>
+              <span className="text-xs text-muted-foreground">{proCount} claw</span>
+            </div>
+            <div className="flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-xl px-3 py-2">
+              <Crown className="h-3.5 w-3.5 text-violet-500" />
+              <span className="text-xs font-semibold text-violet-600 dark:text-violet-300">Bisnis</span>
+              <span className="text-xs text-muted-foreground">{totalClaws} claw</span>
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-2 justify-center">
             {CLAW_CATEGORIES.map((cat) => (
               <a key={cat.label} href={`#${cat.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
@@ -210,20 +244,28 @@ export default function MulticlawPage() {
                   <span className="text-xs text-muted-foreground font-normal normal-case">({cat.items.length} Claw)</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {cat.items.map((item) => (
-                    <Link key={item.name} href={item.href}>
-                      <div className={`rounded-xl border p-4 bg-background cursor-pointer transition-all hover:shadow-md ${c.card}`}
-                        data-testid={`card-multiclaw-${item.name.toLowerCase().replace(/\s+/g, "-")}`}>
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-bold text-sm mb-0.5">{item.name}</p>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  {cat.items.map((item) => {
+                    const planBadge = PLAN_BADGE[item.plan];
+                    return (
+                      <Link key={item.name} href={item.href}>
+                        <div className={`rounded-xl border p-4 bg-background cursor-pointer transition-all hover:shadow-md ${c.card}`}
+                          data-testid={`card-multiclaw-${item.name.toLowerCase().replace(/\s+/g, "-")}`}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <p className="font-bold text-sm truncate">{item.name}</p>
+                                <Badge className={`text-[9px] px-1.5 py-0 h-4 border font-semibold shrink-0 ${planBadge.className}`}>
+                                  {planBadge.label}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             );
