@@ -47,6 +47,7 @@ import IndustriPage from "@/pages/industri";
 import AffiliatePage from "@/pages/affiliate";
 import MulticlawSuitePage from "@/pages/multiclaw-suite";
 import PersonaPage from "@/pages/persona";
+import KonstruksiPage from "@/pages/konstruksi";
 import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
@@ -405,6 +406,7 @@ function Router() {
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/multiclaw-suite" component={MulticlawSuitePage} />
       <Route path="/persona" component={PersonaPage} />
+      <Route path="/konstruksi" component={KonstruksiPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
