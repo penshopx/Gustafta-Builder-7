@@ -42,6 +42,11 @@ import MitraPage from "@/pages/mitra";
 import LegacyPage from "@/pages/legacy";
 import BlueprintPage from "@/pages/blueprint";
 import MulticlawPage from "@/pages/multiclaw";
+import StarterKitPage from "@/pages/starter-kit";
+import IndustriPage from "@/pages/industri";
+import AffiliatePage from "@/pages/affiliate";
+import MulticlawSuitePage from "@/pages/multiclaw-suite";
+import PersonaPage from "@/pages/persona";
 import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
@@ -395,6 +400,11 @@ function Router() {
       <Route path="/mitra" component={MitraPage} />
       <Route path="/legacy" component={LegacyPage} />
       <Route path="/blueprint" component={BlueprintPage} />
+      <Route path="/starter-kit" component={StarterKitPage} />
+      <Route path="/industri" component={IndustriPage} />
+      <Route path="/affiliate" component={AffiliatePage} />
+      <Route path="/multiclaw-suite" component={MulticlawSuitePage} />
+      <Route path="/persona" component={PersonaPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
