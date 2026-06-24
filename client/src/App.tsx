@@ -552,7 +552,7 @@ function Router() {
         <Route path="/trilogi-chat/:orchestratorId" component={TrilogiChat} />
         <Route path="/sbu-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="SBUClaw — Multi-Agen SBU Konstruksi"
             description="10 agen spesialis yang memandu proses pengurusan SBU Konstruksi end-to-end: mapping subklasifikasi, gap analysis, dokumen, SKK, hingga walkthrough OSS-RBA."
             highlights={["Smart mapping subklasifikasi BS/BG/IL/IM/KO","Checklist dokumen & gap analysis kualifikasi","Draft surat & estimasi biaya + timeline","Walkthrough OSS-RBA & LPJK step-by-step"]}
@@ -590,7 +590,7 @@ function Router() {
         )} />
         <Route path="/pjbu-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="PJBUClaw — Personel Manajerial BUJK AI"
             description="5 agen spesialis bekerja paralel: panduan PJBU, PJTBU, PJKBU, SIP-PJBU kontraktor, dan SIP-PJBU konsultan — lengkap dengan kompetensi, persyaratan SKK, dan prosedur pendaftaran LPJK."
             highlights={["Panduan PJBU, PJTBU & PJKBU sesuai PP 14/2021","Persyaratan SKK manajerial per kualifikasi BUJK","Prosedur pendaftaran & update SIP LPJK","Panduan PJBU kontraktor & konsultan berbeda"]}
@@ -599,7 +599,7 @@ function Router() {
         )} />
         <Route path="/keuangan-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="KeuanganClaw — Analisis Keuangan & Manajerial BUJK AI"
             description="4 agen spesialis bekerja paralel: analisis rasio keuangan BUJK, panduan manager keuangan & KPI, toolkit manajerial (cash flow, anggaran proyek), dan matriks kompetensi & JD tim keuangan."
             highlights={["Analisis rasio keuangan BUJK + PSAK 34 konstruksi","Cash flow proyeksi & working capital management","KPI keuangan & dashboard monitoring proyek","JD & matriks kompetensi tim keuangan"]}
@@ -608,7 +608,7 @@ function Router() {
         )} />
         <Route path="/tendera-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="TenderaClaw — AI Tender Multi-Agent BUJK"
             description="10 agen spesialis tender bekerja paralel: pencari tender LPSE/SIRUP, cek kelaikan SBU/SKK, risk scanner SDP, generator 12 dokumen administrasi LKPP, technical proposal, HPS optimizer, FIDIC analyzer, win probability 7-dimensi, anti-suap SMAP, dan sanggah/banding."
             highlights={["Tender Hunter LPSE/SIRUP/INAPROC real-time","Kelaikan SBU·SKK·KBLI — GO/CONDITIONAL/NO-GO","Risk Scanner SDP/RKS/SSKK — Heat-Map prioritas","Win Probability 7-dimensi + Action Levers"]}
@@ -617,7 +617,7 @@ function Router() {
         )} />
         <Route path="/konstra-tender-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="KonstraTenderClaw — Monitor Tender SIRUP/LKPP AI"
             description="4 agen spesialis SIRUP/LKPP bekerja paralel: pencari & ranking tender real-time, cek kecukupan dokumen Perpres 46/2025, kalkulasi probabilitas menang 4-dimensi, dan action plan 7 hari."
             highlights={["Cari & ranking tender SIRUP LKPP real-time","Cek dokumen sesuai Perpres 46/2025","Probabilitas menang scorecard 4-dimensi","Action plan optimal 7 hari siap submit"]}
@@ -698,7 +698,7 @@ function Router() {
         )} />
         <Route path="/lkut-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="LKUTClaw — Laporan Kegiatan Usaha Tahunan BUJK AI"
             description="4 agen spesialis LKUT bekerja paralel: panduan LKUT kontraktor, LKUT konsultan, penyusunan laporan lengkap, dan analisis keuangan & rasio BUJK."
             highlights={["Panduan LKUT kontraktor & konsultan sesuai PP 14/2021","Generator format LKUT lengkap siap submit OSS","Analisis rasio keuangan BUJK & indikator pelaporan","Timeline & checklist persiapan LKUT tahunan"]}
@@ -779,7 +779,7 @@ function Router() {
         )} />
         <Route path="/etlo-academy-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="ETLOAcademyClaw — AI Program ETLO: Kurikulum, Audit Energi & Sertifikasi EBT"
             description="10 agen spesialis program ETLO bekerja paralel: panduan ETL vs ETO, desain kurikulum 100 jam, audit energi SNI/ISO 50001, retrofit efisiensi (ECM & IPMVP), simulasi PLTS rooftop, sertifikasi BNSP/LSP/SKKNI, monitoring IoT/SCADA, pipeline proyek pilot, framework mentoring, dan checker regulasi RUEN/KEN/NZE 2060."
             highlights={["Audit energi SNI/ISO 50001 — walkthrough, rinci, laporan PermenESDM","Simulasi PLTS rooftop — sizing, yield, payback, perizinan PLN & SLO","Sertifikasi BNSP/LSP SKKNI EBT — auditor energi muda & teknisi PLTS","Regulasi RUEN/KEN/NZE 2060 — Paris Agreement, JETP, NDC Indonesia"]}
@@ -788,7 +788,7 @@ function Router() {
         )} />
         <Route path="/etlo-bizdev-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="ETLOBizDevClaw — AI Strategi Bisnis & Pengembangan Program ETLO"
             description="10 agen spesialis business development ETLO bekerja paralel: strategi B2G/B2B, navigator ESG & climate finance (TCFD, carbon credit), drafting proposal grant (ADB/GCF/BPDLH), positioning 5 paket program, kalkulasi ROI & carbon saving, kolaborasi kampus/asosiasi, KPI dampak, dana hijau internasional, model scale-up nasional, dan unit economics."
             highlights={["Proposal grant internasional ADB/GCF/BPDLH/UNDP — Theory of Change & M&E","ESG & climate finance — TCFD, GHG Protocol Scope 1/2/3, IDXCarbon, JETP","ROI & SROI — kalkulasi NPV, IRR, payback, tCO2eq, social return on investment","Scale-up nasional — franchise model, hub regional, lisensi konten 20+ kota"]}
@@ -824,7 +824,7 @@ function Router() {
         )} />
         <Route path="/ketenagalistrikan-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="KetenagalistrikanClaw — AI Konsultan Sistem Ketenagalistrikan Indonesia"
             description="8 spesialis ketenagalistrikan bekerja paralel: perizinan IUPTL/IO/IUPP, instalasi tenaga listrik & SLO (PUIL 2011), sistem distribusi TM/TR & AMI PLN, transmisi SUTT/SUTET & gardu induk, PLTS on-grid/off-grid (Permen ESDM 26/2021), K3 ketenagalistrikan (Permen ESDM 12/2021), tarif listrik & RUPTL PLN, serta regulasi UU 30/2009."
             highlights={["Perizinan IUPTL & IO — OSS-RBA, dokumen teknis, persetujuan ESDM","PLTS Atap & SLO — sizing, Permen ESDM 26/2021, net metering PLN","K3 Ketenagalistrikan — LOTO, ARC Flash IEEE 1584, AK3 Listrik Permen ESDM 12/2021","Tarif & Power Factor — golongan tarif, denda kVArh, capacitor bank, RUPTL"]}
@@ -833,7 +833,7 @@ function Router() {
         )} />
         <Route path="/energi-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="EnergiClaw — AI Konsultan Energi & EBT Indonesia"
             description="8 spesialis energi bekerja paralel: kebijakan RUEN/KEN/NZE 2060/JETP, PLTS skala besar & PPA PLN, energi angin PLTB, mini hidro PLTM/PLTMH, bioenergi & cofiring PLN, konservasi energi & ECM, audit energi ISO 50001, dan perizinan EBT (WKP, IUPTL, KKPR, insentif fiskal)."
             highlights={["Kebijakan EBT — RUEN, KEN, NZE 2060, JETP $20M, Perpres 112/2022","PLTS Utility Scale — PVsyst, PPA PLN, FIT Permen ESDM 2/2023, LCOE","Bioenergi — cofiring PLN 5%, biodiesel B35/B40, biogas POME/landfill","Audit Energi ISO 50001 — SNI 6196, IPMVP, auditor BNSP bersertifikat"]}
@@ -842,7 +842,7 @@ function Router() {
         )} />
         <Route path="/pertambangan-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="PertambanganClaw — AI Konsultan Pertambangan Indonesia"
             description="8 spesialis pertambangan bekerja paralel: perizinan IUP/IUPK/SIPB (UU Minerba 3/2020), geologi eksplorasi & JORC/KCMI, teknik open pit & underground, pengolahan & smelter (RKEF/HPAL), K3 tambang & SMKP, AMDAL & reklamasi (PP 78/2010), PNBP royalti & CSR, serta regulasi UU Minerba."
             highlights={["IUP/IUPK/SIPB — OSS-RBA, CnC, RKAB tahunan, UU Minerba 3/2020","Hilirisasi Mineral — smelter RKEF/NPI vs HPAL/nickel sulfate, wajib olah","K3 Tambang & SMKP — KTT/KIT, POP/POM/POU, Kepmen ESDM 1827/2018","Reklamasi & Pascatambang — jaminan reklamasi, AMD, RPT, PP 78/2010"]}
@@ -851,7 +851,7 @@ function Router() {
         )} />
         <Route path="/ebt-solar-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="EBTSolarClaw — AI Konsultan PLTS & Energi Surya Indonesia"
             description="8 spesialis PLTS bekerja paralel: sizing & PVsyst/yield analysis, PPA & FIT Permen ESDM 2/2023, perizinan IUPTL/KKPR/AMDAL/SLO, EPC konstruksi & commissioning IEC, integrasi grid PLN, O&M & monitoring, BESS LFP/NMC penyimpanan energi, dan inovasi agrivoltaic/floating solar."
             highlights={["Sizing & Yield — PVsyst/PVWatts P50/P90, GHI Indonesia 1.300-1.500 kWh/kWp","PPA & FIT — Permen ESDM 2/2023, tarif per zona, LCOE, project finance","BESS — LFP vs NMC, dispatch strategy, LCOS, NFPA 855, VRE integration","Perizinan — IUPTL OSS-RBA, KKPR, AMDAL, SLO PLN, net metering"]}
@@ -860,7 +860,7 @@ function Router() {
         )} />
         <Route path="/geologi-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="GeologiClaw — AI Konsultan Geologi & Eksplorasi Mineral Indonesia"
             description="8 spesialis geologi bekerja paralel: geologi regional & metalogenik Indonesia, program eksplorasi & QAQC, geofisika (IP/magnetic/EM/seismik), pemboran & core logging, estimasi sumber daya JORC 2012/KCMI 2017, alterasi & mineralisasi epithermal/porphyry, geoteknik lereng (RMR/Hoek-Brown), dan hidrogeologi AMD."
             highlights={["JORC 2012 & KCMI 2017 — Inferred/Indicated/Measured, Competent Person PERHAPI/AusIMM","Geofisika — IP/induced polarization, magnetic, EM, seismik refraksi, CSAMT","Geoteknik Lereng — RMR, Q-system, Hoek-Brown, FoS slope open pit/underground","AMD & Hidrogeologi — ABA test, NAG, dewatering, pit lake, reklamasi PP 22/2021"]}
@@ -869,7 +869,7 @@ function Router() {
         )} />
         <Route path="/offshore-safety-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="OffshoreSafetyClaw — AI Konsultan K3 & Operasi Migas Offshore Indonesia"
             description="8 spesialis offshore bekerja paralel: CSMS & SMK3 (SKK Migas/ISM Code), operasi platform/FPSO, well control & BOP (IWCF/IADC), marine operations & DP vessels (SOLAS), process safety (HAZOP/QRA/SIL IEC 61511), lingkungan MARPOL/oil spill response, asset integrity (API RP 2SIM/NDT), dan regulasi KKKS/PSC/WP&B SKK Migas."
             highlights={["CSMS SKK Migas — pre-qualification, KPI K3, PTK 036, ISM Code offshore","Well Control — BOP API 16A, IWCF/IADC, kill method, deepwater MPD","Process Safety — HAZOP, QRA, SIL IEC 61511, bow-tie, LOPA, PFEER EER","MARPOL & Oil Spill — Annex I/V, produced water, Tier 1/2/3 response"]}
@@ -878,7 +878,7 @@ function Router() {
         )} />
         <Route path="/transisi-energi-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="TransisiEnergiClaw — AI Konsultan Transisi Energi & Dekarbonisasi Indonesia"
             description="8 spesialis transisi energi bekerja paralel: kebijakan JETP/NZE 2060/NDC Indonesia, hidrogen hijau & CCUS, panas bumi (WKP/PPA/Permen ESDM 4/2020), PLTB onshore/offshore (IEC 61400), grid-scale storage & pumped hydro (PHS/BESS/VRFB), pasar karbon IDXCarbon & VCM (Perpres 98/2021), pensiun dini PLTU ETM (ADB), dan smart grid/VRE integration."
             highlights={["JETP/NZE 2060 — CIPP Indonesia, coal phase-down, climate finance blended","Green Hydrogen — elektrolizer PEM/alkaline, LCOH, CCUS PP 2/2023","IDXCarbon — NEK Perpres 98/2021, VCM, Artikel 6, SBTi corporate net zero","ETM PLTU — early retirement ADB, stranded asset, just transition"]}
@@ -887,7 +887,7 @@ function Router() {
         )} />
         <Route path="/digital-marketing-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="DigitalMarketingClaw — AI Konsultan Digital Marketing Indonesia"
             description="8 spesialis digital marketing bekerja paralel: strategi SEO & SEM (Google Ads/Meta Ads), social media marketing (Instagram/TikTok/LinkedIn), content marketing & copywriting, email marketing & marketing automation, analytics & data-driven decision making, influencer & KOL marketing, marketplace optimization (Tokopedia/Shopee/Lazada), dan performance marketing & conversion rate optimization."
             highlights={["SEO/SEM — keyword research, on-page/off-page, Google Ads ROAS optimization","Social Media — algoritma Instagram/TikTok, content calendar, paid social","Analytics — GA4, Meta Pixel, attribution model, funnel analysis","Marketplace — Tokopedia/Shopee ads, ranking algorithm, review management"]}
@@ -896,7 +896,7 @@ function Router() {
         )} />
         <Route path="/crm-sales-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="CrmSalesClaw — AI Konsultan CRM & Sales Excellence Indonesia"
             description="8 spesialis CRM & sales bekerja paralel: strategi sales funnel & pipeline management, CRM implementation (Salesforce/HubSpot/Zoho), customer segmentation & lifetime value, B2B & B2C sales methodology, negotiation & closing techniques, customer retention & loyalty program, sales analytics & forecasting, serta team performance & sales coaching."
             highlights={["Sales Funnel — pipeline design, lead scoring, conversion rate optimization","CRM — Salesforce/HubSpot setup, automation, reporting dashboard","B2B Sales — SPIN Selling, Challenger Sale, account-based selling","Customer Retention — NPS, churn analysis, loyalty program design"]}
@@ -905,7 +905,7 @@ function Router() {
         )} />
         <Route path="/brand-content-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="BrandContentClaw — AI Konsultan Brand & Content Marketing Indonesia"
             description="8 spesialis brand & content bekerja paralel: brand strategy & positioning, visual identity & brand guidelines, content strategy & editorial planning, storytelling & copywriting, video content & podcast production, PR & media relations, brand measurement & equity tracking, serta crisis communication & reputation management."
             highlights={["Brand Strategy — positioning, USP, brand architecture, brand story","Content Planning — editorial calendar, content mix, repurposing strategy","Copywriting — headline formula, persuasive writing, tone of voice","PR & Media — press release, media kit, spokesperson training"]}
@@ -914,7 +914,7 @@ function Router() {
         )} />
         <Route path="/ecommerce-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="EcommerceClaw — AI Konsultan E-Commerce & Perdagangan Digital Indonesia"
             description="8 spesialis e-commerce bekerja paralel: strategi marketplace (Tokopedia/Shopee/Lazada/TikTok Shop), D2C & website optimization, inventory & supply chain management, pricing strategy & promotion, customer experience & UX, payment & logistics integration, cross-border e-commerce, serta data analytics & growth hacking."
             highlights={["Marketplace — Tokopedia/Shopee/TikTok Shop ads, ranking, flash sale strategy","D2C — Shopify/WooCommerce setup, CRO, checkout optimization","Logistics — 3PL selection, last-mile delivery, return management","Growth Hacking — viral loop, referral program, retention automation"]}
@@ -923,7 +923,7 @@ function Router() {
         )} />
         <Route path="/rekrutmen-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="RekrutmenClaw — AI Konsultan Rekrutmen & Talent Acquisition Indonesia"
             description="8 spesialis rekrutmen bekerja paralel: talent strategy & workforce planning, job analysis & competency mapping, sourcing strategy (LinkedIn/jobboard/referral), selection & assessment design, employer branding & EVP, interview & onboarding, diversity & inclusion hiring, serta HR analytics & recruitment metrics."
             highlights={["Talent Strategy — workforce planning, succession planning, talent pipeline","Sourcing — Boolean search, LinkedIn Recruiter, talent mapping","Assessment — psychometric test, structured interview, assessment center","Employer Branding — EVP, Glassdoor management, campus recruitment"]}
@@ -932,7 +932,7 @@ function Router() {
         )} />
         <Route path="/ld-kompetensi-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="LdKompetensiClaw — AI Konsultan Learning & Development Indonesia"
             description="8 spesialis L&D bekerja paralel: training needs analysis & competency framework, learning design & instructional design, LMS & e-learning development, leadership development program, coaching & mentoring system, organizational development, knowledge management, serta learning impact measurement & Kirkpatrick model."
             highlights={["TNA — competency gap analysis, learning roadmap, skills matrix","Instructional Design — ADDIE/SAM model, microlearning, blended learning","Leadership Dev — leadership pipeline, 360 feedback, executive coaching","Learning Metrics — Kirkpatrick 4 levels, ROI training, learning analytics"]}
@@ -941,7 +941,7 @@ function Router() {
         )} />
         <Route path="/penilaian-kinerja-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="PenilaianKinerjaClaw — AI Konsultan Penilaian Kinerja & Manajemen SDM Indonesia"
             description="8 spesialis penilaian kinerja bekerja paralel: performance management system design, KPI & OKR framework, 360-degree feedback, performance appraisal process, compensation & reward linked to performance, performance improvement plan (PIP), HR analytics & people analytics, serta employee engagement & retention strategy."
             highlights={["OKR/KPI — objective setting, cascading goals, SMART framework","Performance Review — appraisal form design, calibration session, forced ranking","Compensation — pay-for-performance, salary band, incentive scheme design","People Analytics — attrition prediction, engagement survey, HRIS dashboard"]}
@@ -977,7 +977,7 @@ function Router() {
         )} />
         <Route path="/korporasi-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="KorporasiClaw — AI Konsultan Korporasi & Bisnis Indonesia"
             description="8 spesialis korporasi bekerja paralel: pendirian PT/CV/Koperasi (AHU Online), perizinan NIB/OSS-RBA (PP 5/2021/KBLI 2020), perpajakan badan (PPh/PPN/transfer pricing), saham & RUPS/GCG (UU 40/2007), kontrak bisnis & LDD (KUH Perdata/BANI), HR compliance (UU 13/2003/PP 35/2021/BPJS), keuangan korporasi & IPO (PSAK/POJK/OJK), serta M&A & restrukturisasi (KPPU/PKPU)."
             highlights={["Pendirian PT: AHU Online, modal minimal, biaya notaris, timeline","NIB/OSS-RBA: KBLI 2020, risiko rendah/menengah/tinggi, Sertifikat Standar","PPh Badan: rekonsiliasi fiskal, tarif 22%/11%, koreksi positif/negatif","PHK/PKWT: hitung pesangon PP 35/2021, uang kompensasi PKWT"]}
@@ -985,7 +985,7 @@ function Router() {
           ><KorporasiClawChat /></PremiumPageGuard>
         )} />
         <Route path="/pajak-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="PajakClaw — AI Advisor Pajak Indonesia"
             description="8 spesialis pajak bekerja paralel: PPh 21/22/23/25/26, PPN 12% & e-Faktur, sistem Coretax DJP 2025, Transfer Pricing & BEPS, Tax Treaty P3B & Pillar 2 GMT, insentif Tax Holiday/Tax Allowance, sengketa pajak & Pengadilan Pajak, serta compliance SPT & risk management."
             highlights={["PPh Karyawan & Badan — tarif progresif, kredit pajak, NPWP/NIK","PPN e-Faktur 12% — Coretax 2025, restitusi, KMS-PPN","Transfer Pricing — Doc-TP, CbCR, BEPS, advance pricing agreement","Banding Pajak — Keberatan, Pengadilan Pajak, PK MA"]}
@@ -993,7 +993,7 @@ function Router() {
           ><PajakClawChat /></PremiumPageGuard>
         )} />
         <Route path="/hubungan-industrial-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="HubunganIndustrialClaw — AI Konsultan HR & Industrial Relations Indonesia"
             description="8 spesialis HR/IR bekerja paralel: PKB & SP/SB, PHK & pesangon UU 6/2023, UMP/UMK & struktur skala upah, BPJS Ketenagakerjaan & Kesehatan, Pengadilan Hubungan Industrial, PKWT vs PKWTT & outsourcing, K3 ketenagakerjaan & kesejahteraan, serta compliance WLKP & RPTKA."
             highlights={["PHK & Pesangon — perhitungan UP/UPMK/UPH PP 35/2021","UMP/UMK — struktur skala upah, THR, lembur Permenaker 18/2022","BPJS — JHT/JKK/JKM/JP & JKP, iuran & manfaat","PHI — bipartit → mediasi → PHI → kasasi MA"]}
@@ -1001,7 +1001,7 @@ function Router() {
           ><HubunganIndustrialClawChat /></PremiumPageGuard>
         )} />
         <Route path="/esg-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="ESGClaw — AI Konsultan ESG & Keberlanjutan Indonesia"
             description="8 spesialis ESG bekerja paralel: Sustainability Report POJK 51 & GRI/ISSB/TCFD, GHG inventory Scope 1/2/3 & SBTi, green bond & sustainable finance, audit energi ISO 50001, HAM bisnis & CSR ISO 26000, GCG & anti-bribery ISO 37001, sertifikasi Greenship/EDGE/LEED, serta rating MSCI/Sustainalytics."
             highlights={["POJK 51 & ISSB IFRS S1/S2 — Sustainability Report, double materiality","GHG Protocol & IDXCarbon — Scope 1/2/3, NEK Perpres 98/2021","Green Bond POJK 60/2017 — Sustainability-Linked Loan, Taxonomi Hijau OJK","Greenship NB/EB — GBCI, EDGE, LEED v4.1, BREEAM"]}
@@ -1009,7 +1009,7 @@ function Router() {
           ><EsgClawChat /></PremiumPageGuard>
         )} />
         <Route path="/lean-opex-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="LeanOpExClaw — AI Konsultan Lean Manufacturing & Operational Excellence"
             description="8 spesialis Lean/OpEx bekerja paralel: Lean & TPS (7 wastes, VSM, Kaizen), Six Sigma DMAIC/DMADV (SPC, FMEA), 5S & visual management, TPM & OEE, QC ISO 9001 & Poka-Yoke, PDCA & A3 problem solving, productivity & line balancing, serta strategi OpEx (Shingo, EFQM, Hoshin Kanri)."
             highlights={["Lean TPS — VSM current/future, Kaizen, Jidoka, Pull system Kanban","Six Sigma — DMAIC, SPC, FMEA, Belt Yellow/Green/Black","TPM & OEE — Availability × Performance × Quality, 8 Pillars","A3 & Hoshin Kanri — root cause 5-Why, X-Matrix, KPI cascading"]}
@@ -1017,7 +1017,7 @@ function Router() {
           ><LeanOpExClawChat /></PremiumPageGuard>
         )} />
         <Route path="/supply-chain-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="SupplyChainClaw — AI Konsultan Supply Chain & Logistics Indonesia"
             description="8 spesialis SCM bekerja paralel: procurement & vendor management, inventory EOQ/safety stock, WMS & warehouse layout, transportation TMS & INCOTERMS 2020, SCOR APICS Plan/Source/Make/Deliver, demand planning S&OP/IBP, supply chain risk & business continuity, serta digital SC (ERP/IoT/blockchain/AI)."
             highlights={["Procurement & Inventory — RFQ/RFP, EOQ, ABC/XYZ, JIT, VMI","WMS & TMS — slotting, picking FIFO/FEFO, 3PL/4PL, cold chain","SCOR & S&OP — KPI OTIF/Fill Rate, demand forecasting Holt-Winters","Digital SC — SAP/Oracle/Odoo, control tower, blockchain traceability"]}
@@ -1025,7 +1025,7 @@ function Router() {
           ><SupplyChainClawChat /></PremiumPageGuard>
         )} />
         <Route path="/industri40-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="Industri40Claw — AI Konsultan Industri 4.0 & Digital Manufacturing Indonesia"
             description="8 spesialis Industri 4.0 bekerja paralel: IoT industrial (MQTT/OPC UA/edge), AI/ML predictive maintenance & computer vision, otomasi PLC/SCADA/robotics, Digital Twin & simulation, big data & OEE analytics real-time, OT/ICS cybersecurity IEC 62443, cloud manufacturing & MES, serta Making Indonesia 4.0 (Kemenperin, INDI 4.0)."
             highlights={["IoT & Edge — MQTT/OPC UA, ThingsBoard, brownfield retrofit","AI/ML — predictive maintenance, computer vision defect, MLOps","Digital Twin — virtual commissioning, what-if scenarios","Making Indonesia 4.0 — 7 priority sectors, INDI 4.0 readiness"]}
@@ -1033,7 +1033,7 @@ function Router() {
           ><Industri40ClawChat /></PremiumPageGuard>
         )} />
         <Route path="/transmisi-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="TransmisiClaw — AI Konsultan Transmisi & Gardu Induk Indonesia"
             description="7 spesialis transmisi bekerja paralel: SUTT 70/150 kV (konduktor, tower, ROW 20m), SUTET 500 kV (bundled conductor, EHV, ROW 54m), GI AIS outdoor switchyard, GI GIS modular SF6, sistem proteksi (distance/differential/IEC 61850), SKTT XLPE 150/500 kV, serta perizinan ROW & kompensasi tanah."
             highlights={["SUTT/SUTET — konduktor ACSR/AAAC, span, sagging, ROW PLN UIP","GI AIS vs GIS — SF6, partial discharge, IEC 62271, commissioning","Proteksi — distance 21, differential 87, IEC 61850, teleprotection","ROW & Permen ESDM 18/2015 — EMF, kompensasi, AMDAL transmisi"]}
@@ -1041,7 +1041,7 @@ function Router() {
           ><TransmisiClawChat /></PremiumPageGuard>
         )} />
         <Route path="/cybersecurity-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="CybersecurityClaw — AI Konsultan Cybersecurity & PDP Indonesia"
             description="8 spesialis cybersecurity bekerja paralel: UU 27/2022 PDP & DPO, ISO 27001:2022 ISMS Annex A, NIST CSF 2.0 & Zero Trust, penetration testing OWASP/PTES, SOC SIEM/SOAR MITRE ATT&CK, cloud security AWS/Azure/GCP CIS, cyber governance & BCMS ISO 22301, serta compliance Indonesia (BSSN, PSE PP 71/2019, OJK)."
             highlights={["UU PDP — DPO, breach notification 72 jam, sanksi pidana","ISO 27001:2022 — 93 controls, SOA, ISMS, surveillance audit","NIST CSF 2.0 — Govern/Identify/Protect/Detect/Respond/Recover","SOC & MITRE ATT&CK — SIEM Splunk/QRadar, SOAR playbook, IR"]}
@@ -1049,7 +1049,7 @@ function Router() {
           ><CybersecurityClawChat /></PremiumPageGuard>
         )} />
         <Route path="/haccp-claw" component={() => (
-          <PremiumPageGuard feature="advanced_ai_tools" requiredPlan="profesional"
+          <PremiumPageGuard feature="claw_bisnis" requiredPlan="bisnis"
             title="HACCPClaw — AI Konsultan HACCP, BPOM & Sertifikasi Halal Indonesia"
             description="8 spesialis food safety bekerja paralel: HACCP Codex 7 principles 12 steps, ISO 22000:2018 FSMS & FSSC 22000, registrasi BPOM MD/ML/SP & e-Registration, CPPOB/GMP & SSOP sanitasi, sertifikasi halal UU 33/2014 & BPJPH SiHalal, label & klaim gizi PerBPOM, cemaran mikroba & kimia SNI, serta standar internasional Codex/FDA/EU."
             highlights={["HACCP Codex — 7 principles, CCP, prerequisite program PRP","BPOM MD/ML/SP — e-Registration, kategori pangan PerBPOM 34/2019","Halal — BPJPH, LPH MUI, SiHalal, mandatory Okt 2024","FSSC 22000 GFSI — ISO/TS 22002-1, traceability, recall"]}
@@ -1074,7 +1074,7 @@ function Router() {
         )} />
         <Route path="/migas-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="MigasClaw — Kompetensi & Perizinan Energi AI"
             description="9 agen spesialis energi bekerja paralel: sertifikasi BUJKM & CSMS SKK Migas, kompetensi teknis Migas (well control & inspeksi), PLTS & BESS (solar & storage), EBT lain (PLTB/PLTP/biomassa), IUP/IUPK Minerba, K3 tambang, gap analysis SKKNI, studi kasus lapangan, dan panduan LSP."
             highlights={["BUJKM & CSMS SKK Migas — dokumen K3LL & pengajuan","IUP/IUPK Minerba — OSS-RBA, CNC, UU Minerba 3/2020","Sertifikasi SKKNI EBT: PLTS/BESS, PLTB, PLTP, biomassa","Gap analysis → rekomendasi jalur LSP Migas/ESDM"]}
@@ -1083,7 +1083,7 @@ function Router() {
         )} />
         <Route path="/dev-properti-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="DevPropertiClaw — AI Developer Real Estate"
             description="10 agen spesialis developer properti bekerja paralel: informasi & master plan proyek, tipe unit & spesifikasi, harga & promo, proses booking & PPJB, simulasi KPR & pembiayaan, legalitas SHM/HGB/PBG, site visit, serah terima & garansi, kerja sama agen, dan FAQ due diligence."
             highlights={["Materi pemasaran: USP, pricing, skrip sales tim lapangan","Legalitas SHM/HGB/PBG — BPHTB, PPh, balik nama","Simulasi KPR & panduan pembiayaan bank rekanan","Program agen & co-marketing — struktur komisi & onboarding"]}
@@ -1092,7 +1092,7 @@ function Router() {
         )} />
         <Route path="/estate-care-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_bisnis" requiredPlan="bisnis"
             title="EstateCareClaw — AI Konsultan Properti Konsumen"
             description="10 agen spesialis properti konsumen bekerja paralel: panduan cari properti, panduan beli step-by-step, strategi jual & listing, proses closing & PPJB, panduan sewa, kontrak sewa, estimasi harga awal, strategi investasi & rental yield, biaya transaksi, dan glossary properti."
             highlights={["Due diligence sertifikat & legalitas — AJB, PPAT, SHM/HGB","Estimasi pajak penjual: BPHTB, PPh final 2,5%, biaya notaris","Analisis rental yield, ROI, & strategi investasi properti","Hak penyewa vs pemilik — klausul kontrak sewa & sengketa"]}
@@ -1101,7 +1101,7 @@ function Router() {
         )} />
         <Route path="/skema-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="SkemaClaw — Konsultan Cerdas Sertifikasi BUJK"
             description="9 spesialis regulasi bekerja paralel: kerangka hukum Permen PU 6/2025, kualifikasi & 4 kriteria penilaian, kemampuan keuangan & audit KAP, tenaga kerja konstruksi (PJBU/PJTBU/PJKBU), peralatan & SIMPK, alur sertifikasi LSBU 10 tahap, konversi 349K SBU & KBLI 2025, sistem informasi SIJKT, dan kewajiban BUJK & sanksi administratif."
             highlights={["Konversi 349.239 SBU — peta jalan KBLI 2020 ke KBLI 2025","4 Kriteria Penilaian Kumulatif — K1/K2/K3/Menengah/Besar","Alur sertifikasi LSBU 10 tahap — PKS, surveilans, QR Code SBU","Mode: Konsultasi · Audit · Simulasi · Ujian · Debat · Strategis"]}
@@ -1146,7 +1146,7 @@ function Router() {
         )} />
         <Route path="/panduan-sbu" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="PanduanSBU — Tanya Jawab Sertifikasi BUJK"
             description="Chatbot ramah untuk semua kalangan — tanya apa saja tentang SBU, kualifikasi perusahaan konstruksi, syarat dokumen, konversi KBLI 2025, dan aturan Permen PU 6/2025. Dijawab langsung, jelas, dan mudah dipahami."
             highlights={["Jawaban langsung tanpa format akademis","Bahasa sederhana — cocok untuk pemilik BUJK & masyarakat umum","Cakupan: SBU, kualifikasi, dokumen, konversi, sanksi, SIJKT","Berbasis Permen PU 6/2025 & materi workshop resmi LPJK"]}
@@ -1155,7 +1155,7 @@ function Router() {
         )} />
         <Route path="/abu-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="Konsultan ABU & LSBU — Asesmen Badan Usaha Konstruksi"
             description="8 agen spesialis untuk Asesor Badan Usaha (ABU) dan pengelola LSBU — audit lapangan, penilaian kesesuaian, manajemen asesor, surveilans, banding BUJK, hingga audit LPJK. Adaptif per level karier, koreksi aktif prosedur keliru."
             highlights={["Panduan teknis ABU: peran, kualifikasi & kewenangan asesor BU","Audit lapangan & penilaian kesesuaian BUJK berbasis Permen PU 6/2025","Manajemen asesor, surveilans, banding & penanganan sengketa BUJK","Audit LPJK & perpanjangan lisensi LSBU — tata kelola kelembagaan"]}
@@ -1164,7 +1164,7 @@ function Router() {
         )} />
         <Route path="/panduan-askom" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="PanduanASKOM — Tanya Jawab Uji Kompetensi SKK"
             description="Chatbot informasi tentang Asesor Kompetensi (ASKOM) dan proses uji kompetensi SKK untuk masyarakat umum. Tanya apa saja: syarat peserta, alur uji, RPL, biaya, hak banding — dijawab langsung, bahasa sederhana."
             highlights={["Apa itu ASKOM & bagaimana proses uji kompetensi SKK","Syarat peserta uji, APL-01/02, dan dokumen yang dibutuhkan","RPL: pengakuan pengalaman kerja tanpa uji ulang","Hak asesi: banding, keberatan, perlindungan data"]}
@@ -1254,7 +1254,7 @@ function Router() {
         )} />
         <Route path="/qs-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="QSClaw — AI Quantity Surveying & Estimasi Biaya Konstruksi"
             description="MultiClaw AI dengan 7 spesialis paralel: QTO dari gambar/BIM, Analisis Harga Satuan AHSP, Penyusunan RAB/BOQ, Cost Control & Earned Value, Value Engineering & LCC, Dokumen Tender & HPS, dan BIM 5D Cost."
             highlights={["QTO & AHSP: pengukuran volume, analisis harga satuan PermenPUPR 01/2022, OH&P, eskalasi","RAB/BOQ: struktur WBS, format tender LPSE, contingency, LKPP, koreksi aritmatik","Cost Control EVM: CPI/SPI/EAC, S-curve, PSAK 34, monthly cost report, variance analysis","Value Engineering: FAST diagram, LCC analysis, alternatif material/sistem, BIM 5D Revit/CostX"]}
@@ -1263,7 +1263,7 @@ function Router() {
         )} />
         <Route path="/pengawas-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="PengawasClaw — AI Pengawas Konstruksi & Jabatan Kerja SKK"
             description="MultiClaw AI dengan 7 spesialis paralel: Pengawas Lapangan, Inspeksi Struktur, Finishing, MEP Commissioning, K3 Lapangan, Quality Control ITP, dan Administrasi berita acara/PHO/FHO."
             highlights={["Inspeksi Struktur: beton fc' 28 hari, tulangan, pondasi bore pile, NCR & remedial, SNI 2847:2019","MEP Commissioning: HVAC TAB, plumbing pressure test, SLO listrik, BAS integration, O&M manual","K3 Lapangan: PTW hot work/confined space/height, toolbox talk, APD, investigasi insiden","Administrasi: berita acara kemajuan, Variation Order, PHO/FHO snagging list, klaim FIDIC"]}
@@ -1272,7 +1272,7 @@ function Router() {
         )} />
         <Route path="/kontrak-claw" component={() => (
           <PremiumPageGuard
-            feature="advanced_ai_tools" requiredPlan="profesional"
+            feature="claw_sbu_tender" requiredPlan="starter"
             title="KontrakClaw — AI Manajemen Kontrak & Klaim Konstruksi"
             description="MultiClaw AI dengan 7 spesialis paralel: FIDIC Red/Yellow/Silver Book, Kontrak Pemerintah SSUK/SSKK, Klaim Delay & EOT, Dispute DAAB/BANI, Subkontrak, Asuransi CAR/EAR, dan Manajemen Komersial."
             highlights={["FIDIC 1999/2017: EOT, VO valuation, payment, termination, DAAB — interpretasi klausul lengkap","Klaim & Delay Analysis: SCL Protocol, as-planned vs as-built, concurrent delay, prolongation cost","Kontrak Pemerintah: SSUK/SSKK Perpres 16/2018, addendum, BPK/BPKP audit compliance","Asuransi & Jaminan: CAR/EAR, TPL, PI, surety bond, jaminan penawaran/pelaksanaan"]}
