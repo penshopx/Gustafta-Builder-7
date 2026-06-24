@@ -54,6 +54,9 @@ import TenderPage from "@/pages/tender";
 import LkutPage from "@/pages/lkut";
 import PkbPage from "@/pages/pkb";
 import LkpmPage from "@/pages/lkpm";
+import RisetSkripsiPage from "@/pages/riset-skripsi";
+import ContentCreatorPage from "@/pages/content-creator";
+import AcademicCounselorPage from "@/pages/academic-counselor";
 import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
@@ -419,6 +422,9 @@ function Router() {
       <Route path="/lkut" component={LkutPage} />
       <Route path="/pkb" component={PkbPage} />
       <Route path="/lkpm" component={LkpmPage} />
+      <Route path="/riset-skripsi" component={RisetSkripsiPage} />
+      <Route path="/content-creator" component={ContentCreatorPage} />
+      <Route path="/academic-counselor" component={AcademicCounselorPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
