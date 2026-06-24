@@ -62,6 +62,14 @@ import KonsultanPajakPage from "@/pages/konsultan-pajak";
 import KonsultanKeuanganPage from "@/pages/konsultan-keuangan";
 import ExecutiveSummaryPage from "@/pages/executive-summary";
 import BiroJasaSbuPage from "@/pages/biro-jasa-sbu";
+import BrainProjectPage from "@/pages/brain-project";
+import KonsultanKontrakPage from "@/pages/konsultan-kontrak";
+import KonsultanDokumenProyekPage from "@/pages/konsultan-dokumen-proyek";
+import KonsultanPancekSmapPage from "@/pages/konsultan-pancek-smap";
+import KonsultanIsoSmmPage from "@/pages/konsultan-iso-smm";
+import KonsultanIsoSmlPage from "@/pages/konsultan-iso-sml";
+import SkkPedomanBnspPage from "@/pages/skk-pedoman-bnsp";
+import PedomanKanPage from "@/pages/pedoman-kan";
 import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
@@ -435,6 +443,14 @@ function Router() {
       <Route path="/konsultan-keuangan" component={KonsultanKeuanganPage} />
       <Route path="/executive-summary" component={ExecutiveSummaryPage} />
       <Route path="/biro-jasa-sbu" component={BiroJasaSbuPage} />
+      <Route path="/brain-project" component={BrainProjectPage} />
+      <Route path="/konsultan-kontrak" component={KonsultanKontrakPage} />
+      <Route path="/konsultan-dokumen-proyek" component={KonsultanDokumenProyekPage} />
+      <Route path="/konsultan-pancek-smap" component={KonsultanPancekSmapPage} />
+      <Route path="/konsultan-iso-smm" component={KonsultanIsoSmmPage} />
+      <Route path="/konsultan-iso-sml" component={KonsultanIsoSmlPage} />
+      <Route path="/skk-pedoman-bnsp" component={SkkPedomanBnspPage} />
+      <Route path="/pedoman-kan" component={PedomanKanPage} />
       <Route path="/multiclaw" component={MulticlawPage} />
       <Route path="/paket-bisnis" component={PaketBisnis} />
         <Route path="/legal/chat" component={() => (
