@@ -95,3 +95,39 @@ id = "FfDV2MjVlQeYN7leS1sRb"
 uri = "file://attached_assets/generated_videos/gustafta-business-opportunity.mp4"
 type = "video"
 title = "4 — Peluang Usaha"
+
+[[outputs]]
+id = "X3ENhs6ugzciyFtzupxjd"
+uri = "file://client/public/images/g04.png"
+type = "image"
+title = "g04 — AI Builder Studio (PALING builder: tampilan dashboard merakit chatbot)"
+
+[[outputs]]
+id = "v1NF5XozXfrT8TZJrXZXP"
+uri = "file://client/public/images/g18.png"
+type = "image"
+title = "g18 — No Code Build Anything (builder + orang merakit + knowledge base)"
+
+[[outputs]]
+id = "5d8Ipm0v1eeG3KuTOmIXA"
+uri = "file://client/public/images/g19.png"
+type = "image"
+title = "g19 — No-Code Platform (blok modular builder, tanpa orang)"
+
+[[outputs]]
+id = "ucp-xq8rSTv9rsZyq2AZF"
+uri = "file://client/public/images/g15.png"
+type = "image"
+title = "g15 — Trilogi: orang ngomong dengan AI (Dialog-Kolaborasi-Kreasi)"
+
+[[outputs]]
+id = "H6s9mO3CQXuHjM9fuzkeD"
+uri = "file://client/public/images/g14.png"
+type = "image"
+title = "g14 — Dialog/Kolaborasi/Kreasi (yang sekarang dipakai di Creator Personas)"
+
+[[outputs]]
+id = "3yRMtr3EJtoaD5E-szv24"
+uri = "file://client/public/images/g20.png"
+type = "image"
+title = "g20 — AI Orchestration Hub (diagram agen, teknis)"
