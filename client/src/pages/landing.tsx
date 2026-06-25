@@ -105,6 +105,21 @@ export default function Landing() {
           <p className="text-base md:text-lg font-semibold text-blue-600 dark:text-blue-400">
             Bukan menggantikan Anda. Melipatgandakan kehadiran Anda.
           </p>
+
+          <div className="mt-10 rounded-2xl overflow-hidden border shadow-lg bg-black/5 dark:bg-white/5">
+            <video
+              src="/videos/gustafta-monolog-to-dialog.mp4"
+              poster="/images/g05.png"
+              className="w-full"
+              controls
+              playsInline
+              preload="metadata"
+              data-testid="video-monolog-dialog"
+            />
+          </div>
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3">
+            Lihat bagaimana pengetahuan satu arah berubah menjadi dialog yang hidup.
+          </p>
         </div>
       </section>
 
@@ -134,6 +149,16 @@ export default function Landing() {
                 <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
+          </div>
+
+          <div className="mt-10 rounded-2xl overflow-hidden border border-white/60 dark:border-white/5 shadow-lg">
+            <img
+              src="/images/g07.png"
+              alt="Contoh ekosistem digital yang dirakit di Gustafta Builder"
+              className="w-full object-cover"
+              loading="lazy"
+              data-testid="img-output-showcase"
+            />
           </div>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8 italic">
@@ -220,6 +245,21 @@ export default function Landing() {
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8 italic">
             Rata-rata creator aktif pertama dalam &lt; 30 menit.
+          </p>
+
+          <div className="mt-10 rounded-2xl overflow-hidden border shadow-lg bg-black/5 dark:bg-white/5">
+            <video
+              src="/videos/gustafta-business-opportunity.mp4"
+              poster="/images/g06.png"
+              className="w-full"
+              controls
+              playsInline
+              preload="metadata"
+              data-testid="video-business-opportunity"
+            />
+          </div>
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3">
+            Peluang bisnis nyata: ubah keahlian Anda menjadi aset digital yang menghasilkan.
           </p>
         </div>
       </section>
