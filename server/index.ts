@@ -11,7 +11,6 @@ process.on("uncaughtException", (err) => {
 });
 
 import express, { type Request, Response, NextFunction } from "express";
-import { execSync } from "child_process";
 
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -263,16 +262,12 @@ const seedModuleRegistry: Record<string, any> = {
   "./seed-teras-lpjk1": M_terasLpjk1,
 };
 
-// Push DB schema on startup in production (build time has no DB access)
-if (process.env.NODE_ENV === "production") {
-  try {
-    console.log("[startup] Pushing database schema...");
-    execSync("npx drizzle-kit push --force", { stdio: "inherit", timeout: 60000 });
-    console.log("[startup] Schema ready.");
-  } catch (err) {
-    console.error("[startup] db:push failed — continuing anyway:", err);
-  }
-}
+// NOTE: Schema migration is handled by Replit's deployment pipeline, which copies
+// the development database (schema + data) to production before the container starts.
+// We intentionally do NOT run `drizzle-kit push` at runtime here: it is a dev-only CLI
+// invoked via `npx`, runs synchronously at module load (blocking the event loop before
+// the HTTP server can `listen`), and on autoscale this blocks the startup health probe
+// long enough to fail the promote step. Keeping startup fast lets the probe pass.
 
 const app = express();
 app.set("trust proxy", 1);
