@@ -200,15 +200,20 @@ export default function Landing() {
             Anda bukan pemakai. Anda adalah arsitek ekosistem.
           </p>
 
-          <div className="mt-10 rounded-2xl overflow-hidden border shadow-lg">
-            <img
-              src="/images/g14.png"
-              alt="Beragam creator merakit ekosistem AI mereka di Gustafta"
-              className="w-full object-cover"
-              loading="lazy"
-              data-testid="img-personas-showcase"
+          <div className="mt-10 max-w-3xl mx-auto rounded-2xl overflow-hidden border shadow-lg bg-black/5 dark:bg-white/5">
+            <video
+              src="/videos/g23.mp4"
+              poster="/images/g23-poster.png"
+              className="w-full"
+              controls
+              playsInline
+              preload="metadata"
+              data-testid="video-personas-dialog"
             />
           </div>
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3">
+            Dari sendirian dalam berpikir — menuju dialog yang menemani Anda.
+          </p>
         </div>
       </section>
 
