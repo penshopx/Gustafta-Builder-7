@@ -199,6 +199,16 @@ export default function Landing() {
           <p className="text-center text-sm font-semibold text-blue-600 dark:text-blue-400 mt-8">
             Anda bukan pemakai. Anda adalah arsitek ekosistem.
           </p>
+
+          <div className="mt-10 rounded-2xl overflow-hidden border shadow-lg">
+            <img
+              src="/images/g14.png"
+              alt="Beragam creator merakit ekosistem AI mereka di Gustafta"
+              className="w-full object-cover"
+              loading="lazy"
+              data-testid="img-personas-showcase"
+            />
+          </div>
         </div>
       </section>
 
@@ -373,6 +383,21 @@ export default function Landing() {
               </div>
             </div>
           </div>
+
+          <div className="mt-12 max-w-3xl mx-auto rounded-2xl overflow-hidden border shadow-lg bg-black/5 dark:bg-white/5">
+            <video
+              src="/videos/gustafta-platform-overview.mp4"
+              poster="/images/g15.png"
+              className="w-full"
+              controls
+              playsInline
+              preload="metadata"
+              data-testid="video-platform-overview"
+            />
+          </div>
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-3">
+            Tur singkat: bagaimana platform Gustafta bekerja untuk Anda.
+          </p>
         </div>
       </section>
 
