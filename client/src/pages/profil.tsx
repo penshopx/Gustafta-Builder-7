@@ -200,22 +200,25 @@ export default function Profil() {
             <h2 className="text-2xl md:text-3xl font-bold">Trilogi Gustafta</h2>
             <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Dari Monolog ke Dialog — Perjalanan transformasi cara belajar, bekerja, dan berkreasi bersama AI.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 items-center">
+          <div className="grid md:grid-cols-2 gap-6 items-start">
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
-              <div className="overflow-hidden" style={{ aspectRatio: "9/11" }}>
+              <div className="overflow-hidden" style={{ aspectRatio: "1/1" }}>
                 <img
                   src="/images/g01.png"
                   alt="Buku Trilogi Gustafta — Dari Monolog ke Dialog"
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "center 12%" }}
                 />
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
-              <img
-                src="/images/g06.png"
-                alt="Peluncuran Buku Trilogi Gustafta"
-                className="w-full object-cover"
-              />
+              <div style={{ aspectRatio: "1/1" }}>
+                <img
+                  src="/images/g06.png"
+                  alt="Peluncuran Buku Trilogi Gustafta"
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
             </div>
           </div>
         </div>
