@@ -208,7 +208,7 @@ export default function Profil() {
                 className="w-full object-cover"
               />
               {/* Overlay menutup "Oleh: Prof..." di bagian bawah */}
-              <div className="absolute bottom-0 left-0 right-0 h-[22%] bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent" />
             </div>
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
               <img
