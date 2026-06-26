@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
+import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Award, ClipboardList,
   BookOpen, GraduationCap, Users, Star, Target,
@@ -40,7 +41,7 @@ const colorTag: Record<string, string> = {
 
 export default function SkkPedomanBnspPage() {
   const { isAuthenticated } = useAuth();
-  const builderUrl = isAuthenticated ? "/dashboard" : "/login";
+  const { ctaUrl: builderUrl } = useTrialCTA();
 
   return (
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-skk-pedoman-bnsp">

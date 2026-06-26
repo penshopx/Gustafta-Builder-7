@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
+import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, FileText, AlertTriangle,
   ClipboardList, CalendarCheck, Building2, Users, Star,
@@ -115,7 +116,7 @@ const colorTag: Record<string, string> = {
 
 export default function LkutPage() {
   const { isAuthenticated } = useAuth();
-  const builderUrl = isAuthenticated ? "/dashboard" : "/login";
+  const { ctaUrl: builderUrl } = useTrialCTA();
 
   return (
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-lkut">

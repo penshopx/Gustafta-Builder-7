@@ -29,6 +29,7 @@ export const users = pgTable("users", {
   passwordHash: varchar("password_hash"),
   emailVerified: boolean("email_verified").default(false),
   authProvider: varchar("auth_provider").default("replit"),
+  dialogCompleted: boolean("dialog_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

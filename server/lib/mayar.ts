@@ -36,10 +36,10 @@ interface MayarWebhookPayload {
 export const subscriptionPlans = {
   free_trial: {
     name: "Free Trial",
-    duration: 14,
+    duration: 7,
     price: 0,
     chatbotLimit: 1,
-    description: "14 hari gratis untuk mencoba semua fitur",
+    description: "7 hari gratis, 75 pesan, 1 chatbot — via Dialog Gustafta",
   },
   monthly_1: {
     name: "1 Bulan",

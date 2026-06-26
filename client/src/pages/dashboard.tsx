@@ -45,6 +45,7 @@ import { MarketingPanel } from "@/components/panels/marketing-panel";
 import { AdminAgentsPanel } from "@/components/panels/admin-agents-panel";
 import { StudioPanel } from "@/components/panels/studio-panel";
 import { EkosistemPanel } from "@/components/panels/ekosistem-panel";
+import { TrialLockOverlay } from "@/components/trial-lock-overlay";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -106,6 +107,119 @@ const navItems: { id: NavItem; label: string; shortLabel: string; icon: typeof B
   { id: "chat", label: "Chat Console", shortLabel: "Chat", icon: MessageSquare },
   { id: "analytics", label: "Analytics", shortLabel: "Stats", icon: BarChart3 },
 ];
+
+function TrialQuotaBanner() {
+  const { data, isLoading } = useQuery<{
+    hasActiveTrial: boolean;
+    trialMessagesUsed: number;
+    trialMessagesQuota: number;
+    trialMessagesRemaining: number;
+    trialEndsAt?: string;
+    dialogCompleted: boolean;
+  }>({ queryKey: ["/api/trial/status"], retry: 1 });
+
+  if (isLoading || !data) return null;
+
+  if (!data.hasActiveTrial) {
+    if (!data.dialogCompleted) {
+      return (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-sm">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-cyan-500 shrink-0" />
+            <span className="text-muted-foreground">Selesaikan <strong>Dialog Gustafta</strong> untuk aktifkan trial gratis (75 pesan)</span>
+          </div>
+          <Link href="/dialog-gustafta">
+            <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-cyan-500/40 text-cyan-600 dark:text-cyan-400">
+              <MessageSquare className="h-3 w-3" /> Mulai Dialog
+            </Button>
+          </Link>
+        </div>
+      );
+    }
+    return null;
+  }
+
+  const used = data.trialMessagesUsed;
+  const quota = data.trialMessagesQuota;
+  const pct = Math.min(100, Math.round((used / quota) * 100));
+  const isNearLimit = pct >= 80;
+  const daysLeft = data.trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(data.trialEndsAt).getTime() - Date.now()) / 86400000))
+    : null;
+
+  return (
+    <div className={`px-4 py-3 rounded-xl border text-sm space-y-2 ${isNearLimit ? "bg-amber-500/10 border-amber-500/20" : "bg-emerald-500/10 border-emerald-500/20"}`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Rocket className={`h-4 w-4 shrink-0 ${isNearLimit ? "text-amber-500" : "text-emerald-500"}`} />
+          <span>
+            <strong>Trial Aktif</strong>
+            {daysLeft !== null && <span className="text-muted-foreground ml-1">· {daysLeft} hari lagi</span>}
+          </span>
+        </div>
+        <span className={`text-xs font-medium ${isNearLimit ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+          {used}/{quota} pesan
+        </span>
+      </div>
+      <div className="w-full bg-muted rounded-full h-1.5">
+        <div
+          className={`h-1.5 rounded-full transition-all ${isNearLimit ? "bg-amber-500" : "bg-emerald-500"}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      {isNearLimit && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Kuota hampir habis — upgrade untuk akses penuh</span>
+          <Link href="/onboarding">
+            <Button size="sm" className="h-6 text-xs gap-1">
+              <Crown className="h-3 w-3" /> Upgrade
+            </Button>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BlueprintUpsellBanner() {
+  const { data } = useQuery<{
+    hasActiveTrial: boolean;
+    dialogCompleted: boolean;
+  }>({ queryKey: ["/api/trial/status"], retry: 1 });
+
+  if (!data?.hasActiveTrial) return null;
+
+  const LOCKED_FEATURES = [
+    "Multi-Agent Orchestration",
+    "Custom Domain",
+    "Knowledge Base Penuh",
+    "Revenue & Monetisasi",
+    "Mini Apps (45 tools)",
+    "Analytics Lengkap",
+  ];
+
+  return (
+    <div className="px-4 py-3 rounded-xl border border-violet-500/20 bg-violet-500/5 text-sm space-y-2">
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-violet-500 shrink-0" />
+        <span className="font-medium text-violet-700 dark:text-violet-300">
+          Blueprint Anda punya {LOCKED_FEATURES.length} fitur lagi yang belum terbuka
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        {LOCKED_FEATURES.join(" · ")}
+      </p>
+      <div className="flex items-center justify-between pt-1">
+        <span className="text-xs text-muted-foreground">Upgrade sekarang untuk akses penuh</span>
+        <Link href="/onboarding">
+          <Button size="sm" className="h-6 text-xs gap-1 bg-violet-600 hover:bg-violet-700 text-white">
+            <Crown className="h-3 w-3" /> Lihat Paket
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 function PlanStatusBanner() {
   const { planInfo, isLoading } = useFeatureAccess();
@@ -209,6 +323,7 @@ export default function Dashboard() {
   const [shortcutPremiumOpen, setShortcutPremiumOpen] = useState(false);
   
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { planInfo } = useFeatureAccess();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
@@ -781,6 +896,12 @@ export default function Dashboard() {
               </p>
             </div>
 
+            {/* Trial Quota Banner */}
+            <TrialQuotaBanner />
+
+            {/* Blueprint Upsell Banner — locked features for trial users */}
+            <BlueprintUpsellBanner />
+
             {/* Plan Status Banner */}
             <PlanStatusBanner />
 
@@ -932,10 +1053,28 @@ export default function Dashboard() {
         return <PersonaPanel agent={currentAgent!} />;
       case "policy":
         return <PolicyPanel agent={currentAgent!} />;
-      case "agentic":
-        return <AgenticAIPanel />;
-      case "knowledge":
-        return <KnowledgeBasePanel agent={currentAgent!} />;
+      case "agentic": {
+        const isFreePlanA = planInfo.tier === 0;
+        return (
+          <div className="relative">
+            {isFreePlanA && (
+              <TrialLockOverlay feature="Multi-Agent Orchestration" description="Konfigurasi sub-agen & alur orkestrasi tersedia di paket Starter ke atas." />
+            )}
+            <AgenticAIPanel />
+          </div>
+        );
+      }
+      case "knowledge": {
+        const isFreePlanK = planInfo.tier === 0;
+        return (
+          <div className="relative">
+            {isFreePlanK && (
+              <TrialLockOverlay feature="Knowledge Base Penuh" description="Upload dokumen & basis pengetahuan kustom tersedia di paket Starter ke atas." />
+            )}
+            <KnowledgeBasePanel agent={currentAgent!} />
+          </div>
+        );
+      }
       case "integrations":
         return <IntegrationsPanel agent={currentAgent!} />;
       case "widget":
@@ -944,8 +1083,17 @@ export default function Dashboard() {
         return null;
       case "project-brain":
         return <ProjectBrainPanel agent={currentAgent!} />;
-      case "mini-apps":
-        return <MiniAppsPanel agent={currentAgent!} />;
+      case "mini-apps": {
+        const isFreePlan = planInfo.tier === 0;
+        return (
+          <div className="relative">
+            {isFreePlan && (
+              <TrialLockOverlay feature="Mini Apps" description="Akses Mini Apps dengan paket Starter ke atas, atau aktifkan trial gratis via Dialog Gustafta." />
+            )}
+            <MiniAppsPanel agent={currentAgent!} />
+          </div>
+        );
+      }
       case "deliverables":
         return <DeliverablesPanel agent={currentAgent!} />;
       case "conversion":
@@ -960,8 +1108,17 @@ export default function Dashboard() {
         return <EkosistemPanel agent={currentAgent!} />;
       case "product-settings":
         return <ProductSettingsPanel agent={currentAgent!} />;
-      case "revenue":
-        return <RevenuPanel agent={currentAgent!} />;
+      case "revenue": {
+        const isFreePlanR = planInfo.tier === 0;
+        return (
+          <div className="relative">
+            {isFreePlanR && (
+              <TrialLockOverlay feature="Revenue & Monetisasi" description="Fitur monetisasi chatbot & langganan klien tersedia di paket Starter ke atas." />
+            )}
+            <RevenuPanel agent={currentAgent!} />
+          </div>
+        );
+      }
       case "affiliates":
         return <AffiliatePanel agent={currentAgent!} />;
       case "vouchers":
@@ -970,8 +1127,17 @@ export default function Dashboard() {
         return <BroadcastPanel agent={currentAgent!} />;
       case "tenders":
         return <TenderPanel agent={currentAgent!} />;
-      case "analytics":
-        return <AnalyticsPanel agent={currentAgent!} />;
+      case "analytics": {
+        const isFreePlan = planInfo.tier === 0;
+        return (
+          <div className="relative">
+            {isFreePlan && (
+              <TrialLockOverlay feature="Analytics" description="Lihat statistik chat & konversi dengan paket Starter ke atas, atau aktifkan trial gratis via Dialog Gustafta." />
+            )}
+            <AnalyticsPanel agent={currentAgent!} />
+          </div>
+        );
+      }
       case "admin-agents":
         return <AdminAgentsPanel />;
       default:

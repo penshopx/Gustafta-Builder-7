@@ -15,7 +15,9 @@ type Mode = "choose" | "login" | "register" | "verify";
 export default function LoginPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const initialMode: Mode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "register" ? "register" : "login";
+  const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const returnUrl = searchParams.get("return") || searchParams.get("redirect") || "/dashboard";
+  const initialMode: Mode = searchParams.get("mode") === "register" ? "register" : "login";
   const [mode, setMode] = useState<Mode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
@@ -57,7 +59,7 @@ export default function LoginPage() {
       await apiRequest("POST", "/api/auth/login-email", { email, password });
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       trackLead({ content_name: "Email Login" });
-      navigate("/dashboard");
+      navigate(returnUrl);
     } catch (err: any) {
       const msg = err?.message || "";
       if (msg.includes("needsVerification") || msg.includes("belum diverifikasi")) {
@@ -125,7 +127,7 @@ export default function LoginPage() {
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       trackCompleteRegistration({ content_name: "Email Registration" });
       toast({ title: "Email terverifikasi!", description: "Selamat datang di Gustafta." });
-      navigate("/dashboard");
+      navigate(returnUrl);
     } catch (err: any) {
       toast({ title: "Verifikasi gagal", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
     } finally {

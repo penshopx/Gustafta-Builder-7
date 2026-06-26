@@ -528,7 +528,7 @@ export default function Pricing() {
       // Free trial — langsung aktif
       if (!result.waUrl) {
         queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
-        toast({ title: "Free Trial Aktif!", description: "Selamat menikmati Gustafta selama 14 hari gratis." });
+        toast({ title: "Free Trial Aktif!", description: "Selamat menikmati Gustafta selama 7 hari gratis." });
         navigate("/");
         return;
       }

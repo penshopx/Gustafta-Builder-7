@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
+import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Video, TrendingUp,
   PenTool, BarChart3, Star, Users, Zap, Globe,
@@ -97,7 +98,7 @@ const NICHES = ["🎮 Gaming", "💄 Beauty & Fashion", "🍳 Food & Kuliner", "
 
 export default function ContentCreatorPage() {
   const { isAuthenticated } = useAuth();
-  const builderUrl = isAuthenticated ? "/dashboard" : "/login";
+  const { ctaUrl: builderUrl } = useTrialCTA();
 
   return (
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-content-creator">

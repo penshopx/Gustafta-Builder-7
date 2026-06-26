@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
+import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Award, ClipboardList,
   FileText, Shield, Users, Star, Building2,
@@ -67,7 +68,7 @@ const TAHAPAN = [
 
 export default function LisensiLspBnspPage() {
   const { isAuthenticated } = useAuth();
-  const builderUrl = isAuthenticated ? "/dashboard" : "/login";
+  const { ctaUrl: builderUrl } = useTrialCTA();
 
   return (
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-lisensi-lsp-bnsp">

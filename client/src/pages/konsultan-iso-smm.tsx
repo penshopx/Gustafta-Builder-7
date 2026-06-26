@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
+import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Award, ClipboardList,
   BarChart3, TrendingUp, Shield, Star, Users,
@@ -27,7 +28,7 @@ const colorMap: Record<string, { bg: string; border: string; badge: string; num:
 
 export default function KonsultanIsoSmmPage() {
   const { isAuthenticated } = useAuth();
-  const builderUrl = isAuthenticated ? "/dashboard" : "/login";
+  const { ctaUrl: builderUrl } = useTrialCTA();
 
   return (
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-konsultan-iso-smm">

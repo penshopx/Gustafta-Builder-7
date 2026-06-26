@@ -36,6 +36,13 @@
       "when": 1778295603195,
       "tag": "0004_whole_vindicator",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782459773784,
+      "tag": "0005_tiny_onslaught",
+      "breakpoints": true
     }
   ]
 }

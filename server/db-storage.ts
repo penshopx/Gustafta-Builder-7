@@ -43,6 +43,7 @@ import {
   scalevMappings,
   agenticDeliverables,
 } from "@shared/schema";
+import { users } from "@shared/models/auth";
 import type {
   TenderDocumentCatalog,
   InsertTenderDocumentCatalog,
@@ -1847,6 +1848,7 @@ export class DatabaseStorage implements IStorage {
       amount: row.amount || 0,
       currency: row.currency || "IDR",
       chatbotLimit: row.chatbotLimit || 1,
+      trialMessagesUsed: row.trialMessagesUsed || 0,
       startDate: row.startDate?.toISOString(),
       endDate: row.endDate?.toISOString(),
       createdAt: row.createdAt.toISOString(),
@@ -1918,7 +1920,7 @@ export class DatabaseStorage implements IStorage {
 
   async expireSubscriptions(): Promise<number> {
     const now = new Date();
-    const result = await db.update(subscriptionsTable)
+    const expired = await db.update(subscriptionsTable)
       .set({ status: "expired", updatedAt: now })
       .where(
         and(
@@ -1927,7 +1929,27 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .returning();
-    return result.length;
+
+    // Pause agents belonging to users whose trial just expired
+    const trialExpiredUserIds = expired
+      .filter((s: any) => s.plan === "free_trial")
+      .map((s: any) => s.userId)
+      .filter(Boolean) as string[];
+
+    if (trialExpiredUserIds.length > 0) {
+      const { inArray } = await import("drizzle-orm");
+      await db.update(agents)
+        .set({ isEnabled: false })
+        .where(
+          and(
+            inArray(agents.userId, trialExpiredUserIds),
+            eq(agents.isEnabled, true)
+          )
+        )
+        .catch((err: any) => console.warn("[expireSubscriptions] pause agents:", err));
+    }
+
+    return expired.length;
   }
 
   async countUserAgents(userId: string): Promise<number> {
@@ -1935,6 +1957,31 @@ export class DatabaseStorage implements IStorage {
       .from(agents)
       .where(eq(agents.userId, userId));
     return Number(result[0]?.count || 0);
+  }
+
+  async incrementTrialMessages(subscriptionId: string): Promise<number> {
+    const result = await db.update(subscriptionsTable)
+      .set({
+        trialMessagesUsed: sql`${subscriptionsTable.trialMessagesUsed} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptionsTable.id, parseInt(subscriptionId)))
+      .returning();
+    return result[0]?.trialMessagesUsed || 0;
+  }
+
+  async getUserDialogCompleted(userId: string): Promise<boolean> {
+    const result = await db.select({ dialogCompleted: users.dialogCompleted })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    return result[0]?.dialogCompleted || false;
+  }
+
+  async setUserDialogCompleted(userId: string): Promise<void> {
+    await db.update(users)
+      .set({ dialogCompleted: true, updatedAt: new Date() })
+      .where(eq(users.id, userId));
   }
 
   // Project Brain Template methods

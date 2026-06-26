@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
+import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Shield, ShieldCheck,
   AlertTriangle, Eye, Star, ClipboardList, Building2,
@@ -13,7 +14,7 @@ const CHECKOUT_URL = "https://dialog.gustafta.my.id/c/checkout?variant_ids=53320
 
 export default function KonsultanPancekSmapPage() {
   const { isAuthenticated } = useAuth();
-  const builderUrl = isAuthenticated ? "/dashboard" : "/login";
+  const { ctaUrl: builderUrl } = useTrialCTA();
 
   return (
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-konsultan-pancek-smap">

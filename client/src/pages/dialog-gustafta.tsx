@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Send, X, RefreshCw, Share2, Copy, MessageCircle,
-  Sparkles, ArrowRight, Check, ChevronRight, RotateCcw,
+  Sparkles, ArrowRight, Check, ChevronRight, RotateCcw, Rocket, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface Msg { role: "user" | "assistant"; content: string; }
@@ -117,6 +120,8 @@ Dibuat via Dialog Gustafta · gustafta.my.id/dialog-gustafta`;
 // ── Component ────────────────────────────────────────────────────────────────
 export default function DialogGustaftaPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [, navigate] = useLocation();
 
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", content: GREETING }]);
   const [stage, setStage] = useState<AppStage>("s1_chat");
@@ -135,6 +140,47 @@ export default function DialogGustaftaPage() {
   const [showResume, setShowResume] = useState(false);
   const [savedSession, setSavedSession] = useState<SavedSession | null>(null);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [trialActivated, setTrialActivated] = useState(false);
+
+  const { data: trialStatus } = useQuery<{
+    dialogCompleted: boolean;
+    hasActiveTrial: boolean;
+    trialMessagesUsed: number;
+    trialMessagesQuota: number;
+  }>({
+    queryKey: ["/api/trial/status"],
+    enabled: !!user,
+    retry: 1,
+  });
+
+  // Redirect authenticated users who already have an active trial straight to dashboard
+  useEffect(() => {
+    if (trialStatus?.hasActiveTrial && !trialActivated) {
+      navigate("/dashboard");
+    }
+  }, [trialStatus?.hasActiveTrial, trialActivated, navigate]);
+
+  const activateTrialMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/subscriptions/create", { plan: "free_trial" }),
+    onSuccess: () => {
+      setTrialActivated(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/trial/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/my"] });
+      toast({ title: "Trial Aktif! 🎉", description: "Kamu punya 75 pesan untuk eksplorasi Gustafta selama 7 hari." });
+    },
+    onError: (err: any) => {
+      const msg = (err as Error)?.message || "Gagal mengaktifkan trial.";
+      if (msg.includes("dialog_required")) {
+        toast({ title: "Selesaikan dialog dulu", description: "Selesaikan hingga Stage 3 (Blueprint) untuk mengaktifkan trial.", variant: "destructive" });
+      } else if (msg.includes("already") || msg.includes("existing") || msg.includes("sudah")) {
+        setTrialActivated(true);
+        queryClient.invalidateQueries({ queryKey: ["/api/trial/status"] });
+        toast({ title: "Trial sudah aktif", description: "Kamu sudah punya trial aktif. Langsung masuk dashboard!" });
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
+    },
+  });
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -585,6 +631,41 @@ export default function DialogGustaftaPage() {
 
               {/* Payment Gate */}
               <div className="border-t border-white/10 pt-4 space-y-3">
+                {/* Free Trial CTA at Stage 2 */}
+                {user && !trialStatus?.hasActiveTrial && !trialActivated && (
+                  <div className="rounded-xl bg-gradient-to-r from-emerald-900/50 to-teal-900/50 border border-emerald-500/30 p-3 space-y-2 text-center">
+                    <div className="text-sm font-bold text-white">🚀 Aktifkan Trial 7 Hari — Gratis</div>
+                    <div className="text-xs text-white/60">75 pesan gratis · lanjut ke Stage 3 untuk blueprint penuh</div>
+                    <Button
+                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold gap-2 h-9 text-sm"
+                      onClick={() => {
+                        activateTrialMutation.mutate();
+                      }}
+                      disabled={activateTrialMutation.isPending}
+                      data-testid="button-activate-trial-s2"
+                    >
+                      {activateTrialMutation.isPending ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Mengaktifkan...</>
+                      ) : (
+                        <><Rocket className="w-4 h-4" /> Aktifkan Trial Gratis</>
+                      )}
+                    </Button>
+                  </div>
+                )}
+                {(trialActivated || trialStatus?.hasActiveTrial) && (
+                  <div className="rounded-xl bg-emerald-900/30 border border-emerald-500/30 p-3 text-center space-y-1.5">
+                    <div className="text-sm font-bold text-emerald-300">✅ Trial aktif — lanjutkan ke Stage 3!</div>
+                    <div className="text-xs text-white/60">Selesaikan dialog untuk dapat Blueprint penuh</div>
+                  </div>
+                )}
+                {!user && (
+                  <Link href="/login">
+                    <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold gap-2 h-9 text-sm" data-testid="button-login-for-trial-s2">
+                      <Rocket className="w-4 h-4" /> Login untuk Trial Gratis
+                    </Button>
+                  </Link>
+                )}
+
                 <div className="rounded-xl bg-gradient-to-r from-amber-900/40 to-orange-900/40 border border-amber-500/30 p-4 text-center space-y-1">
                   <div className="text-sm font-bold text-white">Blueprint Lengkap menanti di Stage 3</div>
                   <div className="text-xs text-white/60">25 sesi pendalaman + blueprint personalisasi penuh</div>
@@ -660,7 +741,26 @@ export default function DialogGustaftaPage() {
               </div>
 
               <div className="border-t border-white/10 pt-4 space-y-2">
-                <div className="text-xs text-white/50 text-center mb-3">Blueprint ini adalah bagian dari Starter Kit Anda</div>
+                {/* Trial activation at blueprint stage — user should have activated at s2_gate */}
+                {(trialActivated || trialStatus?.hasActiveTrial) && null}
+                {(trialActivated || trialStatus?.hasActiveTrial) && (
+                  <div className="rounded-xl bg-emerald-900/30 border border-emerald-500/30 p-3 text-center space-y-2">
+                    <div className="text-sm font-bold text-emerald-300">✅ Trial sudah aktif!</div>
+                    <Link href="/dashboard">
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-semibold" data-testid="button-go-dashboard">
+                        <Rocket className="w-4 h-4" /> Masuk ke Dashboard
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+                {!user && (
+                  <Link href="/login">
+                    <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold gap-2 h-10" data-testid="button-login-for-trial">
+                      <Rocket className="w-4 h-4" /> Login untuk Aktifkan Trial Gratis
+                    </Button>
+                  </Link>
+                )}
+                <div className="text-xs text-white/50 text-center">Blueprint ini adalah bagian dari Starter Kit Anda</div>
                 <Button onClick={shareWA} className="w-full bg-green-600 hover:bg-green-700 text-white gap-2 font-semibold" data-testid="button-blueprint-share-wa">
                   <MessageCircle className="w-4 h-4" /> Kirim ke WhatsApp
                 </Button>

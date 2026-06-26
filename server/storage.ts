@@ -200,6 +200,11 @@ export interface IStorage {
   getActiveSubscription(userId: string): Promise<Subscription | undefined>;
   updateSubscription(id: string, data: Partial<InsertSubscription>): Promise<Subscription | undefined>;
   expireSubscriptions(): Promise<number>;
+  incrementTrialMessages(subscriptionId: string): Promise<number>;
+
+  // User dialog completion methods
+  getUserDialogCompleted(userId: string): Promise<boolean>;
+  setUserDialogCompleted(userId: string): Promise<void>;
   
   // Agent count for subscription limits
   countUserAgents(userId: string): Promise<number>;
@@ -1479,6 +1484,10 @@ export class MemStorage implements IStorage {
     });
     return count;
   }
+
+  async incrementTrialMessages(_subscriptionId: string): Promise<number> { return 0; }
+  async getUserDialogCompleted(_userId: string): Promise<boolean> { return false; }
+  async setUserDialogCompleted(_userId: string): Promise<void> {}
 
   // Project Brain Template methods
   async getProjectBrainTemplates(agentId: string): Promise<ProjectBrainTemplate[]> {

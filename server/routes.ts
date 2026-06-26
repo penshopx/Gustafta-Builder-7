@@ -1407,22 +1407,12 @@ export async function registerRoutes(
         let subscription = await storage.getActiveSubscription(userId);
         
         if (!subscription) {
-          const startDate = new Date();
-          const endDate = new Date();
-          endDate.setDate(endDate.getDate() + 14);
-          
-          subscription = await storage.createSubscription({
-            userId,
-            plan: "free_trial",
-            status: "active",
-            amount: 0,
-            currency: "IDR",
-            chatbotLimit: 3,
-            startDate: startDate.toISOString(),
-            endDate: endDate.toISOString(),
+          // No subscription — require activation via Dialog Gustafta CTA flow
+          return res.status(403).json({
+            error: "Aktifkan akun terlebih dahulu melalui Dialog Gustafta.",
+            reason: "dialog_required",
+            redirectUrl: "/dialog-gustafta",
           });
-          
-          console.log(`Created free trial subscription for user ${userId}`);
         }
 
         if (subscription.status !== "active") {
@@ -2722,16 +2712,40 @@ SKK berlaku 5 tahun. Perpanjangan via: Pengembangan Keprofesian Berkelanjutan (P
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
-      
-      // Save user message
-      const userMessage = await storage.createMessage(parsed.data);
-      
-      // Get agent configuration for persona
+
+      // Get agent configuration first (needed for owner-based quota check)
       const agent = await storage.getAgent(parsed.data.agentId);
       if (!agent) {
         return res.status(404).json({ error: "Agent not found" });
       }
-      
+
+      // ── Trial quota check — keyed to agent OWNER, before persisting message ──
+      let _nonStreamTrialSubId: string | undefined;
+      {
+        const _ownerId = agent.userId;
+        if (_ownerId) {
+          const _sub = await storage.getActiveSubscription(_ownerId);
+          if (_sub?.plan === "free_trial" && _sub?.status === "active") {
+            const TRIAL_QUOTA = 75;
+            const _used = _sub.trialMessagesUsed || 0;
+            if (_used >= TRIAL_QUOTA) {
+              return res.status(429).json({
+                error: `Kuota pesan trial chatbot ini (${TRIAL_QUOTA} pesan) sudah habis. Hubungi pemilik chatbot untuk upgrade.`,
+                reason: "trial_quota_exceeded",
+                used: _used,
+                limit: TRIAL_QUOTA,
+                upgradeUrl: "/onboarding",
+              });
+            }
+            _nonStreamTrialSubId = _sub.id;
+          }
+        }
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
+      // Save user message (only after quota gate passes)
+      const userMessage = await storage.createMessage(parsed.data);
+
       // Get knowledge base for context (RAG-enhanced) - skip if ragEnabled is false
       let knowledgeContext = "";
       if (agent.ragEnabled !== false) {
@@ -3068,6 +3082,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         sources: [],
       });
       
+      // Increment trial usage after successful response
+      if (_nonStreamTrialSubId) {
+        storage.incrementTrialMessages(_nonStreamTrialSubId).catch(() => {});
+      }
+
       // Return both messages
       res.status(201).json({
         userMessage,
@@ -3204,28 +3223,57 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
       // ── Platform-owner monthly quota check ──────────────────────────────
       // Authenticated dashboard users (platform owners) are subject to their
       // Gustafta Apps subscription plan's maxMessagesPerMonth limit.
+      let _trialSubscriptionId: string | undefined;
+      {
+        // ── Trial quota check — keyed to agent OWNER (not requester) ─────
+        const _ownerIdForQuota = agent.userId;
+        if (_ownerIdForQuota) {
+          const _ownerSub = await storage.getActiveSubscription(_ownerIdForQuota);
+          if (_ownerSub?.plan === "free_trial" && _ownerSub?.status === "active") {
+            const TRIAL_QUOTA = 75;
+            const used = _ownerSub.trialMessagesUsed || 0;
+            if (used >= TRIAL_QUOTA) {
+              return res.status(429).json({
+                error: `Kuota pesan trial chatbot ini (${TRIAL_QUOTA} pesan) sudah habis. Hubungi pemilik chatbot untuk upgrade.`,
+                reason: "trial_quota_exceeded",
+                used,
+                limit: TRIAL_QUOTA,
+                upgradeUrl: "/onboarding",
+              });
+            }
+            _trialSubscriptionId = _ownerSub.id;
+          }
+        }
+        // ─────────────────────────────────────────────────────────────────
+      }
+
       if ((req as any).isAuthenticated?.()) {
         const ownerId = (req as any).user?.claims?.sub;
         if (ownerId) {
           const { resolvePlan } = await import("@shared/feature-plans");
           const subscription = await storage.getActiveSubscription(ownerId);
-          const plan = resolvePlan(subscription?.plan, subscription?.status === "active");
-          const limit = plan.maxMessagesPerMonth; // -1 = unlimited
-          if (limit > 0) {
-            const monthKey = new Date().toISOString().slice(0, 7); // "2026-05"
-            const current = ownerMonthlyUsage.get(ownerId);
-            const used = current?.month === monthKey ? current.count : 0;
-            if (used >= limit) {
-              return res.status(429).json({
-                error: `Kuota pesan bulanan Anda (${limit.toLocaleString("id-ID")} pesan) sudah habis. Upgrade paket untuk melanjutkan.`,
-                reason: "owner_quota_exceeded",
-                limit,
-                used,
-                plan: subscription?.plan ?? "free",
-                upgradeUrl: "/onboarding",
-              });
+
+          // Active free_trial users: skip plan-based monthly quota.
+          // Their effective cap is the 75-message trial quota checked above.
+          if (!(subscription?.plan === "free_trial" && subscription?.status === "active")) {
+            const plan = resolvePlan(subscription?.plan, subscription?.status === "active");
+            const limit = plan.maxMessagesPerMonth; // -1 = unlimited
+            if (limit > 0) {
+              const monthKey = new Date().toISOString().slice(0, 7); // "2026-05"
+              const current = ownerMonthlyUsage.get(ownerId);
+              const used = current?.month === monthKey ? current.count : 0;
+              if (used >= limit) {
+                return res.status(429).json({
+                  error: `Kuota pesan bulanan Anda (${limit.toLocaleString("id-ID")} pesan) sudah habis. Upgrade paket untuk melanjutkan.`,
+                  reason: "owner_quota_exceeded",
+                  limit,
+                  used,
+                  plan: subscription?.plan ?? "free",
+                  upgradeUrl: "/onboarding",
+                });
+              }
+              ownerMonthlyUsage.set(ownerId, { month: monthKey, count: used + 1 });
             }
-            ownerMonthlyUsage.set(ownerId, { month: monthKey, count: used + 1 });
           }
         }
       }
@@ -4207,6 +4255,11 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           reasoning: "",
           sources: [],
         });
+
+        // Increment trial message counter if applicable
+        if (_trialSubscriptionId) {
+          storage.incrementTrialMessages(_trialSubscriptionId).catch(err => console.warn("[trial increment]", err));
+        }
         
         // Send completion event
         cleanup();
@@ -4550,8 +4603,16 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
         const now = new Date();
         const endDate = new Date(now.getTime() + pricing.duration * 24 * 60 * 60 * 1000);
 
-        // Free trial — langsung aktif
+        // Free trial — gate with dialogCompleted, langsung aktif jika lolos
         if (selectedPlan === "free_trial") {
+          const dialogCompleted = await storage.getUserDialogCompleted(userId);
+          if (!dialogCompleted) {
+            return res.status(403).json({
+              error: "dialog_required",
+              message: "Selesaikan Dialog Gustafta terlebih dahulu untuk mengaktifkan trial gratis.",
+              redirectUrl: "/dialog-gustafta",
+            });
+          }
           const subscription = await storage.createSubscription({
             userId,
             plan: selectedPlan,
@@ -4559,6 +4620,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             amount: 0,
             currency: "IDR",
             chatbotLimit: pricing.chatbotLimit,
+            trialMessagesUsed: 0,
             startDate: now.toISOString(),
             endDate: endDate.toISOString(),
           });
@@ -26861,6 +26923,19 @@ Buat terasa personal dan berdasarkan detail nyata dari dialog. Bahasa Indonesia 
       });
 
       const gambaran = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+
+      // Mark dialog as completed when user reaches Eksplorasi stage (gambaran generated)
+      if ((req as any).isAuthenticated?.()) {
+        const userId = (req as any).user?.claims?.sub;
+        if (userId) {
+          try {
+            await storage.setUserDialogCompleted(userId);
+          } catch (err) {
+            console.warn("setUserDialogCompleted (gambaran) failed:", err);
+          }
+        }
+      }
+
       return res.json({ gambaran });
     } catch (e: any) {
       console.error("dialog-gustafta/gambaran error:", e);
@@ -26906,10 +26981,52 @@ Buat blueprint yang terasa personal, didasarkan pada detail nyata dari dialog. G
       });
 
       const blueprint = JSON.parse(c.choices[0]?.message?.content ?? "{}");
+
+      // Mark dialog as completed for logged-in users
+      if ((req as any).isAuthenticated?.()) {
+        const userId = (req as any).user?.claims?.sub;
+        if (userId) {
+          try {
+            await storage.setUserDialogCompleted(userId);
+          } catch (err) {
+            console.warn("setUserDialogCompleted failed:", err);
+          }
+        }
+      }
+
       return res.json({ blueprint });
     } catch (e: any) {
       console.error("dialog-gustafta/blueprint error:", e);
       return res.status(500).json({ error: "Gagal generate blueprint." });
+    }
+  });
+
+  // GET /api/trial/status — trial quota and status for current user
+  app.get("/api/trial/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || "";
+      const dialogCompleted = await storage.getUserDialogCompleted(userId);
+      const subscription = await storage.getActiveSubscription(userId);
+      const isTrial = subscription?.plan === "free_trial" && subscription?.status === "active";
+      const TRIAL_QUOTA = 75;
+      const trialMessagesUsed = isTrial ? (subscription?.trialMessagesUsed || 0) : 0;
+      const trialEndsAt = isTrial ? subscription?.endDate : undefined;
+      const chatbotLimit = isTrial ? (subscription?.chatbotLimit || 1) : 0;
+
+      res.json({
+        dialogCompleted,
+        hasActiveTrial: isTrial,
+        trialMessagesUsed,
+        trialMessagesQuota: TRIAL_QUOTA,
+        trialMessagesRemaining: Math.max(0, TRIAL_QUOTA - trialMessagesUsed),
+        trialEndsAt,
+        chatbotLimit,
+        plan: subscription?.plan ?? "free",
+        subscriptionStatus: subscription?.status ?? "none",
+      });
+    } catch (err) {
+      console.error("[/api/trial/status]", err);
+      res.status(500).json({ error: "Gagal mengambil status trial" });
     }
   });
 

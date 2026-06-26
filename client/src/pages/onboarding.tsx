@@ -86,16 +86,8 @@ export default function OnboardingPage() {
       window.location.href = "/login";
       return;
     }
-    setIsSubmitting(true);
-    try {
-      await apiRequest("POST", "/api/subscriptions/create", { plan: "free_trial" });
-      await queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/my"] });
-      setStep("success");
-    } catch {
-      toast({ title: "Gagal", description: "Coba lagi atau hubungi support.", variant: "destructive" });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Redirect to Dialog Gustafta — user must complete dialog to activate trial
+    navigate("/dialog-gustafta");
   }
 
   if (!isAuthenticated) {

@@ -310,7 +310,7 @@ export default function Subscription() {
               </div>
               <h2 className="text-xl font-semibold mb-2">Belum Ada Langganan</h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Anda belum memiliki langganan aktif. Mulai dengan free trial 14 hari atau pilih paket yang sesuai kebutuhan Anda.
+                Anda belum memiliki langganan aktif. Mulai dengan free trial 7 hari atau pilih paket yang sesuai kebutuhan Anda.
               </p>
               <Link href="/pricing">
                 <Button size="lg">

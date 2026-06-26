@@ -450,6 +450,7 @@ export const subscriptionsTable = pgTable("subscriptions_new", {
   amount: integer("amount").default(0),
   currency: text("currency").default("IDR"),
   chatbotLimit: integer("chatbot_limit").default(1),
+  trialMessagesUsed: integer("trial_messages_used").default(0),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -1062,7 +1063,7 @@ export const subscriptionPlanSchema = z.enum([
 export type SubscriptionPlan = z.infer<typeof subscriptionPlanSchema>;
 
 export const subscriptionPricing: Record<SubscriptionPlan, { price: number; duration: number; label: string }> = {
-  free_trial: { price: 0, duration: 14, label: "Free Trial 14 Hari" },
+  free_trial: { price: 0, duration: 7, label: "Free Trial 7 Hari" },
   monthly_1: { price: 199000, duration: 30, label: "1 Bulan" },
   monthly_3: { price: 499000, duration: 90, label: "3 Bulan" },
   monthly_6: { price: 999000, duration: 180, label: "6 Bulan" },
@@ -1078,6 +1079,7 @@ export const insertSubscriptionSchema = z.object({
   amount: z.number(),
   currency: z.string().default("IDR"),
   chatbotLimit: z.number().default(1),
+  trialMessagesUsed: z.number().default(0).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 });
@@ -1085,6 +1087,7 @@ export const insertSubscriptionSchema = z.object({
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = InsertSubscription & {
   id: string;
+  trialMessagesUsed: number;
   createdAt: string;
   updatedAt: string;
 };

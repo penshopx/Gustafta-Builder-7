@@ -198,7 +198,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
 
 /** Map legacy plan keys → PlanTier */
 export const LEGACY_PLAN_MAP: Record<string, PlanTier> = {
-  free_trial: "starter",
+  free_trial: "free",
   monthly_1: "starter",
   monthly_3: "profesional",
   monthly_6: "bisnis",
