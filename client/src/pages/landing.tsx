@@ -55,9 +55,9 @@ export default function Landing() {
                     Masuk ke Dashboard Builder
                   </Button>
                 </Link>
-                <Link href={builderUrl}>
+                <Link href="/dialog-gustafta">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10 gap-2 px-6 h-12" data-testid="button-hero-trial">
-                    Coba 7 Hari Gratis
+                    Mulai dari Blueprint Gratis
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
@@ -515,7 +515,7 @@ export default function Landing() {
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
               Pilih Tier Sesuai Skala Ekosistem Anda
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Semua tier memerlukan lisensi platform (sekali) — sudah termasuk dalam Lisensi Starter Kit.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Semua tier memerlukan lisensi platform (sekali) — sudah termasuk dalam Starter Kit. Alurnya: isi Blueprint → beli Starter Kit → bonus 7 hari trial.</p>
           </div>
 
           {/* Jalur Masuk */}
@@ -530,6 +530,13 @@ export default function Landing() {
                 <div className="flex-1">
                   <div className="font-bold text-gray-900 dark:text-white text-sm mb-1">Beli Starter Kit Gustafta</div>
                   <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Paket pembuka ekosistem — bayar sekali, aktif selamanya</div>
+                  <div className="flex items-center gap-1 text-[9px] mb-2 flex-wrap">
+                    <span className="bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 px-1.5 py-0.5 rounded-full font-semibold">1 Isi Blueprint</span>
+                    <ArrowRight className="w-2.5 h-2.5 text-gray-400 shrink-0" />
+                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-full font-semibold">2 Beli Starter Kit</span>
+                    <ArrowRight className="w-2.5 h-2.5 text-gray-400 shrink-0" />
+                    <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-semibold">3 Bonus 7 hari</span>
+                  </div>
                   <div className="text-xs text-gray-600 dark:text-gray-300 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-emerald-600 dark:text-emerald-400 text-base">Rp 245.000</span>
@@ -539,7 +546,7 @@ export default function Landing() {
                     <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-1">Yang Anda dapat:</div>
                     <div className="flex items-center gap-1.5">✅ <span><strong>Lisensi platform seumur hidup</strong> — tidak perlu bayar lisensi lagi</span></div>
                     <div className="flex items-center gap-1.5">✅ <span>3 Panduan Digital Trilogi Ekosistem Kompetensi</span></div>
-                    <div className="flex items-center gap-1.5">✅ <span>7 hari akses penuh Starter (trial gratis)</span></div>
+                    <div className="flex items-center gap-1.5">✅ <span><strong>Bonus 7 hari</strong> akses penuh Starter (trial)</span></div>
                   </div>
                   <div className="mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-800 text-[11px] text-gray-500 dark:text-gray-400">
                     Lanjut berlangganan setelah trial: <strong className="text-gray-700 dark:text-gray-200">+ Rp 199.000/bln</strong>
@@ -759,9 +766,9 @@ export default function Landing() {
                 Masuk ke Dashboard Builder
               </Button>
             </Link>
-            <Link href={builderUrl}>
+            <Link href="/dialog-gustafta">
               <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 gap-2 px-8 h-12" data-testid="btn-cta-final-trial">
-                Coba Gratis 7 Hari — Tanpa Kartu Kredit
+                Rancang Blueprint Gratis Dulu
               </Button>
             </Link>
           </div>
