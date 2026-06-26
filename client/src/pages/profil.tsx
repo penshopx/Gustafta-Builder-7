@@ -84,7 +84,11 @@ export default function Profil() {
                 — dari sekadar pengguna teknologi menjadi <strong>arsitek masa depan</strong> tanpa batasan teknis."
               </p>
               <div className="mt-6 pt-6 border-t flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold">G</div>
+                <img
+                  src="/images/gustafta-logo.png"
+                  alt="Gustafta Logo"
+                  className="h-12 w-12 rounded-full object-contain bg-white ring-2 ring-violet-200 dark:ring-violet-800 p-1 shadow"
+                />
                 <div>
                   <p className="font-semibold">Founder & Tim GAIA</p>
                   <p className="text-sm text-muted-foreground">Gustafta AI Academy</p>
@@ -188,6 +192,33 @@ export default function Profil() {
         </div>
       </section>
 
+      {/* ============ VISUAL: Trilogi Gustafta — Buku & Publikasi ============ */}
+      <section className="py-12 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900/50 dark:to-blue-950/30">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="text-center mb-8">
+            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-0 mb-3">Publikasi Gustafta</Badge>
+            <h2 className="text-2xl md:text-3xl font-bold">Trilogi Gustafta</h2>
+            <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Dari Monolog ke Dialog — Perjalanan transformasi cara belajar, bekerja, dan berkreasi bersama AI.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6 items-center">
+            <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
+              <img
+                src="/images/g01.png"
+                alt="Buku Trilogi Gustafta — Dari Monolog ke Dialog"
+                className="w-full object-cover"
+              />
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
+              <img
+                src="/images/g06.png"
+                alt="Peluncuran Buku Trilogi Gustafta"
+                className="w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ============ VISUAL: Dari Monolog ke Dialog ============ */}
       <section className="py-0">
         <div className="relative overflow-hidden">
@@ -257,6 +288,19 @@ export default function Profil() {
             <div className="rounded-2xl overflow-hidden shadow-lg border hover:shadow-xl transition-shadow">
               <img src="/images/g04.png" alt="AI Builder Studio — Workflow Automation Dashboard" className="w-full object-cover" />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ VISUAL: Trilogi GUSTAFTA 3 Tahap ============ */}
+      <section className="py-10">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
+            <img
+              src="/images/g15.png"
+              alt="Trilogi Gustafta — Perjalanan Belajar AI dalam 3 Tahap: Dialog, Kolaborasi, Kreasi"
+              className="w-full object-cover"
+            />
           </div>
         </div>
       </section>
