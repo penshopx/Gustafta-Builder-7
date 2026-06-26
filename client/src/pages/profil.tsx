@@ -10,6 +10,7 @@ import {
   Megaphone, Lightbulb, MessageSquare, CheckCircle2, ChevronRight,
 } from "lucide-react";
 import heroIllustration from "@assets/generated_images/gaia_hero.png";
+import coverMonolog from "@assets/cover-monolog.jpg";
 
 export default function Profil() {
   return (
@@ -204,7 +205,7 @@ export default function Profil() {
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
               <div style={{ aspectRatio: "1/1" }}>
                 <img
-                  src="/images/cover-monolog.jpg"
+                  src={coverMonolog}
                   alt="Dari Monolog ke Dialog — Gustafta Team"
                   className="w-full h-full object-cover object-center"
                 />
@@ -285,29 +286,15 @@ export default function Profil() {
         </div>
       </section>
 
-      {/* ============ VISUAL: Platform in Action (VIDEO) ============ */}
+      {/* ============ VISUAL: Platform in Action (IMAGES) ============ */}
       <section className="py-10 bg-muted/20">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid md:grid-cols-2 gap-5">
             <div className="rounded-2xl overflow-hidden shadow-lg border hover:shadow-xl transition-shadow">
-              <video
-                src="/videos/g09.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full object-cover"
-              />
+              <img src="/images/g03.png" alt="Gustafta Platform in Action" className="w-full object-cover" />
             </div>
             <div className="rounded-2xl overflow-hidden shadow-lg border hover:shadow-xl transition-shadow">
-              <video
-                src="/videos/g10.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full object-cover"
-              />
+              <img src="/images/g04.png" alt="Gustafta Platform in Action" className="w-full object-cover" />
             </div>
           </div>
         </div>
