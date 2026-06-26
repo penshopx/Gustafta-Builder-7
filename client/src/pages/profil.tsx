@@ -202,11 +202,13 @@ export default function Profil() {
           </div>
           <div className="grid md:grid-cols-2 gap-6 items-center">
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
-              <img
-                src="/images/g01.png"
-                alt="Buku Trilogi Gustafta — Dari Monolog ke Dialog"
-                className="w-full object-cover"
-              />
+              <div className="overflow-hidden" style={{ aspectRatio: "9/11" }}>
+                <img
+                  src="/images/g01.png"
+                  alt="Buku Trilogi Gustafta — Dari Monolog ke Dialog"
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
             </div>
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
               <img
