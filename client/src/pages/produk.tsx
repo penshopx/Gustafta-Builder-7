@@ -44,36 +44,6 @@ interface BisnisPlan {
 
 const BISNIS_PLANS: BisnisPlan[] = [
   {
-    id: "free",
-    name: "Gratis",
-    badge: "TRIAL",
-    badgeColor: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
-    price: "Rp 0",
-    priceNote: "/bulan",
-    color: "text-slate-500",
-    borderColor: "border-slate-200 dark:border-slate-800",
-    bgColor: "bg-slate-50 dark:bg-slate-900/40",
-    headerBg: "bg-slate-100/60 dark:bg-slate-800/40",
-    icon: Sparkles,
-    tagline: "Coba platform tanpa biaya",
-    limits: [
-      { label: "Pesan/bulan", value: "50 pesan" },
-      { label: "Chatbot buat sendiri", value: "3 bot" },
-      { label: "Knowledge Base", value: "5 dokumen" },
-    ],
-    features: [
-      "Builder chatbot dasar",
-      "Web widget embed",
-      "Dashboard analitik",
-    ],
-    chatbots: [
-      { name: "Sample Bot 1", icon: Bot, tag: "Contoh konfigurasi" },
-      { name: "Sample Bot 2", icon: MessageSquare, tag: "Contoh persona" },
-    ],
-    cta: "Mulai Gratis",
-    planKey: "free",
-  },
-  {
     id: "starter",
     name: "Starter",
     badge: "STARTER",
@@ -391,7 +361,7 @@ function BisnisPaket() {
       </div>
 
       {/* Pricing + chatbot grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
         {BISNIS_PLANS.map(plan => (
           <div key={plan.id}
             className={`relative rounded-2xl border ${plan.borderColor} overflow-hidden flex flex-col transition-shadow hover:shadow-xl`}>
@@ -487,9 +457,7 @@ function BisnisPaket() {
           <Layers className="w-3.5 h-3.5 text-indigo-500"/> Makin tinggi tier = makin lengkap chatbot yang didapat
         </div>
         <div className="flex items-center gap-1 text-[11px] text-gray-500 flex-wrap">
-          <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full text-slate-600 dark:text-slate-400">Free: 2 sample</span>
-          <ArrowRight className="w-3 h-3 text-gray-400 shrink-0"/>
-          <span className="bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full text-blue-600 dark:text-blue-400">Starter: + EduCounsel, AI Tutor</span>
+          <span className="bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded-full text-blue-600 dark:text-blue-400">Starter: EduCounsel, AI Tutor</span>
           <ArrowRight className="w-3 h-3 text-gray-400 shrink-0"/>
           <span className="bg-indigo-100 dark:bg-indigo-900/40 px-2 py-0.5 rounded-full text-indigo-600 dark:text-indigo-400">Pro: + 4 bot konstruksi</span>
           <ArrowRight className="w-3 h-3 text-gray-400 shrink-0"/>

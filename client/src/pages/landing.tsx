@@ -579,15 +579,8 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              {
-                emoji: "🆓", tier: "Gratis", price: "Rp 0", period: "/bulan",
-                note: "",
-                desc: "Eksplorasi awal platform",
-                features: ["Builder chatbot dasar", "3 bot · 50 pesan/bulan", "Web widget embed", "Dashboard analitik"],
-                cta: "Mulai Gratis", ctaVariant: "outline" as const, highlight: false,
-              },
               {
                 emoji: "⚡", tier: "Starter", price: "Rp 199.000", period: "/bulan",
                 note: "Lisensi Rp 0 (dengan Starter Kit) atau Rp 299rb (tanpa) — sekali",

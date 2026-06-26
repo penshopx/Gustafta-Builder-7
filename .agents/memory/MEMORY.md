@@ -6,5 +6,6 @@
 - [Production vs dev agent ID drift](prod-dev-id-drift.md) — prod DB IDs diverge from dev; all orchestrator routes MUST use slug lookup first, never hardcoded IDs. Sequence can lag behind explicit-ID inserts — add setval reset before bulk creates.
 - [jspdf/canvg blank screen](jspdf-canvg-blank.md) — jspdf (dynamic import) → canvg → missing core-js stubs → Vite optimizeDeps crash → blank screen. Fix: `optimizeDeps.exclude: ["jspdf","canvg"]` in vite.config.ts.
 - [Perpres Pengadaan terkini](perpres-pengadaan.md) — Perpres 12/2021 KADALUARSA. Gunakan Perpres 28/2025 untuk semua referensi PBJP.
+- [Model Produk & Layanan](gustafta-pricing-model.md) — produk chatbot = lisensi (tanpa setup); jasa modul = setup; tak ada free permanen (gratis = bonus 7 hari); CTA trial wajib lewat Blueprint.
 - [Email verification & BREVO_API_KEY](email-verification-brevo.md) — "verifikasi email mati" biasanya bukan kode rusak; secret BREVO_API_KEY hilang. Dev tampilkan otpFallback, prod 503. Cek secret dulu.
 - [Session cookie SameSite & Replit proxy](session-cookie-samesite.md) — "login tak tersimpan setelah tutup browser" = cookie SameSite=None dibuang proteksi 3rd-party; fix sameSite:lax. Dev proxy paksa None — verifikasi di app published.
