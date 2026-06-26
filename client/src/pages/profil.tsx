@@ -200,22 +200,24 @@ export default function Profil() {
             <h2 className="text-2xl md:text-3xl font-bold">Trilogi Gustafta</h2>
             <p className="text-muted-foreground mt-2 max-w-xl mx-auto">Dari Monolog ke Dialog — Perjalanan transformasi cara belajar, bekerja, dan berkreasi bersama AI.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 items-stretch">
-            <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow relative">
-              <img
-                src="/images/g01.png"
-                alt="Buku Trilogi Gustafta — Dari Monolog ke Dialog"
-                className="w-full object-cover"
-              />
-              {/* Overlay menutup "Oleh: Prof..." di bagian bawah */}
-              <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent" />
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
+              <div style={{ aspectRatio: "1/1" }}>
+                <img
+                  src="/images/trilogi-gustafta-layers.png"
+                  alt="Trilogi Gustafta — Dialog, Kolaborasi, Kreasi"
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
             </div>
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
-              <img
-                src="/images/g06.png"
-                alt="Peluncuran Buku Trilogi Gustafta"
-                className="w-full object-cover"
-              />
+              <div style={{ aspectRatio: "1/1" }}>
+                <img
+                  src="/images/g06.png"
+                  alt="Peluncuran Buku Trilogi Gustafta"
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
             </div>
           </div>
         </div>
