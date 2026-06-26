@@ -204,7 +204,7 @@ export default function Profil() {
             <div className="rounded-2xl overflow-hidden shadow-xl border hover:shadow-2xl transition-shadow">
               <div style={{ aspectRatio: "1/1" }}>
                 <img
-                  src="/images/trilogi-gustafta-layers.png"
+                  src="/images/g15.png"
                   alt="Trilogi Gustafta — Dialog, Kolaborasi, Kreasi"
                   className="w-full h-full object-cover object-center"
                 />
