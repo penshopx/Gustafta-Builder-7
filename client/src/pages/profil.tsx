@@ -219,12 +219,15 @@ export default function Profil() {
         </div>
       </section>
 
-      {/* ============ VISUAL: Dari Monolog ke Dialog ============ */}
+      {/* ============ VISUAL: Dari Monolog ke Dialog (VIDEO) ============ */}
       <section className="py-0">
         <div className="relative overflow-hidden">
-          <img
-            src="/images/g07.png"
-            alt="Dari Monolog ke Dialog — Transformasi Cara Belajar dengan AI"
+          <video
+            src="/videos/g08.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
             className="w-full object-cover max-h-[420px]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900/70 via-transparent to-transparent flex items-center">
@@ -278,15 +281,29 @@ export default function Profil() {
         </div>
       </section>
 
-      {/* ============ VISUAL: Platform in Action ============ */}
+      {/* ============ VISUAL: Platform in Action (VIDEO) ============ */}
       <section className="py-10 bg-muted/20">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid md:grid-cols-2 gap-5">
             <div className="rounded-2xl overflow-hidden shadow-lg border hover:shadow-xl transition-shadow">
-              <img src="/images/g03.png" alt="AI Professional — Platform Gustafta dalam Aksi" className="w-full object-cover" />
+              <video
+                src="/videos/g09.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full object-cover"
+              />
             </div>
             <div className="rounded-2xl overflow-hidden shadow-lg border hover:shadow-xl transition-shadow">
-              <img src="/images/g04.png" alt="AI Builder Studio — Workflow Automation Dashboard" className="w-full object-cover" />
+              <video
+                src="/videos/g10.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full object-cover"
+              />
             </div>
           </div>
         </div>
