@@ -4742,6 +4742,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           emoji: p.emoji || "🤖",
           color: p.color || "#6366f1",
           price,
+          isGustafta: p.isGustafta ?? false,
           type: "product",
         };
       });
@@ -4835,6 +4836,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
             price,
             originalPrice: calcOriginalPrice(effectiveTotal),
             agentCount: effectiveTotal,
+            isGustafta: false,
             type: "agent",
           };
         });
@@ -4854,6 +4856,104 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     } catch (error) {
       console.error("Store catalog error:", error);
       res.status(500).json({ error: "Failed to fetch catalog" });
+    }
+  });
+
+  // GET /api/store/featured — curated products grouped: isGustafta=true (Gustafta official) + isGustafta=false (mitra)
+  app.get("/api/store/featured", async (_req, res) => {
+    try {
+      const { db } = await import("./db");
+      const { agents: agentsTable, storeProducts } = await import("@shared/schema");
+      const { and, eq } = await import("drizzle-orm");
+
+      const FEATURED_LIMIT = 8;
+
+      const calcPrice = 299000;
+      const calcOriginal = 450000;
+
+      const mapSP = (p: any) => ({
+        id: `sp-${p.id}`,
+        productId: p.id,
+        agentId: p.agentId ?? null,
+        name: p.name,
+        category: p.category || "Konstruksi",
+        tagline: (p.description ?? "").slice(0, 80),
+        description: p.description || "",
+        productSummary: p.description || "",
+        productFeatures: (p.features as string[]) || [],
+        emoji: p.emoji || "🤖",
+        color: p.color || "#6366f1",
+        price: calcPrice,
+        originalPrice: calcOriginal,
+        isGustafta: p.isGustafta ?? false,
+        type: "product",
+      });
+
+      // Gustafta official products
+      const gustaftaRows = await db.select().from(storeProducts)
+        .where(and(eq(storeProducts.isActive, true), eq(storeProducts.isGustafta, true)))
+        .orderBy(storeProducts.sortOrder, storeProducts.id)
+        .limit(FEATURED_LIMIT);
+
+      // Mitra products from store_products
+      const mitraSpRows = await db.select().from(storeProducts)
+        .where(and(eq(storeProducts.isActive, true), eq(storeProducts.isGustafta, false)))
+        .orderBy(storeProducts.sortOrder, storeProducts.id)
+        .limit(FEATURED_LIMIT);
+
+      const mitraSpItems = mitraSpRows.map(mapSP);
+
+      // If mitra store_products < limit, supplement from agents
+      let agentMitraItems: any[] = [];
+      if (mitraSpItems.length < FEATURED_LIMIT) {
+        const spAgentIds = new Set(
+          [...gustaftaRows, ...mitraSpRows].map((p) => p.agentId).filter(Boolean)
+        );
+        const agentRows = await db.select({
+          id: agentsTable.id, name: agentsTable.name, category: agentsTable.category,
+          tagline: agentsTable.tagline, avatar: agentsTable.avatar,
+          widgetColor: agentsTable.widgetColor, agenticSubAgents: agentsTable.agenticSubAgents,
+          productSummary: agentsTable.productSummary, productFeatures: agentsTable.productFeatures,
+          parentAgentId: agentsTable.parentAgentId,
+        }).from(agentsTable).where(eq(agentsTable.isActive, true)).limit(FEATURED_LIMIT * 4);
+
+        agentMitraItems = agentRows
+          .filter((a) => {
+            if (spAgentIds.has(a.id)) return false;
+            if (a.parentAgentId != null) return false;
+            const sub = Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0;
+            return sub >= 1;
+          })
+          .slice(0, FEATURED_LIMIT - mitraSpItems.length)
+          .map((a) => {
+            const sub = Array.isArray(a.agenticSubAgents) ? a.agenticSubAgents.length : 0;
+            return {
+              id: `ag-${a.id}`,
+              agentId: a.id,
+              name: a.name,
+              category: a.category || "Konstruksi",
+              tagline: a.tagline || "",
+              description: "",
+              productSummary: a.productSummary || "",
+              productFeatures: (a.productFeatures as string[]) || [],
+              emoji: a.avatar && a.avatar.length <= 4 ? a.avatar : "🤖",
+              color: a.widgetColor || "#6366f1",
+              price: calcPrice,
+              originalPrice: calcOriginal,
+              agentCount: 1 + sub,
+              isGustafta: false,
+              type: "agent",
+            };
+          });
+      }
+
+      res.json({
+        gustafta: gustaftaRows.map(mapSP),
+        mitra: [...mitraSpItems, ...agentMitraItems],
+      });
+    } catch (error) {
+      console.error("Store featured error:", error);
+      res.status(500).json({ error: "Failed to fetch featured products" });
     }
   });
 

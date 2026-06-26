@@ -194,6 +194,10 @@ export default function Store() {
             </div>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-500">
+            <a href="/store" className="flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-800 font-medium transition-colors" data-testid="link-back-store">
+              ← Store Pilihan
+            </a>
+            <span className="text-gray-300">·</span>
             <a href="https://wa.me/6281287941900" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 hover:text-gray-900 transition-colors" data-testid="link-wa-header-1">
               <Smartphone className="h-4 w-4" />

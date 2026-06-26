@@ -79,6 +79,7 @@ import PaketBisnis from "@/pages/paket-bisnis";
 import LegalChat from "@/pages/legal-chat";
 import TemplatesPage from "@/pages/templates";
 import StorePage from "@/pages/store";
+import StoreFeatured from "@/pages/store-featured";
 import StoreAccess from "@/pages/store-access";
 import TestTracker from "@/pages/test-tracker";
 import HubAudit from "@/pages/hub-audit";
@@ -473,9 +474,10 @@ function Router() {
           ><LegalChat /></PremiumPageGuard>
         )} />
       <Route path="/templates" component={TemplatesPage} />
-      <Route path="/store" component={StorePage} />
+      <Route path="/store" component={StoreFeatured} />
+      <Route path="/store/katalog" component={StorePage} />
       <Route path="/workshop" component={WorkshopPage} />
-      <Route path="/gustafta-store" component={StorePage} />
+      <Route path="/gustafta-store" component={StoreFeatured} />
       <Route path="/store/access/:token" component={StoreAccess} />
       <Route path="/test-tracker" component={TestTracker} />
       <Route path="/hub-audit" component={HubAudit} />

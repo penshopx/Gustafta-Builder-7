@@ -1872,6 +1872,7 @@ export const storeProducts = pgTable("store_products", {
   emoji: text("emoji").default("🤖"),
   color: text("color").default("#6366f1"),
   isActive: boolean("is_active").default(true),
+  isGustafta: boolean("is_gustafta").default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
