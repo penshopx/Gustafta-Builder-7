@@ -2,7 +2,6 @@
  * Gustafta Builder — Halaman Produk
  * 3 jalur produk: Paket Bisnis, Paket Modul, Paket Chatbot
  */
-import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { SharedHeader } from "@/components/shared-header";
 import { Button } from "@/components/ui/button";
@@ -41,6 +40,45 @@ interface BisnisPlan {
   cta: string;
   planKey: string;
 }
+
+const ENTERPRISE_PLAN = {
+  id: "enterprise",
+  name: "Enterprise",
+  badge: "ENTERPRISE",
+  badgeColor: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
+  price: "Custom",
+  priceNote: "hubungi tim",
+  lisensiInfo: "Negosiasi — termasuk lisensi, onboarding penuh, dan SLA dedicated",
+  color: "text-purple-500",
+  borderColor: "border-purple-300 dark:border-purple-700",
+  bgColor: "bg-purple-50/50 dark:bg-purple-950/20",
+  headerBg: "bg-purple-100/50 dark:bg-purple-900/30",
+  icon: Crown,
+  tagline: "Solusi skala penuh — white-label, unlimited, dedicated manager",
+  limits: [
+    { label: "Pesan/bulan", value: "Unlimited" },
+    { label: "Chatbot", value: "Unlimited slot" },
+    { label: "Sub-akun", value: "5 akun tim" },
+    { label: "Knowledge Base", value: "Unlimited dokumen" },
+  ],
+  features: [
+    "Semua fitur Bisnis",
+    "White-label (hapus branding Gustafta)",
+    "5 sub-akun (multi-operator)",
+    "Unlimited chatbot slot",
+    "API akses penuh",
+    "Custom domain unlimited",
+    "Dedicated Account Manager",
+    "SLA prioritas & onboarding tim",
+    "Laporan performa bulanan",
+  ],
+  chatbots: [
+    { name: "Semua bot Bisnis", icon: Crown, tag: "Termasuk" },
+    { name: "+ Bot Custom Enterprise", icon: Building2, tag: "Sesuai kebutuhan" },
+  ],
+  cta: "Hubungi Tim",
+  planKey: "enterprise",
+};
 
 const BISNIS_PLANS: BisnisPlan[] = [
   {
@@ -333,14 +371,6 @@ const CHATBOT_SHOWCASE = [
   { icon: Globe, name: "PerijinanBot", desc: "OSS-RBA, NIB & Perizinan", color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/20", tag: "Regulasi" },
 ];
 
-// ─── Tabs ─────────────────────────────────────────────────────────────────────
-type Tab = "bisnis" | "modul" | "chatbot";
-
-const TABS: { id: Tab; label: string; icon: typeof Bot; color: string }[] = [
-  { id: "bisnis",   label: "Builder DIY (Langganan)",  icon: Zap,    color: "indigo" },
-  { id: "modul",    label: "Layanan Jasa (Kami Kerjakan)",   icon: Wrench, color: "violet" },
-  { id: "chatbot",  label: "Store Creator (Chatbot Jadi)", icon: Bot,    color: "blue"   },
-];
 
 // ─── Sections ─────────────────────────────────────────────────────────────────
 function BisnisPaket() {
@@ -451,6 +481,51 @@ function BisnisPaket() {
         ))}
       </div>
 
+      {/* Enterprise card — full width */}
+      <div className="max-w-5xl mx-auto">
+        <div className={`relative rounded-2xl border ${ENTERPRISE_PLAN.borderColor} overflow-hidden flex flex-col md:flex-row transition-shadow hover:shadow-xl`}>
+          <div className={`${ENTERPRISE_PLAN.headerBg} px-6 pt-6 pb-5 md:w-72 shrink-0`}>
+            <div className="flex items-center gap-2 mb-2">
+              <ENTERPRISE_PLAN.icon className={`w-4 h-4 ${ENTERPRISE_PLAN.color}`}/>
+              <Badge className={`text-[10px] ${ENTERPRISE_PLAN.badgeColor}`}>{ENTERPRISE_PLAN.badge}</Badge>
+            </div>
+            <div className="text-base font-bold text-gray-900 dark:text-white">{ENTERPRISE_PLAN.name}</div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{ENTERPRISE_PLAN.tagline}</div>
+            <div className="mt-3">
+              <span className={`text-2xl font-bold ${ENTERPRISE_PLAN.color}`}>{ENTERPRISE_PLAN.price}</span>
+              <span className="text-xs text-gray-400 ml-2">{ENTERPRISE_PLAN.priceNote}</span>
+            </div>
+            <div className="mt-2 text-[10px] text-gray-400">{ENTERPRISE_PLAN.lisensiInfo}</div>
+            <div className="mt-4 space-y-1">
+              {ENTERPRISE_PLAN.limits.map((l, i) => (
+                <div key={i} className="flex justify-between text-xs">
+                  <span className="text-gray-500">{l.label}</span>
+                  <span className={`font-semibold ${ENTERPRISE_PLAN.color}`}>{l.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className={`flex-1 ${ENTERPRISE_PLAN.bgColor} px-6 py-5 flex flex-col gap-4`}>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+              {ENTERPRISE_PLAN.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-1.5 text-[11px] text-gray-600 dark:text-gray-400">
+                  <Check className={`w-3 h-3 shrink-0 mt-0.5 ${ENTERPRISE_PLAN.color}`}/>
+                  {f}
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto flex flex-col sm:flex-row gap-2 pt-2 border-t border-purple-200 dark:border-purple-800">
+              <a href="https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20info%20paket%20Enterprise" target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button size="sm" className="w-full text-xs h-8 bg-purple-600 hover:bg-purple-500 text-white">
+                  Hubungi Tim Enterprise <ChevronRight className="w-3.5 h-3.5 ml-1"/>
+                </Button>
+              </a>
+              <div className="text-[10px] text-gray-400 self-center">Harga disesuaikan skala & kebutuhan tim Anda</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Upgrade ladder */}
       <div className="max-w-3xl mx-auto bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-950/20 dark:to-violet-950/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-4">
         <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1.5">
@@ -461,7 +536,9 @@ function BisnisPaket() {
           <ArrowRight className="w-3 h-3 text-gray-400 shrink-0"/>
           <span className="bg-indigo-100 dark:bg-indigo-900/40 px-2 py-0.5 rounded-full text-indigo-600 dark:text-indigo-400">Pro: + 4 bot konstruksi</span>
           <ArrowRight className="w-3 h-3 text-gray-400 shrink-0"/>
-          <span className="bg-violet-100 dark:bg-violet-900/40 px-2 py-0.5 rounded-full text-violet-600 dark:text-violet-400">Bisnis: + 5 bot konstruksi lagi (total 9)</span>
+          <span className="bg-violet-100 dark:bg-violet-900/40 px-2 py-0.5 rounded-full text-violet-600 dark:text-violet-400">Bisnis: + 5 bot konstruksi (total 9)</span>
+          <ArrowRight className="w-3 h-3 text-gray-400 shrink-0"/>
+          <span className="bg-purple-100 dark:bg-purple-900/40 px-2 py-0.5 rounded-full text-purple-600 dark:text-purple-400">Enterprise: unlimited + white-label</span>
         </div>
       </div>
 
@@ -621,176 +698,50 @@ function BisnisPaket() {
   );
 }
 
-function ModulPaket() {
-  return (
-    <div className="space-y-8">
-      <div className="text-center max-w-2xl mx-auto">
-        <Badge className="mb-3 bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">Layanan Jasa</Badge>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Minta dibuatkan modul khusus</h2>
-        <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed">
-          Tim Gustafta membuatkan chatbot sesuai spesifikasi bisnis Anda. Ideal untuk perusahaan yang ingin
-          chatbot profesional tanpa perlu konfigurasi sendiri.
-        </p>
-        <p className="text-violet-600 dark:text-violet-400 mt-2 text-xs font-medium">
-          Karena modul dirakit khusus oleh tim, layanan jasa ini dikenakan biaya setup (sekali bayar).
-        </p>
-      </div>
-
-      {/* How it works */}
-      <div className="max-w-3xl mx-auto">
-        <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 text-center">Cara Kerja</div>
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { step:"1", label:"Konsultasi", desc:"Diskusikan kebutuhan via WhatsApp" },
-            { step:"2", label:"Brief & Desain", desc:"Tim kami menyusun spesifikasi chatbot" },
-            { step:"3", label:"Build & Testing", desc:"Pengembangan & pengujian kualitas" },
-            { step:"4", label:"Deploy & Training", desc:"Go-live + pelatihan penggunaan" },
-          ].map((s, i) => (
-            <div key={i} className="text-center">
-              <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 font-bold text-sm flex items-center justify-center mx-auto mb-2">{s.step}</div>
-              <div className="text-xs font-semibold text-gray-800 dark:text-gray-200">{s.label}</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">{s.desc}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Packages */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
-        {MODUL_PACKAGES.map((pkg, i) => (
-          <div key={i}
-            className={`relative rounded-2xl border ${pkg.borderColor} ${pkg.bgColor} p-5 flex flex-col hover:shadow-lg transition-shadow`}>
-            {"popular" in pkg && pkg.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow">PALING DIMINATI</span>
-              </div>
-            )}
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${pkg.bgColor} border ${pkg.borderColor}`}>
-              <pkg.icon className={`w-5 h-5 ${pkg.color}`}/>
-            </div>
-            <div className="text-base font-bold text-gray-900 dark:text-white">{pkg.tier}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3 leading-relaxed">{pkg.desc}</div>
-            <div className="text-[10px] font-semibold text-violet-500 uppercase tracking-wide">Biaya setup (sekali bayar)</div>
-            <div className={`text-2xl font-bold ${pkg.color} mb-1`}>{pkg.price}</div>
-            <div className="text-[10px] text-gray-400 mb-4">Dirakit tim Gustafta · Selesai {pkg.delivery}</div>
-            <ul className="space-y-1.5 flex-1 mb-5">
-              {pkg.includes.map((f, j) => (
-                <li key={j} className="flex items-start gap-1.5 text-xs text-gray-700 dark:text-gray-300">
-                  <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${pkg.color}`}/>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <a href="https://wa.me/6281234567890?text=Halo%20Gustafta%2C%20saya%20ingin%20order%20Paket%20Modul%20" target="_blank" rel="noopener noreferrer">
-              <Button size="sm" variant="outline" className={`w-full text-xs h-8 border-current ${pkg.color}`}>
-                Order Sekarang <ExternalLink className="w-3 h-3 ml-1"/>
-              </Button>
-            </a>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ChatbotPaket() {
-  const [, navigate] = useLocation();
-  return (
-    <div className="space-y-8">
-      <div className="text-center max-w-2xl mx-auto">
-        <Badge className="mb-3 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Store Creator</Badge>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Aktivasi chatbot siap pakai</h2>
-        <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed">
-          Pilih chatbot dari koleksi Gustafta yang sudah dibuat dan dioptimalkan oleh tim ahli.
-          Aktifkan langsung di akun Anda — tidak perlu setup dari nol.
-        </p>
-      </div>
-
-      {/* Value prop */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-        {[
-          { icon: Zap, title: "Langsung Aktif", desc: "Bot diaktifkan di akun Anda dalam 24 jam kerja" },
-          { icon: Star, title: "Sudah Teruji", desc: "Setiap bot telah diuji dan dioptimalkan tim ahli" },
-          { icon: Layers, title: "Multi-Agent", desc: "Bot premium menggunakan orkestrasi 7–10 agen spesialis" },
-        ].map((v, i) => (
-          <div key={i} className="bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-center">
-            <v.icon className="w-5 h-5 text-blue-500 mx-auto mb-2"/>
-            <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">{v.title}</div>
-            <div className="text-[11px] text-gray-500 mt-1">{v.desc}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Bot catalog */}
-      <div className="max-w-5xl mx-auto">
-        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 text-center">Koleksi Bot Premium — Construction Suite</div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {CHATBOT_SHOWCASE.map((bot, i) => (
-            <div key={i} className={`${bot.bg} border border-current/10 rounded-xl p-3.5 flex flex-col items-center text-center hover:shadow-md transition-shadow`}>
-              <div className={`w-10 h-10 rounded-xl ${bot.bg} flex items-center justify-center mb-2 border border-current/10`}>
-                <bot.icon className={`w-5 h-5 ${bot.color}`}/>
-              </div>
-              <div className="text-xs font-semibold text-gray-800 dark:text-gray-200">{bot.name}</div>
-              <div className="text-[10px] text-gray-500 mt-0.5">{bot.desc}</div>
-              <Badge className="mt-2 text-[9px] bg-white/60 dark:bg-black/20 text-gray-600 dark:text-gray-400">{bot.tag}</Badge>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 text-center text-xs text-gray-500">
-          +50 chatbot lainnya tersedia — lihat katalog lengkap di halaman Pricing
-        </div>
-      </div>
-
-      {/* Pricing note */}
-      <div className="max-w-2xl mx-auto bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 text-center">
-        <div className="text-sm font-bold text-gray-800 dark:text-white mb-1">Harga mulai Rp 1.499.000</div>
-        <div className="text-xs text-gray-500 mb-4">Biaya lisensi/aktivasi per bot — produk sudah jadi, <strong>tanpa biaya setup</strong>. Termasuk embed widget.</div>
-        <div className="flex gap-3 justify-center">
-          <Button size="sm" onClick={() => navigate("/pricing")} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8">
-            Lihat Katalog Lengkap <ChevronRight className="w-3.5 h-3.5 ml-1"/>
-          </Button>
-          <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer">
-            <Button size="sm" variant="outline" className="text-xs h-8 border-blue-300 text-blue-600">
-              Konsultasi via WA <ExternalLink className="w-3 h-3 ml-1"/>
-            </Button>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Comparison table ─────────────────────────────────────────────────────────
 function KomparasiTable() {
   const rows = [
-    { label: "Buat chatbot sendiri",      bisnis: true,  modul: false, chatbot: false },
-    { label: "Bot dibuatkan tim ahli",    bisnis: false, modul: true,  chatbot: true  },
-    { label: "Bot siap pakai (jadi)",     bisnis: false, modul: false, chatbot: true  },
-    { label: "Akses semua fitur Gustafta",bisnis: true,  modul: false, chatbot: false },
-    { label: "One-time payment",          bisnis: false, modul: true,  chatbot: true  },
-    { label: "Subscription bulanan",      bisnis: true,  modul: false, chatbot: false },
-    { label: "Cocok untuk pemula",        bisnis: true,  modul: true,  chatbot: true  },
+    { label: "Chatbot dikelola sendiri",                    produk: true,  jasa: false, store: false },
+    { label: "Bot dirakit tim ahli (kami yang kerjakan)",   produk: false, jasa: true,  store: false },
+    { label: "Bot langsung aktif dari katalog",             produk: false, jasa: false, store: true  },
+    { label: "Akses platform builder Gustafta penuh",       produk: true,  jasa: false, store: false },
+    { label: "Biaya lisensi (sekali bayar)",                produk: true,  jasa: false, store: true  },
+    { label: "Biaya berlangganan (bulanan/tahunan)",        produk: true,  jasa: false, store: false },
+    { label: "Biaya setup/perakitan (sekali bayar)",        produk: false, jasa: true,  store: false },
+    { label: "Hosting wajib (via Produk Berlangganan)",     produk: false, jasa: true,  store: true  },
+    { label: "Tidak perlu konfigurasi teknis",              produk: false, jasa: true,  store: true  },
+    { label: "Cocok untuk pemula non-teknis",               produk: false, jasa: true,  store: true  },
+    { label: "Kontrol penuh atas konfigurasi AI",           produk: true,  jasa: false, store: false },
   ];
 
   return (
-    <div className="max-w-2xl mx-auto mt-12">
-      <div className="text-sm font-bold text-center text-gray-800 dark:text-white mb-4">Perbandingan Cepat</div>
+    <div className="max-w-3xl mx-auto mt-12">
+      <div className="text-sm font-bold text-center text-gray-800 dark:text-white mb-1">Perbandingan: Produk vs Layanan Jasa vs Chatbot Store</div>
+      <p className="text-center text-xs text-gray-400 dark:text-gray-500 mb-4">Semua jalur menggunakan platform Gustafta — berbeda di cara mendapatkan & mengelola chatbotnya</p>
       <div className="rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden">
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-gray-50 dark:bg-slate-900">
-              <th className="text-left px-4 py-2.5 text-gray-500 font-medium">Fitur</th>
-              <th className="text-center px-3 py-2.5 text-indigo-500 font-semibold">Bisnis</th>
-              <th className="text-center px-3 py-2.5 text-violet-500 font-semibold">Modul</th>
-              <th className="text-center px-3 py-2.5 text-blue-500 font-semibold">Chatbot</th>
+              <th className="text-left px-4 py-3 text-gray-500 font-medium">Fitur / Perbedaan</th>
+              <th className="text-center px-3 py-3 font-semibold">
+                <div className="text-indigo-500">Produk</div>
+                <div className="text-[9px] font-normal text-gray-400">(Lisensi + Langganan)</div>
+              </th>
+              <th className="text-center px-3 py-3 font-semibold">
+                <div className="text-violet-500">Layanan Jasa</div>
+                <div className="text-[9px] font-normal text-gray-400">(Kami Rakit Untukmu)</div>
+              </th>
+              <th className="text-center px-3 py-3 font-semibold">
+                <div className="text-blue-500">Chatbot Store</div>
+                <div className="text-[9px] font-normal text-gray-400">(Bot Jadi dari Kreator)</div>
+              </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row, i) => (
               <tr key={i} className={i % 2 === 0 ? "bg-white dark:bg-slate-950" : "bg-gray-50/60 dark:bg-slate-900/40"}>
                 <td className="px-4 py-2 text-gray-700 dark:text-gray-300">{row.label}</td>
-                {[row.bisnis, row.modul, row.chatbot].map((v, j) => (
+                {[row.produk, row.jasa, row.store].map((v, j) => (
                   <td key={j} className="text-center px-3 py-2">
                     {v
                       ? <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-600 dark:bg-green-500 mx-auto"><Check className="w-3 h-3 text-white" strokeWidth={3}/></span>
@@ -802,20 +753,17 @@ function KomparasiTable() {
           </tbody>
         </table>
       </div>
+      <div className="mt-4 flex flex-col sm:flex-row gap-2 justify-center text-xs">
+        <Link href="/packs"><span className="text-violet-600 dark:text-violet-400 hover:underline underline-offset-2 cursor-pointer">→ Lihat Layanan Jasa & Harga Setup</span></Link>
+        <span className="hidden sm:inline text-gray-300">·</span>
+        <Link href="/store"><span className="text-blue-600 dark:text-blue-400 hover:underline underline-offset-2 cursor-pointer">→ Jelajahi Chatbot Store</span></Link>
+      </div>
     </div>
   );
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ProdukPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("bisnis");
-
-  const TAB_ACTIVE: Record<Tab, string> = {
-    bisnis:  "bg-indigo-600 text-white shadow-md",
-    modul:   "bg-violet-600 text-white shadow-md",
-    chatbot: "bg-blue-600 text-white shadow-md",
-  };
-
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <SharedHeader/>
@@ -823,53 +771,44 @@ export default function ProdukPage() {
       {/* Hero */}
       <section className="pt-16 pb-10 px-4 text-center bg-gradient-to-b from-indigo-50/60 to-white dark:from-indigo-950/20 dark:to-slate-950">
         <Badge className="mb-4 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs">
-          Produk & Layanan Gustafta
+          Produk Gustafta
         </Badge>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-          Semua Cara Pakai Gustafta
+          Akses Chatbot AI Gustafta
         </h1>
         <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-          Gustafta punya tiga jalur — pilih sesuai seberapa banyak Anda mau terlibat.
-          <br className="hidden sm:block" />
-          <span className="font-medium text-indigo-600 dark:text-indigo-400">Builder DIY</span> (langganan, Anda yang kelola) ·{" "}
-          <span className="font-medium text-violet-600 dark:text-violet-400">Layanan Jasa</span> (tim kami yang kerjakan) ·{" "}
-          <span className="font-medium text-emerald-600 dark:text-emerald-400">Store Creator</span> (beli chatbot jadi dari mitra)
+          Produk Gustafta adalah <strong className="text-gray-700 dark:text-gray-300">hak akses menggunakan chatbot AI</strong> yang sudah jadi — Anda tinggal pakai.
+          <br className="hidden sm:block"/>
+          Terdiri dari dua komponen biaya: <span className="font-medium text-indigo-600 dark:text-indigo-400">Biaya Lisensi</span> (sekali bayar, untuk aktivasi akses) dan{" "}
+          <span className="font-medium text-violet-600 dark:text-violet-400">Biaya Berlangganan</span> (per periode, untuk hosting & fitur platform).
         </p>
-      </section>
-
-      {/* Tab navigation */}
-      <section className="sticky top-0 z-10 bg-white/95 dark:bg-slate-950/95 backdrop-blur border-b border-gray-200 dark:border-slate-800 px-4 py-3">
-        <div className="flex gap-2 max-w-3xl mx-auto overflow-x-auto">
-          {TABS.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              data-testid={`tab-${tab.id}`}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? TAB_ACTIVE[tab.id]
-                  : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700"
-              }`}>
-              <tab.icon className="w-3.5 h-3.5"/>
-              {tab.label}
-            </button>
-          ))}
+        {/* Quick navigation to other sections */}
+        <div className="mt-6 flex flex-wrap gap-2 justify-center text-xs">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 flex items-center gap-1.5">
+            <Wrench className="w-3.5 h-3.5 text-violet-500"/>
+            <span className="text-gray-600 dark:text-gray-400">Ingin chatbot dirakit tim kami?</span>
+            <Link href="/packs"><span className="text-violet-600 dark:text-violet-400 font-semibold hover:underline cursor-pointer">→ Layanan Jasa</span></Link>
+          </div>
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 flex items-center gap-1.5">
+            <Bot className="w-3.5 h-3.5 text-blue-500"/>
+            <span className="text-gray-600 dark:text-gray-400">Cari chatbot siap pakai dari kreator?</span>
+            <Link href="/store"><span className="text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer">→ Chatbot Store</span></Link>
+          </div>
         </div>
       </section>
 
       {/* Content */}
       <section className="py-10 px-4">
-        {activeTab === "bisnis"  && <BisnisPaket/>}
-        {activeTab === "modul"   && <ModulPaket/>}
-        {activeTab === "chatbot" && <ChatbotPaket/>}
-
+        <BisnisPaket/>
         <KomparasiTable/>
       </section>
 
       {/* CTA bottom */}
       <section className="py-12 px-4 bg-gradient-to-b from-white to-indigo-50/60 dark:from-slate-950 dark:to-indigo-950/20 text-center">
-        <div className="text-lg font-bold text-gray-900 dark:text-white mb-2">Masih bingung pilih yang mana?</div>
+        <div className="text-lg font-bold text-gray-900 dark:text-white mb-2">Masih bingung pilih paket yang mana?</div>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Konsultasi gratis dengan tim Gustafta — kami bantu pilihkan paket terbaik untuk bisnis Anda.</p>
-        <div className="flex gap-3 justify-center">
-          <a href="https://wa.me/6281234567890?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20paket" target="_blank" rel="noopener noreferrer">
+        <div className="flex gap-3 justify-center flex-wrap">
+          <a href="https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20paket" target="_blank" rel="noopener noreferrer">
             <Button className="bg-green-600 hover:bg-green-500 text-white text-sm h-10 px-5">
               <Phone className="w-4 h-4 mr-2"/> Chat WhatsApp
             </Button>

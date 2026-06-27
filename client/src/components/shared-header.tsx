@@ -172,9 +172,9 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   });
 
   const navItems = [
-    { href: "/produk", label: "Produk & Layanan", icon: BarChart3 },
+    { href: "/produk", label: "Produk", icon: BarChart3 },
     { href: "/packs", label: "Layanan Jasa", icon: Package },
-    { href: "/store", label: "Store Creator", icon: ShoppingBag },
+    { href: "/store", label: "Chatbot Store", icon: ShoppingBag },
     { href: "/workshop", label: "Workshop", icon: GraduationCap, badge: "Segera" },
     { href: "/panduan", label: "Panduan & Belajar", icon: BookOpen },
     { href: "/profil", label: "Profil GAIA", icon: Sparkles },
