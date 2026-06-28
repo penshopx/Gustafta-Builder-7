@@ -180,8 +180,8 @@ export default function PacksPage() {
     <div className="min-h-screen bg-background">
       <SharedHeader />
 
-      {/* ── Journey Context: MENGEMBANGKAN AI ── */}
-      <section className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
+      {/* ── Journey Context: BERKEMBANG ── */}
+      <section className="bg-amber-50 dark:bg-amber-950/20 border-b border-amber-200 dark:border-amber-800">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex flex-wrap items-center gap-1.5 mb-4 text-xs">
             {["Belajar", "Merakit AI", "Menggunakan AI", "Menghasilkan Nilai"].map((s) => (
@@ -189,40 +189,61 @@ export default function PacksPage() {
                 {s}<ChevronRight className="h-3 w-3" />
               </span>
             ))}
-            <span className="font-bold px-2.5 py-1 rounded-full bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900">TAHAP 5</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Mengembangkan AI</span>
+            <span className="font-bold px-2.5 py-1 rounded-full bg-amber-600 text-white">TAHAP 5</span>
+            <span className="font-semibold text-amber-800 dark:text-amber-200">Berkembang</span>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1.5">
-            Jadikan AI sebagai bisnis — bukan sekadar alat
+          <h2 className="text-xl md:text-2xl font-bold text-amber-900 dark:text-amber-100 mb-1.5">
+            Saya ingin membangun bisnis AI.
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-5 max-w-3xl leading-relaxed">
-            Di tahap ini Anda tidak hanya memakai AI — Anda membangun sistem AI untuk orang lain. Melalui layanan jasa premium, white-label, corporate training, dan pengembangan knowledge engineering khusus.
+          <p className="text-sm text-amber-700 dark:text-amber-300 mb-4 max-w-3xl leading-relaxed">
+            Ini bukan lagi tentang memakai AI — ini tentang <strong>menjadi pelaku bisnis AI</strong>. Bangun organisasi, layanan, atau ekosistem berbasis AI bersama tim GUSTAFTA.
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-5">
+          {/* 3 jalur berkembang */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
             {[
-              { icon: "🏗️", label: "AI Studio", sub: "Jasa custom end-to-end" },
-              { icon: "🧬", label: "Knowledge Engineering", sub: "Strukturisasi pengetahuan domain" },
-              { icon: "🏷️", label: "White Label", sub: "AI dengan brand sendiri" },
-              { icon: "🎓", label: "Corporate Training", sub: "Pelatihan tim internal" },
-              { icon: "🚀", label: "Onboarding Tim", sub: "Implementasi + pendampingan" },
-              { icon: "🤝", label: "Kemitraan", sub: "Jadi mitra resmi Gustafta" },
+              {
+                icon: "🏗️",
+                label: "Kami Rakitkan",
+                tagline: "AI Studio — Done-for-You",
+                sub: "Serahkan kepada tim GUSTAFTA. Custom AI, knowledge engineering, onboarding, prompt design — dari nol sampai jadi.",
+                color: "border-amber-300 dark:border-amber-700",
+              },
+              {
+                icon: "🏷️",
+                label: "Jadikan Bisnis Sendiri",
+                tagline: "White Label & Partner",
+                sub: "Pakai platform Gustafta dengan brand Anda. Layani klien Anda sendiri, tim Gustafta yang jadi backbone teknologinya.",
+                color: "border-orange-300 dark:border-orange-700",
+              },
+              {
+                icon: "🎓",
+                label: "Bangun Ekosistem",
+                tagline: "Corporate Training & AI Organization",
+                sub: "Transformasi digital tim Anda — dari karyawan biasa menjadi Perakit AI. Program pelatihan, sertifikasi, dan AI governance.",
+                color: "border-yellow-300 dark:border-yellow-700",
+              },
             ].map((item) => (
-              <div key={item.label} className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 flex flex-col gap-1 text-center items-center">
-                <span className="text-xl leading-none">{item.icon}</span>
-                <div className="text-[11px] font-semibold text-slate-900 dark:text-slate-100 leading-tight">{item.label}</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{item.sub}</div>
+              <div key={item.label} className={`bg-white dark:bg-amber-900/20 border ${item.color} rounded-xl px-3.5 py-3 flex flex-col gap-1.5`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl leading-none">{item.icon}</span>
+                  <div>
+                    <div className="text-xs font-bold text-amber-900 dark:text-amber-100 leading-tight">{item.label}</div>
+                    <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">{item.tagline}</div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">{item.sub}</p>
               </div>
             ))}
           </div>
           <div className="flex flex-wrap gap-3">
-            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20konsultasi%20layanan%20AI%20Studio%20Gustafta" target="_blank" rel="noopener noreferrer">
-              <button className="inline-flex items-center gap-2 bg-slate-800 dark:bg-slate-200 hover:bg-slate-700 dark:hover:bg-slate-300 text-white dark:text-slate-900 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
-                <Sparkles className="h-3.5 w-3.5" /> Konsultasi AI Studio
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20konsultasi%20AI%20Studio%20Gustafta%20%E2%80%94%20membangun%20bisnis%20AI" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <Sparkles className="h-3.5 w-3.5" /> Konsultasi Gratis — AI Studio
               </button>
             </a>
             <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20tertarik%20program%20White%20Label%20Gustafta" target="_blank" rel="noopener noreferrer">
-              <button className="inline-flex items-center gap-2 border border-slate-400 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
-                <TrendingUp className="h-3.5 w-3.5" /> Info White Label
+              <button className="inline-flex items-center gap-2 border border-amber-400 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <TrendingUp className="h-3.5 w-3.5" /> Info White Label & Kemitraan
               </button>
             </a>
           </div>

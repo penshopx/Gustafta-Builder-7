@@ -176,7 +176,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/produk", label: "Merakit AI", icon: Rocket },
     { href: "/store", label: "Menggunakan AI", icon: Zap },
     { href: "/affiliate", label: "Menghasilkan Nilai", icon: TrendingUp },
-    { href: "/packs", label: "Mengembangkan AI", icon: Sparkles },
+    { href: "/packs", label: "Berkembang", icon: Sparkles },
   ];
 
   const premiumNavItems = [
