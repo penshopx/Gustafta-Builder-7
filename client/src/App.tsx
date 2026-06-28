@@ -43,6 +43,7 @@ import LegacyPage from "@/pages/legacy";
 import BlueprintPage from "@/pages/blueprint";
 import MulticlawPage from "@/pages/multiclaw";
 import StarterKitPage from "@/pages/starter-kit";
+import GustaFtaFrameworkPage from "@/pages/gustafta-framework";
 import IndustriPage from "@/pages/industri";
 import AffiliatePage from "@/pages/affiliate";
 import MulticlawSuitePage from "@/pages/multiclaw-suite";
@@ -430,6 +431,7 @@ function Router() {
       <Route path="/legacy" component={LegacyPage} />
       <Route path="/blueprint" component={BlueprintPage} />
       <Route path="/starter-kit" component={StarterKitPage} />
+      <Route path="/framework" component={GustaFtaFrameworkPage} />
       <Route path="/industri" component={IndustriPage} />
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/multiclaw-suite" component={MulticlawSuitePage} />

@@ -102,17 +102,18 @@ export default function StarterKitPage() {
             {[
               {
                 icon: <BookOpen className="h-7 w-7 text-sky-600" />,
-                title: "Buku I: Dari Monolog ke Dialog",
-                desc: "Mindset shift dari karyawan ke profesional independen yang menghasilkan dari keahliannya — bukan dari jabatannya. PDF + Flipbook interaktif.",
+                title: "Trilogi GUSTAFTA — Buku I, II & III",
+                desc: "Tiga buku panduan lengkap perjalanan Perakit AI: dari mindset shift, cara merakit di Builder, hingga strategi menghasilkan nilai dari AI. PDF + Flipbook interaktif.",
                 badge: "Inti Materi",
-                highlight: "Dibaca rata-rata dalam 4 jam, dipraktikkan dalam 2 minggu",
+                highlight: "Dibaca rata-rata dalam 4 jam per buku, dipraktikkan dalam 2 minggu",
               },
               {
                 icon: <Sparkles className="h-7 w-7 text-indigo-600" />,
-                title: "Panduan Gustafta Builder",
-                desc: "Step-by-step membangun chatbot AI pertama Anda. No-code. Setiap langkah disertai screenshot dan contoh nyata dari berbagai profesi.",
-                badge: "Panduan Praktik",
-                highlight: "80+ halaman, dari setup hingga deploy",
+                title: "GUSTAFTA Framework™",
+                desc: "Kerangka berpikir khas Gustafta — metode konversi pengetahuan menjadi AI. Berisi 5-stage journey, model konversi, identitas Perakit AI, dan 6 pilar ekosistem.",
+                badge: "Framework",
+                highlight: "Fondasi berpikir seluruh ekosistem GUSTAFTA",
+                link: "/framework",
               },
               {
                 icon: <Zap className="h-7 w-7 text-emerald-600" />,
@@ -122,10 +123,24 @@ export default function StarterKitPage() {
                 highlight: "Prompt untuk: K3, Legal, Konsultan, Trainer, Akademisi",
               },
               {
+                icon: <Gift className="h-7 w-7 text-violet-600" />,
+                title: "Template Konfigurasi Chatbot",
+                desc: "Sample konfigurasi chatbot siap pakai dari berbagai profesi — persona, knowledge base, dan system prompt yang sudah dikonfigurasi. Tinggal sesuaikan untuk bidang Anda.",
+                badge: "Template",
+                highlight: "Tersedia untuk: Konsultan, Trainer, K3, Asosiasi, LSP",
+              },
+              {
+                icon: <Star className="h-7 w-7 text-amber-500" />,
+                title: "Akses GUSTAFTA Builder 7 Hari",
+                desc: "Langsung praktik di platform nyata — rakit chatbot pertama Anda selama 7 hari tanpa biaya. Semua fitur Builder tersedia penuh selama masa trial.",
+                badge: "Trial Gratis",
+                highlight: "Langsung aktif setelah pembelian · Tanpa kartu kredit",
+              },
+              {
                 icon: <Gift className="h-7 w-7 text-orange-500" />,
-                title: "Akses Komunitas Beta",
+                title: "Akses Komunitas Perakit AI",
                 desc: "Bergabung di grup eksklusif pembeli Starter Kit — berbagi pengalaman, tanya jawab langsung dengan tim, dan mendapat update materi baru.",
-                badge: "Bonus",
+                badge: "Komunitas",
                 highlight: "340+ anggota aktif sudah bergabung",
               },
             ].map((item, i) => (
@@ -141,6 +156,11 @@ export default function StarterKitPage() {
                     <p className="text-xs text-sky-600 dark:text-sky-400 font-medium flex items-center gap-1">
                       <TrendingUp className="h-3 w-3" />{item.highlight}
                     </p>
+                    {item.link && (
+                      <Link href={item.link}>
+                        <span className="text-xs text-indigo-600 dark:text-indigo-400 underline cursor-pointer font-medium">Baca Framework →</span>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -233,10 +253,12 @@ export default function StarterKitPage() {
             <div className="text-sm text-gray-400 mb-6 line-through">Harga normal Rp 315.000</div>
             <ul className="text-sm text-left space-y-3 mb-8 text-gray-700 dark:text-muted-foreground">
               {[
-                "Buku I PDF + Flipbook interaktif",
-                "Panduan Gustafta Builder (80+ hal)",
+                "Trilogi GUSTAFTA — Buku I, II & III (PDF + Flipbook)",
+                "GUSTAFTA Framework™ (dokumen kerangka berpikir)",
                 "15 Prompt Pack siap pakai",
-                "Akses Komunitas Beta (340+ anggota)",
+                "Template Konfigurasi Chatbot (5 profesi)",
+                "Akses Builder 7 hari (trial penuh)",
+                "Akses Komunitas Perakit AI (340+ anggota)",
                 "🛡️ Garansi 7 hari uang kembali",
                 "🔄 Update gratis selamanya",
               ].map((item, i) => (
