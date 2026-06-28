@@ -175,9 +175,8 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/panduan", label: "Belajar", icon: GraduationCap, badge: "Mulai di Sini" },
     { href: "/produk", label: "Merakit AI", icon: Rocket },
     { href: "/store", label: "Menggunakan AI", icon: Zap },
-    { href: "/workshop", label: "Workshop", icon: BookOpen, badge: "Segera" },
-    { href: "/packs", label: "Kami Rakitkan", icon: Sparkles },
-    { href: "/profil", label: "Tentang GUSTAFTA", icon: BarChart3 },
+    { href: "/affiliate", label: "Menghasilkan AI", icon: TrendingUp },
+    { href: "/packs", label: "Mengembangkan AI", icon: Sparkles },
   ];
 
   const premiumNavItems = [
