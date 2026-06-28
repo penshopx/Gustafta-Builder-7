@@ -30,7 +30,7 @@ export default function AffiliatePage() {
             <span className="font-bold px-2.5 py-1 rounded-full bg-violet-600 text-white">TAHAP 4</span>
             <span className="font-semibold text-violet-800 dark:text-violet-200">Menghasilkan Nilai</span>
             <span className="flex items-center gap-1 text-muted-foreground">
-              <ChevronRight className="h-3 w-3" />Mengembangkan AI
+              <ChevronRight className="h-3 w-3" />Berkembang
             </span>
           </div>
           <h2 className="text-xl md:text-2xl font-bold text-violet-900 dark:text-violet-100 mb-1.5">

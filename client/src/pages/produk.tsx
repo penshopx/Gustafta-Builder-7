@@ -776,7 +776,7 @@ export default function ProdukPage() {
             <ChevronRight className="h-3 w-3 text-muted-foreground" />
             <span className="font-bold px-2.5 py-1 rounded-full bg-indigo-600 text-white">TAHAP 2</span>
             <span className="font-semibold text-indigo-800 dark:text-indigo-200">Merakit AI</span>
-            {["Menggunakan AI", "Menghasilkan Nilai", "Mengembangkan AI"].map((s) => (
+            {["Menggunakan AI", "Menghasilkan Nilai", "Berkembang"].map((s) => (
               <span key={s} className="flex items-center gap-1 text-muted-foreground">
                 <ChevronRight className="h-3 w-3" />{s}
               </span>

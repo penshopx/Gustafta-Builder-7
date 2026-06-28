@@ -263,7 +263,7 @@ export default function StoreFeatured() {
             ))}
             <span className="font-bold px-2.5 py-1 rounded-full bg-blue-600 text-white">TAHAP 3</span>
             <span className="font-semibold text-blue-800">Menggunakan AI</span>
-            {["Menghasilkan Nilai", "Mengembangkan AI"].map((s) => (
+            {["Menghasilkan Nilai", "Berkembang"].map((s) => (
               <span key={s} className="flex items-center gap-1 text-gray-500">
                 <ChevronRight className="h-3 w-3" />{s}
               </span>

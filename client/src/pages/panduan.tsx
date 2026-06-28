@@ -608,7 +608,7 @@ export default function Panduan() {
           <div className="flex flex-wrap items-center gap-1.5 mb-4 text-xs">
             <span className="font-bold px-2.5 py-1 rounded-full bg-green-600 text-white">TAHAP 1</span>
             <span className="font-semibold text-green-800 dark:text-green-200">Belajar</span>
-            {["Merakit AI", "Menggunakan AI", "Menghasilkan Nilai", "Mengembangkan AI"].map((s) => (
+            {["Merakit AI", "Menggunakan AI", "Menghasilkan Nilai", "Berkembang"].map((s) => (
               <span key={s} className="flex items-center gap-1 text-muted-foreground">
                 <ChevronRight className="h-3 w-3" />{s}
               </span>
