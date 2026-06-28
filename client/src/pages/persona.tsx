@@ -306,7 +306,7 @@ export default function PersonaPage() {
               <h3 className="font-bold text-gray-900 dark:text-white mb-1">Starter Kit</h3>
               <p className="text-xs text-gray-500 mb-4">Untuk yang ingin coba dulu sebelum komitmen lebih besar</p>
               <ul className="space-y-2 mb-5 text-xs text-gray-700 dark:text-muted-foreground">
-                {["Buku I + Panduan Builder", "15 Prompt Pack starter", "Cocok untuk 1 profesi", "🛡️ Garansi 7 hari"].map((item, i) => (
+                {["📚 Trilogi Ebook (3 ebook)", "🗂️ Trilogi Prompt Pack", "🤖 Akses Gustafta Builder 7 hari", "🛡️ Garansi 7 hari"].map((item, i) => (
                   <li key={i} className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-green-500" />{item}</li>
                 ))}
               </ul>
