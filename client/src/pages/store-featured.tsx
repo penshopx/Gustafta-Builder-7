@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Bot, Smartphone, ShoppingCart, CheckCircle2,
-  ArrowRight, Star, Users,
+  ArrowRight, Star, Users, ChevronRight,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -252,22 +252,78 @@ export default function StoreFeatured() {
         </div>
       </header>
 
+      {/* ── Journey Context: MENGGUNAKAN AI ── */}
+      <section className="bg-blue-50 border-b border-blue-200">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex flex-wrap items-center gap-1.5 mb-4 text-xs">
+            {["Belajar", "Merakit AI"].map((s) => (
+              <span key={s} className="flex items-center gap-1 text-gray-500">
+                {s}<ChevronRight className="h-3 w-3" />
+              </span>
+            ))}
+            <span className="font-bold px-2.5 py-1 rounded-full bg-blue-600 text-white">TAHAP 3</span>
+            <span className="font-semibold text-blue-800">Menggunakan AI</span>
+            {["Menghasilkan Nilai", "Mengembangkan AI"].map((s) => (
+              <span key={s} className="flex items-center gap-1 text-gray-500">
+                <ChevronRight className="h-3 w-3" />{s}
+              </span>
+            ))}
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold text-blue-900 mb-1.5">
+            Tidak ingin merakit sendiri? Pilih dan langsung pakai
+          </h2>
+          <p className="text-sm text-blue-700 mb-5 max-w-3xl leading-relaxed">
+            Ratusan AI spesialis siap digunakan — dari domain Konstruksi, Hukum, Pendidikan, HR, Keuangan, hingga Properti. Pilih sesuai kebutuhan, aktif dalam hitungan menit.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 mb-5">
+            {[
+              { icon: "🏗️", label: "AI Konstruksi", sub: "SBU, K3, Tender, RAB" },
+              { icon: "⚖️", label: "AI Hukum", sub: "Kontrak, legalitas" },
+              { icon: "🎓", label: "AI Pendidikan", sub: "Tutor & e-learning" },
+              { icon: "👥", label: "AI HR", sub: "Rekrutmen, kinerja" },
+              { icon: "💹", label: "AI Keuangan", sub: "Pajak, cashflow" },
+              { icon: "🏠", label: "AI Properti", sub: "Developer, agen" },
+              { icon: "📋", label: "Template", sub: "Paket siap pakai" },
+              { icon: "📚", label: "Knowledge Pack", sub: "Pengetahuan domain" },
+            ].map((item) => (
+              <div key={item.label} className="bg-white border border-blue-200 rounded-xl px-2.5 py-2 flex flex-col gap-1 text-center items-center">
+                <span className="text-xl leading-none">{item.icon}</span>
+                <div className="text-[11px] font-semibold text-blue-900 leading-tight">{item.label}</div>
+                <div className="text-[10px] text-blue-500">{item.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/store/katalog">
+              <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <ShoppingCart className="h-3.5 w-3.5" /> Lihat Semua AI Solutions
+              </button>
+            </Link>
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20rekomendasi%20AI%20yang%20tepat%20untuk%20kebutuhan%20saya" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 border border-blue-400 text-blue-700 hover:bg-blue-50 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                Minta Rekomendasi <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Hero */}
       <section className="py-10 px-4 text-center border-b border-gray-200 bg-white">
         <Badge className="mb-3 bg-violet-100 text-violet-700 border-violet-200 hover:bg-violet-100">
-          🏪 Gustafta Store — Chatbot AI Pilihan
+          🏪 Gustafta Store — AI Solutions Siap Pakai
         </Badge>
         <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-gray-900">
-          Pilih Chatbot, Langsung Pakai
+          Pilih AI-mu, Langsung Aktif
         </h1>
         <p className="text-gray-600 max-w-xl mx-auto mb-6 text-sm leading-relaxed">
-          Dua kelompok produk — <strong className="text-gray-900">chatbot resmi Gustafta</strong> dan{" "}
-          <strong className="text-gray-900">chatbot dari mitra creator bersertifikat</strong>.
+          Dua sumber produk — <strong className="text-gray-900">AI resmi Gustafta</strong> dan{" "}
+          <strong className="text-gray-900">AI dari creator bersertifikat</strong>.
           Semua siap pakai, biaya lisensi sekali bayar.
         </p>
 
         <div className="inline-flex flex-wrap items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-gray-900 border border-gray-700 text-sm mb-6 shadow-sm">
-          <span className="text-orange-300 font-medium">🏷️ Pilih Chatbot (Lisensi)</span>
+          <span className="text-orange-300 font-medium">🏷️ Pilih AI (Lisensi)</span>
           <span className="text-gray-400">+</span>
           <span className="text-green-300 font-medium">
             ⚡ <a href="/pricing" className="underline underline-offset-2 hover:text-green-200">Paket Berlangganan</a>
@@ -278,7 +334,7 @@ export default function StoreFeatured() {
 
         <div className="flex flex-wrap gap-4 justify-center text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-violet-400 inline-block" />Produk siap pakai, tanpa setup
+            <span className="w-2 h-2 rounded-full bg-violet-400 inline-block" />Aktif tanpa konfigurasi teknis
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />Biaya lisensi sekali bayar

@@ -180,6 +180,55 @@ export default function PacksPage() {
     <div className="min-h-screen bg-background">
       <SharedHeader />
 
+      {/* ── Journey Context: MENGEMBANGKAN AI ── */}
+      <section className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex flex-wrap items-center gap-1.5 mb-4 text-xs">
+            {["Belajar", "Merakit AI", "Menggunakan AI", "Menghasilkan Nilai"].map((s) => (
+              <span key={s} className="flex items-center gap-1 text-muted-foreground">
+                {s}<ChevronRight className="h-3 w-3" />
+              </span>
+            ))}
+            <span className="font-bold px-2.5 py-1 rounded-full bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900">TAHAP 5</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Mengembangkan AI</span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1.5">
+            Jadikan AI sebagai bisnis — bukan sekadar alat
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-5 max-w-3xl leading-relaxed">
+            Di tahap ini Anda tidak hanya memakai AI — Anda membangun sistem AI untuk orang lain. Melalui layanan jasa premium, white-label, corporate training, dan pengembangan knowledge engineering khusus.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-5">
+            {[
+              { icon: "🏗️", label: "AI Studio", sub: "Jasa custom end-to-end" },
+              { icon: "🧬", label: "Knowledge Engineering", sub: "Strukturisasi pengetahuan domain" },
+              { icon: "🏷️", label: "White Label", sub: "AI dengan brand sendiri" },
+              { icon: "🎓", label: "Corporate Training", sub: "Pelatihan tim internal" },
+              { icon: "🚀", label: "Onboarding Tim", sub: "Implementasi + pendampingan" },
+              { icon: "🤝", label: "Kemitraan", sub: "Jadi mitra resmi Gustafta" },
+            ].map((item) => (
+              <div key={item.label} className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 flex flex-col gap-1 text-center items-center">
+                <span className="text-xl leading-none">{item.icon}</span>
+                <div className="text-[11px] font-semibold text-slate-900 dark:text-slate-100 leading-tight">{item.label}</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{item.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20konsultasi%20layanan%20AI%20Studio%20Gustafta" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 bg-slate-800 dark:bg-slate-200 hover:bg-slate-700 dark:hover:bg-slate-300 text-white dark:text-slate-900 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <Sparkles className="h-3.5 w-3.5" /> Konsultasi AI Studio
+              </button>
+            </a>
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20tertarik%20program%20White%20Label%20Gustafta" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 border border-slate-400 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <TrendingUp className="h-3.5 w-3.5" /> Info White Label
+              </button>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Hero */}
       <section className="relative overflow-hidden pt-14 pb-12 md:pt-20 md:pb-16 bg-gradient-to-br from-primary/8 via-violet-500/4 to-transparent">
         <div className="absolute -top-20 -right-20 w-96 h-96 bg-primary/8 rounded-full blur-3xl pointer-events-none" />

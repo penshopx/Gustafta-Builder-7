@@ -175,7 +175,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
     { href: "/panduan", label: "Belajar", icon: GraduationCap, badge: "Mulai di Sini" },
     { href: "/produk", label: "Merakit AI", icon: Rocket },
     { href: "/store", label: "Menggunakan AI", icon: Zap },
-    { href: "/affiliate", label: "Menghasilkan AI", icon: TrendingUp },
+    { href: "/affiliate", label: "Menghasilkan Nilai", icon: TrendingUp },
     { href: "/packs", label: "Mengembangkan AI", icon: Sparkles },
   ];
 

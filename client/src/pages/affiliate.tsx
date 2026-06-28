@@ -18,8 +18,58 @@ export default function AffiliatePage() {
     <div className="min-h-screen bg-white dark:bg-background" data-testid="page-affiliate">
       <SharedHeader />
 
+      {/* ── Journey Context: MENGHASILKAN NILAI ── */}
+      <section className="bg-violet-50 dark:bg-violet-950/20 border-b border-violet-200 dark:border-violet-800">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex flex-wrap items-center gap-1.5 mb-4 text-xs">
+            {["Belajar", "Merakit AI", "Menggunakan AI"].map((s) => (
+              <span key={s} className="flex items-center gap-1 text-muted-foreground">
+                {s}<ChevronRight className="h-3 w-3" />
+              </span>
+            ))}
+            <span className="font-bold px-2.5 py-1 rounded-full bg-violet-600 text-white">TAHAP 4</span>
+            <span className="font-semibold text-violet-800 dark:text-violet-200">Menghasilkan Nilai</span>
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <ChevronRight className="h-3 w-3" />Mengembangkan AI
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold text-violet-900 dark:text-violet-100 mb-1.5">
+            Ubah AI yang kamu rakit menjadi penghasilan nyata
+          </h2>
+          <p className="text-sm text-violet-700 dark:text-violet-300 mb-5 max-w-3xl leading-relaxed">
+            AI yang kamu buat bisa menghasilkan uang — dijual ke orang lain, atau dikomersialisasikan lewat program affiliate. Ini bukan tentang merakit lagi, ini tentang memonetisasi hasil rakitanmu.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
+            {[
+              { icon: "🏪", label: "Creator Marketplace", sub: "Jual chatbot, prompt & template buatanmu" },
+              { icon: "💰", label: "Royalti Rekurring", sub: "Terima komisi tiap bulan selagi produkmu aktif" },
+              { icon: "📦", label: "Knowledge Pack", sub: "Jual paket pengetahuan domain spesialismu" },
+              { icon: "🔗", label: "Affiliate Program", sub: "30% komisi rekurring dari setiap referral" },
+            ].map((item) => (
+              <div key={item.label} className="bg-white dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700 rounded-xl px-3 py-2.5 flex flex-col gap-1">
+                <span className="text-xl leading-none">{item.icon}</span>
+                <div className="text-xs font-semibold text-violet-900 dark:text-violet-100 leading-tight">{item.label}</div>
+                <div className="text-[10px] text-violet-600 dark:text-violet-400 leading-snug">{item.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a href={WA_URL} target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <Star className="h-3.5 w-3.5" /> Daftar Creator Marketplace
+              </button>
+            </a>
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20tahu%20program%20Affiliate%20Gustafta" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 border border-violet-400 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/30 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <Share2 className="h-3.5 w-3.5" /> Info Affiliate Program
+              </button>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── A: ATTENTION ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 py-20 md:py-28 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 py-16 md:py-24 px-4">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-1/4 w-64 h-64 rounded-full bg-white blur-3xl" />
           <div className="absolute bottom-10 right-1/4 w-80 h-80 rounded-full bg-white blur-3xl" />
@@ -27,16 +77,15 @@ export default function AffiliatePage() {
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-semibold mb-6">
             <Share2 className="h-3.5 w-3.5" />
-            Program Affiliate & Reseller Gustafta
+            Program Affiliate & Reseller · Creator Marketplace
           </div>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
-            Anda Sudah Sering Rekomendasikan Tools.<br />
-            <span className="text-violet-200">Kenapa Belum Dibayar untuk Itu?</span>
+            Pengetahuanmu Punya Nilai.<br />
+            <span className="text-violet-200">Sekarang Saatnya Dimonetisasi.</span>
           </h1>
           <p className="text-base md:text-lg text-violet-100 mb-4 max-w-2xl mx-auto leading-relaxed">
-            Setiap kali Anda rekomendasikan Gustafta ke teman, kolega, atau komunitas —
-            Anda bisa menghasilkan komisi hingga 30% secara berulang setiap bulan,
-            tanpa harus membuat produk sendiri.
+            Jual AI yang kamu rakit di Creator Marketplace — atau hasilkan komisi hingga 30% berulang setiap bulan
+            dari program affiliate, tanpa harus membuat produk sendiri.
           </p>
           <div className="flex items-center justify-center gap-6 mb-8 text-white">
             {[["30%", "Komisi Maks"], ["Recurring", "Tiap Bulan"], ["Rp 0", "Modal Awal"]].map(([num, label]) => (

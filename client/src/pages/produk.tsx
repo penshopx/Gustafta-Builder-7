@@ -768,21 +768,74 @@ export default function ProdukPage() {
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <SharedHeader/>
 
+      {/* ── Journey Context: MERAKIT AI ── */}
+      <section className="bg-indigo-50 dark:bg-indigo-950/20 border-b border-indigo-200 dark:border-indigo-800">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex flex-wrap items-center gap-1.5 mb-4 text-xs">
+            <Link href="/panduan"><span className="text-muted-foreground hover:text-foreground cursor-pointer">Belajar</span></Link>
+            <ChevronRight className="h-3 w-3 text-muted-foreground" />
+            <span className="font-bold px-2.5 py-1 rounded-full bg-indigo-600 text-white">TAHAP 2</span>
+            <span className="font-semibold text-indigo-800 dark:text-indigo-200">Merakit AI</span>
+            {["Menggunakan AI", "Menghasilkan Nilai", "Mengembangkan AI"].map((s) => (
+              <span key={s} className="flex items-center gap-1 text-muted-foreground">
+                <ChevronRight className="h-3 w-3" />{s}
+              </span>
+            ))}
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold text-indigo-900 dark:text-indigo-100 mb-1.5">
+            Rakit AI-mu sendiri — dari nol sampai jadi
+          </h2>
+          <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-5 max-w-3xl leading-relaxed">
+            Platform no-code untuk merakit asisten AI, chatbot, dan sistem multi-agen — sesuai domain dan cara kerja Anda. Tidak perlu keahlian teknis, cukup pengetahuan domain.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 mb-5">
+            {[
+              { icon: "🔧", label: "AI Builder", sub: "No-code, visual" },
+              { icon: "🧠", label: "Knowledge Base", sub: "Upload dokumen" },
+              { icon: "🎭", label: "Persona AI", sub: "Karakter & gaya" },
+              { icon: "⚡", label: "Agentic AI", sub: "Orkestrasi agen" },
+              { icon: "🕸️", label: "Multi-Agent", sub: "OpenClaw system" },
+              { icon: "📱", label: "Mini Apps", sub: "45 tipe tersedia" },
+              { icon: "💬", label: "Widget", sub: "Embed di mana saja" },
+              { icon: "📊", label: "Analytics", sub: "Monitor performa" },
+            ].map((item) => (
+              <div key={item.label} className="bg-white dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-xl px-2.5 py-2 flex flex-col gap-1 text-center items-center">
+                <span className="text-xl leading-none">{item.icon}</span>
+                <div className="text-[11px] font-semibold text-indigo-900 dark:text-indigo-100 leading-tight">{item.label}</div>
+                <div className="text-[10px] text-indigo-500 dark:text-indigo-400">{item.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/auth">
+              <button className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <Zap className="h-3.5 w-3.5" /> Mulai Merakit AI
+              </button>
+            </Link>
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20tahu%20lebih%20lanjut%20tentang%20Gustafta%20Builder" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 border border-indigo-400 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <MessageSquare className="h-3.5 w-3.5" /> Tanya via WhatsApp
+              </button>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Hero */}
-      <section className="pt-16 pb-10 px-4 text-center bg-gradient-to-b from-indigo-50/60 to-white dark:from-indigo-950/20 dark:to-slate-950">
+      <section className="pt-12 pb-8 px-4 text-center bg-gradient-to-b from-indigo-50/60 to-white dark:from-indigo-950/20 dark:to-slate-950">
         <Badge className="mb-4 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs">
           Produk Gustafta
         </Badge>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-          Akses Chatbot AI Gustafta
+          Pilih Jalur Memiliki AI Gustafta
         </h1>
         <p className="mt-3 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-          Produk Gustafta adalah <strong className="text-gray-700 dark:text-gray-300">hak akses menggunakan chatbot AI</strong> yang sudah jadi — Anda tinggal pakai.
+          Ada tiga cara mendapatkan AI Gustafta — sesuaikan dengan seberapa banyak Anda ingin terlibat dalam proses perakitannya.
           <br className="hidden sm:block"/>
-          Terdiri dari dua komponen biaya: <span className="font-medium text-indigo-600 dark:text-indigo-400">Biaya Lisensi</span> (sekali bayar, untuk aktivasi akses) dan{" "}
-          <span className="font-medium text-violet-600 dark:text-violet-400">Biaya Berlangganan</span> (per periode, untuk hosting & fitur platform).
+          Semua jalur menggunakan platform yang sama: <span className="font-medium text-indigo-600 dark:text-indigo-400">Builder</span> (merakit sendiri),{" "}
+          <span className="font-medium text-violet-600 dark:text-violet-400">Jasa</span> (kami yang rakit), atau{" "}
+          <span className="font-medium text-blue-600 dark:text-blue-400">Store</span> (pilih dari kreator).
         </p>
-        {/* Quick navigation to other sections */}
         <div className="mt-6 flex flex-wrap gap-2 justify-center text-xs">
           <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 flex items-center gap-1.5">
             <Wrench className="w-3.5 h-3.5 text-violet-500"/>

@@ -601,6 +601,56 @@ export default function Panduan() {
     <div className="min-h-screen bg-background">
       <SharedHeader />
 
+      {/* ── Journey Context: BELAJAR ── */}
+      <section className="bg-green-50 dark:bg-green-950/20 border-b border-green-200 dark:border-green-800">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          {/* Journey strip */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-4 text-xs">
+            <span className="font-bold px-2.5 py-1 rounded-full bg-green-600 text-white">TAHAP 1</span>
+            <span className="font-semibold text-green-800 dark:text-green-200">Belajar</span>
+            {["Merakit AI", "Menggunakan AI", "Menghasilkan Nilai", "Mengembangkan AI"].map((s) => (
+              <span key={s} className="flex items-center gap-1 text-muted-foreground">
+                <ChevronRight className="h-3 w-3" />{s}
+              </span>
+            ))}
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold text-green-900 dark:text-green-100 mb-1.5">
+            Semua dimulai dari sini
+          </h2>
+          <p className="text-sm text-green-700 dark:text-green-300 mb-5 max-w-3xl leading-relaxed">
+            Sebelum merakit AI, pahami dulu cara berpikirnya — bagaimana merancang persona, menyusun pengetahuan, dan mengaktifkan AI yang benar-benar berguna untuk bidangmu.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {[
+              { icon: "📦", label: "Starter Kit", sub: "Rp 245.000 · lisensi + 7 hari trial Builder" },
+              { icon: "🧭", label: "Framework Gustafta", sub: "Cara berpikir & merakit AI" },
+              { icon: "📖", label: "Trilogi Gustafta", sub: "Blueprint · Playbook · Prompt" },
+              { icon: "🎬", label: "Video Tutorial", sub: "Panduan langkah demi langkah" },
+              { icon: "🎓", label: "Workshop 3 Sesi", sub: "Live session bersama tim" },
+              { icon: "🏫", label: "Gustafta Academy", sub: "Jalur belajar terstruktur" },
+            ].map((item) => (
+              <div key={item.label} className="bg-white dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl px-3 py-2.5 flex flex-col gap-1">
+                <span className="text-lg leading-none">{item.icon}</span>
+                <div className="text-xs font-semibold text-green-900 dark:text-green-100 leading-tight">{item.label}</div>
+                <div className="text-[10px] text-green-600 dark:text-green-400 leading-snug">{item.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-3 mt-4">
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20tertarik%20beli%20Starter%20Kit%20Gustafta" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <BookOpen className="h-3.5 w-3.5" /> Beli Starter Kit (Rp 245rb)
+              </button>
+            </a>
+            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20tahu%20jadwal%20Workshop%20Gustafta" target="_blank" rel="noopener noreferrer">
+              <button className="inline-flex items-center gap-2 border border-green-400 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
+                <GraduationCap className="h-3.5 w-3.5" /> Info Jadwal Workshop
+              </button>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <div className="container mx-auto px-4 py-6 max-w-7xl">
 
         {/* Header */}
