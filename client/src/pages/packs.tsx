@@ -198,54 +198,75 @@ export default function PacksPage() {
           <p className="text-sm text-amber-700 dark:text-amber-300 mb-4 max-w-3xl leading-relaxed">
             Ini bukan lagi tentang memakai AI — ini tentang <strong>menjadi pelaku bisnis AI</strong>. Bangun organisasi, layanan, atau ekosistem berbasis AI bersama tim GUSTAFTA.
           </p>
-          {/* 3 jalur berkembang */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-            {[
-              {
-                icon: "🏗️",
-                label: "Kami Rakitkan",
-                tagline: "AI Studio — Done-for-You",
-                sub: "Serahkan kepada tim GUSTAFTA. Custom AI, knowledge engineering, onboarding, prompt design — dari nol sampai jadi.",
-                color: "border-amber-300 dark:border-amber-700",
-              },
-              {
-                icon: "🏷️",
-                label: "Jadikan Bisnis Sendiri",
-                tagline: "White Label & Partner",
-                sub: "Pakai platform Gustafta dengan brand Anda. Layani klien Anda sendiri, tim Gustafta yang jadi backbone teknologinya.",
-                color: "border-orange-300 dark:border-orange-700",
-              },
-              {
-                icon: "🎓",
-                label: "Bangun Ekosistem",
-                tagline: "Corporate Training & AI Organization",
-                sub: "Transformasi digital tim Anda — dari karyawan biasa menjadi Perakit AI. Program pelatihan, sertifikasi, dan AI governance.",
-                color: "border-yellow-300 dark:border-yellow-700",
-              },
-            ].map((item) => (
-              <div key={item.label} className={`bg-white dark:bg-amber-900/20 border ${item.color} rounded-xl px-3.5 py-3 flex flex-col gap-1.5`}>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl leading-none">{item.icon}</span>
-                  <div>
-                    <div className="text-xs font-bold text-amber-900 dark:text-amber-100 leading-tight">{item.label}</div>
-                    <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">{item.tagline}</div>
-                  </div>
+          {/* Dua jalur berkembang */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+
+            {/* Jalur 1 — Perakit AI yang naik level */}
+            <div className="bg-white dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🚀</span>
+                <div>
+                  <div className="text-xs font-bold text-amber-900 dark:text-amber-100">Jalur Perakit AI</div>
+                  <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sudah merakit → naik level menjadi bisnis AI</div>
                 </div>
-                <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">{item.sub}</p>
               </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20konsultasi%20AI%20Studio%20Gustafta%20%E2%80%94%20membangun%20bisnis%20AI" target="_blank" rel="noopener noreferrer">
-              <button className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
-                <Sparkles className="h-3.5 w-3.5" /> Konsultasi Gratis — AI Studio
-              </button>
-            </a>
-            <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20tertarik%20program%20White%20Label%20Gustafta" target="_blank" rel="noopener noreferrer">
-              <button className="inline-flex items-center gap-2 border border-amber-400 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
-                <TrendingUp className="h-3.5 w-3.5" /> Info White Label & Kemitraan
-              </button>
-            </a>
+              <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed mb-3">
+                Sudah merakit AI di Builder? Sekarang waktunya naik level — dari Perakit menjadi Konsultan, Creator bersertifikat, atau Trainer.
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  { icon: "🌱→🛠", label: "Naik Level Perakit", sub: "Pemula → Profesional → Creator → Enterprise" },
+                  { icon: "🏆", label: "Sertifikasi Perakit AI", sub: "Certified AI Assembler — bukti kompetensi resmi" },
+                  { icon: "💼", label: "Buka Jasa AI Sendiri", sub: "Jadi konsultan/freelancer AI berbasis Gustafta" },
+                  { icon: "🎓", label: "Jadi Trainer Gustafta", sub: "Ajar orang lain, hasilkan dari komunitas" },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-start gap-2">
+                    <span className="text-[11px] shrink-0 mt-0.5">{row.icon}</span>
+                    <div>
+                      <span className="text-[11px] font-semibold text-amber-900 dark:text-amber-100">{row.label}</span>
+                      <span className="text-[11px] text-amber-600 dark:text-amber-400"> — {row.sub}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20naik%20level%20jadi%20Perakit%20AI%20Profesional%20di%20Gustafta" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                <Sparkles className="h-3 w-3" /> Naik Level Sekarang
+              </a>
+            </div>
+
+            {/* Jalur 2 — Profesional / Organisasi */}
+            <div className="bg-white dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🏢</span>
+                <div>
+                  <div className="text-xs font-bold text-orange-900 dark:text-orange-100">Jalur Profesional & Organisasi</div>
+                  <div className="text-[10px] text-orange-600 dark:text-orange-400 font-medium">Punya pengetahuan domain → bangun ekosistem AI</div>
+                </div>
+              </div>
+              <p className="text-[11px] text-orange-700 dark:text-orange-300 leading-relaxed mb-3">
+                Anda ahli di bidang Anda. Tim Gustafta yang menjadi Perakit-nya — atau jadikan platform ini sebagai bisnis Anda sendiri.
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  { icon: "🏗️", label: "Kami Rakitkan (AI Studio)", sub: "Custom AI dari nol — serahkan ke tim Gustafta" },
+                  { icon: "🏷️", label: "White Label & Partner", sub: "Layani klien sendiri, Gustafta jadi backbone-nya" },
+                  { icon: "📚", label: "Corporate Training", sub: "Seluruh tim jadi Perakit AI — bukan penonton AI" },
+                  { icon: "🤝", label: "AI Organization", sub: "Bangun ekosistem & tata kelola AI di perusahaan" },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-start gap-2">
+                    <span className="text-[11px] shrink-0 mt-0.5">{row.icon}</span>
+                    <div>
+                      <span className="text-[11px] font-semibold text-orange-900 dark:text-orange-100">{row.label}</span>
+                      <span className="text-[11px] text-orange-600 dark:text-orange-400"> — {row.sub}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20konsultasi%20AI%20Studio%20Gustafta%20untuk%20organisasi%20saya" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                <TrendingUp className="h-3 w-3" /> Konsultasi AI Studio
+              </a>
+            </div>
+
           </div>
         </div>
       </section>
