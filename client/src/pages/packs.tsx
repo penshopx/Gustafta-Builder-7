@@ -7,7 +7,7 @@ import {
   ClipboardList, ArrowRight, Star, Lock, Zap, BarChart3,
   Phone, Check, TrendingUp, Sparkles, Crown, MessageCircle,
   GraduationCap, BookOpen, Users, Award, ClipboardCheck, Scale,
-  Briefcase, Target, Megaphone, ShoppingBag, PieChart, Mic, PenLine, Repeat2
+  Briefcase, Target, Megaphone, ShoppingBag, PieChart, Mic, PenLine, Repeat2, ChevronRight
 } from "lucide-react";
 
 interface Pack {
