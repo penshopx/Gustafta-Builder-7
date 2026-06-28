@@ -172,12 +172,12 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   });
 
   const navItems = [
-    { href: "/produk", label: "Produk", icon: BarChart3 },
-    { href: "/packs", label: "Layanan Jasa", icon: Package },
-    { href: "/store", label: "Chatbot Store", icon: ShoppingBag },
-    { href: "/workshop", label: "Workshop", icon: GraduationCap, badge: "Segera" },
-    { href: "/panduan", label: "Panduan & Belajar", icon: BookOpen },
-    { href: "/profil", label: "Profil GAIA", icon: Sparkles },
+    { href: "/panduan", label: "Belajar", icon: GraduationCap, badge: "Mulai di Sini" },
+    { href: "/produk", label: "Merakit AI", icon: Rocket },
+    { href: "/store", label: "Menggunakan AI", icon: Zap },
+    { href: "/workshop", label: "Workshop", icon: BookOpen, badge: "Segera" },
+    { href: "/packs", label: "Kami Rakitkan", icon: Sparkles },
+    { href: "/profil", label: "Tentang GUSTAFTA", icon: BarChart3 },
   ];
 
   const premiumNavItems = [
@@ -370,7 +370,11 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
               >
                 {item.label}
                 {"badge" in item && item.badge && (
-                  <span className="ml-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-400 text-amber-900 leading-none">
+                  <span className={`ml-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
+                    item.badge === "Mulai di Sini"
+                      ? "bg-emerald-500 text-white"
+                      : "bg-amber-400 text-amber-900"
+                  }`}>
                     {item.badge}
                   </span>
                 )}
