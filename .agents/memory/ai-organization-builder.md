@@ -25,5 +25,13 @@ Gustafta = **AI Organization Builder**: platform yang mengubah **pengetahuan man
 - Builder journey (pengalaman pengguna membangun "organisasi AI"-nya).
 - Bahasa produk konsisten lintas landing/UI (istilah "organisasi AI", bukan "chatbot").
 
+## Roadmap eksekusi (Blueprint Engine) — dokumen kanonik
+Roadmap teknis bertahap hidup di **`docs/blueprint-engine/`** (BUKAN di memory):
+- `00-roadmap.md` — 9 tahap (Audit→Blueprint Schema→Mapping→Config→Dialogue V2→Inference→Confidence→Gap→Critic/Sim/Evolution).
+- `01-builder-audit.md` — Tahap 1 SELESAI: katalog ±150 kolom tabel `agents` + 23 panel + entitas anak.
+
+**Prinsip mati-matian (ditegaskan owner berulang):** JANGAN rombak app, JANGAN ubah UI/Builder. Engine baru = ADITIF, tersembunyi dulu, disambung pelan-pelan. Engine direncanakan di `server/services/blueprint-engine/` agar Builder existing tak tersentuh sampai Tahap 4.
+**Pergeseran inti:** Builder bukan titik awal tapi tujuan — alurnya `Dialog→Blueprint(JSON "DNA")→Config→Builder auto-fill→Ekosistem`. Pakai **Confidence**, bukan Completion %.
+
 ## Catatan selaras strategi lain
 - Tetap hormati Framework Visibility Strategy (Framework login-gated) & aturan anti-testimoni/anti-stat-fiktif di landing-page-persuasion.md.

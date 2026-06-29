@@ -131,3 +131,15 @@ id = "3yRMtr3EJtoaD5E-szv24"
 uri = "file://client/public/images/g20.png"
 type = "image"
 title = "g20 — AI Orchestration Hub (diagram agen, teknis)"
+
+[[outputs]]
+id = "avdoSkRuZV8INWyFSVZG3"
+uri = "file://docs/blueprint-engine/01-builder-audit.md"
+type = "text"
+title = "Tahap 1 — Audit Builder Gustafta"
+
+[[outputs]]
+id = "LM5YlEmwsrV3FbXRKUTxn"
+uri = "file://docs/blueprint-engine/00-roadmap.md"
+type = "text"
+title = "Roadmap — AI Organization Builder (9 tahap)"
