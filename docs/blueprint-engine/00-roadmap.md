@@ -26,7 +26,7 @@ Trilogi Gustafta = framework berpikir di baliknya: **Dialog → Kolaborasi → K
 | 5 | **Dialogue Engine V2** — wawancara Socratic adaptif, pertanyaan sesedikit mungkin | Ya (engine baru, pure, belum disambung) | ✅ SELESAI — `server/services/blueprint-engine/dialogue-engine.ts` + `05-dialogue-engine.md` |
 | 6 | **Inference Engine** — simpulkan field dari sedikit input, beri alasan | Ya (engine baru, pure, belum disambung) | ✅ SELESAI — `server/services/blueprint-engine/inference-engine.ts` + `06-inference-engine.md` |
 | 7 | **Confidence Engine** — skor keyakinan per field (bukan sekadar "completion %") | Ya (engine baru, pure, belum disambung) | ✅ SELESAI — `server/services/blueprint-engine/confidence-engine.ts` + `07-confidence-engine.md` |
-| 8 | **Gap Analysis Engine** — cari field kosong/inkonsisten + rekomendasi | Ya | — |
+| 8 | **Gap Analysis Engine** — cari field kosong/inkonsisten + rekomendasi | Ya (engine baru, pure, belum disambung) | ✅ SELESAI — `server/services/blueprint-engine/gap-analysis-engine.ts` + `08-gap-analysis-engine.md` |
 | 9 | **Critic / Simulation / Evolution Engine** — kritik mutu, simulasi customer, belajar dari history | Ya | — |
 
 ## Tempat kerja engine (rencana, belum dibuat)
