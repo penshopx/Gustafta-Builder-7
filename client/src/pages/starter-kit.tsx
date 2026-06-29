@@ -232,41 +232,86 @@ export default function StarterKitPage() {
 
       {/* ── A: ACTION — Pricing + Urgency ── */}
       <section className="py-16 px-4 bg-gradient-to-b from-sky-50 to-white dark:from-muted/20 dark:to-background">
-        <div className="max-w-md mx-auto text-center">
-          <p className="text-xs font-bold text-sky-600 uppercase tracking-widest mb-2">Investasi</p>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Satu Langkah, Harga Terjangkau</h2>
-          <p className="text-sm text-gray-500 dark:text-muted-foreground mb-8">Lebih murah dari satu sesi kursus — hasilnya bisa Anda pakai seumur karier.</p>
-          <div className="bg-white dark:bg-card rounded-2xl shadow-xl border-2 border-sky-400 p-8">
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-2 mb-5 flex items-center justify-center gap-2">
-              <Clock className="h-4 w-4 text-red-500" />
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-bold text-sky-600 uppercase tracking-widest mb-2 text-center">Investasi</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Pilih yang Sesuai Kebutuhan Anda</h2>
+          <p className="text-sm text-gray-500 dark:text-muted-foreground mb-8 text-center">Lebih murah dari satu sesi kursus — hasilnya bisa Anda pakai seumur karier.</p>
+
+          {/* Promo badge */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-full px-4 py-1.5 flex items-center gap-2">
+              <Clock className="h-3.5 w-3.5 text-red-500" />
               <span className="text-xs font-bold text-red-600 dark:text-red-400">Harga promosi — bisa berubah sewaktu-waktu</span>
             </div>
-            <div className="text-5xl font-extrabold text-sky-600 mb-1">Rp 245.000</div>
-            <div className="text-sm text-gray-400 mb-6 line-through">Harga normal Rp 350.000</div>
-            <ul className="text-sm text-left space-y-3 mb-8 text-gray-700 dark:text-muted-foreground">
-              {[
-                "Trilogi GUSTAFTA — Buku I, II & III (PDF + Flipbook)",
-                "15 Prompt Pack siap pakai",
-                "Template Konfigurasi Chatbot (5 profesi)",
-                "Akses Builder 7 hari (trial penuh)",
-                "Akses Komunitas Perakit AI (340+ anggota)",
-                "🛡️ Garansi 7 hari uang kembali",
-                "🔄 Update gratis selamanya",
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-2.5">
-                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <a href={CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
-              <Button className="w-full h-12 bg-sky-600 hover:bg-sky-500 text-white font-bold text-base" data-testid="btn-pricing-checkout">
-                Beli Starter Kit — Rp 245.000 →
-              </Button>
-            </a>
-            <p className="text-xs text-gray-400 mt-3">Pembayaran aman via Scalev · Transfer / e-wallet</p>
           </div>
-          <p className="text-sm text-gray-500 dark:text-muted-foreground mt-6">
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Kartu 1: Starter Kit saja */}
+            <div className="bg-white dark:bg-card rounded-2xl shadow-md border-2 border-sky-300 dark:border-sky-700 p-7 flex flex-col">
+              <div className="text-xs font-bold text-sky-600 uppercase tracking-widest mb-3">Starter Kit</div>
+              <div className="text-4xl font-extrabold text-sky-600 mb-0.5">Rp 245.000</div>
+              <div className="text-xs text-gray-400 line-through mb-1">Harga normal Rp 350.000</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-5">Sekali bayar · Akses selamanya</div>
+              <ul className="text-sm space-y-2.5 mb-6 text-gray-700 dark:text-muted-foreground flex-1">
+                {[
+                  "Trilogi GUSTAFTA Buku I, II & III",
+                  "15 Prompt Pack siap pakai",
+                  "Template Konfigurasi Chatbot",
+                  "Akses Builder 7 hari (trial)",
+                  "Akses Komunitas Perakit AI",
+                  "🛡️ Garansi 7 hari uang kembali",
+                  "🔄 Update gratis selamanya",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-2.5">
+                    <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <a href={CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
+                <Button className="w-full h-11 bg-sky-600 hover:bg-sky-500 text-white font-bold" data-testid="btn-pricing-kit">
+                  Ambil Starter Kit →
+                </Button>
+              </a>
+              <p className="text-xs text-gray-400 mt-2 text-center">Pembayaran aman via Scalev</p>
+            </div>
+
+            {/* Kartu 2: Starter Kit + Langganan Belajar */}
+            <div className="bg-gradient-to-b from-indigo-600 to-blue-700 rounded-2xl shadow-xl border-2 border-indigo-400 p-7 flex flex-col text-white relative overflow-hidden">
+              <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                Terlengkap
+              </div>
+              <div className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-3">Starter Kit + Belajar</div>
+              <div className="text-4xl font-extrabold text-white mb-0.5">Rp 445.000</div>
+              <div className="text-xs text-indigo-300 line-through mb-1">Harga normal Rp 550.000</div>
+              <div className="text-xs text-indigo-200 mb-5">Starter Kit + Langganan Belajar 1 bulan</div>
+              <ul className="text-sm space-y-2.5 mb-6 text-indigo-100 flex-1">
+                {[
+                  { text: "Semua isi Starter Kit", highlight: false },
+                  { text: "Langganan plan Starter 1 bulan penuh", highlight: true },
+                  { text: "Akses platform Builder tidak terbatas", highlight: true },
+                  { text: "Mulai rakit AI hari ini — bukan trial", highlight: true },
+                  "🛡️ Garansi 7 hari uang kembali",
+                  "🔄 Update gratis selamanya",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-2.5">
+                    <Check className={`h-4 w-4 flex-shrink-0 ${typeof item === "object" && item.highlight ? "text-yellow-300" : "text-indigo-300"}`} />
+                    <span className={typeof item === "object" && item.highlight ? "text-white font-medium" : ""}>
+                      {typeof item === "object" ? item.text : item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <a href={`https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20mau%20ambil%20paket%20Starter%20Kit%20%2B%20Langganan%20Belajar%20Rp%20445.000`} target="_blank" rel="noopener noreferrer">
+                <Button className="w-full h-11 bg-white text-indigo-700 hover:bg-indigo-50 font-bold" data-testid="btn-pricing-bundle">
+                  Ambil Paket Bundle →
+                </Button>
+              </a>
+              <p className="text-xs text-indigo-300 mt-2 text-center">Konfirmasi via WhatsApp</p>
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-muted-foreground mt-6 text-center">
             Mau paket lebih lengkap?{" "}
             <Link href="/trilogi">
               <span className="text-sky-600 font-semibold underline cursor-pointer">Lihat Bundle Trilogi →</span>
