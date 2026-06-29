@@ -167,17 +167,24 @@ function BlueprintLockedCard({ bp, onClose }: { bp: Blueprint; onClose: () => vo
         </div>
 
         {/* CTA */}
-        <div className="flex gap-1.5 pt-0.5">
-          <Link href="/packs" onClick={onClose} className="flex-1">
-            <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white h-8 text-xs font-bold gap-1">
-              <ShoppingBag className="h-3 w-3" /> Pilih Paket
+        <div className="space-y-1.5 pt-0.5">
+          <div className="flex gap-1.5">
+            <Link href="/packs" onClick={onClose} className="flex-1">
+              <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white h-8 text-xs font-bold gap-1">
+                <ShoppingBag className="h-3 w-3" /> Pilih Paket
+              </Button>
+            </Link>
+            <a href={`https://wa.me/6282299417818?text=${waText}`} target="_blank" rel="noopener noreferrer" className="flex-1">
+              <Button variant="outline" className="w-full h-8 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
+                <MessageCircle className="h-3 w-3" /> Konsultasi
+              </Button>
+            </a>
+          </div>
+          <Link href="/blueprint-saya" onClick={onClose} className="block">
+            <Button variant="ghost" className="w-full h-7 text-[11px] gap-1 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30">
+              <FileDown className="h-3 w-3" /> Lihat Blueprint Saya → simpan & kembali kapan saja
             </Button>
           </Link>
-          <a href={`https://wa.me/6282299417818?text=${waText}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-            <Button variant="outline" className="w-full h-8 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
-              <MessageCircle className="h-3 w-3" /> Konsultasi
-            </Button>
-          </a>
         </div>
       </div>
     </div>

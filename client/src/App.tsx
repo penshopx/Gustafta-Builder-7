@@ -41,6 +41,7 @@ import TrilogiLanding from "@/pages/trilogi-landing";
 import MitraPage from "@/pages/mitra";
 import LegacyPage from "@/pages/legacy";
 import BlueprintPage from "@/pages/blueprint";
+import BlueprintSayaPage from "@/pages/blueprint-saya";
 import MulticlawPage from "@/pages/multiclaw";
 import StarterKitPage from "@/pages/starter-kit";
 import GustaFtaFrameworkPage from "@/pages/gustafta-framework";
@@ -430,6 +431,7 @@ function Router() {
       <Route path="/mitra" component={MitraPage} />
       <Route path="/legacy" component={LegacyPage} />
       <Route path="/blueprint" component={BlueprintPage} />
+      <Route path="/blueprint-saya" component={BlueprintSayaPage} />
       <Route path="/starter-kit" component={StarterKitPage} />
       <Route path="/framework" component={GustaFtaFrameworkPage} />
       <Route path="/industri" component={IndustriPage} />
