@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, BookOpen, FlaskConical,
-  Search, FileText, Lightbulb, BarChart3, Star, Users,
+  Search, FileText, Lightbulb, BarChart3, Users,
   GraduationCap, Target, Layers,
 } from "lucide-react";
 
@@ -269,27 +269,26 @@ export default function RisetSkripsiPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONI ── */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-violet-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Mahasiswa & Akademisi</h2>
+          <p className="text-xs font-bold text-violet-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Produktivitas Riset Indonesia</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Reza A.", role: "Mahasiswa Teknik Sipil, Universitas Negeri", text: "RisetSkripsiClaw benar-benar seperti pembimbing tambahan yang bisa diakses kapan saja. Simulasi pertanyaan penguji-nya membuat saya jauh lebih siap menghadapi sidang." },
-              { name: "Novi R., ST", role: "Mahasiswa S2 Teknik Lingkungan", text: "Systematic literature review saya jauh lebih terstruktur setelah pakai AI ini. Matriks literatur yang disarankan AI membuat tesis saya punya landasan yang solid." },
-              { name: "Dr. Ahmad S.", role: "Dosen Pembimbing, Universitas Teknik", text: "Mahasiswa bimbingan saya yang pakai RisetSkripsiClaw datang ke sesi konsultasi dengan pertanyaan yang jauh lebih matang. Membantu efisiensi proses bimbingan saya." },
-            ].map((t, i) => (
-              <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-2xl p-5 border border-violet-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "259.849", label: "Dokumen publikasi ilmiah internasional Indonesia periode 2019–2023", source: "BRIN, IIRI 2024", icon: <FileText className="h-5 w-5 text-violet-600 dark:text-violet-400" /> },
+              { value: "Peringkat 25", label: "Posisi Indonesia dari 243 negara berdasarkan jumlah publikasi terindeks Scopus (2022)", source: "Scopus / SCImago", icon: <BarChart3 className="h-5 w-5 text-violet-600 dark:text-violet-400" /> },
+              { value: "CAGR 26%", label: "Laju pertumbuhan tahunan publikasi ilmiah penulis Indonesia 2012–2022", source: "Elsevier", icon: <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-2xl p-5 border border-violet-100 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

@@ -37,3 +37,8 @@ Karena testimoni dilarang, tiap landing pakai band riset domain-spesifik sebagai
 - **Why:** kredibilitas tanpa testimoni palsu; angka tervalidasi mencegah klaim fiktif yang melanggar aturan brand.
 - Band HANYA cocok untuk landing jualan ber-domain tunggal. SKIP halaman yang sebenarnya aplikasi chat/tool layar-penuh (mis. konsultan-permen-pu-2026, konsultanbot) — tak ada hero/CTA jadi band tak punya tempat. Hub multi-sektor (industri.tsx) juga skip band (riset 1 domain tak mewakili 6 sektor); cukup bersihkan stat fabricated-nya.
 - Penempatan band fleksibel: di halaman PAS penuh taruh setelah Agitate; di landing statis sederhana (hero+konten+CTA) taruh tepat SEBELUM section CTA gradient terakhir.
+
+## Mendeteksi testimoni fabricated (sapu menyeluruh)
+- Testimoni palsu sering tersisa di halaman yang dikira sudah bersih. Sapu seluruh `client/src/pages` dengan rg gabungan: `"Cerita Pengguna|Cerita Kreator|Dari Pelaku|Dari Praktisi|Dari Mahasiswa|Dari Staf|Dari Tenaga Ahli|Bukti Nyata|const TESTIMONIALS|fill-amber-400 text-amber-400"`. Pola bintang `fill-amber-400 text-amber-400` adalah sinyal kuat (tapi juga dipakai badge non-testimoni — verifikasi konteks).
+- **PENGECUALIAN — JANGAN hapus:** `agent-landing.tsx` & `ekosistem-landing.tsx` me-render `landingTestimonials` dari API/DB (admin-configurable) — itu FITUR, bukan fabrikasi. Bintang "Paling Populer" di kartu harga (mis. platform-sales) juga bukan testimoni; jangan ikut buang import `Star`-nya.
+- Setelah hapus testimoni, `Star` sering jadi unused import → buang, TAPI cek dulu `rg -c "\bStar\b"` >1 (mungkin masih dipakai badge/rating lain). tsc akan teriak `Cannot find name 'Star'` kalau salah buang.

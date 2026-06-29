@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, HardHat, Building2,
-  ShieldCheck, FileText, TrendingUp, Zap, Star,
+  ShieldCheck, FileText, TrendingUp, Zap,
   Wrench, Award, BarChart3, ChevronRight, Cpu, Users,
 } from "lucide-react";
 
@@ -187,24 +187,6 @@ const colorMap: Record<string, { bg: string; border: string; icon: string; tag: 
     tag: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
   },
 };
-
-const TESTIMONIALS = [
-  {
-    name: "Ir. Supriyadi, MT",
-    role: "Direktur Teknik, BUJK Kualifikasi Menengah",
-    text: "Tim kami pakai SBUClaw setiap ada perubahan Permen. Dulu butuh 2–3 jam riset, sekarang 10 menit sudah dapat jawaban lengkap dengan dasar regulasinya.",
-  },
-  {
-    name: "Siti Rahayu, ST",
-    role: "HSE Manager, Kontraktor Infrastruktur",
-    text: "CSMSClaw benar-benar mengubah cara kami mempersiapkan audit CSMS. Sub-agen yang bekerja paralel menghasilkan analisis gap yang sangat detail.",
-  },
-  {
-    name: "Budi Hartono",
-    role: "Business Development Manager",
-    text: "TenderaClaw membantu kami menghitung win probability secara sistematis. Sejak pakai ini, hit rate tender kami naik signifikan karena bid lebih selektif.",
-  },
-];
 
 export default function KonstruksiPage() {
   const { isAuthenticated } = useAuth();
@@ -388,25 +370,26 @@ export default function KonstruksiPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONI ── */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Pelaku Industri</h2>
+          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Konteks Sektor Konstruksi Indonesia</h2>
           <div className="grid md:grid-cols-3 gap-5">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-100 dark:border-amber-800/30">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+            {[
+              { value: "4,86%", label: "Tenaga kerja konstruksi yang sudah bersertifikat SKK (Des 2024)", source: "LPJK 2024", icon: <HardHat className="h-5 w-5 text-amber-600 dark:text-amber-400" /> },
+              { value: "±8,76 juta", label: "Tenaga kerja sektor konstruksi nasional (Agustus 2024)", source: "Sakernas BPS 2024", icon: <Building2 className="h-5 w-5 text-amber-600 dark:text-amber-400" /> },
+              { value: "548.977", label: "Total SKK terbit jenjang 1–9 hingga Desember 2024", source: "LPJK 2024", icon: <BarChart3 className="h-5 w-5 text-amber-600 dark:text-amber-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-100 dark:border-amber-800/30" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-sm text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

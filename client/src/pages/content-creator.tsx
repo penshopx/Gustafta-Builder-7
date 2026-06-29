@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Video, TrendingUp,
-  PenTool, BarChart3, Star, Users, Zap, Globe,
+  PenTool, BarChart3, Users, Zap, Globe,
   ShoppingBag, Heart, Target, Layers,
 } from "lucide-react";
 
@@ -255,27 +255,26 @@ export default function ContentCreatorPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONI ── */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-rose-600 uppercase tracking-widest text-center mb-2">Cerita Kreator</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Content Creator Indonesia</h2>
+          <p className="text-xs font-bold text-rose-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Konteks Efektivitas Content Marketing</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Nadia L.", role: "Beauty Creator, 85K Followers Instagram", text: "BrandContentClaw membantu saya mendefinisikan brand voice yang konsisten. Sekarang konten saya terasa lebih kohesif dan engagement naik signifikan dalam 2 bulan." },
-              { name: "Rizky F.", role: "Finance Creator, 50K YouTube Subscribers", text: "DigitalMarketingClaw membantu saya mengoptimalkan SEO konten YouTube. Riset keyword dan strategi thumbnail-nya sangat actionable dan hasilnya terasa." },
-              { name: "Sinta K.", role: "Lifestyle Creator & Digital Products Seller", text: "EcommerceClaw memandu saya membuka jualan e-book dan workshop online. Revenue dari produk digital sekarang melampaui income dari brand deal." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-rose-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "3× lipat", label: "Lead dari content marketing dibanding metode outbound", source: "Demand Metric", icon: <TrendingUp className="h-5 w-5 text-rose-600 dark:text-rose-400" /> },
+              { value: "62%", label: "Lebih hemat biaya dibanding outbound marketing", source: "Demand Metric", icon: <BarChart3 className="h-5 w-5 text-rose-600 dark:text-rose-400" /> },
+              { value: "87%", label: "Marketer menyatakan content marketing menghasilkan demand & leads", source: "Content Marketing Institute 2024", icon: <Users className="h-5 w-5 text-rose-600 dark:text-rose-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-rose-100 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

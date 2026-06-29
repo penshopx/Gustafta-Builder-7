@@ -250,31 +250,25 @@ const FAQS = [
   },
 ];
 
-/* ─── TESTIMONIALS ──────────────────────────────────────────── */
-const TESTIMONIALS = [
+/* ─── RESEARCH (Menurut Data) ───────────────────────────────── */
+const RESEARCH = [
   {
-    name: "Dr. Siti Rahayu, M.Pd",
-    role: "Dosen & Founder EdTech Startup",
-    content: "Saya bisa menerbitkan modul kuliah, chatbot dosen virtual, dan kursus berbayar dalam satu platform. Mahasiswa saya sekarang bisa belajar kapanpun — bahkan jam 2 pagi sebelum ujian!",
-    avatar: "SR",
-    color: "bg-blue-500",
-    rating: 5,
+    value: "USD 2,4 Miliar",
+    label: "Estimasi nilai pasar AI di Indonesia pada 2024",
+    source: "Statista Market Insights",
+    icon: TrendingUp,
   },
   {
-    name: "Hendro Wijaya",
-    role: "Konsultan Manajemen Konstruksi",
-    content: "Document generator-nya luar biasa. Proposal yang dulu butuh 3 jam sekarang selesai dalam 20 menit. Chatbot konsultasi saya aktif 24/7 melayani klien tanpa saya harus online terus.",
-    avatar: "HW",
-    color: "bg-emerald-500",
-    rating: 5,
+    value: "+127%",
+    label: "Pertumbuhan pendapatan aplikasi berbasis AI (H1 2024→H1 2025) — tertinggi di Asia Tenggara",
+    source: "SEA e-Conomy 2025 (Google, Temasek, Bain)",
+    icon: Flame,
   },
   {
-    name: "Aisyah Putri, S.E.",
-    role: "HR Manager, Perusahaan Manufaktur 500+ karyawan",
-    content: "Kami pakai Gustafta Apps untuk training onboarding karyawan baru. Modul SOP, chatbot tanya-jawab internal, dan mini apps assessment — semua dalam satu sistem. Efisiensi training naik 60%.",
-    avatar: "AP",
-    color: "bg-violet-500",
-    rating: 5,
+    value: "~1,3 juta",
+    label: "Perkiraan jumlah pengguna tools AI di Indonesia pada 2024",
+    source: "Statista",
+    icon: Users,
   },
 ];
 
@@ -282,7 +276,7 @@ const TESTIMONIALS = [
 const STATS = [
   { value: "6", label: "Modul Platform Terintegrasi" },
   { value: "33+", label: "Tipe Mini App Bawaan" },
-  { value: "971+", label: "Agent AI Siap Pakai" },
+  { value: "900+", label: "Agent AI Siap Pakai" },
   { value: "24/7", label: "Aktif Menghasilkan — Tanpa Batas" },
 ];
 
@@ -775,36 +769,28 @@ export default function PlatformSalesPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ──────────────────────────────────── */}
+      {/* ── Menurut Data ──────────────────────────────────── */}
       <section className="py-16 md:py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-3">Testimoni</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Mereka Sudah Merasakannya</h2>
+            <Badge variant="secondary" className="mb-3">Menurut Data</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Momentum AI di Indonesia</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {TESTIMONIALS.map((t) => (
-              <Card key={t.name} className="border" data-testid={`card-testimonial-${t.name}`}>
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex">
-                    {Array.from({ length: t.rating }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
+            {RESEARCH.map((s, i) => (
+              <Card key={i} className="border" data-testid={`card-research-${i}`}>
+                <CardContent className="p-6 space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <s.icon className="h-5 w-5 text-primary" />
                   </div>
-                  <p className="text-sm text-muted-foreground italic">"{t.content}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0", t.color)}>
-                      {t.avatar}
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold">{t.name}</div>
-                      <div className="text-xs text-muted-foreground">{t.role}</div>
-                    </div>
-                  </div>
+                  <div className="text-2xl font-extrabold">{s.value}</div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{s.label}</p>
+                  <p className="text-[10px] text-muted-foreground/70">Sumber: {s.source}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
+          <p className="text-center text-[11px] text-muted-foreground/70 mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

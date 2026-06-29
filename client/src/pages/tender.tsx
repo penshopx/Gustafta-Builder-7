@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, TrendingUp, FileText,
-  Target, BarChart3, Shield, Zap, Star, Search, Award,
+  Target, BarChart3, Shield, Zap, Search, Award,
   ClipboardList, DollarSign, AlertTriangle, XCircle, Clock,
 } from "lucide-react";
 
@@ -199,7 +199,7 @@ export default function TenderPage() {
         </div>
       </section>
 
-      {/* ── D: DESIRE — Siklus + Testimoni ── */}
+      {/* ── D: DESIRE — Siklus tender ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto text-center mb-10">
           <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">Siklus Lengkap</p>
@@ -257,29 +257,26 @@ export default function TenderPage() {
         </div>
       </section>
 
-      {/* Testimoni */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-indigo-50 dark:bg-indigo-900/10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest text-center mb-2">Hasil Nyata</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Tim BD & Estimasi yang Sudah Pakai</h2>
+          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Skala Pengadaan Pemerintah Indonesia</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Dedi A.", role: "BD Manager, Kontraktor Nasional", before: "Win rate 12% — ikut 25 tender per tahun, menang 3", after: "Win rate naik ke 28% setelah filter pakai Win Probability Score", text: "TenderaClaw mengubah cara kami melihat tender. Scorecard 4 dimensi memaksa kami berpikir sistematis, bukan sekadar perasaan." },
-              { name: "Lina P., ST", role: "Estimator Senior, BUJK Menengah", before: "Sering ketinggalan tender potensial di SIRUP", after: "Tidak pernah ketinggalan tender sesuai kualifikasi sejak pakai KonstraTenderClaw", text: "Sekarang kami tidak pernah ketinggalan tender potensial yang sesuai kualifikasi kami. Alert-nya akurat dan tepat waktu." },
-              { name: "Arif M.", role: "Konsultan Klaim Konstruksi", before: "Identifikasi dasar klaim butuh waktu 2–3 minggu riset", after: "KontrakClaw bantu identifikasi dasar klaim dalam 2 jam", text: "KontrakClaw sangat dalam menganalisis klausul FIDIC. Membantu saya identifikasi dasar klaim kuat sebelum dibawa ke DAB." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-indigo-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-xs text-gray-400 mb-1">Sebelum: <span className="text-red-400">{t.before}</span></p>
-                <p className="text-xs text-gray-400 mb-3">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-3 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "Rp1.213 T", label: "Total pagu belanja pengadaan barang/jasa pemerintah 2024", source: "LKPP 2024", icon: <DollarSign className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> },
+              { value: "Rp1.043 T", label: "Nilai RUP yang diumumkan di SIRUP (per 1 April 2024)", source: "LKPP / SIRUP 2024", icon: <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> },
+              { value: "Rp595 T", label: "Realisasi belanja PBJ s.d. Triwulan III 2024", source: "LKPP 2024", icon: <BarChart3 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-indigo-100 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

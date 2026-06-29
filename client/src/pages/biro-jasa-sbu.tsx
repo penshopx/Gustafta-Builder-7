@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Award, Globe,
-  ClipboardList, Users, Star, Zap, ShieldCheck,
+  ClipboardList, Users, Zap, ShieldCheck,
   Building2, FileText, TrendingUp, BarChart3, XCircle, Clock,
 } from "lucide-react";
 
@@ -218,29 +218,26 @@ export default function BiroJasaSbuPage() {
         </div>
       </section>
 
-      {/* Testimoni */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-amber-50 dark:bg-amber-900/10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Bukti Nyata</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Biro Jasa & Fasilitator yang Sudah Pakai</h2>
+          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Realita Sertifikasi Konstruksi Indonesia</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Pak Hendra", role: "Pemilik Biro Jasa SBU, Surabaya", before: "Pendampingan input E-SIMPAN klien butuh 2 jam per klien", after: "Kini 45 menit — klien bisa tanya AI dulu sebelum dibantu staf", text: "SBUClaw dan ESIMPANClaw membantu staf kami memandu klien dengan jauh lebih efisien. Kapasitas kami naik tanpa tambah staf." },
-              { name: "Bu Ratna", role: "Konsultan Sertifikasi SKK, Jakarta", before: "Harus scroll regulasi Permen PUPR sebelum setiap konsultasi", after: "Tanya PanduanASKOM — dapat jawaban relevan dalam 30 detik", text: "PanduanASKOM jadi referensi utama saya. Tidak perlu scroll-scroll Permen PUPR — tanya AI langsung dapat jawaban yang tepat." },
-              { name: "Dedi S.", role: "Fasilitator OSS & NIB, Bandung", before: "Identifikasi KBLI yang tepat butuh waktu 1 jam per klien", after: "OSSClaw identifikasi KBLI + cek risiko dalam 15 menit", text: "OSSClaw membantu klien UMKM saya yang bingung KBLI-nya. Proses yang dulu butuh 1 jam bisa selesai 15 menit sekarang." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-amber-100 dark:border-border">
-                <div className="flex gap-0.5 mb-2">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
-                <p className="text-xs text-gray-400 mb-3">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-3 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "4,86%", label: "Tenaga kerja konstruksi yang sudah bersertifikat SKK (Des 2024)", source: "LPJK / Ditjen Bina Konstruksi PU", icon: <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" /> },
+              { value: "548.977", label: "Total SKK terbit jenjang 1–9 hingga Desember 2024", source: "LPJK 2024", icon: <BarChart3 className="h-5 w-5 text-amber-600 dark:text-amber-400" /> },
+              { value: "±8,76 juta", label: "Tenaga kerja sektor konstruksi nasional (Agustus 2024)", source: "Sakernas BPS 2024", icon: <Users className="h-5 w-5 text-amber-600 dark:text-amber-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-amber-100 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

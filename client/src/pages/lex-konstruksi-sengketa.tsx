@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Scale, Gavel,
-  Shield, FileText, Users, Star, AlertTriangle,
+  Shield, FileText, Users, AlertTriangle,
   Building2, TrendingUp, BookOpen, HandshakeIcon,
 } from "lucide-react";
 
@@ -245,27 +245,26 @@ export default function LexKonstruksiSengketaPage() {
         </div>
       </section>
 
-      {/* Testimoni */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-slate-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Praktisi Sengketa Konstruksi</h2>
+          <p className="text-xs font-bold text-slate-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Sengketa Konstruksi dalam Angka</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Arif S., S.H., M.H.", role: "Advokat Spesialis Konstruksi, Jakarta", text: "KontrakClaw sangat membantu riset klaim saya sebelum hearing arbitrase BANI. Analisis klausul FIDIC-nya mendalam dan relevan dengan kasus nyata yang saya tangani." },
-              { name: "Hendra T.", role: "Project Director, BUMN Konstruksi", text: "Ketika klaim EoT kami ditolak kontraktor, AI membantu menyusun strategi negosiasi yang terstruktur. Hasilnya kami berhasil mencapai settlement yang adil tanpa harus ke arbitrase." },
-              { name: "Dr. Rina W., FCIArb", role: "Arbiter BANI & Dosen Hukum Konstruksi", text: "Sangat berguna untuk persiapan kelas hukum konstruksi saya. Mahasiswa bisa simulasi kasus sengketa nyata dan belajar strategi penyelesaian per mekanisme dengan panduan AI ini." },
-            ].map((t, i) => (
-              <div key={i} className="bg-slate-50 dark:bg-slate-900/10 rounded-2xl p-5 border border-slate-200 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "35%", label: "Porsi sengketa jasa konstruksi dari ~1.300 kasus bisnis yang ditangani BANI", source: "BANI", icon: <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-300" /> },
+              { value: ">100 / tahun", label: "Rata-rata kasus sengketa konstruksi di BANI periode 2016–2020 (naik dari ~50/tahun pada 2010–2015)", source: "BANI", icon: <TrendingUp className="h-5 w-5 text-slate-600 dark:text-slate-300" /> },
+              { value: "~6 bulan", label: "Target & rata-rata durasi penyelesaian sengketa melalui arbitrase BANI", source: "BANI / penelitian arbitrase konstruksi", icon: <FileText className="h-5 w-5 text-slate-600 dark:text-slate-300" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-slate-50 dark:bg-slate-900/10 rounded-2xl p-5 border border-slate-200 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

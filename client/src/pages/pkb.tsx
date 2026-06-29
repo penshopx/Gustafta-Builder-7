@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, GraduationCap, Award,
-  BookOpen, Target, Users, Star, TrendingUp,
+  BookOpen, Target, Users, TrendingUp,
   CalendarCheck, ShieldCheck, BarChart3, XCircle, AlertTriangle, Clock,
 } from "lucide-react";
 
@@ -241,7 +241,7 @@ export default function PkbPage() {
         </div>
       </section>
 
-      {/* Untuk Siapa + Testimoni */}
+      {/* Untuk Siapa + Menurut Data */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12">
@@ -271,26 +271,25 @@ export default function PkbPage() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-2">Bukti Nyata</p>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Dari Tenaga Ahli Konstruksi</h2>
+              <p className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-2">Menurut Data</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Sertifikasi Kompetensi Konstruksi</h2>
               <div className="space-y-4">
                 {[
-                  { name: "Ir. Bambang H., MT", role: "Site Manager, Kontraktor BUMN", before: "Persiapan perpanjangan SKK dilakukan sendiri, tidak tahu harus mulai dari mana", after: "ManprojakClaw buat roadmap persiapan yang jelas — lulus asesmen pertama kali", text: "Simulasi pertanyaan asesmen-nya sangat mirip dengan ujian sesungguhnya. Saya merasa jauh lebih siap dibanding perpanjangan SKK 5 tahun lalu." },
-                  { name: "Sari N., ST", role: "Ahli K3 Muda Konstruksi", before: "Bingung unit kompetensi mana yang paling penting untuk portofolio K3 Madya", after: "SafiraClaw petakan semua unit kompetensi + panduan portofolio dalam 1 sesi", text: "SafiraClaw membantu saya memahami secara persis apa yang dinilai asesor. Roadmap karir dari K3 Muda ke K3 Madya jadi sangat jelas dan terstruktur." },
-                  { name: "Prof. Dedi A.", role: "Asesor LSP Konstruksi", before: "Peserta asesmen sering tidak tahu apa yang benar-benar diuji per unit kompetensi", after: "PanduanASKOM jadi tools persiapan standar yang direkomendasikan ke peserta", text: "Pertanyaan-pertanyaan yang muncul dari AI sangat relevan dengan SKKNI. Peserta yang pakai PanduanASKOM terlihat jauh lebih siap saat asesmen." },
-                ].map((t, i) => (
-                  <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-xl p-4 border border-violet-100 dark:border-border">
-                    <div className="flex gap-0.5 mb-2">
-                      {[...Array(5)].map((_, j) => <Star key={j} className="h-3 w-3 fill-amber-400 text-amber-400" />)}
+                  { value: "±8,76 juta", label: "Tenaga kerja di sektor konstruksi Indonesia", source: "BPS, Sakernas 2024", icon: <Users className="h-5 w-5 text-violet-600 dark:text-violet-400" /> },
+                  { value: "548.977", label: "Sertifikat Kompetensi Kerja (SKK) konstruksi yang telah terbit", source: "LPJK / Kementerian PUPR", icon: <BarChart3 className="h-5 w-5 text-violet-600 dark:text-violet-400" /> },
+                  { value: "4,86%", label: "Tenaga kerja konstruksi yang telah bersertifikat kompetensi", source: "LPJK / BPS Sakernas", icon: <TrendingUp className="h-5 w-5 text-violet-600 dark:text-violet-400" /> },
+                ].map((s, i) => (
+                  <div key={i} className="bg-violet-50 dark:bg-violet-900/10 rounded-xl p-4 border border-violet-100 dark:border-border flex items-start gap-3" data-testid={`card-research-${i}`}>
+                    <div className="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">{s.icon}</div>
+                    <div>
+                      <div className="text-lg font-extrabold text-gray-900 dark:text-white leading-tight">{s.value}</div>
+                      <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mt-0.5">{s.label}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">Sumber: {s.source}</p>
                     </div>
-                    <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
-                    <p className="text-xs text-gray-400 mb-2">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
-                    <p className="text-xs text-gray-700 dark:text-muted-foreground italic mb-2 leading-relaxed">"{t.text}"</p>
-                    <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.role}</p>
                   </div>
                 ))}
               </div>
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-4 italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
             </div>
           </div>
         </div>

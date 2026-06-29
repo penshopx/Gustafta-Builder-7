@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Building2, Users,
-  ClipboardList, BarChart3, Shield, FileText, Star,
+  ClipboardList, BarChart3, Shield, FileText,
   Award, Target, Layers, Settings,
 } from "lucide-react";
 
@@ -197,27 +197,26 @@ export default function ManajemenLspTukPage() {
         </div>
       </section>
 
-      {/* Testimoni */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Pengelola LSP Indonesia</h2>
+          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Konteks Sertifikasi Kompetensi Indonesia</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Pak Irwan", role: "Direktur LSP Konstruksi, Jawa Tengah", text: "AI ini sangat membantu untuk manajemen jadwal asesor kami yang cukup banyak. Pengelolaan masa berlaku sertifikat asesor tidak terlewat lagi dengan panduan AI." },
-              { name: "Bu Dewi, S.T.", role: "Manajer Sertifikasi LSP Energi", text: "Persiapan surveillance KAN jadi lebih terstruktur. AI membantu audit internal kami menemukan gap sebelum asesor KAN datang — sehingga tidak ada temuan major." },
-              { name: "Pak Rudi", role: "Pengurus LSP Pihak Kedua, Asosiasi Nasional", text: "Pengembangan skema baru sangat terbantu. AI memandu kami dari SKKNI, penyusunan MUK, hingga presentasi ke komite teknis BNSP." },
-            ].map((t, i) => (
-              <div key={i} className="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-5 border border-indigo-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "1,37 juta", label: "Asesi tersertifikasi kompetensi sepanjang tahun 2024", source: "Laporan Kinerja BNSP 2024", icon: <Award className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> },
+              { value: "648 LSP", label: "129 LSP-P2 + 519 LSP-P3 terlisensi (2024)", source: "BNSP 2024", icon: <Building2 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> },
+              { value: "~8 juta", label: "Kumulatif tenaga kerja bersertifikat BNSP (Juli 2023)", source: "BNSP", icon: <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl p-5 border border-indigo-100 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

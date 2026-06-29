@@ -180,7 +180,7 @@ export default function KonsultanPajakPage() {
         </div>
       </section>
 
-      {/* ── D: DESIRE — 4 area + Testimoni ── */}
+      {/* ── D: DESIRE — 4 area layanan ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">4 Area Layanan</p>

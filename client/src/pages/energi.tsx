@@ -4,7 +4,7 @@ import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
-  Check, ArrowRight, MessageCircle, Zap, Star,
+  Check, ArrowRight, MessageCircle, Zap,
   Flame, Layers, Shield, BarChart3, FileText, Award,
 } from "lucide-react";
 
@@ -258,27 +258,26 @@ export default function EnergiPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONI ── */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-orange-50 dark:bg-orange-900/10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-orange-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Pelaku Sektor Energi</h2>
+          <p className="text-xs font-bold text-orange-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Konteks Sektor Energi Indonesia</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Agus R., ST, MT", role: "Manager Regulasi, Perusahaan IPP", text: "KetenagalistrikanClaw membantu tim kami memahami perubahan Permen ESDM terbaru dengan cepat. Dulu butuh lawyer eksternal, sekarang bisa cek sendiri dulu." },
-              { name: "Ratna W.", role: "Legal Advisor, Kontraktor KKS", text: "MigasClaw sangat membantu untuk interpretasi PTK SKK Migas yang tebal. Sub-agen yang bekerja paralel menghasilkan analisis yang komprehensif." },
-              { name: "Ir. Bambang P.", role: "Konsultan Tambang Senior", text: "PertambanganClaw jadi referensi utama saya untuk cek persyaratan RKAB dan prosedur reklamasi. Regulasi berubah terus, AI ini selalu update." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-orange-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "14,1%", label: "Realisasi bauran energi terbarukan nasional 2024", source: "KESDM 2024", icon: <Zap className="h-5 w-5 text-orange-600 dark:text-orange-400" /> },
+              { value: "19,5%", label: "Target bauran EBT 2024 — masih ada gap ±5,4 poin", source: "KESDM", icon: <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400" /> },
+              { value: "13.155 MW", label: "Total kapasitas terpasang pembangkit EBT (2023)", source: "KESDM", icon: <Flame className="h-5 w-5 text-orange-600 dark:text-orange-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-orange-100 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

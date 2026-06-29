@@ -228,7 +228,7 @@ export default function KonsultanKeuanganPage() {
         </div>
       </section>
 
-      {/* Untuk Siapa + Testimoni */}
+      {/* Untuk Siapa + Menurut Data */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12">

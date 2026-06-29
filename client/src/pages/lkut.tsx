@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, FileText, AlertTriangle,
-  ClipboardList, CalendarCheck, Building2, Users, Star,
+  ClipboardList, CalendarCheck, Building2, Users,
   ChevronRight, ShieldCheck, Zap,
 } from "lucide-react";
 
@@ -299,27 +299,26 @@ export default function LkutPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONI ── */}
+      {/* ── Menurut Data ── */}
       <section className="py-16 px-4 bg-cyan-50 dark:bg-cyan-900/10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-cyan-600 uppercase tracking-widest text-center mb-2">Cerita Pengguna</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Staf Administrasi BUJK</h2>
+          <p className="text-xs font-bold text-cyan-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Skala Sektor Jasa Konstruksi</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { name: "Rini M.", role: "Admin & Legal, Kontraktor Menengah", text: "LKUTClaw benar-benar menyelamatkan kami tahun ini. Checklist-nya sangat detail — ada beberapa field yang hampir kami lewatkan kalau tidak diingatkan AI." },
-              { name: "Pak Santoso", role: "Direktur, BUJK Kualifikasi Kecil", text: "E-SIMPAN selalu bikin pusing. Sekarang pakai ESIMPANClaw, input pengalaman proyek jadi lebih terarah dan tidak ada data yang salah format." },
-              { name: "Yuni P., SE", role: "Finance & Admin Manager", text: "PUB-LKUTClaw membantu kami menganalisis tren dari data LKUT historis dan merencanakan upgrade kualifikasi. Insight yang sebelumnya butuh konsultan mahal." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-cyan-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
+              { value: "±8,76 juta", label: "Tenaga kerja yang bekerja di sektor konstruksi Indonesia", source: "BPS, Sakernas 2024", icon: <Building2 className="h-5 w-5 text-cyan-600 dark:text-cyan-400" /> },
+              { value: "548.977", label: "Sertifikat Kompetensi Kerja (SKK) konstruksi yang telah terbit", source: "LPJK / Kementerian PUPR", icon: <ClipboardList className="h-5 w-5 text-cyan-600 dark:text-cyan-400" /> },
+              { value: "4,86%", label: "Tenaga kerja konstruksi yang telah bersertifikat kompetensi", source: "LPJK / BPS Sakernas", icon: <Users className="h-5 w-5 text-cyan-600 dark:text-cyan-400" /> },
+            ].map((s, i) => (
+              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-cyan-100 dark:border-border" data-testid={`card-research-${i}`}>
+                <div className="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center mb-3">{s.icon}</div>
+                <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
               </div>
             ))}
           </div>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center mt-6 max-w-2xl mx-auto italic">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 
