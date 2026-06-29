@@ -444,7 +444,7 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto relative text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-semibold mb-6 backdrop-blur-sm">
             <Wrench className="h-3.5 w-3.5" />
-            Platform untuk Para Perakit AI
+            Platform Perakit AI — No Code
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-tight" data-testid="text-hero-title">
@@ -1073,7 +1073,7 @@ export default function Landing() {
       {/* ── CTA FINAL ── */}
       <section className="py-20 px-4 bg-gradient-to-br from-blue-600 to-violet-700 text-center">
         <div className="max-w-2xl mx-auto">
-          <p className="text-blue-200 text-sm font-semibold uppercase tracking-widest mb-4">GUSTAFTA — Platform untuk Para Perakit AI</p>
+          <p className="text-blue-200 text-sm font-semibold uppercase tracking-widest mb-4">GUSTAFTA — Platform Perakit AI No-Code</p>
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
             Ubah Pengetahuan Anda Menjadi<br />
             <span className="text-yellow-300">Aset AI yang Menciptakan Nilai.</span>
@@ -1153,7 +1153,7 @@ export default function Landing() {
                 <span className="text-lg font-bold text-gray-900 dark:text-white">GUSTAFTA</span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                Platform untuk Para Perakit AI
+                Platform Perakit AI — No Code
               </p>
               <p className="text-xs text-gray-400 mt-2 italic">Belajar · Merakit · Menggunakan · Menghasilkan · Berkembang</p>
             </div>
@@ -1196,7 +1196,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-xs text-gray-400">© 2026 Gustafta. Platform untuk Para Perakit AI.</p>
+            <p className="text-xs text-gray-400">© 2026 Gustafta. Platform Perakit AI — No Code.</p>
             <div className="flex items-center gap-1 text-xs text-gray-400">
               <ShieldCheck className="h-3 w-3" />
               Pembayaran aman via Scalev.id
