@@ -12,12 +12,10 @@ export interface SectorPainPoint {
   solution: string;
 }
 
-export interface SectorTestimonial {
-  name: string;
-  role: string;
-  avatar: string;
-  content: string;
-  rating: number;
+export interface SectorResearch {
+  value: string;
+  label: string;
+  source: string;
 }
 
 export interface SectorUseCase {
@@ -40,7 +38,7 @@ export interface SectorContent {
   color: string;
   painPoints: SectorPainPoint[];
   useCases: SectorUseCase[];
-  testimonials: SectorTestimonial[];
+  research: SectorResearch[];
   faq: SectorFAQ[];
   stats: { value: string; label: string }[];
 }
@@ -89,10 +87,9 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Sertifikasi SBU/SKK & ISO", description: "Klasifikasi SBU, eligibility SKK, manajemen LSBU/LSP, ISO 9001/14001/37001 (SMAP), CSMAS K3" },
       { title: "Project Brain & Mini Apps 45 Tipe", description: "Pusatkan data proyek + 45 tipe Mini App (notulis rapat, drafter kontrak, RAB, KPI, editorial calendar, script video, media kit kreator, cashflow, NPS, rubrik penilaian) untuk tim" },
     ],
-    testimonials: [
-      { name: "Ir. Budi Santoso", role: "Project Manager, PT Pembangunan Jaya", avatar: "BS", content: "Project Brain mengubah cara kami mengelola data proyek. Laporan mingguan yang biasa butuh 4 jam sekarang selesai dalam 10 menit.", rating: 5 },
-      { name: "Sarah Wijaya, ST", role: "QA/QC Manager, Konstruksi Mandiri", avatar: "SW", content: "Issue Log dan Risk Radar sangat membantu tim QC kami. Isu kritis tidak pernah terlewat lagi sejak pakai Gustafta.", rating: 5 },
-      { name: "Andi Pratama, MT", role: "Site Engineer, Infrastruktur Nusantara", avatar: "AP", content: "Mini Apps untuk checklist dan action tracker mempercepat koordinasi tim di lapangan. Sangat praktis!", rating: 5 },
+    research: [
+      { value: "10,23%", label: "Sektor konstruksi menyumbang 10,23% terhadap PDB Indonesia (Triwulan I-2024) — pasar besar dengan kompleksitas regulasi tinggi.", source: "BPS, 2024" },
+      { value: "80%", label: "Mayoritas proyek konstruksi besar mengalami pembengkakan biaya (rata-rata ~80% di atas anggaran) dan keterlambatan jadwal.", source: "McKinsey & Company" },
     ],
     faq: [
       { question: "Apakah cocok untuk siklus tender LPSE/SPSE?", answer: "Sangat cocok! Gustafta punya 971+ agent AI dalam 131 hub orchestrator khusus konstruksi termasuk Series Tender Konstruksi & PBJP (strategi + dokumen administrasi/teknis/RAB), Series Pasca Tender & Manajemen Kontrak (SPPBJ → BAST FHO), dan Series Pelaksanaan Proyek Lapangan (DPR, opname, EVM, K3). Semua sesuai Perpres 16/2018 jo. 12/2021, Perlem LKPP No. 12/2021, dan SBD PUPR." },
@@ -128,10 +125,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Reminder Jadwal", description: "Otomatis ingatkan pasien tentang jadwal konsultasi via WhatsApp" },
       { title: "Panduan Kesehatan", description: "Berikan tips kesehatan dan panduan perawatan berdasarkan knowledge base medis" },
     ],
-    testimonials: [
-      { name: "dr. Rina Susanti", role: "Direktur, Klinik Sehat Sentosa", avatar: "RS", content: "Sejak pakai Gustafta, panggilan telepon untuk pertanyaan dasar turun 60%. Staff bisa fokus pada pelayanan langsung.", rating: 5 },
-      { name: "dr. Ahmad Fadli, Sp.PD", role: "Internist, RS Harapan Bangsa", avatar: "AF", content: "Pre-screening chatbot membantu pasien menjelaskan gejala lebih terstruktur sebelum konsultasi. Efisiensi meningkat.", rating: 5 },
-      { name: "Siti Nurhaliza", role: "Admin Manager, Klinik Pratama", avatar: "SN", content: "Chatbot WhatsApp kami sekarang bisa jawab pertanyaan tentang jadwal dokter dan layanan 24 jam. Sangat membantu!", rating: 5 },
+    research: [
+      { value: "0,47", label: "Rasio dokter umum Indonesia hanya ~0,47 per 1.000 penduduk, masih di bawah standar ideal WHO (1 per 1.000) — beban layanan sangat tinggi.", source: "Kemenkes RI / WHO, 2024" },
     ],
     faq: [
       { question: "Apakah chatbot bisa memberikan diagnosis medis?", answer: "Tidak, chatbot Gustafta dirancang untuk informasi umum, FAQ, dan pre-screening. Diagnosis tetap dilakukan oleh dokter profesional." },
@@ -140,9 +135,9 @@ export const sectorContentMap: Record<string, SectorContent> = {
     ],
     stats: [
       { value: "24/7", label: "Layanan Non-stop" },
-      { value: "60%", label: "Pertanyaan Ditangani AI" },
-      { value: "100+", label: "Klinik Pengguna" },
-      { value: "95%", label: "Kepuasan Pasien" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "∞", label: "Chat Bersamaan" },
     ],
   },
 
@@ -166,10 +161,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Asisten Dosen", description: "Bantu dosen menjawab pertanyaan umum dan arahkan ke materi yang relevan" },
       { title: "Panduan Skripsi/TA", description: "Chatbot yang membimbing mahasiswa dalam proses penulisan tugas akhir" },
     ],
-    testimonials: [
-      { name: "Prof. Dr. Hendra", role: "Dekan, Fakultas Teknik UNPAD", avatar: "PH", content: "Tutor AI untuk mata kuliah Matematika Teknik membantu mahasiswa belajar mandiri. Nilai rata-rata meningkat 15%.", rating: 5 },
-      { name: "Dra. Maya Kartika, M.Pd", role: "Kepala Administrasi, Universitas Merdeka", avatar: "MK", content: "Helpdesk AI mengurangi antrian administrasi hingga 70%. Mahasiswa bisa dapat info kapan saja.", rating: 5 },
-      { name: "Rizky Firmansyah, S.Kom", role: "IT Manager, Politeknik Negeri", avatar: "RF", content: "Setup chatbot untuk 5 program studi hanya butuh 2 hari. Knowledge base dari silabus langsung bisa dipakai.", rating: 5 },
+    research: [
+      { value: "US$3,2 M", label: "Nilai pasar EdTech Indonesia diperkirakan ~US$3,2 miliar pada 2024 dan terus tumbuh dua digit per tahun.", source: "Research & Markets (riset pasar EdTech), 2024" },
     ],
     faq: [
       { question: "Bisa digunakan untuk semua jenjang pendidikan?", answer: "Ya, Gustafta fleksibel untuk SD, SMP, SMA, universitas, maupun kursus/pelatihan." },
@@ -178,9 +171,9 @@ export const sectorContentMap: Record<string, SectorContent> = {
     ],
     stats: [
       { value: "24/7", label: "Tutor Tersedia" },
-      { value: "70%", label: "Beban Admin Berkurang" },
-      { value: "200+", label: "Institusi Pengguna" },
-      { value: "15%", label: "Peningkatan Nilai" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "∞", label: "Chat Bersamaan" },
     ],
   },
 
@@ -204,10 +197,9 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Onboarding Nasabah", description: "Panduan langkah demi langkah untuk pembukaan rekening baru" },
       { title: "Edukasi Keuangan", description: "Tips investasi, perencanaan pensiun, dan literasi keuangan personal" },
     ],
-    testimonials: [
-      { name: "Hadi Wijayanto", role: "VP Digital, Bank Nusantara", avatar: "HW", content: "Chatbot Gustafta menangani 50% pertanyaan nasabah secara otomatis. Tim CS bisa fokus pada kasus kompleks.", rating: 5 },
-      { name: "Linda Maharani, SE", role: "Branch Manager, BPR Sejahtera", avatar: "LM", content: "Simulasi kredit otomatis via chatbot sangat membantu nasabah. Konversi aplikasi kredit naik 25%.", rating: 5 },
-      { name: "Arief Budiman", role: "Head of Digital, Asuransi Mandala", avatar: "AB", content: "AI membantu menjelaskan produk asuransi dengan bahasa sederhana. Nasabah lebih paham sebelum membeli.", rating: 5 },
+    research: [
+      { value: "65,43%", label: "Indeks literasi keuangan Indonesia 2024 baru 65,43% (inklusi 75,02%) — kebutuhan edukasi & advisory keuangan masih sangat besar.", source: "OJK & BPS, SNLIK 2024" },
+      { value: "~40%", label: "Sekitar 40% aktivitas fungsi keuangan dapat diotomasi sepenuhnya dengan teknologi yang sudah ada saat ini.", source: "McKinsey & Company" },
     ],
     faq: [
       { question: "Apakah aman untuk data keuangan?", answer: "Ya, Gustafta mendukung enkripsi, akses kontrol per agen, dan mode privat. Data sensitif bisa dikontrol sepenuhnya." },
@@ -215,10 +207,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Apakah bisa multi-bahasa?", answer: "Ya, chatbot bisa dikonfigurasi untuk berbagai bahasa sesuai kebutuhan nasabah." },
     ],
     stats: [
-      { value: "50%", label: "Pertanyaan Otomatis" },
-      { value: "25%", label: "Konversi Meningkat" },
       { value: "24/7", label: "Layanan Non-stop" },
-      { value: "97%", label: "Akurasi Jawaban" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "Aman", label: "Enkripsi & Mode Privat" },
     ],
   },
 
@@ -242,10 +234,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Promo & Campaign", description: "Informasikan promo terbaru dan voucher secara proaktif ke pelanggan" },
       { title: "After-sales Support", description: "Tracking pesanan, panduan penggunaan produk, dan penanganan keluhan" },
     ],
-    testimonials: [
-      { name: "Dewi Kartini", role: "Owner, Batik Nusantara Online", avatar: "DK", content: "Chatbot WhatsApp kami menjawab pertanyaan ukuran dan motif batik 24 jam. Penjualan online naik 35%.", rating: 5 },
-      { name: "Tommy Hadinata", role: "E-Commerce Manager, Gadget Store", avatar: "TH", content: "Saat promo 11.11, chatbot menangani 80% pertanyaan pelanggan. Tim CS tidak kewalahan lagi.", rating: 5 },
-      { name: "Ratna Sari", role: "Marketing Director, Fashion House", avatar: "RS", content: "Rekomendasi produk dari AI sangat akurat. Cart abandonment turun 20% sejak implementasi.", rating: 5 },
+    research: [
+      { value: "US$90 M", label: "Nilai ekonomi digital Indonesia mencapai GMV ~US$90 miliar pada 2024 (naik 13% YoY) — e-commerce penyumbang terbesar.", source: "e-Conomy SEA 2024 (Google, Temasek, Bain)" },
     ],
     faq: [
       { question: "Bisa terkoneksi dengan toko online saya?", answer: "Ya, melalui REST API dan webhook. Bisa terhubung dengan Shopify, WooCommerce, Tokopedia, dan platform lainnya." },
@@ -253,10 +243,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bisa handle berapa banyak chat sekaligus?", answer: "Tidak terbatas. AI bisa melayani ratusan pelanggan secara bersamaan tanpa antrian." },
     ],
     stats: [
-      { value: "35%", label: "Penjualan Meningkat" },
-      { value: "80%", label: "Pertanyaan Otomatis" },
       { value: "24/7", label: "Selalu Tersedia" },
-      { value: "20%", label: "Cart Abandon Turun" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Marketplace" },
+      { value: "∞", label: "Chat Bersamaan" },
     ],
   },
 
@@ -280,10 +270,9 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Panduan Dokumen Legal", description: "Bantu klien memahami dokumen legal dan persyaratan yang diperlukan" },
       { title: "Lead Qualification", description: "Kualifikasi calon klien berdasarkan jenis kasus dan urgensi" },
     ],
-    testimonials: [
-      { name: "Dr. Agus Salim, SH, MH", role: "Partner, Kantor Hukum Salim & Associates", avatar: "AS", content: "Chatbot menangani pertanyaan awal klien sehingga tim pengacara bisa fokus pada kasus aktif. Efisiensi naik drastis.", rating: 5 },
-      { name: "Maria Theresia, SH", role: "Legal Consultant, Law Firm Jakarta", avatar: "MT", content: "Knowledge Base berisi regulasi terbaru sangat membantu. Klien bisa cek informasi dasar kapan saja.", rating: 5 },
-      { name: "Benny Kurniawan, SH", role: "Notaris & PPAT", avatar: "BK", content: "FAQ otomatis tentang persyaratan akta dan sertifikat mengurangi beban admin kami hingga 40%.", rating: 5 },
+    research: [
+      { value: "37/100", label: "Skor Indeks Persepsi Korupsi (CPI) Indonesia 2024 berada di 37/100 — kebutuhan tata kelola & kepatuhan hukum sangat tinggi.", source: "Transparency International, 2024" },
+      { value: "9,2%", label: "Organisasi rata-rata kehilangan sekitar 9,2% pendapatan akibat pengelolaan kontrak yang buruk.", source: "World Commerce & Contracting" },
     ],
     faq: [
       { question: "Apakah chatbot bisa menggantikan konsultasi pengacara?", answer: "Tidak. Chatbot memberikan informasi umum dan pre-screening. Konsultasi profesional tetap dilakukan oleh pengacara berlisensi." },
@@ -291,10 +280,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bisa di-update dengan regulasi baru?", answer: "Ya, Knowledge Base bisa di-update kapan saja dengan dokumen regulasi terbaru." },
     ],
     stats: [
-      { value: "40%", label: "Beban Admin Berkurang" },
       { value: "24/7", label: "Konsultasi Awal" },
-      { value: "3x", label: "Lead Lebih Banyak" },
-      { value: "90%", label: "Akurasi Info" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "Aman", label: "Enkripsi & Mode Privat" },
     ],
   },
 
@@ -318,10 +307,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Booking Assistant", description: "Bantu tamu reservasi restoran, spa, tour, dan transportasi" },
       { title: "Multi-bahasa", description: "Layani tamu internasional dalam berbagai bahasa secara otomatis" },
     ],
-    testimonials: [
-      { name: "I Made Surya", role: "GM, Bali Paradise Resort", avatar: "MS", content: "Concierge AI kami melayani tamu dalam 5 bahasa. Review score di TripAdvisor naik dari 4.2 ke 4.7.", rating: 5 },
-      { name: "Ratih Kumala", role: "Owner, Jogja Heritage Hotel", avatar: "RK", content: "Chatbot WhatsApp menangani 70% pertanyaan tamu. Staff bisa lebih fokus pada pelayanan personal.", rating: 5 },
-      { name: "David Chen", role: "Marketing Manager, Tour Operator", avatar: "DC", content: "AI merekomendasikan paket wisata sesuai preferensi. Penjualan paket premium naik 40%.", rating: 5 },
+    research: [
+      { value: "4,0%", label: "Sektor pariwisata menyumbang sekitar 4,0% terhadap PDB Indonesia pada 2024 dan terus pulih pascapandemi.", source: "Kemenparekraf / BPS, 2024" },
     ],
     faq: [
       { question: "Bisa melayani tamu dalam berbagai bahasa?", answer: "Ya, chatbot bisa dikonfigurasi untuk melayani tamu dalam bahasa Indonesia, Inggris, Mandarin, Jepang, dan lainnya." },
@@ -329,10 +316,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bagaimana cara memasukkan informasi hotel?", answer: "Upload brosur, menu, daftar fasilitas, dan info wisata ke Knowledge Base. AI langsung bisa menjawab berdasarkan data tersebut." },
     ],
     stats: [
-      { value: "5+", label: "Bahasa Tersedia" },
-      { value: "70%", label: "FAQ Otomatis" },
-      { value: "40%", label: "Revenue Naik" },
-      { value: "4.7", label: "Rating Tamu" },
+      { value: "24/7", label: "Concierge Aktif" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "Multi", label: "Bahasa Internasional" },
+      { value: "∞", label: "Chat Bersamaan" },
     ],
   },
 
@@ -356,10 +343,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Campaign Bot", description: "Distribusi konten, follow-up otomatis, dan nurturing leads" },
       { title: "Sales Enablement", description: "Asisten AI untuk tim sales dengan product knowledge lengkap" },
     ],
-    testimonials: [
-      { name: "Dian Sastro", role: "CMO, Tech Startup Jakarta", avatar: "DS", content: "Lead generation bot menghasilkan 3x lebih banyak qualified leads. Tim sales lebih produktif karena fokus pada prospek berkualitas.", rating: 5 },
-      { name: "Reza Rahardian", role: "Digital Marketing Manager", avatar: "RR", content: "Chatbot campaign untuk product launch menghasilkan engagement 5x lipat dibanding email blast biasa.", rating: 5 },
-      { name: "Putri Handayani", role: "Sales Director, SaaS Company", avatar: "PH", content: "AI pre-qualification menghemat 60% waktu tim sales. Konversi meningkat karena leads sudah tersaring.", rating: 5 },
+    research: [
+      { value: "US$3,05 M", label: "Belanja iklan digital di Indonesia diperkirakan mencapai ~US$3,05 miliar pada 2024 dan terus tumbuh setiap tahun.", source: "Mordor Intelligence, 2024" },
     ],
     faq: [
       { question: "Bisa terintegrasi dengan CRM?", answer: "Ya, melalui REST API dan webhook, Gustafta bisa terhubung dengan Salesforce, HubSpot, Pipedrive, dan CRM lainnya." },
@@ -367,10 +352,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bisa untuk B2B dan B2C?", answer: "Ya, chatbot bisa dikustomisasi untuk segmen B2B maupun B2C dengan persona dan alur yang berbeda." },
     ],
     stats: [
-      { value: "3x", label: "Leads Lebih Banyak" },
-      { value: "60%", label: "Waktu Sales Hemat" },
-      { value: "5x", label: "Engagement Naik" },
-      { value: "24/7", label: "Always Working" },
+      { value: "24/7", label: "Selalu Bekerja" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Sosmed" },
+      { value: "CRM", label: "Integrasi via API" },
     ],
   },
 
@@ -394,10 +379,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Eskalasi Cerdas", description: "Otomatis eskalasi kasus kompleks ke agent manusia yang tepat" },
       { title: "Self-service Portal", description: "Panduan langkah-demi-langkah untuk troubleshooting dan penyelesaian masalah" },
     ],
-    testimonials: [
-      { name: "Anita Dewi", role: "CS Manager, E-Commerce Terbesar", avatar: "AD", content: "Gustafta menangani 75% pertanyaan pelanggan otomatis. CSAT score naik dari 3.8 ke 4.5.", rating: 5 },
-      { name: "Budi Prasetyo", role: "VP Customer Experience", avatar: "BP", content: "Response time turun dari rata-rata 15 menit ke 3 detik. Pelanggan sangat puas dengan kecepatan respon.", rating: 5 },
-      { name: "Christine Tanuwijaya", role: "Head of Support, Fintech", avatar: "CT", content: "Eskalasi otomatis memastikan keluhan kritis langsung ditangani. Tidak ada lagi tiket terlewat.", rating: 5 },
+    research: [
+      { value: "74%", label: "Sebanyak 74% konsumen kini mengharapkan layanan pelanggan yang lebih cepat dan tersedia kapan saja.", source: "Zendesk CX Trends, 2024" },
     ],
     faq: [
       { question: "Bisa handover ke agent manusia?", answer: "Ya, chatbot bisa diatur untuk eskalasi ke agent manusia saat mendeteksi kasus kompleks atau permintaan klien." },
@@ -405,10 +388,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bisa tracking kepuasan pelanggan?", answer: "Ya, melalui Analytics dashboard Anda bisa melihat engagement, sentiment, dan pola pertanyaan pelanggan." },
     ],
     stats: [
-      { value: "75%", label: "Otomatis Terjawab" },
-      { value: "3 dtk", label: "Response Time" },
-      { value: "4.5", label: "CSAT Score" },
-      { value: "60%", label: "Biaya CS Hemat" },
+      { value: "24/7", label: "Selalu Aktif" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "Handover", label: "Eskalasi ke Agent" },
     ],
   },
 
@@ -432,10 +415,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Virtual Tour Booking", description: "Jadwalkan kunjungan properti dan site visit secara otomatis" },
       { title: "Developer Info Bot", description: "Informasi proyek, progress pembangunan, dan spesifikasi unit" },
     ],
-    testimonials: [
-      { name: "Irwan Hidayat", role: "Director, Properti Nusantara Group", avatar: "IH", content: "Chatbot menangani inquiry dari 3 proyek sekaligus. Konversi kunjungan site visit naik 45%.", rating: 5 },
-      { name: "Stephanie Wijaya", role: "Senior Agent, Century 21", avatar: "SW", content: "AI melakukan pre-screening buyer sehingga saya hanya bertemu prospek yang serius. Closing rate naik 30%.", rating: 5 },
-      { name: "Agus Dharma", role: "Marketing Manager, Ciputra Group", avatar: "AD", content: "Simulasi KPR otomatis di chatbot sangat membantu. Calon pembeli sudah siap saat meeting.", rating: 5 },
+    research: [
+      { value: "12,75 jt", label: "Backlog kepemilikan rumah di Indonesia tercatat sekitar 12,75 juta unit — permintaan hunian sangat besar.", source: "Susenas 2020 / Kementerian PUPR" },
     ],
     faq: [
       { question: "Bisa menampilkan foto dan detail properti?", answer: "Ya, chatbot bisa mengirim gambar, brosur, dan informasi detail properti dari Knowledge Base." },
@@ -443,10 +424,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bisa terkoneksi ke CRM properti?", answer: "Ya, melalui REST API untuk sync data prospek ke CRM atau sistem marketing Anda." },
     ],
     stats: [
-      { value: "45%", label: "Kunjungan Naik" },
-      { value: "30%", label: "Closing Rate Naik" },
       { value: "24/7", label: "Inquiry Terlayani" },
-      { value: "3x", label: "Leads Lebih Banyak" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "KPR", label: "Simulasi Otomatis" },
     ],
   },
 
@@ -470,10 +451,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "Content Planning", description: "AI membantu menyusun editorial calendar dan content strategy" },
       { title: "Client Communication", description: "Hub untuk feedback, revisi, dan approval dari klien" },
     ],
-    testimonials: [
-      { name: "Vanya Sarasvati", role: "Creative Director, Digital Agency", avatar: "VS", content: "AI brainstorming membantu tim kami generate 50+ ide kampanye dalam satu sesi. Proses pitching jauh lebih efisien.", rating: 5 },
-      { name: "Ryan Adriandhy", role: "Content Manager, Media Company", avatar: "RA", content: "Content planning dengan AI menghemat 10 jam per minggu. Editorial calendar selalu terisi dan terorganisir.", rating: 5 },
-      { name: "Nadia Kusuma", role: "Freelance Designer", avatar: "NK", content: "Chatbot brief builder membantu saya mendapat brief yang jelas dari klien. Revisi berkurang drastis.", rating: 5 },
+    research: [
+      { value: "7,28%", label: "Ekonomi kreatif menyumbang 7,28% terhadap PDB Indonesia (Rp1.611 triliun) pada 2024 — salah satu yang terbesar di dunia.", source: "Kemenparekraf, 2024" },
     ],
     faq: [
       { question: "Bisa untuk copywriting?", answer: "Ya, chatbot bisa membantu generate copy, headline, tagline, dan konten berdasarkan brief dan brand guidelines di Knowledge Base." },
@@ -481,10 +460,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bisa kolaborasi tim?", answer: "Ya, chatbot bisa diakses oleh seluruh tim melalui berbagai channel untuk koordinasi dan brainstorming." },
     ],
     stats: [
-      { value: "50+", label: "Ide per Sesi" },
-      { value: "10 jam", label: "Hemat per Minggu" },
-      { value: "70%", label: "Revisi Berkurang" },
-      { value: "3x", label: "Output Meningkat" },
+      { value: "24/7", label: "Selalu Aktif" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "Brand", label: "Sesuai Tone & Persona" },
     ],
   },
 
@@ -508,10 +487,8 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { title: "CS Logistik", description: "Jawab pertanyaan tentang layanan, area coverage, dan prosedur klaim" },
       { title: "Driver Assistant", description: "Chatbot untuk driver: info rute, SOP pengiriman, dan laporan masalah" },
     ],
-    testimonials: [
-      { name: "Hendri Gunawan", role: "COO, Ekspedisi Cepat Nusantara", avatar: "HG", content: "Tracking bot via WhatsApp mengurangi panggilan CS 65%. Pelanggan puas bisa cek status kapan saja.", rating: 5 },
-      { name: "Lisa Permata", role: "CS Manager, JNT Logistics", avatar: "LP", content: "Saat Harbolnas, chatbot menangani 10x volume normal tanpa masalah. Tim CS tetap bisa handle kasus khusus.", rating: 5 },
-      { name: "Eko Prasetyo", role: "Fleet Manager, Transportasi Andalan", avatar: "EP", content: "Chatbot untuk driver membantu standarisasi SOP pengiriman. Keluhan pelanggan turun 40%.", rating: 5 },
+    research: [
+      { value: "~14%", label: "Biaya logistik domestik Indonesia masih setara ~14% terhadap PDB — efisiensi operasional jadi kunci daya saing.", source: "Bappenas / World Bank" },
     ],
     faq: [
       { question: "Bisa terkoneksi dengan sistem tracking?", answer: "Ya, melalui REST API chatbot bisa mengambil data real-time dari TMS (Transportation Management System) Anda." },
@@ -519,10 +496,10 @@ export const sectorContentMap: Record<string, SectorContent> = {
       { question: "Bagaimana update tarif otomatis?", answer: "Update Knowledge Base dengan data tarif terbaru. AI langsung menggunakan informasi yang paling baru." },
     ],
     stats: [
-      { value: "65%", label: "Panggilan CS Turun" },
-      { value: "10x", label: "Capacity Handling" },
-      { value: "40%", label: "Keluhan Turun" },
       { value: "24/7", label: "Tracking Tersedia" },
+      { value: "0", label: "Baris Kode (Tanpa Coding)" },
+      { value: "3+", label: "Channel: WA, Web, Telegram" },
+      { value: "API", label: "Integrasi TMS" },
     ],
   },
 };

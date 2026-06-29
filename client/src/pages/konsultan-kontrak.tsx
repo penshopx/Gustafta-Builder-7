@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, FileText, Scale,
-  AlertTriangle, Gavel, Shield, Star, ClipboardList,
+  AlertTriangle, Gavel, Shield, ClipboardList,
   TrendingUp, Building2, XCircle, DollarSign, Clock,
 } from "lucide-react";
 
@@ -36,6 +36,28 @@ const CONTRACT_TYPES = [
   { type: "FIDIC", variants: ["Red Book (Konstruksi)", "Yellow Book (Rancang Bangun)", "Silver Book (EPC/Turnkey)", "Gold Book (DBO)"] },
   { type: "Perpres 46/2025", variants: ["SSKK & SSUK pengadaan pemerintah", "Kontrak Lump Sum & Harga Satuan", "Kontrak Payung & Multi-Years", "Kontrak Terima Jadi (Turnkey)"] },
   { type: "Komersial & B2B", variants: ["Kontrak konstruksi swasta", "Perjanjian subkontraktor", "Kontrak sewa alat & material", "MOU & perjanjian KSO/JV"] },
+];
+
+// Data riset/lembaga (konteks industri, bukan klaim hasil produk). Diverifikasi via sumber publik.
+const STATS_KONTRAK = [
+  {
+    icon: Gavel,
+    value: "£27 Juta+",
+    label: "Rata-rata nilai sengketa konstruksi global kini melampaui £27 juta, dengan durasi penyelesaian ~14,4 bulan.",
+    source: "Arcadis, Global Construction Disputes Report 2024",
+  },
+  {
+    icon: DollarSign,
+    value: "9,2%",
+    label: "Organisasi rata-rata kehilangan ~9,2% pendapatan tahunan akibat manajemen kontrak yang buruk: tenggat terlewat, klausul terabaikan, perpanjangan merugikan.",
+    source: "World Commerce & Contracting",
+  },
+  {
+    icon: TrendingUp,
+    value: "80%",
+    label: "Proyek besar lintas sektor biasanya selesai 20% lebih lama dari jadwal dan membengkak hingga 80% di atas anggaran — pemicu utama klaim & sengketa.",
+    source: "McKinsey Global Institute, Reinventing Construction 2017",
+  },
 ];
 
 export default function KonsultanKontrakPage() {
@@ -180,29 +202,29 @@ export default function KonsultanKontrakPage() {
         </div>
       </section>
 
-      {/* Testimoni before/after */}
+      {/* Riset: Menurut Data */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-red-600 uppercase tracking-widest text-center mb-2">Bukti Nyata</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Kontraktor & Konsultan Kontrak</h2>
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              { name: "Ir. Andi P., MT", role: "Project Director, Kontraktor Swasta", before: "Review kontrak FIDIC dilakukan sendiri dalam 2–3 hari", after: "KontrakClaw identifikasi 8 klausul berisiko dalam 3 jam", text: "CONTRACT-REVIEWER-nya menemukan klausul force majeure yang sangat sempit — jika tidak dicek, bisa merugikan kami ratusan juta saat ada keterlambatan material." },
-              { name: "Dewi S., SH.", role: "Konsultan Klaim Konstruksi", before: "Persiapan dasar klaim EoT butuh riset 1–2 minggu", after: "CLAIM-STRATEGIST bantu siapkan basis klaim dalam 2 hari", text: "KontrakClaw membantu klien saya memenangkan klaim EoT yang awalnya mereka pikir tidak punya dasar. Sub-agen-nya sangat tahu regulasi FIDIC Silver Book." },
-              { name: "Budi H., MCIArb", role: "Konsultan Arbitrase", before: "Analisis probabilitas keberhasilan sengketa butuh waktu lama", after: "DISPUTE-RESOLVER beri overview probabilitas + strategi dalam 1 sesi", text: "Untuk persiapan arbitrase BANI, KontrakClaw membantu saya mengidentifikasi argumen terkuat dan potensi konter-argumen dari pihak lawan jauh lebih cepat." },
-            ].map((t, i) => (
-              <div key={i} className="bg-red-50 dark:bg-red-900/10 rounded-2xl p-5 border border-red-100 dark:border-border">
-                <div className="flex gap-0.5 mb-2">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-500">{t.before}</span></p>
-                <p className="text-xs text-gray-400 mb-3">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-3 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
-              </div>
-            ))}
+          <div className="text-center mb-10">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 mb-3">Menurut Data</span>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Mengapa Manajemen Kontrak Itu Mahal Jika Salah</h2>
           </div>
+          <div className="grid sm:grid-cols-3 gap-5">
+            {STATS_KONTRAK.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="bg-red-50 dark:bg-red-900/10 rounded-2xl p-5 border border-red-100 dark:border-border" data-testid={`stat-kontrak-${i}`}>
+                  <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-3">
+                    <SIcon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                  <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                  <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-[11px] text-gray-400 text-center mt-5 max-w-2xl mx-auto leading-snug">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

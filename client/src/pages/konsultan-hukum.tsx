@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Scale, Shield,
-  FileText, AlertTriangle, Users, Star, Gavel,
+  FileText, AlertTriangle, Users, Gavel,
   Building2, ShieldCheck, Clock, TrendingUp, XCircle, DollarSign,
 } from "lucide-react";
 
@@ -54,6 +54,28 @@ const colorStyles: Record<string, { bg: string; border: string; icon: string; ta
   teal:   { bg: "bg-teal-50 dark:bg-teal-900/10",     border: "border-teal-200 dark:border-teal-800",     icon: "bg-teal-100 dark:bg-teal-900/30",     tag: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400" },
   emerald:{ bg: "bg-emerald-50 dark:bg-emerald-900/10",border:"border-emerald-200 dark:border-emerald-800",icon:"bg-emerald-100 dark:bg-emerald-900/30", tag:"bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
 };
+
+// Data riset/lembaga (konteks industri, bukan klaim hasil produk). Diverifikasi via sumber publik.
+const STATS_HUKUM = [
+  {
+    icon: Gavel,
+    value: "£27 Juta+",
+    label: "Rata-rata nilai sengketa konstruksi global kini melampaui £27 juta, dengan durasi penyelesaian ~14,4 bulan — risiko kontrak yang mahal.",
+    source: "Arcadis, Global Construction Disputes Report 2024",
+  },
+  {
+    icon: DollarSign,
+    value: "9,2%",
+    label: "Organisasi rata-rata kehilangan ~9,2% pendapatan tahunan akibat manajemen kontrak yang buruk: tenggat terlewat, klausul terabaikan, perpanjangan merugikan.",
+    source: "World Commerce & Contracting",
+  },
+  {
+    icon: ShieldCheck,
+    value: "37/100",
+    label: "Skor Indeks Persepsi Korupsi Indonesia 2024 (peringkat 99 dari 180) — compliance anti-suap (ISO 37001) makin krusial bagi korporasi & BUMN.",
+    source: "Transparency International, CPI 2024",
+  },
+];
 
 export default function KonsultanHukumPage() {
   const { isAuthenticated } = useAuth();
@@ -205,7 +227,7 @@ export default function KonsultanHukumPage() {
         </div>
       </section>
 
-      {/* Untuk siapa + Testimoni */}
+      {/* Untuk siapa + Riset */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12">
@@ -235,26 +257,26 @@ export default function KonsultanHukumPage() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-2">Bukti Nyata</p>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Dari Praktisi Hukum</h2>
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-2">Menurut Data</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Kenapa Ini Penting</h2>
               <div className="space-y-4">
-                {[
-                  { name: "Reza A., SH., MH.", role: "Associate, Law Firm Jakarta", before: "Riset regulasi pengadaan butuh 3–4 jam per kasus", after: "Kini selesai dalam 30 menit dengan KontrakClaw", text: "KontrakClaw sangat mendalam untuk analisis klausul FIDIC. Bisa identifikasi risiko yang sering terlewat saat review manual." },
-                  { name: "Sari W., SH.", role: "Legal Manager, BUMN Konstruksi", before: "Tim legal kewalahan dengan pertanyaan kontrak dari unit bisnis", after: "Chatbot AI pre-screening 80% pertanyaan — tim fokus ke yang kompleks", text: "Compliance anti-korupsi jadi lebih terstruktur. SMAPClaw membantu kami siapkan dokumentasi ISO 37001 jauh lebih efisien." },
-                  { name: "Budi H., SH., MCIArb", role: "Konsultan Arbitrase Independen", before: "Butuh waktu lama untuk riset dasar klaim di BANI/ICC", after: "Persiapan brief arbitrase 2× lebih cepat dengan AI", text: "AI-nya memahami konteks pengadaan pemerintah Indonesia. Bukan sekadar menerjemahkan — tapi benar-benar membantu analisis." },
-                ].map((t, i) => (
-                  <div key={i} className="bg-slate-50 dark:bg-muted/20 rounded-xl p-4 border border-slate-100 dark:border-border">
-                    <div className="flex gap-0.5 mb-2">
-                      {[...Array(5)].map((_, j) => <Star key={j} className="h-3 w-3 fill-amber-400 text-amber-400" />)}
+                {STATS_HUKUM.map((s, i) => {
+                  const SIcon = s.icon;
+                  return (
+                    <div key={i} className="bg-slate-50 dark:bg-muted/20 rounded-xl p-4 border border-slate-100 dark:border-border" data-testid={`stat-hukum-${i}`}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                          <SIcon className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                        </div>
+                        <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
+                      </div>
+                      <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-1.5">{s.label}</p>
+                      <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
                     </div>
-                    <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
-                    <p className="text-xs text-gray-400 mb-2">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
-                    <p className="text-xs text-gray-700 dark:text-muted-foreground italic mb-2 leading-relaxed">"{t.text}"</p>
-                    <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.role}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
+              <p className="text-[10px] text-gray-400 mt-3 leading-snug">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
             </div>
           </div>
         </div>

@@ -6,7 +6,7 @@ import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, Calculator, FileText,
   BarChart3, Shield, AlertTriangle, Building2, Users,
-  Star, TrendingUp, DollarSign, ClipboardList, XCircle, Clock,
+  TrendingUp, DollarSign, ClipboardList, XCircle, Clock,
 } from "lucide-react";
 
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20solusi%20AI%20untuk%20konsultan%20pajak";
@@ -46,6 +46,28 @@ const colorStyles: Record<string, { bg: string; border: string; icon: string; ta
   blue:   { bg: "bg-blue-50 dark:bg-blue-900/10",     border: "border-blue-200 dark:border-blue-800",     icon: "bg-blue-100 dark:bg-blue-900/30",     tag: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
   red:    { bg: "bg-red-50 dark:bg-red-900/10",       border: "border-red-200 dark:border-red-800",       icon: "bg-red-100 dark:bg-red-900/30",       tag: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
 };
+
+// Data riset/lembaga (konteks industri, bukan klaim hasil produk). Diverifikasi via sumber publik.
+const STATS_PAJAK = [
+  {
+    icon: BarChart3,
+    value: "10,08%",
+    label: "Rasio pajak Indonesia 2024 (arti luas) terhadap PDB — masih rendah, sehingga DJP terus memperketat pengawasan & kepatuhan.",
+    source: "Kementerian Keuangan RI, 2024",
+  },
+  {
+    icon: Building2,
+    value: "~60%",
+    label: "UMKM menyumbang sekitar 60% PDB Indonesia (±64 juta unit) — segmen besar yang butuh panduan pajak yang jelas & terjangkau.",
+    source: "Kemenkop UKM / Kemenkeu, 2024",
+  },
+  {
+    icon: Clock,
+    value: "~207 jam",
+    label: "Perusahaan menengah di Indonesia menghabiskan ±207 jam per tahun untuk memenuhi kewajiban perpajakan.",
+    source: "World Bank & PwC, Paying Taxes",
+  },
+];
 
 export default function KonsultanPajakPage() {
   const { isAuthenticated } = useAuth();
@@ -189,26 +211,26 @@ export default function KonsultanPajakPage() {
 
       <section className="py-16 px-4 bg-amber-50 dark:bg-amber-900/10">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest text-center mb-2">Bukti Nyata</p>
-          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">Dari Konsultan & Wajib Pajak</h2>
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              { name: "Hendra T., BKP", role: "Konsultan Pajak Bersertifikat", before: "Riset PMK terbaru butuh 1–2 jam per topik", after: "Sekarang 10 menit — PajakClaw langsung ringkasan relevan", text: "Analisis lintas sub-agen-nya membuat saya bisa memberikan advice yang lebih komprehensif ke klien dalam waktu lebih singkat." },
-              { name: "Dewi S.", role: "Tax Manager, Perusahaan Manufaktur", before: "Harus tunggu eskternal konsultan untuk pertanyaan standar", after: "85% pertanyaan tim internal sudah bisa dijawab AI", text: "Sangat membantu untuk interpretasi PMK dan PER DJP yang baru terbit. Tidak perlu lagi menunggu konfirmasi dari eksternal konsultan." },
-              { name: "Budi R., SE", role: "Pemilik UMKM Menengah", before: "Selalu khawatir salah hitung pajak & kena denda", after: "SPT lebih percaya diri, zero denda 2 tahun terakhir", text: "Akhirnya ada AI yang bisa jelaskan kewajiban pajak UMKM dengan bahasa mudah dipahami. Pengisian SPT tahunan jauh lebih percaya diri." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-amber-100 dark:border-border">
-                <div className="flex gap-0.5 mb-2">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
-                <p className="text-xs text-gray-400 mb-3">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-3 leading-relaxed">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
-              </div>
-            ))}
+          <div className="text-center mb-10">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 mb-3">Menurut Data</span>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Konteks Perpajakan Indonesia</h2>
           </div>
+          <div className="grid sm:grid-cols-3 gap-5">
+            {STATS_PAJAK.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="bg-white dark:bg-card rounded-2xl p-5 border border-amber-100 dark:border-border" data-testid={`stat-pajak-${i}`}>
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-3">
+                    <SIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1.5">{s.value}</div>
+                  <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-2">{s.label}</p>
+                  <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-[11px] text-gray-400 text-center mt-5 max-w-2xl mx-auto leading-snug">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
         </div>
       </section>
 

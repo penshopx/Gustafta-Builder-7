@@ -3,7 +3,6 @@ import { Link, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
@@ -12,7 +11,7 @@ import { SharedHeader } from "@/components/shared-header";
 import { getSectorContent, featuredSectors } from "@/lib/sector-content";
 import {
   Bot, Sparkles, ArrowRight, Check, Rocket, CheckCircle2, XCircle,
-  Star, Brain, Blocks, BookOpen, Plug, Lightbulb, ArrowLeft,
+  Brain, Blocks, BookOpen, Plug, Lightbulb, ArrowLeft,
   Palette, Shield, Code, Cpu, BarChart3, Camera
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -234,40 +233,34 @@ export default function SectorLanding() {
       <section className="py-16 md:py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Testimoni</Badge>
+            <Badge variant="secondary" className="mb-4">Menurut Data</Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Dipercaya oleh Profesional
+              Kenapa Ini Penting
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Lihat bagaimana Gustafta membantu di sektor {sector.label.toLowerCase()}
+              Konteks industri di sektor {sector.label.toLowerCase()} berdasarkan data lembaga riset terverifikasi
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {sector.testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover-elevate overflow-visible" data-testid={`card-testimonial-${index}`}>
+          <div className={`grid grid-cols-1 ${sector.research.length > 1 ? "md:grid-cols-2" : ""} gap-6 max-w-3xl mx-auto`}>
+            {sector.research.map((item, index) => (
+              <Card key={index} className="hover-elevate overflow-visible" data-testid={`card-research-${index}`}>
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-6 italic">"{testimonial.content}"</p>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                        {testimonial.avatar}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-semibold text-sm">{testimonial.name}</div>
-                      <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <BarChart3 className="h-5 w-5 text-primary" />
                     </div>
+                    <div className="text-3xl font-extrabold text-foreground">{item.value}</div>
                   </div>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-2">{item.label}</p>
+                  <p className="text-xs text-muted-foreground/70">Sumber: {item.source}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
+          <p className="text-xs text-muted-foreground/70 text-center max-w-2xl mx-auto mt-6">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
+          </p>
         </div>
       </section>
 

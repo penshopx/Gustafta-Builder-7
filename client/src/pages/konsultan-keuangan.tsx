@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTrialCTA } from "@/hooks/use-trial-cta";
 import {
   Check, ArrowRight, MessageCircle, TrendingUp, BarChart3,
-  DollarSign, Shield, FileText, Star, Building2,
+  DollarSign, Shield, FileText, Building2,
   Calculator, XCircle, Clock, AlertTriangle,
 } from "lucide-react";
 
@@ -58,6 +58,28 @@ const colorStyles: Record<string, { bg: string; border: string; icon: string; ta
   green:  { bg: "bg-green-50 dark:bg-green-900/10",    border: "border-green-200 dark:border-green-800",   icon: "bg-green-100 dark:bg-green-900/30",   tag: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   blue:   { bg: "bg-blue-50 dark:bg-blue-900/10",      border: "border-blue-200 dark:border-blue-800",     icon: "bg-blue-100 dark:bg-blue-900/30",     tag: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
 };
+
+// Data riset/lembaga (konteks industri, bukan klaim hasil produk). Diverifikasi via sumber publik.
+const STATS_KEUANGAN = [
+  {
+    icon: Calculator,
+    value: "~40%",
+    label: "Sekitar 40% aktivitas fungsi keuangan dapat diotomasi sepenuhnya dengan teknologi yang sudah ada — waktu untuk pekerjaan rutin bisa dialihkan ke analisis.",
+    source: "McKinsey, The Future of the Finance Function",
+  },
+  {
+    icon: FileText,
+    value: "30+",
+    label: "Standar pelaporan keberlanjutan IFRS S1 & S2 (efektif 1 Jan 2024) telah diadopsi atau dikomitmenkan di 30+ yurisdiksi — permintaan pelaporan ESG melonjak.",
+    source: "IFRS Foundation / ISSB",
+  },
+  {
+    icon: BarChart3,
+    value: "65,43%",
+    label: "Indeks literasi keuangan Indonesia 2024 (inklusi 75,02%) — kebutuhan advisory & edukasi keuangan yang jelas masih sangat besar.",
+    source: "OJK & BPS, SNLIK 2024",
+  },
+];
 
 export default function KonsultanKeuanganPage() {
   const { isAuthenticated } = useAuth();
@@ -236,26 +258,26 @@ export default function KonsultanKeuanganPage() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-2">Bukti Nyata</p>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Dari Konsultan Keuangan</h2>
+              <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-2">Menurut Data</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Kenapa Ini Penting</h2>
               <div className="space-y-4">
-                {[
-                  { name: "Hendra W., CA, CPA", role: "Senior Manager, KAP Nasional", before: "Analisis laporan keuangan klien butuh 6–8 jam manual", after: "KeuanganClaw selesaikan draft analisis dalam 45 menit", text: "AI-nya benar-benar memahami konteks PSAK Indonesia. Analisis rasio yang dihasilkan langsung relevan untuk diskusi dengan klien korporasi." },
-                  { name: "Dewi A., Ak., MBA", role: "CFO, Perusahaan Manufaktur Menengah", before: "Rekonsiliasi fiskal tahunan butuh 2 minggu persiapan", after: "Selesai dalam 4 hari dengan checklist PajakClaw sebagai panduan", text: "PajakClaw sangat membantu untuk rekonsiliasi fiskal. Tidak ada lagi pos yang terlewat — AI mengingatkan setiap koreksi yang perlu dicek." },
-                  { name: "Budi R., CFA", role: "Analis Investasi, Lembaga Keuangan", before: "Laporan ESG klien makan waktu 3 bulan dari nol", after: "ESGClaw persingkat jadi 3 minggu dengan template GRI terintegrasi", text: "ESGClaw luar biasa untuk klien yang baru mulai pelaporan keberlanjutan. Panduan kalkulasi emisi Scope 1–3-nya sangat terstruktur." },
-                ].map((t, i) => (
-                  <div key={i} className="bg-emerald-50 dark:bg-emerald-900/10 rounded-xl p-4 border border-emerald-100 dark:border-border">
-                    <div className="flex gap-0.5 mb-2">
-                      {[...Array(5)].map((_, j) => <Star key={j} className="h-3 w-3 fill-amber-400 text-amber-400" />)}
+                {STATS_KEUANGAN.map((s, i) => {
+                  const SIcon = s.icon;
+                  return (
+                    <div key={i} className="bg-emerald-50 dark:bg-emerald-900/10 rounded-xl p-4 border border-emerald-100 dark:border-border" data-testid={`stat-keuangan-${i}`}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                          <SIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
+                      </div>
+                      <p className="text-xs text-gray-700 dark:text-muted-foreground leading-relaxed mb-1.5">{s.label}</p>
+                      <p className="text-[10px] text-gray-400">Sumber: {s.source}</p>
                     </div>
-                    <p className="text-xs text-gray-400 mb-0.5">Sebelum: <span className="text-red-400">{t.before}</span></p>
-                    <p className="text-xs text-gray-400 mb-2">Sesudah: <span className="text-green-600 font-semibold">{t.after}</span></p>
-                    <p className="text-xs text-gray-700 dark:text-muted-foreground italic mb-2 leading-relaxed">"{t.text}"</p>
-                    <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.role}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
+              <p className="text-[10px] text-gray-400 mt-3 leading-snug">Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.</p>
             </div>
           </div>
         </div>

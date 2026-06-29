@@ -23,6 +23,7 @@ PAS yang mengalir ke AIDA.
 ## Aturan wajib (jangan dilanggar)
 - **Why:** kredibilitas brand & kepatuhan harga.
 - JANGAN buat testimoni/angka pelanggan fiktif. Pakai bukti jujur: cakupan, dasar regulasi, dikurasi tim.
+- Larangan fabrikasi BUKAN cuma testimoni: hero "stats" sering memuat klaim hasil fiktif (mis. "95% Kepuasan Pasien", "100+ Klinik Pengguna", "25% Konversi Naik"). Ganti dengan kapabilitas platform yang benar (mis. "24/7", "0 Baris Kode", "3+ Channel", "∞ Chat Bersamaan") — nilai pendek karena dirender font besar. Angka makro industri taruh di band Riset (bersumber), JANGAN di hero tanpa sumber.
 - Harga: pakai sumber resmi (link checkout Scalev / `@/data/pricing`). Tidak ada free permanen; "gratis" = bonus berdurasi (mis. "1 bulan Builder gratis" di bundle).
 - FAQ akurasi AI wajib sertakan disclaimer verifikasi ke pihak berwenang (selaras etos FALLBACK).
 - Pertahankan: logika filter paket, dark-mode (`dark:*`), dan `data-testid` pada elemen interaktif/dinamis.
