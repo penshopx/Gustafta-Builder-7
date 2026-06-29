@@ -1,6 +1,9 @@
 import { Link } from "wouter";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { SharedHeader } from "@/components/shared-header";
@@ -8,10 +11,161 @@ import {
   Rocket, ArrowRight, Check, BookOpen, Wrench, Zap, Lightbulb, TrendingUp,
   MessageCircle, ChevronRight, ShieldCheck, Store, Bot, FileText,
   GraduationCap, Smartphone, Users, Building2, Briefcase, User,
+  Send, Loader2, Sparkles,
 } from "lucide-react";
+
+const DEMO_MAX_LANDING = 5;
+const GUSTAFTA_AGENT_ID = "1";
+type LandingMsg = { role: "user" | "assistant"; content: string };
+
+function GustaftaDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [messages, setMessages] = useState<LandingMsg[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [count, setCount] = useState(0);
+  const [sessionId] = useState(() => `landing_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setMessages([{
+        role: "assistant",
+        content: "Halo! Saya Gustafta — asisten Perakit AI Indonesia 👋\n\nAnda punya pengetahuan, pengalaman, atau keahlian tertentu? Gustafta bisa membantu mengubahnya menjadi AI yang bekerja untuk Anda — tanpa coding.\n\nCeritakan dulu — apa yang ingin Anda bangun atau tanyakan? 🚀",
+      }]);
+      setInput("");
+      setCount(0);
+      setLoading(false);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  const send = async () => {
+    if (!input.trim() || loading || count >= DEMO_MAX_LANDING) return;
+    const msg = input.trim();
+    setInput("");
+    setLoading(true);
+    setCount(c => c + 1);
+    setMessages(prev => [...prev, { role: "user", content: msg }]);
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId: GUSTAFTA_AGENT_ID, sessionId, role: "user", content: msg }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: "assistant", content: data.aiMessage?.content ?? "Maaf, tidak ada respons." }]);
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: "Maaf, terjadi gangguan. Silakan coba lagi." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const done = count >= DEMO_MAX_LANDING;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg p-0 overflow-hidden flex flex-col" style={{ maxHeight: "92vh" }}>
+        <div className="px-5 py-4 flex items-center gap-3 bg-gradient-to-r from-blue-600/10 to-violet-600/10 border-b">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
+            <Bot className="h-5 w-5 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <DialogTitle className="text-sm font-bold">Gustafta — Asisten Perakit AI</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">Tanya apa saja tentang platform, fitur, atau cara kerja Gustafta</DialogDescription>
+          </div>
+          <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[10px] shrink-0">GRATIS</Badge>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50 dark:bg-zinc-900" style={{ minHeight: 240, maxHeight: 380 }}>
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              {m.role === "assistant" && (
+                <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+                  <Bot className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+              )}
+              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                m.role === "user"
+                  ? "bg-blue-600 text-white rounded-tr-sm"
+                  : "bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-tl-sm shadow-sm"
+              }`}>
+                {m.content.replace(/\*\*(.*?)\*\*/g, "$1")}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+                <Bot className="h-3.5 w-3.5 text-blue-600" />
+              </div>
+              <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {done && (
+          <div className="px-4 py-3 bg-blue-50 dark:bg-blue-950/20 border-t border-blue-200 dark:border-blue-800">
+            <p className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">Sesi demo selesai ✅</p>
+            <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">Siap memulai perjalanan Perakit AI? Mulai dengan Starter Kit atau langsung coba Builder.</p>
+            <div className="flex gap-2">
+              <Link href="/persona" onClick={onClose} className="flex-1">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-9 text-sm font-semibold gap-2">
+                  <BookOpen className="h-4 w-4" /> Mulai Starter Kit
+                </Button>
+              </Link>
+              <Link href="/login" onClick={onClose} className="flex-1">
+                <Button variant="outline" className="w-full h-9 text-sm gap-2">
+                  <Wrench className="h-4 w-4" /> Coba Builder
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {!done && (
+          <div className="px-4 py-3 border-t bg-white dark:bg-zinc-900">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Sparkles className="h-3 w-3 text-blue-400" />
+              <span className="text-[10px] text-gray-400">{DEMO_MAX_LANDING - count} pertanyaan tersisa</span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
+                placeholder="Tanya apa saja tentang Gustafta..."
+                disabled={loading}
+                className="flex-1 text-sm h-10"
+                data-testid="input-landing-chat"
+              />
+              <Button onClick={send} disabled={loading || !input.trim()} size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-3"
+                data-testid="button-landing-send">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </div>
+            <span className="text-[10px] text-gray-400 mt-1.5 block">Tekan Enter untuk kirim</span>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
+  const [showDialog, setShowDialog] = useState(false);
   const builderUrl = isAuthenticated ? "/dashboard" : "/login";
   const waUrl = "https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20tahu%20lebih%20lanjut%20tentang%20Gustafta";
 
@@ -52,13 +206,16 @@ export default function Landing() {
                 Mulai dengan Starter Kit
               </Button>
             </Link>
-            <Link href={builderUrl}>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10 gap-2 px-6 h-12" data-testid="button-hero-builder">
-                <Wrench className="w-4 h-4" />
-                Coba GUSTAFTA Builder
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10 gap-2 px-6 h-12"
+              onClick={() => setShowDialog(true)}
+              data-testid="button-hero-dialog"
+            >
+              <Bot className="w-4 h-4" />
+              Tanya Gustafta Dulu
+            </Button>
           </div>
 
           <div className="flex flex-wrap gap-4 text-xs text-blue-200 justify-center">
@@ -449,7 +606,6 @@ export default function Landing() {
           <div className="rounded-2xl overflow-hidden border shadow-lg bg-black/5 dark:bg-white/5">
             <video
               src="/videos/gustafta-monolog-to-dialog.mp4"
-              poster="/images/g05.png"
               className="w-full"
               controls
               playsInline
@@ -464,7 +620,6 @@ export default function Landing() {
           <div className="mt-8 rounded-2xl overflow-hidden border shadow-lg bg-black/5 dark:bg-white/5">
             <video
               src="/videos/gustafta-business-opportunity.mp4"
-              poster="/images/g06.png"
               className="w-full"
               controls
               playsInline
@@ -666,6 +821,8 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      <GustaftaDialog open={showDialog} onClose={() => setShowDialog(false)} />
     </div>
   );
 }
