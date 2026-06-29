@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/hooks/use-auth";
 import { SharedHeader } from "@/components/shared-header";
@@ -11,32 +10,31 @@ import {
   Rocket, ArrowRight, Check, BookOpen, Wrench, Zap, Lightbulb, TrendingUp,
   MessageCircle, ChevronRight, ShieldCheck, Store, Bot, FileText,
   GraduationCap, Smartphone, Users, Building2, Briefcase, User,
-  Send, Loader2, Sparkles,
+  Send, Loader2, Sparkles, X, ChevronDown,
 } from "lucide-react";
 
 const DEMO_MAX_LANDING = 5;
 const GUSTAFTA_AGENT_ID = "1";
 type LandingMsg = { role: "user" | "assistant"; content: string };
 
-function GustaftaDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [messages, setMessages] = useState<LandingMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(0);
   const [sessionId] = useState(() => `landing_${Date.now()}_${Math.random().toString(36).slice(2)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
 
   useEffect(() => {
-    if (open) {
+    if (isOpen && !initialized.current) {
+      initialized.current = true;
       setMessages([{
         role: "assistant",
-        content: "Halo! Saya Gustafta — asisten Perakit AI Indonesia 👋\n\nAnda punya pengetahuan, pengalaman, atau keahlian tertentu? Gustafta bisa membantu mengubahnya menjadi AI yang bekerja untuk Anda — tanpa coding.\n\nCeritakan dulu — apa yang ingin Anda bangun atau tanyakan? 🚀",
+        content: "Halo! Saya Gustafta 👋\n\nAnda punya pengetahuan atau keahlian tertentu? Saya bisa bantu mengubahnya menjadi AI yang bekerja untuk Anda — tanpa coding.\n\nApa yang ingin Anda bangun?",
       }]);
-      setInput("");
-      setCount(0);
-      setLoading(false);
     }
-  }, [open]);
+  }, [isOpen]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,100 +64,113 @@ function GustaftaDialog({ open, onClose }: { open: boolean; onClose: () => void 
 
   const done = count >= DEMO_MAX_LANDING;
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg p-0 overflow-hidden flex flex-col" style={{ maxHeight: "92vh" }}>
-        <div className="px-5 py-4 flex items-center gap-3 bg-gradient-to-r from-blue-600/10 to-violet-600/10 border-b">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
-            <Bot className="h-5 w-5 text-blue-600" />
+    <div className="w-80 sm:w-96 rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden bg-card" style={{ height: 500 }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-blue-600">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+            <Bot className="w-4 h-4 text-white" />
           </div>
-          <div className="flex-1 min-w-0">
-            <DialogTitle className="text-sm font-bold">Gustafta — Asisten Perakit AI</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">Tanya apa saja tentang platform, fitur, atau cara kerja Gustafta</DialogDescription>
+          <div>
+            <p className="text-white font-semibold text-sm leading-none">Tanya Gustafta</p>
+            <p className="text-blue-100 text-[10px] mt-0.5 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+              Coba gratis — sesi mandiri
+            </p>
           </div>
-          <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[10px] shrink-0">GRATIS</Badge>
         </div>
+        <button
+          onClick={onClose}
+          className="w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          data-testid="button-gustafta-chat-close"
+        >
+          <ChevronDown className="w-4 h-4" />
+        </button>
+      </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50 dark:bg-zinc-900" style={{ minHeight: 240, maxHeight: 380 }}>
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              {m.role === "assistant" && (
-                <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
-                  <Bot className="h-3.5 w-3.5 text-blue-600" />
-                </div>
-              )}
-              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
-                m.role === "user"
-                  ? "bg-blue-600 text-white rounded-tr-sm"
-                  : "bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-tl-sm shadow-sm"
-              }`}>
-                {m.content.replace(/\*\*(.*?)\*\*/g, "$1")}
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50 dark:bg-zinc-900">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            {m.role === "assistant" && (
+              <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+                <Bot className="h-3 w-3 text-blue-600" />
               </div>
+            )}
+            <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap ${
+              m.role === "user"
+                ? "bg-blue-600 text-white rounded-tr-sm"
+                : "bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-tl-sm shadow-sm"
+            }`}>
+              {m.content.replace(/\*\*(.*?)\*\*/g, "$1")}
             </div>
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
-                <Bot className="h-3.5 w-3.5 text-blue-600" />
-              </div>
-              <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-              </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+              <Bot className="h-3 w-3 text-blue-600" />
             </div>
-          )}
-          <div ref={bottomRef} />
-        </div>
-
-        {done && (
-          <div className="px-4 py-3 bg-blue-50 dark:bg-blue-950/20 border-t border-blue-200 dark:border-blue-800">
-            <p className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">Sesi demo selesai ✅</p>
-            <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">Siap memulai perjalanan Perakit AI? Mulai dengan Starter Kit atau langsung coba Builder.</p>
-            <div className="flex gap-2">
-              <Link href="/persona" onClick={onClose} className="flex-1">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-9 text-sm font-semibold gap-2">
-                  <BookOpen className="h-4 w-4" /> Mulai Starter Kit
-                </Button>
-              </Link>
-              <Link href="/login" onClick={onClose} className="flex-1">
-                <Button variant="outline" className="w-full h-9 text-sm gap-2">
-                  <Wrench className="h-4 w-4" /> Coba Builder
-                </Button>
-              </Link>
+            <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm">
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
             </div>
           </div>
         )}
+        <div ref={bottomRef} />
+      </div>
 
-        {!done && (
-          <div className="px-4 py-3 border-t bg-white dark:bg-zinc-900">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles className="h-3 w-3 text-blue-400" />
-              <span className="text-[10px] text-gray-400">{DEMO_MAX_LANDING - count} pertanyaan tersisa</span>
-            </div>
-            <div className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
-                placeholder="Tanya apa saja tentang Gustafta..."
-                disabled={loading}
-                className="flex-1 text-sm h-10"
-                data-testid="input-landing-chat"
-              />
-              <Button onClick={send} disabled={loading || !input.trim()} size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-3"
-                data-testid="button-landing-send">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+      {/* Done state */}
+      {done && (
+        <div className="px-3 py-3 bg-blue-50 dark:bg-blue-950/20 border-t border-blue-200 dark:border-blue-800">
+          <p className="text-xs font-semibold text-blue-800 dark:text-blue-200 mb-1">Sesi selesai ✅ Lanjutkan perjalanan Anda:</p>
+          <div className="flex gap-2">
+            <Link href="/persona" onClick={onClose} className="flex-1">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs font-semibold gap-1">
+                <BookOpen className="h-3 w-3" /> Starter Kit
               </Button>
-            </div>
-            <span className="text-[10px] text-gray-400 mt-1.5 block">Tekan Enter untuk kirim</span>
+            </Link>
+            <Link href="/login" onClick={onClose} className="flex-1">
+              <Button variant="outline" className="w-full h-8 text-xs gap-1">
+                <Wrench className="h-3 w-3" /> Coba Builder
+              </Button>
+            </Link>
           </div>
-        )}
-      </DialogContent>
-    </Dialog>
+        </div>
+      )}
+
+      {/* Input */}
+      {!done && (
+        <div className="px-3 py-2.5 border-t bg-white dark:bg-zinc-900">
+          <div className="flex items-center gap-1 mb-1.5">
+            <Sparkles className="h-2.5 w-2.5 text-blue-400" />
+            <span className="text-[10px] text-gray-400">{DEMO_MAX_LANDING - count} pertanyaan gratis tersisa</span>
+          </div>
+          <div className="flex gap-1.5">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
+              placeholder="Ketik pertanyaan Anda..."
+              disabled={loading}
+              className="flex-1 text-xs h-8"
+              data-testid="input-gustafta-chat"
+            />
+            <Button onClick={send} disabled={loading || !input.trim()} size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-2.5"
+              data-testid="button-gustafta-send">
+              {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -822,7 +833,29 @@ export default function Landing() {
         </div>
       </footer>
 
-      <GustaftaDialog open={showDialog} onClose={() => setShowDialog(false)} />
+      {/* ── FLOATING GUSTAFTA CHAT (kiri bawah, mirip Help Desk di kanan) ── */}
+      <div className="fixed bottom-6 left-6 z-40 flex flex-col items-start gap-3">
+        <GustaftaFloatingChat isOpen={showDialog} onClose={() => setShowDialog(false)} />
+        <button
+          onClick={() => setShowDialog(prev => !prev)}
+          className="flex items-center gap-2 px-4 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 relative bg-blue-600 hover:bg-blue-700 text-white"
+          data-testid="button-gustafta-float-toggle"
+          title="Tanya Gustafta"
+        >
+          {showDialog ? (
+            <>
+              <X className="w-5 h-5" />
+              <span className="font-semibold text-sm">Tutup</span>
+            </>
+          ) : (
+            <>
+              <Bot className="w-5 h-5" />
+              <span className="font-semibold text-sm">Tanya Gustafta</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 border-2 border-white text-background text-[9px] flex items-center justify-center font-bold">✨</span>
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
