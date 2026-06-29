@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Bot, Smartphone, ShoppingCart, CheckCircle2,
-  ArrowRight, Star, Users, ChevronRight,
+  ArrowRight, Star, Users, ChevronRight, Send, Lock, Sparkles,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -55,6 +55,10 @@ interface FeaturedResponse {
 
 interface BuyFormData { name: string; email: string; phone: string; }
 
+interface DemoMessage { role: "user" | "assistant"; content: string; }
+
+const DEMO_MAX = 3;
+
 function formatPrice(price: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(price);
 }
@@ -66,7 +70,213 @@ function getChatbotTier(n: number = 2): { label: string; className: string } {
   return       { label: "Basic",               className: "bg-gray-100 text-gray-600 border-gray-200" };
 }
 
-function FeaturedCard({ agent, onBuy }: { agent: AgentProduct; onBuy: (a: AgentProduct) => void }) {
+function DemoModal({
+  agent,
+  open,
+  onClose,
+  onBuy,
+}: {
+  agent: AgentProduct | null;
+  open: boolean;
+  onClose: () => void;
+  onBuy: (a: AgentProduct) => void;
+}) {
+  const [messages, setMessages] = useState<DemoMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [userCount, setUserCount] = useState(0);
+  const [sessionId] = useState(() => `demo_store_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open && agent) {
+      setMessages([{
+        role: "assistant",
+        content: `Halo! Saya **${agent.name}**. Coba tanyakan sesuatu — misalnya topik yang relevan dengan keahlian saya. (Demo gratis: ${DEMO_MAX} pertanyaan)`,
+      }]);
+      setInput("");
+      setUserCount(0);
+      setLoading(false);
+    }
+  }, [open, agent]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  const sendMessage = async () => {
+    if (!agent?.agentId || !input.trim() || loading || userCount >= DEMO_MAX) return;
+    const userMsg = input.trim();
+    setInput("");
+    setLoading(true);
+    setUserCount(c => c + 1);
+    setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: String(agent.agentId),
+          sessionId,
+          role: "user",
+          content: userMsg,
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal menghubungi AI");
+      const data = await res.json();
+      const reply: string = data.aiMessage?.content ?? "Maaf, tidak ada respons.";
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: "Maaf, terjadi gangguan. Silakan coba lagi." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const demoUsed = userCount >= DEMO_MAX;
+
+  if (!agent) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg p-0 overflow-hidden flex flex-col" style={{ maxHeight: "90vh" }}>
+        {/* Header */}
+        <div
+          className="px-5 py-4 flex items-center gap-3"
+          style={{ background: `linear-gradient(135deg, ${agent.color}18, ${agent.color}08)`, borderBottom: "1px solid #e5e7eb" }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl shrink-0"
+            style={{ background: `${agent.color}20`, border: `1px solid ${agent.color}40` }}
+          >
+            {agent.emoji}
+          </div>
+          <div className="flex-1 min-w-0">
+            <DialogTitle className="text-sm font-bold text-gray-900 truncate">{agent.name}</DialogTitle>
+            <DialogDescription className="text-xs text-gray-500 truncate">{agent.tagline || "Demo gratis — coba sebelum beli"}</DialogDescription>
+          </div>
+          <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-[10px] shrink-0">
+            DEMO
+          </Badge>
+        </div>
+
+        {/* Chat area */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50" style={{ minHeight: 240, maxHeight: 380 }}>
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              {m.role === "assistant" && (
+                <div
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-sm mr-2 shrink-0 mt-0.5"
+                  style={{ background: `${agent.color}20` }}
+                >
+                  {agent.emoji}
+                </div>
+              )}
+              <div
+                className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                  m.role === "user"
+                    ? "bg-violet-600 text-white rounded-tr-sm"
+                    : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm shadow-sm"
+                }`}
+              >
+                {m.content.replace(/\*\*(.*?)\*\*/g, "$1")}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center text-sm mr-2 shrink-0 mt-0.5"
+                style={{ background: `${agent.color}20` }}>
+                {agent.emoji}
+              </div>
+              <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Demo limit banner */}
+        {demoUsed && (
+          <div className="px-4 py-3 bg-amber-50 border-t border-amber-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Lock className="h-4 w-4 text-amber-600 shrink-0" />
+              <p className="text-sm font-semibold text-amber-800">Demo selesai ({DEMO_MAX}/{DEMO_MAX} pertanyaan)</p>
+            </div>
+            <p className="text-xs text-amber-700 mb-3">
+              Suka dengan kemampuan AI ini? Dapatkan akses penuh — tanya tanpa batas, integrasi WhatsApp, dan lebih banyak fitur.
+            </p>
+            <Button
+              onClick={() => { onClose(); onBuy(agent); }}
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white h-10 font-semibold text-sm gap-2"
+              data-testid="button-demo-buy-cta"
+            >
+              <ShoppingCart className="h-4 w-4" />Beli Akses Penuh — {formatPrice(agent.price)}
+            </Button>
+          </div>
+        )}
+
+        {/* Input area */}
+        {!demoUsed && (
+          <div className="px-4 py-3 border-t border-gray-200 bg-white">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Sparkles className="h-3 w-3 text-violet-400" />
+              <span className="text-[10px] text-gray-400">
+                Demo gratis — {DEMO_MAX - userCount} pertanyaan tersisa
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                placeholder="Ketik pertanyaan Anda..."
+                disabled={loading || demoUsed}
+                className="flex-1 text-sm h-10"
+                data-testid="input-demo-message"
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={loading || !input.trim() || demoUsed}
+                size="sm"
+                className="bg-violet-600 hover:bg-violet-700 text-white h-10 px-3"
+                data-testid="button-demo-send"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </div>
+            <div className="mt-2 flex justify-between items-center">
+              <span className="text-[10px] text-gray-400">Tekan Enter untuk kirim</span>
+              <button
+                onClick={() => { onClose(); onBuy(agent); }}
+                className="text-[10px] text-violet-600 hover:text-violet-800 font-medium underline underline-offset-2"
+                data-testid="button-demo-buy-inline"
+              >
+                Beli sekarang →
+              </button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FeaturedCard({
+  agent,
+  onBuy,
+  onDemo,
+}: {
+  agent: AgentProduct;
+  onBuy: (a: AgentProduct) => void;
+  onDemo: (a: AgentProduct) => void;
+}) {
   const tier = getChatbotTier(agent.agentCount);
   const catLabel = CATEGORY_LABELS[agent.category] || agent.category;
   const detailUrl = agent.agentId ? `/product/${agent.agentId}` : null;
@@ -108,21 +318,34 @@ function FeaturedCard({ agent, onBuy }: { agent: AgentProduct; onBuy: (a: AgentP
             </div>
           )}
 
-          <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-            <div className="flex flex-col">
-              {agent.originalPrice && agent.originalPrice > agent.price && (
-                <span className="text-xs text-gray-400 line-through leading-none mb-0.5">{formatPrice(agent.originalPrice)}</span>
-              )}
-              <span className="font-bold text-gray-900">{formatPrice(agent.price)}</span>
+          <div className="mt-auto pt-3 border-t border-gray-100 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col">
+                {agent.originalPrice && agent.originalPrice > agent.price && (
+                  <span className="text-xs text-gray-400 line-through leading-none mb-0.5">{formatPrice(agent.originalPrice)}</span>
+                )}
+                <span className="font-bold text-gray-900">{formatPrice(agent.price)}</span>
+              </div>
+              <Button
+                size="sm"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBuy(agent); }}
+                className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3"
+                data-testid={`button-buy-featured-${agent.id}`}
+              >
+                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Beli
+              </Button>
             </div>
-            <Button
-              size="sm"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBuy(agent); }}
-              className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3"
-              data-testid={`button-buy-featured-${agent.id}`}
-            >
-              <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Beli
-            </Button>
+            {agent.agentId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDemo(agent); }}
+                className="w-full text-xs h-7 border-violet-200 text-violet-600 hover:bg-violet-50 hover:text-violet-700 gap-1.5"
+                data-testid={`button-demo-featured-${agent.id}`}
+              >
+                <Sparkles className="h-3 w-3" />Coba Demo Gratis
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -164,6 +387,8 @@ export default function StoreFeatured() {
   const [selectedAgent, setSelectedAgent] = useState<AgentProduct | null>(null);
   const [buyForm, setBuyForm] = useState<BuyFormData>({ name: "", email: "", phone: "" });
   const [showBuyDialog, setShowBuyDialog] = useState(false);
+  const [demoAgent, setDemoAgent] = useState<AgentProduct | null>(null);
+  const [showDemoDialog, setShowDemoDialog] = useState(false);
 
   const { data: featured, isLoading } = useQuery<FeaturedResponse>({
     queryKey: ["/api/store/featured"],
@@ -191,6 +416,11 @@ export default function StoreFeatured() {
     setSelectedAgent(agent);
     setBuyForm({ name: "", email: "", phone: "" });
     setShowBuyDialog(true);
+  };
+
+  const handleDemo = (agent: AgentProduct) => {
+    setDemoAgent(agent);
+    setShowDemoDialog(true);
   };
 
   const handleSubmitOrder = () => {
@@ -354,7 +584,7 @@ export default function StoreFeatured() {
                 <Badge className="bg-violet-100 text-violet-700 border-violet-200 text-[10px] font-bold">RESMI</Badge>
               </div>
               <p className="text-sm text-gray-500 ml-9">
-                Dibuat dan dikurasi langsung oleh tim Gustafta — kualitas terjamin.
+                Dibuat dan dikurasi langsung oleh tim Gustafta — kualitas terjamin. <span className="text-violet-600 font-medium">Coba demo gratis sebelum beli.</span>
               </p>
             </div>
             <Link href="/store/katalog">
@@ -371,7 +601,9 @@ export default function StoreFeatured() {
           {isLoading ? <SkeletonGrid /> : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {gustafta.length > 0
-                ? gustafta.map(agent => <FeaturedCard key={String(agent.id)} agent={agent} onBuy={handleBuy} />)
+                ? gustafta.map(agent => (
+                    <FeaturedCard key={String(agent.id)} agent={agent} onBuy={handleBuy} onDemo={handleDemo} />
+                  ))
                 : <GroupEmptyState isGustafta={true} />}
             </div>
           )}
@@ -406,7 +638,9 @@ export default function StoreFeatured() {
           {isLoading ? <SkeletonGrid /> : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {mitra.length > 0
-                ? mitra.map(agent => <FeaturedCard key={String(agent.id)} agent={agent} onBuy={handleBuy} />)
+                ? mitra.map(agent => (
+                    <FeaturedCard key={String(agent.id)} agent={agent} onBuy={handleBuy} onDemo={handleDemo} />
+                  ))
                 : <GroupEmptyState isGustafta={false} />}
             </div>
           )}
@@ -438,6 +672,14 @@ export default function StoreFeatured() {
         </div>
         <p>© 2026 Gustafta. AI Platform Konstruksi Indonesia.</p>
       </footer>
+
+      {/* Demo Dialog */}
+      <DemoModal
+        agent={demoAgent}
+        open={showDemoDialog}
+        onClose={() => setShowDemoDialog(false)}
+        onBuy={(a) => { setShowDemoDialog(false); handleBuy(a); }}
+      />
 
       {/* Buy Dialog */}
       <Dialog open={showBuyDialog} onOpenChange={(o) => !o && setShowBuyDialog(false)}>
