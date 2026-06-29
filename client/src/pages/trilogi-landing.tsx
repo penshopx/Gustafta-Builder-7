@@ -17,6 +17,28 @@ const SCALEV_BUNDLE = "https://dialog.gustafta.my.id/c/checkout?variant_ids=5332
 const SCALEV_BUKU1  = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533205&qty=1";
 const WA_URL        = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20mau%20tanya%20tentang%20Trilogi%20Dari%20Monolog%20ke%20Dialog";
 
+// Data riset/lembaga resmi (konteks umum, bukan janji hasil produk). Diverifikasi via sumber publik.
+const STATS_TRILOGI = [
+  {
+    icon: Briefcase,
+    value: "±49%",
+    label: "Estimasi penghasilan pensiun rata-rata pekerja Indonesia dibanding gaji terakhir — turun lebih dari separuh.",
+    source: "OECD, Pensions at a Glance Asia/Pacific 2024",
+  },
+  {
+    icon: BookOpen,
+    value: "65,43%",
+    label: "Indeks literasi keuangan nasional 2024 — sebagian besar penduduk belum sepenuhnya siap kelola keuangan jangka panjang.",
+    source: "OJK & BPS, SNLIK 2024",
+  },
+  {
+    icon: Brain,
+    value: "+14%",
+    label: "Rata-rata kenaikan produktivitas pekerja yang dibantu AI generatif.",
+    source: "Brynjolfsson, Li & Raymond, NBER w31161 / QJE, 2023",
+  },
+];
+
 export default function TrilogiLanding() {
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -254,78 +276,44 @@ export default function TrilogiLanding() {
       </section>
 
       {/* ══════════════════════════════════════════════
-          SOCIAL PROOF — Testimoni Relatable + B2B
+          RISET / DATA — Konteks industri & lembaga resmi (tanpa testimoni)
       ══════════════════════════════════════════════ */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2 text-center">Kisah Nyata</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10">
-            Bukan Teori. Ini Kisah Nyata dari Orang Seperti Anda.
+          <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2 text-center">Menurut Data</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4">
+            Kenapa Ini Mendesak — Bukan Sekadar Menakut-nakuti
           </h2>
+          <p className="text-center text-gray-500 text-sm max-w-2xl mx-auto mb-10">
+            Data lembaga resmi menunjukkan betapa rapuhnya posisi keuangan banyak pekerja saat penghasilan
+            utama berhenti — dan betapa besar daya ungkit yang kini dibuka oleh AI.
+          </p>
 
-          {/* Relatable testimonials */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {[
-              {
-                quote: "Dulu saya panik tiap denger rumor restructuring. Tapi setelah baca Buku I, saya rakit 'Asisten Admin AI' dari pengalaman 20 tahun saya di kantor. Sekarang saya punya 50 klien UKM subscription Rp 100rb/bulan. Side income Rp 5 juta/bulan. Kalau di-PHK pun, saya nggak panik lagi.",
-                name: "Bu Sari", age: "48 tahun", role: "Staf Admin, Bekasi",
-                bg: "bg-orange-50 border-orange-200", initials: "BS",
-              },
-              {
-                quote: "Saya kira masa tua bakal jadi beban anak. Uang pensiun cuma cukup 2 tahun. Tapi setelah coba metode ini, saya rakit 'Tutor AI untuk Siswa SMA' dari pengalaman 30 tahun mengajar. Sekarang ada 200 subscriber, Rp 10 juta/bulan. Pensiun bukan lagi momok, tapi berkah.",
-                name: "Pak Hartono", age: "62 tahun", role: "Pensiunan Guru, Surabaya",
-                bg: "bg-green-50 border-green-200", initials: "PH",
-              },
-            ].map((t, i) => (
-              <div key={i} className={`p-6 rounded-2xl border ${t.bg}`}>
-                <div className="text-4xl text-gray-200 font-serif leading-none mb-2">"</div>
-                <p className="text-gray-700 italic text-sm leading-relaxed mb-5">{t.quote}</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                    {t.initials}
+          <div className="grid sm:grid-cols-3 gap-5 mb-6">
+            {STATS_TRILOGI.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 text-center" data-testid={`stat-trilogi-${i}`}>
+                  <div className="flex justify-center mb-3">
+                    <div className="p-3 bg-white rounded-xl border border-gray-100"><SIcon className="h-6 w-6 text-blue-600" /></div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.age} · {t.role}</p>
-                  </div>
-                  <div className="ml-auto flex gap-0.5">
-                    {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
-                  </div>
+                  <div className="text-3xl font-extrabold text-gray-900 mb-2">{s.value}</div>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">{s.label}</p>
+                  <p className="text-[10px] text-gray-400 leading-snug">Sumber: {s.source}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-
-          {/* B2B testimonials */}
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              { name: "Budi Santoso", role: "Direktur Teknik, PT Bangun Nusa Konstruksi", avatar: "BS", text: "TenderaClaw menghemat 2–3 hari kerja per tender. Win rate naik signifikan dalam 3 bulan.", tag: "Kontraktor BUJK" },
-              { name: "Retno Ayu", role: "Kepala Divisi Sertifikasi, LSP Konstruksi", avatar: "RA", text: "Simulasi asesmen SKKNI via AI sangat membantu peserta. Kelulusan jauh lebih konsisten.", tag: "Sertifikasi LSP" },
-              { name: "Agus Prasetyo", role: "CEO, PT Graha Mandiri Consultant", avatar: "AP", text: "SCORECARD Win Probability dari BrainClaw — ROI-nya jelas dan terukur.", tag: "Konsultan MK" },
-            ].map((t) => (
-              <div key={t.name} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                <p className="text-sm text-gray-600 italic leading-relaxed mb-4">"{t.text}"</p>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">{t.avatar}</div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold truncate">{t.name}</p>
-                    <p className="text-[10px] text-gray-500 truncate">{t.role}</p>
-                  </div>
-                  <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 flex-shrink-0">{t.tag}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="text-center text-[11px] text-gray-400 max-w-2xl mx-auto">
+            Angka di atas adalah temuan riset/lembaga resmi sebagai konteks umum, bukan janji hasil spesifik dari produk ini.
+          </p>
 
           {/* Trust stats */}
           <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon: Users, value: "1350+", label: "Agent AI Spesialis" },
               { icon: Target, value: "131", label: "Hub Orchestrator" },
-              { icon: Zap, value: "45+", label: "MultiClaw AI Tools" },
+              { icon: Zap, value: "80+", label: "MultiClaw AI Tools" },
               { icon: BadgeCheck, value: "24/7", label: "AI Selalu Aktif" },
             ].map((s) => {
               const SIcon = s.icon;

@@ -48,7 +48,7 @@ Gustafta is an AI chatbot builder platform that enables users to create, configu
 - **Chatbot Templates & Gustafta Store**: Public marketplace with payment integration.
 - **Gustafta Apps Feature Access System**: Plan-gated. Tiers: `free`(0) `starter`(1) `profesional`(2) `bisnis`(3) `enterprise`(4). Source: `shared/feature-plans.ts`. Hook: `use-feature-access.ts`. Gate: `feature-gate.tsx`. Admin activates via `POST /api/subscriptions/activate/:id`.
 
-## MultiClaw Suite (45 halaman)
+## MultiClaw Suite (80 halaman)
 Semua pakai `PremiumPageGuard` feature="advanced_ai_tools" requiredPlan="profesional". SSE streaming, sub-agent panel dots, legend strip, 6 sample prompts.
 
 Endpoint: `GET /api/{nama}-claw/orchestrator` → `{ id, name, tagline, avatar }`. Semua route pakai `getAgentBySlug` sebagai primary lookup — JANGAN ganti ke hardcoded ID.

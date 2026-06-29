@@ -11,6 +11,28 @@ import {
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20mau%20tanya%20tentang%20Starter%20Kit";
 const CHECKOUT_URL = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533205&qty=1";
 
+// Data riset/lembaga (konteks umum, bukan janji hasil produk). Diverifikasi via sumber publik.
+const STATS_STARTER = [
+  {
+    icon: Sparkles,
+    value: "92%",
+    label: "Pekerja pengetahuan di Indonesia sudah memakai AI generatif di tempat kerja — di atas rata-rata global 75%.",
+    source: "Microsoft & LinkedIn, Work Trend Index 2024",
+  },
+  {
+    icon: TrendingUp,
+    value: "65%",
+    label: "Organisasi global kini rutin memakai AI generatif — hampir dua kali lipat hanya dalam 10 bulan.",
+    source: "McKinsey, The State of AI 2024",
+  },
+  {
+    icon: Zap,
+    value: "70%",
+    label: "Aplikasi baru diperkirakan dibuat dengan teknologi no-code/low-code pada 2025 — tanpa perlu coding.",
+    source: "Gartner",
+  },
+];
+
 export default function StarterKitPage() {
   const { isAuthenticated } = useAuth();
   const builderUrl = isAuthenticated ? "/dashboard" : "/login";
@@ -40,7 +62,7 @@ export default function StarterKitPage() {
             langkah yang Anda butuhkan untuk memulai.
           </p>
           <div className="flex items-center justify-center gap-6 mb-8 text-white">
-            {[["2.400+", "Profesional"], ["4.8/5", "Rating"], ["Rp 245rb", "Sekali Bayar"]].map(([num, label]) => (
+            {[["Rp 245rb", "Sekali Bayar"], ["7 Hari", "Garansi Uang Kembali"], ["2 Minggu", "ke Chatbot Pertama"]].map(([num, label]) => (
               <div key={label} className="text-center">
                 <div className="text-2xl md:text-3xl font-extrabold">{num}</div>
                 <div className="text-xs text-sky-200">{label}</div>
@@ -133,7 +155,7 @@ export default function StarterKitPage() {
                 title: "Akses Komunitas Perakit AI",
                 desc: "Bergabung di grup eksklusif pembeli Starter Kit — berbagi pengalaman, tanya jawab langsung dengan tim, dan mendapat update materi baru.",
                 badge: "Komunitas",
-                highlight: "340+ anggota aktif sudah bergabung",
+                highlight: "Tanya jawab langsung dengan tim + update materi baru",
               },
             ].map((item, i) => (
               <div key={i} className="bg-white dark:bg-card rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-border">
@@ -148,11 +170,6 @@ export default function StarterKitPage() {
                     <p className="text-xs text-sky-600 dark:text-sky-400 font-medium flex items-center gap-1">
                       <TrendingUp className="h-3 w-3" />{item.highlight}
                     </p>
-                    {item.link && (
-                      <Link href={item.link}>
-                        <span className="text-xs text-indigo-600 dark:text-indigo-400 underline cursor-pointer font-medium">Baca Framework →</span>
-                      </Link>
-                    )}
                   </div>
                 </div>
               </div>
@@ -164,49 +181,32 @@ export default function StarterKitPage() {
       {/* ── D: DESIRE — Transformasi & Social Proof ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-sky-600 uppercase tracking-widest text-center mb-2">Bukti Nyata</p>
+          <p className="text-xs font-bold text-sky-600 uppercase tracking-widest text-center mb-2">Menurut Data</p>
           <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
-            Dari Ragu ke Chatbot Pertama dalam 2 Minggu
+            Gelombang AI Sudah Datang — Jangan Sampai Tertinggal
           </h2>
           <p className="text-center text-gray-500 dark:text-muted-foreground text-sm mb-10 max-w-lg mx-auto">
-            Mereka bukan programmer. Bukan orang teknis. Tapi mereka berhasil.
+            Bukan sekadar tren. Data lembaga riset global menunjukkan adopsi AI sedang meledak — dan kini bisa
+            dimulai tanpa kemampuan teknis sama sekali.
           </p>
-          <div className="grid md:grid-cols-3 gap-5 mb-10">
-            {[
-              {
-                name: "Hendra S.",
-                role: "Pengawas Konstruksi, Surabaya",
-                before: "Menghabiskan 2 jam/hari menjawab pertanyaan regulasi K3 yang sama",
-                after: "Chatbot-nya kini menjawab 90% pertanyaan tim lapangan secara otomatis",
-                text: "Dalam 2 minggu chatbot saya sudah bisa dipakai klien. Saya kira bakal susah ternyata tidak.",
-              },
-              {
-                name: "Yuli A.",
-                role: "Konsultan HR Freelance, Jakarta",
-                before: "Kehilangan klien karena tidak bisa respond cepat di luar jam kerja",
-                after: "Chatbot pre-screening klien 24/7, omset naik 40% dalam 3 bulan",
-                text: "Prompt pack-nya langsung kepake. Saya custom sedikit, jadilah chatbot yang bisa jawab otomatis.",
-              },
-              {
-                name: "Baskoro W.",
-                role: "Trainer Independen, Bandung",
-                before: "Peserta pelatihan tidak punya tempat bertanya di luar sesi",
-                after: "Tingkat penyelesaian modul naik dari 60% ke 88% setelah pakai chatbot tutor",
-                text: "Harga segitu worth it banget. Terstruktur dan yang paling penting bisa dipraktikkan langsung.",
-              },
-            ].map((t, i) => (
-              <div key={i} className="bg-sky-50 dark:bg-muted/30 rounded-2xl p-5 border border-sky-100 dark:border-border">
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
+          <div className="grid md:grid-cols-3 gap-5 mb-4">
+            {STATS_STARTER.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="bg-sky-50 dark:bg-muted/30 rounded-2xl p-6 border border-sky-100 dark:border-border text-center" data-testid={`stat-starter-${i}`}>
+                  <div className="flex justify-center mb-3">
+                    <div className="p-3 bg-white dark:bg-card rounded-xl border border-sky-100 dark:border-border"><SIcon className="h-6 w-6 text-sky-600" /></div>
+                  </div>
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">{s.value}</div>
+                  <p className="text-sm text-gray-600 dark:text-muted-foreground leading-relaxed mb-3">{s.label}</p>
+                  <p className="text-[10px] text-gray-400 leading-snug">Sumber: {s.source}</p>
                 </div>
-                <p className="text-xs text-gray-400 mb-1">Sebelum: <span className="text-red-400">{t.before}</span></p>
-                <p className="text-xs text-gray-400 mb-3">Sesudah: <span className="text-green-600 dark:text-green-400 font-semibold">{t.after}</span></p>
-                <p className="text-sm text-gray-700 dark:text-muted-foreground italic mb-4">"{t.text}"</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">{t.name}</p>
-                <p className="text-xs text-gray-500">{t.role}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
+          <p className="text-center text-[11px] text-gray-400 max-w-2xl mx-auto mb-10">
+            Angka di atas adalah temuan riset/lembaga sebagai konteks umum, bukan janji hasil spesifik dari produk ini.
+          </p>
 
           {/* Untuk siapa */}
           <div className="bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-muted/20 dark:to-muted/30 rounded-2xl p-8">
@@ -356,7 +356,8 @@ export default function StarterKitPage() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Setiap Hari yang Ditunda adalah Klien yang Tidak Terlayani</h2>
           <p className="text-sky-100 mb-3 text-base leading-relaxed">
-            2.400+ profesional Indonesia sudah memulai. Kapan giliran Anda?
+            92% pekerja pengetahuan di Indonesia sudah memakai AI di tempat kerja
+            <span className="text-sky-300"> (Microsoft/LinkedIn, 2024)</span>. Kapan giliran Anda?
           </p>
           <p className="text-sky-200 mb-8 text-sm">Starter Kit ini adalah langkah pertama yang paling masuk akal — sebelum investasi lebih besar.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

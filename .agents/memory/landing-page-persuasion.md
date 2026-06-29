@@ -26,3 +26,11 @@ PAS yang mengalir ke AIDA.
 - Harga: pakai sumber resmi (link checkout Scalev / `@/data/pricing`). Tidak ada free permanen; "gratis" = bonus berdurasi (mis. "1 bulan Builder gratis" di bundle).
 - FAQ akurasi AI wajib sertakan disclaimer verifikasi ke pihak berwenang (selaras etos FALLBACK).
 - Pertahankan: logika filter paket, dark-mode (`dark:*`), dan `data-testid` pada elemen interaktif/dinamis.
+
+## Band Riset "Menurut Data" (pengganti testimoni)
+Karena testimoni dilarang, tiap landing pakai band riset domain-spesifik sebagai bukti.
+- Posisi: setelah Agitate/Problem, sebelum Solusi (alur PAS tetap terjaga).
+- Isi: Badge "Menurut Data" → grid 3 kartu stat (nilai besar + label + "Sumber: …") → 1 baris disclaimer **"Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini."**
+- Tiap angka WAJIB diverifikasi via webSearch dulu; sumber sespesifik mungkin (lembaga + tahun/laporan), bukan "Gartner" saja.
+- Pola const: `const STATS_{PAGE} = [{icon, value, label, source}]`; render `const SIcon = s.icon` lalu `<SIcon/>`; `data-testid={`stat-{page}-${i}`}`; warna ikuti tema halaman.
+- **Why:** kredibilitas tanpa testimoni palsu; angka tervalidasi mencegah klaim fiktif yang melanggar aturan brand.

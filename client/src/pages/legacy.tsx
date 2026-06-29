@@ -11,6 +11,28 @@ import {
 
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20tahu%20tentang%20Gustafta%20Legacy%20%E2%80%94%20membangun%20AI%20Twin";
 
+// Data riset/lembaga (konteks industri, bukan klaim hasil produk). Diverifikasi via sumber publik.
+const STATS_LEGACY = [
+  {
+    icon: Briefcase,
+    value: "US$31,5 Miliar",
+    label: "Perusahaan Fortune 500 diperkirakan kehilangan ~US$31,5 miliar per tahun karena pengetahuan tidak dibagikan dan tidak terwariskan.",
+    source: "IDC",
+  },
+  {
+    icon: BookOpen,
+    value: "US$47 Juta",
+    label: "Rata-rata perusahaan besar kehilangan ~US$47 juta produktivitas per tahun akibat berbagi pengetahuan yang tidak efisien.",
+    source: "Panopto & YouGov, 2018",
+  },
+  {
+    icon: Users,
+    value: "±20%",
+    label: "Porsi penduduk Indonesia berusia 60+ diproyeksikan mencapai sekitar 20% (±63 juta orang) pada 2045 — gelombang pensiun para ahli senior.",
+    source: "BPS & Bappenas",
+  },
+];
+
 export default function LegacyPage() {
   const { isAuthenticated } = useAuth();
   const builderUrl = isAuthenticated ? "/dashboard" : "/login";
@@ -88,6 +110,44 @@ export default function LegacyPage() {
           </div>
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8 italic">
             "Ini bukan sekadar kehilangan data. Ini kehilangan kearifan. Dan ini terjadi setiap hari."
+          </p>
+        </div>
+      </section>
+
+      {/* ── RISET ── */}
+      <section className="py-16 px-4 bg-gradient-to-b from-gray-50 to-white dark:from-muted/20 dark:to-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <Badge className="mb-4 bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-800">
+              Menurut Data
+            </Badge>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              Pengetahuan yang Hilang Itu Mahal — dan Bisa Dicegah
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+              Data lembaga riset menunjukkan betapa besar nilai yang lenyap ketika kearifan tidak
+              terdokumentasi — terlebih saat gelombang pensiun semakin dekat.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4 mb-4">
+            {STATS_LEGACY.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="rounded-2xl border bg-white dark:bg-card p-6 text-center" data-testid={`stat-legacy-${i}`}>
+                  <div className="flex justify-center mb-3">
+                    <div className="w-11 h-11 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
+                      <SIcon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">{s.value}</div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{s.label}</p>
+                  <p className="text-[10px] text-gray-400 leading-snug">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-[11px] text-gray-400 max-w-2xl mx-auto">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
           </p>
         </div>
       </section>

@@ -11,6 +11,28 @@ import {
 
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20tertarik%20jadi%20Mitra%20Gustafta%20Builder";
 
+// Data riset/lembaga (konteks industri, bukan klaim hasil produk). Diverifikasi via sumber publik.
+const STATS_MITRA = [
+  {
+    icon: TrendingUp,
+    value: "US$480 Miliar",
+    label: "Ekonomi kreator global diperkirakan tumbuh dari ~US$250 miliar (2023) menjadi ~US$480 miliar pada 2027 — hampir dua kali lipat dalam 5 tahun.",
+    source: "Goldman Sachs, 2023",
+  },
+  {
+    icon: Globe,
+    value: "US$90 Miliar",
+    label: "Nilai ekonomi digital Indonesia (GMV) menembus ~US$90 miliar pada 2024 dan terus tumbuh dua digit per tahun.",
+    source: "Google, Temasek & Bain — e-Conomy SEA 2024",
+  },
+  {
+    icon: Award,
+    value: "US$700 Miliar",
+    label: "Pasar e-learning global diproyeksikan menembus ratusan miliar dolar (≈US$700 miliar) pada 2030 — peluang besar memonetisasi keahlian.",
+    source: "The Business Research Company",
+  },
+];
+
 export default function MitraPage() {
   const { isAuthenticated } = useAuth();
   const builderUrl = isAuthenticated ? "/dashboard" : "/login";
@@ -86,6 +108,44 @@ export default function MitraPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── RISET ── */}
+      <section className="py-16 px-4 bg-gradient-to-b from-gray-50 to-white dark:from-muted/20 dark:to-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <Badge className="mb-4 bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800">
+              Menurut Data
+            </Badge>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              Memonetisasi Keahlian Bukan Lagi Tren — Ini Gelombang Besar
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+              Data lembaga riset global menunjukkan ekonomi kreator dan ekonomi digital tumbuh pesat —
+              momentum tepat untuk mengubah pengetahuan menjadi penghasilan.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4 mb-4">
+            {STATS_MITRA.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="rounded-2xl border bg-white dark:bg-card p-6 text-center" data-testid={`stat-mitra-${i}`}>
+                  <div className="flex justify-center mb-3">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                      <SIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">{s.value}</div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{s.label}</p>
+                  <p className="text-[10px] text-gray-400 leading-snug">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-[11px] text-gray-400 max-w-2xl mx-auto">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
+          </p>
         </div>
       </section>
 

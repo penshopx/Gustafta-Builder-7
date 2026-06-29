@@ -4,12 +4,34 @@ import { Badge } from "@/components/ui/badge";
 import { SharedHeader } from "@/components/shared-header";
 import { useAuth } from "@/hooks/use-auth";
 import {
-  Check, ArrowRight, MessageCircle, Sparkles, Map,
+  Check, ArrowRight, MessageCircle, Sparkles, Map as MapIcon,
   Target, Users, BookOpen, TrendingUp, Calendar,
   DollarSign, Brain, Zap, ChevronRight, FileText,
 } from "lucide-react";
 
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20tahu%20tentang%20Blueprint%20Ekosistem%20AI";
+
+// Data riset/lembaga (konteks industri, bukan klaim hasil produk). Diverifikasi via sumber publik.
+const STATS_BLUEPRINT = [
+  {
+    icon: Brain,
+    value: "30%",
+    label: "Proyek AI generatif diperkirakan ditinggalkan setelah tahap uji coba — salah satu penyebab utamanya nilai bisnis yang tidak jelas sejak awal.",
+    source: "Gartner, 2024",
+  },
+  {
+    icon: FileText,
+    value: "37%",
+    label: "Organisasi menyebut kebutuhan & perencanaan yang tidak akurat sebagai penyebab utama kegagalan proyek.",
+    source: "PMI, Pulse of the Profession",
+  },
+  {
+    icon: TrendingUp,
+    value: "5,5%",
+    label: "Meski 78% organisasi memakai AI, hanya 5,5% yang benar-benar menuai nilai bisnis besar — jarak antara 'pakai AI' dan 'untung dari AI' sangat lebar.",
+    source: "McKinsey, The State of AI",
+  },
+];
 
 export default function BlueprintPage() {
   const { isAuthenticated } = useAuth();
@@ -27,7 +49,7 @@ export default function BlueprintPage() {
         </div>
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 border border-white/30 text-white text-xs font-semibold mb-6">
-            <Map className="h-3.5 w-3.5" />
+            <MapIcon className="h-3.5 w-3.5" />
             Gustafta Blueprint
           </div>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
@@ -95,8 +117,46 @@ export default function BlueprintPage() {
         </div>
       </section>
 
-      {/* ── ISI BLUEPRINT ── */}
+      {/* ── RISET ── */}
       <section className="py-16 px-4 bg-white dark:bg-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-800">
+              Menurut Data
+            </Badge>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              Kenapa Perencanaan Menentukan Hasil
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+              Data lembaga riset global menunjukkan: yang membedakan AI yang menghasilkan nilai dari yang
+              berhenti di tengah jalan bukan teknologinya — tapi kejelasan rencananya.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4 mb-4">
+            {STATS_BLUEPRINT.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="rounded-2xl border bg-gray-50 dark:bg-muted/20 p-6 text-center" data-testid={`stat-blueprint-${i}`}>
+                  <div className="flex justify-center mb-3">
+                    <div className="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                      <SIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                  </div>
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">{s.value}</div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{s.label}</p>
+                  <p className="text-[10px] text-gray-400 leading-snug">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-[11px] text-gray-400 max-w-2xl mx-auto">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
+          </p>
+        </div>
+      </section>
+
+      {/* ── ISI BLUEPRINT ── */}
+      <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-800">
@@ -133,7 +193,7 @@ export default function BlueprintPage() {
             ))}
             {/* Last card: CTA */}
             <div className="rounded-2xl border border-indigo-300 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 p-5 flex flex-col gap-3 items-center justify-center text-center">
-              <Map className="h-8 w-8 text-indigo-500" />
+              <MapIcon className="h-8 w-8 text-indigo-500" />
               <h3 className="text-sm font-bold text-gray-900 dark:text-white">Blueprint Lengkap Anda</h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">Dokumen strategis terstruktur yang jadi panduan membangun ekosistem AI Anda.</p>
               <Link href="/dialog-gustafta">
@@ -191,7 +251,7 @@ export default function BlueprintPage() {
           <div className="grid sm:grid-cols-2 gap-6">
             {[
               {
-                icon: Map, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30", border: "border-indigo-200 dark:border-indigo-500/30",
+                icon: MapIcon, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30", border: "border-indigo-200 dark:border-indigo-500/30",
                 title: "BLUEPRINT = Perencanaan", subtitle: "Arsitek menggambar blueprint rumah",
                 items: ["Fokus: Strategi & perencanaan", "Output: Dokumen strategis", "Waktu: 3–5 jam", "Pertanyaan: Apa yang harus saya bangun?"],
                 when: ["Belum punya rencana yang jelas", "Belum tahu target audience", "Ingin bangun ekosistem kompleks", "Ingin maksimalkan ROI"],
