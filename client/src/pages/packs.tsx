@@ -13,6 +13,7 @@ import {
   Briefcase, Target, Megaphone, ShoppingBag, PieChart, Mic, PenLine, Repeat2, ChevronRight,
   Send, Loader2, Bot
 } from "lucide-react";
+import { SERVICE_TIERS, HOSTING_SUMMARY, HOSTING_RANGE, PRICING } from "@/data/pricing";
 
 interface Pack {
   id: string;
@@ -741,12 +742,7 @@ export default function PacksPage() {
             Harga setup modul dibayar sekali. Berlaku untuk semua modul Paket Series — kami yang konfigurasi, Anda langsung pakai. Hosting dibayar terpisah via Paket Berlangganan.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-4">
-            {[
-              { tier: "Tier 1", jasaKey: "tier1", price: "Rp 1.499.000", scope: "Chatbot Dasar", desc: "Chatbot ringan — FAQ, info produk, layanan dasar", tag: "Mulai", tagClass: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", highlight: false },
-              { tier: "Tier 2", jasaKey: "tier2", price: "Rp 2.499.000", scope: "Chatbot Menengah", desc: "Chatbot menengah — multi-fungsi, lead gen, sales assist", tag: "Populer", tagClass: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300", highlight: true },
-              { tier: "Tier 3", jasaKey: "tier3", price: "Rp 4.900.000", scope: "Chatbot Kompleks", desc: "Chatbot kompleks — orkestrasi, knowledge base luas", tag: "Bisnis", tagClass: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300", highlight: false },
-              { tier: "Tier 4", jasaKey: "tier4", price: "Rp 7.490.000", scope: "Chatbot Enterprise", desc: "Chatbot enterprise — multi-domain, agentic penuh", tag: "Enterprise", tagClass: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", highlight: false },
-            ].map((t) => (
+            {SERVICE_TIERS.map((t) => (
               <div key={t.tier} className={`rounded-2xl border p-5 flex flex-col gap-3 bg-background ${t.highlight ? "ring-2 ring-primary" : ""}`}>
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-sm">{t.tier}</span>
@@ -755,7 +751,7 @@ export default function PacksPage() {
                 <div className="text-2xl font-bold text-primary">{t.price}</div>
                 <div className="text-xs text-muted-foreground font-medium">{t.scope}</div>
                 <div className="text-xs text-muted-foreground">{t.desc}</div>
-                <div className="text-[10px] text-muted-foreground border-t pt-2">+ Hosting Rp 199rb–1.999rb/periode</div>
+                <div className="text-[10px] text-muted-foreground border-t pt-2">+ Hosting {HOSTING_RANGE}</div>
                 <Button
                   size="sm"
                   className={`w-full gap-1.5 mt-auto text-xs ${t.highlight ? "" : "bg-muted-foreground/10 text-foreground hover:bg-primary hover:text-white"}`}
@@ -771,7 +767,7 @@ export default function PacksPage() {
           <div className="rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20 px-5 py-3 flex items-center gap-3 max-w-xl mx-auto">
             <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
             <p className="text-xs text-green-800 dark:text-green-300">
-              Paket Berlangganan (hosting) mulai <strong>Rp 199.000/bln · Rp 299.000/3bln · Rp 999.000/6bln · Rp 1.999.000/thn</strong>.{" "}
+              Paket Berlangganan (hosting) mulai <strong>{HOSTING_SUMMARY}</strong>.{" "}
               <a href="/pricing" className="underline underline-offset-2 hover:opacity-80">Lihat detail →</a>
             </p>
           </div>
@@ -895,7 +891,7 @@ export default function PacksPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground font-semibold">Hosting / Berlangganan</p>
-                      <p className="text-xs font-bold text-foreground">Rp 199rb/bln</p>
+                      <p className="text-xs font-bold text-foreground">{PRICING.subscription.starter.perMonth}</p>
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
@@ -1015,7 +1011,7 @@ export default function PacksPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground font-semibold">Hosting / Berlangganan</p>
-                      <p className="text-xs font-bold text-foreground">Rp 199rb/bln</p>
+                      <p className="text-xs font-bold text-foreground">{PRICING.subscription.starter.perMonth}</p>
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
@@ -1130,7 +1126,7 @@ export default function PacksPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground font-semibold">Hosting / Berlangganan</p>
-                      <p className="text-xs font-bold text-foreground">Rp 199rb/bln</p>
+                      <p className="text-xs font-bold text-foreground">{PRICING.subscription.starter.perMonth}</p>
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
@@ -1279,7 +1275,7 @@ function PackCard({ pack, onNavigate }: { pack: Pack; onNavigate: (path: string)
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground font-semibold">Hosting / Berlangganan</p>
-            <p className="text-xs font-bold text-foreground">Rp 199rb/bln</p>
+            <p className="text-xs font-bold text-foreground">{PRICING.subscription.starter.perMonth}</p>
           </div>
           <p className="text-[10px] text-muted-foreground pt-0.5 border-t border-border/40">Hosting sama dengan Paket Bisnis AI · <a href="/pricing" className="underline underline-offset-2">Lihat durasi & harga →</a></p>
         </div>

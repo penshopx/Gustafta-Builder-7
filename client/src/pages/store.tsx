@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { trackViewContent, trackInitiateCheckout } from "@/lib/meta-pixel";
+import { PRICING } from "@/data/pricing";
 
 const CATEGORY_LABELS: Record<string, string> = {
   engineering: "Teknik & Engineering",
@@ -344,8 +345,8 @@ export default function Store() {
                   <p className="text-[11px] text-gray-400">Hak pakai chatbot — sekali bayar, install mandiri</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-gray-400 line-through">Rp 450.000</p>
-                  <p className="text-base font-bold text-violet-700">Rp 299.000</p>
+                  <p className="text-[10px] text-gray-400 line-through">{PRICING.license.normal}</p>
+                  <p className="text-base font-bold text-violet-700">{PRICING.license.price}</p>
                 </div>
               </div>
               <div className="flex items-center justify-between rounded-xl bg-white border border-orange-200 px-4 py-3 shadow-sm">
@@ -353,14 +354,14 @@ export default function Store() {
                   <p className="text-xs font-bold text-gray-700">Biaya Setup <span className="font-normal text-gray-400">(opsional)</span></p>
                   <p className="text-[11px] text-gray-400">Dikonfigurasi penuh oleh tim Gustafta</p>
                 </div>
-                <p className="text-base font-bold text-orange-600">Rp 999.000</p>
+                <p className="text-base font-bold text-orange-600">{PRICING.setup.price}</p>
               </div>
               <div className="flex items-center justify-between rounded-xl bg-white border border-emerald-200 px-4 py-3 shadow-sm">
                 <div>
                   <p className="text-xs font-bold text-gray-700">Biaya Berlangganan</p>
                   <p className="text-[11px] text-gray-400">Hosting & akses platform — bulanan</p>
                 </div>
-                <p className="text-base font-bold text-emerald-600">mulai Rp 199rb/bln</p>
+                <p className="text-base font-bold text-emerald-600">mulai {PRICING.subscription.starter.perMonth}</p>
               </div>
             </div>
           </div>
@@ -652,7 +653,7 @@ export default function Store() {
                     <p className="text-gray-700 text-sm font-medium">Biaya Setup <span className="font-normal text-gray-400">(opsional)</span></p>
                     <p className="text-[11px] text-gray-400">Dikonfigurasi penuh oleh tim Gustafta</p>
                   </div>
-                  <span className="text-base font-bold text-orange-600">Rp 999.000</span>
+                  <span className="text-base font-bold text-orange-600">{PRICING.setup.price}</span>
                 </div>
               </div>
 

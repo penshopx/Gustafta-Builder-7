@@ -16,6 +16,7 @@ import {
   Mic, PenLine, Calculator, Megaphone, ScrollText, LayoutGrid,
   AlertTriangle, TrendingUp, Lightbulb, ClipboardList, BadgePlus,
 } from "lucide-react";
+import { CREDIT_PACKS as KREDIT_EKSTRA, PRICING, LICENSE_INFO } from "@/data/pricing";
 
 // ─── Types & Data ─────────────────────────────────────────────────────────────
 
@@ -86,9 +87,9 @@ const BISNIS_PLANS: BisnisPlan[] = [
     name: "Starter",
     badge: "STARTER",
     badgeColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-    price: "Rp 199.000",
+    price: PRICING.subscription.starter.label,
     priceNote: "/bulan",
-    lisensiInfo: "Dengan Starter Kit Rp 245.000 (sekali) → lisensi Rp 0 · Tanpa Starter Kit → lisensi Rp 299.000 (sekali)",
+    lisensiInfo: LICENSE_INFO,
     color: "text-blue-500",
     borderColor: "border-blue-200 dark:border-blue-800",
     bgColor: "bg-blue-50/50 dark:bg-blue-950/20",
@@ -121,9 +122,9 @@ const BISNIS_PLANS: BisnisPlan[] = [
     name: "Profesional",
     badge: "PRO",
     badgeColor: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
-    price: "Rp 499.000",
+    price: PRICING.subscription.profesional.label,
     priceNote: "/bulan",
-    lisensiInfo: "Dengan Starter Kit Rp 245.000 (sekali) → lisensi Rp 0 · Tanpa Starter Kit → lisensi Rp 299.000 (sekali)",
+    lisensiInfo: LICENSE_INFO,
     popular: true,
     color: "text-indigo-500",
     borderColor: "border-indigo-300 dark:border-indigo-700",
@@ -160,9 +161,9 @@ const BISNIS_PLANS: BisnisPlan[] = [
     name: "Bisnis",
     badge: "BISNIS",
     badgeColor: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-    price: "Rp 999.000",
+    price: PRICING.subscription.bisnis.label,
     priceNote: "/bulan",
-    lisensiInfo: "Dengan Starter Kit Rp 245.000 (sekali) → lisensi Rp 0 · Tanpa Starter Kit → lisensi Rp 299.000 (sekali)",
+    lisensiInfo: LICENSE_INFO,
     color: "text-violet-500",
     borderColor: "border-violet-200 dark:border-violet-800",
     bgColor: "bg-violet-50/50 dark:bg-violet-950/20",
@@ -197,105 +198,6 @@ const BISNIS_PLANS: BisnisPlan[] = [
   },
 ];
 
-const MODUL_PACKAGES = [
-  {
-    tier: "Modul Dasar",
-    price: "Rp 1.499.000",
-    color: "text-blue-500",
-    borderColor: "border-blue-200 dark:border-blue-800",
-    bgColor: "bg-blue-50/40 dark:bg-blue-950/20",
-    icon: Bot,
-    desc: "1 chatbot spesifik untuk kebutuhan Anda — FAQ, info produk, layanan dasar",
-    includes: [
-      "Konfigurasi 1 chatbot tematik",
-      "Prompt engineering profesional",
-      "Knowledge base hingga 10 dokumen",
-      "Testing & QA sebelum go-live",
-      "Training penggunaan 1 jam (online)",
-    ],
-    delivery: "5–7 hari kerja",
-  },
-  {
-    tier: "Modul Menengah",
-    price: "Rp 2.499.000",
-    color: "text-indigo-500",
-    borderColor: "border-indigo-200 dark:border-indigo-800",
-    bgColor: "bg-indigo-50/40 dark:bg-indigo-950/20",
-    icon: Layers,
-    desc: "Chatbot multi-fungsi dengan logika percakapan kompleks dan integrasi",
-    popular: true,
-    includes: [
-      "Semua Modul Dasar",
-      "Multi-persona atau multi-topik",
-      "Integrasi WhatsApp/Telegram",
-      "Knowledge base hingga 20 dokumen",
-      "Revisi hingga 3×",
-      "Training penggunaan 2 jam",
-    ],
-    delivery: "7–14 hari kerja",
-  },
-  {
-    tier: "Modul Kompleks",
-    price: "Rp 4.900.000",
-    color: "text-violet-500",
-    borderColor: "border-violet-200 dark:border-violet-800",
-    bgColor: "bg-violet-50/40 dark:bg-violet-950/20",
-    icon: Zap,
-    desc: "Sistem multi-agent dengan orkestrasi — untuk kebutuhan enterprise",
-    includes: [
-      "Semua Modul Menengah",
-      "Orkestrasi multi-agent (3–7 agen)",
-      "Knowledge base luas (50+ dokumen)",
-      "Custom workflow & persona",
-      "Revisi tidak terbatas (30 hari)",
-      "Dedicated support 30 hari",
-    ],
-    delivery: "14–21 hari kerja",
-  },
-];
-
-const KREDIT_EKSTRA = [
-  {
-    label: "Pack S",
-    pesan: "500 pesan",
-    price: "Rp 49.000",
-    perPesan: "Rp 98/pesan",
-    color: "text-blue-500",
-    border: "border-blue-200 dark:border-blue-800",
-    bg: "bg-blue-50/50 dark:bg-blue-950/20",
-    badge: "",
-  },
-  {
-    label: "Pack M",
-    pesan: "1.500 pesan",
-    price: "Rp 129.000",
-    perPesan: "Rp 86/pesan",
-    color: "text-indigo-500",
-    border: "border-indigo-200 dark:border-indigo-800",
-    bg: "bg-indigo-50/50 dark:bg-indigo-950/20",
-    badge: "PALING LAKU",
-  },
-  {
-    label: "Pack L",
-    pesan: "3.000 pesan",
-    price: "Rp 229.000",
-    perPesan: "Rp 76/pesan",
-    color: "text-violet-500",
-    border: "border-violet-200 dark:border-violet-800",
-    bg: "bg-violet-50/50 dark:bg-violet-950/20",
-    badge: "",
-  },
-  {
-    label: "Pack XL",
-    pesan: "5.000 pesan",
-    price: "Rp 349.000",
-    perPesan: "Rp 70/pesan",
-    color: "text-purple-500",
-    border: "border-purple-200 dark:border-purple-800",
-    bg: "bg-purple-50/50 dark:bg-purple-950/20",
-    badge: "TERBAIK",
-  },
-];
 
 const FITUR_LANJUTAN = [
   {
@@ -360,16 +262,6 @@ const FITUR_LANJUTAN = [
   },
 ];
 
-const CHATBOT_SHOWCASE = [
-  { icon: HardHat, name: "KontraktorBot", desc: "QS, RAB & Estimasi Biaya", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/20", tag: "Konstruksi" },
-  { icon: Target, name: "TenderBot", desc: "AI Tender BUJK & Monitor SIRUP", color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-950/20", tag: "Konstruksi" },
-  { icon: Award, name: "SertifikasiBot", desc: "SBU & SKK Kompetensi", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-950/20", tag: "Konstruksi" },
-  { icon: Building2, name: "OwnerBot", desc: "Developer & Pemilik Proyek", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/20", tag: "Properti" },
-  { icon: Pencil, name: "KonsultanBot", desc: "DED, MK & Jasa Konsultansi", color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-950/20", tag: "Konstruksi" },
-  { icon: Wrench, name: "BoheerBot", desc: "Subkontraktor & Klaim Termin", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-950/20", tag: "Konstruksi" },
-  { icon: Package, name: "SupplierBot", desc: "Material & Supply Chain", color: "text-teal-500", bg: "bg-teal-50 dark:bg-teal-950/20", tag: "Logistik" },
-  { icon: Globe, name: "PerijinanBot", desc: "OSS-RBA, NIB & Perizinan", color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/20", tag: "Regulasi" },
-];
 
 
 // ─── Sections ─────────────────────────────────────────────────────────────────
@@ -421,7 +313,7 @@ function BisnisPaket() {
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px]">
                     <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold px-1.5 py-0.5 rounded">Tanpa Starter Kit</span>
-                    <span className="text-gray-500 dark:text-gray-400">lisensi Rp 299.000 (sekali), tanpa trial</span>
+                    <span className="text-gray-500 dark:text-gray-400">lisensi {PRICING.license.price} (sekali), tanpa trial</span>
                   </div>
                   <div className="text-[10px] text-gray-400 dark:text-gray-500">Produk siap pakai — hanya biaya lisensi, tanpa biaya setup.</div>
                 </div>
