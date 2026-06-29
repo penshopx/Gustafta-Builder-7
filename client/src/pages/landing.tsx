@@ -310,7 +310,11 @@ function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: (
   const isDone = gate === "BLUEPRINT";
 
   return (
-    <div className="w-80 sm:w-96 rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden bg-card" style={{ maxHeight: 560 }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+    <div className="w-full max-w-lg rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden bg-card" style={{ maxHeight: "min(680px, 90vh)" }}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-gradient-to-r from-blue-600 to-violet-600">
         <div className="flex items-center gap-2">
@@ -417,6 +421,7 @@ function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: (
           </p>
         </div>
       )}
+    </div>
     </div>
   );
 }
