@@ -30,6 +30,7 @@ Roadmap teknis bertahap hidup di **`docs/blueprint-engine/`** (BUKAN di memory):
 - `00-roadmap.md` — 9 tahap (Audit→Blueprint Schema→Mapping→Config→Dialogue V2→Inference→Confidence→Gap→Critic/Sim/Evolution).
 - `01-builder-audit.md` — katalog Builder (tabel `agents` + panel + entitas anak).
 - `02-blueprint-schema.md` + `shared/blueprint/blueprint-schema.ts` — Blueprint JSON "DNA".
+- `03-mapping-engine.md` + `server/services/blueprint-engine/mapping-engine.ts` — Blueprint→Builder (PURE, no DB).
 
 **Keputusan desain Blueprint (durable):**
 - Field Blueprint memakai **nama kolom `agents` apa adanya** → Mapping Engine bisa 1:1. Jangan rename.
