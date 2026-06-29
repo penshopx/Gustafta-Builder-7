@@ -10,7 +10,7 @@ import {
   Rocket, ArrowRight, Check, BookOpen, Wrench, Zap, Lightbulb, TrendingUp,
   MessageCircle, ChevronRight, ShieldCheck, Store, Bot, FileText,
   GraduationCap, Smartphone, Users, Building2, Briefcase, User,
-  Send, Loader2, Sparkles, X, ChevronDown, Lock, ShoppingBag,
+  Send, Loader2, Sparkles, X, ChevronDown, Lock, ShoppingBag, FileDown,
 } from "lucide-react";
 
 const GUSTAFTA_AGENT_ID = "1";
