@@ -308,6 +308,12 @@ export function registerEmailAuthRoutes(app: Express): void {
         role: userRow.role,
       };
 
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err); else resolve();
+        });
+      });
+
       res.json({ success: true, message: "Email berhasil diverifikasi. Selamat datang!" });
     } catch (err) {
       console.error("[EmailAuth] Verify error:", err);
@@ -402,6 +408,12 @@ export function registerEmailAuthRoutes(app: Express): void {
         lastName: userRow.lastName,
         role: userRow.role,
       };
+
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err); else resolve();
+        });
+      });
 
       res.json({
         success: true,
