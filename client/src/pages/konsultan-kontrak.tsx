@@ -13,7 +13,7 @@ const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ing
 const CHECKOUT_URL = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533206&qty=1";
 
 const SUB_AGENTS = [
-  { role: "CONTRACT-REVIEWER", color: "red", desc: "Analisis klausul kontrak FIDIC, Perpres 28/2025, & kontrak komersial — identifikasi risiko tersembunyi sebelum penandatanganan" },
+  { role: "CONTRACT-REVIEWER", color: "red", desc: "Analisis klausul kontrak FIDIC, Perpres 46/2025, & kontrak komersial — identifikasi risiko tersembunyi sebelum penandatanganan" },
   { role: "CLAIM-STRATEGIST", color: "orange", desc: "Panduan klaim Extension of Time (EoT), Additional Payment, & Variation Order — dari dasar hukum hingga kalkulasi nilai klaim" },
   { role: "DISPUTE-RESOLVER", color: "rose", desc: "Strategi penyelesaian sengketa: negosiasi, mediasi, DAB/DRBF, arbitrase BANI/ICC, & litigasi — analisis probabilitas keberhasilan" },
   { role: "NOTICE-DRAFTER", color: "amber", desc: "Template & panduan penulisan notice: surat teguran, warning letter, notice of delay, force majeure declaration, & termination notice" },
@@ -34,7 +34,7 @@ const agentColors: Record<string, string> = {
 
 const CONTRACT_TYPES = [
   { type: "FIDIC", variants: ["Red Book (Konstruksi)", "Yellow Book (Rancang Bangun)", "Silver Book (EPC/Turnkey)", "Gold Book (DBO)"] },
-  { type: "Perpres 28/2025", variants: ["SSKK & SSUK pengadaan pemerintah", "Kontrak Lump Sum & Harga Satuan", "Kontrak Payung & Multi-Years", "Kontrak Terima Jadi (Turnkey)"] },
+  { type: "Perpres 46/2025", variants: ["SSKK & SSUK pengadaan pemerintah", "Kontrak Lump Sum & Harga Satuan", "Kontrak Payung & Multi-Years", "Kontrak Terima Jadi (Turnkey)"] },
   { type: "Komersial & B2B", variants: ["Kontrak konstruksi swasta", "Perjanjian subkontraktor", "Kontrak sewa alat & material", "MOU & perjanjian KSO/JV"] },
 ];
 

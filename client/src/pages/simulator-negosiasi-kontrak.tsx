@@ -8,7 +8,7 @@ import {
 import { Link } from "wouter";
 
 const JENIS_KONTRAK = [
-  "Kontrak Pemerintah (Perpres 28/2025)", "Kontrak BUMN/BUMD",
+  "Kontrak Pemerintah (Perpres 46/2025)", "Kontrak BUMN/BUMD",
   "Kontrak Swasta / Developer", "Kontrak EPC / Turnkey",
   "Kontrak Jasa Konsultansi (PPK–Konsultan)",
 ];

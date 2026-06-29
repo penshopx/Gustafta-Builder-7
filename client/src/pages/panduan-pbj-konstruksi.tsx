@@ -98,7 +98,7 @@ export default function PanduanPBJKonstruksi() {
             <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20"><ShoppingCart className="h-6 w-6 text-amber-400" /></div>
             <div>
               <h1 className="text-2xl font-bold text-white">Panduan Pengadaan Barang/Jasa Konstruksi</h1>
-              <p className="text-slate-400 text-sm">Metode pengadaan, tahapan, dokumen wajib, evaluasi — sesuai Perpres 28/2025 & Perlem LKPP</p>
+              <p className="text-slate-400 text-sm">Metode pengadaan, tahapan, dokumen wajib, evaluasi — sesuai Perpres 46/2025 & Perlem LKPP</p>
             </div>
             <Badge className="ml-auto bg-amber-500/15 text-amber-400 border-amber-500/30">Gelombang 26</Badge>
           </div>

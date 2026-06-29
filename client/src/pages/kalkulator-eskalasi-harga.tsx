@@ -87,7 +87,7 @@ export default function KalkulatorEskalasiHarga() {
 
         <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 px-4 py-3 mb-4 flex items-start gap-2">
           <Info className="h-3.5 w-3.5 text-orange-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-orange-300">Masukkan Indeks Harga Konstruksi (IHK/IHBK) dari BPS pada periode kontrak ditandatangani vs periode pelaksanaan. Klausul eskalasi mengacu pada Perpres 28/2025.</p>
+          <p className="text-xs text-orange-300">Masukkan Indeks Harga Konstruksi (IHK/IHBK) dari BPS pada periode kontrak ditandatangani vs periode pelaksanaan. Klausul eskalasi mengacu pada Perpres 46/2025.</p>
         </div>
 
         {/* Klausul eskalasi */}
@@ -213,7 +213,7 @@ export default function KalkulatorEskalasiHarga() {
         {totalEskalasiNetKlaim > 0 && (
           <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 mb-4">
             <p className="text-emerald-400 text-xs font-semibold mb-1">Rekomendasi Klaim</p>
-            <p className="text-sm text-white">Ajukan addendum CCO sebesar <span className="text-emerald-400 font-bold">{fmt(totalEskalasiNetKlaim)}</span> berdasarkan klausul eskalasi {klausulEskalasi}% sesuai Perpres 28/2025 (klausul eskalasi harga).</p>
+            <p className="text-sm text-white">Ajukan addendum CCO sebesar <span className="text-emerald-400 font-bold">{fmt(totalEskalasiNetKlaim)}</span> berdasarkan klausul eskalasi {klausulEskalasi}% sesuai Perpres 46/2025 (klausul eskalasi harga).</p>
           </div>
         )}
 

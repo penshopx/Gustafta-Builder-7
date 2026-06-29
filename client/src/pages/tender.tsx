@@ -116,7 +116,7 @@ export default function TenderPage() {
               <p className="text-base text-indigo-100 mb-4 leading-relaxed">
                 Dari scouting peluang, eligibility check, kalkulasi win probability,
                 optimasi dokumen, hingga manajemen kontrak & klaim — seluruh siklus tender
-                Anda didukung AI spesialis yang memahami Perpres 28/2025 dan FIDIC.
+                Anda didukung AI spesialis yang memahami Perpres 46/2025 dan FIDIC.
               </p>
               <div className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 mb-6 text-sm text-indigo-100">
                 <span className="font-bold text-white">80% BUJK</span> kalah tender bukan karena harga — tapi karena dokumen tidak optimal dan eligibility yang tidak dicek lebih awal.

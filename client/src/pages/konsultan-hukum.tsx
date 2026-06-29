@@ -44,7 +44,7 @@ const TOOLS = [
     name: "TenderaClaw + KontrakClaw", sub: "Hukum Pengadaan Pemerintah",
     title: "Hukum Pengadaan & Regulasi",
     desc: "Interpretasi regulasi pengadaan pemerintah, hak & kewajiban peserta tender, dan penyelesaian sengketa pengadaan.",
-    features: ["Interpretasi Perpres 28/2025 (Pengadaan Barang/Jasa Pemerintah)", "Hak peserta tender & mekanisme sanggah", "Panduan blacklist & cara mengajukan keberatan", "Hukum kontrak pengadaan pemerintah (SSKK/SSUK)", "Panduan audit BPK atas kontrak pengadaan"],
+    features: ["Interpretasi Perpres 46/2025 (Pengadaan Barang/Jasa Pemerintah)", "Hak peserta tender & mekanisme sanggah", "Panduan blacklist & cara mengajukan keberatan", "Hukum kontrak pengadaan pemerintah (SSKK/SSUK)", "Panduan audit BPK atas kontrak pengadaan"],
   },
 ];
 

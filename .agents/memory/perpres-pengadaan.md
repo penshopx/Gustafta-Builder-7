@@ -1,17 +1,24 @@
 ---
-name: Perpres Pengadaan terkini
-description: Referensi Perpres yang benar untuk Pengadaan Barang/Jasa Pemerintah (PBJP) Indonesia.
+name: Regulasi 2025 — Pengadaan vs Perizinan Berusaha
+description: Bedakan Perpres 46/2025 (pengadaan/PBJP) dari PP 28/2025 (perizinan berusaha/PBBR). Jangan tertukar.
 ---
 
-## Aturan
+## Aturan (dikonfirmasi user 29 Jun 2026)
 
-Perpres 12/2021 **KADALUARSA**. Selalu gunakan **Perpres 28/2025** untuk semua konteks PBJP.
+Dua regulasi 2025 yang BERBEDA dan sering tertukar:
 
-**Why:** User telah mengingatkan beberapa kali. Perpres 28 Tahun 2025 adalah regulasi pengadaan yang berlaku saat ini menggantikan Perpres 12/2021.
+- **Perpres No. 46/2025** (Peraturan **Presiden**) = **Pengadaan Barang/Jasa Pemerintah (PBJP)**.
+  Menggantikan Perpres 16/2018 jo. 12/2021. Berlaku sejak 30 April 2025.
+- **PP No. 28/2025** (Peraturan **Pemerintah**) = **Perizinan Berusaha Berbasis Risiko (PBBR)** / OSS-RBA.
+  Menggantikan PP 5/2021.
+
+**Why:** Sebelumnya memory salah menyatakan "Perpres 28/2025 untuk PBJP" — itu KELIRU.
+Tidak ada "Perpres 28/2025" yang benar; angka 28/2025 hanya milik PP (perizinan), dan
+46/2025 milik Perpres (pengadaan). Salah tulis `Perpres 28/2025` muncul di banyak halaman
+dan sudah dikoreksi jadi `Perpres 46/2025`.
 
 **How to apply:**
-- Semua referensi tender, kontrak pemerintah, SSKK/SSUK, kualifikasi penyedia → Perpres 28/2025
-- Jangan sebut Perpres 12/2021 atau "Perpres 16/2018 jo 12/2021" — keduanya sudah tidak berlaku
-- File yang sudah diupdate: konsultan-kontrak, konsultan-hukum, tender, kalkulator-eskalasi-harga, doc-generator, ai-tools-hub, kompetensi-hub, panduan-pbj-konstruksi, panduan-kualifikasi-tender, simulator-negosiasi-kontrak, supply-chain-claw, test-tracker
-
-**Catatan:** Perpres lain yang mengandung angka 2021 (misal Perpres 98/2021 NEK, Perpres 112/2022) TIDAK berubah — hanya Perpres pengadaan/PBJP yang diganti.
+- Konteks tender/pengadaan/kontrak pemerintah/SSKK-SSUK/kualifikasi penyedia/eskalasi harga/LKPP → **Perpres 46/2025**.
+- Konteks perizinan usaha/OSS-RBA/NIB/SBU/IUJK/PB-UMKU/sertifikat standar → **PP 28/2025** (biarkan, sudah benar).
+- JANGAN pernah tulis "Perpres 28/2025". JANGAN ubah "PP 28/2025" menjadi 46.
+- Perpres 12/2021 & "Perpres 16/2018 jo 12/2021" untuk PBJP sudah digantikan 46/2025 (kecuali saat menyebut riwayat "jo." secara eksplisit).

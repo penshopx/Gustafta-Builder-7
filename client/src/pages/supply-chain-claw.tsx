@@ -144,7 +144,7 @@ export default function SupplyChainClawChat() {
             <div>
               <div className="font-semibold text-xl mb-1 bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent">SupplyChainClaw — AI Konsultan Supply Chain & Logistics</div>
               <p className="text-sm text-white/50 max-w-2xl leading-relaxed">Konsultasi supply chain end-to-end dengan <strong className="text-white/70">8 spesialis paralel</strong> — strategic procurement & e-Katalog LKPP, inventory management EOQ/ABC-XYZ, warehouse WMS & slotting, transportasi multimoda & INCOTERMS 2020, SCOR Model & KPI (OTIF/Fill Rate/Cash-to-Cash), S&OP & demand forecasting, supply chain risk management & BCP ISO 22301, serta digital SC (ERP/IoT/Blockchain/AI).</p>
-              <div className="text-xs text-white/25 mt-2">APICS SCOR DS · ISO 28000 · ISO 22301 · ISO 31000 · INCOTERMS 2020 · UU 7/2014 · UU 17/2008 · Perpres 28/2025 · Perpres 49/2021 (INSW) · PerLKPP terkini</div>
+              <div className="text-xs text-white/25 mt-2">APICS SCOR DS · ISO 28000 · ISO 22301 · ISO 31000 · INCOTERMS 2020 · UU 7/2014 · UU 17/2008 · Perpres 46/2025 · Perpres 49/2021 (INSW) · PerLKPP terkini</div>
             </div>
             <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 w-full max-w-3xl">
               {SPEC_CARDS.map(c=>(
@@ -162,7 +162,7 @@ export default function SupplyChainClawChat() {
             </div>
             <div className="flex items-start gap-2 max-w-md text-left p-3 rounded-xl bg-indigo-950/20 border border-indigo-800/30">
               <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5"/>
-              <p className="text-xs text-white/40 leading-relaxed">Berbasis <span className="text-indigo-300">APICS CPIM/CSCP/CPSM, SCOR Model DS 2022, ISO 28000:2022, ISO 22301, ISO 31000, INCOTERMS 2020, UU 7/2014 (Perdagangan), UU 17/2008 (Pelayaran), Perpres 28/2025 (PBJ), Perpres 49/2021 (INSW), dan PerLKPP terkini</span>. Untuk keputusan strategis SCM, verifikasi dengan SC director, freight forwarder, atau konsultan SCM bersertifikat.</p>
+              <p className="text-xs text-white/40 leading-relaxed">Berbasis <span className="text-indigo-300">APICS CPIM/CSCP/CPSM, SCOR Model DS 2022, ISO 28000:2022, ISO 22301, ISO 31000, INCOTERMS 2020, UU 7/2014 (Perdagangan), UU 17/2008 (Pelayaran), Perpres 46/2025 (PBJ), Perpres 49/2021 (INSW), dan PerLKPP terkini</span>. Untuk keputusan strategis SCM, verifikasi dengan SC director, freight forwarder, atau konsultan SCM bersertifikat.</p>
             </div>
           </div>
         ):(

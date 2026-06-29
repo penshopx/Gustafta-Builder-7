@@ -96,7 +96,7 @@ export default function PanduanKualifikasiTender() {
           <div className="space-y-4">
             <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3 flex items-start gap-2">
               <Info className="h-3.5 w-3.5 text-indigo-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-indigo-300">AI akan menganalisis persyaratan kualifikasi berdasarkan Perpres 28/2025, Permen PUPR, dan regulasi pengadaan yang relevan, lalu memberikan gap assessment dan strategi dokumen.</p>
+              <p className="text-xs text-indigo-300">AI akan menganalisis persyaratan kualifikasi berdasarkan Perpres 46/2025, Permen PUPR, dan regulasi pengadaan yang relevan, lalu memberikan gap assessment dan strategi dokumen.</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/3 p-5 space-y-3">
               <div>
