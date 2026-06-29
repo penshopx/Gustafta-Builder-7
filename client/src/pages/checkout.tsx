@@ -71,14 +71,16 @@ const SUBSCRIPTION_PLANS: Record<string, {
   },
 };
 
+const SCALEV_BASE = "https://app.scalev.com/checkout";
+
 const JASA_PLANS: Record<string, {
   key: string; name: string; price: string; priceNum: number;
   scope: string; tag: string; popular?: boolean;
-  description: string; features: string[];
+  description: string; features: string[]; scalevSlug: string;
 }> = {
   tier1: {
     key: "tier1", name: "Jasa Chatbot — Tier 1", price: "Rp 1.499.000", priceNum: 1499000,
-    scope: "Chatbot Dasar", tag: "Mulai",
+    scope: "Chatbot Dasar", tag: "Mulai", scalevSlug: "gustafta-jasa-tier1",
     description: "Chatbot ringan untuk FAQ, info produk, dan layanan dasar.",
     features: [
       "Konfigurasi dasar chatbot", "Setup knowledge base FAQ",
@@ -88,7 +90,7 @@ const JASA_PLANS: Record<string, {
   },
   tier2: {
     key: "tier2", name: "Jasa Chatbot — Tier 2", price: "Rp 2.499.000", priceNum: 2499000,
-    scope: "Chatbot Menengah", tag: "Populer", popular: true,
+    scope: "Chatbot Menengah", tag: "Populer", popular: true, scalevSlug: "gustafta-jasa-tier2",
     description: "Chatbot multi-fungsi untuk lead gen, sales assist, dan layanan pelanggan.",
     features: [
       "Konfigurasi lengkap chatbot", "Setup knowledge base komprehensif",
@@ -99,7 +101,7 @@ const JASA_PLANS: Record<string, {
   },
   tier3: {
     key: "tier3", name: "Jasa Chatbot — Tier 3", price: "Rp 4.900.000", priceNum: 4900000,
-    scope: "Chatbot Kompleks", tag: "Bisnis",
+    scope: "Chatbot Kompleks", tag: "Bisnis", scalevSlug: "gustafta-jasa-tier3",
     description: "Chatbot kompleks dengan orkestrasi multi-agen dan knowledge base luas.",
     features: [
       "Konfigurasi advanced chatbot", "Knowledge base skala besar (30+ dok)",
@@ -111,7 +113,7 @@ const JASA_PLANS: Record<string, {
   },
   tier4: {
     key: "tier4", name: "Jasa Chatbot — Tier 4", price: "Rp 7.490.000", priceNum: 7490000,
-    scope: "Chatbot Enterprise", tag: "Enterprise",
+    scope: "Chatbot Enterprise", tag: "Enterprise", scalevSlug: "gustafta-jasa-tier4",
     description: "Chatbot enterprise multi-domain, agentic penuh, custom branding.",
     features: [
       "Full enterprise configuration", "Knowledge base unlimited",
@@ -178,17 +180,8 @@ export default function CheckoutPage() {
           setDone(true);
         }
       } else if (jasa) {
-        const msg = [
-          `Halo, saya ingin memesan *${jasa.name}* (${jasa.scope}).`,
-          ``,
-          `Harga: ${jasa.price} (setup fee)`,
-          ``,
-          `Nama: ${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "—",
-          `Email: ${user?.email || "—"}`,
-          ``,
-          `Mohon informasi langkah selanjutnya. Terima kasih!`,
-        ].join("\n");
-        window.open(waLink(msg), "_blank");
+        const scalevUrl = `${SCALEV_BASE}/${jasa.scalevSlug}`;
+        window.open(scalevUrl, "_blank");
         setDone(true);
       }
     } catch (err: any) {
@@ -229,21 +222,16 @@ export default function CheckoutPage() {
             <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
           </div>
           <h1 className="text-2xl font-bold mb-2">
-            {plan ? "Diarahkan ke Pembayaran!" : "Pesanan Dikirim!"}
+            Diarahkan ke Pembayaran!
           </h1>
           <p className="text-muted-foreground max-w-sm mb-2">
-            {plan
-              ? "Halaman pembayaran Scalev sudah terbuka di tab baru. Selesaikan pembayaran — akun Anda akan aktif otomatis setelah konfirmasi."
-              : "Tim kami akan menghubungi Anda via WhatsApp untuk detail order dan konfirmasi."
-            }
+            Halaman pembayaran Scalev sudah terbuka di tab baru. Selesaikan pembayaran untuk melanjutkan proses.
           </p>
-          {plan && (
-            <p className="text-xs text-muted-foreground mb-2">
-              Gunakan email Gustafta Anda saat checkout di Scalev agar aktivasi berjalan otomatis.
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground mb-2">
+            Gunakan email Gustafta Anda saat checkout di Scalev agar kami bisa memproses pesanan Anda dengan cepat.
+          </p>
           <p className="text-xs text-muted-foreground mb-8">
-            {plan ? "Butuh bantuan? Hubungi tim kami via WhatsApp." : "Pastikan WhatsApp Anda aktif di nomor yang terdaftar."}
+            Butuh bantuan? Hubungi tim kami via WhatsApp.
           </p>
           <div className="flex gap-3 flex-wrap justify-center">
             <Link href="/dashboard">
@@ -366,19 +354,19 @@ export default function CheckoutPage() {
                   },
                 ] : [
                   {
-                    step: "1", icon: MessageCircle, color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/30",
-                    title: "Konsultasi via WhatsApp",
-                    desc: "Klik tombol — pesan terkirim ke tim Gustafta via WhatsApp untuk diskusi kebutuhan Anda.",
+                    step: "1", icon: CreditCard, color: "text-violet-600", bg: "bg-violet-100 dark:bg-violet-900/30",
+                    title: "Bayar via Scalev",
+                    desc: "Klik tombol — Anda diarahkan ke halaman pembayaran Scalev. Selesaikan pembayaran di sana.",
                   },
                   {
                     step: "2", icon: Phone, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30",
-                    title: "Brief & Pembayaran",
-                    desc: "Tim kami mengirimkan brief dan link pembayaran Scalev sesuai paket jasa yang dipilih.",
+                    title: "Konfirmasi & Brief",
+                    desc: "Tim kami menghubungi Anda dalam 1x24 jam untuk brief kebutuhan dan detail pengerjaan.",
                   },
                   {
                     step: "3", icon: Zap, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/30",
                     title: "Pengerjaan Dimulai",
-                    desc: "Setelah pembayaran terkonfirmasi, tim kami mulai mengerjakan chatbot Anda.",
+                    desc: "Setelah brief selesai, tim kami langsung mengerjakan chatbot Anda sesuai spesifikasi.",
                   },
                 ]).map(({ step, icon: Icon, color, bg, title, desc }) => (
                   <div key={step} className="flex gap-3">
@@ -474,17 +462,13 @@ export default function CheckoutPage() {
                   ? <><Loader2 className="h-4 w-4 animate-spin" /> Memproses...</>
                   : !isAuthenticated
                   ? <><Lock className="h-4 w-4" /> Login & Pesan</>
-                  : plan
-                  ? <><CreditCard className="h-4 w-4" /> Bayar via Scalev<ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" /></>
-                  : <><MessageCircle className="h-4 w-4" /> Hubungi via WhatsApp</>
+                  : <><CreditCard className="h-4 w-4" /> Bayar via Scalev<ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" /></>
                 }
               </Button>
 
-              {plan && (
-                <p className="text-xs text-center text-muted-foreground -mt-1">
-                  Terbuka di tab baru — gunakan email Gustafta Anda
-                </p>
-              )}
+              <p className="text-xs text-center text-muted-foreground -mt-1">
+                Terbuka di tab baru — gunakan email Gustafta Anda
+              </p>
 
               <Button
                 variant="outline"
