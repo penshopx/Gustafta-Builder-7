@@ -198,7 +198,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
   });
 
   const navItems = [
-    { href: "/panduan", label: "Belajar", icon: GraduationCap, badge: "Mulai di Sini" },
+    { href: "/#trilogi", label: "Belajar", icon: GraduationCap, badge: "Mulai di Sini" },
     { href: "/produk", label: "Merakit AI", icon: Rocket },
     { href: "/store", label: "Menggunakan AI", icon: Zap },
     { href: "/affiliate", label: "Menghasilkan Nilai", icon: TrendingUp },

@@ -468,7 +468,10 @@ export default function Landing() {
               size="lg"
               variant="outline"
               className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10 gap-2 px-6 h-12"
-              onClick={() => setShowDialog(true)}
+              onClick={() => {
+                const el = document.getElementById("trilogi");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
               data-testid="button-hero-dialog"
             >
               <Bot className="w-4 h-4" />
@@ -567,6 +570,123 @@ export default function Landing() {
                 <span key={s}>{s}</span>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRILOGI GUSTAFTA — ALUR PIKIR ── */}
+      <section className="py-20 px-4 bg-gray-950 text-white overflow-hidden relative" id="trilogi">
+        {/* subtle grid bg */}
+        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+
+        <div className="max-w-4xl mx-auto relative">
+          {/* Label */}
+          <div className="text-center mb-14">
+            <span className="inline-block text-xs font-bold text-teal-400 uppercase tracking-widest mb-3">Alur Pikir Gustafta</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+              Semua Dimulai<br className="sm:hidden" /> dari <span className="text-teal-400">Satu Dialog.</span>
+            </h2>
+            <p className="text-gray-400 text-base max-w-xl mx-auto leading-relaxed">
+              Sebelum ada AI, sebelum ada chatbot — ada sebuah percakapan sederhana yang mengubah segalanya.
+              Inilah alur pikir di balik Gustafta.
+            </p>
+          </div>
+
+          {/* 4 tahap */}
+          <div className="grid gap-0 relative">
+            {/* Connector line */}
+            <div className="hidden md:block absolute left-[calc(50%-1px)] top-12 bottom-12 w-0.5 bg-gradient-to-b from-gray-700 via-teal-600/40 to-gray-700" />
+
+            {[
+              {
+                num: "01",
+                label: "Monolog",
+                color: "text-gray-400",
+                border: "border-gray-700",
+                bg: "bg-gray-800/50",
+                dot: "bg-gray-500",
+                desc: "Pengetahuan Anda hanya ada di dalam kepala. Anda yang berpikir, Anda yang memutuskan, Anda yang tahu — tetapi tidak ada yang mendengar, tidak ada yang bertanya. Pengetahuan itu diam.",
+                side: "right",
+              },
+              {
+                num: "02",
+                label: "Dialog",
+                color: "text-teal-400",
+                border: "border-teal-600/50",
+                bg: "bg-teal-950/40",
+                dot: "bg-teal-500",
+                desc: "Ketika pengetahuan itu dikeluarkan — lewat percakapan — ia mulai bergerak. Dipertanyakan. Diperjelas. Diuji. Dialog bukan sekadar tanya-jawab: ia adalah proses membuat pengetahuan Anda menjadi nyata dan berguna.",
+                side: "left",
+                highlight: true,
+              },
+              {
+                num: "03",
+                label: "Kolaborasi",
+                color: "text-violet-400",
+                border: "border-violet-600/40",
+                bg: "bg-violet-950/30",
+                dot: "bg-violet-500",
+                desc: "Dialog yang berulang melahirkan ritme. Dua pihak tidak lagi bergantian — mereka mulai bergerak bersama. AI bukan alat yang Anda perintah; ia menjadi mitra yang membantu Anda berpikir dan bekerja lebih jauh dari yang bisa Anda lakukan sendiri.",
+                side: "right",
+              },
+              {
+                num: "04",
+                label: "Kreasi",
+                color: "text-amber-400",
+                border: "border-amber-600/40",
+                bg: "bg-amber-950/20",
+                dot: "bg-amber-500",
+                desc: "Dari kolaborasi yang konsisten, muncul sesuatu yang baru — produk, layanan, solusi — yang tidak bisa lahir dari monolog sendirian. Inilah titik di mana pengetahuan Anda berubah menjadi nilai yang dirasakan orang lain.",
+                side: "left",
+              },
+            ].map((tahap, i) => (
+              <div key={tahap.num} className={`flex items-center gap-6 md:gap-10 py-6 ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"} flex-col md:flex-row`}>
+                {/* Card */}
+                <div className={`flex-1 rounded-2xl border ${tahap.border} ${tahap.bg} p-6 backdrop-blur-sm ${tahap.highlight ? "ring-1 ring-teal-500/30" : ""}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`text-xs font-black ${tahap.color} opacity-60`}>{tahap.num}</span>
+                    <span className={`text-lg font-bold ${tahap.color}`}>{tahap.label}</span>
+                    {tahap.highlight && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30">Titik Awal</span>}
+                  </div>
+                  <p className="text-sm text-gray-400 leading-relaxed">{tahap.desc}</p>
+                </div>
+
+                {/* Center dot */}
+                <div className={`w-4 h-4 rounded-full ${tahap.dot} shrink-0 ring-4 ring-gray-950 relative z-10 hidden md:block`} />
+
+                {/* Spacer for opposite side */}
+                <div className="flex-1 hidden md:block" />
+              </div>
+            ))}
+          </div>
+
+          {/* Insight */}
+          <div className="mt-10 mb-10 text-center">
+            <div className="inline-block rounded-2xl border border-teal-500/20 bg-teal-950/20 px-6 py-5 max-w-2xl">
+              <p className="text-sm text-teal-300 leading-relaxed">
+                <span className="font-bold text-white">Gustafta percaya:</span> transformasi terbesar dalam karier profesional tidak dimulai dari membeli tool atau belajar coding —{" "}
+                <span className="font-semibold text-teal-400">melainkan dari satu dialog yang jujur tentang siapa Anda dan apa yang Anda tahu.</span>
+              </p>
+            </div>
+          </div>
+
+          {/* CTA — bukan floating chatbot */}
+          <div className="text-center">
+            <p className="text-gray-500 text-sm mb-4">Rasakan langsung alurnya — AI akan memandu Anda dari Dialog menuju Blueprint chatbot Anda sendiri.</p>
+            <button
+              onClick={() => setShowDialog(true)}
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold text-base transition-all shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:-translate-y-0.5"
+              data-testid="button-trilogi-cta"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              Mulai Dialog Sekarang
+              <svg className="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </button>
+            <p className="text-xs text-gray-600 mt-3">Gratis · Tanpa daftar · Blueprint tersimpan otomatis</p>
           </div>
         </div>
       </section>
