@@ -23,7 +23,7 @@ Trilogi Gustafta = framework berpikir di baliknya: **Dialog → Kolaborasi → K
 | **2** | **Blueprint Schema** — model data JSON yang mewakili seluruh konfigurasi Builder | Tidak (tipe/skema baru, belum disambung) | ✅ SELESAI — `shared/blueprint/blueprint-schema.ts` + `02-blueprint-schema.md` |
 | **3** | **Mapping Engine** — peta setiap field Blueprint → field Builder | Tidak (fungsi murni, belum disambung) | ✅ SELESAI — `server/services/blueprint-engine/mapping-engine.ts` + `03-mapping-engine.md` |
 | **4** | **Configuration Engine** — baca Blueprint, isi otomatis Builder (user tetap bisa edit) | Ya (engine baru, UI tak diubah, belum disambung) | ✅ SELESAI — `server/services/blueprint-engine/configuration-engine.ts` + `04-configuration-engine.md` |
-| 5 | **Dialogue Engine V2** — wawancara Socratic adaptif, pertanyaan sesedikit mungkin | Ya (engine baru) | — |
+| 5 | **Dialogue Engine V2** — wawancara Socratic adaptif, pertanyaan sesedikit mungkin | Ya (engine baru, pure, belum disambung) | ✅ SELESAI — `server/services/blueprint-engine/dialogue-engine.ts` + `05-dialogue-engine.md` |
 | 6 | **Inference Engine** — simpulkan field dari sedikit input, beri alasan | Ya | — |
 | 7 | **Confidence Engine** — skor keyakinan per field (bukan sekadar "completion %") | Ya | — |
 | 8 | **Gap Analysis Engine** — cari field kosong/inkonsisten + rekomendasi | Ya | — |
