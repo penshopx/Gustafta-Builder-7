@@ -177,6 +177,29 @@ const USE_CASES = [
   },
 ];
 
+// Statistik riset industri (konteks umum, bukan klaim hasil produk).
+// Sumber diverifikasi: McKinsey Global Institute; Brynjolfsson, Li & Raymond (NBER w31161 / QJE).
+const STATS = [
+  {
+    icon: <Clock className="h-6 w-6 text-cyan-600" />,
+    value: "±20%",
+    label: "waktu kerja mingguan pekerja pengetahuan habis hanya untuk mencari informasi.",
+    source: "McKinsey Global Institute, \u201CThe Social Economy\u201D, 2012",
+  },
+  {
+    icon: <TrendingUp className="h-6 w-6 text-teal-600" />,
+    value: "+14%",
+    label: "rata-rata kenaikan produktivitas pekerja yang dibantu AI generatif.",
+    source: "Brynjolfsson, Li & Raymond, NBER w31161 / QJE, 2023",
+  },
+  {
+    icon: <Sparkles className="h-6 w-6 text-emerald-600" />,
+    value: "US$4,4T",
+    label: "potensi nilai tambah AI generatif bagi ekonomi global per tahun.",
+    source: "McKinsey Global Institute, 2023",
+  },
+];
+
 const FAQ = [
   {
     q: "Apakah saya perlu kemampuan teknis atau coding?",
@@ -309,6 +332,35 @@ export default function MulticlawSuitePage() {
           <p className="text-gray-300 leading-relaxed">
             Status quo punya harga yang tak tertulis: kesempatan yang hilang, risiko salah regulasi, dan
             tenaga yang terkuras sebelum proyek menghasilkan. Semakin lama dibiarkan, semakin mahal.
+          </p>
+        </div>
+      </section>
+
+      {/* ── RISET / DATA (credibility) ── */}
+      <section className="py-16 px-4 bg-white dark:bg-background">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-xs font-bold text-teal-600 uppercase tracking-widest text-center mb-2">Bukan Sekadar Tren</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
+            Pergeseran yang Didukung Riset
+          </h2>
+          <p className="text-center text-gray-500 dark:text-muted-foreground mb-10 max-w-2xl mx-auto">
+            Bukan opini — data lintas industri menunjukkan besarnya waktu yang hilang, dan potensi yang
+            terbuka, saat pekerjaan didampingi AI.
+          </p>
+          <div className="grid md:grid-cols-3 gap-5">
+            {STATS.map((s, i) => (
+              <div key={i} className="bg-gray-50 dark:bg-card rounded-2xl p-6 border border-gray-100 dark:border-border text-center" data-testid={`stat-${i}`}>
+                <div className="flex justify-center mb-3">
+                  <div className="p-3 bg-white dark:bg-muted rounded-xl border border-gray-100 dark:border-border">{s.icon}</div>
+                </div>
+                <div className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">{s.value}</div>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground leading-relaxed mb-3">{s.label}</p>
+                <p className="text-[10px] text-gray-400 dark:text-muted-foreground/70 leading-snug">Sumber: {s.source}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-[11px] text-gray-400 dark:text-muted-foreground/60 mt-6 max-w-2xl mx-auto">
+            Angka di atas adalah temuan riset industri sebagai konteks umum, bukan klaim hasil spesifik produk MultiClaw Suite.
           </p>
         </div>
       </section>
