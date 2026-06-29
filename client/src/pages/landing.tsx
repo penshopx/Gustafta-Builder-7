@@ -10,7 +10,7 @@ import {
   Rocket, ArrowRight, Check, BookOpen, Wrench, Zap, Lightbulb, TrendingUp,
   MessageCircle, ChevronRight, ShieldCheck, Store, Bot, FileText,
   GraduationCap, Smartphone, Users, Building2, Briefcase, User,
-  Send, Loader2, Sparkles, X, ChevronDown,
+  Send, Loader2, Sparkles, X, ChevronDown, Lock, ShoppingBag,
 } from "lucide-react";
 
 const GUSTAFTA_AGENT_ID = "1";
@@ -106,53 +106,78 @@ Buat Blueprint Konfigurasi AI dalam format JSON yang valid SAJA (tanpa markdown,
 }`;
 }
 
-function BlueprintCard({ bp, onClose }: { bp: Blueprint; onClose: () => void }) {
+const BLUEPRINT_STORAGE_KEY = "gustafta_blueprint_pending";
+
+function BlueprintLockedCard({ bp, onClose }: { bp: Blueprint; onClose: () => void }) {
+  const waText = encodeURIComponent(
+    `Halo Gustafta! Saya sudah menyelesaikan sesi Socratic Dialog dan Blueprint AI saya sudah siap. Nama AI: ${bp.namaAI} | Domain: ${bp.domain}. Saya ingin melanjutkan ke pembelian paket untuk mengakses Blueprint lengkap dan mulai merakitnya di Builder.`
+  );
+
   return (
-    <div className="mx-3 mb-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-violet-50 dark:from-blue-950/30 dark:to-violet-950/30 overflow-hidden">
-      <div className="px-3 py-2 bg-gradient-to-r from-blue-600 to-violet-600 flex items-center gap-2">
-        <Sparkles className="h-3.5 w-3.5 text-yellow-300" />
-        <span className="text-white text-xs font-bold tracking-wide">BLUEPRINT AI ANDA</span>
+    <div className="mx-3 mb-3 rounded-xl border-2 border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 overflow-hidden">
+      {/* Header */}
+      <div className="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 flex items-center gap-2">
+        <Sparkles className="h-3.5 w-3.5 text-white" />
+        <span className="text-white text-xs font-bold tracking-wide">BLUEPRINT AI ANDA — SIAP!</span>
+        <Lock className="h-3 w-3 text-white/80 ml-auto" />
       </div>
+
       <div className="p-3 space-y-2">
+        {/* Visible — nama & domain sebagai hook */}
         <div>
-          <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Nama AI</p>
+          <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Nama AI Anda</p>
           <p className="text-sm font-bold text-gray-900 dark:text-white">{bp.namaAI}</p>
+          <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-0.5">Domain: <strong>{bp.domain}</strong></p>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Domain</p>
-            <p className="text-xs text-gray-700 dark:text-gray-300">{bp.domain}</p>
+
+        {/* Locked preview — blurred */}
+        <div className="relative rounded-lg overflow-hidden">
+          <div className="p-2.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 space-y-1.5 select-none">
+            <div className="flex flex-wrap gap-1">
+              {(bp.fiturUtama ?? []).map((_, i) => (
+                <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 dark:bg-zinc-600 text-gray-200 dark:text-zinc-600">████████</span>
+              ))}
+            </div>
+            <p className="text-[10px] text-gray-200 dark:text-zinc-600 leading-relaxed">████████████ ████ ██████ ████████████ ████</p>
+            <p className="text-[10px] text-gray-200 dark:text-zinc-600">████████ ████████████</p>
           </div>
-          <div>
-            <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Sasaran</p>
-            <p className="text-xs text-gray-700 dark:text-gray-300">{bp.sasaranPengguna}</p>
+          {/* Blur overlay */}
+          <div className="absolute inset-0 backdrop-blur-[3px] bg-white/60 dark:bg-zinc-900/60 flex flex-col items-center justify-center gap-1">
+            <Lock className="h-5 w-5 text-amber-600" />
+            <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 text-center px-2">Persona · Fitur · System Prompt · Langkah</p>
+            <p className="text-[9px] text-gray-500 text-center">Tersedia setelah pembelian paket</p>
           </div>
         </div>
-        <div>
-          <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-1">Persona AI</p>
-          <p className="text-xs text-gray-700 dark:text-gray-300 italic">"{bp.persona}"</p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-1">Fitur Utama</p>
-          <div className="flex flex-wrap gap-1">
-            {bp.fiturUtama.map((f, i) => (
-              <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">{f}</span>
+
+        {/* What they get after purchase */}
+        <div className="bg-white dark:bg-zinc-800 rounded-lg p-2 border border-amber-200 dark:border-amber-800">
+          <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 mb-1">Setelah beli paket, Anda akan mendapatkan:</p>
+          <div className="space-y-0.5">
+            {[
+              "Blueprint lengkap bisa diimport ke Gustafta Builder",
+              "Konfigurasi awal chatbot otomatis terisi",
+              "Tinggal lengkapi field fitur sesuai kebutuhan",
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-1">
+                <Check className="h-2.5 w-2.5 text-green-500 shrink-0 mt-0.5" />
+                <span className="text-[10px] text-gray-600 dark:text-gray-400">{item}</span>
+              </div>
             ))}
           </div>
         </div>
-        <div className="pt-1 border-t border-blue-200 dark:border-blue-800">
-          <div className="flex gap-1.5">
-            <Link href="/login" onClick={onClose} className="flex-1">
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white h-8 text-xs font-bold gap-1">
-                <Wrench className="h-3 w-3" /> Rakit Sekarang
-              </Button>
-            </Link>
-            <a href="https://wa.me/6282299417818?text=Saya+sudah+punya+Blueprint+AI+dan+ingin+konsultasi+lebih+lanjut" target="_blank" rel="noopener noreferrer" className="flex-1">
-              <Button variant="outline" className="w-full h-8 text-xs gap-1 border-blue-300">
-                <MessageCircle className="h-3 w-3" /> Konsultasi
-              </Button>
-            </a>
-          </div>
+
+        {/* CTA */}
+        <div className="flex gap-1.5 pt-0.5">
+          <Link href="/packs" onClick={onClose} className="flex-1">
+            <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white h-8 text-xs font-bold gap-1">
+              <ShoppingBag className="h-3 w-3" /> Pilih Paket
+            </Button>
+          </Link>
+          <a href={`https://wa.me/6282299417818?text=${waText}`} target="_blank" rel="noopener noreferrer" className="flex-1">
+            <Button variant="outline" className="w-full h-8 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
+              <MessageCircle className="h-3 w-3" /> Konsultasi
+            </Button>
+          </a>
         </div>
       </div>
     </div>
@@ -207,17 +232,22 @@ function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: (
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]) as Blueprint;
+        localStorage.setItem(BLUEPRINT_STORAGE_KEY, JSON.stringify({
+          ...parsed,
+          createdAt: new Date().toISOString(),
+          status: "pending_payment",
+        }));
         setBlueprint(parsed);
         setMessages(prev => [...prev, {
           role: "assistant",
           gate: "BLUEPRINT",
-          content: `✨ Blueprint AI Anda sudah siap! Ini adalah gambaran chatbot yang bisa kita rakit bersama berdasarkan pengetahuan dan keahlian Anda.`,
+          content: `🎉 Blueprint AI Anda sudah selesai dibuat!\n\nBlueprint berisi: nama AI, persona, fitur utama, system prompt, dan langkah perakitan — semuanya dirancang khusus berdasarkan keahlian Anda.\n\nBlueprint akan otomatis tersedia di Gustafta Builder setelah Anda mengaktifkan paket. Tinggal klik "Import Blueprint" dan chatbot Anda langsung terkonfigurasi!`,
         }]);
       } else {
         setMessages(prev => [...prev, {
           role: "assistant",
           gate: "BLUEPRINT",
-          content: "Blueprint Anda sedang kami siapkan. Hubungi tim kami untuk melanjutkan proses konfigurasi! 🚀",
+          content: "Blueprint Anda sudah disiapkan. Lanjutkan ke pemilihan paket untuk mengaksesnya di Builder! 🚀",
         }]);
       }
     } catch {
@@ -354,7 +384,7 @@ function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: (
       </div>
 
       {/* Blueprint Card */}
-      {blueprint && <BlueprintCard bp={blueprint} onClose={onClose} />}
+      {blueprint && <BlueprintLockedCard bp={blueprint} onClose={onClose} />}
 
       {/* Input */}
       {!isDone && (
