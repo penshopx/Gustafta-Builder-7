@@ -69,68 +69,64 @@ function getChatbotTier(n: number = 2): { label: string; className: string } {
 function FeaturedCard({ agent, onBuy }: { agent: AgentProduct; onBuy: (a: AgentProduct) => void }) {
   const tier = getChatbotTier(agent.agentCount);
   const catLabel = CATEGORY_LABELS[agent.category] || agent.category;
+  const detailUrl = agent.agentId ? `/product/${agent.agentId}` : null;
   return (
-    <Card
-      className="bg-white border-gray-200 hover:border-violet-400 hover:shadow-md transition-all group flex flex-col"
-      data-testid={`card-featured-${agent.id}`}
-    >
-      <CardContent className="p-5 flex flex-col h-full">
-        <div className="flex items-start justify-between mb-3">
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
-            style={{ background: `${agent.color}15`, border: `1px solid ${agent.color}30` }}
-          >
-            {agent.emoji}
+    <Link href={detailUrl ?? "#"}>
+      <Card
+        className="bg-white border-gray-200 hover:border-violet-400 hover:shadow-md transition-all group flex flex-col cursor-pointer h-full"
+        data-testid={`card-featured-${agent.id}`}
+      >
+        <CardContent className="p-5 flex flex-col h-full">
+          <div className="flex items-start justify-between mb-3">
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
+              style={{ background: `${agent.color}15`, border: `1px solid ${agent.color}30` }}
+            >
+              {agent.emoji}
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <Badge variant="secondary" className="text-xs px-2 py-0">{catLabel}</Badge>
+              <Badge className={`text-xs px-2 py-0 border ${tier.className}`}>{tier.label}</Badge>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <Badge variant="secondary" className="text-xs px-2 py-0">{catLabel}</Badge>
-            <Badge className={`text-xs px-2 py-0 border ${tier.className}`}>{tier.label}</Badge>
-          </div>
-        </div>
 
-        <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-1 group-hover:text-violet-700 transition-colors line-clamp-2">
-          {agent.name}
-        </h3>
-        {agent.tagline && (
-          <p className="text-gray-600 text-xs leading-relaxed line-clamp-2 mb-2">{agent.tagline}</p>
-        )}
+          <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-1 group-hover:text-violet-700 transition-colors line-clamp-2">
+            {agent.name}
+          </h3>
+          {agent.tagline && (
+            <p className="text-gray-600 text-xs leading-relaxed line-clamp-2 mb-2">{agent.tagline}</p>
+          )}
 
-        {(agent.productFeatures ?? []).length > 0 && (
-          <div className="space-y-1 mb-3 flex-1">
-            {(agent.productFeatures ?? []).slice(0, 3).map((f, i) => (
-              <div key={i} className="flex items-start gap-1.5">
-                <CheckCircle2 className="h-3 w-3 text-violet-600 shrink-0 mt-0.5" />
-                <span className="text-xs text-gray-600 line-clamp-1">{f}</span>
-              </div>
-            ))}
-          </div>
-        )}
+          {(agent.productFeatures ?? []).length > 0 && (
+            <div className="space-y-1 mb-3 flex-1">
+              {(agent.productFeatures ?? []).slice(0, 3).map((f, i) => (
+                <div key={i} className="flex items-start gap-1.5">
+                  <CheckCircle2 className="h-3 w-3 text-violet-600 shrink-0 mt-0.5" />
+                  <span className="text-xs text-gray-600 line-clamp-1">{f}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
-        <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-          <div className="flex flex-col">
-            {agent.originalPrice && agent.originalPrice > agent.price && (
-              <span className="text-xs text-gray-400 line-through leading-none mb-0.5">{formatPrice(agent.originalPrice)}</span>
-            )}
-            <span className="font-bold text-gray-900">{formatPrice(agent.price)}</span>
-          </div>
-          <div className="flex gap-1.5">
-            {agent.agentId && (
-              <a href={`/product/${agent.agentId}`} data-testid={`link-detail-featured-${agent.id}`}>
-                <Button size="sm" variant="ghost" className="text-gray-400 hover:text-violet-700 text-xs h-8 px-2.5">Detail</Button>
-              </a>
-            )}
+          <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            <div className="flex flex-col">
+              {agent.originalPrice && agent.originalPrice > agent.price && (
+                <span className="text-xs text-gray-400 line-through leading-none mb-0.5">{formatPrice(agent.originalPrice)}</span>
+              )}
+              <span className="font-bold text-gray-900">{formatPrice(agent.price)}</span>
+            </div>
             <Button
               size="sm"
-              onClick={() => onBuy(agent)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onBuy(agent); }}
               className="bg-violet-600 hover:bg-violet-700 text-white text-xs h-8 px-3"
               data-testid={`button-buy-featured-${agent.id}`}
             >
               <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />Beli
             </Button>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
@@ -323,13 +319,11 @@ export default function StoreFeatured() {
         </p>
 
         <div className="inline-flex flex-wrap items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-gray-900 border border-gray-700 text-sm mb-6 shadow-sm">
-          <span className="text-orange-300 font-medium">🏷️ Pilih AI (Lisensi)</span>
-          <span className="text-gray-400">+</span>
-          <span className="text-green-300 font-medium">
-            ⚡ <a href="/pricing" className="underline underline-offset-2 hover:text-green-200">Paket Berlangganan</a>
-          </span>
-          <span className="text-gray-400">=</span>
-          <span className="text-white font-bold">✓ Platform Aktif</span>
+          <span className="text-orange-300 font-medium">🏷️ Pilih AI</span>
+          <span className="text-gray-400">→</span>
+          <span className="text-green-300 font-medium">💳 Bayar Lisensi Sekali</span>
+          <span className="text-gray-400">→</span>
+          <span className="text-white font-bold">✓ Langsung Aktif</span>
         </div>
 
         <div className="flex flex-wrap gap-4 justify-center text-xs text-gray-500">
