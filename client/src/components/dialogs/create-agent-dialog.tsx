@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network, Scale, Loader2, CheckCircle2 } from "lucide-react";
+import { Bot, ChevronLeft, ChevronRight, Sparkles, PenLine, Wrench, Lightbulb, Network, Scale, Loader2, CheckCircle2, FileDown, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -78,6 +78,37 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
   });
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [templateInitialCategory, setTemplateInitialCategory] = useState<string | undefined>(undefined);
+  const [savedBlueprint, setSavedBlueprint] = useState<{
+    namaAI: string; domain: string; persona: string; sasaranPengguna: string;
+    fiturUtama: string[]; systemPromptHint: string; langkahSelanjutnya: string[];
+    status?: string; createdAt?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      try {
+        const raw = localStorage.getItem("gustafta_blueprint_pending");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setSavedBlueprint(parsed);
+        }
+      } catch { setSavedBlueprint(null); }
+    }
+  }, [open]);
+
+  const handleImportBlueprint = () => {
+    if (!savedBlueprint) return;
+    setIsOrchestrator(false);
+    setFormData({
+      name: savedBlueprint.namaAI,
+      tagline: savedBlueprint.domain,
+      description: `${savedBlueprint.persona}\n\nSasaran pengguna: ${savedBlueprint.sasaranPengguna}`,
+      category: "",
+      subcategory: "",
+      systemPrompt: savedBlueprint.systemPromptHint,
+    });
+    setStep("details");
+  };
   const [isOrchestrator, setIsOrchestrator] = useState(forceOrchestrator || false);
 
   useEffect(() => {
@@ -306,6 +337,43 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
               </Card>
             )}
             
+            {/* ── BLUEPRINT IMPORT BANNER ── */}
+            {savedBlueprint && (
+              <Card
+                className="cursor-pointer transition-all hover-elevate border-2 border-amber-400 dark:border-amber-600 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20"
+                onClick={handleImportBlueprint}
+                data-testid="card-import-blueprint"
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30 w-fit">
+                        <FileDown className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base text-amber-800 dark:text-amber-300">✨ Import Blueprint AI Anda</CardTitle>
+                        <p className="text-[11px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">{savedBlueprint.namaAI} · {savedBlueprint.domain}</p>
+                      </div>
+                    </div>
+                    <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-amber-700 dark:text-amber-400">
+                    Blueprint dari sesi Socratic Dialog siap diimport. Nama, persona, dan system prompt akan terisi otomatis — tinggal lengkapi detail dan rakit chatbot Anda.
+                  </CardDescription>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {(savedBlueprint.fiturUtama ?? []).slice(0, 3).map((f, i) => (
+                      <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300">{f}</span>
+                    ))}
+                    {(savedBlueprint.fiturUtama ?? []).length > 3 && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700">+{(savedBlueprint.fiturUtama ?? []).length - 3} lainnya</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <Card
                 className="cursor-pointer transition-all hover-elevate"
@@ -504,6 +572,24 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
 
         {step === "details" && (
           <div className="space-y-4 py-4">
+            {/* Blueprint import indicator */}
+            {savedBlueprint && formData.name === savedBlueprint.namaAI && (
+              <div className="flex items-start gap-2 p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20">
+                <FileDown className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">Diimport dari Blueprint AI</p>
+                  <p className="text-[11px] text-amber-600 dark:text-amber-500 mt-0.5">Nama, tagline, deskripsi, dan system prompt sudah terisi dari Blueprint Anda. Lengkapi field dan simpan untuk mulai merakit chatbot.</p>
+                  {(savedBlueprint.fiturUtama ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {(savedBlueprint.fiturUtama ?? []).map((f, i) => (
+                        <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300">{f}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {selectedCategory && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
                 <selectedCategory.icon className="w-5 h-5 text-primary" />
