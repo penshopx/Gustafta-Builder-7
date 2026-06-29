@@ -401,6 +401,8 @@ function Router() {
       <Route path="/admin/audit" component={AdminAudit} />
       <Route path="/login" component={LoginPage} />
       <Route path="/auth" component={LoginPage} />
+      <Route path="/register" component={() => { window.location.replace("/login?mode=register"); return null; }} />
+      <Route path="/daftar" component={() => { window.location.replace("/login?mode=register"); return null; }} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/documentation" component={Documentation} />
       <Route path="/pricing" component={Pricing} />

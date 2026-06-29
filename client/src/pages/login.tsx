@@ -7,10 +7,10 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Sparkles, CheckCircle2, LogOut, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, CheckCircle2, LogOut, AlertTriangle, KeyRound } from "lucide-react";
 import { trackCompleteRegistration, trackLead } from "@/lib/meta-pixel";
 
-type Mode = "choose" | "login" | "register" | "verify";
+type Mode = "choose" | "login" | "register" | "verify" | "forgot" | "reset";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
@@ -33,6 +33,12 @@ export default function LoginPage() {
   const [pendingEmail, setPendingEmail] = useState("");
   const [otpFallback, setOtpFallback] = useState<string | undefined>(undefined);
   const [emailSendError, setEmailSendError] = useState<string | undefined>(undefined);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetOtp, setResetOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [resetOtpFallback, setResetOtpFallback] = useState<string | undefined>(undefined);
 
   // Detect existing session so user can switch accounts
   const { data: currentUser } = useQuery<any>({
@@ -130,6 +136,56 @@ export default function LoginPage() {
       navigate(returnUrl);
     } catch (err: any) {
       toast({ title: "Verifikasi gagal", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRequestReset = async () => {
+    if (!resetEmail) {
+      toast({ title: "Masukkan email Anda", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await apiRequest("POST", "/api/auth/request-reset", { email: resetEmail });
+      setResetOtpFallback(res?.otpFallback);
+      setMode("reset");
+      if (res?.otpFallback) {
+        toast({ title: "Kode reset dibuat", description: "Lihat kode OTP di layar." });
+      } else {
+        toast({ title: "Kode reset dikirim!", description: `Cek email ${resetEmail}.` });
+      }
+    } catch (err: any) {
+      toast({ title: "Gagal", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetOtp || resetOtp.length !== 6) {
+      toast({ title: "Kode OTP harus 6 digit", variant: "destructive" });
+      return;
+    }
+    if (!newPassword || newPassword.length < 8) {
+      toast({ title: "Password minimal 8 karakter", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast({ title: "Konfirmasi password tidak cocok", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      await apiRequest("POST", "/api/auth/reset-password", { email: resetEmail, code: resetOtp, newPassword });
+      toast({ title: "Password berhasil direset!", description: "Silakan login dengan password baru." });
+      setMode("login");
+      setEmail(resetEmail);
+      setPassword("");
+      setResetEmail(""); setResetOtp(""); setNewPassword(""); setConfirmNewPassword(""); setResetOtpFallback(undefined);
+    } catch (err: any) {
+      toast({ title: "Reset gagal", description: (err?.message || "").replace(/^\d+: /, ""), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -279,15 +335,13 @@ export default function LoginPage() {
                 <button className="text-primary font-medium hover:underline" onClick={() => setMode("register")}>
                   Belum punya akun? Daftar
                 </button>
-                <a
-                  href="https://wa.me/6282299417818?text=Halo%2C+saya+lupa+password+akun+Gustafta+saya.+Email%3A+"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
                   className="text-muted-foreground hover:text-foreground hover:underline"
+                  onClick={() => { setResetEmail(email); setMode("forgot"); }}
                   data-testid="link-forgot-password"
                 >
                   Lupa password?
-                </a>
+                </button>
               </div>
             </>
           )}
@@ -493,6 +547,133 @@ export default function LoginPage() {
               </button>
             </>
           )}
+          {/* ── FORGOT PASSWORD ── */}
+          {mode === "forgot" && (
+            <>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setMode("login")} className="text-muted-foreground hover:text-foreground">
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <div>
+                  <h1 className="text-lg font-bold">Lupa Password</h1>
+                  <p className="text-xs text-muted-foreground">Masukkan email untuk menerima kode reset</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="forgot-email">Email terdaftar</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      placeholder="nama@email.com"
+                      className="pl-9"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleRequestReset()}
+                      autoFocus
+                      data-testid="input-forgot-email"
+                    />
+                  </div>
+                </div>
+                <Button className="w-full" onClick={handleRequestReset} disabled={loading || !resetEmail} data-testid="button-request-reset">
+                  {loading ? "Memproses..." : "Kirim Kode Reset"}
+                </Button>
+              </div>
+
+              <p className="text-center text-sm text-muted-foreground">
+                Ingat password?{" "}
+                <button className="text-primary font-medium hover:underline" onClick={() => setMode("login")}>
+                  Kembali login
+                </button>
+              </p>
+            </>
+          )}
+
+          {/* ── RESET PASSWORD ── */}
+          {mode === "reset" && (
+            <>
+              <div className="text-center space-y-2">
+                <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <KeyRound className="h-6 w-6 text-primary" />
+                </div>
+                <h1 className="text-lg font-bold">Reset Password</h1>
+                <p className="text-sm text-muted-foreground">
+                  {resetOtpFallback
+                    ? <>Email server belum dikonfigurasi — lihat kode di layar</>
+                    : <>Kode OTP dikirim ke <span className="font-medium text-foreground">{resetEmail}</span></>
+                  }
+                </p>
+              </div>
+
+              {resetOtpFallback && (
+                <div className="rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 dark:bg-amber-950/30 p-4 text-center space-y-1">
+                  <p className="text-xs font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wide">Kode OTP Reset</p>
+                  <p className="text-3xl font-bold tracking-[0.3em] text-amber-900 dark:text-amber-200 select-all">{resetOtpFallback}</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-500">Salin kode ini dan masukkan di bawah</p>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="reset-otp">Kode OTP (6 digit)</Label>
+                  <Input
+                    id="reset-otp"
+                    placeholder="123456"
+                    maxLength={6}
+                    className="text-center text-2xl font-bold tracking-widest h-12"
+                    value={resetOtp}
+                    onChange={(e) => setResetOtp(e.target.value.replace(/\D/g, ""))}
+                    autoFocus
+                    data-testid="input-reset-otp"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-password">Password Baru <span className="text-muted-foreground font-normal">(min. 8 karakter)</span></Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="new-password"
+                      type={showNewPass ? "text" : "password"}
+                      placeholder="Minimal 8 karakter"
+                      className="pl-9 pr-10"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      data-testid="input-new-password"
+                    />
+                    <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowNewPass(!showNewPass)}>
+                      {showNewPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirm-new-password">Konfirmasi Password Baru</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirm-new-password"
+                      type={showNewPass ? "text" : "password"}
+                      placeholder="Ulangi password baru"
+                      className="pl-9"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleResetPassword()}
+                      data-testid="input-confirm-new-password"
+                    />
+                  </div>
+                </div>
+                <Button className="w-full" onClick={handleResetPassword} disabled={loading || resetOtp.length !== 6 || !newPassword || !confirmNewPassword} data-testid="button-submit-reset">
+                  {loading ? "Memproses..." : "Reset Password"}
+                </Button>
+                <Button variant="ghost" className="w-full text-sm" onClick={() => { setMode("forgot"); setResetOtp(""); setNewPassword(""); setConfirmNewPassword(""); }} disabled={loading} data-testid="button-back-forgot">
+                  ← Minta kode baru
+                </Button>
+              </div>
+            </>
+          )}
+
         </div>
 
         {/* Admin / Replit OIDC fallback — small discreet link */}

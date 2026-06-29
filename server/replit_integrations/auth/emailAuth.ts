@@ -419,6 +419,131 @@ export function registerEmailAuthRoutes(app: Express): void {
     }
   });
 
+  // ── FORGOT PASSWORD: Step 1 — request reset OTP ─────────────────────────────
+  app.post("/api/auth/request-reset", otpLimiter, async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: "Email wajib diisi." });
+
+      const [userRow] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      if (!userRow || !userRow.passwordHash) {
+        // Generic message — don't reveal if email exists
+        return res.json({ success: true, message: "Jika email terdaftar, kode reset dikirim ke email Anda." });
+      }
+      if (!userRow.emailVerified) {
+        return res.status(400).json({ error: "Email belum diverifikasi. Selesaikan verifikasi akun terlebih dahulu." });
+      }
+
+      // Invalidate old OTPs and create new one
+      await db.update(emailVerifications).set({ used: true }).where(eq(emailVerifications.email, email));
+      const code = generateOTP();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      await db.insert(emailVerifications).values({ id: randomUUID(), email, code, expiresAt });
+
+      const firstName = userRow.firstName || "Pengguna";
+      const brevoApiKey = process.env.BREVO_API_KEY;
+
+      if (!brevoApiKey) {
+        if (isProduction) {
+          return res.status(503).json({ error: "Layanan email belum dikonfigurasi. Hubungi administrator." });
+        }
+        return res.json({ success: true, message: "Kode reset dibuat (email belum dikonfigurasi).", otpFallback: code });
+      }
+
+      const senderEmail = process.env.BREVO_SENDER_EMAIL || "noreply@gustafta.com";
+      const html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f3f4f6">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:32px 0">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;padding:40px;font-family:Arial,sans-serif;color:#111">
+        <tr><td>
+          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#6366f1">Gustafta</p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0">
+          <p style="font-size:16px;margin:0 0 8px">Halo <b>${firstName}</b>,</p>
+          <p style="font-size:15px;color:#374151;margin:0 0 24px">Gunakan kode berikut untuk reset password akun Gustafta kamu:</p>
+          <div style="font-size:40px;font-weight:700;letter-spacing:10px;color:#111;text-align:center;padding:24px 16px;background:#f9fafb;border-radius:8px;border:2px solid #e5e7eb;margin:0 0 24px">
+            ${code}
+          </div>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 8px">Kode ini berlaku selama <b>10 menit</b>.</p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 24px">Jika kamu tidak meminta reset password, abaikan email ini — password kamu tidak akan berubah.</p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 16px">
+          <p style="font-size:12px;color:#9ca3af;margin:0">© 2025 Gustafta. Seluruh hak dilindungi.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+      try {
+        const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "accept": "application/json", "api-key": brevoApiKey, "content-type": "application/json" },
+          body: JSON.stringify({
+            sender: { name: "Gustafta", email: senderEmail },
+            to: [{ email, name: firstName }],
+            subject: "Kode Reset Password Gustafta",
+            htmlContent: html,
+            tags: ["reset-password", "transactional"],
+          }),
+        });
+        if (!resp.ok) {
+          const errBody = await resp.text();
+          console.error(`[EmailAuth] Reset email send failed for ${email}: HTTP ${resp.status} — ${errBody}`);
+          return res.status(503).json({ error: "Email gagal terkirim. Coba lagi atau hubungi support." });
+        }
+      } catch (emailErr: any) {
+        console.error(`[EmailAuth] Reset email network error for ${email}:`, emailErr?.message);
+        return res.status(503).json({ error: "Email gagal terkirim. Coba lagi atau hubungi support." });
+      }
+
+      res.json({ success: true, message: "Jika email terdaftar, kode reset dikirim ke email Anda." });
+    } catch (err) {
+      console.error("[EmailAuth] Request reset error:", err);
+      res.status(500).json({ error: "Terjadi kesalahan. Silakan coba lagi." });
+    }
+  });
+
+  // ── FORGOT PASSWORD: Step 2 — verify OTP + set new password ─────────────────
+  app.post("/api/auth/reset-password", otpLimiter, async (req, res) => {
+    try {
+      const { email, code, newPassword } = req.body;
+      if (!email || !code || !newPassword) {
+        return res.status(400).json({ error: "Email, kode OTP, dan password baru wajib diisi." });
+      }
+      if (newPassword.length < 8) {
+        return res.status(400).json({ error: "Password minimal 8 karakter." });
+      }
+
+      const verif = await db
+        .select()
+        .from(emailVerifications)
+        .where(and(
+          eq(emailVerifications.email, email),
+          eq(emailVerifications.code, String(code).trim()),
+          eq(emailVerifications.used, false),
+          gt(emailVerifications.expiresAt, new Date())
+        ))
+        .limit(1);
+
+      if (verif.length === 0) {
+        return res.status(400).json({ error: "Kode OTP salah atau sudah kadaluarsa." });
+      }
+
+      const [userRow] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      if (!userRow) return res.status(404).json({ error: "Akun tidak ditemukan." });
+
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+      await db.update(emailVerifications).set({ used: true }).where(eq(emailVerifications.id, verif[0].id));
+      await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.email, email));
+
+      console.log(`[EmailAuth] Password reset successful for ${email}`);
+      res.json({ success: true, message: "Password berhasil direset. Silakan login dengan password baru." });
+    } catch (err) {
+      console.error("[EmailAuth] Reset password error:", err);
+      res.status(500).json({ error: "Terjadi kesalahan. Silakan coba lagi." });
+    }
+  });
+
   // ── LOGOUT email session ─────────────────────────────────────────────────────
   app.post("/api/auth/logout-email", (req: any, res) => {
     req.session.destroy(() => {
