@@ -1,13 +1,17 @@
 import { useLocation } from "wouter";
+import { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SharedHeader } from "@/components/shared-header";
 import {
   CheckSquare, AlertTriangle, Building2, ShieldCheck,
   ClipboardList, ArrowRight, Star, Lock, Zap, BarChart3,
   Phone, Check, TrendingUp, Sparkles, Crown, MessageCircle,
   GraduationCap, BookOpen, Users, Award, ClipboardCheck, Scale,
-  Briefcase, Target, Megaphone, ShoppingBag, PieChart, Mic, PenLine, Repeat2, ChevronRight
+  Briefcase, Target, Megaphone, ShoppingBag, PieChart, Mic, PenLine, Repeat2, ChevronRight,
+  Send, Loader2, Bot
 } from "lucide-react";
 
 interface Pack {
@@ -170,8 +174,227 @@ const PACKS: Pack[] = [
 const WA_NUMBER = "6282299417818";
 const waLink = (msg: string) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
 
+const KONSUL_MAX = 5;
+const AGENT_ID = "1"; // Gustafta Helpdesk
+
+type ChatMsg = { role: "user" | "assistant"; content: string };
+
+const REKOMENDASI = [
+  {
+    id: "naik-level",
+    emoji: "🛠️",
+    label: "Naik Level Sendiri",
+    desc: "Lanjutkan perjalanan mandiri — sertifikasi, buka jasa, jadi trainer.",
+    color: "amber",
+    wa: "Halo, saya tertarik naik level jadi Perakit AI Profesional di Gustafta. Bisa ceritakan jalurnya?",
+  },
+  {
+    id: "ai-studio",
+    emoji: "🤝",
+    label: "AI Studio — Kami Rakitkan",
+    desc: "Serahkan perakitan ke tim Gustafta. Anda cukup ceritakan kebutuhan.",
+    color: "orange",
+    wa: "Halo, saya ingin konsultasi AI Studio Gustafta. Tim saya butuh AI yang dirakitkan. Bisa diskusi?",
+  },
+  {
+    id: "ai-network",
+    emoji: "🌐",
+    label: "Bergabung AI Network",
+    desc: "Komunitas Perakit AI — berbagi, berkolaborasi, berkembang bersama.",
+    color: "violet",
+    wa: "Halo, saya ingin bergabung Komunitas Perakit AI Gustafta. Bagaimana caranya?",
+  },
+];
+
+function BerkembangDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [userCount, setUserCount] = useState(0);
+  const [sessionId] = useState(() => `berkembang_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+  const [showRek, setShowRek] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setMessages([{
+        role: "assistant",
+        content: "Halo! Saya Gustafta — asisten Perakit AI Indonesia 👋\n\nAnda sudah sampai di Tahap 5: **Berkembang**. Artinya Anda siap membangun bisnis AI, bukan sekadar memakai AI.\n\nCeritakan dulu — apa situasi Anda saat ini? Misalnya:\n• Sudah punya chatbot tapi ingin naik level\n• Punya keahlian domain dan ingin dirakitkan AI-nya\n• Ingin bergabung komunitas dan berkembang bersama\n\nKetik apa saja — saya bantu arahkan! 🚀",
+      }]);
+      setInput("");
+      setUserCount(0);
+      setLoading(false);
+      setShowRek(false);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading, showRek]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading || userCount >= KONSUL_MAX) return;
+    const userMsg = input.trim();
+    setInput("");
+    setLoading(true);
+    setUserCount(c => c + 1);
+    setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId: AGENT_ID, sessionId, role: "user", content: userMsg }),
+      });
+      const data = await res.json();
+      const reply: string = data.aiMessage?.content ?? "Maaf, tidak ada respons.";
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: "Maaf, terjadi gangguan. Silakan coba lagi." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const done = userCount >= KONSUL_MAX;
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg p-0 overflow-hidden flex flex-col" style={{ maxHeight: "92vh" }}>
+        {/* Header */}
+        <div className="px-5 py-4 flex items-center gap-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-b border-amber-200 dark:border-amber-800">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0">
+            <Bot className="h-5 w-5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <DialogTitle className="text-sm font-bold text-amber-900 dark:text-amber-100">Konsultasi Berkembang</DialogTitle>
+            <DialogDescription className="text-xs text-amber-700 dark:text-amber-400">Gustafta bantu temukan jalur terbaik untuk bisnis AI Anda</DialogDescription>
+          </div>
+          <Badge className="bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/50 dark:text-amber-300 text-[10px] shrink-0">
+            TAHAP 5
+          </Badge>
+        </div>
+
+        {/* Chat area */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50 dark:bg-zinc-900" style={{ minHeight: 240, maxHeight: 380 }}>
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              {m.role === "assistant" && (
+                <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+                  <Bot className="h-3.5 w-3.5 text-amber-600" />
+                </div>
+              )}
+              <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                m.role === "user"
+                  ? "bg-amber-600 text-white rounded-tr-sm"
+                  : "bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-tl-sm shadow-sm"
+              }`}>
+                {m.content.replace(/\*\*(.*?)\*\*/g, "$1")}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+                <Bot className="h-3.5 w-3.5 text-amber-600" />
+              </div>
+              <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Rekomendasi panel */}
+          {showRek && (
+            <div className="mt-2 space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground text-center uppercase tracking-wide">Rekomendasi Jalur untuk Anda</p>
+              {REKOMENDASI.map(r => (
+                <a
+                  key={r.id}
+                  href={waLink(r.wa)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-start gap-3 rounded-xl border-2 p-3 hover:shadow-md transition-all ${
+                    r.color === "amber" ? "border-amber-300 bg-amber-50 dark:bg-amber-950/30 hover:border-amber-400" :
+                    r.color === "orange" ? "border-orange-300 bg-orange-50 dark:bg-orange-950/30 hover:border-orange-400" :
+                    "border-violet-300 bg-violet-50 dark:bg-violet-950/30 hover:border-violet-400"
+                  }`}
+                  data-testid={`link-rekomen-${r.id}`}
+                >
+                  <span className="text-xl shrink-0">{r.emoji}</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold leading-tight">{r.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{r.desc}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                </a>
+              ))}
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* End of session — show rekomendasi */}
+        {done && !showRek && (
+          <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/20 border-t border-amber-200 dark:border-amber-800">
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-1">
+              Konsultasi selesai ✅
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+              Berdasarkan cerita Anda, lihat rekomendasi jalur yang paling cocok:
+            </p>
+            <Button
+              onClick={() => setShowRek(true)}
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white h-9 font-semibold text-sm gap-2"
+              data-testid="button-lihat-rekomendasi"
+            >
+              <Sparkles className="h-4 w-4" /> Lihat Rekomendasi Jalur
+            </Button>
+          </div>
+        )}
+
+        {/* Input */}
+        {!done && (
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Sparkles className="h-3 w-3 text-amber-400" />
+              <span className="text-[10px] text-gray-400">{KONSUL_MAX - userCount} pesan tersisa untuk konsultasi</span>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                placeholder="Ceritakan situasi Anda..."
+                disabled={loading}
+                className="flex-1 text-sm h-10"
+                data-testid="input-berkembang-chat"
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={loading || !input.trim()}
+                size="sm"
+                className="bg-amber-600 hover:bg-amber-700 text-white h-10 px-3"
+                data-testid="button-berkembang-send"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </div>
+            <span className="text-[10px] text-gray-400 mt-1.5 block">Tekan Enter untuk kirim</span>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function PacksPage() {
   const [, navigate] = useLocation();
+  const [showKonsul, setShowKonsul] = useState(false);
 
   const available = PACKS.filter(p => p.status === "available");
   const comingSoon = PACKS.filter(p => p.status === "coming_soon");
@@ -198,6 +421,20 @@ export default function PacksPage() {
           <p className="text-sm text-amber-700 dark:text-amber-300 mb-4 max-w-3xl leading-relaxed">
             Ini bukan lagi tentang memakai AI — ini tentang <strong>menjadi pelaku bisnis AI</strong>. Bangun organisasi, layanan, atau ekosistem berbasis AI bersama tim GUSTAFTA.
           </p>
+
+          {/* CTA Dialog Konsultasi */}
+          <div className="flex items-center gap-3 mb-5">
+            <Button
+              onClick={() => setShowKonsul(true)}
+              className="gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+              data-testid="button-konsultasi-berkembang"
+            >
+              <Bot className="h-4 w-4" />
+              Konsultasi dengan Gustafta
+            </Button>
+            <span className="text-xs text-amber-600 dark:text-amber-400">Ceritakan situasi Anda — Gustafta bantu arahkan jalur yang tepat</span>
+          </div>
+
           {/* 4 Level Perakit AI — Growth Path */}
           <div className="mb-5">
             <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-3 uppercase tracking-wide">Jalur Pertumbuhan Perakit AI</p>
@@ -960,6 +1197,9 @@ export default function PacksPage() {
           </div>
         </div>
       </div>
+
+      {/* Dialog Konsultasi Berkembang */}
+      <BerkembangDialog open={showKonsul} onClose={() => setShowKonsul(false)} />
     </div>
   );
 }
