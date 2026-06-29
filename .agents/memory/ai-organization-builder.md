@@ -41,6 +41,9 @@ Roadmap teknis bertahap hidup di **`docs/blueprint-engine/`** (BUKAN di memory):
 - **Confidence, bukan Completion**: tiap field punya `FieldMeta{confidence,source,evidence,needsConfirmation}`; dialog hanya tanya yang confidence rendah.
 - **Scope contract**: Blueprint = DNA desain, BUKAN gudang data. Kecualikan field system-managed (id/userId/accessToken/createdAt) & tabel runtime (analytics/messages/leads/scoring_results). Yang masuk hanya konfigurasinya.
 
+**STATUS roadmap (per Juni 2026): Tahap 1–9 SELESAI.** Seluruh engine ada di `server/services/blueprint-engine/` + barrel `index.ts`. Tahap 6 Inference, 7 Confidence, 8 Gap, 9 = Critic+Simulation+Evolution (tiga file: `critic-engine.ts` skorecard 5-dimensi grade A–E; `simulation-engine.ts` dry-run skenario customer tanpa LLM; `evolution-engine.ts` analisis riwayat snapshot). Semua PURE/deterministik + tes regresi permanen di `tests/*-engine*.test.ts`. **PENTING: lapisan engine ini BELUM DISAMBUNG ke route/UI/DB** — jangan asumsikan "live". Fase penyambungan adalah pekerjaan berikutnya di luar 9-tahap, hanya saat owner memutuskan.
+**Catatan tes pre-existing:** `tests/routes-helper-usage.test.ts` (handler `/api/messages/stream` harus panggil `buildFinalSystemPrompt`) GAGAL sejak sebelum kerja engine — bukan regresi dari Blueprint Engine; terpisah.
+
 **Prinsip mati-matian (ditegaskan owner berulang):** JANGAN rombak app, JANGAN ubah UI/Builder. Engine baru = ADITIF, tersembunyi dulu, disambung pelan-pelan. Engine direncanakan di `server/services/blueprint-engine/` agar Builder existing tak tersentuh sampai Tahap 4.
 **Pergeseran inti:** Builder bukan titik awal tapi tujuan — alurnya `Dialog→Blueprint(JSON "DNA")→Config→Builder auto-fill→Ekosistem`. Pakai **Confidence**, bukan Completion %.
 
