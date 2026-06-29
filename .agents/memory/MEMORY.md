@@ -10,3 +10,4 @@
 - [Email verification & BREVO_API_KEY](email-verification-brevo.md) — "verifikasi email mati" biasanya bukan kode rusak; secret BREVO_API_KEY hilang. Dev tampilkan otpFallback, prod 503. Cek secret dulu.
 - [Session cookie SameSite & Replit proxy](session-cookie-samesite.md) — "login tak tersimpan setelah tutup browser" = cookie SameSite=None dibuang proteksi 3rd-party; fix sameSite:lax. Dev proxy paksa None — verifikasi di app published.
 - [Gustafta Pedoman Kanonik](.local/gustafta-pedoman.md) — dokumen genesis: identitas, visi, 6 pilar ekosistem, 5-stage journey, brand language, arsitektur landing page. Wajib dibaca sebelum iterasi besar apapun.
+- [Framework Visibility Strategy](framework-visibility-strategy.md) — Framework™ login-gated, tidak dibuka penuh ke publik sampai maturity. Dua segmen berbeda: Profesional (tak peduli Framework) vs AI Builder (tertarik Framework).
