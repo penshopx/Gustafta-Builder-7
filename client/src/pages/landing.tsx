@@ -13,16 +13,161 @@ import {
   Send, Loader2, Sparkles, X, ChevronDown,
 } from "lucide-react";
 
-const DEMO_MAX_LANDING = 5;
 const GUSTAFTA_AGENT_ID = "1";
-type LandingMsg = { role: "user" | "assistant"; content: string };
+type LandingMsg = { role: "user" | "assistant"; content: string; gate?: string };
+type SocraticGate = "GATE1" | "GATE2" | "GATE3" | "BLUEPRINT";
+
+interface Blueprint {
+  namaAI: string;
+  domain: string;
+  persona: string;
+  sasaranPengguna: string;
+  fiturUtama: string[];
+  systemPromptHint: string;
+  langkahSelanjutnya: string[];
+}
+
+const GATE_LABELS: Record<SocraticGate, { label: string; color: string; step: number }> = {
+  GATE1: { label: "Menggali Potensi", color: "bg-blue-500", step: 1 },
+  GATE2: { label: "Melihat Visi", color: "bg-violet-500", step: 2 },
+  GATE3: { label: "Merancang Blueprint", color: "bg-amber-500", step: 3 },
+  BLUEPRINT: { label: "Blueprint Siap!", color: "bg-green-500", step: 4 },
+};
+
+function buildSystemContext(gate: SocraticGate, userMsg: string, history: LandingMsg[]): string {
+  const historyText = history
+    .filter(m => m.role === "user")
+    .map(m => `- ${m.content}`)
+    .join("\n");
+
+  if (gate === "GATE1") {
+    return `[INSTRUKSI SISTEM — JANGAN TAMPILKAN KE USER]
+Kamu adalah Gustafta, AI-coach Socratik yang membantu orang menemukan potensi mereka untuk diubah menjadi AI.
+FASE: GATE 1 — Menggali Potensi
+Tugasmu: Gali latar belakang, keahlian, dan pengalaman user dengan pertanyaan Socratik yang hangat dan penasaran.
+- Jangan langsung menawarkan produk.
+- Ajukan 1 pertanyaan mendalam yang membuat user merenung.
+- Fokus pada: siapa mereka, apa yang mereka kuasai, siapa yang mereka bantu.
+Pesan user: ${userMsg}`;
+  }
+
+  if (gate === "GATE2") {
+    return `[INSTRUKSI SISTEM — JANGAN TAMPILKAN KE USER]
+Kamu adalah Gustafta, AI-coach Socratik.
+FASE: GATE 2 — Membuka Visi
+Apa yang sudah user bagikan:
+${historyText}
+
+Tugasmu: Buat user merasakan kekuatan platform ini secara konkret.
+- Gambarkan secara vivid bagaimana pengetahuan/keahlian mereka bisa menjadi sebuah AI yang bekerja 24/7.
+- Gunakan framing "bayangkan jika..." dan berikan contoh spesifik berdasarkan latar belakang mereka.
+- Akhiri dengan 1 pertanyaan yang menggali use case spesifik mereka lebih dalam.
+- Nada: excited, memancing rasa ingin tahu, bukan menjual.
+Pesan user: ${userMsg}`;
+  }
+
+  if (gate === "GATE3") {
+    return `[INSTRUKSI SISTEM — JANGAN TAMPILKAN KE USER]
+Kamu adalah Gustafta, AI-coach Socratik.
+FASE: GATE 3 — Merancang Blueprint
+Yang sudah diketahui tentang user:
+${historyText}
+
+Tugasmu: Ajukan 2 pertanyaan kunci terakhir yang akan membuat Blueprint mereka semakin tajam:
+1. Siapa 3 tipe pengguna utama chatbot mereka?
+2. Apa 1 pertanyaan yang PALING SERING ditanyakan kepada mereka?
+Setelah user menjawab, katakan bahwa kamu siap membuat Blueprint mereka.
+Nada: antusias, memberi rasa bahwa ini adalah langkah konkret.
+Pesan user: ${userMsg}`;
+  }
+
+  return "";
+}
+
+function buildBlueprintPrompt(history: LandingMsg[]): string {
+  const allUserMsgs = history
+    .filter(m => m.role === "user")
+    .map(m => m.content)
+    .join(" | ");
+
+  return `[BUAT BLUEPRINT]
+Berdasarkan seluruh percakapan Socratik ini:
+${allUserMsgs}
+
+Buat Blueprint Konfigurasi AI dalam format JSON yang valid SAJA (tanpa markdown, tanpa penjelasan):
+{
+  "namaAI": "nama chatbot yang menarik dan relevan",
+  "domain": "domain keahlian utama",
+  "persona": "deskripsi singkat karakter AI (1 kalimat)",
+  "sasaranPengguna": "siapa yang dilayani",
+  "fiturUtama": ["fitur 1", "fitur 2", "fitur 3", "fitur 4"],
+  "systemPromptHint": "opening system prompt singkat untuk chatbot ini (2-3 kalimat)",
+  "langkahSelanjutnya": ["langkah 1", "langkah 2", "langkah 3"]
+}`;
+}
+
+function BlueprintCard({ bp, onClose }: { bp: Blueprint; onClose: () => void }) {
+  return (
+    <div className="mx-3 mb-3 rounded-xl border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-violet-50 dark:from-blue-950/30 dark:to-violet-950/30 overflow-hidden">
+      <div className="px-3 py-2 bg-gradient-to-r from-blue-600 to-violet-600 flex items-center gap-2">
+        <Sparkles className="h-3.5 w-3.5 text-yellow-300" />
+        <span className="text-white text-xs font-bold tracking-wide">BLUEPRINT AI ANDA</span>
+      </div>
+      <div className="p-3 space-y-2">
+        <div>
+          <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Nama AI</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-white">{bp.namaAI}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Domain</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{bp.domain}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Sasaran</p>
+            <p className="text-xs text-gray-700 dark:text-gray-300">{bp.sasaranPengguna}</p>
+          </div>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-1">Persona AI</p>
+          <p className="text-xs text-gray-700 dark:text-gray-300 italic">"{bp.persona}"</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-1">Fitur Utama</p>
+          <div className="flex flex-wrap gap-1">
+            {bp.fiturUtama.map((f, i) => (
+              <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">{f}</span>
+            ))}
+          </div>
+        </div>
+        <div className="pt-1 border-t border-blue-200 dark:border-blue-800">
+          <div className="flex gap-1.5">
+            <Link href="/login" onClick={onClose} className="flex-1">
+              <Button className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white h-8 text-xs font-bold gap-1">
+                <Wrench className="h-3 w-3" /> Rakit Sekarang
+              </Button>
+            </Link>
+            <a href="https://wa.me/6282299417818?text=Saya+sudah+punya+Blueprint+AI+dan+ingin+konsultasi+lebih+lanjut" target="_blank" rel="noopener noreferrer" className="flex-1">
+              <Button variant="outline" className="w-full h-8 text-xs gap-1 border-blue-300">
+                <MessageCircle className="h-3 w-3" /> Konsultasi
+              </Button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [messages, setMessages] = useState<LandingMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [count, setCount] = useState(0);
-  const [sessionId] = useState(() => `landing_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+  const [userMsgCount, setUserMsgCount] = useState(0);
+  const [gate, setGate] = useState<SocraticGate>("GATE1");
+  const [blueprint, setBlueprint] = useState<Blueprint | null>(null);
+  const [generatingBP, setGeneratingBP] = useState(false);
+  const [sessionId] = useState(() => `socratic_${Date.now()}_${Math.random().toString(36).slice(2)}`);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
 
@@ -31,55 +176,116 @@ function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: (
       initialized.current = true;
       setMessages([{
         role: "assistant",
-        content: "Halo! Saya Gustafta 👋\n\nAnda punya pengetahuan atau keahlian tertentu? Saya bisa bantu mengubahnya menjadi AI yang bekerja untuk Anda — tanpa coding.\n\nApa yang ingin Anda bangun?",
+        gate: "GATE1",
+        content: "Halo! Saya Gustafta 🙏\n\nSebelum saya ceritakan tentang platform ini — saya lebih ingin mengenal Anda dulu.\n\nCeritakan sedikit: apa keahlian atau pengalaman terbesar yang Anda miliki sekarang?",
       }]);
     }
   }, [isOpen]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, blueprint]);
 
-  const send = async () => {
-    if (!input.trim() || loading || count >= DEMO_MAX_LANDING) return;
-    const msg = input.trim();
-    setInput("");
-    setLoading(true);
-    setCount(c => c + 1);
-    setMessages(prev => [...prev, { role: "user", content: msg }]);
+  const currentGate = (): SocraticGate => {
+    if (userMsgCount < 2) return "GATE1";
+    if (userMsgCount < 4) return "GATE2";
+    return "GATE3";
+  };
+
+  const generateBlueprint = async (history: LandingMsg[]) => {
+    setGeneratingBP(true);
+    setGate("BLUEPRINT");
     try {
+      const prompt = buildBlueprintPrompt(history);
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId: GUSTAFTA_AGENT_ID, sessionId, role: "user", content: msg }),
+        body: JSON.stringify({ agentId: GUSTAFTA_AGENT_ID, sessionId, role: "user", content: prompt }),
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: "assistant", content: data.aiMessage?.content ?? "Maaf, tidak ada respons." }]);
+      const raw = data.aiMessage?.content ?? "";
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]) as Blueprint;
+        setBlueprint(parsed);
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          gate: "BLUEPRINT",
+          content: `✨ Blueprint AI Anda sudah siap! Ini adalah gambaran chatbot yang bisa kita rakit bersama berdasarkan pengetahuan dan keahlian Anda.`,
+        }]);
+      } else {
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          gate: "BLUEPRINT",
+          content: "Blueprint Anda sedang kami siapkan. Hubungi tim kami untuk melanjutkan proses konfigurasi! 🚀",
+        }]);
+      }
     } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Maaf, terjadi gangguan. Silakan coba lagi." }]);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: "Blueprint hampir siap — hubungi kami via WhatsApp untuk melanjutkan!",
+      }]);
+    } finally {
+      setGeneratingBP(false);
+    }
+  };
+
+  const send = async () => {
+    if (!input.trim() || loading || generatingBP || gate === "BLUEPRINT") return;
+    const msg = input.trim();
+    setInput("");
+    setLoading(true);
+    const newCount = userMsgCount + 1;
+    setUserMsgCount(newCount);
+
+    const newHistory = [...messages, { role: "user" as const, content: msg }];
+    setMessages(newHistory);
+
+    const activeGate = currentGate();
+    const nextGate: SocraticGate = newCount >= 2 && newCount < 4 ? "GATE2" : newCount >= 4 ? "GATE3" : "GATE1";
+    setGate(nextGate);
+
+    try {
+      const contextualMsg = buildSystemContext(activeGate, msg, newHistory);
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId: GUSTAFTA_AGENT_ID, sessionId, role: "user", content: contextualMsg }),
+      });
+      const data = await res.json();
+      const aiContent = data.aiMessage?.content ?? "Maaf, tidak ada respons.";
+      const updatedHistory = [...newHistory, { role: "assistant" as const, content: aiContent, gate: nextGate }];
+      setMessages(updatedHistory);
+
+      if (newCount >= 5) {
+        setTimeout(() => generateBlueprint(updatedHistory), 800);
+      }
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: "Maaf, terjadi gangguan. Coba lagi." }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const done = count >= DEMO_MAX_LANDING;
-
   if (!isOpen) return null;
 
+  const gateInfo = GATE_LABELS[gate];
+  const isDone = gate === "BLUEPRINT";
+
   return (
-    <div className="w-80 sm:w-96 rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden bg-card" style={{ height: 500 }}>
+    <div className="w-80 sm:w-96 rounded-2xl border border-border shadow-2xl flex flex-col overflow-hidden bg-card" style={{ maxHeight: 560 }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-blue-600">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-gradient-to-r from-blue-600 to-violet-600">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
             <Bot className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-white font-semibold text-sm leading-none">Tanya Gustafta</p>
-            <p className="text-blue-100 text-[10px] mt-0.5 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-              Coba gratis — sesi mandiri
-            </p>
+            <p className="text-white font-semibold text-sm leading-none">Gustafta Socratic Dialog</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${gateInfo.color}`} />
+              <p className="text-white/80 text-[10px]">{gateInfo.label} · Langkah {gateInfo.step}/4</p>
+            </div>
           </div>
         </div>
         <button
@@ -91,83 +297,87 @@ function GustaftaFloatingChat({ isOpen, onClose }: { isOpen: boolean; onClose: (
         </button>
       </div>
 
+      {/* Gate progress bar */}
+      <div className="flex h-1 w-full bg-gray-200 dark:bg-zinc-700">
+        {[1, 2, 3, 4].map(s => (
+          <div key={s} className={`flex-1 transition-all duration-500 ${s <= gateInfo.step ? "bg-gradient-to-r from-blue-500 to-violet-500" : ""}`} />
+        ))}
+      </div>
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50 dark:bg-zinc-900">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50 dark:bg-zinc-900" style={{ minHeight: 200 }}>
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-            {m.role === "assistant" && (
-              <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
-                <Bot className="h-3 w-3 text-blue-600" />
+          <div key={i}>
+            {m.gate && m.gate !== messages[i - 1]?.gate && m.role === "assistant" && m.gate !== "GATE1" && (
+              <div className="flex items-center gap-2 my-2">
+                <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full text-white ${GATE_LABELS[m.gate as SocraticGate]?.color ?? "bg-gray-400"}`}>
+                  {GATE_LABELS[m.gate as SocraticGate]?.label ?? m.gate}
+                </span>
+                <div className="flex-1 h-px bg-gray-200 dark:bg-zinc-700" />
               </div>
             )}
-            <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap ${
-              m.role === "user"
-                ? "bg-blue-600 text-white rounded-tr-sm"
-                : "bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-tl-sm shadow-sm"
-            }`}>
-              {m.content.replace(/\*\*(.*?)\*\*/g, "$1")}
+            <div className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              {m.role === "assistant" && (
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+                  <Bot className="h-3 w-3 text-white" />
+                </div>
+              )}
+              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap ${
+                m.role === "user"
+                  ? "bg-blue-600 text-white rounded-tr-sm"
+                  : "bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-zinc-700 rounded-tl-sm shadow-sm"
+              }`}>
+                {m.content.replace(/\*\*(.*?)\*\*/g, "$1")}
+              </div>
             </div>
           </div>
         ))}
-        {loading && (
+
+        {(loading || generatingBP) && (
           <div className="flex justify-start">
-            <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-2 shrink-0 mt-0.5">
-              <Bot className="h-3 w-3 text-blue-600" />
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center mr-2 shrink-0 mt-0.5">
+              <Bot className="h-3 w-3 text-white" />
             </div>
             <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm">
               <div className="flex items-center gap-1">
+                {generatingBP && <Sparkles className="h-2.5 w-2.5 text-amber-400 mr-1 animate-pulse" />}
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
+              {generatingBP && <p className="text-[10px] text-amber-600 mt-1">Menyusun Blueprint Anda…</p>}
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Done state */}
-      {done && (
-        <div className="px-3 py-3 bg-blue-50 dark:bg-blue-950/20 border-t border-blue-200 dark:border-blue-800">
-          <p className="text-xs font-semibold text-blue-800 dark:text-blue-200 mb-1">Sesi selesai ✅ Lanjutkan perjalanan Anda:</p>
-          <div className="flex gap-2">
-            <Link href="/persona" onClick={onClose} className="flex-1">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs font-semibold gap-1">
-                <BookOpen className="h-3 w-3" /> Starter Kit
-              </Button>
-            </Link>
-            <Link href="/login" onClick={onClose} className="flex-1">
-              <Button variant="outline" className="w-full h-8 text-xs gap-1">
-                <Wrench className="h-3 w-3" /> Coba Builder
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
+      {/* Blueprint Card */}
+      {blueprint && <BlueprintCard bp={blueprint} onClose={onClose} />}
 
       {/* Input */}
-      {!done && (
+      {!isDone && (
         <div className="px-3 py-2.5 border-t bg-white dark:bg-zinc-900">
-          <div className="flex items-center gap-1 mb-1.5">
-            <Sparkles className="h-2.5 w-2.5 text-blue-400" />
-            <span className="text-[10px] text-gray-400">{DEMO_MAX_LANDING - count} pertanyaan gratis tersisa</span>
-          </div>
           <div className="flex gap-1.5">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
-              placeholder="Ketik pertanyaan Anda..."
-              disabled={loading}
+              placeholder={userMsgCount === 0 ? "Ceritakan keahlian Anda…" : userMsgCount < 4 ? "Jawab pertanyaan di atas…" : "Satu jawaban lagi untuk Blueprint Anda…"}
+              disabled={loading || generatingBP}
               className="flex-1 text-xs h-8"
               data-testid="input-gustafta-chat"
             />
-            <Button onClick={send} disabled={loading || !input.trim()} size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-2.5"
+            <Button onClick={send} disabled={loading || generatingBP || !input.trim()} size="sm"
+              className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white h-8 px-2.5"
               data-testid="button-gustafta-send">
-              {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+              {(loading || generatingBP) ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
             </Button>
           </div>
+          <p className="text-[10px] text-gray-400 mt-1">
+            {userMsgCount === 0 ? "Sesi Socratic gratis — menuju Blueprint AI Anda" : `Langkah ${userMsgCount + 1} dari 5 menuju Blueprint`}
+          </p>
         </div>
       )}
     </div>
