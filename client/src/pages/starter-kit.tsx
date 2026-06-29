@@ -232,7 +232,7 @@ export default function StarterKitPage() {
 
       {/* ── A: ACTION — Pricing + Urgency ── */}
       <section className="py-16 px-4 bg-gradient-to-b from-sky-50 to-white dark:from-muted/20 dark:to-background">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <p className="text-xs font-bold text-sky-600 uppercase tracking-widest mb-2 text-center">Investasi</p>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">Pilih yang Sesuai Kebutuhan Anda</h2>
           <p className="text-sm text-gray-500 dark:text-muted-foreground mb-8 text-center">Lebih murah dari satu sesi kursus — hasilnya bisa Anda pakai seumur karier.</p>
@@ -245,13 +245,43 @@ export default function StarterKitPage() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-5">
-            {/* Kartu 1: Starter Kit saja */}
-            <div className="bg-white dark:bg-card rounded-2xl shadow-md border-2 border-sky-300 dark:border-sky-700 p-7 flex flex-col">
+          <div className="grid md:grid-cols-3 gap-4">
+
+            {/* Kartu 1: Tanpa Starter Kit */}
+            <div className="bg-white dark:bg-card rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col">
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Tanpa Starter Kit</div>
+              <div className="text-3xl font-extrabold text-gray-700 dark:text-gray-200 mb-0.5">Rp 498.000</div>
+              <div className="text-xs text-gray-400 mb-1">bulan pertama</div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 mb-5">Lisensi Rp 299rb + Langganan Rp 199rb/bln</div>
+              <ul className="text-sm space-y-2.5 mb-6 text-gray-500 dark:text-muted-foreground flex-1">
+                {[
+                  { text: "Lisensi platform (sekali bayar)", ok: true },
+                  { text: "Akses Builder 1 bulan penuh", ok: true },
+                  { text: "Tanpa materi Trilogi GUSTAFTA", ok: false },
+                  { text: "Tanpa Prompt Pack & Template", ok: false },
+                  { text: "Tanpa akses komunitas", ok: false },
+                  { text: "Tanpa garansi uang kembali", ok: false },
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-2.5">
+                    <Check className={`h-4 w-4 flex-shrink-0 ${item.ok ? "text-gray-400" : "text-red-300"}`} />
+                    <span className={item.ok ? "" : "text-gray-400 line-through"}>{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+              <a href={`https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20mau%20info%20lisensi%20platform%20tanpa%20Starter%20Kit`} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="w-full h-11 font-semibold text-gray-600 dark:text-gray-300" data-testid="btn-pricing-lisensi">
+                  Tanya via WhatsApp →
+                </Button>
+              </a>
+              <p className="text-xs text-gray-400 mt-2 text-center">Lanjut Rp 199.000/bulan</p>
+            </div>
+
+            {/* Kartu 2: Starter Kit saja */}
+            <div className="bg-white dark:bg-card rounded-2xl shadow-md border-2 border-sky-400 dark:border-sky-600 p-6 flex flex-col relative">
               <div className="text-xs font-bold text-sky-600 uppercase tracking-widest mb-3">Starter Kit</div>
-              <div className="text-4xl font-extrabold text-sky-600 mb-0.5">Rp 245.000</div>
+              <div className="text-3xl font-extrabold text-sky-600 mb-0.5">Rp 245.000</div>
               <div className="text-xs text-gray-400 line-through mb-1">Harga normal Rp 350.000</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-5">Sekali bayar · Akses selamanya</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-5">Sekali bayar · lisensi sudah termasuk · trial 7 hari</div>
               <ul className="text-sm space-y-2.5 mb-6 text-gray-700 dark:text-muted-foreground flex-1">
                 {[
                   "Trilogi GUSTAFTA Buku I, II & III",
@@ -276,21 +306,21 @@ export default function StarterKitPage() {
               <p className="text-xs text-gray-400 mt-2 text-center">Pembayaran aman via Scalev</p>
             </div>
 
-            {/* Kartu 2: Starter Kit + Langganan Belajar */}
-            <div className="bg-gradient-to-b from-indigo-600 to-blue-700 rounded-2xl shadow-xl border-2 border-indigo-400 p-7 flex flex-col text-white relative overflow-hidden">
+            {/* Kartu 3: Starter Kit + Langganan */}
+            <div className="bg-gradient-to-b from-indigo-600 to-blue-700 rounded-2xl shadow-xl border-2 border-indigo-400 p-6 flex flex-col text-white relative overflow-hidden">
               <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Terlengkap
+                Terbaik
               </div>
-              <div className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-3">Starter Kit + Belajar</div>
-              <div className="text-4xl font-extrabold text-white mb-0.5">Rp 445.000</div>
-              <div className="text-xs text-indigo-300 line-through mb-1">Harga normal Rp 550.000</div>
-              <div className="text-xs text-indigo-200 mb-5">Starter Kit + Langganan Belajar 1 bulan</div>
+              <div className="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-3">Kit + Langganan</div>
+              <div className="text-3xl font-extrabold text-white mb-0.5">Rp 445.000</div>
+              <div className="text-xs text-indigo-300 line-through mb-1">Nilai Rp 550.000</div>
+              <div className="text-xs text-indigo-200 mb-5">Kit + Langganan Belajar 1 bulan · hemat Rp 53rb vs tanpa kit</div>
               <ul className="text-sm space-y-2.5 mb-6 text-indigo-100 flex-1">
                 {[
                   { text: "Semua isi Starter Kit", highlight: false },
                   { text: "Langganan plan Starter 1 bulan penuh", highlight: true },
-                  { text: "Akses platform Builder tidak terbatas", highlight: true },
-                  { text: "Mulai rakit AI hari ini — bukan trial", highlight: true },
+                  { text: "Akses Builder tidak terbatas (bukan trial)", highlight: true },
+                  { text: "Mulai rakit AI hari ini", highlight: true },
                   "🛡️ Garansi 7 hari uang kembali",
                   "🔄 Update gratis selamanya",
                 ].map((item, i) => (
@@ -304,11 +334,12 @@ export default function StarterKitPage() {
               </ul>
               <a href={`https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20mau%20ambil%20paket%20Starter%20Kit%20%2B%20Langganan%20Belajar%20Rp%20445.000`} target="_blank" rel="noopener noreferrer">
                 <Button className="w-full h-11 bg-white text-indigo-700 hover:bg-indigo-50 font-bold" data-testid="btn-pricing-bundle">
-                  Ambil Paket Bundle →
+                  Ambil Paket Ini →
                 </Button>
               </a>
               <p className="text-xs text-indigo-300 mt-2 text-center">Konfirmasi via WhatsApp</p>
             </div>
+
           </div>
 
           <p className="text-sm text-gray-500 dark:text-muted-foreground mt-6 text-center">
