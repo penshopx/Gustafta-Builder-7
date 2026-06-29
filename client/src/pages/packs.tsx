@@ -198,75 +198,108 @@ export default function PacksPage() {
           <p className="text-sm text-amber-700 dark:text-amber-300 mb-4 max-w-3xl leading-relaxed">
             Ini bukan lagi tentang memakai AI — ini tentang <strong>menjadi pelaku bisnis AI</strong>. Bangun organisasi, layanan, atau ekosistem berbasis AI bersama tim GUSTAFTA.
           </p>
-          {/* Dua jalur berkembang */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-
-            {/* Jalur 1 — Perakit AI yang naik level */}
-            <div className="bg-white dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🚀</span>
-                <div>
-                  <div className="text-xs font-bold text-amber-900 dark:text-amber-100">Jalur Perakit AI</div>
-                  <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sudah merakit → naik level menjadi bisnis AI</div>
+          {/* 4 Level Perakit AI — Growth Path */}
+          <div className="mb-5">
+            <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-3 uppercase tracking-wide">Jalur Pertumbuhan Perakit AI</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {[
+                { level: "🌱", title: "Perakit Pemula", sub: "Baru mulai — belajar & rakit chatbot pertama", color: "border-green-300 bg-green-50 dark:bg-green-950/30 text-green-800 dark:text-green-200" },
+                { level: "🛠", title: "Perakit Profesional", sub: "Sudah mahir — buka jasa AI & layani klien", color: "border-blue-300 bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-200" },
+                { level: "🚀", title: "Perakit Creator", sub: "Jual hasil rakitan di Marketplace, dapat komisi", color: "border-violet-300 bg-violet-50 dark:bg-violet-950/30 text-violet-800 dark:text-violet-200" },
+                { level: "🏢", title: "Perakit Enterprise", sub: "Bangun organisasi & ekosistem AI sendiri", color: "border-amber-300 bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-200" },
+              ].map((l, i) => (
+                <div key={l.title} className={`rounded-xl border-2 p-3 flex flex-col gap-1 ${l.color}`}>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">{l.level}</span>
+                    {i < 3 && <span className="ml-auto text-[10px] opacity-50">→</span>}
+                  </div>
+                  <p className="text-[11px] font-bold leading-tight">{l.title}</p>
+                  <p className="text-[10px] opacity-70 leading-snug">{l.sub}</p>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 3 Cara Berkembang */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+            {/* Cara 1 */}
+            <div className="bg-white dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-4">
+              <div className="text-base mb-1.5">🛠️</div>
+              <div className="text-xs font-bold text-amber-900 dark:text-amber-100 mb-1">Naik Level Sendiri</div>
               <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed mb-3">
-                Sudah merakit AI di Builder? Sekarang waktunya naik level — dari Perakit menjadi Konsultan, Creator bersertifikat, atau Trainer.
+                Pelajari lebih dalam, rakit AI yang lebih kompleks, lulus sertifikasi, dan jadilah Konsultan atau Trainer AI.
               </p>
-              <div className="flex flex-col gap-1.5">
-                {[
-                  { icon: "🌱→🛠", label: "Naik Level Perakit", sub: "Pemula → Profesional → Creator → Enterprise" },
-                  { icon: "🏆", label: "Sertifikasi Perakit AI", sub: "Certified AI Assembler — bukti kompetensi resmi" },
-                  { icon: "💼", label: "Buka Jasa AI Sendiri", sub: "Jadi konsultan/freelancer AI berbasis Gustafta" },
-                  { icon: "🎓", label: "Jadi Trainer Gustafta", sub: "Ajar orang lain, hasilkan dari komunitas" },
-                ].map((row) => (
-                  <div key={row.label} className="flex items-start gap-2">
-                    <span className="text-[11px] shrink-0 mt-0.5">{row.icon}</span>
-                    <div>
-                      <span className="text-[11px] font-semibold text-amber-900 dark:text-amber-100">{row.label}</span>
-                      <span className="text-[11px] text-amber-600 dark:text-amber-400"> — {row.sub}</span>
-                    </div>
+              <div className="space-y-1 mb-3">
+                {["Sertifikasi Perakit AI (Level 1–4)", "Buka jasa AI berbasis Gustafta", "Jadi Trainer & Mentor komunitas"].map(i => (
+                  <div key={i} className="flex items-start gap-1.5 text-[11px] text-amber-800 dark:text-amber-300">
+                    <Check className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />{i}
                   </div>
                 ))}
               </div>
-              <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20naik%20level%20jadi%20Perakit%20AI%20Profesional%20di%20Gustafta" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
+              <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20naik%20level%20jadi%20Perakit%20AI%20Profesional%20di%20Gustafta" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
                 <Sparkles className="h-3 w-3" /> Naik Level Sekarang
               </a>
             </div>
 
-            {/* Jalur 2 — Profesional / Organisasi */}
+            {/* Cara 2 */}
             <div className="bg-white dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">🏢</span>
-                <div>
-                  <div className="text-xs font-bold text-orange-900 dark:text-orange-100">Jalur Profesional & Organisasi</div>
-                  <div className="text-[10px] text-orange-600 dark:text-orange-400 font-medium">Punya pengetahuan domain → bangun ekosistem AI</div>
-                </div>
-              </div>
+              <div className="text-base mb-1.5">🤝</div>
+              <div className="text-xs font-bold text-orange-900 dark:text-orange-100 mb-1">Kami Rakitkan (AI Studio)</div>
               <p className="text-[11px] text-orange-700 dark:text-orange-300 leading-relaxed mb-3">
-                Anda ahli di bidang Anda. Tim Gustafta yang menjadi Perakit-nya — atau jadikan platform ini sebagai bisnis Anda sendiri.
+                Anda ahli di bidang Anda. Serahkan perakitan AI ke tim Gustafta — atau jadikan platform ini backbone bisnis Anda.
               </p>
-              <div className="flex flex-col gap-1.5">
-                {[
-                  { icon: "🏗️", label: "Kami Rakitkan (AI Studio)", sub: "Custom AI dari nol — serahkan ke tim Gustafta" },
-                  { icon: "🏷️", label: "White Label & Partner", sub: "Layani klien sendiri, Gustafta jadi backbone-nya" },
-                  { icon: "📚", label: "Corporate Training", sub: "Seluruh tim jadi Perakit AI — bukan penonton AI" },
-                  { icon: "🤝", label: "AI Organization", sub: "Bangun ekosistem & tata kelola AI di perusahaan" },
-                ].map((row) => (
-                  <div key={row.label} className="flex items-start gap-2">
-                    <span className="text-[11px] shrink-0 mt-0.5">{row.icon}</span>
-                    <div>
-                      <span className="text-[11px] font-semibold text-orange-900 dark:text-orange-100">{row.label}</span>
-                      <span className="text-[11px] text-orange-600 dark:text-orange-400"> — {row.sub}</span>
-                    </div>
+              <div className="space-y-1 mb-3">
+                {["Custom AI dari nol oleh tim Gustafta", "White Label & Partner Program", "Corporate Training seluruh tim"].map(i => (
+                  <div key={i} className="flex items-start gap-1.5 text-[11px] text-orange-800 dark:text-orange-300">
+                    <Check className="h-3 w-3 text-orange-500 shrink-0 mt-0.5" />{i}
                   </div>
                 ))}
               </div>
-              <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20konsultasi%20AI%20Studio%20Gustafta%20untuk%20organisasi%20saya" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
+              <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20konsultasi%20AI%20Studio%20Gustafta%20untuk%20organisasi%20saya" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
                 <TrendingUp className="h-3 w-3" /> Konsultasi AI Studio
               </a>
             </div>
 
+            {/* Cara 3 */}
+            <div className="bg-white dark:bg-violet-900/20 border border-violet-300 dark:border-violet-700 rounded-xl p-4">
+              <div className="text-base mb-1.5">🌐</div>
+              <div className="text-xs font-bold text-violet-900 dark:text-violet-100 mb-1">Bergabung AI Network</div>
+              <p className="text-[11px] text-violet-700 dark:text-violet-300 leading-relaxed mb-3">
+                Komunitas Perakit AI — saling berbagi, berkolaborasi, dan berkembang bersama sesama Perakit AI Indonesia.
+              </p>
+              <div className="space-y-1 mb-3">
+                {["Komunitas eksklusif Perakit AI", "Akses tips, template & update terbaru", "Kolaborasi & proyek bersama"].map(i => (
+                  <div key={i} className="flex items-start gap-1.5 text-[11px] text-violet-800 dark:text-violet-300">
+                    <Check className="h-3 w-3 text-violet-500 shrink-0 mt-0.5" />{i}
+                  </div>
+                ))}
+              </div>
+              <a href="https://wa.me/6282299417818?text=Halo%2C%20saya%20ingin%20bergabung%20Komunitas%20Perakit%20AI%20Gustafta" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                <Users className="h-3 w-3" /> Gabung Komunitas
+              </a>
+            </div>
+          </div>
+
+          {/* Sertifikasi Perakit AI */}
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/10 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Award className="h-4 w-4 text-amber-600" />
+              <span className="text-sm font-bold text-amber-900 dark:text-amber-100">Sertifikasi Perakit AI GUSTAFTA™</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 font-semibold">Segera Hadir</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {[
+                { badge: "🥉", name: "Certified AI Assembler Level 1", color: "text-amber-700 dark:text-amber-300" },
+                { badge: "🥈", name: "Certified AI Assembler Level 2", color: "text-slate-600 dark:text-slate-300" },
+                { badge: "🥇", name: "Certified AI Assembler Professional", color: "text-yellow-600 dark:text-yellow-300" },
+                { badge: "🏆", name: "Master AI Assembler", color: "text-primary" },
+              ].map(s => (
+                <div key={s.name} className="text-center p-2">
+                  <div className="text-xl mb-1">{s.badge}</div>
+                  <p className={`text-[10px] font-semibold leading-snug ${s.color}`}>{s.name}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -277,21 +310,21 @@ export default function PacksPage() {
         <div className="container mx-auto px-4 text-center relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-5">
             <Sparkles className="h-4 w-4" />
-            Layanan Jasa — Done-for-You
+            AI Studio — Kami Rakitkan
             <Zap className="h-4 w-4 text-orange-500" />
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-            Kami yang Kerjakan,{" "}
+            Biarkan Tim GUSTAFTA{" "}
             <span className="bg-gradient-to-r from-violet-500 to-primary bg-clip-text text-transparent">
-              Anda Langsung Pakai
+              yang Mengerjakannya
             </span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-7">
-            Berbeda dari Builder DIY — di sini Anda cukup <strong>pilih domain yang dibutuhkan</strong>, tim Gustafta yang mengerjakan. Ada dua model layanan sesuai kebutuhan Anda.
+            Anda punya pengetahuan dan domain — tim Gustafta yang menjadi Perakit-nya. Pilih seberapa besar keterlibatan Anda dalam proses perakitan.
           </p>
 
           <p className="text-sm text-muted-foreground mb-6">
-            Ada <strong>3 model layanan</strong> — pilih sesuai seberapa banyak Anda mau terlibat.
+            Ada <strong>3 model layanan AI Studio</strong> — pilih sesuai seberapa banyak Anda mau terlibat.
           </p>
 
           {/* 3 Model Layanan */}
@@ -304,7 +337,7 @@ export default function PacksPage() {
                   <PenLine className="h-4 w-4 text-violet-600" />
                 </div>
                 <div>
-                  <span className="font-bold text-xs text-violet-500 uppercase tracking-wide">Model A</span>
+                  <span className="font-bold text-xs text-violet-500 uppercase tracking-wide">AI Studio — Jalur A</span>
                   <p className="font-bold text-sm text-violet-700 dark:text-violet-300 leading-tight">Kami Buatkan Promptnya</p>
                 </div>
               </div>
@@ -333,7 +366,7 @@ export default function PacksPage() {
                   <Repeat2 className="h-4 w-4 text-amber-600" />
                 </div>
                 <div>
-                  <span className="font-bold text-xs text-amber-500 uppercase tracking-wide">Model B</span>
+                  <span className="font-bold text-xs text-amber-500 uppercase tracking-wide">AI Studio — Jalur B</span>
                   <p className="font-bold text-sm text-amber-700 dark:text-amber-300 leading-tight">Anda Buat Prompt, Kami Setup</p>
                 </div>
               </div>
@@ -359,7 +392,7 @@ export default function PacksPage() {
                   <Star className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <span className="font-bold text-xs text-primary/70 uppercase tracking-wide">Model C</span>
+                  <span className="font-bold text-xs text-primary/70 uppercase tracking-wide">AI Studio — Jalur C</span>
                   <p className="font-bold text-sm text-primary leading-tight">Kami Buat Prompt + Setup Penuh</p>
                 </div>
               </div>
