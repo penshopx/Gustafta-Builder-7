@@ -1,8 +1,133 @@
 import { SharedHeader } from "@/components/shared-header";
 import { Link } from "wouter";
-import { ChevronRight, Printer } from "lucide-react";
+import { ChevronRight, Printer, Lock, ShoppingCart, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+
+function FrameworkLocked() {
+  return (
+    <div className="min-h-screen bg-white dark:bg-background">
+      <SharedHeader />
+
+      {/* Breadcrumb */}
+      <div className="max-w-4xl mx-auto px-4 pt-4">
+        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Link href="/"><span className="hover:text-foreground cursor-pointer">Beranda</span></Link>
+          <ChevronRight className="h-3 w-3" />
+          <Link href="/panduan"><span className="hover:text-foreground cursor-pointer">Belajar</span></Link>
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-foreground font-semibold">GUSTAFTA Framework™</span>
+        </nav>
+      </div>
+
+      {/* Teaser cover */}
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="text-center mb-10">
+          <div className="inline-block bg-gradient-to-br from-blue-600 to-violet-700 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 tracking-widest uppercase">
+            GUSTAFTA Framework™
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+            Metode Konversi Pengetahuan<br />
+            <span className="text-blue-600">Menjadi Aset AI</span>
+          </h1>
+          <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
+            Kerangka berpikir khas GUSTAFTA — bagaimana mengubah pengetahuan yang Anda miliki
+            menjadi AI yang benar-benar bekerja, tanpa coding.
+          </p>
+        </div>
+
+        {/* Teaser — 7 bagian blurred */}
+        <div className="relative rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+          {/* Preview tipis yang terlihat */}
+          <div className="p-6 bg-white dark:bg-card">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Dokumen ini berisi 7 bagian:</p>
+            <div className="space-y-2">
+              {[
+                "01 · Prinsip Dasar — 3 fondasi berpikir Perakit AI",
+                "02 · Dua Dunia — AI Enthusiast vs Profesional",
+                "03 · Lima Tahap Perjalanan + Alur Transformasi",
+                "04 · Model Konversi: Pengetahuan → Builder → Teman Berpikir Digital",
+                "05 · Identitas Bertingkat: Pemula → Profesional → Creator → Enterprise",
+                "06 · Ekosistem 6 Pilar GUSTAFTA",
+                "07 · Bahasa Merek Khas GUSTAFTA",
+              ].map((item, i) => (
+                <div key={i} className={`flex items-center gap-3 text-sm rounded-lg px-3 py-2 ${i < 2 ? "text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-muted/20" : "text-gray-300 dark:text-gray-600"}`}>
+                  <span className={`text-base ${i < 2 ? "" : "grayscale opacity-30"}`}>
+                    {["🔑","🌐","🗺","⚙️","🏅","🏗","💬"][i]}
+                  </span>
+                  <span className={i >= 2 ? "blur-[3px] select-none" : ""}>{item}</span>
+                  {i >= 2 && <Lock className="h-3 w-3 ml-auto text-gray-300 shrink-0" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Overlay kunci */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-white/95 dark:from-background/95 via-white/60 dark:via-background/60 to-transparent pt-20">
+            <div className="bg-white dark:bg-card border border-gray-200 dark:border-gray-700 rounded-2xl p-8 shadow-xl text-center max-w-sm mx-4">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center mx-auto mb-4">
+                <Lock className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                Dokumen Eksklusif Starter Kit
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-muted-foreground mb-6 leading-relaxed">
+                GUSTAFTA Framework™ adalah bagian dari <strong className="text-gray-700 dark:text-gray-300">Starter Kit</strong>.
+                Login atau dapatkan akses dengan memiliki Starter Kit.
+              </p>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="/api/login"
+                  className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-600 to-violet-600 text-white font-bold py-2.5 px-5 rounded-xl text-sm hover:opacity-90 transition-opacity"
+                >
+                  <LogIn className="h-4 w-4" /> Masuk ke Akun Saya
+                </a>
+                <Link href="/starter-kit">
+                  <div className="inline-flex items-center justify-center gap-2 w-full border border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 font-semibold py-2.5 px-5 rounded-xl text-sm hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer">
+                    <ShoppingCart className="h-4 w-4" /> Ambil Starter Kit — Rp 245.000
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Nilai yang didapat */}
+        <div className="grid md:grid-cols-3 gap-4 text-center text-sm">
+          {[
+            { emoji: "🔑", label: "Hanya untuk pembeli", desc: "Eksklusif bagian dari Starter Kit GUSTAFTA" },
+            { emoji: "🖨", label: "Cetak & Simpan PDF", desc: "Dokumen siap cetak, simpan selamanya" },
+            { emoji: "🔄", label: "Update gratis", desc: "Framework diperbarui, akses Anda tetap aktif" },
+          ].map((v) => (
+            <div key={v.label} className="border border-gray-100 dark:border-gray-800 rounded-xl p-4">
+              <div className="text-2xl mb-2">{v.emoji}</div>
+              <div className="font-semibold text-gray-800 dark:text-gray-200 text-sm mb-1">{v.label}</div>
+              <div className="text-xs text-gray-400">{v.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function GustaFtaFrameworkPage() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-background">
+        <SharedHeader />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <FrameworkLocked />;
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-background">
       <SharedHeader />
