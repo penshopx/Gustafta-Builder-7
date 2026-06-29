@@ -381,6 +381,21 @@ export const clientSubscriptions = pgTable("client_subscriptions", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Blueprint Table (AI Organization Builder — persisted "DNA" JSON; ADDITIVE, not yet route-wired)
+export const blueprints = pgTable("blueprints", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull().default(""),
+  name: text("name").notNull().default("Blueprint Tanpa Judul"),
+  intent: text("intent").default(""),
+  data: jsonb("data").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBlueprintSchema = createInsertSchema(blueprints).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertBlueprint = z.infer<typeof insertBlueprintSchema>;
+export type BlueprintRecord = typeof blueprints.$inferSelect;
+
 // Affiliates/Partners Table — MLM 3-Level (Pusat L1 / Provinsi L2 / Kab-Kota L3)
 export const affiliates = pgTable("affiliates", {
   id: serial("id").primaryKey(),

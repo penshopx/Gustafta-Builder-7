@@ -80,6 +80,8 @@ import type {
   InsertScalevMapping,
   TenderAlertProfile,
   InsertTenderAlertProfile,
+  BlueprintRecord,
+  InsertBlueprint,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -138,6 +140,17 @@ export interface IStorage {
   updateAgent(id: string, data: Partial<InsertAgent>): Promise<Agent | undefined>;
   setActiveAgent(id: string): Promise<Agent | undefined>;
   deleteAgent(id: string): Promise<boolean>;
+
+  // Blueprint methods (AI Organization Builder — additive, not yet route-wired)
+  getBlueprints(userId?: string): Promise<BlueprintRecord[]>;
+  getBlueprint(id: number): Promise<BlueprintRecord | undefined>;
+  createBlueprint(data: InsertBlueprint): Promise<BlueprintRecord>;
+  updateBlueprint(id: number, data: Partial<InsertBlueprint>): Promise<BlueprintRecord | undefined>;
+  deleteBlueprint(id: number): Promise<boolean>;
+  // Owner-scoped variants (guard against cross-user access once routes are wired)
+  getBlueprintForUser(id: number, userId: string): Promise<BlueprintRecord | undefined>;
+  updateBlueprintForUser(id: number, userId: string, data: Partial<InsertBlueprint>): Promise<BlueprintRecord | undefined>;
+  deleteBlueprintForUser(id: number, userId: string): Promise<boolean>;
 
   // Knowledge Base methods
   getKnowledgeBases(agentId: string): Promise<KnowledgeBase[]>;
@@ -2150,6 +2163,57 @@ export class MemStorage implements IStorage {
   }
   async updateAgenticDeliverableStatus(_id: string, _status: string): Promise<AgenticDeliverable | undefined> { return undefined; }
   async deleteAgenticDeliverable(_id: string): Promise<boolean> { return false; }
+
+  // Blueprint methods (MemStorage — in-memory)
+  private blueprintsMem: Map<number, BlueprintRecord> = new Map();
+  private blueprintSeq = 1;
+  async getBlueprints(userId?: string): Promise<BlueprintRecord[]> {
+    const all = Array.from(this.blueprintsMem.values());
+    return userId ? all.filter((b) => b.userId === userId) : all;
+  }
+  async getBlueprint(id: number): Promise<BlueprintRecord | undefined> {
+    return this.blueprintsMem.get(id);
+  }
+  async createBlueprint(data: InsertBlueprint): Promise<BlueprintRecord> {
+    const now = new Date();
+    const rec = {
+      id: this.blueprintSeq++,
+      userId: data.userId ?? "",
+      name: data.name ?? "Blueprint Tanpa Judul",
+      intent: data.intent ?? "",
+      data: data.data,
+      createdAt: now,
+      updatedAt: now,
+    } as BlueprintRecord;
+    this.blueprintsMem.set(rec.id, rec);
+    return rec;
+  }
+  async updateBlueprint(id: number, data: Partial<InsertBlueprint>): Promise<BlueprintRecord | undefined> {
+    const existing = this.blueprintsMem.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...data, updatedAt: new Date() } as BlueprintRecord;
+    this.blueprintsMem.set(id, updated);
+    return updated;
+  }
+  async deleteBlueprint(id: number): Promise<boolean> {
+    return this.blueprintsMem.delete(id);
+  }
+  async getBlueprintForUser(id: number, userId: string): Promise<BlueprintRecord | undefined> {
+    const rec = this.blueprintsMem.get(id);
+    return rec && rec.userId === userId ? rec : undefined;
+  }
+  async updateBlueprintForUser(id: number, userId: string, data: Partial<InsertBlueprint>): Promise<BlueprintRecord | undefined> {
+    const existing = this.blueprintsMem.get(id);
+    if (!existing || existing.userId !== userId) return undefined;
+    const updated = { ...existing, ...data, updatedAt: new Date() } as BlueprintRecord;
+    this.blueprintsMem.set(id, updated);
+    return updated;
+  }
+  async deleteBlueprintForUser(id: number, userId: string): Promise<boolean> {
+    const existing = this.blueprintsMem.get(id);
+    if (!existing || existing.userId !== userId) return false;
+    return this.blueprintsMem.delete(id);
+  }
 }
 
 import { dbStorage } from "./db-storage";

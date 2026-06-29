@@ -42,6 +42,7 @@ import {
   storeOrders,
   scalevMappings,
   agenticDeliverables,
+  blueprints,
 } from "@shared/schema";
 import { users } from "@shared/models/auth";
 import type {
@@ -59,6 +60,8 @@ import type {
   InsertScalevMapping,
   AgenticDeliverable,
   InsertAgenticDeliverable,
+  BlueprintRecord,
+  InsertBlueprint,
 } from "@shared/schema";
 import { applyDefaultPolicies } from "./lib/agent-policies";
 import type { IStorage } from "./storage";
@@ -3701,6 +3704,57 @@ export class DatabaseStorage implements IStorage {
   async deleteAgenticDeliverable(id: string): Promise<boolean> {
     const result = await db.delete(agenticDeliverables)
       .where(eq(agenticDeliverables.id, parseInt(id)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Blueprint methods (AI Organization Builder — additive, not yet route-wired)
+  async getBlueprints(userId?: string): Promise<BlueprintRecord[]> {
+    const query = userId
+      ? db.select().from(blueprints).where(eq(blueprints.userId, userId)).orderBy(desc(blueprints.updatedAt))
+      : db.select().from(blueprints).orderBy(desc(blueprints.updatedAt));
+    return await query;
+  }
+
+  async getBlueprint(id: number): Promise<BlueprintRecord | undefined> {
+    const result = await db.select().from(blueprints).where(eq(blueprints.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createBlueprint(data: InsertBlueprint): Promise<BlueprintRecord> {
+    const [created] = await db.insert(blueprints).values(data).returning();
+    return created;
+  }
+
+  async updateBlueprint(id: number, data: Partial<InsertBlueprint>): Promise<BlueprintRecord | undefined> {
+    const [updated] = await db.update(blueprints)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(blueprints.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteBlueprint(id: number): Promise<boolean> {
+    const result = await db.delete(blueprints).where(eq(blueprints.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getBlueprintForUser(id: number, userId: string): Promise<BlueprintRecord | undefined> {
+    const result = await db.select().from(blueprints)
+      .where(and(eq(blueprints.id, id), eq(blueprints.userId, userId))).limit(1);
+    return result[0];
+  }
+
+  async updateBlueprintForUser(id: number, userId: string, data: Partial<InsertBlueprint>): Promise<BlueprintRecord | undefined> {
+    const [updated] = await db.update(blueprints)
+      .set({ ...data, updatedAt: new Date() })
+      .where(and(eq(blueprints.id, id), eq(blueprints.userId, userId)))
+      .returning();
+    return updated;
+  }
+
+  async deleteBlueprintForUser(id: number, userId: string): Promise<boolean> {
+    const result = await db.delete(blueprints)
+      .where(and(eq(blueprints.id, id), eq(blueprints.userId, userId)));
     return (result.rowCount ?? 0) > 0;
   }
 }
