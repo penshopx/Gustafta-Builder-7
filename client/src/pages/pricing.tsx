@@ -1,17 +1,11 @@
-import { useState } from "react";
-import { trackInitiateCheckout, trackPurchase } from "@/lib/meta-pixel";
+import { trackInitiateCheckout } from "@/lib/meta-pixel";
 import { useLocation } from "wouter";
-import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { useCreateSubscription, usePaymentStatus } from "@/hooks/use-subscription";
 import { useGustaftaAssistant } from "@/hooks/use-agents";
 import { ChatPopup } from "@/components/chat-popup";
 import { SharedHeader } from "@/components/shared-header";
-import { Loader2 } from "lucide-react";
 import { 
   Bot, Check, X, Zap, Crown, Building2, Sparkles, ArrowRight,
   MessageSquare, Users, Globe, BookOpen, BarChart3, Shield, Headphones,
@@ -424,8 +418,8 @@ interface PricingCardProps {
   selectedPlan?: string;
 }
 
-function PricingCard({ tier, onSelect, isLoading, selectedPlan }: PricingCardProps) {
-  const isCurrentlyLoading = isLoading && selectedPlan === tier.planKey;
+function PricingCard({ tier, onSelect }: PricingCardProps) {
+  const isCurrentlyLoading = false;
   
   return (
     <Card className={`relative flex flex-col ${tier.popular ? "border-primary shadow-lg scale-105" : ""}`}>
@@ -475,87 +469,34 @@ function PricingCard({ tier, onSelect, isLoading, selectedPlan }: PricingCardPro
           className="w-full" 
           variant={tier.ctaVariant}
           onClick={() => onSelect(tier.planKey)}
-          disabled={isLoading}
-         
+          data-testid={`button-plan-${tier.planKey}`}
         >
-          {isCurrentlyLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Memproses...
-            </>
-          ) : (
-            tier.cta
-          )}
+          {tier.cta} →
         </Button>
       </CardFooter>
     </Card>
   );
 }
 
+const JASA_KEYS = ["tier1", "tier2", "tier3", "tier4"];
+
 export default function Pricing() {
-  const { user, isAuthenticated } = useAuth();
-  const { toast } = useToast();
   const [, navigate] = useLocation();
-  const createSubscription = useCreateSubscription();
-  const { data: paymentStatus } = usePaymentStatus();
   const { data: gustaftaAssistant } = useGustaftaAssistant();
-  const queryClient = useQueryClient();
 
-  const [selectedPlan, setSelectedPlan] = useState<string>("");
-  const [paymentLoading, setPaymentLoading] = useState(false);
-  const [paymentResult, setPaymentResult] = useState<"success" | "pending" | "error" | null>(null);
+  const handleSelectPlan = (planKey: string) => {
+    const tier = subscriptionTiers.find(t => t.planKey === planKey);
+    trackInitiateCheckout({ content_name: tier?.name ?? planKey, currency: "IDR" });
+    navigate(`/checkout?plan=${planKey}`);
+  };
 
-  const handleSelectPlan = async (planKey: string) => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Login Diperlukan",
-        description: "Silakan login terlebih dahulu untuk berlangganan.",
-        variant: "destructive",
-      });
-      window.location.href = "/login";
-      return;
-    }
-
-    setSelectedPlan(planKey);
-    setPaymentLoading(true);
-
-    try {
-      const tier = subscriptionTiers.find(t => t.planKey === planKey);
-      trackInitiateCheckout({ content_name: tier?.name ?? planKey, currency: "IDR" });
-
-      const result = await createSubscription.mutateAsync({ plan: planKey });
-
-      // Free trial — langsung aktif
-      if (!result.waUrl) {
-        queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
-        toast({ title: "Free Trial Aktif!", description: "Selamat menikmati Gustafta selama 7 hari gratis." });
-        navigate("/");
-        return;
-      }
-
-      // Paket berbayar — arahkan ke WA untuk pembayaran via Scalev
-      trackPurchase({ value: 0, currency: "IDR", content_name: tier?.name ?? planKey });
-      toast({
-        title: "Pesanan Berhasil Dibuat!",
-        description: result.message || "Tim kami akan menghubungi Anda untuk konfirmasi pembayaran.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
-      if (result.waUrl) window.open(result.waUrl, "_blank");
-      setPaymentResult("pending");
-    } catch (error: any) {
-      toast({
-        title: "Gagal Memproses",
-        description: error?.message || "Terjadi kesalahan. Silakan coba lagi.",
-        variant: "destructive",
-      });
-    } finally {
-      setPaymentLoading(false);
-    }
+  const handleSelectJasa = (jasaKey: string) => {
+    navigate(`/checkout?jasa=${jasaKey}`);
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {paymentResult === "success" && (
+      {false && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-background rounded-xl p-8 max-w-sm text-center shadow-2xl space-y-4">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
@@ -563,7 +504,7 @@ export default function Pricing() {
             </div>
             <h2 className="text-xl font-bold">Pembayaran Berhasil!</h2>
             <p className="text-muted-foreground text-sm">Langganan Anda sudah aktif. Selamat menggunakan Gustafta!</p>
-            <Button className="w-full" onClick={() => { setPaymentResult(null); navigate("/"); }} data-testid="button-go-dashboard">
+            <Button className="w-full" onClick={() => navigate("/")} data-testid="button-go-dashboard">
               Ke Dashboard <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -882,8 +823,6 @@ export default function Pricing() {
                 key={tier.name} 
                 tier={tier} 
                 onSelect={handleSelectPlan}
-                isLoading={createSubscription.isPending}
-                selectedPlan={selectedPlan}
               />
             ))}
           </div>
@@ -908,7 +847,16 @@ export default function Pricing() {
                 <div className="text-2xl font-bold text-primary">{pkg.price}</div>
                 <div className="text-xs text-muted-foreground font-medium">{pkg.scope}</div>
                 <div className="text-xs text-muted-foreground">{pkg.description}</div>
-                <div className="text-[10px] text-muted-foreground border-t pt-2 mt-auto">+ Hosting Rp 199rb–1.999rb/periode</div>
+                <div className="text-[10px] text-muted-foreground border-t pt-2">+ Hosting Rp 199rb–1.999rb/periode</div>
+                <Button
+                  size="sm"
+                  className="w-full mt-1 gap-1.5"
+                  variant={index === 1 ? "default" : "outline"}
+                  onClick={() => handleSelectJasa(JASA_KEYS[index])}
+                  data-testid={`button-jasa-${JASA_KEYS[index]}`}
+                >
+                  Pesan Sekarang <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
               </div>
             ))}
           </div>

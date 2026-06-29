@@ -1,0 +1,484 @@
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { useCreateSubscription } from "@/hooks/use-subscription";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { SharedHeader } from "@/components/shared-header";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Check, MessageCircle, ArrowRight, Loader2, ShieldCheck, Clock,
+  Sparkles, Crown, Zap, Bot, Wrench, ChevronRight, Lock, User, Phone,
+} from "lucide-react";
+
+const WA_NUMBER = "6282299417818";
+
+function waLink(msg: string) {
+  return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+}
+
+const SUBSCRIPTION_PLANS: Record<string, {
+  key: string; name: string; price: string; priceNum: number;
+  period: string; duration: string; savings?: string;
+  icon: typeof Sparkles; popular?: boolean;
+  features: string[];
+}> = {
+  monthly_1: {
+    key: "monthly_1", name: "Paket 1 Bulan", price: "Rp 199.000", priceNum: 199000,
+    period: "/bulan", duration: "1 Bulan", icon: Sparkles,
+    features: [
+      "1 Chatbot aktif", "5.000 pesan/bulan", "Knowledge Base: 20 dokumen",
+      "Web Widget (No Branding)", "WhatsApp & Telegram", "Agentic AI + Mini Apps (45 Tipe)",
+      "Orchestrator Multi-Agent (7 Specialist)", "Analytics Dashboard", "Email Support",
+    ],
+  },
+  monthly_3: {
+    key: "monthly_3", name: "Paket 3 Bulan", price: "Rp 299.000", priceNum: 299000,
+    period: "/3 bulan", duration: "3 Bulan", savings: "Hemat Rp 298.000",
+    icon: Sparkles, popular: true,
+    features: [
+      "1 Chatbot aktif", "5.000 pesan/bulan", "Knowledge Base: 20 dokumen",
+      "Web Widget (No Branding)", "WhatsApp & Telegram", "Agentic AI + Mini Apps (45 Tipe)",
+      "Orchestrator Multi-Agent (7 Specialist)", "Analytics Dashboard", "Priority Email Support",
+    ],
+  },
+  monthly_6: {
+    key: "monthly_6", name: "Paket 6 Bulan", price: "Rp 999.000", priceNum: 999000,
+    period: "/6 bulan", duration: "6 Bulan", savings: "Hemat Rp 195.000",
+    icon: Crown,
+    features: [
+      "1 Chatbot aktif", "5.000 pesan/bulan", "Knowledge Base: 30 dokumen",
+      "Web Widget (No Branding)", "WhatsApp, Telegram, Discord",
+      "Agentic AI + Mini Apps + Master Standar v2.0",
+      "Orchestrator Multi-Agent + Custom Specialist",
+      "SCORECARD + Win Probability (131 Hub)", "Advanced Analytics", "Priority Support",
+    ],
+  },
+  monthly_12: {
+    key: "monthly_12", name: "Paket 12 Bulan", price: "Rp 1.999.000", priceNum: 1999000,
+    period: "/tahun", duration: "12 Bulan", savings: "Hemat Rp 389.000",
+    icon: Crown,
+    features: [
+      "1 Chatbot aktif", "5.000 pesan/bulan", "Knowledge Base: 50 dokumen",
+      "Web Widget (Custom Branding)", "Semua Multi-channel",
+      "Agentic AI + Mini Apps + Master Standar v2.0",
+      "Orchestrator Multi-Agent + Custom Specialist Unlimited",
+      "SCORECARD + Win Probability + Export Aspekindo LLM",
+      "Advanced Analytics", "Priority Support + WhatsApp",
+    ],
+  },
+};
+
+const JASA_PLANS: Record<string, {
+  key: string; name: string; price: string; priceNum: number;
+  scope: string; tag: string; popular?: boolean;
+  description: string; features: string[];
+}> = {
+  tier1: {
+    key: "tier1", name: "Jasa Chatbot — Tier 1", price: "Rp 1.499.000", priceNum: 1499000,
+    scope: "Chatbot Dasar", tag: "Mulai",
+    description: "Chatbot ringan untuk FAQ, info produk, dan layanan dasar.",
+    features: [
+      "Konfigurasi dasar chatbot", "Setup knowledge base FAQ",
+      "Integrasi web widget", "Training & onboarding",
+      "1x revisi konten", "Panduan penggunaan",
+    ],
+  },
+  tier2: {
+    key: "tier2", name: "Jasa Chatbot — Tier 2", price: "Rp 2.499.000", priceNum: 2499000,
+    scope: "Chatbot Menengah", tag: "Populer", popular: true,
+    description: "Chatbot multi-fungsi untuk lead gen, sales assist, dan layanan pelanggan.",
+    features: [
+      "Konfigurasi lengkap chatbot", "Setup knowledge base komprehensif",
+      "Integrasi WhatsApp & Telegram", "Agentic AI configuration",
+      "Mini Apps setup (hingga 5 tipe)", "3x revisi konten",
+      "Training & onboarding tim", "1 bulan support pasca-launch",
+    ],
+  },
+  tier3: {
+    key: "tier3", name: "Jasa Chatbot — Tier 3", price: "Rp 4.900.000", priceNum: 4900000,
+    scope: "Chatbot Kompleks", tag: "Bisnis",
+    description: "Chatbot kompleks dengan orkestrasi multi-agen dan knowledge base luas.",
+    features: [
+      "Konfigurasi advanced chatbot", "Knowledge base skala besar (30+ dok)",
+      "Orchestrator Multi-Agent (7 specialist)", "Semua multi-channel integration",
+      "Mini Apps setup (hingga 15 tipe)", "SCORECARD + Analytics setup",
+      "5x revisi & optimasi", "Training tim + dokumentasi",
+      "2 bulan support pasca-launch",
+    ],
+  },
+  tier4: {
+    key: "tier4", name: "Jasa Chatbot — Tier 4", price: "Rp 7.490.000", priceNum: 7490000,
+    scope: "Chatbot Enterprise", tag: "Enterprise",
+    description: "Chatbot enterprise multi-domain, agentic penuh, custom branding.",
+    features: [
+      "Full enterprise configuration", "Knowledge base unlimited",
+      "Custom Specialist Agents (unlimited)", "Multi-domain & Custom Domain",
+      "Semua 45 tipe Mini Apps", "Custom branding widget",
+      "SCORECARD + Win Probability + Export", "Dedicated project manager",
+      "Revisi unlimited 30 hari", "3 bulan support prioritas",
+    ],
+  },
+};
+
+function parseQueryParams(search: string): Record<string, string> {
+  const params: Record<string, string> = {};
+  const qs = search.startsWith("?") ? search.slice(1) : search;
+  qs.split("&").forEach(part => {
+    const [k, v] = part.split("=");
+    if (k) params[decodeURIComponent(k)] = decodeURIComponent(v || "");
+  });
+  return params;
+}
+
+export default function CheckoutPage() {
+  const [location] = useLocation();
+  const search = typeof window !== "undefined" ? window.location.search : "";
+  const params = parseQueryParams(search);
+
+  const planKey = params.plan || "";
+  const jasaKey = params.jasa || "";
+
+  const plan = SUBSCRIPTION_PLANS[planKey] || null;
+  const jasa = JASA_PLANS[jasaKey] || null;
+
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const createSubscription = useCreateSubscription();
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const isValid = !!(plan || jasa);
+  const productName = plan?.name || jasa?.name || "Produk tidak ditemukan";
+  const productPrice = plan?.price || jasa?.price || "";
+  const productFeatures = plan?.features || jasa?.features || [];
+
+  const handleOrder = async () => {
+    if (!isAuthenticated) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (plan) {
+        const result = await createSubscription.mutateAsync({ plan: plan.key });
+        queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
+        if (result.waUrl) {
+          window.open(result.waUrl, "_blank");
+          setDone(true);
+        } else {
+          toast({ title: "Berhasil!", description: "Langganan sudah diproses." });
+          setDone(true);
+        }
+      } else if (jasa) {
+        const msg = [
+          `Halo, saya ingin memesan *${jasa.name}* (${jasa.scope}).`,
+          ``,
+          `Harga: ${jasa.price} (setup fee)`,
+          ``,
+          `Nama: ${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "—",
+          `Email: ${user?.email || "—"}`,
+          ``,
+          `Mohon informasi langkah selanjutnya. Terima kasih!`,
+        ].join("\n");
+        window.open(waLink(msg), "_blank");
+        setDone(true);
+      }
+    } catch (err: any) {
+      toast({
+        title: "Gagal Memproses",
+        description: err?.message || "Terjadi kesalahan. Coba lagi.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const PlanIcon = plan?.icon || Bot;
+
+  if (!isValid) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SharedHeader />
+        <div className="flex flex-col items-center justify-center py-32 text-center px-4">
+          <Lock className="h-12 w-12 text-muted-foreground mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Produk Tidak Ditemukan</h1>
+          <p className="text-muted-foreground mb-6">Link checkout tidak valid. Pilih produk dari halaman harga.</p>
+          <Link href="/pricing">
+            <Button>Lihat Daftar Harga</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (done) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SharedHeader />
+        <div className="flex flex-col items-center justify-center py-32 text-center px-4">
+          <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-5">
+            <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Pesanan Dikirim!</h1>
+          <p className="text-muted-foreground max-w-sm mb-2">
+            {plan
+              ? "Tim kami akan menghubungi Anda via WhatsApp untuk konfirmasi pembayaran dan aktivasi akun."
+              : "Tim kami akan menghubungi Anda via WhatsApp untuk detail order dan konfirmasi."
+            }
+          </p>
+          <p className="text-xs text-muted-foreground mb-8">
+            Pastikan WhatsApp Anda aktif di nomor yang terdaftar.
+          </p>
+          <div className="flex gap-3 flex-wrap justify-center">
+            <Link href="/dashboard">
+              <Button data-testid="button-go-dashboard">
+                <Bot className="h-4 w-4 mr-2" /> Ke Dashboard
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button variant="outline">Lihat Paket Lain</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <SharedHeader />
+
+      <div className="container mx-auto px-4 py-10 max-w-5xl">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6">
+          <Link href="/pricing" className="hover:text-foreground transition-colors">Harga</Link>
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-foreground font-medium">Checkout</span>
+        </nav>
+
+        <h1 className="text-2xl font-bold mb-1">Konfirmasi Pesanan</h1>
+        <p className="text-muted-foreground text-sm mb-8">
+          Periksa detail pesanan Anda sebelum melanjutkan ke pembayaran.
+        </p>
+
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* LEFT — Product detail */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Product card */}
+            <div className="rounded-2xl border bg-card p-6">
+              <div className="flex items-start gap-4 mb-5">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  plan?.popular || jasa?.popular
+                    ? "bg-primary/10"
+                    : "bg-muted"
+                }`}>
+                  {plan
+                    ? <PlanIcon className={`h-6 w-6 ${plan.popular ? "text-primary" : "text-muted-foreground"}`} />
+                    : <Wrench className="h-6 w-6 text-violet-600" />
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h2 className="font-bold text-lg leading-tight">{productName}</h2>
+                    {(plan?.popular || jasa?.popular) && (
+                      <Badge className="text-[10px] bg-primary text-white">POPULER</Badge>
+                    )}
+                    {jasa && (
+                      <Badge variant="outline" className="text-[10px]">{jasa.scope}</Badge>
+                    )}
+                    {plan?.savings && (
+                      <Badge variant="outline" className="text-[10px] text-green-700 border-green-300 bg-green-50 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700">
+                        {plan.savings}
+                      </Badge>
+                    )}
+                  </div>
+                  {plan && (
+                    <p className="text-sm text-muted-foreground">Durasi: {plan.duration}</p>
+                  )}
+                  {jasa && (
+                    <p className="text-sm text-muted-foreground">{jasa.description}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className="space-y-2.5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  {plan ? "Yang Anda dapatkan:" : "Termasuk dalam paket jasa:"}
+                </p>
+                {productFeatures.map((f, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <div className="w-4 h-4 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="h-2.5 w-2.5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="text-sm text-muted-foreground">{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              {plan && (
+                <div className="mt-5 pt-4 border-t text-xs text-muted-foreground">
+                  * Biaya berlangganan — terpisah dari biaya setup chatbot jika ada.
+                </div>
+              )}
+              {jasa && (
+                <div className="mt-5 pt-4 border-t text-xs text-muted-foreground">
+                  * Biaya setup dibayar sekali. Hosting berlangganan dibayar terpisah sesuai durasi yang dipilih.
+                </div>
+              )}
+            </div>
+
+            {/* Payment process steps */}
+            <div className="rounded-2xl border bg-card p-6">
+              <h3 className="font-semibold text-sm mb-4">Cara Pembayaran</h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    step: "1", icon: MessageCircle, color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/30",
+                    title: "Konfirmasi via WhatsApp",
+                    desc: "Klik tombol di bawah → sistem membuat pesanan → Anda langsung terhubung ke WhatsApp tim Gustafta.",
+                  },
+                  {
+                    step: "2", icon: Phone, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30",
+                    title: "Transfer Pembayaran",
+                    desc: "Tim kami mengirimkan info rekening. Lakukan transfer sesuai nominal, lalu kirimkan bukti transfer.",
+                  },
+                  {
+                    step: "3", icon: Zap, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/30",
+                    title: "Akun Diaktifkan (< 2 Jam)",
+                    desc: plan
+                      ? "Setelah pembayaran terkonfirmasi, akun Anda langsung aktif dan bisa mulai membuat chatbot."
+                      : "Tim kami mulai mengerjakan chatbot Anda sesuai brief yang telah disepakati.",
+                  },
+                ].map(({ step, icon: Icon, color, bg, title, desc }) => (
+                  <div key={step} className="flex gap-3">
+                    <div className={`w-9 h-9 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`h-4 w-4 ${color}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{step}. {title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT — Order summary + CTA */}
+          <div className="lg:col-span-2">
+            <div className="sticky top-24 space-y-4">
+              {/* Order summary box */}
+              <div className="rounded-2xl border bg-card p-6">
+                <h3 className="font-semibold text-sm mb-4">Ringkasan Pesanan</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Produk</span>
+                    <span className="font-medium text-right max-w-[180px]">{productName}</span>
+                  </div>
+                  {plan && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Durasi</span>
+                      <span className="font-medium">{plan.duration}</span>
+                    </div>
+                  )}
+                  {jasa && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tipe</span>
+                      <span className="font-medium">{jasa.scope}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-3 flex justify-between items-baseline">
+                    <span className="font-semibold">Total</span>
+                    <span className="text-xl font-bold text-primary">{productPrice}</span>
+                  </div>
+                  {plan?.savings && (
+                    <div className="text-xs text-green-700 dark:text-green-400 text-right">{plan.savings}</div>
+                  )}
+                  {plan && (
+                    <div className="text-xs text-muted-foreground text-right">{plan.period}</div>
+                  )}
+                  {jasa && (
+                    <div className="text-xs text-muted-foreground text-right">Biaya setup (bayar sekali)</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Customer info */}
+              {isAuthenticated && user && (
+                <div className="rounded-2xl border bg-card p-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Info Akun</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Login notice */}
+              {!isAuthenticated && (
+                <div className="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-4">
+                  <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-1.5">
+                    <Lock className="h-3.5 w-3.5" /> Login diperlukan
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    Silakan login atau daftar terlebih dahulu untuk melanjutkan pesanan.
+                  </p>
+                </div>
+              )}
+
+              {/* CTA */}
+              <Button
+                size="lg"
+                className="w-full gap-2 h-12 text-base font-semibold"
+                onClick={handleOrder}
+                disabled={loading}
+                data-testid="button-checkout-confirm"
+              >
+                {loading
+                  ? <><Loader2 className="h-4 w-4 animate-spin" /> Memproses...</>
+                  : !isAuthenticated
+                  ? <><Lock className="h-4 w-4" /> Login & Pesan</>
+                  : <><MessageCircle className="h-4 w-4" /> Konfirmasi via WhatsApp</>
+                }
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => window.history.back()}
+                data-testid="button-checkout-back"
+              >
+                ← Kembali
+              </Button>
+
+              {/* Trust badges */}
+              <div className="space-y-2 pt-1">
+                {[
+                  { icon: ShieldCheck, text: "Pembayaran aman via transfer bank" },
+                  { icon: Clock, text: "Aktivasi < 2 jam setelah konfirmasi" },
+                  { icon: MessageCircle, text: "Support WhatsApp siap membantu" },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Icon className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                    {text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

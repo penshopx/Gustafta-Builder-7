@@ -17,6 +17,7 @@ import LoginPage from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Documentation from "@/pages/documentation";
 import Pricing from "@/pages/pricing";
+import CheckoutPage from "@/pages/checkout";
 import Produk from "@/pages/produk";
 import Marketplace from "@/pages/marketplace";
 import Subscription from "@/pages/subscription";
@@ -406,6 +407,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/documentation" component={Documentation} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/checkout" component={CheckoutPage} />
       <Route path="/produk" component={Produk} />
       <Route path="/marketplace" component={MarketplaceRedirect} />
       <Route path="/marketplace/:agentId" component={MarketplaceRedirect} />
