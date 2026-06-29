@@ -242,7 +242,7 @@ export default function StarterKitPage() {
               <span className="text-xs font-bold text-red-600 dark:text-red-400">Harga promosi — bisa berubah sewaktu-waktu</span>
             </div>
             <div className="text-5xl font-extrabold text-sky-600 mb-1">Rp 245.000</div>
-            <div className="text-sm text-gray-400 mb-6 line-through">Harga normal Rp 315.000</div>
+            <div className="text-sm text-gray-400 mb-6 line-through">Harga normal Rp 350.000</div>
             <ul className="text-sm text-left space-y-3 mb-8 text-gray-700 dark:text-muted-foreground">
               {[
                 "Trilogi GUSTAFTA — Buku I, II & III (PDF + Flipbook)",
