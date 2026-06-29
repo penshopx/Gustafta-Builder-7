@@ -108,14 +108,6 @@ export default function StarterKitPage() {
                 highlight: "Dibaca rata-rata dalam 4 jam per buku, dipraktikkan dalam 2 minggu",
               },
               {
-                icon: <Sparkles className="h-7 w-7 text-indigo-600" />,
-                title: "GUSTAFTA Framework™",
-                desc: "Kerangka berpikir khas Gustafta — metode konversi pengetahuan menjadi AI. Berisi 5-stage journey, model konversi, identitas Perakit AI, dan 6 pilar ekosistem.",
-                badge: "Framework",
-                highlight: "Fondasi berpikir seluruh ekosistem GUSTAFTA",
-                link: "/framework",
-              },
-              {
                 icon: <Zap className="h-7 w-7 text-emerald-600" />,
                 title: "Prompt Pack Starter (15 Prompt)",
                 desc: "15 prompt siap pakai untuk chatbot di bidang Anda — tinggal ganti nama, langsung bisa dipakai untuk demo ke calon klien hari ini.",
@@ -254,7 +246,6 @@ export default function StarterKitPage() {
             <ul className="text-sm text-left space-y-3 mb-8 text-gray-700 dark:text-muted-foreground">
               {[
                 "Trilogi GUSTAFTA — Buku I, II & III (PDF + Flipbook)",
-                "GUSTAFTA Framework™ (dokumen kerangka berpikir)",
                 "15 Prompt Pack siap pakai",
                 "Template Konfigurasi Chatbot (5 profesi)",
                 "Akses Builder 7 hari (trial penuh)",
