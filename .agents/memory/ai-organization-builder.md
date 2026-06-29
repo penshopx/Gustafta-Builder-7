@@ -28,7 +28,13 @@ Gustafta = **AI Organization Builder**: platform yang mengubah **pengetahuan man
 ## Roadmap eksekusi (Blueprint Engine) — dokumen kanonik
 Roadmap teknis bertahap hidup di **`docs/blueprint-engine/`** (BUKAN di memory):
 - `00-roadmap.md` — 9 tahap (Audit→Blueprint Schema→Mapping→Config→Dialogue V2→Inference→Confidence→Gap→Critic/Sim/Evolution).
-- `01-builder-audit.md` — Tahap 1 SELESAI: katalog ±150 kolom tabel `agents` + 23 panel + entitas anak.
+- `01-builder-audit.md` — katalog Builder (tabel `agents` + panel + entitas anak).
+- `02-blueprint-schema.md` + `shared/blueprint/blueprint-schema.ts` — Blueprint JSON "DNA".
+
+**Keputusan desain Blueprint (durable):**
+- Field Blueprint memakai **nama kolom `agents` apa adanya** → Mapping Engine bisa 1:1. Jangan rename.
+- **Confidence, bukan Completion**: tiap field punya `FieldMeta{confidence,source,evidence,needsConfirmation}`; dialog hanya tanya yang confidence rendah.
+- **Scope contract**: Blueprint = DNA desain, BUKAN gudang data. Kecualikan field system-managed (id/userId/accessToken/createdAt) & tabel runtime (analytics/messages/leads/scoring_results). Yang masuk hanya konfigurasinya.
 
 **Prinsip mati-matian (ditegaskan owner berulang):** JANGAN rombak app, JANGAN ubah UI/Builder. Engine baru = ADITIF, tersembunyi dulu, disambung pelan-pelan. Engine direncanakan di `server/services/blueprint-engine/` agar Builder existing tak tersentuh sampai Tahap 4.
 **Pergeseran inti:** Builder bukan titik awal tapi tujuan — alurnya `Dialog→Blueprint(JSON "DNA")→Config→Builder auto-fill→Ekosistem`. Pakai **Confidence**, bukan Completion %.

@@ -20,7 +20,7 @@ Trilogi Gustafta = framework berpikir di baliknya: **Dialog → Kolaborasi → K
 | Tahap | Engine / Deliverable | Sentuh kode app? | Status |
 |------|----------------------|------------------|--------|
 | **1** | **AUDIT Builder** — katalog semua field konfigurasi (dokumen Markdown) | Tidak (read-only) | ✅ SELESAI — lihat `01-builder-audit.md` |
-| 2 | **Blueprint Schema** — model data JSON yang mewakili seluruh konfigurasi Builder | Tidak (tipe/skema baru, belum disambung) | ⏳ Menunggu persetujuan |
+| **2** | **Blueprint Schema** — model data JSON yang mewakili seluruh konfigurasi Builder | Tidak (tipe/skema baru, belum disambung) | ✅ SELESAI — `shared/blueprint/blueprint-schema.ts` + `02-blueprint-schema.md` |
 | 3 | **Mapping Engine** — peta setiap field Blueprint → field Builder | Belum disambung | — |
 | 4 | **Configuration Engine** — baca Blueprint, isi otomatis Builder (user tetap bisa edit) | Ya (engine baru, UI tak diubah) | — |
 | 5 | **Dialogue Engine V2** — wawancara Socratic adaptif, pertanyaan sesedikit mungkin | Ya (engine baru) | — |
