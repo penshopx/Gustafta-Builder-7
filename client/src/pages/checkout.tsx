@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Check, MessageCircle, ArrowRight, Loader2, ShieldCheck, Clock,
   Sparkles, Crown, Zap, Bot, Wrench, ChevronRight, Lock, User, Phone,
+  CreditCard, ExternalLink,
 } from "lucide-react";
 
 const WA_NUMBER = "6282299417818";
@@ -166,7 +167,10 @@ export default function CheckoutPage() {
       if (plan) {
         const result = await createSubscription.mutateAsync({ plan: plan.key });
         queryClient.invalidateQueries({ queryKey: ["/api/subscriptions/user"] });
-        if (result.waUrl) {
+        if (result.scalevCheckoutUrl) {
+          window.open(result.scalevCheckoutUrl, "_blank");
+          setDone(true);
+        } else if (result.waUrl) {
           window.open(result.waUrl, "_blank");
           setDone(true);
         } else {
@@ -224,15 +228,22 @@ export default function CheckoutPage() {
           <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-5">
             <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">Pesanan Dikirim!</h1>
+          <h1 className="text-2xl font-bold mb-2">
+            {plan ? "Diarahkan ke Pembayaran!" : "Pesanan Dikirim!"}
+          </h1>
           <p className="text-muted-foreground max-w-sm mb-2">
             {plan
-              ? "Tim kami akan menghubungi Anda via WhatsApp untuk konfirmasi pembayaran dan aktivasi akun."
+              ? "Halaman pembayaran Scalev sudah terbuka di tab baru. Selesaikan pembayaran — akun Anda akan aktif otomatis setelah konfirmasi."
               : "Tim kami akan menghubungi Anda via WhatsApp untuk detail order dan konfirmasi."
             }
           </p>
+          {plan && (
+            <p className="text-xs text-muted-foreground mb-2">
+              Gunakan email Gustafta Anda saat checkout di Scalev agar aktivasi berjalan otomatis.
+            </p>
+          )}
           <p className="text-xs text-muted-foreground mb-8">
-            Pastikan WhatsApp Anda aktif di nomor yang terdaftar.
+            {plan ? "Butuh bantuan? Hubungi tim kami via WhatsApp." : "Pastikan WhatsApp Anda aktif di nomor yang terdaftar."}
           </p>
           <div className="flex gap-3 flex-wrap justify-center">
             <Link href="/dashboard">
@@ -337,25 +348,39 @@ export default function CheckoutPage() {
             <div className="rounded-2xl border bg-card p-6">
               <h3 className="font-semibold text-sm mb-4">Cara Pembayaran</h3>
               <div className="space-y-4">
-                {[
+                {(plan ? [
                   {
-                    step: "1", icon: MessageCircle, color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/30",
-                    title: "Konfirmasi via WhatsApp",
-                    desc: "Klik tombol di bawah → sistem membuat pesanan → Anda langsung terhubung ke WhatsApp tim Gustafta.",
+                    step: "1", icon: CreditCard, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30",
+                    title: "Klik Bayar via Scalev",
+                    desc: "Klik tombol — sistem membuat pesanan & membuka halaman pembayaran Scalev di tab baru.",
                   },
                   {
-                    step: "2", icon: Phone, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30",
-                    title: "Transfer Pembayaran",
-                    desc: "Tim kami mengirimkan info rekening. Lakukan transfer sesuai nominal, lalu kirimkan bukti transfer.",
+                    step: "2", icon: User, color: "text-violet-600", bg: "bg-violet-100 dark:bg-violet-900/30",
+                    title: "Isi Data & Pilih Metode Bayar",
+                    desc: "Gunakan email Gustafta Anda. Scalev mendukung transfer bank, QRIS, kartu kredit, dll.",
                   },
                   {
                     step: "3", icon: Zap, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/30",
-                    title: "Akun Diaktifkan (< 2 Jam)",
-                    desc: plan
-                      ? "Setelah pembayaran terkonfirmasi, akun Anda langsung aktif dan bisa mulai membuat chatbot."
-                      : "Tim kami mulai mengerjakan chatbot Anda sesuai brief yang telah disepakati.",
+                    title: "Akun Aktif Otomatis",
+                    desc: "Setelah pembayaran terkonfirmasi Scalev, akun Gustafta Anda aktif otomatis — tidak perlu konfirmasi manual.",
                   },
-                ].map(({ step, icon: Icon, color, bg, title, desc }) => (
+                ] : [
+                  {
+                    step: "1", icon: MessageCircle, color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/30",
+                    title: "Konsultasi via WhatsApp",
+                    desc: "Klik tombol — pesan terkirim ke tim Gustafta via WhatsApp untuk diskusi kebutuhan Anda.",
+                  },
+                  {
+                    step: "2", icon: Phone, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30",
+                    title: "Brief & Pembayaran",
+                    desc: "Tim kami mengirimkan brief dan link pembayaran Scalev sesuai paket jasa yang dipilih.",
+                  },
+                  {
+                    step: "3", icon: Zap, color: "text-amber-600", bg: "bg-amber-100 dark:bg-amber-900/30",
+                    title: "Pengerjaan Dimulai",
+                    desc: "Setelah pembayaran terkonfirmasi, tim kami mulai mengerjakan chatbot Anda.",
+                  },
+                ]).map(({ step, icon: Icon, color, bg, title, desc }) => (
                   <div key={step} className="flex gap-3">
                     <div className={`w-9 h-9 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
                       <Icon className={`h-4 w-4 ${color}`} />
@@ -449,9 +474,17 @@ export default function CheckoutPage() {
                   ? <><Loader2 className="h-4 w-4 animate-spin" /> Memproses...</>
                   : !isAuthenticated
                   ? <><Lock className="h-4 w-4" /> Login & Pesan</>
-                  : <><MessageCircle className="h-4 w-4" /> Konfirmasi via WhatsApp</>
+                  : plan
+                  ? <><CreditCard className="h-4 w-4" /> Bayar via Scalev<ExternalLink className="h-3.5 w-3.5 ml-1 opacity-60" /></>
+                  : <><MessageCircle className="h-4 w-4" /> Hubungi via WhatsApp</>
                 }
               </Button>
+
+              {plan && (
+                <p className="text-xs text-center text-muted-foreground -mt-1">
+                  Terbuka di tab baru — gunakan email Gustafta Anda
+                </p>
+              )}
 
               <Button
                 variant="outline"
@@ -464,11 +497,15 @@ export default function CheckoutPage() {
 
               {/* Trust badges */}
               <div className="space-y-2 pt-1">
-                {[
-                  { icon: ShieldCheck, text: "Pembayaran aman via transfer bank" },
-                  { icon: Clock, text: "Aktivasi < 2 jam setelah konfirmasi" },
+                {(plan ? [
+                  { icon: ShieldCheck, text: "Pembayaran aman via Scalev (bank, QRIS, kartu)" },
+                  { icon: Zap, text: "Aktivasi otomatis setelah pembayaran dikonfirmasi" },
                   { icon: MessageCircle, text: "Support WhatsApp siap membantu" },
-                ].map(({ icon: Icon, text }) => (
+                ] : [
+                  { icon: ShieldCheck, text: "Pembayaran aman via Scalev" },
+                  { icon: Clock, text: "Pengerjaan dimulai setelah pembayaran" },
+                  { icon: MessageCircle, text: "Support WhatsApp siap membantu" },
+                ]).map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Icon className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
                     {text}

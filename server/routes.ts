@@ -4557,7 +4557,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
     // Payment system status
     app.get("/api/subscriptions/status", (_req, res) => {
       res.json({
-        paymentConfigured: false,
+        paymentConfigured: !!process.env.SCALEV_API_KEY,
         provider: "scalev",
         isSandbox: false,
         clientKey: "",
@@ -4627,7 +4627,7 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           return res.status(201).json({ subscription, message: "Free trial activated" });
         }
 
-        // Paket berbayar — arahkan ke pembayaran via WA (Scalev)
+        // Paket berbayar — arahkan ke pembayaran via Scalev
         const orderId = `GUS-${userId.slice(0, 8)}-${Date.now()}`;
 
         const subscription = await storage.createSubscription({
@@ -4640,8 +4640,21 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           mayarOrderId: orderId,
         });
 
+        // Scalev product slug mapping
+        const SCALEV_SLUG_MAP: Record<string, string> = {
+          monthly_1:  "gustafta-paket-1-bulan",
+          monthly_3:  "gustafta-paket-3-bulan",
+          monthly_6:  "gustafta-paket-6-bulan",
+          monthly_12: "gustafta-paket-12-bulan",
+        };
+        const scalevSlug = SCALEV_SLUG_MAP[selectedPlan];
+        const scalevCheckoutUrl = scalevSlug
+          ? `https://app.scalev.com/checkout/${scalevSlug}`
+          : null;
+
+        // Fallback WA if no Scalev product configured
         const waMsg = encodeURIComponent(
-          `Halo, saya ingin berlangganan Gustafta ${pricing.name}.\nOrder ID: ${orderId}\nHarga: Rp ${pricing.price.toLocaleString("id-ID")}/bulan\n\nMohon info cara pembayaran.`
+          `Halo, saya ingin berlangganan Gustafta ${pricing.name}.\nOrder ID: ${orderId}\nHarga: Rp ${pricing.price.toLocaleString("id-ID")}\n\nMohon info cara pembayaran.`
         );
         const waUrl = `https://wa.me/6282299417818?text=${waMsg}`;
 
@@ -4650,8 +4663,9 @@ Sampaikan dengan natural, misalnya: "Untuk jawaban yang lebih lengkap dan pembua
           orderId,
           amount: pricing.price,
           planName: pricing.name,
+          scalevCheckoutUrl,
           waUrl,
-          message: `Paket ${pricing.name} berhasil didaftarkan. Tim kami akan menghubungi Anda untuk konfirmasi pembayaran.`,
+          message: `Paket ${pricing.name} berhasil didaftarkan.`,
         });
       } catch (error) {
         console.error("Failed to create subscription:", error);
@@ -15837,6 +15851,54 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
       if (existing) {
         return res.status(200).json({ received: true, note: "Duplicate, already processed" });
       }
+
+      // ── Handle Gustafta Platform Subscription Plans ──────────────────────────
+      // Detect if this is a platform subscription purchase (monthly_1/3/6/12)
+      const GUSTAFTA_PLAN_SLUG_MAP: Record<string, { plan: string; duration: number }> = {
+        "gustafta-paket-1-bulan":  { plan: "monthly_1",  duration: 30 },
+        "gustafta-paket-3-bulan":  { plan: "monthly_3",  duration: 90 },
+        "gustafta-paket-6-bulan":  { plan: "monthly_6",  duration: 180 },
+        "gustafta-paket-12-bulan": { plan: "monthly_12", duration: 365 },
+      };
+      const productSlug: string = data.product_slug || data.slug || "";
+      const slugFromName: string = (data.product_name || data.name || "")
+        .toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      const matchedPlanConfig = GUSTAFTA_PLAN_SLUG_MAP[productSlug] || GUSTAFTA_PLAN_SLUG_MAP[slugFromName];
+
+      if (matchedPlanConfig && customerEmail) {
+        // Find user by email in users table
+        const { db } = await import("./db");
+        const { users } = await import("@shared/models/auth");
+        const { eq } = await import("drizzle-orm");
+        const userRows = await db.select().from(users).where(eq(users.email, customerEmail)).limit(1);
+        if (userRows.length > 0) {
+          const targetUserId = userRows[0].id;
+          const now = new Date();
+          const endDate = new Date(now.getTime() + matchedPlanConfig.duration * 24 * 60 * 60 * 1000);
+          const { subscriptionPlans } = await import("./lib/mayar");
+          const pricing = subscriptionPlans[matchedPlanConfig.plan as keyof typeof subscriptionPlans];
+          try {
+            const newSub = await storage.createSubscription({
+              userId: targetUserId,
+              plan: matchedPlanConfig.plan,
+              status: "active",
+              amount: Math.round(grossRevenue) || pricing?.price || 0,
+              currency: "IDR",
+              chatbotLimit: pricing?.chatbotLimit ?? 3,
+              mayarOrderId: `scalev_plan_${orderId}`,
+              startDate: now.toISOString(),
+              endDate: endDate.toISOString(),
+            });
+            console.log(`[Scalev] Platform subscription activated for ${customerEmail}: ${matchedPlanConfig.plan} (${matchedPlanConfig.duration} days) sub#${newSub.id}`);
+          } catch (subErr: any) {
+            console.error(`[Scalev] Failed to activate platform subscription for ${customerEmail}:`, subErr?.message);
+          }
+        } else {
+          console.log(`[Scalev] Platform sub webhook: no user found with email ${customerEmail}`);
+        }
+        return res.status(200).json({ received: true, type: "platform_subscription" });
+      }
+      // ─────────────────────────────────────────────────────────────────────────
 
       // Find matching product mappings by Scalev product variant names
       const productNames = Object.keys(finalVariants);

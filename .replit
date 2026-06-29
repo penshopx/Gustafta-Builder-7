@@ -60,6 +60,7 @@ ADMIN_EMAILS = "tutip98@outlook.com"
 SMTP_HOST = "smtp-relay.brevo.com"
 SMTP_PORT = "587"
 BREVO_SENDER_EMAIL = "noreply@gustafta.my.id"
+SCALEV_API_KEY = "sk_ixJzm4LV0o8K4NkWATTY332WCxmrSQDGc2t4CR4X2jlgV7GOqugRnqZKt9MrUWtb"
 
 [postMerge]
 path = "scripts/post-merge.sh"
