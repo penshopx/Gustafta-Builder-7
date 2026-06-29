@@ -386,6 +386,21 @@ export default function AdminPage() {
   const [showScalevForm, setShowScalevForm] = useState(false);
   const [scalevEditId, setScalevEditId] = useState<number | null>(null);
 
+  const [autoRegForm, setAutoRegForm] = useState({ productName: "", price: "", description: "", type: "chatbot", agentId: "", bigIdeaId: "", agentIds: "", label: "" });
+  const [showAutoReg, setShowAutoReg] = useState(false);
+  const [autoRegResult, setAutoRegResult] = useState<{ checkoutUrl: string; message: string } | null>(null);
+  const autoRegMutation = useMutation({
+    mutationFn: (data: any) => apiRequest("POST", "/api/admin/scalev-auto-register", data),
+    onSuccess: (res: any) => {
+      setAutoRegResult({ checkoutUrl: res.checkoutUrl, message: res.message });
+      setAutoRegForm({ productName: "", price: "", description: "", type: "chatbot", agentId: "", bigIdeaId: "", agentIds: "", label: "" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/scalev-mappings"] });
+    },
+    onError: (err: any) => {
+      toast({ title: "Gagal", description: err?.message || "Terjadi kesalahan.", variant: "destructive" });
+    },
+  });
+
   const { data: storeOrders = [], isLoading: storeOrdersLoading, refetch: refetchOrders } = useQuery<StoreOrder[]>({
     queryKey: ["/api/store/admin/orders"],
     queryFn: async () => { const res = await fetch("/api/store/admin/orders"); return res.json(); },
@@ -1599,6 +1614,113 @@ export default function AdminPage() {
                     <p className="text-xs text-muted-foreground mt-1">Paste URL ini di: Scalev → Settings → Developers → Webhook URL</p>
                   </div>
                 </CardContent>
+              </Card>
+
+              {/* AUTO-REGISTER: Buat Produk Scalev Otomatis */}
+              <Card className="border-orange-500/30">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-orange-500" />
+                      <CardTitle className="text-base">Auto-Daftarkan ke Scalev</CardTitle>
+                    </div>
+                    <Button size="sm" variant={showAutoReg ? "outline" : "default"}
+                      className={showAutoReg ? "" : "bg-orange-500 hover:bg-orange-600 text-white gap-1"}
+                      onClick={() => { setShowAutoReg(!showAutoReg); setAutoRegResult(null); }}
+                      data-testid="button-toggle-auto-register">
+                      {showAutoReg ? "Tutup" : <><Plus className="h-4 w-4" /> Daftarkan Chatbot/Modul</>}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Buat produk di Scalev <strong>otomatis</strong> — tidak perlu buka dashboard Scalev. Satu klik, mapping langsung terdaftar.
+                  </p>
+                </CardHeader>
+                {showAutoReg && (
+                  <CardContent className="space-y-4">
+                    {autoRegResult ? (
+                      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
+                        <p className="text-sm font-semibold text-green-600 dark:text-green-400">✅ {autoRegResult.message}</p>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Link checkout Scalev (bagikan ke customer):</p>
+                          <div className="flex gap-2">
+                            <Input readOnly value={autoRegResult.checkoutUrl} className="font-mono text-xs bg-muted/50" />
+                            <Button variant="outline" size="sm" onClick={() => {
+                              navigator.clipboard.writeText(autoRegResult.checkoutUrl);
+                              toast({ title: "Link disalin!" });
+                            }}><Copy className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => { setAutoRegResult(null); setShowAutoReg(true); }}>
+                          + Daftarkan produk lagi
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Nama Produk (tampil di Scalev) *</label>
+                            <Input value={autoRegForm.productName} onChange={e => setAutoRegForm(f => ({ ...f, productName: e.target.value }))}
+                              placeholder="mis. Chatbot SBUClaw Pro" data-testid="input-auto-product-name" />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Harga (Rp) *</label>
+                            <Input type="number" value={autoRegForm.price} onChange={e => setAutoRegForm(f => ({ ...f, price: e.target.value }))}
+                              placeholder="mis. 299000" data-testid="input-auto-price" />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Label Mapping (nama varian di webhook)</label>
+                            <Input value={autoRegForm.label} onChange={e => setAutoRegForm(f => ({ ...f, label: e.target.value }))}
+                              placeholder="Dikosongkan = sama dengan nama produk" data-testid="input-auto-label" />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Tipe Akses *</label>
+                            <select value={autoRegForm.type} onChange={e => setAutoRegForm(f => ({ ...f, type: e.target.value, agentId: "", bigIdeaId: "", agentIds: "" }))}
+                              className="w-full h-9 px-3 text-sm rounded-md border border-input bg-background" data-testid="select-auto-type">
+                              <option value="chatbot">Chatbot (1 chatbot)</option>
+                              <option value="modul">Modul (Email Access)</option>
+                              <option value="bundle">Bundle (beberapa chatbot)</option>
+                            </select>
+                          </div>
+                          {autoRegForm.type === "chatbot" && (
+                            <div>
+                              <label className="text-xs font-medium mb-1 block text-muted-foreground">Agent ID Chatbot *</label>
+                              <Input type="number" value={autoRegForm.agentId} onChange={e => setAutoRegForm(f => ({ ...f, agentId: e.target.value }))}
+                                placeholder="mis. 24" data-testid="input-auto-agent-id" />
+                            </div>
+                          )}
+                          {autoRegForm.type === "modul" && (
+                            <div>
+                              <label className="text-xs font-medium mb-1 block text-muted-foreground">Big Idea ID Modul *</label>
+                              <Input type="number" value={autoRegForm.bigIdeaId} onChange={e => setAutoRegForm(f => ({ ...f, bigIdeaId: e.target.value }))}
+                                placeholder="mis. 5" data-testid="input-auto-big-idea-id" />
+                            </div>
+                          )}
+                          {autoRegForm.type === "bundle" && (
+                            <div className="sm:col-span-2">
+                              <label className="text-xs font-medium mb-1 block text-muted-foreground">Agent IDs (pisah koma) *</label>
+                              <Input value={autoRegForm.agentIds} onChange={e => setAutoRegForm(f => ({ ...f, agentIds: e.target.value }))}
+                                placeholder="mis. 24, 31, 45, 67" data-testid="input-auto-agent-ids" />
+                            </div>
+                          )}
+                          <div className="sm:col-span-2">
+                            <label className="text-xs font-medium mb-1 block text-muted-foreground">Deskripsi (opsional)</label>
+                            <Input value={autoRegForm.description} onChange={e => setAutoRegForm(f => ({ ...f, description: e.target.value }))}
+                              placeholder="Deskripsi singkat produk untuk halaman checkout Scalev" data-testid="input-auto-description" />
+                          </div>
+                        </div>
+                        <Button className="bg-orange-500 hover:bg-orange-600 text-white gap-2"
+                          disabled={autoRegMutation.isPending || !autoRegForm.productName || !autoRegForm.price}
+                          onClick={() => autoRegMutation.mutate(autoRegForm)}
+                          data-testid="button-auto-register-submit">
+                          {autoRegMutation.isPending
+                            ? <><Loader2 className="h-4 w-4 animate-spin" /> Membuat di Scalev...</>
+                            : <><Zap className="h-4 w-4" /> Buat Produk Scalev & Daftar Mapping</>
+                          }
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                )}
               </Card>
 
               {/* Product Mappings */}

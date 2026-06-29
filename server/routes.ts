@@ -15807,6 +15807,52 @@ Return HANYA JSON berikut (tanpa penjelasan lain):
     }
   });
 
+  // Auto-register: buat produk Scalev via API + simpan mapping otomatis
+  app.post("/api/admin/scalev-auto-register", isAuthenticated, requireAdmin, async (req: any, res: any) => {
+    try {
+      const { productName, price, description, type, agentId, bigIdeaId, agentIds, label } = req.body;
+      if (!productName || !price || !type) {
+        return res.status(400).json({ error: "productName, price, dan type wajib diisi." });
+      }
+      const priceNum = parseInt(price);
+      if (isNaN(priceNum) || priceNum <= 0) {
+        return res.status(400).json({ error: "Harga tidak valid." });
+      }
+
+      const { createScalevProduct } = await import("./lib/scalev");
+      const product = await createScalevProduct({
+        name: productName,
+        description: description || productName,
+        price: priceNum,
+        variantName: label || productName,
+      });
+
+      // Simpan mapping otomatis
+      const mappingData: any = {
+        scalevProductName: label || productName,
+        type,
+        label: label || productName,
+      };
+      if (type === "chatbot" && agentId) mappingData.agentId = parseInt(agentId);
+      if (type === "modul" && bigIdeaId) mappingData.bigIdeaId = parseInt(bigIdeaId);
+      if (type === "bundle" && agentIds) {
+        mappingData.agentIds = String(agentIds).split(",").map((s: string) => parseInt(s.trim())).filter(Boolean);
+      }
+      await storage.createScalevMapping(mappingData);
+
+      res.json({
+        success: true,
+        scalevProductId: product.id,
+        scalevSlug: product.slug,
+        checkoutUrl: product.checkoutUrl,
+        message: `Produk "${product.name}" berhasil dibuat di Scalev dan mapping terdaftar!`,
+      });
+    } catch (err: any) {
+      console.error("[Scalev Auto-Register]", err?.message);
+      res.status(500).json({ error: err?.message || "Gagal membuat produk Scalev." });
+    }
+  });
+
   app.delete("/api/admin/scalev-mappings/:id", isAuthenticated, requireAdmin, async (req: any, res: any) => {
     try {
       const { id } = req.params;
