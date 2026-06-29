@@ -204,6 +204,16 @@ export function CreateAgentDialog({ open, onOpenChange, forceOrchestrator, onCre
       {
         onSuccess: () => {
           onCreated?.();
+          // Mark Blueprint as imported if it was used
+          try {
+            const raw = localStorage.getItem("gustafta_blueprint_pending");
+            if (raw) {
+              const bp = JSON.parse(raw);
+              if (bp.namaAI === formData.name) {
+                localStorage.setItem("gustafta_blueprint_pending", JSON.stringify({ ...bp, status: "imported" }));
+              }
+            }
+          } catch { /* ignore */ }
           toast({
             title: "Alat Bantu Dibuat",
             description: `${formData.name} berhasil dibuat.`,

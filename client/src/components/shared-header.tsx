@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
-import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown, User, Store, Rocket, TrendingUp, MessageCircle, GraduationCap, Sparkles, Brain, Zap } from "lucide-react";
+import { Bot, BookOpen, BarChart3, LogIn, LogOut, Menu, CreditCard, LayoutDashboard, ShoppingBag, Smartphone, Package, Shield, Crown, User, Store, Rocket, TrendingUp, MessageCircle, GraduationCap, Sparkles, Brain, Zap, FileDown } from "lucide-react";
 
 const WA_NUMBERS = [
   { display: "081287941900", link: "6281287941900" },
@@ -54,6 +54,32 @@ function PlanBadge() {
           </span>
         )}
       </Badge>
+    </Link>
+  );
+}
+
+function BlueprintHeaderDot() {
+  const [hasPending, setHasPending] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("gustafta_blueprint_pending");
+      if (raw) {
+        const bp = JSON.parse(raw);
+        setHasPending(bp.status !== "unlocked" && bp.status !== "imported");
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  if (!hasPending) return null;
+
+  return (
+    <Link href="/blueprint-saya" title="Blueprint Saya — klik untuk lihat">
+      <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-950/20 relative">
+        <FileDown className="h-3.5 w-3.5" />
+        Blueprint
+        <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+      </Button>
     </Link>
   );
 }
@@ -232,6 +258,7 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                     Dashboard
                   </Button>
                 </Link>
+                <BlueprintHeaderDot />
                 <Link href="/account" title="Akun Saya">
                   <Avatar className="h-7 w-7 cursor-pointer ring-2 ring-transparent hover:ring-primary/40 transition-all" data-testid="avatar-account-link">
                     <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
@@ -292,6 +319,15 @@ export function SharedHeader({ transparent }: SharedHeaderProps) {
                       </Button>
                     </Link>
                   )}
+                  <Link href="/blueprint-saya" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/blueprint-saya") ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <FileDown className="h-4 w-4 mr-2 text-amber-500" />
+                      Blueprint Saya
+                    </Button>
+                  </Link>
                   <div className="border-t pt-3 mt-1">
                     <Link href="/documentation" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start text-muted-foreground" size="sm">

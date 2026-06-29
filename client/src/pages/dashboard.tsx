@@ -6,7 +6,7 @@ import {
   ShoppingBag, Users, Handshake, TrendingUp, Users2, Ticket, Pencil, Trash2, Radio, FileText, FolderOpen, Target, Globe, Megaphone, Loader2, PackageCheck, Wand2, Scale,
   Download, Upload, Folder, FolderPlus, Power, PowerOff, Cpu, Archive, ArchiveRestore, Eye, EyeOff, Crown, AlertCircle, Rocket, CheckCircle2, GraduationCap, DatabaseZap,
   Award, Shield, ShieldCheck, ShieldAlert, Leaf, Search, HardHat, Building2, Construction, Map as MapIcon, Landmark, Calculator, Package,
-  FileSignature, GitBranch
+  FileSignature, GitBranch, Lock, FileDown
 } from "lucide-react";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { Switch } from "@/components/ui/switch";
@@ -177,6 +177,58 @@ function TrialQuotaBanner() {
           </Link>
         </div>
       )}
+    </div>
+  );
+}
+
+const BLUEPRINT_STORAGE_KEY = "gustafta_blueprint_pending";
+
+function BlueprintPendingBanner() {
+  const [bp, setBp] = useState<{ namaAI: string; domain: string; status?: string } | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(BLUEPRINT_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.status !== "unlocked" && parsed.status !== "imported") setBp(parsed);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  if (!bp || dismissed) return null;
+
+  return (
+    <div className="flex items-start gap-3 px-4 py-3 rounded-xl border-2 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/20">
+      <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/40 shrink-0">
+        <FileDown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Blueprint AI siap — belum diaktivasi</p>
+        <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
+          <strong>{bp.namaAI}</strong> · {bp.domain} — Pilih paket untuk unlock Blueprint lengkap dan import ke Builder.
+        </p>
+        <div className="flex gap-2 mt-2">
+          <Link href="/blueprint-saya">
+            <Button size="sm" className="h-7 text-xs gap-1 bg-amber-500 hover:bg-amber-600 text-white">
+              <Lock className="h-3 w-3" /> Lihat Blueprint
+            </Button>
+          </Link>
+          <Link href="/packs">
+            <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
+              <ShoppingBag className="h-3 w-3" /> Pilih Paket
+            </Button>
+          </Link>
+        </div>
+      </div>
+      <button
+        onClick={() => setDismissed(true)}
+        className="text-amber-400 hover:text-amber-600 transition-colors shrink-0 mt-0.5"
+        title="Tutup"
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 }
@@ -898,6 +950,9 @@ export default function Dashboard() {
 
             {/* Trial Quota Banner */}
             <TrialQuotaBanner />
+
+            {/* Blueprint Pending Banner — from Socratic Dialog */}
+            <BlueprintPendingBanner />
 
             {/* Blueprint Upsell Banner — locked features for trial users */}
             <BlueprintUpsellBanner />
