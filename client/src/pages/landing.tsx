@@ -1200,29 +1200,8 @@ export default function Landing() {
         </div>
       </footer>
 
-      {/* ── FLOATING GUSTAFTA CHAT (kiri bawah, mirip Help Desk di kanan) ── */}
-      <div className="fixed bottom-6 left-6 z-40 flex flex-col items-start gap-3">
-        <GustaftaFloatingChat isOpen={showDialog} onClose={() => setShowDialog(false)} />
-        <button
-          onClick={() => setShowDialog(prev => !prev)}
-          className="flex items-center gap-2 px-4 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 relative bg-blue-600 hover:bg-blue-700 text-white"
-          data-testid="button-gustafta-float-toggle"
-          title="Tanya Gustafta"
-        >
-          {showDialog ? (
-            <>
-              <X className="w-5 h-5" />
-              <span className="font-semibold text-sm">Tutup</span>
-            </>
-          ) : (
-            <>
-              <Bot className="w-5 h-5" />
-              <span className="font-semibold text-sm">Tanya Gustafta</span>
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 border-2 border-white text-background text-[9px] flex items-center justify-center font-bold">✨</span>
-            </>
-          )}
-        </button>
-      </div>
+      {/* Dialog panel — dipanggil dari section Trilogi */}
+      <GustaftaFloatingChat isOpen={showDialog} onClose={() => setShowDialog(false)} />
     </div>
   );
 }
