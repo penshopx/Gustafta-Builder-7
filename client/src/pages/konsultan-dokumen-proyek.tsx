@@ -78,6 +78,12 @@ const colorMap: Record<string, { bg: string; border: string; head: string }> = {
   amber: { bg: "bg-amber-50 dark:bg-amber-900/10", border: "border-amber-200 dark:border-amber-800", head: "text-amber-700 dark:text-amber-400" },
 };
 
+const STATS_DOC = [
+  { icon: BarChart3, value: "48–52%", label: "Rework konstruksi disebabkan data buruk & miskomunikasi", source: "FMI/Autodesk/PlanGrid, 2018" },
+  { icon: TrendingUp, value: "US$88,7 miliar", label: "Estimasi biaya rework global akibat data buruk (2020)", source: "Autodesk + FMI" },
+  { icon: ClipboardList, value: "±14 jam", label: "Waktu kerja terbuang per pekerja/minggu untuk tugas non-produktif (±35%)", source: "FMI/PlanGrid" },
+];
+
 export default function KonsultanDokumenProyekPage() {
   const { isAuthenticated } = useAuth();
   const { ctaUrl: builderUrl } = useTrialCTA();
@@ -189,6 +195,32 @@ export default function KonsultanDokumenProyekPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Menurut Data */}
+      <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-2">Menurut Data</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dokumentasi Buruk = Biaya Rework yang Mahal</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {STATS_DOC.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/10 p-5" data-testid={`card-research-${i}`}>
+                  <SIcon className="h-6 w-6 text-slate-600 mb-3" />
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">{s.label}</div>
+                  <p className="text-xs text-muted-foreground/70 mt-2">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-6 max-w-2xl mx-auto">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
+          </p>
         </div>
       </section>
 

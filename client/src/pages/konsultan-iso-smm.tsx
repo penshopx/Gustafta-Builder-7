@@ -26,6 +26,12 @@ const colorMap: Record<string, { bg: string; border: string; badge: string; num:
   violet: { bg: "bg-violet-50 dark:bg-violet-900/10", border: "border-violet-200 dark:border-violet-800", badge: "bg-violet-600", num: "text-violet-700 dark:text-violet-400" },
 };
 
+const STATS_SMM = [
+  { icon: Award, value: "837.052", label: "Sertifikat ISO 9001 valid di seluruh dunia", source: "ISO Survey 2023" },
+  { icon: BarChart3, value: "10–30%", label: "Cost of Poor Quality (biaya mutu buruk) dari pendapatan perusahaan tanpa sistem mutu", source: "ASQ — American Society for Quality" },
+  { icon: Building2, value: "1,25 juta", label: "Situs/lokasi tersertifikasi ISO 9001 secara global", source: "ISO Survey 2023" },
+];
+
 export default function KonsultanIsoSmmPage() {
   const { isAuthenticated } = useAuth();
   const { ctaUrl: builderUrl } = useTrialCTA();
@@ -143,6 +149,32 @@ export default function KonsultanIsoSmmPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Menurut Data */}
+      <section className="py-16 px-4 bg-white dark:bg-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Menurut Data</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Mengapa Sistem Manajemen Mutu Itu Penting</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {STATS_SMM.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="rounded-2xl border border-blue-100 dark:border-blue-800/30 bg-blue-50 dark:bg-blue-900/10 p-5" data-testid={`card-research-${i}`}>
+                  <SIcon className="h-6 w-6 text-blue-600 mb-3" />
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">{s.label}</div>
+                  <p className="text-xs text-muted-foreground/70 mt-2">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-6 max-w-2xl mx-auto">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
+          </p>
         </div>
       </section>
 

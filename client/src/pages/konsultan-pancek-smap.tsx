@@ -12,6 +12,12 @@ import {
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20AI%20untuk%20SMAP%20ISO%2037001%20dan%20PancekClaw";
 const CHECKOUT_URL = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533206&qty=1";
 
+const STATS_SMAP = [
+  { icon: Gavel, value: "37/100", label: "Skor Indeks Persepsi Korupsi (IPK) Indonesia 2024 — peringkat 99 dari 180 negara", source: "Transparency International, CPI 2024" },
+  { icon: AlertTriangle, value: "≥5%", label: "Estimasi biaya korupsi global terhadap PDB dunia (±US$2,6 triliun/tahun)", source: "World Economic Forum" },
+  { icon: ShieldCheck, value: ">US$1 triliun", label: "Suap yang dibayarkan dunia usaha & individu setiap tahun", source: "World Bank" },
+];
+
 export default function KonsultanPancekSmapPage() {
   const { isAuthenticated } = useAuth();
   const { ctaUrl: builderUrl } = useTrialCTA();
@@ -163,6 +169,32 @@ export default function KonsultanPancekSmapPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Menurut Data */}
+      <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-teal-600 uppercase tracking-widest mb-2">Menurut Data</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Korupsi Masih Jadi Risiko Nyata bagi Organisasi</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {STATS_SMAP.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="rounded-2xl border border-teal-100 dark:border-teal-800/30 bg-teal-50 dark:bg-teal-900/10 p-5" data-testid={`card-research-${i}`}>
+                  <SIcon className="h-6 w-6 text-teal-600 mb-3" />
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">{s.label}</div>
+                  <p className="text-xs text-muted-foreground/70 mt-2">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-6 max-w-2xl mx-auto">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
+          </p>
         </div>
       </section>
 

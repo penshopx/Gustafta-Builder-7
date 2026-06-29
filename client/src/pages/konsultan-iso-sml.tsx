@@ -12,6 +12,12 @@ import {
 const WA_URL = "https://wa.me/6282299417818?text=Halo%20Gustafta%2C%20saya%20ingin%20konsultasi%20AI%20untuk%20ISO%2014001%20Sistem%20Manajemen%20Lingkungan";
 const CHECKOUT_URL = "https://dialog.gustafta.my.id/c/checkout?variant_ids=533206&qty=1";
 
+const STATS_SML = [
+  { icon: Leaf, value: "300.410", label: "Sertifikat ISO 14001 valid di seluruh dunia", source: "ISO Survey 2023" },
+  { icon: Building2, value: "122.814", label: "Di antaranya dari sektor konstruksi — sektor pengguna ISO 14001 teratas", source: "ISO Survey 2023" },
+  { icon: BarChart3, value: "1,48 juta", label: "Total sertifikasi sistem manajemen ISO aktif secara global", source: "ISO Survey 2023" },
+];
+
 export default function KonsultanIsoSmlPage() {
   const { isAuthenticated } = useAuth();
   const { ctaUrl: builderUrl } = useTrialCTA();
@@ -158,6 +164,32 @@ export default function KonsultanIsoSmlPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Menurut Data */}
+      <section className="py-16 px-4 bg-gray-50 dark:bg-muted/20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">Menurut Data</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Standar Lingkungan Makin Jadi Tuntutan Global</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {STATS_SML.map((s, i) => {
+              const SIcon = s.icon;
+              return (
+                <div key={i} className="rounded-2xl border border-green-100 dark:border-green-800/30 bg-green-50 dark:bg-green-900/10 p-5" data-testid={`card-research-${i}`}>
+                  <SIcon className="h-6 w-6 text-green-600 mb-3" />
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-1">{s.label}</div>
+                  <p className="text-xs text-muted-foreground/70 mt-2">Sumber: {s.source}</p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-center text-xs text-muted-foreground mt-6 max-w-2xl mx-auto">
+            Angka di atas adalah konteks industri dari lembaga riset, bukan klaim hasil spesifik dari produk ini.
+          </p>
         </div>
       </section>
 

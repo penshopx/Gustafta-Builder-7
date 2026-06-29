@@ -27,7 +27,7 @@ const VERTICALS = [
       "Tanya-jawab regulasi PUPR & Kemnaker",
     ],
     tools: ["SBUClaw", "SMK3Claw", "SafiraClaw", "K3ManClaw"],
-    stat: "Hemat 2–3 jam/hari administrasi K3",
+    stat: "Akses prosedur K3 & regulasi kapan saja, 24/7",
   },
   {
     icon: <Scale className="h-8 w-8 text-violet-600" />,
@@ -44,7 +44,7 @@ const VERTICALS = [
       "FAQ regulasi bisnis & perizinan",
     ],
     tools: ["LexCom Legal AI", "OSSClaw", "KontrakClaw", "KorporasiClaw"],
-    stat: "Pre-screening menghemat 60% waktu konsultasi awal",
+    stat: "Pra-screening klien otomatis sebelum pertemuan pertama",
   },
   {
     icon: <GraduationCap className="h-8 w-8 text-blue-600" />,
@@ -61,7 +61,7 @@ const VERTICALS = [
       "Onboarding peserta pelatihan batch baru",
     ],
     tools: ["EducounselClaw", "IBTUClaw", "ETLOAcademyClaw", "TutorTeknikClaw"],
-    stat: "Tingkat penyelesaian modul naik rata-rata 30%",
+    stat: "Tutor & latihan soal tersedia di luar jam sesi",
   },
   {
     icon: <Heart className="h-8 w-8 text-rose-600" />,
@@ -78,7 +78,7 @@ const VERTICALS = [
       "Pengingat obat & follow-up pasca konsultasi",
     ],
     tools: ["Gustafta Builder", "HACCPClaw", "Custom AI"],
-    stat: "Kurangi beban administratif hingga 50%",
+    stat: "Tangani FAQ administratif pasien tanpa antre",
   },
   {
     icon: <Building2 className="h-8 w-8 text-sky-600" />,
@@ -95,7 +95,7 @@ const VERTICALS = [
       "Follow-up prospek 24/7 tanpa miss",
     ],
     tools: ["DevPropertiClaw", "EstateCareClaw", "KorporasiClaw"],
-    stat: "Konversi prospek naik rata-rata 2× lipat",
+    stat: "Respon & kualifikasi prospek 24/7 tanpa miss",
   },
   {
     icon: <Leaf className="h-8 w-8 text-emerald-600" />,
@@ -112,7 +112,7 @@ const VERTICALS = [
       "Edukasi karyawan tentang lingkungan",
     ],
     tools: ["ESGClaw", "LingkunganClaw", "ISOClaw 14001", "TataLingkunganClaw"],
-    stat: "Kurangi waktu penyusunan laporan ESG 60%",
+    stat: "Panduan PROPER, ISO 14001 & GRI sesuai standar terbaru",
   },
 ];
 
@@ -154,7 +154,7 @@ export default function IndustriPage() {
             bukan chatbot yang perlu Anda "ajar" setiap kali.
           </p>
           <div className="flex items-center justify-center gap-6 mb-8 text-white">
-            {[["6", "Sektor Industri"], ["80+", "AI Tools Spesialis"], ["2.400+", "Pengguna Aktif"]].map(([num, label]) => (
+            {[["6", "Sektor Industri"], ["80+", "AI Tools Spesialis"], ["900+", "Agen AI Spesialis"]].map(([num, label]) => (
               <div key={label} className="text-center">
                 <div className="text-2xl md:text-3xl font-extrabold">{num}</div>
                 <div className="text-xs text-gray-400">{label}</div>

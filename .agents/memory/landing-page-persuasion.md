@@ -35,3 +35,5 @@ Karena testimoni dilarang, tiap landing pakai band riset domain-spesifik sebagai
 - Tiap angka WAJIB diverifikasi via webSearch dulu; sumber sespesifik mungkin (lembaga + tahun/laporan), bukan "Gartner" saja.
 - Pola const: `const STATS_{PAGE} = [{icon, value, label, source}]`; render `const SIcon = s.icon` lalu `<SIcon/>`; `data-testid={`stat-{page}-${i}`}`; warna ikuti tema halaman.
 - **Why:** kredibilitas tanpa testimoni palsu; angka tervalidasi mencegah klaim fiktif yang melanggar aturan brand.
+- Band HANYA cocok untuk landing jualan ber-domain tunggal. SKIP halaman yang sebenarnya aplikasi chat/tool layar-penuh (mis. konsultan-permen-pu-2026, konsultanbot) — tak ada hero/CTA jadi band tak punya tempat. Hub multi-sektor (industri.tsx) juga skip band (riset 1 domain tak mewakili 6 sektor); cukup bersihkan stat fabricated-nya.
+- Penempatan band fleksibel: di halaman PAS penuh taruh setelah Agitate; di landing statis sederhana (hero+konten+CTA) taruh tepat SEBELUM section CTA gradient terakhir.
