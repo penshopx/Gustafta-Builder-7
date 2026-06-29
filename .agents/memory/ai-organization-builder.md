@@ -31,6 +31,9 @@ Roadmap teknis bertahap hidup di **`docs/blueprint-engine/`** (BUKAN di memory):
 - `01-builder-audit.md` — katalog Builder (tabel `agents` + panel + entitas anak).
 - `02-blueprint-schema.md` + `shared/blueprint/blueprint-schema.ts` — Blueprint JSON "DNA".
 - `03-mapping-engine.md` + `server/services/blueprint-engine/mapping-engine.ts` — Blueprint→Builder (PURE, no DB).
+- `04-configuration-engine.md` + `server/services/blueprint-engine/configuration-engine.ts` — engine penulis pertama (create/update agen + anak via storage; dryRun; belum disambung).
+
+**Drift tipe ID (jebakan nyata, lintas seluruh app):** `agents.id` = `serial` (number runtime) tapi tipe TS `Agent.id` ditulis `string`; kolom `agentId` tabel anak = `integer` tapi insert-Zod-nya `z.string()`; `agents.agenticSubAgents[].agentId` (Zod) = `z.number()`. Akibatnya saat menulis: paksa agentId anak ke `String()` (cocok insert-Zod anak), dan agentId sub-agen ke `number` (cocok jsonb). `insertAgentSchema` adalah ZodEffects (refine "orchestrator wajib Big Idea") → tak bisa `.partial()`; untuk update parsial pakai `createInsertSchema(agents).partial()` (validasi tipe saja, bukan business-range).
 
 **Keputusan desain Blueprint (durable):**
 - Field Blueprint memakai **nama kolom `agents` apa adanya** → Mapping Engine bisa 1:1. Jangan rename.
